@@ -213,12 +213,12 @@ const DataAccessRequestApplication = (props) => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
     });
-    if (!props.readOnlyMode) {
+    if (!props.existingDarsReadOnlyMode) {
       const tabName = DAAUtils.isEnabled() ? 'Data Access Agreements (DAA)' : 'Data Use Agreement';
       const updatedTabs= [...ApplicationTabs, { name: tabName, id: DATA_ACCESS_AGREEMENTS_TAB_ID }];
       setApplicationTabs(updatedTabs);
     }
-  }, [formData.datasetIds, props.readOnlyMode]);
+  }, [formData.datasetIds, props.existingDarsReadOnlyMode]);
 
   useEffect(() => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
@@ -232,7 +232,7 @@ const DataAccessRequestApplication = (props) => {
     const fetchData = async () => {
       try {
         const { collectionId } = props.match.params;
-        if (props.readOnlyMode) {
+        if (props.existingDarsReadOnlyMode) {
           const collection = await Collections.getCollectionById(collectionId);
           setResearcher(collection.createUser);
         } else {
@@ -247,7 +247,7 @@ const DataAccessRequestApplication = (props) => {
       }
     };
     fetchData();
-  }, [props.match.params, props.readOnlyMode]);
+  }, [props.match.params, props.existingDarsReadOnlyMode]);
 
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
@@ -290,9 +290,9 @@ const DataAccessRequestApplication = (props) => {
   }, [props.match.params, researcher]);
 
   useEffect(() => {
-    if (props.readOnlyMode) {
+    if (props.existingDarsReadOnlyMode) {
       let appTabs = []
-      if(props.createProgressReport){
+      if(props.isProgressReportApplication){
         // if we are creating a new progress report, we need to add another tab for the application
         appTabs = [{ name: 'DAR Update ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false}]
       }
@@ -304,7 +304,7 @@ const DataAccessRequestApplication = (props) => {
             return {name: itemLabel, id: `${DAR_UPDATE_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false};
           })]);
     }
-  }, [formData?.darCode, props.createProgressReport, props.readOnlyMode, reverseOrderedDARs]);
+  }, [formData?.darCode, props.isProgressReportApplication, props.existingDarsReadOnlyMode, reverseOrderedDARs]);
 
   useEffect(() => {
     init();
@@ -520,7 +520,7 @@ const DataAccessRequestApplication = (props) => {
   }
   return (
     <div>
-      <div className={props.readOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.readOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.readOnlyMode ? 'white' : '' }}>
+      <div className={props.existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.existingDarsReadOnlyMode ? 'white' : '' }}>
         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
           <div className='row no-margin'>
             <Notification notificationData={notificationData} />
@@ -528,12 +528,12 @@ const DataAccessRequestApplication = (props) => {
               className={(formData.darCode !== null ?
                 'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
               <PageHeading
-                title={props.readOnlyMode ? formData.darCode : 'Data Access Request Application'}
-                description={props.readOnlyMode ? formData.projectTitle : 'Please complete the fields below to request access to data.'}
+                title={props.existingDarsReadOnlyMode ? formData.darCode : 'Data Access Request Application'}
+                description={props.existingDarsReadOnlyMode ? formData.projectTitle : 'Please complete the fields below to request access to data.'}
               />
             </div>
             {formData.darCode !== null &&
-              !props.readOnlyMode &&
+              !props.existingDarsReadOnlyMode &&
               <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
                 <a id='btn_back' onClick={back} className='btn-primary btn-back'>
                   <i className='glyphicon glyphicon-chevron-left' />
@@ -566,7 +566,7 @@ const DataAccessRequestApplication = (props) => {
               </div>
             </ConfirmationDialog>
 
-            {props.createProgressReport && (
+            {props.isProgressReportApplication && (
                 <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className='dar-steps'>
                   <ConditionalAccordion
                       condition={false}
@@ -575,7 +575,7 @@ const DataAccessRequestApplication = (props) => {
                   </ConditionalAccordion>
                 </div>
             )}
-            {props.readOnlyMode && reverseOrderedDARs.length > 1  && (
+            {props.existingDarsReadOnlyMode && reverseOrderedDARs.length > 1  && (
                 <div className='dar-summary'>
                   <h3>Previous Updates</h3>
                   {reverseOrderedDARs.map((dar, index) => {
@@ -596,17 +596,17 @@ const DataAccessRequestApplication = (props) => {
                 </div>
             )}
 
-            <div id={`${DAR_UPDATE_TAB_ID_PREFIX}-0`} className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
-              {props.readOnlyMode && (<h3>{formData.darCode} Summary</h3>)}
-              <div id={RESEARCHER_INFO_TAB_ID} className={props.readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+            <div id={`${DAR_UPDATE_TAB_ID_PREFIX}-0`} className={props.existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
+              {props.existingDarsReadOnlyMode && (<h3>{formData.darCode} Summary</h3>)}
+              <div id={RESEARCHER_INFO_TAB_ID} className={props.existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <ConditionalAccordion
-                    condition={props.readOnlyMode}
+                    condition={props.existingDarsReadOnlyMode}
                     title="Step 1: Researcher Information"
                     defaultExpanded={reverseOrderedDARs.length === 1}>
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
-                  readOnlyMode={props.readOnlyMode || isAttested}
-                  includeInstructions={!props.readOnlyMode}
+                  readOnlyMode={props.existingDarsReadOnlyMode || isAttested}
+                  includeInstructions={!props.existingDarsReadOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}
                   validation={formValidation.researcherInfoErrors}
@@ -626,14 +626,14 @@ const DataAccessRequestApplication = (props) => {
                   </ConditionalAccordion>
               </div>
 
-              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={props.readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={props.existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <ConditionalAccordion
-                    condition={props.readOnlyMode}
+                    condition={props.existingDarsReadOnlyMode}
                     title="Step 2: Data Access Request">
                   <DataAccessRequest
                       formData={formData}
-                      readOnlyMode={props.readOnlyMode || isAttested}
-                      includeInstructions={!props.readOnlyMode}
+                      readOnlyMode={props.existingDarsReadOnlyMode || isAttested}
+                      includeInstructions={!props.existingDarsReadOnlyMode}
                       datasets={datasets}
                       validation={formValidation.darErrors}
                       formValidationChange={(val) => formValidationChange('darErrors', val)}
@@ -651,13 +651,13 @@ const DataAccessRequestApplication = (props) => {
                 </ConditionalAccordion>
               </div>
 
-              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={props.readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={props.existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <ConditionalAccordion
-                    condition={props.readOnlyMode}
+                    condition={props.existingDarsReadOnlyMode}
                     title="Step 3: Research Purpose Statement">
                   <ResearchPurposeStatement
                       darCode={formData.darCode}
-                      readOnlyMode={props.readOnlyMode || isAttested}
+                      readOnlyMode={props.existingDarsReadOnlyMode || isAttested}
                       validation={formValidation.rusErrors}
                       formValidationChange={(val) => formValidationChange('rusErrors', val)}
                       formFieldChange={formFieldChange}
@@ -666,7 +666,7 @@ const DataAccessRequestApplication = (props) => {
                 </ConditionalAccordion>
               </div>
 
-              {!props.readOnlyMode ?
+              {!props.existingDarsReadOnlyMode ?
                   <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} className='step-container'>
                   {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
@@ -702,7 +702,7 @@ const DataAccessRequestApplication = (props) => {
           </div>
         </form>
       </div>
-      {!props.readOnlyMode ? <UsgOmbText /> : null}
+      {!props.existingDarsReadOnlyMode ? <UsgOmbText /> : null}
     </div>
   );
 };

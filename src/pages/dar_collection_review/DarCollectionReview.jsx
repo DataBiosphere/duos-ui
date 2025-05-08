@@ -198,7 +198,7 @@ export default function DarCollectionReview(props) {
           collaborationLetterName={darInfo.collaborationLetterName}
         />}
         {selectedTab === tabs.fullDAR && <DataAccessRequestApplication
-          readOnlyMode={true}
+          existingDarsReadOnlyMode={true}
           researcherProfile={researcherProfile}
           {...props}
         />}
