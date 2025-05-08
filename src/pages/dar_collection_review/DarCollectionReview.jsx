@@ -112,7 +112,7 @@ export default function DarCollectionReview(props) {
       setIsLoading(false);
       setSubcomponentLoading(false);
       setReferenceIdForDocuments(referenceIdForDocuments);
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       });
@@ -131,7 +131,7 @@ export default function DarCollectionReview(props) {
       setIsLoading(true);
       setSubcomponentLoading(true);
       init();
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({ text: 'Failed to initialize collection' });
     }
   }, [init]);
@@ -142,7 +142,7 @@ export default function DarCollectionReview(props) {
         setSubcomponentLoading(true);
         init();
       }
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Failed to initialize collection for chair tab',
       });
@@ -198,7 +198,7 @@ export default function DarCollectionReview(props) {
           collaborationLetterName={darInfo.collaborationLetterName}
         />}
         {selectedTab === tabs.fullDAR && <DataAccessRequestApplication
-          readOnlyMode={true}
+          existingDarsReadOnlyMode={true}
           researcherProfile={researcherProfile}
           {...props}
         />}

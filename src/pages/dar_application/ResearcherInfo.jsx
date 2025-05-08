@@ -10,6 +10,7 @@ import {nihAccountLabel, nihAccountInstructions} from '../../utils/ERACommonsUti
 
 const linkStyle = {color: '#2FA4E7'};
 const titleStyle = {fontSize: '24px', fontWeight: 500, color: '#333333'};
+const noTopMarginStyle = {marginTop: 0, paddingTop: 0};
 const profileLink = <Link to="/profile" style={linkStyle}>Your Profile</Link>;
 const profileUnsubmitted = <span>Please submit {profileLink} to be able to create a Data Access Request</span>;
 const profileSubmitted = <span>Please make sure {profileLink} is updated as it will be used to pre-populate parts of the Data Access Request</span>;
@@ -62,7 +63,7 @@ export default function ResearcherInfo(props) {
 
   return (
     <div data-cy='researcher-info'>
-      <div className='dar-step-card'>
+      <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
         {(completed === false || libraryCardReqSatisfied === false) && (
           <div data-cy='researcher-info-profile-submitted'>
             {!readOnlyMode && (
@@ -83,14 +84,12 @@ export default function ResearcherInfo(props) {
           </div>
         )}
 
-        <h2>Step 1: Researcher Information</h2>
-
         <div className='dar-application-row'>
           <FormField
             id='researcherName'
             placeholder='Enter Firstname Lastname'
             title='1.1 Researcher'
-            titleStyle={titleStyle}
+            titleStyle={readOnlyMode ? {...titleStyle, ...noTopMarginStyle} : titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             defaultValue={researcher.displayName}
