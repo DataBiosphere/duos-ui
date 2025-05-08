@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import useOnMount from '@mui/utils/useOnMount';
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'lodash';
 import { defaultFilters } from './DatasetFilterConstants';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
@@ -15,7 +15,7 @@ import { DAR } from '../../libs/ajax/DAR';
 import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
-import { DatasetSearchFooter } from './DatasetSearchFooter';
+import {DatasetSearchFooter} from './DatasetSearchFooter';
 import ReactMarkdown from 'react-markdown';
 
 const styles = {
@@ -39,10 +39,10 @@ export const applyForAccess = async (selected, history) => {
       history.push(`/dar_application/${draftResponse.referenceId}`);
     } else if (draftResponse.code && draftResponse.message) {
       Notifications.showError(
-        {
-          text: <ReactMarkdown>{draftResponse.message}</ReactMarkdown>,
-          timeout: 6000
-        });
+          {
+            text: <ReactMarkdown>{draftResponse.message}</ReactMarkdown>,
+            timeout: 6000
+            });
     } else {
       Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
     }
@@ -101,7 +101,7 @@ export const DatasetSearchTable = (props) => {
         {
           'multi_match': {
             'query': searchTerm,
-            'type': 'phrase_prefix',
+            'type':'phrase_prefix',
             'fields': [
               'datasetName',
               'dataLocation',
@@ -129,44 +129,44 @@ export const DatasetSearchTable = (props) => {
       filterTerms.push({
         'bool': {
           'should':
-            filters.accessManagement.map(term => ({
-              'term': {
-                'accessManagement': term
-              }
-            }))
+              filters.accessManagement.map(term => ({
+                'term': {
+                  'accessManagement': term
+                }
+              }))
         }
       });
 
       filterTerms.push({
         'bool': {
           'should':
-            filters.dataUse.map(term => ({
-              'match': {
-                'dataUse.primary.code': term
-              }
-            }))
+              filters.dataUse.map(term => ({
+                'match': {
+                  'dataUse.primary.code': term
+                }
+              }))
         }
       });
 
       filterTerms.push({
         'bool': {
           'should':
-            filters.dataType.map(term => ({
-              'match': {
-                'study.dataTypes': term
-              }
-            }))
+              filters.dataType.map(term => ({
+                'match': {
+                  'study.dataTypes': term
+                }
+              }))
         }
       });
 
       filterTerms.push({
         'bool': {
           'should':
-            filters.dac.map(term => ({
-              'match_phrase': {
-                'dac.dacName': term
-              }
-            }))
+              filters.dac.map(term => ({
+                'match_phrase': {
+                  'dac.dacName': term
+                }
+              }))
         }
       });
 
@@ -242,14 +242,13 @@ export const DatasetSearchTable = (props) => {
       searchAndFilter.current(fullQuery);
     } catch (_error) {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' });
-    }
-  }, [filters, searchTerm]); // eslint-disable-line
+    }  }, [filters, searchTerm]); // eslint-disable-line
 
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
-        <Box sx={{ paddingTop: '2em', paddingLeft: '2em' }}>
+        <Box sx={{paddingTop: '2em', paddingLeft: '2em'}}>
           <div className='right-header-section' style={Styles.RIGHT_HEADER_SECTION}>
             <input
               data-cy='search-bar'
@@ -270,7 +269,7 @@ export const DatasetSearchTable = (props) => {
                 setSearchTerm(event.target.value);
               }}
             />
-            <div />
+            <div/>
             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
               <Button variant='contained' onClick={() => setSearchTerm('')} sx={{ width: '100px' }}>
                 Clear Search
@@ -278,7 +277,7 @@ export const DatasetSearchTable = (props) => {
             </Box>
           </div>
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'row', padding: '0 5rem', marginTop: '1rem', borderBottom: '1px solid black' }}>
+        <Box sx={{display: 'flex', flexDirection: 'row', padding: '0 5rem', marginTop: '1rem', borderBottom: '1px solid black'}}>
           <Tabs
             value={false}
             orientation={'horizontal'}
@@ -296,29 +295,28 @@ export const DatasetSearchTable = (props) => {
             />)}
           </Tabs>
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
-          <Box sx={{ width: '14%', padding: '0 1em' }}>
-            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} filters={filters} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters(datasets))} />
+        <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
+          <Box sx={{width: '14%', padding: '0 1em'}}>
+            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} filters={filters} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters(datasets))}/>
           </Box>
-          <Box sx={{ width: '85%', padding: '0 1em' }}>
+          <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {
               if (isEmpty(datasets)) {
                 return (
                   <Box sx={{
                     display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%'
-                  }}>
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                     <h1>No datasets registered for this library.</h1>
                   </Box>
                 );
               } else {
-                return <DatasetSearchTableDisplay key={selectedTable.key} tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets} />;
+                return <DatasetSearchTableDisplay key={selectedTable.key} tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets}/>;
               }
             })()}
           </Box>
         </Box>
-        <Box sx={{ padding: '1em' }} />
-        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, history)} />}
+        <Box sx={{padding: '1em'}}/>
+        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, history)}/>}
       </Box>
     </>
   );

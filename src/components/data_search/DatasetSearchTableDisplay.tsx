@@ -1,17 +1,15 @@
 import * as React from 'react';
-import { isEmpty, capitalize, isUndefined } from 'lodash';
-import { DatasetTerm } from 'src/types/model';
+import {isEmpty, capitalize, isUndefined} from 'lodash';
+import {DatasetTerm} from 'src/types/model';
 import SimpleTable from '../SimpleTable';
-import { Styles } from '../../libs/theme';
+import {Styles} from '../../libs/theme';
 import {
-  type CellData,
+ type CellData,
   DatasetSearchTableTab,
 } from './DatasetSearchTableConstants';
-import { SnapshotSummaryModel } from '../../types/tdrModel';
+import {SnapshotSummaryModel} from '../../types/tdrModel';
 import { Storage } from '../../libs/storage';
 
-// Storage key for persisting sort preferences
-const storageDatasetSearchSort = 'storageDatasetSearchSort';
 
 const styles = {
   baseStyle: {
@@ -44,7 +42,38 @@ const styles = {
   containerOverride: {}
 };
 
-interface DatasetSearchTableDisplayProps {
+interface Sort {
+    colIndex: number;
+    dir: number;
+  }
+
+  // Storage key for persisting sort preferences
+const storageDatasetSearchSort = 'storageDatasetSearchSort';
+  
+  // Helper function to check if a value should be treated as empty/undefined
+  const isMissingValue = (value: CellData['value']): boolean => {
+    return isUndefined(value) ||
+      isEmpty(value) ||
+      value === '--'
+  };
+  
+  // Get the sort configuration for the active tab
+  const getSortForTab = (tabKey: string): Sort => {
+    const storageKey = `${storageDatasetSearchSort}_${tabKey}`;
+    const savedSort = Storage.getCurrentUserSettings(storageKey);
+  
+    if (savedSort) {
+      return {
+        colIndex: savedSort.colIndex,
+        dir: savedSort.dir
+      };
+    }
+  
+    return { colIndex: -1, dir: 1 };
+  };
+
+
+interface DatasetSearchTableDisplayProps{
   onSelect: (newSelectedIds: number[]) => void;
   filteredData: DatasetTerm[];
   selected: number[];
@@ -52,38 +81,12 @@ interface DatasetSearchTableDisplayProps {
   tab: DatasetSearchTableTab<DatasetTerm | DatasetTerm[]>
 }
 
-interface Sort {
-  colIndex: number;
-  dir: number;
-}
-
-// Helper function to check if a value should be treated as empty/undefined
-const isMissingValue = (value: CellData['value']): boolean => {
-  return isUndefined(value) ||
-    isEmpty(value) ||
-    value === '--'
-};
-
-// Get the sort configuration for the active tab
-const getSortForTab = (tabKey: string): Sort => {
-  const storageKey = `${storageDatasetSearchSort}_${tabKey}`;
-  const savedSort = Storage.getCurrentUserSettings(storageKey);
-
-  if (savedSort) {
-    return {
-      colIndex: savedSort.colIndex,
-      dir: savedSort.dir
-    };
-  }
-
-  return { colIndex: -1, dir: 1 };
-};
-
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
   const { onSelect, exportableDatasets, filteredData, selected, tab } = props;
   const [sort, setSort] = React.useState<Sort>(getSortForTab(tab.key));
   const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets);
-
+ 
+  
   const sortData = React.useCallback((data: CellData[][], sortState: Sort) => {
     if (sortState.colIndex < 0) return data;
 
@@ -136,6 +139,7 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     setSort(newSort);
   };
 
+
   return <>
     <div style={{
       fontWeight: 600,
@@ -145,17 +149,17 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     </div>
     {
       isEmpty(filteredData) ?
-        <div style={{ fontWeight: 600, marginTop: '0.5rem' }}>There are no {tab.plural} that fit these criteria.</div> :
+        <div style={{fontWeight: 600, marginTop: '0.5rem'}}>There are no {tab.plural} that fit these criteria.</div> :
         <SimpleTable
           rowData={rowData}
           columnHeaders={headers}
           selected={selected}
           styles={styles}
           tableSize={10}
-          summary={`faceted ${tab.singular} search table`}
+          summary={`faceted ${tab.singular} search table`} 
           onSort={handleSort}
           sort={sort}
-        />
+          />
     }
   </>;
 };
