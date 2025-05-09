@@ -5,6 +5,7 @@ type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is a new application
     readOnlyMode?: boolean
 };
+
 export const ProgressReportApplication = ({dar, readOnlyMode=true}: ProgressReportApplicationProps) => {
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>

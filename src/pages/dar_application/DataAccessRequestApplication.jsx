@@ -34,7 +34,7 @@ import ReactMarkdown from 'react-markdown';
 import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
 import loadingImage from "../../images/loading-indicator.svg";
 import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
-import {ProgressReportApplication} from "./ProgressReportApplication";
+import {ProgressReportApplication} from "../progress_reports/ProgressReportApplication";
 import {ScrollableTabs} from "./ScrollableTabs";
 
 // Constants
