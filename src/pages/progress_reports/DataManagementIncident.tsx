@@ -4,21 +4,6 @@ import { FormFieldChange, FormState } from './ProgressReportFormState';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 
-interface FormStateInterface {
-    dmiYesNo?: boolean;
-    dmiCombination?: boolean;
-    dmiIdentification?: boolean;
-    dmiSharing?: boolean;
-    dmiSecurity?: boolean;
-    dmiAcknowledgement?: boolean;
-    dmiPublication?: boolean;
-    dmiFalsification?: boolean;
-    dmiOther?: boolean;
-    dmiDescription?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
-
 interface DataManagementIncidentProps {
     readonly readOnly: boolean;
     formState: FormState;
