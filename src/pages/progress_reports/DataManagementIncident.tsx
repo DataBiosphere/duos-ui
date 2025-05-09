@@ -22,11 +22,11 @@ interface FormStateInterface {
 interface DataManagementIncidentProps {
     readonly readOnly: boolean;
     formState: FormState;
-    setFormState: (formState: FormState) => void;
+    onFormChange: (newState: Partial<FormState>) => void;
 }
 
 export default function DataManagementIncident(props: DataManagementIncidentProps): React.JSX.Element {
-    const { readOnly, formState, setFormState } = props;
+    const { readOnly, formState, onFormChange } = props;
     const _ignore = readOnly;
 
     return (
@@ -44,7 +44,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             description='Have there been any incidents related to mismanagement or misuse of data?'
                             orientation='horizontal'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
                         />
                     </div>
@@ -57,7 +57,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Inappropriate combination or analysis of the requested datasets with unapproved datasets'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                                 <FormField
@@ -65,7 +65,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Intentional or accidental identification of participants or generation of data which makes them easily identifiable'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                                 <FormField
@@ -73,7 +73,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Distribution of the data to an individual or institution beyond those specified in the approved Data Access Request (DAR)'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                                 <FormField
@@ -81,7 +81,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to adhere to NIH Security Best Practices for Controlled-Access Data'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                                 <FormField
@@ -89,7 +89,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to acknowledge the investigator(s) who generated the data, the funding source, accession numbers of the dataset'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                                 <FormField
@@ -97,7 +97,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Analysis and/or publication of a study using the data for the research purpose other than the approved research use'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                                 <FormField
@@ -105,7 +105,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Fabrication or falsification of data and/or results'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                                 <FormField
@@ -113,7 +113,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Other: such as inadvertent data release or breach of security'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                             </div>
@@ -127,7 +127,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     rows={6}
                                     maxLength={2200}
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                             </div>

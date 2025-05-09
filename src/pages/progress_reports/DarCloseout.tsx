@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { FormFieldChange, FormState } from './ProgressReportFormState';
 
 interface DarCloseoutProps {
     readonly readOnly: boolean;
     formState: FormState;
-    setFormState: (formState: FormState) => void;
+    onFormChange: (newState: Partial<FormState>) => void;
 }
 
 export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
-    const { readOnly, formState, setFormState } = props;
+    const { readOnly, formState, onFormChange } = props;
     const _ignore = readOnly;
 
     return (
@@ -35,8 +35,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The Requestor has completed his/her project'
                             onChange={({ key, value }: FormFieldChange) => {
-                                console.log('closeoutCompleted', formState);
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
                         />
                         <FormField
@@ -44,7 +43,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The Requestor has moved institutions (if the project will continue in a new institution or by a new PI, they must go through Project Transfer)'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
                         />
                         <FormField
@@ -52,7 +51,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The project is being transferred to a new Requestor at the same institution'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
                         />
                         <FormField
@@ -60,7 +59,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The project is being superceded by a new project'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
                         />
                         <FormField
@@ -68,7 +67,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='Other'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
                         />
                         {formState.closeoutOther === true &&
@@ -80,7 +79,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                     rows={6}
                                     maxLength={2200}
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
                                 />
                             </div>

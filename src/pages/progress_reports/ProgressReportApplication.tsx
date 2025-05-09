@@ -12,6 +12,13 @@ type ProgressReportApplicationProps = {
 export const ProgressReportApplication = ({ dar, readOnlyMode = true }: ProgressReportApplicationProps) => {
     const [formState, setFormState] = useState<FormState>({});
 
+    const onFormChange = (newState: Partial<FormState>) => {
+        setFormState(prevState => ({
+            ...prevState,
+            ...newState
+        }));
+    };
+
     return (
         <>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
@@ -27,10 +34,10 @@ export const ProgressReportApplication = ({ dar, readOnlyMode = true }: Progress
                 </div>
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <DataManagementIncident readOnly={readOnlyMode} formState={formState} setFormState={setFormState} />
+                <DataManagementIncident readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <DarCloseout readOnly={readOnlyMode} formState={formState} setFormState={setFormState} />
+                <DarCloseout readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
             </div>
         </>
     )
