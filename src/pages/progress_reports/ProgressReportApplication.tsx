@@ -3,6 +3,7 @@ import { DataAccessRequest } from "src/types/model";
 import { FormState } from "./ProgressReportFormState";
 import DarCloseout from "./DarCloseout";
 import DataManagementIncident from "./DataManagementIncident";
+import CollaboratorChanges from "./CollaboratorChanges";
 
 type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is a new application
@@ -13,6 +14,7 @@ export const ProgressReportApplication = ({ dar, readOnlyMode = true }: Progress
     const [formState, setFormState] = useState<FormState>({});
 
     const onFormChange = (newState: Partial<FormState>) => {
+        console.log('onFormChange', newState);
         setFormState(prevState => ({
             ...prevState,
             ...newState
@@ -32,6 +34,9 @@ export const ProgressReportApplication = ({ dar, readOnlyMode = true }: Progress
                     <h4>Intellectual Property Summary</h4>
                     {dar?.intellectualPropertySummary ?? "PLACEHOLDER Intellectual Property Summary"}
                 </div>
+            </div>
+            <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <CollaboratorChanges readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DataManagementIncident readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
