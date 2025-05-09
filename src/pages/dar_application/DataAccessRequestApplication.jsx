@@ -20,8 +20,6 @@ import { NotificationService } from '../../libs/notificationService';
 import { Storage } from '../../libs/storage';
 import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 
 import {
   validateDARFormData
@@ -33,10 +31,24 @@ import {DAAUtils} from '../../utils/DAAUtils';
 import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
 import ReactMarkdown from 'react-markdown';
+import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
+import loadingImage from "../../images/loading-indicator.svg";
+import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
+import {ProgressReportApplication} from "./ProgressReportApplication";
+import {ScrollableTabs} from "./ScrollableTabs";
+
+// Constants
+const RESEARCHER_INFO_TAB_ID = 'researcher-info';
+const DATA_ACCESS_REQUEST_TAB_ID = 'data-access-request';
+const RESEARCH_PURPOSE_STATEMENT_TAB_ID = 'research-purpose';
+const DATA_ACCESS_AGREEMENTS_TAB_ID = 'data-access-agreements';
+const DAR_UPDATE_TAB_ID_PREFIX = 'dar-update-';
+const PROGRESS_REPORT_APPLICATION_TAB_ID = 'progress-report-app';
+const ADDENDUM_TAB_ID = 'addendum';
 const ApplicationTabs = [
-  { name: 'Researcher Information' },
-  { name: 'Data Access Request' },
-  { name: 'Research Purpose Statement' }
+  { name: 'Researcher Information', id: RESEARCHER_INFO_TAB_ID },
+  { name: 'Data Access Request', id: DATA_ACCESS_REQUEST_TAB_ID },
+  { name: 'Research Purpose Statement', id: RESEARCH_PURPOSE_STATEMENT_TAB_ID }
 ];
 
 const fetchAllDatasets = async (dsIds) => {
@@ -124,7 +136,7 @@ const DataAccessRequestApplication = (props) => {
   const [showDialogSave, setShowDialogSave] = useState(false);
   const [showDialogSubmit, setShowDialogSubmit] = useState(false);
 
-  const [step, setStep] = useState(1);
+  const [tab, setTab] = useState(undefined);
   const [notificationData, setNotificationData] = useState(undefined);
 
   const [researcher, setResearcher] = useState({});
@@ -136,7 +148,7 @@ const DataAccessRequestApplication = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAttested, setIsAttested] = useState(false);
 
-  const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
+  const [applicationTabs, setApplicationTabs] = useState([]);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formFieldChange = useCallback(({ key, value }) => {
@@ -192,6 +204,7 @@ const DataAccessRequestApplication = (props) => {
     setUploadedIrbDocument(document);
   };
 
+  const [reverseOrderedDARs, setReverseOrderedDARs] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [selectedDatasets, setSelectedDatasets] = useState([]);
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
@@ -200,11 +213,12 @@ const DataAccessRequestApplication = (props) => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
     });
-    if (!props.readOnlyMode) {
-      const updatedTabs = DAAUtils.isEnabled() ? [...ApplicationTabs, { name: 'Data Access Agreements (DAA)' }] : [...ApplicationTabs, { name: 'Data Use Agreement' }];
+    if (!props.existingDarsReadOnlyMode) {
+      const tabName = DAAUtils.isEnabled() ? 'Data Access Agreements (DAA)' : 'Data Use Agreement';
+      const updatedTabs= [...ApplicationTabs, { name: tabName, id: DATA_ACCESS_AGREEMENTS_TAB_ID }];
       setApplicationTabs(updatedTabs);
     }
-  }, [formData.datasetIds, props.readOnlyMode]);
+  }, [formData.datasetIds, props.existingDarsReadOnlyMode]);
 
   useEffect(() => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
@@ -212,39 +226,13 @@ const DataAccessRequestApplication = (props) => {
     });
   }, [datasets]);
 
-  const goToStep = useCallback((step = 1) => {
-    setStep(step);
-    window.scroll({
-      top: document.getElementsByClassName('step-container')[step - 1]?.offsetTop,
-      behavior: 'smooth'
-    });
-  }, []);
 
-  const onScroll = useCallback(() => {
-
-    const scrollPos = window.scrollY;
-    const scrollBuffer = window.innerHeight * .25;
-    const sectionIndex = ApplicationTabs
-      .map((_tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
-      .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
-
-    let newStep;
-    if (sectionIndex === 0) {
-      newStep = 1;
-    } else if (sectionIndex === -1) {
-      newStep = ApplicationTabs.length;
-    } else {
-      newStep = sectionIndex;
-    }
-
-    setStep(newStep);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { collectionId } = props.match.params;
-        if (props.readOnlyMode) {
+        if (props.existingDarsReadOnlyMode) {
           const collection = await Collections.getCollectionById(collectionId);
           setResearcher(collection.createUser);
         } else {
@@ -259,19 +247,26 @@ const DataAccessRequestApplication = (props) => {
       }
     };
     fetchData();
-  }, [props.match.params, props.readOnlyMode]);
+  }, [props.match.params, props.existingDarsReadOnlyMode]);
 
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     let formData = {};
-    setIsLoading(false);
 
     if (!isNil(collectionId)) {
       // Review existing DAR application - retrieves all datasets in the collection
       // Besides the datasets, DARs split off from the collection should have the same formData
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
+      // TS thinks that collection.dars is an object, but it is a map
+      const darMap = new Map(Object.entries(dars));
+      setReverseOrderedDARs(
+          [...darMap.values()].sort((a, b) => b.id - a.id)
+      );
       const darReferenceId = head(keys(dars));
+      // TODO - future improvement
+      //  in theory, we should be able to replace this call with the info returned from the collection
+      // form data = the first DAR's data
       formData = await DAR.getPartialDarRequest(darReferenceId);
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
@@ -291,8 +286,25 @@ const DataAccessRequestApplication = (props) => {
     formData.userId = researcher.userId;
 
     batchFormFieldChange(formData);
-    window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
-  }, [onScroll, props.match.params, researcher]);
+    setIsLoading(false);
+  }, [props.match.params, researcher]);
+
+  useEffect(() => {
+    if (props.existingDarsReadOnlyMode) {
+      let appTabs = []
+      if(props.isProgressReportApplication){
+        // if we are creating a new progress report, we need to add another tab for the application
+        appTabs = [{ name: 'DAR Update ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false}]
+      }
+      setApplicationTabs([...appTabs,
+          ...reverseOrderedDARs.map((_dar, index) => {
+            const whichPRIsThis = reverseOrderedDARs.length - index - 1;
+            const isLast = index === reverseOrderedDARs.length - 1;
+            const itemLabel = isLast ? formData?.darCode : 'DAR Update ' + whichPRIsThis;
+            return {name: itemLabel, id: `${DAR_UPDATE_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false};
+          })]);
+    }
+  }, [formData?.darCode, props.isProgressReportApplication, props.existingDarsReadOnlyMode, reverseOrderedDARs]);
 
   useEffect(() => {
     init();
@@ -300,12 +312,6 @@ const DataAccessRequestApplication = (props) => {
       setNotificationData(notificationData);
     });
   }, [init]);
-
-  useEffect(() => {
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, [onScroll]);
 
   //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
   //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
@@ -328,29 +334,29 @@ const DataAccessRequestApplication = (props) => {
 
   const scrollToFormErrors = (validation, eraCommonsIdValid, hasLibraryCard) => {
     if (!isEmpty(validation.researcherInfoErrors) || !eraCommonsIdValid || !hasLibraryCard) {
-      goToStep(1);
+      setTab(RESEARCHER_INFO_TAB_ID);
     } else if (!isEmpty(validation.darErrors)) {
-      goToStep(2);
+      setTab(DATA_ACCESS_REQUEST_TAB_ID);
     } else if (!isEmpty(validation.rusErrors)) {
-      goToStep(3);
+      setTab(RESEARCH_PURPOSE_STATEMENT_TAB_ID);
     } else {
-      goToStep(1);
+      setTab(RESEARCHER_INFO_TAB_ID);
     }
   };
 
   const addDucAddendumTab = () => {
     const tabs = [
       ...ApplicationTabs,
-      { name: 'Addendum', showStep: false }
+      { name: 'Addendum', id: ADDENDUM_TAB_ID, showStep: false }
     ];
     setApplicationTabs(tabs);
   };
 
   const goToDucAddendum = useCallback(async () => {
     if (isAttested) {
-      goToStep(5);
+      setTab(ADDENDUM_TAB_ID);
     }
-  }, [goToStep, isAttested]);
+  }, [setTab, isAttested]);
 
   const attemptSubmit = async () => {
     const validation = validateDARFormData({
@@ -505,9 +511,16 @@ const DataAccessRequestApplication = (props) => {
   const { dataRequestId } = props.match.params;
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
+  if (isLoading) {
+    return <SpinnerComponent
+        show={true}
+        name="loadingSpinner"
+        loadingImage={loadingImage}
+    />;
+  }
   return (
     <div>
-      <div className={props.readOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.readOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.readOnlyMode ? 'white' : '' }}>
+      <div className={props.existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.existingDarsReadOnlyMode ? 'white' : '' }}>
         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
           <div className='row no-margin'>
             <Notification notificationData={notificationData} />
@@ -515,12 +528,12 @@ const DataAccessRequestApplication = (props) => {
               className={(formData.darCode !== null ?
                 'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
               <PageHeading
-                title='Data Access Request Application'
-                description={props.readOnlyMode ? '' : 'Please complete the fields below to request access to data.'}
+                title={props.existingDarsReadOnlyMode ? formData.darCode : 'Data Access Request Application'}
+                description={props.existingDarsReadOnlyMode ? formData.projectTitle : 'Please complete the fields below to request access to data.'}
               />
             </div>
             {formData.darCode !== null &&
-              !props.readOnlyMode &&
+              !props.existingDarsReadOnlyMode &&
               <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
                 <a id='btn_back' onClick={back} className='btn-primary btn-back'>
                   <i className='glyphicon glyphicon-chevron-left' />
@@ -533,34 +546,7 @@ const DataAccessRequestApplication = (props) => {
 
         <div style={{ clear: 'both' }} />
         <form name='form' noValidate={true} className='forms-v2'>
-          <div className='multi-step-buttons-container'>
-            <Tabs
-              value={step}
-              variant='scrollable'
-              scrollButtons='auto'
-              orientation='vertical'
-              TabIndicatorProps={{
-                style: { background: '#2BBD9B' }
-              }}
-              onChange={(_event, step) => {
-                goToStep(step);
-              }}
-            >
-              {
-                applicationTabs.map((tabConfig, index) => {
-                  const { name, showStep = true } = tabConfig;
-                  return <Tab
-                    key={`step-${index}-${name}`}
-                    label={<div>
-                      {showStep && <div className='step'>{`Step ${index + 1}`}</div>}
-                      <div className='title'>{name}</div>
-                    </div>}
-                    value={index + 1}
-                  />;
-                })
-              }
-            </Tabs>
-          </div>
+            <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab}/>
 
           <div id='form-views'>
             <ConfirmationDialog
@@ -580,12 +566,47 @@ const DataAccessRequestApplication = (props) => {
               </div>
             </ConfirmationDialog>
 
-            <div className='dar-steps'>
-              <div className='step-container'>
+            {props.isProgressReportApplication && (
+                <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className='dar-steps'>
+                  <ConditionalAccordion
+                      condition={false}
+                      title={`DAR Report ${reverseOrderedDARs.length}`}>
+                    <ProgressReportApplication readOnlyMode={false}/>
+                  </ConditionalAccordion>
+                </div>
+            )}
+            {props.existingDarsReadOnlyMode && reverseOrderedDARs.length > 1  && (
+                <div className='dar-summary'>
+                  <h3>Previous Updates</h3>
+                  {reverseOrderedDARs.map((dar, index) => {
+                    if ((index + 1 !== reverseOrderedDARs.length)) {
+                      return (
+                          <div key={`dar-${index}`} id={`${DAR_UPDATE_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
+                            <ConditionalAccordion
+                                key={`dar-${index}`}
+                                condition={true}
+                                title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
+                                defaultExpanded={index === 0}>
+                              <ProgressReportApplication readOnlyMode={true} dar={dar?.data}  />
+                            </ConditionalAccordion>
+                          </div>);
+                    }
+                  })
+                  }
+                </div>
+            )}
+
+            <div id={`${DAR_UPDATE_TAB_ID_PREFIX}-0`} className={props.existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
+              {props.existingDarsReadOnlyMode && (<h3>{formData.darCode} Summary</h3>)}
+              <div id={RESEARCHER_INFO_TAB_ID} className={props.existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <ConditionalAccordion
+                    condition={props.existingDarsReadOnlyMode}
+                    title="Step 1: Researcher Information"
+                    defaultExpanded={reverseOrderedDARs.length === 1}>
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
-                  readOnlyMode={props.readOnlyMode || isAttested}
-                  includeInstructions={!props.readOnlyMode}
+                  readOnlyMode={props.existingDarsReadOnlyMode || isAttested}
+                  includeInstructions={!props.existingDarsReadOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}
                   validation={formValidation.researcherInfoErrors}
@@ -602,42 +623,51 @@ const DataAccessRequestApplication = (props) => {
                   setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
                   setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
                 />
+                  </ConditionalAccordion>
               </div>
 
-              <div className='step-container'>
-                <DataAccessRequest
-                  formData={formData}
-                  readOnlyMode={props.readOnlyMode || isAttested}
-                  includeInstructions={!props.readOnlyMode}
-                  datasets={datasets}
-                  validation={formValidation.darErrors}
-                  formValidationChange={(val) => formValidationChange('darErrors', val)}
-                  dataUseTranslations={dataUseTranslations}
-                  formFieldChange={formFieldChange}
-                  batchFormFieldChange={batchFormFieldChange}
-                  uploadedCollaborationLetter={uploadedCollaborationLetter}
-                  updateCollaborationLetter={updateCollaborationLetter}
-                  uploadedIrbDocument={uploadedIrbDocument}
-                  updateUploadedIrbDocument={updateIrbDocument}
-                  setDatasets={setDatasets}
-                  setSelectedDatasets={setSelectedDatasets}
-                  draftDar={props.draftDar}
-                />
+              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={props.existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <ConditionalAccordion
+                    condition={props.existingDarsReadOnlyMode}
+                    title="Step 2: Data Access Request">
+                  <DataAccessRequest
+                      formData={formData}
+                      readOnlyMode={props.existingDarsReadOnlyMode || isAttested}
+                      includeInstructions={!props.existingDarsReadOnlyMode}
+                      datasets={datasets}
+                      validation={formValidation.darErrors}
+                      formValidationChange={(val) => formValidationChange('darErrors', val)}
+                      dataUseTranslations={dataUseTranslations}
+                      formFieldChange={formFieldChange}
+                      batchFormFieldChange={batchFormFieldChange}
+                      uploadedCollaborationLetter={uploadedCollaborationLetter}
+                      updateCollaborationLetter={updateCollaborationLetter}
+                      uploadedIrbDocument={uploadedIrbDocument}
+                      updateUploadedIrbDocument={updateIrbDocument}
+                      setDatasets={setDatasets}
+                      setSelectedDatasets={setSelectedDatasets}
+                      draftDar={props.draftDar}
+                  />
+                </ConditionalAccordion>
               </div>
 
-              <div className='step-container'>
-                <ResearchPurposeStatement
-                  darCode={formData.darCode}
-                  readOnlyMode={props.readOnlyMode || isAttested}
-                  validation={formValidation.rusErrors}
-                  formValidationChange={(val) => formValidationChange('rusErrors', val)}
-                  formFieldChange={formFieldChange}
-                  formData={formData}
-                />
+              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={props.existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <ConditionalAccordion
+                    condition={props.existingDarsReadOnlyMode}
+                    title="Step 3: Research Purpose Statement">
+                  <ResearchPurposeStatement
+                      darCode={formData.darCode}
+                      readOnlyMode={props.existingDarsReadOnlyMode || isAttested}
+                      validation={formValidation.rusErrors}
+                      formValidationChange={(val) => formValidationChange('rusErrors', val)}
+                      formFieldChange={formFieldChange}
+                      formData={formData}
+                  />
+                </ConditionalAccordion>
               </div>
 
-              {!props.readOnlyMode ?
-                <div className='step-container'>
+              {!props.existingDarsReadOnlyMode ?
+                  <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} className='step-container'>
                   {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
                       datasets={selectedDatasets}
@@ -658,7 +688,7 @@ const DataAccessRequestApplication = (props) => {
                 </div> : <div />}
 
               {isAttested &&
-                <div className='step-container'>
+                <div id={ADDENDUM_TAB_ID} className='step-container'>
                   <DucAddendum
                     doSubmit={doSubmit}
                     save={() => setShowDialogSave(true)}
@@ -672,7 +702,7 @@ const DataAccessRequestApplication = (props) => {
           </div>
         </form>
       </div>
-      {!props.readOnlyMode ? <UsgOmbText /> : null}
+      {!props.existingDarsReadOnlyMode ? <UsgOmbText /> : null}
     </div>
   );
 };

@@ -83,8 +83,10 @@ const Routes = (props) => (
     <AuthenticatedRoute path='/member_console' component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
     <AuthenticatedRoute path='/dar_vote_review/:collectionId' component={DarCollectionReview} props={Object.assign({readOnly: true}, props)}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
-    <AuthenticatedRoute path='/dar_application_review/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {readOnlyMode: true})}
+    <AuthenticatedRoute path='/dar_application_review/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true})}
       rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path='/progress_report_application/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true, isProgressReportApplication: true})}
+                          rolesAllowed={[USER_ROLES.researcher]} />
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path='/dar_application/:dataRequestId' component={DataAccessRequestApplication} props={Object.assign({}, props, {draftDar: true})}
       rolesAllowed={[USER_ROLES.researcher]} />
