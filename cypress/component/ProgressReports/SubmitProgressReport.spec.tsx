@@ -1,9 +1,9 @@
 import React from 'react';
 import {mount} from 'cypress/react';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
-import '../../../src/index.css';
-import '../../../src/styles/buttons.css';
+import {StackdriverReporter} from 'src/libs/stackdriverReporter';
+import 'src/index.css';
+import 'src/styles/buttons.css';
 
 
 describe('SubmitProgressReport tests', () => {
@@ -17,7 +17,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentReferenceId="1"
+            parentId="1"
             onSuccess={() => {
             }}
             onCancel={() => {
@@ -36,7 +36,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentReferenceId="1"
+            parentId="1"
             onSuccess={() => {
             }}
             onCancel={() => {
@@ -63,7 +63,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentReferenceId="1"
+            parentId="1"
             onSuccess={functionSpy.successHandler}
             onCancel={() => {
             }}
@@ -84,7 +84,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentReferenceId="1"
+            parentId="1"
             onSuccess={() => {
             }}
             onCancel={functionSpy.cancelHandler}
@@ -104,7 +104,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentReferenceId="1"
+            parentId="1"
             onSuccess={() => {
             }}
             onCancel={() => {

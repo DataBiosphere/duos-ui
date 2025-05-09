@@ -378,6 +378,7 @@ export interface DataAccessRequest {
   dataManagementIncident: DataManagementIncident;
   researchPlans: string;
   closeOutSupplement: 'PROJECT_COMPLETED' | 'REQUESTOR_MOVED_INSTITUTION' | 'PROJECT_TRANSFERRED' | 'PROJECT_SUPERSEDED';
+  parentId?: string;
 }
 
 export interface DataManagementIncident {

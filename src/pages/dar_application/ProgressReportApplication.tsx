@@ -1,5 +1,6 @@
-import React from "react";
-import {DataAccessRequest} from "src/types/model";
+import React from 'react';
+import {DataAccessRequest} from 'src/types/model';
+import SubmitProgressReport from '../progress_reports/SubmitProgressReport';
 
 type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is a new application
@@ -18,6 +19,16 @@ export const ProgressReportApplication = ({dar, readOnlyMode=true}: ProgressRepo
                     <h4>Intellectual Property Summary</h4>
                     {dar?.intellectualPropertySummary ?? "PLACEHOLDER Intellectual Property Summary"}
                 </div>
+                {dar?.parentId && <div>
+                  <SubmitProgressReport
+                      progressReport={dar}
+                      parentId={dar.parentId}
+                      onSuccess={() => {
+                      }}
+                      onCancel={() => {
+                      }}
+                  />
+                </div>}
             </div>
     )
 };
