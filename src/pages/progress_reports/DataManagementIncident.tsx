@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { FormFieldChange, FormState } from './ProgressReportFormState';
 
