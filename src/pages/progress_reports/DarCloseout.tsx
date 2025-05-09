@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
-
-interface FormStateInterface {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
+import { FormFieldChange, FormState } from './ProgressReportFormState';
 
 interface DarCloseoutProps {
-    readonly state: string;
+    readonly readOnly: boolean;
+    formState: FormState;
+    setFormState: (formState: FormState) => void;
 }
 
-interface FormFieldChange {
-    key: string;
-    value: boolean | string;
-}
-
-export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element {
-    const [formState, setFormState] = useState<FormStateInterface>({});
+export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
+    const { readOnly, formState, setFormState } = props;
+    const _ignore = readOnly;
 
     return (
         <div data-cy='dar-closeout'>
@@ -41,6 +35,7 @@ export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The Requestor has completed his/her project'
                             onChange={({ key, value }: FormFieldChange) => {
+                                console.log('closeoutCompleted', formState);
                                 setFormState({ ...formState, [key]: value });
                             }}
                         />

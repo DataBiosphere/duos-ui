@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
+import { FormFieldChange, FormState } from './ProgressReportFormState';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 
@@ -19,16 +20,14 @@ interface FormStateInterface {
 }
 
 interface DataManagementIncidentProps {
-    readonly state: string;
+    readonly readOnly: boolean;
+    formState: FormState;
+    setFormState: (formState: FormState) => void;
 }
 
-interface FormFieldChange {
-    key: string;
-    value: boolean | string;
-}
-
-export default function DataManagementIncident(_props: DataManagementIncidentProps): React.JSX.Element {
-    const [formState, setFormState] = useState<FormStateInterface>({});
+export default function DataManagementIncident(props: DataManagementIncidentProps): React.JSX.Element {
+    const { readOnly, formState, setFormState } = props;
+    const _ignore = readOnly;
 
     return (
         <div data-cy='data-management-incident'>
