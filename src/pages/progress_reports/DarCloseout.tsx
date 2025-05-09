@@ -39,7 +39,7 @@ export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element
                         <FormField
                             id='closeoutCompleted'
                             type={FormFieldTypes.CHECKBOX}
-                            toggleText='The Requestor has completed his/her project'
+                            toggleText='The Requestor has completed the project'
                             onChange={({ key, value }: FormFieldChange) => {
                                 setFormState({ ...formState, [key]: value });
                             }}
