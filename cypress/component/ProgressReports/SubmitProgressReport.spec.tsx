@@ -1,9 +1,9 @@
 import React from 'react';
 import {mount} from 'cypress/react';
-import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {StackdriverReporter} from 'src/libs/stackdriverReporter';
-import 'src/index.css';
-import 'src/styles/buttons.css';
+import SubmitProgressReport from '../../../src/pages/progress_reports/SubmitProgressReport';
+import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
+import '../../../src/index.css';
+import '../../../src/styles/buttons.css';
 
 
 describe('SubmitProgressReport tests', () => {
