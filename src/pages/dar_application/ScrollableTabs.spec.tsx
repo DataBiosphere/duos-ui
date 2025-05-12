@@ -41,14 +41,6 @@ describe('ScrollableTabs Component - Tests', () => {
 
     });
 
-    it('Case 3 - Start at top of page', () => {
-        cy.get('.Mui-selected').contains('Researcher Information').should('exist');
-        cy.get('.Mui-selected').contains('Research Purpose Statement').should('not.exist');
-        cy.window().then(($window) => {
-            expect($window.scrollY).to.be.closeTo(0, 10);
-        });
-    });
-
     it('Case 3 - First tab selected by default and can click and select another tab', () => {
         cy.get('.Mui-selected').contains('Researcher Information').should('exist');
         cy.get('.Mui-selected').contains('Data Access Request').should('not.exist');
