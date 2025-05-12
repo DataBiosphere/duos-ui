@@ -10,7 +10,6 @@ interface DarCloseoutProps {
 
 export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
     const { readOnly, formState, onFormChange } = props;
-    const _ignore = readOnly;
 
     return (
         <div data-cy='dar-closeout'>
@@ -37,6 +36,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             onChange={({ key, value }: FormFieldChange) => {
                                 onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutMoved'
@@ -45,6 +45,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             onChange={({ key, value }: FormFieldChange) => {
                                 onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutTransferred'
@@ -53,6 +54,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             onChange={({ key, value }: FormFieldChange) => {
                                 onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutSuperceded'
@@ -61,6 +63,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             onChange={({ key, value }: FormFieldChange) => {
                                 onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutOther'
@@ -69,6 +72,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                             onChange={({ key, value }: FormFieldChange) => {
                                 onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         {formState.closeoutOther === true &&
                             <div style={{ marginTop: '20px' }}>
@@ -81,6 +85,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                             </div>
                         }
