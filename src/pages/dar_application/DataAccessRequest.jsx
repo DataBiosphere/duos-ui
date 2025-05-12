@@ -416,6 +416,7 @@ export default function DataAccessRequest(props) {
                         onValidationChange={onValidationChange}
                         onChange={({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
                       />
+                      <div style={{marginTop: 12}}>Expiration Date:</div>
                       <DuosDatePicker
                         disabled={readOnlyMode}
                         id={'irbProtocolExpiration'}
