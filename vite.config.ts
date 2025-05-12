@@ -22,4 +22,9 @@ export default defineConfig({
     },
     open: true
   },
+  resolve: {
+    alias: {
+      src: '/src'
+    },
+  }
 });
