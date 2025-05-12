@@ -310,7 +310,7 @@ export const DatasetSearchTable = (props) => {
                   </Box>
                 );
               } else {
-                return <DatasetSearchTableDisplay tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets}/>;
+                return <DatasetSearchTableDisplay key={selectedTable.key} tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets}/>;
               }
             })()}
           </Box>

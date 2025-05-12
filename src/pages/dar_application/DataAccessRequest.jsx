@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
+import React from 'react';
+import {DataSet} from '../../libs/ajax/DataSet';
+import {DAR} from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
 import {
   needsDsAcknowledgement,
@@ -12,8 +12,10 @@ import {
 } from '../../utils/darFormUtils';
 import SelectableDatasets from './SelectableDatasets';
 import {DAAUtils} from '../../utils/DAAUtils';
+import {DuosDatePicker} from '../../components/DuosDatePicker.js';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
+const noTopMarginStyle = { marginTop: '0', paddingTop: '0' };
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -60,7 +62,7 @@ const searchDatasets = (query, callback, currentDatasets) => {
         ... ds
       };
     });
-    let options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
+    const options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
       return formatSearchDataset(item);
     });
     callback(options);
@@ -97,7 +99,7 @@ export default function DataAccessRequest(props) {
     includeInstructions,
     formValidationChange,
     ariaLevel = 2,
-    draftDar
+    _draftDar
   } = props;
 
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
@@ -112,7 +114,7 @@ export default function DataAccessRequest(props) {
   };
 
   const primaryChange = ({key, value}) => {
-    let newFormData = {
+    const newFormData = {
       diseases: null,
       hmb: null,
       poa: null,
@@ -121,7 +123,7 @@ export default function DataAccessRequest(props) {
     };
 
     // ensure that non visible fields are unselected
-    for (var key0 in newFormData) {
+    for (const key0 in newFormData) {
       if (key === key0) {
         newFormData[key0] = value;
         break;
@@ -141,8 +143,7 @@ export default function DataAccessRequest(props) {
   return (
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
-      <div className={'dar-step-card'}>
-        <h2>Step 2: Data Access Request</h2>
+      <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
 
         {DAAUtils.isEnabled() ?
           <div>
@@ -162,7 +163,7 @@ export default function DataAccessRequest(props) {
             isAsync={true}
             isMulti={true}
             title={'2.1 Select Dataset(s)'}
-            titleStyle={titleStyle}
+            titleStyle={readOnlyMode ? {...titleStyle, ...noTopMarginStyle} : titleStyle}
             validators={[FormValidators.REQUIRED]}
             validation={validation.datasetIds}
             onValidationChange={onValidationChange}
@@ -415,11 +416,14 @@ export default function DataAccessRequest(props) {
                         onValidationChange={onValidationChange}
                         onChange={({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
                       />
-                      <FormField
-                        key={'irbProtocolExpiration'}
-                        readOnly={true}
+                      <div style={{marginTop: 12}}>Expiration Date:</div>
+                      <DuosDatePicker
+                        disabled={readOnlyMode}
                         id={'irbProtocolExpiration'}
-                        defaultValue={`IRB Expires on ${irbProtocolExpiration}`}
+                        defaultValue={irbProtocolExpiration}
+                        onChange={(value) => {
+                          onChange({key: 'irbProtocolExpiration', value});
+                        }}
                       />
                     </div>
         }

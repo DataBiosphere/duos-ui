@@ -1,5 +1,5 @@
 # builder image
-FROM node:22.15.0 AS builder
+FROM node:24.0.1 AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
 # set working directory

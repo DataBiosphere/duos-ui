@@ -15,3 +15,8 @@ export interface DuosUserResponse {
 export type CreateDuosUserResponse = DuosUserResponse | false | undefined;
 
 export type UpdateDuosUserResponse = CreateDuosUserResponse;
+
+export interface ConsentError {
+  readonly message?: string;
+  readonly code?: number;
+}
