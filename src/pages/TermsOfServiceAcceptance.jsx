@@ -1,10 +1,10 @@
 import React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {Auth} from '../libs/auth/auth';
-import {TosService} from '../libs/tosService';
-import {Storage} from '../libs/storage';
-import SimpleButton from '../components/SimpleButton';
-import {Theme} from '../libs/theme';
+import {Auth} from 'src/libs/auth/auth';
+import {TosService} from 'src/libs/tosService';
+import {Storage} from 'src/libs/storage';
+import SimpleButton from 'src/components/SimpleButton';
+import {Theme} from 'src/libs/theme';
 
 export default function TermsOfServiceAcceptance(props) {
   const [tosText, setTosText] = useState('');
