@@ -1,6 +1,6 @@
 import React from 'react';
-import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
+import {DataSet} from '../../libs/ajax/DataSet';
+import {DAR} from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
 import {
   needsDsAcknowledgement,
@@ -12,6 +12,7 @@ import {
 } from '../../utils/darFormUtils';
 import SelectableDatasets from './SelectableDatasets';
 import {DAAUtils} from '../../utils/DAAUtils';
+import {DuosDatePicker} from '../../components/DuosDatePicker.js';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 const noTopMarginStyle = { marginTop: '0', paddingTop: '0' };
@@ -415,12 +416,13 @@ export default function DataAccessRequest(props) {
                         onValidationChange={onValidationChange}
                         onChange={({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
                       />
-                      <FormField
-                        key={'irbProtocolExpiration'}
-                        readOnly={false}
+                      <DuosDatePicker
+                        disabled={readOnlyMode}
                         id={'irbProtocolExpiration'}
                         defaultValue={irbProtocolExpiration}
-                        onChange={onChange}
+                        onChange={(value) => {
+                          onChange({key: 'irbProtocolExpiration', value});
+                        }}
                       />
                     </div>
         }
