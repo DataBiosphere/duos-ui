@@ -12,7 +12,6 @@ interface DataManagementIncidentProps {
 
 export default function DataManagementIncident(props: DataManagementIncidentProps): React.JSX.Element {
     const { readOnly, formState, onFormChange } = props;
-    const _ignore = readOnly;
 
     return (
         <div data-cy='data-management-incident'>
@@ -31,6 +30,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             onChange={({ key, value }: FormFieldChange) => {
                                 onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                     </div>
                     {formState.dmiYesNo === true &&
@@ -56,6 +56,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         }
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiIdentification'
@@ -64,6 +65,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiSharing'
@@ -72,6 +74,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiSecurity'
@@ -80,6 +83,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiAcknowledgement'
@@ -88,6 +92,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiPublication'
@@ -96,6 +101,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiFalsification'
@@ -104,6 +110,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiOther'
@@ -112,6 +119,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                             </div>
                             <div style={{ marginTop: '20px' }}>
@@ -126,6 +134,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                             </div>
                         </>
