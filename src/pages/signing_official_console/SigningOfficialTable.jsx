@@ -351,8 +351,8 @@ export default function SigningOfficialTable(props) {
       setShowConfirmation(false);
       setShowModal(false);
       Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(_error) {
-      Notifications.showError({text: `Error issuing library card to ${messageName}`});
+    } catch(error) {
+      Notifications.showError({text: error.response.data.message ?? 'Error issuing library card' });
     }
   };
 
