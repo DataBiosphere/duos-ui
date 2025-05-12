@@ -42,6 +42,18 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Inappropriate combination or analysis of the requested datasets with unapproved datasets'
                                     onChange={({ key, value }: FormFieldChange) => {
+                                        if (value === false) {
+                                            onFormChange({
+                                                dmiCombination: false,
+                                                dmiIdentification: false,
+                                                dmiSharing: false,
+                                                dmiSecurity: false,
+                                                dmiAcknowledgement: false,
+                                                dmiPublication: false,
+                                                dmiFalsification: false,
+                                                dmiOther: false
+                                            });
+                                        }
                                         onFormChange({ [key]: value });
                                     }}
                                 />
