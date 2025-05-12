@@ -120,8 +120,8 @@ const deleteOnClick = (currentCard, libraryCards, setLibraryCards, setShowConfir
     libraryCardsCopy.splice(targetIndex, 1);
     setLibraryCards(libraryCardsCopy);
     setShowConfirmation(false);
-  } catch(_error) {
-    Notifications.showError('Error: Failed to delete library card');
+  } catch(error) {
+    Notifications.showError({text: error.response.data.message ?? 'Error: Failed to delete library card'});
   }
 };
 
@@ -307,9 +307,9 @@ export default function LibraryCardTable(props) {
           updatedCard.userName || updatedCard.userEmail
         }'s library card successfully updated`,
       });
-    } catch (_error) {
+    } catch (error) {
       setShowModal(false);
-      Notifications.showError({ text: 'Error: Failed to update library card' });
+      Notifications.showError({ text:  error.response.data.message ?? 'Error: Failed to update library card' });
     }
   };
 
@@ -317,18 +317,18 @@ export default function LibraryCardTable(props) {
   const addLibraryCard = async (card) => {
     try {
       //check if card combination already exits, show error if it does
-      const alreadyExists = findIndex(
+      const alreadyExists  = findIndex(
         (element) =>
           (isEqual(element.institutionId)(card.institutionId) &&
             element.userId === card.userId) ||
-          isEqual(element.userEmail)(card.userEmail)
+          isEqual(element.userEmail)(card.userEmail), libraryCards
       );
-      const newCard = await LibraryCard.createLibraryCard(card);
       if (alreadyExists > -1) {
         Notifications.showError({ text: 'Library Card already exists' });
         //otherwise execute library card update with payload, get the updated card, and
         //add(with sort afterwards) library card to libraryCards (reference list)
       } else {
+        const newCard = await LibraryCard.createLibraryCard(card);
         const institution = find(
           (institution) => institution.id === newCard.institutionId
         )(institutions);
@@ -343,10 +343,10 @@ export default function LibraryCardTable(props) {
         setLibraryCards(updatedList);
         setShowModal(false);
       }
-    } catch (_error) {
+    } catch (error) {
       setShowModal(false);
       Notifications.showError({
-        text: 'Error: Failed to create new library card',
+        text: error.response.data.message ?? 'Error: Failed to create new library card',
       });
     }
   };
