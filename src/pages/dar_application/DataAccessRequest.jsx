@@ -417,9 +417,10 @@ export default function DataAccessRequest(props) {
                       />
                       <FormField
                         key={'irbProtocolExpiration'}
-                        readOnly={true}
+                        readOnly={false}
                         id={'irbProtocolExpiration'}
-                        defaultValue={`IRB Expires on ${irbProtocolExpiration}`}
+                        defaultValue={irbProtocolExpiration}
+                        onChange={onChange}
                       />
                     </div>
         }
