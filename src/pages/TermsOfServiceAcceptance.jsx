@@ -50,7 +50,7 @@ export default function TermsOfServiceAcceptance(props) {
   };
 
   const rejectButton = <SimpleButton
-    keyProp="tos-accept"
+    keyProp="tos-reject"
     label="Reject Terms of Service"
     isRendered={true}
     onClick={signOut}
