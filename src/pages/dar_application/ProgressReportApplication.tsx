@@ -22,7 +22,7 @@ export const ProgressReportApplication = ({dar, readOnlyMode=true}: ProgressRepo
                 {dar?.parentId && <div>
                   <SubmitProgressReport
                       progressReport={dar}
-                      parentId={dar.parentId}
+                      parentReferenceId={dar.referenceId}
                       onSuccess={() => {
                       }}
                       onCancel={() => {
