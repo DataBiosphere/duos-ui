@@ -2,13 +2,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorList from '../../../src/components/collaborator_list/CollaboratorList';
 
-// Define the Collaborator interface to match the component's expectations
-interface Collaborator {
-    name: string;
-    title: string;
-    institution: string;
-    email: string;
-}
+import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
 
 describe('CollaboratorList - Component Tests', () => {
     const mockCollaborators: Collaborator[] = [
@@ -16,13 +10,17 @@ describe('CollaboratorList - Component Tests', () => {
             name: 'John Doe',
             title: 'Researcher',
             institution: 'Research Institute',
-            email: 'john.doe@example.com'
+            email: 'john.doe@example.com',
+            uuid: '123e4567-e89b-12d3-a456-426614174001',
+            eraCommonsId: 'jdoe123'
         },
         {
             name: 'Jane Smith',
             title: 'Professor',
             institution: 'University',
-            email: 'jane.smith@example.com'
+            email: 'jane.smith@example.com',
+            uuid: '123e4567-e89b-12d3-a456-426614174002',
+            eraCommonsId: 'jsmith456'
         }
     ];
 
@@ -102,10 +100,14 @@ describe('CollaboratorList - Component Tests', () => {
 
         cy.contains('Add Collaborator').click();
 
-        cy.get('#name').type('New Person').blur();
-        cy.get('#title').type('New Title').blur();
-        cy.get('#institution').type('New Institution').blur();
-        cy.get('#email').type('new.person@example.com').blur();
+        cy.get('#name').type('New Person');
+        cy.get('#name').blur();
+        cy.get('#title').type('New Title');
+        cy.get('#title').blur();
+        cy.get('#institution').type('New Institution');
+        cy.get('#institution').blur();
+        cy.get('#email').type('new.person@example.com');
+        cy.get('#email').blur();
 
         cy.get('.collaborator-form-add-save-button').click({ force: true });
 
@@ -123,7 +125,8 @@ describe('CollaboratorList - Component Tests', () => {
         cy.get('.glyphicon-pencil').first().parent('a').click({ force: true });
 
         const updatedName = 'Updated Name';
-        cy.get('#name').clear().type(updatedName);
+        cy.get('#name').clear();
+        cy.get('#name').type(updatedName);
 
         cy.contains('Save').click();
 

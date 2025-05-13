@@ -1,20 +1,16 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorRow from '../../../src/components/collaborator_list/CollaboratorRow';
-
-interface Collaborator {
-    name: string;
-    title: string;
-    institution: string;
-    email: string;
-}
+import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
 
 describe('CollaboratorRow - Component Tests', () => {
     const mockCollaborator: Collaborator = {
         name: 'John Doe',
         title: 'Researcher',
         institution: 'Research Institute',
-        email: 'john.doe@example.com'
+        email: 'john.doe@example.com',
+        uuid: '123e4567-e89b-12d3-a456-426614174000',
+        eraCommonsId: 'jdoe123'
     };
 
     const mockCollaborators: Collaborator[] = [mockCollaborator];
@@ -116,7 +112,8 @@ describe('CollaboratorRow - Component Tests', () => {
             onCollaboratorChange={onCollaboratorChange}
         />);
 
-        cy.get('#name').clear().type('Jane Doe');
+        cy.get('#name').clear();
+        cy.get('#name').type('Jane Doe');
 
         cy.contains('Save').click();
 
@@ -144,7 +141,7 @@ describe('CollaboratorRow - Component Tests', () => {
         cy.get('@deleteAction').should('not.have.been.called');
     });
 
-    it('renders CollaboratorAddEdit with new collaborator in edit mode with no collaborator provided', () => {
+    it('renders CollaboratorAddEdit with new collaborator in edit mode with id=-1', () => {
         const newProps = {
             ...defaultProps,
             id: -1,

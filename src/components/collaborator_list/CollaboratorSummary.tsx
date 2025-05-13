@@ -1,5 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import CollaboratorDelete from "./CollaboratorDelete";
+import { Collaborator } from "./Collaborator";
 
 interface CollaboratorSummaryProps {
     collaborator: Collaborator;
@@ -52,7 +53,7 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
             {/* delete button */}
             <a
                 style={{ marginLeft: 10, ...buttonStyle }}
-                onClick={() => { !disabled && setShowDeleteModal(true);}}
+                onClick={() => !disabled && setShowDeleteModal(true) }
             >
                 <span
                     className='glyphicon glyphicon-trash collaborator-delete-icon'

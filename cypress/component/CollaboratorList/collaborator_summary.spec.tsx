@@ -1,13 +1,15 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorSummary from '../../../src/components/collaborator_list/CollaboratorSummary';
+import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
 
-// Define the Collaborator interface to match component expectations
-interface Collaborator {
+type PartialCollaborator = {
   name: string;
-  title: string;
-  institution: string;
-  email: string;
+  title?: string | null;
+  institution?: string | null;
+  email?: string | null;
+  uuid?: string;
+  eraCommonsId?: string;
 }
 
 describe('CollaboratorSummary - Component Tests', () => {
@@ -15,7 +17,9 @@ describe('CollaboratorSummary - Component Tests', () => {
     name: 'John Doe',
     title: 'Researcher',
     institution: 'Research Institute',
-    email: 'john.doe@example.com'
+    email: 'john.doe@example.com',
+    uuid: '123e4567-e89b-12d3-a456-426614174000',
+    eraCommonsId: 'jdoe123'
   };
 
   const defaultProps = {
@@ -130,7 +134,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   });
 
   it('displays null or undefined column values gracefully', () => {
-    const incompleteCollaborator = {
+    const incompleteCollaborator: PartialCollaborator = {
       name: 'Jane Doe',
       title: '',
       institution: undefined,
@@ -139,7 +143,7 @@ describe('CollaboratorSummary - Component Tests', () => {
 
     mount(<CollaboratorSummary
       {...defaultProps}
-      collaborator={incompleteCollaborator as any}
+      collaborator={incompleteCollaborator as Collaborator}
     />);
 
     cy.contains('Jane Doe').should('be.visible');

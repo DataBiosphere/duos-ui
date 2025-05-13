@@ -1,5 +1,7 @@
-import CollaboratorAddEdit from "./CollaboratorAddEdit";
-import CollaboratorSummary from "./CollaboratorSummary";
+import React from 'react';
+import { Collaborator } from './Collaborator';
+import CollaboratorAddEdit from './CollaboratorAddEdit';
+import CollaboratorSummary from './CollaboratorSummary';
 
 interface CollaboratorRowProps {
     readonly id: number;
@@ -11,7 +13,7 @@ interface CollaboratorRowProps {
     readonly editAction: () => void;
     readonly deleteAction: () => void;
     readonly closeAction: () => void;
-    readonly onCollaboratorChange: (input: any) => void;
+    readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly disabled: boolean;
 }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FormField, FormValidators } from '../forms/forms';
+import { Collaborator } from './Collaborator';
 
 interface FormFieldChange {
     key: string;
@@ -12,7 +13,7 @@ interface CollaboratorAddEditProps {
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
     readonly closeAction: () => void;
-    readonly onCollaboratorChange: (input: any) => void;
+    readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
 }
 
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
@@ -92,7 +93,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                                 onCollaboratorChange([...collaborators, newCollaborator]);
                                 setNewCollaborator(undefined);
                             } else if (newCollaborator !== undefined) {
-                                let collaboratorsCopy = [...collaborators];
+                                const collaboratorsCopy = [...collaborators];
                                 collaboratorsCopy[id] = newCollaborator;
                                 onCollaboratorChange(collaboratorsCopy);
                                 setNewCollaborator(undefined);

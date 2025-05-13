@@ -1,4 +1,4 @@
-interface Collaborator {
+export interface Collaborator {
     uuid: string;
     name: string;
     eraCommonsId: string;

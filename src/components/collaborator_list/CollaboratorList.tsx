@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorRow from './CollaboratorRow';
+import { Collaborator } from './Collaborator';
 
 interface CollaboratorListProps {
     collaborators: Collaborator[];
     readonly collaboratorText: string;
     readonly columnsToShow?: string[];
-    readonly onCollaboratorChange: (input: any) => void;
+    readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly disabled?: boolean;
 }
 
@@ -39,7 +40,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         marginBottom: 5,
                         ...(disabled ? { cursor: 'not-allowed' } : {}),
                     }}
-                    onClick={() => { !disabled && setShowAddEdit(true); }}
+                    onClick={() => !disabled && setShowAddEdit(true) }
                     disabled={disabled}
                 >
                     Add {collaboratorText}

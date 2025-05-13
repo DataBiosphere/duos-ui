@@ -1,3 +1,4 @@
+import React from 'react';
 import ModalWrapper from './ModalWrapper';
 import './CollaboratorDelete.css';
 import CloseIconComponent from '../CloseIconComponent';

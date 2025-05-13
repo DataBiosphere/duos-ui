@@ -2,20 +2,16 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorAddEdit from '../../../src/components/collaborator_list/CollaboratorAddEdit';
 
-// Define the Collaborator interface to match the component's expectations
-interface Collaborator {
-  name: string;
-  title: string;
-  institution: string;
-  email: string;
-}
+import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
 
 describe('CollaboratorAddEdit - Component Tests', () => {
   const mockCollaborator: Collaborator = {
     name: 'John Doe',
     title: 'Researcher',
     institution: 'Research Institute',
-    email: 'john.doe@example.com'
+    email: 'john.doe@example.com',
+    uuid: '123e4567-e89b-12d3-a456-426614174000',
+    eraCommonsId: 'jdoe123'
   };
 
   const mockCollaborators: Collaborator[] = [mockCollaborator];
@@ -72,8 +68,10 @@ describe('CollaboratorAddEdit - Component Tests', () => {
       onCollaboratorChange={onCollaboratorChange}
     />);
 
-    cy.get('#name').clear().type('Jane Doe');
-    cy.get('#title').clear().type('Senior Researcher');
+    cy.get('#name').clear();
+    cy.get('#name').type('Jane Doe');
+    cy.get('#title').clear();
+    cy.get('#title').type('Senior Researcher');
 
     cy.contains('Save').click();
 
@@ -105,25 +103,36 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     mount(<CollaboratorAddEdit {...defaultProps} />);
 
     const name = 'Test Name';
-    cy.get('#name').type(name).should('have.value', name);
+    cy.get('#name').type(name);
+    cy.get('#name').should('have.value', name);
 
     const title = 'Test Title';
-    cy.get('#title').type(title).should('have.value', title);
+    cy.get('#title').type(title);
+    cy.get('#title').should('have.value', title);
 
     const institution = 'Test Institution';
-    cy.get('#institution').type(institution).should('have.value', institution);
+    cy.get('#institution').type(institution);
+    cy.get('#institution').should('have.value', institution);
 
     const email = 'test@example.com';
-    cy.get('#email').type(email).should('have.value', email);
+    cy.get('#email').type(email);
+    cy.get('#email').should('have.value', email);
   });
 
   it('shows validation error for empty required fields', () => {
     mount(<CollaboratorAddEdit {...defaultProps} />);
 
-    cy.get('#name').focus().blur();
-    cy.get('#title').focus().blur();
-    cy.get('#institution').focus().blur();
-    cy.get('#email').focus().blur();
+    cy.get('#name').focus();
+    cy.get('#name').blur();
+    
+    cy.get('#title').focus();
+    cy.get('#title').blur();
+    
+    cy.get('#institution').focus();
+    cy.get('#institution').blur();
+    
+    cy.get('#email').focus();
+    cy.get('#email').blur();
 
     cy.get('#name').parent().find('.error-message').should('be.visible');
     cy.get('#title').parent().find('.error-message').should('be.visible');
@@ -134,7 +143,8 @@ describe('CollaboratorAddEdit - Component Tests', () => {
   it('shows validation error for invalid email format', () => {
     mount(<CollaboratorAddEdit {...defaultProps} />);
 
-    cy.get('#email').type('invalid').blur();
+    cy.get('#email').type('invalid');
+    cy.get('#email').blur();
 
     cy.get('#email').parent().find('.error-message').should('be.visible');
   });
