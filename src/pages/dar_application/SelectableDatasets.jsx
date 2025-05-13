@@ -11,7 +11,7 @@ export default function SelectableDatasets(props) {
     // Populate parent state with the current state of datasets to be saved to the DAR
     const newSelectedDatasets = datasets.filter(ds => !removedIds.includes(ds.datasetId));
     setSelectedDatasets(newSelectedDatasets);
-  }, [removedIds, datasets, setSelectedDatasets]);
+  }, [removedIds, datasets]);
 
   const updateLocalState = (ds) => {
     if (removedIds.includes(ds.datasetId)) {

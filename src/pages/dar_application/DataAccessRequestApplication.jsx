@@ -518,6 +518,11 @@ const DataAccessRequestApplication = (props) => {
         loadingImage={loadingImage}
     />;
   }
+
+  function filterForProgressReport(datasets, datasetIds) {
+    return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
+  }
+
   return (
     <div>
       <div className={props.existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.existingDarsReadOnlyMode ? 'white' : '' }}>
@@ -571,7 +576,7 @@ const DataAccessRequestApplication = (props) => {
                   <ConditionalAccordion
                       condition={false}
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
-                    <ProgressReportApplication readOnlyMode={false}/>
+                    <ProgressReportApplication readOnlyMode={false} datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)} parentDar={reverseOrderedDARs[0]}/>
                   </ConditionalAccordion>
                 </div>
             )}
@@ -587,7 +592,7 @@ const DataAccessRequestApplication = (props) => {
                                 condition={true}
                                 title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
                                 defaultExpanded={index === 0}>
-                              <ProgressReportApplication readOnlyMode={true} dar={dar?.data}  />
+                              <ProgressReportApplication readOnlyMode={true} datasets={filterForProgressReport(datasets, dar.datasetIds)} dar={dar?.data}/>
                             </ConditionalAccordion>
                           </div>);
                     }
