@@ -1,6 +1,6 @@
-import React from 'react';
-import { FormFieldChange, FormState } from './ProgressReportFormState';
-import CollaboratorList from '../dar_application/collaborator/CollaboratorList';
+import React, { useState } from 'react';
+import { FormState } from './ProgressReportFormState';
+import CollaboratorList from './collaborator/CollaboratorList';
 
 interface CollaboratorProps {
     readonly readOnly: boolean;
@@ -10,7 +10,30 @@ interface CollaboratorProps {
 
 export default function CollaboratorChanges(props: CollaboratorProps): React.JSX.Element {
     const { readOnly, formState, onFormChange } = props;
-    const _ignore = readOnly;
+
+    const [internalLabStaff, setInternalLabStaff] = useState(formState.internalLabStaff || [
+        { uuid: 'abc123', name: 'John Doe', eraCommonsId: 'eraId1', email: 'john@example.com', title: 'Signing Official', institution: 'Broad Institute', approved: true, role: 'Data Analyst' },
+        { uuid: 'def456', name: 'Jane Smith', eraCommonsId: 'eraId2', email: 'jane@example.com', title: 'Researcher', institution: 'Broad Institute', approved: true, role: 'Data Analyst' }
+    ]);
+    const [internalCollaborators, setInternalCollaborators] = useState(formState.internalCollaborators || []);
+    const [externalCollaborators, setExternalCollaborators] = useState(formState.externalCollaborators || []);
+
+    const onCollaboratorChange = (key: string, setState: React.Dispatch<Collaborator[]>, collaborators: Collaborator[]) => {
+        onFormChange({ [key]: collaborators });
+        setState(collaborators);
+    };
+
+    const onInternalLabStaffChange = (collaborators: Collaborator[]) => {
+        onCollaboratorChange('internalLabStaff', setInternalLabStaff, collaborators);
+    }
+
+    const onInternalCollaboratorsChange = (collaborators: Collaborator[]) => {
+        onCollaboratorChange('internalCollaborators', setInternalCollaborators, collaborators);
+    }
+
+    const onExternalCollaboratorsChange = (collaborators: Collaborator[]) => {
+        onCollaboratorChange('externalCollaborators', setExternalCollaborators, collaborators);
+    }
 
     return (
         <div data-cy='dar-closeout'>
@@ -25,16 +48,11 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         </p>
                     </div>
                     <CollaboratorList
-                        collaborators={
-                            [
-                                { uuid: 'abc123', name: 'John Doe', email: 'john@example.com', institution: 'Broad Institute', approved: true, role: 'Data Analyst' },
-                                { uuid: 'def456', name: 'Jane Smith', email: 'jane@example.com', institution: 'Broad Institute', approved: true, role: 'Data Analyst' }
-                            ]
-                        }
-                        collaboratorKey='internalLabStaff'
-                        collaboratorLabel='Internal Lab Staff'
-                        setCompleted={() => {}}
-                        formFieldChange={() => {}}
+                        collaborators={internalLabStaff}
+                        collaboratorText='Internal Lab Staff'
+                        columnsToShow={['name', 'title']}
+                        onCollaboratorChange={onInternalLabStaffChange}
+                        disabled={readOnly}
                     />
                 </div>
                 <div className='progress-report-row'>
@@ -45,11 +63,11 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         </p>
                     </div>
                     <CollaboratorList
-                        collaborators={[]}
-                        collaboratorKey='internalCollaborators'
-                        collaboratorLabel='Internal Collaborators'
-                        setCompleted={() => {}}
-                        formFieldChange={() => {}}
+                        collaborators={internalCollaborators}
+                        collaboratorText='Internal Collaborators'
+                        columnsToShow={['name', 'title']}
+                        onCollaboratorChange={onInternalCollaboratorsChange}
+                        disabled={readOnly}
                     />
                 </div>
                 <div className='progress-report-row'>
@@ -60,11 +78,11 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         </p>
                     </div>
                     <CollaboratorList
-                        collaborators={[]}
-                        collaboratorKey='externalCollaborators'
-                        collaboratorLabel='External Collaborators'
-                        setCompleted={() => {}}
-                        formFieldChange={() => {}}
+                        collaborators={externalCollaborators}
+                        collaboratorText='External Collaborators'
+                        columnsToShow={['name', 'title']}
+                        onCollaboratorChange={onExternalCollaboratorsChange}
+                        disabled={readOnly}
                     />
                 </div>
             </div>
