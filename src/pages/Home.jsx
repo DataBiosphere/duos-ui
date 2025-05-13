@@ -1,9 +1,11 @@
 import React from 'react';
-import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
-import { Link } from 'react-router-dom';
+import broadLogo from '../images/broad_logo_allwhite.png';
+import anvilLogo from '../images/anvil-logo.svg';
+import hcaLogo from '../images/human-cell-atlas-logo.png';
+import { Tooltip } from '@mui/material';
 
 const Home = (props) => {
 
@@ -61,24 +63,40 @@ const Home = (props) => {
     padding: '10px 1rem',
   };
 
-  const paragraph = {
-    color: '#1F3B50',
-    padding: '0 5rem 2rem 5rem',
-    fontFamily: 'Montserrat',
-    fontSize: '14px',
-    textAlign: 'justify',
-    textIndent: '10px'
+  const logoGrid = {
+    display: 'flex',
+    gap: '3rem',              
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'nowrap',
+    width: '100%',
   };
 
-  const readMoreStyle = {
-    fontFamily: 'Montserrat',
-    fontSize: '14px',
-    fontWeight: 500,
-    textAlign: 'center',
-    display: 'block'
+  const baseCard = {
+    width: 'clamp(240px, 26vw, 320px)',
+    aspectRatio: '2 / 1',
+    borderRadius: '6px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',     
+  };
+
+  const logoImg = {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    display: 'block',
   };
 
   return (
+    <>
+    <style>{`
+        @media (max-width: 904px) {
+          .logo-grid { flex-direction: column; }
+        }
+      `}</style>
     <div className="row">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
@@ -125,37 +143,42 @@ const Home = (props) => {
             </div>
           </div>
         </div>
-        <div className="row" style={{ margin: 'auto auto 5rem auto' }}>
-          <div className="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2">
-            <div>
-              <h1 style={header}>Overview of DUOS</h1>
-              <ReadMore
-                props={props}
-                readStyle={readMoreStyle}
-                content={[
-                  <p style={paragraph} key="p-0">
-                    Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data. With support from DUOS team members, the Global Alliance for Genomics and Health (GA4GH) published a solution for this ambiguous and inconsistent data sharing language in the form of their
-                    {' '}
-                    <a href="https://www.ga4gh.org/genomic-data-toolkit/regulatory-ethics-toolkit/#:~:text=Machine%20Readable%20Consent%20Guidance&text=Machine%20readable%20consent%20language%20is,to%20for%20their%20research%20purposes" target="_blank" rel="noreferrer">Machine Readable Consent Guidance.</a>
-                    {' '}
-                    For help determining your data&apos;s permitted uses, try our
-                    {' '}
-                    <Link to="/consent_text_generator">Data Sharing Language Tool</Link>, which follows GA4GH guidelines.
-                  </p>
-                ]}
-                moreContent={[
-                  <div key="p-1">
-                    <p style={paragraph}>As part of our efforts to enhance collaborative research, the Broad Institute developed the “Data Use Oversight System” (DUOS) to semi-automate and efficiently manage compliant sharing of human subjects data. DUOS&apos; objective is two-fold, to enhance data access committee&apos;s confidence that data use restrictions are respected while efficiently enabling appropriate data access.</p>
-                    <p style={paragraph}>To better enable the use of existing human subjects datasets in future projects, DUOS mimics, in a semi-automated fashion, the data access request review processes common to DACs globally, like those in dbGaP. To this end, the system includes interfaces to capture and structure data use restrictions and data access requests as machine-readable data use terms based on the GA4GH&apos;s Data Use Ontology. With these machine-readable terms for dataset&apos;s use limitations and data access requests established, DUOS is able to trigger a matching algorithm to reason if data access should be granted given the research purpose and the data restrictions, serving as a decision support tool for DACs using DUOS.</p>
-                    <p style={paragraph}>To evaluate the feasibility of using machine readable data use terms to interpret data use restrictions and access requests, we are piloting a trial of DUOS overseen by Partners’ Healthcare IRB. During the pilot, DACs comprised of governmental and non-governmental data custodians will pilot the use of DUOS, its ability to structure use limitations and access requests, and the accuracy of the DUOS algorithm. This aids us in improving the DUOS algorithm and providing feedback on the GA4GH Data Use Ontology based on experts’ feedback.</p>
+
+        <section style={{ margin: '5rem auto', padding: '0 2rem' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+            <p style={header}>Data Libraries in DUOS</p>
+            <p style={description}>Click the images below to view curated Data Libraries, and search and request access to data.</p>
+
+            <div style={logoGrid} className="logo-grid">
+              <Tooltip title="AnVIL" placement="bottom" arrow>
+                <a href="https://duos.org/datalibrary/anvil" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                  <div className="logo-card" style={baseCard}>
+                    <img src={anvilLogo} alt="AnVIL" style={logoImg} />
                   </div>
-                ]}
-              />
+                </a>
+              </Tooltip>
+
+              <Tooltip title="Broad Institute" placement="bottom" arrow>
+                <a href="https://duos.org/datalibrary/broad" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                  <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
+                    <img src={broadLogo} alt="Broad Institute" style={logoImg} />
+                  </div>
+                </a>
+              </Tooltip>
+       
+              <Tooltip title="Human Cell Atlas" placement="bottom" arrow>
+                <a href="https://duos.org/datalibrary/HCA" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                  <div className="logo-card" style={baseCard}>
+                    <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
+                  </div>
+                </a>
+              </Tooltip>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
+    </>
   );
 };
 
