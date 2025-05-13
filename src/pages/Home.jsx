@@ -7,7 +7,7 @@ import anvilLogo from '../images/anvil-logo.svg';
 import hcaLogo from '../images/human-cell-atlas-logo.png';
 import { Tooltip } from '@mui/material';
 
-const Home = (props) => {
+const Home = () => {
 
   const homeTitle = {
     color: '#FFFFFF',
