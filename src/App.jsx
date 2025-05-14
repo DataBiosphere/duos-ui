@@ -1,17 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import ReactGA from 'react-ga4';
 import Modal from 'react-modal';
-import './App.css';
-import {AuthenticateNIH} from './libs/ajax/AuthenticateNIH.js';
-import {Config} from './libs/config';
-import DuosFooter from './components/DuosFooter';
-import DuosHeader from './components/DuosHeader';
+import 'src/App.css';
+import {AuthenticateNIH} from 'src/libs/ajax/AuthenticateNIH.js';
+import {Config} from 'src/libs/config';
+import DuosFooter from 'src/components/DuosFooter';
+import DuosHeader from 'src/components/DuosHeader';
 import {useHistory, useLocation} from 'react-router-dom';
-import loadingImage from './images/loading-indicator.svg';
-import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
-import {StackdriverReporter} from './libs/stackdriverReporter';
-import {Storage} from './libs/storage';
-import Routes from './Routes';
+import loadingImage from 'src/images/loading-indicator.svg';
+import {SpinnerComponent as Spinner} from 'src/components/SpinnerComponent';
+import {StackdriverReporter} from 'src/libs/stackdriverReporter';
+import {Storage} from 'src/libs/storage';
+import Routes from 'src/Routes';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
