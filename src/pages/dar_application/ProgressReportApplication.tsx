@@ -45,7 +45,7 @@ export const ProgressReportApplication = ({dar, parentDar, datasets, readOnlyMod
                 {!readOnlyMode && parentDar && <div>
                   <SubmitProgressReport
                       progressReport={dar}
-                      parentId={parentDar.referenceId}
+                      parentReferenceId={parentDar.referenceId}
                       onSuccess={() => {
                       }}
                       onCancel={() => {
