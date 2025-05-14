@@ -11,7 +11,6 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 # install and cache app dependencies
 COPY src /usr/src/app/src
-COPY types /usr/src/app/types
 COPY public /usr/src/app/public
 COPY package.json /usr/src/app/package.json
 COPY package-lock.json /usr/src/app/package-lock.json

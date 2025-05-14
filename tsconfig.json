@@ -16,13 +16,8 @@
     "useUnknownInCatchVariables": true,
     "resolveJsonModule": true,
     "paths": {
-      "src/*": ["./src/*"],
-      "@/*": ["./*"]
+      "src/*": ["./src/*"]
     }
   },
-  "include": [
-    "src",
-    "types/index.d.ts"
-  ],
-  "plugins": ["@typescript-eslint", "import"]
+  "plugins": ["@typescript-eslint"]
 }
