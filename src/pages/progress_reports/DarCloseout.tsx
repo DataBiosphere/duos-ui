@@ -30,8 +30,6 @@ export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element
                             If you are ready to finish work on this project, please complete this DAR Closeout section.
                             <br /><br />
                             By completing this page, upon project close-out, the PI and all approved users agree to destroy all copies, versions, and derivations of the dataset(s) retrieved from NIH-designated controlled-access databases, on both local servers and hardware, and if cloud computing was used, delete the data and cloud images from cloud computing provider storage, virtual machines, databases, and random access archives, except as required by publication practices, institutional policies, or law to retain them.
-                            <br /><br />
-                            This close-out will be submitted to the Signing Official (SO) of the project for approval. The SO is required to confirm the data destruction and insure retained data is encrypted, properly stored, and deleted at the appropriate time to comply with data security policies. If approved by the SO, the request will be sent to the Data Access Committee (DAC) for final approval. The project will be closed out after DAC approval is completed.
                         </p>
                     </div>
                     <div style={{ marginTop: '20px' }}>
@@ -39,7 +37,7 @@ export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element
                         <FormField
                             id='closeoutCompleted'
                             type={FormFieldTypes.CHECKBOX}
-                            toggleText='The Requestor has completed his/her project'
+                            toggleText='The Requestor has completed the project'
                             onChange={({ key, value }: FormFieldChange) => {
                                 setFormState({ ...formState, [key]: value });
                             }}
