@@ -15,7 +15,7 @@ interface FormStateInterface {
 }
 
 export const ProgressReportApplication = ({dar, parentDar, datasets, readOnlyMode=true}: ProgressReportApplicationProps) => {
-    const [formState, setFormState] = useState<FormStateInterface>({datasetIds: []});
+    const [formState, setFormState] = useState<FormStateInterface>({datasetIds: datasets.map((ds) => ds.datasetId)});
 
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
