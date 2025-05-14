@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {DataAccessRequest, Dataset} from 'src/types/model';
 import SubmitProgressReport from '../progress_reports/SubmitProgressReport';
 import SelectableDatasets from '../../pages/dar_application/SelectableDatasets';
@@ -15,7 +15,11 @@ interface FormStateInterface {
 }
 
 export const ProgressReportApplication = ({dar, parentDar, datasets, readOnlyMode=true}: ProgressReportApplicationProps) => {
-    const [formState, setFormState] = useState<FormStateInterface>({datasetIds: datasets.map((ds) => ds.datasetId)});
+    const [formState, setFormState] = useState<FormStateInterface>({datasetIds: []});
+
+    useEffect(() => {
+        setFormState({datasetIds: datasets.map((ds) => ds.datasetId)});
+    }, [datasets]);
 
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
