@@ -7,17 +7,17 @@ import {ConsentError} from '../../types/responseTypes';
 
 interface SubmitProgressReportProps {
   readonly progressReport: object;
-  readonly parentId: string;
+  readonly parentReferenceId: string;
   readonly onSuccess: (result: unknown) => void;
   readonly onCancel: (result: unknown) => void;
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const {progressReport, parentId, onSuccess, onCancel} = props;
+  const {progressReport, parentReferenceId, onSuccess, onCancel} = props;
 
   const submit = async () => {
     try {
-      const submittedPR = await ProgressReport.submitProgressReport(progressReport, parentId);
+      const submittedPR = await ProgressReport.submitProgressReport(progressReport, parentReferenceId);
       onSuccess(submittedPR);
     } catch (error: unknown) {
       handleError('Error: Unable to submit progress report: ', error);

@@ -17,7 +17,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentId="1"
+            parentReferenceId="1"
             onSuccess={() => {
             }}
             onCancel={() => {
@@ -36,7 +36,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentId="1"
+            parentReferenceId="1"
             onSuccess={() => {
             }}
             onCancel={() => {
@@ -63,7 +63,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentId="1"
+            parentReferenceId="1"
             onSuccess={functionSpy.successHandler}
             onCancel={() => {
             }}
@@ -84,7 +84,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentId="1"
+            parentReferenceId="1"
             onSuccess={() => {
             }}
             onCancel={functionSpy.cancelHandler}
@@ -104,7 +104,7 @@ describe('SubmitProgressReport tests', () => {
     mount(
         <SubmitProgressReport
             progressReport={{}}
-            parentId="1"
+            parentReferenceId="1"
             onSuccess={() => {
             }}
             onCancel={() => {
