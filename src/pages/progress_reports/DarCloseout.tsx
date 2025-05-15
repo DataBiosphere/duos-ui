@@ -1,22 +1,15 @@
-import React, { useState } from 'react';
-import { FormField, FormFieldTypes } from '../../components/forms/forms';
-
-interface FormStateInterface {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
+import React from 'react';
+import { FormField, FormFieldTypes } from 'src/components/forms/forms';
+import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
 interface DarCloseoutProps {
-    readonly state: string;
+    readonly readOnly: boolean;
+    formState: FormState;
+    onFormChange: (newState: Partial<FormState>) => void;
 }
 
-interface FormFieldChange {
-    key: string;
-    value: boolean | string;
-}
-
-export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element {
-    const [formState, setFormState] = useState<FormStateInterface>({});
+export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
+    const { readOnly, formState, onFormChange } = props;
 
     return (
         <div data-cy='dar-closeout'>
@@ -39,40 +32,45 @@ export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The Requestor has completed the project'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutMoved'
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The Requestor has moved institutions (if the project will continue in a new institution or by a new PI, they must go through Project Transfer)'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutTransferred'
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The project is being transferred to a new Requestor at the same institution'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutSuperceded'
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='The project is being superceded by a new project'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         <FormField
                             id='closeoutOther'
                             type={FormFieldTypes.CHECKBOX}
                             toggleText='Other'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                         {formState.closeoutOther === true &&
                             <div style={{ marginTop: '20px' }}>
@@ -83,8 +81,9 @@ export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element
                                     rows={6}
                                     maxLength={2200}
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                             </div>
                         }
