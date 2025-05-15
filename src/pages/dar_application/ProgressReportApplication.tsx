@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataAccessRequest, Dataset } from 'src/types/model';
+import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
-import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
-import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 
 type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is an application
@@ -31,15 +32,8 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
 
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-            {!readOnlyMode && <h3>Submit a progress report</h3>}
-            {/*TODO we'll want each of these to be components that accept a 'readOnly' flag*/}
-            <div>
-                <h4>Progress Report Summary</h4>
-                {dar?.progressReportSummary ?? "PLACEHOLDER Progress Report Summary"}
-            </div>
-            <div>
-                <h4>Intellectual Property Summary</h4>
-                {dar?.intellectualPropertySummary ?? "PLACEHOLDER Intellectual Property Summary"}
+            <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <SummarySection readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
             </div>
             <div data-cy='remove-datasets'>
                 <div className='progress-report-step-card'>
