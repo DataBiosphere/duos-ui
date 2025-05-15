@@ -41,8 +41,11 @@ export const ProgressReportApplication = ({dar, parentDar, datasets, readOnlyMod
                             disabled={readOnlyMode}
                             datasets={datasets}
                             setSelectedDatasets={(selectedDatasets) => {
-                                setFormState({...formState, datasetIds: selectedDatasets.map((ds) => ds.datasetId)})}
-                            }
+                                setFormState((prevState) => ({
+                                    ...prevState,
+                                    datasetIds: selectedDatasets.map((ds) => ds.datasetId)
+                                }));
+                            }}
                         />
                     </div>
                 </div>
