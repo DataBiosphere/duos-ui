@@ -37,7 +37,7 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
             </div>
             <div data-cy='remove-datasets'>
                 <div className='progress-report-step-card'>
-                    <h2>Step 3: Dataset(s) in this DAR</h2>
+                    <h2>Step 2: Dataset(s) in this DAR</h2>
                     <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
                     <SelectableDatasets
                         disabled={readOnlyMode}

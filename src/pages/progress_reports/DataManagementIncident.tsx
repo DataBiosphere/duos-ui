@@ -16,14 +16,14 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
     return (
         <div data-cy='data-management-incident'>
             <div className='progress-report-step-card'>
-                <h2>Step 3: Data Management Incident</h2>
+                <h2>Step 4: Data Management Incident</h2>
 
                 <div className='progress-report-row'>
                     <div>
                         <FormField
                             id='dmiYesNo'
                             type={FormFieldTypes.YESNORADIOGROUP}
-                            title='3.1 Data Management Incident'
+                            title='4.1 Data Management Incident'
                             titleStyle={titleStyle}
                             description='Have there been any incidents related to mismanagement or misuse of data?'
                             orientation='horizontal'

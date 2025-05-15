@@ -24,8 +24,8 @@ describe('Data Management Incident - Component Tests', () => {
 
   it('renders the component correctly', () => {
     cy.get('[data-cy=data-management-incident]').should('exist');
-    cy.contains('Step 3: Data Management Incident').should('be.visible');
-    cy.contains('3.1 Data Management Incident').should('be.visible');
+    cy.contains('Step 4: Data Management Incident').should('be.visible');
+    cy.contains('4.1 Data Management Incident').should('be.visible');
     cy.contains('Have there been any incidents related to mismanagement or misuse of data?').should('be.visible');
   });
 

@@ -24,8 +24,8 @@ describe('DAR Closeout - Component Tests', () => {
 
   it('renders the component correctly', () => {
     cy.get('[data-cy=dar-closeout]').should('exist');
-    cy.contains('Step 4: DAR Closeout').should('be.visible');
-    cy.contains('4.1 Closeouts').should('be.visible');
+    cy.contains('Step 5: DAR Closeout').should('be.visible');
+    cy.contains('5.1 Closeouts').should('be.visible');
     cy.contains('If you are ready to finish work on this project').should('be.visible');
   });
 

@@ -14,11 +14,11 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
     return (
         <div data-cy='dar-closeout'>
             <div className='progress-report-step-card'>
-                <h2>Step 4: DAR Closeout</h2>
+                <h2>Step 5: DAR Closeout</h2>
 
                 <div className='progress-report-row'>
                     <div>
-                        <h3>4.1 Closeouts</h3>
+                        <h3>5.1 Closeouts</h3>
                         <p>
                             If you are ready to finish work on this project, please complete this DAR Closeout section.
                             <br /><br />
