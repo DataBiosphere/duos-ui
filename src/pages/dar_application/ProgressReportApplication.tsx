@@ -15,7 +15,7 @@ interface FormStateInterface {
 }
 
 export const ProgressReportApplication = ({dar, parentDar, datasets, readOnlyMode=true}: ProgressReportApplicationProps) => {
-    const [formState, setFormState] = useState<FormStateInterface>({datasetIds: []});
+    const [_formState, setFormState] = useState<FormStateInterface>({datasetIds: []});
 
     useEffect(() => {
         setFormState({datasetIds: datasets.map((ds) => ds.datasetId)});
