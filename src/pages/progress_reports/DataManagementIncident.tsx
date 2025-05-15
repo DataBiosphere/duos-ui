@@ -1,34 +1,17 @@
-import React, { useState } from 'react';
-import { FormField, FormFieldTypes } from '../../components/forms/forms';
+import React from 'react';
+import { FormField, FormFieldTypes } from 'src/components/forms/forms';
+import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 
-interface FormStateInterface {
-    dmiYesNo?: boolean;
-    dmiCombination?: boolean;
-    dmiIdentification?: boolean;
-    dmiSharing?: boolean;
-    dmiSecurity?: boolean;
-    dmiAcknowledgement?: boolean;
-    dmiPublication?: boolean;
-    dmiFalsification?: boolean;
-    dmiOther?: boolean;
-    dmiDescription?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
-
 interface DataManagementIncidentProps {
-    readonly state: string;
+    readonly readOnly: boolean;
+    formState: FormState;
+    onFormChange: (newState: Partial<FormState>) => void;
 }
 
-interface FormFieldChange {
-    key: string;
-    value: boolean | string;
-}
-
-export default function DataManagementIncident(_props: DataManagementIncidentProps): React.JSX.Element {
-    const [formState, setFormState] = useState<FormStateInterface>({});
+export default function DataManagementIncident(props: DataManagementIncidentProps): React.JSX.Element {
+    const { readOnly, formState, onFormChange } = props;
 
     return (
         <div data-cy='data-management-incident'>
@@ -45,8 +28,21 @@ export default function DataManagementIncident(_props: DataManagementIncidentPro
                             description='Have there been any incidents related to mismanagement or misuse of data?'
                             orientation='horizontal'
                             onChange={({ key, value }: FormFieldChange) => {
-                                setFormState({ ...formState, [key]: value });
+                                if (value === false) {
+                                    onFormChange({
+                                        dmiCombination: false,
+                                        dmiIdentification: false,
+                                        dmiSharing: false,
+                                        dmiSecurity: false,
+                                        dmiAcknowledgement: false,
+                                        dmiPublication: false,
+                                        dmiFalsification: false,
+                                        dmiOther: false
+                                    });
+                                }
+                                onFormChange({ [key]: value });
                             }}
+                            disabled={readOnly}
                         />
                     </div>
                     {formState.dmiYesNo === true &&
@@ -58,64 +54,72 @@ export default function DataManagementIncident(_props: DataManagementIncidentPro
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Inappropriate combination or analysis of the requested datasets with unapproved datasets'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiIdentification'
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Intentional or accidental identification of participants or generation of data which makes them easily identifiable'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiSharing'
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Distribution of the data to an individual or institution beyond those specified in the approved Data Access Request (DAR)'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiSecurity'
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to adhere to NIH Security Best Practices for Controlled-Access Data'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiAcknowledgement'
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to acknowledge the investigator(s) who generated the data, the funding source, accession numbers of the dataset'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiPublication'
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Analysis and/or publication of a study using the data for the research purpose other than the approved research use'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiFalsification'
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Fabrication or falsification of data and/or results'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                                 <FormField
                                     id='dmiOther'
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Other: such as inadvertent data release or breach of security'
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                             </div>
                             <div style={{ marginTop: '20px' }}>
@@ -128,8 +132,9 @@ export default function DataManagementIncident(_props: DataManagementIncidentPro
                                     rows={6}
                                     maxLength={2200}
                                     onChange={({ key, value }: FormFieldChange) => {
-                                        setFormState({ ...formState, [key]: value });
+                                        onFormChange({ [key]: value });
                                     }}
+                                    disabled={readOnly}
                                 />
                             </div>
                         </>

@@ -1,14 +1,25 @@
 import React from 'react';
 import { mount } from 'cypress/react';
-import DataManagementIncident from '../../../src/pages/progress_reports/DataManagementIncident';
-
-const props = {
-  state: 'step3',
-};
+import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 
 describe('Data Management Incident - Component Tests', () => {
+  let onFormChangeSpy: () => void;
+  
+  const mountComponent = (customState = {}) => {
+    const formState = { ...customState };
+    
+    const props = {
+      readOnly: false,
+      formState,
+      onFormChange: onFormChangeSpy
+    };
+    
+    return mount(<DataManagementIncident {...props} />);
+  };
+  
   beforeEach(() => {
-    mount(<DataManagementIncident {...props}/>);
+    onFormChangeSpy = cy.stub().as('formChangeStub');
+    mountComponent();
   });
 
   it('renders the component correctly', () => {
@@ -25,7 +36,7 @@ describe('Data Management Incident - Component Tests', () => {
   });
 
   it('shows incident details form when "Yes" is selected', () => {
-    cy.get('#dmiYesNo_yes').click();
+    mountComponent({ dmiYesNo: true });
     
     cy.contains('Please select any of the following that describe the nature of this Data Management Incident').should('be.visible');
     cy.get('#dmiCombination').should('exist');
@@ -40,18 +51,18 @@ describe('Data Management Incident - Component Tests', () => {
   });
 
   it('hides incident details form when "No" is selected', () => {
-    // First select Yes to show the form
-    cy.get('#dmiYesNo_yes').click();
+    // First mount with Yes to show the form
+    mountComponent({ dmiYesNo: true });
     cy.get('#dmiCombination').should('exist');
     
-    // Then select No to hide the form
-    cy.get('#dmiYesNo_no').click();
+    // Then mount with No to hide the form
+    mountComponent({ dmiYesNo: false });
     cy.get('#dmiCombination').should('not.exist');
     cy.get('#dmiDescription').should('not.exist');
   });
 
   it('allows checking multiple incident types', () => {
-    cy.get('#dmiYesNo_yes').click();
+    mountComponent({ dmiYesNo: true });
     
     cy.get('#dmiCombination').click();
     cy.get('#dmiIdentification').click();
@@ -64,7 +75,7 @@ describe('Data Management Incident - Component Tests', () => {
   });
 
   it('allows entering incident description text', () => {
-    cy.get('#dmiYesNo_yes').click();
+    mountComponent({ dmiYesNo: true });
     
     const testDescription = 'This is a test description of a data management incident.';
     cy.get('#dmiDescription').type(testDescription);
@@ -72,7 +83,7 @@ describe('Data Management Incident - Component Tests', () => {
   });
 
   it('enforces character limit on incident description', () => {
-    cy.get('#dmiYesNo_yes').click();
+    mountComponent({ dmiYesNo: true });
     
     // Generate a string longer than the 2200 character limit
     const longText = 'A'.repeat(2300);
@@ -83,7 +94,7 @@ describe('Data Management Incident - Component Tests', () => {
   });
 
   it('allows toggling checkboxes on and off', () => {
-    cy.get('#dmiYesNo_yes').click();
+    mountComponent({ dmiYesNo: true });
     
     cy.get('#dmiCombination').click();
     cy.get('#dmiCombination').should('be.checked');

@@ -1,14 +1,25 @@
 import React from 'react';
 import { mount } from 'cypress/react';
-import DarCloseout from '../../../src/pages/progress_reports/DarCloseout';
-
-const props = {
-  state: 'step4',
-};
+import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 
 describe('DAR Closeout - Component Tests', () => {
+  let onFormChangeSpy: () => void;
+  
+  const mountComponent = (customState = {}) => {
+    const formState = { ...customState };
+    
+    const props = {
+      readOnly: false,
+      formState,
+      onFormChange: onFormChangeSpy
+    };
+    
+    return mount(<DarCloseout {...props} />);
+  };
+  
   beforeEach(() => {
-    mount(<DarCloseout {...props}/>);
+    onFormChangeSpy = cy.stub().as('formChangeStub');
+    mountComponent();
   });
 
   it('renders the component correctly', () => {
@@ -30,18 +41,16 @@ describe('DAR Closeout - Component Tests', () => {
     cy.get('#closeoutOtherContext').should('not.exist');
   });
 
-  it('shows "Other" reason text area when "Other" checkbox is selected', () => {
-    cy.get('#closeoutOther').click();
+  it('shows "Other" reason text area when state is true', () => {
+    mountComponent({ closeoutOther: true });
     cy.get('#closeoutOtherContext').should('exist');
   });
 
-  it('hides "Other" reason text area when "Other" checkbox is unselected', () => {
-    // First select the checkbox to show the text area
-    cy.get('#closeoutOther').click();
+  it('hides "Other" reason text area when state is false', () => {
+    mountComponent({ closeoutOther: true });
     cy.get('#closeoutOtherContext').should('exist');
-    
-    // Then unselect to hide the text area
-    cy.get('#closeoutOther').click();
+
+    mountComponent({ closeoutOther: false });
     cy.get('#closeoutOtherContext').should('not.exist');
   });
 
@@ -57,7 +66,7 @@ describe('DAR Closeout - Component Tests', () => {
   });
 
   it('allows entering other closeout reason text', () => {
-    cy.get('#closeoutOther').click();
+    mountComponent({ closeoutOther: true });
     
     const testDescription = 'This is a test description for the other closeout reason.';
     cy.get('#closeoutOtherContext').type(testDescription);
@@ -65,7 +74,7 @@ describe('DAR Closeout - Component Tests', () => {
   });
 
   it('enforces character limit on other closeout reason', () => {
-    cy.get('#closeoutOther').click();
+    mountComponent({ closeoutOther: true });
     
     // Generate a string longer than the 2200 character limit
     const longText = 'A'.repeat(2300);
