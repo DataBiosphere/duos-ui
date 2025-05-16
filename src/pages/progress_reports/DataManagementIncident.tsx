@@ -1,4 +1,5 @@
 import React from 'react';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
@@ -16,14 +17,14 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
     return (
         <div data-cy='data-management-incident'>
             <div className='progress-report-step-card'>
-                <h2>Step 3: Data Management Incident</h2>
+                <h2>Step 4: Data Management Incident</h2>
 
                 <div className='progress-report-row'>
                     <div>
                         <FormField
                             id='dmiYesNo'
                             type={FormFieldTypes.YESNORADIOGROUP}
-                            title='3.1 Data Management Incident'
+                            title='4.1 Data Management Incident'
                             titleStyle={titleStyle}
                             description='Have there been any incidents related to mismanagement or misuse of data?'
                             orientation='horizontal'
@@ -128,9 +129,9 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.TEXTAREA}
                                     titleStyle={titleStyle}
                                     description='Please describe the incidents related to mismanagement or misuse of data below.'
-                                    placeholder='Please limit your Data Management Incident to 2200 characters.'
+                                    placeholder={`Please limit your Data Management Incident to ${FORM_TEXT_AREA_MAX_LENGTH} characters.`}
                                     rows={6}
-                                    maxLength={2200}
+                                    maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}

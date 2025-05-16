@@ -1,4 +1,5 @@
 import React from 'react';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
@@ -14,11 +15,11 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
     return (
         <div data-cy='dar-closeout'>
             <div className='progress-report-step-card'>
-                <h2>Step 4: DAR Closeout</h2>
+                <h2>Step 5: DAR Closeout</h2>
 
                 <div className='progress-report-row'>
                     <div>
-                        <h3>4.1 Closeouts</h3>
+                        <h3>5.1 Closeouts</h3>
                         <p>
                             If you are ready to finish work on this project, please complete this DAR Closeout section.
                             <br /><br />
@@ -79,7 +80,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                     type={FormFieldTypes.TEXTAREA}
                                     placeholder='Please provide context for the other reason.'
                                     rows={6}
-                                    maxLength={2200}
+                                    maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}

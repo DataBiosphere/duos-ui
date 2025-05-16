@@ -44,10 +44,10 @@ describe('Collaborator Changes - Component Tests', () => {
 
   it('renders the component correctly', () => {
     cy.get('[data-cy=dar-closeout]').should('exist');
-    cy.contains('Step 2: Add or Remove Collaborators').should('be.visible');
-    cy.contains('2.1 Internal Lab Staff').should('be.visible');
-    cy.contains('2.2 Internal Collaborators').should('be.visible');
-    cy.contains('2.3 External Collaborators').should('be.visible');
+    cy.contains('Step 3: Add or Remove Collaborators').should('be.visible');
+    cy.contains('3.1 Internal Lab Staff').should('be.visible');
+    cy.contains('3.2 Internal Collaborators').should('be.visible');
+    cy.contains('3.3 External Collaborators').should('be.visible');
   });
 
   it('renders all three collaborator sections', () => {
