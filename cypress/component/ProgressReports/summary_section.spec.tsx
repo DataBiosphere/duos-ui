@@ -2,6 +2,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import { Publication } from 'src/components/publications_list/Publication';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 
 describe('Summary Section - Component Tests', () => {
     let onFormChangeSpy: () => void;
@@ -82,8 +83,8 @@ describe('Summary Section - Component Tests', () => {
     });
 
     it('enforces character limit on summary text', () => {
-        const longText = 'A'.repeat(2300);
-        const expectedText = longText.substring(0, 2200);
+        const longText = 'A'.repeat(FORM_TEXT_AREA_MAX_LENGTH + 100);
+        const expectedText = longText.substring(0, FORM_TEXT_AREA_MAX_LENGTH);
 
         cy.get('#progressReportSummary').type(longText, { delay: 0 });
         cy.get('#progressReportSummary').should('have.value', expectedText);

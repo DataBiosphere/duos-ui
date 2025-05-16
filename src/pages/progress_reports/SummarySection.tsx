@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { Publication } from 'src/components/publications_list/Publication';
 import PublicationList from 'src/components/publications_list/PublicationList';
@@ -42,7 +43,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         description='Please summarize your research on this project since your initial request or most recent renewal in the space below. Please describe whether and how the dataset(s) was used, including referencing the dataset(s) by name in your summary.'
                         placeholder='Please provide an update here.'
                         rows={6}
-                        maxLength={2200}
+                        maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                         onChange={({ key, value }: FormFieldChange) => {
                             onFormChange({ [key]: value });
                         }}
@@ -67,7 +68,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         description='Please describe the intellectual property resulting from analysis of the requested dataset(s).'
                         placeholder='Please provide an update here.'
                         rows={6}
-                        maxLength={2200}
+                        maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                         onChange={({ key, value }: FormFieldChange) => {
                             onFormChange({ [key]: value });
                         }}

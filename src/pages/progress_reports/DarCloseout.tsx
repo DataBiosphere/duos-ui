@@ -1,4 +1,5 @@
 import React from 'react';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
@@ -79,7 +80,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                     type={FormFieldTypes.TEXTAREA}
                                     placeholder='Please provide context for the other reason.'
                                     rows={6}
-                                    maxLength={2200}
+                                    maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                                     onChange={({ key, value }: FormFieldChange) => {
                                         onFormChange({ [key]: value });
                                     }}

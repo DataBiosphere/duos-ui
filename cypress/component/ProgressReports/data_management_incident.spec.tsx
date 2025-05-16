@@ -1,6 +1,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 
 describe('Data Management Incident - Component Tests', () => {
   let onFormChangeSpy: () => void;
@@ -85,9 +86,9 @@ describe('Data Management Incident - Component Tests', () => {
   it('enforces character limit on incident description', () => {
     mountComponent({ dmiYesNo: true });
     
-    // Generate a string longer than the 2200 character limit
-    const longText = 'A'.repeat(2300);
-    const expectedText = longText.substring(0, 2200);
+    // Generate a string longer than the max length character limit
+    const longText = 'A'.repeat(FORM_TEXT_AREA_MAX_LENGTH + 100);
+    const expectedText = longText.substring(0, FORM_TEXT_AREA_MAX_LENGTH);
     
     cy.get('#dmiDescription').type(longText, { delay: 0 });
     cy.get('#dmiDescription').should('have.value', expectedText);
