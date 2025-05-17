@@ -6,6 +6,7 @@ import broadLogo from '../images/broad_logo_allwhite.png';
 import anvilLogo from '../images/anvil-logo.svg';
 import hcaLogo from '../images/human-cell-atlas-logo.png';
 import { Tooltip } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
 
@@ -151,27 +152,27 @@ const Home = () => {
 
             <div style={logoGrid} className="logo-grid">
               <Tooltip title="AnVIL" placement="bottom" arrow>
-                <a href="https://duos.org/datalibrary/anvil" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                <Link to="/datalibrary/anvil" style={{ textDecoration: 'none' }}>
                   <div className="logo-card" style={baseCard}>
                     <img src={anvilLogo} alt="AnVIL" style={logoImg} />
                   </div>
-                </a>
+                </Link>
               </Tooltip>
 
               <Tooltip title="Broad Institute" placement="bottom" arrow>
-                <a href="https://duos.org/datalibrary/broad" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                <Link to="/datalibrary/broad" style={{ textDecoration: 'none' }}>
                   <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
                     <img src={broadLogo} alt="Broad Institute" style={logoImg} />
                   </div>
-                </a>
+                </Link>
               </Tooltip>
        
               <Tooltip title="Human Cell Atlas" placement="bottom" arrow>
-                <a href="https://duos.org/datalibrary/HCA" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                <Link to="/datalibrary/HCA" style={{ textDecoration: 'none' }}>
                   <div className="logo-card" style={baseCard}>
                     <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
                   </div>
-                </a>
+                </Link>
               </Tooltip>
             </div>
           </div>
