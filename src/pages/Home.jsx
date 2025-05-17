@@ -5,7 +5,7 @@ import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
 import broadLogo from '../images/broad_logo_allwhite.png';
 import anvilLogo from '../images/anvil-logo.svg';
 import hcaLogo from '../images/human-cell-atlas-logo.png';
-import { Tooltip } from '@mui/material';
+import { OverflowTooltip } from '../components/Tooltips';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
@@ -151,29 +151,29 @@ const Home = () => {
             <p style={description}>Click the images below to view curated Data Libraries, and search and request access to data.</p>
 
             <div style={logoGrid} className="logo-grid">
-              <Tooltip title="AnVIL" placement="bottom" arrow>
+              <OverflowTooltip id="anvil" tooltipText="AnVIL">
                 <Link to="/datalibrary/anvil" style={{ textDecoration: 'none' }}>
                   <div className="logo-card" style={baseCard}>
                     <img src={anvilLogo} alt="AnVIL" style={logoImg} />
                   </div>
                 </Link>
-              </Tooltip>
+              </OverflowTooltip>
 
-              <Tooltip title="Broad Institute" placement="bottom" arrow>
+              <OverflowTooltip id="broad" tooltipText='Broad Institute'>
                 <Link to="/datalibrary/broad" style={{ textDecoration: 'none' }}>
                   <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
                     <img src={broadLogo} alt="Broad Institute" style={logoImg} />
                   </div>
                 </Link>
-              </Tooltip>
+              </OverflowTooltip>
        
-              <Tooltip title="Human Cell Atlas" placement="bottom" arrow>
+              <OverflowTooltip id="hca" tooltipText="Human Cell Atlas">
                 <Link to="/datalibrary/HCA" style={{ textDecoration: 'none' }}>
                   <div className="logo-card" style={baseCard}>
                     <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
                   </div>
                 </Link>
-              </Tooltip>
+              </OverflowTooltip>
             </div>
           </div>
         </section>
