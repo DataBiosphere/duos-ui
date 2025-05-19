@@ -12,7 +12,7 @@ type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is an application
     parentDar?: DataAccessRequest, // Dar will be empty if this is view only
     datasets: Dataset[],
-    readOnlyMode?: boolean
+    readOnlyMode: boolean
 };
 
 export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
@@ -65,6 +65,7 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
                     onSuccess={() => {
                     }}
                     onCancel={() => {
+
                     }}
                 />
             </div>}

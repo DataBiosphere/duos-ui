@@ -95,8 +95,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     return expectedForm;
   }
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const submit = async () => {
     try {
       const submittedPR = await ProgressReport.submitProgressReport(createMultiPartFormData(convertFormStateToExpectedFormState(formState)), parentReferenceId);
       onSuccess(submittedPR);
@@ -122,8 +121,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     return multiPartFormData;
   };
 
-  const cancel = async (e) => {
-    e.preventDefault();
+  const cancel = async () => {
     try {
       onCancel();
     } catch (error: unknown) {
@@ -140,13 +138,15 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
 
   return (
       <div className='flex flex-row' style={{justifyContent: 'flex-start'}}>
-        <button type={'button'}
-                className='button button-blue'
-                style={{marginRight: '2rem', cursor: 'pointer'}}
-                data-cy='pr-submit-button'
-                onClick={submit}>Submit
+        <button
+            type={'button'}
+            className='button button-blue'
+            style={{marginRight: '2rem', cursor: 'pointer'}}
+            data-cy='pr-submit-button'
+            onClick={submit}>Submit
         </button>
-        <button type={'button'}
+        <button
+            type={'button'}
             className='button button-white'
             style={{cursor: 'pointer'}}
             data-cy='pr-cancel-button'
