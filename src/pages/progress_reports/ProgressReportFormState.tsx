@@ -1,4 +1,4 @@
-import {DataManagementIncident, Presentation, Publication} from "src/types/model";
+import {CloseOutSupplement, Collaborator, DataManagementIncident, Presentation, Publication} from "src/types/model";
 
 export interface FormState {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,7 +31,9 @@ export enum FormStateKey {
     DMI_PUBLICATION = 'dmiPublication',
     DMI_FALSIFICATION = 'dmiFalsification',
     DMI_OTHER = 'dmiOther',
-    DMI_DESCRIPTION = 'dmiDescription'
+    DMI_DESCRIPTION = 'dmiDescription',
+    CLOSEOUT_YES_NO = 'closeoutYesNo',
+    CLOSEOUT_SUPPLEMENT = 'closeoutSupplement'
 }
 
 export interface ExpectedFormState {
@@ -41,7 +43,11 @@ export interface ExpectedFormState {
     datasetIds?: number[];
     publications?: Publication[];
     presentations?: Presentation[];
+    labCollaborators?: Collaborator[];
+    internalCollaborators?: Collaborator[];
+    externalCollaborators?: Collaborator[];
     dataManagementIncident?: DataManagementIncident;
+    closeOutSupplement?: CloseOutSupplement;
 }
 
 export const DMI_INCIDENT_KEYS = [
@@ -53,4 +59,12 @@ export const DMI_INCIDENT_KEYS = [
     FormStateKey.DMI_PUBLICATION,
     FormStateKey.DMI_FALSIFICATION,
     FormStateKey.DMI_OTHER
+]
+
+export const CLOSEOUT_KEYS = [
+    FormStateKey.CLOSEOUT_COMPLETED,
+    FormStateKey.CLOSEOUT_MOVED,
+    FormStateKey.CLOSEOUT_TRANSFERRED,
+    FormStateKey.CLOSEOUT_SUPERSEDED,
+    FormStateKey.CLOSEOUT_OTHER
 ]

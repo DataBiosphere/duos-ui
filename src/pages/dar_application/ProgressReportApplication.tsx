@@ -57,9 +57,10 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DarCloseout readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
             </div>
+            <br/><br/>
             {!readOnlyMode && parentDar && <div>
                 <SubmitProgressReport
-                    progressReport={formState}
+                    formState={formState}
                     parentReferenceId={parentDar.referenceId}
                     onSuccess={() => {
                     }}

@@ -1,8 +1,8 @@
 import React from 'react';
 import {AxiosError} from 'axios';
-import {ProgressReport} from '../../libs/ajax/ProgressReport';
-import {Notifications} from '../../libs/utils';
-import {ConsentError} from '../../types/responseTypes';
+import {ProgressReport} from 'src/libs/ajax/ProgressReport';
+import {Notifications} from 'src/libs/utils';
+import {ConsentError} from 'src/types/responseTypes';
 import {
   DMI_INCIDENT_KEYS,
   ExpectedFormState,
@@ -56,33 +56,42 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     });
   };
 
-  const getDataManagementIncidents = (formState: FormState): DataManagementIncident | undefined => {
-    const DMIYesNo: boolean = getItem(formState, FormStateKey.DMI_YES_NO) ?? false;
-    if (DMIYesNo) {
-      const dataManagementIncident: DataManagementIncident = {} as DataManagementIncident;
-      dataManagementIncident.incidents = []
-      DMI_INCIDENT_KEYS.map((key) => {
-        const incident: string = getItem(formState, key) ?? undefined;
-        if (incident != undefined) {
-          dataManagementIncident.incidents.push(incident);
-        }
-      });
-      dataManagementIncident.description = getItem(formState, FormStateKey.DMI_DESCRIPTION);
+  const getDataManagementIncidents = (formState: FormState): DataManagementIncident => {
+    const dataManagementIncident: DataManagementIncident = {} as DataManagementIncident;
+    dataManagementIncident.incidents = []
+    DMI_INCIDENT_KEYS.map((key) => {
+      const incident: string = getItem(formState, key) ?? undefined;
+      if (incident != undefined) {
+        dataManagementIncident.incidents.push(incident);
+      }
+    });
+    dataManagementIncident.description = getItem(formState, FormStateKey.DMI_DESCRIPTION);
 
-      return dataManagementIncident;
-    }
-    return undefined;
+    return dataManagementIncident;
   }
 
   const convertFormStateToExpectedFormState = (formState: FormState): ExpectedFormState => {
     const expectedForm: ExpectedFormState = {} as ExpectedFormState;
     expectedForm.progressReportSummary = getItem(formState, FormStateKey.PROGRESS_REPORT_SUMMARY);
-    // TODO - this is required in the backend right now, but shouldn't be
-    expectedForm.intellectualPropertySummary = getItem(formState, FormStateKey.INTELLECTUAL_PROPERTY_SUMMARY);
+    if (getItem(formState, FormStateKey.INTELLECTUAL_PROPERTY_YES_NO)) {
+      expectedForm.intellectualPropertySummary = getItem(formState, FormStateKey.INTELLECTUAL_PROPERTY_SUMMARY);
+    }
     expectedForm.datasetIds = getItem(formState, FormStateKey.DATASET_IDS);
-    expectedForm.publications = getPublicationList(formState);
-    expectedForm.presentations = getPresentationList(formState);
-    expectedForm.dataManagementIncident = getDataManagementIncidents(formState);
+    if (getItem(formState, FormStateKey.PUBLICATION_YES_NO)) {
+      expectedForm.publications = getPublicationList(formState);
+    }
+    if (getItem(formState, FormStateKey.PRESENTATION_YES_NO)) {
+      expectedForm.presentations = getPresentationList(formState);
+    }
+    expectedForm.labCollaborators = getItem(formState, FormStateKey.COLLABORATOR_INTERNAL_LAB_STAFF) ?? [];
+    expectedForm.internalCollaborators = getItem(formState, FormStateKey.COLLABORATOR_INTERNAL_COLLABORATORS) ?? [];
+    expectedForm.externalCollaborators = getItem(formState, FormStateKey.COLLABORATOR_EXTERNAL_COLLABORATORS) ?? [];
+    if (getItem(formState, FormStateKey.DMI_YES_NO)) {
+      expectedForm.dataManagementIncident = getDataManagementIncidents(formState);
+    }
+    if (getItem(formState, FormStateKey.CLOSEOUT_YES_NO)) {
+      expectedForm.closeOutSupplement = getItem(formState, FormStateKey.CLOSEOUT_SUPPLEMENT)
+    }
     return expectedForm;
   }
 

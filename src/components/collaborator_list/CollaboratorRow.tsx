@@ -1,7 +1,7 @@
 import React from 'react';
-import { Collaborator } from './Collaborator';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorSummary from './CollaboratorSummary';
+import {Collaborator} from "src/types/model";
 
 interface CollaboratorRowProps {
     readonly id: number;

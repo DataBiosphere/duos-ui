@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
-import { Collaborator } from 'src/components/collaborator_list/Collaborator';
 import CollaboratorList from 'src/components/collaborator_list/CollaboratorList';
+import {Collaborator} from "src/types/model";
 
 interface CollaboratorProps {
     readonly readOnly: boolean;
