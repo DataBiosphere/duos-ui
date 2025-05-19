@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Info } from '@mui/icons-material';
 import { Styles, Theme } from '../../libs/theme';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
+import {head} from 'lodash';
 import SimpleTable from '../../components/SimpleTable';
 import SimpleButton from '../../components/SimpleButton';
 import PaginationBar from '../../components/PaginationBar';
@@ -121,9 +122,7 @@ const LibraryCardCell = ({
   showConfirmationModal,
 }) => {
   const id = researcher.userId || researcher.email;
-  const card = !isEmpty(researcher.libraryCards)
-    ? researcher.libraryCards[0]
-    : null;
+  const card = head(researcher.libraryCards);
   const button = !isNil(card)
     ? DeactivateLibraryCardButton({
       card,
