@@ -1,5 +1,5 @@
 import {needsDsAcknowledgement, needsGsoAcknowledgement, needsPubAcknowledgement} from "src/utils/darFormUtils";
-import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from "src/components/forms/forms";
+import {FormField, FormFieldTitle, FormFieldTypes} from "src/components/forms/forms";
 import React from "react";
 import {Dataset} from "src/types/model";
 
@@ -77,7 +77,7 @@ return (
               type={FormFieldTypes.CHECKBOX}
               toggleText={'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum'}
               defaultValue={formData.dsAcknowledgement}
-              validation={validation?.dsAcknowledgement || [FormValidators.REQUIRED]}
+              validation={validation.dsAcknowledgement}
               onValidationChange={onValidationChange}
               onChange={onChange}
             />

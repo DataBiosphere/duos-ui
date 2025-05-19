@@ -2,9 +2,8 @@
 
 // ********************** DUL LOGIC ********************** //
 
-import {isEmpty, isNil, isEqual, isString, isArray, set} from 'lodash';
+import {isEmpty, isNil, isEqual, isString, isArray} from 'lodash';
 import { FormValidators } from '../components/forms/forms';
-import {cloneDeep} from 'lodash/fp';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
   return datasets?.some((ds) => {
@@ -49,15 +48,6 @@ export const validationFailed = (validation) => {
   return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
 
-export const getNewFormValidation = (formValidation, section, key, validation) => {
-  const newFormValidation = cloneDeep(formValidation);
-  if (isArray(key)) {
-    set(newFormValidation, [section, ...key], validation);
-  } else {
-    set(newFormValidation, [section, key], validation);
-  }
-  return newFormValidation;
-}
 const validationError = (failed) => {
   if (isArray(failed)) {
     return { valid: false, failed: failed };

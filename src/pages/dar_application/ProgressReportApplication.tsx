@@ -8,7 +8,7 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
 import {DataUseAcknowledgements} from "src/pages/dar_application/DataUseAcknowlegements";
 import {translateDataUseRestrictionsFromDataUseArray} from "src/libs/dataUseTranslation";
-import {getNewFormValidation, validatePRFormData} from "src/utils/darFormUtils";
+import {validatePRFormData} from "src/utils/darFormUtils";
 
 type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is an application
@@ -60,7 +60,13 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
 
     const formValidationChange = useCallback(({ key, validation }) => {
         setFormValidation((formValidation) => {
-            getNewFormValidation(formValidation, 'darErrors', key, validation);
+            return {
+                ...formValidation,
+                darErrors: {
+                    ...formValidation.darErrors,
+                    [key]: validation
+                }
+            };
         });
     }, []);
 
