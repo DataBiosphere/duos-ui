@@ -16,7 +16,19 @@ type ProgressReportApplicationProps = {
 };
 
 export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
-    const [formState, setFormState] = useState<FormState>({});
+    const initialState = {
+        ...parentDar,
+        // additional state for summary section
+        intellectualPropertyYesNo: (parentDar?.intellectualPropertySummary?.length ?? 0) > 0,
+        publicationsYesNo: (parentDar?.publications?.length ?? 0) > 0,
+        presentationsYesNo: (parentDar?.presentations?.length ?? 0) > 0,
+        // additional state for dmi section
+        dmiYesNo: (parentDar?.dataManagementIncident?.incidents?.length ?? 0) > 0,
+        // additional state for closeout section
+        closeoutYesNo: parentDar?.closeOutSupplement
+    }
+
+    const [formState, setFormState] = useState<FormState>(initialState);
 
     const onFormChange = (newState: Partial<FormState>) => {
         setFormState(prevState => ({
@@ -25,7 +37,7 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
         }));
     };
 
-    /* required because the datasets state changes during component mount */
+    // required because the datasets state changes during component mount
     useEffect(() => {
         onFormChange({ datasetIds: datasets.map((ds) => ds.datasetId) });
     }, [datasets]);

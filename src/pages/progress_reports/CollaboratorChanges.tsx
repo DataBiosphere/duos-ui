@@ -12,7 +12,7 @@ interface CollaboratorProps {
 export default function CollaboratorChanges(props: CollaboratorProps): React.JSX.Element {
     const { readOnly, formState, onFormChange } = props;
 
-    const [internalLabStaff, setInternalLabStaff] = useState(formState.internalLabStaff || []);
+    const [labCollaborators, setLabCollaborators] = useState(formState.labCollaborators || []);
     const [internalCollaborators, setInternalCollaborators] = useState(formState.internalCollaborators || []);
     const [externalCollaborators, setExternalCollaborators] = useState(formState.externalCollaborators || []);
 
@@ -22,7 +22,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
     };
 
     const onInternalLabStaffChange = (collaborators: Collaborator[]) => {
-        onCollaboratorChange('internalLabStaff', setInternalLabStaff, collaborators);
+        onCollaboratorChange('labCollaborators', setLabCollaborators, collaborators);
     }
 
     const onInternalCollaboratorsChange = (collaborators: Collaborator[]) => {
@@ -46,7 +46,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         </p>
                     </div>
                     <CollaboratorList
-                        collaborators={internalLabStaff}
+                        collaborators={labCollaborators}
                         collaboratorText='Internal Lab Staff'
                         columnsToShow={['name', 'title']}
                         onCollaboratorChange={onInternalLabStaffChange}
