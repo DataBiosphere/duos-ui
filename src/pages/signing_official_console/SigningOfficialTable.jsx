@@ -88,7 +88,6 @@ const DeactivateLibraryCardButton = (props) => {
 const IssueLibraryCardButton = (props) => {
   //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
-  //institution id should be determined from the logged in SO account on the back-end
   const {card, showConfirmationModal} = props;
   const message = (
     <div>
@@ -120,11 +119,10 @@ const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResea
 const LibraryCardCell = ({
   researcher,
   showConfirmationModal,
-  institutionId
 }) => {
   const id = researcher.userId || researcher.email;
   const card = !isEmpty(researcher.libraryCards)
-    ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
+    ? researcher.libraryCards[0]
     : null;
   const button = !isNil(card)
     ? DeactivateLibraryCardButton({
@@ -134,8 +132,7 @@ const LibraryCardCell = ({
     : IssueLibraryCardButton({
       card: {
         userId: researcher.userId,
-        userEmail: researcher.email,
-        institutionId: institutionId
+        userEmail: researcher.email
       },
       showConfirmationModal
     });
@@ -300,8 +297,7 @@ export default function SigningOfficialTable(props) {
         emailCell(email, id),
         LibraryCardCell({
           researcher,
-          showConfirmationModal,
-          institutionId: signingOfficial.institutionId
+          showConfirmationModal
         }),
         roleCell(roles, id),
         // activeDarCountCell(count, id)
