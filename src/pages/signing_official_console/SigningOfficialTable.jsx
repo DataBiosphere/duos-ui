@@ -440,7 +440,6 @@ export default function SigningOfficialTable(props) {
         closeModal={() => setShowModal(false)}
         card={selectedCard}
         users={filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers)}
-        institutions={[]} //pass in empty array to force modal to hide institution dropdown
         modalType="add" />
       <ConfirmationModal
         showConfirmation={showConfirmation}

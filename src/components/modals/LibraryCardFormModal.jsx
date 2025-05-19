@@ -3,18 +3,16 @@ import {cloneDeep, includes, isEmpty, isNil, isObject} from 'lodash/fp';
 import {Styles, Theme} from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
-import {SearchSelect} from '../SearchSelect';
 import Creatable from 'react-select/creatable';
 import SimpleButton from '../SimpleButton';
 import {LibraryCardAgreementTermsDownload} from '../LibraryCardAgreementTermsDownload';
 
 const FormFieldRow = (props) => {
-  const { card, dropdownOptions, updateInstitution, updateUser, modalType, setCard } = props;
+  const { card, dropdownOptions, updateUser, modalType, setCard } = props;
 
   const cardlessOptions = dropdownOptions.filter((option) => {
     const libraryCards = option.libraryCards || [];
-    const savedCard = libraryCards.find(({institutionId}) => institutionId === card.institutionId);
-    return isNil(savedCard);
+    return isEmpty(libraryCards);
   });
   const [filteredDropdown, setFilteredDropdown] = useState(cardlessOptions);
 
@@ -39,48 +37,33 @@ const FormFieldRow = (props) => {
     }
   };
 
-  if(!isNil(updateInstitution)) {
-    //first template for institution selection
+  //template here is for new card creation
+  if (modalType === 'add') {
     template = <div style={{ marginBottom: '2%', width:'100%' }}>
-      <label>Institution</label>
-      <SearchSelect
-        id={'institution-form-field'}
-        name='Institution'
-        onSelection={(selection) => updateInstitution(selection?.value?.institutionId)}
+      <label>Users</label>
+      <Creatable
+        key='select-user'
+        isClearable={true}
+        onChange={updateUser}
+        createOptionPosition='first'
+        onInputChange={(input, { action }) => userListFilter({ input, card, setCard, action })}
+        getNewOptionData={(input) => { return { email: input }; }}
         options={dropdownOptions}
-        placeholder='Search for institution...'
-        value={card.institutionId}
+        placeholder='Select or type a new user email'
+        isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+        /* eslint-disable-next-line no-constant-binary-expression */
+        getOptionLabel={(option) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email}
       />
     </div>;
   } else {
-    //template here is for new card creation
-    if (modalType === 'add') {
-      template = <div style={{ marginBottom: '2%', width:'100%' }}>
-        <label>Users</label>
-        <Creatable
-          key='select-user'
-          isClearable={true}
-          onChange={updateUser}
-          createOptionPosition='first'
-          onInputChange={(input, { action }) => userListFilter({ input, card, setCard, action })}
-          getNewOptionData={(input) => { return { email: input }; }}
-          options={dropdownOptions}
-          placeholder='Select or type a new user email'
-          isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-          /* eslint-disable-next-line no-constant-binary-expression */
-          getOptionLabel={(option) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email}
-        />
-      </div>;
-    } else {
-      <div>{card.displayName}</div>;
-    }
+    <div>{card.displayName}</div>;
   }
   return <div style={{ display: 'flex' }}>{template}</div>;
 };
 
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
-  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType } = props;
+  const { showModal, updateOnClick, createOnClick, closeModal, users, modalType } = props;
 
   const [card, setCard] = useState(props.card);
 
@@ -89,13 +72,6 @@ export default function LibraryCardFormModal(props) {
     setCard(props.card);
   }, [props.card]);
 
-
-  //onClick function, updates associated instituion on dropdown select
-  const updateInstitution = (value) => {
-    const updatedCard = cloneDeep(card);
-    updatedCard.institutionId = value;
-    setCard(updatedCard);
-  };
 
   //onChange function, used to change associated user on Creatable dropdown selection
   const updateUser = (value) => {
@@ -113,14 +89,8 @@ export default function LibraryCardFormModal(props) {
   };
 
   //boolean function, used to determine if submit button should be disabled
-  const isConfirmDisabled = (modalType, card) => {
-    let result;
-    if(modalType === 'add') {
-      result = isNil(card.userEmail) || isNil(card.institutionId);
-    } else {
-      result = isNil(card.institutionId);
-    }
-    return result;
+  const isConfirmDisabled = (card) => {
+    return isNil(card.userEmail);
   };
 
   return (
@@ -151,17 +121,6 @@ export default function LibraryCardFormModal(props) {
           setCard={setCard}
           dropdownOptions={users}
         />
-        {/* institution dropdown */}
-        {
-          !isNil(institutions) && institutions.length > 1 && (
-            <FormFieldRow
-              card={card}
-              modalType={modalType}
-              updateInstitution={updateInstitution}
-              dropdownOptions={institutions}
-            />
-          )
-        }
         <div style={{ display:'inline-block' }}>
           By clicking {modalType === 'add'? "'ADD'" : "'UPDATE'" } you agree to the terms of the agreements above for this user.
         </div>
@@ -175,7 +134,7 @@ export default function LibraryCardFormModal(props) {
             onClick={modalType === 'add' ? () => createOnClick(card) : () => updateOnClick(card)}
             additionalStyle={{ margin: '0%', width: '80px', height: '15px', padding: '20px' }}
             baseColor={Theme.palette.secondary}
-            disabled={isConfirmDisabled(modalType, card)}
+            disabled={isConfirmDisabled(card)}
             label={modalType === 'add' ? 'Add' : 'Update'}
           />
           <SimpleButton
