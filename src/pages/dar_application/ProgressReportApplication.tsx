@@ -25,6 +25,10 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
         }));
     };
 
+    function getItem<T, K extends keyof T>(obj: {[P in keyof T]?: T[P]}, key: K): T[K] | undefined {
+        return obj[key];
+    }
+
     /* required because the datasets state changes during component mount */
     useEffect(() => {
         onFormChange({ datasetIds: datasets.map((ds) => ds.datasetId) });
@@ -59,7 +63,12 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
             </div>
             {!readOnlyMode && parentDar && <div>
                 <SubmitProgressReport
-                    progressReport={dar}
+                    progressReport={{
+                        "progressReportSummary": getItem(formState, 'progressReportSummary'),
+                        "intellectualPropertySummary": getItem(formState, 'intellectualPropertySummary'),
+                        "datasetIds": getItem(formState, 'datasetIds')
+                    }}
+
                     parentReferenceId={parentDar.referenceId}
                     onSuccess={() => {
                     }}

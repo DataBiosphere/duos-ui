@@ -3,6 +3,7 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from '../../libs/ajax/ProgressReport';
 import {Notifications} from '../../libs/utils';
 import {ConsentError} from '../../types/responseTypes';
+import {isNil} from "lodash/fp";
 
 
 interface SubmitProgressReportProps {
@@ -15,16 +16,35 @@ interface SubmitProgressReportProps {
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const {progressReport, parentReferenceId, onSuccess, onCancel} = props;
 
-  const submit = async () => {
+  const submit = async (e) => {
+    e.preventDefault();
     try {
-      const submittedPR = await ProgressReport.submitProgressReport(progressReport, parentReferenceId);
+      const submittedPR = await ProgressReport.submitProgressReport(createMultiPartFormData(progressReport), parentReferenceId);
       onSuccess(submittedPR);
     } catch (error: unknown) {
       handleError('Error: Unable to submit progress report: ', error);
     }
   }
 
-  const cancel = async () => {
+  // compute multipart/form-data object, includes registration information and all files
+  const createMultiPartFormData = (progressReport) => {
+
+    const multiPartFormData = new FormData();
+
+    multiPartFormData.append('dar', JSON.stringify(progressReport));
+
+    // TODO - add files, etc
+    // for (const field of Object.keys(formFiles)) {
+    //   if (!isNil(formFiles[field])) {
+    //     multiPartFormData.append(field, formFiles[field]);
+    //   }
+    // }
+
+    return multiPartFormData;
+  };
+
+  const cancel = async (e) => {
+    e.preventDefault();
     try {
       onCancel(progressReport);
     } catch (error: unknown) {
