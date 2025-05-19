@@ -1,7 +1,7 @@
 import React from 'react';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
-import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {FormFieldChange, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 
@@ -22,7 +22,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                 <div className='progress-report-row'>
                     <div>
                         <FormField
-                            id='dmiYesNo'
+                            id={FormStateKey.DMI_YES_NO}
                             type={FormFieldTypes.YESNORADIOGROUP}
                             title='4.1 Data Management Incident'
                             titleStyle={titleStyle}
@@ -51,7 +51,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             <div style={{ marginTop: '20px' }}>
                                 <div>Please select any of the following that describe the nature of this Data Management Incident:</div>
                                 <FormField
-                                    id='dmiCombination'
+                                    id={FormStateKey.DMI_COMBINATION}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Inappropriate combination or analysis of the requested datasets with unapproved datasets'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -60,7 +60,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     disabled={readOnly}
                                 />
                                 <FormField
-                                    id='dmiIdentification'
+                                    id={FormStateKey.DMI_IDENTIFICATION}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Intentional or accidental identification of participants or generation of data which makes them easily identifiable'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -69,7 +69,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     disabled={readOnly}
                                 />
                                 <FormField
-                                    id='dmiSharing'
+                                    id={FormStateKey.DMI_SHARING}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Distribution of the data to an individual or institution beyond those specified in the approved Data Access Request (DAR)'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -78,7 +78,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     disabled={readOnly}
                                 />
                                 <FormField
-                                    id='dmiSecurity'
+                                    id={FormStateKey.DMI_SECURITY}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to adhere to NIH Security Best Practices for Controlled-Access Data'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -87,7 +87,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     disabled={readOnly}
                                 />
                                 <FormField
-                                    id='dmiAcknowledgement'
+                                    id={FormStateKey.DMI_ACKNOWLEDGEMENT}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to acknowledge the investigator(s) who generated the data, the funding source, accession numbers of the dataset'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -96,7 +96,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     disabled={readOnly}
                                 />
                                 <FormField
-                                    id='dmiPublication'
+                                    id={FormStateKey.DMI_PUBLICATION}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Analysis and/or publication of a study using the data for the research purpose other than the approved research use'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -105,7 +105,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     disabled={readOnly}
                                 />
                                 <FormField
-                                    id='dmiFalsification'
+                                    id={FormStateKey.DMI_FALSIFICATION}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Fabrication or falsification of data and/or results'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -114,7 +114,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     disabled={readOnly}
                                 />
                                 <FormField
-                                    id='dmiOther'
+                                    id={FormStateKey.DMI_OTHER}
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Other: such as inadvertent data release or breach of security'
                                     onChange={({ key, value }: FormFieldChange) => {
@@ -125,7 +125,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             </div>
                             <div style={{ marginTop: '20px' }}>
                                 <FormField
-                                    id='dmiDescription'
+                                    id={FormStateKey.DMI_DESCRIPTION}
                                     type={FormFieldTypes.TEXTAREA}
                                     titleStyle={titleStyle}
                                     description='Please describe the incidents related to mismanagement or misuse of data below.'

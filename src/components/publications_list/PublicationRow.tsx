@@ -1,19 +1,19 @@
 import React from 'react';
-import { Publication } from './Publication';
+import { PublicationOrPresentation } from './PublicationOrPresentation';
 import PublicationAddEdit from './PublicationAddEdit';
 import PublicationSummary from './PublicationSummary';
 
 interface PublicationRowProps {
     readonly id: number;
     readonly editMode: boolean;
-    publication: Publication;
+    publication: PublicationOrPresentation;
     readonly publicationText: string;
-    readonly publications: Publication[];
+    readonly publications: PublicationOrPresentation[];
     readonly columnsToShow: string[];
     readonly editAction: () => void;
     readonly deleteAction: () => void;
     readonly closeAction: () => void;
-    readonly onPublicationChange: (publications: Publication[]) => void;
+    readonly onPublicationChange: (publications: PublicationOrPresentation[]) => void;
     readonly disabled: boolean;
 }
 

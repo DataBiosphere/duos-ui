@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import PublicationAddEdit from './PublicationAddEdit';
 import PublicationRow from './PublicationRow';
-import { Publication } from './Publication';
+import { PublicationOrPresentation } from './PublicationOrPresentation';
 
 interface PublicationListProps {
-    publications: Publication[];
+    publications: PublicationOrPresentation[];
     readonly publicationText: string;
     readonly columnsToShow?: string[];
-    readonly onPublicationChange: (publications: Publication[]) => void;
+    readonly onPublicationChange: (publications: PublicationOrPresentation[]) => void;
     readonly disabled?: boolean;
 }
 
@@ -56,7 +56,7 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
                 )}
             </div>
             <div className="form-group row no-margin">
-                {publications.map((publication: Publication, index: number) => {
+                {publications.map((publication: PublicationOrPresentation, index: number) => {
                     return <PublicationRow
                         key={index}
                         id={index}

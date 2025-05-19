@@ -1,13 +1,13 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
-import { Publication } from 'src/components/publications_list/Publication';
+import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 
 describe('Summary Section - Component Tests', () => {
     let onFormChangeSpy: () => void;
 
-    const initialPublications: Publication[] = [
+    const initialPublications: PublicationOrPresentation[] = [
         {
             title: 'Test Publication 1',
             date: '2022-01-01',

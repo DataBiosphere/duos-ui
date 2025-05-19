@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import { Collaborator } from 'src/components/collaborator_list/Collaborator';
 import CollaboratorList from 'src/components/collaborator_list/CollaboratorList';
 
@@ -12,9 +12,9 @@ interface CollaboratorProps {
 export default function CollaboratorChanges(props: CollaboratorProps): React.JSX.Element {
     const { readOnly, formState, onFormChange } = props;
 
-    const [internalLabStaff, setInternalLabStaff] = useState(formState.internalLabStaff || []);
-    const [internalCollaborators, setInternalCollaborators] = useState(formState.internalCollaborators || []);
-    const [externalCollaborators, setExternalCollaborators] = useState(formState.externalCollaborators || []);
+    const [internalLabStaff, setInternalLabStaff] = useState<Collaborator[]>(formState.internalLabStaff || []);
+    const [internalCollaborators, setInternalCollaborators] = useState<Collaborator[]>(formState.internalCollaborators || []);
+    const [externalCollaborators, setExternalCollaborators] = useState<Collaborator[]>(formState.externalCollaborators || []);
 
     const onCollaboratorChange = (key: string, setState: React.Dispatch<Collaborator[]>, collaborators: Collaborator[]) => {
         onFormChange({ [key]: collaborators });
@@ -22,15 +22,15 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
     };
 
     const onInternalLabStaffChange = (collaborators: Collaborator[]) => {
-        onCollaboratorChange('internalLabStaff', setInternalLabStaff, collaborators);
+        onCollaboratorChange(FormStateKey.COLLABORATOR_INTERNAL_LAB_STAFF, setInternalLabStaff, collaborators);
     }
 
     const onInternalCollaboratorsChange = (collaborators: Collaborator[]) => {
-        onCollaboratorChange('internalCollaborators', setInternalCollaborators, collaborators);
+        onCollaboratorChange(FormStateKey.COLLABORATOR_INTERNAL_COLLABORATORS, setInternalCollaborators, collaborators);
     }
 
     const onExternalCollaboratorsChange = (collaborators: Collaborator[]) => {
-        onCollaboratorChange('externalCollaborators', setExternalCollaborators, collaborators);
+        onCollaboratorChange(FormStateKey.COLLABORATOR_EXTERNAL_COLLABORATORS, setExternalCollaborators, collaborators);
     }
 
     return (

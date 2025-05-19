@@ -392,7 +392,7 @@ export interface Presentation {
   date: string;
   authors: string;
   datasetCitation: string;
-  citation: string;
+  citation: boolean;
 }
 
 export interface Publication {
@@ -402,7 +402,7 @@ export interface Publication {
   authors: string;
   bibliographicCitation: string;
   datasetCitation: string;
-  citation: string;
+  citation: boolean;
 }
 
 export interface Collaborator {
@@ -410,8 +410,8 @@ export interface Collaborator {
   email: string;
   eraCommonsId: string;
   name: string;
-  title: number;
-  uuid: number;
+  title: string
+  uuid: string;
 }
 
 export interface Election {

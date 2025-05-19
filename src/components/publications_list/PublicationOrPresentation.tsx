@@ -1,4 +1,4 @@
-export interface Publication {
+export interface PublicationOrPresentation {
     title: string;
     date: string;
     bibliographic_citation: string;
