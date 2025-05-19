@@ -1,10 +1,10 @@
 import React from 'react';
-import TableIconButton from '../TableIconButton';
-import {Styles, Theme} from '../../libs/theme';
+import TableIconButton from 'src/components/TableIconButton';
+import {Styles, Theme} from 'src/libs/theme';
 import {Block, Delete} from '@mui/icons-material';
-import SimpleButton from '../SimpleButton';
+import SimpleButton from 'src/components/SimpleButton';
 import {useHistory} from 'react-router-dom';
-import {Notifications} from '../../libs/utils';
+import {Notifications} from 'src/libs/utils';
 import {includes, toLower} from 'lodash/fp';
 import {checkEnv, envGroups} from 'src/utils/EnvironmentUtils';
 
