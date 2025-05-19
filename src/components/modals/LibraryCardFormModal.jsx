@@ -10,10 +10,7 @@ import {LibraryCardAgreementTermsDownload} from '../LibraryCardAgreementTermsDow
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateUser, modalType, setCard } = props;
 
-  const cardlessOptions = dropdownOptions.filter((option) => {
-    const libraryCards = option.libraryCards || [];
-    return isEmpty(libraryCards);
-  });
+  const cardlessOptions = dropdownOptions.filter((option) => isEmpty(option.libraryCards));
   const [filteredDropdown, setFilteredDropdown] = useState(cardlessOptions);
 
   let template;
