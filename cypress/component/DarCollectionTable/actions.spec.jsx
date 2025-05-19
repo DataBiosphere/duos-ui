@@ -82,8 +82,7 @@ describe('Actions - Open Button', () => {
   it('should not render Open Button if there is no valid election for opening/re-opening', () => {
     propCopy.actions = [];
     mount(<Actions {...propCopy} />);
-    cy.get(`#chair-open-${collectionId}`);
-    openButton.should('not.exist');
+    cy.get(`#chair-open-${collectionId}`).should('not.exist');
   });
 });
 
