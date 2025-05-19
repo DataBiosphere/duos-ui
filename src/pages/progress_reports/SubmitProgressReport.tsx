@@ -3,11 +3,11 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from '../../libs/ajax/ProgressReport';
 import {Notifications} from '../../libs/utils';
 import {ConsentError} from '../../types/responseTypes';
-import {isNil} from "lodash/fp";
+import {ExpectedFormState} from "src/pages/progress_reports/ProgressReportFormState";
 
 
 interface SubmitProgressReportProps {
-  readonly progressReport: object;
+  readonly progressReport: ExpectedFormState;
   readonly parentReferenceId: string;
   readonly onSuccess: (result: unknown) => void;
   readonly onCancel: (result: unknown) => void;

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { DataAccessRequest, Dataset } from 'src/types/model';
-import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {DataAccessRequest, Dataset, Presentation} from 'src/types/model';
+import {ExpectedPresentation, ExpectedPublication, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
+import {Publication} from "src/components/publications_list/Publication";
 
 type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is an application
@@ -28,6 +29,19 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
     function getItem<T, K extends keyof T>(obj: {[P in keyof T]?: T[P]}, key: K): T[K] | undefined {
         return obj[key];
     }
+
+    const getPublicationList = (formState: FormState): ExpectedPublication[] => {
+        const publications: Publication[] = getItem(formState, 'publications') ?? [];
+        return publications.map((pub: Publication) => ({
+            "title": pub.title,
+            "pubmedId": pub.pubmed_id,
+            "date": pub.date,
+            "authors": pub.authors,
+            "bibliographicCitation": pub.bibliographic_citation,
+            "datasetCitation": pub.dataset_citation,
+            "citation": pub.did_cite
+        }));
+    };
 
     /* required because the datasets state changes during component mount */
     useEffect(() => {
@@ -65,8 +79,12 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
                 <SubmitProgressReport
                     progressReport={{
                         "progressReportSummary": getItem(formState, 'progressReportSummary'),
+                        // TODO - this is required in the backend right now, but shouldn't be
                         "intellectualPropertySummary": getItem(formState, 'intellectualPropertySummary'),
-                        "datasetIds": getItem(formState, 'datasetIds')
+                        "datasetIds": getItem(formState, 'datasetIds'),
+                        "publication": getItem(formState, 'publicationsYesNo'), // this should be a boolean
+                        "publications": getPublicationList(formState),
+                        "presentations": getItem(formState, 'presentations') ?? []
                     }}
 
                     parentReferenceId={parentDar.referenceId}
