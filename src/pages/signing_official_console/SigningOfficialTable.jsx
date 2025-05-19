@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Info } from '@mui/icons-material';
 import { Styles, Theme } from '../../libs/theme';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
+import {head} from 'lodash';
 import SimpleTable from '../../components/SimpleTable';
 import SimpleButton from '../../components/SimpleButton';
 import PaginationBar from '../../components/PaginationBar';
@@ -88,7 +89,6 @@ const DeactivateLibraryCardButton = (props) => {
 const IssueLibraryCardButton = (props) => {
   //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
-  //institution id should be determined from the logged in SO account on the back-end
   const {card, showConfirmationModal} = props;
   const message = (
     <div>
@@ -120,12 +120,9 @@ const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResea
 const LibraryCardCell = ({
   researcher,
   showConfirmationModal,
-  institutionId
 }) => {
   const id = researcher.userId || researcher.email;
-  const card = !isEmpty(researcher.libraryCards)
-    ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
-    : null;
+  const card = head(researcher.libraryCards);
   const button = !isNil(card)
     ? DeactivateLibraryCardButton({
       card,
@@ -134,8 +131,7 @@ const LibraryCardCell = ({
     : IssueLibraryCardButton({
       card: {
         userId: researcher.userId,
-        userEmail: researcher.email,
-        institutionId: institutionId
+        userEmail: researcher.email
       },
       showConfirmationModal
     });
@@ -300,8 +296,7 @@ export default function SigningOfficialTable(props) {
         emailCell(email, id),
         LibraryCardCell({
           researcher,
-          showConfirmationModal,
-          institutionId: signingOfficial.institutionId
+          showConfirmationModal
         }),
         roleCell(roles, id),
         // activeDarCountCell(count, id)
@@ -440,7 +435,6 @@ export default function SigningOfficialTable(props) {
         closeModal={() => setShowModal(false)}
         card={selectedCard}
         users={filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers)}
-        institutions={[]} //pass in empty array to force modal to hide institution dropdown
         modalType="add" />
       <ConfirmationModal
         showConfirmation={showConfirmation}

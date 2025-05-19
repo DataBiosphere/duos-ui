@@ -316,12 +316,9 @@ export default function LibraryCardTable(props) {
   //onClick function, used to create new card on modal based on form data
   const addLibraryCard = async (card) => {
     try {
-      //check if card combination already exits, show error if it does
+      //check if card already exits, show error if it does
       const alreadyExists  = findIndex(
-        (element) =>
-          (isEqual(element.institutionId)(card.institutionId) &&
-            element.userId === card.userId) ||
-          isEqual(element.userEmail)(card.userEmail), libraryCards
+        (element) => isEqual(element.userEmail)(card.userEmail), libraryCards
       );
       if (alreadyExists > -1) {
         Notifications.showError({ text: 'Library Card already exists' });
@@ -329,10 +326,6 @@ export default function LibraryCardTable(props) {
         //add(with sort afterwards) library card to libraryCards (reference list)
       } else {
         const newCard = await LibraryCard.createLibraryCard(card);
-        const institution = find(
-          (institution) => institution.id === newCard.institutionId
-        )(institutions);
-        newCard.institution = institution;
         const updatedList = cloneDeep(libraryCards);
         updatedList.push(newCard);
         updatedList.sort((a, b) => {
@@ -429,7 +422,6 @@ export default function LibraryCardTable(props) {
         updateOnClick={updateListFn}
         createOnClick={addLibraryCard}
         closeModal={() => setShowModal(false)}
-        institutions={institutions}
         users={users}
         card={currentCard}
         modalType={modalType}
