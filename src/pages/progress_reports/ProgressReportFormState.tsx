@@ -60,11 +60,3 @@ export const DMI_INCIDENT_KEYS = [
     FormStateKey.DMI_FALSIFICATION,
     FormStateKey.DMI_OTHER
 ]
-
-export const CLOSEOUT_KEYS = [
-    FormStateKey.CLOSEOUT_COMPLETED,
-    FormStateKey.CLOSEOUT_MOVED,
-    FormStateKey.CLOSEOUT_TRANSFERRED,
-    FormStateKey.CLOSEOUT_SUPERSEDED,
-    FormStateKey.CLOSEOUT_OTHER
-]
