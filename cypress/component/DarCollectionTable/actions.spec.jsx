@@ -209,7 +209,7 @@ describe('Researcher Actions - Update Button', () => {
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-create-progress-report-${collectionId}`).should('exist');
   });
-  it('does not render if the election is not updatable', () => {
+  it('does not render if the collection is not updatable', () => {
     propCopy.consoleType = 'researcher';
     propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
