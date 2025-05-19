@@ -41,12 +41,13 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
 
   return (
       <div className='flex flex-row' style={{justifyContent: 'flex-start'}}>
-        <button className='button button-blue'
+        <button type={'button'}
+                className='button button-blue'
                 style={{marginRight: '2rem', cursor: 'pointer'}}
                 data-cy='pr-submit-button'
                 onClick={submit}>Submit
         </button>
-        <button
+        <button type={'button'}
             className='button button-white'
             style={{cursor: 'pointer'}}
             data-cy='pr-cancel-button'
