@@ -3,16 +3,14 @@ import {DataSet} from '../../libs/ajax/DataSet';
 import {DAR} from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
 import {
-  needsDsAcknowledgement,
-  needsPubAcknowledgement,
   needsIrbApprovalDocument,
   needsCollaborationLetter,
-  needsGsoAcknowledgement,
   newIrbDocumentExpirationDate,
 } from '../../utils/darFormUtils';
 import SelectableDatasets from './SelectableDatasets';
 import {DAAUtils} from '../../utils/DAAUtils';
 import {DuosDatePicker} from '../../components/DuosDatePicker.js';
+import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements.js';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 const noTopMarginStyle = { marginTop: '0', paddingTop: '0' };
@@ -345,56 +343,16 @@ export default function DataAccessRequest(props) {
           onChange={onChange}
         />
 
-        {(needsGsoAcknowledgement(datasets) || needsDsAcknowledgement(dataUseTranslations) || needsPubAcknowledgement(datasets)) &&
-            <FormFieldTitle
-              id={'dataUseAcknowledgements'}
-              key={'dataUseAcknowledgements'}
-              title={'2.5 Data Use Acknowledgements'}
-              description={includeInstructions ? 'Please confirm listed acknowledgements and/or document requirements below:' : ''}
-            />
-        }
-
-        {needsGsoAcknowledgement(datasets) &&
-            <FormField
-              id={'gsoAcknowledgement'}
-              key={'gsoAcknowledgement'}
-              disabled={readOnlyMode}
-              type={FormFieldTypes.CHECKBOX}
-              toggleText={'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.'}
-              defaultValue={formData.gsoAcknowledgement}
-              onChange={onChange}
-              validation={validation.gsoAcknowledgement}
-              onValidationChange={onValidationChange}
-            />
-        }
-
-        {needsPubAcknowledgement(datasets) &&
-            <FormField
-              id={'pubAcknowledgement'}
-              key={'pubAcknowledgement'}
-              disabled={readOnlyMode}
-              type={FormFieldTypes.CHECKBOX}
-              toggleText={'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'}
-              defaultValue={formData.pubAcknowledgement}
-              validation={validation.pubAcknowledgement}
-              onValidationChange={onValidationChange}
-              onChange={onChange}
-            />
-        }
-
-        {needsDsAcknowledgement(dataUseTranslations) &&
-            <FormField
-              id={'dsAcknowledgement'}
-              key={'dsAcknowledgement'}
-              disabled={readOnlyMode}
-              type={FormFieldTypes.CHECKBOX}
-              toggleText={'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum'}
-              defaultValue={formData.dsAcknowledgement}
-              validation={validation.dsAcknowledgement}
-              onValidationChange={onValidationChange}
-              onChange={onChange}
-            />
-        }
+        <DataUseAcknowledgements
+          title={'2.5 Data Use Acknowledgements'}
+          datasets={datasets}
+          dataUseTranslations={dataUseTranslations}
+          formData={formData}
+          readOnlyMode={readOnlyMode}
+          onChange={onChange}
+          onValidationChange={onValidationChange}
+          validation={validation}
+          />
 
         {needsIrbApprovalDocument(datasets) &&
                     <FormFieldTitle

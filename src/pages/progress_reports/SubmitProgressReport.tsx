@@ -3,6 +3,7 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from '../../libs/ajax/ProgressReport';
 import {Notifications} from '../../libs/utils';
 import {ConsentError} from '../../types/responseTypes';
+import {validationFailed} from "src/utils/darFormUtils";
 
 
 interface SubmitProgressReportProps {
@@ -10,21 +11,28 @@ interface SubmitProgressReportProps {
   readonly parentReferenceId: string;
   readonly onSuccess: (result: unknown) => void;
   readonly onCancel: (result: unknown) => void;
+  readonly validateForm: () => any;
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const {progressReport, parentReferenceId, onSuccess, onCancel} = props;
+  const {progressReport, parentReferenceId, onSuccess, onCancel, validateForm} = props;
 
-  const submit = async () => {
-    try {
-      const submittedPR = await ProgressReport.submitProgressReport(progressReport, parentReferenceId);
-      onSuccess(submittedPR);
-    } catch (error: unknown) {
-      handleError('Error: Unable to submit progress report: ', error);
+  const submit = async (e) => {
+    e.preventDefault();
+    if (validationFailed(validateForm())) {
+      Notifications.showError({text: "Form validation failed. Please check the form for errors."});
+    } else {
+      try {
+        const submittedPR = await ProgressReport.submitProgressReport(progressReport, parentReferenceId);
+        onSuccess(submittedPR);
+      } catch (error: unknown) {
+        handleError('Error: Unable to submit progress report: ', error);
+      }
     }
   }
 
-  const cancel = async () => {
+  const cancel = async (e) => {
+    e.preventDefault();
     try {
       onCancel(progressReport);
     } catch (error: unknown) {

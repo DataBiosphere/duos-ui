@@ -2,8 +2,9 @@
 
 // ********************** DUL LOGIC ********************** //
 
-import { isEmpty, isNil, isEqual, isString, isArray } from 'lodash';
+import {isEmpty, isNil, isEqual, isString, isArray, set} from 'lodash';
 import { FormValidators } from '../components/forms/forms';
+import {cloneDeep} from 'lodash/fp';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
   return datasets?.some((ds) => {
@@ -44,6 +45,19 @@ export const newIrbDocumentExpirationDate = () => {
 
 // ********************** DAR FORM VALIDATION ********************** //
 
+export const validationFailed = (validation) => {
+  return Object.keys(validation).some((key) => !isEmpty(validation[key]));
+};
+
+export const getNewFormValidation = (formValidation, section, key, validation) => {
+  const newFormValidation = cloneDeep(formValidation);
+  if (isArray(key)) {
+    set(newFormValidation, [section, ...key], validation);
+  } else {
+    set(newFormValidation, [section, key], validation);
+  }
+  return newFormValidation;
+}
 const validationError = (failed) => {
   if (isArray(failed)) {
     return { valid: false, failed: failed };
@@ -191,6 +205,18 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
     errors.irbDocument = requiredError;
   }
 
+  calcDUAErrors(formData, datasets, errors);
+
+  return errors;
+};
+
+const calcPRErrors = (formData, datasets, dataUseTranslations) => {
+  const errors = {};
+  calcDUAErrors(formData, datasets, dataUseTranslations, errors);
+  return errors;
+};
+
+const calcDUAErrors = (formData, datasets, dataUseTranslations, errors) => {
   if ((needsGsoAcknowledgement(datasets) && !formData.gsoAcknowledgement)) {
     errors.gsoAcknowledgement = requiredError;
   }
@@ -202,10 +228,7 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
   if ((needsDsAcknowledgement(dataUseTranslations) && !formData.dsAcknowledgement)) {
     errors.dsAcknowledgement = requiredError;
   }
-
-
-  return errors;
-};
+}
 
 const requiredRusFields = [
   'controls',
@@ -267,3 +290,13 @@ export const validateDARFormData = ({
     nihValid: isNil(researcher.eraCommonsId),
   };
 };
+
+export const validatePRFormData = (
+    formData,
+    datasets,
+    dataUseTranslations,
+    ) => {
+    return {
+        darErrors: calcPRErrors(formData, datasets, dataUseTranslations)
+    };
+}

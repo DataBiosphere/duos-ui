@@ -22,9 +22,9 @@ import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } fro
 import './DataAccessRequestApplication.css';
 
 import {
+  getNewFormValidation,
   validateDARFormData
 } from '../../utils/darFormUtils';
-import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
 import {DAAUtils} from '../../utils/DAAUtils';
@@ -36,6 +36,7 @@ import loadingImage from "../../images/loading-indicator.svg";
 import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
 import {ProgressReportApplication} from "./ProgressReportApplication";
 import {ScrollableTabs} from "./ScrollableTabs";
+import {validationFailed} from "../../utils/darFormUtils.js";
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info';
@@ -58,10 +59,6 @@ const fetchAllDatasets = async (dsIds) => {
   }
   // filter just for safety
   return DataSet.getDatasetsByIds(filteredDatasetIds);
-};
-
-const validationFailed = (validation) => {
-  return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
 
 const DataAccessRequestApplication = (props) => {
@@ -166,15 +163,7 @@ const DataAccessRequestApplication = (props) => {
 
   const formValidationChange = useCallback((section, { key, validation }) => {
     setFormValidation((formValidation) => {
-      const newFormValidation = cloneDeep(formValidation);
-
-      if (isArray(key)) {
-        set(newFormValidation, [section, ...key], validation);
-      } else {
-        set(newFormValidation, [section, key], validation);
-      }
-
-      return newFormValidation;
+      getNewFormValidation(formValidation, section, key, validation);
     });
   }, []);
 
