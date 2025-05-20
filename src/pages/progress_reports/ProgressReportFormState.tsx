@@ -27,20 +27,6 @@ export interface FormState {
     closeoutSupplement?: CloseOutSupplement;
 }
 
-export interface ExpectedFormState {
-    progressReportSummary?: string;
-    intellectualPropertyYesNo?: boolean;
-    intellectualPropertySummary?: string;
-    datasetIds?: number[];
-    publications?: Publication[];
-    presentations?: Presentation[];
-    labCollaborators?: Collaborator[];
-    internalCollaborators?: Collaborator[];
-    externalCollaborators?: Collaborator[];
-    dataManagementIncident?: DataManagementIncident;
-    closeOutSupplement?: CloseOutSupplement;
-}
-
 export enum FormStateKey {
     PROGRESS_REPORT_SUMMARY = 'progressReportSummary',
     INTELLECTUAL_PROPERTY_YES_NO = 'intellectualPropertyYesNo',

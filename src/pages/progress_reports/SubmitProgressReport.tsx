@@ -3,13 +3,15 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
-import {
-  DMI_INCIDENT_KEYS,
-  ExpectedFormState,
-  FormState
-} from "src/pages/progress_reports/ProgressReportFormState";
+import {DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
-import {DataManagementIncident, Presentation, Publication} from "src/types/model";
+import {
+  CloseOutSupplement,
+  DataAccessRequest,
+  DataManagementIncident,
+  Presentation,
+  Publication
+} from "src/types/model";
 
 
 interface SubmitProgressReportProps {
@@ -65,8 +67,8 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     return dataManagementIncident;
   }
 
-  const convertFormStateToExpectedFormState = (formState: FormState): ExpectedFormState => {
-    const expectedForm: ExpectedFormState = {} as ExpectedFormState;
+  const convertFormStateToDAR = (formState: FormState): Partial<DataAccessRequest> => {
+    const expectedForm: Partial<DataAccessRequest> = {} as Partial<DataAccessRequest>;
     expectedForm.progressReportSummary = formState.progressReportSummary;
     if (formState.intellectualPropertyYesNo) {
       expectedForm.intellectualPropertySummary = formState.intellectualPropertySummary;
@@ -92,7 +94,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
 
   const submit = async () => {
     try {
-      const submittedPR = await ProgressReport.submitProgressReport(createMultiPartFormData(convertFormStateToExpectedFormState(formState)), parentReferenceId);
+      const submittedPR = await ProgressReport.submitProgressReport(createMultiPartFormData(convertFormStateToDAR(formState)), parentReferenceId);
       onSuccess(submittedPR);
     } catch (error: unknown) {
       handleError('Error: Unable to submit progress report: ', error);
