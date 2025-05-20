@@ -2,6 +2,7 @@ import React from 'react';
 import {DataSet} from '../../libs/ajax/DataSet';
 import {DAR} from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import {
   needsIrbApprovalDocument,
   needsCollaborationLetter,
@@ -224,9 +225,9 @@ export default function DataAccessRequest(props) {
               </p>
             </>
           }
-          placeholder={'Please limit your RUS to 2200 characters.'}
+          placeholder={`Please limit your RUS to ${FORM_TEXT_AREA_MAX_LENGTH} characters.`}
           rows={6}
-          maxLength={2200}
+          maxLength={FORM_TEXT_AREA_MAX_LENGTH}
           ariaLevel={ariaLevel + 3}
           defaultValue={formData.rus}
           validation={validation.rus}
