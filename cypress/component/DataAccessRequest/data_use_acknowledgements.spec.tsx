@@ -3,7 +3,7 @@ import { mount } from 'cypress/react';
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements';
 
 describe('DataUseAcknowledgements Component', () => {
-    let defaultProps: any;
+    let defaultProps: object;
 
     beforeEach(() => {
         defaultProps = {
