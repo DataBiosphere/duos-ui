@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
 import {Location} from 'history';
-import ERACommons from 'src/components/ERACommons';
 import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
@@ -38,26 +37,15 @@ export default function ProgressReportApplication (props: ProgressReportApplicat
 
   return (
       <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-        <div className='progress-report-step-card' data-cy='researcher-identification'
-             style={{marginBottom: '4rem'}}>
-          <h3>{'Researcher Identification'}</h3>
-          <div>
-            <ERACommons
-                destination={eRACommonsDestination}
-                researcherProfile={researcher}
-                onNihStatusUpdate={() => {
-                }}
-                location={location}
-                validationError={() => {
-                }}
-                readOnly={readOnlyMode}
-                header={true}
-                required={true}
-            />
-          </div>
-        </div>
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-          <SummarySection readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange}/>
+          <SummarySection
+              readOnly={readOnlyMode}
+              formState={formState}
+              onFormChange={onFormChange}
+              eRACommonsDestination={eRACommonsDestination}
+              researcher={researcher}
+              location={location}
+          />
         </div>
         <div data-cy='remove-datasets'>
           <div className='progress-report-step-card'>
