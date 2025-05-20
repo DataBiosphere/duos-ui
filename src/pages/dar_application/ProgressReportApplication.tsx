@@ -10,9 +10,9 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 
 type ProgressReportApplicationProps = {
-    dar: DataAccessRequest, // corresponds either to the parent DAR for a new application or an existing readonly progress report
-    datasets: Dataset[],
-    readOnlyMode?: boolean
+  readonly dar: DataAccessRequest, // corresponds either to the parent DAR for a new application or an existing readonly progress report
+  readonly datasets: Dataset[],
+  readonly readOnlyMode?: boolean
   readonly location?: Location
   readonly researcher: DuosUser
 };
