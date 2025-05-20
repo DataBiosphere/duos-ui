@@ -1,9 +1,9 @@
 import React from 'react';
 import {mount} from 'cypress/react';
-import SubmitProgressReport from '../../../src/pages/progress_reports/SubmitProgressReport';
-import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
-import '../../../src/index.css';
-import '../../../src/styles/buttons.css';
+import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
+import {StackdriverReporter} from 'src/libs/stackdriverReporter';
+import 'src/index.css';
+import 'src/styles/buttons.css';
 
 
 describe('SubmitProgressReport tests', () => {
@@ -21,6 +21,9 @@ describe('SubmitProgressReport tests', () => {
             onSuccess={() => {
             }}
             onCancel={() => {
+            }}
+            validateForm={() => {
+              return {}
             }}
         />
     );
@@ -41,6 +44,9 @@ describe('SubmitProgressReport tests', () => {
             }}
             onCancel={() => {
             }}
+            validateForm={() => {
+              return {}
+            }}
         />
     );
     cy.get('[data-cy=pr-submit-button]').click();
@@ -60,6 +66,13 @@ describe('SubmitProgressReport tests', () => {
       statusCode: 200,
       body: {},
     });
+    const validationSpy = {
+        validateForm: () => {
+            return {}
+        }
+    }
+    cy.spy(validationSpy, 'validateForm').as('validateForm');
+
     mount(
         <SubmitProgressReport
             progressReport={{}}
@@ -67,11 +80,41 @@ describe('SubmitProgressReport tests', () => {
             onSuccess={functionSpy.successHandler}
             onCancel={() => {
             }}
+            validateForm={validationSpy.validateForm}
         />
     );
     cy.get('[data-cy=pr-submit-button]').should('exist');
     cy.get('[data-cy=pr-submit-button]').click();
+    cy.get('@validateForm').should('have.been.calledOnce');
     cy.get('@successHandler').should('have.been.calledOnce');
+  });
+
+  it('API and On Submit handler should not be called if validation fails', () => {
+      const functionSpy = {
+          successHandler: () => {
+              console.log('successHandler')
+          }
+      }
+      cy.spy(functionSpy, 'successHandler').as('successHandler');
+      const submitSpy = cy.spy().as('submitSpy');
+      cy.intercept('POST', '/api/dar/v2/progress_report/1', () => submitSpy());
+
+      mount(
+          <SubmitProgressReport
+              progressReport={{}}
+              parentReferenceId="1"
+              onSuccess={functionSpy.successHandler}
+              onCancel={() => {
+              }}
+              validateForm={() => {
+                  return {darErrors: {datasetIds: {valid: false, failed: ['required']}}}
+              }}
+            />
+      );
+      cy.get('[data-cy=pr-submit-button]').should('exist');
+      cy.get('[data-cy=pr-submit-button]').click();
+      cy.get('@submitSpy').should('not.always.have.been.called')
+      cy.get('@successHandler').should('not.have.been.called');
   });
 
   it('On Cancel handler should be called after cancel button clicked', () => {
@@ -88,6 +131,9 @@ describe('SubmitProgressReport tests', () => {
             onSuccess={() => {
             }}
             onCancel={functionSpy.cancelHandler}
+            validateForm={() => {
+              return {}
+            }}
         />
     );
     cy.get('[data-cy=pr-cancel-button]').should('exist');
@@ -108,6 +154,9 @@ describe('SubmitProgressReport tests', () => {
             onSuccess={() => {
             }}
             onCancel={() => {
+            }}
+            validateForm={() => {
+              return {}
             }}
         />
     );
