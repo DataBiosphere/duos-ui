@@ -2,6 +2,7 @@ import React from 'react';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import {FormFieldChange, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {getFormStateItem} from "src/pages/progress_reports/ProgressReportUtils";
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 
@@ -46,7 +47,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             disabled={readOnly}
                         />
                     </div>
-                    {formState.dmiYesNo === true &&
+                    {getFormStateItem(formState, FormStateKey.DMI_YES_NO) === true &&
                         <>
                             <div style={{ marginTop: '20px' }}>
                                 <div>Please select any of the following that describe the nature of this Data Management Incident:</div>

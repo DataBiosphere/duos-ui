@@ -1,8 +1,8 @@
 import React from 'react';
-import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import {FormFieldChange, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import {CloseOutSupplement} from "src/types/model";
+import {getFormStateItem} from "src/pages/progress_reports/ProgressReportUtils";
 
 interface DarCloseoutProps {
     readonly readOnly: boolean;
@@ -30,7 +30,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         }}
                         disabled={readOnly}
                     />
-                    {formState.closeoutYesNo === true && (
+                    {getFormStateItem(formState, FormStateKey.DMI_YES_NO) === true && (
                         <div>
                         <p>
                             By completing this page, upon project close-out, the PI and all approved users agree to destroy all copies, versions, and derivations of the dataset(s) retrieved from NIH-designated controlled-access databases, on both local servers and hardware, and if cloud computing was used, delete the data and cloud images from cloud computing provider storage, virtual machines, databases, and random access archives, except as required by publication practices, institutional policies, or law to retain them.
@@ -49,7 +49,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                     { text: 'The project is being superseded by a new project', name: CloseOutSupplement.PROJECT_SUPERSEDED }
                                 ]}
                                 disabled={readOnly}
-                                defaultValue={formState.closeoutSupplement}
+                                defaultValue={getFormStateItem(formState, FormStateKey.CLOSEOUT_SUPPLEMENT)}
                                 onChange={({ _key, value }: FormFieldChange) => {
                                     onFormChange({ [FormStateKey.CLOSEOUT_SUPPLEMENT]: value });
                                 }}

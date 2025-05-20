@@ -4,6 +4,7 @@ import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import PublicationList from 'src/components/publications_list/PublicationList';
 import {FormFieldChange, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {getFormStateItem} from "src/pages/progress_reports/ProgressReportUtils";
 
 interface SummarySectionProps {
     readonly readOnly: boolean;
@@ -62,7 +63,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         }}
                         disabled={readOnly}
                     />
-                    {formState.intellectualPropertyYesNo === true && <FormField
+                    {getFormStateItem(formState, FormStateKey.INTELLECTUAL_PROPERTY_YES_NO) === true && <FormField
                         id={FormStateKey.INTELLECTUAL_PROPERTY_SUMMARY}
                         type={FormFieldTypes.TEXTAREA}
                         description='Please describe the intellectual property resulting from analysis of the requested dataset(s).'
@@ -87,7 +88,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         }}
                         disabled={readOnly}
                     />
-                    {formState.publicationsYesNo === true && <PublicationList
+                    {getFormStateItem(formState, FormStateKey.PUBLICATIONS_YES_NO) === true && <PublicationList
                         publications={publications}
                         publicationText='Publication'
                         columnsToShow={['title', 'date']}
@@ -107,7 +108,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         }}
                         disabled={readOnly}
                     />
-                    {formState.presentationsYesNo === true && <PublicationList
+                    {getFormStateItem(formState, FormStateKey.PRESENTATIONS_YES_NO) === true && <PublicationList
                         publications={presentations}
                         publicationText='Presentation'
                         columnsToShow={['title', 'date']}
