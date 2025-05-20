@@ -597,7 +597,7 @@ const DataAccessRequestApplication = (props) => {
                                 dar={dar?.data}
                                 readOnlyMode={true}
                                 datasets={filterForProgressReport(datasets, dar.datasetIds)}
-                                location={props.location}
+                                location={undefined}
                                 researcher={researcher}
                               />
                             </ConditionalAccordion>
