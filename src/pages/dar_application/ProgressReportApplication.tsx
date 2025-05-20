@@ -9,14 +9,35 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 
 type ProgressReportApplicationProps = {
-    dar?: DataAccessRequest, // Dar will be empty if this is an application
-    parentDar?: DataAccessRequest, // Dar will be empty if this is view only
+    dar: DataAccessRequest, // corresponds either to the parent DAR for a new application or an existing readonly progress report
     datasets: Dataset[],
     readOnlyMode?: boolean
 };
 
-export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
-    const [formState, setFormState] = useState<FormState>({});
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
+    const initialState = {
+        ...dar,
+        // additional state for summary section
+        ...(dar?.intellectualPropertySummary && {
+            intellectualPropertyYesNo: !!dar.intellectualPropertySummary
+        }),
+        ...(dar?.publications && {
+            publicationsYesNo: (dar.publications.length > 0)
+        }),
+        ...(dar?.presentations && {
+            presentationsYesNo: (dar.presentations.length > 0)
+        }),
+        // additional state for dmi section
+        ...(dar?.dataManagementIncident?.incidents && {
+            dmiYesNo: (dar.dataManagementIncident.incidents.length > 0)
+        }),
+        // additional state for closeout section
+        ...(dar?.closeOutSupplement && {
+            closeoutYesNo: !!dar.closeOutSupplement
+        }),
+    }
+
+    const [formState, setFormState] = useState<FormState>(initialState);
 
     const onFormChange = (newState: Partial<FormState>) => {
         setFormState(prevState => ({
@@ -25,7 +46,7 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
         }));
     };
 
-    /* required because the datasets state changes during component mount */
+    // required because the datasets state changes during component mount
     useEffect(() => {
         onFormChange({ datasetIds: datasets.map((ds) => ds.datasetId) });
     }, [datasets]);
@@ -57,10 +78,10 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DarCloseout readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
             </div>
-            {!readOnlyMode && parentDar && <div>
+            {!readOnlyMode && <div>
                 <SubmitProgressReport
                     progressReport={dar}
-                    parentReferenceId={parentDar.referenceId}
+                    parentReferenceId={dar.referenceId}
                     onSuccess={() => {
                     }}
                     onCancel={() => {
