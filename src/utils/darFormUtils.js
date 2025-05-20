@@ -195,7 +195,7 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
     errors.irbDocument = requiredError;
   }
 
-  calcDUAErrors(formData, datasets, errors);
+  calcDUAErrors(formData, datasets, dataUseTranslations, errors);
 
   return errors;
 };

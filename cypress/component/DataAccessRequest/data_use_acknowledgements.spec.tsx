@@ -59,14 +59,15 @@ describe('DataUseAcknowledgements Component', () => {
     });
 
     it('calls onChange when a checkbox is toggled', () => {
+        const onChangeSpy = cy.spy().as('onChangeSpy');
         const props = {
             ...defaultProps,
-            datasets: [{ dataUse: {geneticStudiesOnly: true }}]
+            datasets: [{ dataUse: { geneticStudiesOnly: true } }],
+            onChange: onChangeSpy
         };
         mount(<DataUseAcknowledgements {...props} />);
-        cy.get('input[type="checkbox"]').check().then(() => {
-            expect(props.onChange).to.have.been.called;
-        });
+        cy.get('input[type="checkbox"]').check();
+        cy.get('@onChangeSpy').should('have.been.called');
     });
 
     it('disables fields in read-only mode', () => {

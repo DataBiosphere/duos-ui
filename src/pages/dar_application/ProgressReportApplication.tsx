@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import React, {useCallback, useEffect, useState} from 'react';
 import { DataAccessRequest, Dataset } from 'src/types/model';
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
