@@ -1,13 +1,44 @@
 import {CloseOutSupplement, Collaborator, DataManagementIncident, Presentation, Publication} from "src/types/model";
+import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
 export interface FormState {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    progressReportSummary?: string;
+    intellectualPropertyYesNo?: boolean;
+    intellectualPropertySummary?: string;
+    datasetIds?: number[];
+    publicationsYesNo?: boolean;
+    publications?: PublicationOrPresentation[];
+    presentationsYesNo?: boolean;
+    presentations?: PublicationOrPresentation[];
+    internalLabStaff?: Collaborator[];
+    internalCollaborators?: Collaborator[];
+    externalCollaborators?: Collaborator[];
+    dmiYesNo?: boolean;
+    dmiCombination?: boolean;
+    dmiIdentification?: boolean;
+    dmiSharing?: boolean;
+    dmiSecurity?: boolean;
+    dmiAcknowledgement?: boolean;
+    dmiPublication?: boolean;
+    dmiFalsification?: boolean;
+    dmiOther?: boolean;
+    dmiDescription?: string;
+    closeoutYesNo?: boolean;
+    closeoutSupplement?: CloseOutSupplement;
 }
 
-export interface FormFieldChange {
-    key: string;
-    value: boolean | string;
+export interface ExpectedFormState {
+    progressReportSummary?: string;
+    intellectualPropertyYesNo?: boolean;
+    intellectualPropertySummary?: string;
+    datasetIds?: number[];
+    publications?: Publication[];
+    presentations?: Presentation[];
+    labCollaborators?: Collaborator[];
+    internalCollaborators?: Collaborator[];
+    externalCollaborators?: Collaborator[];
+    dataManagementIncident?: DataManagementIncident;
+    closeOutSupplement?: CloseOutSupplement;
 }
 
 export enum FormStateKey {
@@ -36,21 +67,7 @@ export enum FormStateKey {
     CLOSEOUT_SUPPLEMENT = 'closeoutSupplement'
 }
 
-export interface ExpectedFormState {
-    progressReportSummary?: string;
-    intellectualPropertyYesNo?: boolean;
-    intellectualPropertySummary?: string;
-    datasetIds?: number[];
-    publications?: Publication[];
-    presentations?: Presentation[];
-    labCollaborators?: Collaborator[];
-    internalCollaborators?: Collaborator[];
-    externalCollaborators?: Collaborator[];
-    dataManagementIncident?: DataManagementIncident;
-    closeOutSupplement?: CloseOutSupplement;
-}
-
-export const DMI_INCIDENT_KEYS = [
+export const DMI_INCIDENT_KEYS: FormStateKey[] = [
     FormStateKey.DMI_COMBINATION,
     FormStateKey.DMI_IDENTIFICATION,
     FormStateKey.DMI_SHARING,
@@ -59,4 +76,4 @@ export const DMI_INCIDENT_KEYS = [
     FormStateKey.DMI_PUBLICATION,
     FormStateKey.DMI_FALSIFICATION,
     FormStateKey.DMI_OTHER
-]
+];

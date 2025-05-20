@@ -6,12 +6,10 @@ import {ConsentError} from 'src/types/responseTypes';
 import {
   DMI_INCIDENT_KEYS,
   ExpectedFormState,
-  FormState,
-  FormStateKey
+  FormState
 } from "src/pages/progress_reports/ProgressReportFormState";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 import {DataManagementIncident, Presentation, Publication} from "src/types/model";
-import {getFormStateItem} from "src/pages/progress_reports/ProgressReportUtils";
 
 
 interface SubmitProgressReportProps {
@@ -25,7 +23,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const {formState, parentReferenceId, onSuccess, onCancel} = props;
 
   const getPublicationList = (formState: FormState): Publication[] => {
-    const publications: PublicationOrPresentation[] = getFormStateItem(formState, FormStateKey.PUBLICATIONS) ?? [];
+    const publications: PublicationOrPresentation[] = formState.publications ?? [];
     return publications.map((pub: PublicationOrPresentation) => {
       const expectedPublication: Publication = {} as Publication;
       expectedPublication.title = pub.title;
@@ -40,7 +38,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   };
 
   const getPresentationList = (formState: FormState): Presentation[] => {
-    const presentations: PublicationOrPresentation[] = getFormStateItem(formState, FormStateKey.PRESENTATIONS) ?? [];
+    const presentations: PublicationOrPresentation[] = formState.presentations ?? [];
     return presentations.map((pub: PublicationOrPresentation) => {
       const expectedPresentation: Presentation= {} as Presentation;
       expectedPresentation.title = pub.title;
@@ -57,37 +55,37 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     const dataManagementIncident: DataManagementIncident = {} as DataManagementIncident;
     dataManagementIncident.incidents = []
     DMI_INCIDENT_KEYS.map((key) => {
-      const incident: string = getFormStateItem(formState, key) ?? undefined;
-      if (incident != undefined) {
-        dataManagementIncident.incidents.push(incident);
+      const incident = formState[key] ?? undefined;
+      if (incident) {
+        dataManagementIncident.incidents.push(key);
       }
     });
-    dataManagementIncident.description = getFormStateItem(formState, FormStateKey.DMI_DESCRIPTION);
+    dataManagementIncident.description = formState.dmiDescription ?? '';
 
     return dataManagementIncident;
   }
 
   const convertFormStateToExpectedFormState = (formState: FormState): ExpectedFormState => {
     const expectedForm: ExpectedFormState = {} as ExpectedFormState;
-    expectedForm.progressReportSummary = getFormStateItem(formState, FormStateKey.PROGRESS_REPORT_SUMMARY);
-    if (getFormStateItem(formState, FormStateKey.INTELLECTUAL_PROPERTY_YES_NO)) {
-      expectedForm.intellectualPropertySummary = getFormStateItem(formState, FormStateKey.INTELLECTUAL_PROPERTY_SUMMARY);
+    expectedForm.progressReportSummary = formState.progressReportSummary;
+    if (formState.intellectualPropertyYesNo) {
+      expectedForm.intellectualPropertySummary = formState.intellectualPropertySummary;
     }
-    expectedForm.datasetIds = getFormStateItem(formState, FormStateKey.DATASET_IDS);
-    if (getFormStateItem(formState, FormStateKey.PUBLICATIONS_YES_NO)) {
+    expectedForm.datasetIds = formState.datasetIds ?? [];
+    if (formState.publicationsYesNo) {
       expectedForm.publications = getPublicationList(formState);
     }
-    if (getFormStateItem(formState, FormStateKey.PRESENTATIONS_YES_NO)) {
+    if (formState.presentationsYesNo) {
       expectedForm.presentations = getPresentationList(formState);
     }
-    expectedForm.labCollaborators = getFormStateItem(formState, FormStateKey.COLLABORATOR_INTERNAL_LAB_STAFF) ?? [];
-    expectedForm.internalCollaborators = getFormStateItem(formState, FormStateKey.COLLABORATOR_INTERNAL_COLLABORATORS) ?? [];
-    expectedForm.externalCollaborators = getFormStateItem(formState, FormStateKey.COLLABORATOR_EXTERNAL_COLLABORATORS) ?? [];
-    if (getFormStateItem(formState, FormStateKey.DMI_YES_NO)) {
+    expectedForm.labCollaborators = formState.internalLabStaff ?? [];
+    expectedForm.internalCollaborators = formState.internalCollaborators ?? [];
+    expectedForm.externalCollaborators = formState.externalCollaborators ?? [];
+    if (formState.dmiYesNo) {
       expectedForm.dataManagementIncident = getDataManagementIncidents(formState);
     }
-    if (getFormStateItem(formState, FormStateKey.CLOSEOUT_YES_NO)) {
-      expectedForm.closeOutSupplement = getFormStateItem(formState, FormStateKey.CLOSEOUT_SUPPLEMENT)
+    if (formState.closeoutYesNo) {
+      expectedForm.closeOutSupplement = formState.closeoutSupplement;
     }
     return expectedForm;
   }

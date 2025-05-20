@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {DataAccessRequest, Dataset} from 'src/types/model';
-import { FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -32,7 +32,7 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, history, r
 
     /* required because the datasets state changes during component mount */
     useEffect(() => {
-        onFormChange({ datasetIds: datasets.map((ds) => ds.datasetId) });
+        onFormChange({ [FormStateKey.DATASET_IDS]: datasets.map((ds) => ds.datasetId) });
     }, [datasets]);
 
     return (
@@ -48,7 +48,7 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, history, r
                         disabled={readOnlyMode}
                         datasets={datasets}
                         setSelectedDatasets={(selectedDatasets: Dataset[]) => {
-                            onFormChange({ datasetIds: selectedDatasets.map((ds) => ds.datasetId) });
+                            onFormChange({ [FormStateKey.DATASET_IDS]: selectedDatasets.map((ds) => ds.datasetId) });
                         }}
                     />
                 </div>

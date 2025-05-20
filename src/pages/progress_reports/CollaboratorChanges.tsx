@@ -17,7 +17,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
     const [externalCollaborators, setExternalCollaborators] = useState<Collaborator[]>(formState.externalCollaborators || []);
 
     const onCollaboratorChange = (key: string, setState: React.Dispatch<Collaborator[]>, collaborators: Collaborator[]) => {
-        onFormChange({ [key]: collaborators });
+        onFormChange({ [key]: collaborators } as Partial<FormState>);
         setState(collaborators);
     };
 

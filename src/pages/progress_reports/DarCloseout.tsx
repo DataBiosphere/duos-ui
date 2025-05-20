@@ -1,8 +1,7 @@
 import React from 'react';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
-import {FormFieldChange, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import {CloseOutSupplement} from "src/types/model";
-import {getFormStateItem} from "src/pages/progress_reports/ProgressReportUtils";
 
 interface DarCloseoutProps {
     readonly readOnly: boolean;
@@ -25,12 +24,12 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         title='5.1 Closeouts'
                         description={<span>Are you ready to finish work on this project?</span>}
                         orientation='horizontal'
-                        onChange={({ key, value }: FormFieldChange) => {
-                            onFormChange({ [key]: value });
+                        onChange={({ key, value }: Partial<FormState>) => {
+                            onFormChange({ [key]: value }  as Partial<FormState>);
                         }}
                         disabled={readOnly}
                     />
-                    {getFormStateItem(formState, FormStateKey.DMI_YES_NO) === true && (
+                    {formState.closeoutYesNo && (
                         <div>
                         <p>
                             By completing this page, upon project close-out, the PI and all approved users agree to destroy all copies, versions, and derivations of the dataset(s) retrieved from NIH-designated controlled-access databases, on both local servers and hardware, and if cloud computing was used, delete the data and cloud images from cloud computing provider storage, virtual machines, databases, and random access archives, except as required by publication practices, institutional policies, or law to retain them.
@@ -49,9 +48,9 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                     { text: 'The project is being superseded by a new project', name: CloseOutSupplement.PROJECT_SUPERSEDED }
                                 ]}
                                 disabled={readOnly}
-                                defaultValue={getFormStateItem(formState, FormStateKey.CLOSEOUT_SUPPLEMENT)}
-                                onChange={({ _key, value }: FormFieldChange) => {
-                                    onFormChange({ [FormStateKey.CLOSEOUT_SUPPLEMENT]: value });
+                                defaultValue={formState.closeoutSupplement}
+                                onChange={({ key, value }: Partial<FormState>) => {
+                                    onFormChange({ [key]: value } as Partial<FormState>);
                                 }}
                             />
                         </div>
