@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {DataAccessRequest, Dataset} from 'src/types/model';
-import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -10,6 +10,10 @@ import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressRepor
 import {Navigation} from "src/libs/utils";
 import {Storage} from "src/libs/storage";
 import {History, LocationState} from 'history';
+import {translateDataUseRestrictionsFromDataUseArray} from "src/libs/dataUseTranslation";
+import {validatePRFormData} from "src/utils/darFormUtils";
+import {DataUseAcknowledgements} from "src/pages/dar_application/DataUseAcknowlegements";
+import {FormValidationState} from "src/pages/dar_application/FormValidationState";
 
 type ProgressReportApplicationProps = {
     dar: DataAccessRequest, // corresponds either to the parent DAR for a new application or an existing readonly progress report
