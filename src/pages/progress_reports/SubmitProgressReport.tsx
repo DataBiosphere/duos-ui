@@ -4,7 +4,7 @@ import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
 import {validationFailed} from "src/utils/darFormUtils";
-import {FormValidationState} from "src/pages/dar_application/FormValidationState";
+import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 
 
 interface SubmitProgressReportProps {

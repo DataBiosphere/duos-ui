@@ -7,10 +7,10 @@ import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges'
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {DataUseAcknowledgements} from "src/pages/dar_application/DataUseAcknowlegements";
-import {translateDataUseRestrictionsFromDataUseArray} from "src/libs/dataUseTranslation";
-import {validatePRFormData} from "src/utils/darFormUtils";
-import {FormValidationState} from "src/pages/dar_application/FormValidationState";
+import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
+import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
+import {validatePRFormData} from 'src/utils/darFormUtils';
+import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 
 type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is an application

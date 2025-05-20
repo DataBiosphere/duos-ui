@@ -1,8 +1,8 @@
-import {needsDsAcknowledgement, needsGsoAcknowledgement, needsPubAcknowledgement} from "src/utils/darFormUtils";
-import {FormField, FormFieldTitle, FormFieldTypes} from "src/components/forms/forms";
-import React from "react";
-import {Dataset} from "src/types/model";
-import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
+import {needsDsAcknowledgement, needsGsoAcknowledgement, needsPubAcknowledgement} from 'src/utils/darFormUtils';
+import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/forms';
+import React from 'react';
+import {Dataset} from 'src/types/model';
+import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
 
 type DataUseAcknowledgementsProps = {
     title: string;
