@@ -5,7 +5,7 @@ import DataAccessAgreements from './DataAccessAgreements';
 import DataUseAgreements from './DataUseAgreements';
 import DataAccessRequest from './DataAccessRequest';
 import ResearchPurposeStatement from './ResearchPurposeStatement';
-import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
+import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation';
 import {
   Navigation, Notifications,
 } from '../../libs/utils';
@@ -21,10 +21,6 @@ import { Storage } from '../../libs/storage';
 import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 
-import {
-  validateDARFormData
-} from '../../utils/darFormUtils';
-import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
 import {DAAUtils} from '../../utils/DAAUtils';
@@ -36,6 +32,8 @@ import loadingImage from "../../images/loading-indicator.svg";
 import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
 import {ProgressReportApplication} from "./ProgressReportApplication";
 import {ScrollableTabs} from "./ScrollableTabs";
+import {validateDARFormData, validationFailed} from "src/utils/darFormUtils.js";
+import {isArray, set} from 'lodash';
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info';
@@ -58,10 +56,6 @@ const fetchAllDatasets = async (dsIds) => {
   }
   // filter just for safety
   return DataSet.getDatasetsByIds(filteredDatasetIds);
-};
-
-const validationFailed = (validation) => {
-  return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
 
 const DataAccessRequestApplication = (props) => {
@@ -167,13 +161,11 @@ const DataAccessRequestApplication = (props) => {
   const formValidationChange = useCallback((section, { key, validation }) => {
     setFormValidation((formValidation) => {
       const newFormValidation = cloneDeep(formValidation);
-
       if (isArray(key)) {
         set(newFormValidation, [section, ...key], validation);
       } else {
         set(newFormValidation, [section, key], validation);
       }
-
       return newFormValidation;
     });
   }, []);
@@ -576,7 +568,7 @@ const DataAccessRequestApplication = (props) => {
                   <ConditionalAccordion
                       condition={false}
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
-                    <ProgressReportApplication readOnlyMode={false} datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)} parentDar={reverseOrderedDARs[0]} history={props.history}/>
+                    <ProgressReportApplication readOnlyMode={false} datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)} dar={reverseOrderedDARs[0]} history={props.history}/>
                   </ConditionalAccordion>
                 </div>
             )}

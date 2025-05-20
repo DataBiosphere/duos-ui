@@ -1,10 +1,10 @@
-/* eslint-disable no-undef */
 import { React } from 'react';
 import { mount } from 'cypress/react';
-import Actions from '../../../src/components/dar_collection_table/Actions';
+import Actions from 'src/components/dar_collection_table/Actions';
 import {cloneDeep} from 'lodash/fp';
-import { Navigation } from '../../../src/libs/utils';
-import { Storage } from '../../../src/libs/storage';
+import { Navigation } from 'src/libs/utils';
+import { Storage } from 'src/libs/storage';
+import EnvironmentUtils from 'src/utils/EnvironmentUtils.js';
 
 let propCopy;
 const collectionId = 1;
@@ -68,8 +68,7 @@ beforeEach(() => {
 describe('Actions - Container', () => {
   it('renders the actions container div', () => {
     mount(<Actions {...propCopy}/>);
-    const container = cy.get('.chair-actions');
-    container.should('exist');
+    cy.get('.chair-actions').should('exist');
   });
 });
 
@@ -77,15 +76,13 @@ describe('Actions - Open Button', () => {
   it('should render the open button if there is a an Open Action', () => {
     propCopy.actions = ['Open'];
     mount(<Actions {...propCopy} />);
-    const openButton = cy.get(`#chair-open-${collectionId}`);
-    openButton.should('exist');
+    cy.get(`#chair-open-${collectionId}`).should('exist');
   });
 
   it('should not render Open Button if there is no valid election for opening/re-opening', () => {
     propCopy.actions = [];
     mount(<Actions {...propCopy} />);
-    const openButton = cy.get(`#chair-open-${collectionId}`);
-    openButton.should('not.exist');
+    cy.get(`#chair-open-${collectionId}`).should('not.exist');
   });
 });
 
@@ -93,15 +90,13 @@ describe('Actions - Close Button', () => {
   it('should render if there is a valid election for canceling (all open elections)', () => {
     propCopy.actions = ['Cancel', 'Vote'];
     mount(<Actions {...propCopy} />);
-    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
-    closeButton.should('exist');
+    cy.get(`#chair-cancel-${collectionId}`).should('exist');
   });
 
   it('should not render if there is no valid election for canceling (no open elections)', () => {
     propCopy.actions = [];
     mount(<Actions {...propCopy} />);
-    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
-    closeButton.should('not.exist');
+    cy.get(`#chair-cancel-${collectionId}`).should('not.exist');
   });
 });
 
@@ -109,14 +104,12 @@ describe('Actions - Vote Button', () => {
   it('should not render if relevant elections are not votable', () => {
     propCopy.actions = [];
     mount(<Actions {...propCopy} />);
-    const voteButton = cy.get(`#chair-vote-${collectionId}`);
-    voteButton.should('not.exist');
+    cy.get(`#chair-vote-${collectionId}`).should('not.exist');
   });
   it('should render if all relevant elections are votable', () => {
     propCopy.actions = ['Vote'];
     mount(<Actions {...propCopy} />);
-    const voteButton = cy.get(`#chair-vote-${collectionId}`);
-    voteButton.should('exist');
+    cy.get(`#chair-vote-${collectionId}`).should('exist');
   });
 });
 
@@ -124,14 +117,12 @@ describe('Actions - Update Button', () => {
   it('should not render if relevant elections are not votable', () => {
     propCopy.actions = [];
     mount(<Actions {...propCopy} />);
-    const voteButton = cy.get(`#chair-update-${collectionId}`);
-    voteButton.should('not.exist');
+    cy.get(`#chair-update-${collectionId}`).should('not.exist');
   });
   it('should render if all relevant elections are votable', () => {
     propCopy.actions = ['Update'];
     mount(<Actions {...propCopy} />);
-    const voteButton = cy.get(`#chair-update-${collectionId}`);
-    voteButton.should('exist');
+    cy.get(`#chair-update-${collectionId}`).should('exist');
   });
 });
 
@@ -207,6 +198,22 @@ describe('Researcher Actions - Draft', () => {
     cy.get(`#researcher-cancel-${refId1}`).should('exist');
     cy.get(`#researcher-delete-${refId1}`).should('exist');
     cy.get(`#researcher-revise-${refId1}`).should('exist');
+  });
+});
+
+describe('Researcher Actions - Update Button', () => {
+  it('renders the update button if the collection is updatable', () => {
+    cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0]);
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Resume', 'Create_Progress_Report'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-create-progress-report-${collectionId}`).should('exist');
+  });
+  it('does not render if the collection is not updatable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-create-progress-report-${collectionId}`).should('not.exist');
   });
 });
 

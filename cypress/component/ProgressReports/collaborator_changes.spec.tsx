@@ -57,7 +57,7 @@ describe('Collaborator Changes - Component Tests', () => {
   });
 
   it('displays preloaded internal lab staff', () => {
-    mountComponent({ internalLabStaff: initialCollaborators });
+    mountComponent({ labCollaborators: initialCollaborators });
     
     cy.contains('Test User 1').should('be.visible');
     cy.contains('Test User 2').should('be.visible');
@@ -82,7 +82,7 @@ describe('Collaborator Changes - Component Tests', () => {
   it('renders in read-only mode correctly', () => {
     const props = {
       readOnly: true,
-      formState: { internalLabStaff: initialCollaborators },
+      formState: { labCollaborators: initialCollaborators },
       onFormChange: onFormChangeSpy
     };
     
@@ -94,7 +94,7 @@ describe('Collaborator Changes - Component Tests', () => {
 
   it('handles empty collaborator lists', () => {
     mountComponent({
-      internalLabStaff: [],
+      labCollaborators: [],
       internalCollaborators: [],
       externalCollaborators: []
     });

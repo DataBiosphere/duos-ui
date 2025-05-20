@@ -56,7 +56,9 @@ describe('Affiliation And Role', () => {
     cy.stub(Institution, 'getById').returns(institution);
     const {institutionId, ...userWithoutInstitution} = user;
     mount(<AffiliationAndRole user={userWithoutInstitution} />);
-    cy.get('[ data-cy="institutional-affiliation"]').contains('Please use the Contact Us form to request an institutional affiliation');
+    cy.get('[ data-cy="institutional-affiliation"]').contains('Your institutional affiliation is automatically derived from your email domain.' +
+        ' Please use your institutional email to be affiliated with your institution. If you are using your institutional email and have not been assigned an institution' +
+        ' please use the Contact Us form and provide your email and institution.');
   });
 
   it('Displays all role names for user', () => {
