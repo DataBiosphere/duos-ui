@@ -36,6 +36,13 @@ export interface UserProperty {
   daaAcceptance: string;
 }
 
+export interface EraAuthState {
+  isAuthorized: boolean;
+  expirationCount: number;
+  nihValid: boolean;
+  eraCommonsId: string;
+}
+
 export interface DuosUser {
   createDate: Date;
   displayName: string;
@@ -66,8 +73,6 @@ export interface LibraryCard {
   id: number;
   userId: number;
   institution: Institution;
-  institutionId: number;
-  eraCommonsId: string;
   userName: string;
   userEmail: string;
   createDate: string;
@@ -321,6 +326,7 @@ export interface DataAccessRequest {
   submissionDate: string;
   updateDate: string;
   draft: boolean;
+  collectionId: number;
   darCode: string;
   elections: Array<Election>;
   projectTitle: string;
