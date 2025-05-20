@@ -89,13 +89,15 @@ describe('SubmitProgressReport tests', () => {
     cy.get('@successHandler').should('have.been.calledOnce');
   });
 
-  it('On Submit handler should not be called if validation fails', () => {
+  it('API and On Submit handler should not be called if validation fails', () => {
       const functionSpy = {
           successHandler: () => {
               console.log('successHandler')
           }
       }
       cy.spy(functionSpy, 'successHandler').as('successHandler');
+      const submitSpy = cy.spy().as('submitSpy');
+      cy.intercept('POST', '/api/dar/v2/progress_report/1', () => submitSpy());
 
       mount(
           <SubmitProgressReport
@@ -111,6 +113,7 @@ describe('SubmitProgressReport tests', () => {
       );
       cy.get('[data-cy=pr-submit-button]').should('exist');
       cy.get('[data-cy=pr-submit-button]').click();
+      cy.get('@submitSpy').should('not.always.have.been.called')
       cy.get('@successHandler').should('not.have.been.called');
   });
 
