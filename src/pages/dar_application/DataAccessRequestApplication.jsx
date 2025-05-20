@@ -55,10 +55,6 @@ const fetchAllDatasets = async (dsIds) => {
   return DataSet.getDatasetsByIds(filteredDatasetIds);
 };
 
-const validationFailed = (validation) => {
-  return Object.keys(validation).some((key) => !isEmpty(validation[key]));
-};
-
 const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
     datasetIds: [],
@@ -162,13 +158,11 @@ const DataAccessRequestApplication = (props) => {
   const formValidationChange = useCallback((section, { key, validation }) => {
     setFormValidation((formValidation) => {
       const newFormValidation = cloneDeep(formValidation);
-
       if (isArray(key)) {
         set(newFormValidation, [section, ...key], validation);
       } else {
         set(newFormValidation, [section, key], validation);
       }
-
       return newFormValidation;
     });
   }, []);
