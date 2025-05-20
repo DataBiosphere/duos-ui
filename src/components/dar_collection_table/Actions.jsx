@@ -1,11 +1,12 @@
 import React from 'react';
-import TableIconButton from '../TableIconButton';
-import { Styles, Theme } from '../../libs/theme';
-import { Block, Delete } from '@mui/icons-material';
-import SimpleButton from '../SimpleButton';
-import { useHistory } from 'react-router-dom';
-import { Notifications } from '../../libs/utils';
-import { includes, toLower } from 'lodash/fp';
+import TableIconButton from 'src/components/TableIconButton';
+import {Styles, Theme} from 'src/libs/theme';
+import {Block, Delete} from '@mui/icons-material';
+import SimpleButton from 'src/components/SimpleButton';
+import {useHistory} from 'react-router-dom';
+import {Notifications} from 'src/libs/utils';
+import {includes, toLower} from 'lodash/fp';
+import {checkEnv, envGroups} from 'src/utils/EnvironmentUtils';
 
 const duosBlue = '#0948B7';
 const cancelGray = '#333F52';
@@ -15,8 +16,8 @@ const baseCancelButtonStyle = Object.assign(
   {},
   Styles.TABLE.TABLE_ICON_BUTTON,
   {color: cancelGray},
-  { alignItems: 'center' },
-  { marginRight: '5px' }
+  {alignItems: 'center'},
+  {marginRight: '5px'}
 );
 
 const hoverPrimaryButtonStyle = {
@@ -28,7 +29,7 @@ const hoverPrimaryButtonStyle = {
 const redirectToDARApplication = (darCollectionId, history) => {
   try {
     history.push(`/dar_application_review/${darCollectionId}`);
-  } catch (error) {
+  } catch (_error) {
     Notifications.showError({
       text: 'Error: Cannot view target Data Access Request'
     });
@@ -40,8 +41,13 @@ const resumeDARApplication = (referenceId, history) => {
   history.push(`/dar_application/${referenceId}`);
 };
 
+// redirect function from DAR Collection to create a Progress Report Application
+const createProgressReport = (collectionId, history) => {
+  history.push(`/progress_report_application/${collectionId}`);
+};
+
 export default function Actions(props) {
-  const { showConfirmationModal, collection, goToVote, consoleType, actions = [], status } = props;
+  const {showConfirmationModal, collection, goToVote, consoleType, actions = [], status} = props;
   const collectionId = collection.darCollectionId;
   const uniqueId = (collectionId ? collectionId : collection.referenceIds[0]);
 
@@ -172,6 +178,27 @@ export default function Actions(props) {
     onClick: () => showConfirmationModal(collection, 'revise'),
   };
 
+  const createProgressReportButtonAttributes = {
+    keyProp: `${consoleType}-create-progress-report-${uniqueId}`,
+    onClick: () => {
+      createProgressReport(collection.darCollectionId, history)
+    },
+    label: 'Update',
+    baseColor: 'white',
+    fontColor: Theme.palette.secondary,
+    hoverStyle: {
+      backgroundColor: Theme.palette.secondary,
+      color: 'white'
+    },
+    additionalStyle: {
+      padding: '3%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      border: `1px solid ${Theme.palette.secondary}`,
+      marginRight: 5
+    },
+  }
+
   return (
     <div
       className={`${consoleType}-actions`}
@@ -192,6 +219,8 @@ export default function Actions(props) {
       {actions.includes('Review') && <SimpleButton {...reviewButtonAttributes} />}
       {actions.includes('Delete') && <TableIconButton {...deleteButtonAttributes} />}
       {actions.includes('Cancel') && <TableIconButton {...cancelButtonAttributes} />}
+      {checkEnv(envGroups.NON_PROD) && actions.includes('Create_Progress_Report') &&
+        <SimpleButton {...createProgressReportButtonAttributes} />}
     </div>
   );
 }

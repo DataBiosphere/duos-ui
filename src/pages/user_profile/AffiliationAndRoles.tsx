@@ -57,8 +57,9 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
       <div style={{marginTop: '15px'}}/>
       {institution
           ? <div data-cy='institutional-affiliation'>{institution.name}</div>
-          : <div data-cy='institutional-affiliation'>Please use the Contact Us form to request an institutional
-            affiliation</div>
+          : <div data-cy='institutional-affiliation'>Your institutional affiliation is automatically derived from your email domain. 
+            Please use your institutional email to be affiliated with your institution. If you are using your institutional email and have not been assigned an institution
+            please use the Contact Us form and provide your email and institution. </div>
       }
       <div style={{marginTop: '15px'}}/>
       <p style={subHeadStyle}>Role</p>
