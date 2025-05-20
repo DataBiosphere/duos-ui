@@ -1,41 +1,36 @@
-import React from 'react';
-import { useEffect, useState, useCallback } from 'react';
-import ResearcherInfo from './ResearcherInfo';
-import DataAccessAgreements from './DataAccessAgreements';
-import DataUseAgreements from './DataUseAgreements';
-import DataAccessRequest from './DataAccessRequest';
-import ResearchPurposeStatement from './ResearchPurposeStatement';
-import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
-import {
-  Navigation, Notifications,
-} from '../../libs/utils';
-import { ConfirmationDialog } from '../../components/ConfirmationDialog_new';
-import { Notification } from '../../components/Notification';
-import { PageHeading } from '../../components/PageHeading';
-import { User } from '../../libs/ajax/User';
-import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
-import { Collections } from '../../libs/ajax/Collections';
-import { NotificationService } from '../../libs/notificationService';
-import { Storage } from '../../libs/storage';
-import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
-import './DataAccessRequestApplication.css';
+import React, {useCallback, useEffect, useState} from 'react';
+import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo';
+import DataAccessAgreements from 'src/pages/dar_application/DataAccessAgreements';
+import DataUseAgreements from 'src/pages/dar_application/DataUseAgreements';
+import DataAccessRequest from 'src/pages/dar_application/DataAccessRequest';
+import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement';
+import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
+import {Navigation, Notifications} from 'src/libs/utils';
+import {ConfirmationDialog} from 'src/components/ConfirmationDialog_new';
+import {Notification} from 'src/components/Notification';
+import {PageHeading} from 'src/components/PageHeading';
+import {User} from 'src/libs/ajax/User';
+import {DataSet} from 'src/libs/ajax/DataSet';
+import {DAR} from 'src/libs/ajax/DAR';
+import {Collections} from 'src/libs/ajax/Collections';
+import {NotificationService} from 'src/libs/notificationService';
+import {Storage} from 'src/libs/storage';
+import {assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map} from 'lodash/fp';
+import 'src/pages/dar_application/DataAccessRequestApplication.css';
 
-import {
-  validateDARFormData
-} from '../../utils/darFormUtils';
-import { isArray, set } from 'lodash';
-import DucAddendum from './DucAddendum';
-import UsgOmbText from '../../components/UsgOmbText';
-import {DAAUtils} from '../../utils/DAAUtils';
-import {Metrics} from '../../libs/ajax/Metrics';
-import eventList from '../../libs/events';
+import {validateDARFormData} from 'src/utils/darFormUtils';
+import {isArray, set} from 'lodash';
+import DucAddendum from 'src/pages/dar_application/DucAddendum';
+import UsgOmbText from 'src/components/UsgOmbText';
+import {DAAUtils} from 'src/utils/DAAUtils';
+import {Metrics} from 'src/libs/ajax/Metrics';
+import eventList from 'src/libs/events';
 import ReactMarkdown from 'react-markdown';
-import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
-import loadingImage from "../../images/loading-indicator.svg";
-import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
-import {ProgressReportApplication} from "./ProgressReportApplication";
-import {ScrollableTabs} from "./ScrollableTabs";
+import {SpinnerComponent} from 'src/components/SpinnerComponent.jsx';
+import loadingImage from '../../images/loading-indicator.svg';
+import {ConditionalAccordion} from 'src/components/forms/ConditionalAccordion.js';
+import ProgressReportApplication from './ProgressReportApplication';
+import {ScrollableTabs} from './ScrollableTabs';
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info';
