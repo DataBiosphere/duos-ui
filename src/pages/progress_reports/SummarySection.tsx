@@ -17,14 +17,16 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
     const [publications, setPublications] = useState<PublicationOrPresentation[]>(formState.publications || []);
     const [presentations, setPresentations] = useState<PublicationOrPresentation[]>(formState.presentations || []);
 
+    const onStateChange = (key: string, setState: React.Dispatch<PublicationOrPresentation[]>, publications: PublicationOrPresentation[]) => {
+        onFormChange({ [key]: publications } as Partial<FormState>);
+        setState(publications);
+    };
     const onPublicationChange = (publications: PublicationOrPresentation[]) => {
-        onFormChange({ [FormStateKey.PUBLICATIONS] : publications} as Partial<FormState>); // Cast to Partial<FormState> to avoid type error
-        setPublications(publications);
+        onStateChange(FormStateKey.PUBLICATIONS, setPublications, publications);
     }
 
     const onPresentationChange = (presentations: PublicationOrPresentation[]) => {
-        onFormChange({ [FormStateKey.PRESENTATIONS]: presentations} as Partial<FormState>); // Cast to Partial<FormState> to avoid type error
-        setPresentations(presentations);
+        onStateChange(FormStateKey.PRESENTATIONS, setPresentations, presentations);
     }
 
     return (
