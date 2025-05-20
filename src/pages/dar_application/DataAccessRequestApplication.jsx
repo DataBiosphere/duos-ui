@@ -576,7 +576,7 @@ const DataAccessRequestApplication = (props) => {
                   <ConditionalAccordion
                       condition={false}
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
-                    <ProgressReportApplication readOnlyMode={false} datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)} parentDar={reverseOrderedDARs[0]}/>
+                    <ProgressReportApplication readOnlyMode={false} datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)} parentDar={reverseOrderedDARs[0]} history={props.history}/>
                   </ConditionalAccordion>
                 </div>
             )}

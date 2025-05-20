@@ -7,15 +7,20 @@ import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges'
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
+import {Navigation} from "src/libs/utils";
+import {Storage} from "src/libs/storage";
+import {History, LocationState} from 'history';
 
 type ProgressReportApplicationProps = {
     dar?: DataAccessRequest, // Dar will be empty if this is an application
     parentDar?: DataAccessRequest, // Dar will be empty if this is view only
     datasets: Dataset[],
-    readOnlyMode: boolean
+    history: History<LocationState>,
+    readOnlyMode: boolean,
+
 };
 
-export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, parentDar, datasets, history, readOnlyMode = true }: ProgressReportApplicationProps) => {
     const [formState, setFormState] = useState<FormState>({});
 
     const onFormChange = (newState: Partial<FormState>) => {
@@ -63,9 +68,10 @@ export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMo
                     formState={formState}
                     parentReferenceId={parentDar.referenceId}
                     onSuccess={() => {
+                        Navigation.console(Storage.getCurrentUser(), history);
                     }}
                     onCancel={() => {
-
+                        Navigation.console(Storage.getCurrentUser(), history);
                     }}
                 />
             </div>}
