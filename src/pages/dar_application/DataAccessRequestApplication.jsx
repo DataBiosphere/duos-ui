@@ -5,7 +5,7 @@ import DataAccessAgreements from './DataAccessAgreements';
 import DataUseAgreements from './DataUseAgreements';
 import DataAccessRequest from './DataAccessRequest';
 import ResearchPurposeStatement from './ResearchPurposeStatement';
-import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
+import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation';
 import {
   Navigation, Notifications,
 } from '../../libs/utils';
@@ -21,7 +21,6 @@ import { Storage } from '../../libs/storage';
 import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 
-import {validateDARFormData} from '../../utils/darFormUtils';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
 import {DAAUtils} from '../../utils/DAAUtils';
@@ -33,7 +32,7 @@ import loadingImage from "../../images/loading-indicator.svg";
 import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
 import {ProgressReportApplication} from "./ProgressReportApplication";
 import {ScrollableTabs} from "./ScrollableTabs";
-import {validationFailed} from "../../utils/darFormUtils.js";
+import {validateDARFormData, validationFailed} from "src/utils/darFormUtils.js";
 import {isArray, set} from 'lodash';
 
 // Constants

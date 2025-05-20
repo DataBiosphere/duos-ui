@@ -1,8 +1,8 @@
 import React from 'react';
 import {AxiosError} from 'axios';
-import {ProgressReport} from '../../libs/ajax/ProgressReport';
-import {Notifications} from '../../libs/utils';
-import {ConsentError} from '../../types/responseTypes';
+import {ProgressReport} from 'src/libs/ajax/ProgressReport';
+import {Notifications} from 'src/libs/utils';
+import {ConsentError} from 'src/types/responseTypes';
 import {validationFailed} from "src/utils/darFormUtils";
 
 
@@ -17,8 +17,7 @@ interface SubmitProgressReportProps {
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const {progressReport, parentReferenceId, onSuccess, onCancel, validateForm} = props;
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const submit = async () => {
     if (validationFailed(validateForm())) {
       Notifications.showError({text: "Form validation failed. Please check the form for errors."});
     } else {
@@ -31,8 +30,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     }
   }
 
-  const cancel = async (e) => {
-    e.preventDefault();
+  const cancel = async () => {
     try {
       onCancel(progressReport);
     } catch (error: unknown) {
