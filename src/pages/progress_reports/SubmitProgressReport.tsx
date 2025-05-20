@@ -3,10 +3,11 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
+import {validationFailed} from "src/utils/darFormUtils";
+import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 import {DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 import {
-  CloseOutSupplement,
   DataAccessRequest,
   DataManagementIncident,
   Presentation,
@@ -19,10 +20,11 @@ interface SubmitProgressReportProps {
   readonly parentReferenceId: string;
   readonly onSuccess: (result: unknown) => void;
   readonly onCancel: () => void;
+  readonly validateForm: () => FormValidationState;
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const {formState, parentReferenceId, onSuccess, onCancel} = props;
+  const { formState, parentReferenceId, onSuccess, onCancel, validateForm} = props;
 
   const getPublicationList = (formState: FormState): Publication[] => {
     const publications: PublicationOrPresentation[] = formState.publications ?? [];
@@ -80,7 +82,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     if (formState.presentationsYesNo) {
       expectedForm.presentations = getPresentationList(formState);
     }
-    expectedForm.labCollaborators = formState.internalLabStaff ?? [];
+    expectedForm.labCollaborators = formState.labCollaborators ?? [];
     expectedForm.internalCollaborators = formState.internalCollaborators ?? [];
     expectedForm.externalCollaborators = formState.externalCollaborators ?? [];
     if (formState.dmiYesNo) {
@@ -93,11 +95,15 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   }
 
   const submit = async () => {
-    try {
-      const submittedPR = await ProgressReport.submitProgressReport(createMultiPartFormData(convertFormStateToDAR(formState)), parentReferenceId);
-      onSuccess(submittedPR);
-    } catch (error: unknown) {
-      handleError('Error: Unable to submit progress report: ', error);
+    if (validationFailed(validateForm())) {
+      Notifications.showError({text: "Form validation failed. Please check the form for errors."});
+    } else {
+      try {
+        const submittedPR = await ProgressReport.submitProgressReport(createMultiPartFormData(convertFormStateToDAR(formState)), parentReferenceId);
+        onSuccess(submittedPR);
+      } catch (error: unknown) {
+        handleError('Error: Unable to submit progress report: ', error);
+      }
     }
   }
 

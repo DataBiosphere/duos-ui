@@ -43,6 +43,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         placeholder='Please provide an update here.'
                         rows={6}
                         maxLength={FORM_TEXT_AREA_MAX_LENGTH}
+                        defaultValue={formState.progressReportSummary}
                         onChange={({ key, value }: Partial<FormState>) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
@@ -56,6 +57,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         title='1.2 Intellectual Property'
                         description={<span>Have you generated any <strong>intellectual property</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
+                        defaultValue={formState.intellectualPropertyYesNo}
                         onChange={({ key, value }: Partial<FormState>) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
@@ -68,6 +70,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         placeholder='Please provide an update here.'
                         rows={6}
                         maxLength={FORM_TEXT_AREA_MAX_LENGTH}
+                        defaultValue={formState.intellectualPropertySummary}
                         onChange={({ key, value }: Partial<FormState>) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
@@ -81,6 +84,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         title='1.3 Publications'
                         description={<span>Have you published in any <strong>publications</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
+                        defaultValue={formState.publicationsYesNo}
                         onChange={({ key, value }: Partial<FormState>) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
@@ -101,6 +105,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         title='1.4 Presentations'
                         description={<span>Have you published in any <strong>presentations</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
+                        defaultValue={formState.presentationsYesNo}
                         onChange={({ key, value }: Partial<FormState>) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}

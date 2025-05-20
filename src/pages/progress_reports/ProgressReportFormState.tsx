@@ -1,4 +1,4 @@
-import {CloseOutSupplement, Collaborator, DataManagementIncident, Presentation, Publication} from "src/types/model";
+import {CloseOutSupplement, Collaborator} from "src/types/model";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
 export interface FormState {
@@ -10,7 +10,7 @@ export interface FormState {
     publications?: PublicationOrPresentation[];
     presentationsYesNo?: boolean;
     presentations?: PublicationOrPresentation[];
-    internalLabStaff?: Collaborator[];
+    labCollaborators?: Collaborator[];
     internalCollaborators?: Collaborator[];
     externalCollaborators?: Collaborator[];
     dmiYesNo?: boolean;
@@ -36,7 +36,7 @@ export enum FormStateKey {
     PUBLICATIONS = 'publications',
     PRESENTATIONS_YES_NO = 'presentationsYesNo',
     PRESENTATIONS = 'presentations',
-    COLLABORATOR_INTERNAL_LAB_STAFF = 'internalLabStaff',
+    COLLABORATOR_LAB_COLLABORATORS= 'labCollaborators',
     COLLABORATOR_INTERNAL_COLLABORATORS = 'internalCollaborators',
     COLLABORATOR_EXTERNAL_COLLABORATORS  = 'externalCollaborators',
     DMI_YES_NO = 'dmiYesNo',
