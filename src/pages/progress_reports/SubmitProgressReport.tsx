@@ -77,10 +77,10 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
       expectedForm.intellectualPropertySummary = getItem(formState, FormStateKey.INTELLECTUAL_PROPERTY_SUMMARY);
     }
     expectedForm.datasetIds = getItem(formState, FormStateKey.DATASET_IDS);
-    if (getItem(formState, FormStateKey.PUBLICATION_YES_NO)) {
+    if (getItem(formState, FormStateKey.PUBLICATIONS_YES_NO)) {
       expectedForm.publications = getPublicationList(formState);
     }
-    if (getItem(formState, FormStateKey.PRESENTATION_YES_NO)) {
+    if (getItem(formState, FormStateKey.PRESENTATIONS_YES_NO)) {
       expectedForm.presentations = getPresentationList(formState);
     }
     expectedForm.labCollaborators = getItem(formState, FormStateKey.COLLABORATOR_INTERNAL_LAB_STAFF) ?? [];

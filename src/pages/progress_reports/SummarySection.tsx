@@ -77,7 +77,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                 </div>
                 <div className='progress-report-row'>
                     <FormField
-                        id={FormStateKey.PUBLICATION_YES_NO}
+                        id={FormStateKey.PUBLICATIONS_YES_NO}
                         type={FormFieldTypes.YESNORADIOGROUP}
                         title='1.3 Publications'
                         description={<span>Have you published in any <strong>publications</strong> since your last renewal as a result of using the data?</span>}
@@ -97,7 +97,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                 </div>
                 <div className='progress-report-row'>
                     <FormField
-                        id={FormStateKey.PRESENTATION_YES_NO}
+                        id={FormStateKey.PRESENTATIONS_YES_NO}
                         type={FormFieldTypes.YESNORADIOGROUP}
                         title='1.4 Presentations'
                         description={<span>Have you published in any <strong>presentations</strong> since your last renewal as a result of using the data?</span>}
