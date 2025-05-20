@@ -11,22 +11,16 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 
 type ProgressReportApplicationProps = {
-  dar?: DataAccessRequest, // Dar will be empty if this is an application
-  parentDar?: DataAccessRequest, // Dar will be empty if this is view only
-  datasets: Dataset[],
-  readOnlyMode?: boolean,
-  location?: Location
+  readonly dar?: DataAccessRequest, // Dar will be empty if this is an application
+  readonly parentDar?: DataAccessRequest, // Dar will be empty if this is view only
+  readonly datasets: Dataset[],
+  readonly readOnlyMode: boolean,
+  readonly location?: Location
   readonly researcher: DuosUser
 };
 
-export const ProgressReportApplication = ({
-                                            dar,
-                                            parentDar,
-                                            datasets,
-                                            readOnlyMode = true,
-                                            location,
-                                            researcher
-                                          }: ProgressReportApplicationProps) => {
+export default function ProgressReportApplication (props: ProgressReportApplicationProps){
+  const {dar, parentDar, datasets, readOnlyMode, location, researcher} = props;
   const [formState, setFormState] = useState<FormState>({});
   const eRACommonsDestination = 'progress_report_application/' + parentDar?.collectionId;
 
