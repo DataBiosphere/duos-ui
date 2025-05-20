@@ -18,13 +18,6 @@ type ProgressReportApplicationProps = {
     readOnlyMode: boolean
 };
 
-export const ProgressReportApplication = ({ dar, parentDar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
-    const [formState, setFormState] = useState<FormState>({});
-    const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
-    const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
-    const [formValidation, setFormValidation] = useState<FormValidationState>(
-        {darErrors:
-                    {gsoAcknowledgement: {}, pubAcknowledgement: {}, dsAcknowledgement: {}}});
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
@@ -49,6 +42,11 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
     }
 
     const [formState, setFormState] = useState<FormState>(initialState);
+    const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
+    const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
+    const [formValidation, setFormValidation] = useState<FormValidationState>(
+        {darErrors:
+                {gsoAcknowledgement: {}, pubAcknowledgement: {}, dsAcknowledgement: {}}});
 
     const onFormChange = (newState: Partial<FormState>) => {
         setFormState(prevState => ({
