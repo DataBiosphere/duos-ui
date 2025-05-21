@@ -116,6 +116,8 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   });
 
+  const {location} = props;
+
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
   const [nihValid, setNihValid] = useState(true);
@@ -572,7 +574,7 @@ const DataAccessRequestApplication = (props) => {
                       readOnlyMode={false}
                       datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)}
                       dar={reverseOrderedDARs[0]}
-                      location={props.location}
+                      location={location}
                       researcher={researcher}
                     />
                   </ConditionalAccordion>
@@ -622,7 +624,7 @@ const DataAccessRequestApplication = (props) => {
                   formValidationChange={(val) => formValidationChange('researcherInfoErrors', val)}
                   eRACommonsDestination={eRACommonsDestination}
                   formFieldChange={formFieldChange}
-                  location={props.location}
+                  location={location}
                   nihValid={nihValid}
                   onNihStatusUpdate={setNihValid}
                   showNihValidationError={showNihValidationError}
