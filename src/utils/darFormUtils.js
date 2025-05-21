@@ -202,7 +202,58 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
 
 const calcPRErrors = (formData, datasets, dataUseTranslations) => {
   const errors = {};
+  if (isEmpty(formData.progressReportSummary)) {
+      errors.progressReportSummary = requiredError;
+  }
+  if (isEmpty(formData.intellectualPropertyYesNo)) {
+      errors.intellectualPropertyYesNo = requiredError;
+  }
+  if (formData.intellectualPropertyYesNo && isEmpty(formData.intellectualPropertySummary)) {
+      errors.intellectualPropertySummary = requiredError;
+  }
+  if (isEmpty(formData.publicationsYesNo)) {
+      errors.publicationsYesNo = requiredError;
+  }
+  if (formData.publicationsYesNo && isEmpty(formData.publications)) {
+      errors.publications = requiredError;
+  }
+  if (isEmpty(formData.presentationsYesNo)) {
+        errors.presentationsYesNo = requiredError;
+  }
+  if (formData.presentationsYesNo && isEmpty(formData.presentations)) {
+      errors.presentations = requiredError;
+  }
   calcDUAErrors(formData, datasets, dataUseTranslations, errors);
+  if (isEmpty(formData.dmiYesNo)) {
+      errors.dmiYesNo = requiredError;
+  }
+  const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,
+    formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
+  if (formData.dmiYesNo && dmiFields.every((field) => !field)) {
+    errors.dmiAcknowledgement = requiredError;
+    errors.dmiCombination = requiredError;
+    errors.dmiFalsification = requiredError;
+    errors.dmiIdentification = requiredError;
+    errors.dmiOther = requiredError;
+    errors.dmiPublication = requiredError;
+    errors.dmiSecurity = requiredError;
+    errors.dmiSharing = requiredError;
+  }
+  if (formData.dmiYesNo && isEmpty(formData.dmiDescription)) {
+    errors.dmiDescription = requiredError;
+  }
+  const closeoutFields = [formData.closeoutCompleted, formData.closeoutTransferred, formData.closeoutMoved,
+    formData.closeoutSuperceded, formData.closeoutOther];
+  if (formData.closeoutYesNo && closeoutFields.every((field) => !field)) {
+    errors.closeoutCompleted = requiredError;
+    errors.closeoutTransferred = requiredError;
+    errors.closeoutMoved = requiredError;
+    errors.closeoutSuperceded = requiredError;
+    errors.closeoutOther = requiredError;
+  }
+  if (formData.closeoutOther && isEmpty(formData.closeoutOtherContext)) {
+    errors.closeoutOtherContext = requiredError;
+  }
   return errors;
 };
 

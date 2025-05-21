@@ -4,15 +4,18 @@ import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { Publication } from 'src/components/publications_list/Publication';
 import PublicationList from 'src/components/publications_list/PublicationList';
 import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
 
 interface SummarySectionProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
+    onValidationChange?: (validationState: { key: string, validation: ValidationError }) => void;
+    validation?: DarErrors;
 }
 
 export default function SummarySection(props: SummarySectionProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange } = props;
+    const { readOnly, formState, onFormChange, onValidationChange, validation } = props;
 
     const [publications, setPublications] = useState(formState.publications || []);
     const [presentations, setPresentations] = useState(formState.presentations || []);
@@ -49,6 +52,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                             onFormChange({ [key]: value });
                         }}
                         disabled={readOnly}
+                        validation={validation?.progressReportSummary}
+                        onValidationChange={onValidationChange}
                     />
                 </div>
                 <div className='progress-report-row'>
@@ -63,6 +68,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                             onFormChange({ [key]: value });
                         }}
                         disabled={readOnly}
+                        validation={validation?.intellectualPropertyYesNo}
+                        onValidationChange={onValidationChange}
                     />
                     {formState.intellectualPropertyYesNo === true && <FormField
                         id='intellectualPropertySummary'
@@ -76,6 +83,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                             onFormChange({ [key]: value });
                         }}
                         disabled={readOnly}
+                        validation={validation?.intellectualPropertySummary}
+                        onValidationChange={onValidationChange}
                     />}
                 </div>
                 <div className='progress-report-row'>
@@ -90,6 +99,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                             onFormChange({ [key]: value });
                         }}
                         disabled={readOnly}
+                        validation={validation?.publicationsYesNo}
+                        onValidationChange={onValidationChange}
                     />
                     {formState.publicationsYesNo === true && <PublicationList
                         publications={publications}
@@ -111,6 +122,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                             onFormChange({ [key]: value });
                         }}
                         disabled={readOnly}
+                        validation={validation?.presentationsYesNo}
+                        onValidationChange={onValidationChange}
                     />
                     {formState.presentationsYesNo === true && <PublicationList
                         publications={presentations}

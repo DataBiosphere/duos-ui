@@ -97,7 +97,13 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <SummarySection readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
+                <SummarySection
+                    readOnly={readOnlyMode}
+                    formState={formState}
+                    onFormChange={onFormChange}
+                    onValidationChange={formValidationChange}
+                    validation={formValidation.darErrors}
+                />
             </div>
             <div data-cy='remove-datasets'>
                 <div className='progress-report-step-card'>
@@ -127,10 +133,22 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
                 <CollaboratorChanges readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <DataManagementIncident readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
+                <DataManagementIncident
+                    readOnly={readOnlyMode}
+                    formState={formState}
+                    onFormChange={onFormChange}
+                    onValidationChange={formValidationChange}
+                    validation={formValidation.darErrors}
+                />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <DarCloseout readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
+                <DarCloseout
+                    readOnly={readOnlyMode}
+                    formState={formState}
+                    onFormChange={onFormChange}
+                    onValidationChange={formValidationChange}
+                    validation={formValidation.darErrors}
+                />
             </div>
             {!readOnlyMode && <div>
                 <SubmitProgressReport

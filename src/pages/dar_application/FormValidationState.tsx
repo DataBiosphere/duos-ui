@@ -33,6 +33,31 @@ export interface DarErrors {
     gsoAcknowledgement?: ValidationError,
     pubAcknowledgement?: ValidationError,
     dsAcknowledgement?: ValidationError,
+    progressReportSummary?: ValidationError,
+    intellectualPropertyYesNo?: ValidationError,
+    intellectualPropertySummary?: ValidationError,
+    publicationsYesNo?: ValidationError,
+    publications?: ValidationError,
+    presentationsYesNo?: ValidationError,
+    presentations?: ValidationError,
+    dmiYesNo?: ValidationError,
+    dmiCombination?: ValidationError,
+    dmiIdentification?: ValidationError,
+    dmiSharing?: ValidationError,
+    dmiSecurity?: ValidationError,
+    dmiAcknowledgement?: ValidationError,
+    dmiPublication?: ValidationError,
+    dmiFalsification?: ValidationError,
+    dmiOther?: ValidationError,
+    dmiDescription?: ValidationError,
+    closeoutYesNo?: ValidationError,
+    closeoutCompleted?: ValidationError,
+    closeoutMoved?: ValidationError,
+    closeoutTransferred?: ValidationError,
+    closeoutSuperceded?: ValidationError
+    closeoutOther?: ValidationError,
+    closeoutOtherContext?: ValidationError,
+
 }
 
 export interface RusErrors {

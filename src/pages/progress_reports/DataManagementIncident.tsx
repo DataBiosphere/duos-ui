@@ -2,6 +2,7 @@ import React from 'react';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 
@@ -9,10 +10,12 @@ interface DataManagementIncidentProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
+    onValidationChange?: (validationState: { key: string; validation: ValidationError }) => void;
+    validation?: DarErrors;
 }
 
 export default function DataManagementIncident(props: DataManagementIncidentProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange } = props;
+    const { readOnly, formState, onFormChange, onValidationChange, validation } = props;
 
     return (
         <div data-cy='data-management-incident'>
@@ -45,6 +48,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                 onFormChange({ [key]: value });
                             }}
                             disabled={readOnly}
+                            validation={validation?.dmiYesNo}
+                            onValidationChange={onValidationChange}
                         />
                     </div>
                     {formState.dmiYesNo === true &&
@@ -60,6 +65,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiCombination}
+                                    onValidationChange={onValidationChange}
                                 />
                                 <FormField
                                     id='dmiIdentification'
@@ -70,6 +77,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiIdentification}
+                                    onValidationChange={onValidationChange}
                                 />
                                 <FormField
                                     id='dmiSharing'
@@ -80,6 +89,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiSharing}
+                                    onValidationChange={onValidationChange}
                                 />
                                 <FormField
                                     id='dmiSecurity'
@@ -90,6 +101,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiSecurity}
+                                    onValidationChange={onValidationChange}
                                 />
                                 <FormField
                                     id='dmiAcknowledgement'
@@ -100,6 +113,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiAcknowledgement}
+                                    onValidationChange={onValidationChange}
                                 />
                                 <FormField
                                     id='dmiPublication'
@@ -110,6 +125,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiPublication}
+                                    onValidationChange={onValidationChange}
                                 />
                                 <FormField
                                     id='dmiFalsification'
@@ -120,6 +137,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiFalsification}
+                                    onValidationChange={onValidationChange}
                                 />
                                 <FormField
                                     id='dmiOther'
@@ -130,6 +149,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiOther}
+                                    onValidationChange={onValidationChange}
                                 />
                             </div>
                             <div style={{ marginTop: '20px' }}>
@@ -146,6 +167,8 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.dmiDescription}
+                                    onValidationChange={onValidationChange}
                                 />
                             </div>
                         </>

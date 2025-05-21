@@ -2,15 +2,18 @@ import React from 'react';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
 
 interface DarCloseoutProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
+    onValidationChange?: (validationState: { key: string, validation: ValidationError }) => void;
+    validation?: DarErrors;
 }
 
 export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange } = props;
+    const { readOnly, formState, onFormChange, onValidationChange, validation } = props;
 
     return (
         <div data-cy='dar-closeout'>
@@ -36,6 +39,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onFormChange({ [key]: value });
                             }}
                             disabled={readOnly}
+                            validation={validation?.closeoutCompleted}
+                            onValidationChange={onValidationChange}
                         />
                         <FormField
                             id='closeoutMoved'
@@ -45,6 +50,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onFormChange({ [key]: value });
                             }}
                             disabled={readOnly}
+                            validation={validation?.closeoutMoved}
+                            onValidationChange={onValidationChange}
                         />
                         <FormField
                             id='closeoutTransferred'
@@ -54,6 +61,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onFormChange({ [key]: value });
                             }}
                             disabled={readOnly}
+                            validation={validation?.closeoutTransferred}
+                            onValidationChange={onValidationChange}
                         />
                         <FormField
                             id='closeoutSuperceded'
@@ -63,6 +72,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onFormChange({ [key]: value });
                             }}
                             disabled={readOnly}
+                            validation={validation?.closeoutSuperceded}
+                            onValidationChange={onValidationChange}
                         />
                         <FormField
                             id='closeoutOther'
@@ -72,6 +83,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onFormChange({ [key]: value });
                             }}
                             disabled={readOnly}
+                            validation={validation?.closeoutOther}
+                            onValidationChange={onValidationChange}
                         />
                         {formState.closeoutOther === true &&
                             <div style={{ marginTop: '20px' }}>
@@ -85,6 +98,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                         onFormChange({ [key]: value });
                                     }}
                                     disabled={readOnly}
+                                    validation={validation?.closeoutOtherContext}
+                                    onValidationChange={onValidationChange}
                                 />
                             </div>
                         }
