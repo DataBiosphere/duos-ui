@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import { DataAccessRequest, Dataset } from 'src/types/model';
-import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
+import {Location} from 'history';
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -10,15 +11,17 @@ import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressRepor
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData} from 'src/utils/darFormUtils';
-import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
+import {FormValidationState, ValidationError} from 'src/pages/dar_application/FormValidationState';
 
 type ProgressReportApplicationProps = {
-    dar: DataAccessRequest, // corresponds either to the parent DAR for a new application or an existing readonly progress report
-    datasets: Dataset[],
-    readOnlyMode: boolean
+  readonly dar: DataAccessRequest, // corresponds either to the parent DAR for a new application or an existing readonly progress report
+  readonly datasets: Dataset[],
+  readonly readOnlyMode?: boolean
+  readonly location?: Location
+  readonly researcher: DuosUser
 };
 
-export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, location, researcher }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
         // additional state for summary section
@@ -45,8 +48,9 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
     const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
     const [formValidation, setFormValidation] = useState<FormValidationState>(
-        {darErrors:
-                {gsoAcknowledgement: {}, pubAcknowledgement: {}, dsAcknowledgement: {}}});
+      {darErrors:
+            {gsoAcknowledgement: {}, pubAcknowledgement: {}, dsAcknowledgement: {}}});
+    const eRACommonsDestination = 'progress_report_application/' + dar?.collectionId;
 
     const onFormChange = (newState: Partial<FormState>) => {
         setFormState(prevState => ({
@@ -82,7 +86,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
         return validation;
     }
 
-    const formValidationChange = useCallback(({ key, validation }) => {
+    const formValidationChange = useCallback(({key, validation}: { key: string; validation: ValidationError }) => {
         setFormValidation((formValidation) => {
             return {
                 ...formValidation,
@@ -97,7 +101,14 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <SummarySection readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} />
+                <SummarySection
+                    readOnly={readOnlyMode}
+                    formState={formState}
+                    onFormChange={onFormChange}
+                    eRACommonsDestination={eRACommonsDestination}
+                    researcher={researcher}
+                    location={location}
+                />
             </div>
             <div data-cy='remove-datasets'>
                 <div className='progress-report-step-card'>

@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
-import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
-import { FormField, FormFieldTypes } from 'src/components/forms/forms';
-import { Publication } from 'src/components/publications_list/Publication';
+import React, {useState} from 'react';
+import {FORM_TEXT_AREA_MAX_LENGTH} from 'src/components/forms/formConstants';
+import {FormField, FormFieldTypes} from 'src/components/forms/forms';
+import {Publication} from 'src/components/publications_list/Publication';
 import PublicationList from 'src/components/publications_list/PublicationList';
-import { FormFieldChange, FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {FormFieldChange, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import ERACommons from 'src/components/ERACommons';
+import {DuosUser} from 'src/types/model';
+import {Location} from 'history';
 
 interface SummarySectionProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
+    eRACommonsDestination?: string
+    readonly location?: Location
+    researcher: DuosUser
 }
 
 export default function SummarySection(props: SummarySectionProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange } = props;
+    const { readOnly, formState, onFormChange, eRACommonsDestination, location, researcher } = props;
 
     const [publications, setPublications] = useState(formState.publications || []);
     const [presentations, setPresentations] = useState(formState.presentations || []);
@@ -34,6 +40,22 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
         <div data-cy='summary-section'>
             <div className='progress-report-step-card'>
                 {readOnly ? <h3>Review a Progress Report</h3> : <h3>Step 1: Submit a Progress Report</h3>}
+
+                <div className='progress-report-row' data-cy='researcher-identification'>
+                    <span className={'control-label'}>{'Researcher Identification'}</span>
+                    <ERACommons
+                        destination={eRACommonsDestination}
+                        researcherProfile={researcher}
+                        onNihStatusUpdate={() => {
+                        }}
+                        location={location}
+                        validationError={() => {
+                        }}
+                        readOnly={readOnly}
+                        header={true}
+                        required={true}
+                    />
+                </div>
 
                 <div className='progress-report-row'>
                     <FormField
