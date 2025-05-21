@@ -86,10 +86,10 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     expectedForm.internalCollaborators = formState.internalCollaborators ?? [];
     expectedForm.externalCollaborators = formState.externalCollaborators ?? [];
     if (formState.dmiYesNo) {
-      expectedForm.dataManagementIncident = getDataManagementIncidents(formState);
+      expectedForm.dmi = getDataManagementIncidents(formState);
     }
     if (formState.closeoutYesNo) {
-      expectedForm.closeOutSupplement = formState.closeoutSupplement;
+      expectedForm.closeoutSupplement = formState.closeoutSupplement;
     }
     return expectedForm;
   }
@@ -120,6 +120,8 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     //     multiPartFormData.append(field, formFiles[field]);
     //   }
     // }
+    multiPartFormData.append('collaboratorRequiredFile', '')
+    multiPartFormData.append('ethicsApprovalRequiredFile', '')
 
     return multiPartFormData;
   };

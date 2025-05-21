@@ -37,12 +37,17 @@ export const ProgressReportApplication = ({ dar, datasets, history, readOnlyMode
             presentationsYesNo: (dar.presentations.length > 0)
         }),
         // additional state for dmi section
-        ...(dar?.dataManagementIncident?.incidents && {
-            dmiYesNo: (dar.dataManagementIncident.incidents.length > 0)
+        ...(dar?.dmi?.incidents && {
+            dmiYesNo: (dar.dmi.incidents.length > 0)
         }),
+        ...(dar?.dmi?.incidents.map(incident => {
+            return {
+                [incident]: true as Partial<FormState>
+            }
+        }))?.flat(),
         // additional state for closeout section
-        ...(dar?.closeOutSupplement && {
-            closeoutYesNo: !!dar.closeOutSupplement
+        ...(dar?.closeoutSupplement && {
+            closeoutYesNo: !!dar.closeoutSupplement
         }),
     };
 

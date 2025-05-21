@@ -375,9 +375,9 @@ export interface DataAccessRequest {
   intellectualPropertySummary: string;
   publications: Array<Publication>;
   presentations: Array<Presentation>;
-  dataManagementIncident: DataManagementIncident;
+  dmi: DataManagementIncident;
   researchPlans: string;
-  closeOutSupplement: CloseOutSupplement;
+  closeoutSupplement: CloseOutSupplement;
   parentId?: number;
 }
 
