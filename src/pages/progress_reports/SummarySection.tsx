@@ -12,7 +12,7 @@ interface SummarySectionProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
-    eRACommonsDestination: string
+    eRACommonsDestination?: string
     readonly location?: Location
     researcher: DuosUser
 }
@@ -41,8 +41,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
             <div className='progress-report-step-card'>
                 {readOnly ? <h3>Review a Progress Report</h3> : <h3>Step 1: Submit a Progress Report</h3>}
 
-                <div className='progress-report-row'>
-                    <span className={'control-label'} data-cy='researcher-identification'>{'Researcher Identification'}</span>
+                <div className='progress-report-row' data-cy='researcher-identification'>
+                    <span className={'control-label'}>{'Researcher Identification'}</span>
                     <ERACommons
                         destination={eRACommonsDestination}
                         researcherProfile={researcher}

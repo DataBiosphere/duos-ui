@@ -27,10 +27,10 @@ import {Metrics} from 'src/libs/ajax/Metrics';
 import eventList from 'src/libs/events';
 import ReactMarkdown from 'react-markdown';
 import {SpinnerComponent} from 'src/components/SpinnerComponent.jsx';
-import loadingImage from '../../images/loading-indicator.svg';
+import loadingImage from 'src/images/loading-indicator.svg';
 import {ConditionalAccordion} from 'src/components/forms/ConditionalAccordion.js';
-import ProgressReportApplication from './ProgressReportApplication';
-import {ScrollableTabs} from './ScrollableTabs';
+import {ProgressReportApplication} from 'src/pages/dar_application/ProgressReportApplication';
+import {ScrollableTabs} from 'src/pages/dar_application/ScrollableTabs';
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info';

@@ -21,7 +21,7 @@ type ProgressReportApplicationProps = {
   readonly researcher: DuosUser
 };
 
-export default function ProgressReportApplication ({ dar, datasets, readOnlyMode = true, location, researcher }: ProgressReportApplicationProps) {
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, location, researcher }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
         // additional state for summary section
@@ -86,7 +86,7 @@ export default function ProgressReportApplication ({ dar, datasets, readOnlyMode
         return validation;
     }
 
-    const formValidationChange = useCallback(({ key, validation }) => {
+    const formValidationChange = useCallback(({key, validation}: { key: string; validation: never }) => {
         setFormValidation((formValidation) => {
             return {
                 ...formValidation,
