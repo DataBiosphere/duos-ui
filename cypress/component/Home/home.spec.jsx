@@ -19,9 +19,9 @@ describe('Home Page - Tests', function() {
       cy.contains('Expediting compliant data sharing').should('be.visible');
     });
 
-    it('renders the Data Libraries section with login message', function() {
+    it('renders the Data Libraries section with consistent message', function() {
       cy.contains('Data Libraries in DUOS').should('be.visible');
-      cy.contains('Login to view curated Data Libraries').should('be.visible');
+      cy.contains('Click the images below to view curated Data Libraries').should('be.visible');
     });
 
     it('displays tooltips with login required message for data libraries', function() {
@@ -30,16 +30,34 @@ describe('Home Page - Tests', function() {
       cy.get('[data-for="hca"]').find('span[title="Please login to access Human Cell Atlas Data Library"]').should('exist');
     });
 
-    it('does not have navigation links for data libraries', function() {
-      cy.get('a[href="/datalibrary/anvil"]').should('not.exist');
-      cy.get('a[href="/datalibrary/broad"]').should('not.exist');
-      cy.get('a[href="/datalibrary/HCA"]').should('not.exist');
-    });
-    
-    it('displays disabled logo cards', function() {
+    it('interacts with library card links when not logged in', function() {
       cy.get('.logo-card').should('have.length', 3);
-      cy.get('.logo-card').first().should('have.css', 'opacity', '0.8');
-      cy.get('.logo-card').first().should('have.css', 'cursor', 'not-allowed');
+      cy.get('.logo-card').each($card => {
+        cy.wrap($card).find('a').should('exist');
+      });
+      
+      // Create a spy on replaceState to check if URL parameters are updated
+      cy.window().then((win) => {
+        cy.spy(win.history, 'replaceState').as('replaceState');
+      });
+      
+      // Stub document.querySelectorAll to simulate no sign-in button found (fallback case)
+      cy.window().then((win) => {
+        cy.stub(win.document, 'querySelectorAll').returns([]);
+      });
+      
+      // Also stub scrollTo for the fallback behavior
+      cy.window().then((win) => {
+        cy.stub(win, 'scrollTo').as('scrollTo');
+      });
+      
+      cy.get('.logo-card').first().find('a').click({ force: true });
+      
+      cy.get('@replaceState').should('be.called');
+      cy.get('@scrollTo').should('be.called');
+      
+      // URL should contain the redirectTo parameter
+      cy.location('search').should('include', 'redirectTo=%2Fdatalibrary%2Fanvil');
     });
   });
 
@@ -68,10 +86,18 @@ describe('Home Page - Tests', function() {
       cy.get('[data-for="hca"]').find('span[title="Human Cell Atlas"]').should('exist');
     });
 
-    it('has correct navigation links for data libraries', function() {
+    it('has direct navigation links when logged in', function() {
       cy.get('a[href="/datalibrary/anvil"]').should('exist');
       cy.get('a[href="/datalibrary/broad"]').should('exist');
       cy.get('a[href="/datalibrary/HCA"]').should('exist');
+    });
+    
+    it('navigates directly without calling handleSignIn when logged in', function() {
+      cy.window().then((win) => {
+        cy.spy(win.history, 'replaceState').as('replaceState');
+      });
+      cy.get('a[href="/datalibrary/anvil"]').click({ force: true });
+      cy.get('@replaceState').should('not.be.called');
     });
     
     it('displays logos horizontally on desktop', function() {

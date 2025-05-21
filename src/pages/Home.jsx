@@ -85,18 +85,31 @@ const Home = (props) => {
     position: 'relative',     
   };
 
-  const disabledCard = {
-    ...baseCard,
-    opacity: 0.8,
-    cursor: 'not-allowed',
-  };
-
-
   const logoImg = {
     width: '100%',
     height: '100%',
     objectFit: 'contain',
     display: 'block',
+  };
+
+  const handleSignIn = (redirectPath) => {
+    // Set the redirectTo parameter without forcing a page reload
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('redirectTo', redirectPath);
+    window.history.replaceState({}, '', currentUrl);
+    
+    // Find the existing sign-in button in the header and programmatically click it
+    // This will trigger the existing authentication flow with all proper session handling
+    const signInButtons = document.querySelectorAll('button');
+    const signInButton = Array.from(signInButtons).find(button => 
+      button.textContent && button.textContent.trim() === 'Sign In'
+    );
+    if (signInButton) {
+      signInButton.click();
+    } else {
+      // Fallback - scroll to top where the sign-in button is located
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -157,45 +170,58 @@ const Home = (props) => {
           <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
             <p style={header}>Data Libraries in DUOS</p>
             <p style={description}>
-              {isLogged 
-                ? "Click the images below to view curated Data Libraries, and search and request access to data."
-                : "Login to view curated Data Libraries, and search and request access to data."}
+             Click the images below to view curated Data Libraries, and search and request access to data.
             </p>
 
             <div style={logoGrid} className="logo-grid">
-            <OverflowTooltip id="anvil" tooltipText={isLogged ? "AnVIL" : "Please login to access AnVIL Data Library"}>
-                <div className="logo-card" style={isLogged ? baseCard : disabledCard}>
-                  {isLogged ? (
-                    <Link to="/datalibrary/anvil" style={{ textDecoration: 'none', display: 'contents' }}>
-                      <img src={anvilLogo} alt="AnVIL" style={logoImg} />
-                    </Link>
-                  ) : (
+              <OverflowTooltip id="anvil" tooltipText={isLogged ? "AnVIL" : "Please login to access AnVIL Data Library"}>
+                <div className="logo-card" style={baseCard}>
+                  <Link 
+                    to={isLogged ? "/datalibrary/anvil" : "#"}
+                    onClick={(e) => {
+                      if (!isLogged) {
+                        e.preventDefault();
+                        handleSignIn('/datalibrary/anvil');
+                      }
+                    }}
+                    style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
+                  >
                     <img src={anvilLogo} alt="AnVIL" style={logoImg} />
-                  )}
+                  </Link>
                 </div>
               </OverflowTooltip>
 
               <OverflowTooltip id="broad" tooltipText={isLogged ? 'Broad Institute' : 'Please login to access Broad Institute Data Library'}>
-                <div className="logo-card" style={{ ...(isLogged ? baseCard : disabledCard), background: '#1F3B50', padding: '15px' }}>
-                  {isLogged ? (
-                    <Link to="/datalibrary/broad" style={{ textDecoration: 'none', display: 'contents' }}>
-                      <img src={broadLogo} alt="Broad Institute" style={logoImg} />
-                    </Link>
-                  ) : (
+                <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
+                  <Link 
+                    to={isLogged ? "/datalibrary/broad" : "#"}
+                    onClick={(e) => {
+                      if (!isLogged) {
+                        e.preventDefault();
+                        handleSignIn('/datalibrary/broad');
+                      }
+                    }}
+                    style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
+                  >
                     <img src={broadLogo} alt="Broad Institute" style={logoImg} />
-                  )}
+                  </Link>
                 </div>
               </OverflowTooltip>
        
               <OverflowTooltip id="hca" tooltipText={isLogged ? "Human Cell Atlas" : "Please login to access Human Cell Atlas Data Library"}>
-                <div className="logo-card" style={isLogged ? baseCard : disabledCard}>
-                  {isLogged ? (
-                    <Link to="/datalibrary/HCA" style={{ textDecoration: 'none', display: 'contents' }}>
-                      <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
-                    </Link>
-                  ) : (
+                <div className="logo-card" style={baseCard}>
+                  <Link 
+                    to={isLogged ? "/datalibrary/HCA" : "#"}
+                    onClick={(e) => {
+                      if (!isLogged) {
+                        e.preventDefault();
+                        handleSignIn('/datalibrary/HCA');
+                      }
+                    }}
+                    style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
+                  >
                     <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
-                  )}
+                  </Link>
                 </div>
               </OverflowTooltip>
             </div>
