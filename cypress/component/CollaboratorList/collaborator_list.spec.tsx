@@ -1,26 +1,25 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorList from '../../../src/components/collaborator_list/CollaboratorList';
-
-import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
+import {Collaborator} from "src/types/model";
 
 describe('CollaboratorList - Component Tests', () => {
     const mockCollaborators: Collaborator[] = [
         {
             name: 'John Doe',
             title: 'Researcher',
-            institution: 'Research Institute',
             email: 'john.doe@example.com',
             uuid: '123e4567-e89b-12d3-a456-426614174001',
-            eraCommonsId: 'jdoe123'
+            eraCommonsId: 'jdoe123',
+            approverStatus: true
         },
         {
             name: 'Jane Smith',
             title: 'Professor',
-            institution: 'University',
             email: 'jane.smith@example.com',
             uuid: '123e4567-e89b-12d3-a456-426614174002',
-            eraCommonsId: 'jsmith456'
+            eraCommonsId: 'jsmith456',
+            approverStatus: true
         }
     ];
 
@@ -179,7 +178,6 @@ describe('CollaboratorList - Component Tests', () => {
         />);
 
         cy.contains(mockCollaborators[0].name).should('be.visible');
-        cy.contains(mockCollaborators[0].institution).should('be.visible');
         cy.contains(mockCollaborators[0].title).should('not.exist');
         cy.contains(mockCollaborators[0].email).should('not.exist');
     });

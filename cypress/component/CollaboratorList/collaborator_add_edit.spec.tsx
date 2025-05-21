@@ -1,17 +1,17 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorAddEdit from '../../../src/components/collaborator_list/CollaboratorAddEdit';
+import {Collaborator} from "src/types/model";
 
-import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
 
 describe('CollaboratorAddEdit - Component Tests', () => {
   const mockCollaborator: Collaborator = {
     name: 'John Doe',
     title: 'Researcher',
-    institution: 'Research Institute',
     email: 'john.doe@example.com',
     uuid: '123e4567-e89b-12d3-a456-426614174000',
-    eraCommonsId: 'jdoe123'
+    eraCommonsId: 'jdoe123',
+    approverStatus: false
   };
 
   const mockCollaborators: Collaborator[] = [mockCollaborator];
@@ -46,7 +46,6 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     cy.contains(`Edit ${mockCollaborator.name} Information`).should('be.visible');
     cy.get('#name').should('have.value', mockCollaborator.name);
     cy.get('#title').should('have.value', mockCollaborator.title);
-    cy.get('#institution').should('have.value', mockCollaborator.institution);
     cy.get('#email').should('have.value', mockCollaborator.email);
     cy.contains('Save').should('be.visible');
   });
@@ -124,13 +123,13 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
     cy.get('#name').focus();
     cy.get('#name').blur();
-    
+
     cy.get('#title').focus();
     cy.get('#title').blur();
-    
+
     cy.get('#institution').focus();
     cy.get('#institution').blur();
-    
+
     cy.get('#email').focus();
     cy.get('#email').blur();
 

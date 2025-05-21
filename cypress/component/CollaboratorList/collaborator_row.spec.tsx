@@ -1,16 +1,16 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorRow from '../../../src/components/collaborator_list/CollaboratorRow';
-import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
+import {Collaborator} from "src/types/model";
 
 describe('CollaboratorRow - Component Tests', () => {
     const mockCollaborator: Collaborator = {
         name: 'John Doe',
         title: 'Researcher',
-        institution: 'Research Institute',
         email: 'john.doe@example.com',
         uuid: '123e4567-e89b-12d3-a456-426614174000',
-        eraCommonsId: 'jdoe123'
+        eraCommonsId: 'jdoe123',
+        approverStatus: true
     };
 
     const mockCollaborators: Collaborator[] = [mockCollaborator];
@@ -51,7 +51,6 @@ describe('CollaboratorRow - Component Tests', () => {
         cy.contains(`Edit ${mockCollaborator.name} Information`).should('be.visible');
         cy.get('#name').should('have.value', mockCollaborator.name);
         cy.get('#title').should('have.value', mockCollaborator.title);
-        cy.get('#institution').should('have.value', mockCollaborator.institution);
         cy.get('#email').should('have.value', mockCollaborator.email);
 
         cy.contains('Save').should('be.visible');
