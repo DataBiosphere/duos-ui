@@ -186,7 +186,7 @@ const showModalOnClick = (
 };
 
 const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
-  const [libraryCards, setLibraryCards] = useState<LibraryCardModel[]>(props.libraryCards || []);
+  const [libraryCards, setLibraryCards] = useState<LibraryCardModel[]>(props.libraryCards ?? []);
   const [tableSize, setTableSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageCount, setPageCount] = useState<number>(1);
@@ -195,7 +195,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   const [visibleCards, setVisibleCards] = useState<LibraryCardModel[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const [users, setUsers] = useState<UserData[]>(props.users || []);
+  const [users, setUsers] = useState<UserData[]>(props.users ?? []);
   const [currentCard, setCurrentCard] = useState<LibraryCardModel>({} as LibraryCardModel);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -243,8 +243,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
 
   // Hook that executes on prop load (initialization hook)
   useEffect(() => {
-    setLibraryCards(props.libraryCards || []);
-    setUsers(props.users || []);
+    setLibraryCards(props.libraryCards ?? []);
+    setUsers(props.users ?? []);
     if (
         !isNil(props.libraryCards) &&
         !isNil(props.users)
@@ -310,8 +310,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         const updatedList = cloneDeep(libraryCards);
         updatedList.push(newCard);
         updatedList.sort((a: LibraryCardModel, b: LibraryCardModel) => {
-          const dateA = new Date(a.createDate || '');
-          const dateB = new Date(b.createDate || '');
+          const dateA = new Date(a.createDate ?? '');
+          const dateB = new Date(b.createDate ?? '');
           return dateB.getTime() - dateA.getTime();
         });
         setLibraryCards(updatedList);

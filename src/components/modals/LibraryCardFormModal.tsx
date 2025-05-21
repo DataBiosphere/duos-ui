@@ -54,7 +54,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
 
   //filter function for users dropdown
   const userListFilter = ({ searchTerm, input, card, setCard, action }: FilterOptions) => {
-    const term = searchTerm || input || '';
+    const term = searchTerm ?? input ?? '';
     let filteredCopy: UserOption[];
 
     if (isEmpty(term)) {
@@ -64,7 +64,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
       filteredCopy = copiedDropdown.filter(user => {
         const userNameFilter = !isEmpty(user.displayName) ? includes(term)(user.displayName) : false;
         const emailFilter = !isEmpty(user.email) ? includes(term)(user.email) : false;
-        return userNameFilter || emailFilter;
+        return userNameFilter ?? emailFilter;
       });
     }
     setFilteredDropdown(filteredCopy);
