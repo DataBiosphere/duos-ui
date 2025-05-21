@@ -1,18 +1,18 @@
 import dayjs from 'dayjs';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactTooltip from 'react-tooltip';
-import { Notifications, searchOnFilteredList, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from '../../libs/utils';
-import {isEmpty, isNaN, cloneDeep, findIndex, isEqual, find, isNil, omit } from 'lodash/fp';
-import { Styles } from '../../libs/theme';
-import PaginationBar from '../PaginationBar';
-import SearchBar from '../SearchBar';
-import SimpleTable from '../SimpleTable';
-import lockIcon from '../../images/lock-icon.png';
-import LibraryCardFormModal from '../modals/LibraryCardFormModal';
-import { LibraryCard } from '../../libs/ajax/LibraryCard';
-import ConfirmationModal from '../modals/ConfirmationModal';
-import {Delete, Update} from '@mui/icons-material';
-import TableIconButton from '../TableIconButton';
+import { Notifications, searchOnFilteredList, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from 'src/libs/utils';
+import { isEmpty, isNaN, cloneDeep, findIndex, isEqual, isNil } from 'lodash/fp';
+import { Styles } from 'src/libs/theme';
+import PaginationBar from 'src/components/PaginationBar';
+import SearchBar from 'src/components/SearchBar';
+import SimpleTable from 'src/components/SimpleTable';
+import lockIcon from 'src/images/lock-icon.png';
+import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal.js';
+import { LibraryCard } from 'src/libs/ajax/LibraryCard';
+import ConfirmationModal from 'src/components/modals/ConfirmationModal';
+import {Delete} from '@mui/icons-material';
+import TableIconButton from 'src/components/TableIconButton';
 
 //Styles specific to the LibraryCard table
 const styles = {
@@ -57,24 +57,6 @@ const userNameCell = (userName, id) => {
   };
 };
 
-const institutionCell = (institutionName, id) => {
-  return {
-    data: institutionName || '- -',
-    id,
-    style: { width: styles.cellWidths.institution },
-    label: 'institution',
-  };
-};
-
-const eraCommonsCell = (eraCommonsId, id) => {
-  return {
-    data: eraCommonsId || '- -',
-    id,
-    style: { width: styles.cellWidths.eraCommonsId },
-    label: 'era-commons-id',
-  };
-};
-
 const createDateCell = (createDate, id) => {
   return {
     data: !isNil(createDate) ? dayjs(createDate).format('YYYY-MM-DD') : '- -',
@@ -85,15 +67,14 @@ const createDateCell = (createDate, id) => {
 };
 
 //Update function name and return if requirements change
-const createActionsCell = (card, setCurrentCard, setShowConfirmation, setShowModal, setModalType) => {
+const createActionsCell = (card, setCurrentCard, setShowConfirmation) => {
   const deleteButton = <DeleteRecordButton card={card} setShowConfirmation={setShowConfirmation} setCurrentCard={setCurrentCard} />;
-  const updateButton = <UpdateRecordButton card={card} setShowModal={setShowModal} setCurrentCard={setCurrentCard} setModalType={setModalType} />;
   return {
     id: card.id,
     style: { width: styles.cellWidths.buttons },
     label: 'action-buttons',
     isComponent: true,
-    data: <div style={{display: 'flex', justifyContent: 'left'}} key={`action-cell-${card.id}`}>{updateButton}{deleteButton}</div>
+    data: <div style={{display: 'flex', justifyContent: 'left'}} key={`action-cell-${card.id}`}>{deleteButton}</div>
   };
 };
 
@@ -145,29 +126,10 @@ const DeleteRecordButton = (props) => {
   );
 };
 
-//onClick function to show target card via modal
-const showModalOnClick = (card, type, setModalType, setShowModal, setCurrentCard) => {
+// onClick function to show target card via modal
+const showModalOnClick = (card, setShowModal, setCurrentCard) => {
   setCurrentCard(cloneDeep(card));
-  setModalType(type);
   setShowModal(true);
-};
-
-//update button stored as child component of actions cell
-const UpdateRecordButton = (props) => {
-  const { card, setShowModal, setCurrentCard, setModalType} = props;
-  const onClick = () => showModalOnClick(card, 'update', setModalType, setShowModal, setCurrentCard);
-
-  return (
-    <TableIconButton
-      keyProp={`show-update-form-${card.id}`}
-      dataTip='Update Library Card'
-      isRendered={true}
-      onClick={onClick}
-      icon={Update}
-      style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
-      hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
-    />
-  );
 };
 
 export default function LibraryCardTable(props) {
@@ -180,24 +142,17 @@ export default function LibraryCardTable(props) {
   const [visibleCards, setVisibleCards] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [institutions, setInstitutions] = useState(props.institutions || []);
   const [users, setUsers] = useState(props.users || []);
   const [currentCard, setCurrentCard] = useState({});
-  const [modalType, setModalType] = useState();
   const searchRef = useRef('');
 
-  //add signingOfficial when feature is implemented
   const columnHeaderData = [
     columnHeaderFormat.researcher,
     columnHeaderFormat.email,
-    columnHeaderFormat.institution,
-    columnHeaderFormat.eraCommonsId,
     columnHeaderFormat.createDate,
     columnHeaderFormat.actions,
   ];
 
-  //hook to recalculate visible table records when listed dependencies update
-  //NOTE: function moved to util, update implementation here
   useEffect(() => {
     const init = async () => {
       try {
@@ -231,7 +186,6 @@ export default function LibraryCardTable(props) {
   //hook that executes on prop load (initialization hook)
   useEffect(() => {
     setLibraryCards(props.libraryCards);
-    setInstitutions(props.institutions);
     setUsers(props.users);
     if (
       !isNil(props.libraryCards) &&
@@ -248,17 +202,11 @@ export default function LibraryCardTable(props) {
       return [
         userNameCell(card.userName, card.id),
         emailCell(card.userEmail, card.id),
-        !isEmpty(card.institution)
-          ? institutionCell(card.institution.name, card.id)
-          : institutionCell('- -', card.id),
-        eraCommonsCell(card.eraCommonsId, card.id),
         createDateCell(card.createDate, card.id),
         createActionsCell(
           card,
           setCurrentCard,
-          setShowConfirmation,
-          setShowModal,
-          setModalType
+          setShowConfirmation
         ),
       ];
     });
@@ -280,38 +228,6 @@ export default function LibraryCardTable(props) {
 
   //pre-computed PaginationBar component passed into SimpleTable as a prop
   const paginationBar = <PaginationBar pageCount={pageCount} currentPage={currentPage} tableSize={tableSize} goToPage={goToPage} changeTableSize={changeTableSize} />;
-
-  //update function when element in array is updated via modal
-  const updateListFn = async (payload) => {
-    try {
-      const id = payload.id;
-      const parsedPayload = omit(['createDate', 'updateDate', 'institution'])(
-        payload
-      );
-      const updatedCard = await LibraryCard.updateLibraryCard(parsedPayload);
-      const institution = find(
-        (institution) => institution.id === payload.institutionId
-      )(institutions);
-      updatedCard.institution = institution;
-      const filteredCopy = cloneDeep(filteredCards);
-      const libraryCopy = cloneDeep(libraryCards);
-      const filteredIndex = findIndex((card) => card.id === id)(filteredCards);
-      const originalIndex = findIndex((card) => card.id === id)(libraryCopy);
-      filteredCopy[filteredIndex] = updatedCard;
-      libraryCopy[originalIndex] = updatedCard;
-      setFilteredCards(filteredCopy);
-      setLibraryCards(libraryCopy);
-      setShowModal(false);
-      Notifications.showSuccess({
-        text: `${
-          updatedCard.userName || updatedCard.userEmail
-        }'s library card successfully updated`,
-      });
-    } catch (error) {
-      setShowModal(false);
-      Notifications.showError({ text:  error.response.data.message ?? 'Error: Failed to update library card' });
-    }
-  };
 
   //onClick function, used to create new card on modal based on form data
   const addLibraryCard = async (card) => {
@@ -396,8 +312,6 @@ export default function LibraryCardTable(props) {
                 onClick={() =>
                   showModalOnClick(
                     {},
-                    'add',
-                    setModalType,
                     setShowModal,
                     setCurrentCard
                   )
@@ -419,12 +333,10 @@ export default function LibraryCardTable(props) {
       />
       <LibraryCardFormModal
         showModal={showModal}
-        updateOnClick={updateListFn}
         createOnClick={addLibraryCard}
         closeModal={() => setShowModal(false)}
         users={users}
         card={currentCard}
-        modalType={modalType}
       />
       <ConfirmationModal
         showConfirmation={showConfirmation}
