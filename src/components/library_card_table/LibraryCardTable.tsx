@@ -1,18 +1,26 @@
 import dayjs from 'dayjs';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import ReactTooltip from 'react-tooltip';
-import { Notifications, searchOnFilteredList, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from 'src/libs/utils';
-import { isEmpty, isNaN, cloneDeep, findIndex, isEqual, isNil } from 'lodash/fp';
-import { Styles } from 'src/libs/theme';
+import {
+  calcTablePageCount,
+  calcVisibleWindow,
+  getSearchFilterFunctions,
+  Notifications,
+  searchOnFilteredList
+} from 'src/libs/utils';
+import {cloneDeep, findIndex, isEmpty, isEqual, isNaN, isNil} from 'lodash/fp';
+import {Styles} from 'src/libs/theme';
 import PaginationBar from 'src/components/PaginationBar';
 import SearchBar from 'src/components/SearchBar';
 import SimpleTable from 'src/components/SimpleTable';
 import lockIcon from 'src/images/lock-icon.png';
 import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal';
-import { LibraryCard } from 'src/libs/ajax/LibraryCard';
+import {LibraryCard} from 'src/libs/ajax/LibraryCard';
 import ConfirmationModal from 'src/components/modals/ConfirmationModal';
 import {Delete} from '@mui/icons-material';
 import TableIconButton from 'src/components/TableIconButton';
+import {AxiosError} from 'axios';
+import {ConsentError} from 'src/types/responseTypes';
 
 // Types definitions
 interface LibraryCardData {
@@ -45,7 +53,7 @@ interface LibraryCardTableProps {
 }
 
 interface TableCell {
-  data: any;
+  data: string | React.JSX.Element;
   style: React.CSSProperties;
   id?: number;
   label: string;
@@ -74,9 +82,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center'
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
-  }),
+  columnStyle: {...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',},
   cellWidths: {
     researcher: '15%',
     email: '20%',
@@ -90,8 +96,8 @@ const styles = {
 // Following cell functions format data for processing within the SimpleTable component
 const emailCell = (email: string | undefined, id?: number): TableCell => {
   return {
-    data: email || '- -',
-    style: { width: styles.cellWidths.email },
+    data: email ?? '- -',
+    style: {width: styles.cellWidths.email},
     id,
     label: 'email',
   };
@@ -99,18 +105,18 @@ const emailCell = (email: string | undefined, id?: number): TableCell => {
 
 const userNameCell = (userName: string | undefined, id?: number): TableCell => {
   return {
-    data: userName || '- -',
-    style: { width: styles.cellWidths.researcher },
     id,
+    data: userName ?? '- -',
+    style: {width: styles.cellWidths.researcher},
     label: 'username',
   };
 };
 
 const createDateCell = (createDate: string | Date | undefined, id?: number): TableCell => {
   return {
-    data: !isNil(createDate) ? dayjs(createDate).format('YYYY-MM-DD') : '- -',
     id,
-    style: { width: styles.cellWidths.createDate },
+    data: !isNil(createDate) ? dayjs(createDate).format('YYYY-MM-DD') : '- -',
+    style: {width: styles.cellWidths.createDate},
     label: 'create-date',
   };
 };
@@ -121,13 +127,14 @@ const createActionsCell = (
     setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCardData>>,
     setShowConfirmation: React.Dispatch<React.SetStateAction<boolean>>
 ): TableCell => {
-  const deleteButton = <DeleteRecordButton card={card} setShowConfirmation={setShowConfirmation} setCurrentCard={setCurrentCard} />;
+  const deleteButton = <DeleteRecordButton card={card} setShowConfirmation={setShowConfirmation}
+                                           setCurrentCard={setCurrentCard}/>;
   return {
     id: card.id,
-    style: { width: styles.cellWidths.buttons },
+    data: <div style={{display: 'flex', justifyContent: 'left'}} key={`action-cell-${card.id}`}>{deleteButton}</div>,
+    style: {width: styles.cellWidths.buttons},
     label: 'action-buttons',
-    isComponent: true,
-    data: <div style={{display: 'flex', justifyContent: 'left'}} key={`action-cell-${card.id}`}>{deleteButton}</div>
+    isComponent: true
   };
 };
 
@@ -161,14 +168,17 @@ const deleteOnClick = (
       setLibraryCards(libraryCardsCopy);
       setShowConfirmation(false);
     }
-  } catch(error: any) {
-    Notifications.showError({text: error.response?.data?.message ?? 'Error: Failed to delete library card'});
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+    const consentError = axiosError?.response?.data as ConsentError;
+    const serverError = consentError.message ?? 'Error: Failed to delete library card';
+    Notifications.showError({text: serverError});
   }
 };
 
 // Delete button component contained as child component of actions cell
 const DeleteRecordButton: React.FC<DeleteRecordButtonProps> = (props) => {
-  const { card, setShowConfirmation, setCurrentCard } = props;
+  const {card, setShowConfirmation, setCurrentCard} = props;
   const onClick = () => {
     setCurrentCard(card);
     setShowConfirmation(true);
@@ -180,8 +190,8 @@ const DeleteRecordButton: React.FC<DeleteRecordButtonProps> = (props) => {
           isRendered={true}
           onClick={onClick}
           icon={Delete}
-          style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
-          hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
+          style={({...Styles.TABLE.TABLE_ICON_BUTTON})}
+          hoverStyle={({...Styles.TABLE.TABLE_BUTTON_ICON_HOVER})}
       />
   );
 };
@@ -230,8 +240,11 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
             filteredCards
         );
         setVisibleCards(visibleList);
-      } catch (_error) {
-        Notifications.showError({ text: 'Error updating Library Card table' });
+      } catch (error: unknown) {
+        const axiosError = error as AxiosError;
+        const consentError = axiosError?.response?.data as ConsentError;
+        const serverError = consentError.message ?? 'Error updating Library Card table';
+        Notifications.showError({text: serverError});
       }
     };
     init();
@@ -311,7 +324,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
           libraryCards
       );
       if (alreadyExists > -1) {
-        Notifications.showError({ text: 'Library Card already exists' });
+        Notifications.showError({text: 'Library Card already exists'});
       } else {
         // Execute library card update with payload, get the updated card, and
         // add (with sort afterwards) library card to libraryCards (reference list)
@@ -326,11 +339,12 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         setLibraryCards(updatedList);
         setShowModal(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError;
+      const consentError = axiosError?.response?.data as ConsentError;
+      const serverError = consentError.message ?? 'Error: Failed to create new library card';
       setShowModal(false);
-      Notifications.showError({
-        text: error.response?.data?.message ?? 'Error: Failed to create new library card',
-      });
+      Notifications.showError({text: serverError});
     }
   };
 
@@ -349,14 +363,16 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   // Template for render
   return (
       <div style={Styles.PAGE}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{display: 'flex', justifyContent: 'space-between'}}>
           <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION}>
             <div style={Styles.ICON_CONTAINER}>
-              <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} alt="Lock icon" />
+              <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} alt="Lock icon"/>
             </div>
             <div style={Styles.HEADER_CONTAINER}>
               <div style={Styles.TITLE}>Manage Library Cards</div>
-              <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}>Select and manage Library Cards</div>
+              <div style={({...Styles.MEDIUM_DESCRIPTION, fontSize: '18px'})}>Select and manage Library
+                Cards
+              </div>
             </div>
           </div>
           <SearchBar
@@ -417,10 +433,10 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
             closeConfirmation={() => setShowConfirmation(false)}
             title='Delete Library Card?'
             message='Are you sure you want to delete this library card?'
-            header={`${currentCard.userName || currentCard.userEmail} - ${!isNil(currentCard.institution) ? currentCard.institution.name : ''}`}
+            header={`${currentCard.userName ?? currentCard.userEmail} - ${!isNil(currentCard.institution) ? currentCard.institution.name : ''}`}
             onConfirm={() => deleteOnClick(currentCard, libraryCards, setLibraryCards, setShowConfirmation)}
         />
-        <ReactTooltip place='left' effect='solid' multiline={true} className='tooltip-wrapper' />
+        <ReactTooltip place='left' effect='solid' multiline={true} className='tooltip-wrapper'/>
       </div>
   );
 };
