@@ -49,8 +49,6 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         onNihStatusUpdate={() => {
                         }}
                         location={location}
-                        validationError={() => {
-                        }}
                         readOnly={readOnly}
                         header={true}
                         required={true}
