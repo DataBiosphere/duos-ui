@@ -30,6 +30,7 @@ describe('Library Card Table Tests', () => {
     libraryCardList.forEach((card) => {
       cy.get('[data-cy=manage-library-card-table]').should('contain', card.userName);
       cy.get('[data-cy=manage-library-card-table]').should('contain', card.userEmail);
+      cy.get(`[id=show-delete-modal-${card.id}]`).should('exist');
     });
   });
 
