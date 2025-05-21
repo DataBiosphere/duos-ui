@@ -14,11 +14,11 @@ import {validatePRFormData} from 'src/utils/darFormUtils';
 import {FormValidationState, ValidationError} from 'src/pages/dar_application/FormValidationState';
 
 type ProgressReportApplicationProps = {
-  readonly dar: DataAccessRequest, // corresponds either to the parent DAR for a new application or an existing readonly progress report
-  readonly datasets: Dataset[],
-  readonly readOnlyMode?: boolean
-  readonly location?: Location
-  readonly researcher: DuosUser
+  readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
+  readonly datasets: Dataset[];
+  readonly readOnlyMode: boolean;
+  readonly location?: Location;
+  readonly researcher: DuosUser;
 };
 
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, location, researcher }: ProgressReportApplicationProps) => {
@@ -50,7 +50,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [formValidation, setFormValidation] = useState<FormValidationState>(
       {darErrors:
             {gsoAcknowledgement: {}, pubAcknowledgement: {}, dsAcknowledgement: {}}});
-    const eRACommonsDestination = 'progress_report_application/' + dar?.collectionId;
+    const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
     const onFormChange = (newState: Partial<FormState>) => {
         setFormState(prevState => ({

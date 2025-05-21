@@ -12,9 +12,9 @@ interface SummarySectionProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
-    readonly eRACommonsDestination?: string
-    readonly location?: Location
-    readonly researcher: DuosUser
+    readonly eRACommonsDestination?: string;
+    readonly location?: Location;
+    readonly researcher: DuosUser;
 }
 
 export default function SummarySection(props: SummarySectionProps): React.JSX.Element {
