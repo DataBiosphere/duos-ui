@@ -53,7 +53,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         }}
                         readOnly={readOnly}
                         header={true}
-                        required={true}
+                        required={!readOnly} // In read-only mode, this is not required
                     />
                 </div>
 
