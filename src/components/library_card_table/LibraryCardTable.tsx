@@ -21,35 +21,18 @@ import {Delete} from '@mui/icons-material';
 import TableIconButton from 'src/components/TableIconButton';
 import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
-
-// Types definitions
-interface LibraryCardData {
-  id?: number;
-  userName?: string;
-  userEmail: string;
-  userId?: number;
-  createDate?: string | Date;
-  institution?: {
-    name: string;
-  };
-}
-
-interface Institution {
-  id: number;
-  name: string;
-}
+import {LibraryCard as LibraryCardModel} from 'src/types/model';
 
 interface UserData {
   userId: number;
   displayName: string;
   email: string;
-  libraryCards?: LibraryCardData[];
+  libraryCards?: LibraryCardModel[];
 }
 
-interface LibraryCardTableProps {
-  libraryCards?: LibraryCardData[];
+export interface LibraryCardTableProps {
+  libraryCards?: LibraryCardModel[];
   users?: UserData[];
-  institutions?: Institution[];
 }
 
 interface TableCell {
@@ -66,9 +49,9 @@ interface ColumnHeader {
 }
 
 interface DeleteRecordButtonProps {
-  card: LibraryCardData;
+  card: LibraryCardModel;
   setShowConfirmation: React.Dispatch<React.SetStateAction<boolean>>;
-  setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCardData>>;
+  setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCardModel>>;
 }
 
 // Styles specific to the LibraryCard table
@@ -84,12 +67,10 @@ const styles = {
   },
   columnStyle: {...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',},
   cellWidths: {
-    researcher: '15%',
-    email: '20%',
-    institution: '27%',
-    eraCommonsId: '15%',
-    createDate: '12%',
-    actions: '5%'
+    researcher: '30%',
+    email: '30%',
+    createDate: '15%',
+    actions: '15%'
   },
 };
 
@@ -123,8 +104,8 @@ const createDateCell = (createDate: string | Date | undefined, id?: number): Tab
 
 // Update function name and return if requirements change
 const createActionsCell = (
-    card: LibraryCardData,
-    setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCardData>>,
+    card: LibraryCardModel,
+    setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCardModel>>,
     setShowConfirmation: React.Dispatch<React.SetStateAction<boolean>>
 ): TableCell => {
   const deleteButton = <DeleteRecordButton card={card} setShowConfirmation={setShowConfirmation}
@@ -132,7 +113,7 @@ const createActionsCell = (
   return {
     id: card.id,
     data: <div style={{display: 'flex', justifyContent: 'left'}} key={`action-cell-${card.id}`}>{deleteButton}</div>,
-    style: {width: styles.cellWidths.buttons},
+    style: {width: styles.cellWidths.actions},
     label: 'action-buttons',
     isComponent: true
   };
@@ -145,17 +126,15 @@ const lcFilterFunction = getSearchFilterFunctions().libraryCard;
 const columnHeaderFormat: Record<string, ColumnHeader> = {
   email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
   researcher: {label: 'Researcher', cellStyle: {width: styles.cellWidths.researcher}},
-  institution: {label: 'Institution', cellStyle: {width: styles.cellWidths.institution}},
-  eraCommonsId: {label: 'era Commons ID', cellStyle: {width: styles.cellWidths.eraCommonsId}},
   createDate: {label: 'Create Date', cellStyle: {width: styles.cellWidths.createDate}},
   actions: {label: 'Actions', cellStyle: {width: styles.cellWidths.actions}}
 };
 
 // Delete function used within actions component
 const deleteOnClick = (
-    currentCard: LibraryCardData,
-    libraryCards: LibraryCardData[],
-    setLibraryCards: React.Dispatch<React.SetStateAction<LibraryCardData[]>>,
+    currentCard: LibraryCardModel,
+    libraryCards: LibraryCardModel[],
+    setLibraryCards: React.Dispatch<React.SetStateAction<LibraryCardModel[]>>,
     setShowConfirmation: React.Dispatch<React.SetStateAction<boolean>>
 ): void => {
   try {
@@ -163,7 +142,7 @@ const deleteOnClick = (
     if (id) {
       LibraryCard.deleteLibraryCard(id);
       const libraryCardsCopy = cloneDeep(libraryCards);
-      const targetIndex = findIndex((card: LibraryCardData) => card.id === id)(libraryCardsCopy);
+      const targetIndex = findIndex((card: LibraryCardModel) => card.id === id)(libraryCardsCopy);
       libraryCardsCopy.splice(targetIndex, 1);
       setLibraryCards(libraryCardsCopy);
       setShowConfirmation(false);
@@ -198,26 +177,26 @@ const DeleteRecordButton: React.FC<DeleteRecordButtonProps> = (props) => {
 
 // onClick function to show target card via modal
 const showModalOnClick = (
-    card: LibraryCardData,
+    card: LibraryCardModel,
     setShowModal: React.Dispatch<React.SetStateAction<boolean>>,
-    setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCardData>>
+    setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCardModel>>
 ): void => {
   setCurrentCard(cloneDeep(card));
   setShowModal(true);
 };
 
 const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
-  const [libraryCards, setLibraryCards] = useState<LibraryCardData[]>(props.libraryCards || []);
+  const [libraryCards, setLibraryCards] = useState<LibraryCardModel[]>(props.libraryCards || []);
   const [tableSize, setTableSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageCount, setPageCount] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [filteredCards, setFilteredCards] = useState<LibraryCardData[]>([]);
-  const [visibleCards, setVisibleCards] = useState<LibraryCardData[]>([]);
+  const [filteredCards, setFilteredCards] = useState<LibraryCardModel[]>([]);
+  const [visibleCards, setVisibleCards] = useState<LibraryCardModel[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [users, setUsers] = useState<UserData[]>(props.users || []);
-  const [currentCard, setCurrentCard] = useState<LibraryCardData>({} as LibraryCardData);
+  const [currentCard, setCurrentCard] = useState<LibraryCardModel>({} as LibraryCardModel);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const columnHeaderData: ColumnHeader[] = [
@@ -268,15 +247,14 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
     setUsers(props.users || []);
     if (
         !isNil(props.libraryCards) &&
-        !isNil(props.users) &&
-        !isNil(props.institutions)
+        !isNil(props.users)
     ) {
       setIsLoading(false);
     }
-  }, [props.libraryCards, props.institutions, props.users]);
+  }, [props.libraryCards, props.users]);
 
   // Formats institution data to be used by SimpleTable component
-  const processLCData = (cards: LibraryCardData[] = []): TableCell[][] => {
+  const processLCData = (cards: LibraryCardModel[] = []): TableCell[][] => {
     return cards.map((card) => {
       return [
         userNameCell(card.userName, card.id),
@@ -316,11 +294,11 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   />;
 
   // onClick function, used to create new card on modal based on form data
-  const addLibraryCard = async (card: LibraryCardData): Promise<void> => {
+  const addLibraryCard = async (card: LibraryCardModel): Promise<void> => {
     try {
       // Check if card already exists, show error if it does
       const alreadyExists = findIndex(
-          (element: LibraryCardData) => isEqual(element.userEmail)(card.userEmail),
+          (element: LibraryCardModel) => isEqual(element.userEmail)(card.userEmail),
           libraryCards
       );
       if (alreadyExists > -1) {
@@ -331,7 +309,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         const newCard = await LibraryCard.createLibraryCard(card);
         const updatedList = cloneDeep(libraryCards);
         updatedList.push(newCard);
-        updatedList.sort((a: LibraryCardData, b: LibraryCardData) => {
+        updatedList.sort((a: LibraryCardModel, b: LibraryCardModel) => {
           const dateA = new Date(a.createDate || '');
           const dateB = new Date(b.createDate || '');
           return dateB.getTime() - dateA.getTime();
@@ -362,7 +340,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
 
   // Template for render
   return (
-      <div style={Styles.PAGE}>
+      <div data-cy={'manage-library-card-table'} style={Styles.PAGE}>
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
           <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION}>
             <div style={Styles.ICON_CONTAINER}>
@@ -401,7 +379,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                       }}
                       onClick={() =>
                           showModalOnClick(
-                              {} as LibraryCardData,
+                              {} as LibraryCardModel,
                               setShowModal,
                               setCurrentCard
                           )
