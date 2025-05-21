@@ -6,7 +6,7 @@ export interface DuosUserResponse {
   email: string;
   emailPreference: boolean;
   libraryCards: LibraryCard[];
-  researcherProperties: UserProperty[];
+  properties: UserProperty[];
   roles: UserRole[];
   userId: number;
   userStatusInfo: UserStatusInfo;

@@ -28,12 +28,10 @@ export interface UserStatusInfo {
 }
 
 export interface UserProperty {
-  eraAuthorized: string;
-  eraExpiration: string;
-  suggestedInstitution: string;
-  suggestedSigningOfficial: string;
-  selectedSigningOfficial: string;
-  daaAcceptance: string;
+  propertyId: number
+  userId: number;
+  propertyKey: string;
+  propertyValue: string;
 }
 
 export interface DuosUser {
@@ -41,6 +39,7 @@ export interface DuosUser {
   displayName: string;
   email: string;
   emailPreference: boolean;
+  eraCommonsId?: string;
   institutionId?: number;
   isAdmin: boolean;
   isAlumni: boolean;
@@ -50,7 +49,7 @@ export interface DuosUser {
   isResearcher: boolean;
   isSigningOfficial: boolean;
   libraryCards?: LibraryCard[];
-  researcherProperties?: UserProperty[];
+  properties?: UserProperty[];
   roles: UserRole[];
   userId: number;
   userStatusInfo?: UserStatusInfo;
@@ -65,9 +64,6 @@ export interface SimplifiedDuosUser {
 export interface LibraryCard {
   id: number;
   userId: number;
-  institution: Institution;
-  institutionId: number;
-  eraCommonsId: string;
   userName: string;
   userEmail: string;
   createDate: string;
@@ -321,6 +317,7 @@ export interface DataAccessRequest {
   submissionDate: string;
   updateDate: string;
   draft: boolean;
+  collectionId: number;
   darCode: string;
   elections: Array<Election>;
   projectTitle: string;
