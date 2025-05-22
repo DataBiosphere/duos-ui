@@ -26,6 +26,10 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         orientation='horizontal'
                         onChange={({ key, value }: Partial<FormState>) => {
                             onFormChange({ [key]: value }  as Partial<FormState>);
+                            // clear out selected options if the user selects "No"
+                            if (value === false) {
+                                onFormChange({ [FormStateKey.CLOSEOUT_SUPPLEMENT]: undefined } as Partial<FormState>);
+                            }
                         }}
                         disabled={readOnly}
                     />
