@@ -1,23 +1,22 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
-import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 
 describe('DAR Closeout - Component Tests', () => {
   let onFormChangeSpy: () => void;
-  
+
   const mountComponent = (customState = {}) => {
     const formState = { ...customState };
-    
+
     const props = {
       readOnly: false,
       formState,
       onFormChange: onFormChangeSpy
     };
-    
+
     return mount(<DarCloseout {...props} />);
   };
-  
+
   beforeEach(() => {
     onFormChangeSpy = cy.stub().as('formChangeStub');
     mountComponent();
@@ -27,69 +26,55 @@ describe('DAR Closeout - Component Tests', () => {
     cy.get('[data-cy=dar-closeout]').should('exist');
     cy.contains('Step 5: DAR Closeout').should('be.visible');
     cy.contains('5.1 Closeouts').should('be.visible');
-    cy.contains('If you are ready to finish work on this project').should('be.visible');
+    cy.contains('Are you ready to finish work on this project?').should('be.visible');
+    cy.get('#closeoutYesNo').should('exist');
   });
 
-  it('displays all closeout reason checkboxes', () => {
-    cy.get('#closeoutCompleted').should('exist');
-    cy.get('#closeoutMoved').should('exist');
-    cy.get('#closeoutTransferred').should('exist');
-    cy.get('#closeoutSuperceded').should('exist');
-    cy.get('#closeoutOther').should('exist');
+  it('handles closeout radio buttons', () => {
+    cy.get('#closeoutYesNo').parent().contains('label', 'Yes').find('input[type="radio"]').click({force: true});
+    cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: true });
+
+    cy.get('#closeoutYesNo').parent().contains('label', 'No').find('input[type="radio"]').click({force: true});
+    cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: false });
   });
 
-  it('initially does not show "Other" reason text area', () => {
-    cy.get('#closeoutOtherContext').should('not.exist');
+  it('shows closeout options when "Yes" is selected', () => {
+    mountComponent({ closeoutYesNo: true });
+    cy.get('#closeoutSupplement').should('exist');
   });
 
-  it('shows "Other" reason text area when state is true', () => {
-    mountComponent({ closeoutOther: true });
-    cy.get('#closeoutOtherContext').should('exist');
+  it('hides closeout options when "No" is selected', () => {
+    mountComponent({ closeoutYesNo: false });
+    cy.get('#closeoutSupplement').should('not.exist');
   });
 
-  it('hides "Other" reason text area when state is false', () => {
-    mountComponent({ closeoutOther: true });
-    cy.get('#closeoutOtherContext').should('exist');
-
-    mountComponent({ closeoutOther: false });
-    cy.get('#closeoutOtherContext').should('not.exist');
+  it('displays all closeout reason checkboxes when "Yes" is selected', () => {
+    mountComponent({ closeoutYesNo: true });
+    cy.get('#closeoutSupplement').should('exist');
+    cy.contains('The Requestor has completed his/her project').should('exist');
+    cy.contains('The Requestor has moved institutions').should('exist');
+    cy.contains('The project is being transferred to a new Requestor at the same institution').should('exist');
+    cy.contains('The project is being superseded by a new project').should('exist');
   });
 
-  it('allows checking multiple closeout reasons', () => {
-    cy.get('#closeoutCompleted').click();
-    cy.get('#closeoutMoved').click();
-    cy.get('#closeoutTransferred').click();
-    
-    // Verify checkboxes are selected
-    cy.get('#closeoutCompleted').should('be.checked');
-    cy.get('#closeoutMoved').should('be.checked');
-    cy.get('#closeoutTransferred').should('be.checked');
-  });
+  it('allows checking one closeout reason at a time', () => {
+    mountComponent({ closeoutYesNo: true });
+    cy.get('#closeoutSupplement_PROJECT_COMPLETED').click();
 
-  it('allows entering other closeout reason text', () => {
-    mountComponent({ closeoutOther: true });
-    
-    const testDescription = 'This is a test description for the other closeout reason.';
-    cy.get('#closeoutOtherContext').type(testDescription);
-    cy.get('#closeoutOtherContext').should('have.value', testDescription);
-  });
+    // Verify selected radio option is selected
+    cy.get('#closeoutSupplement_PROJECT_COMPLETED').should('be.checked');
+    cy.get('#closeoutSupplement_REQUESTOR_MOVED_INSTITUTION').should('not.be.checked');
+    cy.get('#closeoutSupplement_PROJECT_TRANSFERRED').should('not.be.checked');
+    cy.get('#closeoutSupplement_PROJECT_SUPERSEDED').should('not.be.checked');
 
-  it('enforces character limit on other closeout reason', () => {
-    mountComponent({ closeoutOther: true });
-    
-    // Generate a string longer than the max length character limit
-    const longText = 'A'.repeat(FORM_TEXT_AREA_MAX_LENGTH + 100);
-    const expectedText = longText.substring(0, FORM_TEXT_AREA_MAX_LENGTH);
-    
-    cy.get('#closeoutOtherContext').type(longText, { delay: 0 });
-    cy.get('#closeoutOtherContext').should('have.value', expectedText);
-  });
 
-  it('allows toggling checkboxes on and off', () => {
-    cy.get('#closeoutCompleted').click();
-    cy.get('#closeoutCompleted').should('be.checked');
-    
-    cy.get('#closeoutCompleted').click();
-    cy.get('#closeoutCompleted').should('not.be.checked');
+    // Select a different option
+    cy.get('#closeoutSupplement_PROJECT_TRANSFERRED').click();
+
+    // Verify selected radio option is selected
+    cy.get('#closeoutSupplement_PROJECT_COMPLETED').should('not.be.checked');
+    cy.get('#closeoutSupplement_REQUESTOR_MOVED_INSTITUTION').should('not.be.checked');
+    cy.get('#closeoutSupplement_PROJECT_TRANSFERRED').should('be.checked');
+    cy.get('#closeoutSupplement_PROJECT_SUPERSEDED').should('not.be.checked');
   });
 });
