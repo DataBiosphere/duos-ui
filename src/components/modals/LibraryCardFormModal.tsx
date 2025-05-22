@@ -7,42 +7,36 @@ import Creatable from 'react-select/creatable';
 import SimpleButton from 'src/components/SimpleButton';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
 import {SingleValue} from 'react-select';
-
-// This represents the required fields for a new LibraryCard object that will be persisted remotely
-interface Card {
-  userEmail: string;
-  userId? : number;
-  userName? : string;
-}
+import {LibraryCard as LibraryCardModel} from 'src/types/model';
 
 // This represents the fields describing users in a selection dropdown menu
 interface UserOption {
   userId: number;
   displayName: string;
   email: string;
-  libraryCards?: Card[];
+  libraryCards?: LibraryCardModel[];
 }
 
 interface FormFieldRowProps {
-  card: Card;
+  card: LibraryCardModel;
   dropdownOptions: UserOption[];
   updateUser: (value: SingleValue<UserOption>) => void;
-  setCard: React.Dispatch<React.SetStateAction<Card>>;
+  setCard: React.Dispatch<React.SetStateAction<LibraryCardModel>>;
 }
 
 interface LibraryCardFormModalProps {
   showModal: boolean;
-  createOnClick: (card: Card) => void;
+  createOnClick: (card: LibraryCardModel) => void;
   closeModal: () => void;
   users: UserOption[];
-  card: Card;
+  card: LibraryCardModel;
 }
 
 interface FilterOptions {
   searchTerm?: string;
   input?: string;
-  card: Card;
-  setCard: React.Dispatch<React.SetStateAction<Card>>;
+  card: LibraryCardModel;
+  setCard: React.Dispatch<React.SetStateAction<LibraryCardModel>>;
   action: string;
 }
 
@@ -100,7 +94,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
 
 const LibraryCardFormModal: React.FC<LibraryCardFormModalProps> = (props) => {
   const { showModal, createOnClick, closeModal, users } = props;
-  const [card, setCard] = useState<Card>(props.card);
+  const [card, setCard] = useState<LibraryCardModel>(props.card);
 
   //initialization hook, sets card as state variables
   useEffect(() => {
@@ -118,11 +112,11 @@ const LibraryCardFormModal: React.FC<LibraryCardFormModalProps> = (props) => {
       userEmail = value;
     }
     const updatedCard = {...card, userEmail, userId, userName};
-    setCard(updatedCard as Card);
+    setCard(updatedCard as LibraryCardModel);
   };
 
   //boolean function, used to determine if submit button should be disabled
-  const isConfirmDisabled = (card: Card): boolean => {
+  const isConfirmDisabled = (card: LibraryCardModel): boolean => {
     return isNil(card.userEmail);
   };
 

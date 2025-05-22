@@ -342,11 +342,18 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   return (
       <div data-cy={'manage-library-card-table'} style={Styles.PAGE}>
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION}>
+          <div className='left-header-section' style={{
+            display: 'flex',
+            flexDirection: 'row',
+            paddingTop: '3rem'
+          }}>
             <div style={Styles.ICON_CONTAINER}>
               <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} alt="Lock icon"/>
             </div>
-            <div style={Styles.HEADER_CONTAINER}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
               <div style={Styles.TITLE}>Manage Library Cards</div>
               <div style={({...Styles.MEDIUM_DESCRIPTION, fontSize: '18px'})}>Select and manage Library
                 Cards
@@ -370,7 +377,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                       width: '300px'
                     }}
                 >
-                  <a
+                  <button
+                      type={'button'}
                       id="btn_addLibraryCard"
                       className="btn-primary btn-add common-background"
                       style={{
@@ -386,7 +394,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                       }
                   >
                     <span>Add Library Card</span>
-                  </a>
+                  </button>
                 </div>
               }
           />
@@ -411,7 +419,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
             closeConfirmation={() => setShowConfirmation(false)}
             title='Delete Library Card?'
             message='Are you sure you want to delete this library card?'
-            header={`${currentCard.userName ?? currentCard.userEmail} - ${!isNil(currentCard.institution) ? currentCard.institution.name : ''}`}
+            header={`${currentCard.userName ?? currentCard.userEmail}`}
             onConfirm={() => deleteOnClick(currentCard, libraryCards, setLibraryCards, setShowConfirmation)}
         />
         <ReactTooltip place='left' effect='solid' multiline={true} className='tooltip-wrapper'/>
