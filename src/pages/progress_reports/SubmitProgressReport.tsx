@@ -99,7 +99,8 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
       Notifications.showError({text: "Form validation failed. Please check the form for errors."});
     } else {
       try {
-        const submittedPR = await ProgressReport.submitProgressReport(createMultiPartFormData(convertFormStateToDAR(formState)), parentReferenceId);
+        const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState));
+        const submittedPR = await ProgressReport.submitProgressReport(multiPartFormData, parentReferenceId);
         onSuccess(submittedPR);
       } catch (error: unknown) {
         handleError('Error: Unable to submit progress report: ', error);
