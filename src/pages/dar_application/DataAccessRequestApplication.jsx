@@ -116,7 +116,7 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   });
 
-  const {location} = props;
+  const {history, location} = props;
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
@@ -414,7 +414,7 @@ const DataAccessRequestApplication = (props) => {
       await DAR.postDar(updatedFormData);
       setShowDialogSubmit({
         showDialogSubmit: false
-      }, Navigation.console(Storage.getCurrentUser(), props.history).response);
+      }, Navigation.console(Storage.getCurrentUser(), history).response);
     } catch (error) {
       setShowDialogSubmit(false);
       if (error.response.data.code && error.response.data.message) {
@@ -471,7 +471,7 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(await DataSet.getDatasetsByIds(formData.datasetIds));
       referenceId = darPartialResponse.referenceId;
       if (isNil(dataRequestId)) {
-        props.history.replace('/dar_application/' + referenceId);
+        history.replace('/dar_application/' + referenceId);
       }
       //execute saveDARDocuments method only if documents are required for the DAR
       //value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
@@ -499,7 +499,7 @@ const DataAccessRequestApplication = (props) => {
   };
 
   const back = () => {
-    props.history.goBack();
+    history.goBack();
   };
 
   const { dataRequestId } = props.match.params;
@@ -574,7 +574,7 @@ const DataAccessRequestApplication = (props) => {
                       readOnlyMode={false}
                       datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)}
                       dar={reverseOrderedDARs[0]}
-                      history={props.history}
+                      history={history}
                       location={location}
                       researcher={researcher}
                     />
