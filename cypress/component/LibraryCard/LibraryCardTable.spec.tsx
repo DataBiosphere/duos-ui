@@ -27,10 +27,20 @@ describe('Library Card Table Tests', () => {
     }
     mount(<LibraryCardTable {...props}/>);
     cy.get('[data-cy=manage-library-card-table]').should('exist');
+    cy.get('[data-cy=add-library-card-button]').should('exist');
+    // For each user in the list, teest that the row is deletable and removed from the table view
     libraryCardList.forEach((card) => {
       cy.get('[data-cy=manage-library-card-table]').should('contain', card.userName);
       cy.get('[data-cy=manage-library-card-table]').should('contain', card.userEmail);
       cy.get(`[id=show-delete-modal-${card.id}]`).should('exist');
+      cy.get(`[id=show-delete-modal-${card.id}]`).click();
+      cy.get('.confirmation-modal').should('exist');
+      cy.get('.confirmation-modal').find('button[type="button"]').contains('Cancel').click();
+      cy.get(`[id=show-delete-modal-${card.id}]`).click();
+      cy.get('.confirmation-modal').find('button[type="button"]').contains('Confirm').click();
+    });
+    libraryCardList.forEach((card) => {
+      cy.get('.table-data').should('not.contain', card.userName)
     });
   });
 

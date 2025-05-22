@@ -378,6 +378,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                     }}
                 >
                   <button
+                      data-cy={'add-library-card-button'}
                       type={'button'}
                       id="btn_addLibraryCard"
                       className="btn-primary btn-add common-background"
