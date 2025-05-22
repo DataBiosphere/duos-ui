@@ -63,7 +63,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     }
     setFilteredDropdown(filteredCopy);
     if (action !== 'input-blur' && action !== 'menu-close') {
-      setCard(Object.assign({}, card, {email: term}));
+      setCard({...card, ...{email: term}});
     }
   };
 
