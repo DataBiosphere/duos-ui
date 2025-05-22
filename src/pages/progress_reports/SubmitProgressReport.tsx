@@ -113,13 +113,8 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     const multiPartFormData = new FormData();
 
     multiPartFormData.append('dar', JSON.stringify(progressReport));
-
-    // TODO - add files, etc
-    // for (const field of Object.keys(formFiles)) {
-    //   if (!isNil(formFiles[field])) {
-    //     multiPartFormData.append(field, formFiles[field]);
-    //   }
-    // }
+    // Endpoint expects files
+    // leaving them empty until we provide these fields in the application form
     multiPartFormData.append('collaboratorRequiredFile', '')
     multiPartFormData.append('ethicsApprovalRequiredFile', '')
 
