@@ -31,6 +31,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onFormChange({ [FormStateKey.CLOSEOUT_SUPPLEMENT]: undefined } as Partial<FormState>);
                             }
                         }}
+                        defaultValue={formState.closeoutYesNo}
                         disabled={readOnly}
                     />
                     {formState.closeoutYesNo && (
