@@ -7,36 +7,36 @@ import Creatable from 'react-select/creatable';
 import SimpleButton from 'src/components/SimpleButton';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
 import {SingleValue} from 'react-select';
-import {LibraryCard as LibraryCardModel} from 'src/types/model';
+import {LibraryCard} from 'src/types/model';
 
 // This represents the fields describing users in a selection dropdown menu
 interface UserOption {
   userId: number;
   displayName: string;
   email: string;
-  libraryCards?: LibraryCardModel[];
+  libraryCards?: LibraryCard[];
 }
 
 interface FormFieldRowProps {
-  card: LibraryCardModel;
+  card: LibraryCard;
   dropdownOptions: UserOption[];
   updateUser: (value: SingleValue<UserOption>) => void;
-  setCard: React.Dispatch<React.SetStateAction<LibraryCardModel>>;
+  setCard: React.Dispatch<React.SetStateAction<LibraryCard>>;
 }
 
-interface LibraryCardFormModalProps {
+export interface LibraryCardFormModalProps {
   showModal: boolean;
-  createOnClick: (card: LibraryCardModel) => void;
+  createOnClick: (card: LibraryCard) => void;
   closeModal: () => void;
   users: UserOption[];
-  card: LibraryCardModel;
+  card: LibraryCard;
 }
 
 interface FilterOptions {
   searchTerm?: string;
   input?: string;
-  card: LibraryCardModel;
-  setCard: React.Dispatch<React.SetStateAction<LibraryCardModel>>;
+  card: LibraryCard;
+  setCard: React.Dispatch<React.SetStateAction<LibraryCard>>;
   action: string;
 }
 
@@ -92,9 +92,9 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
   );
 };
 
-const LibraryCardFormModal: React.FC<LibraryCardFormModalProps> = (props) => {
+const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   const { showModal, createOnClick, closeModal, users } = props;
-  const [card, setCard] = useState<LibraryCardModel>(props.card);
+  const [card, setCard] = useState<LibraryCard>(props.card);
 
   //initialization hook, sets card as state variables
   useEffect(() => {
@@ -112,11 +112,11 @@ const LibraryCardFormModal: React.FC<LibraryCardFormModalProps> = (props) => {
       userEmail = value;
     }
     const updatedCard = {...card, userEmail, userId, userName};
-    setCard(updatedCard as LibraryCardModel);
+    setCard(updatedCard as LibraryCard);
   };
 
   //boolean function, used to determine if submit button should be disabled
-  const isConfirmDisabled = (card: LibraryCardModel): boolean => {
+  const isConfirmDisabled = (card: LibraryCard): boolean => {
     return isNil(card.userEmail);
   };
 
@@ -132,7 +132,7 @@ const LibraryCardFormModal: React.FC<LibraryCardFormModalProps> = (props) => {
             },
           }}
       >
-        <div style={Styles.MODAL.CONTENT}>
+        <div data-cy={'library-card-form-modal'} style={Styles.MODAL.CONTENT}>
           <CloseIconComponent closeFn={closeModal}/>
           <div style={Styles.MODAL.TITLE_HEADER}>
             Add Library Card
@@ -157,6 +157,7 @@ const LibraryCardFormModal: React.FC<LibraryCardFormModalProps> = (props) => {
               }}
           >
             <SimpleButton
+                data-cy={'library-card-form-modal-add-button'}
                 onClick={() => createOnClick(card)}
                 additionalStyle={{margin: '0%', width: '80px', height: '15px', padding: '20px'}}
                 baseColor={Theme.palette.secondary}
@@ -164,6 +165,7 @@ const LibraryCardFormModal: React.FC<LibraryCardFormModalProps> = (props) => {
                 label={'Add'}
             />
             <SimpleButton
+                data-cy={'library-card-form-modal-close-button'}
                 onClick={closeModal}
                 additionalStyle={{marginLeft: '1%', width: '80px', height: '15px', padding: '20px'}}
                 baseColor={Theme.palette.secondary}
