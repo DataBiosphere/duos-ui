@@ -4,15 +4,21 @@ import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import PublicationList from 'src/components/publications_list/PublicationList';
 import {FormState, FormStateKey} from "src/pages/progress_reports/ProgressReportFormState";
+import ERACommons from 'src/components/ERACommons';
+import {DuosUser} from 'src/types/model';
+import {Location} from 'history';
 
 interface SummarySectionProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
+    readonly eRACommonsDestination?: string;
+    readonly location?: Location;
+    readonly researcher: DuosUser;
 }
 
 export default function SummarySection(props: SummarySectionProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange } = props;
+    const { readOnly, formState, onFormChange, eRACommonsDestination, location, researcher } = props;
 
     const [publications, setPublications] = useState<PublicationOrPresentation[]>(formState.publications || []);
     const [presentations, setPresentations] = useState<PublicationOrPresentation[]>(formState.presentations || []);
@@ -33,6 +39,22 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
         <div data-cy='summary-section'>
             <div className='progress-report-step-card'>
                 {readOnly ? <h3>Review a Progress Report</h3> : <h3>Step 1: Submit a Progress Report</h3>}
+
+                <div className='progress-report-row' data-cy='researcher-identification'>
+                    <span className={'control-label'}>{'Researcher Identification'}</span>
+                    <ERACommons
+                        destination={eRACommonsDestination}
+                        researcherProfile={researcher}
+                        onNihStatusUpdate={() => {
+                        }}
+                        location={location}
+                        validationError={() => {
+                        }}
+                        readOnly={readOnly}
+                        header={true}
+                        required={!readOnly} // In read-only mode, this is not required
+                    />
+                </div>
 
                 <div className='progress-report-row'>
                     <FormField

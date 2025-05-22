@@ -116,6 +116,8 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   });
 
+  const {location} = props;
+
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
   const [nihValid, setNihValid] = useState(true);
@@ -568,7 +570,14 @@ const DataAccessRequestApplication = (props) => {
                   <ConditionalAccordion
                       condition={false}
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
-                    <ProgressReportApplication readOnlyMode={false} datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)} dar={reverseOrderedDARs[0]} history={props.history}/>
+                    <ProgressReportApplication
+                      readOnlyMode={false}
+                      datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)}
+                      dar={reverseOrderedDARs[0]}
+                      history={props.history}
+                      location={location}
+                      researcher={researcher}
+                    />
                   </ConditionalAccordion>
                 </div>
             )}
@@ -584,7 +593,13 @@ const DataAccessRequestApplication = (props) => {
                                 condition={true}
                                 title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
                                 defaultExpanded={index === 0}>
-                              <ProgressReportApplication readOnlyMode={true} datasets={filterForProgressReport(datasets, dar.datasetIds)} dar={dar?.data}/>
+                              <ProgressReportApplication
+                                readOnlyMode={true}
+                                datasets={filterForProgressReport(datasets, dar.datasetIds)}
+                                dar={dar?.data}
+                                location={undefined}
+                                researcher={researcher}
+                              />
                             </ConditionalAccordion>
                           </div>);
                     }
@@ -610,7 +625,7 @@ const DataAccessRequestApplication = (props) => {
                   formValidationChange={(val) => formValidationChange('researcherInfoErrors', val)}
                   eRACommonsDestination={eRACommonsDestination}
                   formFieldChange={formFieldChange}
-                  location={props.location}
+                  location={location}
                   nihValid={nihValid}
                   onNihStatusUpdate={setNihValid}
                   showNihValidationError={showNihValidationError}
