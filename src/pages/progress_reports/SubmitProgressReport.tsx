@@ -82,9 +82,9 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     if (formState.presentationsYesNo) {
       expectedForm.presentations = getPresentationList(formState);
     }
-    expectedForm.labCollaborators = formState.labCollaborators ?? [];
-    expectedForm.internalCollaborators = formState.internalCollaborators ?? [];
-    expectedForm.externalCollaborators = formState.externalCollaborators ?? [];
+    expectedForm.labCollaborators = formState.labCollaborators;
+    expectedForm.internalCollaborators = formState.internalCollaborators;
+    expectedForm.externalCollaborators = formState.externalCollaborators;
     if (formState.dmiYesNo) {
       expectedForm.dmi = getDataManagementIncidents(formState);
     }
