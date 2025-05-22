@@ -70,7 +70,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
   return (
       <div style={{display: 'flex'}}>
         <div style={{marginBottom: '2%', width: '100%'}}>
-          <label>Users</label>
+          <p><strong>Users</strong></p>
           <Creatable
               key="select-user"
               isClearable={true}
