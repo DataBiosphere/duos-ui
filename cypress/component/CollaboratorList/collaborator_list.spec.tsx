@@ -103,8 +103,6 @@ describe('CollaboratorList - Component Tests', () => {
         cy.get('#name').blur();
         cy.get('#title').type('New Title');
         cy.get('#title').blur();
-        cy.get('#institution').type('New Institution');
-        cy.get('#institution').blur();
         cy.get('#email').type('new.person@example.com');
         cy.get('#email').blur();
 
@@ -174,7 +172,7 @@ describe('CollaboratorList - Component Tests', () => {
     it('renders correctly with custom columnsToShow', () => {
         mount(<CollaboratorList
             {...defaultProps}
-            columnsToShow={['name', 'institution']}
+            columnsToShow={['name']}
         />);
 
         cy.contains(mockCollaborators[0].name).should('be.visible');

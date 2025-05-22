@@ -30,7 +30,6 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     cy.contains('New Collaborator Information').should('be.visible');
     cy.contains('Collaborator Name').should('be.visible');
     cy.contains('Collaborator Title').should('be.visible');
-    cy.contains('Collaborator Institution').should('be.visible');
     cy.contains('Collaborator Email').should('be.visible');
     cy.contains('Add').should('be.visible');
     cy.contains('Cancel').should('be.visible');
@@ -89,7 +88,6 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
     cy.get('#name').type('Test Name');
     cy.get('#title').type('Test Title');
-    cy.get('#institution').type('Test Institution');
     cy.get('#email').type('test@example.com');
 
     cy.contains('Add').click();
@@ -109,10 +107,6 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     cy.get('#title').type(title);
     cy.get('#title').should('have.value', title);
 
-    const institution = 'Test Institution';
-    cy.get('#institution').type(institution);
-    cy.get('#institution').should('have.value', institution);
-
     const email = 'test@example.com';
     cy.get('#email').type(email);
     cy.get('#email').should('have.value', email);
@@ -127,15 +121,11 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     cy.get('#title').focus();
     cy.get('#title').blur();
 
-    cy.get('#institution').focus();
-    cy.get('#institution').blur();
-
     cy.get('#email').focus();
     cy.get('#email').blur();
 
     cy.get('#name').parent().find('.error-message').should('be.visible');
     cy.get('#title').parent().find('.error-message').should('be.visible');
-    cy.get('#institution').parent().find('.error-message').should('be.visible');
     cy.get('#email').parent().find('.error-message').should('be.visible');
   });
 

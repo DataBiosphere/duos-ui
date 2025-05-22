@@ -154,7 +154,6 @@ describe('CollaboratorRow - Component Tests', () => {
 
         cy.get('#name').should('have.value', '');
         cy.get('#title').should('have.value', '');
-        cy.get('#institution').should('have.value', '');
         cy.get('#email').should('have.value', '');
 
         cy.contains('Add').should('be.visible');
