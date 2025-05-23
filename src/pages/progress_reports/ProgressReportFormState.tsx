@@ -2,6 +2,7 @@ import {CloseOutSupplement, Collaborator} from "src/types/model";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
 export interface AnyFormState {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
 
