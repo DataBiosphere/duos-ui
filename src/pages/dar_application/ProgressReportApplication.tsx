@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useCallback} from 'react';
 import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
 import {Location} from 'history';
-import {DMI_INCIDENT_KEYS, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
