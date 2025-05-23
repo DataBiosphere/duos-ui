@@ -372,10 +372,17 @@ export interface DataAccessRequest {
   intellectualPropertySummary: string;
   publications: Array<Publication>;
   presentations: Array<Presentation>;
-  dataManagementIncident: DataManagementIncident;
+  dmi: DataManagementIncident;
   researchPlans: string;
-  closeOutSupplement: 'PROJECT_COMPLETED' | 'REQUESTOR_MOVED_INSTITUTION' | 'PROJECT_TRANSFERRED' | 'PROJECT_SUPERSEDED';
+  closeoutSupplement: CloseOutSupplement;
   parentId?: number;
+}
+
+export enum CloseOutSupplement {
+    PROJECT_COMPLETED = 'PROJECT_COMPLETED',
+    REQUESTOR_MOVED_INSTITUTION = 'REQUESTOR_MOVED_INSTITUTION',
+    PROJECT_TRANSFERRED = 'PROJECT_TRANSFERRED',
+    PROJECT_SUPERSEDED = 'PROJECT_SUPERSEDED'
 }
 
 export interface DataManagementIncident {
@@ -389,7 +396,7 @@ export interface Presentation {
   date: string;
   authors: string;
   datasetCitation: string;
-  citation: string;
+  citation: boolean;
 }
 
 export interface Publication {
@@ -399,7 +406,7 @@ export interface Publication {
   authors: string;
   bibliographicCitation: string;
   datasetCitation: string;
-  citation: string;
+  citation: boolean;
 }
 
 export interface Collaborator {
@@ -407,8 +414,8 @@ export interface Collaborator {
   email: string;
   eraCommonsId: string;
   name: string;
-  title: number;
-  uuid: number;
+  title: string
+  uuid: string;
 }
 
 export interface Election {

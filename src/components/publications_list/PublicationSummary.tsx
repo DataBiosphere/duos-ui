@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import PublicationDelete from "./PublicationDelete";
-import { Publication } from "./Publication";
+import { PublicationOrPresentation } from "./PublicationOrPresentation";
 
 interface PublicationSummaryProps {
-    publication: Publication;
+    publication: PublicationOrPresentation;
     readonly columnsToShow: string[];
     readonly editAction: () => void;
     readonly deleteAction: () => void;
@@ -26,7 +26,7 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
         <div className='collaborator-summary-card'>
             {/* data elements to show in the row summary */}
             {columnsToShow.map((column, index) => {
-                const columnContent = publication[column as keyof Publication];
+                const columnContent = publication[column as keyof PublicationOrPresentation];
                 return columnContent && (
                     <div key={'publication_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
                         <span>

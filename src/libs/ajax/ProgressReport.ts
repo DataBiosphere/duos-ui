@@ -7,7 +7,7 @@ export const ProgressReport = {
     return await axios.post(
         url,
         progressReport,
-        Config.authOpts()
+        Config.multiPartOpts()
     );
   }
 }

@@ -38,7 +38,6 @@ describe('SubmitProgressReport tests', () => {
     }).as('submitProgressReport');
     mount(
         <SubmitProgressReport
-            progressReport={{}}
             parentReferenceId="1"
             onSuccess={() => {
             }}
@@ -47,7 +46,7 @@ describe('SubmitProgressReport tests', () => {
             validateForm={() => {
               return {}
             }}
-        />
+            formState={{}}/>
     );
     cy.get('[data-cy=pr-submit-button]').click();
     cy.wait('@submitProgressReport').then((interception) => {
@@ -75,7 +74,7 @@ describe('SubmitProgressReport tests', () => {
 
     mount(
         <SubmitProgressReport
-            progressReport={{}}
+            formState={{}}
             parentReferenceId="1"
             onSuccess={functionSpy.successHandler}
             onCancel={() => {
@@ -101,7 +100,7 @@ describe('SubmitProgressReport tests', () => {
 
       mount(
           <SubmitProgressReport
-              progressReport={{}}
+              formState={{}}
               parentReferenceId="1"
               onSuccess={functionSpy.successHandler}
               onCancel={() => {
@@ -126,7 +125,7 @@ describe('SubmitProgressReport tests', () => {
     cy.spy(functionSpy, 'cancelHandler').as('cancelHandler');
     mount(
         <SubmitProgressReport
-            progressReport={{}}
+            formState={{}}
             parentReferenceId="1"
             onSuccess={() => {
             }}
@@ -149,7 +148,7 @@ describe('SubmitProgressReport tests', () => {
     }).as('submitProgressReport');
     mount(
         <SubmitProgressReport
-            progressReport={{}}
+            formState={{}}
             parentReferenceId="1"
             onSuccess={() => {
             }}
