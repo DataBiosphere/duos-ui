@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useCallback} from 'react';
 import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
 import {Location} from 'history';
-import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {DMI_INCIDENT_KEYS, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -41,16 +41,10 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         // additional state for dmi section
         ...(dar?.dmi?.incidents && {
             dmiYesNo: (dar.dmi.incidents.length > 0),
-            dmiCombination: dar.dmi.incidents.includes(FormStateKey.DMI_COMBINATION),
-            dmiIdentification: dar.dmi.incidents.includes(FormStateKey.DMI_IDENTIFICATION),
-            dmiSharing: dar.dmi.incidents.includes(FormStateKey.DMI_SHARING),
-            dmiSecurity: dar.dmi.incidents.includes(FormStateKey.DMI_SECURITY),
-            dmiAcknowledgement: dar.dmi.incidents.includes(FormStateKey.DMI_ACKNOWLEDGEMENT),
-            dmiPublication: dar.dmi.incidents.includes(FormStateKey.DMI_PUBLICATION),
-            dmiFalsification: dar.dmi.incidents.includes(FormStateKey.DMI_FALSIFICATION),
-            dmiOther: dar.dmi.incidents.includes(FormStateKey.DMI_OTHER),
             dmiDescription: dar.dmi.description
         }),
+        // populate true/false for each DMI incident key based on whether it appears in the list of incidents
+        ...(dar?.dmi?.incidents && DMI_INCIDENT_KEYS.map(key => ({ [key]: dar.dmi.incidents.includes(key)})).reduce((acc, obj) => ({ ...acc, ...obj }), {})),
         // additional state for closeout section
         ...(dar?.closeoutSupplement && {
             closeoutYesNo: !!dar.closeoutSupplement
