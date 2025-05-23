@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {cloneDeep, includes, isEmpty, isNil, isObject} from 'lodash/fp';
 import {Styles, Theme} from 'src/libs/theme';
 import CloseIconComponent from 'src/components/CloseIconComponent';
-import Modal from 'react-modal';
+import ModalWrapper from "src/components/collaborator_list/ModalWrapper";
 import Creatable from 'react-select/creatable';
 import SimpleButton from 'src/components/SimpleButton';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
@@ -121,7 +121,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   };
 
   return (
-      <Modal
+      <ModalWrapper
           isOpen={showModal}
           onRequestClose={closeModal}
           shouldCloseOnOverlayClick={true}
@@ -173,7 +173,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
             />
           </div>
         </div>
-      </Modal>
+      </ModalWrapper>
   );
 };
 
