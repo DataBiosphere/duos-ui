@@ -66,10 +66,9 @@ export interface LibraryCard {
   userId: number;
   userName: string;
   userEmail: string;
-  createDate: string;
+  createDate: Date;
   createUserId: number;
-  updateDate: string;
-  updateUserId: number;
+  daaIds?: number[];
 }
 
 export type OrganizationType = 'For-Profit' | 'Nonprofit';

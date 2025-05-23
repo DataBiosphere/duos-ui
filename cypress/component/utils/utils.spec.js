@@ -7,21 +7,13 @@ const sampleLCList = [
     userName: 'Test Person',
     createDate: 1649163460401,
     updateDate: 1649163480401,
-    institution: {
-      name: 'First Institution',
-    },
     userEmail: 'devemail',
-    eraCommonsId: 'commons',
   },
   {
     userName: 'another person',
     createDate: 1629163460401,
     updateDate: 1639163480801,
-    institution: {
-      name: 'Second Institution',
-    },
     userEmail: 'prodemail',
-    eraCommonsId: 'era',
   },
 ];
 
@@ -178,21 +170,6 @@ describe('LC Search Filter', () => {
     });
   });
 
-  it('filters on user institution', () => {
-    let filteredList;
-    const originalCard = sampleLCList[0];
-    filteredList = cardSearchFn('', sampleLCList);
-    expect(filteredList.length).equals(sampleLCList.length);
-
-    const term = 'first';
-    filteredList = cardSearchFn(term, sampleLCList);
-    expect(filteredList.length).equals(1);
-    const filteredCard = filteredList[0];
-    forEach(originalCard, (value, key) => {
-      expect(filteredCard[key]).equals(value);
-    });
-  });
-
   it('filters on user email', () => {
     let filteredList;
     const originalCard = sampleLCList[0];
@@ -208,20 +185,6 @@ describe('LC Search Filter', () => {
     });
   });
 
-  it('filters on eraCommonsId', () => {
-    let filteredList;
-    const originalCard = sampleLCList[0];
-    filteredList = cardSearchFn('', sampleLCList);
-    expect(filteredList.length).equals(sampleLCList.length);
-
-    const term = 'commons';
-    filteredList = cardSearchFn(term, sampleLCList);
-    expect(filteredList.length).equals(1);
-    const filteredCard = filteredList[0];
-    forEach(originalCard, (value, key) => {
-      expect(filteredCard[key]).equals(value);
-    });
-  });
 });
 
 describe('Researcher Search Filter (SO Console)', () => {
