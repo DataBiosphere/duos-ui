@@ -41,10 +41,13 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         // additional state for dmi section
         ...(dar?.dmi?.incidents && {
             dmiYesNo: (dar.dmi.incidents.length > 0),
-            dmiDescription: dar.dmi.description
+            dmiDescription: dar.dmi.description,
+            // populate DMI incident multiselect based on whether the option appears in list of incidents
+            ...DMI_INCIDENT_KEYS.reduce((acc, key) => {
+                acc[key] = dar.dmi.incidents.includes(key);
+                return acc;
+            }, {})
         }),
-        // populate true/false for each DMI incident key based on whether it appears in the list of incidents
-        ...(dar?.dmi?.incidents && DMI_INCIDENT_KEYS.map(key => ({ [key]: dar.dmi.incidents.includes(key)})).reduce((acc, obj) => ({ ...acc, ...obj }), {})),
         // additional state for closeout section
         ...(dar?.closeoutSupplement && {
             closeoutYesNo: !!dar.closeoutSupplement
