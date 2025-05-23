@@ -52,7 +52,6 @@
     "@types/lodash": "4.17.16",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
-    "@types/react-modal": "3.16.3",
     "@types/react-router-dom": "5.3.3",
     "@vitejs/plugin-react": "4.4.1",
     "buffer": "6.0.3",
