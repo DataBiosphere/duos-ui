@@ -266,6 +266,32 @@ const calcDUAErrors = (formData, datasets, dataUseTranslations, errors) => {
   }
 }
 
+export const calcPublicationOrPresentationErrors = (newPublication, publicationText) => {
+  const validation = {};
+  if (isEmpty(newPublication?.title)) {
+    validation.title = requiredError;
+  }
+  if (isEmpty(newPublication?.date)) {
+    validation.date = requiredError;
+  }
+  if (isEmpty(newPublication?.authors)) {
+    validation.authors = requiredError;
+  }
+  if (publicationText === 'Publication') {
+    if (isEmpty(newPublication?.pubmed_id)) {
+      validation.pubmed_id = requiredError;
+    }
+    if (isEmpty(newPublication?.bibliographic_citation)) {
+      validation.bibliographic_citation = requiredError;
+    }
+  } else { // it's a presentation
+    if (isEmpty(newPublication?.link)) {
+      validation.link = requiredError;
+    }
+  }
+  return validation;
+}
+
 const requiredRusFields = [
   'controls',
   'population',

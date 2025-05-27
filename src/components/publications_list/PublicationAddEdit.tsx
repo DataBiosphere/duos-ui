@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
+import { ValidationError } from "src/pages/dar_application/FormValidationState";
+import { validationFailed, calcPublicationOrPresentationErrors } from "src/utils/darFormUtils";
 
 interface FormFieldChange {
     key: string;
@@ -16,10 +18,32 @@ interface PublicationAddEditProps {
     readonly onPublicationChange: (publications: PublicationOrPresentation[]) => void;
 }
 
+interface Validation {
+    title?: ValidationError;
+    date?: ValidationError;
+    authors?: ValidationError;
+    pubmed_id?: ValidationError;
+    bibliographic_citation?: ValidationError;
+    link?: ValidationError;
+}
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
     const { id, publication, publicationText, publications, closeAction, onPublicationChange } = props;
 
     const [newPublication, setNewPublication] = useState(publication);
+    const [validation, setValidation] = useState<Validation>({});
+
+    useEffect(() => {
+        setValidation(calcPublicationOrPresentationErrors(newPublication, publicationText));
+    }, [newPublication]);
+
+    const formValidationChange = useCallback(({ key, validator }) => {
+        setValidation((formValidation) => {
+            return {
+                ...formValidation,
+                [key]: validator
+            };
+        });
+    }, []);
 
     return (
         <div className='form-group row no-margin'>
@@ -39,6 +63,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
+                        validation={validation.title}
+                        onValidationChange={formValidationChange}
                     />
                     <FormField
                         id='date'
@@ -53,6 +79,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
+                        validation={validation.date}
+                        onValidationChange={formValidationChange}
                     />
                     <FormField
                         id='authors'
@@ -67,6 +95,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
+                        validation={validation.authors}
+                        onValidationChange={formValidationChange}
                     />
                     {publicationText === 'Publication' ?
                         <>
@@ -83,12 +113,14 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                                     } as PublicationOrPresentation;
                                     setNewPublication(setPublication);
                                 }}
+                                validation={validation.pubmed_id}
+                                onValidationChange={formValidationChange}
                             />
                             <FormField
                                 id='bibliographic_citation'
                                 title={`${publicationText} Bibliographic Citation`}
                                 defaultValue={publication?.bibliographic_citation}
-                                placeholder='Date'
+                                placeholder='Bibliographic Citation'
                                 validators={[FormValidators.REQUIRED]}
                                 onChange={({ key, value }: FormFieldChange) => {
                                     const setPublication = {
@@ -97,6 +129,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                                     } as PublicationOrPresentation;
                                     setNewPublication(setPublication);
                                 }}
+                                validation={validation.bibliographic_citation}
+                                onValidationChange={formValidationChange}
                             />
                         </> : // otherwise it's a presentation
                         <FormField
@@ -112,6 +146,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                                 } as PublicationOrPresentation;
                                 setNewPublication(setPublication);
                             }}
+                            validation={validation.link}
+                            onValidationChange={formValidationChange}
                         />
                     }
                     <FormField
@@ -143,9 +179,9 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>
                     {/* add/save button */}
-                    <div
+                    <button
                         className='collaborator-form-add-save-button f-left btn'
-                        role='button'
+                        type='button'
                         onClick={() => {
                             if (id < 0) {
                                 onPublicationChange([...publications, newPublication]);
@@ -158,9 +194,10 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             }
                             closeAction();
                         }}
+                        disabled={validationFailed(validation)}
                     >
                         {publication === undefined ? 'Add' : 'Save'}
-                    </div>
+                    </button>
                     {/* cancel button */}
                     <div
                         className='collaborator-form-cancel-button f-left btn'
