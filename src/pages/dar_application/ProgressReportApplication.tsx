@@ -9,7 +9,7 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
-import {validatePRFormData} from 'src/utils/darFormUtils';
+import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
 import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 
 type ProgressReportApplicationProps = {
@@ -44,9 +44,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
     const [formState, setFormState] = useState<FormState>(initialState);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
     const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
-    const [formValidation, setFormValidation] = useState<FormValidationState>(
-        {darErrors:
-                {gsoAcknowledgement: {}, pubAcknowledgement: {}, dsAcknowledgement: {}}});
+    const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
 
     const onFormChange = (newState: Partial<FormState>) => {
         setFormState(prevState => ({
@@ -72,16 +70,16 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
         onFormChange({ datasetIds: selectedIds });
     }, [selectedDatasets]);
 
-    const validateForm = () => {
-        const validation = validatePRFormData(
-            formState,
-            selectedDatasets,
-            dataUseTranslations
-        );
-        setFormValidation(validation);
-        return validation;
-    }
-
+    useEffect(() => {
+        if (!readOnlyMode) {
+            const validation = validatePRFormData(
+                formState,
+                selectedDatasets,
+                dataUseTranslations
+            );
+            setFormValidation(validation);
+        }
+    }, [formState]);
     const formValidationChange = useCallback(({ key, validation }) => {
         setFormValidation((formValidation) => {
             return {
@@ -158,7 +156,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true }
                     }}
                     onCancel={() => {
                     }}
-                    validateForm={validateForm}
+                    disabled={validationFailed(formValidation)}
                 />
             </div>}
         </div >

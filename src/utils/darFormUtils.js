@@ -205,26 +205,26 @@ const calcPRErrors = (formData, datasets, dataUseTranslations) => {
   if (isEmpty(formData.progressReportSummary)) {
       errors.progressReportSummary = requiredError;
   }
-  if (isEmpty(formData.intellectualPropertyYesNo)) {
+  if (isNil(formData.intellectualPropertyYesNo)) {
       errors.intellectualPropertyYesNo = requiredError;
   }
   if (formData.intellectualPropertyYesNo && isEmpty(formData.intellectualPropertySummary)) {
       errors.intellectualPropertySummary = requiredError;
   }
-  if (isEmpty(formData.publicationsYesNo)) {
+  if (isNil(formData.publicationsYesNo)) {
       errors.publicationsYesNo = requiredError;
   }
   if (formData.publicationsYesNo && isEmpty(formData.publications)) {
       errors.publications = requiredError;
   }
-  if (isEmpty(formData.presentationsYesNo)) {
+  if (isNil(formData.presentationsYesNo)) {
         errors.presentationsYesNo = requiredError;
   }
   if (formData.presentationsYesNo && isEmpty(formData.presentations)) {
       errors.presentations = requiredError;
   }
   calcDUAErrors(formData, datasets, dataUseTranslations, errors);
-  if (isEmpty(formData.dmiYesNo)) {
+  if (isNil(formData.dmiYesNo)) {
       errors.dmiYesNo = requiredError;
   }
   const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,

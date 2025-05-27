@@ -108,6 +108,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         columnsToShow={['title', 'date']}
                         onPublicationChange={onPublicationChange}
                         disabled={readOnly}
+                        validation={validation}
+                        onValidationChange={onValidationChange}
                     />}
                 </div>
                 <div className='progress-report-row'>
@@ -131,6 +133,8 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         columnsToShow={['title', 'date']}
                         onPublicationChange={onPresentationChange}
                         disabled={readOnly}
+                        validation={validation}
+                        onValidationChange={onValidationChange}
                     />}
                 </div>
             </div>

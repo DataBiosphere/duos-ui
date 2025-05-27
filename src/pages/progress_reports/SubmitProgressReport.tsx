@@ -3,8 +3,7 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
-import {validationFailed} from "src/utils/darFormUtils";
-import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
+import {Theme} from "src/libs/theme";
 
 
 interface SubmitProgressReportProps {
@@ -12,22 +11,18 @@ interface SubmitProgressReportProps {
   readonly parentReferenceId: string;
   readonly onSuccess: (result: unknown) => void;
   readonly onCancel: (result: unknown) => void;
-  readonly validateForm: () => FormValidationState;
+  readonly disabled?: boolean;
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const {progressReport, parentReferenceId, onSuccess, onCancel, validateForm} = props;
+  const {progressReport, parentReferenceId, onSuccess, onCancel, disabled} = props;
 
   const submit = async () => {
-    if (validationFailed(validateForm())) {
-      Notifications.showError({text: "Form validation failed. Please check the form for errors."});
-    } else {
-      try {
-        const submittedPR = await ProgressReport.submitProgressReport(progressReport, parentReferenceId);
-        onSuccess(submittedPR);
-      } catch (error: unknown) {
-        handleError('Error: Unable to submit progress report: ', error);
-      }
+    try {
+      const submittedPR = await ProgressReport.submitProgressReport(progressReport, parentReferenceId);
+      onSuccess(submittedPR);
+    } catch (error: unknown) {
+      handleError('Error: Unable to submit progress report: ', error);
     }
   }
 
@@ -45,15 +40,24 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     const serverError = consentError.message ?? 'Unknown error';
     Notifications.showError({text: message + serverError});
   }
+  const disabledStyle = {
+    backgroundColor: Theme.palette.disabled,
+    borderColor: Theme.palette.disabled
+  }
 
+  console.log(disabled);
   return (
       <div className='flex flex-row' style={{justifyContent: 'flex-start'}}>
-        <button type={'button'}
+        <span>
+            <button type={'button'}
                 className='button button-blue'
-                style={{marginRight: '2rem', cursor: 'pointer'}}
+                style={{marginRight: '2rem', cursor: 'pointer', ...(disabled ? disabledStyle : {})}}
                 data-cy='pr-submit-button'
+                disabled={disabled}
+                title='Complete required form fields to enable submission.'
                 onClick={submit}>Submit
-        </button>
+            </button>
+        </span>
         <button type={'button'}
             className='button button-white'
             style={{cursor: 'pointer'}}

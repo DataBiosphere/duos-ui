@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PublicationAddEdit from './PublicationAddEdit';
 import PublicationRow from './PublicationRow';
 import { Publication } from './Publication';
+import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
 
 interface PublicationListProps {
     publications: Publication[];
@@ -9,10 +10,12 @@ interface PublicationListProps {
     readonly columnsToShow?: string[];
     readonly onPublicationChange: (publications: Publication[]) => void;
     readonly disabled?: boolean;
+    readonly validation?: DarErrors;
+    readonly onValidationChange?: (validationState: { key: string, validation: ValidationError }) => void;
 }
 
 export default function PublicationList(props: PublicationListProps): React.JSX.Element {
-    const { publications, publicationText, columnsToShow = [], onPublicationChange, disabled = false } = props;
+    const { publications, publicationText, columnsToShow = [], onPublicationChange, disabled = false, validation, onValidationChange } = props;
 
     const [showAddEdit, setShowAddEdit] = useState(false);
     const [editState, setEditState] = useState(publications.map(() => false));
@@ -38,6 +41,8 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
                     style={{
                         marginTop: 25,
                         marginBottom: 5,
+                        border: validation?.publications ? '1px solid red' : '1px solid #0948B7',
+                        boxShadow: validation?.publications ? '0 0 5px red' : 'none',
                         ...(disabled ? { cursor: 'not-allowed' } : {}),
                     }}
                     onClick={() => !disabled && setShowAddEdit(true) }
