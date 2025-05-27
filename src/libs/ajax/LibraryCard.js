@@ -1,6 +1,6 @@
-import { Config } from '../config';
+import {Config} from 'src/libs/config';
 import axios from 'axios';
-import { getApiUrl } from '../ajax';
+import {getApiUrl} from 'src/libs/ajax';
 
 
 export const LibraryCard = {
@@ -12,11 +12,6 @@ export const LibraryCard = {
   createLibraryCard: async (card) => {
     const url = `${await getApiUrl()}/api/libraryCards`;
     const res = await axios.post(url, card, Config.authOpts());
-    return res.data;
-  },
-  updateLibraryCard: async (card) => {
-    const url = `${await getApiUrl()}/api/libraryCards/${card.id}`;
-    const res = await axios.put(url, card, Config.authOpts());
     return res.data;
   },
   deleteLibraryCard: async (id) => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms';
-import { Publication } from 'src/components/publications_list/Publication';
+import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 
 interface FormFieldChange {
     key: string;
@@ -9,11 +9,11 @@ interface FormFieldChange {
 
 interface PublicationAddEditProps {
     readonly id: number;
-    publication?: Publication;
+    publication?: PublicationOrPresentation;
     readonly publicationText: string;
-    readonly publications: Publication[];
+    readonly publications: PublicationOrPresentation[];
     readonly closeAction: () => void;
-    readonly onPublicationChange: (publications: Publication[]) => void;
+    readonly onPublicationChange: (publications: PublicationOrPresentation[]) => void;
 }
 
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
@@ -36,7 +36,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             const setPublication = {
                                 ...newPublication,
                                 [key]: value
-                            } as Publication;
+                            } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
                     />
@@ -50,7 +50,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             const setPublication = {
                                 ...newPublication,
                                 [key]: value
-                            } as Publication;
+                            } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
                     />
@@ -64,7 +64,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             const setPublication = {
                                 ...newPublication,
                                 [key]: value
-                            } as Publication;
+                            } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
                     />
@@ -80,7 +80,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                                     const setPublication = {
                                         ...newPublication,
                                         [key]: value
-                                    } as Publication;
+                                    } as PublicationOrPresentation;
                                     setNewPublication(setPublication);
                                 }}
                             />
@@ -94,7 +94,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                                     const setPublication = {
                                         ...newPublication,
                                         [key]: value
-                                    } as Publication;
+                                    } as PublicationOrPresentation;
                                     setNewPublication(setPublication);
                                 }}
                             />
@@ -109,7 +109,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                                 const setPublication = {
                                     ...newPublication,
                                     [key]: value
-                                } as Publication;
+                                } as PublicationOrPresentation;
                                 setNewPublication(setPublication);
                             }}
                         />
@@ -123,7 +123,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             const setPublication = {
                                 ...newPublication,
                                 [key]: value
-                            } as Publication;
+                            } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
                     />
@@ -136,7 +136,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             const setPublication = {
                                 ...newPublication,
                                 [key]: value
-                            } as Publication;
+                            } as PublicationOrPresentation;
                             setNewPublication(setPublication);
                         }}
                     />

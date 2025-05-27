@@ -116,6 +116,8 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   });
 
+  const {history, location} = props;
+
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
   const [nihValid, setNihValid] = useState(true);
@@ -412,7 +414,7 @@ const DataAccessRequestApplication = (props) => {
       await DAR.postDar(updatedFormData);
       setShowDialogSubmit({
         showDialogSubmit: false
-      }, Navigation.console(Storage.getCurrentUser(), props.history).response);
+      }, Navigation.console(Storage.getCurrentUser(), history).response);
     } catch (error) {
       setShowDialogSubmit(false);
       if (error.response.data.code && error.response.data.message) {
@@ -469,7 +471,7 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(await DataSet.getDatasetsByIds(formData.datasetIds));
       referenceId = darPartialResponse.referenceId;
       if (isNil(dataRequestId)) {
-        props.history.replace('/dar_application/' + referenceId);
+        history.replace('/dar_application/' + referenceId);
       }
       //execute saveDARDocuments method only if documents are required for the DAR
       //value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
@@ -497,7 +499,7 @@ const DataAccessRequestApplication = (props) => {
   };
 
   const back = () => {
-    props.history.goBack();
+    history.goBack();
   };
 
   const { dataRequestId } = props.match.params;
@@ -568,7 +570,14 @@ const DataAccessRequestApplication = (props) => {
                   <ConditionalAccordion
                       condition={false}
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
-                    <ProgressReportApplication readOnlyMode={false} datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)} dar={reverseOrderedDARs[0]}/>
+                    <ProgressReportApplication
+                      readOnlyMode={false}
+                      datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)}
+                      dar={reverseOrderedDARs[0]}
+                      history={history}
+                      location={location}
+                      researcher={researcher}
+                    />
                   </ConditionalAccordion>
                 </div>
             )}
@@ -584,7 +593,13 @@ const DataAccessRequestApplication = (props) => {
                                 condition={true}
                                 title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
                                 defaultExpanded={index === 0}>
-                              <ProgressReportApplication readOnlyMode={true} datasets={filterForProgressReport(datasets, dar.datasetIds)} dar={dar?.data}/>
+                              <ProgressReportApplication
+                                readOnlyMode={true}
+                                datasets={filterForProgressReport(datasets, dar.datasetIds)}
+                                dar={dar?.data}
+                                location={undefined}
+                                researcher={researcher}
+                              />
                             </ConditionalAccordion>
                           </div>);
                     }
@@ -610,7 +625,7 @@ const DataAccessRequestApplication = (props) => {
                   formValidationChange={(val) => formValidationChange('researcherInfoErrors', val)}
                   eRACommonsDestination={eRACommonsDestination}
                   formFieldChange={formFieldChange}
-                  location={props.location}
+                  location={location}
                   nihValid={nihValid}
                   onNihStatusUpdate={setNihValid}
                   showNihValidationError={showNihValidationError}

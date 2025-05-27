@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FormField, FormValidators } from '../forms/forms';
-import { Collaborator } from './Collaborator';
+import {Collaborator} from "src/types/model";
 
 interface FormFieldChange {
     key: string;
@@ -45,20 +45,6 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         title={`${collaboratorText} Title`}
                         defaultValue={collaborator?.title}
                         placeholder='Title'
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setCollaborator = {
-                                ...newCollaborator,
-                                [key]: value
-                            } as Collaborator;
-                            setNewCollaborator(setCollaborator);
-                        }}
-                    />
-                    <FormField
-                        id='institution'
-                        title={`${collaboratorText} Institution`}
-                        defaultValue={collaborator?.institution}
-                        placeholder='Institution'
                         validators={[FormValidators.REQUIRED]}
                         onChange={({ key, value }: FormFieldChange) => {
                             const setCollaborator = {

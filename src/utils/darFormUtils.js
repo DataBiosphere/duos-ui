@@ -4,6 +4,7 @@
 
 import {isEmpty, isNil, isEqual, isString, isArray} from 'lodash';
 import { FormValidators } from '../components/forms/forms';
+import {extractEraAuthenticationState} from 'src/utils/ERACommonsUtils.js';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
   return datasets?.some((ds) => {
@@ -328,7 +329,7 @@ export const validateDARFormData = ({
     researcherInfoErrors: calcResearcherInfoErrors(formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted),
     darErrors: calcDarErrors(formData, datasets, dataUseTranslations, irbDocument, collaborationLetter),
     rusErrors: calcRusErrors(formData),
-    nihValid: isNil(researcher.eraCommonsId),
+    nihValid: extractEraAuthenticationState(researcher).nihValid,
   };
 };
 

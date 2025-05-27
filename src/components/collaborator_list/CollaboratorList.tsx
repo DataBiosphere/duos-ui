@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorRow from './CollaboratorRow';
-import { Collaborator } from './Collaborator';
+import {Collaborator} from "src/types/model";
 
 interface CollaboratorListProps {
     collaborators: Collaborator[];

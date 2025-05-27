@@ -115,7 +115,7 @@ export default function ResearcherInfo(props) {
               validationError={showNihValidationError}
               readOnly={readOnlyMode}
               header={true}
-              required={true}
+              required={!readOnlyMode} // In read-only mode, this is not required
             />
           </div>
           <fieldset>
