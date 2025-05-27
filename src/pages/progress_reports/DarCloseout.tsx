@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
-import {AnyFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import {CloseOutSupplement} from "src/types/model";
 
 interface DarCloseoutProps {
@@ -24,7 +24,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         title='5.1 Closeouts'
                         description={<span>Are you ready to finish work on this project?</span>}
                         orientation='horizontal'
-                        onChange={({ key, value }: AnyFormState) => {
+                        onChange={({ key, value }: ValidFormState) => {
                             onFormChange({ [key]: value }  as Partial<FormState>);
                             // clear out selected options if the user selects "No"
                             if (value === false) {
@@ -54,7 +54,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 ]}
                                 disabled={readOnly}
                                 defaultValue={formState.closeoutSupplement}
-                                onChange={({ key, value }: AnyFormState) => {
+                                onChange={({ key, value }: ValidFormState) => {
                                     onFormChange({ [key]: value } as Partial<FormState>);
                                 }}
                             />
