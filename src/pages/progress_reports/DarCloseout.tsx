@@ -36,6 +36,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         }}
                         defaultValue={formState.closeoutYesNo}
                         disabled={readOnly}
+                        validation={validation?.closeoutYesNo}
+                        onValidationChange={onValidationChange}
                     />
                     {formState.closeoutYesNo && (
                         <div>
@@ -60,6 +62,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onChange={({ key, value }: Partial<FormState>) => {
                                     onFormChange({ [key]: value } as Partial<FormState>);
                                 }}
+                                onValidationChange={onValidationChange}
+                                validation={validation?.closeoutSupplement}
                             />
                         </div>
                     </div>

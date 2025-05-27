@@ -243,17 +243,11 @@ const calcPRErrors = (formData, datasets, dataUseTranslations) => {
   if (formData.dmiYesNo && isEmpty(formData.dmiDescription)) {
     errors.dmiDescription = requiredError;
   }
-  const closeoutFields = [formData.closeoutCompleted, formData.closeoutTransferred, formData.closeoutMoved,
-    formData.closeoutSuperceded, formData.closeoutOther];
-  if (formData.closeoutYesNo && closeoutFields.every((field) => !field)) {
-    errors.closeoutCompleted = requiredError;
-    errors.closeoutTransferred = requiredError;
-    errors.closeoutMoved = requiredError;
-    errors.closeoutSuperceded = requiredError;
-    errors.closeoutOther = requiredError;
+  if (isNil(formData.closeoutYesNo)) {
+    errors.closeoutYesNo = requiredError;
   }
-  if (formData.closeoutOther && isEmpty(formData.closeoutOtherContext)) {
-    errors.closeoutOtherContext = requiredError;
+  if (formData.closeoutYesNo && isEmpty(formData.closeoutSupplement)) {
+    errors.closeoutSupplement = requiredError;
   }
   return errors;
 };

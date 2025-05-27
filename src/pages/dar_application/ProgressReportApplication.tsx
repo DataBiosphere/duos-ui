@@ -14,7 +14,7 @@ import {History, LocationState} from 'history';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
-import {FormValidationState, ValidationError} from 'src/pages/dar_application/FormValidationState';
+import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 
 type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
@@ -133,7 +133,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DataUseAcknowledgements
-                    title={'3.1 Data Use Acknowledgements'}
+                    title={'2.1 Data Use Acknowledgements'}
                     datasets={selectedDatasets}
                     dataUseTranslations={dataUseTranslations}
                     formData={formState}

@@ -51,13 +51,7 @@ export interface DarErrors {
     dmiOther?: ValidationError,
     dmiDescription?: ValidationError,
     closeoutYesNo?: ValidationError,
-    closeoutCompleted?: ValidationError,
-    closeoutMoved?: ValidationError,
-    closeoutTransferred?: ValidationError,
-    closeoutSuperceded?: ValidationError
-    closeoutOther?: ValidationError,
-    closeoutOtherContext?: ValidationError,
-
+    closeoutSupplement?: ValidationError,
 }
 
 export interface RusErrors {
