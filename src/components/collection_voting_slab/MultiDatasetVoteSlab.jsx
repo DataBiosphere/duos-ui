@@ -98,7 +98,7 @@ export default function MultiDatasetVoteSlab(props) {
     const allOpenElections = flow(
       get('elections'),
       filter((election) => includes(election.electionId)(electionIds)),
-      every((election) => toLower(election.status) === 'open')
+      filter((election) => toLower(election.status) === 'open')
     )(bucket);
 
     return (
