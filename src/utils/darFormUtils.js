@@ -302,10 +302,8 @@ export const calcPublicationOrPresentationErrors = (newPublication, publicationT
     if (isEmpty(newPublication?.bibliographic_citation)) {
       validation.bibliographic_citation = requiredError;
     }
-  } else { // it's a presentation
-    if (isEmpty(newPublication?.link)) {
+  } else if (isEmpty(newPublication?.link)) {
       validation.link = requiredError;
-    }
   }
   return validation;
 }
