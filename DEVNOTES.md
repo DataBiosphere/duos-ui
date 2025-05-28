@@ -21,7 +21,7 @@ cd scripts
 ```
 
 #### Notes on render-configs:
-* Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.
+* Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.  You can check like so: `env | grep HOST=`.
 * **Development against other envs**: If you want to point to other envs, you can populate public/config.json with the values from any
 environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where
 {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`. Remember to set the `env` value appropriately, for example,
