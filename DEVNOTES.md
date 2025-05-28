@@ -1,9 +1,9 @@
 # Local Development
 
-1. We use [node@22.11.0](https://docs.volta.sh/guide/understanding):
+1. We use node 24.0.2 at time of writing, but check the [version of Node declared in the Dockerfile](https://github.com/DataBiosphere/duos-ui/blob/develop/Dockerfile#L2) and install that when setting up.  You can install it with [Volta](https://docs.volta.sh/guide/understanding) or NVM.
 
 ```
-volta install 22.11.0
+volta install 24.0.2
 ```
 
 2. Install deps:
