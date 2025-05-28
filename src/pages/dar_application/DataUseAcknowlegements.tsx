@@ -37,6 +37,7 @@ return (
               key={'dataUseAcknowledgements'}
               title={title}
               description={includeInstructions ? 'Please confirm listed acknowledgements and/or document requirements below:' : ''}
+              validation={validation?.gsoAcknowledgement || validation?.pubAcknowledgement || validation?.dsAcknowledgement}
           />
         }
         {

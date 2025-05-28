@@ -4,8 +4,6 @@ import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
 
-const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
-
 interface DataManagementIncidentProps {
     readonly readOnly: boolean;
     formState: FormState;
@@ -28,7 +26,6 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             id={FormStateKey.DMI_YES_NO}
                             type={FormFieldTypes.YESNORADIOGROUP}
                             title='4.1 Data Management Incident'
-                            titleStyle={titleStyle}
                             description='Have there been any incidents related to mismanagement or misuse of data?'
                             orientation='horizontal'
                             defaultValue={formState.dmiYesNo}
@@ -157,7 +154,6 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                 <FormField
                                     id={FormStateKey.DMI_DESCRIPTION}
                                     type={FormFieldTypes.TEXTAREA}
-                                    titleStyle={titleStyle}
                                     description='Please describe the incidents related to mismanagement or misuse of data below.'
                                     placeholder={`Please limit your Data Management Incident to ${FORM_TEXT_AREA_MAX_LENGTH} characters.`}
                                     rows={6}
