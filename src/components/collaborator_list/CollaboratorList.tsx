@@ -9,10 +9,11 @@ interface CollaboratorListProps {
     readonly columnsToShow?: string[];
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly disabled?: boolean;
+    readonly showApproverStatus?: boolean;
 }
 
 export default function CollaboratorList(props: CollaboratorListProps): React.JSX.Element {
-    const { collaborators, collaboratorText, columnsToShow = [], onCollaboratorChange, disabled = false } = props;
+    const { collaborators, collaboratorText, columnsToShow = [], onCollaboratorChange, disabled = false, showApproverStatus = false } = props;
 
     const [showAddEdit, setShowAddEdit] = useState(false);
     const [editState, setEditState] = useState(collaborators.map(() => false));
@@ -52,6 +53,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         collaborators={collaborators}
                         closeAction={() => setShowAddEdit(false)}
                         onCollaboratorChange={onCollaboratorChange}
+                        showApproverStatus={showApproverStatus}
                     />
                 )}
             </div>

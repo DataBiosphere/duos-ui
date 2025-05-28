@@ -51,6 +51,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         columnsToShow={['name', 'title']}
                         onCollaboratorChange={onInternalLabStaffChange}
                         disabled={readOnly}
+                        showApproverStatus={true}
                     />
                 </div>
                 <div className='progress-report-row'>

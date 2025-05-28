@@ -1,10 +1,11 @@
-import {FormFieldTypes, FormField, FormValidators} from '../../../components/forms/forms';
+import {FormField, FormValidators} from 'src/components/forms/forms.jsx';
 import React, {useEffect, useState} from 'react';
 import {isEmpty, isNil} from 'lodash/fp';
 import {v4 as uuidV4} from 'uuid';
-import {computeCollaboratorErrors} from '../../../utils/darFormUtils';
+import {computeCollaboratorErrors} from 'src/utils/darFormUtils.js';
 import DeleteCollaboratorModal from './DeleteCollaboratorModal';
-import {nihAccountLabel} from '../../../utils/ERACommonsUtils.js';
+import {nihAccountLabel} from 'src/utils/ERACommonsUtils.js';
+import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus.js';
 
 export default function CollaboratorForm(props) {
   const {
@@ -104,35 +105,13 @@ export default function CollaboratorForm(props) {
           />
         </div>
         {props.showApproval && (
-          <div className='row' style={{marginTop: 25}}>
-            <FormField
-              id={`${index}_collaboratorApproval`}
-              type={FormFieldTypes.RADIOGROUP}
-              name='approverStatus'
-              description={`Are you requesting permission for this member of the Internal Lab Staff to be given
-                Designated Download/Approval' status? This indication should be limited to individuals who
-                the PI designates to download data and/or share the requested data with other Internal Lab Staff
-                (ie., staff members and trainees under the direct supervision of the PI).`}
-              options={[
-                {name: 'yes', text: 'Yes'},
-                {name: 'no', text: 'No'}
-              ]}
-              validators={[FormValidators.REQUIRED]}
-              orientation='horizontal'
-              defaultValue={
-                (approverStatus === true || approverStatus === 'yes') ? 'yes'
-                  : (approverStatus === false || approverStatus === 'no') ? 'no'
-                    : undefined
-              }
-              validation={validation.approverStatus}
-              onValidationChange={onValidationChange}
-              onChange={({value}) => setApproverStatus(value)}
-            />
-            <p className='control-label rp-choice-questions' style={{fontSize: 14, marginTop: 5, marginBottom: 5}}>
-              Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as
-              their Internal Lab Staff.
-            </p>
-          </div>
+          <ApproverStatus
+            index={index}
+            approverStatus={approverStatus}
+            validation={validation.approverStatus}
+            onValidationChange={onValidationChange}
+            onChange={(value) => setApproverStatus(value)}
+          />
         )}
         <div className='row' style={{marginTop: 20}}>
           {/* Toggle Delete Buttons Cancel/Delete */}

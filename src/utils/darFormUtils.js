@@ -69,26 +69,26 @@ const isStringEmpty = (str) => {
 export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=true}) => {
   const errors = {};
 
-  if (isStringEmpty(collaborator.name)) {
+  if (isStringEmpty(collaborator?.name)) {
     errors.name = requiredError;
   }
 
-  if (isStringEmpty(collaborator.eraCommonsId)) {
+  if (isStringEmpty(collaborator?.eraCommonsId)) {
     errors.eraCommonsId = requiredError;
   }
 
-  if (isStringEmpty(collaborator.title)) {
+  if (isStringEmpty(collaborator?.title)) {
     errors.title = requiredError;
   }
 
-  if (isStringEmpty(collaborator.email)) {
+  if (isStringEmpty(collaborator?.email)) {
     errors.email = requiredError;
   } else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
     errors.email = validationError('email');
   }
 
   if (needsApproverStatus) {
-    if (isEmpty(collaborator.approverStatus)) {
+    if (isEmpty(collaborator?.approverStatus)) {
       errors.approverStatus = requiredError;
     }
   }

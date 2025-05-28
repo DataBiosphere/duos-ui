@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { FormField, FormValidators } from '../forms/forms';
 import {Collaborator} from "src/types/model";
+import {ValidationError} from "src/pages/dar_application/FormValidationState";
+import {computeCollaboratorErrors, validationFailed} from "src/utils/darFormUtils";
+import {nihAccountLabel} from "src/utils/ERACommonsUtils";
+import ApproverStatus from "src/pages/dar_application/collaborator/ApproverStatus";
 
 interface FormFieldChange {
     key: string;
@@ -14,12 +18,35 @@ interface CollaboratorAddEditProps {
     readonly collaborators: Collaborator[];
     readonly closeAction: () => void;
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
+    readonly showApproverStatus?: boolean;
 }
 
+interface Validation {
+    name?: ValidationError;
+    eraCommonsId?: ValidationError;
+    title?: ValidationError;
+    email?: ValidationError;
+    approverStatus?: ValidationError;
+}
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
-    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange } = props;
+    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus } = props;
 
     const [newCollaborator, setNewCollaborator] = useState(collaborator);
+    const [validation, setValidation] = useState<Validation>({});
+    const accountLabel = nihAccountLabel();
+
+    useEffect(() => {
+        setValidation(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}));
+    }, [setNewCollaborator]);
+
+    const formValidationChange = useCallback(({ key, validator }) => {
+        setValidation((formValidation) => {
+            return {
+                ...formValidation,
+                [key]: validator
+            };
+        });
+    }, []);
 
     return (
         <div className='form-group row no-margin'>
@@ -39,6 +66,24 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                             } as Collaborator;
                             setNewCollaborator(setCollaborator);
                         }}
+                        validation={validation.name}
+                        onValidationChange={formValidationChange}
+                    />
+                    <FormField
+                        id='eraCommonsId'
+                        title={`${collaboratorText} ${accountLabel} Account`}
+                        defaultValue={collaborator?.eraCommonsId}
+                        placeholder={`${accountLabel} Account`}
+                        validators={[FormValidators.REQUIRED]}
+                        onChange={({ key, value }: FormFieldChange) => {
+                            const setCollaborator = {
+                                ...newCollaborator,
+                                [key]: value
+                            } as Collaborator;
+                            setNewCollaborator(setCollaborator);
+                        }}
+                        validation={validation.eraCommonsId}
+                        onValidationChange={formValidationChange}
                     />
                     <FormField
                         id='title'
@@ -53,6 +98,8 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                             } as Collaborator;
                             setNewCollaborator(setCollaborator);
                         }}
+                        validation={validation.title}
+                        onValidationChange={formValidationChange}
                     />
                     <FormField
                         id='email'
@@ -67,13 +114,29 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                             } as Collaborator;
                             setNewCollaborator(setCollaborator);
                         }}
+                        validation={validation.email}
+                        onValidationChange={formValidationChange}
                     />
+                    {showApproverStatus && (
+                    <ApproverStatus
+                        index={id}
+                        approverStatus={newCollaborator?.approverStatus}
+                        validation={validation.approverStatus}
+                        onValidationChange={formValidationChange}
+                        onChange={(value) => {
+                            const setCollaborator = {
+                                ...newCollaborator,
+                                approverStatus: value
+                            } as Collaborator;
+                            setNewCollaborator(setCollaborator);
+                        }}/>
+                    )}
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>
                     {/* add/save button */}
-                    <div
+                    <button
                         className='collaborator-form-add-save-button f-left btn'
-                        role='button'
+                        type='button'
                         onClick={() => {
                             if (id < 0) {
                                 onCollaboratorChange([...collaborators, newCollaborator]);
@@ -86,9 +149,10 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                             }
                             closeAction();
                         }}
+                        disabled={validationFailed(validation)}
                     >
                         {collaborator === undefined ? 'Add' : 'Save'}
-                    </div>
+                    </button>
                     {/* cancel button */}
                     <div
                         className='collaborator-form-cancel-button f-left btn'

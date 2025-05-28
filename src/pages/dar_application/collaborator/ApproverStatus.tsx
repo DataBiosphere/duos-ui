@@ -1,0 +1,47 @@
+import {FormField, FormFieldTypes, FormValidators} from "src/components/forms/forms";
+import React from "react";
+import {ValidationError} from "src/pages/dar_application/FormValidationState";
+
+interface ApproverStatusProps {
+    readonly index: number;
+    readonly approverStatus: boolean | string | undefined;
+    readonly validation?: ValidationError;
+    readonly onValidationChange: ({key: string, validator: ValidationError}) => void;
+    readonly onChange: (value: string) => void;
+}
+export default function ApproverStatus(props: ApproverStatusProps): React.JSX.Element {
+    const {index, approverStatus, validation, onValidationChange, onChange} = props;
+
+    return (
+        <div className='row' style={{marginTop: 25}}>
+            <FormField
+                id={`${index}_collaboratorApproval`}
+                type={FormFieldTypes.RADIOGROUP}
+                name='approverStatus'
+                description={`Are you requesting permission for this member of the Internal Lab Staff to be given
+                Designated Download/Approval' status? This indication should be limited to individuals who
+                the PI designates to download data and/or share the requested data with other Internal Lab Staff
+                (ie., staff members and trainees under the direct supervision of the PI).`}
+                options={[
+                    {name: 'yes', text: 'Yes'},
+                    {name: 'no', text: 'No'}
+                ]}
+                validators={[FormValidators.REQUIRED]}
+                orientation='horizontal'
+                defaultValue={
+                    (approverStatus === true || approverStatus === 'yes') ? 'yes'
+                        : (approverStatus === false || approverStatus === 'no') ? 'no'
+                            : undefined
+                }
+                validation={validation}
+                onValidationChange={onValidationChange}
+                onChange={onChange}
+            />
+            <p className='control-label rp-choice-questions' style={{fontSize: 14, marginTop: 5, marginBottom: 5}}>
+                Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well
+                as
+                their Internal Lab Staff.
+            </p>
+        </div>
+    )
+};
