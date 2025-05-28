@@ -203,6 +203,9 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
 
 const calcPRErrors = (formData, datasets, dataUseTranslations) => {
   const errors = {};
+  if (formData.nihValid === false) {
+    errors.nihEraId = requiredError;
+  }
   if (isEmpty(formData.progressReportSummary)) {
       errors.progressReportSummary = requiredError;
   }

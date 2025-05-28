@@ -44,7 +44,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                 {readOnly ? <h3>Review a Progress Report</h3> : <h3>Step 1: Submit a Progress Report</h3>}
 
                 <div className='progress-report-row' data-cy='researcher-identification'>
-                    <span className={'control-label'}>{'Researcher Identification'}</span>
+                    <span className={'control-label'}>{'1.1 Researcher Identification'}</span>
                     <ERACommons
                         destination={eRACommonsDestination}
                         researcherProfile={researcher}
@@ -63,7 +63,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                     <FormField
                         id={FormStateKey.PROGRESS_REPORT_SUMMARY}
                         type={FormFieldTypes.TEXTAREA}
-                        title='1.1 Summary of Progress'
+                        title='1.2 Summary of Progress'
                         description='Please summarize your research on this project since your initial request or most recent renewal in the space below. Please describe whether and how the dataset(s) was used, including referencing the dataset(s) by name in your summary.'
                         placeholder='Please provide an update here.'
                         rows={6}
@@ -81,7 +81,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                     <FormField
                         id={FormStateKey.INTELLECTUAL_PROPERTY_YES_NO}
                         type={FormFieldTypes.YESNORADIOGROUP}
-                        title='1.2 Intellectual Property'
+                        title='1.3 Intellectual Property'
                         description={<span>Have you generated any <strong>intellectual property</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
                         defaultValue={formState.intellectualPropertyYesNo}
@@ -112,7 +112,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                     <FormField
                         id={FormStateKey.PUBLICATIONS_YES_NO}
                         type={FormFieldTypes.YESNORADIOGROUP}
-                        title='1.3 Publications'
+                        title='1.4 Publications'
                         description={<span>Have you published in any <strong>publications</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
                         defaultValue={formState.publicationsYesNo}
@@ -136,7 +136,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                     <FormField
                         id={FormStateKey.PRESENTATIONS_YES_NO}
                         type={FormFieldTypes.YESNORADIOGROUP}
-                        title='1.4 Presentations'
+                        title='1.5 Presentations'
                         description={<span>Have you published in any <strong>presentations</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
                         defaultValue={formState.presentationsYesNo}
