@@ -113,7 +113,7 @@ export default function ManageResearcherDAAsTable(props) {
     const init = async() => {
       try{
         setResearchers(props.researchers);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Failed to initialize researcher table'});
       }
     };

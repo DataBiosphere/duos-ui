@@ -1,5 +1,5 @@
 import React from 'react';
-import {isNil, isEmpty, map, sortedUniq} from 'lodash';
+import {isNil, map, sortedUniq} from 'lodash';
 import {styles} from './ManageUsersTable';
 import {Link} from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
