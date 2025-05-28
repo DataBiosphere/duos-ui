@@ -37,7 +37,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
 
     useEffect(() => {
         setValidation(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}));
-    }, [setNewCollaborator]);
+    }, [newCollaborator]);
 
     const formValidationChange = useCallback(({ key, validator }) => {
         setValidation((formValidation) => {

@@ -11,6 +11,15 @@ interface ApproverStatusProps {
 }
 export default function ApproverStatus(props: ApproverStatusProps): React.JSX.Element {
     const {index, approverStatus, validation, onValidationChange, onChange} = props;
+    const calculateDefaultValue = () => {
+        if (approverStatus === true || approverStatus === 'yes') {
+            return 'yes';
+        }
+        if (approverStatus === false || approverStatus === 'no') {
+            return 'no';
+        }
+        return undefined;
+    }
 
     return (
         <div className='row' style={{marginTop: 25}}>
@@ -28,11 +37,7 @@ export default function ApproverStatus(props: ApproverStatusProps): React.JSX.El
                 ]}
                 validators={[FormValidators.REQUIRED]}
                 orientation='horizontal'
-                defaultValue={
-                    (approverStatus === true || approverStatus === 'yes') ? 'yes'
-                        : (approverStatus === false || approverStatus === 'no') ? 'no'
-                            : undefined
-                }
+                defaultValue={calculateDefaultValue}
                 validation={validation}
                 onValidationChange={onValidationChange}
                 onChange={onChange}

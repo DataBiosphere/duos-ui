@@ -144,14 +144,16 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
                 data-cy='pr-submit-button'
                 disabled={disabled}
                 title='Complete required form fields to enable submission.'
-                onClick={submit}>Submit
+                onClick={submit}>
+              Submit
             </button>
         </span>
         <button type={'button'}
             className='button button-white'
             style={{cursor: 'pointer'}}
             data-cy='pr-cancel-button'
-            onClick={cancel}>Cancel this Update
+            onClick={cancel}>
+          Cancel this Update
         </button>
       </div>
   )
