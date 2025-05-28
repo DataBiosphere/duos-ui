@@ -17,7 +17,7 @@ interface SubmitProgressReportProps {
   readonly formState: FormState;
   readonly parentReferenceId: string;
   readonly onSuccess: (result: unknown) => void;
-  readonly onCancel: (result: unknown) => void;
+  readonly onCancel: () => void;
   readonly disabled?: boolean;
 }
 
@@ -103,7 +103,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   }
 
   // compute multipart/form-data object, includes registration information and all files
-  const createMultiPartFormData = (progressReport) => {
+  const createMultiPartFormData = (progressReport: Partial<DataAccessRequest>) => {
 
     const multiPartFormData = new FormData();
 

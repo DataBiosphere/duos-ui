@@ -3,7 +3,7 @@ import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import PublicationList from 'src/components/publications_list/PublicationList';
-import {FormState, FormStateKey} from "src/pages/progress_reports/ProgressReportFormState";
+import {ValidFormState, FormState, FormStateKey} from "src/pages/progress_reports/ProgressReportFormState";
 import ERACommons from 'src/components/ERACommons';
 import {DuosUser} from 'src/types/model';
 import {Location} from 'history';
@@ -74,7 +74,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         rows={6}
                         maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                         defaultValue={formState.progressReportSummary}
-                        onChange={({ key, value }: Partial<FormState>) => {
+                        onChange={({ key, value }: ValidFormState) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
                         disabled={readOnly}
@@ -90,7 +90,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         description={<span>Have you generated any <strong>intellectual property</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
                         defaultValue={formState.intellectualPropertyYesNo}
-                        onChange={({ key, value }: Partial<FormState>) => {
+                        onChange={({ key, value }: ValidFormState) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
                         disabled={readOnly}
@@ -105,7 +105,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         rows={6}
                         maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                         defaultValue={formState.intellectualPropertySummary}
-                        onChange={({ key, value }: Partial<FormState>) => {
+                        onChange={({ key, value }: ValidFormState) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
                         disabled={readOnly}
@@ -121,7 +121,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         description={<span>Have you published in any <strong>publications</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
                         defaultValue={formState.publicationsYesNo}
-                        onChange={({ key, value }: Partial<FormState>) => {
+                        onChange={({ key, value }: ValidFormState) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
                         disabled={readOnly}
@@ -145,7 +145,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         description={<span>Have you published in any <strong>presentations</strong> since your last renewal as a result of using the data?</span>}
                         orientation='horizontal'
                         defaultValue={formState.presentationsYesNo}
-                        onChange={({ key, value }: Partial<FormState>) => {
+                        onChange={({ key, value }: ValidFormState) => {
                             onFormChange({ [key]: value } as Partial<FormState>);
                         }}
                         disabled={readOnly}

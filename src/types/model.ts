@@ -177,7 +177,7 @@ export interface DatasetTerm {
 
 export interface AccessManagementSummary {
   name: string;
-  icon: unknown;
+  icon: string;
   description: string;
 }
 

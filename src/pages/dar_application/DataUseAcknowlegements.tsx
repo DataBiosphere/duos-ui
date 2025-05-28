@@ -11,7 +11,7 @@ type DataUseAcknowledgementsProps = {
     formData: object,
     readOnlyMode: boolean,
     includeInstructions?: boolean,
-    onChange: (object) => void,
+    onChange: (obj: object) => void,
     onValidationChange: (validation: {key: string, validation: ValidationError}) => void,
     validation?: DarErrors
 }
