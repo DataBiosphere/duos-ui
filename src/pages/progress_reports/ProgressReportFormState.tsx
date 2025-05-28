@@ -1,9 +1,12 @@
 import {CloseOutSupplement, Collaborator} from "src/types/model";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
-export interface ValidFormState {
-    [key: string]: boolean | string | number[] | PublicationOrPresentation[] | Collaborator[] | CloseOutSupplement;
-}
+export type ValidFormState = {
+  [K in keyof FormState]: {
+    key: K;
+    value: FormState[K];
+  }
+}[keyof FormState];
 
 export interface FormState {
     progressReportSummary: string;
