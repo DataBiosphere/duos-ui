@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
-import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import {CloseOutSupplement} from "src/types/model";
 
 interface DarCloseoutProps {
@@ -24,7 +24,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         title='5.1 Closeouts'
                         description={<span>Are you ready to finish work on this project?</span>}
                         orientation='horizontal'
-                        onChange={({ key, value }: Partial<FormState>) => {
+                        onChange={({ key, value }: ValidFormState) => {
                             onFormChange({ [key]: value }  as Partial<FormState>);
                             // clear out selected options if the user selects "No"
                             if (value === false) {
@@ -48,13 +48,13 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 orientation="vertical"
                                 options={[
                                     { text: 'The Requestor has completed his/her project', name: CloseOutSupplement.PROJECT_COMPLETED },
-                                    { text: 'The Requestor has moved institutions (If the project will be continued in a new institution or by a new PI, they must  go through Project Transfer)', name: CloseOutSupplement.REQUESTOR_MOVED_INSTITUTION },
+                                    { text: 'The Requestor has moved institutions (If the project will be continued in a new institution or by a new PI, they must go through Project Transfer)', name: CloseOutSupplement.REQUESTOR_MOVED_INSTITUTION },
                                     { text: 'The project is being transferred to a new Requestor at the same institution', name: CloseOutSupplement.PROJECT_TRANSFERRED },
                                     { text: 'The project is being superseded by a new project', name: CloseOutSupplement.PROJECT_SUPERSEDED }
                                 ]}
                                 disabled={readOnly}
                                 defaultValue={formState.closeoutSupplement}
-                                onChange={({ key, value }: Partial<FormState>) => {
+                                onChange={({ key, value }: ValidFormState) => {
                                     onFormChange({ [key]: value } as Partial<FormState>);
                                 }}
                             />

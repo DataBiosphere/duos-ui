@@ -1,7 +1,7 @@
 import React from 'react';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
-import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
+import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 
@@ -29,7 +29,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             description='Have there been any incidents related to mismanagement or misuse of data?'
                             orientation='horizontal'
                             defaultValue={formState.dmiYesNo}
-                            onChange={({ key, value }: Partial<FormState>) => {
+                            onChange={({ key, value }: ValidFormState) => {
                                 if (value === false) {
                                     onFormChange({
                                         dmiCombination: false,
@@ -56,7 +56,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Inappropriate combination or analysis of the requested datasets with unapproved datasets'
                                     defaultValue={formState.dmiCombination}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value }  as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -66,7 +66,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Intentional or accidental identification of participants or generation of data which makes them easily identifiable'
                                     defaultValue={formState.dmiIdentification}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value } as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -76,7 +76,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Distribution of the data to an individual or institution beyond those specified in the approved Data Access Request (DAR)'
                                     defaultValue={formState.dmiSharing}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value }  as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -86,7 +86,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to adhere to NIH Security Best Practices for Controlled-Access Data'
                                     defaultValue={formState.dmiSecurity}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value } as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -96,7 +96,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Failure to acknowledge the investigator(s) who generated the data, the funding source, accession numbers of the dataset'
                                     defaultValue={formState.dmiAcknowledgement}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value } as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -106,7 +106,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Analysis and/or publication of a study using the data for the research purpose other than the approved research use'
                                     defaultValue={formState.dmiPublication}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value } as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -116,7 +116,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Fabrication or falsification of data and/or results'
                                     defaultValue={formState.dmiFalsification}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value } as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -126,7 +126,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     type={FormFieldTypes.CHECKBOX}
                                     toggleText='Other: such as inadvertent data release or breach of security'
                                     defaultValue={formState.dmiOther}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value } as Partial<FormState>);
                                     }}
                                     disabled={readOnly}
@@ -142,7 +142,7 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                                     rows={6}
                                     maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                                     defaultValue={formState.dmiDescription}
-                                    onChange={({ key, value }: Partial<FormState>) => {
+                                    onChange={({ key, value }: ValidFormState) => {
                                         onFormChange({ [key]: value } as Partial<FormState>);
                                     }}
                                     disabled={readOnly}

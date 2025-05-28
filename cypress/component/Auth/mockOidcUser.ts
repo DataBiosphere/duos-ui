@@ -5,7 +5,7 @@ export const mockOidcUser: OidcUser = {
   get expires_in(): number | undefined {
     return undefined;
   },
-  session_state: undefined,
+  session_state: null,
   state: undefined,
   token_type: '',
   get expired(): boolean | undefined {
@@ -20,7 +20,7 @@ export const mockOidcUser: OidcUser = {
   profile: {
     jti: undefined,
     nbf: undefined,
-    sub: undefined,
+    sub: '',
     iss: '',
     aud: '',
     exp: 0,

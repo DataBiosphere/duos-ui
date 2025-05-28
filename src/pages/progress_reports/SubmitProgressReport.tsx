@@ -3,7 +3,7 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
-import {validationFailed} from "src/utils/darFormUtils";
+import {validationFailed} from 'src/utils/darFormUtils';
 import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 import {DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
@@ -13,7 +13,6 @@ import {
   Presentation,
   Publication
 } from "src/types/model";
-
 
 interface SubmitProgressReportProps {
   readonly formState: FormState;
@@ -109,7 +108,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   }
 
   // compute multipart/form-data object, includes registration information and all files
-  const createMultiPartFormData = (progressReport) => {
+  const createMultiPartFormData = (progressReport: Partial<DataAccessRequest>) => {
 
     const multiPartFormData = new FormData();
 

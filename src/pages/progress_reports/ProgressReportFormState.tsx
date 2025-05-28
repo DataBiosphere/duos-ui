@@ -1,30 +1,37 @@
 import {CloseOutSupplement, Collaborator} from "src/types/model";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
+export type ValidFormState = {
+  [K in keyof FormState]: {
+    key: K;
+    value: FormState[K];
+  }
+}[keyof FormState];
+
 export interface FormState {
-    progressReportSummary?: string;
-    intellectualPropertyYesNo?: boolean;
-    intellectualPropertySummary?: string;
-    datasetIds?: number[];
-    publicationsYesNo?: boolean;
-    publications?: PublicationOrPresentation[];
-    presentationsYesNo?: boolean;
-    presentations?: PublicationOrPresentation[];
-    labCollaborators?: Collaborator[];
-    internalCollaborators?: Collaborator[];
-    externalCollaborators?: Collaborator[];
-    dmiYesNo?: boolean;
-    dmiCombination?: boolean;
-    dmiIdentification?: boolean;
-    dmiSharing?: boolean;
-    dmiSecurity?: boolean;
-    dmiAcknowledgement?: boolean;
-    dmiPublication?: boolean;
-    dmiFalsification?: boolean;
-    dmiOther?: boolean;
-    dmiDescription?: string;
-    closeoutYesNo?: boolean;
-    closeoutSupplement?: CloseOutSupplement;
+    progressReportSummary: string;
+    intellectualPropertyYesNo: boolean;
+    intellectualPropertySummary: string;
+    datasetIds: number[];
+    publicationsYesNo: boolean;
+    publications: PublicationOrPresentation[];
+    presentationsYesNo: boolean;
+    presentations: PublicationOrPresentation[];
+    labCollaborators: Collaborator[];
+    internalCollaborators: Collaborator[];
+    externalCollaborators: Collaborator[];
+    dmiYesNo: boolean;
+    dmiCombination: boolean;
+    dmiIdentification: boolean;
+    dmiSharing: boolean;
+    dmiSecurity: boolean;
+    dmiAcknowledgement: boolean;
+    dmiPublication: boolean;
+    dmiFalsification: boolean;
+    dmiOther: boolean;
+    dmiDescription: string;
+    closeoutYesNo: boolean;
+    closeoutSupplement: CloseOutSupplement;
 }
 
 export enum FormStateKey {

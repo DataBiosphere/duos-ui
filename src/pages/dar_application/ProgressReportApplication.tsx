@@ -10,7 +10,7 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 import {Navigation} from "src/libs/utils";
 import {Storage} from "src/libs/storage";
-import {History, LocationState} from 'history';
+import {History} from 'history';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData} from 'src/utils/darFormUtils';
@@ -20,7 +20,7 @@ type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[];
   readonly readOnlyMode: boolean;
-  readonly history: History<LocationState>;
+  readonly history: History;
   readonly location?: Location;
   readonly researcher: DuosUser;
 };
