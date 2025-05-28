@@ -34,21 +34,19 @@ const props = {
   }
 };
 
-const researcherWithLibraryCards = {
-  libraryCards: [
-    {
-      'id': 1,
-      'userId': 1,
-      'institutionId': 150,
-      'eraCommonsId': 'user',
-      'userName': 'User',
-      'userEmail': 'email',
-      'institution': {
-        'id': 150,
-        'name': 'The Broad Institute of MIT and Harvard',
-      }
+const researcherWithLibraryCard = {
+  libraryCard: {
+    'id': 1,
+    'userId': 1,
+    'institutionId': 150,
+    'eraCommonsId': 'user',
+    'userName': 'User',
+    'userEmail': 'email',
+    'institution': {
+      'id': 150,
+      'name': 'The Broad Institute of MIT and Harvard',
     }
-  ]
+  }
 };
 
 const addNewCollaborator = (collaboratorType) => {
@@ -93,14 +91,14 @@ describe('Researcher Info', () => {
   });
 
   it('renders the profile submitted alert', () => {
-    const mergedProps = {...props, ...{completed: true, researcher: researcherWithLibraryCards}};
+    const mergedProps = {...props, ...{completed: true, researcher: researcherWithLibraryCard}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible');
     cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist');
   });
 
   it('renders the profile unsubmitted alert', () => {
-    const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCards}};
+    const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCard}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('be.visible');
     cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible');

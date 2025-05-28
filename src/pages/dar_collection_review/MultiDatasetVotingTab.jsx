@@ -77,11 +77,11 @@ export default function MultiDatasetVotingTab(props) {
   };
 
   const dataAccessApprovalDisabled = () => {
-    const researcherLibraryCards = flow(
+    const researcherLibraryCard = flow(
       get('createUser'),
-      get('libraryCards')
+      get('libraryCard')
     )(collection);
-    const researcherMissingLibraryCards = isNil(researcherLibraryCards) || isEmpty(researcherLibraryCards);
+    const researcherMissingLibraryCards = isNil(researcherLibraryCard);
     return isChair && researcherMissingLibraryCards;
   };
 

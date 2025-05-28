@@ -3,7 +3,7 @@ import {Alert} from '../../components/Alert';
 import {Link} from 'react-router-dom';
 import ERACommons from '../../components/ERACommons';
 import CollaboratorList from './collaborator/CollaboratorList';
-import {isEmpty, isNil, get} from 'lodash/fp';
+import {isEmpty, isNil} from 'lodash/fp';
 import {FormField, FormValidators, FormFieldTypes} from '../../components/forms/forms';
 import './dar_application.css';
 import {nihAccountLabel, nihAccountInstructions} from '../../utils/ERACommonsUtils.js';
@@ -58,7 +58,7 @@ export default function ResearcherInfo(props) {
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
-    setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)));
+    setLibraryCardReqSatisfied(!isNil(researcher.libraryCard));
   }, [researcher]);
 
   return (

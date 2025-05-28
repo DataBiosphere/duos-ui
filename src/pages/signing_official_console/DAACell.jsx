@@ -4,10 +4,9 @@ import { DAA } from '../../libs/ajax/DAA';
 import { Notifications } from '../../libs/utils';
 
 export default function DAACell(props) {
-  const {rowDac, researcher, institutionId, daas, refreshResearchers, setResearchers} = props;
+  const {rowDac, researcher, daas, refreshResearchers, setResearchers} = props;
   const id = researcher?.userId || researcher?.email;
-  const libraryCards = researcher?.libraryCards;
-  const card = libraryCards?.find(card => card.institutionId === institutionId);
+  const card = researcher?.libraryCard;
   const daaIds = researcher && card?.daaIds;
   const filteredDaas = daaIds && daas?.filter(daa => daaIds.includes(daa.daaId));
   const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs?.some(dac => dac.dacId === rowDac.dacId));
@@ -17,7 +16,7 @@ export default function DAACell(props) {
       await DAA.createDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Approved access to ${dacName} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error approving access to ${dacName} to user: ${researcher.displayName}`});
     }
   };
@@ -27,7 +26,7 @@ export default function DAACell(props) {
       await DAA.deleteDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Removed approval of access to ${dacName} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error removing approval of access to ${dacName} to user: ${researcher.displayName}`});
     }
   };

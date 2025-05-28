@@ -5,8 +5,8 @@ export interface DuosUserResponse {
   displayName: string;
   email: string;
   emailPreference: boolean;
-  libraryCards: LibraryCard[];
-  properties: UserProperty[];
+  libraryCard?: LibraryCard;
+  properties?: UserProperty[];
   roles: UserRole[];
   userId: number;
   userStatusInfo: UserStatusInfo;

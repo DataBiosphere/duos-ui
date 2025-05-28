@@ -22,7 +22,7 @@ const user = {
   displayName: 'Jane Doe',
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
-  libraryCards: [{}],
+  libraryCard: {},
   properties: [
     {
       propertyId: 10350,
@@ -44,7 +44,7 @@ const userNoLibraryCard = {
   displayName: 'Jane Doe',
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
-  libraryCards: [],
+  libraryCard: {},
   properties: [
     {
       propertyId: 10350,

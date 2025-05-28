@@ -367,7 +367,7 @@ const DataAccessRequestApplication = (props) => {
 
     setFormValidation(validation);
 
-    const hasLibraryCard = !isEmpty(researcher.libraryCards);
+    const hasLibraryCard = !isNil(researcher.libraryCard);
 
     const isInvalidForm = validationFailed(validation) || !nihValid || !hasLibraryCard;
     setShowNihValidationError(!nihValid);

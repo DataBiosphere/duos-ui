@@ -27,12 +27,12 @@ export default function ResearcherStatus(props) {
   useEffect(() => {
     const init = async () => {
       try {
-        if (!isNil(user) && !isNil(user.libraryCards)) {
-          if (user.libraryCards.length === 0) {
+        if (!isNil(user)) {
+          if (isNil(user.libraryCard)) {
             setHasCard(false);
-          }
-          else {
-            const card = user.libraryCards[0];
+          } else {
+            setHasCard(true);
+            const card = user.libraryCard;
             const daaIds = card.daaIds;
             const signingOfficialUsers = await User.getSOsForCurrentUser();
             setIssuedOn(card.createDate);

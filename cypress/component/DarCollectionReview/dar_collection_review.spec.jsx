@@ -200,21 +200,19 @@ const dar = {
       'createUser': null,
       'updateUser': null
     },
-    'libraryCards': [
-      {
-        'id': 182,
-        'userId': 7,
-        'institutionId': 90210,
-        'eraCommonsId': null,
-        'userName': 'Bob Jones',
-        'userEmail': 'Bob.Jones@prodigy.com',
-        'createDate': 1667817915000,
-        'createUserId': 5555,
-        'updateDate': null,
-        'updateUserId': null,
-        'institution': null
-      }
-    ]
+    'libraryCard': {
+      'id': 182,
+      'userId': 7,
+      'institutionId': 90210,
+      'eraCommonsId': null,
+      'userName': 'Bob Jones',
+      'userEmail': 'Bob.Jones@prodigy.com',
+      'createDate': 1667817915000,
+      'createUserId': 5555,
+      'updateDate': null,
+      'updateUserId': null,
+      'institution': null
+    }
   },
   'createUserId': 7,
   'updateDate': null,

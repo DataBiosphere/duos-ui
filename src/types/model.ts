@@ -48,7 +48,7 @@ export interface DuosUser {
   isMember: boolean;
   isResearcher: boolean;
   isSigningOfficial: boolean;
-  libraryCards?: LibraryCard[];
+  libraryCard?: LibraryCard;
   properties?: UserProperty[];
   roles: UserRole[];
   userId: number;

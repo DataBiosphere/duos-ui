@@ -101,7 +101,7 @@ const collection = {
     {datasetId: 400}
   ],
   createUser: {
-    libraryCards: [{id: 1}]
+    libraryCard: {id: 1}
   }
 };
 
@@ -110,7 +110,7 @@ const collectionMissingLibraryCard = {
     {datasetId: 300}
   ],
   createUser: {
-    libraryCards: []
+    libraryCard: null
   }
 };
 

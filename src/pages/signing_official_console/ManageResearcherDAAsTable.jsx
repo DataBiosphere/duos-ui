@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Styles } from '../../libs/theme';
-import { isEmpty } from 'lodash/fp';
+import {isNaN} from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
 import PaginationBar from '../../components/PaginationBar';
 import SearchBar from '../../components/SearchBar';
@@ -162,8 +162,7 @@ export default function ManageResearcherDAAsTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const { displayName, libraryCards } = researcher;
-      const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
+      const { displayName, libraryCard } = researcher;
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
       return [

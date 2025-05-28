@@ -50,8 +50,8 @@ export function emailCellData({userId, email, label = 'email'}) {
   };
 }
 
-export function permissionsCellData({userId, roles, libraryCards, label = 'permissions'}) {
-  const hasLibraryCard = !isNil(libraryCards) && !isEmpty(libraryCards);
+export function permissionsCellData({userId, roles, libraryCard, label = 'permissions'}) {
+  const hasLibraryCard = !isNil(libraryCard);
   const roleNames = map(roles, 'name').filter((roleName) => roleName !== 'Researcher');
   const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames);
 
