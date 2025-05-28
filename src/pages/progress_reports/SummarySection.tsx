@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
-import { FormField, FormFieldTypes } from 'src/components/forms/forms';
+import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import PublicationList from 'src/components/publications_list/PublicationList';
 import {FormState, FormStateKey} from "src/pages/progress_reports/ProgressReportFormState";
@@ -18,10 +18,12 @@ interface SummarySectionProps {
     readonly researcher: DuosUser;
     onValidationChange?: (validationState: { key: string, validation: ValidationError }) => void;
     validation?: DarErrors;
+    nihValid?: boolean;
+    onNihStatusUpdate?: (valid: boolean) => void;
 }
 
 export default function SummarySection(props: SummarySectionProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange, eRACommonsDestination, location, researcher, onValidationChange, validation } = props;
+    const { readOnly, formState, onFormChange, eRACommonsDestination, location, researcher, onValidationChange, validation, nihValid, onNihStatusUpdate } = props;
 
     const [publications, setPublications] = useState<PublicationOrPresentation[]>(formState.publications || []);
     const [presentations, setPresentations] = useState<PublicationOrPresentation[]>(formState.presentations || []);
@@ -44,15 +46,18 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                 {readOnly ? <h3>Review a Progress Report</h3> : <h3>Step 1: Submit a Progress Report</h3>}
 
                 <div className='progress-report-row' data-cy='researcher-identification'>
-                    <span className={'control-label'}>{'1.1 Researcher Identification'}</span>
+                    <FormFieldTitle
+                        id='researcherIdentificationTitle'
+                        title='1.1 Researcher Identification'
+                        validation={validation?.nihEraId}>
+                    </FormFieldTitle>
                     <ERACommons
                         destination={eRACommonsDestination}
                         researcherProfile={researcher}
-                        onNihStatusUpdate={() => {
-                        }}
+                        nihValid={nihValid}
+                        onNihStatusUpdate={onNihStatusUpdate}
                         location={location}
-                        validationError={() => {
-                        }}
+                        validationError={validation?.nihEraId}
                         readOnly={readOnly}
                         header={true}
                         required={!readOnly} // In read-only mode, this is not required

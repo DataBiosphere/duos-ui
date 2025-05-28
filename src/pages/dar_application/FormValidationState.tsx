@@ -22,6 +22,7 @@ export interface ResearcherErrors {
 }
 
 export interface DarErrors {
+    nihEraId?: ValidationError,
     datasetIds?: ValidationError,
     projectTitle?: ValidationError,
     rus?: ValidationError,

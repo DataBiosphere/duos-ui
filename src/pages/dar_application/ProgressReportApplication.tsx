@@ -55,6 +55,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     };
 
     const [formState, setFormState] = useState<FormState>(initialState);
+    const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
     const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
@@ -87,13 +88,14 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     useEffect(() => {
         if (!readOnlyMode) {
             const validation = validatePRFormData(
+                nihValid,
                 formState,
                 selectedDatasets,
                 dataUseTranslations
             );
             setFormValidation(validation);
         }
-    }, [formState]);
+    }, [formState, nihValid]);
     const formValidationChange = useCallback(({ key, validation }) => {
         setFormValidation((formValidation) => {
             return {
@@ -118,6 +120,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     location={location}
                     onValidationChange={formValidationChange}
                     validation={formValidation.darErrors}
+                    nihValid={nihValid}
+                    onNihStatusUpdate={setNihValid}
                 />
             </div>
             <div data-cy='remove-datasets'>

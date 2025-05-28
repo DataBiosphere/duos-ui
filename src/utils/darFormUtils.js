@@ -201,9 +201,9 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
   return errors;
 };
 
-const calcPRErrors = (formData, datasets, dataUseTranslations) => {
+const calcPRErrors = (nihValid, formData, datasets, dataUseTranslations) => {
   const errors = {};
-  if (formData.nihValid === false) {
+  if (nihValid === false) {
     errors.nihEraId = requiredError;
   }
   if (isEmpty(formData.progressReportSummary)) {
@@ -357,11 +357,12 @@ export const validateDARFormData = ({
 };
 
 export const validatePRFormData = (
+    nihValid,
     formData,
     datasets,
     dataUseTranslations,
     ) => {
     return {
-        darErrors: calcPRErrors(formData, datasets, dataUseTranslations)
+        darErrors: calcPRErrors(nihValid, formData, datasets, dataUseTranslations)
     };
 }
