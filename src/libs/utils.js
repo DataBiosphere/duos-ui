@@ -1,4 +1,4 @@
-import {forEach as lodashForEach, isArray} from 'lodash';
+import {forEach as lodashForEach} from 'lodash';
 import {DAR} from './ajax/DAR';
 import {Theme} from './theme';
 import {
