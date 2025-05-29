@@ -29,7 +29,7 @@ interface Validation {
     approverStatus?: ValidationError;
 }
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
-    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus } = props;
+    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false } = props;
 
     const [newCollaborator, setNewCollaborator] = useState(collaborator);
     const [validation, setValidation] = useState<Validation>({});

@@ -71,6 +71,10 @@ describe('Summary Section - Component Tests', () => {
       onFormChange: onFormChangeSpy,
       location,
       researcher,
+      onValidationChange: cy.stub(),
+      validation: {},
+      nihValid: true,
+      onNihStatusUpdate: cy.stub(),
     };
 
     return mount(<SummarySection {...props} />);
@@ -84,10 +88,11 @@ describe('Summary Section - Component Tests', () => {
   it('renders the component correctly', () => {
     cy.get('[data-cy=summary-section]').should('exist');
     cy.contains('Step 1: Submit a Progress Report').should('be.visible');
-    cy.contains('1.1 Summary of Progress').should('be.visible');
-    cy.contains('1.2 Intellectual Property').should('be.visible');
-    cy.contains('1.3 Publications').should('be.visible');
-    cy.contains('1.4 Presentations').should('be.visible');
+    cy.contains('1.1 Researcher Identification').should('be.visible');
+    cy.contains('1.2 Summary of Progress').should('be.visible');
+    cy.contains('1.3 Intellectual Property').should('be.visible');
+    cy.contains('1.4 Publications').should('be.visible');
+    cy.contains('1.5 Presentations').should('be.visible');
   });
 
   it('renders in read-only mode correctly', () => {
