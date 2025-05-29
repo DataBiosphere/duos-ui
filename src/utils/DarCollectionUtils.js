@@ -18,8 +18,16 @@ export const processVotesForBucket = (darElections = []) => {
     agreementVotes: []
   };
   darElections.forEach((election) => {
-    const {electionType, votes = []} = election;
-    let dateSortedVotes = sortBy((vote) => vote.updateDate)(votes);
+    const {electionType, votes, status = []} = election;
+    // add field to each vote object to indicate election status
+    const updatedVotes = Object.values(votes).map(vote => ({
+      ...vote,
+      electionStatus: status
+    }));
+    updatedVotes.forEach(vote => {
+      votes[vote.voteId] = vote;
+    });
+    const dateSortedVotes = sortBy((vote) => vote.updateDate)(updatedVotes);
     let targetFinal, targetChair, targetMember, targetFinalType;
 
     if(electionType === 'RP') {
