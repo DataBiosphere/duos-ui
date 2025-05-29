@@ -95,7 +95,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             );
             setFormValidation(validation);
         }
-    }, [formState, nihValid]);
+    }, [formState, nihValid, selectedDatasets, dataUseTranslations, readOnlyMode]);
     const formValidationChange = useCallback(({ key, validation }) => {
         setFormValidation((formValidation) => {
             return {

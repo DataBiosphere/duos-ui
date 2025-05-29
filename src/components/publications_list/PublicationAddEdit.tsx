@@ -34,7 +34,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
 
     useEffect(() => {
         setValidation(calcPublicationOrPresentationErrors(newPublication, publicationText));
-    }, [newPublication]);
+    }, [newPublication, publicationText]);
 
     const formValidationChange = useCallback(({ key, validator }) => {
         setValidation((formValidation) => {

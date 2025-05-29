@@ -110,7 +110,7 @@ export default function CollaboratorForm(props) {
             approverStatus={approverStatus}
             validation={validation.approverStatus}
             onValidationChange={onValidationChange}
-            onChange={({key, value}) => setApproverStatus(value)}
+            onChange={({_key, value}) => setApproverStatus(value)}
           />
         )}
         <div className='row' style={{marginTop: 20}}>
