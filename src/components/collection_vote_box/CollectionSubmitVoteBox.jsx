@@ -112,9 +112,13 @@ export default function CollectionSubmitVoteBox(props) {
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setSubmitted(true);
       //call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render
-      isChair ? updateFinalVote(bucketKey, {vote: newVote, rationale}, voteIds) : setVote(newVote);
+      if (isChair) {
+        updateFinalVote(bucketKey, {vote: newVote, rationale}, voteIds);
+      } else {
+        setVote(newVote);
+      }
       Notifications.showSuccess({text: 'Successfully updated vote'});
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({text: 'Error: Failed to update vote'});
     }
   };
@@ -124,7 +128,7 @@ export default function CollectionSubmitVoteBox(props) {
       const voteIds = map(v => v.voteId)(votes);
       await Votes.updateRationaleByIds(voteIds, rationale);
       Notifications.showSuccess({text: 'Successfully updated vote rationale'});
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({text: 'Error: Failed to update vote rationale'});
     }
   };

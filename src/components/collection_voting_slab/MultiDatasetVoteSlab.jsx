@@ -8,7 +8,6 @@ import {
   isEmpty,
   get,
   includes,
-  every,
   toLower,
 } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
