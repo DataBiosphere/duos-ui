@@ -313,11 +313,11 @@ describe('MultiDatasetVoteSlab - Tests', function() {
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
-    const component = cy.get('.table-data');
-    component.should('exist');
-    component.should('contain', 'test1');
-    component.should('contain', 'test2');
-    component.should('not.contain', 'test3');
+    cy.get('.table-data')
+        .should('exist')
+        .should('contain', 'test1')
+        .should('contain', 'test2')
+        .should('not.contain', 'test3');
   });
 
   it('Renders collapsed row of vote summary table when the same user has same vote for multiple elections', function() {
