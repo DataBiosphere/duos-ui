@@ -297,7 +297,7 @@ export const calcPublicationOrPresentationErrors = (newPublication, publicationT
   if (isEmpty(newPublication?.authors)) {
     validation.authors = requiredError;
   }
-  if (publicationText === 'Publication') {
+  if (isPublication(publicationText)) {
     if (isEmpty(newPublication?.pubmed_id)) {
       validation.pubmed_id = requiredError;
     }
@@ -308,6 +308,10 @@ export const calcPublicationOrPresentationErrors = (newPublication, publicationT
       validation.link = requiredError;
   }
   return validation;
+}
+
+export const isPublication = (publicationText) => {
+    return publicationText === 'Publication';
 }
 
 const requiredRusFields = [

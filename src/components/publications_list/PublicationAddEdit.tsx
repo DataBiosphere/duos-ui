@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import { ValidationError } from "src/pages/dar_application/FormValidationState";
-import { validationFailed, calcPublicationOrPresentationErrors } from "src/utils/darFormUtils";
+import {validationFailed, calcPublicationOrPresentationErrors, isPublication} from "src/utils/darFormUtils";
 
 interface FormFieldChange {
     key: string;
@@ -98,7 +98,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         validation={validation.authors}
                         onValidationChange={formValidationChange}
                     />
-                    {publicationText === 'Publication' ?
+                    {isPublication(publicationText) ?
                         <>
                             <FormField
                                 id='pubmed_id'

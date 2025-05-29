@@ -3,6 +3,7 @@ import PublicationAddEdit from './PublicationAddEdit';
 import PublicationRow from './PublicationRow';
 import { PublicationOrPresentation } from './PublicationOrPresentation';
 import {DarErrors} from "src/pages/dar_application/FormValidationState";
+import {isPublication} from "src/utils/darFormUtils";
 
 interface PublicationListProps {
     publications: PublicationOrPresentation[];
@@ -38,7 +39,7 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
     }
 
     const getValidationState = () => {
-        if (publicationText === 'Publication') {
+        if (isPublication(publicationText)) {
             return validation?.publications;
         } else {
             return validation?.presentations;
