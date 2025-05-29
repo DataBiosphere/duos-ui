@@ -123,10 +123,10 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         approverStatus={newCollaborator?.approverStatus}
                         validation={validation.approverStatus}
                         onValidationChange={formValidationChange}
-                        onChange={(value) => {
+                        onChange={({key, value}) => {
                             const setCollaborator = {
                                 ...newCollaborator,
-                                approverStatus: value
+                                [key]: value
                             } as Collaborator;
                             setNewCollaborator(setCollaborator);
                         }}/>

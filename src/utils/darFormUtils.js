@@ -291,6 +291,8 @@ export const calcPublicationOrPresentationErrors = (newPublication, publicationT
   }
   if (isEmpty(newPublication?.date)) {
     validation.date = requiredError;
+  } else if (!FormValidators.DATE.isValid(newPublication?.date)) {
+    validation.date = validationError('date');
   }
   if (isEmpty(newPublication?.authors)) {
     validation.authors = requiredError;
