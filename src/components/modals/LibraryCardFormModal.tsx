@@ -14,7 +14,7 @@ interface UserOption {
   userId: number;
   displayName: string;
   email: string;
-  libraryCards?: LibraryCard[];
+  libraryCard?: LibraryCard;
 }
 
 interface FormFieldRowProps {
@@ -43,7 +43,7 @@ interface FilterOptions {
 const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
   const { card, dropdownOptions, updateUser, setCard } = props;
 
-  const cardlessOptions = dropdownOptions.filter((option) => isEmpty(option.libraryCards));
+  const cardlessOptions = dropdownOptions.filter((option) => isNil(option.libraryCard));
   const [filteredDropdown, setFilteredDropdown] = useState<UserOption[]>(cardlessOptions);
 
   //filter function for users dropdown

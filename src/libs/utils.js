@@ -1,4 +1,4 @@
-import {forEach as lodashForEach, isArray} from 'lodash';
+import {forEach as lodashForEach} from 'lodash';
 import {DAR} from './ajax/DAR';
 import {Theme} from './theme';
 import {
@@ -330,7 +330,7 @@ export const getSearchFilterFunctions = () => {
 
       return filter(user => {
         const {
-          displayName, email, roles, institution, libraryCards
+          displayName, email, roles, institution, libraryCard
         } = user;
 
         const matchable = [displayName, email];
@@ -341,8 +341,8 @@ export const getSearchFilterFunctions = () => {
           matchable.push(institution.name);
         }
 
-        if (!isNil(libraryCards) && isArray(libraryCards)) {
-          const hasLibraryCard = !isNil(libraryCards) && !isEmpty(libraryCards);
+        if (!isNil(libraryCard)) {
+          const hasLibraryCard = !isNil(libraryCard);
 
           if (hasLibraryCard) {
             matchable.push('LibraryCard');

@@ -27,7 +27,7 @@ interface UserData {
   userId: number;
   displayName: string;
   email: string;
-  libraryCards?: LibraryCard[];
+  libraryCard?: LibraryCard;
 }
 
 export interface LibraryCardTableProps {

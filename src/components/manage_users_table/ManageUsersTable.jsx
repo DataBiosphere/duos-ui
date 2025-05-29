@@ -106,13 +106,13 @@ const processUserRowData = ({ users, columns = columns }) => {
         roles,
         userId,
         displayName,
-        libraryCards,
+        libraryCard,
         institution,
         email
       } = user;
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          user, roles, userId, displayName, email, institution, libraryCards
+          user, roles, userId, displayName, email, institution, libraryCard
         });
       });
     });

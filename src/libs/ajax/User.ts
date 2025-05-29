@@ -66,7 +66,7 @@ export const User = {
 
   update: async (user: UpdateDuosUserRequestV2, userId: number)/*: Promise<UpdateDuosUserResponse>*/ => {
     const url = `${await getApiUrl()}/api/user/${userId}`;
-    // We should not be updating the user's create date, associated institution, or library cards
+    // We should not be updating the user's create date, associated institution, or library card
     // This below code does not seem to work at all and
     // does not seem appropriate for this request anyway.
     // The UpdateDuosUserRequestV2 is not the same shape as a DuosUser
@@ -75,7 +75,7 @@ export const User = {
       cloneDeep,
       unset('updatedUser.createDate'),
       unset('updatedUser.institution'),
-      unset('updatedUser.libraryCards')
+      unset('updatedUser.libraryCard')
     )(user);
     try {
       const res = await fetchOk(

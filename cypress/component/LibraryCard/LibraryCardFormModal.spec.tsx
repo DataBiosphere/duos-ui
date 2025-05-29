@@ -35,7 +35,7 @@ describe('Library Card Form Modal Tests', () => {
 
   it('Existing users should be visible in the user selection list', () => {
     const userOptions = [
-      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCards: []},
+      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: null},
     ]
     const mergedProps = {...props, ...{users: userOptions}};
     mount(<LibraryCardFormModal {...mergedProps} />);
@@ -50,7 +50,7 @@ describe('Library Card Form Modal Tests', () => {
 
   it('Non-existing users should NOT be visible in the user selection list', () => {
     const userOptions = [
-      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCards: []},
+      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: null},
     ]
     const mergedProps = {...props, ...{users: userOptions}};
     mount(<LibraryCardFormModal {...mergedProps} />);

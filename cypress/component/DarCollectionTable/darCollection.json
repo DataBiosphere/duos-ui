@@ -162,19 +162,17 @@
       "createDate": 1617716382481,
       "updateDate": 1620133344596
     },
-    "libraryCards": [
-      {
-        "id": 92,
-        "userId": 3351,
-        "institutionId": 150,
-        "eraCommonsId": "GREGORYRUSHTON",
-        "userName": "Gregory Rushton",
-        "userEmail": "grushton@test.com",
-        "createDate": 1694797680476,
-        "createUserId": 3351,
-        "daaIds": []
-      }
-    ]
+    "libraryCard": {
+      "id": 92,
+      "userId": 3351,
+      "institutionId": 150,
+      "eraCommonsId": "GREGORYRUSHTON",
+      "userName": "Gregory Rushton",
+      "userEmail": "grushton@test.com",
+      "createDate": 1694797680476,
+      "createUserId": 3351,
+      "daaIds": []
+    }
   },
   "createUserId": 3351,
   "dars": {

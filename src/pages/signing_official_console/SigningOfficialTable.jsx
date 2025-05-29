@@ -1,28 +1,27 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Info } from '@mui/icons-material';
-import { Styles, Theme } from '../../libs/theme';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
-import {head} from 'lodash';
-import SimpleTable from '../../components/SimpleTable';
-import SimpleButton from '../../components/SimpleButton';
-import PaginationBar from '../../components/PaginationBar';
-import SearchBar from '../../components/SearchBar';
+import { Styles, Theme } from 'src/libs/theme';
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
+import SimpleTable from 'src/components/SimpleTable';
+import SimpleButton from 'src/components/SimpleButton';
+import PaginationBar from 'src/components/PaginationBar';
+import SearchBar from 'src/components/SearchBar';
 import {
   Notifications,
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList
-} from '../../libs/utils';
-import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
-import ConfirmationModal from '../../components/modals/ConfirmationModal';
-import { LibraryCard } from '../../libs/ajax/LibraryCard';
-import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
+} from 'src/libs/utils';
+import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal';
+import ConfirmationModal from 'src/components/modals/ConfirmationModal';
+import { LibraryCard } from 'src/libs/ajax/LibraryCard';
+import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
+import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement08012024.pdf';
 import {
   NIHDataUseCertificationAgreement
-} from '../../components/external_docs/NIHDataUseCertificationAgreement';
+} from 'src/components/external_docs/NIHDataUseCertificationAgreement';
 
 //Styles specific to this table
 const styles = {
@@ -122,7 +121,7 @@ const LibraryCardCell = ({
   showConfirmationModal,
 }) => {
   const id = researcher.userId || researcher.email;
-  const card = head(researcher.libraryCards);
+  const card = researcher.libraryCard;
   const button = !isNil(card)
     ? DeactivateLibraryCardButton({
       card,
@@ -190,13 +189,11 @@ const displayNameCell = (displayName, id) => {
 };
 
 
-const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
-  const cards = researcher.libraryCards;
-  if (isEmpty(cards)) {
+const onlyResearchersWithoutCardFilter = (researcher) => {
+  const card = researcher.libraryCard;
+  if (isNil(card)) {
     return true;
   }
-
-  return isNil(find((card) => card.institutionId === institutionId)(researcher.libraryCards));
 };
 
 export default function SigningOfficialTable(props) {
@@ -287,8 +284,7 @@ export default function SigningOfficialTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {displayName, /*count = 0,*/ roles, libraryCards} = researcher;
-      const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
+      const {displayName, /*count = 0,*/ roles, libraryCard} = researcher;
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
       return [
@@ -330,7 +326,7 @@ export default function SigningOfficialTable(props) {
         const attributes = {
           email: userEmail,
           displayName: userName,
-          libraryCards: [newLibraryCard],
+          libraryCard: newLibraryCard,
           roles: [],
         };
         if(!isNil(targetUnregisteredResearcher)) {
@@ -339,7 +335,7 @@ export default function SigningOfficialTable(props) {
         listCopy.unshift(attributes);
         messageName = userEmail;
       } else {
-        listCopy[targetIndex].libraryCards = [newLibraryCard];
+        listCopy[targetIndex].libraryCard = newLibraryCard;
         messageName = userName;
       }
       setResearchers(listCopy);
@@ -358,14 +354,13 @@ export default function SigningOfficialTable(props) {
     try {
       await LibraryCard.deleteLibraryCard(id);
       const targetIndex = findIndex((researcher) => {
-        const libraryCards = researcher.libraryCards || [];
-        const card = libraryCards[0];
+        const card = researcher.libraryCard;
         return !isNil(card) && id === card.id;
       })(researchers);
       if(isNil(userId) || researchers[targetIndex].institutionId !== signingOfficial.institutionId) {
         listCopy.splice(targetIndex, 1);
       } else {
-        listCopy[targetIndex].libraryCards = [];
+        listCopy[targetIndex].libraryCard = undefined;
       }
       setResearchers(listCopy);
       setShowConfirmation(false);
@@ -434,7 +429,7 @@ export default function SigningOfficialTable(props) {
         createOnClick={(card) => issueLibraryCard(card, researchers)}
         closeModal={() => setShowModal(false)}
         card={selectedCard}
-        users={filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers)}
+        users={onlyResearchersWithoutCardFilter(researchers)}
         modalType="add" />
       <ConfirmationModal
         showConfirmation={showConfirmation}
