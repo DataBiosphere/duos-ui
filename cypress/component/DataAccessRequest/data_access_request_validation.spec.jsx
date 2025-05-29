@@ -43,7 +43,6 @@ const userNoLibraryCard = {
   displayName: 'Jane Doe',
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
-  libraryCard: {},
   properties: [
     {
       propertyId: 10350,
