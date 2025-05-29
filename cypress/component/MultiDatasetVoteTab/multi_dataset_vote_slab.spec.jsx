@@ -199,7 +199,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('textarea').should('be.disabled');
   });
 
-  it('Renders NOT SELECTED vote result text if some elections are closed and current votes do not match', function() {
+  it('Renders vote button if any election is open', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -211,34 +211,15 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
-    cy.get('textarea').should('be.disabled');
-  });
-
-  it('Renders vote result text if some elections are closed and current votes do match', function() {
-    mount(
-      <MultiDatasetVoteSlab
-        title={'GROUP 1'}
-        bucket={{
-          elections: [openElection1, closedElection],
-          votes: [votesForOpenElection1, votesForClosedElection]
-        }}
-        dacDatasetIds={[10, 30]}
-        isChair={false}
-      />
-    );
-    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
-    cy.stub(Votes, 'updateVotesByIds');
-
-    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'YES');
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
-    cy.get('textarea').should('be.disabled');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('textarea').should('not.be.disabled');
   });
 
   it('Replaces vote buttons with vote result text when readOnly is true', function() {
