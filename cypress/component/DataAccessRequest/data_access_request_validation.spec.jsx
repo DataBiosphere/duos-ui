@@ -89,6 +89,7 @@ describe('Data Access Request - Validation', () => {
 
   describe('With Library Cards', () => {
     beforeEach(() => {
+      cy.initApplicationConfig();
       cy.stub(Metrics, 'captureEvent').returns(Promise.resolve());
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
       cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));
@@ -96,7 +97,10 @@ describe('Data Access Request - Validation', () => {
       cy.stub(Storage, 'getCurrentUser').returns(user);
       cy.stub(User, 'getMe').returns(user);
       cy.stub(Navigation, 'console').returns({});
-      cy.stub(DAR, 'postDar').returns({});
+      cy.intercept('POST', '/api/dar/**', {
+        statusCode: 200,
+        body: {}
+      }).as('postDar');
       cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' });
       cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
       cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
@@ -137,10 +141,10 @@ describe('Data Access Request - Validation', () => {
 
       cy.get('#btn_attest').click();
       cy.get('#btn_openSubmitModal').click();
-      cy.get('#btn_submit').click().then(() => {
-        expect(DAR.postDar).to.have.been.calledOnce;
+      cy.get('#btn_submit').click();
+      cy.wait('@postDar').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
       });
-
     });
 
     it('Required fields should not be errored when you open page', () => {
