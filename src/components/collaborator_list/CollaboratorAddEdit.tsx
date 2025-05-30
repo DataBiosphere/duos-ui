@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import { FormField, FormValidators } from '../forms/forms';
 import {Collaborator} from "src/types/model";
 import {ValidationError} from "src/pages/dar_application/FormValidationState";
@@ -30,23 +30,18 @@ interface Validation {
 }
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
     const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false } = props;
-
     const [newCollaborator, setNewCollaborator] = useState(collaborator);
-    const [validation, setValidation] = useState<Validation>({});
+    const [validation, setValidation] = useState<Validation>(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}));
     const accountLabel = nihAccountLabel();
 
-    useEffect(() => {
-        setValidation(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}));
-    }, [newCollaborator, showApproverStatus]);
-
-    const formValidationChange = useCallback(({ key, validator }) => {
-        setValidation((formValidation) => {
-            return {
-                ...formValidation,
-                [key]: validator
-            };
-        });
-    }, []);
+    const onChange = ({ key, value }: FormFieldChange) => {
+        const setCollaborator = {
+            ...newCollaborator,
+            [key]: value
+        } as Collaborator;
+        setNewCollaborator(setCollaborator);
+        setValidation(computeCollaboratorErrors({collaborator: setCollaborator, needsApproverStatus: showApproverStatus}));
+    };
 
     return (
         <div className='form-group row no-margin'>
@@ -59,15 +54,8 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         defaultValue={collaborator?.name}
                         placeholder='Full Name'
                         validators={[FormValidators.REQUIRED]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setCollaborator = {
-                                ...newCollaborator,
-                                [key]: value
-                            } as Collaborator;
-                            setNewCollaborator(setCollaborator);
-                        }}
+                        onChange={onChange}
                         validation={validation.name}
-                        onValidationChange={formValidationChange}
                     />
                     <FormField
                         id='eraCommonsId'
@@ -75,15 +63,8 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         defaultValue={collaborator?.eraCommonsId}
                         placeholder={`${accountLabel} Account`}
                         validators={[FormValidators.REQUIRED]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setCollaborator = {
-                                ...newCollaborator,
-                                [key]: value
-                            } as Collaborator;
-                            setNewCollaborator(setCollaborator);
-                        }}
+                        onChange={onChange}
                         validation={validation.eraCommonsId}
-                        onValidationChange={formValidationChange}
                     />
                     <FormField
                         id='title'
@@ -91,15 +72,8 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         defaultValue={collaborator?.title}
                         placeholder='Title'
                         validators={[FormValidators.REQUIRED]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setCollaborator = {
-                                ...newCollaborator,
-                                [key]: value
-                            } as Collaborator;
-                            setNewCollaborator(setCollaborator);
-                        }}
+                        onChange={onChange}
                         validation={validation.title}
-                        onValidationChange={formValidationChange}
                     />
                     <FormField
                         id='email'
@@ -107,29 +81,15 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         defaultValue={collaborator?.email}
                         placeholder='Email'
                         validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setCollaborator = {
-                                ...newCollaborator,
-                                [key]: value
-                            } as Collaborator;
-                            setNewCollaborator(setCollaborator);
-                        }}
+                        onChange={onChange}
                         validation={validation.email}
-                        onValidationChange={formValidationChange}
                     />
                     {showApproverStatus && (
                     <ApproverStatus
                         index={id}
                         approverStatus={newCollaborator?.approverStatus}
                         validation={validation.approverStatus}
-                        onValidationChange={formValidationChange}
-                        onChange={({key, value}) => {
-                            const setCollaborator = {
-                                ...newCollaborator,
-                                [key]: value
-                            } as Collaborator;
-                            setNewCollaborator(setCollaborator);
-                        }}/>
+                        onChange={onChange}/>
                     )}
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>
