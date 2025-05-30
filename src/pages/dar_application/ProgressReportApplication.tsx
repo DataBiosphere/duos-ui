@@ -55,9 +55,13 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     };
 
     const [formState, setFormState] = useState<FormState>(initialState);
+    const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
     const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
     const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
+
+    const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
+
     const getValidation = (newState) => {
         if (!readOnlyMode) {
             return validatePRFormData(
@@ -69,8 +73,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         }
         return {darErrors: {}}
     }
-    const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
-    const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
     const onFormChange = (newState: Partial<FormState>) => {
         const setState = {...formState, ...newState};
