@@ -1,4 +1,4 @@
-import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, sortBy, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten} from 'lodash/fp';
+import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten} from 'lodash/fp';
 import { formatDate, Notifications } from '../libs/utils';
 import { Collections } from '../libs/ajax/Collections';
 
@@ -27,7 +27,7 @@ export const processVotesForBucket = (darElections = []) => {
     updatedVotes.forEach(vote => {
       votes[vote.voteId] = vote;
     });
-    const dateSortedVotes = sortBy((vote) => vote.updateDate)(updatedVotes);
+    const dateSortedVotes = updatedVotes.sort((vote) => vote.updateDate);
     let targetFinal, targetChair, targetMember, targetFinalType;
 
     if(electionType === 'RP') {

@@ -4,7 +4,6 @@ import CollectionVoteYesButton from './CollectionVoteYesButton';
 import CollectionVoteNoButton from './CollectionVoteNoButton';
 import {Notifications} from '../../libs/utils';
 import { Votes } from '../../libs/ajax/Votes';
-import {toLower} from "lodash";
 
 const styles = {
   baseStyle: {
@@ -107,8 +106,8 @@ export default function CollectionSubmitVoteBox(props) {
 
   const updateVote = async (newVote, isChair) => {
     try {
-      const openElectionVotes = votes.filter(v => toLower(v.electionStatus) === 'open');
-      const voteIds = map(v => v.voteId)(openElectionVotes);
+      const openElectionVotes = votes.filter(v => v.electionStatus.toLowerCase() === 'open');
+      const voteIds = openElectionVotes.map(v => v.voteId);
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setSubmitted(true);
       //call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render

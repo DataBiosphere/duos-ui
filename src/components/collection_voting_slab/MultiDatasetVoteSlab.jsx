@@ -1,14 +1,9 @@
 import React from 'react';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
 import {
-  filter,
-  flow,
-  map,
   isNil,
   isEmpty,
-  get,
-  includes,
-  toLower,
+  get
 } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 import { useEffect, useState } from 'react';
@@ -93,12 +88,10 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const VoteInfoSubsection = () => {
-    const electionIds = map((vote) => vote.electionId)(currentUserVotes);
-    const allOpenElections = flow(
-      get('elections'),
-      filter((election) => includes(election.electionId)(electionIds)),
-      filter((election) => toLower(election.status) === 'open')
-    )(bucket);
+    const electionIds = currentUserVotes.map((vote) => vote.electionId);
+    const allOpenElections = bucket.elections
+        .filter((election) => electionIds.includes(election.electionId))
+        .filter((election) => election.status.toLowerCase() === 'open');
 
     return (
       <div style={styles.voteInfo}>
