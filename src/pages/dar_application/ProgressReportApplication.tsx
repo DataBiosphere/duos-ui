@@ -38,6 +38,10 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         ...(dar?.presentations && {
             presentationsYesNo: (dar.presentations.length > 0)
         }),
+        // additional state for datasets section populated by useEffect
+        datasets: [],
+        datasetIds: [],
+        selectedDatasets: [],
         // additional state for dmi section
         ...(dar?.dmi?.incidents && {
             dmiYesNo: (dar.dmi.incidents.length > 0),
@@ -58,7 +62,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
     const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
-    const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
 
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
@@ -67,7 +70,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             return validatePRFormData(
                 nihValid,
                 newState,
-                selectedDatasets,
+                formState.selectedDatasets,
                 dataUseTranslations
             );
         }
@@ -83,22 +86,19 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         setFormValidation(getValidation(setState))
     };
 
+    const onSelectedDatasetChange = (newDatasets: Dataset[]) => {
+        const newDatasetIds = newDatasets.map((ds) => ds.datasetId);
+        translateDataUseRestrictionsFromDataUseArray(newDatasets.map((ds) => ds.dataUse)).then((translations) => {
+            setDataUseTranslations(translations);
+        });
+        onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
+    }
+
     // required because the datasets state changes during component mount
     useEffect(() => {
-        onFormChange({ datasetIds: datasets.map((ds) => ds.datasetId) });
-        setSelectedDatasets(datasets);
-        translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
-            setDataUseTranslations(translations);
-        });
+        onFormChange({ datasets: datasets });
+        onSelectedDatasetChange(datasets);
     }, [datasets]);
-
-    useEffect(() => {
-        const selectedIds = selectedDatasets.map((ds => ds.datasetId));
-        translateDataUseRestrictionsFromDataUseArray(selectedDatasets.map((ds) => ds.dataUse)).then((translations) => {
-            setDataUseTranslations(translations);
-        });
-        onFormChange({ datasetIds: selectedIds });
-    }, [selectedDatasets]);
 
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
@@ -121,15 +121,15 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     <p style={{marginBottom: '1rem'}}>Currently selected datasets:</p>
                     <SelectableDatasets
                         disabled={readOnlyMode}
-                        datasets={datasets}
-                        setSelectedDatasets={setSelectedDatasets}
+                        datasets={formState.datasets}
+                        setSelectedDatasets={onSelectedDatasetChange}
                     />
                 </div>
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DataUseAcknowledgements
                     title={'2.1 Data Use Acknowledgements'}
-                    datasets={selectedDatasets}
+                    datasets={formState.selectedDatasets}
                     dataUseTranslations={dataUseTranslations}
                     formData={formState}
                     readOnlyMode={readOnlyMode}
