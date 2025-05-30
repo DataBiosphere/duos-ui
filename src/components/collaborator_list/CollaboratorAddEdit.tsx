@@ -28,6 +28,7 @@ interface Validation {
     email?: ValidationError;
     approverStatus?: ValidationError;
 }
+
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
     const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false } = props;
     const [newCollaborator, setNewCollaborator] = useState(collaborator);
