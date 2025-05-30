@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect} from 'react';
 import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
 import {Location} from 'history';
 import {DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
@@ -58,14 +58,27 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
     const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(datasets);
+    const getValidation = (newState) => {
+        if (!readOnlyMode) {
+            return validatePRFormData(
+                nihValid,
+                newState,
+                selectedDatasets,
+                dataUseTranslations
+            );
+        }
+        return {darErrors: {}}
+    }
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
     const onFormChange = (newState: Partial<FormState>) => {
+        const setState = {...formState, ...newState};
         setFormState(prevState => ({
             ...prevState,
             ...newState
         }));
+        setFormValidation(getValidation(setState))
     };
 
     // required because the datasets state changes during component mount
@@ -85,29 +98,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         onFormChange({ datasetIds: selectedIds });
     }, [selectedDatasets]);
 
-    useEffect(() => {
-        if (!readOnlyMode) {
-            const validation = validatePRFormData(
-                nihValid,
-                formState,
-                selectedDatasets,
-                dataUseTranslations
-            );
-            setFormValidation(validation);
-        }
-    }, [formState, nihValid, selectedDatasets, dataUseTranslations, readOnlyMode]);
-    const formValidationChange = useCallback(({ key, validation }) => {
-        setFormValidation((formValidation) => {
-            return {
-                ...formValidation,
-                darErrors: {
-                    ...formValidation.darErrors,
-                    [key]: validation
-                }
-            };
-        });
-    }, []);
-
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
@@ -118,7 +108,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     eRACommonsDestination={eRACommonsDestination}
                     researcher={researcher}
                     location={location}
-                    onValidationChange={formValidationChange}
                     validation={formValidation.darErrors}
                     nihValid={nihValid}
                     onNihStatusUpdate={setNihValid}
@@ -145,7 +134,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     onChange={(dua) => {
                         onFormChange({[dua.key]: dua.value})
                     }}
-                    onValidationChange={formValidationChange}
                     validation={formValidation.darErrors}
                 />
             </div>
@@ -157,7 +145,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     readOnly={readOnlyMode}
                     formState={formState}
                     onFormChange={onFormChange}
-                    onValidationChange={formValidationChange}
                     validation={formValidation.darErrors}
                 />
             </div>
@@ -166,7 +153,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     readOnly={readOnlyMode}
                     formState={formState}
                     onFormChange={onFormChange}
-                    onValidationChange={formValidationChange}
                     validation={formValidation.darErrors}
                 />
             </div>

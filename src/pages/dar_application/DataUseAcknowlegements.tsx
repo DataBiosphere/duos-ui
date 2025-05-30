@@ -12,7 +12,7 @@ type DataUseAcknowledgementsProps = {
     readOnlyMode: boolean,
     includeInstructions?: boolean,
     onChange: (obj: object) => void,
-    onValidationChange: (validation: {key: string, validation: ValidationError}) => void,
+    onValidationChange?: (validation: {key: string, validation: ValidationError}) => void,
     validation?: DarErrors
 }
 

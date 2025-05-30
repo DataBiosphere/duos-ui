@@ -30,7 +30,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     const { id, publication, publicationText, publications, closeAction, onPublicationChange } = props;
 
     const [newPublication, setNewPublication] = useState(publication);
-    const [validation, setValidation] = useState<Validation>(calcPublicationOrPresentationErrors(newPublication, publicationText));
+    const [validation, setValidation] = useState<Validation>({});
 
     const onChange = ({ key, value }: FormFieldChange) => {
         const setPublication = {
@@ -137,7 +137,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             }
                             closeAction();
                         }}
-                        disabled={validationFailed(validation)}
+                        disabled={validationFailed(calcPublicationOrPresentationErrors(newPublication, publicationText))}
                     >
                         {publication === undefined ? 'Add' : 'Save'}
                     </button>

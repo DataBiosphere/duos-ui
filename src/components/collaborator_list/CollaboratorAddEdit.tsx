@@ -31,7 +31,7 @@ interface Validation {
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
     const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false } = props;
     const [newCollaborator, setNewCollaborator] = useState(collaborator);
-    const [validation, setValidation] = useState<Validation>(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}));
+    const [validation, setValidation] = useState<Validation>({});
     const accountLabel = nihAccountLabel();
 
     const onChange = ({ key, value }: FormFieldChange) => {
@@ -109,7 +109,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                             }
                             closeAction();
                         }}
-                        disabled={validationFailed(validation)}
+                        disabled={validationFailed(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}))}
                     >
                         {collaborator === undefined ? 'Add' : 'Save'}
                     </button>

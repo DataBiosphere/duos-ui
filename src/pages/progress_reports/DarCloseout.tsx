@@ -28,11 +28,12 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         description={<span>Are you ready to finish work on this project?</span>}
                         orientation='horizontal'
                         onChange={({ key, value }: ValidFormState) => {
-                            onFormChange({ [key]: value }  as Partial<FormState>);
-                            // clear out selected options if the user selects "No"
+                            const newState = {[key]: value} as Partial<FormState>;
                             if (value === false) {
-                                onFormChange({ [FormStateKey.CLOSEOUT_SUPPLEMENT]: undefined } as Partial<FormState>);
+                                // If the user selects "No", clear out the closeout supplement field
+                                newState[FormStateKey.CLOSEOUT_SUPPLEMENT] = undefined;
                             }
+                            onFormChange(newState);
                         }}
                         defaultValue={formState.closeoutYesNo}
                         disabled={readOnly}

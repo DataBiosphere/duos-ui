@@ -30,19 +30,18 @@ export default function DataManagementIncident(props: DataManagementIncidentProp
                             orientation='horizontal'
                             defaultValue={formState.dmiYesNo}
                             onChange={({ key, value }: ValidFormState) => {
+                                const newState = { [key]: value } as Partial<FormState>;
                                 if (value === false) {
-                                    onFormChange({
-                                        dmiCombination: false,
-                                        dmiIdentification: false,
-                                        dmiSharing: false,
-                                        dmiSecurity: false,
-                                        dmiAcknowledgement: false,
-                                        dmiPublication: false,
-                                        dmiFalsification: false,
-                                        dmiOther: false
-                                    });
+                                    newState[FormStateKey.DMI_COMBINATION] = false;
+                                    newState[FormStateKey.DMI_IDENTIFICATION] = false;
+                                    newState[FormStateKey.DMI_SHARING] = false;
+                                    newState[FormStateKey.DMI_SECURITY] = false;
+                                    newState[FormStateKey.DMI_ACKNOWLEDGEMENT] = false;
+                                    newState[FormStateKey.DMI_PUBLICATION] = false;
+                                    newState[FormStateKey.DMI_FALSIFICATION] = false;
+                                    newState[FormStateKey.DMI_OTHER] = false;
                                 }
-                                onFormChange({ [key]: value } as Partial<FormState>);
+                                onFormChange(newState);
                             }}
                             disabled={readOnly}
                             validation={validation?.dmiYesNo}
