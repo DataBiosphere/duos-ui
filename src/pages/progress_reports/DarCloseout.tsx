@@ -2,15 +2,18 @@ import React from 'react';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import {CloseOutSupplement} from "src/types/model";
+import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
 
 interface DarCloseoutProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
+    onValidationChange?: (validationState: { key: string, validation: ValidationError }) => void;
+    validation?: DarErrors;
 }
 
 export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange } = props;
+    const { readOnly, formState, onFormChange, onValidationChange, validation } = props;
 
     return (
         <div data-cy='dar-closeout'>
@@ -25,14 +28,17 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         description={<span>Are you ready to finish work on this project?</span>}
                         orientation='horizontal'
                         onChange={({ key, value }: ValidFormState) => {
-                            onFormChange({ [key]: value }  as Partial<FormState>);
-                            // clear out selected options if the user selects "No"
+                            const newState = {[key]: value} as Partial<FormState>;
                             if (value === false) {
-                                onFormChange({ [FormStateKey.CLOSEOUT_SUPPLEMENT]: undefined } as Partial<FormState>);
+                                // If the user selects "No", clear out the closeout supplement field
+                                newState[FormStateKey.CLOSEOUT_SUPPLEMENT] = undefined;
                             }
+                            onFormChange(newState);
                         }}
                         defaultValue={formState.closeoutYesNo}
                         disabled={readOnly}
+                        validation={validation?.closeoutYesNo}
+                        onValidationChange={onValidationChange}
                     />
                     {formState.closeoutYesNo && (
                         <div>
@@ -57,6 +63,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                 onChange={({ key, value }: ValidFormState) => {
                                     onFormChange({ [key]: value } as Partial<FormState>);
                                 }}
+                                onValidationChange={onValidationChange}
+                                validation={validation?.closeoutSupplement}
                             />
                         </div>
                     </div>

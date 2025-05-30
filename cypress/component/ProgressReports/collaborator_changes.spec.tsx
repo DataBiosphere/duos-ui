@@ -5,18 +5,18 @@ import { Collaborator } from 'src/components/collaborator_list/Collaborator';
 
 describe('Collaborator Changes - Component Tests', () => {
   let onFormChangeSpy: () => void;
-  
+
   const initialCollaborators: Collaborator[] = [
-    { 
-      name: 'Test User 1', 
+    {
+      name: 'Test User 1',
       title: 'Researcher',
       uuid: '1',
       eraCommonsId: 'user1',
       email: 'user1@example.com',
       institution: 'Test Institution'
     },
-    { 
-      name: 'Test User 2', 
+    {
+      name: 'Test User 2',
       title: 'Assistant',
       uuid: '2',
       eraCommonsId: 'user2',
@@ -24,19 +24,19 @@ describe('Collaborator Changes - Component Tests', () => {
       institution: 'Test Institution'
     }
   ];
-  
+
   const mountComponent = (customState = {}) => {
     const formState = { ...customState };
-    
+
     const props = {
       readOnly: false,
       formState,
       onFormChange: onFormChangeSpy
     };
-    
+
     return mount(<CollaboratorChanges {...props} />);
   };
-  
+
   beforeEach(() => {
     onFormChangeSpy = cy.stub().as('formChangeStub');
     mountComponent();
@@ -58,7 +58,7 @@ describe('Collaborator Changes - Component Tests', () => {
 
   it('displays preloaded internal lab staff', () => {
     mountComponent({ labCollaborators: initialCollaborators });
-    
+
     cy.contains('Test User 1').should('be.visible');
     cy.contains('Test User 2').should('be.visible');
     cy.contains('Researcher').should('be.visible');
@@ -67,14 +67,14 @@ describe('Collaborator Changes - Component Tests', () => {
 
   it('displays preloaded internal collaborators', () => {
     mountComponent({ internalCollaborators: initialCollaborators });
-    
+
     cy.contains('Test User 1').should('be.visible');
     cy.contains('Test User 2').should('be.visible');
   });
 
   it('displays preloaded external collaborators', () => {
     mountComponent({ externalCollaborators: initialCollaborators });
-    
+
     cy.contains('Test User 1').should('be.visible');
     cy.contains('Test User 2').should('be.visible');
   });
@@ -85,7 +85,7 @@ describe('Collaborator Changes - Component Tests', () => {
       formState: { labCollaborators: initialCollaborators },
       onFormChange: onFormChangeSpy
     };
-    
+
     mount(<CollaboratorChanges {...props} />);
 
     cy.contains('Test User 1').should('be.visible');
@@ -98,7 +98,7 @@ describe('Collaborator Changes - Component Tests', () => {
       internalCollaborators: [],
       externalCollaborators: []
     });
-    
+
     cy.contains('Internal Lab Staff').should('exist');
     cy.contains('Internal Collaborators').should('exist');
     cy.contains('External Collaborators').should('exist');
@@ -106,13 +106,13 @@ describe('Collaborator Changes - Component Tests', () => {
 
   it('displays correct description text for each collaborator type', () => {
     mountComponent();
-    
+
     cy.contains('Please add Internal Lab Staff here').should('be.visible');
     cy.contains('Please add Internal Collaborators here').should('be.visible');
     cy.contains('Please list External collaborators here').should('be.visible');
 
     cy.contains('Internal Lab Staff are defined as users of data from this Data Access Request').should('be.visible');
     cy.contains('Internal Collaborators are defined as individuals who are not under the direct supervision of the PI').should('be.visible');
-    cy.contains('External Collaboratos are not employees of the Requesting PI').should('be.visible');
+    cy.contains('External Collaborators are not employees of the Requesting PI').should('be.visible');
   });
 });

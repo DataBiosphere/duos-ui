@@ -3,8 +3,6 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
-import {validationFailed} from 'src/utils/darFormUtils';
-import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 import {DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 import {
@@ -13,17 +11,18 @@ import {
   Presentation,
   Publication
 } from "src/types/model";
+import {Theme} from "src/libs/theme";
 
 interface SubmitProgressReportProps {
   readonly formState: FormState;
   readonly parentReferenceId: string;
   readonly onSuccess: (result: unknown) => void;
   readonly onCancel: () => void;
-  readonly validateForm: () => FormValidationState;
+  readonly disabled?: boolean;
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const { formState, parentReferenceId, onSuccess, onCancel, validateForm} = props;
+  const { formState, parentReferenceId, onSuccess, onCancel, disabled} = props;
 
   const getPublicationList = (formState: FormState): Publication[] => {
     const publications: PublicationOrPresentation[] = formState.publications ?? [];
@@ -94,16 +93,12 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   }
 
   const submit = async () => {
-    if (validationFailed(validateForm())) {
-      Notifications.showError({text: "Form validation failed. Please check the form for errors."});
-    } else {
-      try {
-        const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState));
-        const submittedPR = await ProgressReport.submitProgressReport(multiPartFormData, parentReferenceId);
-        onSuccess(submittedPR);
-      } catch (error: unknown) {
-        handleError('Error: Unable to submit progress report: ', error);
-      }
+    try {
+      const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState));
+      const submittedPR = await ProgressReport.submitProgressReport(multiPartFormData, parentReferenceId);
+      onSuccess(submittedPR);
+    } catch (error: unknown) {
+      handleError('Error: Unable to submit progress report: ', error);
     }
   }
 
@@ -135,22 +130,30 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     const serverError = consentError.message ?? 'Unknown error';
     Notifications.showError({text: message + serverError});
   }
+  const disabledStyle = {
+    backgroundColor: Theme.palette.disabled,
+    borderColor: Theme.palette.disabled
+  }
 
   return (
       <div className='flex flex-row' style={{justifyContent: 'flex-start'}}>
-        <button
-            type={'button'}
-            className='button button-blue'
-            style={{marginRight: '2rem', cursor: 'pointer'}}
-            data-cy='pr-submit-button'
-            onClick={submit}>Submit
-        </button>
-        <button
-            type={'button'}
+        <span>
+            <button type={'button'}
+                className='button button-blue'
+                style={{marginRight: '2rem', cursor: 'pointer', ...(disabled ? disabledStyle : {})}}
+                data-cy='pr-submit-button'
+                disabled={disabled}
+                title='Complete required form fields to enable submission.'
+                onClick={submit}>
+              Submit
+            </button>
+        </span>
+        <button type={'button'}
             className='button button-white'
             style={{cursor: 'pointer'}}
             data-cy='pr-cancel-button'
-            onClick={cancel}>Cancel this Update
+            onClick={cancel}>
+          Cancel this Update
         </button>
       </div>
   )

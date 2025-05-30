@@ -68,27 +68,27 @@ const isStringEmpty = (str) => {
 
 export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=true}) => {
   const errors = {};
-
-  if (isStringEmpty(collaborator.name)) {
+  // if collaborator is undefined or a required field is empty, include an error
+  if (isStringEmpty(collaborator?.name)) {
     errors.name = requiredError;
   }
 
-  if (isStringEmpty(collaborator.eraCommonsId)) {
+  if (isStringEmpty(collaborator?.eraCommonsId)) {
     errors.eraCommonsId = requiredError;
   }
 
-  if (isStringEmpty(collaborator.title)) {
+  if (isStringEmpty(collaborator?.title)) {
     errors.title = requiredError;
   }
 
-  if (isStringEmpty(collaborator.email)) {
+  if (isStringEmpty(collaborator?.email)) {
     errors.email = requiredError;
   } else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
     errors.email = validationError('email');
   }
 
   if (needsApproverStatus) {
-    if (isEmpty(collaborator.approverStatus)) {
+    if (isEmpty(collaborator?.approverStatus)) {
       errors.approverStatus = requiredError;
     }
   }
@@ -201,9 +201,69 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
   return errors;
 };
 
-const calcPRErrors = (formData, datasets, dataUseTranslations) => {
+const calcSummaryErrors = (nihValid, errors, formData) => {
+  if (nihValid === false) {
+    errors.nihEraId = requiredError;
+  }
+  if (isEmpty(formData.progressReportSummary)) {
+    errors.progressReportSummary = requiredError;
+  }
+  if (isNil(formData.intellectualPropertyYesNo)) {
+    errors.intellectualPropertyYesNo = requiredError;
+  }
+  if (formData.intellectualPropertyYesNo && isEmpty(formData.intellectualPropertySummary)) {
+    errors.intellectualPropertySummary = requiredError;
+  }
+  if (isNil(formData.publicationsYesNo)) {
+    errors.publicationsYesNo = requiredError;
+  }
+  if (formData.publicationsYesNo && isEmpty(formData.publications)) {
+    errors.publications = requiredError;
+  }
+  if (isNil(formData.presentationsYesNo)) {
+    errors.presentationsYesNo = requiredError;
+  }
+  if (formData.presentationsYesNo && isEmpty(formData.presentations)) {
+    errors.presentations = requiredError;
+  }
+}
+
+const calcDmiErrors = (formData, errors) =>{
+  if (isNil(formData.dmiYesNo)) {
+    errors.dmiYesNo = requiredError;
+  }
+  const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,
+    formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
+  if (formData.dmiYesNo && dmiFields.every((field) => !field)) {
+    errors.dmiAcknowledgement = requiredError;
+    errors.dmiCombination = requiredError;
+    errors.dmiFalsification = requiredError;
+    errors.dmiIdentification = requiredError;
+    errors.dmiOther = requiredError;
+    errors.dmiPublication = requiredError;
+    errors.dmiSecurity = requiredError;
+    errors.dmiSharing = requiredError;
+  }
+  if (formData.dmiYesNo && isEmpty(formData.dmiDescription)) {
+    errors.dmiDescription = requiredError;
+  }
+}
+
+const calcCloseoutErrors= (formData, errors) => {
+  if (isNil(formData.closeoutYesNo)) {
+    errors.closeoutYesNo = requiredError;
+  }
+  if (formData.closeoutYesNo && isEmpty(formData.closeoutSupplement)) {
+    errors.closeoutSupplement = requiredError;
+  }
+}
+
+const calcPRErrors = (nihValid, formData, datasets, dataUseTranslations) => {
   const errors = {};
+  calcSummaryErrors(nihValid, errors, formData);
   calcDUAErrors(formData, datasets, dataUseTranslations, errors);
+  calcDmiErrors(formData, errors);
+  calcCloseoutErrors(formData, errors);
   return errors;
 };
 
@@ -219,6 +279,36 @@ const calcDUAErrors = (formData, datasets, dataUseTranslations, errors) => {
   if ((needsDsAcknowledgement(dataUseTranslations) && !formData.dsAcknowledgement)) {
     errors.dsAcknowledgement = requiredError;
   }
+}
+
+export const calcPublicationOrPresentationErrors = (newPublication, publicationText) => {
+  const validation = {};
+  if (isEmpty(newPublication?.title)) {
+    validation.title = requiredError;
+  }
+  if (isEmpty(newPublication?.date)) {
+    validation.date = requiredError;
+  } else if (!FormValidators.DATE.isValid(newPublication?.date)) {
+    validation.date = validationError('date');
+  }
+  if (isEmpty(newPublication?.authors)) {
+    validation.authors = requiredError;
+  }
+  if (isPublication(publicationText)) {
+    if (isEmpty(newPublication?.pubmed_id)) {
+      validation.pubmed_id = requiredError;
+    }
+    if (isEmpty(newPublication?.bibliographic_citation)) {
+      validation.bibliographic_citation = requiredError;
+    }
+  } else if (isEmpty(newPublication?.link)) {
+      validation.link = requiredError;
+  }
+  return validation;
+}
+
+export const isPublication = (publicationText) => {
+    return publicationText === 'Publication';
 }
 
 const requiredRusFields = [
@@ -283,11 +373,12 @@ export const validateDARFormData = ({
 };
 
 export const validatePRFormData = (
+    nihValid,
     formData,
     datasets,
     dataUseTranslations,
     ) => {
     return {
-        darErrors: calcPRErrors(formData, datasets, dataUseTranslations)
+        darErrors: calcPRErrors(nihValid, formData, datasets, dataUseTranslations)
     };
 }

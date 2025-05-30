@@ -101,6 +101,8 @@ describe('CollaboratorList - Component Tests', () => {
 
         cy.get('#name').type('New Person');
         cy.get('#name').blur();
+        cy.get('#eraCommonsId').type('newperson123');
+        cy.get('#eraCommonsId').blur();
         cy.get('#title').type('New Title');
         cy.get('#title').blur();
         cy.get('#email').type('new.person@example.com');

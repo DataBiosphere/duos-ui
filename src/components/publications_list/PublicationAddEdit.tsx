@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
+import { ValidationError } from "src/pages/dar_application/FormValidationState";
+import {validationFailed, calcPublicationOrPresentationErrors, isPublication} from "src/utils/darFormUtils";
 
 interface FormFieldChange {
     key: string;
@@ -16,10 +18,29 @@ interface PublicationAddEditProps {
     readonly onPublicationChange: (publications: PublicationOrPresentation[]) => void;
 }
 
+interface Validation {
+    title?: ValidationError;
+    date?: ValidationError;
+    authors?: ValidationError;
+    pubmed_id?: ValidationError;
+    bibliographic_citation?: ValidationError;
+    link?: ValidationError;
+}
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
     const { id, publication, publicationText, publications, closeAction, onPublicationChange } = props;
 
     const [newPublication, setNewPublication] = useState(publication);
+    const [validation, setValidation] = useState<Validation>({});
+
+    const onChange = ({ key, value }: FormFieldChange) => {
+        const setPublication = {
+            ...newPublication,
+            [key]: value
+        } as PublicationOrPresentation;
+        setNewPublication(setPublication);
+        setValidation(calcPublicationOrPresentationErrors(setPublication, publicationText));
+    };
+
 
     return (
         <div className='form-group row no-margin'>
@@ -32,13 +53,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         defaultValue={publication?.title}
                         placeholder='Title'
                         validators={[FormValidators.REQUIRED]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setPublication = {
-                                ...newPublication,
-                                [key]: value
-                            } as PublicationOrPresentation;
-                            setNewPublication(setPublication);
-                        }}
+                        onChange={onChange}
+                        validation={validation.title}
                     />
                     <FormField
                         id='date'
@@ -46,13 +62,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         defaultValue={publication?.date}
                         placeholder='Date'
                         validators={[FormValidators.REQUIRED, FormValidators.DATE]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setPublication = {
-                                ...newPublication,
-                                [key]: value
-                            } as PublicationOrPresentation;
-                            setNewPublication(setPublication);
-                        }}
+                        onChange={onChange}
+                        validation={validation.date}
                     />
                     <FormField
                         id='authors'
@@ -60,15 +71,10 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         defaultValue={publication?.authors}
                         placeholder='Authors'
                         validators={[FormValidators.REQUIRED]}
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setPublication = {
-                                ...newPublication,
-                                [key]: value
-                            } as PublicationOrPresentation;
-                            setNewPublication(setPublication);
-                        }}
+                        onChange={onChange}
+                        validation={validation.authors}
                     />
-                    {publicationText === 'Publication' ?
+                    {isPublication(publicationText) ?
                         <>
                             <FormField
                                 id='pubmed_id'
@@ -76,27 +82,17 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                                 defaultValue={publication?.pubmed_id}
                                 placeholder='PubMed ID'
                                 validators={[FormValidators.REQUIRED]}
-                                onChange={({ key, value }: FormFieldChange) => {
-                                    const setPublication = {
-                                        ...newPublication,
-                                        [key]: value
-                                    } as PublicationOrPresentation;
-                                    setNewPublication(setPublication);
-                                }}
+                                onChange={onChange}
+                                validation={validation.pubmed_id}
                             />
                             <FormField
                                 id='bibliographic_citation'
                                 title={`${publicationText} Bibliographic Citation`}
                                 defaultValue={publication?.bibliographic_citation}
-                                placeholder='Date'
+                                placeholder='Bibliographic Citation'
                                 validators={[FormValidators.REQUIRED]}
-                                onChange={({ key, value }: FormFieldChange) => {
-                                    const setPublication = {
-                                        ...newPublication,
-                                        [key]: value
-                                    } as PublicationOrPresentation;
-                                    setNewPublication(setPublication);
-                                }}
+                                onChange={onChange}
+                                validation={validation.bibliographic_citation}
                             />
                         </> : // otherwise it's a presentation
                         <FormField
@@ -105,13 +101,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             defaultValue={publication?.link}
                             placeholder='Link'
                             validators={[FormValidators.REQUIRED]}
-                            onChange={({ key, value }: FormFieldChange) => {
-                                const setPublication = {
-                                    ...newPublication,
-                                    [key]: value
-                                } as PublicationOrPresentation;
-                                setNewPublication(setPublication);
-                            }}
+                            onChange={onChange}
+                            validation={validation.link}
                         />
                     }
                     <FormField
@@ -119,33 +110,21 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         title={`Dataset citation used in this publication`}
                         defaultValue={publication?.dataset_citation}
                         placeholder='Dataset Citation'
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setPublication = {
-                                ...newPublication,
-                                [key]: value
-                            } as PublicationOrPresentation;
-                            setNewPublication(setPublication);
-                        }}
+                        onChange={onChange}
                     />
                     <FormField
                         id='did_cite'
                         type={FormFieldTypes.YESNORADIOGROUP}
                         title='Did you cite the dataset(s) used in this publication?'
                         orientation='horizontal'
-                        onChange={({ key, value }: FormFieldChange) => {
-                            const setPublication = {
-                                ...newPublication,
-                                [key]: value
-                            } as PublicationOrPresentation;
-                            setNewPublication(setPublication);
-                        }}
+                        onChange={onChange}
                     />
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>
                     {/* add/save button */}
-                    <div
+                    <button
                         className='collaborator-form-add-save-button f-left btn'
-                        role='button'
+                        type='button'
                         onClick={() => {
                             if (id < 0) {
                                 onPublicationChange([...publications, newPublication]);
@@ -158,9 +137,10 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                             }
                             closeAction();
                         }}
+                        disabled={validationFailed(calcPublicationOrPresentationErrors(newPublication, publicationText))}
                     >
                         {publication === undefined ? 'Add' : 'Save'}
-                    </div>
+                    </button>
                     {/* cancel button */}
                     <div
                         className='collaborator-form-cancel-button f-left btn'

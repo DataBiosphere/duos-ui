@@ -68,8 +68,12 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
     cy.get('#name').clear();
     cy.get('#name').type('Jane Doe');
+    cy.get('#eraCommonsId').clear();
+    cy.get('#eraCommonsId').type('janedoe456');
     cy.get('#title').clear();
     cy.get('#title').type('Senior Researcher');
+    cy.get('#email').clear();
+    cy.get('#email').type('janedoe@example.com')
 
     cy.contains('Save').click();
 
@@ -87,6 +91,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     />);
 
     cy.get('#name').type('Test Name');
+    cy.get('#eraCommonsId').type('example123');
     cy.get('#title').type('Test Title');
     cy.get('#email').type('test@example.com');
 
