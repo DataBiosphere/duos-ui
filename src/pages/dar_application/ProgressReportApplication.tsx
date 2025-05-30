@@ -133,8 +133,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     dataUseTranslations={dataUseTranslations}
                     formData={formState}
                     readOnlyMode={readOnlyMode}
-                    onChange={(dua) => {
-                        onFormChange({[dua.key]: dua.value})
+                    onChange={({key, value}) => {
+                        onFormChange({[key]: value})
                     }}
                     validation={formValidation.darErrors}
                 />
