@@ -35,7 +35,7 @@ describe('DAR Closeout - Component Tests', () => {
     cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: true });
 
     cy.get('#closeoutYesNo').parent().contains('label', 'No').find('input[type="radio"]').click({force: true});
-    cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: false });
+    cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: false, closeoutSupplement: undefined});
   });
 
   it('shows closeout options when "Yes" is selected', () => {
