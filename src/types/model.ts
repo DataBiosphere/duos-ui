@@ -318,7 +318,7 @@ export interface DataAccessRequest {
   draft: boolean;
   collectionId: number;
   darCode: string;
-  elections: Array<Election>;
+  elections: Record<number, Election>;
   projectTitle: string;
   datasetIds: number[];
   rus: string;

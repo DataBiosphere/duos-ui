@@ -15,6 +15,7 @@ import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowle
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
 import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
+import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
 
 type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
@@ -96,7 +97,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
     // required because the datasets state changes during component mount
     useEffect(() => {
-        const approvedDatasets = datasets.filter((ds) => ds.dacApproval);
+        const approvedDatasetIds = getApprovedElectionDatasetIds(Object.values(dar.elections));
+        const approvedDatasets = datasets.filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
         onFormChange({ datasets: approvedDatasets });
         onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
