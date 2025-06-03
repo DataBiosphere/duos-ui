@@ -16,15 +16,15 @@ const closedElection = {datasetId: 30, electionId: 103, status: 'Closed', electi
 const votesForOpenElection1 = {
   dataAccess: {
     finalVotes: [
-      {userId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1, electionStatus: 'Open'},
     ],
     chairpersonVotes: [
-      {userId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1, electionStatus: 'Open'},
     ],
     memberVotes: [
-      {userId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
-      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
-      {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
+      {userId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1, electionStatus: 'Open'},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1, electionStatus: 'Open'},
+      {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1, electionStatus: 'Open'}
     ]
   }
 };
@@ -32,15 +32,15 @@ const votesForOpenElection1 = {
 const votesForOpenElection2 = {
   dataAccess: {
     finalVotes: [
-      {userId: 200, displayName: 'Sarah',  vote: true, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: true, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1, electionStatus: 'Open'},
     ],
     chairpersonVotes: [
-      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1, electionStatus: 'Open'},
     ],
     memberVotes: [
-      {userId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
-      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
-      {userId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6}
+      {userId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2, electionStatus: 'Open'},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1, electionStatus: 'Open'},
+      {userId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6, electionStatus: 'Open'}
     ]
   }
 };
@@ -48,14 +48,14 @@ const votesForOpenElection2 = {
 const votesForClosedElection = {
   dataAccess: {
     finalVotes: [
-      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7, electionStatus: 'Closed'},
     ],
     chairpersonVotes: [
-      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7, electionStatus: 'Closed'},
     ],
     memberVotes: [
-      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
-      {userId: 300, displayName: 'Matt', vote: true, rationale: 'test3', electionId: 103, voteId: 8}
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7, electionStatus: 'Closed'},
+      {userId: 300, displayName: 'Matt', vote: true, rationale: 'test3', electionId: 103, voteId: 8, electionStatus: 'Closed'}
     ]
   }
 };
@@ -70,7 +70,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
             {code: 'GRU', description: 'Use is permitted for any research purpose', type: ControlledAccessType.permissions},
             {code: 'HMB', description: 'Use is permitted for a health, medical, or biomedical research purpose', type: ControlledAccessType.permissions},
             {code: 'NCU', description: 'The dataset will be used in a study related to a commercial purpose.', type: ControlledAccessType.modifiers}
-          ]
+          ],
+          elections: []
         }}
         dacDatasetIds={[10, 20]}
         isChair={true}
