@@ -27,7 +27,7 @@ export const processVotesForBucket = (darElections = []) => {
     updatedVotes.forEach(vote => {
       votes[vote.voteId] = vote;
     });
-    const dateSortedVotes = updatedVotes.sort((vote) => vote.updateDate);
+    const dateSortedVotes = updatedVotes.toSorted((vote) => vote.updateDate);
     let targetFinal, targetChair, targetMember, targetFinalType;
 
     if(electionType === 'RP') {
