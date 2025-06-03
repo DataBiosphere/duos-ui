@@ -1,4 +1,4 @@
-import {CloseOutSupplement, Collaborator} from "src/types/model";
+import {CloseOutSupplement, Collaborator, Dataset} from "src/types/model";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
 export type ValidFormState = {
@@ -32,6 +32,8 @@ export interface FormState {
     dmiDescription: string;
     closeoutYesNo: boolean;
     closeoutSupplement: CloseOutSupplement;
+    datasets: Dataset[];
+    selectedDatasets: Dataset[];
 }
 
 export enum FormStateKey {
