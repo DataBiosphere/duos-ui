@@ -1,10 +1,10 @@
-import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, sortBy, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten} from 'lodash/fp';
+import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten} from 'lodash/fp';
 import { formatDate, Notifications } from '../libs/utils';
 import { Collections } from '../libs/ajax/Collections';
 
 export const rpVoteKey = 'RUS Vote';
 
-//Helper function for processDataUseBuckets, essentilly organizes votes in a dar's elections by type
+//Helper function for processDataUseBuckets, essentially organizes votes in a dar's elections by type
 export const processVotesForBucket = (darElections = []) => {
   const rp =  {
     chairpersonVotes: [],
@@ -18,8 +18,16 @@ export const processVotesForBucket = (darElections = []) => {
     agreementVotes: []
   };
   darElections.forEach((election) => {
-    const {electionType, votes = []} = election;
-    let dateSortedVotes = sortBy((vote) => vote.updateDate)(votes);
+    const {electionType, votes, status = []} = election;
+    // add field to each vote object to indicate election status
+    const updatedVotes = Object.values(votes).map(vote => ({
+      ...vote,
+      electionStatus: status
+    }));
+    updatedVotes.forEach(vote => {
+      votes[vote.voteId] = vote;
+    });
+    const dateSortedVotes = updatedVotes.toSorted((vote) => vote.updateDate);
     let targetFinal, targetChair, targetMember, targetFinalType;
 
     if(electionType === 'RP') {
@@ -103,7 +111,7 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
 //Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
-  let output = flow(
+  const output = flow(
     map(voteData => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
     flatMap(filteredData => adminPage || isChair ?
@@ -233,7 +241,7 @@ export const cancelCollectionFn =
         });
         updateCollections(summary);
         Notifications.showSuccess({ text: `Successfully canceled ${darCode}` });
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: `Error canceling ${darCode}` });
       }
     };
@@ -249,7 +257,7 @@ export const openCollectionFn =
         });
         updateCollections(summary);
         Notifications.showSuccess({ text: `Successfully opened ${darCode}` });
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: `Error opening ${darCode}` });
       }
     };
