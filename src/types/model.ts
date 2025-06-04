@@ -66,6 +66,7 @@ export interface DAAObject {
   daaId: number;
   createUserId: number;
   createDate: string;
+  updateUserId: number;
   updateDate: string;
   initialDacId: number;
   file: FileStorageObject;
@@ -299,11 +300,11 @@ export interface FileStorageObject {
   mediaType: string;
   createUserId: number;
   createDate: number;
-  updateUserId: number;
-  updateDate: number;
-  deleteUserId: number;
-  deleteDate: number;
-  deleted: boolean;
+  updateUserId?: number;
+  updateDate?: number;
+  deleteUserId?: number;
+  deleteDate?: number;
+  deleted?: boolean;
 }
 
 export interface ApprovedDataset {
