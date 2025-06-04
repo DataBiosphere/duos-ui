@@ -35,9 +35,14 @@ export default function ResearcherStatus(props) {
             const card = user.libraryCard;
             const daaIds = card.daaIds;
             const signingOfficialUsers = await User.getSOsForCurrentUser();
-            setIssuedOn(card.createDate);
-            const names = signingOfficialUsers.map(so => so.displayName);
-            setIssuedBy(names.join(', '));
+            setIssuedOn(new Date(card.createDate).toISOString().slice(0, 10));
+            const createUser = signingOfficialUsers.find(so => so.userId === card.createUserId);
+            if (createUser) {
+              setIssuedBy(createUser.displayName);
+            } else {
+              const names = signingOfficialUsers.map(so => so.displayName);
+              setIssuedBy(names.join(', '));
+            }
 
             const daaPromises = daaIds.map(id => DAA.getDaaById(id));
             const daaObjects = await Promise.all(daaPromises);
