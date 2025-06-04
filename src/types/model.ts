@@ -61,6 +61,29 @@ export interface SimplifiedDuosUser {
   email: string;
 }
 
+export interface DAAObject {
+  // Define the shape of a DAA object as needed
+  daaId: number;
+  createUserId: number;
+  createDate: string;
+  updateDate: string;
+  initialDacId: number;
+  file: FileStorageObject;
+  dacs: Array<DacObject>;
+}
+
+export interface DacObject {
+  dacId: number;
+  name: string;
+  description: string;
+  email: string;
+  associatedDaa: DAAObject;
+  createDate: string;
+  updateDate: string;
+  chairpersons: DuosUser[];
+  members: DuosUser[];
+}
+
 export interface LibraryCard {
   id: number;
   userId: number;
