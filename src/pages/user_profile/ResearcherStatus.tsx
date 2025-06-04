@@ -10,7 +10,7 @@ import {DAAUtils} from 'src/utils/DAAUtils';
 import {nihAccountInstructions, nihAccountLabel} from 'src/utils/ERACommonsUtils.js';
 import {DAAObject, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 
-interface ResearcherStatusProps {
+export interface ResearcherStatusProps {
   user: DuosUser;
   pageProps: {
     location?: Location;
