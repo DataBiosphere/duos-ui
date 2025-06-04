@@ -267,10 +267,12 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.datasetName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <Link key={dataset.datasetId} id={`${dataset.datasetId}-link-dataset-name`}
-                    href={`/dataset/${dataset.datasetIdentifier}`}>
-          {trimNewlineCharacters(dataset.datasetName)}
-        </Link>,
+        data: <OverflowTooltip tooltipText={dataset.datasetName} id={`${dataset.datasetId}-dataset-name`}>
+          <Link key={dataset.datasetId} id={`${dataset.datasetId}-link-dataset-name`}
+                href={`/dataset/${dataset.datasetIdentifier}`}>
+            {trimNewlineCharacters(dataset.datasetName)}
+          </Link>
+        </OverflowTooltip>,
         value: dataset.datasetName,
         id: `${dataset.datasetId}-dataset-name`,
         style: makeRowStyle(cellWidths.datasetName),
@@ -282,10 +284,13 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.studyName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <Link key={dataset.study.studyId} id={`${dataset.datasetId}-link-study-name`}
-                    href={`/studies/${dataset.study.studyId}`}>
-          {trimNewlineCharacters(dataset.study.studyName)}
-        </Link>,
+        data: <OverflowTooltip tooltipText={dataset.study.studyName}
+                               id={`${dataset.datasetId}-study-name`}>
+          <Link key={dataset.study.studyId} id={`${dataset.datasetId}-link-study-name`}
+                href={`/studies/${dataset.study.studyId}`}>
+            {trimNewlineCharacters(dataset.study.studyName)}
+          </Link>
+        </OverflowTooltip>,
         value: dataset.study.studyName,
         id: `${dataset.datasetId}-study-name`,
         style: makeRowStyle(cellWidths.studyName),
