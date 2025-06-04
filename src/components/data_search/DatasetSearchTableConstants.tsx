@@ -267,8 +267,10 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.datasetName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <Link key={dataset.datasetId}
-                    href={`/dataset/${dataset.datasetIdentifier}`}>{dataset.datasetName}</Link>,
+        data: <Link key={dataset.datasetId} id={`${dataset.datasetId}-link-dataset-name`}
+                    href={`/dataset/${dataset.datasetIdentifier}`}>
+          {trimNewlineCharacters(dataset.datasetName)}
+        </Link>,
         value: dataset.datasetName,
         id: `${dataset.datasetId}-dataset-name`,
         style: makeRowStyle(cellWidths.datasetName),
@@ -280,7 +282,8 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.studyName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <Link key={dataset.study.studyId} id='link_study' href={`/studies/${dataset.study.studyId}`}>
+        data: <Link key={dataset.study.studyId} id={`${dataset.datasetId}-link-study-name`}
+                    href={`/studies/${dataset.study.studyId}`}>
           {trimNewlineCharacters(dataset.study.studyName)}
         </Link>,
         value: dataset.study.studyName,
