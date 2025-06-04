@@ -1,12 +1,12 @@
-import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
+import {DatasetTerm, getAccessManagementSummary} from 'src/types/model';
 import {groupBy, intersection, without, xor} from 'lodash';
 import {Checkbox, Link} from '@mui/material';
 import * as React from 'react';
-import {OverflowTooltip} from '../Tooltips';
+import {OverflowTooltip} from 'src/components/Tooltips';
 import {SnapshotSummaryModel} from 'src/types/tdrModel';
-import DatasetExportButton from './DatasetExportButton';
-import {dataUseCellData} from '../dac_dataset_table/DACDatasetTableCellData';
-import './DatasetSearch.css';
+import DatasetExportButton from 'src/components/data_search/DatasetExportButton';
+import {dataUseCellData} from 'src/components/dac_dataset_table/DACDatasetTableCellData';
+import 'src/components/data_search/DatasetSearch.css';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
@@ -267,9 +267,8 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.datasetName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip tooltipText={dataset.datasetName} id={`${dataset.datasetId}-dataset-name`}>
-          {trimNewlineCharacters(dataset.datasetName)}
-        </OverflowTooltip>,
+        data: <Link key={dataset.datasetId}
+                    href={`/dataset/${dataset.datasetIdentifier}`}>{dataset.datasetName}</Link>,
         value: dataset.datasetName,
         id: `${dataset.datasetId}-dataset-name`,
         style: makeRowStyle(cellWidths.datasetName),
@@ -281,10 +280,9 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.studyName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip tooltipText={dataset.study.studyName}
-          id={`${dataset.datasetId}-study-name`}>
+        data: <Link key={dataset.study.studyId} id='link_study' href={`/studies/${dataset.study.studyId}`}>
           {trimNewlineCharacters(dataset.study.studyName)}
-        </OverflowTooltip>,
+        </Link>,
         value: dataset.study.studyName,
         id: `${dataset.datasetId}-study-name`,
         style: makeRowStyle(cellWidths.studyName),
