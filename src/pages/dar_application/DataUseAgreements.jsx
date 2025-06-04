@@ -2,11 +2,10 @@ import React from 'react';
 import {isNil} from 'lodash/fp';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
-import ModelDucLink from '../../assets/Model_DUC.pdf';
 
 import './dar_application.css';
 import {
-  NIHDataUseCertificationAgreement
+  NIHDataUseCertificationAgreement, NIHDataUseCertificationAgreementLink
 } from '../../components/external_docs/NIHDataUseCertificationAgreement.js';
 
 export default function DataUseAgreements(props) {
@@ -37,7 +36,7 @@ export default function DataUseAgreements(props) {
           <li>Adhere to the NIH Security Best Practices for Controlled-Access Data Subject to the NIH Genomic Data Sharing Policy and ensure that only approved users can gain access to data files;</li>
           <li>Acknowledge the Intellectual Property terms as specified in the Library Card Agreement;</li>
           <li>Provide appropriate acknowledgement in any dissemination of research findings including the investigator(s) who generated the data, the funding source, accession numbers of the dataset, and the data repository from which the data were accessed; and,</li>
-          <li>Report any inadvertent data release, breach of data security, or other data management incidents in accordance with the terms specified in the <a target='_blank' rel='noreferrer' href={BroadLibraryCardAgreementLink}>Library Card Agreement</a> and <a target='_blank' rel='noreferrer' href={ModelDucLink}>NIH Data Use Certification.</a></li>
+          <li>Report any inadvertent data release, breach of data security, or other data management incidents in accordance with the terms specified in the <a target='_blank' rel='noreferrer' href={BroadLibraryCardAgreementLink}>Library Card Agreement</a> and <a target='_blank' rel='noreferrer' href={NIHDataUseCertificationAgreementLink}>NIH Data Use Certification.</a></li>
         </ol>
       </div>
 
