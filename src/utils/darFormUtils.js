@@ -250,11 +250,20 @@ const calcDmiErrors = (formData, errors) =>{
 }
 
 const calcCloseoutErrors= (formData, errors) => {
+  const closeoutFields = [formData.closeoutOther, formData.closeoutProjectSuperseded, formData.closeoutProjectTransferred, formData.closeoutRequestorMovedInstitution, formData.closeoutProjectCompleted];
   if (isNil(formData.closeoutYesNo)) {
     errors.closeoutYesNo = requiredError;
   }
-  if (formData.closeoutYesNo && isEmpty(formData.closeoutSupplement)) {
-    errors.closeoutSupplement = requiredError;
+  if (formData.closeoutOther && isEmpty(formData.closeoutOtherText)) {
+    errors.closeoutOtherText = requiredError
+  }
+
+  if (formData.closeoutYesNo && closeoutFields.every((field) => !field)) {
+    errors.closeoutProjectCompleted = requiredError;
+    errors.closeoutRequestorMovedInstitution = requiredError;
+    errors.closeoutProjectTransferred = requiredError;
+    errors.closeoutProjectSuperseded = requiredError;
+    errors.closeoutOther = requiredError;
   }
 }
 

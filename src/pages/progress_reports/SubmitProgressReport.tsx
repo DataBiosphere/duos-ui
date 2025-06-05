@@ -3,11 +3,12 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
-import {DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
+import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 import {
   DataAccessRequest,
   DataManagementIncident,
+  Closeout,
   Presentation,
   Publication
 } from "src/types/model";
@@ -67,6 +68,21 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     return dataManagementIncident;
   }
 
+
+  const getCloseoutInfo = (formState: FormState): Closeout => {
+    const closeout: Closeout = {} as Closeout;
+    closeout.reasons = []
+    CLOSEOUT_KEYS.map((key) => {
+      const reason = formState[key] ?? undefined;
+      if (reason) {
+        closeout.reasons.push(key);
+      }
+    });
+    closeout.otherText = formState.closeoutOtherText ?? '';
+
+    return closeout;
+  }
+
   const convertFormStateToDAR = (formState: FormState): Partial<DataAccessRequest> => {
     const expectedForm: Partial<DataAccessRequest> = {} as Partial<DataAccessRequest>;
     expectedForm.progressReportSummary = formState.progressReportSummary;
@@ -87,7 +103,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
       expectedForm.dmi = getDataManagementIncidents(formState);
     }
     if (formState.closeoutYesNo) {
-      expectedForm.closeoutSupplement = formState.closeoutSupplement;
+      expectedForm.closeoutSupplement = getCloseoutInfo(formState);
     }
     return expectedForm;
   }

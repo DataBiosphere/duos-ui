@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
 import {Location} from 'history';
-import {DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -50,7 +50,12 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         }),
         // additional state for closeout section
         ...(dar?.closeoutSupplement && {
-            closeoutYesNo: !!dar.closeoutSupplement
+            closeoutYesNo: (dar.closeoutSupplement.reasons.length > 0),
+            closeoutOtherText: dar.closeoutSupplement.otherText,
+            ...CLOSEOUT_KEYS.reduce((acc, key) => {
+                acc[key] = dar.closeoutSupplement.reasons.includes(key);
+                return acc;
+            },{})
         }),
     };
 
