@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
-import {Location} from 'history';
+import {History, Location} from 'history';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
@@ -10,7 +10,6 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 import {Navigation} from "src/libs/utils";
 import {Storage} from "src/libs/storage";
-import {History} from 'history';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
@@ -29,6 +28,21 @@ type ProgressReportApplicationProps = {
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
+        dmiCombination:false,
+        dmiIdentification: false,
+        dmiSharing: false,
+        dmiSecurity: false,
+        dmiAcknowledgement: false,
+        dmiPublication: false,
+        dmiFalsification: false,
+        dmiOther: false,
+        closeoutProjectCompleted: false,
+        closeoutRequestorMovedInstitution: false,
+        closeoutProjectTransferred: false,
+        closeoutProjectSuperseded: false,
+        closeoutOther: false,
+        publications: [],
+        presentations: [],
         // additional state for summary section
         ...(dar?.intellectualPropertySummary && {
             intellectualPropertyYesNo: !!dar.intellectualPropertySummary
@@ -51,7 +65,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             ...DMI_INCIDENT_KEYS.reduce((acc, key) => {
                 acc[key] = dar.dmi.incidents.includes(key);
                 return acc;
-            }, {})
+            }, {} as Record<string, boolean>)
         }),
         // additional state for closeout section
         ...(dar?.closeoutSupplement && {
@@ -60,9 +74,9 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             ...CLOSEOUT_KEYS.reduce((acc, key) => {
                 acc[key] = dar.closeoutSupplement.reasons.includes(key);
                 return acc;
-            },{})
+            },{} as Record<string, boolean>)
         }),
-    };
+    } as FormState;
 
     const [formState, setFormState] = useState<FormState>(initialState);
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
@@ -71,7 +85,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
-    const getValidation = (newState) => {
+    const getValidation = (newState: FormState) => {
         if (!readOnlyMode) {
             return validatePRFormData(
                 nihValid,

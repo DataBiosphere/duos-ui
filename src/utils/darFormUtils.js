@@ -234,7 +234,7 @@ const calcDmiErrors = (formData, errors) =>{
   }
   const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,
     formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
-  if (formData.dmiYesNo && dmiFields.every((field) => !field)) {
+  if (formData.dmiYesNo && !dmiFields.some((field) => field)) {
     errors.dmiAcknowledgement = requiredError;
     errors.dmiCombination = requiredError;
     errors.dmiFalsification = requiredError;
@@ -258,7 +258,7 @@ const calcCloseoutErrors= (formData, errors) => {
     errors.closeoutOtherText = requiredError
   }
 
-  if (formData.closeoutYesNo && closeoutFields.every((field) => !field)) {
+  if (formData.closeoutYesNo && !closeoutFields.some((field) => field)) {
     errors.closeoutProjectCompleted = requiredError;
     errors.closeoutRequestorMovedInstitution = requiredError;
     errors.closeoutProjectTransferred = requiredError;
