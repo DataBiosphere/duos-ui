@@ -1,12 +1,12 @@
-import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
+import {DatasetTerm, getAccessManagementSummary} from 'src/types/model';
 import {groupBy, intersection, without, xor} from 'lodash';
 import {Checkbox, Link} from '@mui/material';
 import * as React from 'react';
-import {OverflowTooltip} from '../Tooltips';
+import {OverflowTooltip} from 'src/components/Tooltips';
 import {SnapshotSummaryModel} from 'src/types/tdrModel';
-import DatasetExportButton from './DatasetExportButton';
-import {dataUseCellData} from '../dac_dataset_table/DACDatasetTableCellData';
-import './DatasetSearch.css';
+import DatasetExportButton from 'src/components/data_search/DatasetExportButton';
+import {dataUseCellData} from 'src/components/dac_dataset_table/DACDatasetTableCellData';
+import 'src/components/data_search/DatasetSearch.css';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
@@ -268,7 +268,10 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellStyle: makeHeaderStyle(cellWidths.datasetName),
       cellDataFn: (dataset: DatasetTerm) => ({
         data: <OverflowTooltip tooltipText={dataset.datasetName} id={`${dataset.datasetId}-dataset-name`}>
-          {trimNewlineCharacters(dataset.datasetName)}
+          <Link key={dataset.datasetId} id={`${dataset.datasetId}-link-dataset-name`}
+                href={`/dataset/${dataset.datasetIdentifier}`}>
+            {trimNewlineCharacters(dataset.datasetName)}
+          </Link>
         </OverflowTooltip>,
         value: dataset.datasetName,
         id: `${dataset.datasetId}-dataset-name`,
@@ -282,8 +285,11 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellStyle: makeHeaderStyle(cellWidths.studyName),
       cellDataFn: (dataset: DatasetTerm) => ({
         data: <OverflowTooltip tooltipText={dataset.study.studyName}
-          id={`${dataset.datasetId}-study-name`}>
-          {trimNewlineCharacters(dataset.study.studyName)}
+                               id={`${dataset.datasetId}-study-name`}>
+          <Link key={dataset.study.studyId} id={`${dataset.datasetId}-link-study-name`}
+                href={`/studies/${dataset.study.studyId}`}>
+            {trimNewlineCharacters(dataset.study.studyName)}
+          </Link>
         </OverflowTooltip>,
         value: dataset.study.studyName,
         id: `${dataset.datasetId}-study-name`,

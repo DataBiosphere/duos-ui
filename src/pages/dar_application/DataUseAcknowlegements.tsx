@@ -3,6 +3,7 @@ import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/fo
 import React from 'react';
 import {Dataset} from 'src/types/model';
 import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
+import { ValidFormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
 type DataUseAcknowledgementsProps = {
     title: string;
@@ -11,7 +12,7 @@ type DataUseAcknowledgementsProps = {
     formData: object,
     readOnlyMode: boolean,
     includeInstructions?: boolean,
-    onChange: (obj: object) => void,
+    onChange: ({ key, value }: ValidFormState) => void,
     onValidationChange?: (validation: {key: string, validation: ValidationError}) => void,
     validation?: DarErrors
 }

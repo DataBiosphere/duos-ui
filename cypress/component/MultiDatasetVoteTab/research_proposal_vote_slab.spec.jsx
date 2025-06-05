@@ -29,15 +29,15 @@ const collapseSlabLinkText = 'Hide Research Use Statement (Narrative)';
 const votesForElection1 = {
   rp: {
     finalVotes: [
-      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1, electionStatus: 'Open'},
     ],
     chairpersonVotes: [
-      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1, electionStatus: 'Open'},
     ],
     memberVotes: [
-      {userId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
-      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
-      {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
+      {userId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1, electionStatus: 'Open'},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1, electionStatus: 'Open'},
+      {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1, electionStatus: 'Open'}
     ]
   }
 };
@@ -45,15 +45,15 @@ const votesForElection1 = {
 const votesForElection2 = {
   rp: {
     finalVotes: [
-      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1, electionStatus: 'Open'},
     ],
     chairpersonVotes: [
-      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1, electionStatus: 'Open'},
     ],
     memberVotes: [
-      {userId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
-      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
-      {userId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6}
+      {userId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2, electionStatus: 'Open'},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1, electionStatus: 'Open'},
+      {userId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6, electionStatus: 'Open'}
     ]
   }
 };
@@ -130,8 +130,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{key: 'test'}}
       />
     );
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
     cy.contains(collapseSlabLinkText);
   });
 
@@ -142,8 +141,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{ key: 'test' }}
       />
     );
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
     cy.contains(primaryUseCode);
     cy.contains(secondaryUseCode);
   });
@@ -155,8 +153,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{key: 'test'}}
       />
     );
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
     cy.get('[data-cy=research-purpose]').should('exist');
     cy.contains('test');
   });
@@ -179,8 +176,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
     cy.get('[datacy=alert-box]').should('exist');
   });
 
@@ -191,8 +187,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{ key: 'test' }}
       />
     );
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
     cy.get('[datacy=alert-box]').should('not.exist');
   });
 
@@ -258,8 +253,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
@@ -281,8 +275,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
@@ -304,8 +297,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -327,8 +319,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -350,8 +341,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
@@ -372,8 +362,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
@@ -392,8 +381,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[data-cy=chair-vote-info]').should('not.exist');
   });
@@ -409,8 +397,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[data-cy=chair-vote-info]').should('not.exist');
   });
@@ -426,8 +413,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('[data-cy=chair-vote-info]').should('exist');
   });
@@ -443,16 +429,15 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
-    const component = cy.get('.table-data');
-    component.should('exist');
-    component.should('contain', 'test1');
-    component.should('contain', 'test2');
-    component.should('not.contain', 'test3');
+    cy.get('.table-data')
+    .should('exist')
+    .should('contain', 'test1')
+    .should('contain', 'test2')
+    .should('not.contain', 'test3');
   });
 
   it('Renders collapsed row of vote summary table when the same user has same vote for multiple elections', function() {
@@ -466,8 +451,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
@@ -486,8 +470,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
@@ -506,8 +489,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
@@ -526,8 +508,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
@@ -547,8 +528,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
@@ -568,8 +548,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains(expandSlabLinkText);
-    link.click();
+    cy.contains(expandSlabLinkText).click();
 
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();

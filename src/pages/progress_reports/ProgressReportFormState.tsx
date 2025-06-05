@@ -1,4 +1,4 @@
-import {Collaborator} from "src/types/model";
+import {Collaborator, Dataset} from "src/types/model";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
 export type ValidFormState = {
@@ -37,6 +37,8 @@ export interface FormState {
     closeoutProjectSuperseded: boolean;
     closeoutOther: boolean;
     closeoutOtherText: string;
+    datasets: Dataset[];
+    selectedDatasets: Dataset[];
 }
 
 export enum FormStateKey {
