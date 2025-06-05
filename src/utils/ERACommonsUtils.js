@@ -1,8 +1,9 @@
 import {Buffer} from 'buffer';
-import EnvironmentUtils, {envGroups} from '../utils/EnvironmentUtils.js';
+//import EnvironmentUtils, {envGroups} from '../utils/EnvironmentUtils.js';
 
 export const rasEnabled = () => {
-  return EnvironmentUtils.checkEnv(envGroups.DEV);
+  //return EnvironmentUtils.checkEnv(envGroups.DEV);
+  return false;
 }
 
 export const nihAccountLabel = () => {
