@@ -1,7 +1,7 @@
-import { DuosUserResponse } from './responseTypes';
-import externalAccessIcon from '../images/external_access.svg';
-import openAccessIcon from '../images/open_access.svg';
-import controlledAccessIcon from '../images/controlled_access.svg';
+import { DuosUserResponse } from 'src/types/responseTypes';
+import externalAccessIcon from 'src/images/external_access.svg';
+import openAccessIcon from 'src/images/open_access.svg';
+import controlledAccessIcon from 'src/images/controlled_access.svg';
 
 export type UserRoleName =
   | 'Admin'
