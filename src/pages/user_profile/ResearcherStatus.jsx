@@ -77,7 +77,7 @@ export default function ResearcherStatus(props) {
       <a href={accountLink}>
         {accountLabel} Account
       </a>
-      &nbsp;is required to submit a data access request.
+      &nbsp;is required to submit a Data Access Request (DAR).
     </p>
     {ERACommons({
       destination: 'profile',
