@@ -9,6 +9,8 @@ import DAAs from './DAAs';
 import {DAAUtils} from 'src/utils/DAAUtils';
 import {nihAccountInstructions, nihAccountLabel} from 'src/utils/ERACommonsUtils.js';
 import {DAAObject, DuosUser, SimplifiedDuosUser} from 'src/types/model';
+import {AxiosError} from "axios";
+import {ConsentError} from "src/types/responseTypes";
 
 export interface ResearcherStatusProps {
   user: DuosUser;
@@ -53,8 +55,11 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
             setDaaObjects(daaObjects);
           }
         }
-      } catch (_error) {
-        Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        const consentError = axiosError?.response?.data as ConsentError;
+        const serverError = consentError.message ?? 'Unknown error';
+        Notifications.showError({text: 'Error: Unable to retrieve user data from server: ' + serverError});
       }
     };
     init();
