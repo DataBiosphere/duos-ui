@@ -76,6 +76,15 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         />
   }
 
+  const subheadStyle = {
+    color: '#000',
+    fontFamily: 'Montserrat',
+    fontSize: '16px',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    lineHeight: 'normal'
+  };
+
   return (
       <div>
         <h1
@@ -88,18 +97,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
           Researcher Status
         </h1>
         <div style={{marginTop: '20px'}}/>
-        <p
-            style={{
-              color: '#000',
-              fontFamily: 'Montserrat',
-              fontSize: '16px',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              lineHeight: 'normal'
-            }}
-        >
-          {accountLabel} Account
-        </p>
+        <p style={subheadStyle}>{accountLabel} Account</p>
         <p>A&nbsp;<a href={accountLink}>{accountLabel}&nbsp;Account</a>&nbsp;is required to submit a dar.</p>
         {ERACommons({
           destination: 'profile',
@@ -108,18 +106,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
           header: false
         })}
         <div style={{marginTop: '20px'}}/>
-        <p
-            style={{
-              color: '#000',
-              fontFamily: 'Montserrat',
-              fontSize: '16px',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              lineHeight: 'normal'
-            }}
-        >
-          Library Cards issued to you
-        </p>
+        <p style={subheadStyle}>Library Cards issued to you</p>
         <div style={{marginTop: '15px'}}/>
         {hasCard ? cardComponent() :
             <div>
