@@ -95,5 +95,4 @@ describe('ResearcherStatus', () => {
     mount(<ResearcherStatus user={user} pageProps={pageProps}/>);
     cy.contains('No Library Card Found');
   });
-
 });
