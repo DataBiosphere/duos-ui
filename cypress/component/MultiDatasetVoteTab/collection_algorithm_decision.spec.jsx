@@ -1,8 +1,7 @@
-/* eslint-disable no-undef */
-import CollectionAlgorithmDecision from '../../../src/components/CollectionAlgorithmDecision';
+import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision';
 import { mount } from 'cypress/react';
 import React from 'react';
-import {formatDate} from '../../../src/libs/utils';
+import {formatDate} from 'src/libs/utils';
 
 describe('CollectionAlgorithmDecision component', () => {
   it('renders a container with an id', () => {
@@ -12,8 +11,7 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props}/>);
 
-    const container = cy.get(`#collection-algorithm-id-${id}`);
-    container.should('exist');
+    cy.get(`#collection-algorithm-id-${id}`).should('exist');
   });
 
   it('renders the decision label', () => {
@@ -26,9 +24,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-decision-label`);
-    container.should('exist');
-    container.contains('Decision:');
+    cy.get(`#collection-${id}-decision-label`).should('exist');
+    cy.get(`#collection-${id}-decision-label`).contains('Decision:');
   });
 
   it('renders the date label', () => {
@@ -41,9 +38,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-date-label`);
-    container.should('exist');
-    container.contains('Date:');
+    cy.get(`#collection-${id}-date-label`).should('exist');
+    cy.get(`#collection-${id}-date-label`).contains('Date:');
   });
 
   it('renders the component subtitle', () => {
@@ -56,9 +52,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-subtitle`);
-    container.should('exist');
-    container.contains('DUOS Algorithm Decision');
+    cy.get(`#collection-${id}-subtitle`).should('exist');
+    cy.get(`#collection-${id}-subtitle`).contains('DUOS Algorithm Decision');
   });
 
 
@@ -72,9 +67,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-decision-value`);
-    container.should('exist');
-    container.contains('N/A');
+    cy.get(`#collection-${id}-decision-value`).should('exist');
+    cy.get(`#collection-${id}-decision-value`).contains('N/A');
   });
 
   it('renders "YES" if provided by algorithmResult', () => {
@@ -87,9 +81,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-decision-value`);
-    container.should('exist');
-    container.contains('YES');
+    cy.get(`#collection-${id}-decision-value`).should('exist');
+    cy.get(`#collection-${id}-decision-value`).contains('YES');
   });
   it('renders "NO" if provided by algorithmResult', () => {
     const id = 1;
@@ -101,9 +94,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-decision-value`);
-    container.should('exist');
-    container.contains('NO');
+    cy.get(`#collection-${id}-decision-value`).should('exist');
+    cy.get(`#collection-${id}-decision-value`).contains('NO');
   });
 
   it('renders createDate if provided by algorithmResult', () => {
@@ -119,9 +111,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-date-value`);
-    container.should('exist');
-    container.contains(expectedDate);
+    cy.get(`#collection-${id}-date-value`).should('exist');
+    cy.get(`#collection-${id}-date-value`).contains(expectedDate);
   });
 
   it('renders "N/A if createDate is not provided by algorithmResult', () => {
@@ -134,9 +125,8 @@ describe('CollectionAlgorithmDecision component', () => {
     };
     mount(<CollectionAlgorithmDecision {...props} />);
 
-    const container = cy.get(`#collection-${id}-date-value`);
-    container.should('exist');
-    container.contains('N/A');
+    cy.get(`#collection-${id}-date-value`).should('exist');
+    cy.get(`#collection-${id}-date-value`).contains('N/A');
   });
 
 });
