@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
 import DataUseAlertBox from '../../../src/components/collection_voting_slab/DataUseAlertBox';
@@ -35,8 +34,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{'primary': [dataUseManualReviewTrue]}}
       />
     );
-    const component = cy.get('[datacy=alert-box]').should('be.visible');
-    component.contains('!');
+    cy.get('[datacy=alert-box]').should('be.visible').contains('!');
   });
 
   it('Does not render the alert box and exclamation point when translated data use a manually reviewed data use', function() {
@@ -65,7 +63,7 @@ describe('DataUseAlertBox - Tests', function() {
     );
     cy.get('[datacy=alert-box]').should('be.visible');
     cy.contains('data use 1');
-    cy.get('data use 2').should('not.exist');
+    cy.should('not.contain', 'data use 2');
   });
 
   it('Renders the description of a secondary use manually reviewed data use', function() {
@@ -76,7 +74,7 @@ describe('DataUseAlertBox - Tests', function() {
     );
     cy.get('[datacy=alert-box]').should('be.visible');
     cy.contains('data use 1');
-    cy.get('data use 3').should('not.exist');
+    cy.should('not.contain', 'data use 3');
   });
 
   it('Renders the description multiple manually reviewed data uses in the same category', function() {
