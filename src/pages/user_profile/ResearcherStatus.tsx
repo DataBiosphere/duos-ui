@@ -98,7 +98,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         </h1>
         <div style={{marginTop: '20px'}}/>
         <p style={subheadStyle}>{accountLabel} Account</p>
-        <p>A&nbsp;<a href={accountLink}>{accountLabel}&nbsp;Account</a>&nbsp;is required to submit a dar.</p>
+        <p>A&nbsp;<a href={accountLink}>{accountLabel}&nbsp;Account</a>&nbsp;is required to submit a Data Access Requeset (DAR).</p>
         {ERACommons({
           destination: 'profile',
           onNihStatusUpdate: nihStatusUpdate,
