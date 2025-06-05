@@ -97,7 +97,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
     // required because the datasets state changes during component mount
     useEffect(() => {
-        const approvedDatasetIds = getApprovedElectionDatasetIds(Object.values(dar.elections));
+        const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : [];
         const approvedDatasets = datasets.filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
         onFormChange({ datasets: approvedDatasets });
         onSelectedDatasetChange(approvedDatasets);

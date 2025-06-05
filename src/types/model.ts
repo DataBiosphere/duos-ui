@@ -1,7 +1,7 @@
-import { DuosUserResponse } from './responseTypes';
-import externalAccessIcon from '../images/external_access.svg';
-import openAccessIcon from '../images/open_access.svg';
-import controlledAccessIcon from '../images/controlled_access.svg';
+import { DuosUserResponse } from 'src/types/responseTypes';
+import externalAccessIcon from 'src/images/external_access.svg';
+import openAccessIcon from 'src/images/open_access.svg';
+import controlledAccessIcon from 'src/images/controlled_access.svg';
 
 export type UserRoleName =
   | 'Admin'
@@ -59,6 +59,30 @@ export interface SimplifiedDuosUser {
   userId: number;
   displayName: string;
   email: string;
+}
+
+export interface DAAObject {
+  // Define the shape of a DAA object as needed
+  daaId: number;
+  createUserId: number;
+  createDate: string;
+  updateUserId: number;
+  updateDate: string;
+  initialDacId: number;
+  file: FileStorageObject;
+  dacs: Array<DacObject>;
+}
+
+export interface DacObject {
+  dacId: number;
+  name: string;
+  description: string;
+  email: string;
+  associatedDaa: DAAObject;
+  createDate: string;
+  updateDate: string;
+  chairpersons: DuosUser[];
+  members: DuosUser[];
 }
 
 export interface LibraryCard {
@@ -276,11 +300,11 @@ export interface FileStorageObject {
   mediaType: string;
   createUserId: number;
   createDate: number;
-  updateUserId: number;
-  updateDate: number;
-  deleteUserId: number;
-  deleteDate: number;
-  deleted: boolean;
+  updateUserId?: number;
+  updateDate?: number;
+  deleteUserId?: number;
+  deleteDate?: number;
+  deleted?: boolean;
 }
 
 export interface ApprovedDataset {
