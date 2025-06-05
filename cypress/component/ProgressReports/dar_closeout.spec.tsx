@@ -31,50 +31,78 @@ describe('DAR Closeout - Component Tests', () => {
   });
 
   it('handles closeout radio buttons', () => {
-    cy.get('#closeoutYesNo').parent().contains('label', 'Yes').find('input[type="radio"]').click({force: true});
+    cy.get('#closeoutYesNo_yes').click()
     cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: true });
 
-    cy.get('#closeoutYesNo').parent().contains('label', 'No').find('input[type="radio"]').click({force: true});
-    cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: false, closeoutSupplement: undefined});
+    cy.get('#closeoutYesNo_no').click()
+    cy.get('@formChangeStub').should('have.been.calledWith', {
+      closeoutOther: false,
+      closeoutOtherText: "",
+      closeoutProjectCompleted : false,
+      closeoutProjectSuperseded: false,
+      closeoutProjectTransferred: false,
+      closeoutRequestorMovedInstitution: false,
+      closeoutYesNo: false });
   });
 
   it('shows closeout options when "Yes" is selected', () => {
     mountComponent({ closeoutYesNo: true });
-    cy.get('#closeoutSupplement').should('exist');
+    cy.get('[data-cy=dar-closeout-details]').should('exist');
   });
 
   it('hides closeout options when "No" is selected', () => {
     mountComponent({ closeoutYesNo: false });
-    cy.get('#closeoutSupplement').should('not.exist');
+    cy.get('[data-cy=dar-closeout-details]').should('not.exist');
   });
 
   it('displays all closeout reason checkboxes when "Yes" is selected', () => {
     mountComponent({ closeoutYesNo: true });
-    cy.get('#closeoutSupplement').should('exist');
+    cy.get('[data-cy=dar-closeout-details]').should('exist');
     cy.contains('The Requestor has completed his/her project').should('exist');
     cy.contains('The Requestor has moved institutions').should('exist');
     cy.contains('The project is being transferred to a new Requestor at the same institution').should('exist');
     cy.contains('The project is being superseded by a new project').should('exist');
+    cy.contains('Other').should('exist');
   });
 
-  it('allows checking one closeout reason at a time', () => {
+  it('allows checking multiple closeout reasons', () => {
     mountComponent({ closeoutYesNo: true });
-    cy.get('#closeoutSupplement_PROJECT_COMPLETED').click();
+    cy.get('#closeoutProjectCompleted').click();
 
-    // Verify selected radio option is selected
-    cy.get('#closeoutSupplement_PROJECT_COMPLETED').should('be.checked');
-    cy.get('#closeoutSupplement_REQUESTOR_MOVED_INSTITUTION').should('not.be.checked');
-    cy.get('#closeoutSupplement_PROJECT_TRANSFERRED').should('not.be.checked');
-    cy.get('#closeoutSupplement_PROJECT_SUPERSEDED').should('not.be.checked');
+    // Verify selected checkbox option is selected
+    cy.get('#closeoutProjectCompleted').should('be.checked');
+    cy.get('#closeoutRequestorMovedInstitution').should('not.be.checked');
+    cy.get('#closeoutProjectTransferred').should('not.be.checked');
+    cy.get('#closeoutProjectSuperseded').should('not.be.checked');
+    cy.get('#closeoutOther').should('not.be.checked');
 
 
     // Select a different option
-    cy.get('#closeoutSupplement_PROJECT_TRANSFERRED').click();
+    cy.get('#closeoutProjectTransferred').click();
 
-    // Verify selected radio option is selected
-    cy.get('#closeoutSupplement_PROJECT_COMPLETED').should('not.be.checked');
-    cy.get('#closeoutSupplement_REQUESTOR_MOVED_INSTITUTION').should('not.be.checked');
-    cy.get('#closeoutSupplement_PROJECT_TRANSFERRED').should('be.checked');
-    cy.get('#closeoutSupplement_PROJECT_SUPERSEDED').should('not.be.checked');
+    // Verify selected checkbox option is selected
+    cy.get('#closeoutProjectCompleted').should('be.checked');
+    cy.get('#closeoutRequestorMovedInstitution').should('not.be.checked');
+    cy.get('#closeoutProjectTransferred').should('be.checked');
+    cy.get('#closeoutProjectSuperseded').should('not.be.checked');
+    cy.get('#closeoutOther').should('not.be.checked');
+  });
+
+  it('allows the component to be opened with the correct state', () => {
+    mountComponent( {
+      closeoutOther: true,
+      closeoutOtherText: "My Other Text",
+      closeoutProjectCompleted : true,
+      closeoutProjectSuperseded: false,
+      closeoutProjectTransferred: false,
+      closeoutRequestorMovedInstitution: false,
+      closeoutYesNo: true });
+    cy.get('#closeoutProjectCompleted').should('be.checked');
+    cy.get('#closeoutRequestorMovedInstitution').should('not.be.checked');
+    cy.get('#closeoutProjectTransferred').should('not.be.checked');
+    cy.get('#closeoutProjectSuperseded').should('not.be.checked');
+    cy.get('#closeoutOther').should('be.checked');
+    cy.get('#closeoutOtherText').should('be.visible');
+    cy.get('#closeoutOtherText').contains('My Other Text');
   });
 });
