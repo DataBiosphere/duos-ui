@@ -61,6 +61,21 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
     init();
   }, [user]);
 
+  const cardComponent = () => {
+    return DAAUtils.isEnabled() ?
+        <DAAs
+            issuedOn={issuedOn}
+            issuedBy={issuedBy}
+            daas={daaObjects}
+        />
+        :
+        <LibraryCard
+            issuedOn={issuedOn}
+            issuedBy={issuedBy}
+            daas={daaObjects}
+        />
+  }
+
   return (
       <div>
         <h1
@@ -106,32 +121,17 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
           Library Cards issued to you
         </p>
         <div style={{marginTop: '15px'}}/>
-        {hasCard ?
-            (DAAUtils.isEnabled() ?
-                (
-                    <DAAs
-                        issuedOn={issuedOn}
-                        issuedBy={issuedBy}
-                        daas={daaObjects}
-                    />
-                ) :
-                (
-                    <LibraryCard
-                        issuedOn={issuedOn}
-                        issuedBy={issuedBy}
-                        daas={daaObjects}
-                    />
-                )) : (
-                <div>
-                  <p>No Library Card Found</p>
-                  <p style={{
-                    marginTop: '10px',
-                    marginBottom: '50px'
-                  }}>You must have a Library Card to submit a data access request. To obtain one, your Institutional
-                    Signing Official must register in DUOS, request and receive Signing Official permissions, and issue
-                    you a Library Card.</p>
-                </div>
-            )}
+        {hasCard ? cardComponent() :
+            <div>
+              <p>No Library Card Found</p>
+              <p style={{
+                marginTop: '10px',
+                marginBottom: '50px'
+              }}>You must have a Library Card to submit a data access request. To obtain one, your Institutional
+                Signing Official must register in DUOS, request and receive Signing Official permissions, and issue
+                you a Library Card.</p>
+            </div>
+        }
       </div>
   );
 };
