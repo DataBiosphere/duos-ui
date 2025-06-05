@@ -91,7 +91,7 @@ export default function MultiDatasetVoteSlab(props) {
     const electionIds = currentUserVotes.map((vote) => vote.electionId);
     const allOpenElections = bucket.elections
         .filter((election) => electionIds.includes(election.electionId))
-        .filter((election) => election.status.toLowerCase() === 'open');
+        .filter((election) => election.status?.toLowerCase() === 'open');
 
     return (
       <div style={styles.voteInfo}>
