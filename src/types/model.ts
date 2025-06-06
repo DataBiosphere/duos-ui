@@ -397,20 +397,18 @@ export interface DataAccessRequest {
   presentations: Array<Presentation>;
   dmi: DataManagementIncident;
   researchPlans: string;
-  closeoutSupplement: CloseOutSupplement;
+  closeoutSupplement: Closeout;
   parentId?: number;
-}
-
-export enum CloseOutSupplement {
-    PROJECT_COMPLETED = 'PROJECT_COMPLETED',
-    REQUESTOR_MOVED_INSTITUTION = 'REQUESTOR_MOVED_INSTITUTION',
-    PROJECT_TRANSFERRED = 'PROJECT_TRANSFERRED',
-    PROJECT_SUPERSEDED = 'PROJECT_SUPERSEDED'
 }
 
 export interface DataManagementIncident {
   incidents: string[];
   description: string;
+}
+
+export interface Closeout {
+  reasons: string[];
+  otherText: string;
 }
 
 export interface Presentation {

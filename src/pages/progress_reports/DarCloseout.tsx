@@ -1,8 +1,8 @@
 import React from 'react';
-import { FormField, FormFieldTypes } from 'src/components/forms/forms';
+import {FormField, FormFieldTypes, FormValidators} from 'src/components/forms/forms';
 import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
-import {CloseOutSupplement} from "src/types/model";
 import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
+import {FORM_TEXT_AREA_MAX_LENGTH} from "src/components/forms/formConstants";
 
 interface DarCloseoutProps {
     readonly readOnly: boolean;
@@ -30,8 +30,13 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         onChange={({ key, value }: ValidFormState) => {
                             const newState = {[key]: value} as Partial<FormState>;
                             if (value === false) {
-                                // If the user selects "No", clear out the closeout supplement field
-                                newState[FormStateKey.CLOSEOUT_SUPPLEMENT] = undefined;
+                                // If the user selects "No", clear out the closeout fields
+                                newState[FormStateKey.CLOSEOUT_PROJECT_COMPLETED] = false;
+                                newState[FormStateKey.CLOSEOUT_REQUESTOR_MOVED_INSTITUTION] = false;
+                                newState[FormStateKey.CLOSEOUT_PROJECT_TRANSFERRED] = false;
+                                newState[FormStateKey.CLOSEOUT_PROJECT_SUPERSEDED] = false;
+                                newState[FormStateKey.CLOSEOUT_OTHER] = false;
+                                newState[FormStateKey.CLOSEOUT_OTHER_TEXT] = '';
                             }
                             onFormChange(newState);
                         }}
@@ -41,7 +46,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         onValidationChange={onValidationChange}
                     />
                     {formState.closeoutYesNo && (
-                        <div>
+                        <div data-cy='dar-closeout-details'>
                         <p>
                             By completing this page, upon project close-out, the PI and all approved users agree to destroy all copies, versions, and derivations of the dataset(s) retrieved from NIH-designated controlled-access databases, on both local servers and hardware, and if cloud computing was used, delete the data and cloud images from cloud computing provider storage, virtual machines, databases, and random access archives, except as required by publication practices, institutional policies, or law to retain them.
                         </p>
@@ -49,23 +54,76 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         <div style={{ marginTop: '20px' }}>
                             <h4>Reasons for Project Closeout</h4>
                             <FormField
-                                id={FormStateKey.CLOSEOUT_SUPPLEMENT}
-                                type={FormFieldTypes.RADIOGROUP}
-                                orientation="vertical"
-                                options={[
-                                    { text: 'The Requestor has completed his/her project', name: CloseOutSupplement.PROJECT_COMPLETED },
-                                    { text: 'The Requestor has moved institutions (If the project will be continued in a new institution or by a new PI, they must go through Project Transfer)', name: CloseOutSupplement.REQUESTOR_MOVED_INSTITUTION },
-                                    { text: 'The project is being transferred to a new Requestor at the same institution', name: CloseOutSupplement.PROJECT_TRANSFERRED },
-                                    { text: 'The project is being superseded by a new project', name: CloseOutSupplement.PROJECT_SUPERSEDED }
-                                ]}
+                                id={FormStateKey.CLOSEOUT_PROJECT_COMPLETED}
+                                type={FormFieldTypes.CHECKBOX}
+                                toggleText='The Requestor has completed his/her project'
                                 disabled={readOnly}
-                                defaultValue={formState.closeoutSupplement}
                                 onChange={({ key, value }: ValidFormState) => {
                                     onFormChange({ [key]: value } as Partial<FormState>);
                                 }}
-                                onValidationChange={onValidationChange}
-                                validation={validation?.closeoutSupplement}
+                                defaultValue={formState.closeoutProjectCompleted}
+                                validation={validation?.closeoutProjectCompleted}
                             />
+                            <FormField
+                                id={FormStateKey.CLOSEOUT_REQUESTOR_MOVED_INSTITUTION}
+                                type={FormFieldTypes.CHECKBOX}
+                                toggleText='The Requestor has moved institutions (If the project will be continued in a new institution or by a new PI, they must go through Project Transfer)'
+                                disabled={readOnly}
+                                onChange={({ key, value }: ValidFormState) => {
+                                    onFormChange({ [key]: value } as Partial<FormState>);
+                                }}
+                                defaultValue={formState.closeoutRequestorMovedInstitution}
+                                validation={validation?.closeoutRequestorMovedInstitution}
+                            />
+                            <FormField
+                                id={FormStateKey.CLOSEOUT_PROJECT_TRANSFERRED}
+                                type={FormFieldTypes.CHECKBOX}
+                                toggleText='The project is being transferred to a new Requestor at the same institution'
+                                disabled={readOnly}
+                                onChange={({ key, value }: ValidFormState) => {
+                                    onFormChange({ [key]: value } as Partial<FormState>);
+                                }}
+                                defaultValue={formState.closeoutProjectTransferred}
+                                validation={validation?.closeoutProjectTransferred}
+                            />
+                            <FormField
+                                id={FormStateKey.CLOSEOUT_PROJECT_SUPERSEDED}
+                                type={FormFieldTypes.CHECKBOX}
+                                toggleText='The project is being superseded by a new project'
+                                disabled={readOnly}
+                                onChange={({ key, value }: ValidFormState) => {
+                                    onFormChange({ [key]: value } as Partial<FormState>);
+                                }}
+                                defaultValue={formState.closeoutProjectSuperseded}
+                                validation={validation?.closeoutProjectSuperseded}
+                            />
+                            <FormField
+                                id={FormStateKey.CLOSEOUT_OTHER}
+                                type={FormFieldTypes.CHECKBOX}
+                                toggleText='Other'
+                                disabled={readOnly}
+                                onChange={({ key, value }: ValidFormState) => {
+                                    onFormChange({ [key]: value } as Partial<FormState>);
+                                }}
+                                defaultValue={formState.closeoutOther}
+                                validation={validation?.closeoutOther}
+                            />
+                            {formState.closeoutOther &&
+                                <FormField
+                                    id={FormStateKey.CLOSEOUT_OTHER_TEXT}
+                                    type={FormFieldTypes.TEXTAREA}
+                                    placeholder={'Please provide context for "other"'}
+                                    defaultValue={formState.closeoutOtherText}
+                                    description={''}
+                                    rows={6}
+                                    maxLength={FORM_TEXT_AREA_MAX_LENGTH}
+                                    onChange={({ key, value }: ValidFormState) => {
+                                        onFormChange({ [key]: value } as Partial<FormState>);
+                                    }}
+                                    validation={validation?.closeoutOtherText}
+                                    validators={[FormValidators.REQUIRED]}
+                                />
+                            }
                         </div>
                     </div>
                 )}

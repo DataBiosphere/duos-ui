@@ -234,7 +234,7 @@ const calcDmiErrors = (formData, errors) =>{
   }
   const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,
     formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
-  if (formData.dmiYesNo && dmiFields.every((field) => !field)) {
+  if (formData.dmiYesNo && !dmiFields.some((field) => field)) {
     errors.dmiAcknowledgement = requiredError;
     errors.dmiCombination = requiredError;
     errors.dmiFalsification = requiredError;
@@ -250,11 +250,20 @@ const calcDmiErrors = (formData, errors) =>{
 }
 
 const calcCloseoutErrors= (formData, errors) => {
+  const closeoutFields = [formData.closeoutOther, formData.closeoutProjectSuperseded, formData.closeoutProjectTransferred, formData.closeoutRequestorMovedInstitution, formData.closeoutProjectCompleted];
   if (isNil(formData.closeoutYesNo)) {
     errors.closeoutYesNo = requiredError;
   }
-  if (formData.closeoutYesNo && isEmpty(formData.closeoutSupplement)) {
-    errors.closeoutSupplement = requiredError;
+  if (formData.closeoutOther && isEmpty(formData.closeoutOtherText)) {
+    errors.closeoutOtherText = requiredError
+  }
+
+  if (formData.closeoutYesNo && !closeoutFields.some((field) => field)) {
+    errors.closeoutProjectCompleted = requiredError;
+    errors.closeoutRequestorMovedInstitution = requiredError;
+    errors.closeoutProjectTransferred = requiredError;
+    errors.closeoutProjectSuperseded = requiredError;
+    errors.closeoutOther = requiredError;
   }
 }
 

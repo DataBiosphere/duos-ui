@@ -1,4 +1,4 @@
-import {CloseOutSupplement, Collaborator, Dataset} from "src/types/model";
+import {Collaborator, Dataset} from "src/types/model";
 import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
 
 export type ValidFormState = {
@@ -31,7 +31,12 @@ export interface FormState {
     dmiOther: boolean;
     dmiDescription: string;
     closeoutYesNo: boolean;
-    closeoutSupplement: CloseOutSupplement;
+    closeoutProjectCompleted: boolean;
+    closeoutRequestorMovedInstitution: boolean;
+    closeoutProjectTransferred: boolean;
+    closeoutProjectSuperseded: boolean;
+    closeoutOther: boolean;
+    closeoutOtherText: string;
     datasets: Dataset[];
     selectedDatasets: Dataset[];
 }
@@ -59,8 +64,21 @@ export enum FormStateKey {
     DMI_OTHER = 'dmiOther',
     DMI_DESCRIPTION = 'dmiDescription',
     CLOSEOUT_YES_NO = 'closeoutYesNo',
-    CLOSEOUT_SUPPLEMENT = 'closeoutSupplement'
+    CLOSEOUT_PROJECT_COMPLETED = 'closeoutProjectCompleted',
+    CLOSEOUT_REQUESTOR_MOVED_INSTITUTION = 'closeoutRequestorMovedInstitution',
+    CLOSEOUT_PROJECT_TRANSFERRED = 'closeoutProjectTransferred',
+    CLOSEOUT_PROJECT_SUPERSEDED = 'closeoutProjectSuperseded',
+    CLOSEOUT_OTHER = 'closeoutOther',
+    CLOSEOUT_OTHER_TEXT = 'closeoutOtherText'
 }
+
+export const CLOSEOUT_KEYS: FormStateKey[] = [
+    FormStateKey.CLOSEOUT_PROJECT_COMPLETED,
+    FormStateKey.CLOSEOUT_REQUESTOR_MOVED_INSTITUTION,
+    FormStateKey.CLOSEOUT_PROJECT_TRANSFERRED,
+    FormStateKey.CLOSEOUT_PROJECT_SUPERSEDED,
+    FormStateKey.CLOSEOUT_OTHER
+];
 
 export const DMI_INCIDENT_KEYS: FormStateKey[] = [
     FormStateKey.DMI_COMBINATION,
