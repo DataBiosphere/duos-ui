@@ -409,6 +409,7 @@ export interface DataManagementIncident {
 export interface Closeout {
   reasons: string[];
   otherText: string;
+  signingOfficialId: number;
 }
 
 export interface Presentation {

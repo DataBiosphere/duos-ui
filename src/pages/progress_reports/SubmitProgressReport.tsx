@@ -79,6 +79,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
       }
     });
     closeout.otherText = formState.closeoutOtherText ?? '';
+    closeout.signingOfficialId = formState.closeoutSigningOfficial?.userId;
 
     return closeout;
   }

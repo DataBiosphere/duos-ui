@@ -1,5 +1,5 @@
-import {Collaborator, Dataset} from "src/types/model";
-import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
+import {Collaborator, Dataset, SimplifiedDuosUser} from 'src/types/model';
+import {PublicationOrPresentation} from 'src/components/publications_list/PublicationOrPresentation';
 
 export type ValidFormState = {
   [K in keyof FormState]: {
@@ -31,6 +31,7 @@ export interface FormState {
     dmiOther: boolean;
     dmiDescription: string;
     closeoutYesNo: boolean;
+    closeoutSigningOfficial: SimplifiedDuosUser;
     closeoutProjectCompleted: boolean;
     closeoutRequestorMovedInstitution: boolean;
     closeoutProjectTransferred: boolean;
@@ -64,6 +65,7 @@ export enum FormStateKey {
     DMI_OTHER = 'dmiOther',
     DMI_DESCRIPTION = 'dmiDescription',
     CLOSEOUT_YES_NO = 'closeoutYesNo',
+    CLOSEOUT_SIGNING_OFFICIAL = 'closeoutSigningOfficial',
     CLOSEOUT_PROJECT_COMPLETED = 'closeoutProjectCompleted',
     CLOSEOUT_REQUESTOR_MOVED_INSTITUTION = 'closeoutRequestorMovedInstitution',
     CLOSEOUT_PROJECT_TRANSFERRED = 'closeoutProjectTransferred',

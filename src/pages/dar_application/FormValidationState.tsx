@@ -55,6 +55,7 @@ export interface DarErrors {
     dmiOther?: ValidationError,
     dmiDescription?: ValidationError,
     closeoutYesNo?: ValidationError,
+    closeoutSigningOfficial?: ValidationError,
     closeoutProjectCompleted?: ValidationError,
     closeoutRequestorMovedInstitution?: ValidationError,
     closeoutProjectTransferred?: ValidationError,

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {FormField, FormFieldTypes, FormValidators} from 'src/components/forms/forms';
 import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
 import {FORM_TEXT_AREA_MAX_LENGTH} from "src/components/forms/formConstants";
+import { User } from 'src/libs/ajax/User';
+import { SimplifiedDuosUser } from 'src/types/model';
 
 interface DarCloseoutProps {
     readonly readOnly: boolean;
@@ -14,6 +16,27 @@ interface DarCloseoutProps {
 
 export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
     const { readOnly, formState, onFormChange, onValidationChange, validation } = props;
+
+    const [allSigningOfficials, setAllSigningOfficials] = useState<SimplifiedDuosUser[]>([]);
+    const [defaultSigningOfficial, setDefaultSigningOfficial] = useState<SimplifiedDuosUser>();
+
+    const displaySigningOfficial = (so: SimplifiedDuosUser) => {
+        const {displayName, email} = so;
+        const nameString = (email !== undefined && email.length > 0) ? `${displayName} (${email})` : displayName;
+        return {displayText: nameString, ...so};
+    }
+
+    useEffect(() => {
+        const init = async () => {
+            const signingOfficials = await User.getSOsForCurrentUser();
+            setAllSigningOfficials(signingOfficials);
+            const closeoutSigningOfficial = signingOfficials.find(so => so.userId === formState.closeoutSigningOfficial?.userId);
+            if (closeoutSigningOfficial !== undefined) {
+                setDefaultSigningOfficial(closeoutSigningOfficial);
+            }
+        }
+        init();
+    }, []);
 
     return (
         <div data-cy='dar-closeout'>
@@ -47,6 +70,25 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                     />
                     {formState.closeoutYesNo && (
                         <div data-cy='dar-closeout-details'>
+
+                        <div style={{ marginTop: '10px' }}>
+                            <FormField
+                                id={FormStateKey.CLOSEOUT_SIGNING_OFFICIAL}
+                                type={FormFieldTypes.SELECT}
+                                description='I certify that the individual listed below is my institutional Signing Official'
+                                validators={[FormValidators.REQUIRED]}
+                                disabled={readOnly}
+                                onChange={({ key, value }: ValidFormState) => {
+                                    onFormChange({
+                                        [key]: value,
+                                    } as Partial<FormState>);
+                                }}
+                                defaultValue={defaultSigningOfficial}
+                                selectOptions={(allSigningOfficials?.map((so) => displaySigningOfficial(so)) || [''])}
+                                validation={validation?.closeoutSigningOfficial}
+                            />
+                        </div>
+
                         <p>
                             By completing this page, upon project close-out, the PI and all approved users agree to destroy all copies, versions, and derivations of the dataset(s) retrieved from NIH-designated controlled-access databases, on both local servers and hardware, and if cloud computing was used, delete the data and cloud images from cloud computing provider storage, virtual machines, databases, and random access archives, except as required by publication practices, institutional policies, or law to retain them.
                         </p>
