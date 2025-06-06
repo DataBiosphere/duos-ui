@@ -84,7 +84,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                                     } as Partial<FormState>);
                                 }}
                                 defaultValue={defaultSigningOfficial}
-                                selectOptions={(allSigningOfficials?.map((so) => displaySigningOfficial(so)) || [''])}
+                                selectOptions={(allSigningOfficials?.map((so) => displaySigningOfficial(so)) ?? [''])}
                                 validation={validation?.closeoutSigningOfficial}
                             />
                         </div>
