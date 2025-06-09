@@ -1,8 +1,6 @@
-/* eslint-disable no-undef */
-
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import React from 'react';
-import PrivacyPolicy from '../../../src/pages/PrivacyPolicy';
+import PrivacyPolicy from 'src/pages/PrivacyPolicy';
 
 describe('Privacy Policy', () => {
   it('Renders the privacy policy page', () => {

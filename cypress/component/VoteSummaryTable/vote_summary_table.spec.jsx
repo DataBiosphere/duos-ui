@@ -1,7 +1,6 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
-import VoteSummaryTable from '../../../src/components/vote_summary_table/VoteSummaryTable';
+import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable';
 
 const dacVotes = [
   {
@@ -19,8 +18,7 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={false}
       />
     );
-    const colHeaders = cy.get('.column-header');
-    colHeaders.should('have.length', 4);
+    cy.get('.column-header').should('have.length', 4);
   });
 
   it('Renders member decision in the vote column', function() {
@@ -30,8 +28,7 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={false}
       />
     );
-    const component = cy.get('.table-data');
-    component.contains('No');
+    cy.get('.table-data').contains('No');
   });
 
   //this test works locally but fails on Github
@@ -43,8 +40,7 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={false}
       />
     );
-    const component = cy.get('.table-data');
-    component.contains("2022-01-12");
+    cy.get('.table-data').contains("2022-01-12");
   });
   */
 
@@ -55,8 +51,7 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={false}
       />
     );
-    const component = cy.get('.table-data');
-    component.contains('- -');
+    cy.get('.table-data').contains('- -');
   });
 
   it('Renders skeleton table if isLoading is true', function() {
@@ -65,9 +60,7 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={true}
       />
     );
-    const component = cy.get('.table-data');
-    component.should('exist');
-    const rows = cy.get('.table-loading-placeholder');
-    rows.should('exist');
+    cy.get('.table-data').should('exist');
+    cy.get('.table-loading-placeholder').should('exist');
   });
 });

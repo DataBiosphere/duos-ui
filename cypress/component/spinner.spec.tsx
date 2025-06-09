@@ -1,8 +1,6 @@
-/* eslint-disable no-undef */
-
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import React from 'react';
-import {Spinner} from '../../src/components/Spinner';
+import { Spinner } from 'src/components/Spinner';
 
 describe('Spinner', () => {
   it('Renders the spinner component', () => {
