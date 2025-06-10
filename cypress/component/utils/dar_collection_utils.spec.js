@@ -26,7 +26,7 @@ describe('updateCollectionFn', () => {
     const setFilteredList = () => {
     };
 
-    expect(updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList})).to.exist;
+    cy.wrap(updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList})).should('exist');
   });
 
   it('collections and filteredList with the filter results', () => {
@@ -52,10 +52,10 @@ describe('cancelCollectionFn', () => {
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (arr) => collections = arr;
     const callback = cancelCollectionFn({updateCollections, role: USER_ROLES.admin});
-    expect(callback).to.exist;
+    cy.wrap(callback).should('exist');
   });
 
-  it('updates collections and filteredList on successful cancel', async () => {
+  it('updates collections and filteredList on successful cancel', () => {
     let collections = [{status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1}];
     const updatedCollection = {status: 'Complete', darCode: 'DAR-1', darCollectionId: 1};
     const updateCollections = (collection) => collections = [collection];
@@ -67,10 +67,11 @@ describe('cancelCollectionFn', () => {
     cy.stub(Notifications, 'showSuccess').returns(undefined);
     cy.stub(Notifications, 'showError').returns(undefined);
 
-    await callback({darCode: '', darCollectionId: 1});
-    expect(collections).to.not.be.empty;
-    expect(collections[0].darCollectionId).to.equal(1);
-    expect(collections[0].status).to.equal('Complete');
+    cy.wrap(callback({darCode: '', darCollectionId: 1})).then(() => {
+      cy.wrap(collections).should('not.be.empty');
+      cy.wrap(collections[0].darCollectionId).should('equal', 1);
+      cy.wrap(collections[0].status).should('equal', 'Complete');
+    });
   });
 });
 
@@ -78,10 +79,10 @@ describe('openCollectionFn', () => {
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (arr) => collections = arr;
     const callback = openCollectionFn({updateCollections, role: USER_ROLES.admin});
-    expect(callback).to.exist;
+    cy.wrap(callback).should('exist');
   });
 
-  it('updatesCollections on a successful open', async () => {
+  it('updatesCollections on a successful open', () => {
     let collections = [{status: 'Complete', darCode: 'DAR-1', darCollectionId: 1}];
     const updatedCollection = {status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1};
     cy.stub(Collections, 'openElectionsById').returns({});
@@ -90,9 +91,10 @@ describe('openCollectionFn', () => {
     );
     const updateCollections = (collection) => collections = [collection];
     const callback = openCollectionFn({updateCollections});
-    await callback({darCode: '', darCollectionId: 1});
-    expect(collections[0].darCode).to.equal('DAR-1');
-    expect(collections[0].status).to.equal('In Progress');
+    cy.wrap(callback({darCode: '', darCollectionId: 1})).then(() => {
+      cy.wrap(collections[0].darCode).should('equal', 'DAR-1');
+      cy.wrap(collections[0].status).should('equal', 'In Progress');
+    });
   });
 });
 
@@ -110,7 +112,7 @@ describe('extractDacDataAccessVotesFromBucket', () => {
     const user = {userId: 1};
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
-    expect(votes).to.be.empty;
+    cy.wrap(votes).should('be.empty');
   });
 
   it('returns all member votes in the same data access elections as the given user', () => {
@@ -207,7 +209,7 @@ describe('extractDacRPVotesFromBucket', () => {
     const user = {userId: 1};
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
-    expect(votes).to.be.empty;
+    cy.wrap(votes).should('be.empty');
   });
 
   it('returns all member votes in the same rp elections as the given user', () => {
@@ -555,16 +557,16 @@ describe('updateFinalVote()', () => {
       const votes = concat(voteObj.finalVotes, voteObj.chairpersonVotes);
       forEach((vote) => {
         if(includes(vote.voteId)(voteIds)) {
-          expect(vote.vote).to.equal(votePayload.vote);
-          expect(vote.rationale).to.equal(votePayload.rationale);
+          cy.wrap(vote.vote).should('equal', votePayload.vote);
+          cy.wrap(vote.rationale).should('equal', votePayload.rationale);
         } else {
-          expect(vote.vote).to.equal(undefined);
-          expect(vote.rationale).to.equal(undefined);
+          cy.wrap(vote.vote).should('equal', undefined);
+          cy.wrap(vote.rationale).should('equal', undefined);
         }
       })(votes);
     })(updatedBuckets);
 
-    expect(dataUseBuckets).to.deep.equal(updatedBuckets);
+    cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets);
   });
 
   it('updates votes for the target bucket in the source collection (rp votes)', () => {
@@ -583,17 +585,15 @@ describe('updateFinalVote()', () => {
       const votes = concat(voteObj.finalVotes, voteObj.chairpersonVotes);
       forEach((vote) => {
         if (includes(vote.voteId)(voteIds)) {
-          expect(vote.vote).to.equal(votePayload.vote);
-          expect(vote.rationale).to.equal(votePayload.rationale);
+          cy.wrap(vote.vote).should('equal', votePayload.vote);
+          cy.wrap(vote.rationale).should('equal', votePayload.rationale);
         } else {
-          expect(vote.vote).to.equal(undefined);
-          expect(vote.rationale).to.equal(undefined);
+          cy.wrap(vote.vote).should('equal', undefined);
+          cy.wrap(vote.rationale).should('equal', undefined);
         }
       })(votes);
     })(updatedBuckets);
 
-    expect(dataUseBuckets).to.deep.equal(updatedBuckets);
+    cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets);
   });
 });
-
-
