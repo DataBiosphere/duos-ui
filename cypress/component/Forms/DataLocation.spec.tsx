@@ -1,7 +1,7 @@
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import React from 'react';
-import {DataLocation, DataLocationComponentProps, DataLocationInfo} from '../../../src/components/forms/DataLocation';
-import {BrowserRouter} from 'react-router-dom';
+import { DataLocation, DataLocationComponentProps, DataLocationInfo } from 'src/components/forms/DataLocation';
+import { BrowserRouter } from 'react-router-dom';
 
 const baseProps = {
     idx: 0,
@@ -26,14 +26,14 @@ describe('Data Locations List Component - Tests', () => {
         mount(<BrowserRouter><DataLocation {...customProps}/></BrowserRouter>)
         cy.get('.formField-researchStage').type('Pre{enter}');
         cy.get('@onChangeSpy').should('be.calledWith', {
-            "idx": 0,
-            "location": {
-                "cloudProvider": null,
-                "dataLocation": null,
-                "locationUrl": null,
-                "researchStage": {
-                    "displayText": 'Pre-analysis',
-                    "key": 'PRA'
+            'idx': 0,
+            'location': {
+                'cloudProvider': null,
+                'dataLocation': null,
+                'locationUrl': null,
+                'researchStage': {
+                    'displayText': 'Pre-analysis',
+                    'key': 'PRA'
                 }
             }
         })
@@ -45,15 +45,15 @@ describe('Data Locations List Component - Tests', () => {
         mount(<BrowserRouter><DataLocation {...customProps}/></BrowserRouter>)
         cy.get('.formField-dataLocation').type('Ter{enter}');
         cy.get('@onChangeSpy').should('be.calledWith', {
-            "idx": 0,
-            "location": {
-                "cloudProvider": null,
-                "dataLocation": {
-                    "displayText": "Terra",
-                    "key": "TERRA"
+            'idx': 0,
+            'location': {
+                'cloudProvider': null,
+                'dataLocation': {
+                    'displayText': 'Terra',
+                    'key': 'TERRA'
                 },
-                "locationUrl": null,
-                "researchStage": null
+                'locationUrl': null,
+                'researchStage': null
             }
         })
     });
@@ -64,15 +64,15 @@ describe('Data Locations List Component - Tests', () => {
         mount(<BrowserRouter><DataLocation {...customProps}/></BrowserRouter>)
         cy.get('.formField-cloudProvider').type('AW{enter}');
         cy.get('@onChangeSpy').should('be.calledWith', {
-            "idx": 0,
-            "location": {
-                "cloudProvider": {
-                    "displayText": "AWS",
-                    "key": "AWS"
+            'idx': 0,
+            'location': {
+                'cloudProvider': {
+                    'displayText': 'AWS',
+                    'key': 'AWS'
                 },
-                "dataLocation": null,
-                "locationUrl": null,
-                "researchStage": null
+                'dataLocation': null,
+                'locationUrl': null,
+                'researchStage': null
             }
         })
     });
@@ -83,12 +83,12 @@ describe('Data Locations List Component - Tests', () => {
         mount(<BrowserRouter><DataLocation {...customProps}/></BrowserRouter>)
         cy.get('.formField-locationUrl').type('https://www.duos.org{enter}');
         cy.get('@onChangeSpy').should('be.calledWith', {
-            "idx": 0,
-            "location": {
-                "cloudProvider": null,
-                "dataLocation": null,
-                "locationUrl": "https://www.duos.org",
-                "researchStage": null
+            'idx': 0,
+            'location': {
+                'cloudProvider': null,
+                'dataLocation': null,
+                'locationUrl': 'https://www.duos.org',
+                'researchStage': null
             }
         })
     });

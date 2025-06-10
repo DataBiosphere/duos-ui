@@ -1,4 +1,4 @@
-import {OidcUser} from "../../../src/libs/auth/oidcBroker";
+import { OidcUser } from 'src/libs/auth/oidcBroker';
 
 export const mockOidcUser: OidcUser = {
   access_token: '',
