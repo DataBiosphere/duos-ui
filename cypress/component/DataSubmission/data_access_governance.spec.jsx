@@ -60,7 +60,8 @@ describe('Data Access Governance', function () {
     cy.get('#2_consentGroupForm').should('exist');
     cy.get('#3_consentGroupForm').should('exist');
 
-  }),
+  });
+
   it('Delete consent group works', function () {
     mount(<DataSubmissionForm />);
 

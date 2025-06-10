@@ -52,7 +52,8 @@ describe('Consent Group', function () {
     cy.get('#0_url').type('https://www.asdf.gov');
 
     cy.wrap(propCopy.saveConsentGroup).should('not.have.been.called');
-  }),
+  });
+
   /* TO DO: Re-enable test once DS Form schema is updated.
 
   it('Saves properly', function () {
@@ -109,6 +110,7 @@ describe('Consent Group', function () {
     });
 
   }),*/
+
   it('Deletes properly', function () {
     cy.spy(propCopy, 'deleteConsentGroup');
 
@@ -121,7 +123,8 @@ describe('Consent Group', function () {
     cy.get('#0_col').check();
     cy.get('#0_deleteConsentGroup').click();
     cy.wrap(propCopy.deleteConsentGroup).should('have.been.called');
-  }),
+  });
+
   it('Shows conditional fields only when checked', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
