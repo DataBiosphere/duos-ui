@@ -1,9 +1,9 @@
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import React from 'react';
-import ResearcherStatus, {ResearcherStatusProps} from '../../../src/pages/user_profile/ResearcherStatus';
-import {DAAObject, DuosUser, FileStorageObject, SimplifiedDuosUser} from 'src/types/model';
-import {User} from "src/libs/ajax/User";
-import {DAA} from "src/libs/ajax/DAA";
+import ResearcherStatus, {ResearcherStatusProps} from 'src/pages/user_profile/ResearcherStatus';
+import { DAAObject, DuosUser, FileStorageObject, SimplifiedDuosUser } from 'src/types/model';
+import { User } from 'src/libs/ajax/User';
+import { DAA } from 'src/libs/ajax/DAA';
 
 describe('ResearcherStatus', () => {
   const user: DuosUser = {

@@ -1,9 +1,8 @@
-/* eslint-disable no-undef */
 import { makeDatasetTerm } from '../test-utils'
-import {React} from 'react';
-import {mount} from 'cypress/react';
-import DatasetSearchTable from '../../../src/components/data_search/DatasetSearchTable';
-import {TerraDataRepo} from '../../../src/libs/ajax/TerraDataRepo';
+import { React } from 'react';
+import { mount } from 'cypress/react';
+import DatasetSearchTable from 'src/components/data_search/DatasetSearchTable';
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo';
 
 const datasets = [
   makeDatasetTerm({
@@ -81,24 +80,20 @@ describe('Dataset Search Table tests', () => {
         }).as('searchIndex');
       mount(<DatasetSearchTable {...props} />);
       // first clear the default value (50), without clearing first, type('3') would result in input of 503
-      const minRange = cy.get('#participantCountMin-range-input');
-      minRange.clear();
-      // Just type 3 because after being cleared it defaults to 0
-      minRange.type('3');
+      cy.get('#participantCountMin-range-input').clear();
+      cy.get('#participantCountMin-range-input').type('3');
       // first clear the default value (100), without clearing first, type('5') would result in input of 1005
-      const maxRange = cy.get('#participantCountMax-range-input');
-      maxRange.clear();
-      // Just type 5 because after being cleared it defaults to 0
-      maxRange.type('5')
+      cy.get('#participantCountMax-range-input').clear();
+      cy.get('#participantCountMax-range-input').type('5');
       cy.tick(150);
       // this api call should have had a request that contained the searchText
       let count = 0;
       cy.wait('@searchIndex').then((response) => {
-        expect(response.response.body[0]).to.equal('filtered');
+        cy.wrap(response.response.body[0]).should('equal', 'filtered');
         count++;
       });
       cy.get('@searchIndex').then(() => {
-        expect(count).to.equal(1);
+        cy.wrap(count).should('equal', 1);
       });
 
     });

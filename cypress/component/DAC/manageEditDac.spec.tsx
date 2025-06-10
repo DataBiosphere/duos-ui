@@ -1,15 +1,13 @@
-/* eslint-disable no-undef */
-
 import React from 'react';
-import {mount} from 'cypress/react';
-import {DAC} from '../../../src/libs/ajax/DAC';
-import {Storage} from '../../../src/libs/storage';
-import ManageEditDac from '../../../src/pages/manage_dac/ManageEditDac';
-import {BrowserRouter} from 'react-router-dom';
+import { mount } from 'cypress/react';
+import { DAC } from 'src/libs/ajax/DAC';
+import { Storage } from 'src/libs/storage';
+import ManageEditDac from 'src/pages/manage_dac/ManageEditDac';
+import { BrowserRouter } from 'react-router-dom';
 import admin from './admin.json';
 import chair from './chair.json';
 import dac from './dac.json';
-import {setUserRoleStatuses} from '../../../src/libs/utils';
+import { setUserRoleStatuses } from 'src/libs/utils';
 
 // It's necessary to wrap components that contain `Link` components
 const WrappedManageEditDac = (props) => {
@@ -68,9 +66,8 @@ describe('ManageEditDAC Tests', () => {
     cy.get('[data-cy="dac_name"]').type('New DAC Name');
     cy.get('[data-cy="dac_description"]').type('New DAC Description');
     cy.get('[data-cy="dac_email"]').type('New DAC Email');
-    cy.get('[data-cy="btn_save"]').click().then(() => {
-      expect(dacCreate).to.be.called;
-    });
+    cy.get('[data-cy="btn_save"]').click();
+    cy.wrap(dacCreate).should('have.been.called');
   });
 
   it('Chairs cannot create a DAC', () => {
@@ -93,9 +90,8 @@ describe('ManageEditDAC Tests', () => {
     cy.get('[data-cy="dac_name"]').type('New DAC Name');
     cy.get('[data-cy="dac_description"]').type('New DAC Description');
     cy.get('[data-cy="dac_email"]').type('New DAC Email');
-    cy.get('[data-cy="btn_save"]').click().then(() => {
-      expect(dacCreate).to.not.be.called;
-    });
+    cy.get('[data-cy="btn_save"]').click();
+    cy.wrap(dacCreate).should('not.have.been.called');
   });
 
 });

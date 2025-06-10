@@ -1,10 +1,10 @@
 import React from 'react';
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
-import {Location} from 'history';
-import {DuosUser} from 'src/types/model';
-import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
+import { Location } from 'history';
+import { DuosUser } from 'src/types/model';
+import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 
 describe('Summary Section - Component Tests', () => {
   let onFormChangeSpy: () => void;

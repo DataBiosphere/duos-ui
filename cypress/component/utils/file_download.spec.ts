@@ -1,4 +1,4 @@
-import { fileDownload } from "../../../src/utils/FileDownload";
+import { fileDownload } from 'src/utils/FileDownload';
 
 describe('FileDownload', () => {
     it('should create and trigger download with correct attributes', () => {

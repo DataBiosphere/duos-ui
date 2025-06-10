@@ -1,15 +1,15 @@
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import React from 'react';
-import {DataLocationList, DataLocationsProps} from '../../../src/components/forms/DataLocationList';
-import {DataLocationInfo} from "src/components/forms/DataLocation";
-import {BrowserRouter} from 'react-router-dom';
-
+import { DataLocationList, DataLocationsProps } from 'src/components/forms/DataLocationList';
+import { DataLocationInfo } from 'src/components/forms/DataLocation';
+import { BrowserRouter } from 'react-router-dom';
 
 const props = {
     locations: [] as DataLocationInfo[],
     onChange: () => {
     }
 } as DataLocationsProps
+
 describe('Data Locations List Component - Tests', () => {
     it('should render a Data Locations component with Add location button', () => {
         mount(<DataLocationList {...props}/>)
