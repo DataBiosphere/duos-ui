@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const roles = {
   ADMIN: 'ADMIN',
   CHAIR: 'CHAIR',

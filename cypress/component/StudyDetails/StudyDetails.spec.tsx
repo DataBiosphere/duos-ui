@@ -1,11 +1,9 @@
-/* eslint-disable no-undef */
-
 import React from 'react';
-import {mount} from 'cypress/react';
-import { StudyDetails } from '../../../src/components/study_details/StudyDetails';
-import {TerraDataRepo} from '../../../src/libs/ajax/TerraDataRepo';
-import {DataSet} from '../../../src/libs/ajax/DataSet';
-import {BrowserRouter} from 'react-router-dom';
+import { mount } from 'cypress/react';
+import { StudyDetails } from 'src/components/study_details/StudyDetails';
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo';
+import { DataSet } from 'src/libs/ajax/DataSet';
+import { BrowserRouter } from 'react-router-dom';
 
 const datasets = [
   {
@@ -56,7 +54,6 @@ describe('Study details test', () => {
       history: {},
       match: { params: { studyId: 1 } }
     };
-    // @ts-ignore
     mount(<WrappedStudyDetailsComponent {...props} />);
   });
 

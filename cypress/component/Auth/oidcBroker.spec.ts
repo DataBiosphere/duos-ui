@@ -1,7 +1,5 @@
-/* eslint-disable no-undef */
-
-import {OAuth2} from '../../../src/libs/ajax/OAuth2';
-import {OidcBroker} from '../../../src/libs/auth/oidcBroker';
+import { OAuth2 } from 'src/libs/ajax/OAuth2';
+import { OidcBroker } from 'src/libs/auth/oidcBroker';
 
 describe('OidcBroker Failure', function () {
 
@@ -31,32 +29,36 @@ describe('OidcBroker Success', function () {
     });
   });
 
-  it('Initialization Succeeds', async function () {
-    await OidcBroker.initialize();
-    expect(OidcBroker.getUserManager()).to.not.be.null;
-    expect(OidcBroker.getUserManagerSettings()).to.not.be.null;
-  });
-
-  it('Sign In calls Oidc Broker UserManager sign-in popup function', async function () {
-    await OidcBroker.initialize();
-    const um = OidcBroker.getUserManager();
-    cy.spy(um, 'signinPopup').as('signinPopup');
-    // Since we are not calling a real sign-in url, we expect oidc-client errors when doing so
-    cy.on('uncaught:exception', (err) => {
-      return !(err.message.includes('Invalid URL'))
+  it('Initialization Succeeds', function () {
+    cy.wrap(OidcBroker.initialize()).then(() => {
+      cy.wrap(OidcBroker.getUserManager()).should('not.be.null');
+      cy.wrap(OidcBroker.getUserManagerSettings()).should('not.be.null');
     });
-    OidcBroker.signIn();
-    expect(um.signinPopup).to.be.called;
   });
 
-  it('Sign Out calls Oidc UserManager sign-out functions', async function () {
-    await OidcBroker.initialize();
-    const um = OidcBroker.getUserManager();
-    cy.spy(um, 'removeUser').as('removeUser');
-    cy.spy(um, 'clearStaleState').as('clearStaleState');
-    await OidcBroker.signOut();
-    expect(um.removeUser).to.be.called;
-    expect(um.clearStaleState).to.be.called;
+  it('Sign In calls Oidc Broker UserManager sign-in popup function', function () {
+    cy.wrap(OidcBroker.initialize()).then(() => {
+      const um = OidcBroker.getUserManager();
+      cy.spy(um, 'signinPopup').as('signinPopup');
+      // Since we are not calling a real sign-in url, we expect oidc-client errors when doing so
+      cy.on('uncaught:exception', (err) => {
+        return !(err.message.includes('Invalid URL'))
+      });
+      OidcBroker.signIn();
+      cy.get('@signinPopup').should('have.been.called');
+    });
+  });
+
+  it('Sign Out calls Oidc UserManager sign-out functions', function () {
+    cy.wrap(OidcBroker.initialize()).then(() => {
+      const um = OidcBroker.getUserManager();
+      cy.spy(um, 'removeUser').as('removeUser');
+      cy.spy(um, 'clearStaleState').as('clearStaleState');
+      cy.wrap(OidcBroker.signOut()).then(() => {
+        cy.get('@removeUser').should('have.been.called');
+        cy.get('@clearStaleState').should('have.been.called');
+      });
+    });
   });
 
 });

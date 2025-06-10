@@ -1,8 +1,7 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
 import { MemoryRouter } from 'react-router-dom';
-import Home from '../../../src/pages/Home';
+import Home from 'src/pages/Home';
 
 describe('Home Page - Tests', function() {
   describe('When user is not logged in', function() {

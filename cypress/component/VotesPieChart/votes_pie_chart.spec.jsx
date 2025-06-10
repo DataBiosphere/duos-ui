@@ -1,7 +1,6 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
-import VotesPieChart from '../../../src/components/common/VotesPieChart';
+import VotesPieChart from 'src/components/common/VotesPieChart';
 
 const testVotes = [{vote: true}, {vote: false}, {}];
 const keyString = 'test';
@@ -12,15 +11,14 @@ const keyString = 'test';
 describe('VotesPieChart - Tests', function() {
   it('renders the no data div if the votes array is empty', function() {
     mount(<VotesPieChart keyString={keyString}/>);
-    const component = cy.get(`.${keyString}-pie-chart-no-data`);
-    component.should('exist');
-    component.contains(`No data for ${keyString}`);
+    const chart = `.${keyString}-pie-chart-no-data`;
+    cy.get(chart).should('exist');
+    cy.get(chart).contains(`No data for ${keyString}`);
   });
 
   it('renders the results so that each division is 1/3 of the whole', function() {
     const props = {votes: testVotes, keyString};
     mount(<VotesPieChart {...props}/>);
-    const component = cy.get('svg');
-    component.should('exist');
+    cy.get('svg').should('exist');
   });
 });

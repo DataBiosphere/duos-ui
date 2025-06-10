@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 describe('Home', function() {
 
   it('Home page loads correctly', function() {

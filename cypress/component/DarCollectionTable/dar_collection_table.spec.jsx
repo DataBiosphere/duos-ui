@@ -1,7 +1,6 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
-import { DarCollectionTableColumnOptions, DarCollectionTable } from '../../../src/components/dar_collection_table/DarCollectionTable';
+import { DarCollectionTableColumnOptions, DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable';
 
 const collections = [
   {
@@ -27,8 +26,7 @@ describe('DarCollectionTable - Tests', function() {
         actionsDisabled={false}
       />
     );
-    const colHeaders = cy.get('.column-header');
-    colHeaders.should('have.length', 1);
+    cy.get('.column-header').should('have.length', 1);
   });
 
   it('renders multiple rows of the data', function() {
@@ -47,8 +45,7 @@ describe('DarCollectionTable - Tests', function() {
         actionsDisabled={false}
       />
     );
-    const colHeaders = cy.get('.column-header');
-    colHeaders.should('have.length', 2);
+    cy.get('.column-header').should('have.length', 2);
   });
 
   it('should render skeleton table if isLoading is true', function() {
@@ -57,9 +54,7 @@ describe('DarCollectionTable - Tests', function() {
         isLoading={true}
       />
     );
-    const component = cy.get('.table-data');
-    component.should('exist');
-    const rows = cy.get('.table-loading-placeholder');
-    rows.should('exist');
+    cy.get('.table-data').should('exist');
+    cy.get('.table-loading-placeholder').should('exist');
   });
 });

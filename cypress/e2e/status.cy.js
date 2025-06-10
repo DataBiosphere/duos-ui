@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const headers = ['Consent', 'Ontology'];
 
 describe('Status', function() {

@@ -1,8 +1,6 @@
-/* eslint-disable no-undef */
-
 import {mount} from 'cypress/react';
 import React from 'react';
-import {DraftFileUpload} from '../../../src/components/forms/DraftFileUpload';
+import {DraftFileUpload} from 'src/components/forms/DraftFileUpload';
 import {BrowserRouter} from 'react-router-dom';
 
 const baseProps = {
