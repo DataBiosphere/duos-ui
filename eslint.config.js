@@ -62,6 +62,7 @@ export default ts.config(
         }
       ],
       'react/prop-types': 'off',
+      'quotes': ['error', 'single', { 'avoidEscape': true, 'allowTemplateLiterals': true }],
     },
   },
 )
