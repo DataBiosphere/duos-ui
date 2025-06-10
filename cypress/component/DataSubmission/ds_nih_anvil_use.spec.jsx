@@ -1,8 +1,7 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
 import { cloneDeep } from 'lodash/fp';
-import  NihAnvilUse, { YES_NHGRI_YES_PHS_ID } from '../../../src/pages/data_submission/NihAnvilUse';
+import NihAnvilUse, { YES_NHGRI_YES_PHS_ID } from 'src/pages/data_submission/NihAnvilUse';
 
 let propCopy;
 
@@ -21,8 +20,7 @@ beforeEach(() => {
 describe('NihAnvilUse - Tests', () => {
   it('should mount with only the nihAnvilUse form field displayed', () => {
     mount(<NihAnvilUse {...propCopy}/>);
-    const formFields = cy.get('.formField-container');
-    formFields.should('exist');
+    cy.get('.formField-container').should('exist');
 
     cy.get('#nihAnvilUse').should('exist');
     cy.get('#dbGaPPhsID').should('not.exist');

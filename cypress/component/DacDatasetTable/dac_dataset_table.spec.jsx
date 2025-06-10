@@ -1,11 +1,9 @@
-/* eslint-disable no-undef */
-
 import React from 'react';
-import {mount} from 'cypress/react';
-import DACDatasets from '../../../src/pages/DACDatasets';
-import {DataSet} from '../../../src/libs/ajax/DataSet';
-import {Storage} from '../../../src/libs/storage';
-import {BrowserRouter} from 'react-router-dom';
+import { mount } from 'cypress/react';
+import DACDatasets from 'src/pages/DACDatasets';
+import { DataSet } from 'src/libs/ajax/DataSet';
+import { Storage } from 'src/libs/storage';
+import { BrowserRouter } from 'react-router-dom';
 
 const sampleDataset = {
   'datasetId': 1,
@@ -165,25 +163,16 @@ describe('Dac Dataset Table Component', function () {
     mount(WrappedDACDatasetsComponent({}));
     cy.contains('HMB').should('exist');
     cy.contains('GRU').should('exist');
-    cy.get('[data-cy="search-bar"]')
-      .clear()
-      .type('HMB')
-      .then(() => {
-        cy.contains('HMB').should('exist');
-        cy.contains('GRU').should('not.exist');
-      });
-    cy.get('[data-cy="search-bar"]')
-      .clear()
-      .type('GRU')
-      .then(() => {
-        cy.contains('HMB').should('not.exist');
-        cy.contains('GRU').should('exist');
-      });
-    cy.get('[data-cy="search-bar"]')
-      .clear()
-      .type('PHS')
-      .then(() => {
-        cy.contains('PHS').should('exist');
-      });
+    cy.get('[data-cy="search-bar"]').clear();
+    cy.get('[data-cy="search-bar"]').type('HMB');
+    cy.contains('HMB').should('exist');
+    cy.contains('GRU').should('not.exist');
+    cy.get('[data-cy="search-bar"]').clear();
+    cy.get('[data-cy="search-bar"]').type('GRU');
+    cy.contains('HMB').should('not.exist');
+    cy.contains('GRU').should('exist');
+    cy.get('[data-cy="search-bar"]').clear();
+    cy.get('[data-cy="search-bar"]').type('PHS');
+    cy.contains('PHS').should('exist');
   });
 });

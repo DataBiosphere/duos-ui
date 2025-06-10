@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
-import CollaboratorRow from '../../../src/components/collaborator_list/CollaboratorRow';
-import {Collaborator} from "src/types/model";
+import CollaboratorRow from 'src/components/collaborator_list/CollaboratorRow';
+import { Collaborator } from 'src/types/model';
 
 describe('CollaboratorRow - Component Tests', () => {
     const mockCollaborator: Collaborator = {

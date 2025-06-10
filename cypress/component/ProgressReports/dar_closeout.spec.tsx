@@ -45,7 +45,7 @@ describe('DAR Closeout - Component Tests', () => {
     cy.get('#closeoutYesNo_no').click()
     cy.get('@formChangeStub').should('have.been.calledWith', {
       closeoutOther: false,
-      closeoutOtherText: "",
+      closeoutOtherText: '',
       closeoutProjectCompleted : false,
       closeoutProjectSuperseded: false,
       closeoutProjectTransferred: false,
@@ -99,7 +99,7 @@ describe('DAR Closeout - Component Tests', () => {
   it('allows the component to be opened with the correct state', () => {
     mountComponent( {
       closeoutOther: true,
-      closeoutOtherText: "My Other Text",
+      closeoutOtherText: 'My Other Text',
       closeoutProjectCompleted : true,
       closeoutProjectSuperseded: false,
       closeoutProjectTransferred: false,

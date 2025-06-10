@@ -1,5 +1,4 @@
-/* eslint-disable no-undef */
-import { processDefinedLimitations, consentTranslations } from '../../../src/libs/dataUseTranslation';
+import { processDefinedLimitations, consentTranslations } from 'src/libs/dataUseTranslation';
 import { isEmpty, cloneDeep } from 'lodash/fp';
 
 const mockDataUse = {
@@ -13,9 +12,9 @@ describe('Data Use Translation', () => {
       const modifiedMockData = Object.assign(cloneDeep(mockDataUse), {diseaseRestrictions: [], populationOriginsAncestry: true});
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
       const targetTranslation = consentTranslations[targetKey];
-      expect(!isEmpty(resp)).to.be.true;
-      expect(resp.code).to.equal(targetTranslation.code);
-      expect(resp.description).to.equal(targetTranslation.description);
+      cy.wrap(resp).should('not.be.empty');
+      cy.wrap(resp.code).should('equal', targetTranslation.code);
+      cy.wrap(resp.description).should('equal', targetTranslation.description);
     });
 
     it("translates HMB if it's been marked in the data use", () => {
@@ -23,9 +22,9 @@ describe('Data Use Translation', () => {
       const modifiedMockData = Object.assign(cloneDeep(mockDataUse), {[targetKey]: true, diseaseRestrictions: []});
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
       const targetTranslation = consentTranslations[targetKey];
-      expect(!isEmpty(resp)).to.be.true;
-      expect(resp.code).to.equal(targetTranslation.code);
-      expect(resp.description).to.equal(targetTranslation.description);
+      cy.wrap(resp).should('not.be.empty');
+      cy.wrap(resp.code).should('equal', targetTranslation.code);
+      cy.wrap(resp.description).should('equal', targetTranslation.description);
     });
 
     it('translates HMB if diseaseRestrictions is an empty array', () => {
@@ -33,9 +32,9 @@ describe('Data Use Translation', () => {
       const modifiedMockData = Object.assign(cloneDeep(mockDataUse), {diseaseRestrictions: [], [targetKey]: true});
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
       const targetTranslation = consentTranslations[targetKey];
-      expect(!isEmpty(resp)).to.be.true;
-      expect(resp.code).to.equal(targetTranslation.code);
-      expect(resp.description).to.equal(targetTranslation.description);
+      cy.wrap(resp).should('not.be.empty');
+      cy.wrap(resp.code).should('equal', targetTranslation.code);
+      cy.wrap(resp.description).should('equal', targetTranslation.description);
     });
 
     it('does not translate HMB if diseaseRestrictions is populated', () => {
@@ -45,7 +44,7 @@ describe('Data Use Translation', () => {
         [targetKey]: true,
       });
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
-      expect(isEmpty(resp)).to.be.true;
+      cy.wrap(isEmpty(resp)).should('be.true');
     });
 
     it('translates General Research Use (GRU) if selected', () => {
@@ -56,9 +55,9 @@ describe('Data Use Translation', () => {
       });
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
       const targetTranslation = consentTranslations[targetKey];
-      expect(!isEmpty(resp)).to.be.true;
-      expect(resp.code).to.equal(targetTranslation.code);
-      expect(resp.description).to.equal(targetTranslation.description);
+      cy.wrap(resp).should('not.be.empty');
+      cy.wrap(resp.code).should('equal', targetTranslation.code);
+      cy.wrap(resp.description).should('equal', targetTranslation.description);
     });
 
     it('does not translate GRU if HMB is selected', () => {
@@ -69,7 +68,7 @@ describe('Data Use Translation', () => {
         diseaseRestrictions: []
       });
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
-      expect(isEmpty(resp)).to.be.true;
+      cy.wrap(isEmpty(resp)).should('be.true');
     });
 
     it('does not translate GRU if diseaseRestrictions is populated', () => {
@@ -79,7 +78,7 @@ describe('Data Use Translation', () => {
         diseaseRestrictions: ['test'],
       });
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
-      expect(isEmpty(resp)).to.be.true;
+      cy.wrap(isEmpty(resp)).should('be.true');
     });
 
     it('does not translate GRU if POA is selected', () => {
@@ -90,7 +89,7 @@ describe('Data Use Translation', () => {
         diseaseRestrictions: []
       });
       const resp = processDefinedLimitations(targetKey, modifiedMockData, consentTranslations);
-      expect(isEmpty(resp)).to.be.true;
+      cy.wrap(isEmpty(resp)).should('be.true');
     });
 
     it('translates Pediatric Studies (PSO) if pediatric is selected', () => {
@@ -105,9 +104,9 @@ describe('Data Use Translation', () => {
         consentTranslations
       );
       const targetTranslation = consentTranslations[targetKey];
-      expect(!isEmpty(resp)).to.be.true;
-      expect(resp.code).to.equal(targetTranslation.code);
-      expect(resp.description).to.equal(targetTranslation.description);
+      cy.wrap(resp).should('not.be.empty');
+      cy.wrap(resp.code).should('equal', targetTranslation.code);
+      cy.wrap(resp.description).should('equal', targetTranslation.description);
     });
 
     it('translates Gender Studies (GSO) if gender is selected', () => {
@@ -122,9 +121,9 @@ describe('Data Use Translation', () => {
         consentTranslations
       );
       const targetTranslation = consentTranslations[targetKey];
-      expect(!isEmpty(resp)).to.be.true;
-      expect(resp.code).to.equal(targetTranslation.code);
-      expect(resp.description).to.equal(targetTranslation.description);
+      cy.wrap(resp).should('not.be.empty');
+      cy.wrap(resp.code).should('equal', targetTranslation.code);
+      cy.wrap(resp.description).should('equal', targetTranslation.description);
     });
   });
 });

@@ -1,5 +1,4 @@
-/* eslint-disable no-undef */
-import {compileSchema, validateForm} from '../../../src/pages/data_submission/RegistrationValidation.js';
+import {compileSchema, validateForm} from 'src/pages/data_submission/RegistrationValidation.js';
 
 const formData = {
   'studyType': 'Observational',
@@ -34,47 +33,47 @@ describe('Dataset Registration Schema Validator', () => {
 
   it('Compiles schema and generates a validate function', () => {
     const validateFunction = compileSchema(schema);
-    expect(validateFunction).to.not.be.null;
+    cy.wrap(validateFunction).should('not.be.null');
   });
 
   it('Validates a valid instance of a schema', () => {
     const [valid, validation] = validateForm(schema, formData);
-    expect(valid).to.be.true;
-    expect(validation).to.be.empty;
+    cy.wrap(valid).should('be.true');
+    cy.wrap(validation).should('be.empty');
   });
 
   it('Invalidates an invalid instance of a schema', () => {
     const [valid, validation] = validateForm(schema, {});
-    expect(valid).to.be.false;
-    expect(validation).to.not.be.empty;
+    cy.wrap(valid).should('be.false');
+    cy.wrap(validation).should('not.be.empty');
   });
 
   it('Validates a valid date field', () => {
     const form = Object.assign({}, formData, {targetDeliveryDate: '2021-01-01', targetPublicReleaseDate: '2021-01-01'});
     const [valid, validation] = validateForm(schema, form);
-    expect(valid).to.be.true;
-    expect(validation).to.be.empty;
+    cy.wrap(valid).should('be.true');
+    cy.wrap(validation).should('be.empty');
   });
 
   it('Invalidates an invalid date field', () => {
     const form = Object.assign({}, formData, {targetDeliveryDate: '20210101', targetPublicReleaseDate: '20210101'});
     const [valid, validation] = validateForm(schema, form);
-    expect(valid).to.be.false;
-    expect(validation).to.not.be.empty;
+    cy.wrap(valid).should('be.false');
+    cy.wrap(validation).should('not.be.empty');
   });
 
   it('Validates a valid email field', () => {
     const form = Object.assign({}, formData, {dataCustodianEmail: ['user@test.com']});
     const [valid, validation] = validateForm(schema, form);
-    expect(valid).to.be.true;
-    expect(validation).to.be.empty;
+    cy.wrap(valid).should('be.true');
+    cy.wrap(validation).should('be.empty');
   });
 
   it('Invalidates an invalid email field', () => {
     const form = Object.assign({}, formData, {dataCustodianEmail: ['user']});
     const [valid, validation] = validateForm(schema, form);
-    expect(valid).to.be.false;
-    expect(validation).to.not.be.empty;
+    cy.wrap(valid).should('be.false');
+    cy.wrap(validation).should('not.be.empty');
   });
 
   it('Validates a valid uri field', () => {
@@ -87,8 +86,8 @@ describe('Dataset Registration Schema Validator', () => {
     };
     const form = Object.assign({}, formData, {consentGroups: [consentGroup]});
     const [valid, validation] = validateForm(schema, form);
-    expect(valid).to.be.true;
-    expect(validation).to.be.empty;
+    cy.wrap(valid).should('be.true');
+    cy.wrap(validation).should('be.empty');
   });
 
   it('Invalidates an invalid uri field', () => {
@@ -101,8 +100,8 @@ describe('Dataset Registration Schema Validator', () => {
     };
     const form = Object.assign({}, formData, {consentGroups: [consentGroup]});
     const [valid, validation] = validateForm(schema, form);
-    expect(valid).to.be.false;
-    expect(validation).to.not.be.empty;
+    cy.wrap(valid).should('be.false');
+    cy.wrap(validation).should('not.be.empty');
   });
 
 });

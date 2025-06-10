@@ -1,9 +1,7 @@
-/* eslint-disable no-undef */
-
 import React from 'react';
-import {mount} from 'cypress/react';
-import {SupportRequestModal} from '../../../src/components/modals/SupportRequestModal';
-import {Storage} from '../../../src/libs/storage';
+import { mount } from 'cypress/react';
+import { SupportRequestModal } from 'src/components/modals/SupportRequestModal';
+import { Storage } from 'src/libs/storage';
 
 const mockUser = {
   displayName: 'Display Name',
@@ -146,8 +144,7 @@ describe('Support Request Modal Tests', () => {
       />);
       // {force: true} is necessary here due to the surrounding div that covers the input.
       cy.get('[data-cy="supportFormAttachment"]').selectFile(['cypress/fixtures/example.json'], {force: true});
-      const container = cy.get('[data-cy="supportFormAttachmentContainer"]');
-      expect(container.contains('example.json'));
+      cy.get('[data-cy="supportFormAttachmentContainer"]').should('contain', 'example.json');
     });
 
     it('Multiple attachments displayed', () => {
@@ -159,8 +156,7 @@ describe('Support Request Modal Tests', () => {
       />);
       // {force: true} is necessary here due to the surrounding div that covers the input.
       cy.get('[data-cy="supportFormAttachment"]').selectFile(['cypress/fixtures/example.json', 'cypress/fixtures/dataset-registration-schema_v1.json'], {force: true});
-      const container = cy.get('[data-cy="supportFormAttachmentContainer"]');
-      expect(container.contains('2 files selected'));
+      cy.get('[data-cy="supportFormAttachmentContainer"]').should('contain', '2 files selected');
     });
   });
 });

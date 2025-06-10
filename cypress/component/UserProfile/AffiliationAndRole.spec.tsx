@@ -1,8 +1,8 @@
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import React from 'react';
-import {Institution} from '../../../src/libs/ajax/Institution';
-import AffiliationAndRole from '../../../src/pages/user_profile/AffiliationAndRoles';
-import {DuosUser} from "src/types/model";
+import { Institution } from 'src/libs/ajax/Institution';
+import AffiliationAndRole from 'src/pages/user_profile/AffiliationAndRoles';
+import { DuosUser } from 'src/types/model';
 
 const user: DuosUser = {
   createDate: new Date(),

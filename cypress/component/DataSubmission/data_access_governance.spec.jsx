@@ -1,12 +1,11 @@
-/* eslint-disable no-undef */
 import React from 'react';
-import { DAC } from '../../../src/libs/ajax/DAC';
-import { DataSet } from '../../../src/libs/ajax/DataSet';
-import { Institution } from '../../../src/libs/ajax/Institution';
-import { Schema } from '../../../src/libs/ajax/Schema';
-import { Study } from '../../../src/libs/ajax/Study';
-import { User } from '../../../src/libs/ajax/User';
-import DataSubmissionForm from '../../../src/pages/data_submission/DataSubmissionForm';
+import { DAC } from 'src/libs/ajax/DAC';
+import { DataSet } from 'src/libs/ajax/DataSet';
+import { Institution } from 'src/libs/ajax/Institution';
+import { Schema } from 'src/libs/ajax/Schema';
+import { Study } from 'src/libs/ajax/Study';
+import { User } from 'src/libs/ajax/User';
+import DataSubmissionForm from 'src/pages/data_submission/DataSubmissionForm';
 import { mount } from 'cypress/react';
 
 const dacs = [
@@ -61,7 +60,8 @@ describe('Data Access Governance', function () {
     cy.get('#2_consentGroupForm').should('exist');
     cy.get('#3_consentGroupForm').should('exist');
 
-  }),
+  });
+
   it('Delete consent group works', function () {
     mount(<DataSubmissionForm />);
 

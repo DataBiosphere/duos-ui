@@ -1,8 +1,6 @@
-/* eslint-disable no-undef */
-
 import React from 'react';
 import { mount } from 'cypress/react';
-import DataCustodianTable from '../../../src/pages/signing_official_console/DataCustodianTable';
+import DataCustodianTable from 'src/pages/signing_official_console/DataCustodianTable';
 
 const dpaHeaderText = 'BROAD DATA USE OVERSIGHT SYSTEM (DUOS) - DATA PROVIDER AGREEMENT';
 
@@ -15,11 +13,8 @@ describe('DataCustodianTable - Tests', function () {
       researchers={[]}
       unregisteredResearchers={[]}
     />);
-    const button = cy.contains('ADD NEW DATA SUBMITTER', {matchCase: false});
-    expect(button).to.exist;
-    button.click();
-    const dpaHeader = cy.contains(dpaHeaderText, {matchCase: false});
-    expect(dpaHeader).to.exist;
+    cy.contains('ADD NEW DATA SUBMITTER', {matchCase: false}).should('exist').click();
+    cy.contains(dpaHeaderText, {matchCase: false}).should('exist');
   });
 
   it('Issue modal displays the DPA Text', function () {
@@ -37,10 +32,7 @@ describe('DataCustodianTable - Tests', function () {
       ]}
       unregisteredResearchers={[]}
     />);
-    const button = cy.get('button').last();
-    expect(button).to.exist;
-    button.click();
-    const dpaHeader = cy.contains(dpaHeaderText);
-    expect(dpaHeader).to.exist;
+    cy.get('button').last().should('exist').click();
+    cy.contains(dpaHeaderText).should('exist');
   });
 });
