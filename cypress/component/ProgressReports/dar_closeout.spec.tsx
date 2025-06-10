@@ -1,9 +1,16 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
+import { User } from 'src/libs/ajax/User';
 
 describe('DAR Closeout - Component Tests', () => {
   let onFormChangeSpy: () => void;
+
+  const mockSigningOfficials = [
+    { userId: 1, displayName: 'John Doe', email: 'john.doe@example.com' },
+    { userId: 2, displayName: 'Jane Smith', email: 'jane.smith@example.com' },
+    { userId: 3, displayName: 'Bob Johnson', email: '' }
+  ];
 
   const mountComponent = (customState = {}) => {
     const formState = { ...customState };
@@ -18,6 +25,7 @@ describe('DAR Closeout - Component Tests', () => {
   };
 
   beforeEach(() => {
+    cy.stub(User, 'getSOsForCurrentUser').resolves(mockSigningOfficials);
     onFormChangeSpy = cy.stub().as('formChangeStub');
     mountComponent();
   });
@@ -104,5 +112,25 @@ describe('DAR Closeout - Component Tests', () => {
     cy.get('#closeoutOther').should('be.checked');
     cy.get('#closeoutOtherText').should('be.visible');
     cy.get('#closeoutOtherText').contains('My Other Text');
+  });
+
+  it('displays signing official dropdown when closeout is enabled', () => {
+    mountComponent({ closeoutYesNo: true });
+    cy.get('[data-cy=dar-closeout-details]').should('exist');
+    cy.contains('I certify that the individual listed below is my institutional Signing Official').should('be.visible');
+    cy.get('#closeoutSigningOfficial').should('exist');
+  });
+
+  it('does not display signing official dropdown when closeout is disabled', () => {
+    mountComponent({ closeoutYesNo: false });
+    cy.get('#closeoutSigningOfficial').should('not.exist');
+  });
+
+  it('populates signing official options correctly with email', () => {
+    mountComponent({ closeoutYesNo: true });
+    cy.get('#closeoutSigningOfficial').should('exist');
+    cy.get('#closeoutSigningOfficial').click();
+    cy.contains('John Doe (john.doe@example.com)').should('exist');
+    cy.contains('Jane Smith (jane.smith@example.com)').should('exist');
   });
 });

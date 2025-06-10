@@ -257,13 +257,17 @@ const calcCloseoutErrors= (formData, errors) => {
   if (formData.closeoutOther && isEmpty(formData.closeoutOtherText)) {
     errors.closeoutOtherText = requiredError
   }
-
-  if (formData.closeoutYesNo && !closeoutFields.some((field) => field)) {
-    errors.closeoutProjectCompleted = requiredError;
-    errors.closeoutRequestorMovedInstitution = requiredError;
-    errors.closeoutProjectTransferred = requiredError;
-    errors.closeoutProjectSuperseded = requiredError;
-    errors.closeoutOther = requiredError;
+  if (formData.closeoutYesNo) {
+    if (formData.closeoutSigningOfficial?.userId === undefined) {
+      errors.closeoutSigningOfficial = requiredError;
+    }
+    if (!closeoutFields.some((field) => field)) {
+      errors.closeoutProjectCompleted = requiredError;
+      errors.closeoutRequestorMovedInstitution = requiredError;
+      errors.closeoutProjectTransferred = requiredError;
+      errors.closeoutProjectSuperseded = requiredError;
+      errors.closeoutOther = requiredError;
+    }
   }
 }
 

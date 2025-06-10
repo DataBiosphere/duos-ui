@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {DataAccessRequest, Dataset, DuosUser} from 'src/types/model';
+import {DataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
@@ -70,6 +70,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         // additional state for closeout section
         ...(dar?.closeoutSupplement && {
             closeoutYesNo: (dar.closeoutSupplement.reasons.length > 0),
+            closeoutSigningOfficial: { userId: dar.closeoutSupplement.signingOfficialId } as SimplifiedDuosUser,
             closeoutOtherText: dar.closeoutSupplement.otherText,
             ...CLOSEOUT_KEYS.reduce((acc, key) => {
                 acc[key] = dar.closeoutSupplement.reasons.includes(key);
