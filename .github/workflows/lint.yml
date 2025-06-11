@@ -17,18 +17,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install dependencies
         run: npm ci
-      - name: Identify changed files
+      - name: Lint changed files
         run: |
           CHANGED_FILES=$(git diff "origin/$DESTINATION_REF" --diff-filter=d --name-only)
-          echo "CHANGED_FILES=${CHANGED_FILES}" >> $GITHUB_ENV
+          npx eslint ${CHANGED_FILES}
         env:
           DESTINATION_REF: ${{ github.event.pull_request.base.ref }}
-      - name: Lint changed files
-        run: npx eslint ${CHANGED_FILES}
-        env:
-          CHANGED_FILES: ${{ env.CHANGED_FILES }}
       - name: TypeScript check
         run: |
+          CHANGED_FILES=$(git diff "origin/$DESTINATION_REF" --diff-filter=d --name-only)
           echo "$CHANGED_FILES" | node scripts/parse-tsc-output.js
         env:
-          CHANGED_FILES: ${{ env.CHANGED_FILES }}
+          DESTINATION_REF: ${{ github.event.pull_request.base.ref }}
