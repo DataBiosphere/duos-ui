@@ -23,7 +23,7 @@ const tsc_parse_errors = (lines) => {
     }
 
     // match typescript compiler error output
-    const errorMatch = line.match(/^(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)$/);
+    const errorMatch = line.match(/^(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)$/); // NOSONAR
 
     // if no match, skip to next line
     if (!errorMatch) {
