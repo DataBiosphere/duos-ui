@@ -1,4 +1,5 @@
 import React from 'react';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface CloseoutReviewProps {
     onApprove?: () => void;
@@ -17,25 +18,12 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
             marginTop: '20px'
         }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                {/* Information Icon */}
-                <div style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    backgroundColor: '#4D72AA',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    flexShrink: 0,
-                    marginTop: '0px'
-                }}>
-                    i
-                </div>
-                
-                {/* Content */}
+                <InfoIcon style={{
+                    color: '#4D72AA',
+                    fontSize: '24px',
+                    flexShrink: 0
+                }} />
+
                 <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                     <div style={{ flex: 1 }}>
                         <p style={{
@@ -56,7 +44,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
                             If there are issues with the content in this closeout report, please contact the researcher.
                         </p>
                     </div>
-                    
+
                     <div style={{ display: 'flex', gap: '12px', marginLeft: '16px' }}>
                         <button
                             type="button"
@@ -87,7 +75,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
                         >
                             Approve closeout
                         </button>
-                        
+
                         <button
                             type="button"
                             onClick={onReturn}
