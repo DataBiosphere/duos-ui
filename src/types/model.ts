@@ -1,4 +1,3 @@
-import { DuosUserResponse } from 'src/types/responseTypes';
 import externalAccessIcon from 'src/images/external_access.svg';
 import openAccessIcon from 'src/images/open_access.svg';
 import controlledAccessIcon from 'src/images/controlled_access.svg';
@@ -117,23 +116,26 @@ export interface Institution {
 
 export interface Dataset {
   name: string;
-  datasetName: string;
+  // datasetName is deprecated, use name instead
+  datasetName?: string;
   datasetId: number;
   createUserId: number;
-  createUser: DuosUserResponse;
-  dacId: string;
-  consentId: string;
+  createUser: DuosUser;
+  createDate: Date;
+  dacId: number;
   translatedDataUse: string;
   deletable: boolean;
   properties: DatasetProperty[];
   study: Study;
-  alias: string;
+  alias: number;
   datasetIdentifier: string;
-  objectId: string;
+  objectId?: string;
   dataUse: DataUse;
-  dacApproval: boolean;
-  nihCertificationFile: FileStorageObject;
-  alternativeDataSharingPlanFile: FileStorageObject;
+  dacApproval?: boolean;
+  nihCertificationFile?: FileStorageObject;
+  updateUserId?: number;
+  updateDate?: Date;
+  indexedDate?: Date;
 }
 
 interface DacTerm {
