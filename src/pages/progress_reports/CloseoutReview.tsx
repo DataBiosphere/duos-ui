@@ -75,7 +75,13 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
                             onMouseOver={(e) => {
                                 e.currentTarget.style.backgroundColor = '#3d5a8a';
                             }}
+                            onFocus={(e) => {
+                                e.currentTarget.style.backgroundColor = '#3d5a8a';
+                            }}
                             onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = '#4D72AA';
+                            }}
+                            onBlur={(e) => {
                                 e.currentTarget.style.backgroundColor = '#4D72AA';
                             }}
                         >
@@ -99,7 +105,13 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
                             onMouseOver={(e) => {
                                 e.currentTarget.style.backgroundColor = '#f5f7fa';
                             }}
+                            onFocus={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f5f7fa';
+                            }}
                             onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'white';
+                            }}
+                            onBlur={(e) => {
                                 e.currentTarget.style.backgroundColor = 'white';
                             }}
                         >
