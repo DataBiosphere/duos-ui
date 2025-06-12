@@ -27,12 +27,12 @@ import {DAAUtils} from '../../utils/DAAUtils';
 import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
 import ReactMarkdown from 'react-markdown';
-import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
-import loadingImage from "../../images/loading-indicator.svg";
-import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
-import {ProgressReportApplication} from "./ProgressReportApplication";
-import {ScrollableTabs} from "./ScrollableTabs";
-import {validateDARFormData, validationFailed} from "src/utils/darFormUtils.js";
+import {SpinnerComponent} from '../../components/SpinnerComponent.jsx';
+import loadingImage from '../../images/loading-indicator.svg';
+import {ConditionalAccordion} from '../../components/forms/ConditionalAccordion.js';
+import {ProgressReportApplication} from './ProgressReportApplication';
+import {ScrollableTabs} from './ScrollableTabs';
+import {validateDARFormData, validationFailed} from 'src/utils/darFormUtils.js';
 import {isArray, set} from 'lodash';
 
 // Constants
