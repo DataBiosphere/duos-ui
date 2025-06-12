@@ -8,8 +8,8 @@ import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges'
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {Navigation} from "src/libs/utils";
-import {Storage} from "src/libs/storage";
+import {Navigation} from 'src/libs/utils';
+import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
@@ -58,7 +58,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         ...DMI_INCIDENT_KEYS.reduce((acc, key) => {
             acc[key] = dar.dmi?.incidents?.includes(key);
             return acc;
-        }, {}),
+        }, {} as Record<string, boolean>),
         // additional state for closeout section
         closeoutYesNo: (dar.closeoutSupplement?.reasons.length > 0),
         ...(dar?.closeoutSupplement && {

@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication';
 import { DataAccessRequest, Dataset, DuosUser } from 'src/types/model';
-import { History, Location } from 'history';
+import { History, Location, Action } from 'history';
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History;
@@ -24,8 +24,7 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     // Create mock history with stubs inside beforeEach
     mockHistory = {
-      length: 1,
-      action: 'POP',
+      action: Action.Pop,
       location: {
         pathname: '/test',
         search: '',
@@ -36,12 +35,12 @@ describe('ProgressReportApplication - Component Tests', () => {
       push: cy.stub(),
       replace: cy.stub(),
       go: cy.stub(),
-      goBack: cy.stub(),
-      goForward: cy.stub(),
+      back: cy.stub(),
+      forward: cy.stub(),
       block: cy.stub(),
       listen: cy.stub(),
       createHref: cy.stub()
-    } as any;
+    };
   });
 
   const location: Location = {
@@ -79,20 +78,24 @@ describe('ProgressReportApplication - Component Tests', () => {
       datasetId: 1,
       name: 'Test Dataset',
       dacApproval: true,
-      dataUse: { generalUse: true }
-    } as any
+      dataUse: { title: 'test' }
+    }
   ];
 
   const baseDar: DataAccessRequest = {
+    userId: 1,
+    projectTitle: 'Test Project',
+    draft: false,
+    datasetIds: [1],
     referenceId: 'DAR-123',
     collectionId: 1,
     elections: {},
     darCode: 'DAR-123',
-    createDate: new Date(),
-    sortDate: new Date(),
-    submissionDate: new Date(),
-    updateDate: new Date()
-  } as any;
+    createDate: '2023-10-01T00:00:00Z',
+    sortDate: '2023-10-01T00:00:00Z',
+    submissionDate: '2023-10-01T00:00:00Z',
+    updateDate: '2023-10-01T00:00:00Z'
+  };
 
   const mountComponent = (dar: Partial<DataAccessRequest> = {}, readOnly = true) => {
     const fullDar = { ...baseDar, ...dar } as DataAccessRequest;
