@@ -172,8 +172,7 @@ describe('ERA Commons Component', function () {
     cy.stub(AuthenticateNIH, 'getECMProviderAuthUrl').throws(new Error('error'));
     cy.get('[data-cy=era-commons-authenticate-link]').should('exist');
     cy.get('[data-cy=era-commons-authenticate-link]').click();
-    // WHEN DT-1800 is reverted, enable this test.
-    //cy.get('[data-cy=era-commons-error-span]').should('be.visible');
+    cy.get('[data-cy=era-commons-error-span]').should('be.visible');
   });
 
 });

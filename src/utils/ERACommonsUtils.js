@@ -1,11 +1,8 @@
 import {Buffer} from 'buffer';
-//import EnvironmentUtils, {envGroups} from '../utils/EnvironmentUtils.js';
+import EnvironmentUtils, {envGroups} from 'src/utils/EnvironmentUtils.js';
 
 export const rasEnabled = () => {
-  // when re-enabling this, don't forget to turn back on the test in era_commons_spec.jsx.
-  // search DT-1800 to find it.
-  //return EnvironmentUtils.checkEnv(envGroups.DEV);
-  return false;
+  return EnvironmentUtils.checkEnv(envGroups.DEV);
 }
 
 export const nihAccountLabel = () => {
