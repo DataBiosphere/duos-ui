@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {DataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
+import {DataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser, UserRole} from 'src/types/model';
 import {History, Location} from 'history';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
@@ -139,6 +139,19 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
     }
 
+    // Check if the DAR is a closeout review
+    // TODO: modify this logic for DAC chair when backend supports it
+    const isCloseoutReview = () => {
+        const user = Storage.getCurrentUser();
+        const isSigningOfficial = user.roles.some((role: UserRole) => role.name === 'SigningOfficial');
+        const isDacChair = user.roles.some((role: UserRole) => role.name === 'Chairperson');
+        const isSameUserId = user.userId === dar.closeoutSupplement?.signingOfficialId;
+        const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined;
+        return readOnlyMode &&
+            (isSigningOfficial && isSameUserId && !isCloseoutApproved) ||
+            (isDacChair && isCloseoutApproved);
+    }
+
     function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
         return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
     }
@@ -211,16 +224,16 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     validation={formValidation.darErrors}
                 />
             </div>
-            <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+            {isCloseoutReview() && <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <CloseoutReview
                     onApprove={() => {
                         console.log('DAR approved');
                     }}
                     onReturn={() => {
-                        console.log('DAR returned for issues');
+                        Navigation.console(Storage.getCurrentUser(), history);
                     }}
                 />
-            </div>
+            </div>}
             <br/><br/>
             {!readOnlyMode && <div>
                 <SubmitProgressReport
