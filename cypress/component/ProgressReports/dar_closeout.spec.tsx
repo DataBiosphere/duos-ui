@@ -1,24 +1,51 @@
 import React from 'react';
-import { mount } from 'cypress/react';
+import {mount} from 'cypress/react';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
-import { User } from 'src/libs/ajax/User';
+import {User} from 'src/libs/ajax/User';
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {Dataset, DataUse, FileStorageObject, Study} from 'src/types/model';
+import {DuosUserResponse} from 'src/types/responseTypes';
 
 describe('DAR Closeout - Component Tests', () => {
   let onFormChangeSpy: () => void;
+  let validationChangeSpy: () => void;
 
   const mockSigningOfficials = [
-    { userId: 1, displayName: 'John Doe', email: 'john.doe@example.com' },
-    { userId: 2, displayName: 'Jane Smith', email: 'jane.smith@example.com' },
-    { userId: 3, displayName: 'Bob Johnson', email: '' }
+    {userId: 1, displayName: 'John Doe', email: 'john.doe@example.com'},
+    {userId: 2, displayName: 'Jane Smith', email: 'jane.smith@example.com'},
+    {userId: 3, displayName: 'Bob Johnson', email: ''}
   ];
 
-  const mountComponent = (customState = {}) => {
-    const formState = { ...customState };
+  const mockDataset: Dataset = {
+    name: 'Test Dataset',
+    datasetName: 'Test Dataset',
+    datasetId: 1,
+    createUserId: 1,
+    createUser: {} as DuosUserResponse,
+    dacId: 'id',
+    consentId: 'id',
+    translatedDataUse: '',
+    deletable: false,
+    properties: [],
+    study: {} as Study,
+    alias: '5',
+    datasetIdentifier: 'DUOS-12345',
+    objectId: '12345',
+    dataUse: {} as DataUse,
+    dacApproval: true,
+    nihCertificationFile: {} as FileStorageObject,
+    alternativeDataSharingPlanFile: {} as FileStorageObject
+  }
 
+  const mountComponent = (customState = {}) => {
+    const formState = {...customState} as FormState;
     const props = {
       readOnly: false,
+      allDatasets: [mockDataset],
       formState,
-      onFormChange: onFormChangeSpy
+      onFormChange: onFormChangeSpy,
+      onValidationChange: validationChangeSpy,
+      validation: {},
     };
 
     return mount(<DarCloseout {...props} />);
@@ -27,6 +54,7 @@ describe('DAR Closeout - Component Tests', () => {
   beforeEach(() => {
     cy.stub(User, 'getSOsForCurrentUser').resolves(mockSigningOfficials);
     onFormChangeSpy = cy.stub().as('formChangeStub');
+    validationChangeSpy = cy.stub();
     mountComponent();
   });
 
@@ -40,31 +68,32 @@ describe('DAR Closeout - Component Tests', () => {
 
   it('handles closeout radio buttons', () => {
     cy.get('#closeoutYesNo_yes').click()
-    cy.get('@formChangeStub').should('have.been.calledWith', { closeoutYesNo: true });
+    cy.get('@formChangeStub').should('have.been.calledWith', {closeoutYesNo: true});
 
     cy.get('#closeoutYesNo_no').click()
     cy.get('@formChangeStub').should('have.been.calledWith', {
       closeoutOther: false,
       closeoutOtherText: '',
-      closeoutProjectCompleted : false,
+      closeoutProjectCompleted: false,
       closeoutProjectSuperseded: false,
       closeoutProjectTransferred: false,
       closeoutRequestorMovedInstitution: false,
-      closeoutYesNo: false });
+      closeoutYesNo: false
+    });
   });
 
   it('shows closeout options when "Yes" is selected', () => {
-    mountComponent({ closeoutYesNo: true });
+    mountComponent({closeoutYesNo: true});
     cy.get('[data-cy=dar-closeout-details]').should('exist');
   });
 
   it('hides closeout options when "No" is selected', () => {
-    mountComponent({ closeoutYesNo: false });
+    mountComponent({closeoutYesNo: false});
     cy.get('[data-cy=dar-closeout-details]').should('not.exist');
   });
 
   it('displays all closeout reason checkboxes when "Yes" is selected', () => {
-    mountComponent({ closeoutYesNo: true });
+    mountComponent({closeoutYesNo: true});
     cy.get('[data-cy=dar-closeout-details]').should('exist');
     cy.contains('The Requestor has completed his/her project').should('exist');
     cy.contains('The Requestor has moved institutions').should('exist');
@@ -74,7 +103,7 @@ describe('DAR Closeout - Component Tests', () => {
   });
 
   it('allows checking multiple closeout reasons', () => {
-    mountComponent({ closeoutYesNo: true });
+    mountComponent({closeoutYesNo: true});
     cy.get('#closeoutProjectCompleted').click();
 
     // Verify selected checkbox option is selected
@@ -97,14 +126,15 @@ describe('DAR Closeout - Component Tests', () => {
   });
 
   it('allows the component to be opened with the correct state', () => {
-    mountComponent( {
+    mountComponent({
       closeoutOther: true,
       closeoutOtherText: 'My Other Text',
-      closeoutProjectCompleted : true,
+      closeoutProjectCompleted: true,
       closeoutProjectSuperseded: false,
       closeoutProjectTransferred: false,
       closeoutRequestorMovedInstitution: false,
-      closeoutYesNo: true });
+      closeoutYesNo: true
+    });
     cy.get('#closeoutProjectCompleted').should('be.checked');
     cy.get('#closeoutRequestorMovedInstitution').should('not.be.checked');
     cy.get('#closeoutProjectTransferred').should('not.be.checked');
@@ -115,22 +145,29 @@ describe('DAR Closeout - Component Tests', () => {
   });
 
   it('displays signing official dropdown when closeout is enabled', () => {
-    mountComponent({ closeoutYesNo: true });
+    mountComponent({closeoutYesNo: true});
     cy.get('[data-cy=dar-closeout-details]').should('exist');
     cy.contains('I certify that the individual listed below is my institutional Signing Official').should('be.visible');
     cy.get('#closeoutSigningOfficial').should('exist');
   });
 
   it('does not display signing official dropdown when closeout is disabled', () => {
-    mountComponent({ closeoutYesNo: false });
+    mountComponent({closeoutYesNo: false});
     cy.get('#closeoutSigningOfficial').should('not.exist');
   });
 
   it('populates signing official options correctly with email', () => {
-    mountComponent({ closeoutYesNo: true });
+    mountComponent({closeoutYesNo: true});
     cy.get('#closeoutSigningOfficial').should('exist');
     cy.get('#closeoutSigningOfficial').click();
     cy.contains('John Doe (john.doe@example.com)').should('exist');
     cy.contains('Jane Smith (jane.smith@example.com)').should('exist');
+  });
+
+  it('displays datasets correctly', () => {
+    mountComponent({closeoutYesNo: true});
+    cy.get('[data-cy=dar-closeout-details]').should('exist');
+    cy.get('[data-cy=dar-closeout-details]').contains(mockDataset.datasetIdentifier);
+    cy.get('[data-cy=dar-closeout-details]').contains(mockDataset.name);
   });
 });
