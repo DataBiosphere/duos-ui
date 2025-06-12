@@ -59,10 +59,17 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             acc[key] = dar.dmi?.incidents?.includes(key);
             return acc;
         }, {}),
-
         // additional state for closeout section
-        closeoutYesNo: !!dar.closeoutSupplement
-    };
+        closeoutYesNo: (dar.closeoutSupplement?.reasons.length > 0),
+        ...(dar?.closeoutSupplement && {
+            closeoutSigningOfficial: { userId: dar.closeoutSupplement.signingOfficialId } as SimplifiedDuosUser,
+            closeoutOtherText: dar.closeoutSupplement.otherText,
+            ...CLOSEOUT_KEYS.reduce((acc, key) => {
+                acc[key] = dar.closeoutSupplement.reasons.includes(key);
+                return acc;
+            },{} as Record<string, boolean>)
+        }),
+    } as FormState;
 
     const [formState, setFormState] = useState<FormState>(initialState);
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
