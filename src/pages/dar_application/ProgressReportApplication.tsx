@@ -7,6 +7,7 @@ import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
+import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
 import {Navigation} from 'src/libs/utils';
 import {Storage} from 'src/libs/storage';
@@ -208,6 +209,16 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     formState={formState}
                     onFormChange={onFormChange}
                     validation={formValidation.darErrors}
+                />
+            </div>
+            <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <CloseoutReview
+                    onApprove={() => {
+                        console.log('DAR approved');
+                    }}
+                    onReturn={() => {
+                        console.log('DAR returned for issues');
+                    }}
                 />
             </div>
             <br/><br/>
