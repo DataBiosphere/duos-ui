@@ -572,6 +572,7 @@ const DataAccessRequestApplication = (props) => {
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
                     <ProgressReportApplication
                       readOnlyMode={false}
+                      allDatasets={datasets}
                       datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)}
                       dar={reverseOrderedDARs[0]}
                       history={history}
@@ -595,6 +596,7 @@ const DataAccessRequestApplication = (props) => {
                                 defaultExpanded={index === 0}>
                               <ProgressReportApplication
                                 readOnlyMode={true}
+                                allDatasets={datasets}
                                 datasets={filterForProgressReport(datasets, dar.datasetIds)}
                                 dar={dar?.data}
                                 location={undefined}

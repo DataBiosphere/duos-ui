@@ -8,8 +8,8 @@ import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges'
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {Navigation} from "src/libs/utils";
-import {Storage} from "src/libs/storage";
+import {Navigation} from 'src/libs/utils';
+import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
@@ -18,6 +18,7 @@ import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
 
 type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
+  readonly allDatasets: Dataset[];
   readonly datasets: Dataset[];
   readonly readOnlyMode: boolean;
   readonly history: History;
@@ -25,7 +26,7 @@ type ProgressReportApplicationProps = {
   readonly researcher: DuosUser;
 };
 
-export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, allDatasets, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
         dmiCombination:false,
@@ -176,6 +177,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DarCloseout
                     readOnly={readOnlyMode}
+                    allDatasets={allDatasets}
                     formState={formState}
                     onFormChange={onFormChange}
                     validation={formValidation.darErrors}
