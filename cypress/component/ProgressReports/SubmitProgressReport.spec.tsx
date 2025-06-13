@@ -1,10 +1,8 @@
 import React from 'react';
-import {mount} from 'cypress/react';
+import { mount } from 'cypress/react';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {StackdriverReporter} from 'src/libs/stackdriverReporter';
-import 'src/index.css';
-import 'src/styles/buttons.css';
-
+import { StackdriverReporter } from 'src/libs/stackdriverReporter';
+import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
 describe('SubmitProgressReport tests', () => {
   beforeEach(() => {
@@ -16,7 +14,7 @@ describe('SubmitProgressReport tests', () => {
   it('Should show a submit and cancel button', () => {
     mount(
         <SubmitProgressReport
-            progressReport={{}}
+            formState={{} as FormState}
             parentReferenceId="1"
             onSuccess={() => {
             }}
@@ -35,12 +33,13 @@ describe('SubmitProgressReport tests', () => {
     }).as('submitProgressReport');
     mount(
         <SubmitProgressReport
+            formState={{} as FormState}
             parentReferenceId="1"
             onSuccess={() => {
             }}
             onCancel={() => {
             }}
-            formState={{}}/>
+        />
     );
     cy.get('[data-cy=pr-submit-button]').click();
     cy.wait('@submitProgressReport').then((interception) => {
@@ -62,7 +61,7 @@ describe('SubmitProgressReport tests', () => {
 
     mount(
         <SubmitProgressReport
-            formState={{}}
+            formState={{} as FormState}
             parentReferenceId="1"
             onSuccess={functionSpy.successHandler}
             onCancel={() => {
@@ -83,7 +82,7 @@ describe('SubmitProgressReport tests', () => {
     cy.spy(functionSpy, 'cancelHandler').as('cancelHandler');
     mount(
         <SubmitProgressReport
-            formState={{}}
+            formState={{} as FormState}
             parentReferenceId="1"
             onSuccess={() => {
             }}
@@ -103,7 +102,7 @@ describe('SubmitProgressReport tests', () => {
     }).as('submitProgressReport');
     mount(
         <SubmitProgressReport
-            formState={{}}
+            formState={{} as FormState}
             parentReferenceId="1"
             onSuccess={() => {
             }}

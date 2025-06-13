@@ -17,6 +17,9 @@ export interface FormState {
     publications: PublicationOrPresentation[];
     presentationsYesNo: boolean;
     presentations: PublicationOrPresentation[];
+    dsAcknowledgement: boolean;
+    gsoAcknowledgement: boolean;
+    pubAcknowledgement: boolean;
     labCollaborators: Collaborator[];
     internalCollaborators: Collaborator[];
     externalCollaborators: Collaborator[];
