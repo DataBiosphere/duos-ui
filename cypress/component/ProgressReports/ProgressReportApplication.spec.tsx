@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication';
-import { DataAccessRequest, Dataset, DuosUser } from 'src/types/model';
+import { DataAccessRequest, Dataset, DuosUser, FileStorageObject } from 'src/types/model';
 import { History, Location, Action } from 'history';
 
 describe('ProgressReportApplication - Component Tests', () => {
@@ -73,6 +73,16 @@ describe('ProgressReportApplication - Component Tests', () => {
     userId: 1
   };
 
+  const fso: FileStorageObject = {
+    fileStorageObjectId: 1,
+    entityId: 'id',
+    fileName: 'name',
+    category: 'irbCollaborationLetter',
+    mediaType: 'image/pdf',
+    createUserId: 3,
+    createDate: new Date().getDate()
+  }
+
   const mockDatasets: Dataset[] = [
     {
       datasetId: 1,
@@ -86,7 +96,51 @@ describe('ProgressReportApplication - Component Tests', () => {
         type: 'object',
         anyOf: [],
         properties: {}
-      }
+      },
+      datasetName: '',
+      createUserId: 0,
+      createUser: {
+        userId: 0,
+        displayName: 'Test Create User',
+        email: 'createuser@test.com',
+        createDate: new Date('2023-10-01T00:00:00Z'),
+        emailPreference: false,
+        roles: [],
+        userStatusInfo: {
+          enabled: true,
+          adminEnabled: false,
+          userEmail: '',
+          userSubjectId: ''
+        }
+      },
+      dacId: '',
+      consentId: '',
+      translatedDataUse: '',
+      deletable: false,
+      properties: [],
+      alias: '',
+      datasetIdentifier: '',
+      objectId: '',
+      nihCertificationFile: fso,
+      alternativeDataSharingPlanFile: fso,
+      study: {
+        description: 'Test Dataset Submission',
+        studyId: 39,
+        piName: 'Test Dataset Submission',
+        publicVisibility: true,
+        dataTypes: [
+          'CITE-seq'
+        ],
+        name: '',
+        datasetIds: [],
+        datasets: [],
+        properties: [],
+        alternativeDataSharingPlan: fso,
+        createDate: '',
+        createUserId: 0,
+        updateDate: '',
+        updateUserId: 0
+      },
     }
   ];
 
@@ -117,7 +171,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       researcher
     };
 
-    return mount(<ProgressReportApplication {...props} />);
+    return mount(<ProgressReportApplication {...props} /> as any);
   };
 
   it('renders the component without errors', () => {
