@@ -128,7 +128,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         validation={validation?.publicationsYesNo}
                         onValidationChange={onValidationChange}
                     />
-                    {formState.publicationsYesNo && <PublicationList
+                    {(formState.publicationsYesNo || (readOnly && publications.length > 0)) && <PublicationList
                         publications={publications}
                         publicationText='Publication'
                         columnsToShow={['title', 'date']}
@@ -152,7 +152,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         validation={validation?.presentationsYesNo}
                         onValidationChange={onValidationChange}
                     />
-                    {formState.presentationsYesNo && <PublicationList
+                    {(formState.presentationsYesNo || (readOnly && presentations.length > 0)) && <PublicationList
                         publications={presentations}
                         publicationText='Presentation'
                         columnsToShow={['title', 'date']}

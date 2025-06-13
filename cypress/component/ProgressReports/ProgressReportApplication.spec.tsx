@@ -279,6 +279,33 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the publications "Yes" radio button is checked (true state)
     cy.get('#publicationsYesNo_yes').should('be.checked');
     cy.get('#publicationsYesNo_no').should('not.be.checked');
+    
+    // Check that publications are actually displayed in the DOM
+    cy.contains('Publication 1').should('be.visible');
+    cy.contains('Publication 2').should('be.visible');
+  });
+
+  it('displays publications in read-only mode even if radio button state is inconsistent', () => {
+    // Test scenario where publications exist but radio might not be set correctly
+    const darWithPublications = {
+      publications: [
+        {
+          title: 'Test Publication',
+          pubmedId: '11111',
+          date: '2023-03-01',
+          authors: 'Test Author',
+          bibliographicCitation: 'Test Citation',
+          datasetCitation: 'Test Dataset Citation',
+          citation: true
+        }
+      ]
+    };
+
+    mountComponent(darWithPublications, true);
+
+    // Publications should be visible regardless of radio button state
+    cy.contains('Test Publication').should('be.visible');
+    cy.contains('Test Author').should('be.visible');
   });
 
   it('defaults presentationsYesNo to false when dar.presentations is undefined', () => {
@@ -328,6 +355,10 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the presentations "Yes" radio button is checked (true state)
     cy.get('#presentationsYesNo_yes').should('be.checked');
     cy.get('#presentationsYesNo_no').should('not.be.checked');
+    
+    // Check that presentations are actually displayed in the DOM
+    cy.contains('Presentation 1').should('be.visible');
+    cy.contains('Presentation 2').should('be.visible');
   });
 
   it('defaults dmiYesNo to false when dar.dmi is undefined', () => {
