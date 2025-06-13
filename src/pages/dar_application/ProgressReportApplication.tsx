@@ -18,7 +18,6 @@ import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
 
 type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
-  readonly allDatasets: Dataset[];
   readonly datasets: Dataset[];
   readonly readOnlyMode: boolean;
   readonly history: History;
@@ -26,7 +25,7 @@ type ProgressReportApplicationProps = {
   readonly researcher: DuosUser;
 };
 
-export const ProgressReportApplication = ({ dar, allDatasets, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
         dmiCombination:false,
@@ -116,10 +115,15 @@ export const ProgressReportApplication = ({ dar, allDatasets, datasets, readOnly
         onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
     }
 
+    function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
+        return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
+    }
+
     // required because the datasets state changes during component mount
     useEffect(() => {
         const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : [];
-        const approvedDatasets = datasets.filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
+        const approvedDatasets = filterForProgressReport(datasets, dar.datasetIds)
+            .filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
         onFormChange({ datasets: approvedDatasets });
         onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
@@ -177,7 +181,7 @@ export const ProgressReportApplication = ({ dar, allDatasets, datasets, readOnly
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DarCloseout
                     readOnly={readOnlyMode}
-                    allDatasets={allDatasets}
+                    allDatasets={datasets}
                     formState={formState}
                     onFormChange={onFormChange}
                     validation={formValidation.darErrors}

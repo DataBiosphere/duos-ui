@@ -513,10 +513,6 @@ const DataAccessRequestApplication = (props) => {
     />;
   }
 
-  function filterForProgressReport(datasets, datasetIds) {
-    return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
-  }
-
   return (
     <div>
       <div className={props.existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.existingDarsReadOnlyMode ? 'white' : '' }}>
@@ -572,8 +568,7 @@ const DataAccessRequestApplication = (props) => {
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
                     <ProgressReportApplication
                       readOnlyMode={false}
-                      allDatasets={datasets}
-                      datasets={filterForProgressReport(datasets, reverseOrderedDARs[0].datasetIds)}
+                      datasets={datasets}
                       dar={reverseOrderedDARs[0]}
                       history={history}
                       location={location}
@@ -596,8 +591,7 @@ const DataAccessRequestApplication = (props) => {
                                 defaultExpanded={index === 0}>
                               <ProgressReportApplication
                                 readOnlyMode={true}
-                                allDatasets={datasets}
-                                datasets={filterForProgressReport(datasets, dar.datasetIds)}
+                                datasets={datasets}
                                 dar={dar?.data}
                                 location={undefined}
                                 researcher={researcher}
