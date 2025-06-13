@@ -116,7 +116,7 @@ export interface Institution {
 
 export interface Dataset {
   name: string;
-  // datasetName is deprecated, use name instead
+  // @deprecated datasetName is deprecated, use name instead
   datasetName?: string;
   datasetId: number;
   createUserId: number;
