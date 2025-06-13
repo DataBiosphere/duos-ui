@@ -3,8 +3,7 @@ import {mount} from 'cypress/react';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import {User} from 'src/libs/ajax/User';
 import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
-import {Dataset, DataUse, FileStorageObject, Study} from 'src/types/model';
-import {DuosUserResponse} from 'src/types/responseTypes';
+import {Dataset, DataUse, DuosUser, FileStorageObject, Study} from 'src/types/model';
 
 describe('DAR Closeout - Component Tests', () => {
   let onFormChangeSpy: () => void;
@@ -21,20 +20,19 @@ describe('DAR Closeout - Component Tests', () => {
     datasetName: 'Test Dataset',
     datasetId: 1,
     createUserId: 1,
-    createUser: {} as DuosUserResponse,
-    dacId: 'id',
-    consentId: 'id',
+    createUser: {} as DuosUser,
+    createDate: new Date(),
+    dacId: 1,
     translatedDataUse: '',
     deletable: false,
     properties: [],
     study: {} as Study,
-    alias: '5',
+    alias: 1,
     datasetIdentifier: 'DUOS-12345',
     objectId: '12345',
     dataUse: {} as DataUse,
     dacApproval: true,
-    nihCertificationFile: {} as FileStorageObject,
-    alternativeDataSharingPlanFile: {} as FileStorageObject
+    nihCertificationFile: {} as FileStorageObject
   }
 
   const mountComponent = (customState = {}) => {
