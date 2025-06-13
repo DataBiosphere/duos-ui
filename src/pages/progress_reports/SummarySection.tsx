@@ -97,7 +97,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         validation={validation?.intellectualPropertyYesNo}
                         onValidationChange={onValidationChange}
                     />
-                    {formState.intellectualPropertyYesNo && <FormField
+                    {(formState.intellectualPropertyYesNo || (readOnly && formState.intellectualPropertySummary)) && <FormField
                         id={FormStateKey.INTELLECTUAL_PROPERTY_SUMMARY}
                         type={FormFieldTypes.TEXTAREA}
                         description='Please describe the intellectual property resulting from analysis of the requested dataset(s).'

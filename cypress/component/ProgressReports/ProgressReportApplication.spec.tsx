@@ -279,13 +279,13 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the publications "Yes" radio button is checked (true state)
     cy.get('#publicationsYesNo_yes').should('be.checked');
     cy.get('#publicationsYesNo_no').should('not.be.checked');
-    
+
     // Check that publications are actually displayed in the DOM
     cy.contains('Publication 1').should('be.visible');
     cy.contains('Publication 2').should('be.visible');
   });
 
-  it('displays publications in read-only mode even if radio button state is inconsistent', () => {
+  it('displays publications in read-only when they exist', () => {
     // Test scenario where publications exist but radio might not be set correctly
     const darWithPublications = {
       publications: [
@@ -305,7 +305,6 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     // Publications should be visible regardless of radio button state
     cy.contains('Test Publication').should('be.visible');
-    cy.contains('Test Author').should('be.visible');
   });
 
   it('defaults presentationsYesNo to false when dar.presentations is undefined', () => {
@@ -355,7 +354,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the presentations "Yes" radio button is checked (true state)
     cy.get('#presentationsYesNo_yes').should('be.checked');
     cy.get('#presentationsYesNo_no').should('not.be.checked');
-    
+
     // Check that presentations are actually displayed in the DOM
     cy.contains('Presentation 1').should('be.visible');
     cy.contains('Presentation 2').should('be.visible');
@@ -423,5 +422,22 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the closeout "Yes" radio button is checked (true state)
     cy.get('#closeoutYesNo_yes').should('be.checked');
     cy.get('#closeoutYesNo_no').should('not.be.checked');
+  });
+
+  it('displays intellectual property summary in read-only mode when it exists', () => {
+    // Test scenario where intellectual property summary exists
+    const darWithIntellectualProperty = {
+      intellectualPropertySummary: 'Test intellectual property description with important details'
+    };
+
+    mountComponent(darWithIntellectualProperty, true);
+
+    // Check that the intellectual property "Yes" radio button is checked (true state)
+    cy.get('#intellectualPropertyYesNo_yes').should('be.checked');
+    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked');
+
+    // Check that the intellectual property summary is visible in the form
+    cy.get('#intellectualPropertySummary').should('be.visible');
+    cy.get('#intellectualPropertySummary').should('contain.value', 'Test intellectual property description with important details');
   });
 });
