@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { mount } from 'cypress/react';
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication';
 import { DataAccessRequest, Dataset, DuosUser, FileStorageObject } from 'src/types/model';
@@ -171,7 +171,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       researcher
     };
 
-    return mount(<ProgressReportApplication {...props} /> as any);
+    return mount(<ProgressReportApplication {...props} /> as ReactNode);
   };
 
   it('renders the component without errors', () => {
