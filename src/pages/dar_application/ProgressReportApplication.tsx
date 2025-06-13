@@ -181,7 +181,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DarCloseout
                     readOnly={readOnlyMode}
-                    allDatasets={datasets}
+                    datasets={datasets}
                     formState={formState}
                     onFormChange={onFormChange}
                     validation={formValidation.darErrors}

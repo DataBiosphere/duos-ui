@@ -41,7 +41,7 @@ describe('DAR Closeout - Component Tests', () => {
     const formState = {...customState} as FormState;
     const props = {
       readOnly: false,
-      allDatasets: [mockDataset],
+      datasets: [mockDataset],
       formState,
       onFormChange: onFormChangeSpy,
       onValidationChange: validationChangeSpy,
