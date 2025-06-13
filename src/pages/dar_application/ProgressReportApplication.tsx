@@ -43,31 +43,62 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         closeoutOther: false,
         publications: [],
         presentations: [],
+
         // additional state for summary section
-        intellectualPropertyYesNo: !!dar.intellectualPropertySummary,
-        publicationsYesNo: (dar.publications?.length > 0),
-        presentationsYesNo: (dar.presentations?.length > 0),
+        ...(readOnlyMode
+          ? {
+            // In read-only mode, check "No" when undefined
+            intellectualPropertyYesNo: !!dar.intellectualPropertySummary,
+            publicationsYesNo: (dar.publications?.length > 0),
+            presentationsYesNo: (dar.presentations?.length > 0),
+          }
+          : {
+            // When not in read-only mode, don't check anything when undefined
+            ...(dar?.intellectualPropertySummary && {
+              intellectualPropertyYesNo: !!dar.intellectualPropertySummary
+            }),
+            ...(dar?.publications && {
+              publicationsYesNo: (dar.publications.length > 0)
+            }),
+            ...(dar?.presentations && {
+              presentationsYesNo: (dar.presentations.length > 0)
+            })
+          }
+        ),
         // additional state for datasets section populated by useEffect
         datasets: [],
         datasetIds: [],
         selectedDatasets: [],
         // additional state for dmi section
-        dmiYesNo: (dar.dmi?.incidents?.length > 0),
-        dmiDescription: dar.dmi?.description,
-        // populate DMI incident multiselect based on whether the option appears in list of incidents
-        ...DMI_INCIDENT_KEYS.reduce((acc, key) => {
-            acc[key] = dar.dmi?.incidents?.includes(key);
-            return acc;
-        }, {} as Record<string, boolean>),
+        ...(dar?.dmi?.incidents && {
+            dmiYesNo: (dar.dmi.incidents.length > 0),
+            dmiDescription: dar.dmi.description,
+            // populate DMI incident multiselect based on whether the option appears in list of incidents
+            ...DMI_INCIDENT_KEYS.reduce((acc, key) => {
+                acc[key] = dar.dmi.incidents.includes(key);
+                return acc;
+            }, {} as Record<string, boolean>)
+        }),
+
+        // Set undefined to "No" only in read-only mode
+        ...(readOnlyMode && {
+          dmiYesNo: (dar.dmi?.incidents?.length > 0),
+        }),
+
         // additional state for closeout section
-        closeoutYesNo: (dar.closeoutSupplement?.reasons.length > 0),
         ...(dar?.closeoutSupplement && {
+            closeoutYesNo: (dar.closeoutSupplement.reasons.length > 0),
             closeoutSigningOfficial: { userId: dar.closeoutSupplement.signingOfficialId } as SimplifiedDuosUser,
             closeoutOtherText: dar.closeoutSupplement.otherText,
             ...CLOSEOUT_KEYS.reduce((acc, key) => {
                 acc[key] = dar.closeoutSupplement.reasons.includes(key);
                 return acc;
             },{} as Record<string, boolean>)
+        }),
+
+        // Set undefined to "No" only in read-only mode
+        ...(readOnlyMode && {
+          closeoutYesNo: (dar.closeoutSupplement?.reasons.length > 0),
         }),
     } as FormState;
 

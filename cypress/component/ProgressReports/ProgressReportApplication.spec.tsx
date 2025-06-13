@@ -78,11 +78,19 @@ describe('ProgressReportApplication - Component Tests', () => {
       datasetId: 1,
       name: 'Test Dataset',
       dacApproval: true,
-      dataUse: { title: 'test' }
+      dataUse: {
+        $id: 'test-data-use',
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        title: 'test',
+        version: 1,
+        type: 'object',
+        anyOf: [],
+        properties: {}
+      }
     }
   ];
 
-  const baseDar: DataAccessRequest = {
+  const baseDar: Partial<DataAccessRequest> = {
     userId: 1,
     projectTitle: 'Test Project',
     draft: false,
@@ -114,9 +122,7 @@ describe('ProgressReportApplication - Component Tests', () => {
 
   it('renders the component without errors', () => {
     // Mount component with basic DAR
-    const basicDar = {
-      intellectualPropertySummary: undefined
-    };
+    const basicDar = {};
 
     mountComponent(basicDar, true);
 
@@ -126,9 +132,7 @@ describe('ProgressReportApplication - Component Tests', () => {
 
   it('defaults intellectualPropertyYesNo to false when dar.intellectualPropertySummary is undefined', () => {
     // Mount component with DAR that has undefined intellectualPropertySummary
-    const darWithoutIntellectualProperty = {
-      intellectualPropertySummary: undefined
-    };
+    const darWithoutIntellectualProperty = {};
 
     mountComponent(darWithoutIntellectualProperty, true);
 
@@ -150,11 +154,20 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('#intellectualPropertyYesNo_no').should('not.be.checked');
   });
 
+  it('in non-read-only mode, has neither intellectualPropertyYesNo radio button checked when dar.intellectualPropertySummary is undefined', () => {
+    // Mount component with DAR that has undefined intellectualPropertySummary
+    const darWithoutIntellectualProperty = {};
+
+    mountComponent(darWithoutIntellectualProperty, false);
+
+    // Check that neither radio button is checked when the value is undefined
+    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked');
+    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked');
+  });
+
   it('defaults publicationsYesNo to false when dar.publications is undefined or empty', () => {
     // Test with undefined publications
-    const darWithoutPublications = {
-      publications: undefined
-    };
+    const darWithoutPublications = {};
 
     mountComponent(darWithoutPublications, true);
 
@@ -179,7 +192,26 @@ describe('ProgressReportApplication - Component Tests', () => {
   it('sets publicationsYesNo to true when dar.publications has items', () => {
     // Test with publications array containing items
     const darWithPublications = {
-      publications: ['Publication 1', 'Publication 2']
+      publications: [
+        {
+          title: 'Publication 1',
+          pubmedId: '12345',
+          date: '2023-01-01',
+          authors: 'Author 1',
+          bibliographicCitation: 'Citation 1',
+          datasetCitation: 'Dataset Citation 1',
+          citation: true
+        },
+        {
+          title: 'Publication 2',
+          pubmedId: '67890',
+          date: '2023-02-01',
+          authors: 'Author 2',
+          bibliographicCitation: 'Citation 2',
+          datasetCitation: 'Dataset Citation 2',
+          citation: false
+        }
+      ]
     };
 
     mountComponent(darWithPublications, true);
@@ -211,7 +243,24 @@ describe('ProgressReportApplication - Component Tests', () => {
 
   it('sets presentationsYesNo to true when dar.presentations has items', () => {
     const darWithPresentations = {
-      presentations: ['Presentation 1', 'Presentation 2']
+      presentations: [
+        {
+          title: 'Presentation 1',
+          link: 'http://example.com/presentation1',
+          date: '2023-01-01',
+          authors: 'Author 1',
+          datasetCitation: 'Dataset Citation 1',
+          citation: true
+        },
+        {
+          title: 'Presentation 2',
+          link: 'http://example.com/presentation2',
+          date: '2023-02-01',
+          authors: 'Author 2',
+          datasetCitation: 'Dataset Citation 2',
+          citation: false
+        }
+      ]
     };
 
     mountComponent(darWithPresentations, true);
