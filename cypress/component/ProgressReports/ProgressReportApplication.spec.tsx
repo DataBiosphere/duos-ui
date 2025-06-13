@@ -111,18 +111,23 @@ describe('ProgressReportApplication - Component Tests', () => {
           adminEnabled: false,
           userEmail: '',
           userSubjectId: ''
-        }
+        },
+        isAdmin: false,
+        isAlumni: false,
+        isChairPerson: false,
+        isDataSubmitter: false,
+        isMember: false,
+        isResearcher: false,
+        isSigningOfficial: false
       },
-      dacId: '',
-      consentId: '',
+      dacId: 2,
       translatedDataUse: '',
       deletable: false,
       properties: [],
-      alias: '',
+      alias: 2,
       datasetIdentifier: '',
       objectId: '',
       nihCertificationFile: fso,
-      alternativeDataSharingPlanFile: fso,
       study: {
         description: 'Test Dataset Submission',
         studyId: 39,
@@ -141,6 +146,7 @@ describe('ProgressReportApplication - Component Tests', () => {
         updateDate: '',
         updateUserId: 0
       },
+      createDate: new Date('2023-10-01T00:00:00Z'),
     }
   ];
 
