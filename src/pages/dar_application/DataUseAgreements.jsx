@@ -41,7 +41,12 @@ export default function DataUseAgreements(props) {
       </div>
 
       <div>
-        By submitting this DAR you agree to all terms in the agreement(s) below, and you attest you are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{fontWeight: 600}}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students.</div>
+        By submitting this DAR you agree to all terms in the agreement(s) below, and you attest you are a permanent
+          employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior
+          researcher. This does <span style={{fontWeight: 600}}>not</span> include lab technicians or trainees, e.g.,
+          post-docs or graduate students. All DARs submitted and approved in DUOS are valid for 12 months. Researchers
+          may submit a Progress Report to extend their access if necessary.
+      </div>
 
       <div className='flex flex-row' style={{ justifyContent: 'left', marginTop: '3rem' }}>
         <div>
