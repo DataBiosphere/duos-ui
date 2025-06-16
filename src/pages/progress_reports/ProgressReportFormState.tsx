@@ -1,6 +1,5 @@
-import {
-  Collaborator, Dataset, SimplifiedDuosUser, Publication, Presentation
-} from 'src/types/model';
+import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
+import {Collaborator, Dataset, SimplifiedDuosUser} from 'src/types/model';
 
 export type ValidFormState = {
   [K in keyof FormState]: {
@@ -15,9 +14,9 @@ export interface FormState {
     intellectualPropertySummary: string;
     datasetIds: number[];
     publicationsYesNo: boolean;
-    publications: Publication[];
+    publications: PublicationOrPresentation[];
     presentationsYesNo: boolean;
-    presentations: Presentation[];
+    presentations: PublicationOrPresentation[];
     labCollaborators: Collaborator[];
     internalCollaborators: Collaborator[];
     externalCollaborators: Collaborator[];
