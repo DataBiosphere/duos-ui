@@ -8,8 +8,8 @@ import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges'
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {Navigation} from "src/libs/utils";
-import {Storage} from "src/libs/storage";
+import {Navigation} from 'src/libs/utils';
+import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
@@ -115,10 +115,15 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
     }
 
+    function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
+        return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
+    }
+
     // required because the datasets state changes during component mount
     useEffect(() => {
         const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : [];
-        const approvedDatasets = datasets.filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
+        const approvedDatasets = filterForProgressReport(datasets, dar.datasetIds)
+            .filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
         onFormChange({ datasets: approvedDatasets });
         onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
@@ -176,6 +181,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DarCloseout
                     readOnly={readOnlyMode}
+                    datasets={datasets}
                     formState={formState}
                     onFormChange={onFormChange}
                     validation={formValidation.darErrors}
