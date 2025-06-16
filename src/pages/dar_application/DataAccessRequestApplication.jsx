@@ -31,6 +31,7 @@ import {ProgressReportApplication} from 'src/pages/dar_application/ProgressRepor
 import {ScrollableTabs} from 'src/pages/dar_application/ScrollableTabs';
 import {validateDARFormData, validationFailed} from 'src/utils/darFormUtils.js';
 import {isArray, set} from 'lodash';
+import {Countries} from 'src/libs/ajax/Countries.js';
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info';
