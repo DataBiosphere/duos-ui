@@ -155,21 +155,17 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const onApproveReview = async () => {
         const user = Storage.getCurrentUser();
         const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined;
-        if (user.isSigningOfficial && !isCloseoutApproved) {
-            await DAR.approveCloseout(dar.referenceId).then(() => {
-                Notifications.showSuccess({ text: 'Closeout review approved successfully.' });
-            }).catch((e) => {
-                const message = e.response.data.message;
-                Notifications.showError({ text: 'Error approving closeout review: ' + message });
-            });
-        } else {
-            const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId;
-            await User.acceptAcknowledgments(acknowledgement).then(() => {
-                Notifications.showSuccess({ text: 'Closeout review approved successfully.' });
-            }).catch((e) => {
-                const message = e.response.data.message;
-                Notifications.showError({ text: 'Error approving closeout review: ' + message });
-            });
+        try {
+            if (user.isSigningOfficial && !isCloseoutApproved) {
+                await DAR.approveCloseout(dar.referenceId);
+            } else {
+                const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId;
+                await User.acceptAcknowledgments(acknowledgement);
+            }
+            Notifications.showSuccess({ text: 'Closeout review approved successfully.' });
+        } catch (e) {
+            const message = e.response.data.message;
+            Notifications.showError({ text: 'Error approving closeout review: ' + message });
         }
     }
 
