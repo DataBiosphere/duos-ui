@@ -18,6 +18,7 @@ import {FormValidationState} from 'src/pages/dar_application/FormValidationState
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
 import { DAR } from 'src/libs/ajax/DAR';
 import { User } from 'src/libs/ajax/User';
+import { AxiosError } from 'axios';
 
 type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
@@ -164,7 +165,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             }
             Notifications.showSuccess({ text: 'Closeout review approved successfully.' });
         } catch (e) {
-            const message = e.response.data.message;
+            const err = e as AxiosError<Record<string, string>>;
+            const message = err.response?.data.message;
             Notifications.showError({ text: 'Error approving closeout review: ' + message });
         }
     }
