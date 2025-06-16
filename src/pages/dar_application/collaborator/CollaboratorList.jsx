@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import CollaboratorForm from './CollaboratorForm';
 import CollaboratorRow from './CollaboratorRow';
-import { useState, useEffect} from 'react';
 import './collaborator.css';
 import { isNil } from 'lodash';
 
 export default function CollaboratorList(props) {
-  const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval, setCompleted, validation, onValidationChange} = props;
+  const {formFieldChange, collaboratorLabel, collaboratorKey, countriesOfOperation, showApproval, setCompleted, validation, onValidationChange} = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);
   const [editState, setEditState] = useState([]);
@@ -22,9 +21,9 @@ export default function CollaboratorList(props) {
   };
 
   const deleteCollaborator = (index) => {
-    let deleteCopy = deleteBoolArray.slice();
-    let collaboratorCopy = collaborators.slice();
-    let editCopy = editState.slice();
+    const deleteCopy = deleteBoolArray.slice();
+    const collaboratorCopy = collaborators.slice();
+    const editCopy = editState.slice();
 
     deleteCopy.splice(index, 1);
     collaboratorCopy.splice(index, 1);
@@ -40,7 +39,7 @@ export default function CollaboratorList(props) {
   }, [setCompleted, showNewForm, editState]);
 
   const saveCollaborator = (index, newCollaborator) => {
-    let newCollaborators = collaborators.slice();
+    const newCollaborators = collaborators.slice();
     newCollaborators[index] = newCollaborator;
     setCollaborators(newCollaborators);
     const deleteBoolCopy = [...deleteBoolArray, false];
@@ -48,13 +47,13 @@ export default function CollaboratorList(props) {
   };
 
   const updateEditState = (index, bool) => {
-    let newEditState = [...editState];
+    const newEditState = [...editState];
     newEditState[index] = bool;
     setEditState(newEditState);
   };
 
   const toggleDeleteBool = (index, bool) => {
-    let deleteCopy = [...deleteBoolArray];
+    const deleteCopy = [...deleteBoolArray];
     deleteCopy[index] = bool;
     setDeleteBoolArray(deleteCopy);
   };
@@ -85,6 +84,7 @@ export default function CollaboratorList(props) {
           validation={!isNil(validation) ? validation[index] || {} : {}}
           onCollaboratorValidationChange={onCollaboratorValidationChange}
           deleteMode={deleteBoolArray[index]}
+          countriesOfOperation={countriesOfOperation}
         />
       ))}
     </div>
@@ -120,6 +120,7 @@ export default function CollaboratorList(props) {
             editMode={true}
             validation={!isNil(validation) ? validation[collaborators.length] || {} : {}}
             onCollaboratorValidationChange={onCollaboratorValidationChange}
+            countriesOfOperation={countriesOfOperation}
           />
         )}
       </div>

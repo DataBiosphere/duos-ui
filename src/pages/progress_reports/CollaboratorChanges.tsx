@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import {FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import CollaboratorList from 'src/components/collaborator_list/CollaboratorList';
-import {Collaborator} from "src/types/model";
-import {FormFieldTitle} from "src/components/forms/forms";
+import {Collaborator} from 'src/types/model';
+import {FormFieldTitle} from 'src/components/forms/forms';
 
 interface CollaboratorProps {
     readonly readOnly: boolean;
     formState: FormState;
     onFormChange: (newState: Partial<FormState>) => void;
+    readonly countriesOfOperation: string[];
 }
 
 export default function CollaboratorChanges(props: CollaboratorProps): React.JSX.Element {
-    const { readOnly, formState, onFormChange } = props;
+    const { readOnly, formState, onFormChange, countriesOfOperation } = props;
 
     const [labCollaborators, setLabCollaborators] = useState<Collaborator[]>(formState.labCollaborators || []);
     const [internalCollaborators, setInternalCollaborators] = useState<Collaborator[]>(formState.internalCollaborators || []);
@@ -52,6 +53,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         onCollaboratorChange={onInternalLabStaffChange}
                         disabled={readOnly}
                         showApproverStatus={true}
+                        countriesOfOperation={countriesOfOperation}
                     />
                 </div>
                 <div className='progress-report-row'>
@@ -66,6 +68,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         columnsToShow={['name', 'title']}
                         onCollaboratorChange={onInternalCollaboratorsChange}
                         disabled={readOnly}
+                        countriesOfOperation={countriesOfOperation}
                     />
                 </div>
                 <div className='progress-report-row'>
@@ -80,6 +83,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         columnsToShow={['name', 'title']}
                         onCollaboratorChange={onExternalCollaboratorsChange}
                         disabled={readOnly}
+                        countriesOfOperation={countriesOfOperation}
                     />
                 </div>
             </div>

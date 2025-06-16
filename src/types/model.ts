@@ -435,6 +435,7 @@ export interface Publication {
 
 export interface Collaborator {
   approverStatus: boolean;
+  countryOfOperation: string;
   email: string;
   eraCommonsId: string;
   name: string;

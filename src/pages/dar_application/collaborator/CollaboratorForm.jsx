@@ -1,4 +1,8 @@
-import {FormField, FormValidators} from 'src/components/forms/forms.jsx';
+import {
+  FormField,
+  FormFieldTypes,
+  FormValidators,
+} from 'src/components/forms/forms.jsx';
 import React, {useEffect, useState} from 'react';
 import {isEmpty, isNil} from 'lodash/fp';
 import {v4 as uuidV4} from 'uuid';
@@ -12,6 +16,7 @@ export default function CollaboratorForm(props) {
     index,
     collaborator,
     collaboratorKey,
+    countriesOfOperation,
     validation,
     onCollaboratorValidationChange
   } = props;
@@ -24,6 +29,7 @@ export default function CollaboratorForm(props) {
   const [uuid, setUuid] = useState('');
   const [showDeleteCollaboratorModal, setShowDeleteCollaboratorModal] = useState(false);
   const accountLabel = nihAccountLabel();
+  const [countryOfOperation, setCountryOfOperation] = useState('');
 
   const onValidationChange = ({key, validation}) => {
     onCollaboratorValidationChange({index, key, validation});
@@ -37,13 +43,14 @@ export default function CollaboratorForm(props) {
       setTitle(collaborator.title);
       setApproverStatus(collaborator.approverStatus);
       setUuid(collaborator.uuid);
+      setCountryOfOperation(collaborator.countryOfOperation);
     } else {
       setUuid(uuidV4());
     }
   }, [collaborator]);
 
   const saveUpdate = () => {
-    props.saveCollaborator({name, eraCommonsId, title, email, approverStatus, uuid});
+    props.saveCollaborator({name, eraCommonsId, title, email, approverStatus, uuid, countryOfOperation});
     props.updateEditState(false);
   };
 
@@ -102,6 +109,19 @@ export default function CollaboratorForm(props) {
             validation={validation.email}
             onValidationChange={onValidationChange}
             onChange={({value}) => setEmail(value)}
+          />
+          <FormField
+              id={`${index}_collaboratorCountryOfOperation`}
+              name='countryOfOperation'
+              title={`${props.collaboratorLabel} Country of Operation`}
+              defaultValue={countryOfOperation === '' ? null : countryOfOperation}
+              placeholder='Country of Operation'
+              validators={[FormValidators.REQUIRED]}
+              type={FormFieldTypes.SELECT}
+              selectOptions={countriesOfOperation}
+              optionsAreString={true}
+              onValidationChange={onValidationChange}
+              onChange={({value})=> setCountryOfOperation(value)}
           />
         </div>
         {props.showApproval && (

@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
-import { FormField, FormValidators } from '../forms/forms';
-import {Collaborator} from "src/types/model";
-import {ValidationError} from "src/pages/dar_application/FormValidationState";
-import {computeCollaboratorErrors, validationFailed} from "src/utils/darFormUtils";
-import {nihAccountLabel} from "src/utils/ERACommonsUtils";
-import ApproverStatus from "src/pages/dar_application/collaborator/ApproverStatus";
+import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
+import {Collaborator} from 'src/types/model';
+import {ValidationError} from 'src/pages/dar_application/FormValidationState';
+import {computeCollaboratorErrors, validationFailed} from 'src/utils/darFormUtils';
+import {nihAccountLabel} from 'src/utils/ERACommonsUtils';
+import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus';
 
 interface FormFieldChange {
     key: string;
@@ -17,8 +17,9 @@ interface CollaboratorAddEditProps {
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
     readonly closeAction: () => void;
-    readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
+    readonly onCollaboratorChange: (collaborators: (Collaborator | undefined)[]) => void;
     readonly showApproverStatus?: boolean;
+    readonly countriesOfOperation: string[];
 }
 
 interface Validation {
@@ -27,10 +28,11 @@ interface Validation {
     title?: ValidationError;
     email?: ValidationError;
     approverStatus?: ValidationError;
+    countryOfOperation?: ValidationError;
 }
 
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
-    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false } = props;
+    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false, countriesOfOperation } = props;
     const [newCollaborator, setNewCollaborator] = useState(collaborator);
     const [validation, setValidation] = useState<Validation>({});
     const accountLabel = nihAccountLabel();
@@ -84,6 +86,18 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
                         onChange={onChange}
                         validation={validation.email}
+                    />
+                    <FormField
+                        id='countryOfOperation'
+                        title={`${collaboratorText} Country of Operation`}
+                        type={FormFieldTypes.SELECT}
+                        optionsAreString={true}
+                        selectOptions={countriesOfOperation}
+                        defaultValue={collaborator?.countryOfOperation}
+                        placeholder='Country of Operation'
+                        validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+                        onChange={onChange}
+                        validation={validation.countryOfOperation}
                     />
                     {showApproverStatus && (
                     <ApproverStatus

@@ -8,8 +8,8 @@ import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges'
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {Navigation} from "src/libs/utils";
-import {Storage} from "src/libs/storage";
+import {Navigation} from 'src/libs/utils';
+import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
@@ -23,9 +23,10 @@ type ProgressReportApplicationProps = {
   readonly history: History;
   readonly location?: Location;
   readonly researcher: DuosUser;
+  readonly countriesOfOperation: string[]
 };
 
-export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
         dmiCombination:false,
@@ -163,7 +164,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                 />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <CollaboratorChanges readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange}/>
+                <CollaboratorChanges readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} countriesOfOperation={countriesOfOperation}/>
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DataManagementIncident
