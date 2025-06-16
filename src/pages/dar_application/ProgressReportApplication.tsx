@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {DataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser, UserRole} from 'src/types/model';
+import {DataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
@@ -143,13 +143,11 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     // TODO: modify this logic for DAC chair when backend supports it
     const isCloseoutReview = () => {
         const user = Storage.getCurrentUser();
-        const isSigningOfficial = user.roles.some((role: UserRole) => role.name === 'SigningOfficial');
-        const isDacChair = user.roles.some((role: UserRole) => role.name === 'Chairperson');
         const isSameUserId = user.userId === dar.closeoutSupplement?.signingOfficialId;
         const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined;
         return readOnlyMode &&
-            (isSigningOfficial && isSameUserId && !isCloseoutApproved) ||
-            (isDacChair && isCloseoutApproved);
+            (user.isSigningOfficial && isSameUserId && !isCloseoutApproved) ||
+            (user.isChairPerson && isCloseoutApproved);
     }
 
     function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
