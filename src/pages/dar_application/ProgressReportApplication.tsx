@@ -9,13 +9,14 @@ import DataManagementIncident from 'src/pages/progress_reports/DataManagementInc
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {Navigation} from 'src/libs/utils';
+import {Navigation, Notifications} from 'src/libs/utils';
 import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
 import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
+import { DAR } from 'src/libs/ajax/DAR';
 
 type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
@@ -150,6 +151,20 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             (user.isChairPerson && isCloseoutApproved);
     }
 
+    const onApproveReview = async () => {
+        const user = Storage.getCurrentUser();
+        if (user.isSigningOfficial) {
+            await DAR.approveCloseout(dar.referenceId).then(() => {
+                Notifications.showSuccess({ text: 'Closeout review approved successfully.' });
+            }).catch((e) => {
+                const message = e.response.data.message;
+                Notifications.showError({ text: 'Error approving closeout review: ' + message });
+            });
+        } else {
+
+        }
+    }
+
     function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
         return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
     }
@@ -224,9 +239,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             </div>
             {isCloseoutReview() && <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <CloseoutReview
-                    onApprove={() => {
-                        console.log('DAR approved');
-                    }}
+                    onApprove={onApproveReview}
                     onReturn={() => {
                         Navigation.console(Storage.getCurrentUser(), history);
                     }}

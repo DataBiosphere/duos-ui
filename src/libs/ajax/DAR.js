@@ -98,5 +98,10 @@ export const DAR = {
       const url = `${await getApiUrl()}/api/dar/v2/${darId}/${fileType}`;
       return axios.post(url, formData, authOpts);
     }
+  },
+
+  approveCloseout: async (referenceId) => {
+    const url = `${await getApiUrl()}/api/dar/${referenceId}/approveCloseout`;
+    return axios.put(url, {}, Config.authOpts());
   }
 };
