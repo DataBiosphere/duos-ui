@@ -44,16 +44,28 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         closeoutOther: false,
         publications: [],
         presentations: [],
+
         // additional state for summary section
-        ...(dar?.intellectualPropertySummary && {
-            intellectualPropertyYesNo: !!dar.intellectualPropertySummary
-        }),
-        ...(dar?.publications && {
-            publicationsYesNo: (dar.publications.length > 0)
-        }),
-        ...(dar?.presentations && {
-            presentationsYesNo: (dar.presentations.length > 0)
-        }),
+        ...(readOnlyMode
+          ? {
+            // In read-only mode, check "No" when undefined
+            intellectualPropertyYesNo: !!dar.intellectualPropertySummary,
+            publicationsYesNo: (dar.publications?.length > 0),
+            presentationsYesNo: (dar.presentations?.length > 0),
+          }
+          : {
+            // When not in read-only mode, don't check anything when undefined
+            ...(dar?.intellectualPropertySummary && {
+              intellectualPropertyYesNo: !!dar.intellectualPropertySummary
+            }),
+            ...(dar?.publications && {
+              publicationsYesNo: (dar.publications.length > 0)
+            }),
+            ...(dar?.presentations && {
+              presentationsYesNo: (dar.presentations.length > 0)
+            })
+          }
+        ),
         // additional state for datasets section populated by useEffect
         datasets: [],
         datasetIds: [],
@@ -68,6 +80,12 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                 return acc;
             }, {} as Record<string, boolean>)
         }),
+
+        // Set undefined to "No" only in read-only mode
+        ...(readOnlyMode && {
+          dmiYesNo: (dar.dmi?.incidents?.length > 0),
+        }),
+
         // additional state for closeout section
         ...(dar?.closeoutSupplement && {
             closeoutYesNo: (dar.closeoutSupplement.reasons.length > 0),
@@ -77,6 +95,11 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                 acc[key] = dar.closeoutSupplement.reasons.includes(key);
                 return acc;
             },{} as Record<string, boolean>)
+        }),
+
+        // Set undefined to "No" only in read-only mode
+        ...(readOnlyMode && {
+          closeoutYesNo: (dar.closeoutSupplement?.reasons.length > 0),
         }),
     } as FormState;
 
@@ -116,10 +139,15 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
     }
 
+    function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
+        return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
+    }
+
     // required because the datasets state changes during component mount
     useEffect(() => {
         const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : [];
-        const approvedDatasets = datasets.filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
+        const approvedDatasets = filterForProgressReport(datasets, dar.datasetIds)
+            .filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
         onFormChange({ datasets: approvedDatasets });
         onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
@@ -177,6 +205,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DarCloseout
                     readOnly={readOnlyMode}
+                    datasets={datasets}
                     formState={formState}
                     onFormChange={onFormChange}
                     validation={formValidation.darErrors}
