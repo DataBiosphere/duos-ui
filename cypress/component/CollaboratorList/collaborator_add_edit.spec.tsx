@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorAddEdit from 'src/components/collaborator_list/CollaboratorAddEdit';
 import { Collaborator } from 'src/types/model';
-import {Countries} from "src/libs/ajax/Countries";
+import {Countries} from 'src/libs/ajax/Countries';
 
 describe('CollaboratorAddEdit - Component Tests', () => {
   const mockCollaborator: Collaborator = {

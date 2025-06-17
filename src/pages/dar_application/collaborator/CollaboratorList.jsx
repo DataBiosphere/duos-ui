@@ -103,7 +103,7 @@ export default function CollaboratorList(props) {
             ...(props.disabled ? { cursor: 'not-allowed' } : {}),
           }}
           onClick={() => {
-            !props.disabled && setShowNewForm(true);
+            if (!props.disabled) {setShowNewForm(true);}
           }}
           disabled={props.disabled}
         >

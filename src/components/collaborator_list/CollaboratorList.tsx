@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorRow from './CollaboratorRow';
 import {Collaborator} from 'src/types/model';
-import {Countries} from "src/libs/ajax/Countries";
+import {Countries} from 'src/libs/ajax/Countries';
 
 interface CollaboratorListProps {
     collaborators: Collaborator[];
