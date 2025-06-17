@@ -173,7 +173,7 @@ export default function ResearcherInfo(props) {
             id='piCountryOfOperation'
             placeholder='Country of Operation'
             disabled={readOnlyMode}
-            defaultValue={(formData.piCountryOfOperation || formData.piCountryOfOperation === '') ? null : formData.piCountryOfOperation}
+            defaultValue={formData.piCountryOfOperation}
             type={FormFieldTypes.SELECT}
             validators={[FormValidators.REQUIRED]}
             validation={validation.piCountryOfOperation}

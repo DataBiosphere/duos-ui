@@ -90,7 +90,7 @@ const DataAccessRequestApplication = (props) => {
     researcher: '',
     piName: '',
     piEmail: '',
-    piCountryOfOperation: '',
+    piCountryOfOperation: Countries.DEFAULT_COUNTRY,
     projectTitle: '',
     profileName: '',
     pubmedId: '',
