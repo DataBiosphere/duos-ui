@@ -81,7 +81,6 @@ export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=tru
     errors.title = requiredError;
   }
 
-  console.error(collaborator);
   if (isStringEmpty(collaborator?.countryOfOperation)) {
     errors.countryOfOperation = requiredError;
   }
