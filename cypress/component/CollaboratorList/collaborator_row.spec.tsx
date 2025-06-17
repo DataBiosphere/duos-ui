@@ -10,6 +10,7 @@ describe('CollaboratorRow - Component Tests', () => {
         email: 'john.doe@example.com',
         uuid: '123e4567-e89b-12d3-a456-426614174000',
         eraCommonsId: 'jdoe123',
+        countryOfOperation: 'United States of America (the)',
         approverStatus: true
     };
 
@@ -24,6 +25,7 @@ describe('CollaboratorRow - Component Tests', () => {
         collaboratorText: 'Collaborator',
         collaborators: mockCollaborators,
         columnsToShow: columnsToShow,
+        countriesOfOperation: ['United States of America (the)', 'Canada', 'France'],
         editAction: () => { },
         deleteAction: () => { },
         closeAction: () => { },
@@ -52,6 +54,8 @@ describe('CollaboratorRow - Component Tests', () => {
         cy.get('#name').should('have.value', mockCollaborator.name);
         cy.get('#title').should('have.value', mockCollaborator.title);
         cy.get('#email').should('have.value', mockCollaborator.email);
+        cy.get('#countryOfOperation').should('contain', mockCollaborator.countryOfOperation);
+        cy.get('#countryOfOperation').should('not.contain', 'France');
 
         cy.contains('Save').should('be.visible');
         cy.contains('Cancel').should('be.visible');

@@ -2,6 +2,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorAddEdit from 'src/components/collaborator_list/CollaboratorAddEdit';
 import { Collaborator } from 'src/types/model';
+import {Countries} from "src/libs/ajax/Countries";
 
 describe('CollaboratorAddEdit - Component Tests', () => {
   const mockCollaborator: Collaborator = {
@@ -10,6 +11,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     email: 'john.doe@example.com',
     uuid: '123e4567-e89b-12d3-a456-426614174000',
     eraCommonsId: 'jdoe123',
+    countryOfOperation: 'United States of America (the)',
     approverStatus: false
   };
 
@@ -17,9 +19,11 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
   const defaultProps = {
     id: -1,
+    collaborator: {countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator,
     collaboratorText: 'Collaborator',
     collaborators: mockCollaborators,
     closeAction: () => { },
+    countriesOfOperation:['France', 'Canada', 'United States of America (the)'],
     onCollaboratorChange: () => { }
   };
 

@@ -81,6 +81,11 @@ export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=tru
     errors.title = requiredError;
   }
 
+  console.error(collaborator);
+  if (isStringEmpty(collaborator?.countryOfOperation)) {
+    errors.countryOfOperation = requiredError;
+  }
+
   if (isStringEmpty(collaborator?.email)) {
     errors.email = requiredError;
   } else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
@@ -114,12 +119,24 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
     errors.piName = requiredError;
   }
 
+  if (isStringEmpty(formData.piEmail)) {
+    errors.piEmail = requiredError;
+  }
+
+  if (isStringEmpty(formData.piCountryOfOperation)) {
+    errors.piCountryOfOperation = requiredError;
+  }
+
   if (isStringEmpty(formData.signingOfficial)) {
     errors.signingOfficial = requiredError;
   }
 
   if (isStringEmpty(formData.itDirector)) {
     errors.itDirector = requiredError;
+  }
+
+  if (isStringEmpty(formData.itDirectorEmail)) {
+    errors.itDirectorEmail = requiredError;
   }
 
   if (!labCollaboratorsCompleted) {

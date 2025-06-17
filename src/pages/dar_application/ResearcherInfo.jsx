@@ -168,13 +168,16 @@ export default function ResearcherInfo(props) {
               defaultValue={formData.piEmail}
             />
           </div>
-          <label className="control-label" id="principal-investigator-email">Principal Investigator Country of Operation*</label>
+          <label className="control-label" id="principal-investigator-country-of-operation">Principal Investigator Country of Operation*</label>
           <FormField
             id='piCountryOfOperation'
+            placeholder='Country of Operation'
             disabled={readOnlyMode}
-            defaultValue={formData.piCountryOfOperation}
+            defaultValue={(formData.piCountryOfOperation || formData.piCountryOfOperation === '') ? null : formData.piCountryOfOperation}
             type={FormFieldTypes.SELECT}
             validators={[FormValidators.REQUIRED]}
+            validation={validation.piCountryOfOperation}
+            onValidationChange={onValidationChange}
             selectOptions={countriesOfOperation}
             optionsAreString={true}
             onChange={({key, value}) => formFieldChange({key, value})}

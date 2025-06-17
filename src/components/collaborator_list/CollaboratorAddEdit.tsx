@@ -50,7 +50,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
         <div className='form-group row no-margin'>
             <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card' key={`collaborator-item-id`}>
                 <div className='row'>
-                    <h2>{collaborator === undefined ? `New ${collaboratorText} Information` : `Edit ${collaborator.name} Information`}</h2>
+                    <h2>{collaborator?.name === undefined ? `New ${collaboratorText} Information` : `Edit ${collaborator.name} Information`}</h2>
                     <FormField
                         id='name'
                         title={`${collaboratorText} Name`}
@@ -95,7 +95,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         selectOptions={countriesOfOperation}
                         defaultValue={collaborator?.countryOfOperation}
                         placeholder='Country of Operation'
-                        validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+                        validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
                         validation={validation.countryOfOperation}
                     />
@@ -126,7 +126,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         }}
                         disabled={validationFailed(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}))}
                     >
-                        {collaborator === undefined ? 'Add' : 'Save'}
+                        {collaborator?.name === undefined ? 'Add' : 'Save'}
                     </button>
                     {/* cancel button */}
                     <div

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorRow from './CollaboratorRow';
 import {Collaborator} from 'src/types/model';
+import {Countries} from "src/libs/ajax/Countries";
 
 interface CollaboratorListProps {
     collaborators: Collaborator[];
@@ -52,6 +53,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         id={-1}
                         collaboratorText={collaboratorText}
                         collaborators={collaborators}
+                        collaborator={{countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator}
                         closeAction={() => setShowAddEdit(false)}
                         onCollaboratorChange={onCollaboratorChange}
                         showApproverStatus={showApproverStatus}
@@ -69,6 +71,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         collaboratorText={collaboratorText}
                         collaborators={collaborators}
                         columnsToShow={columnsToShow}
+                        countriesOfOperation={countriesOfOperation}
                         editAction={() => toggleEditState(index)}
                         deleteAction={() => { handleDeleteCollaborator(index); }}
                         closeAction={() => { toggleEditState(index); setShowAddEdit(false); }}

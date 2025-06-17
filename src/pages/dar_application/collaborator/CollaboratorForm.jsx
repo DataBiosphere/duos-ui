@@ -10,6 +10,7 @@ import {computeCollaboratorErrors} from 'src/utils/darFormUtils.js';
 import DeleteCollaboratorModal from './DeleteCollaboratorModal';
 import {nihAccountLabel} from 'src/utils/ERACommonsUtils.js';
 import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus.js';
+import {Countries} from 'src/libs/ajax/Countries.js';
 
 export default function CollaboratorForm(props) {
   const {
@@ -46,6 +47,7 @@ export default function CollaboratorForm(props) {
       setCountryOfOperation(collaborator.countryOfOperation);
     } else {
       setUuid(uuidV4());
+      setCountryOfOperation(Countries.DEFAULT_COUNTRY);
     }
   }, [collaborator]);
 
@@ -120,6 +122,7 @@ export default function CollaboratorForm(props) {
               type={FormFieldTypes.SELECT}
               selectOptions={countriesOfOperation}
               optionsAreString={true}
+              validation={validation.countryOfOperation}
               onValidationChange={onValidationChange}
               onChange={({value})=> setCountryOfOperation(value)}
           />
@@ -161,7 +164,7 @@ export default function CollaboratorForm(props) {
             className='collaborator-form-add-save-button f-left btn'
             role='button'
             onClick={() => {
-              const newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
+              const newCollaborator = {name, eraCommonsId, title, email, approverStatus, countryOfOperation, uuid};
               const errors = computeCollaboratorErrors({
                 collaborator: newCollaborator,
                 needsApproverStatus: props.showApproval
