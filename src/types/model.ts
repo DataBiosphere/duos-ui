@@ -400,6 +400,7 @@ export interface DataAccessRequest {
   dmi: DataManagementIncident;
   researchPlans: string;
   closeoutSupplement: Closeout;
+  data: object;
   parentId?: number;
 }
 
