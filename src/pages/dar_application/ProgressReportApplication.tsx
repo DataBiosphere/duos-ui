@@ -41,8 +41,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         closeoutProjectTransferred: false,
         closeoutProjectSuperseded: false,
         closeoutOther: false,
-        publications: dar.publications,
-        presentations: dar.presentations,
 
         // additional state for summary section
         ...(readOnlyMode
