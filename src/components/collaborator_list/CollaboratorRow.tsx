@@ -13,7 +13,7 @@ interface CollaboratorRowProps {
     readonly editAction: () => void;
     readonly deleteAction: () => void;
     readonly closeAction: () => void;
-    readonly onCollaboratorChange: (collaborators: (Collaborator | undefined)[]) => void;
+    readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly countriesOfOperation: string[];
     readonly disabled: boolean;
 }

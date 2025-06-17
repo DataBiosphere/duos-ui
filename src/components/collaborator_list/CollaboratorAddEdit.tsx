@@ -17,7 +17,7 @@ interface CollaboratorAddEditProps {
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
     readonly closeAction: () => void;
-    readonly onCollaboratorChange: (collaborators: (Collaborator | undefined)[]) => void;
+    readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly showApproverStatus?: boolean;
     readonly countriesOfOperation: string[];
 }
@@ -33,7 +33,7 @@ interface Validation {
 
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
     const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false, countriesOfOperation } = props;
-    const [newCollaborator, setNewCollaborator] = useState(collaborator);
+    const [newCollaborator, setNewCollaborator] = useState<Collaborator | undefined>(collaborator);
     const [validation, setValidation] = useState<Validation>({});
     const accountLabel = nihAccountLabel();
 
@@ -114,7 +114,11 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         type='button'
                         onClick={() => {
                             if (id < 0) {
-                                onCollaboratorChange([...collaborators, newCollaborator]);
+                                if (newCollaborator) {
+                                    onCollaboratorChange([...collaborators, newCollaborator]);
+                                } else {
+                                    onCollaboratorChange([...collaborators])
+                                }
                                 setNewCollaborator(undefined);
                             } else if (newCollaborator !== undefined) {
                                 const collaboratorsCopy = [...collaborators];

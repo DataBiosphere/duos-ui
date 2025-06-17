@@ -8,7 +8,7 @@ interface CollaboratorListProps {
     collaborators: Collaborator[];
     readonly collaboratorText: string;
     readonly columnsToShow?: string[];
-    readonly onCollaboratorChange: (collaborators: (Collaborator | undefined)[]) => void;
+    readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly disabled?: boolean;
     readonly showApproverStatus?: boolean;
     readonly countriesOfOperation: string[];
