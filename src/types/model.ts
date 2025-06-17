@@ -402,6 +402,8 @@ export interface DataAccessRequest {
   researchPlans: string;
   closeoutSupplement: Closeout;
   parentId?: number;
+  closeoutSigningOfficialApprovedDate: number;
+  closeoutSigningOfficialApprovedUserId: number;
 }
 
 export interface DataManagementIncident {

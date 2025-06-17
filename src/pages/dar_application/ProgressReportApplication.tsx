@@ -7,14 +7,18 @@ import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident';
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
+import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
-import {Navigation} from 'src/libs/utils';
+import {Navigation, Notifications} from 'src/libs/utils';
 import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
 import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
 import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
+import { DAR } from 'src/libs/ajax/DAR';
+import { User } from 'src/libs/ajax/User';
+import { AxiosError } from 'axios';
 
 type ProgressReportApplicationProps = {
   readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
@@ -136,6 +140,35 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
     }
 
+    // Check if the DAR is a closeout review
+    // TODO: modify this logic for DAC chair when backend supports it
+    const isCloseoutReview = () => {
+        const user = Storage.getCurrentUser();
+        const isSameUserId = user.userId === dar.closeoutSupplement?.signingOfficialId;
+        const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined;
+        return readOnlyMode &&
+            (user.isSigningOfficial && isSameUserId && !isCloseoutApproved) ||
+            (user.isChairPerson && isCloseoutApproved);
+    }
+
+    const onApproveReview = async () => {
+        const user = Storage.getCurrentUser();
+        const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined;
+        try {
+            if (user.isSigningOfficial && !isCloseoutApproved) {
+                await DAR.approveCloseout(dar.referenceId);
+            } else {
+                const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId;
+                await User.acceptAcknowledgments(acknowledgement);
+            }
+            Notifications.showSuccess({ text: 'Closeout review approved successfully.' });
+        } catch (e) {
+            const err = e as AxiosError<Record<string, string>>;
+            const message = err.response?.data.message;
+            Notifications.showError({ text: 'Error approving closeout review: ' + message });
+        }
+    }
+
     function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
         return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
     }
@@ -208,6 +241,14 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     validation={formValidation.darErrors}
                 />
             </div>
+            {isCloseoutReview() && <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <CloseoutReview
+                    onApprove={onApproveReview}
+                    onReturn={() => {
+                        Navigation.console(Storage.getCurrentUser(), history);
+                    }}
+                />
+            </div>}
             <br/><br/>
             {!readOnlyMode && <div>
                 <SubmitProgressReport
