@@ -1,6 +1,7 @@
 import externalAccessIcon from 'src/images/external_access.svg';
 import openAccessIcon from 'src/images/open_access.svg';
 import controlledAccessIcon from 'src/images/controlled_access.svg';
+import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 
 export type UserRoleName =
   | 'Admin'
@@ -395,8 +396,8 @@ export interface DataAccessRequest {
   labCollaborators: Array<Collaborator>;
   progressReportSummary: string;
   intellectualPropertySummary: string;
-  publications: Array<Publication>;
-  presentations: Array<Presentation>;
+  publications: Array<PublicationOrPresentation>;
+  presentations: Array<PublicationOrPresentation>;
   dmi: DataManagementIncident;
   researchPlans: string;
   closeoutSupplement: Closeout;

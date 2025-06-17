@@ -1,5 +1,5 @@
+import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import {Collaborator, Dataset, SimplifiedDuosUser} from 'src/types/model';
-import {PublicationOrPresentation} from 'src/components/publications_list/PublicationOrPresentation';
 
 export type ValidFormState = {
   [K in keyof FormState]: {

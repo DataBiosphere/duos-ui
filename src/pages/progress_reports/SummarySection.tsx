@@ -3,11 +3,11 @@ import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import PublicationList from 'src/components/publications_list/PublicationList';
-import {ValidFormState, FormState, FormStateKey} from "src/pages/progress_reports/ProgressReportFormState";
+import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
 import ERACommons from 'src/components/ERACommons';
 import {DuosUser} from 'src/types/model';
 import {Location} from 'history';
-import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
+import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
 
 interface SummarySectionProps {
     readonly readOnly: boolean;
@@ -128,7 +128,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         validation={validation?.publicationsYesNo}
                         onValidationChange={onValidationChange}
                     />
-                    {formState.publicationsYesNo && <PublicationList
+                    {(formState.publicationsYesNo || (readOnly && publications.length > 0)) && <PublicationList
                         publications={publications}
                         publicationText='Publication'
                         columnsToShow={['title', 'date']}
@@ -152,7 +152,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         validation={validation?.presentationsYesNo}
                         onValidationChange={onValidationChange}
                     />
-                    {formState.presentationsYesNo && <PublicationList
+                    {(formState.presentationsYesNo || (readOnly && presentations.length > 0)) && <PublicationList
                         publications={presentations}
                         publicationText='Presentation'
                         columnsToShow={['title', 'date']}

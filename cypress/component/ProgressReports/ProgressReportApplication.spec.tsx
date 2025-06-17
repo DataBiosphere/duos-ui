@@ -255,21 +255,23 @@ describe('ProgressReportApplication - Component Tests', () => {
       publications: [
         {
           title: 'Publication 1',
-          pubmedId: '12345',
+          pubmed_id: '12345',
           date: '2023-01-01',
           authors: 'Author 1',
-          bibliographicCitation: 'Citation 1',
-          datasetCitation: 'Dataset Citation 1',
-          citation: true
+          bibliographic_citation: 'Citation 1',
+          dataset_citation: 'Dataset Citation 1',
+          did_cite: true,
+          link: ''
         },
         {
           title: 'Publication 2',
-          pubmedId: '67890',
+          pubmed_id: '67890',
           date: '2023-02-01',
           authors: 'Author 2',
-          bibliographicCitation: 'Citation 2',
-          datasetCitation: 'Dataset Citation 2',
-          citation: false
+          bibliographic_citation: 'Citation 2',
+          dataset_citation: 'Dataset Citation 2',
+          did_cite: false,
+          link: ''
         }
       ]
     };
@@ -279,6 +281,33 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the publications "Yes" radio button is checked (true state)
     cy.get('#publicationsYesNo_yes').should('be.checked');
     cy.get('#publicationsYesNo_no').should('not.be.checked');
+
+    // Check that publications are actually displayed in the DOM
+    cy.contains('Publication 1').should('be.visible');
+    cy.contains('Publication 2').should('be.visible');
+  });
+
+  it('displays publications in read-only when they exist', () => {
+    // Test scenario where publications exist but radio might not be set correctly
+    const darWithPublications = {
+      publications: [
+        {
+          title: 'Test Publication',
+          pubmed_id: '11111',
+          date: '2023-03-01',
+          authors: 'Test Author',
+          bibliographic_citation: 'Test Citation',
+          dataset_citation: 'Test Dataset Citation',
+          did_cite: true,
+          link: ''
+        }
+      ]
+    };
+
+    mountComponent(darWithPublications, true);
+
+    // Publications should be visible regardless of radio button state
+    cy.contains('Test Publication').should('be.visible');
   });
 
   it('defaults presentationsYesNo to false when dar.presentations is undefined', () => {
@@ -309,16 +338,20 @@ describe('ProgressReportApplication - Component Tests', () => {
           link: 'http://example.com/presentation1',
           date: '2023-01-01',
           authors: 'Author 1',
-          datasetCitation: 'Dataset Citation 1',
-          citation: true
+          dataset_citation: 'Dataset Citation 1',
+          did_cite: true,
+          bibliographic_citation: 'Bibliographic Citation 1',
+          pubmed_id: ''
         },
         {
           title: 'Presentation 2',
           link: 'http://example.com/presentation2',
           date: '2023-02-01',
           authors: 'Author 2',
-          datasetCitation: 'Dataset Citation 2',
-          citation: false
+          dataset_citation: 'Dataset Citation 2',
+          did_cite: false,
+          bibliographic_citation: 'Bibliographic Citation 2',
+          pubmed_id: ''
         }
       ]
     };
@@ -328,6 +361,10 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the presentations "Yes" radio button is checked (true state)
     cy.get('#presentationsYesNo_yes').should('be.checked');
     cy.get('#presentationsYesNo_no').should('not.be.checked');
+
+    // Check that presentations are actually displayed in the DOM
+    cy.contains('Presentation 1').should('be.visible');
+    cy.contains('Presentation 2').should('be.visible');
   });
 
   it('defaults dmiYesNo to false when dar.dmi is undefined', () => {
@@ -392,5 +429,22 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the closeout "Yes" radio button is checked (true state)
     cy.get('#closeoutYesNo_yes').should('be.checked');
     cy.get('#closeoutYesNo_no').should('not.be.checked');
+  });
+
+  it('displays intellectual property summary in read-only mode when it exists', () => {
+    // Test scenario where intellectual property summary exists
+    const darWithIntellectualProperty = {
+      intellectualPropertySummary: 'Test intellectual property description with important details'
+    };
+
+    mountComponent(darWithIntellectualProperty, true);
+
+    // Check that the intellectual property "Yes" radio button is checked (true state)
+    cy.get('#intellectualPropertyYesNo_yes').should('be.checked');
+    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked');
+
+    // Check that the intellectual property summary is visible in the form
+    cy.get('#intellectualPropertySummary').should('be.visible');
+    cy.get('#intellectualPropertySummary').should('contain.value', 'Test intellectual property description with important details');
   });
 });
