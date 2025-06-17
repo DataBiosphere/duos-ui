@@ -3,7 +3,7 @@ import CollaboratorDelete from './CollaboratorDelete';
 import {Collaborator} from 'src/types/model';
 
 interface CollaboratorSummaryProps {
-    collaborator: Collaborator | undefined;
+    collaborator: Collaborator;
     readonly columnsToShow: string[];
     readonly editAction: () => void;
     readonly deleteAction: () => void;

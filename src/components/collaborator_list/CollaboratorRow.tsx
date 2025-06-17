@@ -6,7 +6,7 @@ import {Collaborator} from 'src/types/model';
 interface CollaboratorRowProps {
     readonly id: number;
     readonly editMode: boolean;
-    collaborator: Collaborator | undefined;
+    collaborator: Collaborator;
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
     readonly columnsToShow: string[];
