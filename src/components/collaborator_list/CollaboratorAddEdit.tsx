@@ -5,6 +5,7 @@ import {ValidationError} from 'src/pages/dar_application/FormValidationState';
 import {computeCollaboratorErrors, validationFailed} from 'src/utils/darFormUtils';
 import {nihAccountLabel} from 'src/utils/ERACommonsUtils';
 import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus';
+import { Countries } from 'src/libs/ajax/Countries';
 
 interface FormFieldChange {
     key: string;
@@ -33,7 +34,7 @@ interface Validation {
 
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
     const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false, countriesOfOperation } = props;
-    const [newCollaborator, setNewCollaborator] = useState<Collaborator | undefined>(collaborator);
+    const [newCollaborator, setNewCollaborator] = useState<Collaborator>(collaborator);
     const [validation, setValidation] = useState<Validation>({});
     const accountLabel = nihAccountLabel();
 
@@ -115,12 +116,12 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         onClick={() => {
                             if (id < 0) {
                                 onCollaboratorChange([...collaborators, newCollaborator]);
-                                setNewCollaborator(undefined);
+                                setNewCollaborator({countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator);
                             } else if (newCollaborator !== undefined) {
                                 const collaboratorsCopy = [...collaborators];
                                 collaboratorsCopy[id] = newCollaborator;
                                 onCollaboratorChange(collaboratorsCopy);
-                                setNewCollaborator(undefined);
+                                setNewCollaborator({countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator);
                             }
                             closeAction();
                         }}
