@@ -13,7 +13,7 @@ interface FormFieldChange {
 
 interface CollaboratorAddEditProps {
     readonly id: number;
-    collaborator?: Collaborator;
+    collaborator: Collaborator;
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
     readonly closeAction: () => void;
@@ -54,7 +54,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     <FormField
                         id='name'
                         title={`${collaboratorText} Name`}
-                        defaultValue={collaborator?.name}
+                        defaultValue={collaborator.name}
                         placeholder='Full Name'
                         validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
@@ -63,7 +63,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     <FormField
                         id='eraCommonsId'
                         title={`${collaboratorText} ${accountLabel} Account`}
-                        defaultValue={collaborator?.eraCommonsId}
+                        defaultValue={collaborator.eraCommonsId}
                         placeholder={`${accountLabel} Account`}
                         validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
@@ -72,7 +72,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     <FormField
                         id='title'
                         title={`${collaboratorText} Title`}
-                        defaultValue={collaborator?.title}
+                        defaultValue={collaborator.title}
                         placeholder='Title'
                         validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
@@ -81,7 +81,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     <FormField
                         id='email'
                         title={`${collaboratorText} Email`}
-                        defaultValue={collaborator?.email}
+                        defaultValue={collaborator.email}
                         placeholder='Email'
                         validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
                         onChange={onChange}
@@ -93,7 +93,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         type={FormFieldTypes.SELECT}
                         optionsAreString={true}
                         selectOptions={countriesOfOperation}
-                        defaultValue={collaborator?.countryOfOperation}
+                        defaultValue={collaborator.countryOfOperation}
                         placeholder='Country of Operation'
                         validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
@@ -114,11 +114,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         type='button'
                         onClick={() => {
                             if (id < 0) {
-                                if (newCollaborator) {
-                                    onCollaboratorChange([...collaborators, newCollaborator]);
-                                } else {
-                                    onCollaboratorChange([...collaborators])
-                                }
+                                onCollaboratorChange([...collaborators, newCollaborator]);
                                 setNewCollaborator(undefined);
                             } else if (newCollaborator !== undefined) {
                                 const collaboratorsCopy = [...collaborators];

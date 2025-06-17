@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 
 interface CollaboratorDeleteProps {
-    readonly collaboratorName: string | undefined;
+    readonly collaboratorName: string;
     readonly showDelete: boolean;
     readonly confirmAction: () => void;
     readonly closeAction: () => void;

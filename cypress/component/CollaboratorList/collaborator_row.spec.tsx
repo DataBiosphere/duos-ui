@@ -148,7 +148,7 @@ describe('CollaboratorRow - Component Tests', () => {
         const newProps = {
             ...defaultProps,
             id: -1,
-            collaborator: undefined,
+            collaborator: {countryOfOperation:'United States of America (the)'} as Collaborator,
             editMode: true
         };
 
