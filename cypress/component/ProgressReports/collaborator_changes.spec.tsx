@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
 import {Collaborator} from 'src/types/model';
-import {FormState} from "src/pages/progress_reports/ProgressReportFormState";
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 
 
 describe('Collaborator Changes - Component Tests', () => {
