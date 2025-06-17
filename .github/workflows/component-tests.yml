@@ -8,8 +8,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - run: echo "NODE_VERSION=$(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}' | awk '{split($0, array, "@"); print array[2]}')" >> $GITHUB_ENV
-      - run: echo $NODE_VERSION
+      - run: echo "NODE_VERSION=$(sed -n 's/FROM node:\([0-9.]*\).*/\1/p' Dockerfile)" >> $GITHUB_ENV
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
