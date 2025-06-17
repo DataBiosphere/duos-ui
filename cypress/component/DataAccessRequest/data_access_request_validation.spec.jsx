@@ -1,15 +1,15 @@
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication.jsx';
+import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication';
 import { MemoryRouter } from 'react-router-dom';
-import { DAR } from '../../../src/libs/ajax/DAR.js';
-import { DataSet } from '../../../src/libs/ajax/DataSet.js';
-import { Metrics } from '../../../src/libs/ajax/Metrics';
-import { Navigation } from '../../../src/libs/utils.js';
-import { NotificationService } from '../../../src/libs/notificationService.js';
-import { Storage } from '../../../src/libs/storage.js';
-import { User } from '../../../src/libs/ajax/User';
-import {Countries} from 'src/libs/ajax/Countries.js';
+import { DAR } from 'src/libs/ajax/DAR';
+import { DataSet } from 'src/libs/ajax/DataSet';
+import { Metrics } from 'src/libs/ajax/Metrics';
+import { Navigation } from 'src/libs/utils';
+import { NotificationService } from 'src/libs/notificationService';
+import { Storage } from 'src/libs/storage';
+import { User } from 'src/libs/ajax/User';
+import {Countries} from 'src/libs/ajax/Countries';
 
 const props = {
   match: {
