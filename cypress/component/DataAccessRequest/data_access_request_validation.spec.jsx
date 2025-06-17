@@ -189,7 +189,8 @@ beforeEach(() => {
 
       cy.get('#piName').should('have.class', 'errored');
       cy.get('#piEmail').should('have.class', 'errored');
-      cy.get('#piCountryOfOperation').should('have.class', 'errored');
+      // since we're setting a default value, this should not error on initial validation
+      cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('have.class', 'errored');
       cy.get('#itDirector').should('have.class', 'errored');
       cy.get('#itDirectorEmail').should('have.class', 'errored');
