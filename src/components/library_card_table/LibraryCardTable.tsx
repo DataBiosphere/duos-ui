@@ -410,7 +410,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         />
         <LibraryCardFormModal
             showModal={showModal}
-            createOnClick={addLibraryCard}
+            // TODO: LibraryCardTable doesn't support bulk creation
+            createOnClick={(card) => addLibraryCard(card[0])}
             closeModal={() => setShowModal(false)}
             users={users}
             card={currentCard}

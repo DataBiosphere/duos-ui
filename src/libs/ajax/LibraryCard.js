@@ -10,9 +10,30 @@ export const LibraryCard = {
     return res.data;
   },
   createLibraryCard: async (card) => {
-    const url = `${await getApiUrl()}/api/libraryCards`;
-    const res = await axios.post(url, card, Config.authOpts());
-    return res.data;
+    // const url = `${await getApiUrl()}/api/libraryCards`;
+    // const res = await axios.post(url, card, Config.authOpts());
+    // return res.data;
+    console.log('using mock createLibraryCard!');
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // 50% chance of returning an error
+        if (Math.random() < 0.5) {
+          resolve({
+            id: 'stubbed-id',
+            ...card
+          });
+        } else {
+          reject({
+            response: {
+              data: {
+                message: `Failed to issue library card for ${card.userEmail || card.email}`
+              }
+            }
+          });
+        }
+      }, 1000);
+    });
   },
   deleteLibraryCard: async (id) => {
     const url = `${await getApiUrl()}/api/libraryCards/${id}`;
