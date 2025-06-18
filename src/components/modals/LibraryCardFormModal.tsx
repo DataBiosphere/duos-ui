@@ -10,7 +10,7 @@ import {MultiValue} from 'react-select';
 import {LibraryCard} from 'src/types/model';
 
 // This represents the fields describing users in a selection dropdown menu
-export interface UserOption {
+interface UserOption {
   userId: number;
   displayName: string;
   email: string;

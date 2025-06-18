@@ -100,7 +100,7 @@ describe('SigningOfficialTable', () => {
 
     cy.contains('Bulk Issue / Add Users').click();
 
-    // Select users
+    // Select user
     cy.get('input[id^=react-select-]').type('Existing Researcher 1');
     cy.get('[id$=option-1]').click();
 

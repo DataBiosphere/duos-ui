@@ -297,14 +297,17 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   // onClick function, used to create new card on modal based on form data
   const addLibraryCards = async (newLibraryCards: LibraryCard[]): Promise<void> => {
     // Check if any cards already exist, show error if any do
-    const hasDuplicateCard = newLibraryCards.some((card) => {
-      return findIndex(
-          (element: LibraryCard) => isEqual(element.userEmail)(card.userEmail),
-          libraryCards
-      ) > -1;
+    const duplicateLibraryCards = newLibraryCards.filter((card) => {
+        return findIndex(
+            (element: LibraryCard) => isEqual(element.userEmail)(card.userEmail),
+            libraryCards
+        ) > -1;
     });
-    if (hasDuplicateCard) {
-      Notifications.showError({text: 'One or more of the library cards already exist.'});
+
+    if (duplicateLibraryCards.length > 0) {
+      Notifications.showError({
+        text: 'Error updating library cards. The following users already have library cards: ' + duplicateLibraryCards.map(card => card.userEmail).join(', ')
+      });
     } else {
       // Execute library card updates with payload, get the updated card, and
       // add (with sort afterwards) library card to libraryCards (reference list)

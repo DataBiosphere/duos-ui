@@ -1,6 +1,6 @@
 import React from 'react';
 import {mount} from 'cypress/react';
-import LibraryCardFormModal, {LibraryCardFormModalProps, UserOption} from 'src/components/modals/LibraryCardFormModal';
+import LibraryCardFormModal, {LibraryCardFormModalProps} from 'src/components/modals/LibraryCardFormModal';
 import {LibraryCard} from 'src/types/model';
 
 describe('Library Card Form Modal Tests', () => {
@@ -34,7 +34,7 @@ describe('Library Card Form Modal Tests', () => {
   });
 
   it('Existing users should be visible in the user selection list', () => {
-    const userOptions: UserOption[] = [
+    const userOptions = [
       {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: undefined},
     ]
     const mergedProps = {...props, ...{users: userOptions}};
@@ -49,7 +49,7 @@ describe('Library Card Form Modal Tests', () => {
   });
 
   it('Multiple users should be selectable in the user selection list', () => {
-    const userOptions: UserOption[] = [
+    const userOptions = [
       {userId: 1, displayName: 'Test User 1', email: 'user1@test.com', libraryCard: undefined},
         {userId: 2, displayName: 'Test User 2', email: 'user2@test.com', libraryCard: undefined},
         {userId: 3, displayName: 'Test User 3', email: 'user3@test.com', libraryCard: undefined}
@@ -81,7 +81,7 @@ describe('Library Card Form Modal Tests', () => {
   });
 
   it('Non-existing users should NOT be visible in the user selection list', () => {
-    const userOptions: UserOption[] = [
+    const userOptions = [
       {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: undefined},
     ]
     const mergedProps = {...props, ...{users: userOptions}};
