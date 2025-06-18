@@ -2,7 +2,6 @@ import React from 'react';
 import {mount} from 'cypress/react';
 import LibraryCardTable, {LibraryCardTableProps} from 'src/components/library_card_table/LibraryCardTable';
 import {LibraryCard as LibraryCardModel} from 'src/types/model';
-import {UserOption} from 'src/components/modals/LibraryCardFormModal';
 import {LibraryCard} from 'src/libs/ajax/LibraryCard';
 
 describe('Library Card Table Tests', () => {
@@ -18,7 +17,7 @@ describe('Library Card Table Tests', () => {
     }
   ]
 
-  const userOptions: UserOption[] = [
+  const userOptions = [
     {userId: 1, displayName: 'Test User 1', email: 'user1@test.com', libraryCard: undefined},
     {userId: 2, displayName: 'Test User 2', email: 'user2@test.com', libraryCard: undefined},
     {userId: 3, displayName: 'Test User 3', email: 'user3@test.com', libraryCard: undefined}
