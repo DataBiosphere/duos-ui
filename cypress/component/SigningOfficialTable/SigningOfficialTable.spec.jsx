@@ -47,7 +47,7 @@ describe('SigningOfficialTable', () => {
   it('should render the modal when Add Users button is clicked', () => {
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />);
 
-    cy.contains('Bulk Issue / Add Users').should('exist').click();
+    cy.contains('Add Library Card').should('exist').click();
     cy.get('[data-cy=library-card-form-modal]').should('be.visible');
     cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Cards');
   });
@@ -66,14 +66,14 @@ describe('SigningOfficialTable', () => {
       });
 
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />);
-    cy.contains('Bulk Issue / Add Users').click();
+    cy.contains('Add Library Card').click();
 
     // Select user
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName);
     cy.get('[id$=option-1]').click();
 
     // Submit the form
-    cy.get('[id=Add-button]').click();
+    cy.contains('button', 'Bulk Issue / Add Users').click();
 
     // Verify error notification is shown
     cy.contains('Error issuing library card').should('be.visible');
@@ -100,14 +100,14 @@ describe('SigningOfficialTable', () => {
 
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial}/>);
 
-    cy.contains('Bulk Issue / Add Users').click();
+    cy.contains('Add Library Card').click();
 
     // Select user
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName);
     cy.get('[id$=option-1]').click();
 
     // Submit the form
-    cy.get('[id=Add-button]').click();
+    cy.contains('button', 'Bulk Issue / Add Users').click();
 
     // Verify success notification is shown
     cy.contains('Issued 1 library card').should('be.visible');
@@ -143,7 +143,7 @@ describe('SigningOfficialTable', () => {
       });
 
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />);
-    cy.contains('Bulk Issue / Add Users').click();
+    cy.contains('Add Library Card').click();
 
     // Select users
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName);
@@ -152,7 +152,7 @@ describe('SigningOfficialTable', () => {
     cy.get('[id$=option-2]').click();
 
     // Submit the form
-    cy.get('[id=Add-button]').click();
+    cy.contains('button', 'Bulk Issue / Add Users').click();
 
     // Verify warning notification is shown
     cy.contains(`Issued 1 library card, but encountered errors issuing library cards to ${mockResearcher2.email}`).should('be.visible');

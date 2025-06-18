@@ -21,8 +21,8 @@ describe('Library Card Form Modal Tests', () => {
   it('Should render the Library Card Form Modal', () => {
     mount(<LibraryCardFormModal {...props} />);
     cy.get('[data-cy=library-card-form-modal]').should('exist');
-    cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Card');
-    cy.get('[id=Add-button]').should('exist');
+    cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Cards');
+    cy.contains('button', 'Bulk Issue / Add Users')
     cy.get('[id=Cancel-button]').should('exist');
     ['Broad Library Card Agreement',
       'NIH Library Card Agreement',
@@ -44,7 +44,7 @@ describe('Library Card Form Modal Tests', () => {
     cy.get('[data-cy=library-card-form-modal]').should('contain', userOptions[0].email);
     // select the second option since the first is always the 'New User...' option
     cy.get('[id$=option-1]').click();
-    cy.get('[id=Add-button]').click();
+    cy.contains('button', 'Bulk Issue / Add Users').click()
     cy.get('@createOnClick').should('have.been.called');
   });
 
@@ -72,7 +72,7 @@ describe('Library Card Form Modal Tests', () => {
     cy.get('[id$=option-3]').click();
 
     // click add and confirm the call was made with all selected users
-    cy.get('[id=Add-button]').click();
+    cy.contains('button', 'Bulk Issue / Add Users').click()
     cy.get('@createOnClick').should('have.been.calledWith', [
       {userId: 1, userEmail: 'user1@test.com', userName: 'Test User 1'},
         {userId: 2, userEmail: 'user2@test.com', userName: 'Test User 2'},

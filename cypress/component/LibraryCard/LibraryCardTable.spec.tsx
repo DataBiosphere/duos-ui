@@ -76,7 +76,7 @@ describe('Library Card Table Tests', () => {
     cy.get('input[id^=react-select-]').type('Test User');
     cy.get('[id$=option-1]').click(); // Test User 1
 
-    cy.get('[id=Add-button]').click();
+    cy.contains('button', 'Bulk Issue / Add Users').click()
     cy.contains('Failed to issue library card for user1@test.com')
   });
 });

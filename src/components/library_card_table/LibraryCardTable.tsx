@@ -311,11 +311,12 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
     } else {
       // Execute library card updates with payload, get the updated card, and
       // add (with sort afterwards) library card to libraryCards (reference list)
+
+      // Process each card individually and aggregate the results at the end.
+      // Eventually, if there's a bulk API endpoint, this can be optimized. But for
+      // now, the volume of cards being added is small enough that this should be okay
       const successfulCards = [];
       const failedCards = [];
-
-      // Process each card individually. Eventually, if there's a bulk API endpoint, this can be optimized.
-      // But for now, the volume of cards being added is small enough that this should be okay
       for (const card of newLibraryCards) {
         try {
           const newCard = await LibraryCardAPI.createLibraryCard(card);
@@ -390,7 +391,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                       flexDirection: 'row',
                       alignItems: 'flex-end',
                       justifyContent: 'center',
-                      width: '380px'
+                      width: '300px'
                     }}
                 >
                   <button
@@ -410,7 +411,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                           )
                       }
                   >
-                    <span>Bulk Issue / Add Users</span>
+                    <span>Add Library Card</span>
                   </button>
                 </div>
               }

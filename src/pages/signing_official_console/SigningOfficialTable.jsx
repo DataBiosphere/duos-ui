@@ -314,7 +314,7 @@ export default function SigningOfficialTable(props) {
     setShowModal(true);
   };
 
-  const bulkIssueLibraryCards = async (cards, researchers) => {
+  const issueLibraryCards = async (cards, researchers) => {
     const successfulCards = [];
     const failedCards = [];
 
@@ -425,10 +425,10 @@ export default function SigningOfficialTable(props) {
           <SimpleButton
             onClick={() => showModalOnClick()}
             baseColor={Theme.palette.secondary}
-            label="Bulk Issue / Add Users"
+            label="Add Library Card"
             additionalStyle={{
               width: '22rem',
-              height: '5rem',
+              height: '4rem',
               padding: '4% 10%',
               fontWeight: '600' }}
           />
@@ -444,7 +444,7 @@ export default function SigningOfficialTable(props) {
       />
       <LibraryCardFormModal
         showModal={showModal}
-        createOnClick={(cards) => bulkIssueLibraryCards(cards, researchers)}
+        createOnClick={(cards) => issueLibraryCards(cards, researchers)}
         closeModal={() => setShowModal(false)}
         card={selectedCard}
         users={researchers.filter(onlyResearchersWithoutCardFilter)}
@@ -465,7 +465,7 @@ export default function SigningOfficialTable(props) {
         onConfirm={() =>
           confirmType === confirmModalType.delete
             ? deactivateLibraryCard(selectedCard, researchers)
-            : bulkIssueLibraryCards([selectedCard], researchers)}
+            : issueLibraryCards([selectedCard], researchers)}
       />
     </>
   );

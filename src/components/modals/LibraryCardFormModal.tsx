@@ -145,8 +145,8 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
               updateUsers={updateUsers}
               dropdownOptions={users}
           />
-          <div style={{display: 'inline-block'}}>
-            By clicking {'\'ADD\''} you agree to the terms of the agreements above for all users.
+          <div style={{display: 'inline-block', marginBottom: '1rem',}}>
+            By clicking {'\'BULK ISSUE / ADD USERS\''} you agree to the terms of the agreements above for all users.
           </div>
           <div
               style={{
@@ -157,10 +157,10 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
             <SimpleButton
                 data-cy={'library-card-form-modal-add-button'}
                 onClick={createLibraryCards}
-                additionalStyle={{margin: '0%', width: '80px', height: '15px', padding: '20px'}}
+                additionalStyle={{margin: '0%', width: '280px', height: '15px', padding: '20px'}}
                 baseColor={Theme.palette.secondary}
                 disabled={isConfirmDisabled()}
-                label={'Add'}
+                label={'Bulk Issue / Add Users'}
             />
             <SimpleButton
                 data-cy={'library-card-form-modal-close-button'}
