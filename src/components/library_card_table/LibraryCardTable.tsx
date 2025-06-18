@@ -311,7 +311,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
       const successfulCards = [];
       const failedCards = [];
 
-      // Process each card individually
+      // Process each card individually. Eventually, if there's a bulk API endpoint, this can be optimized.
+      // But for now, the volume of cards being added is small enough that this should be okay
       for (const card of newLibraryCards) {
         try {
           const newCard = await LibraryCardAPI.createLibraryCard(card);
@@ -321,8 +322,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
           failedCards.push({ card, error: errorMessage });
         }
       }
-      const updatedList = cloneDeep(libraryCards);
-      libraryCards.push(...successfulCards);
+
+      const updatedList = [...cloneDeep(libraryCards), ...successfulCards];
 
       updatedList.sort((a, b) => {
         return dayjs(b.createDate).valueOf() - dayjs(a.createDate).valueOf();

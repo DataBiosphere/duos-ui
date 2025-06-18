@@ -50,7 +50,7 @@ describe('SigningOfficialTable', () => {
     cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Cards');
   });
 
-  it('should display an error message issuing a library card fails', () => {
+  it('should display an error message when issuing a library card fails', () => {
     // Stub to make all requests fail
     cy.stub(LibraryCardApi.LibraryCard, 'createLibraryCard')
       .callsFake((card) => {
@@ -118,7 +118,7 @@ describe('SigningOfficialTable', () => {
     });
   });
 
-  it('should display a warning when some cards succeed and some fail', () => {
+  it('should display a warning when there are both failures and successes bulk-issuing library cards', () => {
     // Stub to make some requests succeed and some fail
     cy.stub(LibraryCardApi.LibraryCard, 'createLibraryCard')
       .callsFake((card) => {
