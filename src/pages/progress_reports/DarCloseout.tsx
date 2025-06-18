@@ -180,6 +180,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                         placeholder={'Please provide context for "other"'}
                         defaultValue={formState.closeoutOtherText}
                         description={''}
+                        disabled={readOnly}
                         rows={6}
                         maxLength={FORM_TEXT_AREA_MAX_LENGTH}
                         onChange={({key, value}: ValidFormState) => {

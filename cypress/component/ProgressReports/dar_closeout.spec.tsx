@@ -35,7 +35,7 @@ describe('DAR Closeout - Component Tests', () => {
     nihCertificationFile: {} as FileStorageObject
   }
 
-  const mountComponent = (customState = {}) => {
+  const mountComponent = (customState = {}, customProps = {}) => {
     const formState = {...customState} as FormState;
     const props = {
       readOnly: false,
@@ -44,6 +44,7 @@ describe('DAR Closeout - Component Tests', () => {
       onFormChange: onFormChangeSpy,
       onValidationChange: validationChangeSpy,
       validation: {},
+      ...customProps
     };
 
     return mount(<DarCloseout {...props} />);
@@ -167,5 +168,21 @@ describe('DAR Closeout - Component Tests', () => {
     cy.get('[data-cy=dar-closeout-details]').should('exist');
     cy.get('[data-cy=dar-closeout-details]').contains(mockDataset.datasetIdentifier);
     cy.get('[data-cy=dar-closeout-details]').contains(mockDataset.name);
+  });
+
+  it('displays readOnly other text view correctly', () => {
+    mountComponent({closeoutYesNo: true, closeoutOther:true, closeoutOtherText: 'Some other text.'}, {readOnly:true});
+    cy.get('#closeoutProjectCompleted').should('not.be.checked');
+    cy.get('#closeoutRequestorMovedInstitution').should('not.be.checked');
+    cy.get('#closeoutProjectTransferred').should('not.be.checked');
+    cy.get('#closeoutProjectSuperseded').should('not.be.checked');
+    cy.get('#closeoutProjectCompleted').should('be.disabled');
+    cy.get('#closeoutRequestorMovedInstitution').should('be.disabled');
+    cy.get('#closeoutProjectTransferred').should('be.disabled');
+    cy.get('#closeoutProjectSuperseded').should('be.disabled');
+    cy.get('#closeoutOther').should('be.checked');
+    cy.get('#closeoutOther').should('be.disabled');
+    cy.get('#closeoutOtherText').contains('Some other text.');
+    cy.get('#closeoutOtherText').should('be.disabled');
   });
 });
