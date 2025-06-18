@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Info } from '@mui/icons-material';
 import { Styles, Theme } from 'src/libs/theme';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
+import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
 import SimpleTable from 'src/components/SimpleTable';
 import SimpleButton from 'src/components/SimpleButton';
 import PaginationBar from 'src/components/PaginationBar';
