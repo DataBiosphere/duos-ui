@@ -294,35 +294,51 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   />;
 
   // onClick function, used to create new card on modal based on form data
-  const addLibraryCard = async (card: LibraryCard): Promise<void> => {
-    try {
-      // Check if card already exists, show error if it does
-      const alreadyExists = findIndex(
+  const addLibraryCards = async (newLibraryCards: LibraryCard[]): Promise<void> => {
+    // Check if any cards already exist, show error if any do
+    const hasDuplicateCard = newLibraryCards.some((card) => {
+      return findIndex(
           (element: LibraryCard) => isEqual(element.userEmail)(card.userEmail),
           libraryCards
-      );
-      if (alreadyExists > -1) {
-        Notifications.showError({text: 'Library Card already exists'});
-      } else {
-        // Execute library card update with payload, get the updated card, and
-        // add (with sort afterwards) library card to libraryCards (reference list)
-        const newCard = await LibraryCardAPI.createLibraryCard(card);
-        const updatedList = cloneDeep(libraryCards);
-        updatedList.push(newCard);
-        updatedList.sort((a: LibraryCard, b: LibraryCard) => {
-          const dateA = new Date(a.createDate ?? '');
-          const dateB = new Date(b.createDate ?? '');
-          return dateB.getTime() - dateA.getTime();
-        });
-        setLibraryCards(updatedList);
-        setShowModal(false);
+      ) > -1;
+    });
+    if (hasDuplicateCard) {
+      Notifications.showError({text: 'One or more of the library cards already exist.'});
+    } else {
+      // Execute library card update with payload, get the updated card, and
+      // add (with sort afterwards) library card to libraryCards (reference list)
+      const successfulCards = [];
+      const failedCards = [];
+
+      // Process each card individually
+      for (const card of newLibraryCards) {
+        try {
+          const newCard = await LibraryCardAPI.createLibraryCard(card);
+          successfulCards.push(newCard);
+        } catch (error: unknown) {
+          const axiosError = error as AxiosError;
+          const consentError = axiosError?.response?.data as ConsentError;
+          const serverError = consentError.message ?? 'Error: Failed to create new library card';
+          failedCards.push({
+            card,
+            error: serverError || 'Unknown error'
+          });
+        }
       }
-    } catch (error: unknown) {
-      const axiosError = error as AxiosError;
-      const consentError = axiosError?.response?.data as ConsentError;
-      const serverError = consentError.message ?? 'Error: Failed to create new library card';
+      const updatedList = cloneDeep(libraryCards);
+      libraryCards.push(...successfulCards);
+
+      updatedList.sort((a: LibraryCard, b: LibraryCard) => {
+        const dateA = new Date(a.createDate ?? '');
+        const dateB = new Date(b.createDate ?? '');
+        return dateB.getTime() - dateA.getTime();
+      });
+      setLibraryCards(updatedList);
       setShowModal(false);
-      Notifications.showError({text: serverError});
+      if(failedCards.length > 0) {
+        const errorMessages = failedCards.map(failure => `${failure.card.userEmail}: ${failure.error}`).join('\n');
+        Notifications.showError({text: `Failed to create the following library cards:\n${errorMessages}`});
+      }
     }
   };
 
@@ -410,8 +426,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         />
         <LibraryCardFormModal
             showModal={showModal}
-            // TODO: LibraryCardTable doesn't support bulk creation
-            createOnClick={(card) => addLibraryCard(card[0])}
+            createOnClick={(cards) => addLibraryCards(cards)}
             closeModal={() => setShowModal(false)}
             users={users}
             card={currentCard}

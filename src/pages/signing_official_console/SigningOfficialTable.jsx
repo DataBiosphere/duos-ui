@@ -313,41 +313,7 @@ export default function SigningOfficialTable(props) {
     setShowModal(true);
   };
 
-  const issueLibraryCard = async (selectedCard, researchers) => {
-    let messageName;
-    try {
-      const listCopy = cloneDeep(researchers);
-      const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
-      const {userEmail, userName, userId} = newLibraryCard;
-      const targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
-      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
-      if(targetIndex === -1) { //if card is not found, push new user to top of list
-        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
-        const attributes = {
-          email: userEmail,
-          displayName: userName,
-          libraryCard: newLibraryCard,
-          roles: [],
-        };
-        if(!isNil(targetUnregisteredResearcher)) {
-          attributes.roles = targetUnregisteredResearcher.roles;
-        }
-        listCopy.unshift(attributes);
-        messageName = userEmail;
-      } else {
-        listCopy[targetIndex].libraryCard = newLibraryCard;
-        messageName = userName;
-      }
-      setResearchers(listCopy);
-      setShowConfirmation(false);
-      setShowModal(false);
-      Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(error) {
-      Notifications.showError({text: error.response.data.message ?? 'Error issuing library card' });
-    }
-  };
-
-  const bulkIssueLibraryCards = async (cards) => {
+  const bulkIssueLibraryCards = async (cards, researchers) => {
     const successfulCards = [];
     const failedCards = [];
 
@@ -384,12 +350,12 @@ export default function SigningOfficialTable(props) {
       setResearchers(listCopy);
     }
 
-    // Close modal regardless of success/failure
+    setShowConfirmation(false);
     setShowModal(false);
 
     const successNotificationText = `Issued ${successfulCards.length} library card${successfulCards.length > 1 ? 's' : ''}`;
     const errorNotificationText = `Error issuing library card${failedCards.length > 1 ? 's' : ''}.`;
-    const warningNotificationText = `${successNotificationText}, but encountered errors issuing library cards for: ${failedCards.map(fc => fc.card.userEmail || fc.card.email).join(', ')}`;
+    const warningNotificationText = `${successNotificationText}, but encountered errors issuing library cards to ${failedCards.map(fc => fc.card.userEmail || fc.card.email).join(', ')}`;
 
     if(successfulCards.length > 0 && failedCards.length > 0) {
       Notifications.showWarning({ text: warningNotificationText });
@@ -479,7 +445,7 @@ export default function SigningOfficialTable(props) {
       />
       <LibraryCardFormModal
         showModal={showModal}
-        createOnClick={(cards) => bulkIssueLibraryCards(cards)}
+        createOnClick={(cards) => bulkIssueLibraryCards(cards, researchers)}
         closeModal={() => setShowModal(false)}
         card={selectedCard}
         users={researchers.filter(onlyResearchersWithoutCardFilter)}
@@ -500,7 +466,7 @@ export default function SigningOfficialTable(props) {
         onConfirm={() =>
           confirmType === confirmModalType.delete
             ? deactivateLibraryCard(selectedCard, researchers)
-            : issueLibraryCard(selectedCard, researchers)}
+            : bulkIssueLibraryCards([selectedCard], researchers)}
       />
     </>
   );

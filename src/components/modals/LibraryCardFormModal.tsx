@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {cloneDeep, includes, isEmpty, isNil, isObject} from 'lodash/fp';
+import React, {useState} from 'react';
+import {cloneDeep, includes, isEmpty, isNil} from 'lodash/fp';
 import {Styles, Theme} from 'src/libs/theme';
 import CloseIconComponent from 'src/components/CloseIconComponent';
-import ModalWrapper from "src/components/collaborator_list/ModalWrapper";
+import ModalWrapper from 'src/components/collaborator_list/ModalWrapper';
 import Creatable from 'react-select/creatable';
 import SimpleButton from 'src/components/SimpleButton';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
@@ -46,7 +46,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
   const [filteredDropdown, setFilteredDropdown] = useState<UserOption[]>(cardlessOptions);
 
   //filter function for users dropdown
-  const userListFilter = ({ searchTerm, input, action }: { searchTerm?: string, input?: string, action: string }) => {
+  const userListFilter = ({ searchTerm, input }: FilterOptions) => {
     const term = searchTerm ?? input ?? '';
     let filteredCopy: UserOption[];
 

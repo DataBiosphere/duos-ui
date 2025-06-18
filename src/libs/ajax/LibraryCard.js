@@ -13,7 +13,7 @@ export const LibraryCard = {
     // const url = `${await getApiUrl()}/api/libraryCards`;
     // const res = await axios.post(url, card, Config.authOpts());
     // return res.data;
-    console.log('using mock createLibraryCard!');
+    console.warn('WARNING: you are using a mock createLibraryCard implementation');
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {
