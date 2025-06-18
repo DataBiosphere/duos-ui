@@ -401,7 +401,10 @@ export interface DataAccessRequest {
   dmi: DataManagementIncident;
   researchPlans: string;
   closeoutSupplement: Closeout;
+  data: object;
   parentId?: number;
+  closeoutSigningOfficialApprovedDate: number;
+  closeoutSigningOfficialApprovedUserId: number;
 }
 
 export interface DataManagementIncident {
@@ -436,6 +439,7 @@ export interface Publication {
 
 export interface Collaborator {
   approverStatus: boolean;
+  countryOfOperation: string;
   email: string;
   eraCommonsId: string;
   name: string;

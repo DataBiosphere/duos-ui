@@ -8,6 +8,7 @@ import {BrowserRouter} from 'react-router-dom';
 const props = {
   allSigningOfficials: [],
   completed: true,
+  countriesOfOperation:['United States of America (the)', 'France', 'Canada'],
   darCode: undefined,
   eRACommonsDestination: undefined,
   formFieldChange: () => {},

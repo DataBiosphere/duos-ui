@@ -25,6 +25,7 @@ export default function ResearcherInfo(props) {
     readOnlyMode,
     includeInstructions,
     completed,
+    countriesOfOperation,
     darCode,
     eRACommonsDestination,
     formFieldChange,
@@ -159,6 +160,20 @@ export default function ResearcherInfo(props) {
               defaultValue={readOnlyMode ? formData.piEmail : researcher.email}
             />
           </div>
+          <label className="control-label" id="principal-investigator-country-of-operation">Principal Investigator Country of Operation*</label>
+          <FormField
+            id='piCountryOfOperation'
+            placeholder='Country of Operation'
+            disabled={readOnlyMode}
+            defaultValue={formData.piCountryOfOperation}
+            type={FormFieldTypes.SELECT}
+            validators={[FormValidators.REQUIRED]}
+            validation={validation.piCountryOfOperation}
+            onValidationChange={onValidationChange}
+            selectOptions={countriesOfOperation}
+            optionsAreString={true}
+            onChange={({key, value}) => formFieldChange({key, value})}
+          />
         </div>
 
         <div className='dar-application-row' data-cy='internal-lab-staff'>
@@ -182,6 +197,7 @@ export default function ResearcherInfo(props) {
             onValidationChange={onValidationChange}
             showApproval={true}
             disabled={!isEmpty(darCode) || readOnlyMode}
+            countriesOfOperation={countriesOfOperation}
           />
         </div>
 
@@ -202,6 +218,7 @@ export default function ResearcherInfo(props) {
             collaborators={formData.internalCollaborators}
             collaboratorKey='internalCollaborators'
             collaboratorLabel='Internal Collaborator'
+            countriesOfOperation={countriesOfOperation}
             setCompleted={setInternalCollaboratorsCompleted}
             validation={validation.internalCollaborators}
             onValidationChange={onValidationChange}
@@ -418,6 +435,7 @@ export default function ResearcherInfo(props) {
             collaborators={formData.externalCollaborators}
             collaboratorKey='externalCollaborators'
             collaboratorLabel='External Collaborator'
+            countriesOfOperation={countriesOfOperation}
             setCompleted={setExternalCollaboratorsCompleted}
             showApproval={false}
             disabled={!isEmpty(darCode) || readOnlyMode}

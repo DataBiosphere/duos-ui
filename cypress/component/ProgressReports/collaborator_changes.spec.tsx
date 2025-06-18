@@ -1,11 +1,13 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
-import { Collaborator } from 'src/components/collaborator_list/Collaborator';
+import {Collaborator} from 'src/types/model';
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+
 
 describe('Collaborator Changes - Component Tests', () => {
   let onFormChangeSpy: () => void;
-
+  const countriesOfOperation = ['United States of America (the)', 'France'];
   const initialCollaborators: Collaborator[] = [
     {
       name: 'Test User 1',
@@ -13,7 +15,8 @@ describe('Collaborator Changes - Component Tests', () => {
       uuid: '1',
       eraCommonsId: 'user1',
       email: 'user1@example.com',
-      institution: 'Test Institution'
+      countryOfOperation: 'France',
+      approverStatus: false
     },
     {
       name: 'Test User 2',
@@ -21,17 +24,19 @@ describe('Collaborator Changes - Component Tests', () => {
       uuid: '2',
       eraCommonsId: 'user2',
       email: 'user2@example.com',
-      institution: 'Test Institution'
+      approverStatus: false,
+      countryOfOperation: 'United States of America (the)'
     }
   ];
 
   const mountComponent = (customState = {}) => {
-    const formState = { ...customState };
+    const formState = { ...customState } as FormState;
 
     const props = {
       readOnly: false,
       formState,
-      onFormChange: onFormChangeSpy
+      onFormChange: onFormChangeSpy,
+      countriesOfOperation: countriesOfOperation
     };
 
     return mount(<CollaboratorChanges {...props} />);
@@ -82,8 +87,9 @@ describe('Collaborator Changes - Component Tests', () => {
   it('renders in read-only mode correctly', () => {
     const props = {
       readOnly: true,
-      formState: { labCollaborators: initialCollaborators },
-      onFormChange: onFormChangeSpy
+      formState: { labCollaborators: initialCollaborators } as FormState,
+      onFormChange: onFormChangeSpy,
+      countriesOfOperation: countriesOfOperation
     };
 
     mount(<CollaboratorChanges {...props} />);

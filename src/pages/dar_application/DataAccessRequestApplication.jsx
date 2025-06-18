@@ -31,6 +31,7 @@ import {ProgressReportApplication} from 'src/pages/dar_application/ProgressRepor
 import {ScrollableTabs} from 'src/pages/dar_application/ScrollableTabs';
 import {validateDARFormData, validationFailed} from 'src/utils/darFormUtils.js';
 import {isArray, set} from 'lodash';
+import {Countries} from 'src/libs/ajax/Countries.js';
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info';
@@ -89,6 +90,7 @@ const DataAccessRequestApplication = (props) => {
     researcher: '',
     piName: '',
     piEmail: '',
+    piCountryOfOperation: Countries.DEFAULT_COUNTRY,
     projectTitle: '',
     profileName: '',
     pubmedId: '',
@@ -142,6 +144,8 @@ const DataAccessRequestApplication = (props) => {
   const [isAttested, setIsAttested] = useState(false);
 
   const [applicationTabs, setApplicationTabs] = useState([]);
+
+  const [countriesOfOperation, setCountriesOfOperation] = useState([]);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formFieldChange = useCallback(({ key, value }) => {
@@ -303,6 +307,9 @@ const DataAccessRequestApplication = (props) => {
     init();
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       setNotificationData(notificationData);
+    });
+    Countries.getCountries().then((isoCountriesData)=> {
+      setCountriesOfOperation(isoCountriesData);
     });
   }, [init]);
 
@@ -572,6 +579,7 @@ const DataAccessRequestApplication = (props) => {
                       history={history}
                       location={location}
                       researcher={researcher}
+                      countriesOfOperation={countriesOfOperation}
                     />
                   </ConditionalAccordion>
                 </div>
@@ -629,6 +637,7 @@ const DataAccessRequestApplication = (props) => {
                   setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
                   setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
                   setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
+                  countriesOfOperation={countriesOfOperation}
                 />
                   </ConditionalAccordion>
               </div>

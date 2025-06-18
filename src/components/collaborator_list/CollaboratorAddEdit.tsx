@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
-import { FormField, FormValidators } from '../forms/forms';
-import {Collaborator} from "src/types/model";
-import {ValidationError} from "src/pages/dar_application/FormValidationState";
-import {computeCollaboratorErrors, validationFailed} from "src/utils/darFormUtils";
-import {nihAccountLabel} from "src/utils/ERACommonsUtils";
-import ApproverStatus from "src/pages/dar_application/collaborator/ApproverStatus";
+import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
+import {Collaborator} from 'src/types/model';
+import {ValidationError} from 'src/pages/dar_application/FormValidationState';
+import {computeCollaboratorErrors, validationFailed} from 'src/utils/darFormUtils';
+import {nihAccountLabel} from 'src/utils/ERACommonsUtils';
+import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus';
+import { Countries } from 'src/libs/ajax/Countries';
 
 interface FormFieldChange {
     key: string;
@@ -13,12 +14,13 @@ interface FormFieldChange {
 
 interface CollaboratorAddEditProps {
     readonly id: number;
-    collaborator?: Collaborator;
+    collaborator: Collaborator;
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
     readonly closeAction: () => void;
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly showApproverStatus?: boolean;
+    readonly countriesOfOperation: string[];
 }
 
 interface Validation {
@@ -27,11 +29,12 @@ interface Validation {
     title?: ValidationError;
     email?: ValidationError;
     approverStatus?: ValidationError;
+    countryOfOperation?: ValidationError;
 }
 
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
-    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false } = props;
-    const [newCollaborator, setNewCollaborator] = useState(collaborator);
+    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false, countriesOfOperation } = props;
+    const [newCollaborator, setNewCollaborator] = useState<Collaborator>(collaborator);
     const [validation, setValidation] = useState<Validation>({});
     const accountLabel = nihAccountLabel();
 
@@ -48,11 +51,11 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
         <div className='form-group row no-margin'>
             <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card' key={`collaborator-item-id`}>
                 <div className='row'>
-                    <h2>{collaborator === undefined ? `New ${collaboratorText} Information` : `Edit ${collaborator.name} Information`}</h2>
+                    <h2>{collaborator?.name === undefined ? `New ${collaboratorText} Information` : `Edit ${collaborator.name} Information`}</h2>
                     <FormField
                         id='name'
                         title={`${collaboratorText} Name`}
-                        defaultValue={collaborator?.name}
+                        defaultValue={collaborator.name}
                         placeholder='Full Name'
                         validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
@@ -61,7 +64,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     <FormField
                         id='eraCommonsId'
                         title={`${collaboratorText} ${accountLabel} Account`}
-                        defaultValue={collaborator?.eraCommonsId}
+                        defaultValue={collaborator.eraCommonsId}
                         placeholder={`${accountLabel} Account`}
                         validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
@@ -70,7 +73,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     <FormField
                         id='title'
                         title={`${collaboratorText} Title`}
-                        defaultValue={collaborator?.title}
+                        defaultValue={collaborator.title}
                         placeholder='Title'
                         validators={[FormValidators.REQUIRED]}
                         onChange={onChange}
@@ -79,11 +82,23 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     <FormField
                         id='email'
                         title={`${collaboratorText} Email`}
-                        defaultValue={collaborator?.email}
+                        defaultValue={collaborator.email}
                         placeholder='Email'
                         validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
                         onChange={onChange}
                         validation={validation.email}
+                    />
+                    <FormField
+                        id='countryOfOperation'
+                        title={`${collaboratorText} Country of Operation`}
+                        type={FormFieldTypes.SELECT}
+                        optionsAreString={true}
+                        selectOptions={countriesOfOperation}
+                        defaultValue={collaborator.countryOfOperation}
+                        placeholder='Country of Operation'
+                        validators={[FormValidators.REQUIRED]}
+                        onChange={onChange}
+                        validation={validation.countryOfOperation}
                     />
                     {showApproverStatus && (
                     <ApproverStatus
@@ -101,18 +116,18 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         onClick={() => {
                             if (id < 0) {
                                 onCollaboratorChange([...collaborators, newCollaborator]);
-                                setNewCollaborator(undefined);
+                                setNewCollaborator({countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator);
                             } else if (newCollaborator !== undefined) {
                                 const collaboratorsCopy = [...collaborators];
                                 collaboratorsCopy[id] = newCollaborator;
                                 onCollaboratorChange(collaboratorsCopy);
-                                setNewCollaborator(undefined);
+                                setNewCollaborator({countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator);
                             }
                             closeAction();
                         }}
                         disabled={validationFailed(computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: showApproverStatus}))}
                     >
-                        {collaborator === undefined ? 'Add' : 'Save'}
+                        {collaborator?.name === undefined ? 'Add' : 'Save'}
                     </button>
                     {/* cancel button */}
                     <div

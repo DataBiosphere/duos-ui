@@ -3,6 +3,7 @@ import { mount } from 'cypress/react';
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication';
 import { DataAccessRequest, Dataset, DuosUser, FileStorageObject } from 'src/types/model';
 import { History, Location, Action } from 'history';
+import { Storage } from 'src/libs/storage';
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History;
@@ -21,6 +22,8 @@ describe('ProgressReportApplication - Component Tests', () => {
       win.localStorage.clear();
       win.sessionStorage.clear();
     });
+
+    cy.stub(Storage, 'getCurrentUser').returns(researcher);
 
     // Create mock history with stubs inside beforeEach
     mockHistory = {
