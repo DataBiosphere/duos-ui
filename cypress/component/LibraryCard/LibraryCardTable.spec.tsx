@@ -2,7 +2,8 @@ import React from 'react';
 import {mount} from 'cypress/react';
 import LibraryCardTable, {LibraryCardTableProps} from 'src/components/library_card_table/LibraryCardTable';
 import {LibraryCard as LibraryCardModel} from 'src/types/model';
-import {UserOption} from "src/components/modals/LibraryCardFormModal";
+import {UserOption} from 'src/components/modals/LibraryCardFormModal';
+import {LibraryCard} from 'src/libs/ajax/LibraryCard';
 
 describe('Library Card Table Tests', () => {
 
@@ -52,16 +53,22 @@ describe('Library Card Table Tests', () => {
   });
 
   it('Should display an error message if a library card failed to create', () => {
-    cy.intercept('POST', '/api/libraryCards', {
-        statusCode: 500,
-        body: {
-            message: 'Failed to issue library card for user1@test.com'
-        }
-    }).as('createLibraryCard')
+    cy.stub(LibraryCard, 'createLibraryCard')
+        .callsFake((card) => {
+          return Promise.reject({
+            response: {
+              data: {
+                message: `Failed to issue library card for ${card.userEmail}`
+              }
+            }
+          });
+        });
+
     const props: LibraryCardTableProps = {
       libraryCards: [],
       users: userOptions,
     }
+
     mount(<LibraryCardTable {...props}/>);
     cy.get('[data-cy=add-library-card-button]').click();
     cy.get('[data-cy=library-card-form-modal]').should('exist');
@@ -71,7 +78,6 @@ describe('Library Card Table Tests', () => {
     cy.get('[id$=option-1]').click(); // Test User 1
 
     cy.get('[id=Add-button]').click();
-    cy.contains('Unknown error')
+    cy.contains('Failed to issue library card for user1@test.com')
   });
-
 });
