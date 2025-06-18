@@ -22,6 +22,7 @@ import TableIconButton from 'src/components/TableIconButton';
 import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {LibraryCard} from 'src/types/model';
+import {extractError} from "src/utils/ErrorUtils";
 
 interface UserData {
   userId: number;
@@ -316,13 +317,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
           const newCard = await LibraryCardAPI.createLibraryCard(card);
           successfulCards.push(newCard);
         } catch (error: unknown) {
-          const axiosError = error as AxiosError;
-          const consentError = axiosError?.response?.data as ConsentError;
-          const serverError = consentError.message ?? 'Error: Failed to create new library card';
-          failedCards.push({
-            card,
-            error: serverError || 'Unknown error'
-          });
+          const errorMessage = extractError(error);
+          failedCards.push({ card, error: errorMessage });
         }
       }
       const updatedList = cloneDeep(libraryCards);

@@ -22,6 +22,7 @@ import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement08012
 import {
   NIHDataUseCertificationAgreement
 } from 'src/components/external_docs/NIHDataUseCertificationAgreement';
+import {extractError} from 'src/utils/ErrorUtils.js';
 
 //Styles specific to this table
 const styles = {
@@ -323,10 +324,8 @@ export default function SigningOfficialTable(props) {
         const newCard = await LibraryCard.createLibraryCard(card);
         successfulCards.push(newCard);
       } catch (error) {
-        failedCards.push({
-          card,
-          error: error.response?.data?.message || 'Unknown error'
-        });
+        const errorMessage = extractError(error);
+        failedCards.push({ card, error: errorMessage });
       }
     }
 
