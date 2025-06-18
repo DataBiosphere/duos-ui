@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
-import CollaboratorSummary from '../../../src/components/collaborator_list/CollaboratorSummary';
-import { Collaborator } from '../../../src/components/collaborator_list/Collaborator';
+import CollaboratorSummary from 'src/components/collaborator_list/CollaboratorSummary';
+import {Collaborator} from 'src/types/model';
 
 type PartialCollaborator = {
   name: string;
@@ -16,10 +16,11 @@ describe('CollaboratorSummary - Component Tests', () => {
   const mockCollaborator: Collaborator = {
     name: 'John Doe',
     title: 'Researcher',
-    institution: 'Research Institute',
     email: 'john.doe@example.com',
     uuid: '123e4567-e89b-12d3-a456-426614174000',
-    eraCommonsId: 'jdoe123'
+    eraCommonsId: 'jdoe123',
+    approverStatus: false,
+    countryOfOperation: 'United States of America (the)'
   };
 
   const defaultProps = {
@@ -37,8 +38,6 @@ describe('CollaboratorSummary - Component Tests', () => {
     cy.contains(mockCollaborator.title).should('be.visible');
     cy.contains(mockCollaborator.email).should('be.visible');
 
-    cy.contains(mockCollaborator.institution).should('not.exist');
-
     cy.get('.collaborator-summary-edit-delete-buttons').should('exist');
     cy.get('.glyphicon-pencil').should('exist');
     cy.get('.glyphicon-trash').should('exist');
@@ -47,16 +46,15 @@ describe('CollaboratorSummary - Component Tests', () => {
   it('renders different columns when columnsToShow changes', () => {
     const customProps = {
       ...defaultProps,
-      columnsToShow: ['name', 'institution']
+      columnsToShow: ['name', 'email']
     };
 
     mount(<CollaboratorSummary {...customProps} />);
 
     cy.contains(mockCollaborator.name).should('be.visible');
-    cy.contains(mockCollaborator.institution).should('be.visible');
 
     cy.contains(mockCollaborator.title).should('not.exist');
-    cy.contains(mockCollaborator.email).should('not.exist');
+    cy.contains(mockCollaborator.email).should('be.visible');
   });
 
   it('calls editAction when edit button is clicked', () => {

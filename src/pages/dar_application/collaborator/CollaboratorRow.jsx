@@ -4,6 +4,7 @@ import CollaboratorForm from './CollaboratorForm';
 
 export const CollaboratorRow = (props) => {
   const {
+    countriesOfOperation,
     index,
     validation,
     onCollaboratorValidationChange,
@@ -18,6 +19,7 @@ export const CollaboratorRow = (props) => {
         collaborator={collaborator}
         index={index}
         validation={validation}
+        countriesOfOperation={countriesOfOperation}
         onCollaboratorValidationChange={onCollaboratorValidationChange}
       />}
       {!editMode && <CollaboratorSummary

@@ -11,6 +11,7 @@ describe('CollaboratorList - Component Tests', () => {
             email: 'john.doe@example.com',
             uuid: '123e4567-e89b-12d3-a456-426614174001',
             eraCommonsId: 'jdoe123',
+            countryOfOperation: 'Canada',
             approverStatus: true
         },
         {
@@ -19,6 +20,7 @@ describe('CollaboratorList - Component Tests', () => {
             email: 'jane.smith@example.com',
             uuid: '123e4567-e89b-12d3-a456-426614174002',
             eraCommonsId: 'jsmith456',
+            countryOfOperation: 'United States of America (the)',
             approverStatus: true
         }
     ];
@@ -27,6 +29,7 @@ describe('CollaboratorList - Component Tests', () => {
         collaborators: mockCollaborators,
         collaboratorText: 'Collaborator',
         columnsToShow: ['name', 'title', 'email'],
+        countriesOfOperation:['France', 'Canada', 'United States of America (the)'],
         onCollaboratorChange: () => { },
         disabled: false
     };

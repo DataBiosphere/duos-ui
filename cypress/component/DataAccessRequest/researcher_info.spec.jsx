@@ -1,13 +1,14 @@
 import {React} from 'react';
 import {mount} from 'cypress/react';
 import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo';
-import { User } from '../../../src/libs/ajax/User';
+import { User } from 'src/libs/ajax/User.js';
 
 import {BrowserRouter} from 'react-router-dom';
 
 const props = {
   allSigningOfficials: [],
   completed: true,
+  countriesOfOperation:['United States of America (the)', 'France', 'Canada'],
   darCode: undefined,
   eRACommonsDestination: undefined,
   formFieldChange: () => {},
