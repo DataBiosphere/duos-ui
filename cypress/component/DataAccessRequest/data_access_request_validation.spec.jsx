@@ -2,13 +2,13 @@ import {React} from 'react';
 import {mount} from 'cypress/react';
 import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication.jsx';
 import { MemoryRouter } from 'react-router-dom';
-import { DAR } from '../../../src/libs/ajax/DAR.js';
-import { DataSet } from '../../../src/libs/ajax/DataSet.js';
-import { Metrics } from '../../../src/libs/ajax/Metrics';
-import { Navigation } from '../../../src/libs/utils.js';
-import { NotificationService } from '../../../src/libs/notificationService.js';
-import { Storage } from '../../../src/libs/storage.js';
-import { User } from '../../../src/libs/ajax/User';
+import { DAR } from 'src/libs/ajax/DAR.js';
+import { DataSet } from 'src/libs/ajax/DataSet.js';
+import { Metrics } from 'src/libs/ajax/Metrics.js';
+import { Navigation } from 'src/libs/utils.js';
+import { NotificationService } from 'src/libs/notificationService.js';
+import { Storage } from 'src/libs/storage.js';
+import { User } from 'src/libs/ajax/User.js';
 
 const props = {
   match: {
@@ -113,7 +113,6 @@ describe('Data Access Request - Validation', () => {
     });
 
     it('Submits given valid DAR', () => {
-      cy.get('#piName').type('Some PI');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
       cy.get('#anvilUse_yes').click();
@@ -148,7 +147,6 @@ describe('Data Access Request - Validation', () => {
     });
 
     it('Required fields should not be errored when you open page', () => {
-      cy.get('#piName').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('not.have.class', 'errored');
       cy.get('#itDirector').should('not.have.class', 'errored');
       cy.get('#anvilUse').should('not.have.class', 'errored');
@@ -177,7 +175,6 @@ describe('Data Access Request - Validation', () => {
     it('Required fields get errors on submit', () => {
       cy.get('#btn_attest').click();
 
-      cy.get('#piName').should('have.class', 'errored');
       cy.get('#signingOfficial').should('have.class', 'errored');
       cy.get('#itDirector').should('have.class', 'errored');
       cy.get('#anvilUse').should('have.class', 'errored');

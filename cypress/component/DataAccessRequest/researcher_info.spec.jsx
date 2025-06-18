@@ -1,7 +1,7 @@
 import {React} from 'react';
 import {mount} from 'cypress/react';
 import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo';
-import { User } from '../../../src/libs/ajax/User';
+import { User } from 'src/libs/ajax/User.js';
 
 import {BrowserRouter} from 'react-router-dom';
 
@@ -18,7 +18,7 @@ const props = {
   setLabCollaboratorsCompleted: () => {},
   setInternalCollaboratorsCompleted: () => {},
   setExternalCollaboratorsCompleted: () => {},
-  researcher: {},
+  researcher: {displayName: 'Researcher Name', email: 'name@email.com'},
   showValidationMessages: false,
   nextPage: () => {},
   validation: {},
@@ -30,6 +30,8 @@ const props = {
     internalCollaborators: [],
     externalCollaborators: [],
     labCollaborators: [],
+    piName: 'PI Name',
+    piEmail: 'pi@email.com'
   }
 };
 
@@ -200,5 +202,20 @@ describe('Researcher Info', () => {
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('not.exist');
+  });
+
+  it('renders researcher and pi as disabled with pi fields populated with the researcher data when not in read only mode', () => {
+    mount(<WrappedResearcherInfo {...props}/>);
+    cy.get('#researcherName').should('have.value', props.researcher.displayName);
+    cy.get('#piName').should('have.value', props.researcher.displayName);
+    cy.get('#piEmail').should('have.value', props.researcher.email);
+  });
+
+  it('renders researcher and pi as disabled with pi fields populated with saved pi info in read only mode', () => {
+    const mergedProps = {...props, ...{readOnlyMode: true}};
+    mount(<WrappedResearcherInfo {...mergedProps}/>);
+    cy.get('#researcherName').should('have.value', props.researcher.displayName);
+    cy.get('#piName').should('have.value', props.formData.piName);
+    cy.get('#piEmail').should('have.value', props.formData.piEmail);
   });
 });

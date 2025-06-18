@@ -87,7 +87,6 @@ export default function ResearcherInfo(props) {
         <div className='dar-application-row'>
           <FormField
             id='researcherName'
-            placeholder='Enter Firstname Lastname'
             title='1.1 Researcher'
             titleStyle={readOnlyMode ? {...titleStyle, ...noTopMarginStyle} : titleStyle}
             validators={[FormValidators.REQUIRED]}
@@ -138,7 +137,7 @@ export default function ResearcherInfo(props) {
 
         <div className='dar-application-row'>
           <h3>1.3 Principal Investigator</h3>
-          <div>I certify that the principal investigator listed below is aware of this study</div>
+          <div>I certify that I am the principal investigator. </div>
           <div className="formTable-row formTable-cols-full">
             <label className="control-label" id="principal-investigator-name">Principal Investigator Name*</label>
             <label className="control-label" id="principal-investigator-email">Principal Investigator Email*</label>
@@ -146,25 +145,18 @@ export default function ResearcherInfo(props) {
           <div className="formTable-row formTable-data-row">
             <FormField
               id='piName'
-              disabled={readOnlyMode}
+              disabled={true}
               placeholder='Principal Investigator Name'
               validators={[FormValidators.REQUIRED]}
               ariaLevel={ariaLevel + 1}
-              validation={validation.piName}
-              onValidationChange={onValidationChange}
-              onChange={({key, value}) => formFieldChange({key, value})}
-              defaultValue={formData.piName}
+              defaultValue={readOnlyMode ? formData.piName : researcher.displayName}
             />
             <FormField
               id='piEmail'
-              disabled={readOnlyMode}
-              placeholder='Principal Investigator Email'
+              disabled={true}
               validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
               ariaLevel={ariaLevel + 1}
-              validation={validation.piEmail}
-              onValidationChange={onValidationChange}
-              onChange={({key, value}) => formFieldChange({key, value})}
-              defaultValue={formData.piEmail}
+              defaultValue={readOnlyMode ? formData.piEmail : researcher.email}
             />
           </div>
         </div>

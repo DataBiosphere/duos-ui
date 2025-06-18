@@ -273,12 +273,14 @@ const DataAccessRequestApplication = (props) => {
     }
 
     formData.researcher = isNil(researcher) ? '' : researcher.displayName;
+    formData.piName = props.existingDarsReadOnlyMode ? formData.piName : formData.researcher;
+    formData.piEmail = props.existingDarsReadOnlyMode ? formData.piEmail : (isNil(researcher) ? '' : researcher.email);
     formData.institution = isNil(researcher) || isNil(researcher.institution) ? '' : researcher.institution.name;
     formData.userId = researcher.userId;
 
     batchFormFieldChange(formData);
     setIsLoading(false);
-  }, [props.match.params, researcher]);
+  }, [props.match.params, props.existingDarsReadOnlyMode, researcher]);
 
   useEffect(() => {
     if (props.existingDarsReadOnlyMode) {

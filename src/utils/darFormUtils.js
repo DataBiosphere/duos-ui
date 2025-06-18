@@ -110,10 +110,6 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
     errors.nihEraId = requiredError;
   }
 
-  if (isStringEmpty(formData.piName)) {
-    errors.piName = requiredError;
-  }
-
   if (isStringEmpty(formData.signingOfficial)) {
     errors.signingOfficial = requiredError;
   }
