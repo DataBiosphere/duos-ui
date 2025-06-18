@@ -425,10 +425,10 @@ export default function SigningOfficialTable(props) {
           <SimpleButton
             onClick={() => showModalOnClick()}
             baseColor={Theme.palette.secondary}
-            label="Add Library Card"
+            label="Bulk Issue / Add Users"
             additionalStyle={{
               width: '22rem',
-              height: '4rem',
+              height: '5rem',
               padding: '4% 10%',
               fontWeight: '600' }}
           />

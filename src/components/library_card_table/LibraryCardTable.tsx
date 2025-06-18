@@ -22,7 +22,7 @@ import TableIconButton from 'src/components/TableIconButton';
 import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {LibraryCard} from 'src/types/model';
-import {extractError} from "src/utils/ErrorUtils";
+import {extractError} from 'src/utils/ErrorUtils';
 
 interface UserData {
   userId: number;
@@ -306,7 +306,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
     if (hasDuplicateCard) {
       Notifications.showError({text: 'One or more of the library cards already exist.'});
     } else {
-      // Execute library card update with payload, get the updated card, and
+      // Execute library card updates with payload, get the updated card, and
       // add (with sort afterwards) library card to libraryCards (reference list)
       const successfulCards = [];
       const failedCards = [];
@@ -324,16 +324,16 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
       const updatedList = cloneDeep(libraryCards);
       libraryCards.push(...successfulCards);
 
-      updatedList.sort((a: LibraryCard, b: LibraryCard) => {
-        const dateA = new Date(a.createDate ?? '');
-        const dateB = new Date(b.createDate ?? '');
-        return dateB.getTime() - dateA.getTime();
+      updatedList.sort((a, b) => {
+        return dayjs(b.createDate).valueOf() - dayjs(a.createDate).valueOf();
       });
+
       setLibraryCards(updatedList);
       setShowModal(false);
+
       if(failedCards.length > 0) {
-        const errorMessages = failedCards.map(failure => `${failure.card.userEmail}: ${failure.error}`).join('\n');
-        Notifications.showError({text: `Failed to create the following library cards:\n${errorMessages}`});
+        const errorMessages = failedCards.map(failure => `${failure.error}`).join(', ');
+        Notifications.showError({text: `${errorMessages}`});
       }
     }
   };
@@ -386,7 +386,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                       flexDirection: 'row',
                       alignItems: 'flex-end',
                       justifyContent: 'center',
-                      width: '300px'
+                      width: '380px'
                     }}
                 >
                   <button
@@ -406,7 +406,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                           )
                       }
                   >
-                    <span>Add Library Card</span>
+                    <span>Bulk Issue / Add Users</span>
                   </button>
                 </div>
               }

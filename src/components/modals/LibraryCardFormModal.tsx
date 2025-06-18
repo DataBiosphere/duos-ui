@@ -34,8 +34,6 @@ export interface LibraryCardFormModalProps {
 interface FilterOptions {
   searchTerm?: string;
   input?: string;
-  card: LibraryCard;
-  setCard: React.Dispatch<React.SetStateAction<LibraryCard>>;
   action: string;
 }
 
@@ -121,14 +119,6 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
     return selectedUsers.length === 0;
   };
 
-  // Update text to reflect multiple users
-  const getActionText = (): string => {
-    const userCount = selectedUsers.length;
-    if (userCount === 0) return "By clicking 'ADD' you agree to the terms of the agreements above.";
-    if (userCount === 1) return "By clicking 'ADD' you agree to the terms of the agreements above for this user.";
-    return `By clicking 'ADD' you agree to the terms of the agreements above for all ${userCount} users.`;
-  };
-
   return (
       <ModalWrapper
           isOpen={showModal}
@@ -156,7 +146,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
               dropdownOptions={users}
           />
           <div style={{display: 'inline-block'}}>
-            {getActionText()}
+            By clicking {'\'ADD\''} you agree to the terms of the agreements above for all users.
           </div>
           <div
               style={{
