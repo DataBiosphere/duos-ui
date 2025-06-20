@@ -52,6 +52,7 @@ const fetchAllDatasets = async (dsIds) => {
   if (isEmpty(filteredDatasetIds)) {
     return [];
   }
+
   // filter just for safety
   return DataSet.getDatasetsByIds(filteredDatasetIds);
 };
@@ -257,6 +258,7 @@ const DataAccessRequestApplication = (props) => {
       // Add elections to DAR data passed into form, to enable showing approved datasets
       Object.values(dars).map((dar) => {
         dar.data.elections = dar.elections;
+        dar.data.datasetIds = dar.datasetIds;
       })
 
       // TS thinks that collection.dars is an object, but it is a map

@@ -31,7 +31,6 @@ type ProgressReportApplicationProps = {
 };
 
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
-  console.log('ProgressReportApplication', { dar, datasets, readOnlyMode, history, location, researcher });
     const initialState = {
         ...dar,
         ...dar.data,
@@ -70,10 +69,12 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             })
           }
         ),
+
         // additional state for datasets section populated by useEffect
         datasets: [],
         datasetIds: [],
         selectedDatasets: [],
+
         // additional state for dmi section
         ...(dar?.dmi?.incidents && {
             dmiYesNo: (dar.dmi.incidents.length > 0),
@@ -173,36 +174,27 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     }
 
     function getDatasetsInApprovedElections(datasets: Dataset[], approvedElectionDatasetIds: number[]) {
-      console.log('in getDatasetsInApprovedElections, approvedElectionDatasetIds', approvedElectionDatasetIds);
-      console.log('in getDatasetsInApprovedElections, datasets', JSON.stringify(datasets));
-
       const datasetsInApprovedElections = datasets.filter(dataset => {
         return approvedElectionDatasetIds.includes(dataset.datasetId)
       });
-      console.log('datasetsInApprovedElections', datasetsInApprovedElections);
       return datasetsInApprovedElections
     }
 
     // required because the datasets state changes during component mount
     useEffect(() => {
       let approvedDatasets;
-      console.log('dar.elections', dar.elections);
       if (readOnlyMode) {
-        // Only approved datasets are submittable for a DAR, so
-        // simply
         approvedDatasets = datasets.filter(
           dataset => dar.datasetIds.includes(dataset.datasetId)
         )
       } else {
         const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : [];
-        console.log('approvedDatasetIds', approvedDatasetIds)
         approvedDatasets = getDatasetsInApprovedElections(datasets, approvedDatasetIds)
           .filter((ds) => ds.dacApproval);
       }
-      console.log('approvedDatasets', approvedDatasets);
+
       onFormChange({ datasets: approvedDatasets });
       onSelectedDatasetChange(approvedDatasets);
-
     }, [datasets]);
 
     return (
