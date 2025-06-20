@@ -30,7 +30,7 @@ type ProgressReportApplicationProps = {
   readonly countriesOfOperation: string[]
 };
 
-export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
   console.log('ProgressReportApplication', { dar, datasets, readOnlyMode, history, location, researcher });
     const initialState = {
         ...dar,
