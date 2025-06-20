@@ -117,8 +117,6 @@ beforeEach(() => {
     });
 
     it('Submits given valid DAR', () => {
-      cy.get('#piName').type('Some PI');
-      cy.get('#piEmail').type('alice@good.org');
       cy.get('#piCountryOfOperation').type('United{enter}');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
@@ -155,8 +153,6 @@ beforeEach(() => {
     });
 
     it('Required fields should not be errored when you open page', () => {
-      cy.get('#piName').should('not.have.class', 'errored');
-      cy.get('#piEmail').should('not.have.class', 'errored');
       cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('not.have.class', 'errored');
       cy.get('#itDirector').should('not.have.class', 'errored');
@@ -187,8 +183,6 @@ beforeEach(() => {
     it('Required fields get errors on submit', () => {
       cy.get('#btn_attest').click();
 
-      cy.get('#piName').should('have.class', 'errored');
-      cy.get('#piEmail').should('have.class', 'errored');
       // since we're setting a default value, this should not error on initial validation
       cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('have.class', 'errored');
@@ -290,12 +284,9 @@ beforeEach(() => {
     });
 
     it('Cannot submit without library card', () => {
-      cy.get('#piName').type('Some PI');
-      cy.get('#piEmail').type('alice@good.org');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
       cy.get('#itDirectorEmail').type('it@good.org');
-      cy.get('#piEmail').type('alice@good.org');
       cy.get('#piCountryOfOperation').type('United{enter}');
       cy.get('#anvilUse_yes').click();
 
