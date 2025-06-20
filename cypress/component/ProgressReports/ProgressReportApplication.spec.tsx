@@ -820,4 +820,124 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 1);
   });
+
+  it('shows only datasets with IDs included in DAR.datasetIds as available datasets (read-only mode)', () => {
+    // Create multiple datasets where some are DAC approved but only some are in the DAR datasetIds
+    const testDatasets: Dataset[] = [
+      {
+        ...mockDatasets[0],
+        datasetId: 1,
+        name: 'Dataset In DAR 1',
+        datasetName: 'Dataset In DAR 1',
+        datasetIdentifier: 'DUOS-000001',
+        dacApproval: true,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 2,
+        name: 'Dataset In DAR 2',
+        datasetName: 'Dataset In DAR 2',
+        datasetIdentifier: 'DUOS-000002',
+        dacApproval: true,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 3,
+        name: 'Dataset NOT In DAR',
+        datasetName: 'Dataset NOT In DAR',
+        datasetIdentifier: 'DUOS-000003',
+        dacApproval: true, // DAC approved but NOT in DAR datasetIds
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 4,
+        name: 'Another Dataset NOT In DAR',
+        datasetName: 'Another Dataset NOT In DAR',
+        datasetIdentifier: 'DUOS-000004',
+        dacApproval: true, // DAC approved but NOT in DAR datasetIds
+      }
+    ];
+
+    // Create elections where all datasets are approved (to isolate the datasetIds filtering)
+    const darWithSelectiveDatasetIds = {
+      datasetIds: [1, 2], // Only datasets 1 and 2 are in the DAR request
+      elections: {
+        1001: {
+          electionId: 1001,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 1,
+          votes: {
+            10001: {
+              voteId: 10001,
+              vote: true, // Approved
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 1001,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        },
+        1002: {
+          electionId: 1002,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 2,
+          votes: {
+            10002: {
+              voteId: 10002,
+              vote: true, // Approved
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 1002,
+              type: 'FINAL',
+              displayName: 'Test Voter 2'
+            }
+          }
+        },
+        // Note: No elections for datasets 3 and 4 since they're not in the DAR
+      }
+    };
+
+    const fullDar = { ...baseDar, ...darWithSelectiveDatasetIds } as unknown as DataAccessRequest;
+
+    const props = {
+      dar: fullDar,
+      datasets: testDatasets,
+      readOnlyMode: true, // Testing in read-only mode
+      history: mockHistory,
+      location,
+      researcher,
+      countriesOfOperation: []
+    };
+
+    mount(<ProgressReportApplication {...props} /> as ReactNode);
+
+    cy.get('[data-cy="remove-datasets"]').should('exist');
+
+    // Should show only datasets 1 and 2 (which are in dar.datasetIds)
+    cy.get('[data-cy="remove-datasets"]').within(() => {
+      cy.contains('Dataset In DAR 1').should('exist');
+      cy.contains('Dataset In DAR 2').should('exist');
+
+      // Should NOT show datasets 3 and 4 (not in dar.datasetIds, even though they have DAC approval)
+      cy.contains('Dataset NOT In DAR').should('not.exist');
+      cy.contains('Another Dataset NOT In DAR').should('not.exist');
+    });
+
+    // Verify exactly 2 datasets are displayed (only those in dar.datasetIds)
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 2);
+
+    // In read-only mode, verify that the datasets are displayed but not editable
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').each(($card) => {
+      // Should not have remove buttons or other interactive elements in read-only mode
+      cy.wrap($card).find('button').should('not.exist');
+      cy.wrap($card).find('input[type="checkbox"]').should('not.exist');
+    });
+  });
 });
