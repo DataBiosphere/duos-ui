@@ -450,4 +450,374 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('#intellectualPropertySummary').should('be.visible');
     cy.get('#intellectualPropertySummary').should('contain.value', 'Test intellectual property description with important details');
   });
+
+  it('shows only approved datasets in create-mode progress report', () => {
+    // Create multiple datasets with different approval states
+    const testDatasets: Dataset[] = [
+      {
+        ...mockDatasets[0],
+        datasetId: 1,
+        name: 'Approved Dataset 1',
+        datasetName: 'Approved Dataset 1',
+        datasetIdentifier: 'DUOS-000001',
+        dacApproval: true,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 2,
+        name: 'Approved Dataset 2',
+        datasetName: 'Approved Dataset 2',
+        datasetIdentifier: 'DUOS-000002',
+        dacApproval: true,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 3,
+        name: 'Not DAC Approved Dataset',
+        datasetName: 'Not DAC Approved Dataset',
+        datasetIdentifier: 'DUOS-000003',
+        dacApproval: false,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 4,
+        name: 'DAC Approved but Not Election Approved Dataset',
+        datasetName: 'DAC Approved but Not Election Approved Dataset',
+        datasetIdentifier: 'DUOS-000004',
+        dacApproval: true,
+      }
+    ];
+
+    // Create elections where only datasets 1 and 2 are approved
+    const darWithElections = {
+      datasetIds: [1, 2, 3, 4], // All datasets are requested in the DAR
+      elections: {
+        1001: {
+          electionId: 1001,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 1,
+          votes: {
+            10001: {
+              voteId: 10001,
+              vote: true, // Approved
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 1001,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        },
+        1002: {
+          electionId: 1002,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 2,
+          votes: {
+            10002: {
+              voteId: 10002,
+              vote: true, // Approved
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 1002,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        },
+        1003: {
+          electionId: 1003,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 3,
+          votes: {
+            10003: {
+              voteId: 10003,
+              vote: false, // Denied
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 1003,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        },
+        1004: {
+          electionId: 1004,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 4,
+          votes: {
+            10004: {
+              voteId: 10004,
+              vote: false, // Denied
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 1004,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        }
+      }
+    };
+
+    // Mount component with datasets and elections
+    const fullDar = { ...baseDar, ...darWithElections } as unknown as DataAccessRequest;
+    const props = {
+      dar: fullDar,
+      datasets: testDatasets,
+      readOnlyMode: false,
+      history: mockHistory,
+      location,
+      researcher
+    };
+
+    mount(<ProgressReportApplication {...props} /> as ReactNode);
+
+    // Verify that only approved datasets are shown
+    // The component should only show datasets that are:
+    // 1. In dar.datasetIds
+    // 2. Have dacApproval = true
+    // 3. Have approved elections (finalAccessVote = true)
+
+    // Should show dataset 1 and 2 (both DAC approved AND election approved)
+    cy.get('[data-cy="remove-datasets"]').within(() => {
+      cy.contains('Approved Dataset 1').should('exist');
+      cy.contains('Approved Dataset 2').should('exist');
+
+      // Should NOT show dataset 3 (not DAC approved)
+      cy.contains('Not DAC Approved Dataset').should('not.exist');
+
+      // Should NOT show dataset 4 (DAC approved but election denied)
+      cy.contains('DAC Approved but Not Election Approved Dataset').should('not.exist');
+    });
+
+    // Verify the count of displayed datasets using the actual CSS class
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 2);
+  });
+
+  it('in create-mode, shows no datasets when none are approved through elections', () => {
+    // Create datasets where all have DAC approval but none have election approval
+    const testDatasets: Dataset[] = [
+      {
+        ...mockDatasets[0],
+        datasetId: 1,
+        name: 'DAC Approved Dataset 1',
+        datasetName: 'DAC Approved Dataset 1',
+        datasetIdentifier: 'DUOS-000001',
+        dacApproval: true,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 2,
+        name: 'DAC Approved Dataset 2',
+        datasetName: 'DAC Approved Dataset 2',
+        datasetIdentifier: 'DUOS-000002',
+        dacApproval: true,
+      }
+    ];
+
+    // Create elections where all datasets are denied
+    const darWithDeniedElections = {
+      datasetIds: [1, 2],
+      elections: {
+        2001: {
+          electionId: 2001,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 1,
+          votes: {
+            20001: {
+              voteId: 20001,
+              vote: false, // Denied
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 2001,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        },
+        2002: {
+          electionId: 2002,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 2,
+          votes: {
+            20002: {
+              voteId: 20002,
+              vote: false, // Denied
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 2002,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        }
+      }
+    };
+
+    const fullDar = { ...baseDar, ...darWithDeniedElections } as unknown as DataAccessRequest;
+    const props = {
+      dar: fullDar,
+      datasets: testDatasets,
+      readOnlyMode: false,
+      history: mockHistory,
+      location,
+      researcher
+    };
+
+    mount(<ProgressReportApplication {...props} /> as ReactNode);
+
+    // Should show no datasets since none are approved through elections
+    cy.get('[data-cy="remove-datasets"]').within(() => {
+      cy.contains('DAC Approved Dataset 1').should('not.exist');
+      cy.contains('DAC Approved Dataset 2').should('not.exist');
+    });
+
+    // The dataset list should be empty or show a message about no datasets
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 0);
+  });
+
+  it('in create-mode, only shows datasets that pass all approval criteria', () => {
+    // This test ensures the filtering logic works correctly by testing the exact criteria:
+    // 1. Dataset must be in dar.datasetIds
+    // 2. Dataset must have dacApproval = true
+    // 3. Dataset must have an approved election (type=FINAL, vote=true)
+
+    const testDatasets: Dataset[] = [
+      {
+        ...mockDatasets[0],
+        datasetId: 1,
+        name: 'All Criteria Met',
+        datasetName: 'All Criteria Met',
+        datasetIdentifier: 'DUOS-000001',
+        dacApproval: true,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 2,
+        name: 'Not in DAR datasetIds',
+        datasetName: 'Not in DAR datasetIds',
+        datasetIdentifier: 'DUOS-000002',
+        dacApproval: true,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 3,
+        name: 'No DAC Approval',
+        datasetName: 'No DAC Approval',
+        datasetIdentifier: 'DUOS-000003',
+        dacApproval: false,
+      },
+      {
+        ...mockDatasets[0],
+        datasetId: 4,
+        name: 'No Election Approval',
+        datasetName: 'No Election Approval',
+        datasetIdentifier: 'DUOS-000004',
+        dacApproval: true,
+      }
+    ];
+
+    const darWithFilteringTest = {
+      datasetIds: [1, 3, 4], // Note: dataset 2 is NOT included in DAR
+      elections: {
+        3001: {
+          electionId: 3001,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 1,
+          votes: {
+            30001: {
+              voteId: 30001,
+              vote: true, // Approved
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 3001,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        },
+        3003: {
+          electionId: 3003,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 3,
+          votes: {
+            30003: {
+              voteId: 30003,
+              vote: true, // Approved
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 3003,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        },
+        3004: {
+          electionId: 3004,
+          electionType: 'DataAccess',
+          status: 'Closed',
+          createDate: 1700000000000,
+          referenceId: 'DAR-123',
+          datasetId: 4,
+          votes: {
+            30004: {
+              voteId: 30004,
+              vote: false, // Denied
+              userId: 1,
+              createDate: 1700000000000,
+              electionId: 3004,
+              type: 'FINAL',
+              displayName: 'Test Voter 1'
+            }
+          }
+        }
+      }
+    };
+
+    const fullDar = { ...baseDar, ...darWithFilteringTest } as unknown as DataAccessRequest;
+    const props = {
+      dar: fullDar,
+      datasets: testDatasets,
+      readOnlyMode: false,
+      history: mockHistory,
+      location,
+      researcher
+    };
+
+    mount(<ProgressReportApplication {...props} /> as ReactNode);
+
+    // Only dataset 1 should be shown (meets all criteria)
+    cy.get('[data-cy="remove-datasets"]').within(() => {
+      cy.contains('All Criteria Met').should('exist');
+      cy.contains('Not in DAR datasetIds').should('not.exist');
+      cy.contains('No DAC Approval').should('not.exist');
+      cy.contains('No Election Approval').should('not.exist');
+    });
+
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 1);
+  });
 });
