@@ -81,6 +81,10 @@ export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=tru
     errors.title = requiredError;
   }
 
+  if (isStringEmpty(collaborator?.countryOfOperation)) {
+    errors.countryOfOperation = requiredError;
+  }
+
   if (isStringEmpty(collaborator?.email)) {
     errors.email = requiredError;
   } else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
@@ -110,8 +114,8 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
     errors.nihEraId = requiredError;
   }
 
-  if (isStringEmpty(formData.piName)) {
-    errors.piName = requiredError;
+  if (isStringEmpty(formData.piCountryOfOperation)) {
+    errors.piCountryOfOperation = requiredError;
   }
 
   if (isStringEmpty(formData.signingOfficial)) {
@@ -120,6 +124,10 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
 
   if (isStringEmpty(formData.itDirector)) {
     errors.itDirector = requiredError;
+  }
+
+  if (isStringEmpty(formData.itDirectorEmail)) {
+    errors.itDirectorEmail = requiredError;
   }
 
   if (!labCollaboratorsCompleted) {

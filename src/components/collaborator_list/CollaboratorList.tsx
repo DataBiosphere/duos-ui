@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorRow from './CollaboratorRow';
-import {Collaborator} from "src/types/model";
+import {Collaborator} from 'src/types/model';
+import {Countries} from 'src/libs/ajax/Countries';
 
 interface CollaboratorListProps {
     collaborators: Collaborator[];
@@ -10,10 +11,11 @@ interface CollaboratorListProps {
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly disabled?: boolean;
     readonly showApproverStatus?: boolean;
+    readonly countriesOfOperation: string[];
 }
 
 export default function CollaboratorList(props: CollaboratorListProps): React.JSX.Element {
-    const { collaborators, collaboratorText, columnsToShow = [], onCollaboratorChange, disabled = false, showApproverStatus = false } = props;
+    const { collaborators, collaboratorText, columnsToShow = [], onCollaboratorChange, disabled = false, showApproverStatus = false, countriesOfOperation } = props;
 
     const [showAddEdit, setShowAddEdit] = useState(false);
     const [editState, setEditState] = useState(collaborators.map(() => false));
@@ -51,9 +53,11 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         id={-1}
                         collaboratorText={collaboratorText}
                         collaborators={collaborators}
+                        collaborator={{countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator}
                         closeAction={() => setShowAddEdit(false)}
                         onCollaboratorChange={onCollaboratorChange}
                         showApproverStatus={showApproverStatus}
+                        countriesOfOperation={countriesOfOperation}
                     />
                 )}
             </div>
@@ -67,6 +71,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         collaboratorText={collaboratorText}
                         collaborators={collaborators}
                         columnsToShow={columnsToShow}
+                        countriesOfOperation={countriesOfOperation}
                         editAction={() => toggleEditState(index)}
                         deleteAction={() => { handleDeleteCollaborator(index); }}
                         closeAction={() => { toggleEditState(index); setShowAddEdit(false); }}

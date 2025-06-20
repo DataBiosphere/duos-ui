@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import CollaboratorDelete from "./CollaboratorDelete";
-import { Collaborator } from "./Collaborator";
+import React, { useState } from 'react';
+import CollaboratorDelete from './CollaboratorDelete';
+import {Collaborator} from 'src/types/model';
 
 interface CollaboratorSummaryProps {
     collaborator: Collaborator;
@@ -26,7 +26,7 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
         <div className='collaborator-summary-card'>
             {/* data elements to show in the row summary */}
             {columnsToShow.map((column, index) => {
-                const columnContent = collaborator[column as keyof Collaborator];
+                const columnContent = collaborator ? collaborator[column as keyof Collaborator] : [];
                 return columnContent && (
                     <div key={'collaborator_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
                         <span>
@@ -65,7 +65,7 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
             </a>
             {/* delete modal */}
             <CollaboratorDelete
-                collaboratorName={collaborator.name}
+                collaboratorName={collaborator?.name}
                 showDelete={showDeleteModal}
                 confirmAction={() => { deleteAction(); setShowDeleteModal(false); }}
                 closeAction={() => setShowDeleteModal(false)}

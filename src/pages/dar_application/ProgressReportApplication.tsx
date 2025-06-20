@@ -27,12 +27,14 @@ type ProgressReportApplicationProps = {
   readonly history: History;
   readonly location?: Location;
   readonly researcher: DuosUser;
+  readonly countriesOfOperation: string[]
 };
 
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher }: ProgressReportApplicationProps) => {
   console.log('ProgressReportApplication', { dar, datasets, readOnlyMode, history, location, researcher });
     const initialState = {
         ...dar,
+        ...dar.data,
         dmiCombination:false,
         dmiIdentification: false,
         dmiSharing: false,
@@ -243,7 +245,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                 />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <CollaboratorChanges readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange}/>
+                <CollaboratorChanges readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} countriesOfOperation={countriesOfOperation}/>
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DataManagementIncident

@@ -25,6 +25,7 @@ export default function ResearcherInfo(props) {
     readOnlyMode,
     includeInstructions,
     completed,
+    countriesOfOperation,
     darCode,
     eRACommonsDestination,
     formFieldChange,
@@ -87,7 +88,6 @@ export default function ResearcherInfo(props) {
         <div className='dar-application-row'>
           <FormField
             id='researcherName'
-            placeholder='Enter Firstname Lastname'
             title='1.1 Researcher'
             titleStyle={readOnlyMode ? {...titleStyle, ...noTopMarginStyle} : titleStyle}
             validators={[FormValidators.REQUIRED]}
@@ -138,7 +138,7 @@ export default function ResearcherInfo(props) {
 
         <div className='dar-application-row'>
           <h3>1.3 Principal Investigator</h3>
-          <div>I certify that the principal investigator listed below is aware of this study</div>
+          <div>I certify that I am the principal investigator. </div>
           <div className="formTable-row formTable-cols-full">
             <label className="control-label" id="principal-investigator-name">Principal Investigator Name*</label>
             <label className="control-label" id="principal-investigator-email">Principal Investigator Email*</label>
@@ -146,27 +146,34 @@ export default function ResearcherInfo(props) {
           <div className="formTable-row formTable-data-row">
             <FormField
               id='piName'
-              disabled={readOnlyMode}
+              disabled={true}
               placeholder='Principal Investigator Name'
               validators={[FormValidators.REQUIRED]}
               ariaLevel={ariaLevel + 1}
-              validation={validation.piName}
-              onValidationChange={onValidationChange}
-              onChange={({key, value}) => formFieldChange({key, value})}
-              defaultValue={formData.piName}
+              defaultValue={readOnlyMode ? formData.piName : researcher.displayName}
             />
             <FormField
               id='piEmail'
-              disabled={readOnlyMode}
-              placeholder='Principal Investigator Email'
+              disabled={true}
               validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
               ariaLevel={ariaLevel + 1}
-              validation={validation.piEmail}
-              onValidationChange={onValidationChange}
-              onChange={({key, value}) => formFieldChange({key, value})}
-              defaultValue={formData.piEmail}
+              defaultValue={readOnlyMode ? formData.piEmail : researcher.email}
             />
           </div>
+          <label className="control-label" id="principal-investigator-country-of-operation">Principal Investigator Country of Operation*</label>
+          <FormField
+            id='piCountryOfOperation'
+            placeholder='Country of Operation'
+            disabled={readOnlyMode}
+            defaultValue={formData.piCountryOfOperation}
+            type={FormFieldTypes.SELECT}
+            validators={[FormValidators.REQUIRED]}
+            validation={validation.piCountryOfOperation}
+            onValidationChange={onValidationChange}
+            selectOptions={countriesOfOperation}
+            optionsAreString={true}
+            onChange={({key, value}) => formFieldChange({key, value})}
+          />
         </div>
 
         <div className='dar-application-row' data-cy='internal-lab-staff'>
@@ -190,6 +197,7 @@ export default function ResearcherInfo(props) {
             onValidationChange={onValidationChange}
             showApproval={true}
             disabled={!isEmpty(darCode) || readOnlyMode}
+            countriesOfOperation={countriesOfOperation}
           />
         </div>
 
@@ -210,6 +218,7 @@ export default function ResearcherInfo(props) {
             collaborators={formData.internalCollaborators}
             collaboratorKey='internalCollaborators'
             collaboratorLabel='Internal Collaborator'
+            countriesOfOperation={countriesOfOperation}
             setCompleted={setInternalCollaboratorsCompleted}
             validation={validation.internalCollaborators}
             onValidationChange={onValidationChange}
@@ -426,6 +435,7 @@ export default function ResearcherInfo(props) {
             collaborators={formData.externalCollaborators}
             collaboratorKey='externalCollaborators'
             collaboratorLabel='External Collaborator'
+            countriesOfOperation={countriesOfOperation}
             setCompleted={setExternalCollaboratorsCompleted}
             showApproval={false}
             disabled={!isEmpty(darCode) || readOnlyMode}
