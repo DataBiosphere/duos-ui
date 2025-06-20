@@ -177,7 +177,8 @@ describe('ProgressReportApplication - Component Tests', () => {
       readOnlyMode: readOnly,
       history: mockHistory,
       location,
-      researcher
+      researcher,
+      countriesOfOperation: []
     };
 
     return mount(<ProgressReportApplication {...props} /> as ReactNode);
@@ -579,7 +580,8 @@ describe('ProgressReportApplication - Component Tests', () => {
       readOnlyMode: false,
       history: mockHistory,
       location,
-      researcher
+      researcher,
+      countriesOfOperation: []
     };
 
     mount(<ProgressReportApplication {...props} /> as ReactNode);
@@ -679,7 +681,8 @@ describe('ProgressReportApplication - Component Tests', () => {
       readOnlyMode: false,
       history: mockHistory,
       location,
-      researcher
+      researcher,
+      countriesOfOperation: []
     };
 
     mount(<ProgressReportApplication {...props} /> as ReactNode);
@@ -805,7 +808,8 @@ describe('ProgressReportApplication - Component Tests', () => {
       readOnlyMode: false,
       history: mockHistory,
       location,
-      researcher
+      researcher,
+      countriesOfOperation: []
     };
 
     mount(<ProgressReportApplication {...props} /> as ReactNode);
