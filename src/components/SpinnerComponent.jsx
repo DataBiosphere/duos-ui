@@ -42,7 +42,7 @@ export class SpinnerComponent extends React.Component {
   }
 
   render() {
-    let divStyle = { 'position': 'fixed', 'top': '30vh', 'left': '50vw', 'marginLeft': '-30px', 'zIndex': '10000' };
+    const divStyle = { 'position': 'fixed', 'top': '30vh', 'left': '50vw', 'marginLeft': '-30px', 'zIndex': '10000' };
     if (this.state.show) {
       const { loadingImage } = this.props;
       return (

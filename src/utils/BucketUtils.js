@@ -44,7 +44,7 @@ import {processMatchData} from './VoteUtils';
  */
 export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
-  let buckets = [];
+  const buckets = [];
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
   const referenceIds = flow(
@@ -67,7 +67,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
   forEach(dataset => {
     // Put each dataset into a bucket. If the dataset's data use is missing, unique or has an "Other" restriction, then
     // it gets its own bucket. If the data use is already in a bucket, then it gets merged in.
-    let bucket = {
+    const bucket = {
       key: '',
       label: '',
       datasets: [dataset],
@@ -312,7 +312,7 @@ export const shouldAbstain = (dataUse) => {
  */
 const createRpVoteStructureFromBuckets = (buckets) => {
   // List of rp vote groups broken out by election into chair, member, and final votes.
-  let rpVotes = [];
+  const rpVotes = [];
 
   const rpElectionVoteArrays = flow(
     flatMap(b => b.elections),
@@ -323,7 +323,7 @@ const createRpVoteStructureFromBuckets = (buckets) => {
   )(buckets);
 
   forEach(vArray => {
-    let rpVoteGroup = {
+    const rpVoteGroup = {
       chairpersonVotes: [],
       memberVotes: [],
       finalVotes: []

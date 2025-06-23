@@ -15,7 +15,7 @@ export const ResearcherReview = (props) => {
 
   useEffect(() => {
     const user = props.user;
-    let userProps = getPropertyValuesFromUser(user);
+    const userProps = getPropertyValuesFromUser(user);
     setState((prev) => ({
       ...prev,
       user: user,

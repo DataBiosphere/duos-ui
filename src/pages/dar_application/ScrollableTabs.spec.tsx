@@ -12,7 +12,7 @@ const ApplicationTabs = [
 describe('ScrollableTabs Component - Tests', () => {
     beforeEach(() => {
         mount(<BrowserRouter>
-            <div style={{display: "inline-flex"}}>
+            <div style={{display: 'inline-flex'}}>
                 <ScrollableTabs applicationTabs={ApplicationTabs} formSelectedTabId={1}/>
                 <div>
                     <div id='researcher-info' style={{height: '1000px', backgroundColor: 'red'}}>Researcher Info</div>

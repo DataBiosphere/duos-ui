@@ -80,7 +80,7 @@ export default function InstitutionTable(props) {
           {tableHeaderTemplate}
         </div>
         {filteredList.slice((currentPage - 1) * tableSize, (currentPage * tableSize)).map((inst, index) => {
-          let signingOfficialsList = [];
+          const signingOfficialsList = [];
           if (!isNil(inst.signingOfficials)) {
             inst.signingOfficials.forEach((user) => {
               signingOfficialsList.push(

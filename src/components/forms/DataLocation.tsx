@@ -4,8 +4,8 @@ import {cloneDeep, set} from 'lodash';
 import {Link} from 'react-router-dom';
 import {asIdAndDisplayText, SelectEntry} from './SelectOptionInterface';
 import {CloudProviders} from './CloudProviders';
-import {DataLocations} from "./DataLocations";
-import {ResearchStage} from "./ResearchStage";
+import {DataLocations} from './DataLocations';
+import {ResearchStage} from './ResearchStage';
 
 export type DataLocationInfo = {
     cloudProvider: null | SelectEntry,

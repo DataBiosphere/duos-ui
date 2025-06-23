@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import PublicationAddEdit from './PublicationAddEdit';
 import PublicationRow from './PublicationRow';
 import { PublicationOrPresentation } from './PublicationOrPresentation';
-import {DarErrors} from "src/pages/dar_application/FormValidationState";
-import {isPublication} from "src/utils/darFormUtils";
+import {DarErrors} from 'src/pages/dar_application/FormValidationState';
+import {isPublication} from 'src/utils/darFormUtils';
 
 interface PublicationListProps {
     publications: PublicationOrPresentation[];

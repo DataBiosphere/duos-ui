@@ -48,7 +48,7 @@ export default function RequestForm(props) {
   };
 
   const handleSupportRequestsChange = ({key, value}) => {
-    let newSupportRequests = Object.assign({}, supportRequests, {[key]: value});
+    const newSupportRequests = Object.assign({}, supportRequests, {[key]: value});
     setSupportRequests(newSupportRequests);
     const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key]);
     setHasSupportRequests(hasAnyRequests);

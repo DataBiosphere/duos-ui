@@ -56,7 +56,7 @@ export const AdminManageUsers = function AdminManageUsers() {
   const okModal = async () => {
     setShowAddUserModal(false);
     setIsLoading(true);
-    let userList = await getUserList();
+    const userList = await getUserList();
     setIsLoading(false);
     setUserList(userList);
   };

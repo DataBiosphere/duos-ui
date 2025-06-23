@@ -2,7 +2,7 @@ import React from 'react';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { FormField, FormFieldTypes } from 'src/components/forms/forms';
 import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
-import {DarErrors, ValidationError} from "src/pages/dar_application/FormValidationState";
+import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
 
 interface DataManagementIncidentProps {
     readonly readOnly: boolean;

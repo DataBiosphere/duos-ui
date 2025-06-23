@@ -42,7 +42,7 @@ export const Storage = {
 
   setCurrentUserSettings: (key, value) => {
     const id = Storage.getCurrentUser()?.userId || '';
-    let userSettings = JSON.parse(sessionStorage.getItem(UserSettings)) || {};
+    const userSettings = JSON.parse(sessionStorage.getItem(UserSettings)) || {};
     if (!userSettings[id]) {
       userSettings[id] = {};
     }

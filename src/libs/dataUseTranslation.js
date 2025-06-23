@@ -26,7 +26,7 @@ export const srpTranslations = {
     type: ControlledAccessType.permissions
   },
   diseases: (diseases) => {
-    let outputStruct = {
+    const outputStruct = {
       code: 'DS',
       description: 'The dataset will be used for disease related studies',
       manualReview: false,
@@ -249,7 +249,7 @@ const getOntologyName = async(urls) => {
 
 export const processRestrictionStatements = async (key, dataUse) => {
   let resp;
-  let value = dataUse[key];
+  const value = dataUse[key];
   if (!isNil(value) && value) {
     if (key === 'diseaseRestrictions') {
       //condition for datasets that have ontology labels contained within the dataUse object
@@ -264,7 +264,7 @@ export const processRestrictionStatements = async (key, dataUse) => {
             const ontologyLabels = await getOntologyName(ontologyUrls);
             resp = consentTranslations.diseaseRestrictions(ontologyLabels);
           }
-        } catch (error) {
+        } catch (_error) {
           Notifications.showError({ text: 'Ontology API Request Error' });
         }
       }
@@ -345,7 +345,7 @@ export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => 
     return filter(
       (restriction) => !isEmpty(restriction)
     ) (await Promise.all(translationPromises));
-  } catch(error) {
+  } catch(_error) {
     throw new Error('Failed to translate Data Use Restrictions from list');
   }
 };
@@ -363,7 +363,7 @@ export const DataUseTranslation = {
    */
 
   translateDarInfo: (darInfo) => {
-    let dataUseSummary = {
+    const dataUseSummary = {
       primary: [],
       secondary: [],
     };

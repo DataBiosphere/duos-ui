@@ -39,7 +39,7 @@ export const ManageDac = function ManageDac() {
     const roles = (currentUser.roles) ? currentUser.roles.map(r => r.name) : [];
     const role = roles.includes(ADMIN) ? ADMIN : CHAIR;
     setUserRole(role);
-    let chairDACIds = currentUser.roles.filter(r => r.name === CHAIR).map(r => r.dacId);
+    const chairDACIds = currentUser.roles.filter(r => r.name === CHAIR).map(r => r.dacId);
     setIsLoading(true);
     const allDacs = await DAC.list();
     if (roles.includes(ADMIN)) {

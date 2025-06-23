@@ -26,7 +26,7 @@ export default function AdminManageInstitutions(props) {
       setInstitutionList(listOfInstitutions);
       filter(listOfInstitutions, searchTerm);
       setIsLoading(false);
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
     } finally {
       setIsLoading(false);
@@ -41,7 +41,7 @@ export default function AdminManageInstitutions(props) {
         setInstitutionList(listOfInstitutions);
         setFilteredList(listOfInstitutions);
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
       } finally {
         setIsLoading(false);
@@ -60,7 +60,7 @@ export default function AdminManageInstitutions(props) {
   const filter = (list, value) => {
     setFilteredList(list.filter(institution => {
       if (value && value !== undefined) {
-        let text = JSON.stringify(institution);
+        const text = JSON.stringify(institution);
         return text.toLowerCase().includes(value.toLowerCase());
       }
       return true;
