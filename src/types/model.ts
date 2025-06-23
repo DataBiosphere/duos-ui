@@ -348,6 +348,8 @@ export interface DatasetStatisticsDar {
  * in DataAccessRequest.data field. This model simplifies usages in ProgressReport forms.
  */
 export interface CombinedDataAccessRequest extends DataAccessRequest {
+  projectTitle: string;
+  checkNihDataOnly: boolean;
   rus: string;
   nonTechRus: string;
   diseases: boolean;
@@ -371,6 +373,16 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   notHealth: boolean;
   hmb: boolean;
   poa: boolean;
+  status: string;
+  darCode: string;
+  validRestriction: boolean;
+  progressReportSummary: string;
+  intellectualPropertySummary: string;
+  publications?: Array<PublicationOrPresentation>;
+  presentations?: Array<PublicationOrPresentation>;
+  dmi?: DataManagementIncident;
+  researchPlans?: string;
+  closeoutSupplement?: Closeout;
   anvilUse: boolean;
   cloudUse: boolean;
   localUse: boolean;
@@ -381,27 +393,25 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   irb: boolean;
   irbDocumentLocation: string;
   irbProtocolExpiration: string;
+  itDirector: string;
+  itDirectorEmail: string;
+  signingOfficial: string;
+  signingOfficialEmail: string;
+  publication: boolean;
+  collaboration: boolean;
+  collaborationLetterLocation?: string;
+  collaborationLetterName?: string;
+  forensicActivities?: boolean;
+  sharingDistribution?: boolean;
+  labCollaborators?: Array<Collaborator>;
+  internalCollaborators?: Array<Collaborator>;
+  externalCollaborators?: Array<Collaborator>;
   dsAcknowledgement: boolean;
   gsoAcknowledgement: boolean;
   pubAcknowledgement: boolean;
-  itDirector: string;
-  signingOfficial: string;
-  publication: boolean;
-  collaboration: boolean;
-  collaborationLetterLocation: string;
-  forensicActivities: boolean;
-  sharingDistribution: boolean;
-  externalCollaborators: Array<Collaborator>;
-  internalCollaborators: Array<Collaborator>;
-  labCollaborators: Array<Collaborator>;
-  projectTitle: string;
-  progressReportSummary: string;
-  intellectualPropertySummary: string;
-  publications: Array<PublicationOrPresentation>;
-  presentations: Array<PublicationOrPresentation>;
-  dmi: DataManagementIncident;
-  researchPlans: string;
-  closeoutSupplement: Closeout;
+  piName: string;
+  piEmail: string;
+  piCountryOfOperation: string;
 }
 
 export interface DataAccessRequest {
