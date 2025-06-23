@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {DataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
+import {CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
@@ -21,7 +21,7 @@ import { User } from 'src/libs/ajax/User';
 import { AxiosError } from 'axios';
 
 type ProgressReportApplicationProps = {
-  readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
+  readonly dar: CombinedDataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[];
   readonly readOnlyMode: boolean;
   readonly history: History;

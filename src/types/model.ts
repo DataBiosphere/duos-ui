@@ -335,19 +335,11 @@ export interface DatasetStats {
   elections: Array<Election>;
 }
 
-export interface DataAccessRequest {
-  referenceId: string;
-  userId: number;
-  createDate: string;
-  sortDate: string;
-  submissionDate: string;
-  updateDate: string;
-  draft: boolean;
-  collectionId: number;
-  darCode: string;
-  elections: Record<number, Election>;
-  projectTitle: string;
-  datasetIds: number[];
+/**
+ * This interface combines the DataAccessRequest with all fields from the DataAccessRequestData object stored
+ * in DataAccessRequest.data field. This model simplifies usages in ProgressReport forms.
+ */
+export interface CombinedDataAccessRequest extends DataAccessRequest {
   rus: string;
   nonTechRus: string;
   diseases: boolean;
@@ -394,6 +386,7 @@ export interface DataAccessRequest {
   externalCollaborators: Array<Collaborator>;
   internalCollaborators: Array<Collaborator>;
   labCollaborators: Array<Collaborator>;
+  projectTitle: string;
   progressReportSummary: string;
   intellectualPropertySummary: string;
   publications: Array<PublicationOrPresentation>;
@@ -401,8 +394,26 @@ export interface DataAccessRequest {
   dmi: DataManagementIncident;
   researchPlans: string;
   closeoutSupplement: Closeout;
-  data: object;
+}
+
+export interface DataAccessRequest {
+  id: number;
+  referenceId: string;
+  collectionId: number;
   parentId?: number;
+  data: object;
+  draft: boolean;
+  progressReport: boolean;
+  expired: boolean;
+  expiresAt: number;
+  userId: number;
+  createDate: number;
+  sortDate: number;
+  submissionDate: number;
+  updateDate: number;
+  datasetIds: number[];
+  elections: Record<number, Election>;
+  eraCommonsId: string;
   closeoutSigningOfficialApprovedDate: number;
   closeoutSigningOfficialApprovedUserId: number;
 }

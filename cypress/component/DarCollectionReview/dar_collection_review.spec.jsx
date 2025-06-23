@@ -223,7 +223,6 @@ const dar = {
       'referenceId': 'dars-id-123',
       'collectionId': 777,
       'data': {
-        'referenceId': 'dars-id-123',
         'institution': 'Ace Industries',
         'projectTitle': 'Collection of sleep apnea samples',
         'researcher': 'Bob Jones',
