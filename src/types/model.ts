@@ -331,23 +331,25 @@ export interface Acknowledgement {
 
 export interface DatasetStats {
   dataset: Dataset;
-  dars: Array<DataAccessRequest>;
+  dars: Array<DatasetStatisticsDar>;
   elections: Array<Election>;
 }
 
-export interface DataAccessRequest {
-  referenceId: string;
-  userId: number;
-  createDate: string;
-  sortDate: string;
-  submissionDate: string;
-  updateDate: string;
-  draft: boolean;
-  collectionId: number;
-  darCode: string;
-  elections: Record<number, Election>;
+export interface DatasetStatisticsDar {
+  updateDate: number;
   projectTitle: string;
-  datasetIds: number[];
+  darCode: string;
+  nonTechRus: string;
+  referenceId: string;
+}
+
+/**
+ * This interface combines the DataAccessRequest with all fields from the DataAccessRequestData object stored
+ * in DataAccessRequest.data field. This model simplifies usages in ProgressReport forms.
+ */
+export interface CombinedDataAccessRequest extends DataAccessRequest {
+  projectTitle: string;
+  checkNihDataOnly: boolean;
   rus: string;
   nonTechRus: string;
   diseases: boolean;
@@ -371,6 +373,16 @@ export interface DataAccessRequest {
   notHealth: boolean;
   hmb: boolean;
   poa: boolean;
+  status: string;
+  darCode: string;
+  validRestriction: boolean;
+  progressReportSummary: string;
+  intellectualPropertySummary: string;
+  publications?: Array<PublicationOrPresentation>;
+  presentations?: Array<PublicationOrPresentation>;
+  dmi?: DataManagementIncident;
+  researchPlans?: string;
+  closeoutSupplement?: Closeout;
   anvilUse: boolean;
   cloudUse: boolean;
   localUse: boolean;
@@ -381,28 +393,45 @@ export interface DataAccessRequest {
   irb: boolean;
   irbDocumentLocation: string;
   irbProtocolExpiration: string;
+  itDirector: string;
+  itDirectorEmail: string;
+  signingOfficial: string;
+  signingOfficialEmail: string;
+  publication: boolean;
+  collaboration: boolean;
+  collaborationLetterLocation?: string;
+  collaborationLetterName?: string;
+  forensicActivities?: boolean;
+  sharingDistribution?: boolean;
+  labCollaborators?: Array<Collaborator>;
+  internalCollaborators?: Array<Collaborator>;
+  externalCollaborators?: Array<Collaborator>;
   dsAcknowledgement: boolean;
   gsoAcknowledgement: boolean;
   pubAcknowledgement: boolean;
-  itDirector: string;
-  signingOfficial: string;
-  publication: boolean;
-  collaboration: boolean;
-  collaborationLetterLocation: string;
-  forensicActivities: boolean;
-  sharingDistribution: boolean;
-  externalCollaborators: Array<Collaborator>;
-  internalCollaborators: Array<Collaborator>;
-  labCollaborators: Array<Collaborator>;
-  progressReportSummary: string;
-  intellectualPropertySummary: string;
-  publications: Array<PublicationOrPresentation>;
-  presentations: Array<PublicationOrPresentation>;
-  dmi: DataManagementIncident;
-  researchPlans: string;
-  closeoutSupplement: Closeout;
-  data: object;
+  piName: string;
+  piEmail: string;
+  piCountryOfOperation: string;
+}
+
+export interface DataAccessRequest {
+  id: number;
+  referenceId: string;
+  collectionId: number;
   parentId?: number;
+  data: object;
+  draft: boolean;
+  progressReport: boolean;
+  expired: boolean;
+  expiresAt: number;
+  userId: number;
+  createDate: number;
+  sortDate: number;
+  submissionDate: number;
+  updateDate: number;
+  datasetIds: number[];
+  elections: Record<number, Election>;
+  eraCommonsId: string;
   closeoutSigningOfficialApprovedDate: number;
   closeoutSigningOfficialApprovedUserId: number;
 }

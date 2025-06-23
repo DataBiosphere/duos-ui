@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { mount } from 'cypress/react';
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication';
-import { DataAccessRequest, Dataset, DuosUser, FileStorageObject } from 'src/types/model';
+import {CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject} from 'src/types/model';
 import { History, Location, Action } from 'history';
 import { Storage } from 'src/libs/storage';
 
@@ -153,7 +153,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     }
   ];
 
-  const baseDar: Partial<DataAccessRequest> = {
+  const baseDar: Partial<CombinedDataAccessRequest> = {
     userId: 1,
     projectTitle: 'Test Project',
     draft: false,
@@ -161,15 +161,14 @@ describe('ProgressReportApplication - Component Tests', () => {
     referenceId: 'DAR-123',
     collectionId: 1,
     elections: {},
-    darCode: 'DAR-123',
-    createDate: '2023-10-01T00:00:00Z',
-    sortDate: '2023-10-01T00:00:00Z',
-    submissionDate: '2023-10-01T00:00:00Z',
-    updateDate: '2023-10-01T00:00:00Z'
+    createDate: 1748736000,
+    sortDate: 1748736000,
+    submissionDate: 1748736000,
+    updateDate: 1748736000
   };
 
-  const mountComponent = (dar: Partial<DataAccessRequest> = {}, readOnly = true) => {
-    const fullDar = { ...baseDar, ...dar } as DataAccessRequest;
+  const mountComponent = (dar: Partial<CombinedDataAccessRequest> = {}, readOnly = true) => {
+    const fullDar = { ...baseDar, ...dar } as CombinedDataAccessRequest;
 
     const props = {
       dar: fullDar,
@@ -573,7 +572,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     };
 
     // Mount component with datasets and elections
-    const fullDar = { ...baseDar, ...darWithElections } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithElections } as unknown as CombinedDataAccessRequest;
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -674,7 +673,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       }
     };
 
-    const fullDar = { ...baseDar, ...darWithDeniedElections } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithDeniedElections } as unknown as CombinedDataAccessRequest;
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -801,7 +800,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       }
     };
 
-    const fullDar = { ...baseDar, ...darWithFilteringTest } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithFilteringTest } as unknown as CombinedDataAccessRequest;
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -908,7 +907,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       }
     };
 
-    const fullDar = { ...baseDar, ...darWithSelectiveDatasetIds } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithSelectiveDatasetIds } as unknown as CombinedDataAccessRequest;
 
     const props = {
       dar: fullDar,

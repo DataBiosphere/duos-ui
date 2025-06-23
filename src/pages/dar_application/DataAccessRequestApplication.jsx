@@ -15,7 +15,7 @@ import {DAR} from 'src/libs/ajax/DAR';
 import {Collections} from 'src/libs/ajax/Collections';
 import {NotificationService} from 'src/libs/notificationService';
 import {Storage} from 'src/libs/storage';
-import {assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map} from 'lodash/fp';
+import {get, map} from 'lodash/fp';
 import 'src/pages/dar_application/DataAccessRequestApplication.css';
 
 import DucAddendum from 'src/pages/dar_application/DucAddendum';
@@ -30,7 +30,7 @@ import {ConditionalAccordion} from 'src/components/forms/ConditionalAccordion.js
 import {ProgressReportApplication} from 'src/pages/dar_application/ProgressReportApplication';
 import {ScrollableTabs} from 'src/pages/dar_application/ScrollableTabs';
 import {validateDARFormData, validationFailed} from 'src/utils/darFormUtils.js';
-import {isArray, set} from 'lodash';
+import {assign, cloneDeep, head, isArray, isEmpty, isNil, isString, keys, merge, set} from 'lodash';
 import {Countries} from 'src/libs/ajax/Countries.js';
 
 // Constants
@@ -584,7 +584,7 @@ const DataAccessRequestApplication = (props) => {
                     <ProgressReportApplication
                       readOnlyMode={false}
                       datasets={datasets}
-                      dar={reverseOrderedDARs[0]}
+                      dar={merge(reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
                       history={history}
                       location={location}
                       researcher={researcher}
@@ -608,7 +608,7 @@ const DataAccessRequestApplication = (props) => {
                               <ProgressReportApplication
                                 readOnlyMode={true}
                                 datasets={datasets}
-                                dar={dar?.data}
+                                dar={merge(dar?.data, dar)}
                                 location={undefined}
                                 researcher={researcher}
                               />

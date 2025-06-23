@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {DataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
+import {CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
@@ -21,7 +21,7 @@ import { User } from 'src/libs/ajax/User';
 import { AxiosError } from 'axios';
 
 type ProgressReportApplicationProps = {
-  readonly dar: DataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
+  readonly dar: CombinedDataAccessRequest; // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[];
   readonly readOnlyMode: boolean;
   readonly history: History;
@@ -33,7 +33,6 @@ type ProgressReportApplicationProps = {
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
-        ...dar.data,
         dmiCombination:false,
         dmiIdentification: false,
         dmiSharing: false,
@@ -53,8 +52,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           ? {
             // In read-only mode, check "No" when undefined
             intellectualPropertyYesNo: !!dar.intellectualPropertySummary,
-            publicationsYesNo: (dar.publications?.length > 0),
-            presentationsYesNo: (dar.presentations?.length > 0),
+            publicationsYesNo: ((dar.publications?.length ?? 0) > 0),
+            presentationsYesNo: ((dar.presentations?.length ?? 0) > 0),
           }
           : {
             // When not in read-only mode, don't check anything when undefined
@@ -81,14 +80,16 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             dmiDescription: dar.dmi.description,
             // populate DMI incident multiselect based on whether the option appears in list of incidents
             ...DMI_INCIDENT_KEYS.reduce((acc, key) => {
-                acc[key] = dar.dmi.incidents.includes(key);
+                if (dar.dmi?.incidents.includes(key)) {
+                  acc[key] = dar.dmi?.incidents.includes(key);
+                }
                 return acc;
             }, {} as Record<string, boolean>)
         }),
 
         // Set undefined to "No" only in read-only mode
         ...(readOnlyMode && {
-          dmiYesNo: (dar.dmi?.incidents?.length > 0),
+          dmiYesNo: ((dar.dmi?.incidents?.length ?? 0) > 0),
         }),
 
         // additional state for closeout section
@@ -97,14 +98,16 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             closeoutSigningOfficial: { userId: dar.closeoutSupplement.signingOfficialId } as SimplifiedDuosUser,
             closeoutOtherText: dar.closeoutSupplement.otherText,
             ...CLOSEOUT_KEYS.reduce((acc, key) => {
-                acc[key] = dar.closeoutSupplement.reasons.includes(key);
+                if (dar.closeoutSupplement?.reasons.includes(key)) {
+                  acc[key] = dar.closeoutSupplement?.reasons.includes(key);
+                }
                 return acc;
             },{} as Record<string, boolean>)
         }),
 
         // Set undefined to "No" only in read-only mode
         ...(readOnlyMode && {
-          closeoutYesNo: (dar.closeoutSupplement?.reasons.length > 0),
+          closeoutYesNo: ((dar.closeoutSupplement?.reasons.length ?? 0) > 0),
         }),
     } as FormState;
 
