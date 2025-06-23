@@ -572,7 +572,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     };
 
     // Mount component with datasets and elections
-    const fullDar = { ...baseDar, ...darWithElections } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithElections } as unknown as CombinedDataAccessRequest;
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -673,7 +673,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       }
     };
 
-    const fullDar = { ...baseDar, ...darWithDeniedElections } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithDeniedElections } as unknown as CombinedDataAccessRequest;
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -800,7 +800,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       }
     };
 
-    const fullDar = { ...baseDar, ...darWithFilteringTest } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithFilteringTest } as unknown as CombinedDataAccessRequest;
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -907,7 +907,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       }
     };
 
-    const fullDar = { ...baseDar, ...darWithSelectiveDatasetIds } as unknown as DataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithSelectiveDatasetIds } as unknown as CombinedDataAccessRequest;
 
     const props = {
       dar: fullDar,
