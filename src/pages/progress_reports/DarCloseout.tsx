@@ -33,7 +33,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
       setAllSigningOfficials(signingOfficials);
       const closeoutSigningOfficial = signingOfficials.find(so => so.userId === formState.closeoutSigningOfficial?.userId);
       if (closeoutSigningOfficial !== undefined) {
-        setDefaultSigningOfficial(closeoutSigningOfficial);
+        setDefaultSigningOfficial(displaySigningOfficial(closeoutSigningOfficial));
       }
     }
     init();
