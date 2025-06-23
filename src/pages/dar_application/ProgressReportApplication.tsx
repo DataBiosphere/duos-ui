@@ -68,10 +68,12 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             })
           }
         ),
+
         // additional state for datasets section populated by useEffect
         datasets: [],
         datasetIds: [],
         selectedDatasets: [],
+
         // additional state for dmi section
         ...(dar?.dmi?.incidents && {
             dmiYesNo: (dar.dmi.incidents.length > 0),
@@ -170,17 +172,28 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         }
     }
 
-    function filterForProgressReport(datasets: Dataset[], datasetIds: number[]) {
-        return datasets.filter(dataset => {return datasetIds.includes(dataset.datasetId)});
+    function getDatasetsInApprovedElections(datasets: Dataset[], approvedElectionDatasetIds: number[]) {
+      const datasetsInApprovedElections = datasets.filter(dataset => {
+        return approvedElectionDatasetIds.includes(dataset.datasetId)
+      });
+      return datasetsInApprovedElections
     }
 
     // required because the datasets state changes during component mount
     useEffect(() => {
+      let approvedDatasets;
+      if (readOnlyMode) {
+        approvedDatasets = datasets.filter(
+          dataset => dar.datasetIds.includes(dataset.datasetId)
+        )
+      } else {
         const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : [];
-        const approvedDatasets = filterForProgressReport(datasets, dar.datasetIds)
-            .filter((ds) => ds.dacApproval && approvedDatasetIds.includes(ds.datasetId));
-        onFormChange({ datasets: approvedDatasets });
-        onSelectedDatasetChange(approvedDatasets);
+        approvedDatasets = getDatasetsInApprovedElections(datasets, approvedDatasetIds)
+          .filter((ds) => ds.dacApproval);
+      }
+
+      onFormChange({ datasets: approvedDatasets });
+      onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
 
     return (

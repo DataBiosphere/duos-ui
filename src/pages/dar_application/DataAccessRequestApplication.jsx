@@ -52,6 +52,7 @@ const fetchAllDatasets = async (dsIds) => {
   if (isEmpty(filteredDatasetIds)) {
     return [];
   }
+
   // filter just for safety
   return DataSet.getDatasetsByIds(filteredDatasetIds);
 };
@@ -253,6 +254,13 @@ const DataAccessRequestApplication = (props) => {
       // Besides the datasets, DARs split off from the collection should have the same formData
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
+
+      // Add elections to DAR data passed into form, to enable showing approved datasets
+      Object.values(dars).map((dar) => {
+        dar.data.elections = dar.elections;
+        dar.data.datasetIds = dar.datasetIds;
+      })
+
       // TS thinks that collection.dars is an object, but it is a map
       const darMap = new Map(Object.entries(dars));
       setReverseOrderedDARs(
@@ -263,6 +271,7 @@ const DataAccessRequestApplication = (props) => {
       //  in theory, we should be able to replace this call with the info returned from the collection
       // form data = the first DAR's data
       formData = await DAR.getPartialDarRequest(darReferenceId);
+
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
     }
