@@ -33,7 +33,6 @@ type ProgressReportApplicationProps = {
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
     const initialState = {
         ...dar,
-        ...dar.data,
         dmiCombination:false,
         dmiIdentification: false,
         dmiSharing: false,
