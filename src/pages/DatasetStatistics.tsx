@@ -1,16 +1,15 @@
-import React from 'react';
-import {useCallback, useState, useEffect} from 'react';
-import {DatasetMetrics} from '../libs/ajax/DatasetMetrics';
-import {DataSet} from '../libs/ajax/DataSet';
-import {DAR} from '../libs/ajax/DAR';
-import {Notifications} from '../libs/utils';
-import {Styles, Theme} from '../libs/theme';
+import React, {useCallback, useEffect, useState} from 'react';
+import {DatasetMetrics} from 'src/libs/ajax/DatasetMetrics';
+import {DataSet} from 'src/libs/ajax/DataSet';
+import {DAR} from 'src/libs/ajax/DAR';
+import {formatDate, Notifications} from 'src/libs/utils';
+import {Styles, Theme} from 'src/libs/theme';
 import {find} from 'lodash/fp';
 import {ReadMore} from '../components/ReadMore';
-import {formatDate} from '../libs/utils';
 import {Button} from '@mui/material';
 import {History} from 'history';
-import {DataAccessRequest, Dataset, DatasetStats, DatasetProperty, StudyProperty} from '../types/model';
+import {Dataset, DatasetProperty, DatasetStatisticsDar, DatasetStats, StudyProperty} from 'src/types/model';
+import {extractError} from 'src/utils/ErrorUtils';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -22,8 +21,8 @@ enum AccessManagement {
 
 
 interface DatasetStatisticsProps {
-  history: History,
-  match: {
+  readonly history: History,
+  readonly match: {
     params: {
       datasetIdentifier: string;
     }
@@ -33,7 +32,7 @@ interface DatasetStatisticsProps {
 export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
   const [dataset, setDataset] = useState<Dataset>();
-  const [dars, setDars] = useState<Array<DataAccessRequest>>();
+  const [dars, setDars] = useState<Array<DatasetStatisticsDar>>();
   const [isLoading, setIsLoading] = useState(true);
 
   const showError = (message: string) => {
@@ -58,8 +57,8 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
       } else {
         showError('Unable to create a Draft Data Access Request');
       }
-    } catch (_error) {
-      showError('Unable to create a Draft Data Access Request');
+    } catch (error) {
+      showError('Unable to create a Draft Data Access Request: ' + extractError(error));
     }
   };
 
@@ -71,8 +70,8 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
         setDataset(dataset);
         setDars(metrics.dars);
         setIsLoading(false);
-      } catch (_error) {
-        showError('Unable to retrieve dataset statistics from server');
+      } catch (error) {
+        showError('Unable to retrieve dataset statistics from server: ' + extractError(error));
         setIsLoading(false);
       }
     }
@@ -144,7 +143,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               <div style={{...Styles.MINOR_HEADER, paddingLeft: '10px'}}>Dataset Description:</div>
               {LINE}
               <div style={{fontSize: Theme.font.size.small, padding: '1rem'}}>
-                {extract('Dataset Description') || dataset?.study?.description || 'N/A'}
+                {extract('Dataset Description') ?? dataset?.study?.description ?? 'N/A'}
               </div>
             </div>
             <div>
@@ -169,7 +168,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             </div>
           </div>
           <div style={Styles.SUB_HEADER}>Data Access Requests - Research Statements</div>
-          {dars?.map((dar: DataAccessRequest) => (
+          {dars?.map((dar: DatasetStatisticsDar) => (
             <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
                 // @ts-expect-error next-line props for non ts component
