@@ -8,7 +8,7 @@ import {
   Notifications,
   searchOnFilteredList
 } from 'src/libs/utils';
-import {cloneDeep, findIndex, isEmpty, isEqual, isNaN, isNil} from 'lodash/fp';
+import {cloneDeep, findIndex, isEmpty, isNaN, isNil} from 'lodash/fp';
 import {Styles} from 'src/libs/theme';
 import PaginationBar from 'src/components/PaginationBar';
 import SearchBar from 'src/components/SearchBar';
@@ -298,10 +298,9 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   const addLibraryCards = async (newLibraryCards: LibraryCard[]): Promise<void> => {
     // Check if any cards already exist, show error if any do
     const duplicateLibraryCards = newLibraryCards.filter((card) => {
-        return findIndex(
-            (element: LibraryCard) => isEqual(element.userEmail)(card.userEmail),
-            libraryCards
-        ) > -1;
+      return libraryCards.some((element: LibraryCard) =>
+          element.userEmail === card.userEmail
+      );
     });
 
     if (duplicateLibraryCards.length > 0) {
@@ -427,7 +426,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         />
         <LibraryCardFormModal
             showModal={showModal}
-            createOnClick={(cards) => addLibraryCards(cards)}
+            createOnClick={addLibraryCards}
             closeModal={() => setShowModal(false)}
             users={users}
             card={currentCard}
