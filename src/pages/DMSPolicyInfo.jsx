@@ -59,9 +59,9 @@ function DMSPolicyInfo(props) {
   // Title text of footer section
   let advantageText;
   // Institution bullet points for footer section
-  let institutionBullets = [];
+  const institutionBullets = [];
   // Researcher bullet points for footer section
-  let researcherBullets = [];
+  const researcherBullets = [];
   switch (variant) {
     case 'NIH':
       backgroundStyle = styles.nihBackground;

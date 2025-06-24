@@ -3,13 +3,13 @@ import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/fo
 import React from 'react';
 import {Dataset} from 'src/types/model';
 import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
-import { ValidFormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import { FormState, ValidFormState } from 'src/pages/progress_reports/ProgressReportFormState';
 
 type DataUseAcknowledgementsProps = {
     title: string;
     datasets: Dataset[],
     dataUseTranslations: string[],
-    formData: object,
+    formData: FormState,
     readOnlyMode: boolean,
     includeInstructions?: boolean,
     onChange: ({ key, value }: ValidFormState) => void,

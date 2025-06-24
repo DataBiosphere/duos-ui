@@ -66,8 +66,7 @@ export const SignInButton = (props: SignInButtonProps) => {
       }
     }
   };
-
-  // eslint-disable-next-line no-unused-vars
+   
   const onSuccess = async (_: OidcUser) => {
     const redirectTo = getRedirectTo();
     const shouldRedirect = shouldRedirectTo(redirectTo);

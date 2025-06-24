@@ -174,10 +174,10 @@ const Home = (props) => {
             </p>
 
             <div style={logoGrid} className="logo-grid">
-              <OverflowTooltip id="anvil" tooltipText={isLogged ? "AnVIL" : "Please login to access AnVIL Data Library"}>
+              <OverflowTooltip id="anvil" tooltipText={isLogged ? 'AnVIL' : 'Please login to access AnVIL Data Library'}>
                 <div className="logo-card" style={baseCard}>
                   <Link 
-                    to={isLogged ? "/datalibrary/anvil" : "#"}
+                    to={isLogged ? '/datalibrary/anvil' : '#'}
                     onClick={(e) => {
                       if (!isLogged) {
                         e.preventDefault();
@@ -194,7 +194,7 @@ const Home = (props) => {
               <OverflowTooltip id="broad" tooltipText={isLogged ? 'Broad Institute' : 'Please login to access Broad Institute Data Library'}>
                 <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
                   <Link 
-                    to={isLogged ? "/datalibrary/broad" : "#"}
+                    to={isLogged ? '/datalibrary/broad' : '#'}
                     onClick={(e) => {
                       if (!isLogged) {
                         e.preventDefault();
@@ -208,10 +208,10 @@ const Home = (props) => {
                 </div>
               </OverflowTooltip>
        
-              <OverflowTooltip id="hca" tooltipText={isLogged ? "Human Cell Atlas" : "Please login to access Human Cell Atlas Data Library"}>
+              <OverflowTooltip id="hca" tooltipText={isLogged ? 'Human Cell Atlas' : 'Please login to access Human Cell Atlas Data Library'}>
                 <div className="logo-card" style={baseCard}>
                   <Link 
-                    to={isLogged ? "/datalibrary/HCA" : "#"}
+                    to={isLogged ? '/datalibrary/HCA' : '#'}
                     onClick={(e) => {
                       if (!isLogged) {
                         e.preventDefault();

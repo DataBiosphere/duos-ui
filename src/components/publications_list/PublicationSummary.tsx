@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import PublicationDelete from "./PublicationDelete";
-import { PublicationOrPresentation } from "./PublicationOrPresentation";
+import React, { useState } from 'react';
+import PublicationDelete from './PublicationDelete';
+import { PublicationOrPresentation } from './PublicationOrPresentation';
 
 interface PublicationSummaryProps {
     publication: PublicationOrPresentation;

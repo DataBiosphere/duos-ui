@@ -45,8 +45,8 @@ export default function Translator() {
     const normalizedObjects = Object
       .keys(rawResults || {})
       .map(key => {
-        let normalizedRaw = cloneDeep(rawResults[key]);
-        let splitArr = key.split('/');
+        const normalizedRaw = cloneDeep(rawResults[key]);
+        const splitArr = key.split('/');
         normalizedRaw.key = key;
         normalizedRaw.url = key;
         normalizedRaw.urlDisplay = splitArr[splitArr.length - 1];

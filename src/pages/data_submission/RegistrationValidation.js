@@ -18,7 +18,6 @@ export const compileSchema = (schema) => {
     .addFormat('email', emailValidator.isValid);
 
   // Ajv doesn't like the `$schema` and `version` properties so we destructure them away
-  // eslint-disable-next-line no-unused-vars
   const {$schema, version, ...filteredSchema} = schema;
   return ajv.compile(filteredSchema);
 };
@@ -49,7 +48,7 @@ export const validateForm = (schema, formData) => {
  * @returns {{}}
  */
 function errorsToValidation(errors) {
-  let validation = {};
+  const validation = {};
   if (errors !== null) {
     errors.forEach(error => {
       let path;

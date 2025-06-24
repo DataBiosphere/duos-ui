@@ -12,12 +12,12 @@ export default function BackgroundSignIn(props) {
   const history = useHistory();
   const queryParams = new URLSearchParams(location.search);
   let token = queryParams.get('token');
-  let { onSignIn, onError, bearerToken } = props;
+  const { onSignIn, onError, bearerToken } = props;
   token = bearerToken || (token || '');
-  let [loading, setLoading] = useState(token && token !== '');
-  let [accessToken, setAccessToken] = useState(token);
-  let [formToken, setFormToken] = useState(token);
-  let [invalidToken, setInvalidToken] = useState(false);
+  const [loading, setLoading] = useState(token && token !== '');
+  const [accessToken, setAccessToken] = useState(token);
+  const [formToken, setFormToken] = useState(token);
+  const [invalidToken, setInvalidToken] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {

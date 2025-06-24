@@ -9,7 +9,7 @@ export const TerraDataRepo = {
     // DUOS ID + param (?duosDatasetIds=DUOS-000852): 27 chars
     // ~70 should a safe default at 1890 characters
     const partitionedIdentifiers = partition(identifiers, 70);
-    let enumerateSnapshotModel = {
+    const enumerateSnapshotModel = {
       total: 0,
       filteredTotal: 0,
       items: [],

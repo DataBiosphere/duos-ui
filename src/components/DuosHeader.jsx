@@ -422,7 +422,7 @@ const DuosHeader = (props) => {
     toggleDrawer(false);
   };
 
-  let isLogged = Storage.userIsLogged();
+  const isLogged = Storage.userIsLogged();
   let currentUser = {};
 
   if (isLogged) {
