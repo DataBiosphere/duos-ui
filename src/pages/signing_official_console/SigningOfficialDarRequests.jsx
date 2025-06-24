@@ -53,6 +53,7 @@ export default function SigningOfficialDarRequests() {
             DarCollectionTableColumnOptions.EXPIRES_AT,
             DarCollectionTableColumnOptions.DATASET_COUNT,
             DarCollectionTableColumnOptions.STATUS,
+            DarCollectionTableColumnOptions.ACTIONS,
           ]}
           isLoading={isLoading}
           cancelCollection={null}
