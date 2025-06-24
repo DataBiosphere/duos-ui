@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import CollaboratorForm from './CollaboratorForm';
-import CollaboratorRow from './CollaboratorRow';
+import CollaboratorRow from 'src/components/collaborator_list/CollaboratorRow';
 import './collaborator.css';
 import { isNil } from 'lodash';
 
 export default function CollaboratorList(props) {
-  const {formFieldChange, collaboratorLabel, collaboratorKey, countriesOfOperation, showApproval, setCompleted, validation, onValidationChange} = props;
+  const {
+    formFieldChange,
+    collaboratorLabel,
+    collaboratorKey,
+    countriesOfOperation,
+    showApproval,
+    setCompleted,
+    validation,
+    onValidationChange
+  } = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);
   const [editState, setEditState] = useState([]);
@@ -71,20 +80,25 @@ export default function CollaboratorList(props) {
     <div className="form-group row no-margin">
       {collaborators.map((collaborator, index) => (
         <CollaboratorRow
-          index={index}
-          saveCollaborator={(newCollaborator) => saveCollaborator(index, newCollaborator)}
-          deleteCollaborator={() => deleteCollaborator(index)}
-          updateEditState={(bool) => updateEditState(index, bool)}
-          toggleDeleteBool={(bool) => toggleDeleteBool(index, bool)}
-          collaborator={collaborator}
-          collaboratorLabel={collaboratorLabel}
-          showApproval={showApproval}
+          id={index}
+          key={index}
           editMode={editState[index]}
-          key={collaborator?.uuid}
-          validation={!isNil(validation) ? validation[index] || {} : {}}
-          onCollaboratorValidationChange={onCollaboratorValidationChange}
-          deleteMode={deleteBoolArray[index]}
+          collaborator={collaborator}
+          collaboratorText={collaboratorLabel}
+          collaborators={collaborators}
+          columnsToShow={showApproval ? ['name', 'email', 'approval'] : ['name', 'email']}
+          editAction={() => updateEditState(index, true)}
+          deleteAction={() => deleteCollaborator(index)}
+          closeAction={() => updateEditState(index, false)}
+          onCollaboratorChange={(updatedCollaborators) => {
+            // Update the specific collaborator at the index
+            const newCollaborator = updatedCollaborators.find(c => c.uuid === collaborator.uuid) || updatedCollaborators[index];
+            if (newCollaborator) {
+              saveCollaborator(index, newCollaborator);
+            }
+          }}
           countriesOfOperation={countriesOfOperation}
+          disabled={editState[index] ?? false}
         />
       ))}
     </div>

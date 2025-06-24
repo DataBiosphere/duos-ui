@@ -15,7 +15,15 @@ interface CollaboratorListProps {
 }
 
 export default function CollaboratorList(props: CollaboratorListProps): React.JSX.Element {
-    const { collaborators, collaboratorText, columnsToShow = [], onCollaboratorChange, disabled = false, showApproverStatus = false, countriesOfOperation } = props;
+    const {
+      collaborators,
+      collaboratorText,
+      columnsToShow = [],
+      onCollaboratorChange,
+      disabled = false,
+      showApproverStatus = false,
+      countriesOfOperation
+    } = props;
 
     const [showAddEdit, setShowAddEdit] = useState(false);
     const [editState, setEditState] = useState(collaborators.map(() => false));
