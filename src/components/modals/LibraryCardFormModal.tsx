@@ -8,6 +8,7 @@ import SimpleButton from 'src/components/SimpleButton';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
 import {MultiValue} from 'react-select';
 import {LibraryCard} from 'src/types/model';
+import {Spinner} from 'src/components/Spinner';
 
 // This represents the fields describing users in a selection dropdown menu
 interface UserOption {
@@ -91,22 +92,29 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
 const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   const { showModal, createOnClick, closeModal, users } = props;
   const [selectedUsers, setSelectedUsers] = useState<UserOption[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Create a library card for each selected user
-  const createLibraryCards = () => {
+  const createLibraryCards = async () => {
     if (selectedUsers.length === 0) return;
 
-    // Map selected users to library cards
-    const cards = selectedUsers.map(user => {
-      return {
-        userId: user.userId,
-        userEmail: user.email,
-        userName: user.displayName,
-      } as LibraryCard;
-    });
+    try {
+      setIsLoading(true);
 
-    createOnClick(cards);
-    setSelectedUsers([]);
+      // Map selected users to library cards
+      const cards = selectedUsers.map(user => {
+        return {
+          userId: user.userId,
+          userEmail: user.email,
+          userName: user.displayName,
+        } as LibraryCard;
+      });
+
+      await createOnClick(cards);
+      setSelectedUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle multi-selection changes
@@ -116,7 +124,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
 
   // Check if we have any selected users
   const isConfirmDisabled = (): boolean => {
-    return selectedUsers.length === 0;
+    return selectedUsers.length === 0 || isLoading;
   };
 
   return (
@@ -154,6 +162,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
                 justifyContent: 'flex-end',
               }}
           >
+            {isLoading && <Spinner />}
             <SimpleButton
                 data-cy={'library-card-form-modal-add-button'}
                 onClick={createLibraryCards}
