@@ -217,3 +217,36 @@ describe('Researcher Actions - Update Button', () => {
   });
 });
 
+describe('Researcher Actions - Review Closeout Button', () => {
+  it('renders the review closeout button if the collection has Review_Progress_Report action in non-prod environment', () => {
+    cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0]);
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review_Progress_Report'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-review-closeout-${collectionId}`).should('exist');
+  });
+
+  it('does not render in production environment even with Review_Progress_Report action', () => {
+    cy.stub(Storage, 'getEnv').returns('prod');
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review_Progress_Report'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-review-closeout-${collectionId}`).should('not.exist');
+  });
+
+  it('does not render if Review_Progress_Report action is not present', () => {
+    cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0]);
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-review-closeout-${collectionId}`).should('not.exist');
+  });
+
+  it('renders with correct label "Review Closeout"', () => {
+    cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0]);
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review_Progress_Report'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-review-closeout-${collectionId}`).should('contain.text', 'Review Closeout');
+  });
+});

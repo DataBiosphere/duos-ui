@@ -137,6 +137,25 @@ export default function Actions(props) {
     },
   };
 
+  const reviewCloseoutButtonAttributes = {
+    keyProp: `${consoleType}-review-closeout-${uniqueId}`,
+    label: 'Review Closeout',
+    onClick: () => redirectToDARApplication(collectionId, history),
+    baseColor: 'white',
+    fontColor: Theme.palette.secondary,
+    hoverStyle: {
+      backgroundColor: Theme.palette.secondary,
+      color: 'white'
+    },
+    additionalStyle: {
+      padding: '3%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      border: `1px solid ${Theme.palette.secondary}`,
+      marginRight: 5
+    },
+  };
+
   const deleteButtonAttributes = {
     keyProp: `${consoleType}-delete-${uniqueId}`,
     label: 'Delete',
@@ -221,6 +240,8 @@ export default function Actions(props) {
       {actions.includes('Cancel') && <TableIconButton {...cancelButtonAttributes} />}
       {checkEnv(envGroups.NON_PROD) && actions.includes('Create_Progress_Report') &&
         <SimpleButton {...createProgressReportButtonAttributes} />}
+      {checkEnv(envGroups.NON_PROD) && actions.includes('Review_Progress_Report') &&
+        <SimpleButton {...reviewCloseoutButtonAttributes} />}
     </div>
   );
 }
