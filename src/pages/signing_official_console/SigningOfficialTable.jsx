@@ -23,6 +23,7 @@ import {
   NIHDataUseCertificationAgreement
 } from 'src/components/external_docs/NIHDataUseCertificationAgreement';
 import {extractError} from 'src/utils/ErrorUtils.js';
+import { processLibraryCards } from 'src/utils/LibraryCardUtils';
 
 //Styles specific to this table
 const styles = {
@@ -315,19 +316,7 @@ export default function SigningOfficialTable(props) {
   };
 
   const issueLibraryCards = async (cards, researchers) => {
-    const successfulCards = [];
-    const failedCards = [];
-
-    // Process each card individually
-    for (const card of cards) {
-      try {
-        const newCard = await LibraryCard.createLibraryCard(card);
-        successfulCards.push(newCard);
-      } catch (error) {
-        const errorMessage = extractError(error);
-        failedCards.push({ card, error: errorMessage });
-      }
-    }
+    const { successfulCards, failedCards } = await processLibraryCards(cards);
 
     // Update researchers list with successful cards
     if (successfulCards.length > 0) {

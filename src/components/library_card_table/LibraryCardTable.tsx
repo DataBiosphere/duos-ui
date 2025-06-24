@@ -23,6 +23,7 @@ import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {LibraryCard} from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
+import { processLibraryCards } from 'src/utils/LibraryCardUtils';
 
 interface UserData {
   userId: number;
@@ -308,31 +309,18 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         text: 'Error updating library cards. The following users already have library cards: ' + duplicateLibraryCards.map(card => card.userEmail).join(', ')
       });
     } else {
-      // Execute library card updates with payload, get the updated card, and
-      // add (with sort afterwards) library card to libraryCards (reference list)
+      const { successfulCards, failedCards } = await processLibraryCards(newLibraryCards);
 
-      // Process each card individually and aggregate the results at the end.
-      // Eventually, if there's a bulk API endpoint, this can be optimized. But for
-      // now, the volume of cards being added is small enough that this should be okay
-      const successfulCards = [];
-      const failedCards = [];
-      for (const card of newLibraryCards) {
-        try {
-          const newCard = await LibraryCardAPI.createLibraryCard(card);
-          successfulCards.push(newCard);
-        } catch (error: unknown) {
-          const errorMessage = extractError(error);
-          failedCards.push({ card, error: errorMessage });
-        }
+      if (successfulCards.length > 0) {
+        const updatedList = [...cloneDeep(libraryCards), ...successfulCards];
+
+        updatedList.sort((a, b) => {
+          return dayjs(b.createDate).valueOf() - dayjs(a.createDate).valueOf();
+        });
+
+        setLibraryCards(updatedList);
       }
 
-      const updatedList = [...cloneDeep(libraryCards), ...successfulCards];
-
-      updatedList.sort((a, b) => {
-        return dayjs(b.createDate).valueOf() - dayjs(a.createDate).valueOf();
-      });
-
-      setLibraryCards(updatedList);
       setShowModal(false);
 
       if(failedCards.length > 0) {
