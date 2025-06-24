@@ -22,7 +22,6 @@ import TableIconButton from 'src/components/TableIconButton';
 import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {LibraryCard} from 'src/types/model';
-import {extractError} from 'src/utils/ErrorUtils';
 import { processLibraryCards } from 'src/utils/LibraryCardUtils';
 
 interface UserData {

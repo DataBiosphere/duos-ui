@@ -22,7 +22,6 @@ import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement08012
 import {
   NIHDataUseCertificationAgreement
 } from 'src/components/external_docs/NIHDataUseCertificationAgreement';
-import {extractError} from 'src/utils/ErrorUtils.js';
 import { processLibraryCards } from 'src/utils/LibraryCardUtils';
 
 //Styles specific to this table
