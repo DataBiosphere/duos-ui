@@ -19,7 +19,10 @@ interface CollaboratorRowProps {
 }
 
 export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.Element {
-    const { id, editMode, collaborator, collaboratorText, collaborators, columnsToShow, countriesOfOperation, editAction, deleteAction, closeAction, onCollaboratorChange, disabled } = props;
+    const {
+      id, editMode, collaborator, collaboratorText, collaborators, columnsToShow, countriesOfOperation,
+      editAction, deleteAction, closeAction, onCollaboratorChange, disabled
+    } = props;
 
     return (
         <div>

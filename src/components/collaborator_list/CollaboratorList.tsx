@@ -49,7 +49,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                     style={{
                         marginTop: 25,
                         marginBottom: 5,
-                        ...(disabled ? { cursor: 'not-allowed' } : {}),
+                        ...(disabled ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
                     }}
                     onClick={() => !disabled && setShowAddEdit(true) }
                     disabled={disabled}

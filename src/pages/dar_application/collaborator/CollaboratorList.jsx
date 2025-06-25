@@ -114,7 +114,7 @@ export default function CollaboratorList(props) {
           style={{
             marginTop: 25,
             marginBottom: 5,
-            ...(props.disabled ? { cursor: 'not-allowed' } : {}),
+            ...(props.disabled ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
           }}
           onClick={() => {
             if (!props.disabled) {setShowNewForm(true);}
