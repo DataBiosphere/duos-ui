@@ -434,7 +434,6 @@ export default function SigningOfficialTable(props) {
         showModal={showModal}
         createOnClick={(cards) => issueLibraryCards(cards, researchers)}
         closeModal={() => setShowModal(false)}
-        card={selectedCard}
         users={researchers.filter(onlyResearchersWithoutCardFilter)}
         modalType="add" />
       <ConfirmationModal

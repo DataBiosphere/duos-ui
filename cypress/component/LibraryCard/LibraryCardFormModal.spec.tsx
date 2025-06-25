@@ -1,7 +1,6 @@
 import React from 'react';
 import {mount} from 'cypress/react';
 import LibraryCardFormModal, {LibraryCardFormModalProps} from 'src/components/modals/LibraryCardFormModal';
-import {LibraryCard} from 'src/types/model';
 
 describe('Library Card Form Modal Tests', () => {
 
@@ -13,8 +12,7 @@ describe('Library Card Form Modal Tests', () => {
       showModal: true,
       createOnClick: cy.stub().as('createOnClick'),
       closeModal: cy.stub().as('closeModal'),
-      users: [],
-      card: {} as LibraryCard
+      users: []
     };
   });
 

@@ -416,7 +416,6 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
             createOnClick={addLibraryCards}
             closeModal={() => setShowModal(false)}
             users={users}
-            card={currentCard}
         />
         <ConfirmationModal
             showConfirmation={showConfirmation}

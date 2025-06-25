@@ -26,10 +26,9 @@ interface FormFieldRowProps {
 
 export interface LibraryCardFormModalProps {
   showModal: boolean;
-  createOnClick: (cards: LibraryCard[]) => void;
+  createOnClick: (cards: LibraryCard[]) => Promise<void>;
   closeModal: () => void;
   users: UserOption[];
-  card: LibraryCard;
 }
 
 interface FilterOptions {
