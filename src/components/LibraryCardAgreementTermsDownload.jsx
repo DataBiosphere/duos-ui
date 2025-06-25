@@ -3,7 +3,7 @@ import {
   NIHDataUseCertificationAgreement
 } from '../components/external_docs/NIHDataUseCertificationAgreement';
 import NihLibraryCardAgreementLink
-  from '../assets/NIHLibraryCardAgreement08012024.pdf';
+  from '../assets/NIHLibraryCardAgreement06252025.pdf';
 import BroadLibraryCardAgreementLink
   from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 
