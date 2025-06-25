@@ -20,6 +20,7 @@ interface CollaboratorAddEditProps {
     readonly closeAction: () => void;
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly showApproverStatus?: boolean;
+    readonly readOnly?: boolean;
     readonly countriesOfOperation: string[];
 }
 
@@ -38,6 +39,8 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
     const [validation, setValidation] = useState<Validation>({});
     const accountLabel = nihAccountLabel();
 
+    const readOnly = props.readOnly || false;
+
     const onChange = ({ key, value }: FormFieldChange) => {
         const setCollaborator = {
             ...newCollaborator,
@@ -47,48 +50,53 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
         setValidation(computeCollaboratorErrors({collaborator: setCollaborator, needsApproverStatus: showApproverStatus}));
     };
 
+      const sharedProps = readOnly ? {} : {
+        validators: [FormValidators.REQUIRED],
+        onChange,
+      }
+
+    console.log('countriesOfOperation', countriesOfOperation)
+
     return (
         <div className='form-group row no-margin'>
             <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card' key={`collaborator-item-id`}>
                 <div className='row'>
                     <h2>{collaborator?.name === undefined ? `New ${collaboratorText} Information` : `Edit ${collaborator.name} Information`}</h2>
                     <FormField
+                        {...sharedProps}
                         id='name'
                         title={`${collaboratorText} Name`}
                         defaultValue={collaborator.name}
                         placeholder='Full Name'
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.name}
                     />
                     <FormField
+                        {...sharedProps}
                         id='eraCommonsId'
                         title={`${collaboratorText} ${accountLabel} Account`}
                         defaultValue={collaborator.eraCommonsId}
                         placeholder={`${accountLabel} Account`}
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.eraCommonsId}
                     />
                     <FormField
+                        {...sharedProps}
                         id='title'
                         title={`${collaboratorText} Title`}
                         defaultValue={collaborator.title}
                         placeholder='Title'
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.title}
                     />
                     <FormField
+                        {...sharedProps}
                         id='email'
                         title={`${collaboratorText} Email`}
                         defaultValue={collaborator.email}
                         placeholder='Email'
-                        validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
-                        onChange={onChange}
+                        validators={!readOnly ? [FormValidators.REQUIRED, FormValidators.EMAIL] : []}
                         validation={validation.email}
                     />
                     <FormField
+                        {...sharedProps}
                         id='countryOfOperation'
                         title={`${collaboratorText} Country of Operation`}
                         type={FormFieldTypes.SELECT}
@@ -96,8 +104,6 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         selectOptions={countriesOfOperation}
                         defaultValue={collaborator.countryOfOperation}
                         placeholder='Country of Operation'
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.countryOfOperation}
                     />
                     {showApproverStatus && (
@@ -105,7 +111,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         index={id}
                         approverStatus={newCollaborator?.approverStatus}
                         validation={validation.approverStatus}
-                        onChange={onChange}/>
+                        onChange={(!readOnly ? ({ key, value }: { key: string; value: any }) => onChange({ key, value }) : null)}/>
                     )}
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>

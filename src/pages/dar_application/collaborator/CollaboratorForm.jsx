@@ -19,7 +19,8 @@ export default function CollaboratorForm(props) {
     collaboratorKey,
     countriesOfOperation,
     validation,
-    onCollaboratorValidationChange
+    onCollaboratorValidationChange,
+    readOnly = false
   } = props;
 
   const [name, setName] = useState('');
@@ -60,78 +61,79 @@ export default function CollaboratorForm(props) {
     setShowDeleteCollaboratorModal(false);
   };
 
+  const validatorProps = readOnly ? {} : {
+    validators: [FormValidators.REQUIRED],
+    onValidationChange,
+  }
+
   return (
     <div className='form-group row no-margin'>
       <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card' key={`collaborator-item-${uuid}`}>
         <div className='row'>
           <h2>{`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`}</h2>
           <FormField
+            {...validatorProps}
             id={`${index}_collaboratorName`}
             name='name'
             title={`${props.collaboratorLabel} Name`}
             defaultValue={name}
             placeholder='Firstname Lastname'
-            validators={[FormValidators.REQUIRED]}
-            validation={validation.name}
-            onValidationChange={onValidationChange}
-            onChange={({value}) => setName(value)}
+            validation={!readOnly ? validation.name : {}}
+            onChange={!readOnly ? ({value}) => setName(value) : null}
           />
           <FormField
+            {...validatorProps}
             id={`${index}_collaboratorEraCommonsId`}
             name='eraCommonsId'
             title={`${props.collaboratorLabel} ${accountLabel} Account`}
             defaultValue={eraCommonsId}
             placeholder={`${accountLabel} Account`}
-            validators={[FormValidators.REQUIRED]}
-            validation={validation.eraCommonsId}
-            onValidationChange={onValidationChange}
-            onChange={({value}) => setEraCommonsId(value)}
+            validation={!readOnly ? validation.eraCommonsId : {}}
+            onChange={!readOnly ? ({value}) => setEraCommonsId(value) : null}
           />
         </div>
         {/* title and email */}
         <div className='row'>
           <FormField
+            {...validatorProps}
             id={`${index}_collaboratorTitle`}
             name='title'
             title={`${props.collaboratorLabel} Title`}
             defaultValue={title}
             placeholder='Title'
-            validators={[FormValidators.REQUIRED]}
-            validation={validation.title}
-            onValidationChange={onValidationChange}
-            onChange={({value}) => setTitle(value)}
+            validation={!readOnly ? validation.title : {}}
+            onChange={!readOnly ? ({value}) => setTitle(value) : null}
           />
           <FormField
+            {...validatorProps}
             id={`${index}_collaboratorEmail`}
             name='email'
             title={`${props.collaboratorLabel} Email`}
             defaultValue={email}
             placeholder='Email'
-            validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
-            validation={validation.email}
-            onValidationChange={onValidationChange}
-            onChange={({value}) => setEmail(value)}
+            validators={!readOnly ? [FormValidators.REQUIRED, FormValidators.EMAIL]: []}
+            validation={!readOnly ? validation.email : {}}
+            onChange={!readOnly ? ({value}) => setEmail(value) : null}
           />
           <FormField
-              id={`${index}_collaboratorCountryOfOperation`}
-              name='countryOfOperation'
-              title={`${props.collaboratorLabel} Country of Operation`}
-              defaultValue={countryOfOperation === '' ? null : countryOfOperation}
-              placeholder='Country of Operation'
-              validators={[FormValidators.REQUIRED]}
-              type={FormFieldTypes.SELECT}
-              selectOptions={countriesOfOperation}
-              optionsAreString={true}
-              validation={validation.countryOfOperation}
-              onValidationChange={onValidationChange}
-              onChange={({value})=> setCountryOfOperation(value)}
+            {...validatorProps}
+            id={`${index}_collaboratorCountryOfOperation`}
+            name='countryOfOperation'
+            title={`${props.collaboratorLabel} Country of Operation`}
+            defaultValue={countryOfOperation === '' ? null : countryOfOperation}
+            placeholder='Country of Operation'
+            type={FormFieldTypes.SELECT}
+            selectOptions={countriesOfOperation}
+            optionsAreString={true}
+            validation={!readOnly ? validation.countryOfOperation : {}}
+            onChange={!readOnly ? ({value})=> setCountryOfOperation(value) : null}
           />
         </div>
         {props.showApproval && (
           <ApproverStatus
             index={index}
             approverStatus={approverStatus}
-            validation={validation.approverStatus}
+            validation={!readOnly ? validation.approverStatus : {}}
             onValidationChange={onValidationChange}
             onChange={({_key, value}) => setApproverStatus(value)}
           />

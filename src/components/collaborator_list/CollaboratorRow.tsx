@@ -1,11 +1,13 @@
 import React from 'react';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorSummary from './CollaboratorSummary';
+import CollaboratorForm from 'src/pages/dar_application/collaborator/CollaboratorRow';
 import {Collaborator} from 'src/types/model';
 
 interface CollaboratorRowProps {
     readonly id: number;
     readonly editMode: boolean;
+    readonly readOnly: boolean;
     collaborator: Collaborator;
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
@@ -14,14 +16,12 @@ interface CollaboratorRowProps {
     readonly deleteAction: () => void;
     readonly closeAction: () => void;
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
-    readonly countriesOfOperation: string[];
-    readonly disabled: boolean;
 }
 
 export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.Element {
     const {
-      id, editMode, collaborator, collaboratorText, collaborators, columnsToShow, countriesOfOperation,
-      editAction, deleteAction, closeAction, onCollaboratorChange, disabled
+      id, editMode, readOnly, collaborator, collaboratorText, collaborators, columnsToShow, countriesOfOperation,
+      editAction, deleteAction, closeAction, onCollaboratorChange
     } = props;
 
     return (
@@ -36,14 +36,21 @@ export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.
                     onCollaboratorChange={onCollaboratorChange}
                     countriesOfOperation={countriesOfOperation}
                 />)}
-            {!editMode && (
+            {editMode && readOnly &&
+                  <CollaboratorForm
+                    {...props}
+                    collaborator={collaborator}
+                    countriesOfOperation={countriesOfOperation}
+                  />
+            }
+            {!editMode &&
                 <CollaboratorSummary
                     collaborator={collaborator}
                     columnsToShow={columnsToShow}
                     editAction={editAction}
                     deleteAction={deleteAction}
-                    disabled={disabled}
-                />)}
+                    readOnly={readOnly}
+                />}
         </div>
     );
 }

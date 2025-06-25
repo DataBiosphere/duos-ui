@@ -7,11 +7,11 @@ interface CollaboratorSummaryProps {
     readonly columnsToShow: string[];
     readonly editAction: () => void;
     readonly deleteAction: () => void;
-    readonly disabled: boolean;
+    readonly readOnly: boolean;
 }
 
 export default function CollaboratorSummary(props: CollaboratorSummaryProps): React.JSX.Element {
-    const { collaborator, columnsToShow, editAction, deleteAction, disabled } = props;
+    const { collaborator, columnsToShow, editAction, deleteAction, readOnly } = props;
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -20,7 +20,7 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
         opacity: 0.5
     };
 
-    const buttonStyle = disabled ? disabledStyle : {};
+    const deleteButtonStyle = readOnly ? disabledStyle : {};
 
     return (
         <div className='collaborator-summary-card'>
@@ -38,8 +38,8 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
             {/* edit button */}
             <div className='collaborator-summary-edit-delete-buttons'>
                 <a
-                    style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
-                    onClick={() => !disabled && editAction()}
+                    style={{ marginLeft: 10, marginRight: 10 }}
+                    onClick={() => editAction()}
                 >
                     <span
                         className='glyphicon glyphicon-pencil caret-margin collaborator-edit-icon'
@@ -52,8 +52,8 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
             </div>
             {/* delete button */}
             <a
-                style={{ marginLeft: 10, ...buttonStyle }}
-                onClick={() => !disabled && setShowDeleteModal(true) }
+                style={{ marginLeft: 10, ...deleteButtonStyle }}
+                onClick={() => !readOnly && setShowDeleteModal(true) }
             >
                 <span
                     className='glyphicon glyphicon-trash collaborator-delete-icon'

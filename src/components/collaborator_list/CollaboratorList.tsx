@@ -9,7 +9,7 @@ interface CollaboratorListProps {
     readonly collaboratorText: string;
     readonly columnsToShow?: string[];
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
-    readonly disabled?: boolean;
+    readonly readOnly?: boolean;
     readonly showApproverStatus?: boolean;
     readonly countriesOfOperation: string[];
 }
@@ -20,7 +20,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
       collaboratorText,
       columnsToShow = [],
       onCollaboratorChange,
-      disabled = false,
+      readOnly = false,
       showApproverStatus = false,
       countriesOfOperation
     } = props;
@@ -49,10 +49,10 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                     style={{
                         marginTop: 25,
                         marginBottom: 5,
-                        ...(disabled ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
+                        ...(readOnly ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
                     }}
-                    onClick={() => !disabled && setShowAddEdit(true) }
-                    disabled={disabled}
+                    onClick={() => !readOnly && setShowAddEdit(true) }
+                    disabled={readOnly}
                 >
                     Add {collaboratorText}
                 </button>
@@ -75,6 +75,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         key={index}
                         id={index}
                         editMode={editState[index]}
+                        readOnly={readOnly}
                         collaborator={collaborator}
                         collaboratorText={collaboratorText}
                         collaborators={collaborators}
@@ -84,7 +85,6 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         deleteAction={() => { handleDeleteCollaborator(index); }}
                         closeAction={() => { toggleEditState(index); setShowAddEdit(false); }}
                         onCollaboratorChange={onCollaboratorChange}
-                        disabled={disabled}
                     />
                 })}
             </div>

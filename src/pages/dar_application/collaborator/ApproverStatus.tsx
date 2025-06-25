@@ -8,8 +8,8 @@ interface ApproverStatusProps {
     readonly index: number;
     readonly approverStatus: ApproverStatusType;
     readonly validation?: ValidationError;
-    readonly onValidationChange?: ({key: string, validator: ValidationError}) => void;
-    readonly onChange: ({key: string, value: ApproverStatusType}) => void;
+    readonly onValidationChange?: (params: {key: string, validator: ValidationError}) => void;
+    readonly onChange: ((params: {key: string, value: ApproverStatusType}) => void) | null;
 }
 export default function ApproverStatus(props: ApproverStatusProps): React.JSX.Element {
     const {index, approverStatus, validation, onValidationChange, onChange} = props;

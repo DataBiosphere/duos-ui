@@ -611,6 +611,7 @@ const DataAccessRequestApplication = (props) => {
                                 dar={merge(dar?.data, dar)}
                                 location={undefined}
                                 researcher={researcher}
+                                countriesOfOperation={countriesOfOperation}
                               />
                             </ConditionalAccordion>
                           </div>);
