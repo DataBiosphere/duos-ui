@@ -32,17 +32,11 @@ export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.
                     collaborator={collaborator}
                     collaboratorText={collaboratorText}
                     collaborators={collaborators}
+                    readOnly={readOnly}
                     closeAction={closeAction}
                     onCollaboratorChange={onCollaboratorChange}
                     countriesOfOperation={countriesOfOperation}
                 />)}
-            {editMode && readOnly &&
-                  <CollaboratorForm
-                    {...props}
-                    collaborator={collaborator}
-                    countriesOfOperation={countriesOfOperation}
-                  />
-            }
             {!editMode &&
                 <CollaboratorSummary
                     collaborator={collaborator}

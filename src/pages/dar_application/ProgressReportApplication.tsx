@@ -200,8 +200,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
       onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
 
-    console.log('in ProgressReportApplication, countriesOfOperation:', formState);
-
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>

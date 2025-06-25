@@ -50,18 +50,23 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
         setValidation(computeCollaboratorErrors({collaborator: setCollaborator, needsApproverStatus: showApproverStatus}));
     };
 
-      const sharedProps = readOnly ? {} : {
+      const sharedProps = readOnly ? {
+        disabled: readOnly,
+      } : {
         validators: [FormValidators.REQUIRED],
         onChange,
+        disabled: readOnly,
       }
 
-    console.log('countriesOfOperation', countriesOfOperation)
+    const header = collaborator?.name === undefined
+      ? `New ${collaboratorText} Information`
+      : `${!readOnly ? `Edit ` : `View` } ${collaborator.name} Information`;
 
     return (
         <div className='form-group row no-margin'>
             <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card' key={`collaborator-item-id`}>
                 <div className='row'>
-                    <h2>{collaborator?.name === undefined ? `New ${collaboratorText} Information` : `Edit ${collaborator.name} Information`}</h2>
+                    <h2>{header}</h2>
                     <FormField
                         {...sharedProps}
                         id='name'
@@ -87,13 +92,14 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         validation={validation.title}
                     />
                     <FormField
-                        {...sharedProps}
                         id='email'
                         title={`${collaboratorText} Email`}
                         defaultValue={collaborator.email}
                         placeholder='Email'
                         validators={!readOnly ? [FormValidators.REQUIRED, FormValidators.EMAIL] : []}
                         validation={validation.email}
+                        disabled={readOnly}
+                        {...(!readOnly ? { onChange } : {})}
                     />
                     <FormField
                         {...sharedProps}
@@ -116,6 +122,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>
                     {/* add/save button */}
+                    {!readOnly && (
                     <button
                         className='collaborator-form-add-save-button f-left btn'
                         type='button'
@@ -135,13 +142,14 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     >
                         {collaborator?.name === undefined ? 'Add' : 'Save'}
                     </button>
-                    {/* cancel button */}
+                    )}
+                    {/* cancel/close button */}
                     <div
                         className='collaborator-form-cancel-button f-left btn'
                         role='button'
                         onClick={closeAction}
                     >
-                        Cancel
+                        {readOnly ? 'Close' : 'Cancel'}
                     </div>
                 </div>
             </div>
