@@ -10,6 +10,8 @@ import {Button} from '@mui/material';
 import {History} from 'history';
 import {Dataset, DatasetProperty, DatasetStatisticsDar, DatasetStats, StudyProperty} from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
+import {getDataLocationLink} from 'src/utils/DataLocationUtils';
+import {consentTranslations} from 'src/libs/dataUseTranslation';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -28,6 +30,18 @@ interface DatasetStatisticsProps {
     }
   }
 }
+
+
+interface LabeledSectionProps {
+  label: string
+  style?: React.CSSProperties
+}
+
+const LabeledSection = ({ style, label, children }: React.PropsWithChildren<LabeledSectionProps>) =>
+    <div style={{paddingTop: 20, ...style}}>
+      <span style={{fontWeight: 600}}>{label}: </span>
+      {children}
+    </div>;
 
 export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
@@ -96,7 +110,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     const locationUrl = extract('URL');
     switch (accessManagement) {
       case AccessManagement.CONTROLLED:
-        return <Button variant='contained' onClick={applyForAccess} sx={{transform: 'scale(1.5)'}}>
+        return <Button variant='contained' onClick={applyForAccess} style={{fontSize: '12px'}}>
           Apply for Access
         </Button>;
       case AccessManagement.OPEN:
@@ -113,61 +127,65 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
           }
         </span>;
       default:
-        return <div/>;
+        return <span>N/A</span>;
     }
   };
+
+  const accessType = extract('Access Management')?.toLowerCase();
+  // const dataUseConsentTranslations = dataset?.dataUse ? consentTranslations[dataset.dataUse.] || undefined;
+
+  console.log(dataset?.study)
+  console.log(dataset?.dataUse)
 
   if (!isLoading) {
     return (
       <div style={{...Styles.PAGE, color: Theme.palette.primary}}>
         <div style={{justifyContent: 'space-between'}}>
           <div style={{marginTop: '25px'}}>
-            <div style={Styles.TITLE}>Dataset Statistics</div>
-            <div style={Styles.MEDIUM_ROW}>
-              <div style={{fontWeight: '500', marginRight: '5px'}}>Dataset ID:</div>
-              <div>{dataset?.datasetIdentifier}</div>
+            <div style={{fontSize: 20, fontWeight: 600}}>
+              <div>{dataset?.datasetIdentifier} - {extract('Dataset Name') || dataset?.name}</div>
             </div>
-            <div style={Styles.MEDIUM_ROW}>
-              <div style={{fontWeight: '500', marginRight: '5px'}}>Dataset Name:</div>
-              <div>
-                {extract('Dataset Name') || dataset?.name}
-              </div>
-            </div>
-            <div style={{paddingTop: '20px', paddingLeft: '30px'}}>
-              {accessInstructions()}
-            </div>
-          </div>
-          <div style={Styles.SUB_HEADER}>Dataset Information</div>
-          <div style={{display: 'flex'}}>
-            <div style={Styles.DESCRIPTION_BOX as React.CSSProperties}>
-              <div style={{...Styles.MINOR_HEADER, paddingLeft: '10px'}}>Dataset Description:</div>
-              {LINE}
-              <div style={{fontSize: Theme.font.size.small, padding: '1rem'}}>
-                {extract('Dataset Description') ?? dataset?.study?.description ?? 'N/A'}
-              </div>
-            </div>
-            <div>
-              <div style={{display: 'flex'}}>
-                <div style={Styles.SMALL_BOLD}>Number of Participants:</div>
-                <div style={Styles.SMALL_BOLD}>
-                  {extract('# of participants')}
-                </div>
-              </div>
-              {(extract('Principal Investigator(PI)') || dataset?.study?.piName) && <div style={{display: 'flex'}}>
-                <div style={Styles.SMALL_BOLD}>Principal Investigator:</div>
-                <div style={Styles.SMALL_BOLD}>
+            {dataset?.study?.name && <LabeledSection label={'Study'}>
+              <span>{dataset.study.name}</span>
+            </LabeledSection>}
+            <LabeledSection label={'Access Type'}>
+              {accessInstructions() || 'N/A'}
+            </LabeledSection>
+            {(accessType === AccessManagement.CONTROLLED || accessType === AccessManagement.EXTERNAL) &&
+                <LabeledSection label={'Data Use'}>
+                  {dataset?.dataUse ? consentTranslations[dataset.dataUse] || dataset.dataUse : 'N/A'}
+                </LabeledSection>
+            }
+            <LabeledSection label={'Data Location'}>
+              {getDataLocationLink(extract('Data Location'), extract('URL'))}
+            </LabeledSection>
+            <LabeledSection label={'Phenotype'}>
+              {extractStudyProp('phenotypeIndication')}
+            </LabeledSection>
+            <LabeledSection label={'Participants'}>
+              {extract('# of participants')}
+            </LabeledSection>
+            {(extract('Principal Investigator(PI)') || dataset?.study?.piName) &&
+                <LabeledSection label={'Principal Investigator(s)'}>
                   {extract('Principal Investigator(PI)') || dataset?.study?.piName}
-                </div>
-              </div>}
-              {(extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName) && <div style={{display: 'flex'}}>
-                <div style={Styles.SMALL_BOLD}>Data Custodian:</div>
-                <div style={Styles.SMALL_BOLD}>
+                </LabeledSection>
+            }
+            {(extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName) &&
+                <LabeledSection label={'Data Custodian'}>
                   {extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName}
-                </div>
-              </div>}
+                </LabeledSection>
+            }
+            <div style={{paddingTop: '20px'}}>
+              {extract('Dataset Description') ?? dataset?.study?.description ?? 'N/A'}
             </div>
           </div>
-          <div style={Styles.SUB_HEADER}>Data Access Requests - Research Statements</div>
+          <div style={{paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%'}}/>
+          <div style={Styles.SUB_HEADER}>Data Access Requests for this dataset</div>
+          {dars?.length === 0 &&
+            <div style={{paddingTop: '20px', fontStyle: 'italic'}}>
+                No Data Access Requests have been created for this dataset.
+            </div>
+          }
           {dars?.map((dar: DatasetStatisticsDar) => (
             <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
