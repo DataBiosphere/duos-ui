@@ -1,6 +1,7 @@
 import React from 'react';
 import {mount} from 'cypress/react';
 import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
+import {Acknowledgement} from 'src/types/model';
 
 describe('CloseoutReview - Component Tests', () => {
   let onApproveSpy: () => void;
@@ -82,5 +83,20 @@ describe('CloseoutReview - Component Tests', () => {
 
     cy.contains('If there are issues with the content in this closeout report, please contact the researcher.')
       .should('have.css', 'font-weight', '400'); // normal
+  });
+
+  it('displays closeout approval when acknowledgement exists', () => {
+    const now = new Date();
+    const acknowledgement = {
+      userId: 1,
+      ackKey: 'dar_closeout_chair_ref_DAR-UUID',
+      firstAcknowledged: now.getTime(),
+      lastAcknowledged: now.getTime(),
+    } as Acknowledgement;
+    mountComponent({acknowledgement: acknowledgement});
+
+    // Approved button with approved date should be visible
+    cy.contains('Approved on').should('exist');
+    cy.contains(now.toISOString().substring(0, 10)).should('exist');
   });
 });
