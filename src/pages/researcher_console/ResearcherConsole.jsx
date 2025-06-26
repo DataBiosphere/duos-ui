@@ -6,13 +6,13 @@ import { Collections } from 'src/libs/ajax/Collections';
 import {
   DarCollectionTable,
   DarCollectionTableColumnOptions
-} from '../../components/dar_collection_table/DarCollectionTable';
-import accessIcon from '../../images/lock-icon.png';
-import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from '../../libs/utils';
-import SearchBar from '../../components/SearchBar';
-import { consoleTypes } from '../../components/dar_collection_table/DarCollectionTableCellData';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement06252025.pdf';
+} from 'src/components/dar_collection_table/DarCollectionTable';
+import accessIcon from 'src/images/lock-icon.png';
+import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils';
+import SearchBar from 'src/components/SearchBar';
+import { consoleTypes } from 'src/components/dar_collection_table/DarCollectionTableCellData';
+import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 
 const filterFn = getSearchFilterFunctions().darCollections;
 
