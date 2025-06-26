@@ -18,7 +18,7 @@ import ConfirmationModal from 'src/components/modals/ConfirmationModal';
 import { LibraryCard } from 'src/libs/ajax/LibraryCard';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement08012024.pdf';
+import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 import {
   NIHDataUseCertificationAgreement
 } from 'src/components/external_docs/NIHDataUseCertificationAgreement';
