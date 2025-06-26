@@ -1,9 +1,9 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Institution } from '../libs/ajax/Institution';
-import { LibraryCard } from '../libs/ajax/LibraryCard';
-import { Notifications } from '../libs/utils';
-import LibraryCardTable from '../components/library_card_table/LibraryCardTable';
+import { Institution } from 'src/libs/ajax/Institution';
+import { LibraryCard } from 'src/libs/ajax/LibraryCard';
+import { Notifications } from 'src/libs/utils';
+import LibraryCardTable from 'src/components/library_card_table/LibraryCardTable';
 
 export default function AdminManageLC() {
   const [libraryCards, setLibraryCards] = useState();
