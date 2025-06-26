@@ -152,15 +152,6 @@ describe('CollaboratorList - Component Tests', () => {
         cy.contains('Add Collaborator').should('not.exist');
     });
 
-    it('passes readOnly prop to CollaboratorRow components', () => {
-        mount(<CollaboratorList {...defaultProps} readOnly={true} />);
-
-        // In read-only mode, should show view icon instead of edit/delete icons
-        cy.get('.glyphicon-eye-open').should('exist');
-        cy.get('.glyphicon-pencil').should('not.exist');
-        cy.get('.glyphicon-trash').should('not.exist');
-    });
-
     it('renders correctly with empty collaborators list', () => {
         mount(<CollaboratorList
             {...defaultProps}
@@ -225,6 +216,9 @@ describe('CollaboratorList - Component Tests', () => {
         // Should not show Add button in read-only mode
         cy.contains('Add Collaborator').should('not.exist');
 
+        // Wait for component to render and check icons
+        cy.get('.collaborator-summary-card').should('have.length', 2);
+        
         // Should show view icon (eye) instead of edit/delete icons
         cy.get('.collaborator-summary-card').first().within(() => {
             cy.get('.glyphicon-eye-open').should('exist');
@@ -241,16 +235,20 @@ describe('CollaboratorList - Component Tests', () => {
 
         mount(<CollaboratorList {...readOnlyProps} />);
 
+        // Wait for component to fully render
+        cy.get('.collaborator-summary-card').should('have.length', 2);
+        cy.get('.glyphicon-eye-open').should('exist');
+
         // Click the view icon
         cy.get('.glyphicon-eye-open').first().parent('a').click({ force: true });
 
         // Should open read-only view with correct header
         cy.contains(`View ${mockCollaborators[0].name} Information`).should('be.visible');
-        
+
         // Form fields should be disabled
         cy.get('#name').should('be.disabled');
         cy.get('#email').should('be.disabled');
-        
+
         // Only Close button should be present
         cy.contains('button', 'Save').should('not.exist');
         cy.contains('button', 'Add').should('not.exist');

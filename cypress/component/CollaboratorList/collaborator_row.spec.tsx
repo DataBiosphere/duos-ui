@@ -21,16 +21,17 @@ describe('CollaboratorRow - Component Tests', () => {
     const defaultProps = {
         id: 0,
         editMode: false,
+        readOnly: false,
         collaborator: mockCollaborator,
         collaboratorText: 'Collaborator',
         collaborators: mockCollaborators,
         columnsToShow: columnsToShow,
         countriesOfOperation: ['United States of America (the)', 'Canada', 'France'],
+        showApproverStatus: false,
         editAction: () => { },
         deleteAction: () => { },
         closeAction: () => { },
-        onCollaboratorChange: () => { },
-        disabled: false
+        onCollaboratorChange: () => { }
     };
 
     it('renders CollaboratorSummary when not in edit mode', () => {
@@ -131,16 +132,17 @@ describe('CollaboratorRow - Component Tests', () => {
             {...defaultProps}
             editAction={editAction}
             deleteAction={deleteAction}
-            disabled={true}
+            readOnly={true}
         />);
 
-        cy.get('.glyphicon-pencil').parent().should('have.css', 'opacity', '0.5');
-        cy.get('.glyphicon-trash').parent().should('have.css', 'opacity', '0.5');
+        // In read-only mode, should show eye icon instead of edit/delete icons
+        cy.get('.glyphicon-eye-open').should('exist');
+        cy.get('.glyphicon-pencil').should('not.exist');
+        cy.get('.glyphicon-trash').should('not.exist');
 
-        cy.get('.glyphicon-pencil').parent('a').click({ force: true });
-        cy.get('.glyphicon-trash').parent('a').click({ force: true });
-
-        cy.get('@editAction').should('not.have.been.called');
+        // Clicking the eye icon should call editAction (to view details)
+        cy.get('.glyphicon-eye-open').parent('a').click();
+        cy.get('@editAction').should('have.been.calledOnce');
         cy.get('@deleteAction').should('not.have.been.called');
     });
 

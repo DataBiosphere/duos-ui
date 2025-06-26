@@ -15,13 +15,6 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const disabledStyle = {
-        cursor: 'not-allowed',
-        opacity: 0.5
-    };
-
-    const deleteButtonStyle = readOnly ? disabledStyle : {};
-
     return (
         <div className='collaborator-summary-card'>
             {/* data elements to show in the row summary */}
@@ -35,41 +28,60 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
                     </div>
                 );
             })}
-            {/* edit button */}
+            {/* action buttons */}
             <div className='collaborator-summary-edit-delete-buttons'>
-                <a
-                    style={{ marginLeft: 10, marginRight: 10 }}
-                    onClick={() => editAction()}
-                >
-                    <span
-                        className='glyphicon glyphicon-pencil caret-margin collaborator-edit-icon'
-                        aria-hidden='true'
-                        data-tip='Edit dataset'
-                        data-for='tip_edit'
-                    ></span>
-                    <span style={{ marginLeft: '1rem' }}></span>
-                </a>
+                {readOnly ? (
+                    <a
+                        style={{ marginLeft: 10, marginRight: 10 }}
+                        onClick={() => editAction()}
+                    >
+                        <span
+                            className='glyphicon glyphicon-eye-open collaborator-view-icon'
+                            aria-hidden='true'
+                            data-tip='View collaborator'
+                            data-for='tip_view'
+                        ></span>
+                        <span style={{ marginLeft: '1rem' }}></span>
+                    </a>
+                ) : (
+                    <>
+                        <a
+                            style={{ marginLeft: 10, marginRight: 10 }}
+                            onClick={() => editAction()}
+                        >
+                            <span
+                                className='glyphicon glyphicon-pencil caret-margin collaborator-edit-icon'
+                                aria-hidden='true'
+                                data-tip='Edit dataset'
+                                data-for='tip_edit'
+                            ></span>
+                            <span style={{ marginLeft: '1rem' }}></span>
+                        </a>
+                        {/* delete button */}
+                        <a
+                            style={{ marginLeft: 10 }}
+                            onClick={() => setShowDeleteModal(true) }
+                        >
+                            <span
+                                className='glyphicon glyphicon-trash collaborator-delete-icon'
+                                aria-hidden='true'
+                                data-tip='Delete dataset'
+                                data-for='tip_delete'
+                            ></span>
+                            <span style={{ marginLeft: '1rem' }}></span>
+                        </a>
+                    </>
+                )}
             </div>
-            {/* delete button */}
-            <a
-                style={{ marginLeft: 10, ...deleteButtonStyle }}
-                onClick={() => !readOnly && setShowDeleteModal(true) }
-            >
-                <span
-                    className='glyphicon glyphicon-trash collaborator-delete-icon'
-                    aria-hidden='true'
-                    data-tip='Delete dataset'
-                    data-for='tip_delete'
-                ></span>
-                <span style={{ marginLeft: '1rem' }}></span>
-            </a>
             {/* delete modal */}
-            <CollaboratorDelete
-                collaboratorName={collaborator?.name}
-                showDelete={showDeleteModal}
-                confirmAction={() => { deleteAction(); setShowDeleteModal(false); }}
-                closeAction={() => setShowDeleteModal(false)}
-            />
+            {!readOnly && (
+                <CollaboratorDelete
+                    collaboratorName={collaborator?.name}
+                    showDelete={showDeleteModal}
+                    confirmAction={() => { deleteAction(); setShowDeleteModal(false); }}
+                    closeAction={() => setShowDeleteModal(false)}
+                />
+            )}
         </div>
     );
 }

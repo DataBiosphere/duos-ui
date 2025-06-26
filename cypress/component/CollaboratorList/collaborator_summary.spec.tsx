@@ -116,16 +116,16 @@ describe('CollaboratorSummary - Component Tests', () => {
       {...defaultProps}
       editAction={editAction}
       deleteAction={deleteAction}
-      disabled={true}
+      readOnly={true}
     />);
 
-    cy.get('.glyphicon-pencil').parent().should('have.css', 'opacity', '0.5');
+    cy.get('.glyphicon-eye').parent().should('not.have.css', 'opacity', '0.5');
     cy.get('.glyphicon-trash').parent().should('have.css', 'opacity', '0.5');
 
-    cy.get('.glyphicon-pencil').parent('a').click({ force: true });
+    cy.get('.glyphicon-eye').parent('a').click({ force: true });
     cy.get('.glyphicon-trash').parent('a').click({ force: true });
 
-    cy.get('@editAction').should('not.have.been.called');
+    cy.get('@editAction').should('have.been.called');
     cy.get('@deleteAction').should('not.have.been.called');
 
     cy.get('.delete-modal').should('not.exist');

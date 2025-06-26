@@ -16,12 +16,14 @@ interface CollaboratorRowProps {
     readonly deleteAction: () => void;
     readonly closeAction: () => void;
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
+    readonly showApproverStatus?: boolean;
+    readonly countriesOfOperation: string[];
 }
 
 export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.Element {
     const {
       id, editMode, readOnly, collaborator, collaboratorText, collaborators, columnsToShow, countriesOfOperation,
-      editAction, deleteAction, closeAction, onCollaboratorChange
+      showApproverStatus, editAction, deleteAction, closeAction, onCollaboratorChange
     } = props;
 
     return (
@@ -35,6 +37,7 @@ export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.
                     readOnly={readOnly}
                     closeAction={closeAction}
                     onCollaboratorChange={onCollaboratorChange}
+                    showApproverStatus={showApproverStatus}
                     countriesOfOperation={countriesOfOperation}
                 />)}
             {!editMode &&
