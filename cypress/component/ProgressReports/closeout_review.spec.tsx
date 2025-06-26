@@ -1,6 +1,6 @@
 import React from 'react';
-import { mount } from 'cypress/react';
-import { CloseoutReview } from 'src/pages/progress_reports/CloseoutReview';
+import {mount} from 'cypress/react';
+import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
 
 describe('CloseoutReview - Component Tests', () => {
   let onApproveSpy: () => void;
@@ -8,6 +8,7 @@ describe('CloseoutReview - Component Tests', () => {
 
   const mountComponent = (props = {}) => {
     const defaultProps = {
+      acknowledgement: undefined,
       onApprove: onApproveSpy,
       onReturn: onReturnSpy,
       ...props
