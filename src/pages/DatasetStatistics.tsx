@@ -8,9 +8,17 @@ import {find} from 'lodash/fp';
 import {ReadMore} from '../components/ReadMore';
 import {Button} from '@mui/material';
 import {History} from 'history';
-import {Dataset, DatasetProperty, DatasetStatisticsDar, DatasetStats, StudyProperty} from 'src/types/model';
+import {
+  Dataset,
+  DatasetProperty,
+  DatasetStatisticsDar,
+  DatasetStats,
+  DatasetTerm,
+  StudyProperty
+} from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
+import {createDataUseDisplay} from "src/components/dac_dataset_table/DACDatasetTableCellData";
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -44,7 +52,7 @@ const LabeledSection = ({ style, label, children }: React.PropsWithChildren<Labe
 
 export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
-  const [dataset, setDataset] = useState<Dataset>();
+  const [dataset, setDataset] = useState<DatasetTerm>();
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -79,8 +87,25 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     const init = async () => {
       try {
         const dataset: Dataset = await DataSet.getDatasetByDatasetIdentifier(datasetIdentifier);
+        const datasetTerms = await DataSet.searchDatasetIndex({  query: {
+          'bool': {
+            'must': [
+              {
+                'match': {
+                  '_type': 'dataset'
+                }
+              },
+              {
+                'match': {
+                  '_id': dataset.datasetId
+                }
+              }
+            ]
+          }
+        }});
+        console.log(datasetTerms)
         const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
-        setDataset(dataset);
+        setDataset(datasetTerms[0]);
         setDars(metrics.dars);
         setIsLoading(false);
       } catch (error) {
@@ -91,22 +116,22 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     init();
   }, [datasetIdentifier]);
 
-  const extract = useCallback((propertyName: string) => {
-    const property = find({propertyName})(dataset?.properties) as DatasetProperty;
-    return property?.propertyValue;
-  }, [dataset]);
-
-  const extractStudyProp = useCallback((key: string) => {
-    const property = find({key})(dataset?.study?.properties) as StudyProperty;
-    if (Array.isArray(property?.value)) {
-      return property.value.join(', ');
-    }
-    return property?.value;
-  }, [dataset]);
+  // const extract = useCallback((propertyName: string) => {
+  //   const property = find({propertyName})(dataset?.) as DatasetProperty;
+  //   return property?.propertyValue;
+  // }, [dataset]);
+  //
+  // const extractStudyProp = useCallback((key: string) => {
+  //   const property = find({key})(dataset?.study?.properties) as StudyProperty;
+  //   if (Array.isArray(property?.value)) {
+  //     return property.value.join(', ');
+  //   }
+  //   return property?.value;
+  // }, [dataset]);
 
   const accessInstructions = () => {
-    const accessManagement = extract('Access Management')?.toLowerCase();
-    const locationUrl = extract('URL');
+    const accessManagement = dataset?.accessManagement as AccessManagement;
+    const locationUrl = dataset?.url;
     switch (accessManagement) {
       case AccessManagement.CONTROLLED:
         return <Button variant='contained' onClick={applyForAccess} style={{fontSize: '12px'}}>
@@ -130,48 +155,46 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     }
   };
 
-  const accessType = extract('Access Management')?.toLowerCase();
+  const accessType = dataset?.accessManagement
+  console.log('dataset', dataset);
 
-  if (!isLoading) {
+  if (!isLoading && dataset) {
     return (
       <div style={{...Styles.PAGE, color: Theme.palette.primary}}>
         <div style={{justifyContent: 'space-between'}}>
           <div style={{marginTop: '25px'}}>
             <div style={{fontSize: 20, fontWeight: 600}}>
-              <div>{dataset?.datasetIdentifier} - {extract('Dataset Name') || dataset?.name}</div>
+              <div>{dataset?.datasetIdentifier} - {dataset?.datasetName}</div>
             </div>
-            {dataset?.study?.name && <LabeledSection label={'Study'}>
-              <span>{dataset.study.name}</span>
-            </LabeledSection>}
+            <LabeledSection label={'Study'}>
+              {dataset.study.studyName}
+            </LabeledSection>
             <LabeledSection label={'Access Type'}>
-              {accessInstructions() || 'N/A'}
+              {accessInstructions()}
             </LabeledSection>
             {(accessType === AccessManagement.CONTROLLED || accessType === AccessManagement.EXTERNAL) &&
                 <LabeledSection label={'Data Use'}>
-                  Coming Soon
+                  {createDataUseDisplay({dataset, divClass: '', spanClass: '', tooltipPlace: 'right'})}
                 </LabeledSection>
             }
             <LabeledSection label={'Data Location'}>
-              {getDataLocationLink(extract('Data Location'), extract('URL'))}
+              {getDataLocationLink(dataset.dataLocation, dataset.url)}
             </LabeledSection>
             <LabeledSection label={'Phenotype'}>
-              {extractStudyProp('phenotypeIndication')}
+                {dataset?.study?.phenotype || 'N/A'}
             </LabeledSection>
             <LabeledSection label={'Participants'}>
-              {extract('# of participants')}
+                {dataset.participantCount}
             </LabeledSection>
-            {(extract('Principal Investigator(PI)') || dataset?.study?.piName) &&
-                <LabeledSection label={'Principal Investigator(s)'}>
-                  {extract('Principal Investigator(PI)') || dataset?.study?.piName}
-                </LabeledSection>
-            }
-            {(extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName) &&
-                <LabeledSection label={'Data Custodian'}>
-                  {extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName}
-                </LabeledSection>
-            }
+            <LabeledSection label={'Principal Investigator(s)'}>
+                {dataset?.study?.piName}
+            </LabeledSection>
+            <LabeledSection label={'Data Custodian'}>
+              {/* TODO: this does not seem to be correct */}
+              {dataset.createUserDisplayName}
+            </LabeledSection>
             <div style={{paddingTop: '20px'}}>
-              {extract('Dataset Description') ?? dataset?.study?.description ?? 'N/A'}
+              {dataset?.study?.description ?? 'N/A'}
             </div>
           </div>
           <div style={{paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%'}}/>

@@ -71,7 +71,13 @@ export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}
   };
 }
 
-export function dataUseCellData({dataset, label = 'dataUseCellData', divClass = style['cell-data'], spanClass = style['data-use'], cellWidth = styles.cellWidths.dataUse, tooltipPlace = 'right'}) {
+/**
+ * Process data use codes from a dataset
+ * @param {Object} dataset - DatasetTerm object containing data use information
+ * @returns {Object} - Object with processed data use information
+ */
+export function processDataUseCodes(dataset) {
+  // Process primary data use codes
   const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
     if (dataUse.code === 'OTHER') {
       return {'code': `OTH1`, 'description': dataUse.description};
@@ -82,8 +88,10 @@ export function dataUseCellData({dataset, label = 'dataUseCellData', divClass = 
       return {'code': dataUse.code, 'description': dataUse.description};
     }
   }) : [];
+
+  // Add secondary data use codes if they exist
   if (dataset.dataUse?.secondary) {
-    dataset.dataUse?.secondary.forEach((dataUse) => {
+    dataset.dataUse.secondary.forEach((dataUse) => {
       if (dataUse.code === 'OTHER') {
         codesAndDescriptions.push({'code': `OTH2`, 'description': dataUse.description});
       } else {
@@ -91,19 +99,51 @@ export function dataUseCellData({dataset, label = 'dataUseCellData', divClass = 
       }
     });
   }
+
+  // Create the list of codes
   const codeList = codesAndDescriptions.map(du => du.code);
-  const display =
-    <div className={divClass}>
-      <span className={spanClass} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>{codeList.join(', ')}</span>
-      <ReactTooltip
-        place={tooltipPlace}
-        effect={'solid'}
-        id={`dataset-data-use-${dataset.datasetId}`}>
-        <ul>{codesAndDescriptions.map((translation, index) => {
-          return <li key={`${translation.code}_s_${index}`}>{translation.code}: {translation.description}</li>;
-        })}</ul>
-      </ReactTooltip>
-    </div>;
+
+  return { codesAndDescriptions, codeList };
+}
+
+/**
+ * Creates a data use display component with tooltips
+ * @param {Object} params - Parameters object
+ * @param {Object} params.dataset - DatasetTerm object
+ * @param {string} params.divClass - CSS class for the div
+ * @param {string} params.spanClass - CSS class for the span
+ * @param {string} params.tooltipPlace - Placement direction for tooltip
+ * @returns {JSX.Element} - Data use display component
+ */
+export function createDataUseDisplay({
+                                       dataset,
+                                       divClass,
+                                       spanClass,
+                                       tooltipPlace = 'right'
+                                     }) {
+  const { codesAndDescriptions, codeList } = processDataUseCodes(dataset);
+
+  return (
+      <div className={divClass}>
+      <span className={spanClass} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>
+        {codeList.join(', ')}
+      </span>
+        <ReactTooltip
+            place={tooltipPlace}
+            effect={'solid'}
+            id={`dataset-data-use-${dataset.datasetId}`}>
+          <ul>{codesAndDescriptions.map((translation, index) => {
+            return <li key={`${translation.code}_s_${index}`}>{translation.code}: {translation.description}</li>;
+          })}</ul>
+        </ReactTooltip>
+      </div>
+  );
+}
+
+export function dataUseCellData({dataset, label = 'dataUseCellData', divClass = style['cell-data'], spanClass = style['data-use'], cellWidth = styles.cellWidths.dataUse, tooltipPlace = 'right'}) {
+  const { codeList } = processDataUseCodes(dataset);
+  const display = createDataUseDisplay({ dataset, divClass, spanClass, tooltipPlace });
+
   return {
     data: display,
     value: codeList.join(', '),
