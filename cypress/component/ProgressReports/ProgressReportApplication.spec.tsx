@@ -4,6 +4,7 @@ import { ProgressReportApplication } from 'src/pages/dar_application/ProgressRep
 import {CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject} from 'src/types/model';
 import { History, Location, Action } from 'history';
 import { Storage } from 'src/libs/storage';
+import { User } from 'src/libs/ajax/User';
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History;
@@ -24,6 +25,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     });
 
     cy.stub(Storage, 'getCurrentUser').returns(researcher);
+    cy.stub(User, 'getAcknowledgements').resolves([]);
 
     // Create mock history with stubs inside beforeEach
     mockHistory = {
