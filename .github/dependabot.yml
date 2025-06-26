@@ -12,6 +12,15 @@ updates:
       action-dependencies:
         patterns:
           - "*"
+        update-types:
+          - "major"
+          - "minor"
+      action-patch-updates:
+        update-types:
+          - "patch"
+        schedule:
+          interval: cron
+          cronjob: "0 0 1,15 * *"
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -27,6 +36,15 @@ updates:
       npm-dependencies:
         patterns:
           - "*"
+        update-types:
+          - "major"
+          - "minor"
+      npm-patch-updates:
+        update-types:
+          - "patch"
+        schedule:
+          interval: cron
+          cronjob: "0 0 1,15 * *"
   - package-ecosystem: docker
     directory: "/"
     schedule:
@@ -42,3 +60,12 @@ updates:
       docker-dependencies:
         patterns:
           - "*"
+        update-types:
+          - "major"
+          - "minor"
+      docker-patch-updates:
+        update-types:
+          - "patch"
+        schedule:
+          interval: cron
+          cronjob: "0 0 1,15 * *"
