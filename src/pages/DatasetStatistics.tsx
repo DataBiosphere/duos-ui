@@ -11,7 +11,6 @@ import {History} from 'history';
 import {Dataset, DatasetProperty, DatasetStatisticsDar, DatasetStats, StudyProperty} from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
-import {consentTranslations} from 'src/libs/dataUseTranslation';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -132,10 +131,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
   };
 
   const accessType = extract('Access Management')?.toLowerCase();
-  // const dataUseConsentTranslations = dataset?.dataUse ? consentTranslations[dataset.dataUse.] || undefined;
-
-  console.log(dataset?.study)
-  console.log(dataset?.dataUse)
 
   if (!isLoading) {
     return (
@@ -153,7 +148,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             </LabeledSection>
             {(accessType === AccessManagement.CONTROLLED || accessType === AccessManagement.EXTERNAL) &&
                 <LabeledSection label={'Data Use'}>
-                  {dataset?.dataUse ? consentTranslations[dataset.dataUse] || dataset.dataUse : 'N/A'}
+                  Coming Soon
                 </LabeledSection>
             }
             <LabeledSection label={'Data Location'}>
