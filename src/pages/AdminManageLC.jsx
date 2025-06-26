@@ -29,7 +29,7 @@ export default function AdminManageLC() {
     };
     try{
       initData();
-    } catch(error) {
+    } catch {
       Notifications.showError({text:'Error: Failed to initialize component'});
     }
   }, []);

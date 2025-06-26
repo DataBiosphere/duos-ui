@@ -22,13 +22,6 @@ import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {LibraryCard} from 'src/types/model';
 
-interface UserData {
-  userId: number;
-  displayName: string;
-  email: string;
-  libraryCard?: LibraryCard;
-}
-
 export interface LibraryCardTableProps {
   libraryCards?: LibraryCard[];
 }
