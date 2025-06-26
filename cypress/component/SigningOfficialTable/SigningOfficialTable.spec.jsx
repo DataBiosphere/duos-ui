@@ -73,7 +73,7 @@ describe('SigningOfficialTable', () => {
     cy.get('[id$=option-1]').click();
 
     // Submit the form
-    cy.contains('button', 'Bulk Issue / Add Users').click();
+    cy.get('[id=Add-button]').click();
 
     // Verify error notification is shown
     cy.contains('Error issuing library card').should('be.visible');
@@ -107,7 +107,7 @@ describe('SigningOfficialTable', () => {
     cy.get('[id$=option-1]').click();
 
     // Submit the form
-    cy.contains('button', 'Bulk Issue / Add Users').click();
+    cy.get('[id=Add-button]').click();
 
     // Verify success notification is shown
     cy.contains('Issued 1 library card').should('be.visible');
@@ -152,7 +152,7 @@ describe('SigningOfficialTable', () => {
     cy.get('[id$=option-2]').click();
 
     // Submit the form
-    cy.contains('button', 'Bulk Issue / Add Users').click();
+    cy.get('[id=Add-button]').click();
 
     // Verify warning notification is shown
     cy.contains(`Issued 1 library card, but encountered errors issuing library cards to ${mockResearcher2.email}`).should('be.visible');
