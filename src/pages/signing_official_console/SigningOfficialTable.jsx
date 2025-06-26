@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Info } from '@mui/icons-material';
 import { Styles, Theme } from 'src/libs/theme';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
+import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
 import SimpleTable from 'src/components/SimpleTable';
 import SimpleButton from 'src/components/SimpleButton';
 import PaginationBar from 'src/components/PaginationBar';
@@ -22,6 +22,7 @@ import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252
 import {
   NIHDataUseCertificationAgreement
 } from 'src/components/external_docs/NIHDataUseCertificationAgreement';
+import { processLibraryCards } from 'src/utils/LibraryCardUtils';
 
 //Styles specific to this table
 const styles = {
@@ -313,37 +314,42 @@ export default function SigningOfficialTable(props) {
     setShowModal(true);
   };
 
-  const issueLibraryCard = async (selectedCard, researchers) => {
-    let messageName;
-    try {
+  const issueLibraryCards = async (cards, researchers) => {
+    const { successfulCards, failedCards } = await processLibraryCards(cards);
+
+    // Update researchers list with successful cards
+    if (successfulCards.length > 0) {
       const listCopy = cloneDeep(researchers);
-      const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
-      const {userEmail, userName, userId} = newLibraryCard;
-      const targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
-      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
-      if(targetIndex === -1) { //if card is not found, push new user to top of list
-        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
-        const attributes = {
-          email: userEmail,
-          displayName: userName,
-          libraryCard: newLibraryCard,
-          roles: [],
-        };
-        if(!isNil(targetUnregisteredResearcher)) {
-          attributes.roles = targetUnregisteredResearcher.roles;
+      successfulCards.forEach((newCard) => {
+        const {userEmail, userName, userId} = newCard;
+        const targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+        if(targetIndex === -1) { //if card is not found, push new user to top of list
+          listCopy.unshift({
+            email: userEmail,
+            displayName: userName,
+            libraryCard: newCard,
+            roles: [],
+          });
+        } else {
+          listCopy[targetIndex].libraryCard = newCard;
         }
-        listCopy.unshift(attributes);
-        messageName = userEmail;
-      } else {
-        listCopy[targetIndex].libraryCard = newLibraryCard;
-        messageName = userName;
-      }
+      });
       setResearchers(listCopy);
-      setShowConfirmation(false);
-      setShowModal(false);
-      Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(error) {
-      Notifications.showError({text: error.response.data.message ?? 'Error issuing library card' });
+    }
+
+    setShowConfirmation(false);
+    setShowModal(false);
+
+    const successNotificationText = `Issued ${successfulCards.length} library card${successfulCards.length > 1 ? 's' : ''}`;
+    const errorNotificationText = `Error issuing library card${failedCards.length > 1 ? 's' : ''}.`;
+    const warningNotificationText = `${successNotificationText}, but encountered errors issuing library cards to ${failedCards.map(fc => fc.card.userEmail || fc.card.email).join(', ')}`;
+
+    if(successfulCards.length > 0 && failedCards.length > 0) {
+      Notifications.showWarning({ text: warningNotificationText });
+    } else if (successfulCards.length > 0) {
+      Notifications.showSuccess({ text: successNotificationText });
+    } else if (failedCards.length > 0) {
+      Notifications.showError({ text: errorNotificationText });
     }
   };
 
@@ -426,10 +432,9 @@ export default function SigningOfficialTable(props) {
       />
       <LibraryCardFormModal
         showModal={showModal}
-        createOnClick={(card) => issueLibraryCard(card, researchers)}
+        createOnClick={(cards) => issueLibraryCards(cards, researchers)}
         closeModal={() => setShowModal(false)}
-        card={selectedCard}
-        users={onlyResearchersWithoutCardFilter(researchers)}
+        users={researchers.filter(onlyResearchersWithoutCardFilter)}
         modalType="add" />
       <ConfirmationModal
         showConfirmation={showConfirmation}
@@ -447,7 +452,7 @@ export default function SigningOfficialTable(props) {
         onConfirm={() =>
           confirmType === confirmModalType.delete
             ? deactivateLibraryCard(selectedCard, researchers)
-            : issueLibraryCard(selectedCard, researchers)}
+            : issueLibraryCards([selectedCard], researchers)}
       />
     </>
   );

@@ -8,7 +8,7 @@ import {
   Notifications,
   searchOnFilteredList
 } from 'src/libs/utils';
-import {cloneDeep, findIndex, isEmpty, isEqual, isNaN, isNil} from 'lodash/fp';
+import {cloneDeep, findIndex, isEmpty, isNaN, isNil} from 'lodash/fp';
 import {Styles} from 'src/libs/theme';
 import PaginationBar from 'src/components/PaginationBar';
 import SearchBar from 'src/components/SearchBar';
@@ -22,6 +22,7 @@ import TableIconButton from 'src/components/TableIconButton';
 import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {LibraryCard} from 'src/types/model';
+import { processLibraryCards } from 'src/utils/LibraryCardUtils';
 
 interface UserData {
   userId: number;
@@ -294,35 +295,37 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   />;
 
   // onClick function, used to create new card on modal based on form data
-  const addLibraryCard = async (card: LibraryCard): Promise<void> => {
-    try {
-      // Check if card already exists, show error if it does
-      const alreadyExists = findIndex(
-          (element: LibraryCard) => isEqual(element.userEmail)(card.userEmail),
-          libraryCards
+  const addLibraryCards = async (newLibraryCards: LibraryCard[]): Promise<void> => {
+    // Check if any cards already exist, show error if any do
+    const duplicateLibraryCards = newLibraryCards.filter((card) => {
+      return libraryCards.some((element: LibraryCard) =>
+          element.userEmail === card.userEmail
       );
-      if (alreadyExists > -1) {
-        Notifications.showError({text: 'Library Card already exists'});
-      } else {
-        // Execute library card update with payload, get the updated card, and
-        // add (with sort afterwards) library card to libraryCards (reference list)
-        const newCard = await LibraryCardAPI.createLibraryCard(card);
-        const updatedList = cloneDeep(libraryCards);
-        updatedList.push(newCard);
-        updatedList.sort((a: LibraryCard, b: LibraryCard) => {
-          const dateA = new Date(a.createDate ?? '');
-          const dateB = new Date(b.createDate ?? '');
-          return dateB.getTime() - dateA.getTime();
+    });
+
+    if (duplicateLibraryCards.length > 0) {
+      Notifications.showError({
+        text: 'Error updating library cards. The following users already have library cards: ' + duplicateLibraryCards.map(card => card.userEmail).join(', ')
+      });
+    } else {
+      const { successfulCards, failedCards } = await processLibraryCards(newLibraryCards);
+
+      if (successfulCards.length > 0) {
+        const updatedList = [...cloneDeep(libraryCards), ...successfulCards];
+
+        updatedList.sort((a, b) => {
+          return dayjs(b.createDate).valueOf() - dayjs(a.createDate).valueOf();
         });
+
         setLibraryCards(updatedList);
-        setShowModal(false);
       }
-    } catch (error: unknown) {
-      const axiosError = error as AxiosError;
-      const consentError = axiosError?.response?.data as ConsentError;
-      const serverError = consentError.message ?? 'Error: Failed to create new library card';
+
       setShowModal(false);
-      Notifications.showError({text: serverError});
+
+      if(failedCards.length > 0) {
+        const errorMessages = failedCards.map(failure => `${failure.error}`).join(', ');
+        Notifications.showError({text: `${errorMessages}`});
+      }
     }
   };
 
@@ -410,10 +413,9 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         />
         <LibraryCardFormModal
             showModal={showModal}
-            createOnClick={addLibraryCard}
+            createOnClick={addLibraryCards}
             closeModal={() => setShowModal(false)}
             users={users}
-            card={currentCard}
         />
         <ConfirmationModal
             showConfirmation={showConfirmation}

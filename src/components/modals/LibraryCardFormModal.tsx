@@ -1,13 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import {cloneDeep, includes, isEmpty, isNil, isObject} from 'lodash/fp';
+import React, {useState} from 'react';
+import {cloneDeep, includes, isEmpty, isNil} from 'lodash/fp';
 import {Styles, Theme} from 'src/libs/theme';
 import CloseIconComponent from 'src/components/CloseIconComponent';
 import ModalWrapper from 'src/components/collaborator_list/ModalWrapper';
 import Creatable from 'react-select/creatable';
 import SimpleButton from 'src/components/SimpleButton';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
-import {SingleValue} from 'react-select';
+import {MultiValue} from 'react-select';
 import {LibraryCard} from 'src/types/model';
+import {Spinner} from 'src/components/Spinner';
 
 // This represents the fields describing users in a selection dropdown menu
 interface UserOption {
@@ -18,36 +19,32 @@ interface UserOption {
 }
 
 interface FormFieldRowProps {
-  card: LibraryCard;
+  selectedUsers: UserOption[];
   dropdownOptions: UserOption[];
-  updateUser: (value: SingleValue<UserOption>) => void;
-  setCard: React.Dispatch<React.SetStateAction<LibraryCard>>;
+  updateUsers: (values: MultiValue<UserOption>) => void;
 }
 
 export interface LibraryCardFormModalProps {
   showModal: boolean;
-  createOnClick: (card: LibraryCard) => void;
+  createOnClick: (cards: LibraryCard[]) => Promise<void>;
   closeModal: () => void;
   users: UserOption[];
-  card: LibraryCard;
 }
 
 interface FilterOptions {
   searchTerm?: string;
   input?: string;
-  card: LibraryCard;
-  setCard: React.Dispatch<React.SetStateAction<LibraryCard>>;
   action: string;
 }
 
 const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
-  const { card, dropdownOptions, updateUser, setCard } = props;
+  const { selectedUsers, dropdownOptions, updateUsers } = props;
 
   const cardlessOptions = dropdownOptions.filter((option) => isNil(option.libraryCard));
   const [filteredDropdown, setFilteredDropdown] = useState<UserOption[]>(cardlessOptions);
 
   //filter function for users dropdown
-  const userListFilter = ({ searchTerm, input, card, setCard, action }: FilterOptions) => {
+  const userListFilter = ({ searchTerm, input }: FilterOptions) => {
     const term = searchTerm ?? input ?? '';
     let filteredCopy: UserOption[];
 
@@ -62,9 +59,6 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
       });
     }
     setFilteredDropdown(filteredCopy);
-    if (action !== 'input-blur' && action !== 'menu-close') {
-      setCard({...card, ...{email: term}});
-    }
   };
 
   return (
@@ -74,15 +68,17 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
           <Creatable
               key="select-user"
               isClearable={true}
-              onChange={updateUser}
+              isMulti={true}
+              onChange={updateUsers}
+              value={selectedUsers}
               createOptionPosition="first"
               onInputChange={(input: string, { action }: { action: string }) =>
-                  userListFilter({ input, card, setCard, action })}
+                  userListFilter({ input, action })}
               getNewOptionData={(input: string) => {
                 return { email: input } as UserOption;
               }}
-              options={dropdownOptions}
-              placeholder="Select or type a new user email"
+              options={cardlessOptions}
+              placeholder="Select or type new user emails"
               isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
               /* eslint-disable-next-line no-constant-binary-expression */
               getOptionLabel={(option: UserOption) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email || ''}
@@ -94,30 +90,40 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
 
 const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   const { showModal, createOnClick, closeModal, users } = props;
-  const [card, setCard] = useState<LibraryCard>(props.card);
+  const [selectedUsers, setSelectedUsers] = useState<UserOption[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  //initialization hook, sets card as state variables
-  useEffect(() => {
-    setCard(props.card);
-  }, [props.card]);
+  // Create a library card for each selected user
+  const createLibraryCards = async () => {
+    if (selectedUsers.length === 0) return;
 
-  const updateUser = (value: SingleValue<UserOption> | string) => {
-    let userEmail, userId, userName;
-    if (isObject(value)) {
-      const userOption = value;
-      userId = userOption.userId;
-      userEmail = userOption.email;
-      userName = userOption.displayName;
-    } else {
-      userEmail = value;
+    try {
+      setIsLoading(true);
+
+      // Map selected users to library cards
+      const cards = selectedUsers.map(user => {
+        return {
+          userId: user.userId,
+          userEmail: user.email,
+          userName: user.displayName,
+        } as LibraryCard;
+      });
+
+      await createOnClick(cards);
+      setSelectedUsers([]);
+    } finally {
+      setIsLoading(false);
     }
-    const updatedCard = {...card, userEmail, userId, userName};
-    setCard(updatedCard as LibraryCard);
   };
 
-  //boolean function, used to determine if submit button should be disabled
-  const isConfirmDisabled = (card: LibraryCard): boolean => {
-    return isNil(card.userEmail);
+  // Handle multi-selection changes
+  const updateUsers = (newValues: MultiValue<UserOption>) => {
+    setSelectedUsers(newValues as UserOption[]);
+  };
+
+  // Check if we have any selected users
+  const isConfirmDisabled = (): boolean => {
+    return selectedUsers.length === 0 || isLoading;
   };
 
   return (
@@ -135,20 +141,19 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
         <div data-cy={'library-card-form-modal'} style={Styles.MODAL.CONTENT}>
           <CloseIconComponent closeFn={closeModal}/>
           <div style={Styles.MODAL.TITLE_HEADER}>
-            Add Library Card
+            Add Library Cards
           </div>
           <div style={{borderBottom: '1px solid #1FB50'}}/>
           {/* LCA Terms Download */}
           <LibraryCardAgreementTermsDownload/>
           {/* users dropdown */}
           <FormFieldRow
-              card={card}
-              updateUser={updateUser}
-              setCard={setCard}
+              selectedUsers={selectedUsers}
+              updateUsers={updateUsers}
               dropdownOptions={users}
           />
-          <div style={{display: 'inline-block'}}>
-            By clicking {'\'ADD\''} you agree to the terms of the agreements above for this user.
+          <div style={{display: 'inline-block', marginBottom: '1rem',}}>
+            By clicking {'\'ADD\''} you agree to the terms of the agreements above for all users.
           </div>
           <div
               style={{
@@ -156,12 +161,13 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
                 justifyContent: 'flex-end',
               }}
           >
+            {isLoading && <Spinner />}
             <SimpleButton
                 data-cy={'library-card-form-modal-add-button'}
-                onClick={() => createOnClick(card)}
+                onClick={createLibraryCards}
                 additionalStyle={{margin: '0%', width: '80px', height: '15px', padding: '20px'}}
                 baseColor={Theme.palette.secondary}
-                disabled={isConfirmDisabled(card)}
+                disabled={isConfirmDisabled()}
                 label={'Add'}
             />
             <SimpleButton
