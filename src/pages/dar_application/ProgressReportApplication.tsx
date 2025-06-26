@@ -115,7 +115,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
     const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
-    const [closeoutAcknowledgement, setCloseoutAcknowledgement] = useState<Acknowledgement>({} as Acknowledgement);
+    const [closeoutAcknowledgement, setCloseoutAcknowledgement] = useState<undefined | Acknowledgement>(undefined);
 
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 

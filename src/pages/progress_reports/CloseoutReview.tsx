@@ -46,7 +46,14 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
 
   const approvedButton =
       (acknowledgement: Acknowledgement) => {
-        const approvalDate = new Date(acknowledgement.lastAcknowledged).toISOString().substring(0, 10);
+        let approvalDate = '';
+        if (acknowledgement.lastAcknowledged) {
+          approvalDate += new Date(acknowledgement.lastAcknowledged).toISOString().substring(0, 10);
+        } else if (acknowledgement.firstAcknowledged) {
+          approvalDate += new Date(acknowledgement.firstAcknowledged).toISOString().substring(0, 10);
+        } else {
+          approvalDate += 'unknown date';
+        }
         return <button
             type='button' disabled={true}
             style={{
