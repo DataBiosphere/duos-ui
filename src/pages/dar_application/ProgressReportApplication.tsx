@@ -207,7 +207,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         if (readOnlyMode) {
           const acknowledgementMap: AcknowledgementMap = await User.getAcknowledgements();
           Object.keys(acknowledgementMap).forEach((key:string) => {
-            if (key.indexOf(dar.referenceId) >= 0 && key.indexOf('dar_closeout_chair') >= 0) {
+            if (key.indexOf('dar_closeout_chair_ref_') >= 0 && key.indexOf(dar.referenceId) >= 0) {
               setCloseoutAcknowledgement(acknowledgementMap[key]);
             }
           });
