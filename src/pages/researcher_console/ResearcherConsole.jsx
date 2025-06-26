@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { cloneDeep, findIndex } from 'lodash/fp';
-import { Styles } from '../../libs/theme';
-import { DAR } from '../../libs/ajax/DAR';
-import { Collections } from '../../libs/ajax/Collections';
+import { Styles } from 'src/libs/theme';
+import { DAR } from 'src/libs/ajax/DAR';
+import { Collections } from 'src/libs/ajax/Collections';
 import {
   DarCollectionTable,
   DarCollectionTableColumnOptions

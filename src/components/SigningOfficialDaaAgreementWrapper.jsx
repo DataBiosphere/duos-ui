@@ -1,12 +1,12 @@
-import { Notifications } from '../libs/utils';
-import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihLibraryCardAgreementLink from '../assets/NIHLibraryCardAgreement06252025.pdf';
-import DataSubmitterAgreementLink from '../assets/Data_Registrant_Agreement_7.2.24.22.pdf';
-import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';
+import { Notifications } from 'src/libs/utils';
+import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
+import DataSubmitterAgreementLink from 'src/assets/Data_Registrant_Agreement_7.2.24.22.pdf';
+import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from 'src/libs/acknowledgements';
 import React, { useEffect, useState } from 'react';
-import { spinnerService } from '../libs/spinner-service';
+import { spinnerService } from 'src/libs/spinner-service';
 import { isNil, isNull } from 'lodash';
-import { Styles } from '../libs/theme';
+import { Styles } from 'src/libs/theme';
 import UsgOmbText from './UsgOmbText';
 import {
   NIHDataUseCertificationAgreement

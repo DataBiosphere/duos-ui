@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   NIHDataUseCertificationAgreement
-} from '../components/external_docs/NIHDataUseCertificationAgreement';
+} from 'src/components/external_docs/NIHDataUseCertificationAgreement';
 import NihLibraryCardAgreementLink
-  from '../assets/NIHLibraryCardAgreement06252025.pdf';
+  from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 import BroadLibraryCardAgreementLink
-  from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+  from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 
 export const LibraryCardAgreementTermsDownload = () => (
   <div>
