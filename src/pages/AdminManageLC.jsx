@@ -1,23 +1,20 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Institution } from '../libs/ajax/Institution';
-import { User } from '../libs/ajax/User';
 import { LibraryCard } from '../libs/ajax/LibraryCard';
-import { Notifications, USER_ROLES } from '../libs/utils';
+import { Notifications } from '../libs/utils';
 import LibraryCardTable from '../components/library_card_table/LibraryCardTable';
 
 export default function AdminManageLC() {
   const [libraryCards, setLibraryCards] = useState();
   const [institutions, setInstitutions] = useState();
-  const [users, setUsers] = useState();
 
   //init hook to get users, institutions, and cards to be passed down as props
   useEffect(() => {
     const initData = async() => {
       const dataPromiseArray = await Promise.all([
         LibraryCard.getAllLibraryCards(),
-        Institution.list(),
-        User.list(USER_ROLES.admin)
+        Institution.list()
       ]);
       const cards = dataPromiseArray[0];
       const institutions = dataPromiseArray[1].map((institution) => {
@@ -27,10 +24,8 @@ export default function AdminManageLC() {
           displayText: institution.name
         };
       });
-      const users = dataPromiseArray[2];
       setLibraryCards(cards);
       setInstitutions(institutions);
-      setUsers(users);
     };
     try{
       initData();
@@ -41,6 +36,6 @@ export default function AdminManageLC() {
 
   //props are expecting array format
   return (
-    <LibraryCardTable users={users} institutions={institutions} libraryCards={libraryCards} />
+    <LibraryCardTable institutions={institutions} libraryCards={libraryCards} />
   );
 }
