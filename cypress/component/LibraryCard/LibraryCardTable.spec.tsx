@@ -69,4 +69,42 @@ describe('Library Card Table Tests', () => {
       cy.get('[data-cy=manage-library-card-table]').should('contain', card.userEmail);
     });
   });
+
+  it('should allow searching for a library card by email', () => {
+    const props: LibraryCardTableProps = {
+      libraryCards: libraryCardList
+    };
+
+    mount(<LibraryCardTable {...props} />);
+
+    cy.get('[data-cy=search-bar]').type(libraryCardList[0].userEmail);
+
+    // Verify that only the matching card is displayed
+    cy.get('[data-cy=manage-library-card-table]').should('contain', libraryCardList[0].userName);
+
+    //Remaining cards should not be displayed
+    libraryCardList.slice(1).forEach((card) => {
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userName);
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userEmail);
+    });
+  });
+
+  it('should allow searching for a library card by user name', () => {
+    const props: LibraryCardTableProps = {
+      libraryCards: libraryCardList
+    };
+
+    mount(<LibraryCardTable {...props} />);
+
+    cy.get('[data-cy=search-bar]').type(libraryCardList[0].userName.toLowerCase());
+
+    // Verify that only the matching card is displayed
+    cy.get('[data-cy=manage-library-card-table]').should('contain', libraryCardList[0].userName);
+
+    //Remaining cards should not be displayed
+    libraryCardList.slice(1).forEach((card) => {
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userName);
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userEmail);
+    });
+  });
 });
