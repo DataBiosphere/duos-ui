@@ -3,17 +3,17 @@ import {get} from 'lodash';
 import {isNil} from 'lodash/fp';
 import queryString from 'query-string';
 import './ERACommons.css';
-import {AuthenticateNIH} from '../libs/ajax/AuthenticateNIH';
-import {User} from '../libs/ajax/User';
-import {Config} from '../libs/config';
-import './Animations.css';
-import {Storage} from '../libs/storage';
+import {AuthenticateNIH} from '../../libs/ajax/AuthenticateNIH.js';
+import {User} from '../../libs/ajax/User.js';
+import {Config} from '../../libs/config.js';
+import '../Animations.css';
+import {Storage} from '../../libs/storage.js';
 import {
   decodeNihToken,
   extractEraAuthenticationState,
   rasEnabled,
   nihAccountLabel
-} from '../../src/utils/ERACommonsUtils';
+} from '../../utils/ERACommonsUtils.js';
 import ReactTooltip from 'react-tooltip';
 
 export default function ERACommons(props) {
@@ -24,7 +24,6 @@ export default function ERACommons(props) {
     required = false,
     destination = '',
     researcherProfile = undefined,
-    readOnly = false
   } = props;
   const [search, setSearch] = useState(props.location?.search || '');
   const [isAuthorized, setAuthorized] = useState(false);
@@ -134,7 +133,7 @@ export default function ERACommons(props) {
           {required ? <span data-cy="era-commons-required">*</span> : ''}
         </span>
       </label>}
-      {(!isAuthorized || expirationCount < 0) && (!readOnly &&
+      {(!isAuthorized || expirationCount < 0) &&
         <a
           data-cy="era-commons-authenticate-link"
           className={validationErrorState ? 'era-button-state-error' : 'era-button-state'}
@@ -143,30 +142,26 @@ export default function ERACommons(props) {
           <div className={rasEnabled() ? 'nih-logo-style' : 'era-logo-style'}/>
           <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
         </a>
-      )}
+      }
       {nihError && <span data-cy="era-commons-error-span"
                          className="era-cancel-color era-required-field-error-span">{nihError}</span>}
       {isAuthorized && <div>
         {expirationCount >= 0 && <div className="era-commons-id-value">
           <span data-cy="era-commons-id-value">{eraCommonsId}</span>
-          {!readOnly &&
             <button data-cy="era-delete-icon" className="era-delete-icon" type="button" onClick={deleteNihAccount}>
               <span className="glyphicon glyphicon-remove-circle" data-tip="Clear account"
                     data-for="tip_clear_era_commons_link"/>
             </button>
-          }
-          {!readOnly &&
             <ReactTooltip
               place={'right'}
               effect={'solid'}
               id={`tip_clear_era_commons_link`}>Clear {accountLabel} Account Link</ReactTooltip>
-          }
         </div>}
         <div className="era-expiration-value">
           {expirationCount >= 0 && <div
-            className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${expirationCount} days`}</div>}
+            className="era-fadein">{`Your NIH authentication will expire in ${expirationCount} days`}</div>}
           {expirationCount < 0 &&
-            <div className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`}</div>}
+            <div className="era-fadein">{'Your NIH authentication has expired'}</div>}
         </div>
       </div>}
     </div>

@@ -1,4 +1,4 @@
-import ERACommons from '../../../src/components/ERACommons.jsx';
+import ERACommons from 'src/components/era_commons/ERACommons.jsx';
 import {decodeNihToken} from '../../../src/utils/ERACommonsUtils.js';
 import {AuthenticateNIH} from '../../../src/libs/ajax/AuthenticateNIH.js';
 import {User} from '../../../src/libs/ajax/User';
@@ -66,7 +66,6 @@ describe('ERA Commons Component', function () {
       destination={''}
       header={true} // Triggers the NIH eRA Commons header
       onNihStatusUpdate={() => {}}
-      readOnly={false}
       required={true} // Triggers the required flag on the NIH eRA Commons ID
       style={{}}
     />);
@@ -96,7 +95,6 @@ describe('ERA Commons Component', function () {
       location={{search: `?nih-username-token=${buildToken('testing', iat, exp)}`}}
       header={true}
       onNihStatusUpdate={() => {}}
-      readOnly={false}
       required={true}
       style={{}}
     />);
@@ -115,7 +113,6 @@ describe('ERA Commons Component', function () {
       destination={''}
       header={true} // Triggers the NIH eRA Commons header
       onNihStatusUpdate={() => {}}
-      readOnly={false}
       required={true} // Triggers the required flag on the NIH eRA Commons ID
       style={{}}
       location={{search: '?nih-username-token=invalid'}}
@@ -142,7 +139,6 @@ describe('ERA Commons Component', function () {
       destination={''}
       header={true} // Triggers the NIH eRA Commons header
       onNihStatusUpdate={() => {}}
-      readOnly={false}
       required={true} // Triggers the required flag on the NIH eRA Commons ID
       style={{}}
       location={{search: '?nih-username-token=' + encodedToken}}
@@ -164,7 +160,6 @@ describe('ERA Commons Component', function () {
       destination={''}
       header={true} // Triggers the NIH eRA Commons header
       onNihStatusUpdate={() => {}}
-      readOnly={false}
       required={true} // Triggers the required flag on the NIH eRA Commons ID
       style={{}}
     />);
