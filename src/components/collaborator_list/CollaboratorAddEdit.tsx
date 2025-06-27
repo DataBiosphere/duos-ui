@@ -60,7 +60,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
 
     const header = collaborator?.name === undefined
       ? `New ${collaboratorText} Information`
-      : `${!readOnly ? `Edit ` : `View` } ${collaborator.name} Information`;
+      : `${!readOnly ? `Edit` : `View` } ${collaborator.name} Information`;
 
     return (
         <div className='form-group row no-margin'>

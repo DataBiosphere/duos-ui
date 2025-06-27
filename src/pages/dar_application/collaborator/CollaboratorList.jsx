@@ -13,7 +13,8 @@ export default function CollaboratorList(props) {
     showApproval,
     setCompleted,
     validation,
-    onValidationChange
+    onValidationChange,
+    readOnly = false,
   } = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);
@@ -83,6 +84,7 @@ export default function CollaboratorList(props) {
           id={index}
           key={index}
           editMode={editState[index]}
+          readOnly={readOnly}
           collaborator={collaborator}
           collaboratorText={collaboratorLabel}
           collaborators={collaborators}

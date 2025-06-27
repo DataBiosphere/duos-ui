@@ -69,6 +69,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         onCollaboratorChange={onCollaboratorChange}
                         showApproverStatus={showApproverStatus}
                         countriesOfOperation={countriesOfOperation}
+                        readOnly={readOnly}
                     />
                 )}
             </div>
