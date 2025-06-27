@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
+      interval: cron
+      cronjob: "0 0 1,15 * *"
     open-pull-requests-limit: 10
     target-branch: develop
     commit-message:
@@ -18,13 +19,11 @@ updates:
       action-patch-updates:
         update-types:
           - "patch"
-        schedule:
-          interval: cron
-          cronjob: "0 0 1,15 * *"
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: weekly
+      interval: cron
+      cronjob: "0 0 1,15 * *"
     open-pull-requests-limit: 10
     target-branch: develop
     labels:
@@ -42,13 +41,11 @@ updates:
       npm-patch-updates:
         update-types:
           - "patch"
-        schedule:
-          interval: cron
-          cronjob: "0 0 1,15 * *"
   - package-ecosystem: docker
     directory: "/"
     schedule:
-      interval: weekly
+      interval: cron
+      cronjob: "0 0 1,15 * *"
     open-pull-requests-limit: 10
     target-branch: develop
     labels:
@@ -66,6 +63,3 @@ updates:
       docker-patch-updates:
         update-types:
           - "patch"
-        schedule:
-          interval: cron
-          cronjob: "0 0 1,15 * *"
