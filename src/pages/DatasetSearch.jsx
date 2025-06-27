@@ -282,6 +282,15 @@ export const DatasetSearch = (props) => {
       icon: getzLabIcon,
       title: 'Getz Lab Data Library',
     },
+    'asap': {
+      query: {
+        'match_phrase': {
+          'study.description': 'ASAP'
+        }
+      },
+      icon: asapIcon,
+      title: 'Aligning Science Across Parkinson\'s Data Library',
+    },
     '/custom': {
       query: {
         'bool': {
