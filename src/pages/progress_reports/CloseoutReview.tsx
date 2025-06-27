@@ -9,13 +9,14 @@ interface CloseoutReviewProps {
 }
 
 export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
-                                                                acknowledgement,
-                                                                onApprove,
-                                                                onReturn,
-                                                              }) => {
+    acknowledgement,
+    onApprove,
+    onReturn,
+}) => {
 
   const approveButton =
       <button
+          data-cy="closeout-review-approve-button"
           type="button"
           onClick={onApprove}
           style={{
@@ -55,6 +56,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
           approvalDate += 'unknown date';
         }
         return <button
+            data-cy="closeout-review-approved-button"
             type='button' disabled={true}
             style={{
               backgroundColor: '#cccccc',
@@ -75,7 +77,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
         borderRadius: '4px',
         padding: '24px',
         marginTop: '20px'
-      }}>
+      }} data-cy="closeout-review">
         <div style={{display: 'flex', alignItems: 'flex-start', gap: '16px'}}>
           <InfoIcon style={{
             color: '#4D72AA',

@@ -85,6 +85,14 @@ describe('CloseoutReview - Component Tests', () => {
       .should('have.css', 'font-weight', '400'); // normal
   });
 
+  it('displays closeout approve when no acknowledgement exists', () => {
+    mountComponent();
+
+    // Approved button with approved date should be visible
+    cy.get('[data-cy="closeout-review"]').should('exist');
+    cy.get('[data-cy="closeout-review-approve-button"]').should('exist');
+  });
+
   it('displays closeout approval when acknowledgement exists', () => {
     const now = new Date();
     const acknowledgement = {
@@ -96,7 +104,8 @@ describe('CloseoutReview - Component Tests', () => {
     mountComponent({acknowledgement: acknowledgement});
 
     // Approved button with approved date should be visible
-    cy.contains('Approved on').should('exist');
+    cy.get('[data-cy="closeout-review"]').should('exist');
+    cy.get('[data-cy="closeout-review-approved-button"]').should('exist');
     cy.contains(now.toISOString().substring(0, 10)).should('exist');
   });
 });
