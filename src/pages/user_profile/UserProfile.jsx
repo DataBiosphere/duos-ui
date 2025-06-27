@@ -6,13 +6,12 @@ import { Notification } from 'src/components/Notification';
 import { User } from 'src/libs/ajax/User';
 import { Storage } from 'src/libs/storage';
 import { NotificationService } from 'src/libs/notificationService';
-import { Notifications } from 'src/libs/utils';
+import { Notifications, setUserRoleStatuses } from 'src/libs/utils';
 import AffiliationAndRoles from './AffiliationAndRoles';
 import ResearcherStatus from './ResearcherStatus';
 import AcceptedAcknowledgements from './AcceptedAcknowledgements';
 import ga4ghLogo from 'src/images/ga4gh-logo.png';
 import userProfileIcon from 'src/images/user-profile.png';
-import {setUserRoleStatuses} from 'src/libs/utils';
 
 export default function UserProfile(props) {
 
