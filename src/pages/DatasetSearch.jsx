@@ -20,6 +20,7 @@ import zoonomicsIcon from 'src/images/ZoonomicsLogoColor.png';
 import aouIcon from 'src/images/aou-logo.png';
 import stanleyIcon from 'src/images/stanley-center-logo.png';
 import getzLabIcon from 'src/images/getz-lab-logo.svg';
+import gp2Icon from 'src/images/gp2-logo.svg';
 import asapIcon from 'src/images/asap-logo.svg';
 import homeIcon from 'src/images/icon_dataset_.png';
 import { Storage } from 'src/libs/storage';
@@ -290,6 +291,15 @@ export const DatasetSearch = (props) => {
       },
       icon: asapIcon,
       title: 'Aligning Science Across Parkinson\'s Data Library',
+    },
+    'gp2': {
+      query: {
+        'match_phrase': {
+          'study.description': 'GP2'
+        }
+      },
+      icon: gp2Icon,
+      title: 'Global Parkinson\'s Genetics Program Data Library',
     },
     '/custom': {
       query: {
