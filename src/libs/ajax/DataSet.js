@@ -1,8 +1,7 @@
-import { mergeAll } from 'lodash/fp';
-import { Config } from '../config';
 import axios from 'axios';
-import { getApiUrl, fetchOk } from '../ajax';
-
+import { mergeAll } from 'lodash/fp';
+import { Config } from 'src/libs/config';
+import { getApiUrl, fetchOk } from 'src/libs/ajax';
 
 export const DataSet = {
   getDatasetNames: async () => {
