@@ -25,7 +25,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     });
 
     cy.stub(Storage, 'getCurrentUser').returns(researcher);
-    cy.stub(User, 'getAcknowledgements').resolves([]);
+    cy.stub(User, 'getAcknowledgements').resolves({});
 
     // Create mock history with stubs inside beforeEach
     mockHistory = {
