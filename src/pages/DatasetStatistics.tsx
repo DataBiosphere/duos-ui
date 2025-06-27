@@ -87,7 +87,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     const init = async () => {
       try {
         const dataset: Dataset = await DataSet.getDatasetByDatasetIdentifier(datasetIdentifier);
-        const datasetTerms = await DataSet.searchDatasetIndex({  query: {
+        const datasetTerms = await DataSet.searchDatasetIndex({ query: {
           'bool': {
             'must': [
               {
@@ -103,7 +103,13 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             ]
           }
         }});
-        console.log(datasetTerms)
+
+        if(datasetTerms.length === 0) {
+          showError(`Unable to retrieve dataset statistics from server: dataset ${datasetIdentifier} not found.`);
+          setIsLoading(false);
+          return;
+        }
+
         const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
         setDataset(datasetTerms[0]);
         setDars(metrics.dars);
@@ -115,19 +121,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     }
     init();
   }, [datasetIdentifier]);
-
-  // const extract = useCallback((propertyName: string) => {
-  //   const property = find({propertyName})(dataset?.) as DatasetProperty;
-  //   return property?.propertyValue;
-  // }, [dataset]);
-  //
-  // const extractStudyProp = useCallback((key: string) => {
-  //   const property = find({key})(dataset?.study?.properties) as StudyProperty;
-  //   if (Array.isArray(property?.value)) {
-  //     return property.value.join(', ');
-  //   }
-  //   return property?.value;
-  // }, [dataset]);
 
   const accessInstructions = () => {
     const accessManagement = dataset?.accessManagement as AccessManagement;

@@ -108,12 +108,11 @@ export function processDataUseCodes(dataset) {
 
 /**
  * Creates a data use display component with tooltips
- * @param {Object} params - Parameters object
- * @param {Object} params.dataset - DatasetTerm object
- * @param {string} params.divClass - CSS class for the div
- * @param {string} params.spanClass - CSS class for the span
- * @param {string} params.tooltipPlace - Placement direction for tooltip
- * @returns {JSX.Element} - Data use display component
+ * @param {Object} dataset - DatasetTerm object
+ * @param {string} divClass - CSS class for the div
+ * @param {string} spanClass - CSS class for the span
+ * @param {string} tooltipPlace - Placement direction for tooltip
+ * @returns {JSX.Element} - Element displaying data use codes with tooltips
  */
 export function createDataUseDisplay({
                                        dataset,
