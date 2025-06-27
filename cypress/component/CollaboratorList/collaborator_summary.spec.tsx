@@ -25,10 +25,10 @@ describe('CollaboratorSummary - Component Tests', () => {
 
   const defaultProps = {
     collaborator: mockCollaborator,
-    columnsToShow: ['name', 'title', 'email'],
+    columnsToShow: ['name', 'title', 'email', 'eraCommonsId'],
     editAction: () => { },
     deleteAction: () => { },
-    disabled: false
+    readOnly: false
   };
 
   it('renders the component correctly with specified columns', () => {
@@ -37,6 +37,7 @@ describe('CollaboratorSummary - Component Tests', () => {
     cy.contains(mockCollaborator.name).should('be.visible');
     cy.contains(mockCollaborator.title).should('be.visible');
     cy.contains(mockCollaborator.email).should('be.visible');
+    cy.contains(mockCollaborator.eraCommonsId).should('be.visible');
 
     cy.get('.collaborator-summary-edit-delete-buttons').should('exist');
     cy.get('.glyphicon-pencil').should('exist');
@@ -46,7 +47,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   it('renders different columns when columnsToShow changes', () => {
     const customProps = {
       ...defaultProps,
-      columnsToShow: ['name', 'email']
+      columnsToShow: ['name', 'email', 'eraCommonsId']
     };
 
     mount(<CollaboratorSummary {...customProps} />);
@@ -55,6 +56,7 @@ describe('CollaboratorSummary - Component Tests', () => {
 
     cy.contains(mockCollaborator.title).should('not.exist');
     cy.contains(mockCollaborator.email).should('be.visible');
+    cy.contains(mockCollaborator.eraCommonsId).should('be.visible');
   });
 
   it('calls editAction when edit button is clicked', () => {
@@ -108,7 +110,7 @@ describe('CollaboratorSummary - Component Tests', () => {
     cy.get('.delete-modal').should('not.exist');
   });
 
-  it('disables interactions when disabled prop is true', () => {
+  it('shows view icon and calls editAction in read-only mode', () => {
     const editAction = cy.stub().as('editAction');
     const deleteAction = cy.stub().as('deleteAction');
 
@@ -119,15 +121,19 @@ describe('CollaboratorSummary - Component Tests', () => {
       readOnly={true}
     />);
 
-    cy.get('.glyphicon-eye').parent().should('not.have.css', 'opacity', '0.5');
-    cy.get('.glyphicon-trash').parent().should('have.css', 'opacity', '0.5');
+    // Should show eye-open icon for viewing
+    cy.get('.glyphicon-eye-open').should('exist');
+    cy.get('.glyphicon-eye-open').parent('a').should('exist');
 
-    cy.get('.glyphicon-eye').parent('a').click({ force: true });
-    cy.get('.glyphicon-trash').parent('a').click({ force: true });
+    // Should not show edit or delete icons at all in read-only mode
+    cy.get('.glyphicon-pencil').should('not.exist');
+    cy.get('.glyphicon-trash').should('not.exist');
 
+    // Clicking the eye icon should call editAction (to open in view mode)
+    cy.get('.glyphicon-eye-open').parent('a').click({ force: true });
     cy.get('@editAction').should('have.been.called');
-    cy.get('@deleteAction').should('not.have.been.called');
 
+    // Delete modal should never appear in read-only mode
     cy.get('.delete-modal').should('not.exist');
   });
 
