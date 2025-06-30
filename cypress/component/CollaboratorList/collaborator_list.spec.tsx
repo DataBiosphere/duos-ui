@@ -149,7 +149,9 @@ describe('CollaboratorList - Component Tests', () => {
     it('disables the Add button when readOnly prop is true', () => {
         mount(<CollaboratorList {...defaultProps} readOnly={true} />);
 
-        cy.contains('Add Collaborator').should('not.exist');
+        // Button should be visible but disabled
+        cy.contains('Add Collaborator').should('be.visible');
+        cy.get('button').contains('Add Collaborator').should('be.disabled');
     });
 
     it('renders correctly with empty collaborators list', () => {
@@ -213,8 +215,9 @@ describe('CollaboratorList - Component Tests', () => {
 
         mount(<CollaboratorList {...readOnlyProps} />);
 
-        // Should not show Add button in read-only mode
-        cy.contains('Add Collaborator').should('not.exist');
+        // Should show Add button but disabled in read-only mode
+        cy.contains('Add Collaborator').should('be.visible');
+        cy.get('button').contains('Add Collaborator').should('be.disabled');
 
         // Wait for component to render and check icons
         cy.get('.collaborator-summary-card').should('have.length', 2);
@@ -249,9 +252,11 @@ describe('CollaboratorList - Component Tests', () => {
         cy.get('#name').should('be.disabled');
         cy.get('#email').should('be.disabled');
 
-        // Only Close button should be present
-        cy.contains('button', 'Save').should('not.exist');
-        cy.contains('button', 'Add').should('not.exist');
-        cy.contains('Close').should('be.visible');
+        // Within the collaborator form, only Close button should be present (no Add/Save)
+        cy.get('.collaborator-form-card').within(() => {
+            cy.contains('button', 'Save').should('not.exist');
+            cy.contains('button', 'Add').should('not.exist');
+            cy.contains('Close').should('be.visible');
+        });
     });
 });

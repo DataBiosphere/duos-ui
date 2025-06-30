@@ -47,20 +47,24 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
     return (
         <div className="collaborator-list-component">
             <div className="row no-margin">
-                {!readOnly && (
-                    <button
-                        id={`add-${collaboratorText}-btn`}
-                        type="button"
-                        className="button button-white"
-                        style={{
-                            marginTop: 25,
-                            marginBottom: 5,
-                        }}
-                        onClick={() => setShowAddEdit(true) }
-                    >
-                        Add {collaboratorText}
-                    </button>
-                )}
+                <button
+                    id={`add-${collaboratorText}-btn`}
+                    type="button"
+                    className="button button-white"
+                    style={{
+                        marginTop: 25,
+                        marginBottom: 5,
+                        ...(readOnly ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
+                    }}
+                    onClick={() => {
+                        if (!readOnly) {
+                            setShowAddEdit(true);
+                        }
+                    }}
+                    disabled={readOnly}
+                >
+                    Add {collaboratorText}
+                </button>
                 {showAddEdit && (
                     <CollaboratorAddEdit
                         id={-1}
@@ -68,6 +72,7 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         collaborators={collaborators}
                         collaborator={{countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator}
                         closeAction={() => setShowAddEdit(false)}
+                        deleteAction={() => {}} // Empty function since this is for adding, not editing
                         onCollaboratorChange={onCollaboratorChange}
                         showApproverStatus={showApproverStatus}
                         countriesOfOperation={countriesOfOperation}
