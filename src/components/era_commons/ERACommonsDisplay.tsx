@@ -17,3 +17,4 @@ export const ERACommonsDisplay = (props: ERACommonsDisplayProps) => {
         </div>
     </div>)
 }
+
