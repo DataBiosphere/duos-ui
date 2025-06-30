@@ -145,9 +145,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     }
   };
 
-  const accessType = dataset?.accessManagement
-  console.log('dataset', dataset);
-
   if (!isLoading && dataset) {
     return (
       <div style={{...Styles.PAGE, color: Theme.palette.primary}}>
@@ -162,7 +159,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             <LabeledSection label={'Access Type'}>
               {accessInstructions()}
             </LabeledSection>
-            {(accessType === AccessManagement.CONTROLLED || accessType === AccessManagement.EXTERNAL) &&
+            {(dataset?.accessManagement === AccessManagement.CONTROLLED || dataset?.accessManagement === AccessManagement.EXTERNAL) &&
                 <LabeledSection label={'Data Use'}>
                   {createDataUseDisplay({dataset, divClass: '', spanClass: '', tooltipPlace: 'right'})}
                 </LabeledSection>

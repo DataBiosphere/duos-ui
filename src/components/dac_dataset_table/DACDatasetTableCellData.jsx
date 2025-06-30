@@ -120,7 +120,7 @@ export function createDataUseDisplay({
   const { codesAndDescriptions, codeList } = processDataUseCodes(dataset);
 
   return (
-      <div className={divClass}>
+      <div style={{display: 'inline-block'}} className={divClass}>
       <span className={spanClass} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>
         {codeList.join(', ')}
       </span>
