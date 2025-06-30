@@ -13,6 +13,22 @@ describe('Library Card Table Tests', () => {
       userEmail: 'test.user.1@test.com',
       createUserId: 2,
       createDate: new Date(),
+    },
+    {
+      id: 2,
+      userId: 2,
+      userName: 'Test User 2',
+      userEmail: 'test.user.2@test.com',
+      createUserId: 2,
+      createDate: new Date(),
+    },
+    {
+      id: 3,
+      userId: 3,
+      userName: 'Test User 3',
+      userEmail: 'test.user.3@test.com',
+      createUserId: 2,
+      createDate: new Date(),
     }
   ]
 
@@ -20,28 +36,75 @@ describe('Library Card Table Tests', () => {
     cy.viewport(1000, 800);
   });
 
-  it('Should render the Library Card Table', () => {
+  it('should render the Library Card Table with a list of users', () => {
     const props: LibraryCardTableProps = {
-      libraryCards: libraryCardList,
-      users: [],
+      libraryCards: libraryCardList
     }
     mount(<LibraryCardTable {...props}/>);
     cy.get('[data-cy=manage-library-card-table]').should('exist');
-    cy.get('[data-cy=add-library-card-button]').should('exist');
-    // For each user in the list, teest that the row is deletable and removed from the table view
+    // For each user in the list, test that the row is visible
     libraryCardList.forEach((card) => {
       cy.get('[data-cy=manage-library-card-table]').should('contain', card.userName);
       cy.get('[data-cy=manage-library-card-table]').should('contain', card.userEmail);
-      cy.get(`[id=show-delete-modal-${card.id}]`).should('exist');
-      cy.get(`[id=show-delete-modal-${card.id}]`).click();
-      cy.get('.confirmation-modal').should('exist');
-      cy.get('.confirmation-modal').find('button[type="button"]').contains('Cancel').click();
-      cy.get(`[id=show-delete-modal-${card.id}]`).click();
-      cy.get('.confirmation-modal').find('button[type="button"]').contains('Confirm').click();
-    });
-    libraryCardList.forEach((card) => {
-      cy.get('.table-data').should('not.contain', card.userName)
     });
   });
 
+  it('should allow deleting a library card', () => {
+    const props: LibraryCardTableProps = {
+      libraryCards: libraryCardList
+    };
+
+    mount(<LibraryCardTable {...props} />);
+
+    cy.get('[data-cy=manage-library-card-table]').should('contain', libraryCardList[0].userName);
+    cy.get(`[id=show-delete-modal-1]`).click();
+    cy.get('.confirmation-modal').find('button[type="button"]').contains('Confirm').click();
+
+    // Verify that the card is removed from the table
+    cy.get('[data-cy=manage-library-card-table]').should('not.contain', libraryCardList[0].userName);
+
+    // Verify that the remaining cards are still present
+    libraryCardList.slice(1).forEach((card) => {
+      cy.get('[data-cy=manage-library-card-table]').should('contain', card.userName);
+      cy.get('[data-cy=manage-library-card-table]').should('contain', card.userEmail);
+    });
+  });
+
+  it('should allow searching for a library card by email', () => {
+    const props: LibraryCardTableProps = {
+      libraryCards: libraryCardList
+    };
+
+    mount(<LibraryCardTable {...props} />);
+
+    cy.get('[data-cy=search-bar]').type(libraryCardList[0].userEmail);
+
+    // Verify that only the matching card is displayed
+    cy.get('[data-cy=manage-library-card-table]').should('contain', libraryCardList[0].userName);
+
+    //Remaining cards should not be displayed
+    libraryCardList.slice(1).forEach((card) => {
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userName);
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userEmail);
+    });
+  });
+
+  it('should allow searching for a library card by user name', () => {
+    const props: LibraryCardTableProps = {
+      libraryCards: libraryCardList
+    };
+
+    mount(<LibraryCardTable {...props} />);
+
+    cy.get('[data-cy=search-bar]').type(libraryCardList[0].userName.toLowerCase());
+
+    // Verify that only the matching card is displayed
+    cy.get('[data-cy=manage-library-card-table]').should('contain', libraryCardList[0].userName);
+
+    //Remaining cards should not be displayed
+    libraryCardList.slice(1).forEach((card) => {
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userName);
+      cy.get('[data-cy=manage-library-card-table]').should('not.contain', card.userEmail);
+    });
+  });
 });

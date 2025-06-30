@@ -1,19 +1,17 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { FormField, FormFieldTypes } from '../../components/forms/forms';
-import { PageHeading } from '../../components/PageHeading';
-import { Notification } from '../../components/Notification';
-import { User } from '../../libs/ajax/User';
-import { Storage } from '../../libs/storage';
-import { NotificationService } from '../../libs/notificationService';
-import { Notifications } from '../../libs/utils';
+import { FormField, FormFieldTypes } from 'src/components/forms/forms';
+import { PageHeading } from 'src/components/PageHeading';
+import { Notification } from 'src/components/Notification';
+import { User } from 'src/libs/ajax/User';
+import { Storage } from 'src/libs/storage';
+import { NotificationService } from 'src/libs/notificationService';
+import { Notifications, setUserRoleStatuses } from 'src/libs/utils';
 import AffiliationAndRoles from './AffiliationAndRoles';
 import ResearcherStatus from './ResearcherStatus';
 import AcceptedAcknowledgements from './AcceptedAcknowledgements';
-import ControlledAccessGrants from './ControlledAccessGrants';
-import ga4ghLogo from '../../images/ga4gh-logo.png';
-import userProfileIcon from '../../images/user-profile.png';
-import {setUserRoleStatuses} from '../../libs/utils';
+import ga4ghLogo from 'src/images/ga4gh-logo.png';
+import userProfileIcon from 'src/images/user-profile.png';
 
 export default function UserProfile(props) {
 
@@ -203,9 +201,7 @@ export default function UserProfile(props) {
         defaultValue={profile.emailPreference}
         onChange={(field) => updateEmailPreference(field.value)}
       />
-    <div style={{ 'marginTop': '60px' }} />
-    <ControlledAccessGrants />
-    <div style={{ 'marginTop': '60px' }} />
+    <div style={{ 'marginTop': '45px' }} />
     <AffiliationAndRoles
       user={user}
     />
@@ -225,7 +221,7 @@ export default function UserProfile(props) {
       pageProps={props}
       profile={profile}
     />
-    <div style={{ marginTop: '115px' }} />
+    <div style={{ marginTop: '60px' }} />
     <AcceptedAcknowledgements />
   </div>;
 }
