@@ -16,7 +16,7 @@ import {
 } from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
-import {createDataUseDisplay} from 'src/components/dac_dataset_table/DACDatasetTableCellData';
+import {createDataUseDisplay} from "src/utils/DataUseUtils";
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -169,7 +169,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             </LabeledSection>
             {(datasetTerm.accessManagement === AccessManagement.CONTROLLED || datasetTerm.accessManagement === AccessManagement.EXTERNAL) &&
                 <LabeledSection label={'Data Use'}>
-                  {createDataUseDisplay({dataset: datasetTerm, divClass: '', spanClass: '', tooltipPlace: 'right'})}
+                  {createDataUseDisplay({dataset: datasetTerm, tooltipPlace: 'right'})}
                 </LabeledSection>
             }
             <LabeledSection label={'Data Location'}>
