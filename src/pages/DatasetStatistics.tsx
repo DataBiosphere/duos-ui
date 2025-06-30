@@ -1,24 +1,21 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {DatasetMetrics} from 'src/libs/ajax/DatasetMetrics';
 import {DataSet} from 'src/libs/ajax/DataSet';
 import {DAR} from 'src/libs/ajax/DAR';
 import {formatDate, Notifications} from 'src/libs/utils';
 import {Styles, Theme} from 'src/libs/theme';
-import {find} from 'lodash/fp';
-import {ReadMore} from '../components/ReadMore';
+import {ReadMore} from 'src/components/ReadMore';
 import {Button} from '@mui/material';
 import {History} from 'history';
 import {
   Dataset,
-  DatasetProperty,
   DatasetStatisticsDar,
   DatasetStats,
   DatasetTerm,
-  StudyProperty
 } from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
-import {createDataUseDisplay} from "src/components/dac_dataset_table/DACDatasetTableCellData";
+import {createDataUseDisplay} from 'src/components/dac_dataset_table/DACDatasetTableCellData';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 

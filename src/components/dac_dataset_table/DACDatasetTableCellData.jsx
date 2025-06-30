@@ -1,5 +1,5 @@
 import React from 'react';
-import style from '../../pages/DACDatasets.module.css';
+import style from 'src/pages/DACDatasets.module.css';
 import {styles} from './DACDatasetConstants';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
 import ReactTooltip from 'react-tooltip';
@@ -77,7 +77,6 @@ export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}
  * @returns {Object} - Object with processed data use information
  */
 export function processDataUseCodes(dataset) {
-  // Process primary data use codes
   const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
     if (dataUse.code === 'OTHER') {
       return {'code': `OTH1`, 'description': dataUse.description};
@@ -89,7 +88,6 @@ export function processDataUseCodes(dataset) {
     }
   }) : [];
 
-  // Add secondary data use codes if they exist
   if (dataset.dataUse?.secondary) {
     dataset.dataUse.secondary.forEach((dataUse) => {
       if (dataUse.code === 'OTHER') {
@@ -100,7 +98,6 @@ export function processDataUseCodes(dataset) {
     });
   }
 
-  // Create the list of codes
   const codeList = codesAndDescriptions.map(du => du.code);
 
   return { codesAndDescriptions, codeList };
