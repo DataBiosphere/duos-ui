@@ -9,16 +9,13 @@
   "alias": 682,
   "datasetIdentifier": "DUOS-000682",
   "dataUse": {
-    "generalUse": true,
-    "hmbResearch": false,
-    "diseaseRestrictions": [],
-    "populationOriginsAncestry": false,
-    "ethicsApprovalRequired": false,
-    "collaboratorRequired": true,
-    "geneticStudiesOnly": true,
-    "publicationResults": true,
-    "controls": false,
-    "population": false
+    "primary": [
+      {
+        "code": "GRU",
+        "description": "Data is available for general research use."
+      }
+    ],
+    "secondary": []
   },
   "deletable": false,
   "createUser": {
@@ -32,8 +29,8 @@
   },
   "study": {
     "studyId": 5854,
-    "name": "ExternalAccessTestJL1",
-    "description": "ExternalAccessTestJL1",
+    "studyName": "ExternalAccessTestJL1",
+    "description": "A description for ExternalAccessTestJL1",
     "publicVisibility": true,
     "piName": "Dr. Make",
     "dataTypes": [
