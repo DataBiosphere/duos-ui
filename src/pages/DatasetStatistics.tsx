@@ -177,7 +177,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               {getDataLocationLink(datasetTerm.dataLocation, datasetTerm.url)}
             </LabeledSection>
             <LabeledSection label={'Phenotype'}>
-                {datasetTerm.study?.phenotype || 'N/A'}
+                {datasetTerm.study?.phenotype ?? 'N/A'}
             </LabeledSection>
             <LabeledSection label={'Participants'}>
                 {datasetTerm.participantCount}
@@ -186,7 +186,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
                 {dataset?.study?.piName}
             </LabeledSection>
             <LabeledSection label={'Data Custodian'}>
-              {extractStudyProp('dataCustodianEmail') || datasetTerm.createUserDisplayName}
+              {extractStudyProp('dataCustodianEmail') ?? datasetTerm.createUserDisplayName}
             </LabeledSection>
             <div style={{paddingTop: '20px'}}>
               {dataset?.study?.description ?? 'N/A'}

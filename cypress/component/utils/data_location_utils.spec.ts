@@ -51,7 +51,7 @@ describe('DataLocationUtils', () => {
       const dataLocation = 'Terra Workspace';
       // No dataUrl provided
 
-      mount(getDataLocationLink(dataLocation, undefined));
+      mount(getDataLocationLink(dataLocation));
 
       cy.get('a')
         .should('contain', 'Terra Workspace');
