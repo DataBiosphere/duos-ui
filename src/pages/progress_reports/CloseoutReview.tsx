@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import InfoIcon from '@mui/icons-material/Info';
 import {Acknowledgement} from 'src/types/model';
 import {User} from 'src/libs/ajax/User';
@@ -17,7 +17,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
     onReturn,
 }) => {
 
-  const [acknowledgement, setAcknowledgement] = React.useState<Acknowledgement | undefined>(undefined);
+  const [acknowledgement, setAcknowledgement] = useState<Acknowledgement | undefined>(undefined);
 
   // Required to get Chairperson acknowledgments of closeouts
   useEffect(() => {
