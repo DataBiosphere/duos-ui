@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {DatasetMetrics} from 'src/libs/ajax/DatasetMetrics';
 import {DataSet} from 'src/libs/ajax/DataSet';
 import {DAR} from 'src/libs/ajax/DAR';
 import {formatDate, Notifications} from 'src/libs/utils';
 import {Styles, Theme} from 'src/libs/theme';
+import {find} from 'lodash/fp';
 import {ReadMore} from 'src/components/ReadMore';
 import {Button} from '@mui/material';
 import {History} from 'history';
@@ -11,7 +12,7 @@ import {
   Dataset,
   DatasetStatisticsDar,
   DatasetStats,
-  DatasetTerm,
+  DatasetTerm, StudyProperty,
 } from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
@@ -35,21 +36,19 @@ interface DatasetStatisticsProps {
   }
 }
 
-
-interface LabeledSectionProps {
-  label: string
-  style?: React.CSSProperties
+const LabeledSection = ({label, children}: { label: string, children: React.ReactNode }) => {
+  return (
+      <div style={{paddingTop: 20}}>
+        <span style={{fontWeight: 600}}>{label}: </span>
+        {children}
+      </div>
+  );
 }
-
-const LabeledSection = ({ style, label, children }: React.PropsWithChildren<LabeledSectionProps>) =>
-    <div style={{paddingTop: 20, ...style}}>
-      <span style={{fontWeight: 600}}>{label}: </span>
-      {children}
-    </div>;
 
 export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
-  const [dataset, setDataset] = useState<DatasetTerm>();
+  const [dataset, setDataset] = useState<Dataset>();
+  const [datasetTerm, setDatasetTerm] = useState<DatasetTerm>();
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -84,7 +83,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     const init = async () => {
       try {
         const dataset: Dataset = await DataSet.getDatasetByDatasetIdentifier(datasetIdentifier);
-        const datasetTerms = await DataSet.searchDatasetIndex({ query: {
+        const datasetTerms: DatasetTerm[] = await DataSet.searchDatasetIndex({ query: {
           'bool': {
             'must': [
               {
@@ -108,7 +107,8 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
         }
 
         const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
-        setDataset(datasetTerms[0]);
+        setDatasetTerm(datasetTerms[0]);
+        setDataset(dataset);
         setDars(metrics.dars);
         setIsLoading(false);
       } catch (error) {
@@ -119,9 +119,17 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     init();
   }, [datasetIdentifier]);
 
+  const extractStudyProp = useCallback((key: string) => {
+    const property = find({key})(dataset?.study?.properties) as StudyProperty;
+    if (Array.isArray(property?.value)) {
+      return property.value.join(', ');
+    }
+    return property?.value;
+  }, [dataset]);
+
   const accessInstructions = () => {
-    const accessManagement = dataset?.accessManagement as AccessManagement;
-    const locationUrl = dataset?.url;
+    const accessManagement = datasetTerm?.accessManagement as AccessManagement;
+    const locationUrl = datasetTerm?.url;
     switch (accessManagement) {
       case AccessManagement.CONTROLLED:
         return <Button variant='contained' onClick={applyForAccess} style={{fontSize: '12px'}}>
@@ -145,40 +153,39 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     }
   };
 
-  if (!isLoading && dataset) {
+  if (!isLoading && datasetTerm) {
     return (
       <div style={{...Styles.PAGE, color: Theme.palette.primary}}>
         <div style={{justifyContent: 'space-between'}}>
           <div style={{marginTop: '25px'}}>
             <div style={{fontSize: 20, fontWeight: 600}}>
-              <div>{dataset?.datasetIdentifier} - {dataset?.datasetName}</div>
+              <div>{datasetTerm.datasetIdentifier} - {datasetTerm.datasetName}</div>
             </div>
             <LabeledSection label={'Study'}>
-              {dataset.study.studyName}
+              {datasetTerm.study.studyName}
             </LabeledSection>
             <LabeledSection label={'Access Type'}>
               {accessInstructions()}
             </LabeledSection>
-            {(dataset?.accessManagement === AccessManagement.CONTROLLED || dataset?.accessManagement === AccessManagement.EXTERNAL) &&
+            {(datasetTerm.accessManagement === AccessManagement.CONTROLLED || datasetTerm.accessManagement === AccessManagement.EXTERNAL) &&
                 <LabeledSection label={'Data Use'}>
-                  {createDataUseDisplay({dataset, divClass: '', spanClass: '', tooltipPlace: 'right'})}
+                  {createDataUseDisplay({datasetTerm, divClass: '', spanClass: '', tooltipPlace: 'right'})}
                 </LabeledSection>
             }
             <LabeledSection label={'Data Location'}>
-              {getDataLocationLink(dataset.dataLocation, dataset.url)}
+              {getDataLocationLink(datasetTerm.dataLocation, datasetTerm.url)}
             </LabeledSection>
             <LabeledSection label={'Phenotype'}>
-                {dataset?.study?.phenotype || 'N/A'}
+                {datasetTerm.study?.phenotype || 'N/A'}
             </LabeledSection>
             <LabeledSection label={'Participants'}>
-                {dataset.participantCount}
+                {datasetTerm.participantCount}
             </LabeledSection>
             <LabeledSection label={'Principal Investigator(s)'}>
                 {dataset?.study?.piName}
             </LabeledSection>
             <LabeledSection label={'Data Custodian'}>
-              {/* TODO: this does not seem to be correct */}
-              {dataset.createUserDisplayName}
+              {extractStudyProp('dataCustodianEmail') || datasetTerm.createUserDisplayName}
             </LabeledSection>
             <div style={{paddingTop: '20px'}}>
               {dataset?.study?.description ?? 'N/A'}
