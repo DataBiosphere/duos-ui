@@ -25,8 +25,12 @@ interface CollaboratorAddEditProps {
     readonly readOnly?: boolean;
     readonly countriesOfOperation: string[];
     // Additional props for DAR application compatibility
-    readonly validation?: any;
-    readonly onCollaboratorValidationChange?: any;
+    readonly validation?: Record<string, ValidationError>;
+    readonly onCollaboratorValidationChange?: (params: {
+        index: number;
+        key?: string;
+        validation: ValidationError;
+    }) => void;
     readonly collaboratorKey?: string;
 }
 
@@ -47,11 +51,11 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
     const accountLabel = nihAccountLabel();
 
     const readOnly = props.readOnly || false;
-    
+
     // Generate field ID prefix for DAR application compatibility only when collaboratorKey is provided
     const fieldIdPrefix = (collaboratorKey && id >= 0) ? `${id}_collaborator` : '';
-    
-    // Generate button ID for DAR application compatibility  
+
+    // Generate button ID for DAR application compatibility
     const saveButtonId = collaboratorKey ? `collaborator-${collaboratorKey}-add-save` : undefined;
 
     const onChange = ({ key, value }: FormFieldChange) => {
@@ -62,7 +66,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
         setNewCollaborator(setCollaborator);
         const newValidation = computeCollaboratorErrors({collaborator: setCollaborator, needsApproverStatus: showApproverStatus});
         setValidation(newValidation);
-        
+
         // Call DAR validation callback if provided
         if (onCollaboratorValidationChange) {
             onCollaboratorValidationChange({index: id, key, validation: newValidation[key as keyof Validation] || {}});
@@ -141,7 +145,9 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         index={id}
                         approverStatus={newCollaborator?.approverStatus}
                         validation={validation.approverStatus}
-                        onChange={(!readOnly ? ({ key, value }: { key: string; value: any }) => onChange({ key, value }) : null)}/>
+                        onChange={(!readOnly ? ({ key: _key, value }: { key: string; value: boolean | 'yes' | 'no' | undefined }) => {
+                            onChange({ key: 'approverStatus', value: String(value || '') });
+                        } : null)}/>
                     )}
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>

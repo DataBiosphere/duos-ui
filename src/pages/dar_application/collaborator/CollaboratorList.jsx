@@ -62,12 +62,6 @@ export default function CollaboratorList(props) {
     setEditState(newEditState);
   };
 
-  const toggleDeleteBool = (index, bool) => {
-    const deleteCopy = [...deleteBoolArray];
-    deleteCopy[index] = bool;
-    setDeleteBoolArray(deleteCopy);
-  };
-
   useEffect(() => {
     return formFieldChange({key: collaboratorKey, value: collaborators});
   }, [formFieldChange, collaboratorKey, collaborators]);

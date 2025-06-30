@@ -1,8 +1,8 @@
 import React from 'react';
 import CollaboratorAddEdit from './CollaboratorAddEdit';
 import CollaboratorSummary from './CollaboratorSummary';
-import CollaboratorForm from 'src/pages/dar_application/collaborator/CollaboratorRow';
 import {Collaborator} from 'src/types/model';
+import {ValidationError} from 'src/pages/dar_application/FormValidationState';
 
 interface CollaboratorRowProps {
     readonly id: number;
@@ -19,8 +19,12 @@ interface CollaboratorRowProps {
     readonly showApproverStatus?: boolean;
     readonly countriesOfOperation: string[];
     // Additional props for DAR application compatibility
-    readonly validation?: any;
-    readonly onCollaboratorValidationChange?: any;
+    readonly validation?: Record<string, ValidationError>;
+    readonly onCollaboratorValidationChange?: (params: {
+        index: number;
+        key?: string;
+        validation: ValidationError;
+    }) => void;
     readonly collaboratorKey?: string;
 }
 
