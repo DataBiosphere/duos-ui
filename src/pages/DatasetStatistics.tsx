@@ -34,7 +34,7 @@ interface DatasetStatisticsProps {
   }
 }
 
-const LabeledSection = ({label, children}: { label: string, children: React.ReactNode }) => {
+const LabeledField = ({label, children}: { label: string, children: React.ReactNode }) => {
   return (
       <div style={{paddingTop: 20}}>
         <span style={{fontWeight: 600}}>{label}: </span>
@@ -94,9 +94,9 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               }
             ]
           }
-        }});
+        }}).then(response => response.filter((term: DatasetTerm) => term.datasetIdentifier === datasetIdentifier));
 
-        if(datasetTerms.length === 0) {
+        if(datasetTerms.length != 1) {
           showError(`Unable to retrieve dataset statistics from server: dataset ${datasetIdentifier} not found.`);
           setIsLoading(false);
           return;
@@ -148,32 +148,32 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             <div style={{fontSize: 20, fontWeight: 600}}>
               <div>{datasetTerm.datasetIdentifier} - {datasetTerm.datasetName}</div>
             </div>
-            <LabeledSection label={'Study'}>
+            <LabeledField label={'Study'}>
               {datasetTerm.study.studyName}
-            </LabeledSection>
-            <LabeledSection label={'Access Type'}>
+            </LabeledField>
+            <LabeledField label={'Access Type'}>
               {accessInstructions()}
-            </LabeledSection>
+            </LabeledField>
             {(datasetTerm.accessManagement === AccessManagement.CONTROLLED || datasetTerm.accessManagement === AccessManagement.EXTERNAL) &&
-                <LabeledSection label={'Data Use'}>
+                <LabeledField label={'Data Use'}>
                   {createDataUseDisplay({dataset: datasetTerm, tooltipPlace: 'right'})}
-                </LabeledSection>
+                </LabeledField>
             }
-            <LabeledSection label={'Data Location'}>
+            <LabeledField label={'Data Location'}>
               {getDataLocationLink(datasetTerm.dataLocation, datasetTerm.url)}
-            </LabeledSection>
-            <LabeledSection label={'Phenotype'}>
+            </LabeledField>
+            <LabeledField label={'Phenotype'}>
                 {datasetTerm.study?.phenotype ?? 'N/A'}
-            </LabeledSection>
-            <LabeledSection label={'Participants'}>
+            </LabeledField>
+            <LabeledField label={'Participants'}>
                 {datasetTerm.participantCount}
-            </LabeledSection>
-            <LabeledSection label={'Principal Investigator(s)'}>
+            </LabeledField>
+            <LabeledField label={'Principal Investigator(s)'}>
                 {datasetTerm.study.piName}
-            </LabeledSection>
-            <LabeledSection label={'Data Custodian'}>
+            </LabeledField>
+            <LabeledField label={'Data Custodian'}>
               {datasetTerm.study.dataCustodianEmail?.join(', ') ?? 'N/A'}
-            </LabeledSection>
+            </LabeledField>
             <div style={{paddingTop: '20px'}}>
               {datasetTerm.study.description}
             </div>

@@ -235,4 +235,39 @@ describe('Dataset Statistics Tests', () => {
     cy.contains('Principal Investigator').should('exist');
     cy.contains(datasetTerm.study.piName).should('exist');
   });
+
+  it('Displays DAR section with data', () => {
+    const darsData = [{
+      darCode: 'DAR-123',
+      projectTitle: 'Test Project',
+      updateDate: '2023-01-01',
+      nonTechRus: 'Test summary'
+    }];
+
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({dars: darsData}));
+
+    const props = {
+      match: { params: { datasetIdentifier: datasetTerm.datasetIdentifier }},
+      history: { push() {} }
+    };
+
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('Data Access Requests for this dataset').should('exist');
+    cy.contains('DAR-123').should('exist');
+    cy.contains('Test Project').should('exist');
+  });
+
+  it('Displays message when no DARs exist', () => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({dars: []}));
+
+    const props = {
+      match: { params: { datasetIdentifier: datasetTerm.datasetIdentifier }},
+      history: { push() {} }
+    };
+
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('No Data Access Requests have been created for this dataset').should('exist');
+  });
 });
