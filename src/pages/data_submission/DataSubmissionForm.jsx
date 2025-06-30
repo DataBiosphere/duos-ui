@@ -2,20 +2,19 @@ import React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {validateForm} from './RegistrationValidation';
 import {cloneDeep, isNil} from 'lodash/fp';
-import { Institution } from '../../libs/ajax/Institution';
-import { Study } from '../../libs/ajax/Study';
-import { DataSet } from '../../libs/ajax/DataSet';
-import {Notifications} from '../../libs/utils';
-import lockIcon from '../../images/lock-icon.png';
-import {Styles} from '../../libs/theme';
-import DataAccessGovernance from './DataAccessGovernance';
-import DataSubmissionStudyInformation from './ds_study_information';
-import NIHAdministrativeInformation from './NIHAdministrativeInformation';
-import NIHDataManagement from './NIHDataManagement';
-import NihAnvilUse from './NihAnvilUse';
-import {uniqueValidator} from '../../components/forms/formValidation';
 import {set} from 'lodash';
-import UsgOmbText from '../../components/UsgOmbText';
+import { Institution } from 'src/libs/ajax/Institution';
+import { Study } from 'src/libs/ajax/Study';
+import { DataSet } from 'src/libs/ajax/DataSet';
+import {Notifications} from 'src/libs/utils';
+import lockIcon from 'src/images/lock-icon.png';
+import {Styles} from 'src/libs/theme';
+import DataAccessGovernance from 'src/pages/data_submission/DataAccessGovernance';
+import DataSubmissionStudyInformation from 'src/pages/data_submission/ds_study_information';
+import NIHAdministrativeInformation from 'src/pages/data_submission/NIHAdministrativeInformation';
+import NIHDataManagement from 'src/pages/data_submission/NIHDataManagement';
+import NihAnvilUse from 'src/pages/data_submission/NihAnvilUse';
+import {uniqueValidator} from 'src/components/forms/formValidation';
 
 export const DataSubmissionForm = (props) => {
   const {
@@ -59,7 +58,7 @@ export const DataSubmissionForm = (props) => {
         await getAllInstitutions();
         await getAllStudyNames();
         await getAllDatasetNames();
-      } catch (error) {
+      } catch (_error) {
         setFailedInit(true);
         Notifications.showError({
           text: 'Error: Unable to initialize data from server',
@@ -118,7 +117,8 @@ export const DataSubmissionForm = (props) => {
     formatForRegistration(registration);
 
     // check against json schema validator to see if there are uncaught validation issues
-    let [valid, validation] = validateForm(registrationSchema, registration);
+    const [valid0, validation] = validateForm(registrationSchema, registration);
+    let valid = valid0;
 
     // check secondary validation for non-schema validation issues
     if (!uniqueValidator.isValid(registration.studyName, studyNames)) {
@@ -214,7 +214,6 @@ export const DataSubmissionForm = (props) => {
         </div>
       </form>
     </div>}
-    <UsgOmbText />
   </div>;
 };
 
