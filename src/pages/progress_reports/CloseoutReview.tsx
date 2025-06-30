@@ -3,8 +3,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import {Acknowledgement} from 'src/types/model';
 import {User} from 'src/libs/ajax/User';
 import {Notifications} from 'src/libs/utils';
-import {ConsentError} from 'src/types/responseTypes';
-import {AxiosError} from 'axios';
+import {extractConsentError, extractError} from 'src/utils/ErrorUtils';
 
 interface CloseoutReviewProps {
   onApprove?: () => void;
@@ -32,9 +31,11 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
             setAcknowledgement(chairAcknowledgement);
           }
         } catch (error) {
-          const consentError = (error as AxiosError)?.response?.data as ConsentError;
-          if (consentError && consentError.code !== 404) {
-            Notifications.showError({text: 'Error: Unable to retrieve chairperson acknowledgement: ' + consentError.message});
+          const consentError = extractConsentError(error);
+          if (consentError && consentError.code === 404) {
+            // 404 indicates no acknowledgement found, which is not an error
+          } else {
+            Notifications.showError({text: 'Error: Unable to retrieve chairperson acknowledgement: ' + extractError(error)});
           }
         }
       }
