@@ -1,10 +1,9 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {DatasetMetrics} from 'src/libs/ajax/DatasetMetrics';
 import {DataSet} from 'src/libs/ajax/DataSet';
 import {DAR} from 'src/libs/ajax/DAR';
 import {formatDate, Notifications} from 'src/libs/utils';
 import {Styles, Theme} from 'src/libs/theme';
-import {find} from 'lodash/fp';
 import {ReadMore} from 'src/components/ReadMore';
 import {Button} from '@mui/material';
 import {History} from 'history';
@@ -12,7 +11,7 @@ import {
   Dataset,
   DatasetStatisticsDar,
   DatasetStats,
-  DatasetTerm, StudyProperty,
+  DatasetTerm
 } from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
@@ -47,7 +46,6 @@ const LabeledSection = ({label, children}: { label: string, children: React.Reac
 
 export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
-  const [dataset, setDataset] = useState<Dataset>();
   const [datasetTerm, setDatasetTerm] = useState<DatasetTerm>();
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>();
   const [isLoading, setIsLoading] = useState(true);
@@ -66,7 +64,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
 
   const applyForAccess = async () => {
     try {
-      const draftResponse = await DAR.postDarDraft({datasetId: [dataset?.datasetId]});
+      const draftResponse = await DAR.postDarDraft({datasetId: [datasetTerm?.datasetId]});
       if (draftResponse.referenceId) {
         history.push(`/dar_application/${draftResponse.referenceId}`);
       } else if (draftResponse.message) {
@@ -109,7 +107,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
         }
 
         const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
-        setDataset(dataset);
         setDars(metrics.dars);
         setIsLoading(false);
       } catch (error) {
@@ -119,14 +116,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     }
     init();
   }, [datasetIdentifier]);
-
-  const extractStudyProp = useCallback((key: string) => {
-    const property = find({key})(dataset?.study?.properties) as StudyProperty;
-    if (Array.isArray(property?.value)) {
-      return property.value.join(', ');
-    }
-    return property?.value;
-  }, [dataset]);
 
   const accessInstructions = () => {
     const accessManagement = datasetTerm?.accessManagement as AccessManagement;
@@ -183,13 +172,13 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
                 {datasetTerm.participantCount}
             </LabeledSection>
             <LabeledSection label={'Principal Investigator(s)'}>
-                {dataset?.study?.piName}
+                {datasetTerm.study.piName}
             </LabeledSection>
             <LabeledSection label={'Data Custodian'}>
-              {extractStudyProp('dataCustodianEmail') ?? datasetTerm.createUserDisplayName}
+              {datasetTerm.study.dataCustodianEmail.join(', ') ?? 'N/A'}
             </LabeledSection>
             <div style={{paddingTop: '20px'}}>
-              {dataset?.study?.description ?? 'N/A'}
+              {datasetTerm.study.description}
             </div>
           </div>
           <div style={{paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%'}}/>

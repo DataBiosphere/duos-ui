@@ -200,6 +200,7 @@ export interface DatasetTerm {
   submitter: UserTerm;
   updateUser: UserTerm;
   dac: DacTerm;
+  piName: string;
 }
 
 export interface AccessManagementSummary {

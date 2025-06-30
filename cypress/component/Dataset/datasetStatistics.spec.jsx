@@ -1,9 +1,9 @@
 import React from 'react';
 import {mount} from 'cypress/react';
-import DatasetStatistics from '../../../src/pages/DatasetStatistics';
+import DatasetStatistics from 'src/pages/DatasetStatistics';
 import dataset from './dataset.json';
-import {DataSet} from '../../../src/libs/ajax/DataSet';
-import {DatasetMetrics} from '../../../src/libs/ajax/DatasetMetrics';
+import {DataSet} from 'src/libs/ajax/DataSet';
+import {DatasetMetrics} from 'src/libs/ajax/DatasetMetrics';
 
 const externalProp = {
   'propertyId': 9314,
