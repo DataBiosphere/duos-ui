@@ -12,7 +12,6 @@ describe('Dataset Statistics Tests', () => {
   });
 
   it('Displays Controlled Access Dataset Apply Button', () => {
-    // const controlled = Object.assign(dataset, {properties: [controlledProp]});
     const controlled = {...dataset, accessManagement: 'controlled'};
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([controlled]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
@@ -155,7 +154,6 @@ describe('Dataset Statistics Tests', () => {
         }
     };
 
-    console.log('datasetWithCustodians', datasetWithCustodians);
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetWithCustodians]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
