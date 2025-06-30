@@ -8,13 +8,12 @@ import {
   Notifications,
   searchOnFilteredList
 } from 'src/libs/utils';
-import {cloneDeep, findIndex, isEmpty, isEqual, isNaN, isNil} from 'lodash/fp';
+import {cloneDeep, findIndex, isEmpty, isNaN, isNil} from 'lodash/fp';
 import {Styles} from 'src/libs/theme';
 import PaginationBar from 'src/components/PaginationBar';
 import SearchBar from 'src/components/SearchBar';
 import SimpleTable from 'src/components/SimpleTable';
 import lockIcon from 'src/images/lock-icon.png';
-import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal';
 import {LibraryCard as LibraryCardAPI} from 'src/libs/ajax/LibraryCard';
 import ConfirmationModal from 'src/components/modals/ConfirmationModal';
 import {Delete} from '@mui/icons-material';
@@ -23,16 +22,8 @@ import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {LibraryCard} from 'src/types/model';
 
-interface UserData {
-  userId: number;
-  displayName: string;
-  email: string;
-  libraryCard?: LibraryCard;
-}
-
 export interface LibraryCardTableProps {
   libraryCards?: LibraryCard[];
-  users?: UserData[];
 }
 
 interface TableCell {
@@ -175,16 +166,6 @@ const DeleteRecordButton: React.FC<DeleteRecordButtonProps> = (props) => {
   );
 };
 
-// onClick function to show target card via modal
-const showModalOnClick = (
-    card: LibraryCard,
-    setShowModal: React.Dispatch<React.SetStateAction<boolean>>,
-    setCurrentCard: React.Dispatch<React.SetStateAction<LibraryCard>>
-): void => {
-  setCurrentCard(cloneDeep(card));
-  setShowModal(true);
-};
-
 const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   const [libraryCards, setLibraryCards] = useState<LibraryCard[]>(props.libraryCards ?? []);
   const [tableSize, setTableSize] = useState<number>(10);
@@ -193,9 +174,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredCards, setFilteredCards] = useState<LibraryCard[]>([]);
   const [visibleCards, setVisibleCards] = useState<LibraryCard[]>([]);
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const [users, setUsers] = useState<UserData[]>(props.users ?? []);
   const [currentCard, setCurrentCard] = useState<LibraryCard>({} as LibraryCard);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -244,14 +223,10 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   // Hook that executes on prop load (initialization hook)
   useEffect(() => {
     setLibraryCards(props.libraryCards ?? []);
-    setUsers(props.users ?? []);
-    if (
-        !isNil(props.libraryCards) &&
-        !isNil(props.users)
-    ) {
+    if (!isNil(props.libraryCards)) {
       setIsLoading(false);
     }
-  }, [props.libraryCards, props.users]);
+  }, [props.libraryCards]);
 
   // Formats institution data to be used by SimpleTable component
   const processLCData = (cards: LibraryCard[] = []): TableCell[][] => {
@@ -292,39 +267,6 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
       goToPage={goToPage}
       changeTableSize={changeTableSize}
   />;
-
-  // onClick function, used to create new card on modal based on form data
-  const addLibraryCard = async (card: LibraryCard): Promise<void> => {
-    try {
-      // Check if card already exists, show error if it does
-      const alreadyExists = findIndex(
-          (element: LibraryCard) => isEqual(element.userEmail)(card.userEmail),
-          libraryCards
-      );
-      if (alreadyExists > -1) {
-        Notifications.showError({text: 'Library Card already exists'});
-      } else {
-        // Execute library card update with payload, get the updated card, and
-        // add (with sort afterwards) library card to libraryCards (reference list)
-        const newCard = await LibraryCardAPI.createLibraryCard(card);
-        const updatedList = cloneDeep(libraryCards);
-        updatedList.push(newCard);
-        updatedList.sort((a: LibraryCard, b: LibraryCard) => {
-          const dateA = new Date(a.createDate ?? '');
-          const dateB = new Date(b.createDate ?? '');
-          return dateB.getTime() - dateA.getTime();
-        });
-        setLibraryCards(updatedList);
-        setShowModal(false);
-      }
-    } catch (error: unknown) {
-      const axiosError = error as AxiosError;
-      const consentError = axiosError?.response?.data as ConsentError;
-      const serverError = consentError.message ?? 'Error: Failed to create new library card';
-      setShowModal(false);
-      Notifications.showError({text: serverError});
-    }
-  };
 
   // Search function for SearchBar component
   const handleSearchChange = useCallback(
@@ -367,37 +309,6 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
                 width: '100%',
                 margin: '0 3% 0 0',
               }}
-              button={
-                <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'flex-end',
-                      justifyContent: 'center',
-                      width: '300px'
-                    }}
-                >
-                  <button
-                      data-cy={'add-library-card-button'}
-                      type={'button'}
-                      id="btn_addLibraryCard"
-                      className="btn-primary btn-add common-background"
-                      style={{
-                        marginTop: '30%',
-                        display: 'flex',
-                      }}
-                      onClick={() =>
-                          showModalOnClick(
-                              {} as LibraryCard,
-                              setShowModal,
-                              setCurrentCard
-                          )
-                      }
-                  >
-                    <span>Add Library Card</span>
-                  </button>
-                </div>
-              }
           />
         </div>
         <SimpleTable
@@ -407,13 +318,6 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
             styles={styles}
             tableSize={tableSize}
             paginationBar={paginationBar}
-        />
-        <LibraryCardFormModal
-            showModal={showModal}
-            createOnClick={addLibraryCard}
-            closeModal={() => setShowModal(false)}
-            users={users}
-            card={currentCard}
         />
         <ConfirmationModal
             showConfirmation={showConfirmation}

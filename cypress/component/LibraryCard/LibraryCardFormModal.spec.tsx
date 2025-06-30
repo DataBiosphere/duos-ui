@@ -1,7 +1,6 @@
 import React from 'react';
 import {mount} from 'cypress/react';
 import LibraryCardFormModal, {LibraryCardFormModalProps} from 'src/components/modals/LibraryCardFormModal';
-import {LibraryCard} from 'src/types/model';
 
 describe('Library Card Form Modal Tests', () => {
 
@@ -13,16 +12,15 @@ describe('Library Card Form Modal Tests', () => {
       showModal: true,
       createOnClick: cy.stub().as('createOnClick'),
       closeModal: cy.stub().as('closeModal'),
-      users: [],
-      card: {} as LibraryCard
+      users: []
     };
   });
 
   it('Should render the Library Card Form Modal', () => {
     mount(<LibraryCardFormModal {...props} />);
     cy.get('[data-cy=library-card-form-modal]').should('exist');
-    cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Card');
-    cy.get('[id=Add-button]').should('exist');
+    cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Cards');
+    cy.get('[id=Add-button]').click();
     cy.get('[id=Cancel-button]').should('exist');
     ['Broad Library Card Agreement',
       'NIH Library Card Agreement',
@@ -35,7 +33,7 @@ describe('Library Card Form Modal Tests', () => {
 
   it('Existing users should be visible in the user selection list', () => {
     const userOptions = [
-      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: null},
+      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: undefined},
     ]
     const mergedProps = {...props, ...{users: userOptions}};
     mount(<LibraryCardFormModal {...mergedProps} />);
@@ -48,9 +46,41 @@ describe('Library Card Form Modal Tests', () => {
     cy.get('@createOnClick').should('have.been.called');
   });
 
+  it('Multiple users should be selectable in the user selection list', () => {
+    const userOptions = [
+      {userId: 1, displayName: 'Test User 1', email: 'user1@test.com', libraryCard: undefined},
+        {userId: 2, displayName: 'Test User 2', email: 'user2@test.com', libraryCard: undefined},
+        {userId: 3, displayName: 'Test User 3', email: 'user3@test.com', libraryCard: undefined}
+    ]
+
+    const mergedProps = {...props, ...{users: userOptions}};
+    mount(<LibraryCardFormModal {...mergedProps} />);
+    cy.get('input').should('exist');
+
+    // select the first option
+    cy.get('input').type('Test User');
+    cy.get('[id$=option-1]').click();
+
+    // select the second option
+    cy.get('input').type('Test User');
+    cy.get('[id$=option-2]').click();
+
+    // select the third option
+    cy.get('input').type('Test User');
+    cy.get('[id$=option-3]').click();
+
+    // click add and confirm the call was made with all selected users
+    cy.get('[id=Add-button]').click();
+    cy.get('@createOnClick').should('have.been.calledWith', [
+      {userId: 1, userEmail: 'user1@test.com', userName: 'Test User 1'},
+        {userId: 2, userEmail: 'user2@test.com', userName: 'Test User 2'},
+        {userId: 3, userEmail: 'user3@test.com', userName: 'Test User 3'}
+    ]);
+  });
+
   it('Non-existing users should NOT be visible in the user selection list', () => {
     const userOptions = [
-      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: null},
+      {userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: undefined},
     ]
     const mergedProps = {...props, ...{users: userOptions}};
     mount(<LibraryCardFormModal {...mergedProps} />);
