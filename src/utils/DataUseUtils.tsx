@@ -7,7 +7,6 @@ interface DataUseCode {
     description: string;
 }
 
-// Define the return  of the function
 interface ProcessedDataUseCodes {
     codesAndDescriptions: DataUseCode[];
     codeList: string[];
@@ -15,8 +14,8 @@ interface ProcessedDataUseCodes {
 
 /**
  * Process data use codes from a dataset
- * @param {Object} dataset - DatasetTerm object containing data use information
- * @returns {Object} - Object with processed data use information
+ * @param {DatasetTerm} dataset - DatasetTerm object containing data use information
+ * @returns {ProcessedDataUseCodes} - Object with processed data use information
  */
 export function processDataUseCodes(dataset: DatasetTerm): ProcessedDataUseCodes {
     const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
@@ -52,8 +51,8 @@ export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
  * @param {DatasetTerm} dataset - DatasetTerm object
  * @param {string} divClass - CSS class for the div
  * @param {string} spanClass - CSS class for the span
- * @param {string} tooltipPlace - Placement direction for tooltip
- * @returns {JSX.Element} - Element displaying data use codes with tooltips
+ * @param {TooltipPlacement} tooltipPlace - Placement direction for tooltip
+ * @returns {ReactNode} - Element displaying data use codes with tooltips
  */
 export function createDataUseDisplay({
     dataset,

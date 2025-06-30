@@ -16,7 +16,7 @@ import {
 } from 'src/types/model';
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
-import {createDataUseDisplay} from "src/utils/DataUseUtils";
+import {createDataUseDisplay} from 'src/utils/DataUseUtils';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -104,10 +104,11 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
           showError(`Unable to retrieve dataset statistics from server: dataset ${datasetIdentifier} not found.`);
           setIsLoading(false);
           return;
+        } else {
+          setDatasetTerm(datasetTerms[0]);
         }
 
         const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
-        setDatasetTerm(datasetTerms[0]);
         setDataset(dataset);
         setDars(metrics.dars);
         setIsLoading(false);
