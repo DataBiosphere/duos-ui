@@ -1,18 +1,46 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import InfoIcon from '@mui/icons-material/Info';
 import {Acknowledgement} from 'src/types/model';
+import {User} from 'src/libs/ajax/User';
+import {Notifications} from 'src/libs/utils';
+import {ConsentError} from 'src/types/responseTypes';
+import {AxiosError} from 'axios';
 
 interface CloseoutReviewProps {
-  acknowledgement?: Acknowledgement;
   onApprove?: () => void;
   onReturn?: () => void;
+  referenceId?: string;
 }
 
 export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
-    acknowledgement,
+    referenceId,
     onApprove,
     onReturn,
 }) => {
+
+  const [acknowledgement, setAcknowledgement] = React.useState<Acknowledgement | undefined>(undefined);
+
+  // Required to get Chairperson acknowledgments of closeouts
+  useEffect(() => {
+    // Fetch the acknowledgement for the given referenceId
+    const fetchAcknowledgement = async () => {
+      if (referenceId) {
+        try {
+          const key = `dar_closeout_chair_ref_${referenceId}`;
+          const chairAcknowledgement = await User.getAcknowledgement(key);
+          if (chairAcknowledgement) {
+            setAcknowledgement(chairAcknowledgement);
+          }
+        } catch (error) {
+          const consentError = (error as AxiosError)?.response?.data as ConsentError;
+          if (consentError && consentError.code !== 404) {
+            Notifications.showError({text: 'Error: Unable to retrieve chairperson acknowledgement: ' + consentError.message});
+          }
+        }
+      }
+    };
+    fetchAcknowledgement();
+  }, [referenceId]);
 
   const approveButton =
       <button

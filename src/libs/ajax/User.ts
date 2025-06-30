@@ -4,7 +4,14 @@ import axios from 'axios';
 import { getApiUrl, fetchOk, fetchAny } from '../ajax';
 import { CreateDuosUserResponse, DuosUserResponse, UpdateDuosUserResponse } from 'src/types/responseTypes';
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes';
-import { AcknowledgementMap, ApprovedDataset, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model';
+import {
+  Acknowledgement,
+  AcknowledgementMap,
+  ApprovedDataset,
+  Dataset,
+  DuosUser,
+  SimplifiedDuosUser
+} from 'src/types/model';
 
 export const User = {
   getMe: async (): Promise<DuosUserResponse> => {
@@ -145,6 +152,12 @@ export const User = {
 
   getAcknowledgements: async (): Promise<AcknowledgementMap> => {
     const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  getAcknowledgement: async (key: string): Promise<Acknowledgement> => {
+    const url = `${await getApiUrl()}/api/user/acknowledgements/${key}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },

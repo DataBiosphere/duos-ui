@@ -1,20 +1,12 @@
 import React, { ReactNode } from 'react';
 import { mount } from 'cypress/react';
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication';
-import {
-  AcknowledgementMap,
-  CombinedDataAccessRequest,
-  Dataset,
-  DuosUser,
-  FileStorageObject
-} from 'src/types/model';
+import {CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject} from 'src/types/model';
 import { History, Location, Action } from 'history';
 import { Storage } from 'src/libs/storage';
-import { User } from 'src/libs/ajax/User';
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History;
-  let mockAcknowledgementMap: AcknowledgementMap;
 
   beforeEach(() => {
     cy.initApplicationConfig();
@@ -52,9 +44,6 @@ describe('ProgressReportApplication - Component Tests', () => {
       listen: cy.stub(),
       createHref: cy.stub()
     };
-
-    mockAcknowledgementMap = {} as AcknowledgementMap;
-    cy.stub(User, 'getAcknowledgements').resolves(mockAcknowledgementMap);
   });
 
   const location: Location = {
@@ -953,36 +942,5 @@ describe('ProgressReportApplication - Component Tests', () => {
       cy.wrap($card).find('button').should('not.exist');
       cy.wrap($card).find('input[type="checkbox"]').should('not.exist');
     });
-  });
-
-  it('populates closeout review with acknowledgement readonly is true', () => {
-    // Set user as chairperson to allow closeout review
-    researcher.isChairPerson = true;
-    const now = new Date();
-    const darWithCloseout = {
-      closeoutSupplement: {
-        reasons: ['closeoutProjectCompleted'],
-        otherText: '',
-        signingOfficialId: 1
-      },
-      closeoutSigningOfficialApprovedDate: now.getTime()
-    };
-
-    // Show that the Approve button is visible when not acknowledged
-    mountComponent(darWithCloseout, true);
-    cy.get('[data-cy="closeout-review"]').should('exist');
-    cy.get('[data-cy="closeout-review-approve-button"]').should('exist');
-
-    // Show that the Approved button is visible when acknowledged
-    const ackKey = 'dar_closeout_chair_ref_' + baseDar.referenceId;
-    mockAcknowledgementMap[ackKey] = {
-      userId: 1,
-      ackKey: ackKey,
-      firstAcknowledged: now.getTime(),
-      lastAcknowledged: now.getTime(),
-    };
-    mountComponent(darWithCloseout, true);
-    cy.get('[data-cy="closeout-review"]').should('exist');
-    cy.get('[data-cy="closeout-review-approved-button"]').should('exist');
   });
 });

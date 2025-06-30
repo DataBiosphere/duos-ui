@@ -2,6 +2,7 @@ import React from 'react';
 import {mount} from 'cypress/react';
 import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
 import {Acknowledgement} from 'src/types/model';
+import {User} from 'src/libs/ajax/User';
 
 describe('CloseoutReview - Component Tests', () => {
   let onApproveSpy: () => void;
@@ -9,9 +10,9 @@ describe('CloseoutReview - Component Tests', () => {
 
   const mountComponent = (props = {}) => {
     const defaultProps = {
-      acknowledgement: undefined,
       onApprove: onApproveSpy,
       onReturn: onReturnSpy,
+      referenceId: undefined,
       ...props
     };
 
@@ -101,7 +102,8 @@ describe('CloseoutReview - Component Tests', () => {
       firstAcknowledged: now.getTime(),
       lastAcknowledged: now.getTime(),
     } as Acknowledgement;
-    mountComponent({acknowledgement: acknowledgement});
+    cy.stub(User, 'getAcknowledgement').returns(acknowledgement);
+    mountComponent({referenceId: 'DAR-UUID'});
 
     // Approved button with approved date should be visible
     cy.get('[data-cy="closeout-review"]').should('exist');

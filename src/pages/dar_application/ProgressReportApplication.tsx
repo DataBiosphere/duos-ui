@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Acknowledgement, AcknowledgementMap, CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
+import {CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
@@ -115,7 +115,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
     const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
-    const [closeoutAcknowledgement, setCloseoutAcknowledgement] = useState<undefined | Acknowledgement>(undefined);
 
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
@@ -201,21 +200,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
       onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
 
-    // Required to get Chairperson acknowledgments of closeouts
-    useEffect(() => {
-      async function fetchAcknowledgements() {
-        if (readOnlyMode) {
-          const acknowledgementMap: AcknowledgementMap = await User.getAcknowledgements();
-          Object.keys(acknowledgementMap).forEach((key:string) => {
-            if (key.indexOf('dar_closeout_chair_ref_') >= 0 && key.indexOf(dar.referenceId) >= 0) {
-              setCloseoutAcknowledgement(acknowledgementMap[key]);
-            }
-          });
-        }
-      }
-      fetchAcknowledgements();
-    }, [readOnlyMode, dar.referenceId]);
-
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
@@ -277,7 +261,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             </div>
             {isCloseoutReview() && <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <CloseoutReview
-                    acknowledgement={closeoutAcknowledgement}
+                    referenceId={dar.referenceId}
                     onApprove={onApproveReview}
                     onReturn={() => {
                         Navigation.console(Storage.getCurrentUser(), history);
