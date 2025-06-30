@@ -1,6 +1,6 @@
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo';
+import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo';
 import { User } from 'src/libs/ajax/User.js';
 
 import {BrowserRouter} from 'react-router-dom';
@@ -213,10 +213,11 @@ describe('Researcher Info', () => {
   });
 
   it('renders researcher and pi as disabled with pi fields populated with saved pi info in read only mode', () => {
-    const mergedProps = {...props, ...{readOnlyMode: true}};
+    const mergedProps = {...props, ...{readOnlyMode: true, eraCommonsId: 'scoobydoo'}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('#researcherName').should('have.value', props.researcher.displayName);
     cy.get('#piName').should('have.value', props.formData.piName);
     cy.get('#piEmail').should('have.value', props.formData.piEmail);
+    cy.get('[data-cy=era-commons-display-id-value]').should('have.text', 'scoobydoo')
   });
 });

@@ -647,6 +647,7 @@ const DataAccessRequestApplication = (props) => {
                   setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
                   setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
                   countriesOfOperation={countriesOfOperation}
+                  eraCommonsId={reverseOrderedDARs.at(-1)?.eraCommonsId}
                 />
                   </ConditionalAccordion>
               </div>

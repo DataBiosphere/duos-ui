@@ -5,6 +5,7 @@ import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { Location } from 'history';
 import { DuosUser } from 'src/types/model';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 
 describe('Summary Section - Component Tests', () => {
   let onFormChangeSpy: () => void;
@@ -63,7 +64,7 @@ describe('Summary Section - Component Tests', () => {
   ];
 
   const mountComponent = (customState = {}) => {
-    const formState = {...customState};
+    const formState = {...customState} as FormState;
 
     const props = {
       readOnly: false,
@@ -98,7 +99,7 @@ describe('Summary Section - Component Tests', () => {
   it('renders in read-only mode correctly', () => {
     const props = {
       readOnly: true,
-      formState: {},
+      formState: {} as FormState,
       onFormChange: onFormChangeSpy,
       location,
       researcher,
@@ -195,35 +196,16 @@ describe('Summary Section - Component Tests', () => {
   });
 
   it('shows era authenticated researcher commons id', () => {
-    const eraAuthedResearcher: DuosUser = {
-      ...researcher, properties: [
-        {
-          propertyId: 1,
-          userId: 1,
-          propertyKey: 'eraAuthorized',
-          propertyValue: 'true'
-        },
-        {
-          propertyId: 2,
-          userId: 1,
-          propertyKey: 'eraExpiration',
-          // 86400000 = 1 day in milliseconds
-          propertyValue: (new Date().getTime() + 86400000).toString(),
-        }
-      ]
-    };
     const props = {
       readOnly: true,
-      formState: {},
+      formState: {eraCommonsId: 'scoobydoo'} as FormState,
       onFormChange: onFormChangeSpy,
       location,
-      researcher: eraAuthedResearcher,
+      researcher: {} as DuosUser,
     };
     mount(<SummarySection {...props} />);
     cy.get('[data-cy=researcher-identification]').should('exist');
-    cy.get('[data-cy=researcher-identification]').should(($p) => {
-      expect($p).to.contain(eraAuthedResearcher.eraCommonsId);
-    })
+    cy.get('[data-cy=era-commons-display-id-value]').should('have.text', 'scoobydoo')
   });
 
   it('shows authentication message for un-auth-ed user', () => {
