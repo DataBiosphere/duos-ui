@@ -21,34 +21,6 @@
     "population": false
   },
   "deletable": false,
-  "properties": [
-    {
-      "propertyId": 9311,
-      "datasetId": 1975,
-      "propertyName": "Data Location",
-      "propertyValue": "Not Determined",
-      "schemaProperty": "dataLocation",
-      "propertyType": "String"
-    },
-    {
-      "propertyId": 9312,
-      "datasetId": 1975,
-      "propertyName": "# of participants",
-      "propertyValue": 1,
-      "schemaProperty": "numberOfParticipants",
-      "propertyType": "Number"
-    },
-    {
-      "propertyId": 9313,
-      "datasetId": 1975,
-      "propertyName": "File Types",
-      "propertyValue": [
-        {}
-      ],
-      "schemaProperty": "fileTypes",
-      "propertyType": "Json"
-    }
-  ],
   "createUser": {
     "userId": 3396,
     "email": "jlawson@test.com",
@@ -71,67 +43,6 @@
       1975,
       1976,
       1977
-    ],
-    "properties": [
-      {
-        "studyPropertyId": 5860,
-        "studyId": 5854,
-        "key": "collaboratingSites",
-        "type": "Json",
-        "value": []
-      },
-      {
-        "studyPropertyId": 5855,
-        "studyId": 5854,
-        "key": "species",
-        "type": "String",
-        "value": "ExternalAccessTestJL1"
-      },
-      {
-        "studyPropertyId": 5857,
-        "studyId": 5854,
-        "key": "dataCustodianEmail",
-        "type": "Json",
-        "value": [
-          "user_1@test.com",
-          "user_2@test.com"
-        ]
-      },
-      {
-        "studyPropertyId": 5858,
-        "studyId": 5854,
-        "key": "nihAnvilUse",
-        "type": "String",
-        "value": "I am not NHGRI funded and do not plan to store data in AnVIL"
-      },
-      {
-        "studyPropertyId": 5854,
-        "studyId": 5854,
-        "key": "phenotypeIndication",
-        "type": "String",
-        "value": "ExternalAccessTestJL1"
-      },
-      {
-        "studyPropertyId": 5859,
-        "studyId": 5854,
-        "key": "nihICsSupportingStudy",
-        "type": "Json",
-        "value": []
-      },
-      {
-        "studyPropertyId": 5853,
-        "studyId": 5854,
-        "key": "studyType",
-        "type": "String",
-        "value": "Observational"
-      },
-      {
-        "studyPropertyId": 5861,
-        "studyId": 5854,
-        "key": "alternativeDataSharingPlanReasons",
-        "type": "Json",
-        "value": []
-      }
     ],
     "createDate": 1698897809861,
     "createUserId": 3396

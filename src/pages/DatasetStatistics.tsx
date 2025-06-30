@@ -8,7 +8,6 @@ import {ReadMore} from 'src/components/ReadMore';
 import {Button} from '@mui/material';
 import {History} from 'history';
 import {
-  Dataset,
   DatasetStatisticsDar,
   DatasetStats,
   DatasetTerm
@@ -80,7 +79,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
   useEffect(() => {
     const init = async () => {
       try {
-        const dataset: Dataset = await DataSet.getDatasetByDatasetIdentifier(datasetIdentifier);
         const datasetTerms: DatasetTerm[] = await DataSet.searchDatasetIndex({ query: {
           'bool': {
             'must': [
@@ -91,7 +89,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               },
               {
                 'match': {
-                  '_id': dataset.datasetId
+                  'datasetIdentifier': datasetIdentifier
                 }
               }
             ]
@@ -104,10 +102,9 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
           return;
         } else {
           setDatasetTerm(datasetTerms[0]);
+          const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId);
+          setDars(metrics.dars);
         }
-
-        const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
-        setDars(metrics.dars);
         setIsLoading(false);
       } catch (error) {
         showError('Unable to retrieve dataset statistics from server: ' + extractError(error));
@@ -175,7 +172,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
                 {datasetTerm.study.piName}
             </LabeledSection>
             <LabeledSection label={'Data Custodian'}>
-              {datasetTerm.study.dataCustodianEmail.join(', ') ?? 'N/A'}
+              {datasetTerm.study.dataCustodianEmail?.join(', ') ?? 'N/A'}
             </LabeledSection>
             <div style={{paddingTop: '20px'}}>
               {datasetTerm.study.description}
