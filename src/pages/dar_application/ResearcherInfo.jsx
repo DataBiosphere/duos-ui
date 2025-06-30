@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {Alert} from '../../components/Alert';
+import {Alert} from 'src/components/Alert';
 import {Link} from 'react-router-dom';
-import ERACommons from '../../components/era_commons/ERACommons';
+import ERACommons from 'src/components/era_commons/ERACommons';
 import CollaboratorList from './collaborator/CollaboratorList';
 import {isEmpty, isNil} from 'lodash/fp';
-import {FormField, FormValidators, FormFieldTypes} from '../../components/forms/forms';
+import {FormField, FormValidators, FormFieldTypes} from 'src/components/forms/forms';
 import './dar_application.css';
-import {nihAccountLabel, nihAccountInstructions} from '../../utils/ERACommonsUtils';
+import {nihAccountLabel, nihAccountInstructions} from 'src/utils/ERACommonsUtils';
 import {
   ERACommonsDisplay
 } from '../../components/era_commons/ERACommonsDisplay';

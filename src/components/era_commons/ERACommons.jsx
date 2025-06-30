@@ -3,11 +3,11 @@ import {get} from 'lodash';
 import {isNil} from 'lodash/fp';
 import queryString from 'query-string';
 import './ERACommons.css';
-import {AuthenticateNIH} from '../../libs/ajax/AuthenticateNIH.js';
-import {User} from '../../libs/ajax/User.js';
-import {Config} from '../../libs/config.js';
+import {AuthenticateNIH} from 'src/libs/ajax/AuthenticateNIH.js';
+import {User} from 'src/libs/ajax/User.js';
+import {Config} from 'src/libs/config.js';
 import '../Animations.css';
-import {Storage} from '../../libs/storage.js';
+import {Storage} from 'src/libs/storage.js';
 import {
   decodeNihToken,
   extractEraAuthenticationState,
