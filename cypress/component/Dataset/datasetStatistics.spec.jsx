@@ -175,7 +175,27 @@ describe('Dataset Statistics Tests', () => {
     });
   });
 
-  it('Displays the Data Use field', () => {
+  it('Does not display the Data Use field for open datasets', () => {
+    const open = {...datasetTerm, accessManagement: 'open'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([open]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: open.datasetIdentifier
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('Data Use').should('not.exist');
+  });
+
+  it('Displays the Data Use field for controlled datasets', () => {
     const controlled = {...datasetTerm, accessManagement: 'controlled'};
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([controlled]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
