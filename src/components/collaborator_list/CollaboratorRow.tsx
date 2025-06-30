@@ -18,12 +18,17 @@ interface CollaboratorRowProps {
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly showApproverStatus?: boolean;
     readonly countriesOfOperation: string[];
+    // Additional props for DAR application compatibility
+    readonly validation?: any;
+    readonly onCollaboratorValidationChange?: any;
+    readonly collaboratorKey?: string;
 }
 
 export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.Element {
     const {
       id, editMode, readOnly, collaborator, collaboratorText, collaborators, columnsToShow, countriesOfOperation,
-      showApproverStatus, editAction, deleteAction, closeAction, onCollaboratorChange
+      showApproverStatus, editAction, deleteAction, closeAction, onCollaboratorChange,
+      validation, onCollaboratorValidationChange, collaboratorKey
     } = props;
 
     return (
@@ -36,9 +41,13 @@ export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.
                     collaborators={collaborators}
                     readOnly={readOnly}
                     closeAction={closeAction}
+                    deleteAction={deleteAction}
                     onCollaboratorChange={onCollaboratorChange}
                     showApproverStatus={showApproverStatus}
                     countriesOfOperation={countriesOfOperation}
+                    validation={validation}
+                    onCollaboratorValidationChange={onCollaboratorValidationChange}
+                    collaboratorKey={collaboratorKey}
                 />)}
             {!editMode &&
                 <CollaboratorSummary
@@ -47,6 +56,8 @@ export default function CollaboratorRow(props: CollaboratorRowProps): React.JSX.
                     editAction={editAction}
                     deleteAction={deleteAction}
                     readOnly={readOnly}
+                    index={id}
+                    collaboratorKey={collaboratorKey}
                 />}
         </div>
     );

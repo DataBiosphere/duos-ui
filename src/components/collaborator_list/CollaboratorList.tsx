@@ -25,8 +25,10 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
       countriesOfOperation
     } = props;
 
-    // Ensure email and eraCommonsId are always included in columnsToShow
-    const columnsToShowWithDefaults = [...new Set([...columnsToShow, 'email', 'eraCommonsId'])];
+    // Only add email and eraCommonsId as defaults when columnsToShow is empty or undefined
+    const columnsToShowWithDefaults = columnsToShow.length > 0
+        ? columnsToShow
+        : ['name', 'title', 'email', 'eraCommonsId'];
 
     const [showAddEdit, setShowAddEdit] = useState(false);
     const [editState, setEditState] = useState(collaborators.map(() => false));

@@ -81,14 +81,14 @@ export default function CollaboratorList(props) {
     <div className="form-group row no-margin">
       {collaborators.map((collaborator, index) => (
         <CollaboratorRow
-          id={index}
           key={index}
+          id={index}
           editMode={editState[index]}
           readOnly={readOnly}
           collaborator={collaborator}
           collaboratorText={collaboratorLabel}
           collaborators={collaborators}
-          columnsToShow={showApproval ? ['name', 'email', 'approval'] : ['name', 'email']}
+          columnsToShow={showApproval ? ['name', 'title', 'eraCommonsId', 'email', 'approval'] : ['name', 'title', 'eraCommonsId', 'email']}
           editAction={() => updateEditState(index, true)}
           deleteAction={() => deleteCollaborator(index)}
           closeAction={() => updateEditState(index, false)}
@@ -100,7 +100,11 @@ export default function CollaboratorList(props) {
             }
           }}
           countriesOfOperation={countriesOfOperation}
-          disabled={editState[index] ?? false}
+          showApproverStatus={showApproval}
+          // Pass validation-related props for DAR application compatibility
+          validation={!isNil(validation) ? validation[index] || {} : {}}
+          onCollaboratorValidationChange={onCollaboratorValidationChange}
+          collaboratorKey={collaboratorKey}
         />
       ))}
     </div>
