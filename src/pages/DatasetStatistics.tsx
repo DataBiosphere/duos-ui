@@ -169,7 +169,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             </LabeledSection>
             {(datasetTerm.accessManagement === AccessManagement.CONTROLLED || datasetTerm.accessManagement === AccessManagement.EXTERNAL) &&
                 <LabeledSection label={'Data Use'}>
-                  {createDataUseDisplay({datasetTerm, divClass: '', spanClass: '', tooltipPlace: 'right'})}
+                  {createDataUseDisplay({dataset: datasetTerm, divClass: '', spanClass: '', tooltipPlace: 'right'})}
                 </LabeledSection>
             }
             <LabeledSection label={'Data Location'}>
