@@ -89,7 +89,7 @@ describe('CloseoutReview - Component Tests', () => {
   it('displays closeout approve when no acknowledgement exists', () => {
     mountComponent();
 
-    // Approved button should be visible
+    // Approve button should be visible
     cy.get('[data-cy="closeout-review"]').should('exist');
     cy.get('[data-cy="closeout-review-approve-button"]').should('exist');
   });
