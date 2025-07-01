@@ -1,6 +1,8 @@
 import React from 'react';
-import { mount } from 'cypress/react';
-import { CloseoutReview } from 'src/pages/progress_reports/CloseoutReview';
+import {mount} from 'cypress/react';
+import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
+import {Acknowledgement} from 'src/types/model';
+import {User} from 'src/libs/ajax/User';
 
 describe('CloseoutReview - Component Tests', () => {
   let onApproveSpy: () => void;
@@ -10,6 +12,7 @@ describe('CloseoutReview - Component Tests', () => {
     const defaultProps = {
       onApprove: onApproveSpy,
       onReturn: onReturnSpy,
+      referenceId: 'DAR-UUID',
       ...props
     };
 
@@ -73,13 +76,36 @@ describe('CloseoutReview - Component Tests', () => {
     mountComponent();
 
     cy.contains('Please note:')
-      .should('have.css', 'font-weight', '700'); // bold
+        .should('have.css', 'font-weight', '700'); // bold
   });
 
   it('displays explanatory text with normal font weight', () => {
     mountComponent();
 
     cy.contains('If there are issues with the content in this closeout report, please contact the researcher.')
-      .should('have.css', 'font-weight', '400'); // normal
+        .should('have.css', 'font-weight', '400'); // normal
+  });
+
+  it('displays closeout approve when no acknowledgement exists', () => {
+    mountComponent();
+
+    // Approve button should be visible
+    cy.get('[data-cy="closeout-review"]').should('exist');
+    cy.get('[data-cy="closeout-review-approve-button"]').should('exist');
+  });
+
+  it('displays closeout approval when acknowledgement exists', () => {
+    const now = new Date();
+    const acknowledgement = {
+      userId: 1,
+      ackKey: 'dar_closeout_chair_ref_DAR-UUID',
+      firstAcknowledged: now.getTime(),
+      lastAcknowledged: now.getTime(),
+    } as Acknowledgement;
+    cy.stub(User, 'getAcknowledgement').returns(acknowledgement);
+    mountComponent();
+
+    // Approve button should not be visible
+    cy.get('[data-cy="closeout-review-approve-button"]').should('not.exist');
   });
 });

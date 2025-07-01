@@ -261,6 +261,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             </div>
             {isCloseoutReview() && <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <CloseoutReview
+                    referenceId={dar.referenceId}
                     onApprove={onApproveReview}
                     onReturn={() => {
                         Navigation.console(Storage.getCurrentUser(), history);
