@@ -7,6 +7,7 @@ type ApproverStatusType = boolean | 'yes' | 'no' | undefined;
 interface ApproverStatusProps {
     readonly index: number;
     readonly approverStatus: ApproverStatusType;
+    readonly readOnly?: boolean;
     readonly validation?: ValidationError;
     readonly onValidationChange?: (params: {key: string, validator: ValidationError}) => void;
     readonly onChange: ((params: {key: string, value: ApproverStatusType}) => void) | null;
@@ -37,6 +38,7 @@ export default function ApproverStatus(props: ApproverStatusProps): React.JSX.El
                     {name: 'yes', text: 'Yes'},
                     {name: 'no', text: 'No'}
                 ]}
+                disabled={props.readOnly}
                 validators={[FormValidators.REQUIRED]}
                 orientation='horizontal'
                 defaultValue={calculateDefaultValue}
