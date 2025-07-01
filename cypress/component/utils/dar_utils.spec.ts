@@ -6,7 +6,7 @@ import {
   getPresentationList,
   getPublicationList
 } from 'src/utils/DarUtils';
-import {Election, Vote} from 'src/types/model';
+import {Collaborator, Election, Vote} from 'src/types/model';
 import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 
 describe('DarUtils', () => {
@@ -196,9 +196,42 @@ describe('DarUtils', () => {
           did_cite: true
         }],
         presentationsYesNo: true,
-        labCollaborators: ['Lab A'],
-        internalCollaborators: ['Internal A'],
-        externalCollaborators: ['External A'],
+        presentations: [{
+          title: 'Presentation 1',
+          pubmed_id: '67890',
+          date: '2023-02-01',
+          authors: ['Author B'],
+          bibliographic_citation: 'Citation 2',
+          dataset_citation: 'Dataset 2',
+          did_cite: true
+        }],
+        labCollaborators: [{
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'Collaborator A',
+          title: 'Collaborator Title',
+          uuid: 'collab-uuid',
+        } as Collaborator],
+        internalCollaborators: [{
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'Internal Collaborator A',
+          title: 'Internal Collaborator Title',
+          uuid: 'collab-uuid-internal',
+        } as Collaborator],
+        externalCollaborators: [{
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'External Collaborator A',
+          title: 'External Collaborator Title',
+          uuid: 'collab-uuid-external',
+        } as Collaborator ],
         dmiYesNo: true,
         closeoutYesNo: true,
         dsAcknowledgement: true,
