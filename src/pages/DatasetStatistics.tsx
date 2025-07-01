@@ -88,7 +88,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
                 }
               },
               {
-                'match': {
+                'match_phrase': {
                   'datasetIdentifier': datasetIdentifier
                 }
               }
