@@ -11,7 +11,6 @@ describe('ControlledAccessGrants', () => {
   })
 
   it('should render the component with correct header and description', () => {
-    // Mock successful API response with empty data
     cy.stub(User, 'getApprovedDatasets').returns(Promise.resolve([]));
 
     mount(
@@ -75,7 +74,7 @@ describe('ControlledAccessGrants', () => {
     // Verify that the error notification was shown
     cy.contains('Error: Unable to retrieve user data from server')
 
-    // Table should still be rendered, but with no data rows
+    // Table should still be rendered, but with no rows
     cy.get('table').should('exist');
   });
 });
