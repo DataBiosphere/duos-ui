@@ -11,9 +11,9 @@ interface CloseoutReviewProps {
 }
 
 export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
-    referenceId,
     onApprove,
     onReturn,
+    referenceId
 }) => {
 
   const [acknowledged, setAcknowledged] = useState<boolean | undefined>(undefined);
@@ -22,20 +22,18 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
   useEffect(() => {
     // Fetch the acknowledgement for the given referenceId
     const fetchAcknowledgement = async () => {
-      if (referenceId) {
-        try {
-          const key = `dar_closeout_chair_ref_${referenceId}`;
-          const chairAcknowledgement = await User.getAcknowledgement(key);
-          if (chairAcknowledgement) {
-            setAcknowledged(true);
-          }
-        } catch (error) {
-          const consentError = extractConsentError(error);
-          if (consentError && consentError.code === 404) {
-            // 404 indicates no acknowledgement found, which is not an error
-          } else {
-            Notifications.showError({text: 'Error: Unable to retrieve chairperson acknowledgement: ' + extractError(error)});
-          }
+      try {
+        const key = `dar_closeout_chair_ref_${referenceId}`;
+        const chairAcknowledgement = await User.getAcknowledgement(key);
+        if (chairAcknowledgement) {
+          setAcknowledged(true);
+        }
+      } catch (error) {
+        const consentError = extractConsentError(error);
+        if (consentError && consentError.code === 404) {
+          // 404 indicates no acknowledgement found, which is not an error
+        } else {
+          Notifications.showError({text: 'Error: Unable to retrieve chairperson acknowledgement: ' + extractError(error)});
         }
       }
     };
@@ -78,7 +76,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
             </div>
 
             <div style={{display: 'flex', gap: '12px', marginLeft: '16px'}}>
-              {/* If there is a closeout acknowledgement, show the approved button with the approved date */}
+              {/* Hide the Approve button if there is no closeout acknowledgement */}
               {(!acknowledged) &&
                 (<button
                   data-cy="closeout-review-approve-button"
