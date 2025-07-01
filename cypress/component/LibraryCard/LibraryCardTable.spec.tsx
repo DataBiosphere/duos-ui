@@ -9,7 +9,7 @@ describe('Library Card Table Tests', () => {
     {
       id: 1,
       userId: 1,
-      userName: 'Test User 1',
+      userName: 'foo foo',
       userEmail: 'test.user.1@test.com',
       createUserId: 2,
       createDate: new Date(),
@@ -17,7 +17,7 @@ describe('Library Card Table Tests', () => {
     {
       id: 2,
       userId: 2,
-      userName: 'Test User 2',
+      userName: 'bar bar',
       userEmail: 'test.user.2@test.com',
       createUserId: 2,
       createDate: new Date(),
@@ -25,7 +25,7 @@ describe('Library Card Table Tests', () => {
     {
       id: 3,
       userId: 3,
-      userName: 'Test User 3',
+      userName: 'baz baz',
       userEmail: 'test.user.3@test.com',
       createUserId: 2,
       createDate: new Date(),
@@ -96,7 +96,7 @@ describe('Library Card Table Tests', () => {
 
     mount(<LibraryCardTable {...props} />);
 
-    cy.get('[data-cy=search-bar]').type(libraryCardList[0].userName.toLowerCase());
+    cy.get('[data-cy=search-bar]').type(libraryCardList[0].userName);
 
     // Verify that only the matching card is displayed
     cy.get('[data-cy=manage-library-card-table]').should('contain', libraryCardList[0].userName);

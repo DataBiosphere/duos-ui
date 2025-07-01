@@ -1,8 +1,18 @@
-import { mergeAll } from 'lodash/fp';
-import { Config } from '../config';
 import axios from 'axios';
-import { getApiUrl, fetchOk } from '../ajax';
+import { mergeAll } from 'lodash/fp';
+import { Config } from 'src/libs/config';
+import { getApiUrl, fetchOk } from 'src/libs/ajax';
 
+// FIXME: temporary read-only mode for NHGRI datasets
+const setNhgriExternalAccess = (datasets) => {
+  return datasets.map(d => {
+    // nhgri dac id in prod is 2, verified in db
+    if (d.dacId === 2 && d.accessManagement === 'controlled') {
+      d.accessManagement = 'external';
+    }
+    return d;
+  })
+};
 
 export const DataSet = {
   getDatasetNames: async () => {
@@ -38,7 +48,7 @@ export const DataSet = {
   searchDatasetIndex: async (query) => {
     const url = `${await getApiUrl()}/api/dataset/search/index`;
     const res = await axios.post(url, query, Config.authOpts());
-    return res.data;
+    return setNhgriExternalAccess(res.data);
   },
 
   getDataSetsByDatasetId: async (datasetId) => {

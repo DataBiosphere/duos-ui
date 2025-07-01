@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import ERACommons from 'src/components/ERACommons';
+import ERACommons from 'src/components/era_commons/ERACommons';
 import {Notifications} from 'src/libs/utils';
 import {User} from 'src/libs/ajax/User';
 import {DAA} from 'src/libs/ajax/DAA';
