@@ -4,10 +4,11 @@ import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/fo
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 import PublicationList from 'src/components/publications_list/PublicationList';
 import {ValidFormState, FormState, FormStateKey} from 'src/pages/progress_reports/ProgressReportFormState';
-import ERACommons from 'src/components/ERACommons';
+import ERACommons from 'src/components/era_commons/ERACommons';
 import {DuosUser} from 'src/types/model';
 import {Location} from 'history';
 import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
+import {ERACommonsDisplay} from 'src/components/era_commons/ERACommonsDisplay';
 
 interface SummarySectionProps {
     readonly readOnly: boolean;
@@ -51,17 +52,16 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                         title='1.1 Researcher Identification'
                         validation={validation?.nihEraId}>
                     </FormFieldTitle>
-                    <ERACommons
+                    {!readOnly ? (<ERACommons
                         destination={eRACommonsDestination}
                         researcherProfile={researcher}
                         nihValid={nihValid}
                         onNihStatusUpdate={onNihStatusUpdate}
                         location={location}
                         validationError={validation?.nihEraId}
-                        readOnly={readOnly}
                         header={true}
                         required={!readOnly} // In read-only mode, this is not required
-                    />
+                    />) : (<ERACommonsDisplay eraCommonsId={formState.eraCommonsId}/>)}
                 </div>
 
                 <div className='progress-report-row'>

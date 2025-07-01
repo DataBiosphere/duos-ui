@@ -43,6 +43,7 @@ export interface FormState {
     closeoutOtherText: string;
     datasets: Dataset[];
     selectedDatasets: Dataset[];
+    eraCommonsId: string;
 }
 
 export enum FormStateKey {

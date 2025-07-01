@@ -402,9 +402,14 @@ export default function SigningOfficialTable(props) {
               </a>
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px',
+              fontSize: '16px', marginTop: '1rem'
             })}>
               Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad Library Card Agreement</a>, <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH Library Card Agreement</a>, and <NIHDataUseCertificationAgreement/> and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{ fontWeight: 600 }}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
+            </div>
+            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+              fontSize: '16px', marginTop: '1rem'
+            })}>
+              Note: NIH DACs are not currently using DUOS to review Data Access Requests (DARs).
             </div>
           </div>
         </div>

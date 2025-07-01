@@ -1,12 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import {Alert} from '../../components/Alert';
+import {Alert} from 'src/components/Alert';
 import {Link} from 'react-router-dom';
-import ERACommons from '../../components/ERACommons';
+import ERACommons from 'src/components/era_commons/ERACommons';
 import CollaboratorList from './collaborator/CollaboratorList';
 import {isEmpty, isNil} from 'lodash/fp';
-import {FormField, FormValidators, FormFieldTypes} from '../../components/forms/forms';
+import {FormField, FormValidators, FormFieldTypes} from 'src/components/forms/forms';
 import './dar_application.css';
-import {nihAccountLabel, nihAccountInstructions} from '../../utils/ERACommonsUtils.js';
+import {nihAccountLabel, nihAccountInstructions} from 'src/utils/ERACommonsUtils';
+import {
+  ERACommonsDisplay
+} from '../../components/era_commons/ERACommonsDisplay';
 
 const linkStyle = {color: '#2FA4E7'};
 const titleStyle = {fontSize: '24px', fontWeight: 500, color: '#333333'};
@@ -40,7 +43,8 @@ export default function ResearcherInfo(props) {
     showValidationMessages,
     validation,
     formValidationChange,
-    ariaLevel = 2
+    ariaLevel = 2,
+    eraCommonsId
   } = props;
   const accountLabel = nihAccountLabel();
   const accountLink = nihAccountInstructions();
@@ -107,24 +111,23 @@ export default function ResearcherInfo(props) {
             </span>
           )}
           <div className='flex-row' style={{justifyContent: 'flex-start', alignItems: 'flex-start'}}>
-            <ERACommons
+            {!readOnlyMode ? (<ERACommons
               destination={eRACommonsDestination}
               researcherProfile={researcher}
               onNihStatusUpdate={onNihStatusUpdate}
               location={location}
               validationError={showNihValidationError}
-              readOnly={readOnlyMode}
               header={true}
               required={!readOnlyMode} // In read-only mode, this is not required
-            />
+            />) : (<ERACommonsDisplay eraCommonsId={eraCommonsId} />)}
           </div>
           <fieldset>
             {
-              (completed === false && libraryCardReqSatisfied === true) && (
-                <div data-cy='researcher-info-profile-unsubmitted' className='rp-alert'>
-                  {!readOnlyMode && <Alert id='profileUnsubmitted' type='danger' title={profileUnsubmitted}/>}
-                </div>
-              )
+                (completed === false && libraryCardReqSatisfied === true) && (
+                    <div data-cy='researcher-info-profile-unsubmitted' className='rp-alert'>
+                      {!readOnlyMode && <Alert id='profileUnsubmitted' type='danger' title={profileUnsubmitted}/>}
+                    </div>
+                )
             }
             {
               (completed === true && libraryCardReqSatisfied === true) && (
