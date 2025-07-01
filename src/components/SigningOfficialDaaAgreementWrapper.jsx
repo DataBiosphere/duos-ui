@@ -1,16 +1,15 @@
+import React, { useEffect, useState } from 'react';
+import { isNil, isNull } from 'lodash';
 import { Notifications } from 'src/libs/utils';
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 import DataSubmitterAgreementLink from 'src/assets/Data_Registrant_Agreement_7.2.24.22.pdf';
 import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from 'src/libs/acknowledgements';
-import React, { useEffect, useState } from 'react';
 import { spinnerService } from 'src/libs/spinner-service';
-import { isNil, isNull } from 'lodash';
 import { Styles } from 'src/libs/theme';
-import UsgOmbText from './UsgOmbText';
 import {
   NIHDataUseCertificationAgreement
-} from '../components/external_docs/NIHDataUseCertificationAgreement';
+} from 'src/components/external_docs/NIHDataUseCertificationAgreement';
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
@@ -111,12 +110,12 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
 // Broad and NIH agreements before proceeding to the given
 // component.
 export const ensureSoHasDaaAcknowledgement = (Component, isLibraryCardIssueTable = false, isDataSubmitterTab = false) => {
+  const _ignored = isLibraryCardIssueTable;
   const WrappedComponent = (props) => (
     <>
       <SigningOfficialDaaAgreementWrapper isDataSubmitterTab={isDataSubmitterTab}>
         <Component {...props} />
       </SigningOfficialDaaAgreementWrapper>
-      {isLibraryCardIssueTable && <UsgOmbText />}
     </>
   );
   return WrappedComponent;

@@ -19,7 +19,6 @@ import {get, map} from 'lodash/fp';
 import 'src/pages/dar_application/DataAccessRequestApplication.css';
 
 import DucAddendum from 'src/pages/dar_application/DucAddendum';
-import UsgOmbText from 'src/components/UsgOmbText';
 import {DAAUtils} from 'src/utils/DAAUtils';
 import {Metrics} from 'src/libs/ajax/Metrics';
 import eventList from 'src/libs/events';
@@ -728,7 +727,6 @@ const DataAccessRequestApplication = (props) => {
           </div>
         </form>
       </div>
-      {!existingDarsReadOnlyMode ? <UsgOmbText /> : null}
     </div>
   );
 };
