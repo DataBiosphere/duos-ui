@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import InfoIcon from '@mui/icons-material/Info';
-import {Acknowledgement} from 'src/types/model';
 import {User} from 'src/libs/ajax/User';
 import {Notifications} from 'src/libs/utils';
 import {extractConsentError, extractError} from 'src/utils/ErrorUtils';
@@ -17,7 +16,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
     onReturn,
 }) => {
 
-  const [acknowledgement, setAcknowledgement] = useState<Acknowledgement | undefined>(undefined);
+  const [acknowledged, setAcknowledged] = useState<boolean | undefined>(undefined);
 
   // Required to get Chairperson acknowledgments of closeouts
   useEffect(() => {
@@ -28,7 +27,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
           const key = `dar_closeout_chair_ref_${referenceId}`;
           const chairAcknowledgement = await User.getAcknowledgement(key);
           if (chairAcknowledgement) {
-            setAcknowledgement(chairAcknowledgement);
+            setAcknowledged(true);
           }
         } catch (error) {
           const consentError = extractConsentError(error);
@@ -42,63 +41,6 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
     };
     fetchAcknowledgement();
   }, [referenceId]);
-
-  const approveButton =
-      <button
-          data-cy="closeout-review-approve-button"
-          type="button"
-          onClick={onApprove}
-          style={{
-            backgroundColor: '#4D72AA',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            padding: '10px 20px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            minWidth: '136px'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#3d5a8a';
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.backgroundColor = '#3d5a8a';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#4D72AA';
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.backgroundColor = '#4D72AA';
-          }}>
-        Approve closeout
-      </button>;
-
-  const approvedButton =
-      (acknowledgement: Acknowledgement) => {
-        let approvalDate = '';
-        if (acknowledgement.lastAcknowledged) {
-          approvalDate += new Date(acknowledgement.lastAcknowledged).toISOString().substring(0, 10);
-        } else if (acknowledgement.firstAcknowledged) {
-          approvalDate += new Date(acknowledgement.firstAcknowledged).toISOString().substring(0, 10);
-        } else {
-          approvalDate += 'unknown date';
-        }
-        return <button
-            data-cy="closeout-review-approved-button"
-            type='button' disabled={true}
-            style={{
-              backgroundColor: '#cccccc',
-              color: 'black',
-              border: '1px solid gray',
-              borderRadius: '4px',
-              padding: '10px 20px',
-              cursor: 'default',
-              minWidth: '136px'
-            }}>
-          Approved on {approvalDate}
-        </button>
-      }
 
   return (
       <div className="progress-report-step-card" style={{
@@ -137,8 +79,37 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
 
             <div style={{display: 'flex', gap: '12px', marginLeft: '16px'}}>
               {/* If there is a closeout acknowledgement, show the approved button with the approved date */}
-              {acknowledgement ? approvedButton(acknowledgement) : approveButton}
-
+              {(!acknowledged) &&
+                (<button
+                  data-cy="closeout-review-approve-button"
+                  type="button"
+                  onClick={onApprove}
+                  style={{
+                    backgroundColor: '#4D72AA',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    minWidth: '136px'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3d5a8a';
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3d5a8a';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = '#4D72AA';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.backgroundColor = '#4D72AA';
+                  }}>
+                  Approve closeout
+                </button>)
+              }
               <button
                   type="button"
                   onClick={onReturn}

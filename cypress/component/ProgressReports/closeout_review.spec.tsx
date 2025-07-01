@@ -76,14 +76,14 @@ describe('CloseoutReview - Component Tests', () => {
     mountComponent();
 
     cy.contains('Please note:')
-      .should('have.css', 'font-weight', '700'); // bold
+        .should('have.css', 'font-weight', '700'); // bold
   });
 
   it('displays explanatory text with normal font weight', () => {
     mountComponent();
 
     cy.contains('If there are issues with the content in this closeout report, please contact the researcher.')
-      .should('have.css', 'font-weight', '400'); // normal
+        .should('have.css', 'font-weight', '400'); // normal
   });
 
   it('displays closeout approve when no acknowledgement exists', () => {
@@ -105,9 +105,7 @@ describe('CloseoutReview - Component Tests', () => {
     cy.stub(User, 'getAcknowledgement').returns(acknowledgement);
     mountComponent();
 
-    // Approved button with approved date should be visible
-    cy.get('[data-cy="closeout-review"]').should('exist');
-    cy.get('[data-cy="closeout-review-approved-button"]').should('exist');
-    cy.contains(now.toISOString().substring(0, 10)).should('exist');
+    // Approve button should not be visible
+    cy.get('[data-cy="closeout-review-approve-button"]').should('not.exist');
   });
 });
