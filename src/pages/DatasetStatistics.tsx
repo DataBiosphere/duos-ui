@@ -94,7 +94,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               }
             ]
           }
-        }}).then(response => response.filter((term: DatasetTerm) => term.datasetIdentifier === datasetIdentifier));
+        }})
 
         if(datasetTerms.length != 1) {
           showError(`Unable to retrieve dataset statistics from server: dataset ${datasetIdentifier} not found.`);
