@@ -5,21 +5,21 @@ import {IconButton} from '@mui/material';
 import { withStyles } from 'tss-react/mui';
 import MenuIcon from '@mui/icons-material/Menu';
 import {Link, withRouter} from 'react-router-dom';
-import {Storage} from '../libs/storage';
+import {Storage} from 'src/libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from './Notification';
-import DuosLogo from '../images/duos-network-logo.svg';
-import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
-import contactUsStandard from '../images/navbar_icon_contact_us.svg';
+import DuosLogo from 'src/images/duos-network-logo.svg';
+import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg';
+import contactUsStandard from 'src/images/navbar_icon_contact_us.svg';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import {isFunction, isNil} from 'lodash/fp';
-import {DAAUtils} from '../utils/DAAUtils';
-import {Auth} from '../libs/auth/auth';
-import SignInButton from '../components/SignInButton';
+import {DAAUtils} from 'src/utils/DAAUtils';
+import {Auth} from 'src/libs/auth/auth';
+import SignInButton from 'src/components/SignInButton';
 
 const styles = {
   drawerPaper: {
