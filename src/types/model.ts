@@ -1,7 +1,6 @@
 import externalAccessIcon from 'src/images/external_access.svg';
 import openAccessIcon from 'src/images/open_access.svg';
 import controlledAccessIcon from 'src/images/controlled_access.svg';
-import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
 
 export type UserRoleName =
   | 'Admin'
@@ -378,8 +377,8 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   validRestriction: boolean;
   progressReportSummary: string;
   intellectualPropertySummary: string;
-  publications?: Array<PublicationOrPresentation>;
-  presentations?: Array<PublicationOrPresentation>;
+  publications?: Array<Publication>;
+  presentations?: Array<Presentation>;
   dmi?: DataManagementIncident;
   researchPlans?: string;
   closeoutSupplement?: Closeout;
@@ -391,8 +390,9 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   cloudProviderDescription: string;
   geneticStudiesOnly: boolean;
   irb: boolean;
-  irbDocumentLocation: string;
-  irbProtocolExpiration: string;
+  irbDocumentLocation?: string;
+  irbDocumentName?: string;
+  irbProtocolExpiration?: string;
   itDirector: string;
   itDirectorEmail: string;
   signingOfficial: string;

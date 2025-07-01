@@ -3,16 +3,10 @@ import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
 import {ConsentError} from 'src/types/responseTypes';
-import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
-import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
-import {
-  DataAccessRequest,
-  DataManagementIncident,
-  Closeout,
-  Presentation,
-  Publication
-} from "src/types/model";
-import {Theme} from "src/libs/theme";
+import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {PublicationOrPresentation} from 'src/components/publications_list/PublicationOrPresentation';
+import {Closeout, CombinedDataAccessRequest, DataManagementIncident, Presentation, Publication} from 'src/types/model';
+import {Theme} from 'src/libs/theme';
 
 interface SubmitProgressReportProps {
   readonly formState: FormState;
@@ -57,7 +51,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const getDataManagementIncidents = (formState: FormState): DataManagementIncident => {
     const dataManagementIncident: DataManagementIncident = {} as DataManagementIncident;
     dataManagementIncident.incidents = []
-    DMI_INCIDENT_KEYS.map((key) => {
+    DMI_INCIDENT_KEYS.forEach((key) => {
       const incident = formState[key] ?? undefined;
       if (incident) {
         dataManagementIncident.incidents.push(key);
@@ -72,7 +66,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const getCloseoutInfo = (formState: FormState): Closeout => {
     const closeout: Closeout = {} as Closeout;
     closeout.reasons = []
-    CLOSEOUT_KEYS.map((key) => {
+    CLOSEOUT_KEYS.forEach((key) => {
       const reason = formState[key] ?? undefined;
       if (reason) {
         closeout.reasons.push(key);
@@ -84,8 +78,8 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     return closeout;
   }
 
-  const convertFormStateToDAR = (formState: FormState): Partial<DataAccessRequest> => {
-    const expectedForm: Partial<DataAccessRequest> = {} as Partial<DataAccessRequest>;
+  const convertFormStateToDAR = (formState: FormState): Partial<CombinedDataAccessRequest> => {
+    const expectedForm: Partial<CombinedDataAccessRequest> = {} as Partial<CombinedDataAccessRequest>;
     expectedForm.progressReportSummary = formState.progressReportSummary;
     if (formState.intellectualPropertyYesNo) {
       expectedForm.intellectualPropertySummary = formState.intellectualPropertySummary;
@@ -106,12 +100,24 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     if (formState.closeoutYesNo) {
       expectedForm.closeoutSupplement = getCloseoutInfo(formState);
     }
+    expectedForm.dsAcknowledgement = formState.dsAcknowledgement;
+    expectedForm.gsoAcknowledgement = formState.gsoAcknowledgement;
+    expectedForm.pubAcknowledgement = formState.pubAcknowledgement;
+    expectedForm.irbDocumentLocation = formState.irbDocumentLocation;
+    expectedForm.irbDocumentName = formState.irbDocumentName;
+    expectedForm.irbProtocolExpiration = formState.irbProtocolExpiration;
+    expectedForm.collaborationLetterLocation = formState.collaborationLetterLocation;
+    expectedForm.collaborationLetterName = formState.collaborationLetterName;
     return expectedForm;
   }
 
   const submit = async () => {
     try {
       const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState));
+      console.log('Submitting progress report with multiPartFormData: ', JSON.stringify(multiPartFormData));
+      console.log('Submitting progress report with convertFormStateToDAR(formState): ', convertFormStateToDAR(formState));
+      console.log('Submitting progress report with formState: ', formState);
+      console.log('parentReferenceId: ', parentReferenceId);
       const submittedPR = await ProgressReport.submitProgressReport(multiPartFormData, parentReferenceId);
       onSuccess(submittedPR);
     } catch (error: unknown) {
@@ -120,7 +126,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   }
 
   // compute multipart/form-data object, includes registration information and all files
-  const createMultiPartFormData = (progressReport: Partial<DataAccessRequest>) => {
+  const createMultiPartFormData = (progressReport: Partial<CombinedDataAccessRequest>) => {
 
     const multiPartFormData = new FormData();
 
