@@ -114,10 +114,6 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const submit = async () => {
     try {
       const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState));
-      console.log('Submitting progress report with multiPartFormData: ', JSON.stringify(multiPartFormData));
-      console.log('Submitting progress report with convertFormStateToDAR(formState): ', convertFormStateToDAR(formState));
-      console.log('Submitting progress report with formState: ', formState);
-      console.log('parentReferenceId: ', parentReferenceId);
       const submittedPR = await ProgressReport.submitProgressReport(multiPartFormData, parentReferenceId);
       onSuccess(submittedPR);
     } catch (error: unknown) {
