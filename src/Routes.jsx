@@ -45,6 +45,7 @@ import DatasetSearch from 'src/pages/DatasetSearch';
 import { StudyUpdateForm } from 'src/pages/StudyUpdateForm';
 import {DAAUtils} from 'src/utils/DAAUtils';
 import EditDac from 'src/pages/manage_dac/EditDac';
+import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants';
 
 const Routes = (props) => (
   <Switch>
@@ -78,6 +79,8 @@ const Routes = (props) => (
     {DAAUtils.isEnabled() &&  <AuthenticatedRoute path='/manage_add_dac_daa' component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
     <AuthenticatedRoute path='/admin_manage_institutions' component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
+    {/*TODO: confirm path*/}
+    <AuthenticatedRoute path='/datasets' component={ControlledAccessGrants} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path='/dar_collection/:collectionId' component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>
     <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
     <AuthenticatedRoute path='/member_console' component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>

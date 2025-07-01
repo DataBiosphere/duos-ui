@@ -132,6 +132,7 @@ export const headerTabsConfig = [
     children: [
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
+      { label: 'Datasets', link: '/datasets' },
       { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
     ],
     isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)

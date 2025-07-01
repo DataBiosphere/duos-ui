@@ -1,8 +1,8 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import SortableTable from '../../components/sortable_table/SortableTable';
-import { User } from '../../libs/ajax/User';
-import { Notifications } from '../../libs/utils';
+import SortableTable from 'src/components/sortable_table/SortableTable';
+import { User } from 'src/libs/ajax/User';
+import { Notifications } from 'src/libs/utils';
 
 const headCells = [
   {
@@ -66,14 +66,14 @@ export default function ControlledAccessGrants() {
       try {
         const userRows = await User.getApprovedDatasets();
         setRows(createRows(userRows));
-      } catch (error) {
+      } catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
       }
     };
     init();
   }, []);
 
-  return <div>
+  return <div style={{ margin: '1rem 5rem' }}>
     <h1
       style={{
         color: '#01549F',

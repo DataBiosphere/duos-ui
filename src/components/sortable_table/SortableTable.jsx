@@ -40,7 +40,6 @@ Step 3: Pass both arrays into the headCells and rows props
 */
 
 import React, {useState, useMemo} from 'react';
-import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -51,6 +50,7 @@ import Paper from '@mui/material/Paper';
 import { ThemeProvider } from '@mui/material/styles';
 import EnhancedTableHead from './EnhancedTableHead';
 import { theme } from './Themes';
+import Box from '@mui/material/Box';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
