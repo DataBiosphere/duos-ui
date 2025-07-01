@@ -8,7 +8,7 @@ import {extractConsentError, extractError} from 'src/utils/ErrorUtils';
 interface CloseoutReviewProps {
   onApprove?: () => void;
   onReturn?: () => void;
-  referenceId?: string;
+  referenceId: string;
 }
 
 export const CloseoutReview: React.FC<CloseoutReviewProps> = ({

@@ -12,7 +12,7 @@ describe('CloseoutReview - Component Tests', () => {
     const defaultProps = {
       onApprove: onApproveSpy,
       onReturn: onReturnSpy,
-      referenceId: undefined,
+      referenceId: 'DAR-UUID',
       ...props
     };
 
@@ -103,7 +103,7 @@ describe('CloseoutReview - Component Tests', () => {
       lastAcknowledged: now.getTime(),
     } as Acknowledgement;
     cy.stub(User, 'getAcknowledgement').returns(acknowledgement);
-    mountComponent({referenceId: 'DAR-UUID'});
+    mountComponent();
 
     // Approved button with approved date should be visible
     cy.get('[data-cy="closeout-review"]').should('exist');
