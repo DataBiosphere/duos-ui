@@ -1,18 +1,11 @@
 import React from 'react';
-import {AxiosError} from 'axios';
 import {ProgressReport} from 'src/libs/ajax/ProgressReport';
 import {Notifications} from 'src/libs/utils';
-import {ConsentError} from 'src/types/responseTypes';
-import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from "src/pages/progress_reports/ProgressReportFormState";
-import {PublicationOrPresentation} from "src/components/publications_list/PublicationOrPresentation";
-import {
-  DataAccessRequest,
-  DataManagementIncident,
-  Closeout,
-  Presentation,
-  Publication
-} from "src/types/model";
-import {Theme} from "src/libs/theme";
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {CombinedDataAccessRequest} from 'src/types/model';
+import {Theme} from 'src/libs/theme';
+import {convertFormStateToDAR} from 'src/utils/DarUtils';
+import {extractError} from 'src/utils/ErrorUtils';
 
 interface SubmitProgressReportProps {
   readonly formState: FormState;
@@ -25,90 +18,6 @@ interface SubmitProgressReportProps {
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const { formState, parentReferenceId, onSuccess, onCancel, disabled} = props;
 
-  const getPublicationList = (formState: FormState): Publication[] => {
-    const publications: PublicationOrPresentation[] = formState.publications ?? [];
-    return publications.map((pub: PublicationOrPresentation) => {
-      const expectedPublication: Publication = {} as Publication;
-      expectedPublication.title = pub.title;
-      expectedPublication.pubmedId = pub.pubmed_id;
-      expectedPublication.date = pub.date;
-      expectedPublication.authors = pub.authors;
-      expectedPublication.bibliographicCitation = pub.bibliographic_citation
-      expectedPublication.datasetCitation = pub.dataset_citation;
-      expectedPublication.citation = pub.did_cite;
-      return expectedPublication;
-    });
-  };
-
-  const getPresentationList = (formState: FormState): Presentation[] => {
-    const presentations: PublicationOrPresentation[] = formState.presentations ?? [];
-    return presentations.map((pub: PublicationOrPresentation) => {
-      const expectedPresentation: Presentation= {} as Presentation;
-      expectedPresentation.title = pub.title;
-      expectedPresentation.date = pub.date;
-      expectedPresentation.authors = pub.authors;
-      expectedPresentation.datasetCitation = pub.dataset_citation;
-      expectedPresentation.citation = pub.did_cite;
-      expectedPresentation.link = pub.link;
-      return expectedPresentation;
-    });
-  };
-
-  const getDataManagementIncidents = (formState: FormState): DataManagementIncident => {
-    const dataManagementIncident: DataManagementIncident = {} as DataManagementIncident;
-    dataManagementIncident.incidents = []
-    DMI_INCIDENT_KEYS.map((key) => {
-      const incident = formState[key] ?? undefined;
-      if (incident) {
-        dataManagementIncident.incidents.push(key);
-      }
-    });
-    dataManagementIncident.description = formState.dmiDescription ?? '';
-
-    return dataManagementIncident;
-  }
-
-
-  const getCloseoutInfo = (formState: FormState): Closeout => {
-    const closeout: Closeout = {} as Closeout;
-    closeout.reasons = []
-    CLOSEOUT_KEYS.map((key) => {
-      const reason = formState[key] ?? undefined;
-      if (reason) {
-        closeout.reasons.push(key);
-      }
-    });
-    closeout.otherText = formState.closeoutOtherText ?? '';
-    closeout.signingOfficialId = formState.closeoutSigningOfficial?.userId;
-
-    return closeout;
-  }
-
-  const convertFormStateToDAR = (formState: FormState): Partial<DataAccessRequest> => {
-    const expectedForm: Partial<DataAccessRequest> = {} as Partial<DataAccessRequest>;
-    expectedForm.progressReportSummary = formState.progressReportSummary;
-    if (formState.intellectualPropertyYesNo) {
-      expectedForm.intellectualPropertySummary = formState.intellectualPropertySummary;
-    }
-    expectedForm.datasetIds = formState.datasetIds ?? [];
-    if (formState.publicationsYesNo) {
-      expectedForm.publications = getPublicationList(formState);
-    }
-    if (formState.presentationsYesNo) {
-      expectedForm.presentations = getPresentationList(formState);
-    }
-    expectedForm.labCollaborators = formState.labCollaborators;
-    expectedForm.internalCollaborators = formState.internalCollaborators;
-    expectedForm.externalCollaborators = formState.externalCollaborators;
-    if (formState.dmiYesNo) {
-      expectedForm.dmi = getDataManagementIncidents(formState);
-    }
-    if (formState.closeoutYesNo) {
-      expectedForm.closeoutSupplement = getCloseoutInfo(formState);
-    }
-    return expectedForm;
-  }
-
   const submit = async () => {
     try {
       const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState));
@@ -120,7 +29,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   }
 
   // compute multipart/form-data object, includes registration information and all files
-  const createMultiPartFormData = (progressReport: Partial<DataAccessRequest>) => {
+  const createMultiPartFormData = (progressReport: Partial<CombinedDataAccessRequest>) => {
 
     const multiPartFormData = new FormData();
 
@@ -142,10 +51,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   }
 
   const handleError = (message: string, error: unknown): void => {
-    const axiosError = error as AxiosError;
-    const consentError = axiosError?.response?.data as ConsentError;
-    const serverError = consentError.message ?? 'Unknown error';
-    Notifications.showError({text: message + serverError});
+    Notifications.showError({text: message + extractError(error)});
   }
   const disabledStyle = {
     backgroundColor: Theme.palette.disabled,

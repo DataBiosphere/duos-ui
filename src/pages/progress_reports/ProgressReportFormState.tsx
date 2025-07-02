@@ -22,6 +22,11 @@ export interface FormState {
     pubAcknowledgement: boolean;
     labCollaborators: Collaborator[];
     internalCollaborators: Collaborator[];
+    irbDocumentLocation?: string;
+    irbDocumentName?: string;
+    irbProtocolExpiration?: string;
+    collaborationLetterLocation?: string;
+    collaborationLetterName?: string;
     externalCollaborators: Collaborator[];
     dmiYesNo: boolean;
     dmiCombination: boolean;

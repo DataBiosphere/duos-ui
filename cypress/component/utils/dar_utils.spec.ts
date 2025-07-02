@@ -1,5 +1,13 @@
-import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
-import { Election, Vote } from 'src/types/model';
+import {
+  convertFormStateToDAR,
+  getApprovedElectionDatasetIds,
+  getCloseoutInfo,
+  getDataManagementIncidents,
+  getPresentationList,
+  getPublicationList
+} from 'src/utils/DarUtils';
+import {Collaborator, Election, Vote} from 'src/types/model';
+import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 
 describe('DarUtils', () => {
   describe('getApprovedElectionDatasetIds', () => {
@@ -168,5 +176,92 @@ describe('DarUtils', () => {
       const result = getApprovedElectionDatasetIds(elections);
       expect(result).to.deep.equal([101, 101]);
     });
+  });
+
+  describe('convertFormStateToDAR', () => {
+    it('should convert FormState to DAR format', () => {
+      const formState = {
+        progressReportSummary: 'Test summary',
+        intellectualPropertyYesNo: true,
+        intellectualPropertySummary: 'IP summary',
+        datasetIds: [1, 2],
+        publicationsYesNo: true,
+        publications: [{
+          title: 'Publication 1',
+          pubmed_id: '12345',
+          date: '2023-01-01',
+          authors: ['Author A'],
+          bibliographic_citation: 'Citation 1',
+          dataset_citation: 'Dataset 1',
+          did_cite: true
+        }],
+        presentationsYesNo: true,
+        presentations: [{
+          title: 'Presentation 1',
+          pubmed_id: '67890',
+          date: '2023-02-01',
+          authors: ['Author B'],
+          bibliographic_citation: 'Citation 2',
+          dataset_citation: 'Dataset 2',
+          did_cite: true
+        }],
+        labCollaborators: [{
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'Collaborator A',
+          title: 'Collaborator Title',
+          uuid: 'collab-uuid',
+        } as Collaborator],
+        internalCollaborators: [{
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'Internal Collaborator A',
+          title: 'Internal Collaborator Title',
+          uuid: 'collab-uuid-internal',
+        } as Collaborator],
+        externalCollaborators: [{
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'External Collaborator A',
+          title: 'External Collaborator Title',
+          uuid: 'collab-uuid-external',
+        } as Collaborator ],
+        dmiYesNo: true,
+        closeoutYesNo: true,
+        dsAcknowledgement: true,
+        gsoAcknowledgement: true,
+        pubAcknowledgement: true,
+        irbDocumentLocation: 'location',
+        irbDocumentName: 'IRB Document',
+        irbProtocolExpiration: '2024-01-01',
+        collaborationLetterLocation: 'collab_location',
+        collaborationLetterName: 'Collaboration Letter'
+      } as unknown as FormState;
+      const result = convertFormStateToDAR(formState);
+      expect(result.progressReportSummary).to.equal(formState.progressReportSummary);
+      expect(result.intellectualPropertySummary).to.equal(formState.intellectualPropertySummary);
+      expect(result.datasetIds).to.equal(formState.datasetIds);
+      expect(result.publications).to.deep.equal(getPublicationList(formState));
+      expect(result.presentations).to.deep.equal(getPresentationList(formState));
+      expect(result.labCollaborators).to.equal(formState.labCollaborators);
+      expect(result.internalCollaborators).to.equal(formState.internalCollaborators);
+      expect(result.externalCollaborators).to.equal(formState.externalCollaborators);
+      expect(result.dmi).to.deep.equal(getDataManagementIncidents(formState));
+      expect(result.closeoutSupplement).to.deep.equal(getCloseoutInfo(formState));
+      expect(result.dsAcknowledgement).to.equal(formState.dsAcknowledgement);
+      expect(result.gsoAcknowledgement).to.equal(formState.gsoAcknowledgement);
+      expect(result.pubAcknowledgement).to.equal(formState.pubAcknowledgement);
+      expect(result.irbDocumentLocation).to.equal(formState.irbDocumentLocation);
+      expect(result.irbDocumentName).to.equal(formState.irbDocumentName);
+      expect(result.irbProtocolExpiration).to.equal(formState.irbProtocolExpiration);
+      expect(result.collaborationLetterLocation).to.equal(formState.collaborationLetterLocation);
+      expect(result.collaborationLetterName).to.equal(formState.collaborationLetterName);
+    })
   });
 });
