@@ -1,4 +1,4 @@
-import React, {ReactNode} from 'react';
+import React, {CSSProperties, ReactNode} from 'react';
 import ReactTooltip from 'react-tooltip';
 import {DatasetTerm} from 'src/types/model';
 
@@ -50,6 +50,7 @@ export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
  * Creates a data use display component with tooltips
  * @param {DatasetTerm} dataset - DatasetTerm object
  * @param {string} divClass - CSS class for the div
+ * @param {CSSProperties} divStyle - CSS style properties for the div
  * @param {string} spanClass - CSS class for the span
  * @param {TooltipPlacement} tooltipPlace - Placement direction for tooltip
  * @returns {ReactNode} - Element displaying data use codes with tooltips
@@ -57,18 +58,20 @@ export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
 export function createDataUseDisplay({
     dataset,
     divClass,
+    divStyle,
     spanClass,
     tooltipPlace = 'right'
 }: {
     dataset: DatasetTerm,
     divClass?: string,
+    divStyle?: CSSProperties,
     spanClass?: string,
     tooltipPlace?: TooltipPlacement
 }): ReactNode {
     const {codesAndDescriptions, codeList} = processDataUseCodes(dataset);
 
     return (
-        <div style={{display: 'inline-block'}} className={divClass}>
+        <div style={divStyle} className={divClass}>
       <span className={spanClass} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>
         {codeList.join(', ')}
       </span>
