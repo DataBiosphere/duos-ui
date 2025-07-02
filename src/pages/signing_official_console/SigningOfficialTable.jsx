@@ -409,7 +409,7 @@ export default function SigningOfficialTable(props) {
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px', marginTop: '1rem'
             })}>
-              Note: NIH DACs are not currently using DUOS to review Data Access Requests (DARs).
+              Note: NIH DACs are not currently using DUOS to review Data Access Requests (DARs). Signing Officials agree to review Library Cards for their institutions annually, and add/remove Library Cards as necessary.
             </div>
           </div>
         </div>
