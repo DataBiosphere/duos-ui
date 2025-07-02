@@ -168,7 +168,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             <LabeledField label={'Participants'}>
                 {datasetTerm.participantCount}
             </LabeledField>
-            <LabeledField label={'Principal Investigator(s)'}>
+            <LabeledField label={'Principal Investigator'}>
                 {datasetTerm.study.piName}
             </LabeledField>
             <LabeledField label={'Data Custodian'}>
