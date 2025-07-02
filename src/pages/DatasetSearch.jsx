@@ -1,9 +1,8 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { Box, CircularProgress } from '@mui/material';
-import { toLower } from 'lodash';
-import { Notifications } from 'src/libs/utils';
-import { DataSet } from 'src/libs/ajax/DataSet';
+import React, {useEffect, useState} from 'react';
+import {Box, CircularProgress} from '@mui/material';
+import {toLower} from 'lodash';
+import {Notifications} from 'src/libs/utils';
+import {DataSet} from 'src/libs/ajax/DataSet';
 import DatasetSearchTable from 'src/components/data_search/DatasetSearchTable';
 import broadIcon from 'src/logo.svg';
 import duosIcon from 'src/images/duos-network-logo.svg';
@@ -24,8 +23,8 @@ import gp2Icon from 'src/images/gp2-logo.svg';
 import asapIcon from 'src/images/asap-logo.svg';
 import gedIcon from 'src/images/ged-logo.png';
 import homeIcon from 'src/images/icon_dataset_.png';
-import { Storage } from 'src/libs/storage';
-import { Metrics } from 'src/libs/ajax/Metrics';
+import {Storage} from 'src/libs/storage';
+import {Metrics} from 'src/libs/ajax/Metrics';
 import eventList from 'src/libs/events';
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
@@ -305,7 +304,7 @@ export const DatasetSearch = (props) => {
     'ged': {
       query: {
         'match_phrase': {
-          'study.description': 'GED'
+          'study.description': 'Eating Disorder Sequencing Program'
         }
       },
       icon: gedIcon,
