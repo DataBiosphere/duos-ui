@@ -25,7 +25,6 @@ describe('ControlledAccessGrants', () => {
     // Check if all the expected table headers are present
     cy.get('table').should('exist');
     cy.contains('th', 'DAR Code').should('be.visible');
-    cy.contains('th', 'Approval Date').should('be.visible');
     cy.contains('th', 'Dataset Identifier').should('be.visible');
     cy.contains('th', 'Dataset Name').should('be.visible');
     cy.contains('th', 'DAC Name').should('be.visible');
@@ -35,14 +34,12 @@ describe('ControlledAccessGrants', () => {
     const mockDatasets = [
       {
         darCode: 'DAR-001',
-        approvalDate: '2025-01-15',
         datasetIdentifier: 'DS-123',
         datasetName: 'Test Dataset 1',
         dacName: 'DAC 1'
       },
       {
         darCode: 'DAR-002',
-        approvalDate: '2025-02-20',
         datasetIdentifier: 'DS-456',
         datasetName: 'Test Dataset 2',
         dacName: 'DAC 2'
@@ -54,13 +51,11 @@ describe('ControlledAccessGrants', () => {
     mount(<ControlledAccessGrants />);
 
     cy.contains('DAR-001').should('be.visible');
-    cy.contains('2025-01-15').should('be.visible');
     cy.contains('DS-123').should('be.visible');
     cy.contains('Test Dataset 1').should('be.visible');
     cy.contains('DAC 1').should('be.visible');
 
     cy.contains('DAR-002').should('be.visible');
-    cy.contains('2025-02-20').should('be.visible');
     cy.contains('DS-456').should('be.visible');
     cy.contains('Test Dataset 2').should('be.visible');
     cy.contains('DAC 2').should('be.visible');

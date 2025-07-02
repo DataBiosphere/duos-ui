@@ -12,12 +12,6 @@ const headCells = [
     label: 'DAR Code',
   },
   {
-    id: 'approvalDate',
-    numeric: false,
-    disablePadding: false,
-    label: 'Approval Date',
-  },
-  {
     id: 'datasetIdentifier',
     numeric: false,
     disablePadding: false,
@@ -37,10 +31,9 @@ const headCells = [
   },
 ];
 
-function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
+function createData(darCode, datasetIdentifier, datasetName, dacName) {
   return {
     darCode,
-    approvalDate,
     datasetIdentifier,
     datasetName,
     dacName
@@ -50,7 +43,6 @@ function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacNa
 function createRows(userRows) {
   return userRows.map((exampleRow) => createData(
     exampleRow.darCode,
-    exampleRow.approvalDate,
     exampleRow.datasetIdentifier,
     exampleRow.datasetName,
     exampleRow.dacName

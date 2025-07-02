@@ -8,7 +8,7 @@ import {Link, withRouter} from 'react-router-dom';
 import {Storage} from 'src/libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
-import { NotificationService } from '../libs/notificationService';
+import { NotificationService } from 'src/libs/notificationService';
 import { Notification } from './Notification';
 import DuosLogo from 'src/images/duos-network-logo.svg';
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg';
