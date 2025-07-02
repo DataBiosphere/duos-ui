@@ -13,11 +13,7 @@ describe('ControlledAccessGrants', () => {
   it('should render the component with correct header and description', () => {
     cy.stub(User, 'getApprovedDatasets').returns(Promise.resolve([]));
 
-    mount(
-      <ThemeProvider theme={theme}>
-        <ControlledAccessGrants />
-      </ThemeProvider>
-    );
+    mount(<ControlledAccessGrants />);
 
     cy.contains('h1', 'Controlled Access Grants').should('be.visible');
     cy.contains('p', 'Your current dataset approvals').should('be.visible');
