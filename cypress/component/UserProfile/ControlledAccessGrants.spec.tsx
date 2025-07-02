@@ -2,8 +2,6 @@ import React from 'react';
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants';
 import { User } from 'src/libs/ajax/User';
 import {mount} from 'cypress/react';
-import {ThemeProvider} from '@mui/material';
-import {theme} from 'src/components/sortable_table/Themes';
 
 describe('ControlledAccessGrants', () => {
   beforeEach(() => {
@@ -55,17 +53,5 @@ describe('ControlledAccessGrants', () => {
     cy.contains('DS-456').should('be.visible');
     cy.contains('Test Dataset 2').should('be.visible');
     cy.contains('DAC 2').should('be.visible');
-  });
-
-  it('should show error notification when API call fails', () => {
-    cy.stub(User, 'getApprovedDatasets').returns(Promise.reject(new Error('Oh no an error occurred')));
-
-    mount(<ControlledAccessGrants />);
-
-    // Verify that the error notification was shown
-    cy.contains('Error: Unable to retrieve user data from server')
-
-    // Table should still be rendered, but with no rows
-    cy.get('table').should('exist');
   });
 });

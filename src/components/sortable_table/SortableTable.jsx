@@ -95,14 +95,14 @@ export default function SortableTable(props) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (_event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
 
-  const handleClick = (event, name) => {
+  const handleClick = (_event, name) => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
@@ -122,7 +122,7 @@ export default function SortableTable(props) {
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (_event, newPage) => {
     setPage(newPage);
   };
 
