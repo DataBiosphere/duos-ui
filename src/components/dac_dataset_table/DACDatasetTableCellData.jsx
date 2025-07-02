@@ -1,8 +1,8 @@
 import React from 'react';
-import style from '../../pages/DACDatasets.module.css';
+import style from 'src/pages/DACDatasets.module.css';
 import {styles} from './DACDatasetConstants';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
-import ReactTooltip from 'react-tooltip';
+import {createDataUseDisplay, processDataUseCodes} from 'src/utils/DataUseUtils.js';
 
 export const consoleTypes = { CHAIR: 'chair' };
 
@@ -72,38 +72,9 @@ export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}
 }
 
 export function dataUseCellData({dataset, label = 'dataUseCellData', divClass = style['cell-data'], spanClass = style['data-use'], cellWidth = styles.cellWidths.dataUse, tooltipPlace = 'right'}) {
-  const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
-    if (dataUse.code === 'OTHER') {
-      return {'code': `OTH1`, 'description': dataUse.description};
-    } else if (dataUse.code === 'DS') {
-      const disease = dataUse.description.substring(dataUse.description.indexOf(':') + 2);
-      return {'code': `${dataUse.code} (${disease})`, 'description': dataUse.description};
-    } else {
-      return {'code': dataUse.code, 'description': dataUse.description};
-    }
-  }) : [];
-  if (dataset.dataUse?.secondary) {
-    dataset.dataUse?.secondary.forEach((dataUse) => {
-      if (dataUse.code === 'OTHER') {
-        codesAndDescriptions.push({'code': `OTH2`, 'description': dataUse.description});
-      } else {
-        codesAndDescriptions.push({'code': dataUse.code, 'description': dataUse.description});
-      }
-    });
-  }
-  const codeList = codesAndDescriptions.map(du => du.code);
-  const display =
-    <div className={divClass}>
-      <span className={spanClass} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>{codeList.join(', ')}</span>
-      <ReactTooltip
-        place={tooltipPlace}
-        effect={'solid'}
-        id={`dataset-data-use-${dataset.datasetId}`}>
-        <ul>{codesAndDescriptions.map((translation, index) => {
-          return <li key={`${translation.code}_s_${index}`}>{translation.code}: {translation.description}</li>;
-        })}</ul>
-      </ReactTooltip>
-    </div>;
+  const { codeList } = processDataUseCodes(dataset);
+  const display = createDataUseDisplay({ dataset, divClass, spanClass, tooltipPlace });
+
   return {
     data: display,
     value: codeList.join(', '),

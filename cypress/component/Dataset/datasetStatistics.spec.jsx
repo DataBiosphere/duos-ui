@@ -1,45 +1,9 @@
 import React from 'react';
 import {mount} from 'cypress/react';
-import DatasetStatistics from '../../../src/pages/DatasetStatistics';
-import dataset from './dataset.json';
-import {DataSet} from '../../../src/libs/ajax/DataSet';
-import {DatasetMetrics} from '../../../src/libs/ajax/DatasetMetrics';
-
-const externalProp = {
-  'propertyId': 9314,
-  'datasetId': 1975,
-  'propertyName': 'Access Management',
-  'propertyValue': 'external',
-  'schemaProperty': 'accessManagement',
-  'propertyType': 'String'
-};
-
-const openProp = {
-  'propertyId': 9314,
-  'datasetId': 1975,
-  'propertyName': 'Access Management',
-  'propertyValue': 'open',
-  'schemaProperty': 'accessManagement',
-  'propertyType': 'String'
-};
-
-const controlledProp = {
-  'propertyId': 9314,
-  'datasetId': 1975,
-  'propertyName': 'Access Management',
-  'propertyValue': 'controlled',
-  'schemaProperty': 'accessManagement',
-  'propertyType': 'String'
-};
-
-const location = {
-  'propertyId': 12657,
-  'datasetId': 1975,
-  'propertyName': 'URL',
-  'propertyValue': 'https://duos.org',
-  'schemaProperty': 'url',
-  'propertyType': 'String'
-};
+import DatasetStatistics from 'src/pages/DatasetStatistics';
+import datasetTerm from './datasetTerm.json';
+import {DataSet} from 'src/libs/ajax/DataSet';
+import {DatasetMetrics} from 'src/libs/ajax/DatasetMetrics';
 
 describe('Dataset Statistics Tests', () => {
 
@@ -48,14 +12,14 @@ describe('Dataset Statistics Tests', () => {
   });
 
   it('Displays Controlled Access Dataset Apply Button', () => {
-    const controlled = Object.assign(dataset, {properties: [controlledProp]});
-    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(controlled));
+    const controlled = {...datasetTerm, accessManagement: 'controlled'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([controlled]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
       match: {
         params: {
-          datasetIdentifier: controlled.datasetIdentifier
+          datasetIdentifier: datasetTerm.datasetIdentifier
         }
       },
       history: {
@@ -65,12 +29,13 @@ describe('Dataset Statistics Tests', () => {
     };
     mount(<DatasetStatistics {...props}/>);
     cy.contains(controlled.datasetIdentifier).should('exist');
+    cy.contains(controlled.datasetName).should('exist');
     cy.contains('Apply for Access').should('exist');
   });
 
   it('Displays External Access Language With Location', () => {
-    const external = Object.assign(dataset, {properties: [externalProp, location]});
-    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(external));
+    const external = {...datasetTerm, accessManagement: 'external', url: 'https://duos.org'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([external]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -86,13 +51,14 @@ describe('Dataset Statistics Tests', () => {
     };
     mount(<DatasetStatistics {...props}/>);
     cy.contains(external.datasetIdentifier).should('exist');
+    cy.contains(external.datasetName).should('exist');
     cy.contains('This dataset is externally managed').should('exist');
     cy.contains('Requests cannot be made via DUOS, but must be made directly').should('exist');
   });
 
   it('Displays External Access Language Without Location', () => {
-    const external = Object.assign(dataset, {properties: [externalProp]});
-    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(external));
+    const external = {...datasetTerm, accessManagement: 'external'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([external]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -108,13 +74,14 @@ describe('Dataset Statistics Tests', () => {
     };
     mount(<DatasetStatistics {...props}/>);
     cy.contains(external.datasetIdentifier).should('exist');
+    cy.contains(external.datasetName).should('exist');
     cy.contains('This dataset is externally managed').should('exist');
     cy.contains('Requests cannot be made via DUOS, but must be made directly').should('not.exist');
   });
 
   it('Displays Open Access Language With Location', () => {
-    const open = Object.assign(dataset, {properties: [openProp, location]});
-    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(open));
+    const open = {...datasetTerm, accessManagement: 'open', url: 'https://duos.org'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([open]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -130,13 +97,14 @@ describe('Dataset Statistics Tests', () => {
     };
     mount(<DatasetStatistics {...props}/>);
     cy.contains(open.datasetIdentifier).should('exist');
+    cy.contains(open.datasetName).should('exist');
     cy.contains('This dataset is open access, does not require an access request').should('exist');
     cy.contains('and can be accessed directly').should('exist');
   });
 
   it('Displays Open Access Language Without Location', () => {
-    const open = Object.assign(dataset, {properties: [openProp]});
-    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(open));
+    const open = {...datasetTerm, accessManagement: 'open'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([open]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -152,18 +120,19 @@ describe('Dataset Statistics Tests', () => {
     };
     mount(<DatasetStatistics {...props}/>);
     cy.contains(open.datasetIdentifier).should('exist');
+    cy.contains(open.datasetName).should('exist');
     cy.contains('This dataset is open access, does not require an access request').should('exist');
     cy.contains('and can be accessed directly').should('not.exist');
   });
 
-  it('displays with no additional properties', () => {
-    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(dataset));
+  it('Displays with no additional properties', () => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
       match: {
         params: {
-          datasetIdentifier: dataset.datasetIdentifier
+          datasetIdentifier: datasetTerm.datasetIdentifier
         }
       },
       history: {
@@ -172,17 +141,26 @@ describe('Dataset Statistics Tests', () => {
       }
     };
     mount(<DatasetStatistics {...props}/>);
-    cy.contains(dataset.datasetIdentifier).should('exist');
+    cy.contains(datasetTerm.datasetIdentifier).should('exist');
   });
 
   it('Displays All Data Custodian Emails', () => {
-    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(dataset));
+    const dataCustodians = ['foo@bar.com', 'bar@baz.com']
+    const datasetWithCustodians = {
+        ...datasetTerm,
+        study: {
+            ...datasetTerm.study,
+          dataCustodianEmail: dataCustodians
+        }
+    };
+
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetWithCustodians]));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
       match: {
         params: {
-          datasetIdentifier: dataset.datasetIdentifier
+          datasetIdentifier: datasetTerm.datasetIdentifier
         }
       },
       history: {
@@ -191,13 +169,105 @@ describe('Dataset Statistics Tests', () => {
       }
     };
     mount(<DatasetStatistics {...props}/>);
-    cy.contains(dataset.datasetIdentifier).should('exist');
     cy.contains('Data Custodian').should('exist');
-    const dataCustodians = dataset.study.properties.find((property) => property.key === 'dataCustodianEmail').value;
-    expect(dataCustodians).to.be.an('array');
-    expect(dataCustodians.length).to.be.greaterThan(0);
     dataCustodians.forEach((dataCustodian) => {
       cy.contains(dataCustodian).should('exist');
     });
+  });
+
+  it('Does not display the Data Use field for open datasets', () => {
+    const open = {...datasetTerm, accessManagement: 'open'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([open]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: open.datasetIdentifier
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('Data Use').should('not.exist');
+  });
+
+  it('Displays the Data Use field for controlled datasets', () => {
+    const controlled = {...datasetTerm, accessManagement: 'controlled'};
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([controlled]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: datasetTerm.datasetIdentifier
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('Data Use').should('exist');
+    cy.contains(datasetTerm.dataUse.primary[0].code).should('exist');
+  });
+
+  it('Displays the Principal Investigator field', () => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: datasetTerm.datasetIdentifier
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('Principal Investigator').should('exist');
+    cy.contains(datasetTerm.study.piName).should('exist');
+  });
+
+  it('Displays DAR section with data', () => {
+    const darsData = [{
+      darCode: 'DAR-123',
+      projectTitle: 'Test Project',
+      updateDate: '2023-01-01',
+      nonTechRus: 'Test summary'
+    }];
+
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({dars: darsData}));
+
+    const props = {
+      match: { params: { datasetIdentifier: datasetTerm.datasetIdentifier }},
+      history: { push() {} }
+    };
+
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('Data Access Requests for this dataset').should('exist');
+    cy.contains('DAR-123').should('exist');
+    cy.contains('Test Project').should('exist');
+  });
+
+  it('Displays message when no DARs exist', () => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({dars: []}));
+
+    const props = {
+      match: { params: { datasetIdentifier: datasetTerm.datasetIdentifier }},
+      history: { push() {} }
+    };
+
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains('No Data Access Requests have been created for this dataset').should('exist');
   });
 });
