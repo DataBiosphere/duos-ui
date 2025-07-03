@@ -161,7 +161,11 @@ export const Navigation = {
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
           : '/';
-    history.push(page);
+    if (history) {
+      history.push(page);
+    } else {
+      window.location = page;
+    }
   },
   console: async (user, history) => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -170,7 +174,11 @@ export const Navigation = {
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
           : '/';
-    history.push(page);
+    if (history) {
+      history.push(page);
+    } else {
+      window.location = page;
+    }
   }
 };
 
