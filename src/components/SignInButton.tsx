@@ -60,13 +60,13 @@ export const SignInButton = (props: SignInButtonProps) => {
     } else {
       // User is authenticated, registered and has accepted ToS: redirect to destination.
       if (isNil(redirectPath)) {
-        await Navigation.back(Storage.getCurrentUser(), history);
+        await Navigation.console(Storage.getCurrentUser(), history);
       } else {
         history.push(redirectPath);
       }
     }
   };
-   
+
   const onSuccess = async (_: OidcUser) => {
     const redirectTo = getRedirectTo();
     const shouldRedirect = shouldRedirectTo(redirectTo);

@@ -154,26 +154,11 @@ export const setUserRoleStatuses = (user, Storage) => {
 };
 
 export const Navigation = {
-  back: async (user, history) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    const page =
-      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
-        : firstConsole ? firstConsole.link
-          : '/';
-    if (history) {
-      history.push(page);
-    } else {
-      window.location = page;
-    }
-  },
   console: async (user, history) => {
     const queryParams = new URLSearchParams(window.location.search);
+    const redirectTo = queryParams?.get('redirectTo');
     const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    const page =
-      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
-        : firstConsole ? firstConsole.link
-          : '/';
+    const page = redirectTo || (firstConsole ? firstConsole.link : '/');
     if (history) {
       history.push(page);
     } else {
