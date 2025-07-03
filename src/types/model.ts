@@ -1,6 +1,7 @@
 import externalAccessIcon from 'src/images/external_access.svg';
 import openAccessIcon from 'src/images/open_access.svg';
 import controlledAccessIcon from 'src/images/controlled_access.svg';
+import {useState} from "react";
 
 export type UserRoleName =
   | 'Admin'
@@ -82,6 +83,16 @@ export interface DacObject {
   updateDate: string;
   chairpersons: DuosUser[];
   members: DuosUser[];
+}
+
+export interface DataAccessAgreement {
+  daaId: number;
+  createUserId: number;
+  createDate: number;
+  updateUserId?: number;
+  updateDate?: number;
+  file?: FileStorageObject;
+  dacs?: DacObject[];
 }
 
 export interface LibraryCard {
