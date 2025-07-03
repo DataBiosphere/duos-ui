@@ -205,6 +205,9 @@ const DataAccessRequestApplication = (props) => {
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
 
   useEffect(() => {
+    console.log('props', props);
+    console.log('existingDarsReadOnlyMode', existingDarsReadOnlyMode);
+    console.log('isAttested', isAttested);
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
     });
@@ -696,14 +699,14 @@ const DataAccessRequestApplication = (props) => {
                   {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
                       datasets={selectedDatasets}
-                      darCode={formData.darCode}
+                      isDraft={props.draftDar}
                       cancelAttest={() => setIsAttested(false)}
                       isAttested={isAttested}
                       attest={attemptSubmit}
                       save={() => setShowDialogSave(true)}
                     /> :
                     <DataUseAgreements
-                      darCode={formData.darCode}
+                      isDraft={props.draftDar}
                       cancelAttest={() => setIsAttested(false)}
                       isAttested={isAttested}
                       attest={attemptSubmit}

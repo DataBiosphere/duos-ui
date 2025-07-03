@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import {isNil} from 'lodash/fp';
-import { Notifications } from '../../libs/utils';
-import { DAA } from '../../libs/ajax/DAA';
+import React, {useEffect, useState} from 'react';
+import {Notifications} from 'src/libs/utils';
+import {DAA} from 'src/libs/ajax/DAA';
 import RequiredDAAs from './RequiredDAAs';
 
 import './dar_application.css';
@@ -11,7 +10,7 @@ export default function DataAccessAgreements(props) {
   const {
     save,
     attest,
-    darCode,
+    isDraft,
     isAttested,
     cancelAttest,
     datasets
@@ -34,9 +33,10 @@ export default function DataAccessAgreements(props) {
 
   const DAADownload = (id, fileName) => {
     return (
-      <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
+      <div className="flex flex-row" style={{justifyContent: 'flex-start'}}>
         <div>
-          <a target="_blank" rel="noreferrer" onClick={() => DAA.getDaaFileById(id, fileName)} className="button button-white" style={{ marginRight: '2rem' }}>
+          <a target="_blank" rel="noreferrer" onClick={() => DAA.getDaaFileById(id, fileName)}
+             className="button button-white" style={{marginRight: '2rem'}}>
             <span className="glyphicon glyphicon-download"></span>
             {' '}
             {fileName}
@@ -70,18 +70,20 @@ export default function DataAccessAgreements(props) {
 
       <RequiredDAAs datasets={datasets} daas={daas} daaDownload={DAADownload}/>
 
-      <div className="flex flex-row" style={{ justifyContent: 'around', paddingTop: '4rem' }}>
-        <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
-          {isNil(darCode) && <a id="btn_attest" onClick={attest} className="button button-blue" disabled={isAttested} style={{ marginRight: '2rem' }}>
+      <div className="flex flex-row" style={{justifyContent: 'around', paddingTop: '4rem'}}>
+        <div className="flex flex-row" style={{justifyContent: 'flex-start'}}>
+          {isDraft && <a id="btn_attest" onClick={attest} className="button button-blue" disabled={isAttested}
+                         style={{marginRight: '2rem'}}>
             Attest
           </a>}
-          {isNil(darCode) && <a id="btn_saveDar" onClick={save} className="button button-white" disabled={isAttested}>
+          {isDraft && <a id="btn_saveDar" onClick={save} className="button button-white" disabled={isAttested}>
             Save
           </a>}
         </div>
-        {isNil(darCode) && isAttested && <a id="btn_cancelAttest" onClick={cancelAttest} style={{ float: 'right' }} className="button button-white">
-          Cancel
-        </a>}
+        {isDraft && isAttested &&
+          <a id="btn_cancelAttest" onClick={cancelAttest} style={{float: 'right'}} className="button button-white">
+            Cancel
+          </a>}
       </div>
     </div>
   );

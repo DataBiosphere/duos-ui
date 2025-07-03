@@ -1,19 +1,19 @@
 import React from 'react';
-import {isNil} from 'lodash/fp';
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 
 import './dar_application.css';
 import {
-  NIHDataUseCertificationAgreement, NIHDataUseCertificationAgreementLink
-} from '../../components/external_docs/NIHDataUseCertificationAgreement.js';
+  NIHDataUseCertificationAgreement,
+  NIHDataUseCertificationAgreementLink
+} from 'src/components/external_docs/NIHDataUseCertificationAgreement.js';
 
 export default function DataUseAgreements(props) {
 
   const {
     save,
     attest,
-    darCode,
+    isDraft,
     isAttested,
     cancelAttest,
   } = props;
@@ -69,18 +69,20 @@ export default function DataUseAgreements(props) {
       </div>
 
 
-      <div className='flex flex-row' style={{ justifyContent: 'around', paddingTop: '4rem' }}>
-        <div className='flex flex-row' style={{ justifyContent: 'flex-start' }}>
-          {isNil(darCode) && <a id='btn_attest' onClick={attest} className='button button-blue' disabled={isAttested} style={{ marginRight: '2rem' }}>
+      <div className="flex flex-row" style={{justifyContent: 'around', paddingTop: '4rem'}}>
+        <div className="flex flex-row" style={{justifyContent: 'flex-start'}}>
+          {isDraft && <a id="btn_attest" onClick={attest} className="button button-blue" disabled={isAttested}
+                         style={{marginRight: '2rem'}}>
             Attest
           </a>}
-          {isNil(darCode) && <a id='btn_saveDar' onClick={save} className='button button-white' disabled={isAttested}>
+          {isDraft && <a id="btn_saveDar" onClick={save} className="button button-white" disabled={isAttested}>
             Save
           </a>}
         </div>
-        {isNil(darCode) && isAttested && <a id='btn_cancelAttest' onClick={cancelAttest} style={{ float: 'right' }} className='button button-white'>
-          Cancel
-        </a>}
+        {isDraft && isAttested &&
+          <a id="btn_cancelAttest" onClick={cancelAttest} style={{float: 'right'}} className="button button-white">
+            Cancel
+          </a>}
       </div>
     </div>
   );
