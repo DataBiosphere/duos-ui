@@ -1,7 +1,8 @@
 import React from 'react';
+import {DAA} from 'src/libs/ajax/DAA.js';
 
 export default function RequiredDAAs(props) {
-  const { datasets, daas, daaDownload } = props;
+  const { datasets, daas } = props;
   const fileNames = new Set();
   const daaDivs = datasets.map((dataset, index) => {
     const datasetDacId = dataset.dacId;
@@ -17,7 +18,21 @@ export default function RequiredDAAs(props) {
     fileNames.add(fileName);
     return (
       <div key={'download-daa-' + index}>
-        {daaDownload(id, fileName)}
+        <div className="flex flex-row" style={{justifyContent: 'flex-start'}}>
+          <div>
+            <button
+              type="button"
+              rel="noreferrer"
+              onClick={() => DAA.getDaaFileById(id, fileName)}
+              className="button button-white"
+              style={{marginRight: '2rem'}}
+            >
+              <span className="glyphicon glyphicon-download"></span>
+              {' '}
+              {fileName}
+            </button>
+          </div>
+        </div>
       </div>
     );
   });
