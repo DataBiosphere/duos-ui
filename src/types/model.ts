@@ -1,7 +1,6 @@
 import externalAccessIcon from 'src/images/external_access.svg';
 import openAccessIcon from 'src/images/open_access.svg';
 import controlledAccessIcon from 'src/images/controlled_access.svg';
-import {useState} from "react";
 
 export type UserRoleName =
   | 'Admin'
