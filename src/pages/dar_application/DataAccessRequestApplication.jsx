@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo';
 import {DataAccessAgreements} from 'src/pages/dar_application/DataAccessAgreements';
-import DataUseAgreements from 'src/pages/dar_application/DataUseAgreements';
+import {DataUseAgreements} from 'src/pages/dar_application/DataUseAgreements';
 import DataAccessRequest from 'src/pages/dar_application/DataAccessRequest';
 import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
