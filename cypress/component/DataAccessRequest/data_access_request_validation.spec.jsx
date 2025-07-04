@@ -15,6 +15,7 @@ const props = {
   match: {
     params: {},
   },
+  draftDar: true,
 };
 
 const user = {
