@@ -1,5 +1,6 @@
 import React from 'react';
 import {DAA} from 'src/libs/ajax/DAA.js';
+import PropTypes from 'prop-types';
 
 export default function RequiredDAAs(props) {
   const { datasets, daas } = props;
@@ -50,4 +51,9 @@ export default function RequiredDAAs(props) {
       </div>
     );
   }
+}
+
+RequiredDAAs.propTypes = {
+  datasets: PropTypes.array.isRequired,
+  daas: PropTypes.array.isRequired
 }
