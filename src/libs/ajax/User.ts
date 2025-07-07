@@ -145,7 +145,7 @@ export const User = {
 
 
   getUserRelevantDatasets: async (): Promise<Dataset[]> => {
-    const url = `${await getApiUrl()}/api/user/me/dac/datasets`;
+    const url = `${await getApiUrl()}/api/user/me/dac/datasets/v2`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
