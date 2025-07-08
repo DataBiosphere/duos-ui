@@ -22,6 +22,7 @@ describe('ControlledAccessGrants', () => {
     cy.contains('th', 'Dataset Identifier').should('be.visible');
     cy.contains('th', 'Dataset Name').should('be.visible');
     cy.contains('th', 'DAC Name').should('be.visible');
+    cy.contains('th', 'Expiration Date').should('be.visible');
   });
 
   it('should display dataset information', () => {
@@ -30,13 +31,15 @@ describe('ControlledAccessGrants', () => {
         darCode: 'DAR-001',
         datasetIdentifier: 'DS-123',
         datasetName: 'Test Dataset 1',
-        dacName: 'DAC 1'
+        dacName: 'DAC 1',
+        expirationDate: 1742014831956
       },
       {
         darCode: 'DAR-002',
         datasetIdentifier: 'DS-456',
         datasetName: 'Test Dataset 2',
-        dacName: 'DAC 2'
+        dacName: 'DAC 2',
+        expirationDate: 1752014831956
       }
     ];
 
@@ -48,10 +51,12 @@ describe('ControlledAccessGrants', () => {
     cy.contains('DS-123').should('be.visible');
     cy.contains('Test Dataset 1').should('be.visible');
     cy.contains('DAC 1').should('be.visible');
+    cy.contains('2025-03-15').should('be.visible');
 
     cy.contains('DAR-002').should('be.visible');
     cy.contains('DS-456').should('be.visible');
     cy.contains('Test Dataset 2').should('be.visible');
     cy.contains('DAC 2').should('be.visible');
+    cy.contains('2025-07-08').should('be.visible');
   });
 });

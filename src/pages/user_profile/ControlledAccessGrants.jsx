@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import SortableTable from 'src/components/sortable_table/SortableTable';
 import { User } from 'src/libs/ajax/User';
-import { Notifications } from 'src/libs/utils';
+import {formatDate, Notifications} from 'src/libs/utils';
 
 const headCells = [
   {
@@ -29,14 +29,21 @@ const headCells = [
     disablePadding: false,
     label: 'DAC Name',
   },
+  {
+    id: 'expirationDate',
+    numeric: false,
+    disablePadding: false,
+    label: 'Expiration Date',
+  }
 ];
 
-function createData(darCode, datasetIdentifier, datasetName, dacName) {
+function createData(darCode, datasetIdentifier, datasetName, dacName, expirationDate) {
   return {
     darCode,
     datasetIdentifier,
     datasetName,
-    dacName
+    dacName,
+    expirationDate
   };
 }
 
@@ -45,7 +52,8 @@ function createRows(userRows) {
     exampleRow.darCode,
     exampleRow.datasetIdentifier,
     exampleRow.datasetName,
-    exampleRow.dacName
+    exampleRow.dacName,
+    formatDate(exampleRow.expirationDate)
   ));
 }
 

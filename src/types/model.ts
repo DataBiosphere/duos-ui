@@ -315,6 +315,7 @@ export interface ApprovedDataset {
   datasetId: number;
   datasetName: string;
   dacName: string;
+  expirationDate: number;
 }
 
 export interface AcknowledgementMap {
