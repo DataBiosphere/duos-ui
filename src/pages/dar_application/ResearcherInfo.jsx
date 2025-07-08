@@ -201,6 +201,7 @@ export default function ResearcherInfo(props) {
             showApproval={true}
             disabled={!isEmpty(darCode) || readOnlyMode}
             countriesOfOperation={countriesOfOperation}
+            readOnly={readOnlyMode}
           />
         </div>
 
@@ -227,6 +228,7 @@ export default function ResearcherInfo(props) {
             onValidationChange={onValidationChange}
             showApproval={false}
             disabled={!isEmpty(darCode) || readOnlyMode}
+            readOnly={readOnlyMode}
           />
         </div>
 
@@ -444,6 +446,7 @@ export default function ResearcherInfo(props) {
             disabled={!isEmpty(darCode) || readOnlyMode}
             validation={validation.externalCollaborators}
             onValidationChange={onValidationChange}
+            readOnly={readOnlyMode}
           />
         </div>
       </div>

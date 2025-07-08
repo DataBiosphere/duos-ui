@@ -31,7 +31,7 @@ describe('CollaboratorList - Component Tests', () => {
         columnsToShow: ['name', 'title', 'email'],
         countriesOfOperation:['France', 'Canada', 'United States of America (the)'],
         onCollaboratorChange: () => { },
-        disabled: false
+        readOnly: false
     };
 
     it('renders the component with a list of collaborators', () => {
@@ -146,21 +146,12 @@ describe('CollaboratorList - Component Tests', () => {
         cy.contains('New Collaborator Information').should('not.exist');
     });
 
-    it('disables the Add button when disabled prop is true', () => {
-        mount(<CollaboratorList {...defaultProps} disabled={true} />);
+    it('disables the Add button when readOnly prop is true', () => {
+        mount(<CollaboratorList {...defaultProps} readOnly={true} />);
 
-        cy.contains('Add Collaborator').should('be.disabled');
-
-        cy.contains('Add Collaborator').click({ force: true });
-
-        cy.contains('New Collaborator Information').should('not.exist');
-    });
-
-    it('passes disabled prop to CollaboratorRow components', () => {
-        mount(<CollaboratorList {...defaultProps} disabled={true} />);
-
-        cy.get('.glyphicon-pencil').parent().should('have.css', 'opacity', '0.5');
-        cy.get('.glyphicon-trash').parent().should('have.css', 'opacity', '0.5');
+        // Button should be visible but disabled
+        cy.contains('Add Collaborator').should('be.visible');
+        cy.get('button').contains('Add Collaborator').should('be.disabled');
     });
 
     it('renders correctly with empty collaborators list', () => {
@@ -214,5 +205,58 @@ describe('CollaboratorList - Component Tests', () => {
 
         cy.contains(mockCollaborators[0].name).should('be.visible');
         cy.contains(`Edit ${mockCollaborators[1].name} Information`).should('be.visible');
+    });
+
+    it('displays view icon instead of edit/delete icons in read-only mode', () => {
+        const readOnlyProps = {
+            ...defaultProps,
+            readOnly: true
+        };
+
+        mount(<CollaboratorList {...readOnlyProps} />);
+
+        // Should show Add button but disabled in read-only mode
+        cy.contains('Add Collaborator').should('be.visible');
+        cy.get('button').contains('Add Collaborator').should('be.disabled');
+
+        // Wait for component to render and check icons
+        cy.get('.collaborator-summary-card').should('have.length', 2);
+        
+        // Should show view icon (eye) instead of edit/delete icons
+        cy.get('.collaborator-summary-card').first().within(() => {
+            cy.get('.glyphicon-eye-open').should('exist');
+            cy.get('.glyphicon-pencil').should('not.exist');
+            cy.get('.glyphicon-trash').should('not.exist');
+        });
+    });
+
+    it('opens read-only collaborator details when view icon is clicked', () => {
+        const readOnlyProps = {
+            ...defaultProps,
+            readOnly: true
+        };
+
+        mount(<CollaboratorList {...readOnlyProps} />);
+
+        // Wait for component to fully render
+        cy.get('.collaborator-summary-card').should('have.length', 2);
+        cy.get('.glyphicon-eye-open').should('exist');
+
+        // Click the view icon
+        cy.get('.glyphicon-eye-open').first().parent('a').click({ force: true });
+
+        // Should open read-only view with correct header
+        cy.contains(`View ${mockCollaborators[0].name} Information`).should('be.visible');
+
+        // Form fields should be disabled
+        cy.get('#name').should('be.disabled');
+        cy.get('#email').should('be.disabled');
+
+        // Within the collaborator form, only Close button should be present (no Add/Save)
+        cy.get('.collaborator-form-card').within(() => {
+            cy.contains('button', 'Save').should('not.exist');
+            cy.contains('button', 'Add').should('not.exist');
+            cy.contains('Close').should('be.visible');
+        });
     });
 });

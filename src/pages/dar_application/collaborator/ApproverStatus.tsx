@@ -1,15 +1,16 @@
-import {FormField, FormFieldTypes, FormValidators} from "src/components/forms/forms";
-import React from "react";
-import {ValidationError} from "src/pages/dar_application/FormValidationState";
+import {FormField, FormFieldTypes, FormValidators} from 'src/components/forms/forms';
+import React from 'react';
+import {ValidationError} from 'src/pages/dar_application/FormValidationState';
 
 type ApproverStatusType = boolean | 'yes' | 'no' | undefined;
 
 interface ApproverStatusProps {
     readonly index: number;
     readonly approverStatus: ApproverStatusType;
+    readonly readOnly?: boolean;
     readonly validation?: ValidationError;
-    readonly onValidationChange?: ({key: string, validator: ValidationError}) => void;
-    readonly onChange: ({key: string, value: ApproverStatusType}) => void;
+    readonly onValidationChange?: (params: {key: string, validator: ValidationError}) => void;
+    readonly onChange: ((params: {key: string, value: ApproverStatusType}) => void) | null;
 }
 export default function ApproverStatus(props: ApproverStatusProps): React.JSX.Element {
     const {index, approverStatus, validation, onValidationChange, onChange} = props;
@@ -37,6 +38,7 @@ export default function ApproverStatus(props: ApproverStatusProps): React.JSX.El
                     {name: 'yes', text: 'Yes'},
                     {name: 'no', text: 'No'}
                 ]}
+                disabled={props.readOnly}
                 validators={[FormValidators.REQUIRED]}
                 orientation='horizontal'
                 defaultValue={calculateDefaultValue}

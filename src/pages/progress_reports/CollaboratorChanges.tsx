@@ -51,7 +51,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         collaboratorText='Internal Lab Staff'
                         columnsToShow={['name', 'title']}
                         onCollaboratorChange={onInternalLabStaffChange}
-                        disabled={readOnly}
+                        readOnly={readOnly}
                         showApproverStatus={true}
                         countriesOfOperation={countriesOfOperation}
                     />
@@ -67,7 +67,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         collaboratorText='Internal Collaborators'
                         columnsToShow={['name', 'title']}
                         onCollaboratorChange={onInternalCollaboratorsChange}
-                        disabled={readOnly}
+                        readOnly={readOnly}
                         countriesOfOperation={countriesOfOperation}
                     />
                 </div>
@@ -82,7 +82,7 @@ export default function CollaboratorChanges(props: CollaboratorProps): React.JSX
                         collaboratorText='External Collaborators'
                         columnsToShow={['name', 'title']}
                         onCollaboratorChange={onExternalCollaboratorsChange}
-                        disabled={readOnly}
+                        readOnly={readOnly}
                         countriesOfOperation={countriesOfOperation}
                     />
                 </div>

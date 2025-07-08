@@ -240,7 +240,12 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                 />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                <CollaboratorChanges readOnly={readOnlyMode} formState={formState} onFormChange={onFormChange} countriesOfOperation={countriesOfOperation}/>
+                <CollaboratorChanges
+                  readOnly={readOnlyMode}
+                  formState={formState}
+                  onFormChange={onFormChange}
+                  countriesOfOperation={countriesOfOperation}
+                />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DataManagementIncident

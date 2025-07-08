@@ -5,6 +5,7 @@ import {ValidationError} from 'src/pages/dar_application/FormValidationState';
 import {computeCollaboratorErrors, validationFailed} from 'src/utils/darFormUtils';
 import {nihAccountLabel} from 'src/utils/ERACommonsUtils';
 import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus';
+import DeleteCollaboratorModal from 'src/pages/dar_application/collaborator/DeleteCollaboratorModal';
 import { Countries } from 'src/libs/ajax/Countries';
 
 interface FormFieldChange {
@@ -18,9 +19,19 @@ interface CollaboratorAddEditProps {
     readonly collaboratorText: string;
     readonly collaborators: Collaborator[];
     readonly closeAction: () => void;
+    readonly deleteAction: () => void;
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
     readonly showApproverStatus?: boolean;
+    readonly readOnly?: boolean;
     readonly countriesOfOperation: string[];
+    // Additional props for DAR application compatibility
+    readonly validation?: Record<string, ValidationError>;
+    readonly onCollaboratorValidationChange?: (params: {
+        index: number;
+        key?: string;
+        validation: ValidationError;
+    }) => void;
+    readonly collaboratorKey?: string;
 }
 
 interface Validation {
@@ -33,10 +44,19 @@ interface Validation {
 }
 
 export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): React.JSX.Element {
-    const { id, collaborator, collaboratorText, collaborators, closeAction, onCollaboratorChange, showApproverStatus = false, countriesOfOperation } = props;
+    const { id, collaborator, collaboratorText, collaborators, closeAction, deleteAction, onCollaboratorChange, showApproverStatus = false, countriesOfOperation, validation: propsValidation, onCollaboratorValidationChange, collaboratorKey } = props;
     const [newCollaborator, setNewCollaborator] = useState<Collaborator>(collaborator);
-    const [validation, setValidation] = useState<Validation>({});
+    const [validation, setValidation] = useState<Validation>(propsValidation || {});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const accountLabel = nihAccountLabel();
+
+    const readOnly = props.readOnly || false;
+
+    // Generate field ID prefix for DAR application compatibility only when collaboratorKey is provided
+    const fieldIdPrefix = (collaboratorKey && id >= 0) ? `${id}_collaborator` : '';
+
+    // Generate button ID for DAR application compatibility
+    const saveButtonId = collaboratorKey ? `collaborator-${collaboratorKey}-add-save` : undefined;
 
     const onChange = ({ key, value }: FormFieldChange) => {
         const setCollaborator = {
@@ -44,73 +64,116 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
             [key]: value
         } as Collaborator;
         setNewCollaborator(setCollaborator);
-        setValidation(computeCollaboratorErrors({collaborator: setCollaborator, needsApproverStatus: showApproverStatus}));
+        const newValidation = computeCollaboratorErrors({collaborator: setCollaborator, needsApproverStatus: showApproverStatus});
+        setValidation(newValidation);
+
+        // Call DAR validation callback if provided
+        if (onCollaboratorValidationChange) {
+            onCollaboratorValidationChange({index: id, key, validation: newValidation[key as keyof Validation] || {}});
+        }
     };
+
+      const sharedProps = readOnly ? {
+        disabled: readOnly,
+      } : {
+        validators: [FormValidators.REQUIRED],
+        onChange,
+        disabled: readOnly,
+      }
+
+    const header = collaborator?.name === undefined
+      ? `New ${collaboratorText} Information`
+      : `${!readOnly ? `Edit` : `View` } ${collaborator.name} Information`;
 
     return (
         <div className='form-group row no-margin'>
             <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card' key={`collaborator-item-id`}>
                 <div className='row'>
-                    <h2>{collaborator?.name === undefined ? `New ${collaboratorText} Information` : `Edit ${collaborator.name} Information`}</h2>
+                    <h2>{header}</h2>
                     <FormField
-                        id='name'
+                        {...sharedProps}
+                        id={fieldIdPrefix ? `${fieldIdPrefix}Name` : 'name'}
+                        name='name'
                         title={`${collaboratorText} Name`}
                         defaultValue={collaborator.name}
                         placeholder='Full Name'
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.name}
                     />
                     <FormField
-                        id='eraCommonsId'
+                        {...sharedProps}
+                        id={fieldIdPrefix ? `${fieldIdPrefix}EraCommonsId` : 'eraCommonsId'}
+                        name='eraCommonsId'
                         title={`${collaboratorText} ${accountLabel} Account`}
                         defaultValue={collaborator.eraCommonsId}
                         placeholder={`${accountLabel} Account`}
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.eraCommonsId}
                     />
                     <FormField
-                        id='title'
+                        {...sharedProps}
+                        id={fieldIdPrefix ? `${fieldIdPrefix}Title` : 'title'}
+                        name='title'
                         title={`${collaboratorText} Title`}
                         defaultValue={collaborator.title}
                         placeholder='Title'
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.title}
                     />
                     <FormField
-                        id='email'
+                        id={fieldIdPrefix ? `${fieldIdPrefix}Email` : 'email'}
+                        name='email'
                         title={`${collaboratorText} Email`}
                         defaultValue={collaborator.email}
                         placeholder='Email'
-                        validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
-                        onChange={onChange}
+                        validators={!readOnly ? [FormValidators.REQUIRED, FormValidators.EMAIL] : []}
                         validation={validation.email}
+                        disabled={readOnly}
+                        {...(!readOnly ? { onChange } : {})}
                     />
                     <FormField
-                        id='countryOfOperation'
+                        {...sharedProps}
+                        id={fieldIdPrefix ? `${fieldIdPrefix}CountryOfOperation` : 'countryOfOperation'}
+                        name='countryOfOperation'
                         title={`${collaboratorText} Country of Operation`}
                         type={FormFieldTypes.SELECT}
                         optionsAreString={true}
                         selectOptions={countriesOfOperation}
                         defaultValue={collaborator.countryOfOperation}
                         placeholder='Country of Operation'
-                        validators={[FormValidators.REQUIRED]}
-                        onChange={onChange}
                         validation={validation.countryOfOperation}
                     />
                     {showApproverStatus && (
                     <ApproverStatus
                         index={id}
                         approverStatus={newCollaborator?.approverStatus}
+                        readOnly={readOnly}
                         validation={validation.approverStatus}
-                        onChange={onChange}/>
+                        onChange={(!readOnly ? ({ key: _key, value }: { key: string; value: boolean | 'yes' | 'no' | undefined }) => {
+                            onChange({ key: 'approverStatus', value: String(value || '') });
+                        } : null)}/>
                     )}
                 </div>
                 <div className='row' style={{ marginTop: 20 }}>
+                    {/* delete button for existing collaborators in DAR mode */}
+                    {!readOnly && collaboratorKey && id >= 0 && collaborator?.name && (
+                        <a
+                            id={`${id}_deleteMember`}
+                            onClick={() => setShowDeleteModal(true)}
+                            style={{ verticalAlign: 'middle', lineHeight: '4rem', float: 'right' }}
+                        >
+                            <span
+                                className='collaborator-delete-icon glyphicon glyphicon-trash'
+                                aria-hidden='true'
+                                data-tip='Delete dataset'
+                                data-for='tip_delete'
+                            />
+                            <span style={{ marginLeft: '1rem', color: '#0948B7', verticalAlign: 'middle' }}>
+                                Delete this entry
+                            </span>
+                        </a>
+                    )}
                     {/* add/save button */}
+                    {!readOnly && (
                     <button
+                        id={saveButtonId}
                         className='collaborator-form-add-save-button f-left btn'
                         type='button'
                         onClick={() => {
@@ -129,15 +192,31 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                     >
                         {collaborator?.name === undefined ? 'Add' : 'Save'}
                     </button>
-                    {/* cancel button */}
+                    )}
+                    {/* cancel/close button */}
                     <div
                         className='collaborator-form-cancel-button f-left btn'
                         role='button'
                         onClick={closeAction}
                     >
-                        Cancel
+                        {readOnly ? 'Close' : 'Cancel'}
                     </div>
                 </div>
+                {/* Delete Modal */}
+                {showDeleteModal && (
+                    <DeleteCollaboratorModal
+                        showDelete={showDeleteModal}
+                        closeDelete={() => setShowDeleteModal(false)}
+                        header='Delete Entry'
+                        title={<div>Are you sure you want to delete <strong>{newCollaborator?.name}</strong>?</div>}
+                        message={<div><i>This action is permanent and cannot be undone.</i></div>}
+                        onConfirm={() => {
+                            deleteAction();
+                            setShowDeleteModal(false);
+                            closeAction();
+                        }}
+                    />
+                )}
             </div>
         </div>
     )

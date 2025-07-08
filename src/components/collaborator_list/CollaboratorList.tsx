@@ -9,13 +9,26 @@ interface CollaboratorListProps {
     readonly collaboratorText: string;
     readonly columnsToShow?: string[];
     readonly onCollaboratorChange: (collaborators: Collaborator[]) => void;
-    readonly disabled?: boolean;
+    readonly readOnly?: boolean;
     readonly showApproverStatus?: boolean;
     readonly countriesOfOperation: string[];
 }
 
 export default function CollaboratorList(props: CollaboratorListProps): React.JSX.Element {
-    const { collaborators, collaboratorText, columnsToShow = [], onCollaboratorChange, disabled = false, showApproverStatus = false, countriesOfOperation } = props;
+    const {
+      collaborators,
+      collaboratorText,
+      columnsToShow = [],
+      onCollaboratorChange,
+      readOnly = false,
+      showApproverStatus = false,
+      countriesOfOperation
+    } = props;
+
+    // Only add email and eraCommonsId as defaults when columnsToShow is empty or undefined
+    const columnsToShowWithDefaults = columnsToShow.length > 0
+        ? columnsToShow
+        : ['name', 'title', 'email', 'eraCommonsId'];
 
     const [showAddEdit, setShowAddEdit] = useState(false);
     const [editState, setEditState] = useState(collaborators.map(() => false));
@@ -41,10 +54,14 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                     style={{
                         marginTop: 25,
                         marginBottom: 5,
-                        ...(disabled ? { cursor: 'not-allowed' } : {}),
+                        ...(readOnly ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
                     }}
-                    onClick={() => !disabled && setShowAddEdit(true) }
-                    disabled={disabled}
+                    onClick={() => {
+                        if (!readOnly) {
+                            setShowAddEdit(true);
+                        }
+                    }}
+                    disabled={readOnly}
                 >
                     Add {collaboratorText}
                 </button>
@@ -55,9 +72,11 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         collaborators={collaborators}
                         collaborator={{countryOfOperation: Countries.DEFAULT_COUNTRY} as Collaborator}
                         closeAction={() => setShowAddEdit(false)}
+                        deleteAction={() => {}} // Empty function since this is for adding, not editing
                         onCollaboratorChange={onCollaboratorChange}
                         showApproverStatus={showApproverStatus}
                         countriesOfOperation={countriesOfOperation}
+                        readOnly={readOnly}
                     />
                 )}
             </div>
@@ -67,16 +86,17 @@ export default function CollaboratorList(props: CollaboratorListProps): React.JS
                         key={index}
                         id={index}
                         editMode={editState[index]}
+                        readOnly={readOnly}
                         collaborator={collaborator}
                         collaboratorText={collaboratorText}
                         collaborators={collaborators}
-                        columnsToShow={columnsToShow}
+                        columnsToShow={columnsToShowWithDefaults}
                         countriesOfOperation={countriesOfOperation}
+                        showApproverStatus={showApproverStatus}
                         editAction={() => toggleEditState(index)}
                         deleteAction={() => { handleDeleteCollaborator(index); }}
                         closeAction={() => { toggleEditState(index); setShowAddEdit(false); }}
                         onCollaboratorChange={onCollaboratorChange}
-                        disabled={disabled}
                     />
                 })}
             </div>
