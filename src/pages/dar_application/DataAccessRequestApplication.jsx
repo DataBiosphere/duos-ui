@@ -378,7 +378,6 @@ const DataAccessRequestApplication = (props) => {
       internalCollaboratorsCompleted,
       externalCollaboratorsCompleted,
     });
-    console.log('validation', validation);
     setFormValidation(validation);
 
     const hasLibraryCard = !isNil(researcher.libraryCard);
