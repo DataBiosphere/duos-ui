@@ -151,7 +151,7 @@ export default function DucAddendum(props) {
       });
 
       return (
-        <Fragment key='duc-addendum-bucket'>
+        <Fragment key={`duc-addendum-bucket-${dataUseCodes}`}>
           <Fragment key='duc-addendum-column-headers'>
             <SimpleTable
               isLoading={isLoading}

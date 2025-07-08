@@ -1,14 +1,14 @@
-/* eslint-disable no-undef */
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo';
-import { User } from '../../../src/libs/ajax/User';
+import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo';
+import { User } from 'src/libs/ajax/User.js';
 
 import {BrowserRouter} from 'react-router-dom';
 
 const props = {
   allSigningOfficials: [],
   completed: true,
+  countriesOfOperation:['United States of America (the)', 'France', 'Canada'],
   darCode: undefined,
   eRACommonsDestination: undefined,
   formFieldChange: () => {},
@@ -19,7 +19,7 @@ const props = {
   setLabCollaboratorsCompleted: () => {},
   setInternalCollaboratorsCompleted: () => {},
   setExternalCollaboratorsCompleted: () => {},
-  researcher: {},
+  researcher: {displayName: 'Researcher Name', email: 'name@email.com'},
   showValidationMessages: false,
   nextPage: () => {},
   validation: {},
@@ -31,24 +31,24 @@ const props = {
     internalCollaborators: [],
     externalCollaborators: [],
     labCollaborators: [],
+    piName: 'PI Name',
+    piEmail: 'pi@email.com'
   }
 };
 
-const researcherWithLibraryCards = {
-  libraryCards: [
-    {
-      'id': 1,
-      'userId': 1,
-      'institutionId': 150,
-      'eraCommonsId': 'user',
-      'userName': 'User',
-      'userEmail': 'email',
-      'institution': {
-        'id': 150,
-        'name': 'The Broad Institute of MIT and Harvard',
-      }
+const researcherWithLibraryCard = {
+  libraryCard: {
+    'id': 1,
+    'userId': 1,
+    'institutionId': 150,
+    'eraCommonsId': 'user',
+    'userName': 'User',
+    'userEmail': 'email',
+    'institution': {
+      'id': 150,
+      'name': 'The Broad Institute of MIT and Harvard',
     }
-  ]
+  }
 };
 
 const addNewCollaborator = (collaboratorType) => {
@@ -93,14 +93,14 @@ describe('Researcher Info', () => {
   });
 
   it('renders the profile submitted alert', () => {
-    const mergedProps = {...props, ...{completed: true, researcher: researcherWithLibraryCards}};
+    const mergedProps = {...props, ...{completed: true, researcher: researcherWithLibraryCard}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible');
     cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist');
   });
 
   it('renders the profile unsubmitted alert', () => {
-    const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCards}};
+    const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCard}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('be.visible');
     cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible');
@@ -203,5 +203,21 @@ describe('Researcher Info', () => {
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('not.exist');
+  });
+
+  it('renders researcher and pi as disabled with pi fields populated with the researcher data when not in read only mode', () => {
+    mount(<WrappedResearcherInfo {...props}/>);
+    cy.get('#researcherName').should('have.value', props.researcher.displayName);
+    cy.get('#piName').should('have.value', props.researcher.displayName);
+    cy.get('#piEmail').should('have.value', props.researcher.email);
+  });
+
+  it('renders researcher and pi as disabled with pi fields populated with saved pi info in read only mode', () => {
+    const mergedProps = {...props, ...{readOnlyMode: true, eraCommonsId: 'scoobydoo'}};
+    mount(<WrappedResearcherInfo {...mergedProps}/>);
+    cy.get('#researcherName').should('have.value', props.researcher.displayName);
+    cy.get('#piName').should('have.value', props.formData.piName);
+    cy.get('#piEmail').should('have.value', props.formData.piEmail);
+    cy.get('[data-cy=era-commons-display-id-value]').should('have.text', 'scoobydoo')
   });
 });

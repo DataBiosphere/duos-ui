@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
-import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
+import React from 'react';
+import {DataSet} from '../../libs/ajax/DataSet';
+import {DAR} from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import {
-  needsDsAcknowledgement,
-  needsPubAcknowledgement,
   needsIrbApprovalDocument,
   needsCollaborationLetter,
-  needsGsoAcknowledgement,
   newIrbDocumentExpirationDate,
 } from '../../utils/darFormUtils';
 import SelectableDatasets from './SelectableDatasets';
 import {DAAUtils} from '../../utils/DAAUtils';
+import {DuosDatePicker} from '../../components/DuosDatePicker.js';
+import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements.js';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
+const noTopMarginStyle = { marginTop: '0', paddingTop: '0' };
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -60,7 +61,7 @@ const searchDatasets = (query, callback, currentDatasets) => {
         ... ds
       };
     });
-    let options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
+    const options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
       return formatSearchDataset(item);
     });
     callback(options);
@@ -97,7 +98,7 @@ export default function DataAccessRequest(props) {
     includeInstructions,
     formValidationChange,
     ariaLevel = 2,
-    draftDar
+    _draftDar
   } = props;
 
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
@@ -112,7 +113,7 @@ export default function DataAccessRequest(props) {
   };
 
   const primaryChange = ({key, value}) => {
-    let newFormData = {
+    const newFormData = {
       diseases: null,
       hmb: null,
       poa: null,
@@ -121,7 +122,7 @@ export default function DataAccessRequest(props) {
     };
 
     // ensure that non visible fields are unselected
-    for (var key0 in newFormData) {
+    for (const key0 in newFormData) {
       if (key === key0) {
         newFormData[key0] = value;
         break;
@@ -141,8 +142,7 @@ export default function DataAccessRequest(props) {
   return (
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
-      <div className={'dar-step-card'}>
-        <h2>Step 2: Data Access Request</h2>
+      <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
 
         {DAAUtils.isEnabled() ?
           <div>
@@ -162,7 +162,7 @@ export default function DataAccessRequest(props) {
             isAsync={true}
             isMulti={true}
             title={'2.1 Select Dataset(s)'}
-            titleStyle={titleStyle}
+            titleStyle={readOnlyMode ? {...titleStyle, ...noTopMarginStyle} : titleStyle}
             validators={[FormValidators.REQUIRED]}
             validation={validation.datasetIds}
             onValidationChange={onValidationChange}
@@ -225,9 +225,9 @@ export default function DataAccessRequest(props) {
               </p>
             </>
           }
-          placeholder={'Please limit your RUS to 2200 characters.'}
+          placeholder={`Please limit your RUS to ${FORM_TEXT_AREA_MAX_LENGTH} characters.`}
           rows={6}
-          maxLength={2200}
+          maxLength={FORM_TEXT_AREA_MAX_LENGTH}
           ariaLevel={ariaLevel + 3}
           defaultValue={formData.rus}
           validation={validation.rus}
@@ -344,56 +344,16 @@ export default function DataAccessRequest(props) {
           onChange={onChange}
         />
 
-        {(needsGsoAcknowledgement(datasets) || needsDsAcknowledgement(dataUseTranslations) || needsPubAcknowledgement(datasets)) &&
-            <FormFieldTitle
-              id={'dataUseAcknowledgements'}
-              key={'dataUseAcknowledgements'}
-              title={'2.5 Data Use Acknowledgements'}
-              description={includeInstructions ? 'Please confirm listed acknowledgements and/or document requirements below:' : ''}
-            />
-        }
-
-        {needsGsoAcknowledgement(datasets) &&
-            <FormField
-              id={'gsoAcknowledgement'}
-              key={'gsoAcknowledgement'}
-              disabled={readOnlyMode}
-              type={FormFieldTypes.CHECKBOX}
-              toggleText={'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.'}
-              defaultValue={formData.gsoAcknowledgement}
-              onChange={onChange}
-              validation={validation.gsoAcknowledgement}
-              onValidationChange={onValidationChange}
-            />
-        }
-
-        {needsPubAcknowledgement(datasets) &&
-            <FormField
-              id={'pubAcknowledgement'}
-              key={'pubAcknowledgement'}
-              disabled={readOnlyMode}
-              type={FormFieldTypes.CHECKBOX}
-              toggleText={'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'}
-              defaultValue={formData.pubAcknowledgement}
-              validation={validation.pubAcknowledgement}
-              onValidationChange={onValidationChange}
-              onChange={onChange}
-            />
-        }
-
-        {needsDsAcknowledgement(dataUseTranslations) &&
-            <FormField
-              id={'dsAcknowledgement'}
-              key={'dsAcknowledgement'}
-              disabled={readOnlyMode}
-              type={FormFieldTypes.CHECKBOX}
-              toggleText={'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum'}
-              defaultValue={formData.dsAcknowledgement}
-              validation={validation.dsAcknowledgement}
-              onValidationChange={onValidationChange}
-              onChange={onChange}
-            />
-        }
+        <DataUseAcknowledgements
+          title={'2.5 Data Use Acknowledgements'}
+          datasets={datasets}
+          dataUseTranslations={dataUseTranslations}
+          formData={formData}
+          readOnlyMode={readOnlyMode}
+          onChange={onChange}
+          onValidationChange={onValidationChange}
+          validation={validation}
+          />
 
         {needsIrbApprovalDocument(datasets) &&
                     <FormFieldTitle
@@ -415,11 +375,14 @@ export default function DataAccessRequest(props) {
                         onValidationChange={onValidationChange}
                         onChange={({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
                       />
-                      <FormField
-                        key={'irbProtocolExpiration'}
-                        readOnly={true}
+                      <div style={{marginTop: 12}}>Expiration Date:</div>
+                      <DuosDatePicker
+                        disabled={readOnlyMode}
                         id={'irbProtocolExpiration'}
-                        defaultValue={`IRB Expires on ${irbProtocolExpiration}`}
+                        defaultValue={irbProtocolExpiration}
+                        onChange={(value) => {
+                          onChange({key: 'irbProtocolExpiration', value});
+                        }}
                       />
                     </div>
         }

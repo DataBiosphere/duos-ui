@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 describe('About', function() {
 
   it('About page loads from home - Desktop', function() {

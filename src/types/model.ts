@@ -1,7 +1,6 @@
-import { DuosUserResponse } from './responseTypes';
-import externalAccessIcon from '../images/external_access.svg';
-import openAccessIcon from '../images/open_access.svg';
-import controlledAccessIcon from '../images/controlled_access.svg';
+import externalAccessIcon from 'src/images/external_access.svg';
+import openAccessIcon from 'src/images/open_access.svg';
+import controlledAccessIcon from 'src/images/controlled_access.svg';
 
 export type UserRoleName =
   | 'Admin'
@@ -28,12 +27,10 @@ export interface UserStatusInfo {
 }
 
 export interface UserProperty {
-  eraAuthorized: string;
-  eraExpiration: string;
-  suggestedInstitution: string;
-  suggestedSigningOfficial: string;
-  selectedSigningOfficial: string;
-  daaAcceptance: string;
+  propertyId: number
+  userId: number;
+  propertyKey: string;
+  propertyValue: string;
 }
 
 export interface DuosUser {
@@ -41,6 +38,8 @@ export interface DuosUser {
   displayName: string;
   email: string;
   emailPreference: boolean;
+  eraCommonsId?: string;
+  institutionId?: number;
   isAdmin: boolean;
   isAlumni: boolean;
   isChairPerson: boolean;
@@ -48,11 +47,11 @@ export interface DuosUser {
   isMember: boolean;
   isResearcher: boolean;
   isSigningOfficial: boolean;
-  libraryCards: LibraryCard[];
-  researcherProperties: UserProperty[];
+  libraryCard?: LibraryCard;
+  properties?: UserProperty[];
   roles: UserRole[];
   userId: number;
-  userStatusInfo: UserStatusInfo;
+  userStatusInfo?: UserStatusInfo;
 }
 
 export interface SimplifiedDuosUser {
@@ -61,18 +60,38 @@ export interface SimplifiedDuosUser {
   email: string;
 }
 
+export interface DAAObject {
+  // Define the shape of a DAA object as needed
+  daaId: number;
+  createUserId: number;
+  createDate: string;
+  updateUserId: number;
+  updateDate: string;
+  initialDacId: number;
+  file: FileStorageObject;
+  dacs: Array<DacObject>;
+}
+
+export interface DacObject {
+  dacId: number;
+  name: string;
+  description: string;
+  email: string;
+  associatedDaa: DAAObject;
+  createDate: string;
+  updateDate: string;
+  chairpersons: DuosUser[];
+  members: DuosUser[];
+}
+
 export interface LibraryCard {
   id: number;
   userId: number;
-  institution: Institution;
-  institutionId: number;
-  eraCommonsId: string;
   userName: string;
   userEmail: string;
-  createDate: string;
+  createDate: Date;
   createUserId: number;
-  updateDate: string;
-  updateUserId: number;
+  daaIds?: number[];
 }
 
 export type OrganizationType = 'For-Profit' | 'Nonprofit';
@@ -97,23 +116,26 @@ export interface Institution {
 
 export interface Dataset {
   name: string;
-  datasetName: string;
+  // @deprecated datasetName is deprecated, use name instead
+  datasetName?: string;
   datasetId: number;
   createUserId: number;
-  createUser: DuosUserResponse;
-  dacId: string;
-  consentId: string;
+  createUser: DuosUser;
+  createDate: Date;
+  dacId: number;
   translatedDataUse: string;
   deletable: boolean;
   properties: DatasetProperty[];
   study: Study;
-  alias: string;
+  alias: number;
   datasetIdentifier: string;
-  objectId: string;
+  objectId?: string;
   dataUse: DataUse;
-  dacApproval: boolean;
-  nihCertificationFile: FileStorageObject;
-  alternativeDataSharingPlanFile: FileStorageObject;
+  dacApproval?: boolean;
+  nihCertificationFile?: FileStorageObject;
+  updateUserId?: number;
+  updateDate?: Date;
+  indexedDate?: Date;
 }
 
 interface DacTerm {
@@ -177,11 +199,12 @@ export interface DatasetTerm {
   submitter: UserTerm;
   updateUser: UserTerm;
   dac: DacTerm;
+  piName: string;
 }
 
 export interface AccessManagementSummary {
   name: string;
-  icon: unknown;
+  icon: string;
   description: string;
 }
 
@@ -280,11 +303,11 @@ export interface FileStorageObject {
   mediaType: string;
   createUserId: number;
   createDate: number;
-  updateUserId: number;
-  updateDate: number;
-  deleteUserId: number;
-  deleteDate: number;
-  deleted: boolean;
+  updateUserId?: number;
+  updateDate?: number;
+  deleteUserId?: number;
+  deleteDate?: number;
+  deleted?: boolean;
 }
 
 export interface ApprovedDataset {
@@ -308,22 +331,25 @@ export interface Acknowledgement {
 
 export interface DatasetStats {
   dataset: Dataset;
-  dars: Array<DataAccessRequest>;
+  dars: Array<DatasetStatisticsDar>;
   elections: Array<Election>;
 }
 
-export interface DataAccessRequest {
-  referenceId: string;
-  userId: number;
-  createDate: string;
-  sortDate: string;
-  submissionDate: string;
-  updateDate: string;
-  draft: boolean;
-  darCode: string;
-  elections: Array<Election>;
+export interface DatasetStatisticsDar {
+  updateDate: number;
   projectTitle: string;
-  datasetIds: number[];
+  darCode: string;
+  nonTechRus: string;
+  referenceId: string;
+}
+
+/**
+ * This interface combines the DataAccessRequest with all fields from the DataAccessRequestData object stored
+ * in DataAccessRequest.data field. This model simplifies usages in ProgressReport forms.
+ */
+export interface CombinedDataAccessRequest extends DataAccessRequest {
+  projectTitle: string;
+  checkNihDataOnly: boolean;
   rus: string;
   nonTechRus: string;
   diseases: boolean;
@@ -347,6 +373,16 @@ export interface DataAccessRequest {
   notHealth: boolean;
   hmb: boolean;
   poa: boolean;
+  status: string;
+  darCode: string;
+  validRestriction: boolean;
+  progressReportSummary: string;
+  intellectualPropertySummary: string;
+  publications?: Array<Publication>;
+  presentations?: Array<Presentation>;
+  dmi?: DataManagementIncident;
+  researchPlans?: string;
+  closeoutSupplement?: Closeout;
   anvilUse: boolean;
   cloudUse: boolean;
   localUse: boolean;
@@ -355,33 +391,61 @@ export interface DataAccessRequest {
   cloudProviderDescription: string;
   geneticStudiesOnly: boolean;
   irb: boolean;
-  irbDocumentLocation: string;
-  irbProtocolExpiration: string;
+  irbDocumentLocation?: string;
+  irbDocumentName?: string;
+  irbProtocolExpiration?: string;
+  itDirector: string;
+  itDirectorEmail: string;
+  signingOfficial: string;
+  signingOfficialEmail: string;
+  publication: boolean;
+  collaboration: boolean;
+  collaborationLetterLocation?: string;
+  collaborationLetterName?: string;
+  forensicActivities?: boolean;
+  sharingDistribution?: boolean;
+  labCollaborators?: Array<Collaborator>;
+  internalCollaborators?: Array<Collaborator>;
+  externalCollaborators?: Array<Collaborator>;
   dsAcknowledgement: boolean;
   gsoAcknowledgement: boolean;
   pubAcknowledgement: boolean;
-  itDirector: string;
-  signingOfficial: string;
-  publication: boolean;
-  collaboration: boolean;
-  collaborationLetterLocation: string;
-  forensicActivities: boolean;
-  sharingDistribution: boolean;
-  externalCollaborators: Array<Collaborator>;
-  internalCollaborators: Array<Collaborator>;
-  labCollaborators: Array<Collaborator>;
-  progressReportSummary: string;
-  intellectualPropertySummary: string;
-  publications: Array<Publication>;
-  presentations: Array<Presentation>;
-  dataManagementIncident: DataManagementIncident;
-  researchPlans: string;
-  closeOutSupplement: 'PROJECT_COMPLETED' | 'REQUESTOR_MOVED_INSTITUTION' | 'PROJECT_TRANSFERRED' | 'PROJECT_SUPERSEDED';
+  piName: string;
+  piEmail: string;
+  piCountryOfOperation: string;
+}
+
+export interface DataAccessRequest {
+  id: number;
+  referenceId: string;
+  collectionId: number;
+  parentId?: number;
+  data: object;
+  draft: boolean;
+  progressReport: boolean;
+  expired: boolean;
+  expiresAt: number;
+  userId: number;
+  createDate: number;
+  sortDate: number;
+  submissionDate: number;
+  updateDate: number;
+  datasetIds: number[];
+  elections: Record<number, Election>;
+  eraCommonsId: string;
+  closeoutSigningOfficialApprovedDate: number;
+  closeoutSigningOfficialApprovedUserId: number;
 }
 
 export interface DataManagementIncident {
   incidents: string[];
   description: string;
+}
+
+export interface Closeout {
+  reasons: string[];
+  otherText: string;
+  signingOfficialId: number;
 }
 
 export interface Presentation {
@@ -390,7 +454,7 @@ export interface Presentation {
   date: string;
   authors: string;
   datasetCitation: string;
-  citation: string;
+  citation: boolean;
 }
 
 export interface Publication {
@@ -400,16 +464,17 @@ export interface Publication {
   authors: string;
   bibliographicCitation: string;
   datasetCitation: string;
-  citation: string;
+  citation: boolean;
 }
 
 export interface Collaborator {
   approverStatus: boolean;
+  countryOfOperation: string;
   email: string;
   eraCommonsId: string;
   name: string;
-  title: number;
-  uuid: number;
+  title: string
+  uuid: string;
 }
 
 export interface Election {

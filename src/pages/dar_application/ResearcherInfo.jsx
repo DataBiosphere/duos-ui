@@ -1,15 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import {Alert} from '../../components/Alert';
+import {Alert} from 'src/components/Alert';
 import {Link} from 'react-router-dom';
-import ERACommons from '../../components/ERACommons';
+import ERACommons from 'src/components/era_commons/ERACommons';
 import CollaboratorList from './collaborator/CollaboratorList';
-import {isEmpty, isNil, get} from 'lodash/fp';
-import {FormField, FormValidators, FormFieldTypes} from '../../components/forms/forms';
+import {isEmpty, isNil} from 'lodash/fp';
+import {FormField, FormValidators, FormFieldTypes} from 'src/components/forms/forms';
 import './dar_application.css';
-import {nihAccountLabel, nihAccountInstructions} from '../../utils/ERACommonsUtils.js';
+import {nihAccountLabel, nihAccountInstructions} from 'src/utils/ERACommonsUtils';
+import {
+  ERACommonsDisplay
+} from '../../components/era_commons/ERACommonsDisplay';
 
 const linkStyle = {color: '#2FA4E7'};
 const titleStyle = {fontSize: '24px', fontWeight: 500, color: '#333333'};
+const noTopMarginStyle = {marginTop: 0, paddingTop: 0};
 const profileLink = <Link to="/profile" style={linkStyle}>Your Profile</Link>;
 const profileUnsubmitted = <span>Please submit {profileLink} to be able to create a Data Access Request</span>;
 const profileSubmitted = <span>Please make sure {profileLink} is updated as it will be used to pre-populate parts of the Data Access Request</span>;
@@ -24,6 +28,7 @@ export default function ResearcherInfo(props) {
     readOnlyMode,
     includeInstructions,
     completed,
+    countriesOfOperation,
     darCode,
     eRACommonsDestination,
     formFieldChange,
@@ -38,7 +43,8 @@ export default function ResearcherInfo(props) {
     showValidationMessages,
     validation,
     formValidationChange,
-    ariaLevel = 2
+    ariaLevel = 2,
+    eraCommonsId
   } = props;
   const accountLabel = nihAccountLabel();
   const accountLink = nihAccountInstructions();
@@ -57,12 +63,12 @@ export default function ResearcherInfo(props) {
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
-    setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)));
+    setLibraryCardReqSatisfied(!isNil(researcher.libraryCard));
   }, [researcher]);
 
   return (
     <div data-cy='researcher-info'>
-      <div className='dar-step-card'>
+      <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
         {(completed === false || libraryCardReqSatisfied === false) && (
           <div data-cy='researcher-info-profile-submitted'>
             {!readOnlyMode && (
@@ -83,14 +89,11 @@ export default function ResearcherInfo(props) {
           </div>
         )}
 
-        <h2>Step 1: Researcher Information</h2>
-
         <div className='dar-application-row'>
           <FormField
             id='researcherName'
-            placeholder='Enter Firstname Lastname'
             title='1.1 Researcher'
-            titleStyle={titleStyle}
+            titleStyle={readOnlyMode ? {...titleStyle, ...noTopMarginStyle} : titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             defaultValue={researcher.displayName}
@@ -99,8 +102,8 @@ export default function ResearcherInfo(props) {
         </div>
 
         <div className='dar-application-row'>
-          <h3>{'1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')}</h3>
-          {(!readOnlyMode && formData.checkCollaborator !== true) && (
+          <h3>{'1.2 Researcher Identification'}</h3>
+          {!readOnlyMode && (
             <span className={`${showNihValidationError ? 'errored' : 'default-color'}`}>
               Please authenticate with&nbsp;
               <a target='_blank' rel='noreferrer' href={accountLink}>{accountLabel}</a>
@@ -108,25 +111,23 @@ export default function ResearcherInfo(props) {
             </span>
           )}
           <div className='flex-row' style={{justifyContent: 'flex-start', alignItems: 'flex-start'}}>
-            <h4 style={{marginRight: 30, marginTop: 30}}>1.2.1</h4>
-            <ERACommons
+            {!readOnlyMode ? (<ERACommons
               destination={eRACommonsDestination}
               researcherProfile={researcher}
               onNihStatusUpdate={onNihStatusUpdate}
               location={location}
               validationError={showNihValidationError}
-              readOnly={readOnlyMode}
               header={true}
-              required={formData.checkCollaborator !== true}
-            />
+              required={!readOnlyMode} // In read-only mode, this is not required
+            />) : (<ERACommonsDisplay eraCommonsId={eraCommonsId} />)}
           </div>
           <fieldset>
             {
-              (completed === false && libraryCardReqSatisfied === true) && (
-                <div data-cy='researcher-info-profile-unsubmitted' className='rp-alert'>
-                  {!readOnlyMode && <Alert id='profileUnsubmitted' type='danger' title={profileUnsubmitted}/>}
-                </div>
-              )
+                (completed === false && libraryCardReqSatisfied === true) && (
+                    <div data-cy='researcher-info-profile-unsubmitted' className='rp-alert'>
+                      {!readOnlyMode && <Alert id='profileUnsubmitted' type='danger' title={profileUnsubmitted}/>}
+                    </div>
+                )
             }
             {
               (completed === true && libraryCardReqSatisfied === true) && (
@@ -136,36 +137,45 @@ export default function ResearcherInfo(props) {
               )
             }
           </fieldset>
-          <div className='flex-row' style={{justifyContent: 'flex-start'}}>
-            <h4 style={{marginRight: 30}}>1.2.2</h4>
-            <FormField
-              id='checkCollaborator'
-              disabled={readOnlyMode}
-              toggleText={<span style={{fontSize: 14, fontWeight: 'bold'}}>I am an NIH intramural researcher (NIH email required)</span>}
-              type={FormFieldTypes.CHECKBOX}
-              ariaLevel={ariaLevel + 2}
-              validation={validation.checkCollaborator}
-              onValidationChange={onValidationChange}
-              onChange={({key, value}) => formFieldChange({key, value})}
-              defaultValue={formData.checkCollaborator}
-            />
-          </div>
         </div>
 
         <div className='dar-application-row'>
+          <h3>1.3 Principal Investigator</h3>
+          <div>I certify that I am the principal investigator. </div>
+          <div className="formTable-row formTable-cols-full">
+            <label className="control-label" id="principal-investigator-name">Principal Investigator Name*</label>
+            <label className="control-label" id="principal-investigator-email">Principal Investigator Email*</label>
+          </div>
+          <div className="formTable-row formTable-data-row">
+            <FormField
+              id='piName'
+              disabled={true}
+              placeholder='Principal Investigator Name'
+              validators={[FormValidators.REQUIRED]}
+              ariaLevel={ariaLevel + 1}
+              defaultValue={readOnlyMode ? formData.piName : researcher.displayName}
+            />
+            <FormField
+              id='piEmail'
+              disabled={true}
+              validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+              ariaLevel={ariaLevel + 1}
+              defaultValue={readOnlyMode ? formData.piEmail : researcher.email}
+            />
+          </div>
+          <label className="control-label" id="principal-investigator-country-of-operation">Principal Investigator Country of Operation*</label>
           <FormField
-            id='piName'
+            id='piCountryOfOperation'
+            placeholder='Country of Operation'
             disabled={readOnlyMode}
-            description='I certify that the principal investigator listed below is aware of this study'
-            placeholder='Firstname Lastname'
-            title='1.3 Principal Investigator'
-            titleStyle={titleStyle}
+            defaultValue={formData.piCountryOfOperation}
+            type={FormFieldTypes.SELECT}
             validators={[FormValidators.REQUIRED]}
-            ariaLevel={ariaLevel + 1}
-            validation={validation.piName}
+            validation={validation.piCountryOfOperation}
             onValidationChange={onValidationChange}
+            selectOptions={countriesOfOperation}
+            optionsAreString={true}
             onChange={({key, value}) => formFieldChange({key, value})}
-            defaultValue={formData.piName}
           />
         </div>
 
@@ -190,6 +200,8 @@ export default function ResearcherInfo(props) {
             onValidationChange={onValidationChange}
             showApproval={true}
             disabled={!isEmpty(darCode) || readOnlyMode}
+            countriesOfOperation={countriesOfOperation}
+            readOnly={readOnlyMode}
           />
         </div>
 
@@ -210,11 +222,13 @@ export default function ResearcherInfo(props) {
             collaborators={formData.internalCollaborators}
             collaboratorKey='internalCollaborators'
             collaboratorLabel='Internal Collaborator'
+            countriesOfOperation={countriesOfOperation}
             setCompleted={setInternalCollaboratorsCompleted}
             validation={validation.internalCollaborators}
             onValidationChange={onValidationChange}
             showApproval={false}
             disabled={!isEmpty(darCode) || readOnlyMode}
+            readOnly={readOnlyMode}
           />
         </div>
 
@@ -227,34 +241,55 @@ export default function ResearcherInfo(props) {
             titleStyle={titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
-            defaultValue={formData.signingOfficial}
+            defaultValue={{
+              displayText: formData.signingOfficial,
+              email: formData.signingOfficialEmail
+            }}
             validation={validation.signingOfficial}
             onValidationChange={onValidationChange}
             disabled={readOnlyMode}
-            onChange={({key, value}) => {
-              formFieldChange({key, value});
+            onChange={({key, value: {displayText, email}}) => {
+              formFieldChange({key, value: displayText});
+              formFieldChange({key: 'signingOfficialEmail', value: email});
             }}
             selectOptions={(allSigningOfficials?.map((so) => {
-              return formatSOString(so.displayName, so.email);
+              const displayText = formatSOString(so.displayName, so.email);
+              return {displayText, email: so.email}
             }) || [''])}
           />
         </div>
 
         <div className='dar-application-row'>
-          <FormField
-            id='itDirector'
-            disabled={readOnlyMode}
-            description='I certify that the individual listed below is my IT Director'
-            placeholder='Enter Firstname Lastname'
-            title='1.7 Information Technology (IT) Director'
-            titleStyle={titleStyle}
-            validators={[FormValidators.REQUIRED]}
-            ariaLevel={ariaLevel + 1}
-            validation={validation.itDirector}
-            onValidationChange={onValidationChange}
-            onChange={({key, value}) => formFieldChange({key, value})}
-            defaultValue={formData.itDirector}
-          />
+          <h3>1.7 Information Technology (IT) Director</h3>
+          <div>I certify that the individual listed below is my IT Director</div>
+          <div className="formTable-row formTable-cols-full">
+            <label className="control-label" id="it-director-name">IT Director Name*</label>
+            <label className="control-label" id="it-director-email">IT Director Email*</label>
+          </div>
+          <div className="formTable-row formTable-data-row">
+            <FormField
+              id='itDirector'
+              disabled={readOnlyMode}
+              placeholder='IT Director Name'
+              validators={[FormValidators.REQUIRED]}
+              ariaLevel={ariaLevel + 1}
+              validation={validation.itDirector}
+              onValidationChange={onValidationChange}
+              onChange={({key, value}) => formFieldChange({key, value})}
+              defaultValue={formData.itDirector}
+            />
+            <FormField
+              id='itDirectorEmail'
+              disabled={readOnlyMode}
+              placeholder='IT Director Email'
+              validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+              ariaLevel={ariaLevel + 1}
+              validation={validation.itDirectorEmail}
+              onValidationChange={onValidationChange}
+              onChange={({key, value}) => formFieldChange({key, value})}
+              defaultValue={formData.itDirectorEmail}
+            />
+          </div>
         </div>
 
         <div className='dar-application-row'>
@@ -405,11 +440,13 @@ export default function ResearcherInfo(props) {
             collaborators={formData.externalCollaborators}
             collaboratorKey='externalCollaborators'
             collaboratorLabel='External Collaborator'
+            countriesOfOperation={countriesOfOperation}
             setCompleted={setExternalCollaboratorsCompleted}
             showApproval={false}
             disabled={!isEmpty(darCode) || readOnlyMode}
             validation={validation.externalCollaborators}
             onValidationChange={onValidationChange}
+            readOnly={readOnlyMode}
           />
         </div>
       </div>

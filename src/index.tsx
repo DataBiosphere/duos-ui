@@ -1,10 +1,10 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import './index.css';
-import './styles/bootstrap_replacement.css';
-import App from './App';
-import {Auth} from './libs/auth/auth';
-import {OidcBroker} from './libs/auth/oidcBroker';
+import 'src/index.css';
+import 'src/styles/bootstrap_replacement.css';
+import App from 'src/App';
+import {Auth} from 'src/libs/auth/auth';
+import {OidcBroker} from 'src/libs/auth/oidcBroker';
 import {BrowserRouter} from 'react-router-dom';
 
 const load = async () => {

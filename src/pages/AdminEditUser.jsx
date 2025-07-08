@@ -12,6 +12,7 @@ import {SearchSelect} from '../components/SearchSelect';
 const adminRole = {'roleId': 4, 'name': USER_ROLES.admin};
 const researcherRole = {'roleId': 5, 'name': USER_ROLES.researcher};
 const signingOfficialRole = {'roleId': 7, 'name': USER_ROLES.signingOfficial};
+const serviceAccount = {'roleId': 10, 'name': USER_ROLES.serviceAccount}
 
 
 export const AdminEditUser = (props) => {
@@ -226,6 +227,7 @@ export const AdminEditUser = (props) => {
                   options={institutionOptions || []}
                   placeholder='Please Select an Institution'
                   value={institutionId}
+                  isClearable={false}
                   className='form-control'
                 />
               </div>
@@ -265,7 +267,6 @@ export const AdminEditUser = (props) => {
                 </div>
               </div>
             </div>
-
             <div className='form-group'>
               <div className='col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4' style={{ paddingLeft: '30px' }}>
                 <div className='checkbox'>
@@ -277,6 +278,20 @@ export const AdminEditUser = (props) => {
                     onChange={(e) => roleStatusChanged(e, adminRole)}
                   />
                   <label id='lbl_admin' className='regular-checkbox rp-choice-questions' htmlFor='chk_admin'>Admin</label>
+                </div>
+              </div>
+            </div>
+            <div className='form-group'>
+              <div className='col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4' style={{ paddingLeft: '30px' }}>
+                <div className='checkbox'>
+                  <input
+                      type='checkbox'
+                      id='chk_service_account'
+                      checked={userHasRole(serviceAccount)}
+                      className='checkbox-inline user-checkbox'
+                      onChange={(e) => roleStatusChanged(e, serviceAccount)}
+                  />
+                  <label id='lbl_service_account' className='regular-checkbox rp-choice-questions' htmlFor='chk_service_account'>Service Account</label>
                 </div>
               </div>
             </div>

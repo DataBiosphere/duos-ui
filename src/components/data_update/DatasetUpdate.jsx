@@ -57,7 +57,7 @@ export const DatasetUpdate = (props) => {
   };
 
   const normalizeDataUse = useCallback(async (dataUse) => {
-    let du = dataUse;
+    const du = dataUse;
     if (!isNil(dataUse.diseaseRestrictions)) {
       du.hasDiseaseRestrictions = true;
       du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);

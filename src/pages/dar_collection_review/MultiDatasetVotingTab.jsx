@@ -2,7 +2,7 @@ import React from 'react';
 import {useEffect, useState} from 'react';
 import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab';
 import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab';
-import {find, get, filter, flow, map, isNil, isEmpty} from 'lodash/fp';
+import {find, get, filter, flow, map, isNil} from 'lodash/fp';
 import { User } from '../../libs/ajax/User';
 import {Alert} from '../../components/Alert';
 
@@ -77,11 +77,11 @@ export default function MultiDatasetVotingTab(props) {
   };
 
   const dataAccessApprovalDisabled = () => {
-    const researcherLibraryCards = flow(
+    const researcherLibraryCard = flow(
       get('createUser'),
-      get('libraryCards')
+      get('libraryCard')
     )(collection);
-    const researcherMissingLibraryCards = isNil(researcherLibraryCards) || isEmpty(researcherLibraryCards);
+    const researcherMissingLibraryCards = isNil(researcherLibraryCard);
     return isChair && researcherMissingLibraryCards;
   };
 

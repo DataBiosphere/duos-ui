@@ -1,15 +1,15 @@
-/* eslint-disable no-undef */
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication.jsx';
+import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication';
 import { MemoryRouter } from 'react-router-dom';
-import { DAR } from '../../../src/libs/ajax/DAR.js';
-import { DataSet } from '../../../src/libs/ajax/DataSet.js';
-import { Metrics } from '../../../src/libs/ajax/Metrics';
-import { Navigation } from '../../../src/libs/utils.js';
-import { NotificationService } from '../../../src/libs/notificationService.js';
-import { Storage } from '../../../src/libs/storage.js';
-import { User } from '../../../src/libs/ajax/User';
+import { DAR } from 'src/libs/ajax/DAR';
+import { DataSet } from 'src/libs/ajax/DataSet';
+import { Metrics } from 'src/libs/ajax/Metrics';
+import { Navigation } from 'src/libs/utils';
+import { NotificationService } from 'src/libs/notificationService';
+import { Storage } from 'src/libs/storage';
+import { User } from 'src/libs/ajax/User';
+import {Countries} from 'src/libs/ajax/Countries';
 
 const props = {
   match: {
@@ -22,7 +22,7 @@ const user = {
   displayName: 'Jane Doe',
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
-  libraryCards: [{}],
+  libraryCard: {},
   properties: [
     {
       propertyId: 10350,
@@ -44,7 +44,6 @@ const userNoLibraryCard = {
   displayName: 'Jane Doe',
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
-  libraryCards: [],
   properties: [
     {
       propertyId: 10350,
@@ -88,9 +87,13 @@ const userSigningOfficials = [
 
 
 describe('Data Access Request - Validation', () => {
+beforeEach(() => {
+  cy.stub(Countries, 'getCountries').returns(Promise.resolve(['United States of America (the)', 'Canada']));
+});
 
   describe('With Library Cards', () => {
     beforeEach(() => {
+      cy.initApplicationConfig();
       cy.stub(Metrics, 'captureEvent').returns(Promise.resolve());
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
       cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));
@@ -98,7 +101,10 @@ describe('Data Access Request - Validation', () => {
       cy.stub(Storage, 'getCurrentUser').returns(user);
       cy.stub(User, 'getMe').returns(user);
       cy.stub(Navigation, 'console').returns({});
-      cy.stub(DAR, 'postDar').returns({});
+      cy.intercept('POST', '/api/dar/**', {
+        statusCode: 200,
+        body: {}
+      }).as('postDar');
       cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' });
       cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
       cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
@@ -111,9 +117,10 @@ describe('Data Access Request - Validation', () => {
     });
 
     it('Submits given valid DAR', () => {
-      cy.get('#piName').type('Some PI');
+      cy.get('#piCountryOfOperation').type('United{enter}');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
+      cy.get('#itDirectorEmail').type('it@good.org');
       cy.get('#anvilUse_yes').click();
 
       cy.get('#datasetIds').type('asdf{enter}');
@@ -139,16 +146,17 @@ describe('Data Access Request - Validation', () => {
 
       cy.get('#btn_attest').click();
       cy.get('#btn_openSubmitModal').click();
-      cy.get('#btn_submit').click().then(() => {
-        expect(DAR.postDar).to.have.been.calledOnce;
+      cy.get('#btn_submit').click();
+      cy.wait('@postDar').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
       });
-
     });
 
     it('Required fields should not be errored when you open page', () => {
-      cy.get('#piName').should('not.have.class', 'errored');
+      cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('not.have.class', 'errored');
       cy.get('#itDirector').should('not.have.class', 'errored');
+      cy.get('#itDirectorEmail').should('not.have.class', 'errored');
       cy.get('#anvilUse').should('not.have.class', 'errored');
 
       cy.get('#datasetIds').should('not.have.class', 'errored');
@@ -175,9 +183,11 @@ describe('Data Access Request - Validation', () => {
     it('Required fields get errors on submit', () => {
       cy.get('#btn_attest').click();
 
-      cy.get('#piName').should('have.class', 'errored');
+      // since we're setting a default value, this should not error on initial validation
+      cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('have.class', 'errored');
       cy.get('#itDirector').should('have.class', 'errored');
+      cy.get('#itDirectorEmail').should('have.class', 'errored');
       cy.get('#anvilUse').should('have.class', 'errored');
 
       cy.get('#datasetIds').should('have.class', 'errored');
@@ -210,6 +220,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#0_collaboratorTitle').should('not.have.class', 'errored');
       cy.get('#0_collaboratorEmail').should('not.have.class', 'errored');
       cy.get('#0_collaboratorApproval').should('not.have.class', 'errored');
+      cy.get('#0_collaboratorCountryOfOperation').should('not.have.class', 'errored');
 
       cy.get('#collaborator-labCollaborators-add-save').click();
 
@@ -218,6 +229,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#0_collaboratorEraCommonsId').should('have.class', 'errored');
       cy.get('#0_collaboratorTitle').should('have.class', 'errored');
       cy.get('#0_collaboratorEmail').should('have.class', 'errored');
+      // we set a default value on countryOfOperation, so it does not error.
       cy.get('#0_collaboratorApproval').should('have.class', 'errored');
 
       // fill out fields
@@ -233,6 +245,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#0_collaboratorTitle').should('not.have.class', 'errored');
       cy.get('#0_collaboratorApproval').should('not.have.class', 'errored');
       cy.get('#0_collaboratorEmail').should('have.class', 'errored');
+      cy.get('#0_collaboratorCountryOfOperation').should('not.have.class', 'errored');
 
       // shouldn't submit since invalid email format
       cy.get('#collaborator-labCollaborators-add-save').click();
@@ -271,9 +284,10 @@ describe('Data Access Request - Validation', () => {
     });
 
     it('Cannot submit without library card', () => {
-      cy.get('#piName').type('Some PI');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
+      cy.get('#itDirectorEmail').type('it@good.org');
+      cy.get('#piCountryOfOperation').type('United{enter}');
       cy.get('#anvilUse_yes').click();
 
       cy.get('#datasetIds').type('asdf{enter}');

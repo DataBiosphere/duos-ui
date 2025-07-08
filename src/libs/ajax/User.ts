@@ -4,7 +4,14 @@ import axios from 'axios';
 import { getApiUrl, fetchOk, fetchAny } from '../ajax';
 import { CreateDuosUserResponse, DuosUserResponse, UpdateDuosUserResponse } from 'src/types/responseTypes';
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes';
-import { AcknowledgementMap, ApprovedDataset, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model';
+import {
+  Acknowledgement,
+  AcknowledgementMap,
+  ApprovedDataset,
+  Dataset,
+  DuosUser,
+  SimplifiedDuosUser
+} from 'src/types/model';
 
 export const User = {
   getMe: async (): Promise<DuosUserResponse> => {
@@ -66,7 +73,7 @@ export const User = {
 
   update: async (user: UpdateDuosUserRequestV2, userId: number)/*: Promise<UpdateDuosUserResponse>*/ => {
     const url = `${await getApiUrl()}/api/user/${userId}`;
-    // We should not be updating the user's create date, associated institution, or library cards
+    // We should not be updating the user's create date, associated institution, or library card
     // This below code does not seem to work at all and
     // does not seem appropriate for this request anyway.
     // The UpdateDuosUserRequestV2 is not the same shape as a DuosUser
@@ -75,7 +82,7 @@ export const User = {
       cloneDeep,
       unset('updatedUser.createDate'),
       unset('updatedUser.institution'),
-      unset('updatedUser.libraryCards')
+      unset('updatedUser.libraryCard')
     )(user);
     try {
       const res = await fetchOk(
@@ -145,6 +152,12 @@ export const User = {
 
   getAcknowledgements: async (): Promise<AcknowledgementMap> => {
     const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  getAcknowledgement: async (key: string): Promise<Acknowledgement> => {
+    const url = `${await getApiUrl()}/api/user/acknowledgements/${key}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },

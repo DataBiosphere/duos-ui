@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { cloneDeep, findIndex } from 'lodash/fp';
-import { Styles } from '../../libs/theme';
-import { DAR } from '../../libs/ajax/DAR';
-import { Collections } from '../../libs/ajax/Collections';
+import { Styles } from 'src/libs/theme';
+import { DAR } from 'src/libs/ajax/DAR';
+import { Collections } from 'src/libs/ajax/Collections';
 import {
   DarCollectionTable,
   DarCollectionTableColumnOptions
-} from '../../components/dar_collection_table/DarCollectionTable';
-import accessIcon from '../../images/lock-icon.png';
-import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from '../../libs/utils';
-import SearchBar from '../../components/SearchBar';
-import { consoleTypes } from '../../components/dar_collection_table/DarCollectionTableCellData';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
+} from 'src/components/dar_collection_table/DarCollectionTable';
+import accessIcon from 'src/images/lock-icon.png';
+import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils';
+import SearchBar from 'src/components/SearchBar';
+import { consoleTypes } from 'src/components/dar_collection_table/DarCollectionTableCellData';
+import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 
 const filterFn = getSearchFilterFunctions().darCollections;
 
@@ -70,7 +70,7 @@ export default function ResearcherConsole() {
       clonedCollections[targetIndex] = updatedCollection;
       setResearcherCollections(clonedCollections);
       Notifications.showSuccess({ text: `Deleted Data Access Request ${darCode}` });
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Error: Cannot cancel target Data Access Request'
       });
@@ -92,7 +92,7 @@ export default function ResearcherConsole() {
       clonedCollections[targetIndex] = draftCollection;
       setResearcherCollections(clonedCollections);
       Notifications.showSuccess({ text: `Revising Data Access Request ${darCode}` });
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Error: Cannot revise target Data Access Request'
       });
@@ -124,7 +124,7 @@ export default function ResearcherConsole() {
       } else {
         Notifications.showSuccess({ text: `Deleted Data Access Request Draft ${darCode}` });
       }
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: `Failed to delete Data Access Request Draft ${darCode}`,
       });
@@ -153,8 +153,8 @@ export default function ResearcherConsole() {
               {' '}
               and
               {' '}
-              <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink}>
-                NHGRI
+              <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>
+                NIH
               </a>
               {' '}
               Library Card Agreements.
@@ -171,6 +171,7 @@ export default function ResearcherConsole() {
             DarCollectionTableColumnOptions.NAME,
             DarCollectionTableColumnOptions.SUBMISSION_DATE,
             DarCollectionTableColumnOptions.DATASET_COUNT,
+            DarCollectionTableColumnOptions.EXPIRES_AT,
             DarCollectionTableColumnOptions.STATUS,
             DarCollectionTableColumnOptions.ACTIONS,
           ]}

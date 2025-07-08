@@ -1,50 +1,50 @@
 import React from 'react';
 import {Redirect, Route, Switch} from 'react-router-dom';
-import { StudyDetails } from './components/study_details/StudyDetails';
-import AuthenticatedRoute from './components/AuthenticatedRoute';
-import {USER_ROLES} from './libs/utils';
-import ManageDac from './pages/manage_dac/ManageDac';
-import ManageEditDac from './pages/manage_dac/ManageEditDac';
-import AdminManageUsers from './pages/AdminManageUsers';
-import DataAccessRequestApplication from './pages/dar_application/DataAccessRequestApplication';
-import DACDatasets from './pages/DACDatasets';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
-import NIHICWebform from './pages/NIHicWebform';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import ResearcherConsole from './pages/researcher_console/ResearcherConsole';
-import UserProfile from './pages/user_profile/UserProfile';
-import RequestForm from './pages/user_profile/RequestForm';
-import SigningOfficialResearchers from './pages/signing_official_console/SigningOfficialResearchers';
-import ManageResearcherDAAs from './pages/signing_official_console/ManageResearcherDAAs';
-import SigningOfficialDarRequests from './pages/signing_official_console/SigningOfficialDarRequests';
-import SigningOfficialDataSubmitters from './pages/signing_official_console/SigningOfficialDataSubmitters';
-import Translator from './pages/Translator';
-import NIHPilotInfo from './pages/NIHPilotInfo';
-import Status from './pages/Status';
-import BackgroundSignIn from './pages/BackgroundSignIn';
-import ConsentTextGenerator from './pages/ConsentTextGenerator';
-import AdminManageInstitutions from './pages/AdminManageInstitutions';
-import AdminManageLC from './pages/AdminManageLC';
-import DatasetStatistics from './pages/DatasetStatistics';
-import DarCollectionReview from './pages/dar_collection_review/DarCollectionReview';
-import AdminManageDarCollections from './pages/AdminManageDarCollections';
-import {AdminEditUser} from './pages/AdminEditUser';
-import ChairConsole from './pages/ChairConsole';
-import MemberConsole from './pages/MemberConsole';
-import DatasetSubmissions from './pages/researcher_console/DatasetSubmissions';
-import TermsOfService from './pages/TermsOfService';
-import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
-import {HealthCheck} from './pages/HealthCheck';
-import DataSubmissionForm from './pages/data_submission/DataSubmissionForm';
-import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
-import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
-import {checkEnv, envGroups} from './utils/EnvironmentUtils';
-import { DatasetUpdateForm } from './pages/DatasetUpdateForm';
-import DatasetSearch from './pages/DatasetSearch';
-import { StudyUpdateForm } from './pages/StudyUpdateForm';
-import {DAAUtils} from './utils/DAAUtils';
-import EditDac from './pages/manage_dac/EditDac';
+import { StudyDetails } from 'src/components/study_details/StudyDetails';
+import AuthenticatedRoute from 'src/components/AuthenticatedRoute';
+import {USER_ROLES} from 'src/libs/utils';
+import ManageDac from 'src/pages/manage_dac/ManageDac';
+import ManageEditDac from 'src/pages/manage_dac/ManageEditDac';
+import AdminManageUsers from 'src/pages/AdminManageUsers';
+import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication';
+import DACDatasets from 'src/pages/DACDatasets';
+import Home from 'src/pages/Home';
+import NotFound from 'src/pages/NotFound';
+import NIHICWebform from 'src/pages/NIHicWebform';
+import PrivacyPolicy from 'src/pages/PrivacyPolicy';
+import ResearcherConsole from 'src/pages/researcher_console/ResearcherConsole';
+import UserProfile from 'src/pages/user_profile/UserProfile';
+import RequestForm from 'src/pages/user_profile/RequestForm';
+import SigningOfficialResearchers from 'src/pages/signing_official_console/SigningOfficialResearchers';
+import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs';
+import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests';
+import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters';
+import Translator from 'src/pages/Translator';
+import NIHPilotInfo from 'src/pages/NIHPilotInfo';
+import Status from 'src/pages/Status';
+import BackgroundSignIn from 'src/pages/BackgroundSignIn';
+import ConsentTextGenerator from 'src/pages/ConsentTextGenerator';
+import AdminManageInstitutions from 'src/pages/AdminManageInstitutions';
+import AdminManageLC from 'src/pages/AdminManageLC';
+import DatasetStatistics from 'src/pages/DatasetStatistics';
+import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview';
+import AdminManageDarCollections from 'src/pages/AdminManageDarCollections';
+import {AdminEditUser} from 'src/pages/AdminEditUser';
+import ChairConsole from 'src/pages/ChairConsole';
+import MemberConsole from 'src/pages/MemberConsole';
+import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions';
+import TermsOfService from 'src/pages/TermsOfService';
+import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance';
+import {HealthCheck} from 'src/pages/HealthCheck';
+import DataSubmissionForm from 'src/pages/data_submission/DataSubmissionForm';
+import {ensureSoHasDaaAcknowledgement} from 'src/components/SigningOfficialDaaAgreementWrapper';
+import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from 'src/pages/DMSPolicyInfo';
+import {checkEnv, envGroups} from 'src/utils/EnvironmentUtils';
+import { DatasetUpdateForm } from 'src/pages/DatasetUpdateForm';
+import DatasetSearch from 'src/pages/DatasetSearch';
+import { StudyUpdateForm } from 'src/pages/StudyUpdateForm';
+import {DAAUtils} from 'src/utils/DAAUtils';
+import EditDac from 'src/pages/manage_dac/EditDac';
 
 const Routes = (props) => (
   <Switch>
@@ -82,9 +82,11 @@ const Routes = (props) => (
     <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
     <AuthenticatedRoute path='/member_console' component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
     <AuthenticatedRoute path='/dar_vote_review/:collectionId' component={DarCollectionReview} props={Object.assign({readOnly: true}, props)}
-      rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
-    <AuthenticatedRoute path='/dar_application_review/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {readOnlyMode: true})}
+      rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>
+    <AuthenticatedRoute path='/dar_application_review/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true})}
       rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path='/progress_report_application/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true, isProgressReportApplication: true})}
+                          rolesAllowed={[USER_ROLES.researcher]} />
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path='/dar_application/:dataRequestId' component={DataAccessRequestApplication} props={Object.assign({}, props, {draftDar: true})}
       rolesAllowed={[USER_ROLES.researcher]} />

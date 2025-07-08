@@ -1,19 +1,18 @@
-/* eslint-disable no-undef */
 import React from 'react';
-import CollectionSubmitVoteBox from '../../../src/components/collection_vote_box/CollectionSubmitVoteBox';
+import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox';
 import { mount } from 'cypress/react';
-import { Votes } from '../../../src/libs/ajax/Votes';
-import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
+import { Votes } from 'src/libs/ajax/Votes';
+import {votingColors} from 'src/pages/dar_collection_review/MultiDatasetVotingTab';
 
 const votesMatch = [
-  {vote: true, voteId: 1, rationale: 'test'},
-  {vote: true, voteId: 2, rationale: 'test'},
-  {vote: true, voteId: 3, rationale: 'test'}
+  {vote: true, voteId: 1, rationale: 'test', electionStatus: 'Open'},
+  {vote: true, voteId: 2, rationale: 'test', electionStatus: 'Open'},
+  {vote: true, voteId: 3, rationale: 'test', electionStatus: 'Open'}
 ];
 
 const votesMixed = [
-  {vote: true, voteId: 1, rationale: 'test1'},
-  {vote: false, voteId: 2, rationale: 'test2'},
+  {vote: true, voteId: 1, rationale: 'test1', electionStatus: 'Open'},
+  {vote: false, voteId: 2, rationale: 'test2', electionStatus: 'Open'},
 ];
 
 

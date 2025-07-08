@@ -53,8 +53,7 @@ export const DAR = {
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3` :
       `${await getApiUrl()}/api/dar/v2`;
-    const res = axios.post(url, filteredDar, Config.authOpts());
-    return await res.data;
+    return axios.post(url, filteredDar, Config.authOpts());
   },
 
   getAutoCompleteOT: async (partial) => {
@@ -99,5 +98,10 @@ export const DAR = {
       const url = `${await getApiUrl()}/api/dar/v2/${darId}/${fileType}`;
       return axios.post(url, formData, authOpts);
     }
+  },
+
+  approveCloseout: async (referenceId) => {
+    const url = `${await getApiUrl()}/api/dar/${referenceId}/approveCloseout`;
+    return axios.put(url, {}, Config.authOpts());
   }
 };

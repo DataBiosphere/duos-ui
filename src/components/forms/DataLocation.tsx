@@ -2,11 +2,10 @@ import React, {useCallback} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from './forms';
 import {cloneDeep, set} from 'lodash';
 import {Link} from 'react-router-dom';
-import {Styles} from '../../libs/theme';
 import {asIdAndDisplayText, SelectEntry} from './SelectOptionInterface';
 import {CloudProviders} from './CloudProviders';
-import {DataLocations} from "./DataLocations";
-import {ResearchStage} from "./ResearchStage";
+import {DataLocations} from './DataLocations';
+import {ResearchStage} from './ResearchStage';
 
 export type DataLocationInfo = {
     cloudProvider: null | SelectEntry,
@@ -33,7 +32,7 @@ export const DataLocation = (props: DataLocationComponentProps) => {
 
     const commonFieldStyle = {width: '50%', paddingBottom: '10px'};
 
-    return (<div style={Styles.REPEATING_SECTION}>
+    return (<div>
         <h4>Data Location {idx + 1} <Link style={{marginLeft: '15px'}} id={`${idx}_deleteDataLocation`}
                                           className={'glyphicon glyphicon-trash'} onClick={() => onDelete(idx)}
                                           to={`#`}/></h4>

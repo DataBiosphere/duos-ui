@@ -1,7 +1,6 @@
-/* eslint-disable no-undef */
-import {mount} from 'cypress/react';
-import {React} from 'react';
-import {DatasetSearchFooter} from '../../../src/components/data_search/DatasetSearchFooter';
+import { mount } from 'cypress/react';
+import { React } from 'react';
+import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter';
 
 const datasets = [
   {

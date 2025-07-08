@@ -1,9 +1,8 @@
-/* eslint-disable no-undef */
-
-import ERACommons from '../../../src/components/ERACommons.jsx';
-import {decodeNihToken} from '../../../src/utils/ERACommonsUtils.js';
-import { AuthenticateNIH } from '../../../src/libs/ajax/AuthenticateNIH.js';
-import { User } from '../../../src/libs/ajax/User';
+import ERACommons from 'src/components/era_commons/ERACommons.jsx';
+import {decodeNihToken} from 'src/utils/ERACommonsUtils.js';
+import {AuthenticateNIH} from 'src/libs/ajax/AuthenticateNIH.js';
+import {User} from 'src/libs/ajax/User.js';
+import {Storage} from 'src/libs/storage.js';
 import {mount} from 'cypress/react';
 import React from 'react';
 import {Buffer} from 'buffer';
@@ -55,6 +54,7 @@ describe('ERA Commons Utility', function () {
     const decoded = await decodeNihToken(token);
     expect(decoded).to.equal(null);
   });
+
 });
 
 describe('ERA Commons Component', function () {
@@ -66,14 +66,13 @@ describe('ERA Commons Component', function () {
       destination={''}
       header={true} // Triggers the NIH eRA Commons header
       onNihStatusUpdate={() => {}}
-      readOnly={false}
       required={true} // Triggers the required flag on the NIH eRA Commons ID
       style={{}}
     />);
     cy.get('#era-commons-id').should('exist');
-    cy.get('[data-cy=era-commons-header').should('exist');
-    cy.get('[data-cy=era-commons-required').should('exist');
-    cy.get('[data-cy=era-commons-authenticate-link').should('exist');
+    cy.get('[data-cy=era-commons-header]').should('exist');
+    cy.get('[data-cy=era-commons-required]').should('exist');
+    cy.get('[data-cy=era-commons-authenticate-link]').should('exist');
     cy.get('.required-field-error-span').should('not.exist');
   });
 
@@ -96,15 +95,79 @@ describe('ERA Commons Component', function () {
       location={{search: `?nih-username-token=${buildToken('testing', iat, exp)}`}}
       header={true}
       onNihStatusUpdate={() => {}}
-      readOnly={false}
       required={true}
       style={{}}
     />);
     cy.get('#era-commons-id').should('exist');
-    cy.get('[data-cy=era-commons-header').should('exist');
-    cy.get('[data-cy=era-commons-required').should('exist');
-    cy.get('[data-cy=era-commons-authenticate-link').should('not.exist');
-    cy.get('[data-cy=era-commons-id-value').should('exist');
+    cy.get('[data-cy=era-commons-header]').should('exist');
+    cy.get('[data-cy=era-commons-required]').should('exist');
+    cy.get('[data-cy=era-commons-authenticate-link]').should('not.exist');
+    cy.get('[data-cy=era-commons-id-value]').should('exist');
     cy.get('.required-field-error-span').should('not.exist');
   });
+
+  it('shows an error when auth token decoding fails', function () {
+    mount(<ERACommons
+      isAuthorized={false}
+      className={''}
+      destination={''}
+      header={true} // Triggers the NIH eRA Commons header
+      onNihStatusUpdate={() => {}}
+      required={true} // Triggers the required flag on the NIH eRA Commons ID
+      style={{}}
+      location={{search: '?nih-username-token=invalid'}}
+    />);
+
+    // cy.stub(AuthenticateNIH, 'getECMProviderAuthUrl').throws(new Error('error'));
+    cy.get('[data-cy=era-commons-authenticate-link]').should('exist');
+    cy.get('[data-cy=era-commons-authenticate-link]').click();
+    cy.get('[data-cy=era-commons-error-span]').should('be.visible');
+  });
+
+  it('shows an error when removing linked account fails', function () {
+    const eraAuthedUser = Object.assign({}, researcher, {
+      eraCommonsId: 'testing',
+      properties: [
+        {propertyKey:'eraAuthorized', propertyValue: true},
+        {propertyKey:'eraExpiration', propertyValue: Date.now() + (30 * 24 * 60 * 60 * 1000)} // iat + 30 days
+      ]
+    })
+    cy.stub(User, 'getMe').returns(eraAuthedUser);
+    mount(<ERACommons
+      isAuthorized={true}
+      className={''}
+      destination={''}
+      header={true} // Triggers the NIH eRA Commons header
+      onNihStatusUpdate={() => {}}
+      required={true} // Triggers the required flag on the NIH eRA Commons ID
+      style={{}}
+      location={{search: '?nih-username-token=' + encodedToken}}
+    />);
+
+    cy.stub(AuthenticateNIH, 'deleteAccountLinkage').throws(new Error('error'));
+    cy.get('[data-cy=era-delete-icon]').should('exist');
+    cy.get('[data-cy=era-delete-icon]').click({force: true});
+    cy.get('[data-cy=era-commons-error-span]').should('be.visible');
+  });
+
+  it('shows an error when ECM fails', function () {
+    // Enable RAS
+    cy.stub(Storage, 'getEnv').returns('dev');
+    cy.stub(Storage, 'getCurrentUser').returns(researcher);
+    mount(<ERACommons
+      isAuthorized={false}
+      className={''}
+      destination={''}
+      header={true} // Triggers the NIH eRA Commons header
+      onNihStatusUpdate={() => {}}
+      required={true} // Triggers the required flag on the NIH eRA Commons ID
+      style={{}}
+    />);
+
+    cy.stub(AuthenticateNIH, 'getECMProviderAuthUrl').throws(new Error('error'));
+    cy.get('[data-cy=era-commons-authenticate-link]').should('exist');
+    cy.get('[data-cy=era-commons-authenticate-link]').click();
+    cy.get('[data-cy=era-commons-error-span]').should('be.visible');
+  });
+
 });

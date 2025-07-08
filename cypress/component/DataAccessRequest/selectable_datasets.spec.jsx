@@ -1,8 +1,6 @@
-/* eslint-disable no-undef */
-import {React} from 'react';
-import {mount} from 'cypress/react';
-import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication.jsx';
-import SelectableDatasets from '../../../src/pages/dar_application/SelectableDatasets.jsx';
+import { React } from 'react';
+import { mount } from 'cypress/react';
+import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets.jsx';
 
 const datasets = [
   {

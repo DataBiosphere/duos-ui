@@ -30,7 +30,7 @@ export default function AdminManageDarCollections() {
         setCollections(collectionsResp);
         setFilteredList(collectionsResp);
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Error initializing Collections table' });
       }
     };
@@ -69,6 +69,7 @@ export default function AdminManageDarCollections() {
           DarCollectionTableColumnOptions.RESEARCHER,
           DarCollectionTableColumnOptions.INSTITUTION,
           DarCollectionTableColumnOptions.DATASET_COUNT,
+          DarCollectionTableColumnOptions.EXPIRES_AT,
           DarCollectionTableColumnOptions.STATUS,
           DarCollectionTableColumnOptions.ACTIONS,
         ]}

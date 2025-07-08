@@ -1,22 +1,31 @@
 on: [pull_request]
-name: changed files lint
+name: Lint Changed Files
 jobs:
-  scan:
-    name: npm lint
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout the repository
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
-      -  run: echo "NODE_VERSION=$(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}' | awk '{split($0, array, "@"); print array[2]}')" >> $GITHUB_ENV
-      -  run: echo $NODE_VERSION
-      - uses: actions/setup-node@v4
+      - name: Extract Node.js version
+        run: echo "NODE_VERSION=$(sed -n 's/FROM node:\([0-9.]*\).*/\1/p' Dockerfile)" >> $GITHUB_ENV
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: install dependencies
+      - name: Install dependencies
         run: npm ci
-      - name: npm lint
-        run: npx eslint $(git diff "origin/$DESTINATION_REF" --name-only | xargs)
+      - name: Lint changed files
+        run: |
+          CHANGED_FILES=$(git diff "origin/$DESTINATION_REF" --diff-filter=d --name-only)
+          npx eslint ${CHANGED_FILES}
+        env:
+          DESTINATION_REF: ${{ github.event.pull_request.base.ref }}
+      - name: TypeScript check
+        run: |
+          CHANGED_FILES=$(git diff "origin/$DESTINATION_REF" --diff-filter=d --name-only)
+          echo "$CHANGED_FILES" | node scripts/parse-tsc-output.js
         env:
           DESTINATION_REF: ${{ github.event.pull_request.base.ref }}

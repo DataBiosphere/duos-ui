@@ -1,9 +1,9 @@
 # Local Development
 
-1. We use [node@22.11.0](https://docs.volta.sh/guide/understanding):
+1. We use node LTS at time of writing, but check the [version of Node declared in the Dockerfile](https://github.com/DataBiosphere/duos-ui/blob/develop/Dockerfile#L2) and install that when setting up.  You can install it with [Volta](https://docs.volta.sh/guide/understanding) or NVM.
 
 ```
-volta install 22.11.0
+volta install node@22.16.0
 ```
 
 2. Install deps:
@@ -12,8 +12,8 @@ volta install 22.11.0
 npm install
 ```
 
-3. Generate configuration files and populate certificates by running the [render-configs.sh](scripts/render-configs.sh) script. This requires 
-connection to the Broad VPN. By default, this points the DUOS UI to the dev environment. 
+3. Generate configuration files and populate certificates by running the [render-configs.sh](scripts/render-configs.sh) script. This requires
+connection to the Broad VPN. By default, this points the DUOS UI to the dev environment.
 
 ```
 cd scripts
@@ -21,13 +21,13 @@ cd scripts
 ```
 
 #### Notes on render-configs:
-* Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.
-* **Development against other envs**: If you want to point to other envs, you can populate public/config.json with the values from any 
-environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where 
+* Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.  You can check like so: `env | grep HOST=`.
+* **Development against other envs**: If you want to point to other envs, you can populate public/config.json with the values from any
+environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where
 {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`. Remember to set the `env` value appropriately, for example,
-`dev`. Certain features are available only in specific environments. Setting the `env` value to the desired environment 
+`dev`. Certain features are available only in specific environments. Setting the `env` value to the desired environment
 will simulate it for local development.
-* **Refresh certs on rotation**: render-config.sh populates local certificate files. The certificates are rotated every 
+* **Refresh certs on rotation**: render-config.sh populates local certificate files. The certificates are rotated every
 3 months and can be repopulated by re-running the script. Again, you'll need to be on the broad VPN.
 
 ```shell
@@ -41,7 +41,7 @@ cd scripts
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-5. Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model. 
+5. Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model.
 
 
 
@@ -59,7 +59,7 @@ the `env` value to the desired environment will simulate it for local developmen
 ```yaml
     volumes:
       - ./public/config.json:/usr/share/nginx/html/config.json
-``` 
+```
 
 Build and run:
 
@@ -125,4 +125,3 @@ To run a single test suite:
 ```shell
 npm run cypress:open:component --spec "**/data_access_governance.spec.js"
 ```
- 

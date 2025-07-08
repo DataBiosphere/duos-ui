@@ -5,8 +5,8 @@ export interface DuosUserResponse {
   displayName: string;
   email: string;
   emailPreference: boolean;
-  libraryCards: LibraryCard[];
-  researcherProperties: UserProperty[];
+  libraryCard?: LibraryCard;
+  properties?: UserProperty[];
   roles: UserRole[];
   userId: number;
   userStatusInfo: UserStatusInfo;
@@ -15,3 +15,8 @@ export interface DuosUserResponse {
 export type CreateDuosUserResponse = DuosUserResponse | false | undefined;
 
 export type UpdateDuosUserResponse = CreateDuosUserResponse;
+
+export interface ConsentError {
+  readonly message?: string;
+  readonly code?: number;
+}

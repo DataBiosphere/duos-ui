@@ -1,27 +1,31 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { Notifications } from '../libs/utils';
-import { DataSet } from '../libs/ajax/DataSet';
-import DatasetSearchTable from '../components/data_search/DatasetSearchTable';
-import broadIcon from '../logo.svg';
-import duosIcon from '../images/duos-network-logo.svg';
-import mgbIcon from '../images/mass-general-brigham-logo.svg';
-import elwaziIcon from '../images/elwazi-logo-color.svg';
-import nhgriIcon from '../images/nhgri-logo-color.svg';
-import anvilIcon from '../images/anvil-logo.svg';
-import terraIcon from '../images/terra-logo.svg';
-import hcaIcon from '../images/human-cell-atlas-logo.png';
-import cfdeIcon from '../images/cfde-logo.png';
-import firecloudIcon from '../images/firecloud-logo.png';
-import aouIcon from '../images/aou-logo.png';
-import stanleyIcon from '../images/stanley-center-logo.png';
-import getzLabIcon from '../images/getz-lab-logo.svg';
-import homeIcon from '../images/icon_dataset_.png';
-import { Storage } from '../libs/storage';
-import { Box, CircularProgress } from '@mui/material';
-import { toLower } from 'lodash';
-import {Metrics} from '../libs/ajax/Metrics';
-import eventList from '../libs/events';
+import React, {useEffect, useState} from 'react';
+import {Box, CircularProgress} from '@mui/material';
+import {toLower} from 'lodash';
+import {Notifications} from 'src/libs/utils';
+import {DataSet} from 'src/libs/ajax/DataSet';
+import DatasetSearchTable from 'src/components/data_search/DatasetSearchTable';
+import broadIcon from 'src/logo.svg';
+import duosIcon from 'src/images/duos-network-logo.svg';
+import mgbIcon from 'src/images/mass-general-brigham-logo.svg';
+import elwaziIcon from 'src/images/elwazi-logo-color.svg';
+import nhgriIcon from 'src/images/nhgri-logo-color.svg';
+import anvilIcon from 'src/images/anvil-logo.svg';
+import terraIcon from 'src/images/terra-logo.svg';
+import hcaIcon from 'src/images/human-cell-atlas-logo.png';
+import ifgcIcon from 'src/images/IFGC-logo.png';
+import cfdeIcon from 'src/images/cfde-logo.png';
+import firecloudIcon from 'src/images/firecloud-logo.png';
+import zoonomicsIcon from 'src/images/ZoonomicsLogoColor.png';
+import aouIcon from 'src/images/aou-logo.png';
+import stanleyIcon from 'src/images/stanley-center-logo.png';
+import getzLabIcon from 'src/images/getz-lab-logo.svg';
+import gp2Icon from 'src/images/gp2-logo.svg';
+import asapIcon from 'src/images/asap-logo.svg';
+import gedIcon from 'src/images/ged-logo.png';
+import homeIcon from 'src/images/icon_dataset_.png';
+import {Storage} from 'src/libs/storage';
+import {Metrics} from 'src/libs/ajax/Metrics';
+import eventList from 'src/libs/events';
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -187,6 +191,15 @@ export const DatasetSearch = (props) => {
       icon: hcaIcon,
       title: 'Human Cell Atlas Data Library',
     },
+    'zoonomics': {
+      query: {
+        'match_phrase': {
+          'study.description': 'zoonomics'
+        }
+      },
+      icon: zoonomicsIcon,
+      title: 'Center for Zoonomics Data Library',
+    },
     'terra': {
       query: null,
       icon: terraIcon,
@@ -234,6 +247,15 @@ export const DatasetSearch = (props) => {
       icon: duosIcon,
       title: 'DUOS Open Access Data Library',
     },
+    'ifgc': {
+      query: {
+        'match_phrase': {
+          'study.description': 'International Fetal Genomics Consortium'
+        }
+      },
+      icon: ifgcIcon,
+      title: 'International Fetal Genomics Consortium Data Library',
+    },
     'stanley': {
       query: {
         'match_phrase': {
@@ -260,6 +282,33 @@ export const DatasetSearch = (props) => {
       },
       icon: getzLabIcon,
       title: 'Getz Lab Data Library',
+    },
+    'asap': {
+      query: {
+        'match_phrase': {
+          'study.description': 'ASAP'
+        }
+      },
+      icon: asapIcon,
+      title: 'Aligning Science Across Parkinson\'s Data Library',
+    },
+    'gp2': {
+      query: {
+        'match_phrase': {
+          'study.description': 'GP2'
+        }
+      },
+      icon: gp2Icon,
+      title: 'Global Parkinson\'s Genetics Program Data Library',
+    },
+    'ged': {
+      query: {
+        'match_phrase': {
+          'study.description': 'Eating Disorder Sequencing Program'
+        }
+      },
+      icon: gedIcon,
+      title: 'Genetics of Eating Disorders Data Library',
     },
     '/custom': {
       query: {
@@ -294,10 +343,14 @@ export const DatasetSearch = (props) => {
 
   useEffect(() => {
     const init = async () => {
-      // noinspection ES6MissingAwait
-      key === '/datalibrary' ?
-        Metrics.captureEvent(eventList.dataLibrary) :
-        Metrics.captureEvent(eventList.dataLibrary, {'brand': key.replaceAll('/', '').toLowerCase()});
+      if (key === '/datalibrary') {
+        // noinspection ES6MissingAwait
+        Metrics.captureEvent(eventList.dataLibrary);
+      } else {
+        const brand = key.replaceAll('/', '').toLowerCase();
+        // noinspection ES6MissingAwait
+        Metrics.captureEvent(eventList.dataLibrary, { brand: brand });
+      }
     };
     init();
   }, [key]);
@@ -316,7 +369,7 @@ export const DatasetSearch = (props) => {
             setLoading(false);
             setQueryState(query);
           });
-        } catch (error) {
+        } catch (_error) {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' });
         }
       }

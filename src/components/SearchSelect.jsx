@@ -4,7 +4,7 @@ import './SearchSelect.css';
 import {FormField, FormFieldTypes} from './forms/forms';
 
 export const SearchSelect = (props) => {
-  const { onSelection, placeholder, options, value } = props;
+  const { onSelection, placeholder, options, value, isClearable } = props;
   const [selectedInstitution, setSelectedInstitution] = useState();
 
   useEffect(() => {
@@ -28,6 +28,7 @@ export const SearchSelect = (props) => {
         institutionId: selectedInstitution?.institutionId,
         displayText: selectedInstitution?.displayText,
       }}
+      isClearable={isClearable}
       onChange={onSelection}>
     </FormField>
   );

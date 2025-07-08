@@ -1,5 +1,4 @@
-/* eslint-disable no-undef */
-import {processMatchData} from '../../../src/utils/VoteUtils';
+import { processMatchData } from 'src/utils/VoteUtils';
 
 describe('VoteUtil - processMatchData()', () => {
   it('returns "N/A" if matchData is empty', () => {

@@ -1,6 +1,3 @@
-/* eslint-disable no-undef */
-
-
 describe('Status', function() {
 
   it('Liveness successfully loads', function() {

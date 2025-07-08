@@ -1,10 +1,10 @@
 import React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {Auth} from '../libs/auth/auth';
-import {TosService} from '../libs/tosService';
-import {Storage} from '../libs/storage';
-import SimpleButton from '../components/SimpleButton';
-import {Theme} from '../libs/theme';
+import {Auth} from 'src/libs/auth/auth';
+import {TosService} from 'src/libs/tosService';
+import {Storage} from 'src/libs/storage';
+import SimpleButton from 'src/components/SimpleButton';
+import {Theme} from 'src/libs/theme';
 
 export default function TermsOfServiceAcceptance(props) {
   const [tosText, setTosText] = useState('');
@@ -23,9 +23,9 @@ export default function TermsOfServiceAcceptance(props) {
     await Storage.setUserIsLogged(true);
 
     // if there is a redirectTo, we should go to that. otherwise, just go to the appropriate
-    // user's profile.
+    // data library.
     const queryParams = new URLSearchParams(window.location.search);
-    const redirect = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : '/profile';
+    const redirect = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : '/datalibrary';
 
     history.push(redirect);
   }, [history]);
@@ -50,7 +50,7 @@ export default function TermsOfServiceAcceptance(props) {
   };
 
   const rejectButton = <SimpleButton
-    keyProp="tos-accept"
+    keyProp="tos-reject"
     label="Reject Terms of Service"
     isRendered={true}
     onClick={signOut}

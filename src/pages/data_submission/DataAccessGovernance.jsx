@@ -33,7 +33,7 @@ export const DataAccessGovernance = (props) => {
   };
 
   const normalizeDataUse = useCallback(async (dataUse) => {
-    let du = dataUse;
+    const du = dataUse;
     if (!isNil(dataUse.diseaseRestrictions)) {
       du.hasDiseaseRestrictions = true;
       // The disease restriction may not cleanly map to the label
@@ -114,7 +114,7 @@ export const DataAccessGovernance = (props) => {
 
   // extract consent groups from datasets
   const prefillConsentGroups = useCallback(async () => {
-    var consentGroups = await Promise.all(datasets?.map(async (dataset, idx) => {
+    const consentGroups = await Promise.all(datasets?.map(async (dataset, idx) => {
       const dataUse = await normalizeDataUse(dataset?.dataUse);
       const accessManagement = extract('Access Management', dataset);
       const dac = 'dacId' in dataset ? await DAC.get(dataset.dacId) : undefined;

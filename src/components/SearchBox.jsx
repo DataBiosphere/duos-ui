@@ -11,7 +11,7 @@ export class SearchBox extends Component {
   }
 
   changeHandler = (e) => {
-    let value = e.target.value;
+    const value = e.target.value;
     this.props.searchHandler(value);
     this.props.pageHandler(1);
   };

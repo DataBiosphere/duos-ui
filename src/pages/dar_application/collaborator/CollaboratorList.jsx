@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import CollaboratorForm from './CollaboratorForm';
-import CollaboratorRow from './CollaboratorRow';
-import { useState, useEffect} from 'react';
+import CollaboratorRow from 'src/components/collaborator_list/CollaboratorRow';
 import './collaborator.css';
 import { isNil } from 'lodash';
 
 export default function CollaboratorList(props) {
-  const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval, setCompleted, validation, onValidationChange} = props;
+  const {
+    formFieldChange,
+    collaboratorLabel,
+    collaboratorKey,
+    countriesOfOperation,
+    showApproval,
+    setCompleted,
+    validation,
+    onValidationChange,
+    readOnly = false,
+  } = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);
   const [editState, setEditState] = useState([]);
@@ -22,9 +31,9 @@ export default function CollaboratorList(props) {
   };
 
   const deleteCollaborator = (index) => {
-    let deleteCopy = deleteBoolArray.slice();
-    let collaboratorCopy = collaborators.slice();
-    let editCopy = editState.slice();
+    const deleteCopy = deleteBoolArray.slice();
+    const collaboratorCopy = collaborators.slice();
+    const editCopy = editState.slice();
 
     deleteCopy.splice(index, 1);
     collaboratorCopy.splice(index, 1);
@@ -40,7 +49,7 @@ export default function CollaboratorList(props) {
   }, [setCompleted, showNewForm, editState]);
 
   const saveCollaborator = (index, newCollaborator) => {
-    let newCollaborators = collaborators.slice();
+    const newCollaborators = collaborators.slice();
     newCollaborators[index] = newCollaborator;
     setCollaborators(newCollaborators);
     const deleteBoolCopy = [...deleteBoolArray, false];
@@ -48,15 +57,9 @@ export default function CollaboratorList(props) {
   };
 
   const updateEditState = (index, bool) => {
-    let newEditState = [...editState];
+    const newEditState = [...editState];
     newEditState[index] = bool;
     setEditState(newEditState);
-  };
-
-  const toggleDeleteBool = (index, bool) => {
-    let deleteCopy = [...deleteBoolArray];
-    deleteCopy[index] = bool;
-    setDeleteBoolArray(deleteCopy);
   };
 
   useEffect(() => {
@@ -72,19 +75,30 @@ export default function CollaboratorList(props) {
     <div className="form-group row no-margin">
       {collaborators.map((collaborator, index) => (
         <CollaboratorRow
-          index={index}
-          saveCollaborator={(newCollaborator) => saveCollaborator(index, newCollaborator)}
-          deleteCollaborator={() => deleteCollaborator(index)}
-          updateEditState={(bool) => updateEditState(index, bool)}
-          toggleDeleteBool={(bool) => toggleDeleteBool(index, bool)}
-          collaborator={collaborator}
-          collaboratorLabel={collaboratorLabel}
-          showApproval={showApproval}
+          key={index}
+          id={index}
           editMode={editState[index]}
-          key={collaborator?.uuid}
+          readOnly={readOnly}
+          collaborator={collaborator}
+          collaboratorText={collaboratorLabel}
+          collaborators={collaborators}
+          columnsToShow={showApproval ? ['name', 'title', 'eraCommonsId', 'email', 'approval'] : ['name', 'title', 'eraCommonsId', 'email']}
+          editAction={() => updateEditState(index, true)}
+          deleteAction={() => deleteCollaborator(index)}
+          closeAction={() => updateEditState(index, false)}
+          onCollaboratorChange={(updatedCollaborators) => {
+            // Update the specific collaborator at the index
+            const newCollaborator = updatedCollaborators.find(c => c.uuid === collaborator.uuid) || updatedCollaborators[index];
+            if (newCollaborator) {
+              saveCollaborator(index, newCollaborator);
+            }
+          }}
+          countriesOfOperation={countriesOfOperation}
+          showApproverStatus={showApproval}
+          // Pass validation-related props for DAR application compatibility
           validation={!isNil(validation) ? validation[index] || {} : {}}
           onCollaboratorValidationChange={onCollaboratorValidationChange}
-          deleteMode={deleteBoolArray[index]}
+          collaboratorKey={collaboratorKey}
         />
       ))}
     </div>
@@ -100,10 +114,10 @@ export default function CollaboratorList(props) {
           style={{
             marginTop: 25,
             marginBottom: 5,
-            ...(props.disabled ? { cursor: 'not-allowed' } : {}),
+            ...(props.disabled ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
           }}
           onClick={() => {
-            !props.disabled && setShowNewForm(true);
+            if (!props.disabled) {setShowNewForm(true);}
           }}
           disabled={props.disabled}
         >
@@ -120,6 +134,7 @@ export default function CollaboratorList(props) {
             editMode={true}
             validation={!isNil(validation) ? validation[collaborators.length] || {} : {}}
             onCollaboratorValidationChange={onCollaboratorValidationChange}
+            countriesOfOperation={countriesOfOperation}
           />
         )}
       </div>

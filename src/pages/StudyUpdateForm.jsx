@@ -39,7 +39,7 @@ export const StudyUpdateForm = (props) => {
     const init = async () => {
       try {
         await getAllInstitutions();
-      } catch (error) {
+      } catch (_error) {
         setFailedInit(true);
         Notifications.showError({
           text: 'Error: Unable to initialize data from server',
@@ -49,7 +49,7 @@ export const StudyUpdateForm = (props) => {
         const me = Storage.getCurrentUser();
         setUser(me);
         setStudy(await DataSet.getStudyById(studyId));
-      } catch (error) {
+      } catch (_error) {
         setFailedInit(true);
         Notifications.showError({ text: 'Failed to load study' });
       }
@@ -81,7 +81,7 @@ export const StudyUpdateForm = (props) => {
   };
 
   const extractAllProperties = useCallback(() => {
-    var properties = {};
+    const properties = {};
 
     study.properties.forEach((property) => {
       properties[property.key] = property?.value;

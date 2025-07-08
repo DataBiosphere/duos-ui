@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable cypress/no-assigning-return-values */
 import { React } from 'react';
 import { mount } from 'cypress/react';
 import DarCollectionReview from '../../../src/pages/dar_collection_review/DarCollectionReview';
@@ -200,21 +200,19 @@ const dar = {
       'createUser': null,
       'updateUser': null
     },
-    'libraryCards': [
-      {
-        'id': 182,
-        'userId': 7,
-        'institutionId': 90210,
-        'eraCommonsId': null,
-        'userName': 'Bob Jones',
-        'userEmail': 'Bob.Jones@prodigy.com',
-        'createDate': 1667817915000,
-        'createUserId': 5555,
-        'updateDate': null,
-        'updateUserId': null,
-        'institution': null
-      }
-    ]
+    'libraryCard': {
+      'id': 182,
+      'userId': 7,
+      'institutionId': 90210,
+      'eraCommonsId': null,
+      'userName': 'Bob Jones',
+      'userEmail': 'Bob.Jones@prodigy.com',
+      'createDate': 1667817915000,
+      'createUserId': 5555,
+      'updateDate': null,
+      'updateUserId': null,
+      'institution': null
+    }
   },
   'createUserId': 7,
   'updateDate': null,
@@ -225,10 +223,8 @@ const dar = {
       'referenceId': 'dars-id-123',
       'collectionId': 777,
       'data': {
-        'referenceId': 'dars-id-123',
         'institution': 'Ace Industries',
         'projectTitle': 'Collection of sleep apnea samples',
-        'checkCollaborator': false,
         'researcher': 'Bob Jones',
         'rus': 'One good RUS\n',
         'nonTechRus': 'One non-technical RUS\n',

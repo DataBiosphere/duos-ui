@@ -1,6 +1,5 @@
-/* eslint-disable no-undef */
 import React from 'react';
-import ConsentGroupForm from '../../../src/pages/data_submission/consent_group/ConsentGroupForm';
+import ConsentGroupForm from 'src/pages/data_submission/consent_group/ConsentGroupForm';
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'cypress/react';
 
@@ -52,8 +51,9 @@ describe('Consent Group', function () {
     cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
 
-    expect(propCopy.saveConsentGroup).to.not.be.called;
-  }),
+    cy.wrap(propCopy.saveConsentGroup).should('not.have.been.called');
+  });
+
   /* TO DO: Re-enable test once DS Form schema is updated.
 
   it('Saves properly', function () {
@@ -110,6 +110,7 @@ describe('Consent Group', function () {
     });
 
   }),*/
+
   it('Deletes properly', function () {
     cy.spy(propCopy, 'deleteConsentGroup');
 
@@ -120,10 +121,10 @@ describe('Consent Group', function () {
     cy.get('#0_url').type('https://www.asdf.gov');
     cy.get('#0_primaryConsent_hmb').check();
     cy.get('#0_col').check();
-    cy.get('#0_deleteConsentGroup').click().then(() => {
-      expect(propCopy.deleteConsentGroup).to.be.called;
-    });
-  }),
+    cy.get('#0_deleteConsentGroup').click();
+    cy.wrap(propCopy.deleteConsentGroup).should('have.been.called');
+  });
+
   it('Shows conditional fields only when checked', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);

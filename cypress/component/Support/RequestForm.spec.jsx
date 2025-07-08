@@ -1,8 +1,6 @@
-/* eslint-disable no-undef */
-
 import React from 'react';
-import {mount} from 'cypress/react';
-import RequestForm from '../../../src/pages/user_profile/RequestForm';
+import { mount } from 'cypress/react';
+import RequestForm from 'src/pages/user_profile/RequestForm';
 
 describe('SupportRequestsPage Tests', () => {
   beforeEach(() => {
@@ -58,7 +56,7 @@ describe('SupportRequestsPage Tests', () => {
     cy.get('[id="checkRegisterDataset"]').check();
     cy.get('[data-cy="submitButton"]').click();
     cy.wait(['@request']).then((interception) => {
-      expect(interception).to.not.be.null;
+      cy.wrap(interception).should('not.be.null');
     });
   });
 

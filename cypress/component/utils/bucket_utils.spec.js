@@ -1,7 +1,6 @@
-/* eslint-disable no-undef */
-import {binCollectionToBuckets, isEqualDataUse, shouldAbstain} from '../../../src/utils/BucketUtils';
-import {filter, find, forEach, isEmpty, isUndefined} from 'lodash/fp';
-import { Match } from '../../../src/libs/ajax/Match';
+import { binCollectionToBuckets, isEqualDataUse, shouldAbstain } from 'src/utils/BucketUtils';
+import { forEach, isEmpty, isUndefined } from 'lodash/fp';
+import { Match } from 'src/libs/ajax/Match';
 
 const dar_collection = {
   'darCollectionId': 1,
@@ -398,92 +397,99 @@ const match_results = [
 ];
 
 describe('BucketUtils', () => {
-  it('instantiates a collection into buckets', async () => {
+  it('instantiates a collection into buckets', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
-    const buckets = await binCollectionToBuckets(dar_collection);
-    expect(buckets).to.not.be.empty;
-    forEach(b => {
-      expect(b.key).to.not.be.empty;
-      expect(b.votes).to.not.be.empty;
-      if (!b.isRP) {
-        expect(b.label).to.not.be.empty;
-        expect(b.datasets).to.not.be.empty;
-        expect(b.datasetIds).to.not.be.empty;
-        if (b.dataUse) {
-          expect(b.dataUse).to.not.be.empty;
-          expect(b.dataUses).to.not.be.empty;
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+      cy.wrap(buckets).should('not.be.empty');
+      buckets.forEach(b => {
+        cy.wrap(b.key).should('not.be.empty');
+        cy.wrap(b.votes).should('not.be.empty');
+        if (!b.isRP) {
+          cy.wrap(b.label).should('not.be.empty');
+          cy.wrap(b.datasets).should('not.be.empty');
+          cy.wrap(b.datasetIds).should('not.be.empty');
+          if (b.dataUse) {
+            cy.wrap(b.dataUse).should('not.be.empty');
+            cy.wrap(b.dataUses).should('not.be.empty');
+          }
+          cy.wrap(b.elections).should('not.be.empty');
         }
-        expect(b.elections).to.not.be.empty;
-      }
-    })(buckets);
+      });
+    });
   });
 
-  it('there should be a bucket with two GRU datasets', async () => {
+  it('there should be a bucket with two GRU datasets', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
-    const buckets = await binCollectionToBuckets(dar_collection);
-    const gruBucket = find(b => b.label === 'GRU')(buckets);
-    expect(gruBucket).to.not.be.empty;
-    expect(gruBucket.datasets).to.not.be.empty;
-    expect(gruBucket.datasets.length).to.eq(2);
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+      const gruBucket = buckets.find(b => b.label === 'GRU');
+      cy.wrap(gruBucket).should('not.be.empty');
+      cy.wrap(gruBucket.datasets).should('not.be.empty');
+      cy.wrap(gruBucket.datasets.length).should('eq', 2);
+    });
   });
 
-  it('there should be a bucket with a primary OTHER dataset', async () => {
+  it('there should be a bucket with a primary OTHER dataset', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
-    const buckets = await binCollectionToBuckets(dar_collection);
-    const other = find(b => b.label === 'OTH1')(buckets);
-    expect(other).to.not.be.empty;
-    expect(other.datasets).to.not.be.empty;
-    expect(other.datasets.length).to.eq(1);
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+      const other = buckets.find(b => b.label === 'OTH1');
+      cy.wrap(other).should('not.be.empty');
+      cy.wrap(other.datasets).should('not.be.empty');
+      cy.wrap(other.datasets.length).should('eq', 1);
+    });
   });
 
-  it('there should be a bucket with a secondary OTHER dataset', async () => {
+  it('there should be a bucket with a secondary OTHER dataset', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
-    const buckets = await binCollectionToBuckets(dar_collection);
-    const secondaryOther = find(b => b.label === 'OTH2')(buckets);
-    expect(secondaryOther).to.not.be.empty;
-    expect(secondaryOther.datasets).to.not.be.empty;
-    expect(secondaryOther.datasets.length).to.eq(1);
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+      const secondaryOther = buckets.find(b => b.label === 'OTH2');
+      cy.wrap(secondaryOther).should('not.be.empty');
+      cy.wrap(secondaryOther.datasets).should('not.be.empty');
+      cy.wrap(secondaryOther.datasets.length).should('eq', 1);
+    });
   });
 
-  it('there should be a bucket with a an undefined data use', async () => {
+  it('there should be a bucket with a an undefined data use', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
-    const buckets = await binCollectionToBuckets(dar_collection);
-    const missingDataUse = find(b => !b.isRP && isUndefined(b.dataUse))(buckets);
-    expect(missingDataUse).to.not.be.empty;
-    expect(missingDataUse.datasets).to.not.be.empty;
-    expect(missingDataUse.datasets.length).to.eq(1);
-    expect(missingDataUse.dataUse).to.be.undefined;
-    expect(missingDataUse.dataUses).to.be.empty;
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+      const missingDataUse = buckets.find(b => !b.isRP && isUndefined(b.dataUse));
+      cy.wrap(missingDataUse).should('not.be.empty');
+      cy.wrap(missingDataUse.datasets).should('not.be.empty');
+      cy.wrap(missingDataUse.datasets.length).should('eq', 1);
+      cy.wrap(missingDataUse.dataUse).should('be.undefined');
+      cy.wrap(missingDataUse.dataUses).should('be.empty');
+    });
   });
 
-  it('buckets should be filtered to datasets containing one dac id: 1', async () => {
+  it('buckets should be filtered to datasets containing one dac id: 1', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
-    const buckets = await binCollectionToBuckets(dar_collection, [1]);
-    const dataAccessBuckets = filter(b => !b.isRP)(buckets);
-    expect(dataAccessBuckets).to.exist;
-    expect(dataAccessBuckets.length).to.eq(1);
-    expect(dataAccessBuckets[0].datasetIds.length).to.eq(1);
-    forEach(b => {
-      forEach(e => {
-        expect(b.datasetIds).to.contain(e.datasetId);
-      })(b.elections);
-    })(buckets);
+    cy.wrap(binCollectionToBuckets(dar_collection, [1])).then((buckets) => {
+      const dataAccessBuckets = buckets.filter(b => !b.isRP);
+      cy.wrap(dataAccessBuckets).should('exist');
+      cy.wrap(dataAccessBuckets.length).should('eq', 1);
+      cy.wrap(dataAccessBuckets[0].datasetIds.length).should('eq', 1);
+      forEach(b => {
+        forEach(e => {
+          cy.wrap(b.datasetIds).should('contain', e.datasetId);
+        })(b.elections);
+      })(buckets);
+    });
   });
 
-  it('buckets should be filtered to datasets containing two dac ids: 1 & 5', async () => {
+  it('buckets should be filtered to datasets containing two dac ids: 1 & 5', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
-    const buckets = await binCollectionToBuckets(dar_collection, [1, 5]);
-    const dataAccessBuckets = filter(b => !b.isRP)(buckets);
-    expect(dataAccessBuckets).to.exist;
-    expect(dataAccessBuckets.length).to.eq(2);
-    forEach(b => {
-      forEach(e => {
-        expect(b.datasetIds).to.contain(e.datasetId);
-      })(b.elections);
-    })(buckets);
+    cy.wrap(binCollectionToBuckets(dar_collection, [1, 5])).then((buckets) => {
+      const dataAccessBuckets = buckets.filter(b => !b.isRP);
+      cy.wrap(dataAccessBuckets).should('exist');
+      cy.wrap(dataAccessBuckets.length).should('eq', 2);
+      forEach(b => {
+        forEach(e => {
+          cy.wrap(b.datasetIds).should('contain', e.datasetId);
+        })(b.elections);
+      })(buckets);
+    });
   });
 
-  it('match failures should be condensed for a bucket with two failing matches', async () => {
+  it('match failures should be condensed for a bucket with two failing matches', () => {
     const failing_matches = [
       {
         'id': 1,
@@ -509,75 +515,76 @@ describe('BucketUtils', () => {
       }
     ];
     cy.stub(Match, 'findMatchBatch').returns(failing_matches);
-    const buckets = await binCollectionToBuckets(dar_collection);
-    expect(buckets).to.not.be.empty;
-    let rationaleCheck = false;
-    forEach(b => {
-      if (!isEmpty(b.matchResults)) {
-        expect(b.algorithmResult.rationales).to.not.be.empty;
-        expect(b.algorithmResult.rationales.length).to.eq(5, 'Rationales should be length 5');
-        rationaleCheck = true;
-      }
-    })(buckets);
-    expect(rationaleCheck).to.eq(true, 'Rationale checks should have occurred');
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+      cy.wrap(buckets).should('not.be.empty');
+      let rationaleCheck = false;
+      buckets.forEach(b => {
+        if (!isEmpty(b.matchResults)) {
+          cy.wrap(b.algorithmResult.rationales).should('not.be.empty');
+          cy.wrap(b.algorithmResult.rationales.length).should('eq', 5);
+          rationaleCheck = true;
+        }
+      });
+      cy.wrap(rationaleCheck).should('eq', true);
+    });
   });
 
-  it('marks three unequal data uses as unequal', async () => {
+  it('marks three unequal data uses as unequal', () => {
     const dataUses = [
       {'generalUse': true},
       {'generalUse': false, 'hmbResearch': true, 'other': 'other restrictions'},
       {'generalUse': false, 'hmbResearch': true, 'secondaryOther': 'secondary other restrictions'}
     ];
-    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(false);
-    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(false);
-    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(false);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', false);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', false);
+    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', false);
   });
 
-  it('marks three mixed, unequal data uses as unequal', async () => {
+  it('marks three mixed, unequal data uses as unequal', () => {
     const dataUses = [
       {'generalUse': true, 'collaborationInvestigators': true},
       {'generalUse': false, 'hmbResearch': true, 'publicationMoratorium': 'date'},
       {'generalUse': false, 'hmbResearch': false, 'stigmatizeDiseases': true}
     ];
-    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(false);
-    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(false);
-    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(false);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', false);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', false);
+    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', false);
   });
 
-  it('marks three equal data uses as equal', async () => {
+  it('marks three equal data uses as equal', () => {
     const dataUses = [
       {'generalUse': true},
       {'generalUse': true},
       {'generalUse': true}
     ];
-    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(true);
-    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(true);
-    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(true);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', true);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', true);
+    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', true);
   });
 
-  it('marks three mixed, equal data uses as equal', async () => {
+  it('marks three mixed, equal data uses as equal', () => {
     const dataUses = [
       {'generalUse': true, 'recontactMay': true},
       {'generalUse': true, 'recontactMust': true},
       {'generalUse': true, 'recontactingDataSubjects': true}
     ];
-    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(true);
-    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(true);
-    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(true);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', true);
+    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', true);
+    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', true);
   });
 
-  it('correctly determines matchable data use objects', async () => {
+  it('correctly determines matchable data use objects', () => {
     const dataUses = [
       {'generalUse': true, 'recontactMay': true},
       {'generalUse': true, 'recontactMust': true},
       {'generalUse': true, 'genomicSummaryResults': true}
     ];
-    forEach(d => {
-      expect(shouldAbstain(d)).to.eq(false);
-    })(dataUses);
+    dataUses.forEach(d => {
+      cy.wrap(shouldAbstain(d)).should('eq', false);
+    });
   });
 
-  it('correctly determines unmatchable data use objects', async () => {
+  it('correctly determines unmatchable data use objects', () => {
     const dataUses = [
       {'generalUse': true, 'addiction': true},
       {'generalUse': true, 'collaboratorRequired': true},
@@ -597,12 +604,12 @@ describe('BucketUtils', () => {
       {'generalUse': true, 'stigmatizeDiseases': true},
       {'generalUse': true, 'vulnerablePopulations': true}
     ];
-    forEach(d => {
-      expect(shouldAbstain(d)).to.eq(true);
-    })(dataUses);
+    dataUses.forEach(d => {
+      cy.wrap(shouldAbstain(d)).should('eq', true);
+    });
   });
 
-  it('correctly buckets data uses when there are similar data use entries', async () => {
+  it('correctly buckets data uses when there are similar data use entries', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results);
     const collection = {
       'darCollectionId': 1,
@@ -975,22 +982,23 @@ describe('BucketUtils', () => {
         }
       ],
     };
-    const buckets = await binCollectionToBuckets(collection);
-    expect(buckets).to.not.be.empty;
-    // The provided dar collection should have 1 RP bucket and 3 Data Use buckets
-    expect(buckets.length).to.eq(4);
-    expect(buckets[0].isRP).to.eq(true);
-    // HMB + Other
-    expect(buckets[1].isRP).to.eq(undefined);
-    expect(buckets[1].dataUse.hmbResearch).to.eq(true);
-    expect(buckets[1].dataUse.other).to.not.be.empty;
-    // General Use
-    expect(buckets[2].isRP).to.eq(undefined);
-    expect(buckets[2].dataUse.generalUse).to.eq(true);
-    // HMB
-    expect(buckets[3].isRP).to.eq(undefined);
-    expect(buckets[3].dataUse.hmbResearch).to.eq(true);
-    expect(buckets[3].dataUse.other).to.eq(undefined);
+    cy.wrap(binCollectionToBuckets(collection)).then((buckets) => {
+      cy.wrap(buckets).should('not.be.empty');
+      // The provided dar collection should have 1 RP bucket and 3 Data Use buckets
+      cy.wrap(buckets.length).should('eq', 4);
+      cy.wrap(buckets[0].isRP).should('eq', true);
+      // HMB + Other
+      cy.wrap(buckets[1].isRP).should('eq', undefined);
+      cy.wrap(buckets[1].dataUse.hmbResearch).should('eq', true);
+      cy.wrap(buckets[1].dataUse.other).should('not.be.empty');
+      // General Use
+      cy.wrap(buckets[2].isRP).should('eq', undefined);
+      cy.wrap(buckets[2].dataUse.generalUse).should('eq', true);
+      // HMB
+      cy.wrap(buckets[3].isRP).should('eq', undefined);
+      cy.wrap(buckets[3].dataUse.hmbResearch).should('eq', true);
+      cy.wrap(buckets[3].dataUse.other).should('eq', undefined);
+    });
   });
 
 });

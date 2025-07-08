@@ -1,8 +1,6 @@
-/* eslint-disable no-undef,no-console */
-
 import React from 'react';
-import {mount} from 'cypress/react';
-import {DacUsers} from '../../../src/pages/manage_dac/DacUsers.jsx';
+import { mount } from 'cypress/react';
+import { DacUsers } from 'src/pages/manage_dac/DacUsers.jsx';
 import dac from './dac.json';
 
 describe('Dac User Tests', () => {
@@ -16,21 +14,17 @@ describe('Dac User Tests', () => {
     mount(<DacUsers {...props} />);
     dac.chairpersons.forEach(u => {
       cy.contains(u.displayName);
-      cy.get('[data-cy="remove_button_' + u.userId + '"]').click().then(() => {
-        cy.contains('Pending Removal');
-      });
-      cy.get('[data-cy="remove_button_' + u.userId + '"]').click().then(() => {
-        cy.get('Pending Removal').should('not.exist');
-      });
+      cy.get('[data-cy="remove_button_' + u.userId + '"]').click();
+      cy.contains('Pending Removal');
+      cy.get('[data-cy="remove_button_' + u.userId + '"]').click();
+      cy.get('Pending Removal').should('not.exist');
     });
     dac.members.forEach(u => {
       cy.contains(u.displayName);
-      cy.get('[data-cy="remove_button_' + u.userId + '"]').click().then(() => {
-        cy.contains('Pending Removal');
-      });
-      cy.get('[data-cy="remove_button_' + u.userId + '"]').click().then(() => {
-        cy.get('Pending Removal').should('not.exist');
-      });
+      cy.get('[data-cy="remove_button_' + u.userId + '"]').click();
+      cy.contains('Pending Removal');
+      cy.get('[data-cy="remove_button_' + u.userId + '"]').click();
+      cy.get('Pending Removal').should('not.exist');
     });
   });
 });

@@ -1,9 +1,8 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
 import { cloneDeep } from 'lodash/fp';
-import { User } from '../../../src/libs/ajax/User';
-import DataSubmissionStudyInformation from '../../../src/pages/data_submission/ds_study_information';
+import { User } from 'src/libs/ajax/User';
+import DataSubmissionStudyInformation from 'src/pages/data_submission/ds_study_information';
 
 let propCopy;
 const user = {
@@ -26,8 +25,7 @@ beforeEach(() => {
 describe('DataSubmissionStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
     mount(<DataSubmissionStudyInformation {...propCopy}/>);
-    const formFields = cy.get('.formField-container');
-    formFields.should('have.length', 13);
+    cy.get('.formField-container').should('have.length', 13);
 
     cy.get('.formField-studyName').should('have.length', 1);
     cy.get('.formField-studyType').should('have.length', 1);

@@ -1,13 +1,15 @@
-import { Notifications } from '../libs/utils';
-import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
-import DataSubmitterAgreementLink from '../assets/Data_Registrant_Agreement_7.2.24.22.pdf';
-import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';
 import React, { useEffect, useState } from 'react';
-import { spinnerService } from '../libs/spinner-service';
 import { isNil, isNull } from 'lodash';
-import { Styles } from '../libs/theme';
-import UsgOmbText from './UsgOmbText';
+import { Notifications } from 'src/libs/utils';
+import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
+import DataSubmitterAgreementLink from 'src/assets/Data_Registrant_Agreement_7.2.24.22.pdf';
+import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from 'src/libs/acknowledgements';
+import { spinnerService } from 'src/libs/spinner-service';
+import { Styles } from 'src/libs/theme';
+import {
+  NIHDataUseCertificationAgreement
+} from 'src/components/external_docs/NIHDataUseCertificationAgreement';
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
@@ -25,7 +27,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
         setIsLoading(true);
         setHasAccepted(await hasSOAcceptedDAAs());
         setIsLoading(false);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Error: Unable to retrieve user acknowledgements from server'});
         setIsLoading(false);
       }
@@ -80,9 +82,14 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
             </div>
             <div>
               {isDataSubmitterTab === true ? isNull :
-                <a target='_blank' rel='noreferrer' href={NIHLibraryCardAgreementLink} className='button button-white'>
-                  <span className='glyphicon glyphicon-download'/> NHGRI Library Card Agreement
-                </a>
+                  <div>
+                    <div style={{ marginBottom: '25px' }}>
+                      <a target='_blank' rel='noreferrer' href={NihLibraryCardAgreementLink} className='button button-white'>
+                        <span className='glyphicon glyphicon-download'/> NIH Library Card Agreement
+                      </a>
+                    </div>
+                  <NIHDataUseCertificationAgreement className={'button button-white'} showDownloadIcon={true}/>
+                  </div>
               }
             </div>
             <div className='flex flex-row' style={{ justifyContent: 'flex-end' }}>
@@ -103,12 +110,12 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
 // Broad and NIH agreements before proceeding to the given
 // component.
 export const ensureSoHasDaaAcknowledgement = (Component, isLibraryCardIssueTable = false, isDataSubmitterTab = false) => {
+  const _ignored = isLibraryCardIssueTable;
   const WrappedComponent = (props) => (
     <>
       <SigningOfficialDaaAgreementWrapper isDataSubmitterTab={isDataSubmitterTab}>
         <Component {...props} />
       </SigningOfficialDaaAgreementWrapper>
-      {isLibraryCardIssueTable && <UsgOmbText />}
     </>
   );
   return WrappedComponent;

@@ -12,7 +12,7 @@ const DacDatasetsModal = (props) => {
 
   useEffect(() => {
     const init = async () => {
-      let translationPromises = datasets.map((dataset) =>
+      const translationPromises = datasets.map((dataset) =>
         DataUseTranslation.translateDataUseRestrictions(dataset.dataUse));
       const datasetTranslations = await Promise.all(translationPromises);
       setTranslatedDatasetRestrictions(datasetTranslations);

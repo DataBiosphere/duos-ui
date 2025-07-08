@@ -4,7 +4,7 @@ import ts from 'typescript-eslint'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import cypress from 'eslint-plugin-cypress/flat'
+import cypress from 'eslint-plugin-cypress'
 
 /*
 This config is a combination of the basic recommended React configs from Vite:
@@ -38,6 +38,7 @@ export default ts.config(
       react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      cypress,
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -61,6 +62,7 @@ export default ts.config(
         }
       ],
       'react/prop-types': 'off',
+      'quotes': ['error', 'single', { 'avoidEscape': true, 'allowTemplateLiterals': true }],
     },
   },
 )

@@ -1,9 +1,26 @@
-import {forEach as lodashForEach, isArray, map as lodashMap} from 'lodash';
-import { DAR } from './ajax/DAR';
+import {forEach as lodashForEach} from 'lodash';
+import {DAR} from './ajax/DAR';
 import {Theme} from './theme';
-import {capitalize, cloneDeep, concat, each, every, filter, find, first, flatten, flow, forEach as lodashFPForEach, get, getOr, includes, isEmpty, isNil, join, map, toLower, uniq} from 'lodash/fp';
+import {
+  capitalize,
+  cloneDeep,
+  concat,
+  every,
+  filter,
+  find,
+  first,
+  forEach as lodashFPForEach,
+  get,
+  getOr,
+  includes,
+  isEmpty,
+  isNil,
+  join,
+  map,
+  toLower
+} from 'lodash/fp';
 import {headerTabsConfig} from '../components/DuosHeader';
-import { ToastNotifications } from './ToastNotifications';
+import {ToastNotifications} from './ToastNotifications';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
@@ -18,68 +35,6 @@ export const isCollectionCanceled = (collection) => {
   return every((dar) => toLower(dar.data.status) === 'canceled')(dars);
 };
 
-export const darCollectionUtils = {
-  nonCancellableCollectionStatuses: ['Canceled', 'Under Election'],
-  //this needs to be defined outside of the object, keys can't reference other key/value pairs on object initialization,
-  //determineCollectionStatus uses this function so its definition/reference needs to exist
-  isCollectionCanceled,
-  determineCollectionStatus: (collection, relevantDatasets) => {
-    const electionStatusCount = {};
-    let output;
-    if (!isEmpty(collection.dars)) {
-      const targetElections = flow([
-        map((dar) => {
-          const {elections} = dar;
-          //election is empty => no elections made for dar
-          //need to figure out if dar is relevant, can obtain datasetId from dar.data
-          //see if its relevant, if it is, add 1 to submitted on hash
-          //return empty array at the end
-          if (isEmpty(elections)) {
-            // Dataset IDs should be on the DAR, but if not, pull from the dar.data
-            const datasetIds = isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
-            lodashFPForEach((datasetId) => {
-              if (includes(relevantDatasets, datasetId)) {
-                if (isNil(electionStatusCount['Submitted'])) {
-                  electionStatusCount['Submitted'] = 0;
-                }
-                electionStatusCount['Submitted']++;
-              }
-            })(datasetIds);
-            return [];
-          } else {
-            //if elections exist, filter out elections based on relevant ids
-            //only Data Access elections impact the status of the collection
-            //NOTE: Admin does not have relevantIds, DAC roles do
-            const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
-            if (isNil(relevantDatasets)) {
-              return electionArr;
-            } else {
-              const relevantIds = map(dataset => dataset.datasetId)(relevantDatasets);
-              return filter(election => includes(election.datasetId, relevantIds))(electionArr);
-            }
-          }
-        }),
-        flatten
-      ])(collection.dars);
-
-      if (isNil(relevantDatasets)) {
-        each(election => {
-          const {status} = election;
-          if (isNil(electionStatusCount[status])) {
-            electionStatusCount[status] = 0;
-          }
-          electionStatusCount[status]++;
-        })(targetElections);
-        output = lodashMap(electionStatusCount, (value, key) => {
-          return `${key}: ${value}`;
-        }).join('\n');
-      } else {
-        output = outputCommaSeperatedElectionStatuses(targetElections);
-      }
-      return output;
-    }
-  }
-};
 ///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
 
 export const goToPage = (value, pageCount, setCurrentPage) => {
@@ -158,6 +113,7 @@ export const USER_ROLES = {
   alumni: 'Alumni',
   signingOfficial: 'SigningOfficial',
   dataSubmitter: 'DataSubmitter',
+  serviceAccount: 'ServiceAccount',
   all: 'All'
 };
 
@@ -192,6 +148,7 @@ export const setUserRoleStatuses = (user, Storage) => {
   user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
   user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1;
   user.isDataSubmitter = currentUserRoles.indexOf(USER_ROLES.dataSubmitter) > -1;
+  user.isServiceAccount = currentUserRoles.indexOf(USER_ROLES.serviceAccount) > -1;
   Storage.setCurrentUser(user);
   return user;
 };
@@ -249,17 +206,6 @@ export const PromiseSerial = funcs =>
 //////////////////////////////////
 //DAR CONSOLES UTILITY FUNCTIONS//
 /////////////////////////////////
-
-export const outputCommaSeperatedElectionStatuses = (elections) => {
-  // find all statuses that exist for all the user's elections
-  const statuses = uniq(
-    elections.map((e) => processElectionStatus(e, e.votes, false))
-  ).filter((status) => !isEmpty(status));
-  if (isEmpty(statuses)) {
-    return 'Unreviewed';
-  }
-  return statuses.join(', ');
-};
 
 export const getElectionDate = (election) => {
   let formattedString = '- -';
@@ -335,14 +281,11 @@ export const getSearchFilterFunctions = () => {
       return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
     }, targetList),
     libraryCard: (term, targetList) => filter(libraryCard => {
-      const {userName, institution, createDate, updateDate, eraCommonsId, userEmail} = libraryCard;
-      const institutionName = institution.name;
+      const {userName, createDate, updateDate, userEmail} = libraryCard;
       return includes(term, toLower(userName)) ||
-        includes(term, toLower(institutionName)) ||
         includes(term, formatDate(createDate)) ||
         includes(term, formatDate(updateDate)) ||
-        includes(term, toLower(userEmail)) ||
-        includes(term, toLower(eraCommonsId));
+        includes(term, toLower(userEmail));
     }, targetList),
     signingOfficialResearchers: (term, targetList) => filter(researcher => {
       const {displayName, eraCommonsId, email} = researcher;
@@ -363,12 +306,22 @@ export const getSearchFilterFunctions = () => {
     darCollections: (term, targetList) =>
       isEmpty(term) ? targetList :
         filter(collection => {
-          const {darCode, datasetCount, institutionName, name, researcherName, status, submissionDate} = collection;
+          const {
+            darCode,
+            datasetCount,
+            institutionName,
+            name,
+            researcherName,
+            status,
+            submissionDate,
+            expiresAt
+          } = collection;
           const formattedSubmissionDate = formatDate(submissionDate);
+          const formattedExpiresAt = formatDate(expiresAt);
           const matched = find((phrase) => {
             const termArr = term.split(' ');
             return find(term => includes(toLower(term), toLower(phrase)))(termArr);
-          })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate]);
+          })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate, formattedExpiresAt]);
           return !isNil(matched);
         })(targetList),
     users: (term, targetList) => {
@@ -377,7 +330,7 @@ export const getSearchFilterFunctions = () => {
 
       return filter(user => {
         const {
-          displayName, email, roles, institution, libraryCards
+          displayName, email, roles, institution, libraryCard
         } = user;
 
         const matchable = [displayName, email];
@@ -388,8 +341,8 @@ export const getSearchFilterFunctions = () => {
           matchable.push(institution.name);
         }
 
-        if (!isNil(libraryCards) && isArray(libraryCards)) {
-          const hasLibraryCard = !isNil(libraryCards) && !isEmpty(libraryCards);
+        if (!isNil(libraryCard)) {
+          const hasLibraryCard = !isNil(libraryCard);
 
           if (hasLibraryCard) {
             matchable.push('LibraryCard');

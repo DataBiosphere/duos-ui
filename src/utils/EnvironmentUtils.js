@@ -1,4 +1,4 @@
-import {Storage} from '../libs/storage';
+import {Storage} from 'src/libs/storage';
 import {includes} from 'lodash/fp';
 
 

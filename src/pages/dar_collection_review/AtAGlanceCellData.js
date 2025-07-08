@@ -1,4 +1,4 @@
-import {styles} from "./AtAGlance";
+import {styles} from './AtAGlance';
 
 
 export function dataUseCellData({dataUse = '- -', label = 'Data Use'}) {

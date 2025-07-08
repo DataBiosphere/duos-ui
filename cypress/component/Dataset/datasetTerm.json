@@ -1,0 +1,48 @@
+{
+  "datasetId": 1975,
+  "name": "ExternalAccessTestJL1",
+  "datasetName": "ExternalAccessTestJL1",
+  "createDate": "Nov 2, 2023",
+  "createUserId": 3396,
+  "participantCount": 100,
+  "updateDate": 1730999135936,
+  "updateUserId": 3351,
+  "alias": 682,
+  "datasetIdentifier": "DUOS-000682",
+  "dataUse": {
+    "primary": [
+      {
+        "code": "GRU",
+        "description": "Data is available for general research use."
+      }
+    ],
+    "secondary": []
+  },
+  "deletable": false,
+  "createUser": {
+    "userId": 3396,
+    "email": "jlawson@test.com",
+    "displayName": "Jonathan Lawson (Admin \u0026 DAC Member)",
+    "createDate": 1526056488000,
+    "emailPreference": false,
+    "institutionId": 150,
+    "eraCommonsId": "a"
+  },
+  "study": {
+    "studyId": 5854,
+    "studyName": "ExternalAccessTestJL1",
+    "description": "A description for ExternalAccessTestJL1",
+    "publicVisibility": true,
+    "piName": "Dr. Make",
+    "dataTypes": [
+      "Hybrid Capture"
+    ],
+    "datasetIds": [
+      1975,
+      1976,
+      1977
+    ],
+    "createDate": 1698897809861,
+    "createUserId": 3396
+  }
+}

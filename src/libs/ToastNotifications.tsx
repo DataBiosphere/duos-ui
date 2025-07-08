@@ -4,7 +4,7 @@ import { AlertColor, Alert, Snackbar, SnackbarOrigin } from '@mui/material';
 
 type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 
-interface NotificationProps {
+interface NotificationRequiredProps extends NotificationProps {
   severity: AlertColor;
   text: string;
   timeout: number;
@@ -13,7 +13,16 @@ interface NotificationProps {
   [key: string]: any;
 }
 
-const defaultProps: NotificationProps = {
+interface NotificationProps {
+  severity?: AlertColor;
+  text: string;
+  timeout?: number;
+  layout?: ToastPosition | SnackbarOrigin;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+const defaultProps: NotificationRequiredProps = {
   severity: 'info',
   text: 'default',
   timeout: 3500,
@@ -72,6 +81,7 @@ export const ToastNotifications = {
           {...props}
         >
           <Alert
+            data-cy='notification-alert'
             onClose={handleClose}
             severity={severity}
             variant="filled"

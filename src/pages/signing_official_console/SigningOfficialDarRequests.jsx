@@ -18,7 +18,7 @@ export default function SigningOfficialDarRequests() {
         const collectionList = await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial);
         setCollectionList(collectionList);
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Error: Unable to retrieve current user from server' });
         setIsLoading(false);
       }
@@ -50,8 +50,10 @@ export default function SigningOfficialDarRequests() {
             DarCollectionTableColumnOptions.SUBMISSION_DATE,
             DarCollectionTableColumnOptions.RESEARCHER,
             DarCollectionTableColumnOptions.INSTITUTION,
+            DarCollectionTableColumnOptions.EXPIRES_AT,
             DarCollectionTableColumnOptions.DATASET_COUNT,
             DarCollectionTableColumnOptions.STATUS,
+            DarCollectionTableColumnOptions.ACTIONS,
           ]}
           isLoading={isLoading}
           cancelCollection={null}
