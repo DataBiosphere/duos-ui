@@ -30,7 +30,7 @@ describe('Terms of Service Acceptance Page', function () {
     cy.stub(ToS, 'getDUOSText').returns(text);
     cy.stub(ToS, 'acceptToS').as('acceptToS');
     cy.stub(Storage, 'getCurrentUser').returns({});
-    cy.stub(Navigation, 'back').returns(true);
+    cy.stub(Navigation, 'console').returns(true);
     cy.stub(Auth, 'signOut').as('signOut');
 
     mount(<TermsOfServiceAcceptance

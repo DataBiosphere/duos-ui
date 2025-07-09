@@ -25,7 +25,7 @@ export default function BackgroundSignIn(props) {
     };
 
     const redirect = (user) => {
-      Navigation.back(user, history);
+      Navigation.console(user, history);
       if (onSignIn)
         onSignIn();
     };

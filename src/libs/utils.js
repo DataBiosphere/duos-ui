@@ -154,23 +154,26 @@ export const setUserRoleStatuses = (user, Storage) => {
 };
 
 export const Navigation = {
-  back: async (user, history) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    const page =
-      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
-        : firstConsole ? firstConsole.link
-          : '/';
-    history.push(page);
-  },
+  /**
+   * This function is used to redirect the user to one of the following locations in order of priority:
+   * - The redirectTo query parameter in the URL if it exists
+   * - The first console tab that is rendered for the user if it exists
+   * - The root path ("/") if no redirectTo or console tab is available
+   *
+   * @param user The user object to determine which console tabs are available
+   * @param history The history object to use for navigation (optional)
+   * @returns {Promise<void>}
+   */
   console: async (user, history) => {
     const queryParams = new URLSearchParams(window.location.search);
+    const redirectTo = queryParams?.get('redirectTo');
     const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    const page =
-      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
-        : firstConsole ? firstConsole.link
-          : '/';
-    history.push(page);
+    const page = redirectTo || (firstConsole ? firstConsole.link : '/');
+    if (history) {
+      history.push(page);
+    } else {
+      window.location = page;
+    }
   }
 };
 
