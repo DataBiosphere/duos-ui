@@ -40,7 +40,6 @@ Step 3: Pass both arrays into the headCells and rows props
 */
 
 import React, {useState, useMemo} from 'react';
-import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -51,6 +50,7 @@ import Paper from '@mui/material/Paper';
 import { ThemeProvider } from '@mui/material/styles';
 import EnhancedTableHead from './EnhancedTableHead';
 import { theme } from './Themes';
+import Box from '@mui/material/Box';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -95,14 +95,14 @@ export default function SortableTable(props) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (_event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
 
-  const handleClick = (event, name) => {
+  const handleClick = (_event, name) => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
@@ -122,7 +122,7 @@ export default function SortableTable(props) {
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (_event, newPage) => {
     setPage(newPage);
   };
 

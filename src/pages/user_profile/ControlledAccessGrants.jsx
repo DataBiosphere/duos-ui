@@ -1,8 +1,8 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import SortableTable from '../../components/sortable_table/SortableTable';
-import { User } from '../../libs/ajax/User';
-import { Notifications } from '../../libs/utils';
+import SortableTable from 'src/components/sortable_table/SortableTable';
+import { User } from 'src/libs/ajax/User';
+import {formatDate, Notifications} from 'src/libs/utils';
 
 const headCells = [
   {
@@ -10,12 +10,6 @@ const headCells = [
     numeric: false,
     disablePadding: false,
     label: 'DAR Code',
-  },
-  {
-    id: 'approvalDate',
-    numeric: false,
-    disablePadding: false,
-    label: 'Approval Date',
   },
   {
     id: 'datasetIdentifier',
@@ -35,25 +29,31 @@ const headCells = [
     disablePadding: false,
     label: 'DAC Name',
   },
+  {
+    id: 'expirationDate',
+    numeric: false,
+    disablePadding: false,
+    label: 'Expiration Date',
+  }
 ];
 
-function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
+function createData(darCode, datasetIdentifier, datasetName, dacName, expirationDate) {
   return {
     darCode,
-    approvalDate,
     datasetIdentifier,
     datasetName,
-    dacName
+    dacName,
+    expirationDate
   };
 }
 
 function createRows(userRows) {
   return userRows.map((exampleRow) => createData(
     exampleRow.darCode,
-    exampleRow.approvalDate,
     exampleRow.datasetIdentifier,
     exampleRow.datasetName,
-    exampleRow.dacName
+    exampleRow.dacName,
+    formatDate(exampleRow.expirationDate)
   ));
 }
 
@@ -66,14 +66,14 @@ export default function ControlledAccessGrants() {
       try {
         const userRows = await User.getApprovedDatasets();
         setRows(createRows(userRows));
-      } catch (error) {
+      } catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
       }
     };
     init();
   }, []);
 
-  return <div>
+  return <div style={{ margin: '1rem 5rem' }}>
     <h1
       style={{
         color: '#01549F',
