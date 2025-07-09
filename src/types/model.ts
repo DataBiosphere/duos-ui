@@ -84,6 +84,16 @@ export interface DacObject {
   members: DuosUser[];
 }
 
+export interface DataAccessAgreement {
+  daaId: number;
+  createUserId: number;
+  createDate: number;
+  updateUserId?: number;
+  updateDate?: number;
+  file?: FileStorageObject;
+  dacs?: DacObject[];
+}
+
 export interface LibraryCard {
   id: number;
   userId: number;

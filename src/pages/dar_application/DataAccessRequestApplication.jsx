@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo';
-import DataAccessAgreements from 'src/pages/dar_application/DataAccessAgreements';
-import DataUseAgreements from 'src/pages/dar_application/DataUseAgreements';
+import {DataAccessAgreements} from 'src/pages/dar_application/DataAccessAgreements';
+import {DataUseAgreements} from 'src/pages/dar_application/DataUseAgreements';
 import DataAccessRequest from 'src/pages/dar_application/DataAccessRequest';
 import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
@@ -17,7 +17,6 @@ import {NotificationService} from 'src/libs/notificationService';
 import {Storage} from 'src/libs/storage';
 import {get, map} from 'lodash/fp';
 import 'src/pages/dar_application/DataAccessRequestApplication.css';
-
 import DucAddendum from 'src/pages/dar_application/DucAddendum';
 import {DAAUtils} from 'src/utils/DAAUtils';
 import {Metrics} from 'src/libs/ajax/Metrics';
@@ -31,6 +30,7 @@ import {ScrollableTabs} from 'src/pages/dar_application/ScrollableTabs';
 import {validateDARFormData, validationFailed} from 'src/utils/darFormUtils.js';
 import {assign, cloneDeep, head, isArray, isEmpty, isNil, isString, keys, merge, set} from 'lodash';
 import {Countries} from 'src/libs/ajax/Countries.js';
+import PropTypes from 'prop-types';
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info';
@@ -115,7 +115,7 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   });
 
-  const {history, location, existingDarsReadOnlyMode} = props;
+  const {history, location, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication} = props;
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
@@ -226,7 +226,7 @@ const DataAccessRequestApplication = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { collectionId } = props.match.params;
+        const { collectionId } = match.params;
         if (existingDarsReadOnlyMode) {
           const collection = await Collections.getCollectionById(collectionId);
           setResearcher(collection.createUser);
@@ -242,10 +242,10 @@ const DataAccessRequestApplication = (props) => {
       }
     };
     fetchData();
-  }, [props.match.params, existingDarsReadOnlyMode]);
+  }, [match.params, existingDarsReadOnlyMode]);
 
   const init = useCallback(async () => {
-    const { dataRequestId, collectionId } = props.match.params;
+    const { dataRequestId, collectionId } = match.params;
     let formData = {};
 
     if (!isNil(collectionId)) {
@@ -292,12 +292,12 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData);
     setIsLoading(false);
-  }, [props.match.params, existingDarsReadOnlyMode, researcher]);
+  }, [match.params, existingDarsReadOnlyMode, researcher]);
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {
       let appTabs = []
-      if(props.isProgressReportApplication){
+      if(isProgressReportApplication){
         // if we are creating a new progress report, we need to add another tab for the application
         appTabs = [{ name: 'DAR Update ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false}]
       }
@@ -309,7 +309,7 @@ const DataAccessRequestApplication = (props) => {
             return {name: itemLabel, id: `${DAR_UPDATE_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false};
           })]);
     }
-  }, [formData?.darCode, props.isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs]);
+  }, [formData?.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs]);
 
   useEffect(() => {
     init();
@@ -369,7 +369,7 @@ const DataAccessRequestApplication = (props) => {
   const attemptSubmit = async () => {
     const validation = validateDARFormData({
       formData,
-      datasets: (props.draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets,
+      datasets: (draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets,
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
@@ -378,7 +378,6 @@ const DataAccessRequestApplication = (props) => {
       internalCollaboratorsCompleted,
       externalCollaboratorsCompleted,
     });
-
     setFormValidation(validation);
 
     const hasLibraryCard = !isNil(researcher.libraryCard);
@@ -478,7 +477,7 @@ const DataAccessRequestApplication = (props) => {
     }
 
     // Make sure we navigate back to the current DAR after saving.
-    const { dataRequestId } = props.match.params;
+    const { dataRequestId } = match.params;
     try {
       let referenceId = formattedFormData.referenceId;
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
@@ -516,7 +515,7 @@ const DataAccessRequestApplication = (props) => {
     history.goBack();
   };
 
-  const { dataRequestId } = props.match.params;
+  const { dataRequestId } = match.params;
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
   if (isLoading) {
@@ -575,7 +574,7 @@ const DataAccessRequestApplication = (props) => {
               </div>
             </ConfirmationDialog>
 
-            {props.isProgressReportApplication && (
+            {isProgressReportApplication && (
                 <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className='dar-steps'>
                   <ConditionalAccordion
                       condition={false}
@@ -672,7 +671,7 @@ const DataAccessRequestApplication = (props) => {
                       updateUploadedIrbDocument={updateIrbDocument}
                       setDatasets={setDatasets}
                       setSelectedDatasets={setSelectedDatasets}
-                      draftDar={props.draftDar}
+                      draftDar={draftDar}
                   />
                 </ConditionalAccordion>
               </div>
@@ -697,14 +696,14 @@ const DataAccessRequestApplication = (props) => {
                   {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
                       datasets={selectedDatasets}
-                      darCode={formData.darCode}
+                      isDraft={draftDar}
                       cancelAttest={() => setIsAttested(false)}
                       isAttested={isAttested}
                       attest={attemptSubmit}
                       save={() => setShowDialogSave(true)}
                     /> :
                     <DataUseAgreements
-                      darCode={formData.darCode}
+                      isDraft={draftDar}
                       cancelAttest={() => setIsAttested(false)}
                       isAttested={isAttested}
                       attest={attemptSubmit}
@@ -733,3 +732,12 @@ const DataAccessRequestApplication = (props) => {
 };
 
 export default DataAccessRequestApplication;
+
+DataAccessRequestApplication.propTypes = {
+  match: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  draftDar: PropTypes.bool.isRequired,
+  isProgressReportApplication: PropTypes.bool.isRequired,
+  existingDarsReadOnlyMode: PropTypes.bool
+}
