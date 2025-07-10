@@ -9,6 +9,7 @@ import {LabeledField} from 'src/pages/DatasetStatistics';
 import {Button, Chip, TextField} from '@mui/material';
 import {FormField, FormFieldTypes} from 'src/components/forms/forms';
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 
 const styles = {
     row: {
@@ -61,6 +62,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const [institution, setInstitution] = useState<Institution>();
     const [editMode, setEditMode] = useState(false);
     const [tempInstitution, setTempInstitution] = useState<Institution | undefined>(institution);
+    const [tempDomain, setTempDomain] = useState<string>('');
 
     useEffect(() => {
         InstitutionAPI.getById(institutionId).then((resp) => {
@@ -171,6 +173,34 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         onDelete={editMode ? () => handleDomainDelete(domain) : undefined}
                     />
                 ))}
+                {editMode && <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                    <TextField
+                        variant='outlined'
+                        value={tempDomain}
+                        size="small"
+                        InputProps={{
+                            style: { fontSize: 14 }
+                        }}
+                        style={{ width: 250 }}
+                        onChange={(e) => {
+                            setTempDomain(e.target.value);
+                        }}
+                    />
+                    <Button
+                        // size={'small'}
+                        variant="contained"
+                        onClick={() => {
+                            if (tempDomain && tempInstitution && !tempInstitution.domains.includes(tempDomain)) {
+                                const updatedDomains = [...tempInstitution.domains, tempDomain];
+                                setTempInstitution({...tempInstitution, domains: updatedDomains});
+                                setTempDomain('');
+                            }
+                        }}
+                        style={{ marginLeft: 10, fontSize: 14, width: 'auto' }}
+                    >
+                        Add
+                    </Button>
+                </div>}
             </LabeledField>
             <div style={{paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%'}}>
                 <div style={{ fontSize: 20, fontWeight: 600, paddingBottom: 10 }}>
@@ -183,6 +213,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                             disabled={!editMode}
                             value={so.displayName}
                             InputProps={{
+                                style: { fontSize: 14 },
                                 readOnly: !editMode,
                             }}
                             onChange={(e) => {
@@ -201,6 +232,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                             disabled={!editMode}
                             value={so.email}
                             InputProps={{
+                                style: { fontSize: 14 },
                                 readOnly: !editMode,
                             }}
                             onChange={(e) => {
