@@ -119,7 +119,7 @@ export default function CollectionSubmitVoteBox(props) {
       Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
       if (error && error.status === 409) {
-        Notifications.showError({text: error.response.data.message + ' Chair vote not submitted, updating chair votes'});
+        Notifications.showError({text: error.response.data.message + ' Chair vote not submitted, updating chair votes.'});
         reloadFn();
       } else {
         Notifications.showError({text: 'Error: Failed to update vote'});
