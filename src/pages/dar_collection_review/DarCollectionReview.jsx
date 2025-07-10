@@ -219,6 +219,7 @@ export default function DarCollectionReview(props) {
           adminPage={adminPage}
           readOnly={readOnly}
           updateFinalVote={updateFinalVoteFn}
+          reloadFn={init}
         />}
       </div>
     </div>

@@ -75,7 +75,7 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isVotingDisabled, setIsVotingDisabled] = useState(false);
-  const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage, bucketKey, updateFinalVote} = props;
+  const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage, bucketKey, updateFinalVote, reloadFn} = props;
 
   useEffect(() => {
     setIsVotingDisabled( props.isDisabled || (isFinal && submitted) || adminPage);
@@ -117,8 +117,13 @@ export default function CollectionSubmitVoteBox(props) {
         setVote(newVote);
       }
       Notifications.showSuccess({text: 'Successfully updated vote'});
-    } catch (_error) {
-      Notifications.showError({text: 'Error: Failed to update vote'});
+    } catch (error) {
+      if (error && error.status === 409) {
+        Notifications.showError({text: error.response.data.message + ' Chair vote not submitted, updating chair votes'});
+        reloadFn();
+      } else {
+        Notifications.showError({text: 'Error: Failed to update vote'});
+      }
     }
   };
 
@@ -127,8 +132,14 @@ export default function CollectionSubmitVoteBox(props) {
       const voteIds = map(v => v.voteId)(votes);
       await Votes.updateRationaleByIds(voteIds, rationale);
       Notifications.showSuccess({text: 'Successfully updated vote rationale'});
-    } catch (_error) {
-      Notifications.showError({text: 'Error: Failed to update vote rationale'});
+    } catch (error) {
+      if (error && error.status === 409) {
+        Notifications.showError({text: error.response.data.message + '  Rationale not submitted, updating vote display.'});
+        reloadFn();
+      } else {
+        Notifications.showError(
+            {text: 'Error: Failed to update vote rationale'});
+      }
     }
   };
 
