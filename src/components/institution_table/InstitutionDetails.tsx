@@ -8,6 +8,7 @@ import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {LabeledField} from 'src/pages/DatasetStatistics';
 import {Button, Chip, TextField} from '@mui/material';
 import {FormField, FormFieldTypes} from 'src/components/forms/forms';
+import EditIcon from '@mui/icons-material/Edit';
 
 const styles = {
     row: {
@@ -119,7 +120,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 <img id='back-arrow-icon' src={backArrowIcon} alt={'Back'} style={{height: 28, width: 28}}/>
             </Link>
         </div>
-        <div style={{padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%'}}>
+        <div style={{padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%', paddingRight: 40}}>
             <div style={{ fontSize: 20, fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>Back to institutions</span>
                 <div>
@@ -129,7 +130,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                             variant="outlined"
                             color="error"
                             onClick={handleCancelEdit}
-                            style={{ marginRight: '10px' }}
+                            style={{ marginRight: '10px', fontSize: 14 }}
                         >
                             Cancel
                         </Button>
@@ -139,12 +140,14 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         variant="contained"
                         color={editMode ? 'success' : 'primary'}
                         onClick={handleEditToggle}
+                        style={{fontSize: 14}}
+                        startIcon={!editMode && <EditIcon />}
                     >
                         {editMode ? 'Save' : 'Edit'}
                     </Button>
                 </div>
             </div>
-            <LabeledField label={'Institution Name'}>
+            <LabeledField label={'Institution Name'} labelPlacement={'top'}>
                 <div style={{display: 'flex', alignItems: 'center'}}>
                     <FormField
                         type={FormFieldTypes.TEXT}
@@ -177,6 +180,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     <div key={so.userId} style={{display: 'flex', alignItems: 'center', marginBottom: 10}}>
                         <TextField
                             label='Name'
+                            disabled={!editMode}
                             value={so.displayName}
                             InputProps={{
                                 readOnly: !editMode,
@@ -194,6 +198,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         />
                         <TextField
                             label='Email'
+                            disabled={!editMode}
                             value={so.email}
                             InputProps={{
                                 readOnly: !editMode,
