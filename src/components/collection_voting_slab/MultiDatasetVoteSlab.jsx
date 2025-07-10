@@ -69,6 +69,7 @@ export default function MultiDatasetVoteSlab(props) {
     readOnly,
     adminPage,
     updateFinalVote,
+    reloadFn
   } = props;
   const { algorithmResult, key } = bucket;
 
@@ -111,6 +112,7 @@ export default function MultiDatasetVoteSlab(props) {
             adminPage={adminPage}
             bucketKey={key}
             updateFinalVote={updateFinalVote}
+            reloadFn={reloadFn}
           />
         </div>
       </div>

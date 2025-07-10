@@ -1,6 +1,6 @@
-import { mergeAll } from 'lodash/fp';
 import { Config } from '../config';
-import { getApiUrl, fetchOk } from '../ajax';
+import { getApiUrl } from '../ajax';
+import axios from 'axios';
 
 
 export const Votes = {
@@ -11,8 +11,8 @@ export const Votes = {
     voteUpdate.voteIds = voteIds;
 
     const url = `${await getApiUrl()}/api/votes`;
-    const res = await fetchOk(url, mergeAll([Config.authOpts(), Config.jsonBody(voteUpdate), { method: 'PUT' }]));
-    return await res.json();
+    const res = await axios.put(url, voteUpdate, Config.authOpts());
+    return res.data;
   },
 
   updateRationaleByIds: async (voteIds, rationale) => {
@@ -21,7 +21,7 @@ export const Votes = {
     rationaleUpdate.voteIds = voteIds;
 
     const url = `${await getApiUrl()}/api/votes/rationale`;
-    const res = await fetchOk(url, mergeAll([Config.authOpts(), Config.jsonBody(rationaleUpdate), { method: 'PUT' }]));
-    return await res.json();
+    const res = await axios.put(url, rationaleUpdate, Config.authOpts());
+    return res.data;
   }
 };
