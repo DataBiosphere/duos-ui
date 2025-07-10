@@ -46,6 +46,7 @@ import { StudyUpdateForm } from 'src/pages/StudyUpdateForm';
 import {DAAUtils} from 'src/utils/DAAUtils';
 import EditDac from 'src/pages/manage_dac/EditDac';
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants';
+import {InstitutionDetails} from 'src/components/institution_table/InstitutionDetails.js';
 
 const Routes = (props) => (
   <Switch>
@@ -77,6 +78,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path='/manage_add_dac' component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     {DAAUtils.isEnabled() && <AuthenticatedRoute path='/manage_edit_dac_daa/:dacId' component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
     {DAAUtils.isEnabled() &&  <AuthenticatedRoute path='/manage_add_dac_daa' component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
+    <AuthenticatedRoute path='/admin_manage_institutions/:institutionId' component={InstitutionDetails} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path='/admin_manage_institutions' component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path='/datasets' component={ControlledAccessGrants} props={props} rolesAllowed={[USER_ROLES.researcher]}/>

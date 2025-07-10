@@ -29,6 +29,12 @@ export const Institution = {
     return res.data;
   },
 
+  patchInstitution: async (id, institution) => {
+    const url = `${await getApiUrl()}/api/institutions/${id}`;
+    const res = await axios.patch(url, institution, Config.authOpts());
+    return res.data;
+  },
+
   deleteInstitution: async (id) => {
     const url = `${await getApiUrl()}/api/institutions/${id}`;
     return await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]));
