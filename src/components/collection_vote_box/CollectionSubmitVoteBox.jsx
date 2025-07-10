@@ -119,7 +119,8 @@ export default function CollectionSubmitVoteBox(props) {
       Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
       if (error && error.status === 409) {
-        Notifications.showError({text: error.response.data.message + ' Chair vote not submitted, updating vote display.'});
+        const voteText = isChair ? 'Chair vote' : 'Vote'
+        Notifications.showError({text: `${error.response.data.message} ${voteText} not submitted, updating vote display.`});
         reloadFn();
       } else {
         Notifications.showError({text: 'Error: Failed to update vote'});
@@ -134,7 +135,7 @@ export default function CollectionSubmitVoteBox(props) {
       Notifications.showSuccess({text: 'Successfully updated vote rationale'});
     } catch (error) {
       if (error && error.status === 409) {
-        Notifications.showError({text: error.response.data.message + '  Rationale not submitted, updating vote display.'});
+        Notifications.showError({text: `${error.response.data.message} Rationale not submitted, updating vote display.`});
         reloadFn();
       } else {
         Notifications.showError(
