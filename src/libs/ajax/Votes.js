@@ -1,6 +1,5 @@
-import { mergeAll } from 'lodash/fp';
 import { Config } from '../config';
-import { getApiUrl, fetchOk } from '../ajax';
+import { getApiUrl } from '../ajax';
 import axios from 'axios';
 
 
