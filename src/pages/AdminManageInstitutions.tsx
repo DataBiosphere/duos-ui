@@ -1,33 +1,42 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { Institution } from '../libs/ajax/Institution';
-import { Styles} from '../libs/theme';
-import { Notifications } from '../libs/utils';
-import manageInstitutionsIcon from '../images/icon_manage_dac.png';
-import SearchBar from '../components/SearchBar';
-import InstitutionTable from '../components/institution_table/InstitutionTable';
-import AddInstitutionModal from '../components/modals/AddInstitutionModal';
-import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/institution_table/InstitutionTable';
+import React, {useEffect, useState} from 'react';
+import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
+import {Institution} from 'src/types/model';
+import {Styles} from 'src/libs/theme';
+import {Notifications} from 'src/libs/utils';
+import manageInstitutionsIcon from 'src/images/icon_manage_dac.png';
+import SearchBar from 'src/components/SearchBar';
+import InstitutionTable, {
+  tableHeaderTemplate,
+  tableRowLoadingTemplate
+} from 'src/components/institution_table/InstitutionTable';
+import AddInstitutionModal from 'src/components/modals/AddInstitutionModal';
+import DarTableSkeletonLoader from 'src/components/TableSkeletonLoader';
+import {extractError} from 'src/utils/ErrorUtils';
 
-export default function AdminManageInstitutions(props) {
-  const [institutionList, setInstitutionList] = useState([]);
-  const [filteredList, setFilteredList] = useState([]);
-  const [tableSize, setTableSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showAddInstitutionModal, setShowAddInstitutionModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+interface AdminManageInstitutionsProps {
+  readonly history?: History;
+}
+
+export default function AdminManageInstitutions(props: AdminManageInstitutionsProps) {
+  const {history} = props;
+  const [institutionList, setInstitutionList] = useState<Institution[]>([]);
+  const [filteredList, setFilteredList] = useState<Institution[]>([]);
+  const [tableSize, setTableSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showAddInstitutionModal, setShowAddInstitutionModal] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const loadInstitutions = async () => {
     try {
       setIsLoading(true);
-      const listOfInstitutions = await Institution.list();
+      const listOfInstitutions = await InstitutionAPI.list();
       setInstitutionList(listOfInstitutions);
       filter(listOfInstitutions, searchTerm);
       setIsLoading(false);
-    } catch (_error) {
-      Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
+    } catch (error) {
+      const message = extractError(error);
+      Notifications.showError({ text: 'Error: Unable to retrieve institutions from server: ' + message});
     } finally {
       setIsLoading(false);
     }
@@ -37,12 +46,13 @@ export default function AdminManageInstitutions(props) {
     const init = async () => {
       try {
         setIsLoading(true);
-        const listOfInstitutions = await Institution.list();
+        const listOfInstitutions = await InstitutionAPI.list();
         setInstitutionList(listOfInstitutions);
         setFilteredList(listOfInstitutions);
         setIsLoading(false);
-      } catch (_error) {
-        Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
+      } catch (error) {
+        const message = extractError(error);
+        Notifications.showError({ text: 'Error: Unable to retrieve institutions from server: ' + message});
       } finally {
         setIsLoading(false);
       }
@@ -51,13 +61,13 @@ export default function AdminManageInstitutions(props) {
     init();
   }, []);
 
-  const handleSearchChange = (query) => {
+  const handleSearchChange = (query: { current: { value: string } }) => {
     const value = query.current.value;
     setSearchTerm(value);
     filter(institutionList, value);
   };
 
-  const filter = (list, value) => {
+  const filter = (list: Institution[], value: string) => {
     setFilteredList(list.filter(institution => {
       if (value && value !== undefined) {
         const text = JSON.stringify(institution);
@@ -75,7 +85,7 @@ export default function AdminManageInstitutions(props) {
     setShowAddInstitutionModal(false);
   };
 
-  const modalSave = (result) => {
+  const modalSave = (result: any) => {
     if (result) {
       setShowAddInstitutionModal(false);
       loadInstitutions();
@@ -87,7 +97,7 @@ export default function AdminManageInstitutions(props) {
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
           <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={manageInstitutionsIcon} style={Styles.HEADER_IMG} />
+            <img id="lock-icon" src={manageInstitutionsIcon} style={Styles.HEADER_IMG} alt="Manage Institutions" />
           </div>
           <div style={Styles.HEADER_CONTAINER}>
             <div style={Styles.TITLE}>Manage Institutions</div>
@@ -114,7 +124,7 @@ export default function AdminManageInstitutions(props) {
       </div>
       {!isLoading && <InstitutionTable
         filteredList={filteredList}
-        history={props.history}
+        history={history}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         tableSize={tableSize}
@@ -133,4 +143,4 @@ export default function AdminManageInstitutions(props) {
       />}
     </div>
   );
-}
+};
