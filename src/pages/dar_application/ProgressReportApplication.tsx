@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
-import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState, ValidFormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -9,6 +9,7 @@ import DataManagementIncident from 'src/pages/progress_reports/DataManagementInc
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
+import IrbDocumentUpload from 'src/pages/progress_reports/IrbDocumentUpload';
 import {Navigation, Notifications} from 'src/libs/utils';
 import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
@@ -31,6 +32,8 @@ type ProgressReportApplicationProps = {
 };
 
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
+    const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null);
+    
     const initialState = {
         ...dar,
         dmiCombination:false,
@@ -109,7 +112,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         ...(readOnlyMode && {
           closeoutYesNo: ((dar.closeoutSupplement?.reasons.length ?? 0) > 0),
         }),
-    } as FormState;
+    } as unknown as FormState;
 
     const [formState, setFormState] = useState<FormState>(initialState);
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
@@ -117,6 +120,15 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
 
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
+
+    const updateIrbDocument = (document: File | null, expiration: string) => {
+        onFormChange({
+            irbDocumentName: '',
+            irbDocumentLocation: '',
+            irbProtocolExpiration: expiration,
+        });
+        setUploadedIrbDocument(document);
+    };
 
     const getValidation = (newState: FormState) => {
         if (!readOnlyMode) {
@@ -233,8 +245,10 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     dataUseTranslations={dataUseTranslations}
                     formData={formState}
                     readOnlyMode={readOnlyMode}
-                    onChange={({key, value}) => {
-                        onFormChange({[key]: value})
+                    onChange={(update: ValidFormState) => {
+                        if (update) {
+                            onFormChange({[update.key]: update.value})
+                        }
                     }}
                     validation={formValidation.darErrors}
                 />
@@ -245,6 +259,16 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                   formState={formState}
                   onFormChange={onFormChange}
                   countriesOfOperation={countriesOfOperation}
+                />
+            </div>
+            <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <IrbDocumentUpload
+                    readOnly={readOnlyMode}
+                    formState={formState}
+                    onFormChange={onFormChange}
+                    validation={formValidation.darErrors as Record<string, any>}
+                    uploadedIrbDocument={uploadedIrbDocument}
+                    onIrbDocumentChange={updateIrbDocument}
                 />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
