@@ -9,41 +9,6 @@ import {LabeledField} from 'src/pages/DatasetStatistics';
 import {Button, Chip, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
-const styles = {
-    row: {
-        display: 'flex',
-        alignItems: 'flex-start'
-    },
-    baseStyle: {
-        fontFamily: 'Montserrat',
-        fontSize: '1.4rem',
-        fontWeight: 400,
-        display: 'flex',
-        padding: '1rem 2%',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        whiteSpace: 'pre-wrap',
-        backgroundColor: 'white',
-        border: '1px solid #DEDEDE',
-        borderRadius: '4px',
-        textOverflow: 'ellipsis',
-        height: '4rem',
-        marginTop: 5,
-    },
-    columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-        justifyContent: 'space-between',
-        fontFamily: 'Montserrat',
-        fontSize: '1.2rem',
-        fontWeight: 'bold',
-        letterSpacing: '0.2px',
-        backgroundColor: '#E2E8F4',
-        border: 'none',
-        textTransform: 'uppercase',
-        lineHeight: '16px',
-    }),
-    containerOverride: {}
-};
-
 interface InstitutionDetailsProps {
     history: History,
     match: {
@@ -121,7 +86,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     const hasDomains = institution && institution.domains && institution.domains.length > 0;
 
-    return !loading ? <div style={styles.row}>
+    return !loading ? <div style={{
+        display: 'flex',
+        alignItems: 'flex-start'
+    }}>
         <div style={{paddingLeft: 40}}>
             <Link
                 id='link_institutions'
