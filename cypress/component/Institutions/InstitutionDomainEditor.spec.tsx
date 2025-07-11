@@ -106,6 +106,7 @@ describe('Institution Domain Editor Tests', () => {
         cy.contains('button', 'Add').click();
 
         cy.get('@domainsChangeHandler').should('not.have.been.called');
+        cy.contains('This domain has already been added').should('be.visible');
     });
 
     it('should allow deleting a domain in edit mode', () => {

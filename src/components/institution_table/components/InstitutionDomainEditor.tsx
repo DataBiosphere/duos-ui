@@ -9,6 +9,7 @@ interface DomainEditorProps {
 
 export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChange }: DomainEditorProps) => {
     const [tempDomain, setTempDomain] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     const handleDomainDelete = (domainToDelete: string) => {
         if (onDomainsChange) {
@@ -19,10 +20,15 @@ export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChang
 
     const handleDomainAdd = () => {
         const trimmedDomain = tempDomain.trim();
-        if (trimmedDomain && !domains.includes(trimmedDomain) && onDomainsChange) {
-            const updatedDomains = [...domains, trimmedDomain];
-            onDomainsChange(updatedDomains);
-            setTempDomain('');
+        if (trimmedDomain) {
+            if (domains.includes(trimmedDomain)) {
+                setErrorMessage('This domain has already been added');
+            } else if (onDomainsChange) {
+                const updatedDomains = [...domains, trimmedDomain];
+                onDomainsChange(updatedDomains);
+                setTempDomain('');
+                setErrorMessage('');
+            }
         }
     };
 
@@ -45,26 +51,37 @@ export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChang
             }
 
             {editMode && (
-                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
-                    <TextField
-                        variant='outlined'
-                        value={tempDomain}
-                        placeholder={'Domain'}
-                        size="small"
-                        InputProps={{
-                            style: {fontSize: 14}
-                        }}
-                        style={{width: 250}}
-                        onChange={(e) => setTempDomain(e.target.value)}
-                    />
-                    <Button
-                        variant="contained"
-                        onClick={handleDomainAdd}
-                        style={{marginLeft: 10, fontSize: 14, width: 'auto'}}
-                        disabled={!tempDomain.trim()}
-                    >
-                        Add
-                    </Button>
+                <div style={{display: 'flex', flexDirection: 'column', marginTop: 10}}>
+                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                        <TextField
+                            variant='outlined'
+                            value={tempDomain}
+                            placeholder={'Domain'}
+                            size="small"
+                            InputProps={{
+                                style: {fontSize: 14}
+                            }}
+                            style={{width: 250}}
+                            onChange={(e) => {
+                                setTempDomain(e.target.value);
+                                setErrorMessage('');
+                            }}
+                            error={!!errorMessage}
+                        />
+                        <Button
+                            variant="contained"
+                            onClick={handleDomainAdd}
+                            style={{marginLeft: 10, fontSize: 14, width: 'auto'}}
+                            disabled={!tempDomain.trim()}
+                        >
+                            Add
+                        </Button>
+                    </div>
+                    {errorMessage && (
+                        <div style={{color: 'red', fontSize: 12, marginTop: 4, marginLeft: 2}}>
+                            {errorMessage}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
