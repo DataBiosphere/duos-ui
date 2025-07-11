@@ -132,7 +132,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 <img id='back-arrow-icon' src={backArrowIcon} alt={'Back'} style={{height: 28, width: 28}}/>
             </Link>
         </div>
-        <div style={{padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%', paddingRight: 40}}>
+        <div style={{padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%', paddingRight: 40, paddingBottom: 40}}>
             <div style={{ fontSize: 20, fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>Back to institutions</span>
                 <div>
@@ -259,12 +259,13 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                                 }
                             }}
                             variant='outlined'
-                            style={{marginRight: 10}}
+                            style={{marginRight: 10, width: 300}}
                         />
                         <TextField
                             label='Email'
                             disabled={!editMode}
                             value={so.email}
+                            style={{ width: 300 }}
                             InputProps={{
                                 style: { fontSize: 14 },
                                 size: 'small',
