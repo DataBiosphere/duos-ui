@@ -5,7 +5,6 @@ import {Link} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {Button, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
 import {AxiosError} from 'axios';
 import {Notifications} from 'src/libs/utils';
 import {Spinner} from 'src/components/Spinner';
@@ -34,11 +33,16 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const [editMode, setEditMode] = useState(false);
     const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate | undefined>();
 
-    useEffect(() => {
-        InstitutionAPI.getById(institutionId).then((resp) => {
-            setInstitution(resp);
-            setLoading(false);
-        });
+    useEffect( () => {
+        const loadInstitution = async () => {
+            await InstitutionAPI.getById(institutionId)
+                .then((resp) => {
+                    setInstitution(resp);
+                    setLoading(false);
+                });
+        }
+
+        loadInstitution();
     }, [institutionId]);
 
     const updateInstitution = async (updatedInstitution: InstitutionDetailsUpdate) => {
