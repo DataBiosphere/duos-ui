@@ -6,6 +6,7 @@ import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {LabeledField} from 'src/pages/DatasetStatistics';
 import {Button, Chip, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import InfoIcon from '@mui/icons-material/Info';
 import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {Notifications} from 'src/libs/utils';
@@ -147,7 +148,8 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     </Button>
                 </div>
             </div>
-            <LabeledField label={'Institution Name'} labelPlacement={'top'}>
+            <div style={{paddingTop: 20}}>
+                <div style={{fontWeight: 600, marginBottom: 5, fontSize: 18}}>Institution Name</div>
                 <div style={{display: 'flex', alignItems: 'center'}}>
                     <TextField
                         variant='outlined'
@@ -155,9 +157,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         size="small"
                         disabled={!editMode}
                         InputProps={{
-                            style: { fontSize: 14 }
+                            style: {fontSize: 14}
                         }}
-                        style={{ width: 300 }}
+                        style={{width: 300}}
                         onChange={(e) => {
                             handleNameChange(e.target.value);
                         }}
@@ -168,29 +170,37 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         }}
                     />
                 </div>
-            </LabeledField>
-            <LabeledField label={'Domains'} labelPlacement={'top'}>
+            </div>
+            <div style={{paddingTop: 20}}>
+                <div style={{fontWeight: 600, marginBottom: 5, fontSize: 18}}>Domains</div>
                 {(editMode ? institutionUpdates?.domains : institution?.domains)?.map((domain, idx) => (
                     <Chip
                         key={idx}
                         label={domain}
                         variant={'outlined'}
-                        style={{marginRight: 5, marginTop: 5, fontSize: 12, color: editMode ? undefined : '#7b7b7b', borderColor: editMode ? undefined : '#7b7b7b'}}
+                        style={{
+                            marginRight: 5,
+                            marginTop: 5,
+                            fontSize: 12,
+                            color: editMode ? undefined : '#7b7b7b',
+                            borderColor: editMode ? undefined : '#7b7b7b'
+                        }}
                         onDelete={editMode ? () => handleDomainDelete(domain) : undefined}
                     />
                 ))}
 
                 {/*TODO: text to display when there are no domains*/}
-                {(!editMode && !hasDomains) && <div className={'italic'}>This institution is not associated with any domains</div> }
-                {editMode && <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                {(!editMode && !hasDomains) &&
+                    <div className={'italic'}>This institution is not associated with any domains</div>}
+                {editMode && <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
                     <TextField
                         variant='outlined'
                         value={tempDomain}
                         size="small"
                         InputProps={{
-                            style: { fontSize: 14 }
+                            style: {fontSize: 14}
                         }}
-                        style={{ width: 250 }}
+                        style={{width: 250}}
                         onChange={(e) => {
                             setTempDomain(e.target.value);
                         }}
@@ -206,18 +216,23 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                                 setTempDomain('');
                             }
                         }}
-                        style={{ marginLeft: 10, fontSize: 14, width: 'auto' }}
+                        style={{marginLeft: 10, fontSize: 14, width: 'auto'}}
                     >
                         Add
                     </Button>
                 </div>}
-            </LabeledField>
+            </div>
             <div style={{paddingTop: 20, marginTop: 20, borderTop: '1px solid', borderColor: '#e1e1e1', width: '100%'}}>
-                <div style={{ fontSize: 14, fontWeight: 600, paddingBottom: '2rem' }}>
+                <div style={{fontSize: 18, fontWeight: 600, paddingBottom: '1rem'}}>
                     Signing Officials
                 </div>
+                <div className={'italic'} style={{display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '2rem'}}>
+                    <InfoIcon fontSize="large" color="info"/>
+                    Signing Officials cannot be modified from this page
+                </div>
                 {(!institution?.signingOfficials || institution.signingOfficials.length === 0) && (
-                    <div className={'italic'}>This institution does not have any signing officials</div>
+                    <div style={{marginBottom: 10}} className={'italic'}>This institution does not have any signing
+                        officials</div>
                 )}
                 {institution?.signingOfficials?.map((so) => (
                     <div key={so.userId} style={{display: 'flex', alignItems: 'center', marginBottom: 10}}>
@@ -226,12 +241,12 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                             disabled={true}
                             value={so.displayName}
                             InputProps={{
-                                style: { fontSize: 14 },
+                                style: {fontSize: 14},
                                 size: 'small',
                                 readOnly: true,
                             }}
                             InputLabelProps={{
-                                style: { fontSize: 14 }
+                                style: {fontSize: 14}
                             }}
                             variant='outlined'
                             style={{marginRight: 10, width: 300}}
@@ -245,14 +260,14 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                             label='Email'
                             disabled={true}
                             value={so.email}
-                            style={{ width: 300 }}
+                            style={{width: 300}}
                             InputProps={{
-                                style: { fontSize: 14 },
+                                style: {fontSize: 14},
                                 size: 'small',
                                 readOnly: true,
                             }}
                             InputLabelProps={{
-                                style: { fontSize: 14 }
+                                style: {fontSize: 14}
                             }}
                             variant='outlined'
                             sx={{
@@ -264,7 +279,6 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     </div>
                 ))}
             </div>
-            <div className={'italic'}>Note: Signing Officials cannot be edited from this page.</div>
         </div>
     </div> : <div>Loading</div>;
 }
