@@ -149,12 +149,13 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 </div>
             </div>
             <div style={{paddingTop: 20}}>
-                <div style={{fontWeight: 600, marginBottom: 5, fontSize: 18}}>Institution Name</div>
+                <div style={{fontWeight: 600, marginBottom: '0.5rem', fontSize: 18}}>Institution Name</div>
                 <div style={{display: 'flex', alignItems: 'center'}}>
                     <TextField
                         variant='outlined'
                         value={editMode ? institutionUpdates?.name : institution?.name}
                         size="small"
+                        placeholder={'Institution Name'}
                         disabled={!editMode}
                         InputProps={{
                             style: {fontSize: 14}
@@ -172,7 +173,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 </div>
             </div>
             <div style={{paddingTop: 20}}>
-                <div style={{fontWeight: 600, marginBottom: 5, fontSize: 18}}>Domains</div>
+                <div style={{fontWeight: 600, marginBottom: '0.5rem', fontSize: 18}}>Domains</div>
                 {(editMode ? institutionUpdates?.domains : institution?.domains)?.map((domain, idx) => (
                     <Chip
                         key={idx}
@@ -180,7 +181,6 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         variant={'outlined'}
                         style={{
                             marginRight: 5,
-                            marginTop: 5,
                             fontSize: 12,
                             color: editMode ? undefined : '#7b7b7b',
                             borderColor: editMode ? undefined : '#7b7b7b'
@@ -189,13 +189,13 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     />
                 ))}
 
-                {/*TODO: text to display when there are no domains*/}
                 {(!editMode && !hasDomains) &&
                     <div className={'italic'}>This institution is not associated with any domains</div>}
                 {editMode && <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
                     <TextField
                         variant='outlined'
                         value={tempDomain}
+                        placeholder={'Domain'}
                         size="small"
                         InputProps={{
                             style: {fontSize: 14}
