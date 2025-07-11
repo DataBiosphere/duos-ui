@@ -2,15 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {Institution} from 'src/types/model';
 import backArrowIcon from 'src/images/back_arrow.svg';
 import {Link} from 'react-router-dom';
-import {Styles} from 'src/libs/theme';
-import {History} from 'history';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {LabeledField} from 'src/pages/DatasetStatistics';
 import {Button, Chip, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
 interface InstitutionDetailsProps {
-    history: History,
     match: {
         params: {
             institutionId: number;
@@ -21,11 +18,9 @@ interface InstitutionDetailsProps {
 interface InstitutionUpdate {
     name: string;
     domains: string[];
-    signingOfficials: {userId: number; displayName: string; email: string}[];
 }
 
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
-    // const { history } = props;
     const { institutionId } = props.match.params;
     const [loading, setLoading] = useState(true);
     const [institution, setInstitution] = useState<Institution>();
@@ -40,26 +35,28 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         });
     }, [institutionId]);
 
-    //TODO: handle signing officials
     const updateInstitution = (updatedInstitution: InstitutionUpdate) => {
         InstitutionAPI.patchInstitution(institutionId, updatedInstitution).then((resp) => {
-            setInstitution(resp);
+            // Quirk: preserve signing officials on update since they are not returned by the patch endpoint
+            setInstitution(prevInstitution => {
+                if (!prevInstitution) return resp;
+                return {
+                    ...resp,
+                    signingOfficials: prevInstitution.signingOfficials || []
+                };
+            });
         });
-        console.log('Updating institution:', updatedInstitution);
     }
 
     const handleEditToggle = () => {
         if (editMode) {
-            // Save changes
             if (institutionUpdates) {
                 updateInstitution(institutionUpdates);
             }
         } else {
-            // Enter edit mode - create a copy of the institution data
             setInstitutionUpdates({
                 name: institution?.name || '',
                 domains: institution?.domains ? [...institution.domains] : [],
-                signingOfficials: institution?.signingOfficials ? [...institution.signingOfficials] : []
             });
         }
         setEditMode(!editMode);
@@ -129,16 +126,6 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             </div>
             <LabeledField label={'Institution Name'} labelPlacement={'top'}>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                    {/*<FormField*/}
-                    {/*    type={FormFieldTypes.TEXT}*/}
-                    {/*    id='institution-name'*/}
-                    {/*    readOnly={!editMode}*/}
-                    {/*    defaultValue={editMode ? tempInstitution?.name : institution?.name}*/}
-                    {/*    onChange={(e) => editMode && handleNameChange(e.target.value)}*/}
-                    {/*    style={{*/}
-                    {/*        width: '25%', marginTop: '10px', minWidth: 300*/}
-                    {/*    }}*/}
-                    {/*/>*/}
                     <TextField
                         variant='outlined'
                         value={editMode ? institutionUpdates?.name : institution?.name}
@@ -183,10 +170,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     <Button
                         variant="contained"
                         onClick={() => {
+                            const trimmedDomain = tempDomain.trim();
                             const currentDomains = institutionUpdates?.domains || [];
-
-                            if (!currentDomains.includes(tempDomain) && institutionUpdates) {
-                                const updatedDomains = [...currentDomains, tempDomain];
+                            if (trimmedDomain && !currentDomains.includes(trimmedDomain) && institutionUpdates) {
+                                const updatedDomains = [...currentDomains, trimmedDomain];
                                 setInstitutionUpdates({...institutionUpdates, domains: updatedDomains});
                                 setTempDomain('');
                             }
