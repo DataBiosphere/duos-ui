@@ -11,6 +11,7 @@ import {Notifications} from 'src/libs/utils';
 import {Spinner} from 'src/components/Spinner';
 import {extractConsentError} from 'src/utils/ErrorUtils';
 import {InstitutionDomainEditor} from 'src/components/institution_table/components/InstitutionDomainEditor';
+import {SigningOfficialsList} from 'src/components/institution_table/components/SigningOfficialsList';
 
 interface InstitutionDetailsProps {
     match: {
@@ -176,63 +177,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 onDomainsChange={handleDomainsChange}
             />
 
-            <div style={{paddingTop: 20, marginTop: 20, borderTop: '1px solid', borderColor: '#e1e1e1', width: '100%'}}>
-                <div style={{fontSize: 18, fontWeight: 600, paddingBottom: '1rem'}}>
-                    Signing Officials
-                </div>
-                <div className={'italic'} style={{display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '2rem'}}>
-                    <InfoIcon fontSize="small" color="info"/>
-                    Signing Officials cannot be modified from this page
-                </div>
-                {(!institution?.signingOfficials || institution.signingOfficials.length === 0) && (
-                    <div style={{marginBottom: 10}} className={'italic'}>This institution does not have any signing
-                        officials</div>
-                )}
-                {institution?.signingOfficials?.map((so) => (
-                    <div key={so.userId} style={{display: 'flex', alignItems: 'center', marginBottom: 10}}>
-                        <TextField
-                            label='Name'
-                            disabled={true}
-                            value={so.displayName}
-                            InputProps={{
-                                style: {fontSize: 14},
-                                size: 'small',
-                                readOnly: true,
-                            }}
-                            InputLabelProps={{
-                                style: {fontSize: 14}
-                            }}
-                            variant='outlined'
-                            style={{marginRight: 10, width: 300}}
-                            sx={{
-                                '& .MuiInputBase-input.Mui-disabled': {
-                                    WebkitTextFillColor: '#7b7b7b',
-                                },
-                            }}
-                        />
-                        <TextField
-                            label='Email'
-                            disabled={true}
-                            value={so.email}
-                            style={{width: 300}}
-                            InputProps={{
-                                style: {fontSize: 14},
-                                size: 'small',
-                                readOnly: true,
-                            }}
-                            InputLabelProps={{
-                                style: {fontSize: 14}
-                            }}
-                            variant='outlined'
-                            sx={{
-                                '& .MuiInputBase-input.Mui-disabled': {
-                                    WebkitTextFillColor: '#7b7b7b',
-                                },
-                            }}
-                        />
-                    </div>
-                ))}
-            </div>
+            <SigningOfficialsList signingOfficials={institution?.signingOfficials || []} />
         </div>
     </div> : <div>Loading</div>;
 }
