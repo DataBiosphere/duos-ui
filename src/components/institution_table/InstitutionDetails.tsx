@@ -233,6 +233,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 <div style={{ fontSize: 14, fontWeight: 600, paddingBottom: '2rem' }}>
                     Signing Officials
                 </div>
+                {(!editMode && (!institution || !institution.signingOfficials || institution.signingOfficials.length === 0)) && (
+                    <div className={'italic'}>This institution does not have any signing officials</div>
+                )}
                 {(editMode ? institutionUpdates?.signingOfficials : institution?.signingOfficials)?.map((so) => (
                     <div key={so.userId} style={{display: 'flex', alignItems: 'center', marginBottom: 10}}>
                         <TextField
