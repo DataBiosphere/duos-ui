@@ -233,54 +233,38 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 <div style={{ fontSize: 14, fontWeight: 600, paddingBottom: '2rem' }}>
                     Signing Officials
                 </div>
-                {(!editMode && (!institution || !institution.signingOfficials || institution.signingOfficials.length === 0)) && (
+                {(!institution?.signingOfficials || institution.signingOfficials.length === 0) && (
                     <div className={'italic'}>This institution does not have any signing officials</div>
                 )}
-                {(editMode ? institutionUpdates?.signingOfficials : institution?.signingOfficials)?.map((so) => (
+                {institution?.signingOfficials?.map((so) => (
                     <div key={so.userId} style={{display: 'flex', alignItems: 'center', marginBottom: 10}}>
                         <TextField
                             label='Name'
-                            disabled={!editMode}
+                            disabled={true}
                             value={so.displayName}
                             InputProps={{
                                 style: { fontSize: 14 },
                                 size: 'small',
-                                readOnly: !editMode,
+                                readOnly: true,
                             }}
                             InputLabelProps={{
                                 style: { fontSize: 14 }
-                            }}
-                            onChange={(e) => {
-                                if (editMode && institutionUpdates) {
-                                    const updatedOfficials = institutionUpdates?.signingOfficials || [];
-                                    const officialIndex = updatedOfficials.findIndex(o => o.userId === so.userId);
-                                    updatedOfficials[officialIndex] = {...updatedOfficials[officialIndex], displayName: e.target.value};
-                                    setInstitutionUpdates({...institutionUpdates, signingOfficials: updatedOfficials});
-                                }
                             }}
                             variant='outlined'
                             style={{marginRight: 10, width: 300}}
                         />
                         <TextField
                             label='Email'
-                            disabled={!editMode}
+                            disabled={true}
                             value={so.email}
                             style={{ width: 300 }}
                             InputProps={{
                                 style: { fontSize: 14 },
                                 size: 'small',
-                                readOnly: !editMode,
+                                readOnly: true,
                             }}
                             InputLabelProps={{
                                 style: { fontSize: 14 }
-                            }}
-                            onChange={(e) => {
-                                if (editMode && institutionUpdates) {
-                                    const updatedOfficials = institutionUpdates.signingOfficials || [];
-                                    const officialIndex = updatedOfficials.findIndex(o => o.userId === so.userId);
-                                    updatedOfficials[officialIndex] = {...updatedOfficials[officialIndex], email: e.target.value};
-                                    setInstitutionUpdates({...institutionUpdates, signingOfficials: updatedOfficials});
-                                }
                             }}
                             variant='outlined'
                         />
