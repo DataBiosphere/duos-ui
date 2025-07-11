@@ -9,6 +9,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import {AxiosError} from 'axios';
 import {ConsentError} from 'src/types/responseTypes';
 import {Notifications} from 'src/libs/utils';
+import {Spinner} from 'src/components/Spinner';
 
 interface InstitutionDetailsProps {
     match: {
@@ -26,6 +27,7 @@ interface InstitutionUpdate {
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false); // New state to track when we're saving changes
     const [institution, setInstitution] = useState<Institution>();
     const [editMode, setEditMode] = useState(false);
     const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionUpdate | undefined>();
@@ -40,6 +42,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     const updateInstitution = async (updatedInstitution: InstitutionUpdate) => {
         try {
+            setSaving(true);
             const resp = await InstitutionAPI.patchInstitution(institutionId, updatedInstitution);
             // Quirk: preserve signing officials on update since they are not returned by the patch endpoint
             setInstitution(prevInstitution => {
@@ -57,21 +60,26 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             } else {
                 Notifications.showError({text: 'An error occurred when trying to update the institution.'});
             }
+        } finally {
+            setSaving(false);
         }
     }
 
-    const handleEditToggle = () => {
+    const handleEditToggle = async () => {
         if (editMode) {
             if (institutionUpdates) {
-                updateInstitution(institutionUpdates);
+                // Don't toggle edit mode immediately when saving
+                await updateInstitution(institutionUpdates);
+                // Only exit edit mode after save completes successfully
+                setEditMode(false);
             }
         } else {
             setInstitutionUpdates({
                 name: institution?.name || '',
                 domains: institution?.domains ? [...institution.domains] : [],
             });
+            setEditMode(true);
         }
-        setEditMode(!editMode);
     }
 
     const handleCancelEdit = () => {
@@ -112,14 +120,16 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         <div style={{padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%', paddingRight: 40, paddingBottom: 40}}>
             <div style={{ fontSize: 20, fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>Back to institutions</span>
-                <div>
-                    {editMode && (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {saving && <Spinner />}
+                    {editMode && !saving && (
                         <Button
                             size={'large'}
                             variant="outlined"
                             color="error"
                             onClick={handleCancelEdit}
                             style={{ marginRight: '10px', fontSize: 14 }}
+                            disabled={saving}
                         >
                             Cancel
                         </Button>
@@ -131,8 +141,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         onClick={handleEditToggle}
                         style={{fontSize: 14}}
                         startIcon={!editMode && <EditIcon />}
+                        disabled={saving}
                     >
-                        {editMode ? 'Save' : 'Edit'}
+                        {editMode ? (saving ? 'Saving...' : 'Save') : 'Edit'}
                     </Button>
                 </div>
             </div>
