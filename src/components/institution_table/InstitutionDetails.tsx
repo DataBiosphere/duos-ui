@@ -3,14 +3,13 @@ import {Institution} from 'src/types/model';
 import backArrowIcon from 'src/images/back_arrow.svg';
 import {Link} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
-import {LabeledField} from 'src/pages/DatasetStatistics';
 import {Button, Chip, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoIcon from '@mui/icons-material/Info';
 import {AxiosError} from 'axios';
-import {ConsentError} from 'src/types/responseTypes';
 import {Notifications} from 'src/libs/utils';
 import {Spinner} from 'src/components/Spinner';
+import {extractConsentError} from 'src/utils/ErrorUtils';
 
 interface InstitutionDetailsProps {
     match: {
@@ -20,7 +19,7 @@ interface InstitutionDetailsProps {
     }
 }
 
-interface InstitutionUpdate {
+interface InstitutionDetailsUpdate {
     name: string;
     domains: string[];
 }
@@ -28,10 +27,10 @@ interface InstitutionUpdate {
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false); // New state to track when we're saving changes
+    const [saving, setSaving] = useState(false);
     const [institution, setInstitution] = useState<Institution>();
     const [editMode, setEditMode] = useState(false);
-    const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionUpdate | undefined>();
+    const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate | undefined>();
     const [tempDomain, setTempDomain] = useState<string>('');
 
     useEffect(() => {
@@ -41,11 +40,11 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         });
     }, [institutionId]);
 
-    const updateInstitution = async (updatedInstitution: InstitutionUpdate) => {
+    const updateInstitution = async (updatedInstitution: InstitutionDetailsUpdate) => {
         try {
             setSaving(true);
             const resp = await InstitutionAPI.patchInstitution(institutionId, updatedInstitution);
-            // Quirk: preserve signing officials on update since they are not returned by the patch endpoint
+            // NB: we need to preserve signing officials in state on update since they're not returned by the patch endpoint
             setInstitution(prevInstitution => {
                 if (!prevInstitution) return resp;
                 return {
@@ -55,11 +54,15 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             });
         } catch (error) {
             const axiosError = error as AxiosError;
-            const consentError = axiosError?.response?.data as ConsentError;
-            if(consentError.code === 409) {
-                Notifications.showError({text: 'One or more of the domains specified already exists for another institutions. A domain can only belong to one institution.'});
+            const consentError = extractConsentError(axiosError);
+            if(consentError && consentError.code === 409) {
+                Notifications.showError({
+                    text: 'One or more of the domains specified is already used by another institution. A domain can only be associated with one institution.'
+                });
             } else {
-                Notifications.showError({text: 'An error occurred when trying to update the institution.'});
+                Notifications.showError({
+                    text: `An error occurred when trying to update the institution: ${consentError ? consentError.message : 'no additional error available'}`,
+                });
             }
         } finally {
             setSaving(false);
@@ -69,9 +72,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const handleEditToggle = async () => {
         if (editMode) {
             if (institutionUpdates) {
-                // Don't toggle edit mode immediately when saving
                 await updateInstitution(institutionUpdates);
-                // Only exit edit mode after save completes successfully
                 setEditMode(false);
             }
         } else {
@@ -84,7 +85,6 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     }
 
     const handleCancelEdit = () => {
-        // Exit edit mode without saving changes
         setEditMode(false);
         setInstitutionUpdates(undefined);
     }
