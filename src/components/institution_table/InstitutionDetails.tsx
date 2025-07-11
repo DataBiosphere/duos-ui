@@ -6,6 +6,9 @@ import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {LabeledField} from 'src/pages/DatasetStatistics';
 import {Button, Chip, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import {AxiosError} from 'axios';
+import {ConsentError} from 'src/types/responseTypes';
+import {Notifications} from 'src/libs/utils';
 
 interface InstitutionDetailsProps {
     match: {
@@ -35,8 +38,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         });
     }, [institutionId]);
 
-    const updateInstitution = (updatedInstitution: InstitutionUpdate) => {
-        InstitutionAPI.patchInstitution(institutionId, updatedInstitution).then((resp) => {
+    const updateInstitution = async (updatedInstitution: InstitutionUpdate) => {
+        try {
+            const resp = await InstitutionAPI.patchInstitution(institutionId, updatedInstitution);
             // Quirk: preserve signing officials on update since they are not returned by the patch endpoint
             setInstitution(prevInstitution => {
                 if (!prevInstitution) return resp;
@@ -45,7 +49,15 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     signingOfficials: prevInstitution.signingOfficials || []
                 };
             });
-        });
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            const consentError = axiosError?.response?.data as ConsentError;
+            if(consentError.code === 409) {
+                Notifications.showError({text: 'One or more of the domains specified already exists for another institutions. A domain can only belong to one institution.'});
+            } else {
+                Notifications.showError({text: 'An error occurred when trying to update the institution.'});
+            }
+        }
     }
 
     const handleEditToggle = () => {
@@ -138,6 +150,11 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         onChange={(e) => {
                             handleNameChange(e.target.value);
                         }}
+                        sx={{
+                            '& .MuiInputBase-input.Mui-disabled': {
+                                WebkitTextFillColor: '#7b7b7b',
+                            },
+                        }}
                     />
                 </div>
             </LabeledField>
@@ -147,7 +164,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         key={idx}
                         label={domain}
                         variant={'outlined'}
-                        style={{marginRight: 5, marginTop: 5, fontSize: 12}}
+                        style={{marginRight: 5, marginTop: 5, fontSize: 12, color: editMode ? undefined : '#7b7b7b', borderColor: editMode ? undefined : '#7b7b7b'}}
                         onDelete={editMode ? () => handleDomainDelete(domain) : undefined}
                     />
                 ))}
@@ -207,6 +224,11 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                             }}
                             variant='outlined'
                             style={{marginRight: 10, width: 300}}
+                            sx={{
+                                '& .MuiInputBase-input.Mui-disabled': {
+                                    WebkitTextFillColor: '#7b7b7b',
+                                },
+                            }}
                         />
                         <TextField
                             label='Email'
@@ -222,10 +244,16 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                                 style: { fontSize: 14 }
                             }}
                             variant='outlined'
+                            sx={{
+                                '& .MuiInputBase-input.Mui-disabled': {
+                                    WebkitTextFillColor: '#7b7b7b',
+                                },
+                            }}
                         />
                     </div>
                 ))}
             </div>
+            <div className={'italic'}>Note: Signing Officials cannot be edited from this page.</div>
         </div>
     </div> : <div>Loading</div>;
 }
