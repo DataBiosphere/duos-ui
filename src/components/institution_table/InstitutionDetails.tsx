@@ -3,13 +3,14 @@ import {Institution} from 'src/types/model';
 import backArrowIcon from 'src/images/back_arrow.svg';
 import {Link} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
-import {Button, Chip, TextField} from '@mui/material';
+import {Button, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoIcon from '@mui/icons-material/Info';
 import {AxiosError} from 'axios';
 import {Notifications} from 'src/libs/utils';
 import {Spinner} from 'src/components/Spinner';
 import {extractConsentError} from 'src/utils/ErrorUtils';
+import {InstitutionDomainEditor} from 'src/components/institution_table/components/InstitutionDomainEditor';
 
 interface InstitutionDetailsProps {
     match: {
@@ -31,7 +32,6 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const [institution, setInstitution] = useState<Institution>();
     const [editMode, setEditMode] = useState(false);
     const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate | undefined>();
-    const [tempDomain, setTempDomain] = useState<string>('');
 
     useEffect(() => {
         InstitutionAPI.getById(institutionId).then((resp) => {
@@ -95,14 +95,11 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         }
     }
 
-    const handleDomainDelete = (domainToDelete: string) => {
+    const handleDomainsChange = (newDomains: string[]) => {
         if (institutionUpdates) {
-            const updatedDomains = institutionUpdates.domains.filter(domain => domain !== domainToDelete);
-            setInstitutionUpdates({...institutionUpdates, domains: updatedDomains});
+            setInstitutionUpdates({...institutionUpdates, domains: newDomains});
         }
     }
-
-    const hasDomains = institution && institution.domains && institution.domains.length > 0;
 
     return !loading ? <div style={{
         display: 'flex',
@@ -172,62 +169,19 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     />
                 </div>
             </div>
-            <div style={{paddingTop: 20}}>
-                <div style={{fontWeight: 600, marginBottom: '0.5rem', fontSize: 18}}>Domains</div>
-                {(editMode ? institutionUpdates?.domains : institution?.domains)?.map((domain, idx) => (
-                    <Chip
-                        key={idx}
-                        label={domain}
-                        variant={'outlined'}
-                        style={{
-                            marginRight: 5,
-                            fontSize: 12,
-                            color: editMode ? undefined : '#7b7b7b',
-                            borderColor: editMode ? undefined : '#7b7b7b'
-                        }}
-                        onDelete={editMode ? () => handleDomainDelete(domain) : undefined}
-                    />
-                ))}
 
-                {(!editMode && !hasDomains) &&
-                    <div className={'italic'}>This institution is not associated with any domains</div>}
-                {editMode && <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
-                    <TextField
-                        variant='outlined'
-                        value={tempDomain}
-                        placeholder={'Domain'}
-                        size="small"
-                        InputProps={{
-                            style: {fontSize: 14}
-                        }}
-                        style={{width: 250}}
-                        onChange={(e) => {
-                            setTempDomain(e.target.value);
-                        }}
-                    />
-                    <Button
-                        variant="contained"
-                        onClick={() => {
-                            const trimmedDomain = tempDomain.trim();
-                            const currentDomains = institutionUpdates?.domains || [];
-                            if (trimmedDomain && !currentDomains.includes(trimmedDomain) && institutionUpdates) {
-                                const updatedDomains = [...currentDomains, trimmedDomain];
-                                setInstitutionUpdates({...institutionUpdates, domains: updatedDomains});
-                                setTempDomain('');
-                            }
-                        }}
-                        style={{marginLeft: 10, fontSize: 14, width: 'auto'}}
-                    >
-                        Add
-                    </Button>
-                </div>}
-            </div>
+            <InstitutionDomainEditor
+                domains={editMode ? institutionUpdates?.domains || [] : institution?.domains || []}
+                editMode={editMode}
+                onDomainsChange={handleDomainsChange}
+            />
+
             <div style={{paddingTop: 20, marginTop: 20, borderTop: '1px solid', borderColor: '#e1e1e1', width: '100%'}}>
                 <div style={{fontSize: 18, fontWeight: 600, paddingBottom: '1rem'}}>
                     Signing Officials
                 </div>
                 <div className={'italic'} style={{display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '2rem'}}>
-                    <InfoIcon fontSize="large" color="info"/>
+                    <InfoIcon fontSize="small" color="info"/>
                     Signing Officials cannot be modified from this page
                 </div>
                 {(!institution?.signingOfficials || institution.signingOfficials.length === 0) && (
@@ -282,3 +236,4 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         </div>
     </div> : <div>Loading</div>;
 }
+
