@@ -56,11 +56,6 @@ export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChang
                         }}
                         style={{width: 250}}
                         onChange={(e) => setTempDomain(e.target.value)}
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                                handleDomainAdd();
-                            }
-                        }}
                     />
                     <Button
                         variant="contained"
