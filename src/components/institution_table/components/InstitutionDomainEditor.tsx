@@ -36,7 +36,7 @@ export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChang
         <div style={{paddingTop: 20}}>
             <div style={{fontWeight: 600, marginBottom: '0.5rem', fontSize: 18}}>Domains</div>
             <div>
-                {domains.map((domain, idx) => (
+                {domains.map(domain => (
                     <DomainChip
                         key={domain}
                         domain={domain}
