@@ -65,10 +65,7 @@ describe('Institution Domain Editor Tests', () => {
             />
         );
 
-        // Try to add empty domain
         cy.get('input').type('   {enter}');
-
-        // Verify callback was not called
         cy.get('@domainsChangeHandler').should('not.have.been.called');
     });
 
@@ -122,20 +119,17 @@ describe('Institution Domain Editor Tests', () => {
             />
         );
 
-        // Find the domain chip and click its delete button
         cy.contains(domainToDelete)
             .parent()
-            .find('svg') // The delete icon
+            .find('svg') // Look for the delete icon
             .click();
 
-        // Verify callback was called with updated domains (without the deleted one)
         cy.get('@domainsChangeHandler').should('have.been.calledWith', expectedDomains);
     });
 
     it('should not show delete buttons in view mode', () => {
         mount(<InstitutionDomainEditor domains={testDomains} editMode={false} />);
 
-        // No delete icons should be visible on the chips
         cy.contains(testDomains[0])
             .parent()
             .find('svg')

@@ -34,28 +34,11 @@ interface DatasetStatisticsProps {
   }
 }
 
-export const LabeledField = ({
-                               label,
-                               children,
-                               labelPlacement = 'left'
-                             }: {
-  label: string,
-  children: React.ReactNode,
-  labelPlacement?: 'left' | 'top'
-}) => {
+const LabeledField = ({label, children}: { label: string, children: React.ReactNode }) => {
   return (
       <div style={{paddingTop: 20}}>
-        {labelPlacement === 'top' ? (
-            <>
-              <div style={{fontWeight: 600, marginBottom: 5}}>{label}</div>
-              <div>{children}</div>
-            </>
-        ) : (
-            <>
-              <span style={{fontWeight: 600}}>{label}: </span>
-              {children}
-            </>
-        )}
+        <span style={{fontWeight: 600}}>{label}: </span>
+        {children}
       </div>
   );
 }
