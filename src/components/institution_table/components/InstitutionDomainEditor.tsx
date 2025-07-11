@@ -38,7 +38,7 @@ export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChang
             <div>
                 {domains.map((domain, idx) => (
                     <DomainChip
-                        key={idx}
+                        key={domain}
                         domain={domain}
                         editMode={editMode}
                         onDelete={() => handleDomainDelete(domain)}

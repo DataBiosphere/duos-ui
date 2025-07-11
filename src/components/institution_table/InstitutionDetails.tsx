@@ -116,6 +116,13 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         }
     }
 
+    const getEditButtonText = () => {
+        if (editMode) {
+            return saving ? 'Saving...' : 'Save';
+        }
+        return 'Edit';
+    };
+
     return !loading ? <div style={{
         display: 'flex',
         alignItems: 'flex-start'
@@ -156,7 +163,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         startIcon={!editMode && <EditIcon />}
                         disabled={saving}
                     >
-                        {editMode ? (saving ? 'Saving...' : 'Save') : 'Edit'}
+                        {getEditButtonText()}
                     </Button>
                 </div>
             </div>
