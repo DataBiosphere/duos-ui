@@ -122,7 +122,7 @@ export interface Institution {
   updateUser: number;
   updateDate: Date;
   signingOfficials: SimplifiedDuosUser[];
-  domains: string[];
+  domains?: string[];
 }
 
 export interface Dataset {
