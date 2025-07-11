@@ -29,8 +29,8 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [institution, setInstitution] = useState<Institution>();
     const [editMode, setEditMode] = useState(false);
+    const [institution, setInstitution] = useState<Institution>();
     const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate | undefined>();
 
     useEffect( () => {
@@ -74,20 +74,30 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         }
     }
 
-    const handleEditToggle = async () => {
-        if (editMode) {
-            if (institutionUpdates) {
-                await updateInstitution(institutionUpdates);
-                setEditMode(false);
-            }
-        } else {
-            setInstitutionUpdates({
-                name: institution?.name || '',
-                domains: institution?.domains ? [...institution.domains] : [],
-            });
-            setEditMode(true);
+    const enterEditMode = () => {
+        setInstitutionUpdates({
+            name: institution?.name || '',
+            domains: institution?.domains ? [...institution.domains] : [],
+        });
+        setEditMode(true);
+    };
+
+    const saveChanges = async () => {
+        if (institutionUpdates) {
+            setSaving(true);
+            await updateInstitution(institutionUpdates);
+            setSaving(false);
+            setEditMode(false);
         }
-    }
+    };
+
+    const handleEditToggle = () => {
+        if (editMode) {
+            saveChanges();
+        } else {
+            enterEditMode();
+        }
+    };
 
     const handleCancelEdit = () => {
         setEditMode(false);
@@ -183,6 +193,6 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
             <SigningOfficialsList signingOfficials={institution?.signingOfficials || []} />
         </div>
-    </div> : <div>Loading</div>;
+    </div> : <div>Loading...</div>;
 }
 
