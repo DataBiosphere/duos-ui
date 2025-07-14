@@ -24,6 +24,8 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
         }
     };
 
+    console.log(tempDomain);
+
     const handleDomainAdd = () => {
         const trimmedDomain = tempDomain.trim();
 
