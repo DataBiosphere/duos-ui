@@ -1,7 +1,7 @@
 import React from 'react';
 import {mount} from 'cypress/react';
 import {InstitutionDomainEditor} from 'src/components/institution_table/components/InstitutionDomainEditor';
-import {Institution} from "src/types/model";
+import {Institution} from 'src/types/model';
 
 describe('Institution Domain Editor Tests', () => {
     const testDomains = ['example.com', 'test.edu', 'domain.org'];
