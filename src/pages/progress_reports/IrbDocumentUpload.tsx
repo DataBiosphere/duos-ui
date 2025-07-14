@@ -38,20 +38,22 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
       <h2>IRB Documentation</h2>
       
       <div className='progress-report-row'>
-        <FormField
-          id='irbDocument'
-          type={FormFieldTypes.FILE}
-          title='IRB Document'
-          description='Upload your current IRB approval document'
-          disabled={readOnly}
-          onChange={({ key, value }: { key: string; value: File }) => {
-            onIrbDocumentChange(value, formState.irbProtocolExpiration || '');
-          }}
-          validation={validation?.irbDocument}
-        />
+        {!readOnly && (
+          <FormField
+            id='irbDocument'
+            type={FormFieldTypes.FILE}
+            title='IRB Document'
+            description='Upload your current IRB approval document'
+            disabled={readOnly}
+            onChange={({ key, value }: { key: string; value: File }) => {
+              onIrbDocumentChange(value, formState.irbProtocolExpiration || '');
+            }}
+            validation={validation?.irbDocument}
+          />
+        )}
         
         {displayFileName && (
-          <div style={{ padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px', marginTop: '10px' }}>
+          <div style={{ padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px', marginTop: readOnly ? '0' : '10px' }}>
             <strong>Current file:</strong> {displayFileName}
             {(referenceId && formState.irbDocumentLocation && formState.irbDocumentName) && (
               <div style={{ marginLeft: '10px', display: 'inline-block' }}>
@@ -68,16 +70,29 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
       </div>
 
       <div className='progress-report-row'>
-        <FormField
-          id='irbProtocolExpiration'
-          type={FormFieldTypes.CALENDAR}
-          title='IRB Protocol Expiration Date'
-          description='When does your current IRB approval expire?'
-          defaultValue={formState.irbProtocolExpiration}
-          onChange={handleExpirationChange}
-          disabled={readOnly}
-          validation={validation?.irbProtocolExpiration}
-        />
+        {readOnly ? (
+          formState.irbProtocolExpiration && (
+            <div>
+              <label style={{ fontWeight: 600, fontSize: '1.6rem', marginBottom: '0.5rem', display: 'block' }}>
+                IRB Protocol Expiration Date
+              </label>
+              <span style={{ fontSize: '1.4rem' }}>
+                {formState.irbProtocolExpiration}
+              </span>
+            </div>
+          )
+        ) : (
+          <FormField
+            id='irbProtocolExpiration'
+            type={FormFieldTypes.CALENDAR}
+            title='IRB Protocol Expiration Date'
+            description='When does your current IRB approval expire?'
+            defaultValue={formState.irbProtocolExpiration}
+            onChange={handleExpirationChange}
+            disabled={readOnly}
+            validation={validation?.irbProtocolExpiration}
+          />
+        )}
       </div>
     </div>
   );
