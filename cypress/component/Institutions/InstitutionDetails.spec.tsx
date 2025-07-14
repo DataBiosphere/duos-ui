@@ -31,7 +31,7 @@ describe('Institution Details Tests', () => {
     });
 
     it('should show a loading spinner', () => {
-        mount(<InstitutionDetails match={{params: {institutionId: 123}}} />);
+        mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 123}}} /></BrowserRouter>);
         cy.contains('Loading').should('be.visible');
     });
 
