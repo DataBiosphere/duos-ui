@@ -10,7 +10,7 @@ describe('Institution Domain Editor Tests', () => {
     });
 
     it('should render domains in view mode', () => {
-        mount(<InstitutionDomainEditor domains={testDomains} editMode={false} />);
+        mount(<InstitutionDomainEditor domains={testDomains} isEditing={false} />);
 
         testDomains.forEach((domain) => {
             cy.contains(domain).should('exist');
@@ -20,13 +20,13 @@ describe('Institution Domain Editor Tests', () => {
     });
 
     it('should show message when no domains in view mode', () => {
-        mount(<InstitutionDomainEditor domains={[]} editMode={false} />);
+        mount(<InstitutionDomainEditor domains={[]} isEditing={false} />);
 
         cy.contains('This institution is not associated with any domains').should('be.visible');
     });
 
     it('should render domains and input field in edit mode', () => {
-        mount(<InstitutionDomainEditor domains={testDomains} editMode={true} />);
+        mount(<InstitutionDomainEditor domains={testDomains} isEditing={true} />);
 
         testDomains.forEach((domain) => {
             cy.contains(domain).should('exist');
@@ -43,7 +43,7 @@ describe('Institution Domain Editor Tests', () => {
         mount(
             <InstitutionDomainEditor
                 domains={testDomains}
-                editMode={true}
+                isEditing={true}
                 onDomainsChange={onDomainsChange}
             />
         );
@@ -60,7 +60,7 @@ describe('Institution Domain Editor Tests', () => {
         mount(
             <InstitutionDomainEditor
                 domains={testDomains}
-                editMode={true}
+                isEditing={true}
                 onDomainsChange={onDomainsChange}
             />
         );
@@ -76,7 +76,7 @@ describe('Institution Domain Editor Tests', () => {
         mount(
             <InstitutionDomainEditor
                 domains={testDomains}
-                editMode={true}
+                isEditing={true}
                 onDomainsChange={onDomainsChange}
             />
         );
@@ -94,7 +94,7 @@ describe('Institution Domain Editor Tests', () => {
         mount(
             <InstitutionDomainEditor
                 domains={testDomains}
-                editMode={true}
+                isEditing={true}
                 onDomainsChange={onDomainsChange}
             />
         );
@@ -114,7 +114,7 @@ describe('Institution Domain Editor Tests', () => {
         mount(
             <InstitutionDomainEditor
                 domains={testDomains}
-                editMode={true}
+                isEditing={true}
                 onDomainsChange={onDomainsChange}
             />
         );
@@ -128,7 +128,7 @@ describe('Institution Domain Editor Tests', () => {
     });
 
     it('should not show delete buttons in view mode', () => {
-        mount(<InstitutionDomainEditor domains={testDomains} editMode={false} />);
+        mount(<InstitutionDomainEditor domains={testDomains} isEditing={false} />);
 
         cy.contains(testDomains[0])
             .parent()

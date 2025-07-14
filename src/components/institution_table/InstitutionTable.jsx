@@ -40,7 +40,7 @@ const calcPageCount = (tableSize, filteredList) => {
 };
 
 export default function InstitutionTable(props) {
-  const { filteredList, currentPage, setCurrentPage, tableSize, setTableSize } = props;
+  const { filteredList, currentPage, setCurrentPage, tableSize, setTableSize, institutionList } = props;
   const [pageCount, setPageCount] = useState(calcPageCount(tableSize, filteredList));
 
   useEffect(() => {
@@ -83,16 +83,23 @@ export default function InstitutionTable(props) {
             <div style={Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW)} key={`${inst.id}-${index}`}>
               <div style={Object.assign({}, Styles.TABLE.ID_CELL)}>{inst.id}</div>
               <div style={Object.assign({}, Styles.TABLE.INSTITUTION_CELL)}>
-                <Link
-                  to={`/admin_manage_institutions/${inst.id}`}
-                  style={{
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
-                    textDecoration: 'none',
-                    color: '#1f75b6',
-                    cursor: 'pointer'
-                  }}
+                  <Link
+                      to={{
+                          pathname: `/admin_manage_institutions/${inst.id}`,
+                          // If we have the institution list already loaded, pass it along to the Edit Institution
+                          // page so we can check for duplicate domains before hitting the backend or fetching the
+                          // entire institution list again. If this value is not present or not yet loaded, the Edit
+                          // Institution page will rely on backend validation.
+                          state: { institutionList }
+                      }}
+                      style={{
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        textDecoration: 'none',
+                        color: '#1f75b6',
+                        cursor: 'pointer'
+                      }}
                 >
                   {inst.name}
                 </Link>

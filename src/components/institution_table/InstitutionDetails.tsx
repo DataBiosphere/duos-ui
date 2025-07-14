@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Institution} from 'src/types/model';
 import backArrowIcon from 'src/images/back_arrow.svg';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {Button, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -27,9 +27,11 @@ interface InstitutionDetailsUpdate {
 
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
+    const location = useLocation();
+    const institutionList = location.state?.institutionList || [];
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [editMode, setEditMode] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [institution, setInstitution] = useState<Institution>();
     const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate | undefined>();
 
@@ -57,6 +59,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     signingOfficials: prevInstitution.signingOfficials || []
                 };
             });
+            Notifications.showSuccess({ text: 'Institution updated successfully' });
         } catch (error) {
             const axiosError = error as AxiosError;
             const consentError = extractConsentError(axiosError);
@@ -79,7 +82,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             name: institution?.name || '',
             domains: institution?.domains ? [...institution.domains] : [],
         });
-        setEditMode(true);
+        setIsEditing(true);
     };
 
     const saveChanges = async () => {
@@ -87,12 +90,12 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             setSaving(true);
             await updateInstitution(institutionUpdates);
             setSaving(false);
-            setEditMode(false);
+            setIsEditing(false);
         }
     };
 
     const handleEditToggle = () => {
-        if (editMode) {
+        if (isEditing) {
             saveChanges();
         } else {
             enterEditMode();
@@ -100,7 +103,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     };
 
     const handleCancelEdit = () => {
-        setEditMode(false);
+        setIsEditing(false);
         setInstitutionUpdates(undefined);
     }
 
@@ -117,7 +120,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     }
 
     const getEditButtonText = () => {
-        if (editMode) {
+        if (isEditing) {
             return saving ? 'Saving...' : 'Save';
         }
         return 'Edit';
@@ -142,7 +145,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 <span>Back to institutions</span>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     {saving && <Spinner />}
-                    {editMode && !saving && (
+                    {isEditing && !saving && (
                         <Button
                             size={'large'}
                             variant="outlined"
@@ -157,10 +160,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                     <Button
                         size={'large'}
                         variant="contained"
-                        color={editMode ? 'success' : 'primary'}
+                        color={'primary'}
                         onClick={handleEditToggle}
                         style={{fontSize: 14}}
-                        startIcon={!editMode && <EditIcon />}
+                        startIcon={!isEditing && <EditIcon />}
                         disabled={saving}
                     >
                         {getEditButtonText()}
@@ -172,10 +175,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 <div style={{display: 'flex', alignItems: 'center'}}>
                     <TextField
                         variant='outlined'
-                        value={editMode ? institutionUpdates?.name : institution?.name}
+                        value={isEditing ? institutionUpdates?.name : institution?.name}
                         size="small"
                         placeholder={'Institution Name'}
-                        disabled={!editMode}
+                        disabled={!isEditing}
                         InputProps={{
                             style: {fontSize: 14}
                         }}
@@ -193,9 +196,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             </div>
 
             <InstitutionDomainEditor
-                domains={editMode ? institutionUpdates?.domains || [] : institution?.domains || []}
-                editMode={editMode}
+                domains={isEditing ? institutionUpdates?.domains || [] : institution?.domains || []}
+                isEditing={isEditing}
                 onDomainsChange={handleDomainsChange}
+                institutionList={institutionList}
             />
 
             <SigningOfficialsList signingOfficials={institution?.signingOfficials || []} />

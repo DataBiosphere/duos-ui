@@ -119,6 +119,7 @@ export default function AdminManageInstitutions(props) {
         setCurrentPage={setCurrentPage}
         tableSize={tableSize}
         setTableSize={setTableSize}
+        institutionList={institutionList}
         onUpdateSave={modalSave}
       />}
       {isLoading && <DarTableSkeletonLoader

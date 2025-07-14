@@ -1,15 +1,21 @@
 import {Button, Chip, TextField} from '@mui/material';
 import React, {useState} from 'react';
+import {Institution} from 'src/types/model';
 
 interface DomainEditorProps {
     domains: string[];
-    editMode: boolean;
+    isEditing: boolean;
     onDomainsChange?: (domains: string[]) => void;
+    institutionList: Institution[];
 }
 
-export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChange }: DomainEditorProps) => {
+export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, institutionList }: DomainEditorProps) => {
     const [tempDomain, setTempDomain] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
+
+    const allInstitutionDomains = institutionList
+        ? institutionList.flatMap((inst: Institution) => inst.domains || [])
+        : [];
 
     const handleDomainDelete = (domainToDelete: string) => {
         if (onDomainsChange) {
@@ -20,15 +26,16 @@ export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChang
 
     const handleDomainAdd = () => {
         const trimmedDomain = tempDomain.trim();
-        if (trimmedDomain) {
-            if (domains.includes(trimmedDomain)) {
-                setErrorMessage('This domain has already been added');
-            } else if (onDomainsChange) {
-                const updatedDomains = [...domains, trimmedDomain];
-                onDomainsChange(updatedDomains);
-                setTempDomain('');
-                setErrorMessage('');
-            }
+
+        if(allInstitutionDomains.includes(trimmedDomain)) {
+            setErrorMessage('This domain is associated with another institution');
+        } else if (domains.includes(trimmedDomain)) {
+            setErrorMessage('This domain has already been added');
+        } else if (onDomainsChange) {
+            const updatedDomains = [...domains, trimmedDomain];
+            onDomainsChange(updatedDomains);
+            setTempDomain('');
+            setErrorMessage('');
         }
     };
 
@@ -40,17 +47,17 @@ export const InstitutionDomainEditor = ({ domains = [], editMode, onDomainsChang
                     <DomainChip
                         key={domain}
                         domain={domain}
-                        editMode={editMode}
+                        editMode={isEditing}
                         onDelete={() => handleDomainDelete(domain)}
                     />
                 ))}
             </div>
 
-            {(!editMode && domains.length === 0) &&
+            {(!isEditing && domains.length === 0) &&
                 <div className={'italic'}>This institution is not associated with any domains</div>
             }
 
-            {editMode && (
+            {isEditing && (
                 <div style={{display: 'flex', flexDirection: 'column', marginTop: 10}}>
                     <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <TextField

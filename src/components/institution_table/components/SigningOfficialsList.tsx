@@ -21,7 +21,7 @@ export const SigningOfficialsList = ({ signingOfficials = [] }: SigningOfficials
                 Signing Officials
             </div>
             <div className={'italic'} style={{display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '2rem'}}>
-                <InfoIcon fontSize="small" color="info"/>
+                <InfoIcon fontSize="large" color="info"/>
                 Signing Officials cannot be modified from this page
             </div>
             {!hasSigningOfficials && (
