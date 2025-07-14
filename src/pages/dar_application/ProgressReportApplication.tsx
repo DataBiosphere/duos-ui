@@ -309,6 +309,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     }}
                     disabled={validationFailed(formValidation)}
                     uploadedIrbDocument={uploadedIrbDocument}
+                    parentDar={dar}
                 />
             </div>}
         </div>
