@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
-import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState, ValidFormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -32,8 +32,6 @@ type ProgressReportApplicationProps = {
 };
 
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
-    const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null);
-    
     const initialState = {
         ...dar,
         dmiCombination:false,
@@ -112,23 +110,18 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         ...(readOnlyMode && {
           closeoutYesNo: ((dar.closeoutSupplement?.reasons.length ?? 0) > 0),
         }),
-    } as unknown as FormState;
+    } as FormState;
 
     const [formState, setFormState] = useState<FormState>(initialState);
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
     const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
+    const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null);
+
+    console.log('ProgressReportApplication initial state:', initialState);
+    console.log('ProgressReportApplication formState:', formState);
 
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
-
-    const updateIrbDocument = (document: File | null, expiration: string) => {
-        onFormChange({
-            irbDocumentName: '',
-            irbDocumentLocation: '',
-            irbProtocolExpiration: expiration,
-        });
-        setUploadedIrbDocument(document);
-    };
 
     const getValidation = (newState: FormState) => {
         if (!readOnlyMode) {
@@ -158,6 +151,14 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         });
         onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
     }
+
+    const onIrbDocumentChange = (document: File | null, expiration: string) => {
+        setUploadedIrbDocument(document);
+        onFormChange({
+            irbProtocolExpiration: expiration,
+            ...(document && { irbDocumentName: document.name })
+        });
+    };
 
     // Check if the DAR is a closeout review
     // TODO: modify this logic for DAC chair when backend supports it
@@ -245,10 +246,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     dataUseTranslations={dataUseTranslations}
                     formData={formState}
                     readOnlyMode={readOnlyMode}
-                    onChange={(update: ValidFormState) => {
-                        if (update) {
-                            onFormChange({[update.key]: update.value})
-                        }
+                    onChange={({key, value}) => {
+                        onFormChange({[key]: value})
                     }}
                     validation={formValidation.darErrors}
                 />
@@ -265,10 +264,9 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                 <IrbDocumentUpload
                     readOnly={readOnlyMode}
                     formState={formState}
-                    onFormChange={onFormChange}
-                    validation={formValidation.darErrors as Record<string, any>}
+                    validation={formValidation.darErrors || {}}
                     uploadedIrbDocument={uploadedIrbDocument}
-                    onIrbDocumentChange={updateIrbDocument}
+                    onIrbDocumentChange={onIrbDocumentChange}
                 />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
@@ -309,6 +307,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                         Navigation.console(Storage.getCurrentUser(), history);
                     }}
                     disabled={validationFailed(formValidation)}
+                    uploadedIrbDocument={uploadedIrbDocument}
                 />
             </div>}
         </div>

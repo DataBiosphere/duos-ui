@@ -13,10 +13,11 @@ interface SubmitProgressReportProps {
   readonly onSuccess: (result: unknown) => void;
   readonly onCancel: () => void;
   readonly disabled?: boolean;
+  readonly uploadedIrbDocument?: File | null;
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const { formState, parentReferenceId, onSuccess, onCancel, disabled} = props;
+  const { formState, parentReferenceId, onSuccess, onCancel, disabled, uploadedIrbDocument } = props;
 
   const submit = async () => {
     try {
@@ -37,7 +38,13 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     // Endpoint expects files
     // leaving them empty until we provide these fields in the application form
     multiPartFormData.append('collaboratorRequiredFile', '')
-    multiPartFormData.append('ethicsApprovalRequiredFile', '')
+    
+    // Use uploaded IRB document if available, otherwise empty string
+    if (uploadedIrbDocument) {
+      multiPartFormData.append('ethicsApprovalRequiredFile', uploadedIrbDocument);
+    } else {
+      multiPartFormData.append('ethicsApprovalRequiredFile', '');
+    }
 
     return multiPartFormData;
   };

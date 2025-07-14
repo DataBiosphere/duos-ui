@@ -254,6 +254,10 @@ const DataAccessRequestApplication = (props) => {
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
 
+      console.log('dars', dars)
+      console.log('datasets', datasets)
+      console.log('collection', collection)
+
       // Add elections to DAR data passed into form, to enable showing approved datasets
       Object.values(dars).map((dar) => {
         dar.data.elections = dar.elections;
@@ -262,9 +266,10 @@ const DataAccessRequestApplication = (props) => {
 
       // TS thinks that collection.dars is an object, but it is a map
       const darMap = new Map(Object.entries(dars));
-      setReverseOrderedDARs(
-          [...darMap.values()].sort((a, b) => b.id - a.id)
-      );
+      const reverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
+
+
+      setReverseOrderedDARs(reverseOrderedDARs);
       const darReferenceId = head(keys(dars));
       // TODO - future improvement
       //  in theory, we should be able to replace this call with the info returned from the collection
