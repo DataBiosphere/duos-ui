@@ -676,6 +676,7 @@ const DataAccessRequestApplication = (props) => {
                       updateUploadedIrbDocument={updateIrbDocument}
                       setDatasets={setDatasets}
                       setSelectedDatasets={setSelectedDatasets}
+                      referenceId={formData.referenceId}
                       draftDar={draftDar}
                   />
                 </ConditionalAccordion>

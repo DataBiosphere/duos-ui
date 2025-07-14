@@ -12,6 +12,7 @@ import SelectableDatasets from './SelectableDatasets';
 import {DAAUtils} from '../../utils/DAAUtils';
 import {DuosDatePicker} from '../../components/DuosDatePicker.js';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements.js';
+import {DownloadLink} from '../../components/DownloadLink';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 const noTopMarginStyle = { marginTop: '0', paddingTop: '0' };
@@ -98,6 +99,7 @@ export default function DataAccessRequest(props) {
     includeInstructions,
     formValidationChange,
     ariaLevel = 2,
+    referenceId,
     _draftDar
   } = props;
 
@@ -363,21 +365,33 @@ export default function DataAccessRequest(props) {
         }
         {needsIrbApprovalDocument(datasets) &&
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                      <FormField
-                        key={'irbDocument'}
-                        type={FormFieldTypes.FILE}
-                        disabled={readOnlyMode}
-                        id={'irbDocument'}
-                        defaultValue={uploadedIrbDocument || {
-                          name: formData.irbDocumentName,
-                        }}
-                        validation={validation.irbDocument}
-                        onValidationChange={onValidationChange}
-                        onChange={({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
-                      />
+                      <div style={{display: 'flex', flexDirection: 'column', flex: 1}}>
+                        <FormField
+                          key={'irbDocument'}
+                          type={FormFieldTypes.FILE}
+                          disabled={readOnlyMode}
+                          id={'irbDocument'}
+                          defaultValue={uploadedIrbDocument || {
+                            name: formData.irbDocumentName,
+                          }}
+                          validation={validation.irbDocument}
+                          onValidationChange={onValidationChange}
+                          onChange={({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
+                        />
+                        {readOnlyMode && formData.irbDocumentName && formData.irbDocumentLocation && referenceId && (
+                          <div style={{ marginTop: '10px' }}>
+                            <DownloadLink
+                              label="Download IRB Document"
+                              onDownload={() => {
+                                DAR.downloadDARDocument(referenceId, 'irbDocument', formData.irbDocumentName);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
                       <div style={{marginTop: 12}}>Expiration Date:</div>
                       <DuosDatePicker
-                        disabled={readOnlyMode}
+                        readOnly={readOnlyMode}
                         id={'irbProtocolExpiration'}
                         defaultValue={irbProtocolExpiration}
                         onChange={(value) => {
@@ -390,7 +404,7 @@ export default function DataAccessRequest(props) {
         {needsCollaborationLetter(datasets) &&
                     <FormField
                       type={FormFieldTypes.FILE}
-                      disabled={readOnlyMode}
+                      readOnly={readOnlyMode}
                       defaultValue={uploadedCollaborationLetter || {
                         name: formData.collaborationLetterName,
                       }}
