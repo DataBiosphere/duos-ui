@@ -267,6 +267,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     validation={formValidation.darErrors || {}}
                     uploadedIrbDocument={uploadedIrbDocument}
                     onIrbDocumentChange={onIrbDocumentChange}
+                    referenceId={dar.referenceId}
                 />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
