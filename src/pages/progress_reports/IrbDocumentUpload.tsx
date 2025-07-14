@@ -3,6 +3,7 @@ import {FormField, FormFieldTypes} from 'src/components/forms/forms';
 import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import {DownloadLink} from 'src/components/DownloadLink';
 import {DAR} from 'src/libs/ajax/DAR';
+import {DuosDatePicker} from 'src/components/DuosDatePicker';
 
 interface IrbDocumentUploadProps {
   readOnly: boolean;
@@ -32,6 +33,9 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
 
   // Display filename from formState if available, otherwise from uploaded file
   const displayFileName = formState.irbDocumentName || uploadedIrbDocument?.name || '';
+
+  // Ensure we have a proper date value for the form field
+  const expirationDateValue = formState.irbProtocolExpiration || '';
 
   return (
     <div className='progress-report-step-card'>
@@ -82,16 +86,25 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
             </div>
           )
         ) : (
-          <FormField
-            id='irbProtocolExpiration'
-            type={FormFieldTypes.CALENDAR}
-            title='IRB Protocol Expiration Date'
-            description='When does your current IRB approval expire?'
-            defaultValue={formState.irbProtocolExpiration}
-            onChange={handleExpirationChange}
-            disabled={readOnly}
-            validation={validation?.irbProtocolExpiration}
-          />
+          <div>
+            <label style={{ fontWeight: 600, fontSize: '1.6rem', marginBottom: '0.5rem', display: 'block' }}>
+              IRB Protocol Expiration Date
+            </label>
+            <p style={{ fontSize: '1.2rem', color: '#666', marginBottom: '1rem' }}>
+              When does your current IRB approval expire?
+            </p>
+            <DuosDatePicker
+              inputFormat={'YYYY-MM-DD'}
+              defaultValue={expirationDateValue}
+              onChange={(value: string | null) => {
+                handleExpirationChange({ key: 'irbProtocolExpiration', value: value || '' });
+              }}
+              onError={(_error: any, value: any) => {
+                console.warn('IRB Date picker error:', _error, value);
+              }}
+              readOnly={readOnly}
+            />
+          </div>
         )}
       </div>
     </div>
