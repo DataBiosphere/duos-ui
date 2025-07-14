@@ -16,7 +16,7 @@ import type {} from '@mui/x-date-pickers/themeAugmentation';
 
 interface DUOSDatePickerProps {
     inputFormat: string;
-    defaultValue: Dayjs;
+    defaultValue: Dayjs | string | null;
     onChange: any;
     onError: any;
     readOnly: boolean;
@@ -25,16 +25,27 @@ interface DUOSDatePickerProps {
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   const {inputFormat, defaultValue, onChange, onError, readOnly} = props;
   const duosColorBlue = '#216FB4';
+  
+  // Convert defaultValue to Dayjs object if it's a string, or use it directly if it's already Dayjs
+  const defaultValueAsDayjs = useMemo(() => {
+    if (!defaultValue) return null;
+    if (typeof defaultValue === 'string') {
+      const parsed = dayjs(defaultValue, inputFormat);
+      return parsed.isValid() ? parsed : null;
+    }
+    return defaultValue;
+  }, [defaultValue, inputFormat]);
+  
   //Required to display the error on initialization with an invalid value when letting the date picker manage the value.
   //onError must be excluded as a dependency of the hook because of change detection looping.
   const checkInitialValue = useMemo(() => {
-    if (defaultValue != null && defaultValue.toString() === 'Invalid Date') {
-      onError('Invalid Date', defaultValue.toString());
+    if (defaultValueAsDayjs != null && !defaultValueAsDayjs.isValid()) {
+      onError('Invalid Date', defaultValue?.toString());
     }
     return true;
   },
   // eslint-disable-next-line
-        [defaultValue]);
+        [defaultValueAsDayjs]);
   const theme = createTheme({
     palette: {
       primary: {
@@ -191,7 +202,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
         closeOnSelect={false}
         label={'Select a date'}
         format={inputFormat}
-        defaultValue={defaultValue ? dayjs(defaultValue) : null}
+        defaultValue={defaultValueAsDayjs}
         onChange={(value) => {
           onChange(value ? value.format(inputFormat) : null);
         }}

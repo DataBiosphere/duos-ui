@@ -36,7 +36,7 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
   return (
     <div className='progress-report-step-card'>
       <h2>IRB Documentation</h2>
-      
+
       <div className='progress-report-row'>
         {!readOnly && (
           <FormField
@@ -51,17 +51,17 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
             validation={validation?.irbDocument}
           />
         )}
-        
+
         {displayFileName && (
           <div style={{ padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px', marginTop: readOnly ? '0' : '10px' }}>
             <strong>Current file:</strong> {displayFileName}
             {(referenceId && formState.irbDocumentLocation && formState.irbDocumentName) && (
               <div style={{ marginLeft: '10px', display: 'inline-block' }}>
-                <DownloadLink 
-                  label="Download" 
+                <DownloadLink
+                  label="Download"
                   onDownload={() => {
                     DAR.downloadDARDocument(referenceId, 'irbDocument', formState.irbDocumentName);
-                  }} 
+                  }}
                 />
               </div>
             )}

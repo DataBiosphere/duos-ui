@@ -393,9 +393,14 @@ export default function DataAccessRequest(props) {
                       <DuosDatePicker
                         readOnly={readOnlyMode}
                         id={'irbProtocolExpiration'}
+                        inputFormat={'YYYY-MM-DD'}
                         defaultValue={irbProtocolExpiration}
                         onChange={(value) => {
                           onChange({key: 'irbProtocolExpiration', value});
+                        }}
+                        onError={(_error, value) => {
+                          // Handle error if needed
+                          console.warn('Date picker error:', _error, value);
                         }}
                       />
                     </div>
