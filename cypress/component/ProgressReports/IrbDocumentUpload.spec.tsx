@@ -12,7 +12,7 @@ describe('IrbDocumentUpload Component Tests', () => {
   const mockFormState: FormState = {
     irbProtocolExpiration: '2026-06-14',
     irbDocumentName: 'existing-irb.pdf',
-    irbDocumentLocation: 'gs://bucket/path/to/existing-document'
+    irbDocumentLocation: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
   } as FormState;
 
   const mockFormStateWithoutIrb: FormState = {

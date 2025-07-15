@@ -127,7 +127,7 @@ describe('SubmitProgressReport tests', () => {
     const mockParentDar: CombinedDataAccessRequest = {
       referenceId: 'DAR-123',
       irbDocumentName: 'parent-irb-document.pdf',
-      irbDocumentLocation: 'gs://bucket/path/to/document'
+      irbDocumentLocation: 'f7e8d9c0-b1a2-3456-7890-abcdef123456'
     } as CombinedDataAccessRequest;
 
     const mockParentDarWithoutIrb: CombinedDataAccessRequest = {
