@@ -20,7 +20,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Mock Storage methods that might be used
     cy.window().then((win) => {
       win.localStorage.clear();
-      win.sessionStorage.clear();
+      win.localStorage.clear();
     });
 
     cy.stub(Storage, 'getCurrentUser').returns(researcher);
