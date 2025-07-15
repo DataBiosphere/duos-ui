@@ -6,16 +6,12 @@ import {DAR} from 'src/libs/ajax/DAR';
 import {DuosDatePicker} from 'src/components/DuosDatePicker';
 import {DateValidationError} from '@mui/x-date-pickers';
 import {Dayjs} from 'dayjs';
-
-interface ValidationRule {
-  isValid?: boolean;
-  errorText?: string;
-}
+import {DarErrors} from 'src/pages/dar_application/FormValidationState';
 
 interface IrbDocumentUploadProps {
   readOnly: boolean;
   formState: FormState;
-  validation: Record<string, ValidationRule>;
+  validation: DarErrors;
   uploadedIrbDocument: File | null;
   onIrbDocumentChange: (document: File | null, expiration: string) => void;
   referenceId: string;
