@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Institution} from 'src/types/model';
 import backArrowIcon from 'src/images/back_arrow.svg';
-import {Link, useLocation} from 'react-router-dom';
+import {Link, useHistory, useLocation} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {Button, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -31,12 +31,16 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
     const formMode = props.formMode;
     const location = useLocation();
+    const history = useHistory();
     const institutionList = location.state?.institutionList || [];
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(formMode === FORM_MODES.createNew);
     const [institution, setInstitution] = useState<Institution>();
-    const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate | undefined>();
+    const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate>({
+        name: '',
+        domains: [],
+    });
 
     useEffect( () => {
         const loadInstitution = async () => {
@@ -92,6 +96,31 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         }
     }
 
+    const createNewInstitution = async (newInstitution: InstitutionDetailsUpdate) => {
+        try {
+            setSaving(true);
+            const resp = await InstitutionAPI.postInstitution(newInstitution);
+            setInstitution(resp);
+            Notifications.showSuccess({ text: 'Institution created successfully' });
+            setIsEditing(false);
+            history.push(`/admin_manage_institutions/institutions/${resp.id}`);
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            const consentError = extractConsentError(axiosError);
+            if(consentError && consentError.code === 409) {
+                Notifications.showError({
+                    text: 'One or more of the domains specified is already used by another institution. A domain can only be associated with one institution.'
+                });
+            } else {
+                Notifications.showError({
+                    text: `An error occurred when trying to create the institution: ${consentError ? consentError.message : 'no additional error available'}`,
+                });
+            }
+        } finally {
+            setSaving(false);
+        }
+    }
+
     const enterEditMode = () => {
         setInstitutionUpdates({
             name: institution?.name || '',
@@ -103,7 +132,8 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const saveChanges = async () => {
         if (institutionUpdates) {
             setSaving(true);
-            await updateInstitution(institutionUpdates);
+            if(formMode === FORM_MODES.createNew) await createNewInstitution(institutionUpdates);
+            if(formMode === FORM_MODES.editExisting) await updateInstitution(institutionUpdates);
             setSaving(false);
             setIsEditing(false);
         }
@@ -119,7 +149,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
-        setInstitutionUpdates(undefined);
+        setInstitutionUpdates({
+            name: institution?.name || '',
+            domains: institution?.domains ? [...institution.domains] : [],
+        });
     }
 
     const handleNameChange = (value: string) => {
@@ -182,7 +215,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         onClick={handleEditToggle}
                         style={{fontSize: 14}}
                         startIcon={!isEditing && <EditIcon />}
-                        disabled={saving}
+                        disabled={saving || (isEditing && (!institutionUpdates || institutionUpdates.name.trim().length === 0))}
                     >
                         {getConfirmButtonText()}
                     </Button>
