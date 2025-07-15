@@ -137,9 +137,9 @@ export default function ApplicationInformation(props) {
     rus,
     cloudProviderDescription,
     referenceId,
-    irbDocumentLocation,
+    _irbDocumentLocation,
     collaborationLetterLocation,
-    irbDocumentName,
+    _irbDocumentName,
     collaborationLetterName
   } = props;
 

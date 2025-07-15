@@ -153,9 +153,7 @@ describe('IrbDocumentUpload Component Tests', () => {
       });
 
       // Verify that the callback was called
-      cy.then(() => {
-        expect(onIrbDocumentChangeSpy).to.have.been.called;
-      });
+      cy.wrap(onIrbDocumentChangeSpy).should('have.been.called');
     });
   });
 

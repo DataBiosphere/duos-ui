@@ -250,5 +250,63 @@ describe('SubmitProgressReport tests', () => {
         expect(interception.request.headers['content-type']).to.include('multipart/form-data');
       });
     });
+
+    it('Should submit without IRB document when no new document and no parent document exists', () => {
+      cy.intercept('POST', '/api/dar/v2/progress_report/1', {
+        statusCode: 200,
+        body: {},
+      }).as('submitProgressReport');
+
+      mount(
+        <SubmitProgressReport
+          formState={mockFormState}
+          parentReferenceId="1"
+          onSuccess={() => {}}
+          onCancel={() => {}}
+          uploadedIrbDocument={null}
+          parentDar={mockParentDarWithoutIrb}
+        />
+      );
+
+      cy.get('[data-cy=pr-submit-button]').click();
+      cy.wait('@submitProgressReport').then((interception) => {
+        assert(interception?.response?.statusCode === 200, 'Submit was successful');
+        // Verify no IRB document filename was included
+        const requestBody = interception.request.body;
+        expect(requestBody).to.be.a('string');
+        expect(requestBody).to.not.include('filename=');
+        expect(requestBody).to.include('name="ethicsApprovalRequiredFile"\r\n\r\n\r\n');
+        expect(interception.request.headers['content-type']).to.include('multipart/form-data');
+      });
+    });
+
+    it('Should handle missing parent DAR gracefully', () => {
+      cy.intercept('POST', '/api/dar/v2/progress_report/1', {
+        statusCode: 200,
+        body: {},
+      }).as('submitProgressReport');
+
+      mount(
+        <SubmitProgressReport
+          formState={mockFormState}
+          parentReferenceId="1"
+          onSuccess={() => {}}
+          onCancel={() => {}}
+          uploadedIrbDocument={null}
+          parentDar={undefined}
+        />
+      );
+
+      cy.get('[data-cy=pr-submit-button]').click();
+      cy.wait('@submitProgressReport').then((interception) => {
+        assert(interception?.response?.statusCode === 200, 'Submit was successful');
+        // Verify no IRB document was included when no parent DAR
+        const requestBody = interception.request.body;
+        expect(requestBody).to.be.a('string');
+        expect(requestBody).to.not.include('filename=');
+        expect(requestBody).to.include('name="ethicsApprovalRequiredFile"\r\n\r\n\r\n');
+        expect(interception.request.headers['content-type']).to.include('multipart/form-data');
+      });
+    });
   });
 });

@@ -5,7 +5,8 @@ import {
   LocalizationProvider,
   PickersActionBarProps,
   PickersDay,
-  PickersDayProps
+  PickersDayProps,
+  DateValidationError
 } from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {Button} from '@mui/material';
@@ -17,8 +18,8 @@ import type {} from '@mui/x-date-pickers/themeAugmentation';
 interface DUOSDatePickerProps {
     inputFormat: string;
     defaultValue: Dayjs | string | null;
-    onChange: any;
-    onError: any;
+    onChange: (value: string | null) => void;
+    onError: (error: DateValidationError, value: Dayjs | null) => void;
     readOnly: boolean;
 }
 
@@ -40,7 +41,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   //onError must be excluded as a dependency of the hook because of change detection looping.
   const checkInitialValue = useMemo(() => {
     if (defaultValueAsDayjs != null && !defaultValueAsDayjs.isValid()) {
-      onError('Invalid Date', defaultValue?.toString());
+      onError('invalidDate', defaultValueAsDayjs);
     }
     return true;
   },
