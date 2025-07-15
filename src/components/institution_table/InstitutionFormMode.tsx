@@ -1,4 +1,4 @@
-// Represents the two possible modes that this component can be in
+// Represents the two possible modes that the InstitutionDetails editor can be in
 // Either a user is creating a new institution or editing an existing one
 export type InstitutionFormMode = 'CREATE_NEW' | 'EDIT_EXISTING';
 
