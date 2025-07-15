@@ -24,7 +24,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const submit = async () => {
     try {
       let irbDocumentToSubmit = uploadedIrbDocument;
-      
+
       // If no new IRB document was uploaded, but parent DAR has an IRB document, use that
       if (!uploadedIrbDocument && parentDar?.irbDocumentLocation && parentDar?.irbDocumentName) {
         try {
@@ -38,7 +38,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
           // Continue without IRB document if fetch fails
         }
       }
-      
+
       const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState), irbDocumentToSubmit);
       const submittedPR = await ProgressReport.submitProgressReport(multiPartFormData, parentReferenceId);
       onSuccess(submittedPR);
@@ -56,7 +56,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     // Endpoint expects files
     // leaving them empty until we provide these fields in the application form
     multiPartFormData.append('collaboratorRequiredFile', '')
-    
+
     // Use provided IRB document if available, otherwise empty string
     if (irbDocument) {
       multiPartFormData.append('ethicsApprovalRequiredFile', irbDocument);

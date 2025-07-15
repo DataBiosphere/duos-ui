@@ -31,8 +31,8 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
     onIrbDocumentChange(uploadedIrbDocument, value);
   };
 
-  // Display filename from formState if available, otherwise from uploaded file
-  const displayFileName = formState.irbDocumentName || uploadedIrbDocument?.name || '';
+  // Display filename from uploaded file first, then formState if no upload
+  const displayFileName = uploadedIrbDocument?.name || formState.irbDocumentName || '';
 
   // Ensure we have a proper date value for the form field
   const expirationDateValue = formState.irbProtocolExpiration || '';

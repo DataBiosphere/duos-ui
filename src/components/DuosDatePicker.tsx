@@ -25,7 +25,7 @@ interface DUOSDatePickerProps {
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   const {inputFormat, defaultValue, onChange, onError, readOnly} = props;
   const duosColorBlue = '#216FB4';
-  
+
   // Convert defaultValue to Dayjs object if it's a string, or use it directly if it's already Dayjs
   const defaultValueAsDayjs = useMemo(() => {
     if (!defaultValue) return null;
@@ -35,7 +35,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
     }
     return defaultValue;
   }, [defaultValue, inputFormat]);
-  
+
   //Required to display the error on initialization with an invalid value when letting the date picker manage the value.
   //onError must be excluded as a dependency of the hook because of change detection looping.
   const checkInitialValue = useMemo(() => {
