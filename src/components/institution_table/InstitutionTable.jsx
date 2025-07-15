@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Styles } from '../../libs/theme';
 import ReactTooltip from 'react-tooltip';
 import PaginationBar from '../PaginationBar';
-import AddInstitutionModal from '../modals/AddInstitutionModal';
+import { Link } from 'react-router-dom';
 
 export const tableHeaderTemplate = (
   <>
@@ -40,10 +40,8 @@ const calcPageCount = (tableSize, filteredList) => {
 };
 
 export default function InstitutionTable(props) {
-  const { filteredList, currentPage, setCurrentPage, tableSize, setTableSize, onUpdateSave } = props;
+  const { filteredList, currentPage, setCurrentPage, tableSize, setTableSize, institutionList } = props;
   const [pageCount, setPageCount] = useState(calcPageCount(tableSize, filteredList));
-  const [showUpdateInstitutionModal, setShowUpdateInstitutionModal] = useState(false);
-  const [institutionId, setInstitutionId] = useState();
 
   useEffect(() => {
     setPageCount(calcPageCount(tableSize, filteredList));
@@ -61,16 +59,6 @@ export default function InstitutionTable(props) {
     if(currentPage > 0 && currentPage < pageCount + 1) {
       setCurrentPage(currentPage);
     }
-  };
-
-  const openUpdateModal = (id) => {
-    setInstitutionId(id);
-    setShowUpdateInstitutionModal(true);
-  };
-
-  const closeUpdateModal = () => {
-    setShowUpdateInstitutionModal(false);
-    setInstitutionId(undefined);
   };
 
   return (
@@ -95,7 +83,26 @@ export default function InstitutionTable(props) {
             <div style={Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW)} key={`${inst.id}-${index}`}>
               <div style={Object.assign({}, Styles.TABLE.ID_CELL)}>{inst.id}</div>
               <div style={Object.assign({}, Styles.TABLE.INSTITUTION_CELL)}>
-                <a style={{overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'}} onClick={() => { openUpdateModal(inst.id); }}>{inst.name}</a>
+                  <Link
+                      to={{
+                          pathname: `/admin_manage_institutions/${inst.id}`,
+                          // If we have the institution list already loaded, pass it along to the Edit Institution
+                          // page so we can check for duplicate domains before hitting the backend or fetching the
+                          // entire institution list again. If this value is not present or not yet loaded, the Edit
+                          // Institution page will rely on backend validation.
+                          state: { institutionList }
+                      }}
+                      style={{
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        textDecoration: 'none',
+                        color: '#1f75b6',
+                        cursor: 'pointer'
+                      }}
+                >
+                  {inst.name}
+                </Link>
               </div>
               <div style={Object.assign({}, {...Styles.TABLE.INSTITUTION_CELL, display: 'block'})}>{signingOfficialsList}</div>
               <div style={Object.assign({}, Styles.TABLE.DATA_ID_CELL)}>{inst.createUser ? inst.createUser.displayName : ''}</div>
@@ -107,13 +114,6 @@ export default function InstitutionTable(props) {
         })}
         <PaginationBar pageCount={pageCount} currentPage={currentPage} tableSize={tableSize} goToPage={goToPage} changeTableSize={changeTableSize} />
       </div>
-      {showUpdateInstitutionModal && <AddInstitutionModal
-        showModal={showUpdateInstitutionModal}
-        institutionId={institutionId}
-        closeModal={closeUpdateModal}
-        onOKRequest={onUpdateSave}
-        onCloseRequest={closeUpdateModal}
-      />}
       <ReactTooltip
         place='left'
         effect='solid'
