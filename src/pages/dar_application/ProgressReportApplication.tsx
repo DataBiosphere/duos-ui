@@ -118,9 +118,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
     const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null);
 
-    console.log('ProgressReportApplication initial state:', initialState);
-    console.log('ProgressReportApplication formState:', formState);
-
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
     const getValidation = (newState: FormState) => {

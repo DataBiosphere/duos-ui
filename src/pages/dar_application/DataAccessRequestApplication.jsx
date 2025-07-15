@@ -254,10 +254,6 @@ const DataAccessRequestApplication = (props) => {
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
 
-      console.log('dars', dars)
-      console.log('datasets', datasets)
-      console.log('collection', collection)
-
       // Add elections to DAR data passed into form, to enable showing approved datasets
       Object.values(dars).map((dar) => {
         dar.data.elections = dar.elections;
