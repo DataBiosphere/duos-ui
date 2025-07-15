@@ -2,6 +2,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import IrbDocumentUpload from 'src/pages/progress_reports/IrbDocumentUpload';
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import { DarErrors } from 'src/pages/dar_application/FormValidationState';
 
 describe('IrbDocumentUpload Component Tests', () => {
   beforeEach(() => {
@@ -262,10 +263,10 @@ describe('IrbDocumentUpload Component Tests', () => {
 
   describe('Error States', () => {
     it('Should handle validation errors appropriately', () => {
-      const mockValidationWithErrors = {
+      const mockValidationWithErrors: DarErrors = {
         irbDocument: {
-          isValid: false,
-          errorText: 'IRB document is required'
+          valid: false,
+          failed: ['IRB document is required']
         }
       };
 
