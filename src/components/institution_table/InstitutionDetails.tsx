@@ -11,13 +11,15 @@ import {Spinner} from 'src/components/Spinner';
 import {extractConsentError} from 'src/utils/ErrorUtils';
 import {InstitutionDomainEditor} from 'src/components/institution_table/components/InstitutionDomainEditor';
 import {SigningOfficialsList} from 'src/components/institution_table/components/SigningOfficialsList';
+import {FORM_MODES, InstitutionFormMode} from 'src/components/institution_table/InstitutionFormMode';
 
 interface InstitutionDetailsProps {
     match: {
         params: {
-            institutionId: number;
+            institutionId?: number;
         }
-    }
+    },
+    formMode: InstitutionFormMode
 }
 
 interface InstitutionDetailsUpdate {
@@ -27,6 +29,7 @@ interface InstitutionDetailsUpdate {
 
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
+    const formMode = props.formMode;
     const location = useLocation();
     const institutionList = location.state?.institutionList || [];
     const [loading, setLoading] = useState(true);
@@ -37,15 +40,27 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     useEffect( () => {
         const loadInstitution = async () => {
-            await InstitutionAPI.getById(institutionId)
-                .then((resp) => {
-                    setInstitution(resp);
-                    setLoading(false);
+            try {
+                const resp = await InstitutionAPI.getById(institutionId);
+                setInstitution(resp);
+            } catch (error) {
+                const axiosError = error as AxiosError;
+                const consentError = extractConsentError(axiosError);
+                Notifications.showError({
+                    text: `Failed to load institution details: ${consentError ? consentError.message : 'An unexpected error occurred'}`,
                 });
+            } finally {
+                setLoading(false);
+            }
         }
 
-        loadInstitution();
-    }, [institutionId]);
+        if(institutionId && formMode === FORM_MODES.editExisting) {
+            loadInstitution();
+        } else {
+            setLoading(false);
+            setIsEditing(true);
+        }
+    }, [formMode, institutionId]);
 
     const updateInstitution = async (updatedInstitution: InstitutionDetailsUpdate) => {
         try {
@@ -119,8 +134,11 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         }
     }
 
-    const getEditButtonText = () => {
-        if (isEditing) {
+    const getConfirmButtonText = () => {
+        if(isEditing && formMode === FORM_MODES.createNew) {
+            return saving ? 'Creating...' : 'Create';
+        }
+        if(isEditing && formMode === FORM_MODES.editExisting) {
             return saving ? 'Saving...' : 'Save';
         }
         return 'Edit';
@@ -145,7 +163,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                 <span>Back to institutions</span>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     {saving && <Spinner />}
-                    {isEditing && !saving && (
+                    {isEditing && !saving && formMode === FORM_MODES.editExisting && (
                         <Button
                             size={'large'}
                             variant="outlined"
@@ -166,7 +184,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         startIcon={!isEditing && <EditIcon />}
                         disabled={saving}
                     >
-                        {getEditButtonText()}
+                        {getConfirmButtonText()}
                     </Button>
                 </div>
             </div>
