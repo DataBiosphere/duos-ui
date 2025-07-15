@@ -1,29 +1,39 @@
-import {Styles} from 'src/libs/theme';
 import ReactTooltip from 'react-tooltip';
 import React from 'react';
 import {Institution} from 'src/types/model';
 
+const columnWidths = {
+  id: '10%',
+  name: '25%',
+  domains: '15%',
+  signingOfficials: '25%',
+  updateUser: '15%',
+  updateDate: '10%'
+}
+
+const baseTemplateStyle = {
+  margin: '1rem 2%'
+}
+
 export const tableHeaderTemplate = (
     <>
-      <div style={Styles.TABLE.ID_CELL}>ID</div>
-      <div style={Styles.TABLE.INSTITUTION_CELL}>Institution</div>
-      <div style={Styles.TABLE.DATA_ID_CELL}>Domains</div>
-      <div style={Styles.TABLE.INSTITUTION_CELL}>Signing Officials</div>
-      <div style={Styles.TABLE.DATA_ID_CELL}>Update User</div>
-      <div style={Styles.TABLE.SUBMISSION_DATE_CELL}>Updated On</div>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.id}}}>ID</div>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.name}}}>Institution</div>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.domains}}}>Domains</div>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.signingOfficials}}}>Signing Officials</div>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.updateUser}}}>Update User</div>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.updateDate}}}>Updated On</div>
     </>
 );
 
-const loadingMarginOverwrite = {margin: '1rem 2%'};
-
 export const tableRowLoadingTemplate = (
     <>
-      <div style={{...Styles.TABLE.ID_CELL, ...loadingMarginOverwrite}} className="text-placeholder"/>
-      <div style={{...Styles.TABLE.INSTITUTION_CELL, ...loadingMarginOverwrite}} className="text-placeholder"/>
-      <div style={{...Styles.TABLE.INSTITUTION_CELL, ...loadingMarginOverwrite}} className="text-placeholder"/>
-      <div style={{...Styles.TABLE.DATA_ID_CELL, ...loadingMarginOverwrite}} className="text-placeholder"/>
-      <div style={{...Styles.TABLE.SUBMISSION_DATE_CELL, ...loadingMarginOverwrite}} className="text-placeholder"/>
-      <div style={{...Styles.TABLE.DATA_ID_CELL, ...loadingMarginOverwrite}} className="text-placeholder"/>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.id}}} className="text-placeholder"/>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.name}}} className="text-placeholder"/>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.domains}}} className="text-placeholder"/>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.signingOfficials}}} className="text-placeholder"/>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.updateUser}}} className="text-placeholder"/>
+      <div style={{...baseTemplateStyle, ...{width: columnWidths.updateDate}}} className="text-placeholder"/>
     </>
 );
 
@@ -37,7 +47,9 @@ export const tableStyles = {
     margin: '0.5% 0'
   },
   columnStyle: {
-    ...Styles.TABLE.HEADER_ROW,
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '1rem',
     color: '#7B7B7B',
     fontSize: '1.6rem',
     fontWeight: 'bold',
@@ -62,13 +74,13 @@ interface ColumnConfigCell {
 export const columnConfig: ColumnConfig = {
   id: {
     label: 'ID',
-    cellStyle: {width: '10%'},
+    cellStyle: {width: columnWidths.id},
     cellDataFn: (row: Institution) => row.id,
     sortable: true
   },
   name: {
     label: 'Institution',
-    cellStyle: {width: '25%'},
+    cellStyle: {width: columnWidths.name},
     cellDataFn: (row: Institution) => {
       return <a style={{overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'}} onClick={() => {
         // TODO: This needs to be replaced with a proper navigation to the institution edit page
@@ -79,7 +91,7 @@ export const columnConfig: ColumnConfig = {
   },
   domains: {
     label: 'Domains',
-    cellStyle: {width: '10%'},
+    cellStyle: {width: columnWidths.domains},
     cellDataFn: (row: Institution) => {
       if (row.domains) {
         return row.domains.join(', ');
@@ -91,7 +103,7 @@ export const columnConfig: ColumnConfig = {
   },
   signingOfficials: {
     label: 'Signing Officials',
-    cellStyle: {width: '25%'},
+    cellStyle: {width: columnWidths.signingOfficials},
     cellDataFn: (row: Institution) => {
       if (row.signingOfficials && row.signingOfficials.length > 0) {
         const fullNames = row.signingOfficials.map((user) => `${user.displayName} (${user.email})`).join(', ');
@@ -127,7 +139,7 @@ export const columnConfig: ColumnConfig = {
   },
   updateUser: {
     label: 'Updated By',
-    cellStyle: {width: '15%'},
+    cellStyle: {width: columnWidths.updateUser},
     cellDataFn: (row: Institution) => {
       const user = row.updateUser || row.createUser;
       return user ? user.displayName : '- -';
@@ -136,7 +148,7 @@ export const columnConfig: ColumnConfig = {
   },
   updateDate: {
     label: 'Updated On',
-    cellStyle: {width: '15%'},
+    cellStyle: {width: columnWidths.updateDate},
     cellDataFn: (row: Institution) => {
       if (row.updateDate) {
         return row.updateDate;
