@@ -132,8 +132,17 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const saveChanges = async () => {
         if (institutionUpdates) {
             setSaving(true);
-            if(formMode === FORM_MODES.createNew) await createNewInstitution(institutionUpdates);
-            if(formMode === FORM_MODES.editExisting) await updateInstitution(institutionUpdates);
+            switch(formMode) {
+                case FORM_MODES.createNew:
+                    await createNewInstitution(institutionUpdates);
+                    break;
+                case FORM_MODES.editExisting:
+                    await updateInstitution(institutionUpdates);
+                    break;
+                default:
+                    Notifications.showError({ text: 'An unexpected error occurred: unrecognized form mode' });
+                    break;
+            }
             setSaving(false);
             setIsEditing(false);
         }
