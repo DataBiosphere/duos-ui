@@ -57,7 +57,7 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
         )}
 
         {displayFileName && (
-          <div style={{ padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px', marginTop: readOnly ? '0' : '10px' }}>
+          <div style={{ padding: '8px', borderRadius: '4px', marginTop: readOnly ? '0' : '10px' }}>
             <strong>Current file:</strong> {displayFileName}
             {(referenceId && formState.irbDocumentLocation && formState.irbDocumentName) && (
               <div style={{ marginLeft: '10px', display: 'inline-block' }}>
