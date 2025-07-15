@@ -13,9 +13,12 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
     const [tempDomain, setTempDomain] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
 
-    const allInstitutionDomains = institutionList
-        ? institutionList.flatMap((inst: Institution) => inst.domains || [])
-        : [];
+    const domainToInstitutionMap: Record<string, Institution> = {};
+    institutionList.forEach((inst: Institution) => {
+        (inst.domains || []).forEach(domain => {
+            domainToInstitutionMap[domain] = inst;
+        });
+    });
 
     const handleDomainDelete = (domainToDelete: string) => {
         if (onDomainsChange) {
@@ -27,8 +30,8 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
     const handleDomainAdd = () => {
         const trimmedDomain = tempDomain.trim();
 
-        if(allInstitutionDomains.includes(trimmedDomain)) {
-            setErrorMessage('This domain is associated with another institution');
+        if(Object.keys(domainToInstitutionMap).includes(trimmedDomain)) {
+            setErrorMessage('This domain is associated with another institution: ' + domainToInstitutionMap[trimmedDomain].name);
         } else if (domains.includes(trimmedDomain)) {
             setErrorMessage('This domain has already been added');
         } else if (onDomainsChange) {

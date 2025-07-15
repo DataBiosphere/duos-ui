@@ -164,6 +164,6 @@ describe('Institution Domain Editor Tests', () => {
         cy.get('input').type('a.com');
         cy.contains('button', 'Add').click();
         cy.get('@domainsChangeHandler').should('not.have.been.called');
-        cy.contains('This domain is associated with another institution').should('be.visible');
+        cy.contains('This domain is associated with another institution: Institution A').should('be.visible');
     });
 });
