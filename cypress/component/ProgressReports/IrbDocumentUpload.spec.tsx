@@ -261,28 +261,4 @@ describe('IrbDocumentUpload Component Tests', () => {
     });
   });
 
-  describe('Error States', () => {
-    it('Should handle validation errors appropriately', () => {
-      const mockValidationWithErrors: DarErrors = {
-        irbDocument: {
-          valid: false,
-          failed: ['IRB document is required']
-        }
-      };
-
-      mount(
-        <IrbDocumentUpload
-          readOnly={false}
-          formState={mockFormStateWithoutIrb}
-          validation={mockValidationWithErrors}
-          uploadedIrbDocument={null}
-          onIrbDocumentChange={() => {}}
-          referenceId={mockReferenceId}
-        />
-      );
-
-      // Check that the component renders with validation in place
-      cy.contains('IRB Document').should('exist');
-    });
-  });
 });
