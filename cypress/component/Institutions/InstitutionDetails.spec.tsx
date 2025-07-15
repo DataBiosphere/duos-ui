@@ -156,7 +156,7 @@ describe('Institution Details Tests', () => {
         cy.contains('Institution created successfully').should('be.visible');
     });
 
-    it('should show validation errors when creating a new institution with missing fields', () => {
+    it('should disable the create/save button if the institution name is empty', () => {
         mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
 
         // Create button should be disabled to start
