@@ -21,11 +21,10 @@ interface SortType {
 interface InstitutionTableProps {
   readonly isLoading?: boolean;
   readonly institutionList: Institution[];
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
-  tableSize: number;
-  setTableSize: (size: number) => void;
-  // onUpdateSave: (result: any) => void;
+  readonly currentPage: number;
+  readonly setCurrentPage: (page: number) => void;
+  readonly tableSize: number;
+  readonly setTableSize: (size: number) => void;
 }
 
 const calcPageCount = (tableSize: number, filteredList: Institution[]) => {
@@ -52,7 +51,7 @@ const getInitialSort = (columns: string[] = []): SortType => {
 
 const defaultColumns = Object.keys(columnConfig);
 
-const InstitutionTable: React.FC<InstitutionTableProps> = (props) => {
+export default function InstitutionTable(props: InstitutionTableProps) {
   const {isLoading, institutionList, currentPage, setCurrentPage, tableSize, setTableSize} = props;
   const [pageCount, setPageCount] = useState<number>(calcPageCount(tableSize, institutionList));
   const [showUpdateInstitutionModal, setShowUpdateInstitutionModal] = useState<boolean>(false);
@@ -82,12 +81,6 @@ const InstitutionTable: React.FC<InstitutionTableProps> = (props) => {
       setCurrentPage(page);
     }
   };
-
-  // TODO: Remove when update is moved to a separate page
-  // const openUpdateModal = (id: number | string) => {
-  //   setInstitutionId(id);
-  //   setShowUpdateInstitutionModal(true);
-  // };
 
   const closeUpdateModal = () => {
     setShowUpdateInstitutionModal(false);
@@ -133,5 +126,3 @@ const InstitutionTable: React.FC<InstitutionTableProps> = (props) => {
       </div>
   );
 };
-
-export default InstitutionTable;

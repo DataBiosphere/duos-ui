@@ -124,13 +124,11 @@ export default function AdminManageInstitutions(props: AdminManageInstitutionsPr
       {!isLoading && <InstitutionTable
         isLoading={isLoading}
         filteredList={filteredList}
-        // history={props.history}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         tableSize={tableSize}
         setTableSize={setTableSize}
         institutionList={institutionList}
-        // onUpdateSave={modalSave}
       />}
       {isLoading && <DarTableSkeletonLoader
         tableHeaderTemplate={tableHeaderTemplate}
