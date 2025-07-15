@@ -84,15 +84,7 @@ export const columnConfig: ColumnConfig = {
     cellStyle: {width: columnWidths.name},
     cellDataFn: (row: Institution) => {
       return <Link
-          to={{
-            pathname: `/admin_manage_institutions/${row.id}`
-            // If we have the institution list already loaded, pass it along to the Edit Institution
-            // page so we can check for duplicate domains before hitting the backend or fetching the
-            // entire institution list again. If this value is not present or not yet loaded, the Edit
-            // Institution page will rely on backend validation.
-            // TODO: Fix this!
-            // state: { institutionList }
-          }}
+          to={{pathname: `/admin_manage_institutions/${row.id}`}}
           style={{
             overflow: 'hidden',
             whiteSpace: 'nowrap',
