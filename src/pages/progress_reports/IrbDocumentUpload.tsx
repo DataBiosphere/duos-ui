@@ -22,11 +22,6 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
   onIrbDocumentChange,
   referenceId
 }) => {
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    onIrbDocumentChange(file, formState.irbProtocolExpiration || '');
-  };
-
   const handleExpirationChange = ({ value }: { key: string; value: string }) => {
     onIrbDocumentChange(uploadedIrbDocument, value);
   };
@@ -49,7 +44,7 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
             title='IRB Document'
             description='Upload your current IRB approval document'
             disabled={readOnly}
-            onChange={({ key, value }: { key: string; value: File }) => {
+            onChange={({ _key, value }: { _key: string; value: File }) => {
               onIrbDocumentChange(value, formState.irbProtocolExpiration || '');
             }}
             validation={validation?.irbDocument}
@@ -99,7 +94,7 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
               onChange={(value: string | null) => {
                 handleExpirationChange({ key: 'irbProtocolExpiration', value: value || '' });
               }}
-              onError={(_error: any, value: any) => {
+              onError={(_error: Error, value: string) => {
                 console.warn('IRB Date picker error:', _error, value);
               }}
               readOnly={readOnly}
