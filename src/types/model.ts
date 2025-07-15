@@ -117,10 +117,12 @@ export interface Institution {
   verificationUrl: string;
   verificationFilename: string;
   organizationType: OrganizationType;
-  createUser: number;
-  createDate: Date;
-  updateUser: number;
-  updateDate: Date;
+  createUser: DuosUser;
+  createUserId: number;
+  createDate: string;
+  updateUser: DuosUser;
+  updateUserId: number;
+  updateDate: string;
   signingOfficials: SimplifiedDuosUser[];
   domains: string[];
 }
