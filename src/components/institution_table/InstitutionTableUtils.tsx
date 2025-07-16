@@ -76,26 +76,30 @@ export const columnConfig: ColumnConfig = {
   id: {
     label: 'ID',
     cellStyle: {width: columnWidths.id},
-    cellDataFn: (row: Institution) => row.id,
+    cellDataFn: (row: Institution) => row.id ?? 0,
     sortable: true
   },
   name: {
     label: 'Institution',
     cellStyle: {width: columnWidths.name},
     cellDataFn: (row: Institution) => {
-      return <Link
-          to={{pathname: `/admin_manage_institutions/${row.id}`}}
-          style={{
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-            textDecoration: 'none',
-            color: '#1f75b6',
-            cursor: 'pointer'
-          }}
-      >
-        {row.name}
-      </Link>
+      if (row) {
+        return <Link
+            to={{pathname: `/admin_manage_institutions/${row.id}`}}
+            style={{
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              textDecoration: 'none',
+              color: '#1f75b6',
+              cursor: 'pointer'
+            }}
+        >
+          {row.name}
+        </Link>
+      } else {
+        return '- -';
+      }
     },
     sortable: true
   },
@@ -103,7 +107,7 @@ export const columnConfig: ColumnConfig = {
     label: 'Domains',
     cellStyle: {width: columnWidths.domains},
     cellDataFn: (row: Institution) => {
-      if (row.domains) {
+      if (row?.domains) {
         return row.domains.join(', ');
       } else {
         return '- -';
@@ -160,10 +164,12 @@ export const columnConfig: ColumnConfig = {
     label: 'Updated On',
     cellStyle: {width: columnWidths.updateDate},
     cellDataFn: (row: Institution) => {
-      if (row.updateDate) {
+      if (row?.updateDate) {
         return row.updateDate;
-      } else {
+      } else if (row?.createDate) {
         return row.createDate;
+      } else {
+        return '- -';
       }
     },
     sortable: true
@@ -177,7 +183,7 @@ export interface CellData {
   label: string;
 }
 
-export const processRowData = (row: Institution) => {
+export const processRowData = (row: Institution): CellData[] => {
   const rowData: CellData[] = [];
   Object.keys(columnConfig).forEach((col) => {
     const {cellDataFn, cellStyle, label} = columnConfig[col];

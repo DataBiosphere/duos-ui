@@ -7,7 +7,7 @@ import manageInstitutionsIcon from 'src/images/icon_manage_dac.png';
 import SearchBar from 'src/components/SearchBar';
 import InstitutionTable from 'src/components/institution_table/InstitutionTable';
 import {tableHeaderTemplate, tableRowLoadingTemplate} from 'src/components/institution_table/InstitutionTableUtils';
-import AddInstitutionModal from 'src/components/modals/AddInstitutionModal';
+// import AddInstitutionModal from 'src/components/modals/AddInstitutionModal';
 import DarTableSkeletonLoader from 'src/components/TableSkeletonLoader';
 import {extractError} from 'src/utils/ErrorUtils';
 
@@ -22,24 +22,22 @@ export default function AdminManageInstitutions(props: AdminManageInstitutionsPr
   const [filteredList, setFilteredList] = useState<Institution[]>([]);
   const [tableSize, setTableSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [showAddInstitutionModal, setShowAddInstitutionModal] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // const [showAddInstitutionModal, setShowAddInstitutionModal] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const loadInstitutions = async () => {
-    try {
-      setIsLoading(true);
-      const listOfInstitutions = await InstitutionAPI.list();
-      setInstitutionList(listOfInstitutions);
-      filter(listOfInstitutions, searchTerm);
-      setIsLoading(false);
-    } catch (error) {
-      const message = extractError(error);
-      Notifications.showError({ text: 'Error: Unable to retrieve institutions from server: ' + message});
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const loadInstitutions = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const listOfInstitutions = await InstitutionAPI.list();
+  //     setInstitutionList(listOfInstitutions);
+  //     setFilteredList(listOfInstitutions);
+  //   } catch (error) {
+  //     const message = extractError(error);
+  //     Notifications.showError({ text: 'Error: Unable to retrieve institutions from server: ' + message});
+  //   }
+  //   setIsLoading(false);
+  // };
 
   useEffect(() => {
     const init = async () => {
@@ -47,49 +45,53 @@ export default function AdminManageInstitutions(props: AdminManageInstitutionsPr
         setIsLoading(true);
         const listOfInstitutions = await InstitutionAPI.list();
         setInstitutionList(listOfInstitutions);
-        setFilteredList(listOfInstitutions);
-        setIsLoading(false);
+        setFilteredList(filter(listOfInstitutions, searchTerm));
+
+        console.log('AdminManageInstitutions useEffect triggered');
+        console.log('AdminManageInstitutions: Filtered List:', filteredList);
+        console.log('AdminManageInstitutions: isLoading:', isLoading);
+
       } catch (error) {
         const message = extractError(error);
         Notifications.showError({ text: 'Error: Unable to retrieve institutions from server: ' + message});
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
-
     init();
   }, []);
 
   const handleSearchChange = (query: { current: { value: string } }) => {
     const value = query.current.value;
     setSearchTerm(value);
-    filter(institutionList, value);
+    setFilteredList(filter(institutionList, searchTerm));
   };
 
-  const filter = (list: Institution[], value: string) => {
-    setFilteredList(list.filter(institution => {
-      if (value) {
+  const filter = (list: Institution[], value: string): Institution[] => {
+    if (value) {
+      const filtered = list.filter(institution => {
         const text = JSON.stringify(institution);
         return text.toLowerCase().includes(value.toLowerCase());
-      }
-      return true;
-    }));
-  };
-
-  const addInstitution = () => {
-    setShowAddInstitutionModal(true);
-  };
-
-  const closeAddInstitutionModal = () => {
-    setShowAddInstitutionModal(false);
-  };
-
-  const modalSave = (result: never) => {
-    if (result) {
-      setShowAddInstitutionModal(false);
-      loadInstitutions();
+      });
+      console.log('Search term provided, showing filtered institutions:', filtered);
+      return filtered;
     }
+    return list;
   };
+
+  // const addInstitution = () => {
+  //   setShowAddInstitutionModal(true);
+  // };
+
+  // const closeAddInstitutionModal = () => {
+  //   setShowAddInstitutionModal(false);
+  // };
+
+  // const modalSave = (result: never) => {
+  //   if (result) {
+  //     setShowAddInstitutionModal(false);
+  //     loadInstitutions();
+  //   }
+  // };
 
   return (
     <div style={Styles.PAGE}>
@@ -113,7 +115,7 @@ export default function AdminManageInstitutions(props: AdminManageInstitutionsPr
                 id="btn_addInstitution"
                 className="btn-primary btn-add common-background"
                 style={{ marginTop: '30%', display: 'block', lineHeight: 0.6 }}
-                onClick={addInstitution}
+                // onClick={addInstitution}
               >
                 <span>Add Institution</span>
               </a>
@@ -122,24 +124,22 @@ export default function AdminManageInstitutions(props: AdminManageInstitutionsPr
         />
       </div>
       {!isLoading && <InstitutionTable
-        isLoading={isLoading}
         filteredList={filteredList}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         tableSize={tableSize}
         setTableSize={setTableSize}
-        institutionList={institutionList}
       />}
       {isLoading && <DarTableSkeletonLoader
         tableHeaderTemplate={tableHeaderTemplate}
         tableRowLoadingTemplate={tableRowLoadingTemplate}
       />}
-      {showAddInstitutionModal && <AddInstitutionModal
-        showModal={showAddInstitutionModal}
-        closeModal={closeAddInstitutionModal}
-        onOKRequest={modalSave}
-        onCloseRequest={closeAddInstitutionModal}
-      />}
+      {/*{showAddInstitutionModal && <AddInstitutionModal*/}
+      {/*  showModal={showAddInstitutionModal}*/}
+      {/*  closeModal={closeAddInstitutionModal}*/}
+      {/*  onOKRequest={modalSave}*/}
+      {/*  onCloseRequest={closeAddInstitutionModal}*/}
+      {/*/>}*/}
     </div>
   );
 };

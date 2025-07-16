@@ -501,7 +501,11 @@ export const sortVisibleTable = ({list = [], sort}) => {
         if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
           return (aVal > bVal ? -1 : 1) * sort.dir;
         } else {
-          return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);
+          try {
+            return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);
+          } catch (_error) {
+            return 0; // Fallback if comparison fails
+          }
         }
       }
     });
@@ -530,7 +534,6 @@ export const recalculateVisibleTable = async ({
     );
     setVisibleList(visibleList);
   } catch (_error) {
-    console.error('Error recalculating visible table:', _error);
     Notifications.showError({text: 'Error updating table'});
   }
 };

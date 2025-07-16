@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {isEmpty} from 'lodash/fp';
+import {isEmpty} from 'lodash';
 import ReactTooltip from 'react-tooltip';
 import PaginationBar from '../PaginationBar';
 import AddInstitutionModal from '../modals/AddInstitutionModal';
@@ -12,6 +12,7 @@ import {
   tableStyles
 } from 'src/components/institution_table/InstitutionTableUtils';
 import {Institution} from 'src/types/model';
+import {recalculateVisibleTable} from 'src/libs/utils';
 
 interface SortType {
   colIndex: number;
@@ -19,8 +20,7 @@ interface SortType {
 }
 
 interface InstitutionTableProps {
-  readonly isLoading?: boolean;
-  readonly institutionList: Institution[];
+  readonly filteredList: Institution[];
   readonly currentPage: number;
   readonly setCurrentPage: (page: number) => void;
   readonly tableSize: number;
@@ -49,26 +49,39 @@ const getInitialSort = (columns: string[] = []): SortType => {
   }
 };
 
-const defaultColumns = Object.keys(columnConfig);
+const columns = Object.keys(columnConfig);
+
+const columnHeaderData = (columns: string[]) => {
+  return columns.map((col) => columnConfig[col]);
+};
+
+const processInstitutions = (institutions: Institution[]): CellData[][] => {
+  return institutions.map((institution) => {
+    return processRowData(institution);
+  });
+}
 
 export default function InstitutionTable(props: InstitutionTableProps) {
-  const {isLoading, institutionList, currentPage, setCurrentPage, tableSize, setTableSize} = props;
-  const [pageCount, setPageCount] = useState<number>(calcPageCount(tableSize, institutionList));
+  const {filteredList, currentPage, setCurrentPage, tableSize, setTableSize} = props;
+  const [pageCount, setPageCount] = useState<number>(calcPageCount(tableSize, filteredList));
   const [showUpdateInstitutionModal, setShowUpdateInstitutionModal] = useState<boolean>(false);
   const [institutionId, setInstitutionId] = useState<number | string | undefined>();
-  const [paginatedRows, setPaginatedRows] = useState<Array<CellData[]>>([]);
-  const [sort, setSort] = useState<SortType>(getInitialSort(defaultColumns));
+  const [visibleInstitutions, setVisibleInstitutions] = useState<CellData[][]>([]);
+  const [sort, setSort] = useState<SortType>(getInitialSort(columns));
 
   useEffect(() => {
-    setPageCount(calcPageCount(tableSize, institutionList));
-    const rows: Array<CellData[]> = [];
-    institutionList.forEach((row) => {
-      const rowData = processRowData(row);
-      rows.push(rowData);
+    recalculateVisibleTable({
+      tableSize,
+      pageCount,
+      filteredList: processInstitutions(filteredList),
+      currentPage,
+      setPageCount,
+      setCurrentPage,
+      setVisibleList: setVisibleInstitutions,
+      sort
     });
-    setPaginatedRows(rows.slice((currentPage - 1) * tableSize, currentPage * tableSize));
     ReactTooltip.rebuild();
-  }, [currentPage, tableSize, institutionList]);
+  }, [tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, sort]);
 
   const changeTableSize = (newTableSize: number) => {
     if (!isEmpty(newTableSize) && newTableSize > 0) {
@@ -90,9 +103,9 @@ export default function InstitutionTable(props: InstitutionTableProps) {
   return (
       <div>
         <SimpleTable
-            isLoading={isLoading}
-            rowData={paginatedRows}
-            columnHeaders={defaultColumns.map((col) => columnConfig[col])}
+            isLoading={false}
+            rowData={visibleInstitutions}
+            columnHeaders={columnHeaderData(columns)}
             styles={tableStyles}
             rowWrapper={({renderedRow}: { renderedRow: React.ReactNode }) => renderedRow}
             paginationBar={
@@ -107,7 +120,7 @@ export default function InstitutionTable(props: InstitutionTableProps) {
             sort={sort}
             onSort={(sort: SortType) => {
               Storage.setCurrentUserSettings(storageInstitutionSort, {
-                field: defaultColumns[sort.colIndex],
+                field: columns[sort.colIndex],
                 dir: sort.dir
               });
               setSort(sort);
@@ -119,7 +132,8 @@ export default function InstitutionTable(props: InstitutionTableProps) {
                 showModal={showUpdateInstitutionModal}
                 institutionId={institutionId}
                 closeModal={closeUpdateModal}
-                onOKRequest={() =>{}}
+                onOKRequest={() => {
+                }}
                 onCloseRequest={closeUpdateModal}
             />
         )}
