@@ -1,7 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
-import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {
+    CLOSEOUT_KEYS,
+    DMI_INCIDENT_KEYS,
+    FormState
+} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
