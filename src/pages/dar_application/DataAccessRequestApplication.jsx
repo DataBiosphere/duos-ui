@@ -28,7 +28,7 @@ import {ConditionalAccordion} from 'src/components/forms/ConditionalAccordion.js
 import {ProgressReportApplication} from 'src/pages/dar_application/ProgressReportApplication';
 import {ScrollableTabs} from 'src/pages/dar_application/ScrollableTabs';
 import {validateDARFormData, validationFailed} from 'src/utils/darFormUtils.js';
-import {assign, cloneDeep, head, isArray, isEmpty, isNil, isString, keys, merge, set} from 'lodash';
+import {assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set} from 'lodash';
 import {Countries} from 'src/libs/ajax/Countries.js';
 import PropTypes from 'prop-types';
 

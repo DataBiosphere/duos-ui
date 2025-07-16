@@ -4,8 +4,7 @@ import {History, Location} from 'history';
 import {
     CLOSEOUT_KEYS,
     DMI_INCIDENT_KEYS,
-    FormState,
-    ValidFormState
+    FormState
 } from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
@@ -205,8 +204,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
       onSelectedDatasetChange(approvedDatasets);
     }, [datasets]);
 
-    // @ts-ignore
-    // @ts-ignore
     return (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
