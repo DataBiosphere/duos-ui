@@ -1,12 +1,11 @@
-import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
-import {Collaborator, Dataset, SimplifiedDuosUser} from 'src/types/model';
+import {Collaborator, Dataset, Presentation, Publication, SimplifiedDuosUser} from 'src/types/model';
+
+type FormStateKeys = keyof FormState;
 
 export type ValidFormState = {
-  [K in keyof FormState]: {
-    key: K;
-    value: FormState[K];
-  }
-}[keyof FormState];
+    key: FormStateKeys,
+    value: FormState[keyof FormState]
+}
 
 export interface FormState {
     progressReportSummary: string;
@@ -14,9 +13,9 @@ export interface FormState {
     intellectualPropertySummary: string;
     datasetIds: number[];
     publicationsYesNo: boolean;
-    publications: PublicationOrPresentation[];
+    publications: Publication[];
     presentationsYesNo: boolean;
-    presentations: PublicationOrPresentation[];
+    presentations: Presentation[];
     dsAcknowledgement: boolean;
     gsoAcknowledgement: boolean;
     pubAcknowledgement: boolean;
