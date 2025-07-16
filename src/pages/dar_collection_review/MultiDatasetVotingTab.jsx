@@ -37,7 +37,7 @@ export default function MultiDatasetVotingTab(props) {
   const [rpBucket, setRpBucket] = useState({});
   const [dataBuckets, setDataBuckets] = useState([]);
   const [dacDatasetIds, setDacDatasetIds] = useState([]);
-  const {darInfo, buckets, collection, isChair, isLoading, readOnly, adminPage, updateFinalVote} = props;
+  const {darInfo, buckets, collection, isChair, isLoading, readOnly, adminPage, updateFinalVote, reloadFn} = props;
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n' +
     (!adminPage ? 'You can still deny this request and/or vote on the Structured Research Purpose.' : '');
 
@@ -72,6 +72,7 @@ export default function MultiDatasetVotingTab(props) {
         adminPage={adminPage}
         updateFinalVote={updateFinalVote}
         isLoading={isLoading}
+        reloadFn={reloadFn}
       />
     ));
   };

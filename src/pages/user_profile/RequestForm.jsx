@@ -1,5 +1,4 @@
-import React from 'react';
-import {useState} from 'react';
+import React, {useState} from 'react';
 import {Support} from '../../libs/ajax/Support';
 import {Notifications} from '../../libs/utils';
 import {isNil} from 'lodash';
@@ -40,6 +39,7 @@ export default function RequestForm(props) {
   };
 
   const [hasSupportRequests, setHasSupportRequests] = useState(hasSupportRequestsCond);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [supportRequests, setSupportRequests] = useState(supportRequestsCond);
 
   const goToPrevPage = async (event) => {
@@ -99,18 +99,21 @@ export default function RequestForm(props) {
         ticketInfo.attachmentToken,
         'User Profile Page'
       );
-
-      const response = await Support.createSupportRequest(ticket);
-      if (response.status === 201) {
-        Notifications.showSuccess(
-          {text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500}
-        );
-      } else {
-        Notifications.showError({
-          text: `ERROR ${response.status} : Unable To Send Requests`,
-          layout: 'topRight',
-        });
-      }
+      try {
+        setIsSubmitting(true);
+        await Support.createSupportRequest(ticket);
+          Notifications.showSuccess(
+              {text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500}
+          );
+        setIsSubmitting(false);
+        await props.history.push('/profile');
+      } catch (error){
+          Notifications.showError({
+            text: `ERROR ${error.status} : Unable To Send Requests`,
+            layout: 'topRight',
+          });
+          setIsSubmitting(false);
+        }
     };
 
   return <div
@@ -174,7 +177,7 @@ export default function RequestForm(props) {
       style={{
         marginTop: '50px',
       }}
-      disabled={!hasSupportRequests}
+      disabled={!hasSupportRequests || isSubmitting}
       data-cy={'submitButton'}>
       Submit
     </button>
