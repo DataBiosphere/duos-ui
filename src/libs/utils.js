@@ -498,7 +498,7 @@ export const sortVisibleTable = ({list = [], sort}) => {
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {
-        if (aVal === null || bVal === null || aVal.type === 'div' || bVal.type === 'div') {
+        if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
           return (aVal > bVal ? -1 : 1) * sort.dir;
         } else {
           return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);
@@ -530,6 +530,7 @@ export const recalculateVisibleTable = async ({
     );
     setVisibleList(visibleList);
   } catch (_error) {
+    console.error('Error recalculating visible table:', _error);
     Notifications.showError({text: 'Error updating table'});
   }
 };
