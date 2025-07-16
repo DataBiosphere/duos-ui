@@ -69,15 +69,17 @@ interface ColumnConfigCell {
   label: string;
   cellStyle: React.CSSProperties;
   cellDataFn: (row: Institution) => React.ReactNode;
-  sortable?: boolean;
+  sortable: boolean;
+  sortValueFn: (row: Institution) => string | number;
 }
 
 export const columnConfig: ColumnConfig = {
   id: {
     label: 'ID',
     cellStyle: {width: columnWidths.id},
-    cellDataFn: (row: Institution) => row.id ?? 0,
-    sortable: true
+    cellDataFn: (row: Institution) => row.id,
+    sortable: true,
+    sortValueFn: (row: Institution) => row.id,
   },
   name: {
     label: 'Institution',
@@ -101,7 +103,8 @@ export const columnConfig: ColumnConfig = {
         return '- -';
       }
     },
-    sortable: true
+    sortable: true,
+    sortValueFn: (row: Institution) => row.name,
   },
   domains: {
     label: 'Domains',
@@ -113,7 +116,10 @@ export const columnConfig: ColumnConfig = {
         return '- -';
       }
     },
-    sortable: true
+    sortable: true,
+    sortValueFn: (row: Institution) => {
+      return row.domains?.join(', ') ?? '- -';
+    }
   },
   signingOfficials: {
     label: 'Signing Officials',
@@ -149,7 +155,10 @@ export const columnConfig: ColumnConfig = {
         return '- -';
       }
     },
-    sortable: false
+    sortable: false,
+    sortValueFn: (row: Institution) => {
+      return row.signingOfficials?.map((user) => `${user.displayName} ${user.email}`).join(' ') || '';
+    }
   },
   updateUser: {
     label: 'Updated By',
@@ -158,7 +167,10 @@ export const columnConfig: ColumnConfig = {
       const user = row.updateUser || row.createUser;
       return user ? user.displayName : '- -';
     },
-    sortable: true
+    sortable: true,
+    sortValueFn: (row: Institution) => {
+      return row.updateUser?.displayName || row.createUser?.displayName || '';
+    }
   },
   updateDate: {
     label: 'Updated On',
@@ -172,7 +184,16 @@ export const columnConfig: ColumnConfig = {
         return '- -';
       }
     },
-    sortable: true
+    sortable: true,
+    sortValueFn: (row: Institution) => {
+      // Institution dates are in the form of 'Mon D, YYYY', e.g. 'Jan 1, 2023'
+      const dateString = row.updateDate || row.createDate;
+      if (dateString) {
+        const date = new Date(dateString);
+        return date.getTime();
+      }
+      return 0;
+    }
   }
 };
 
@@ -181,17 +202,19 @@ export interface CellData {
   id: number;
   cellStyle: React.CSSProperties;
   label: string;
+  value: string | number;
 }
 
 export const processRowData = (row: Institution): CellData[] => {
   const rowData: CellData[] = [];
   Object.keys(columnConfig).forEach((col) => {
-    const {cellDataFn, cellStyle, label} = columnConfig[col];
+    const {cellDataFn, cellStyle, label, sortValueFn} = columnConfig[col];
     rowData.push({
       data: cellDataFn(row),
       id: row.id,
       cellStyle: cellStyle,
-      label: label
+      label: label,
+      value: sortValueFn(row)
     } as CellData);
   });
   return rowData;
