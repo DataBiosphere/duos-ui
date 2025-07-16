@@ -16,6 +16,7 @@ const props = {
     params: {},
   },
   draftDar: true,
+  isProgressReportApplication: false,
 };
 
 const user = {

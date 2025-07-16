@@ -199,6 +199,8 @@ export default function DarCollectionReview(props) {
         />}
         {selectedTab === tabs.fullDAR && <DataAccessRequestApplication
           existingDarsReadOnlyMode={true}
+          draftDar={false}
+          isProgressReportApplication={false}
           researcherProfile={researcherProfile}
           {...props}
         />}
