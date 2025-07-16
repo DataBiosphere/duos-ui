@@ -15,6 +15,6 @@ export function Spinner() {
 // DatasetStatistics, DatasetRegistration, DatasetCatalog, DataOwnerReview, DataAccessRequestApplication,
 // ChairConsole, BackgroundSignIn, AdminManageUser, AdminManageLC, AdminMaangeInstitutions,
 // SupportRequestModal, ElectionTimeoutModal,
-// DacDatasetsModal, EraCommons, ApplicationSummaryModa, AddUserModal, AddInstitutionModal,
+// DacDatasetsModal, EraCommons, ApplicationSummaryModa, AddUserModal,
 // LibraryCardTable, DarTableCancelButton, SubmitVoteBox
 // See SignIn for example usage of this constant.

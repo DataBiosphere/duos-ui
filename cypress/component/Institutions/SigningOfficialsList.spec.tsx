@@ -2,6 +2,7 @@ import React from 'react';
 import {mount} from 'cypress/react';
 import {SigningOfficialsList} from 'src/components/institution_table/components/SigningOfficialsList';
 import {SimplifiedDuosUser} from 'src/types/model';
+import {BrowserRouter} from 'react-router-dom';
 
 describe('Signing Officials List Tests', () => {
     const testSigningOfficials: SimplifiedDuosUser[] = [
@@ -22,10 +23,10 @@ describe('Signing Officials List Tests', () => {
     });
 
     it('should render the signing officials list', () => {
-        mount(<SigningOfficialsList signingOfficials={testSigningOfficials} />);
+        mount(<BrowserRouter><SigningOfficialsList signingOfficials={testSigningOfficials} /></BrowserRouter>);
 
         cy.contains('Signing Officials').should('be.visible');
-        cy.contains('Signing Officials cannot be modified from this page').should('be.visible');
+        cy.contains('Administrators can manage Signing Officials from the Manage Users page by assigning or removing the "Signing Official" role for users associated with this institution.').should('be.visible');
 
         cy.get('input').each(($input) => {
             cy.wrap($input).should('have.attr', 'readonly');
@@ -34,13 +35,13 @@ describe('Signing Officials List Tests', () => {
     });
 
     it('should show message when no signing officials', () => {
-        mount(<SigningOfficialsList signingOfficials={[]} />);
+        mount(<BrowserRouter><SigningOfficialsList signingOfficials={[]} /></BrowserRouter>);
 
-        cy.contains('This institution does not have any signing officials').should('be.visible');
+        cy.contains('This institution does not have any Signing Officials').should('be.visible');
     });
 
     it('should display correct signing official information', () => {
-        mount(<SigningOfficialsList signingOfficials={testSigningOfficials} />);
+        mount(<BrowserRouter><SigningOfficialsList signingOfficials={testSigningOfficials} /></BrowserRouter>);
 
         cy.get('input[value="John Doe"]').should('exist');
         cy.get('input[value="john.doe@example.com"]').should('exist');
