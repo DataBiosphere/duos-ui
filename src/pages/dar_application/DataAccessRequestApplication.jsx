@@ -265,11 +265,8 @@ const DataAccessRequestApplication = (props) => {
       setReverseOrderedDARs(
           [...darMap.values()].sort((a, b) => b.id - a.id)
       );
-      const darReferenceId = head(keys(dars));
-      // TODO - future improvement
-      //  in theory, we should be able to replace this call with the info returned from the collection
-      // form data = the first DAR's data
-      formData = await DAR.getPartialDarRequest(darReferenceId);
+      // form data = the "root" DAR's data
+      formData = await DAR.getPartialDarRequest(reverseOrderedDARs[reverseOrderedDARs.length - 1].referenceId);
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
