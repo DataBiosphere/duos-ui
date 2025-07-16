@@ -69,8 +69,8 @@ interface ColumnConfigCell {
   label: string;
   cellStyle: React.CSSProperties;
   cellDataFn: (row: Institution) => React.ReactNode;
-  sortable: boolean;
-  sortValueFn: (row: Institution) => string | number;
+  sortable?: boolean;
+  sortValueFn?: (row: Institution) => React.ReactNode;
 }
 
 export const columnConfig: ColumnConfig = {
@@ -79,7 +79,7 @@ export const columnConfig: ColumnConfig = {
     cellStyle: {width: columnWidths.id},
     cellDataFn: (row: Institution) => row.id,
     sortable: true,
-    sortValueFn: (row: Institution) => row.id,
+    // sortValueFn: (row: Institution) => row.id,
   },
   name: {
     label: 'Institution',
@@ -116,10 +116,6 @@ export const columnConfig: ColumnConfig = {
         return '- -';
       }
     },
-    sortable: true,
-    sortValueFn: (row: Institution) => {
-      return row.domains?.join(', ') ?? '- -';
-    }
   },
   signingOfficials: {
     label: 'Signing Officials',
@@ -155,10 +151,6 @@ export const columnConfig: ColumnConfig = {
         return '- -';
       }
     },
-    sortable: false,
-    sortValueFn: (row: Institution) => {
-      return row.signingOfficials?.map((user) => `${user.displayName} ${user.email}`).join(' ') || '';
-    }
   },
   updateUser: {
     label: 'Updated By',
@@ -168,9 +160,6 @@ export const columnConfig: ColumnConfig = {
       return user ? user.displayName : '- -';
     },
     sortable: true,
-    sortValueFn: (row: Institution) => {
-      return row.updateUser?.displayName || row.createUser?.displayName || '';
-    }
   },
   updateDate: {
     label: 'Updated On',
@@ -214,7 +203,7 @@ export const processRowData = (row: Institution): CellData[] => {
       id: row.id,
       cellStyle: cellStyle,
       label: label,
-      value: sortValueFn(row)
+      value: sortValueFn ? sortValueFn(row) : cellDataFn(row)
     } as CellData);
   });
   return rowData;

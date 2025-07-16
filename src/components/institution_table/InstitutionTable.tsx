@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {isEmpty} from 'lodash';
 import ReactTooltip from 'react-tooltip';
 import PaginationBar from '../PaginationBar';
-import AddInstitutionModal from '../modals/AddInstitutionModal';
 import SimpleTable from 'src/components/SimpleTable';
 import {Storage} from 'src/libs/storage';
 import {
@@ -66,8 +65,6 @@ const processInstitutions = (institutions: Institution[]): CellData[][] => {
 export default function InstitutionTable(props: InstitutionTableProps) {
   const {filteredList, currentPage, setCurrentPage, tableSize, setTableSize} = props;
   const [pageCount, setPageCount] = useState<number>(calcPageCount(tableSize, filteredList));
-  const [showUpdateInstitutionModal, setShowUpdateInstitutionModal] = useState<boolean>(false);
-  const [institutionId, setInstitutionId] = useState<number | string | undefined>();
   const [visibleInstitutions, setVisibleInstitutions] = useState<CellData[][]>([]);
   const [sort, setSort] = useState<SortType>(getInitialSort(columns));
 
@@ -97,11 +94,6 @@ export default function InstitutionTable(props: InstitutionTableProps) {
     }
   };
 
-  const closeUpdateModal = () => {
-    setShowUpdateInstitutionModal(false);
-    setInstitutionId(undefined);
-  };
-
   return (
       <div>
         <SimpleTable
@@ -129,16 +121,6 @@ export default function InstitutionTable(props: InstitutionTableProps) {
             }}
         >
         </SimpleTable>
-        {showUpdateInstitutionModal && (
-            <AddInstitutionModal
-                showModal={showUpdateInstitutionModal}
-                institutionId={institutionId}
-                closeModal={closeUpdateModal}
-                onOKRequest={() => {
-                }}
-                onCloseRequest={closeUpdateModal}
-            />
-        )}
       </div>
   );
 };
