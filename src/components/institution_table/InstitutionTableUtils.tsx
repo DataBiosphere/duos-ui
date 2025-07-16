@@ -79,7 +79,7 @@ export const columnConfig: ColumnConfig = {
     cellStyle: {width: columnWidths.id},
     cellDataFn: (row: Institution) => row.id,
     sortable: true,
-    // sortValueFn: (row: Institution) => row.id,
+    sortValueFn: (row: Institution) => row.id,
   },
   name: {
     label: 'Institution',
@@ -157,9 +157,13 @@ export const columnConfig: ColumnConfig = {
     cellStyle: {width: columnWidths.updateUser},
     cellDataFn: (row: Institution) => {
       const user = row.updateUser || row.createUser;
-      return user ? user.displayName : '- -';
+      return user?.displayName ?? '- -';
     },
     sortable: true,
+    sortValueFn: (row: Institution) => {
+      const user = row.updateUser || row.createUser;
+      return user?.displayName ?? 'zz'; // 'zz' ensures that institutions without a user appear at the end of the list
+    }
   },
   updateDate: {
     label: 'Updated On',
@@ -203,7 +207,7 @@ export const processRowData = (row: Institution): CellData[] => {
       id: row.id,
       cellStyle: cellStyle,
       label: label,
-      value: sortValueFn ? sortValueFn(row) : cellDataFn(row)
+      value: sortValueFn ? sortValueFn(row) : 'zz'
     } as CellData);
   });
   return rowData;

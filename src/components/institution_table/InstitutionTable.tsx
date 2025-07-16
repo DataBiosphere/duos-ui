@@ -56,8 +56,6 @@ const columnHeaderData = (columns: string[]) => {
 
 const processInstitutions = (institutions: Institution[]): CellData[][] => {
   return institutions.map((institution) => {
-    const rowData = processRowData(institution);
-    console.log('Processing institution:', institution.id, rowData);
     return processRowData(institution);
   });
 }

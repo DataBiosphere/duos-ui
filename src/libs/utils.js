@@ -501,11 +501,7 @@ export const sortVisibleTable = ({list = [], sort}) => {
         if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
           return (aVal > bVal ? -1 : 1) * sort.dir;
         } else {
-          try {
-            return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);
-          } catch (_error) {
-            return 0; // Fallback if comparison fails
-          }
+          return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);
         }
       }
     });
