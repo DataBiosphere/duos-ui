@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "@databiosphere/bard-client": "0.1.0",
-    "@mui/icons-material": "5.17.1",
-    "@mui/material": "5.17.1",
+    "@mui/icons-material": "5.18.0",
+    "@mui/material": "5.18.0",
     "@mui/utils": "5.17.1",
     "@mui/x-date-pickers": "^7.29.4",
     "@mui/system": "7.2.0",
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@emotion/styled": "11.14.1",
-    "@eslint/js": "9.30.0",
+    "@eslint/js": "9.31.0",
     "@types/node": "24.0.13",
     "@types/lodash": "4.17.20",
     "@types/react": "18.3.12",
