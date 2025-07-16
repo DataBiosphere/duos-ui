@@ -262,11 +262,10 @@ const DataAccessRequestApplication = (props) => {
 
       // TS thinks that collection.dars is an object, but it is a map
       const darMap = new Map(Object.entries(dars));
-      setReverseOrderedDARs(
-          [...darMap.values()].sort((a, b) => b.id - a.id)
-      );
+      const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
+      setReverseOrderedDARs(newReverseOrderedDARs);
       // form data = the "root" DAR's data
-      formData = await DAR.getPartialDarRequest(reverseOrderedDARs[reverseOrderedDARs.length - 1].referenceId);
+      formData = await DAR.getPartialDarRequest(newReverseOrderedDARs[newReverseOrderedDARs.length - 1].referenceId);
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
