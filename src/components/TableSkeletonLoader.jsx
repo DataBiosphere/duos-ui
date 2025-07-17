@@ -35,5 +35,5 @@ export default function TableSkeletonLoader(props) {
     return template;
   };
 
-  return <div style={Styles.TABLE.CONTAINER}>{generateLoaderTemplate()}</div>;
+  return <div data-cy="table-skeleton-loader" style={Styles.TABLE.CONTAINER}>{generateLoaderTemplate()}</div>;
 }
