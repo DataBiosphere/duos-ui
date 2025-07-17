@@ -109,20 +109,20 @@ export type OrganizationType = 'For-Profit' | 'Nonprofit';
 export interface Institution {
   id: number;
   name: string;
-  itDirectorName: string;
-  itDirectorEmail: string;
-  institutionUrl: string;
-  dunsNumber: number;
-  orgChartUrl: string;
-  verificationUrl: string;
-  verificationFilename: string;
-  organizationType: OrganizationType;
+  itDirectorName?: string;
+  itDirectorEmail?: string;
+  institutionUrl?: string;
+  dunsNumber?: number;
+  orgChartUrl?: string;
+  verificationUrl?: string;
+  verificationFilename?: string;
+  organizationType?: OrganizationType;
   createUser: DuosUser;
   createUserId: number;
   createDate: string;
-  updateUser: DuosUser;
-  updateUserId: number;
-  updateDate: string;  signingOfficials: SimplifiedDuosUser[];
+  updateUser?: DuosUser;
+  updateUserId?: number;
+  updateDate?: string;  signingOfficials: SimplifiedDuosUser[];
   domains?: string[];
 }
 
