@@ -1,6 +1,8 @@
 import {Button, Chip, TextField} from '@mui/material';
 import React, {useState} from 'react';
 import {Institution} from 'src/types/model';
+import validator from 'validator';
+import * as punycode from 'punycode';
 
 interface DomainEditorProps {
     domains: string[];
@@ -20,6 +22,49 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
         });
     });
 
+    const validateDomain = (domain: string): string | null => {
+        try {
+            // Check if it's a valid FQDN (Fully Qualified Domain Name)
+            if (!validator.isFQDN(domain, {
+                require_tld: true,
+                allow_underscores: false,
+                allow_trailing_dot: false,
+                allow_numeric_tld: false,
+                allow_wildcard: false
+            })) {
+                return 'Please enter a valid domain name (e.g., example.com)';
+            }
+
+            // Additional checks for domain format
+            if (domain.length > 253) {
+                return 'Domain name is too long (maximum 253 characters)';
+            }
+
+            // Check for valid characters and structure
+            const parts = domain.split('.');
+            if (parts.length < 2) {
+                return 'Domain must have at least one dot (e.g., example.com)';
+            }
+
+            // Check each part of the domain
+            for (const part of parts) {
+                if (part.length === 0) {
+                    return 'Domain parts cannot be empty';
+                }
+                if (part.length > 63) {
+                    return 'Domain parts cannot exceed 63 characters';
+                }
+                if (part.startsWith('-') || part.endsWith('-')) {
+                    return 'Domain parts cannot start or end with hyphens';
+                }
+            }
+
+            return null; // Valid domain
+        } catch (_error) {
+            return 'Invalid domain format';
+        }
+    };
+
     const handleDomainDelete = (domainToDelete: string) => {
         if (onDomainsChange) {
             const updatedDomains = domains.filter(domain => domain !== domainToDelete);
@@ -28,8 +73,16 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
     };
 
     const handleDomainAdd = () => {
-        const trimmedDomain = tempDomain.trim();
+        const trimmedDomain = tempDomain.trim().toLowerCase();
 
+        // Validate domain format first
+        const validationError = validateDomain(trimmedDomain);
+        if (validationError) {
+            setErrorMessage(validationError);
+            return;
+        }
+
+        // Check if domain is already associated with another institution
         if(Object.keys(domainToInstitutionMap).includes(trimmedDomain)) {
             setErrorMessage('This domain is associated with another institution: ' + domainToInstitutionMap[trimmedDomain].name);
         } else if (domains.includes(trimmedDomain)) {
@@ -66,7 +119,7 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
                         <TextField
                             variant='outlined'
                             value={tempDomain}
-                            placeholder={'Domain'}
+                            placeholder={'e.g., example.com'}
                             size="small"
                             InputProps={{
                                 style: {fontSize: 14}
@@ -74,9 +127,28 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
                             style={{width: 250}}
                             onChange={(e) => {
                                 setTempDomain(e.target.value);
-                                setErrorMessage('');
+                                // Clear error message when user starts typing
+                                if (errorMessage) {
+                                    setErrorMessage('');
+                                }
+                            }}
+                            onBlur={() => {
+                                // Validate domain when user leaves the field
+                                const trimmed = tempDomain.trim().toLowerCase();
+                                if (trimmed && !errorMessage) {
+                                    const validationError = validateDomain(trimmed);
+                                    if (validationError) {
+                                        setErrorMessage(validationError);
+                                    }
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && tempDomain.trim()) {
+                                    handleDomainAdd();
+                                }
                             }}
                             error={!!errorMessage}
+                            helperText={!errorMessage ? 'Enter a valid domain name' : undefined}
                         />
                         <Button
                             variant="contained"
