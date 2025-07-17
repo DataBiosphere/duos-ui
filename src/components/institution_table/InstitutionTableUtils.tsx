@@ -212,12 +212,12 @@ export const columnConfig: ColumnConfig = {
     label: 'Updated By',
     cellStyle: {width: columnWidths.updateUser},
     cellDataFn: (row: Institution) => {
-      const user = row.updateUser || row.createUser;
+      const user = isEmpty(row.updateUser) ? row.createUser : row.updateUser;
       return user?.displayName ?? '- -';
     },
     sortable: true,
     sortValueFn: (row: Institution) => {
-      const user = row.updateUser || row.createUser;
+      const user = isEmpty(row.updateUser) ? row.createUser : row.updateUser;
       return user?.displayName ?? 'zz'; // 'zz' ensures that institutions without a user appear at the end of the list
     }
   },
