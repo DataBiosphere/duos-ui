@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { styles } from './DarCollectionTable';
+import { styles } from '../../utils/DarCollectionUtils';
 
 export default function DarCollectionAdminReviewLink(props) {
   const { darCollectionId, darCode } = props;

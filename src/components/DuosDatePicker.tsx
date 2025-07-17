@@ -17,8 +17,8 @@ import type {} from '@mui/x-date-pickers/themeAugmentation';
 interface DUOSDatePickerProps {
     inputFormat: string;
     defaultValue: Dayjs;
-    onChange: any;
-    onError: any;
+    onChange: (value: string | undefined) => void;
+    onError?: (error: string, value: string | undefined) => void;
     readOnly: boolean;
 }
 
@@ -28,7 +28,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   //Required to display the error on initialization with an invalid value when letting the date picker manage the value.
   //onError must be excluded as a dependency of the hook because of change detection looping.
   const checkInitialValue = useMemo(() => {
-    if (defaultValue != null && defaultValue.toString() === 'Invalid Date') {
+    if (defaultValue != null && defaultValue.toString() === 'Invalid Date' && onError) {
       onError('Invalid Date', defaultValue.toString());
     }
     return true;
@@ -152,7 +152,6 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   const CancelSelectActionBar = (props: PickersActionBarProps) => {
     // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
     // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
-    // eslint-disable-next-line no-unused-vars
     const {onAccept, onCancel, onSetToday, onClear, actions, ...other} = props;
     const buttons = actions?.map((actionType: React.Key | null | undefined) => {
       switch (actionType) {
@@ -193,12 +192,12 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
         format={inputFormat}
         defaultValue={defaultValue ? dayjs(defaultValue) : null}
         onChange={(value) => {
-          onChange(value ? value.format(inputFormat) : null);
+          onChange(value?.format(inputFormat));
         }}
         onAccept={(value) => {
-          onChange(value ? value.format(inputFormat) : null);
+          onChange(value?.format(inputFormat));
         }}
-        onError={onError}
+        onError={(value) => onError && onError(value?.toString() === 'Invalid Date' ? 'Invalid Date' : '', value?.toString())}
         dayOfWeekFormatter={(day) => (`${day.format('ddd')}`)}
         readOnly={readOnly}
         slotProps={{

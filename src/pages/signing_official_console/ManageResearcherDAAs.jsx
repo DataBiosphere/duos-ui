@@ -31,7 +31,7 @@ export default function ManageResearcherDAAs() {
         setDaas(daaList);
         setDacs(dacList);
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({
           text: 'Error: Unable to retrieve current user from server',
         });

@@ -1,72 +1,28 @@
-import React, {useEffect, useState} from 'react';
-import Drawer from '@mui/material/Drawer';
-import Hidden from '@mui/material/Hidden';
-import {IconButton} from '@mui/material';
-import { withStyles } from 'tss-react/mui';
-import MenuIcon from '@mui/icons-material/Menu';
-import {Link, withRouter} from 'react-router-dom';
-import {Storage} from 'src/libs/storage';
-import {SupportRequestModal} from './modals/SupportRequestModal';
-import './DuosHeader.css';
-import { NotificationService } from 'src/libs/notificationService';
-import { Notification } from './Notification';
-import DuosLogo from 'src/images/duos-network-logo.svg';
-import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg';
-import contactUsStandard from 'src/images/navbar_icon_contact_us.svg';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import {isFunction, isNil} from 'lodash/fp';
-import {DAAUtils} from 'src/utils/DAAUtils';
-import {Auth} from 'src/libs/auth/auth';
-import SignInButton from 'src/components/SignInButton';
+import MenuIcon from '@mui/icons-material/Menu'
+import { IconButton } from '@mui/material'
+import Drawer from '@mui/material/Drawer'
+import Hidden from '@mui/material/Hidden'
+import React, { useEffect, useState } from 'react'
+import { withRouter } from 'react-router-dom'
+import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent.jsx'
+import DuosLogo from 'src/images/duos-network-logo.svg'
+import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
+import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
+import { Auth } from 'src/libs/auth/auth'
+import { NotificationService } from 'src/libs/notificationService'
+import { Storage } from 'src/libs/storage'
+import { DAAUtils } from 'src/utils/DAAUtils'
+import { withStyles } from 'tss-react/mui'
+import { SupportRequestModal } from './modals/SupportRequestModal'
+import './DuosHeader.css'
+import { Notification } from './Notification'
+
 
 const styles = {
   drawerPaper: {
     backgroundColor: '#FFF',
     color: 'white',
     fontFamily: 'Montserrat'
-  },
-  mainTab: {
-    padding: '0 25px',
-    fontSize: '16px',
-    textTransform: 'none',
-    fontFamily: 'Montserrat, sans-serif',
-    minHeight: '80px',
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  mainTabActive: {
-    padding: '0 25px',
-    fontSize: '16px',
-    fontFamily: '\'Montserrat\', sans-serif',
-    minHeight: '80px',
-    textTransform: 'none',
-    color: 'white',
-    background: 'rgba(255, 255, 255, 0.1)',
-    fontWeight: 'bold'
-  },
-  subTab: {
-    padding: '0 25px',
-    fontSize: '15px',
-    textTransform: 'none',
-    fontFamily: '\'Montserrat\', sans-serif',
-    color: '#00609f',
-    minHeight: '65px'
-  },
-  subTabActive: {
-    padding: '0 25px',
-    fontSize: '15px',
-    textTransform: 'none',
-    fontFamily: '\'Montserrat\', sans-serif',
-    color: '#00609f',
-    minHeight: '65px',
-    fontWeight: 'bold'
-  },
-  navButton: {
-    background: 'transparent',
-    color: 'white',
-    border: 'none',
-    minHeight: '80px'
   }
 };
 
@@ -139,188 +95,6 @@ export const headerTabsConfig = [
   }
 ];
 
-const NavigationTabsComponent = (props) => {
-  const {
-    history,
-    orientation,
-    makeNotifications,
-    navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
-    currentUser, signOut, isLogged,
-    contactUsButton, showRequestModal, supportrequestModal,
-    tabs, initialTab, initialSubTab,
-    onSubtabChange, showProfileLinks, profileState
-  } = props;
-  const [selectedMenuTab, setSelectedMenuTab] = useState(false);
-  const [selectedSubTab, setSelectedSubTab] = useState(false);
-
-  useEffect(() => {
-    setSelectedMenuTab(initialTab === -1 ? false : initialTab);
-    setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab);
-  }, [initialTab, initialSubTab]);
-
-  return (
-    <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
-      {makeNotifications()}
-      <ul className='navbar-main'>
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-          {
-            orientation === 'horizontal' && (
-              <Link
-                id='link_logo'
-                to='/home'
-                className='navbar-brand'
-              >
-                <img style={duosLogoImage} src={DuosLogo} alt='DUOS Logo' />
-              </Link>
-            )
-          }
-          {
-            isLogged && (
-              <Box className='duos-navigation-box'>
-                <Tabs
-                  value={selectedMenuTab}
-                  variant='scrollable'
-                  scrollButtons='auto'
-                  orientation={orientation}
-                  TabIndicatorProps={{ style: { background: '#2BBD9B' } }}
-                >
-                  {tabs.map((tab, tabIndex) => (
-                    <Tab
-                      key={`${tab.link}_${tabIndex}`}
-                      label={tab.label}
-                      style={selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab}
-                      to={{ pathname: tab.link, state: { selectedMenuTab: tabIndex } }}
-                      component={Link}
-                    />
-                  ))}
-                </Tabs>
-              </Box>
-            )
-          }
-          {
-            !isLogged && (
-              <ul className='navbar-public'>
-                <li>
-                  <a
-                    id='link_about'
-                    className='navbar-duos-link'
-                    href='https://support.terra.bio/hc/en-us/articles/28485372215579-About-DUOS'
-                    target='_blank'
-                    rel='noreferrer'
-                  >
-                    <div className='navbar-duos-icon-about' style={navbarDuosIcon}></div>
-                    <span style={navbarDuosText}>About</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    id='link_help'
-                    className='navbar-duos-link'
-                    href='https://support.terra.bio/hc/en-us/articles/28486067349531-Frequently-Asked-Questions-about-DUOS'
-                    target='_blank' rel='noreferrer'
-                  >
-                    <div className='navbar-duos-icon-help' style={navbarDuosIcon}></div>
-                    <span style={navbarDuosText}>FAQs</span>
-                  </a>
-                </li>
-                {contactUsButton}
-                {supportrequestModal}
-                {/* Sign-in button location when window is narrow and menu is vertical */}
-                {!isLogged && orientation === 'vertical' && <li style={{marginRight: 0}}>
-                  <SignInButton
-                    props={props}
-                    history={history}/>
-                </li>}
-              </ul>
-            )
-          }
-        </div>
-        {/* Navbar right side */}
-        {/* Sign-in button location when window is wider and menu is not vertical */}
-        {!isLogged && orientation !== 'vertical' &&
-          <div
-            style={{
-              minWidth: '185px',
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: orientation === 'vertical' ? 'column' : 'row'
-            }}>
-            <SignInButton
-              props={props}
-              history={history}/>
-          </div>
-        }
-        {isLogged && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: orientation === 'vertical' ? 'column' : 'row'
-            }}
-          >
-            <a href='https://support.terra.bio/hc/en-us/categories/28485138480539-Managing-Data-Access-with-DUOS'
-              id='terra-support-docs-link' target='_blank' rel='noreferrer'
-              style={{color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20}}>Help</a>
-            <button onClick={showRequestModal} style={styles.navButton}>
-              <div id='help' style={{whiteSpace: 'nowrap'}}>Contact Us</div>
-            </button>
-            {supportrequestModal}
-            <li className='dropdown user-li' onClick={showProfileLinks} style={{listStyleType: 'none'}}>
-              <a id='sel_user' role='button' className='dropdown-toggle' data-toggle='dropdown'>
-                <div id='dacUser'>
-                  {currentUser.displayName}
-                  <span className='caret caret-margin'></span>
-                </div>
-                <small id='dacUserMail'>{currentUser.email}</small>
-              </a>
-              <ul className='dropdown-menu navbar-dropdown' role='menu' style={{
-                display: `${profileState ? 'block' : 'none'}`,
-                top: orientation === 'vertical' ? '-100%' : '100%'
-              }}>
-                <li>
-                  <Link id='link_profile' to='/profile' onClick={onSubtabChange}>Your Profile</Link>
-                </li>
-                <li>
-                  <a id='link_signOut' onClick={signOut}>Sign out</a>
-                </li>
-              </ul>
-            </li>
-          </div>
-        )}
-      </ul>
-
-      {/* Sub Tabs */}
-      {tabs[selectedMenuTab]?.children && (
-        <Box className='duos-navigation-box navbar-sub'>
-          <Tabs
-            value={selectedSubTab}
-            variant='scrollable'
-            scrollButtons='auto'
-            orientation={orientation}
-            TabIndicatorProps={{ style: { background: '#00609f' } }}
-            onChange={onSubtabChange}
-          >
-            {tabs[selectedMenuTab].children.map((tab, tabIndex) => {
-              // Default to displaying the sub tab if no render function exists for it
-              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered();
-              const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser))) ? true : tab.isRenderedForUser(currentUser);
-              return (isRendered && isRenderedForUser) ? (
-                <Tab
-                  key={`${tab.link}_${tabIndex}`}
-                  label={tab.label}
-                  style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
-                  to={{ pathname: tab.link, state: { selectedMenuTab: selectedMenuTab } }}
-                  component={Link}
-                />
-              ) : null;
-            })}
-          </Tabs>
-        </Box>
-      )}
-    </div>
-  );
-};
-
 
 const duosLogoImage = {
   height: '50px',
@@ -343,6 +117,7 @@ const navbarDuosText = {
   verticalAlign: 'text-bottom'
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 const DuosHeader = (props) => {
   const {location, classes, history} = props;
   const [state, setState] = useState({
@@ -590,4 +365,5 @@ const DuosHeader = (props) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export default withRouter(withStyles(DuosHeader, styles));

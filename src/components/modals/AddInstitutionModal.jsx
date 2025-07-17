@@ -32,7 +32,7 @@ const AddInstitutionModal = (props) => {
         const institution = await Institution.getById(instId);
         setInstitution(institution);
         setInstitutionName(institution.name);
-      } catch (e) {
+      } catch (_error) {
         Notifications.showError('Unable to load Institution');
       } finally {
         setIsLoading(false);
@@ -83,7 +83,7 @@ const AddInstitutionModal = (props) => {
         };
         try {
           result = await Institution.postInstitution(newInstitution);
-        } catch (e) {
+        } catch (_error) {
           Notifications.showError({ text: 'Unable to save institution by that name' });
         }
         break;
@@ -94,7 +94,7 @@ const AddInstitutionModal = (props) => {
         };
         try {
           result = await Institution.putInstitution(institution.id, editInstitution);
-        } catch (e) {
+        } catch (_error) {
           Notifications.showError({ text: 'Unable to save institution by that name' });
         }
         break;

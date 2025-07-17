@@ -45,7 +45,7 @@ export default function AcceptedAcknowledgements() {
           allAcknowledgements.push(newAcknowledgment);
         }
         setAcceptedAcknowledgements(allAcknowledgements);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
       }
     };

@@ -13,7 +13,7 @@ import {TerraDataRepo} from '../../libs/ajax/TerraDataRepo';
 import {chain, intersection, isEmpty, Dictionary} from 'lodash';
 import {EnumerateSnapshotModel, SnapshotSummaryModel} from '../../types/tdrModel';
 import {DatasetSearchFooter} from '../data_search/DatasetSearchFooter';
-import {applyForAccess} from '../data_search/DatasetSearchTable';
+import {applyForAccess} from '../../utils/accessUtils';
 import {History} from 'history';
 
 const styles = {

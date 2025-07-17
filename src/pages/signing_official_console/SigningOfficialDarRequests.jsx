@@ -4,8 +4,8 @@ import {Styles} from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
 import { Collections } from '../../libs/ajax/Collections';
 import { USER_ROLES } from '../../libs/utils';
-import { DarCollectionTableColumnOptions, DarCollectionTable } from '../../components/dar_collection_table/DarCollectionTable';
-import { consoleTypes } from '../../components/dar_collection_table/DarCollectionTableCellData';
+import { DarCollectionTable } from '../../components/dar_collection_table/DarCollectionTable';
+import { consoleTypes, DarCollectionTableColumnOptions } from '../../utils/darCollectionUtils';
 
 export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([]);

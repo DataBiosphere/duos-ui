@@ -8,7 +8,7 @@ import SearchBar from '../components/SearchBar';
 import InstitutionTable from '../components/institution_table/InstitutionTable';
 import AddInstitutionModal from '../components/modals/AddInstitutionModal';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/institution_table/InstitutionTable';
+import { TableHeader, TableRowLoading } from '../components/institution_table/InstitutionTable';
 
 export default function AdminManageInstitutions(props) {
   const [institutionList, setInstitutionList] = useState([]);
@@ -123,8 +123,8 @@ export default function AdminManageInstitutions(props) {
         onUpdateSave={modalSave}
       />}
       {isLoading && <DarTableSkeletonLoader
-        tableHeaderTemplate={tableHeaderTemplate}
-        tableRowLoadingTemplate={tableRowLoadingTemplate}
+        tableHeader={<TableHeader />}
+        tableRowLoading={<TableRowLoading />}
       />}
       {showAddInstitutionModal && <AddInstitutionModal
         showModal={showAddInstitutionModal}

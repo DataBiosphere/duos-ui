@@ -1,4 +1,4 @@
-import { selectedPrimaryGroup } from './EditConsentGroup';
+import { selectedPrimaryGroup } from './consentGroupUtils';
 import { isNil, isEmpty } from 'lodash/fp';
 import { dateValidator, uniqueValidator } from '../../../components/forms/formValidation';
 import { FormValidators } from '../../../components/forms/forms';
@@ -40,7 +40,7 @@ export const computeConsentGroupValidationErrors = (consentGroup, datasetNames =
   } else {
     try {
       FormValidators.URL.isValid(consentGroup.url);
-    } catch(err) {
+    } catch(_err) {
       validation.url = invalidFormatError('uri');
     }
   }

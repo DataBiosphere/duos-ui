@@ -30,7 +30,7 @@ export default function DataSubmissionStudyInformation(props) {
     const init = async () => {
       try {
         updateUserAndFields();
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
       }
     };

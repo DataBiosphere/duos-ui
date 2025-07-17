@@ -16,6 +16,7 @@ import {
 import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal';
 import ConfirmationModal from 'src/components/modals/ConfirmationModal';
 import { LibraryCard } from 'src/libs/ajax/LibraryCard';
+import { confirmModalType } from '../../libs/libraryCardUtils';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
@@ -54,12 +55,6 @@ const columnHeaderFormat = {
   libraryCard: {label: 'Library Card', cellStyle: {width: styles.cellWidths.libraryCard}},
   role: {label: 'Role', cellStyle: {width: styles.cellWidths.libraryCard}},
   // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
-};
-
-// Used to determine which modal type to use for either issuing or deleting a Library Card.
-export const confirmModalType = {
-  issue: 'issue',
-  delete: 'delete'
 };
 
 const DeactivateLibraryCardButton = (props) => {

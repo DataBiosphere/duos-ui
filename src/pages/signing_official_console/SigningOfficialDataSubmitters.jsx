@@ -29,7 +29,7 @@ export default function SigningOfficialConsole() {
         setUnregisteredResearchers(soPromises[1]);
         setSigningOfficial(soUser);
         setIsLoading(false);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
         setIsLoading(false);
       }

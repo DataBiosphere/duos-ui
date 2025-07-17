@@ -185,7 +185,7 @@ export const SupportRequestModal = (props) => {
   },[]);
 
   useEffect(() => {
-    window.addEventListener('resize', handleResize); // eslint-disable-line -- codacy says event listeners are dangerous
+    window.addEventListener('resize', handleResize);
 
     return () => {
       // Cleanup listener on unmount
