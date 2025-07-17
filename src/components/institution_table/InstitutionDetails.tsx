@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Institution} from 'src/types/model';
 import backArrowIcon from 'src/images/back_arrow.svg';
-import {Link, useHistory, useLocation} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {Button, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -30,9 +30,8 @@ interface InstitutionDetailsUpdate {
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
     const formMode = props.formMode;
-    const location = useLocation();
     const history = useHistory();
-    const institutionList = location.state?.institutionList || [];
+    const [institutionList, setInstitutionList] = useState<Institution[]>([])
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(formMode === FORM_MODES.createNew);
@@ -46,6 +45,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         const loadInstitution = async () => {
             try {
                 const institutions: Institution[] = await InstitutionAPI.list();
+                setInstitutionList(institutions);
                 if (institutionId && formMode === FORM_MODES.editExisting) {
                     const institution = institutions.find((inst) => inst.id.toString() === institutionId.toString());
                     setInstitution(institution);
