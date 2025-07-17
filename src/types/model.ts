@@ -122,7 +122,8 @@ export interface Institution {
   createDate: string;
   updateUser?: DuosUser;
   updateUserId?: number;
-  updateDate?: string;  signingOfficials: SimplifiedDuosUser[];
+  updateDate?: string;
+  signingOfficials: SimplifiedDuosUser[];
   domains?: string[];
 }
 
