@@ -24,7 +24,7 @@ import NIHPilotInfo from 'src/pages/NIHPilotInfo';
 import Status from 'src/pages/Status';
 import BackgroundSignIn from 'src/pages/BackgroundSignIn';
 import ConsentTextGenerator from 'src/pages/ConsentTextGenerator';
-import AdminManageInstitutions from 'src/pages/AdminManageInstitutions';
+import AdminManageInstitutions from 'src/pages/AdminManageInstitutions.js';
 import AdminManageLC from 'src/pages/AdminManageLC';
 import DatasetStatistics from 'src/pages/DatasetStatistics';
 import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview';
@@ -80,7 +80,8 @@ const Routes = (props) => (
     {DAAUtils.isEnabled() && <AuthenticatedRoute path='/manage_edit_dac_daa/:dacId' component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
     {DAAUtils.isEnabled() &&  <AuthenticatedRoute path='/manage_add_dac_daa' component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
     <AuthenticatedRoute path='/admin_manage_institutions/create_new' component={InstitutionDetails} props={{...props, formMode: FORM_MODES.createNew}} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path='/admin_manage_institutions/institutions/:institutionId' component={InstitutionDetails} props={{...props, formMode: FORM_MODES.editExisting}} rolesAllowed={[USER_ROLES.admin]} />    <AuthenticatedRoute path='/admin_manage_institutions' component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path='/admin_manage_institutions/institutions/:institutionId' component={InstitutionDetails} props={{...props, formMode: FORM_MODES.editExisting}} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path='/admin_manage_institutions' component={AdminManageInstitutions} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path='/datasets' component={ControlledAccessGrants} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path='/dar_collection/:collectionId' component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>

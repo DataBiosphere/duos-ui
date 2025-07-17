@@ -1,34 +1,35 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { Institution } from '../libs/ajax/Institution';
-import { Styles} from '../libs/theme';
-import { Notifications } from '../libs/utils';
-import manageInstitutionsIcon from '../images/icon_manage_dac.png';
-import SearchBar from '../components/SearchBar';
-import InstitutionTable from '../components/institution_table/InstitutionTable';
-import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/institution_table/InstitutionTable';
+import React, {useEffect, useState} from 'react';
+import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
+import {Institution} from 'src/types/model';
+import {Styles} from '../libs/theme';
+import {Notifications} from 'src/libs/utils';
+import manageInstitutionsIcon from 'src/images/icon_manage_dac.png';
+import SearchBar from 'src/components/SearchBar';
+import InstitutionTable from 'src/components/institution_table/InstitutionTable';
+import {tableHeaderTemplate, tableRowLoadingTemplate} from 'src/components/institution_table/InstitutionTableUtils';
+import DarTableSkeletonLoader from 'src/components/TableSkeletonLoader';
 import {Link} from 'react-router-dom';
+import {extractError} from 'src/utils/ErrorUtils';
 
-export default function AdminManageInstitutions(props) {
-  const [institutionList, setInstitutionList] = useState([]);
-  const [filteredList, setFilteredList] = useState([]);
-  const [tableSize, setTableSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+export default function AdminManageInstitutions() {
+  const [institutionList, setInstitutionList] = useState<Institution[]>([]);
+  const [filteredList, setFilteredList] = useState<Institution[]>([]);
+  const [tableSize, setTableSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const init = async () => {
       try {
         setIsLoading(true);
-        const listOfInstitutions = await Institution.list();
+        const listOfInstitutions = await InstitutionAPI.list();
         setInstitutionList(listOfInstitutions);
-        filter(listOfInstitutions, searchTerm);
+        setFilteredList(filter(listOfInstitutions, searchTerm));
         setIsLoading(false);
-      } catch (_error) {
-        Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
-      } finally {
+      } catch (error) {
+        const message = extractError(error);
+        Notifications.showError({text: 'Error: Unable to retrieve institutions from server: ' + message});      } finally {
         setIsLoading(false);
       }
     };
@@ -36,30 +37,29 @@ export default function AdminManageInstitutions(props) {
     init();
   }, []);
 
-  const handleSearchChange = (query) => {
+  const handleSearchChange = (query: { current: { value: string } }) => {
     const value = query.current.value;
     setSearchTerm(value);
-    filter(institutionList, value);
+    setFilteredList(filter(institutionList, searchTerm));
   };
 
-  const filter = (list, value) => {
-    setFilteredList(list.filter(institution => {
-      if (value && value !== undefined) {
+  const filter = (list: Institution[], value: string): Institution[] => {
+    if (value) {
+      return list.filter(institution => {
         const text = JSON.stringify(institution);
         return text.toLowerCase().includes(value.toLowerCase());
-      }
-      return true;
-    }));
+      });
+    }
+    return list;
   };
-
   return (
     <div style={Styles.PAGE}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION as React.CSSProperties}>
           <div style={Styles.ICON_CONTAINER}>
             <img id="lock-icon" src={manageInstitutionsIcon} style={Styles.HEADER_IMG} />
           </div>
-          <div style={Styles.HEADER_CONTAINER}>
+          <div style={Styles.HEADER_CONTAINER as React.CSSProperties}>
             <div style={Styles.TITLE}>Manage Institutions</div>
             <div style={Styles.SMALL}>Select and manage Institutions</div>
           </div>
@@ -87,12 +87,10 @@ export default function AdminManageInstitutions(props) {
       </div>
       {!isLoading && <InstitutionTable
           filteredList={filteredList}
-          history={props.history}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           tableSize={tableSize}
           setTableSize={setTableSize}
-          institutionList={institutionList}
       />}
       {isLoading && <DarTableSkeletonLoader
         tableHeaderTemplate={tableHeaderTemplate}
