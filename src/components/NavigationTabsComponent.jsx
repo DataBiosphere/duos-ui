@@ -61,14 +61,14 @@ export const NavigationTabsComponent = (props) => {
     contactUsButton, showRequestModal, supportrequestModal,
     tabs, initialTab, initialSubTab,
     onSubtabChange, showProfileLinks, profileState
-  } = props
-  const [selectedMenuTab, setSelectedMenuTab] = useState(false)
-  const [selectedSubTab, setSelectedSubTab] = useState(false)
+  } = props;
+  const [selectedMenuTab, setSelectedMenuTab] = useState(false);
+  const [selectedSubTab, setSelectedSubTab] = useState(false);
 
   useEffect(() => {
     setSelectedMenuTab(initialTab === -1 ? false : initialTab)
     setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab)
-  }, [initialTab, initialSubTab])
+  }, [initialTab, initialSubTab]);
 
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
@@ -214,7 +214,7 @@ export const NavigationTabsComponent = (props) => {
           >
             {tabs[selectedMenuTab].children.map((tab, tabIndex) => {
               // Default to displaying the sub tab if no render function exists for it
-              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered()
+              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered();
               const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser))) ?
                 true :
                 tab.isRenderedForUser(currentUser)

@@ -275,7 +275,7 @@ const DuosHeader = (props) => {
     if (tabs[initialTab].link === location.pathname) {
       initialSubTab = 0;
     } else if (tabs[initialTab].children) {
-      initialSubTab = tabs[initialTab].children.findIndex((subtab) => {
+      initialSubTab = tabs[initialTab].children.filter((data) => data.isRendered === undefined || data.isRendered(currentUser)).findIndex((subtab) => {
         return subtab.link === location.pathname || location.pathname.includes(subtab.search);
       });
     }
