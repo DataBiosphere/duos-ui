@@ -261,9 +261,8 @@ const DataAccessRequestApplication = (props) => {
       })
       // TS thinks that collection.dars is an object, but it is a map
       const darMap = new Map(Object.entries(dars));
-      setReverseOrderedDARs(
-          [...darMap.values()].sort((a, b) => b.id - a.id)
-      );
+      const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
+      setReverseOrderedDARs(newReverseOrderedDARs);
       // form data = the "root" DAR's data
       const darId = Object.values(dars).sort((a,b) => a.id - b.id)[0].referenceId
       formData = await DAR.getPartialDarRequest(darId);
@@ -668,6 +667,7 @@ const DataAccessRequestApplication = (props) => {
                       updateUploadedIrbDocument={updateIrbDocument}
                       setDatasets={setDatasets}
                       setSelectedDatasets={setSelectedDatasets}
+                      referenceId={formData.referenceId}
                       draftDar={draftDar}
                   />
                 </ConditionalAccordion>
