@@ -5,7 +5,6 @@ import {BrowserRouter} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {DuosUser, Institution} from 'src/types/model';
 
-
 const createUser: DuosUser = {
   createDate: new Date(),
   displayName: 'Create User',
@@ -147,7 +146,6 @@ describe('AdminManageInstitutions', () => {
   });
 
   it('handles loading state', () => {
-    // cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(mockInstitutions));
     cy.intercept('GET', '/api/institutions', (req) => {
       req.reply({
         delay: 1000, // Simulate a delay to show loading state
