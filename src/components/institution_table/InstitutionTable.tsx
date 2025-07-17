@@ -5,10 +5,12 @@ import PaginationBar from 'src/components/PaginationBar';
 import SimpleTable from 'src/components/SimpleTable';
 import {Storage} from 'src/libs/storage';
 import {
+  calcPageCount,
   CellData,
-  columnConfig,
+  columnHeaderData,
+  columns,
   getInitialSort,
-  processRowData,
+  processRows,
   SortType,
   storageInstitutionSort,
   tableStyles
@@ -22,25 +24,6 @@ interface InstitutionTableProps {
   readonly setCurrentPage: (page: number) => void;
   readonly tableSize: number;
   readonly setTableSize: (size: number) => void;
-}
-
-const calcPageCount = (tableSize: number, filteredList: Institution[]) => {
-  if (isEmpty(filteredList)) {
-    return 1;
-  }
-  return Math.ceil(filteredList.length / tableSize);
-};
-
-const columns = Object.keys(columnConfig);
-
-const columnHeaderData = (columns: string[]) => {
-  return columns.map((col) => columnConfig[col]);
-};
-
-const processRows = (institutions: Institution[]): CellData[][] => {
-  return institutions.map((institution) => {
-    return processRowData(institution);
-  });
 }
 
 export default function InstitutionTable(props: InstitutionTableProps) {

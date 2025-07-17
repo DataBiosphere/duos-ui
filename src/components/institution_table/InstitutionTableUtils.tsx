@@ -3,6 +3,7 @@ import React from 'react';
 import {Institution} from 'src/types/model';
 import {Link} from 'react-router-dom';
 import {Storage} from 'src/libs/storage';
+import {isEmpty} from 'lodash';
 
 // Sort functionality for the institution table.
 export interface SortType {
@@ -15,7 +16,7 @@ export const storageInstitutionSort = 'storageInstitutionSort';
 
 // Sort functionality for the institution table.
 export const getInitialSort = (columns: string[] = []): SortType => {
-  const sort = Storage.getCurrentUserSettings(storageInstitutionSort) || {
+  const sort = Storage.getCurrentUserSettings(storageInstitutionSort) ?? {
     field: 'name',
     dir: 1
   };
@@ -26,7 +27,6 @@ export const getInitialSort = (columns: string[] = []): SortType => {
     return {colIndex: 0, dir: 1};
   }
 };
-
 
 /**
  * ColumnConfig defines a map of column names to their configuration.
@@ -63,6 +63,9 @@ export interface CellData {
   value: string | number;
 }
 
+/**
+ * Standardized table column widths that can be adjusted and re-used across different components.
+ */
 const columnWidths = {
   id: '10%',
   name: '25%',
@@ -262,4 +265,27 @@ export const processRowData = (row: Institution): CellData[] => {
     } as CellData);
   });
   return rowData;
+}
+
+/*
+ * Utility functions for the Institution Table.
+ */
+
+export const calcPageCount = (tableSize: number, filteredList: Institution[]) => {
+  if (isEmpty(filteredList)) {
+    return 1;
+  }
+  return Math.ceil(filteredList.length / tableSize);
+};
+
+export const columns = Object.keys(columnConfig);
+
+export const columnHeaderData = (columns: string[]) => {
+  return columns.map((col) => columnConfig[col]);
+};
+
+export const processRows = (institutions: Institution[]): CellData[][] => {
+  return institutions.map((institution) => {
+    return processRowData(institution);
+  });
 }
