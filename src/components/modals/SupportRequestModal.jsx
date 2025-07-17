@@ -185,10 +185,12 @@ export const SupportRequestModal = (props) => {
   },[]);
 
   useEffect(() => {
+    // eslint-disable-next-line -- codacy says event listeners are dangerous
     window.addEventListener('resize', handleResize);
 
     return () => {
       // Cleanup listener on unmount
+      // eslint-disable-next-line -- codacy says event listeners are dangerous
       window.removeEventListener('resize', handleResize);
     };
   },[handleResize]);
