@@ -18,7 +18,7 @@ import {
 import {Institution} from 'src/types/model';
 import {recalculateVisibleTable} from 'src/libs/utils';
 
-interface InstitutionTableProps {
+export interface InstitutionTableProps {
   readonly filteredList: Institution[];
   readonly currentPage: number;
   readonly setCurrentPage: (page: number) => void;
@@ -59,7 +59,7 @@ export default function InstitutionTable(props: InstitutionTableProps) {
   };
 
   return (
-      <div>
+      <div data-cy="institution-table">
         <SimpleTable
             isLoading={false}
             rowData={visibleRows}
