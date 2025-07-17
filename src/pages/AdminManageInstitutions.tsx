@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {Institution} from 'src/types/model';
 import {Styles} from '../libs/theme';
-import {Notifications} from 'src/libs/utils';
+import {getSearchFilterFunctions, Notifications} from 'src/libs/utils';
 import manageInstitutionsIcon from 'src/images/icon_manage_dac.png';
 import SearchBar from 'src/components/SearchBar';
 import InstitutionTable from 'src/components/institution_table/InstitutionTable';
@@ -45,15 +45,12 @@ export default function AdminManageInstitutions() {
 
   const filter = (list: Institution[], value: string): Institution[] => {
     if (value) {
-      return list.filter(institution => {
-        const text = JSON.stringify(institution);
-        return text.toLowerCase().includes(value.toLowerCase());
-      });
+      return getSearchFilterFunctions().institutions(value, list);
     }
     return list;
   };
   return (
-    <div style={Styles.PAGE}>
+    <div style={Styles.PAGE} data-cy="admin-manage-institutions">
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION as React.CSSProperties}>
           <div style={Styles.ICON_CONTAINER}>
