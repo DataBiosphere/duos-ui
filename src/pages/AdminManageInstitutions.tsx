@@ -57,7 +57,7 @@ export default function AdminManageInstitutions() {
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION as React.CSSProperties}>
           <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={manageInstitutionsIcon} style={Styles.HEADER_IMG} />
+            <img alt={'Admin Manage Institutions'} id="lock-icon" src={manageInstitutionsIcon} style={Styles.HEADER_IMG} />
           </div>
           <div style={Styles.HEADER_CONTAINER as React.CSSProperties}>
             <div style={Styles.TITLE}>Manage Institutions</div>
