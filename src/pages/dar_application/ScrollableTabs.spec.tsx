@@ -13,7 +13,7 @@ describe('ScrollableTabs Component - Tests', () => {
     beforeEach(() => {
         mount(<BrowserRouter>
             <div style={{display: 'inline-flex'}}>
-                <ScrollableTabs applicationTabs={ApplicationTabs} formSelectedTabId={1}/>
+                <ScrollableTabs applicationTabs={ApplicationTabs} formSelectedTabId={'1'}/>
                 <div>
                     <div id='researcher-info' style={{height: '1000px', backgroundColor: 'red'}}>Researcher Info</div>
                     <div id='data-access-request' style={{height: '1000px', backgroundColor: 'blue'}}>Data Access Request</div>
@@ -23,11 +23,11 @@ describe('ScrollableTabs Component - Tests', () => {
         </BrowserRouter>)
     });
     it('Case 1 - change tabs based on formSelectedTabId', () => {
-        mount(<BrowserRouter><ScrollableTabs applicationTabs={ApplicationTabs} formSelectedTabId={1}/></BrowserRouter>)
+        mount(<BrowserRouter><ScrollableTabs applicationTabs={ApplicationTabs} formSelectedTabId={'1'}/></BrowserRouter>)
         cy.get('.Mui-selected').contains('Researcher Information').should('exist');
         cy.get('.Mui-selected').contains('Data Access Request').should('not.exist');
 
-        mount(<BrowserRouter><ScrollableTabs applicationTabs={ApplicationTabs} formSelectedTabId={2}/></BrowserRouter>)
+        mount(<BrowserRouter><ScrollableTabs applicationTabs={ApplicationTabs} formSelectedTabId={'2'}/></BrowserRouter>)
         cy.get('button').contains('Data Access Request').click();
         cy.get('.Mui-selected').contains('Data Access Request').should('exist');
     });
