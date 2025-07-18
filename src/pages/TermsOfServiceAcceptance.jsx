@@ -1,8 +1,6 @@
-import React from 'react';
-import {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Auth} from 'src/libs/auth/auth';
 import {TosService} from 'src/libs/tosService';
-import {Storage} from 'src/libs/storage';
 import SimpleButton from 'src/components/SimpleButton';
 import {Theme} from 'src/libs/theme';
 
@@ -20,7 +18,6 @@ export default function TermsOfServiceAcceptance(props) {
 
   const acceptToS = useCallback(async () => {
     await TosService.acceptTos();
-    await Storage.setUserIsLogged(true);
 
     // if there is a redirectTo, we should go to that. otherwise, just go to the appropriate
     // data library.

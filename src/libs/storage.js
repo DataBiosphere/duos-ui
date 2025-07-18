@@ -4,7 +4,6 @@ import { v4 as uuid } from 'uuid';
 // Storage Variables
 const CurrentUser = 'CurrentUser'; // System user
 const OidcUser = 'OidcUser'; // B2C Tenant user info, including token
-const UserIsLogged = 'isLogged'; // User log status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
 const anonymousId = 'anonymousId';
 const ENV = 'env';
@@ -63,11 +62,8 @@ export const Storage = {
   },
 
   userIsLogged: () => {
-    return localStorage.getItem(UserIsLogged) === 'true';
-  },
-
-  setUserIsLogged: value => {
-    localStorage.setItem(UserIsLogged, value);
+    const oidcUser = localStorage.getItem(OidcUser) ? JSON.parse(localStorage.getItem(OidcUser)) : null;
+    return oidcUser && oidcUser.expires_at > Math.floor(Date.now() / 1000);
   },
 
   setData: (key, value) => {
