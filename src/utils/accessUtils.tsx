@@ -7,7 +7,7 @@ interface History {
   push: (path: string) => void;
 }
 
-export const applyForAccess = async (selected: number, history: History) => {
+export const applyForAccess = async (selected: number[], history: History) => {
   try {
     const draftResponse = await DAR.postDarDraft({ datasetId: selected });
     if (draftResponse.referenceId) {
