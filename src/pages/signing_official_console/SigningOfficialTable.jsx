@@ -16,7 +16,7 @@ import {
 import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal';
 import ConfirmationModal from 'src/components/modals/ConfirmationModal';
 import { LibraryCard } from 'src/libs/ajax/LibraryCard';
-import { confirmModalType } from '../../libs/libraryCardUtils';
+import { confirmModalType } from 'src/libs/libraryCardUtils';
 import {LibraryCardAgreementTermsDownload} from 'src/components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
