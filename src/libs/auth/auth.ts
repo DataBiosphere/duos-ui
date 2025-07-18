@@ -34,12 +34,10 @@ export const Auth = {
       throw new Error(Auth.signInError());
     }
     Storage.setOidcUser(user);
-    Storage.setUserIsLogged(true);
     return user;
   },
   signOut: async () => {
     Storage.clearStorage();
-    Storage.setUserIsLogged(false);
     await OidcBroker.signOut();
   },
 };

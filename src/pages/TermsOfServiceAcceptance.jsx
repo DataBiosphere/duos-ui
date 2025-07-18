@@ -20,7 +20,6 @@ export default function TermsOfServiceAcceptance(props) {
 
   const acceptToS = useCallback(async () => {
     await TosService.acceptTos();
-    await Storage.setUserIsLogged(true);
 
     // if there is a redirectTo, we should go to that. otherwise, just go to the appropriate
     // data library.

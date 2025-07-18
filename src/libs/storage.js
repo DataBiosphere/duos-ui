@@ -67,10 +67,6 @@ export const Storage = {
     return oidcUser && oidcUser.expires_at > Math.floor(Date.now() / 1000);
   },
 
-  setUserIsLogged: value => {
-    localStorage.setItem(UserIsLogged, value);
-  },
-
   setData: (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
   },

@@ -38,11 +38,9 @@ describe('Auth Success', function () {
   });
 
   it('Sign Out Clears the session when called', function () {
-    Storage.setUserIsLogged(true);
     Storage.setAnonymousId(uuid());
     Storage.setData('key', 'val');
     Storage.setEnv('test');
-    cy.wrap(Storage.userIsLogged()).should('be.true');
     cy.wrap(Storage.getAnonymousId()).should('not.be.empty');
     cy.wrap(Storage.getData('key')).should('not.be.empty');
     cy.wrap(Storage.getEnv()).should('not.be.empty');
