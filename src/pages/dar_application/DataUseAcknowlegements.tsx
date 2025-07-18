@@ -3,7 +3,7 @@ import {FormField, FormFieldTitle, FormFieldTypes} from 'src/components/forms/fo
 import React from 'react';
 import {Dataset} from 'src/types/model';
 import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
-import { FormState, ValidFormState } from 'src/pages/progress_reports/ProgressReportFormState';
+import {FormState, ValidFormState} from 'src/pages/progress_reports/ProgressReportFormState';
 
 type DataUseAcknowledgementsProps = {
     title: string;

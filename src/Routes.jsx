@@ -47,6 +47,7 @@ import {DAAUtils} from 'src/utils/DAAUtils';
 import EditDac from 'src/pages/manage_dac/EditDac';
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants';
 import {InstitutionDetails} from 'src/components/institution_table/InstitutionDetails.js';
+import {FORM_MODES} from 'src/components/institution_table/InstitutionFormMode.js';
 
 const Routes = (props) => (
   <Switch>
@@ -78,8 +79,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path='/manage_add_dac' component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     {DAAUtils.isEnabled() && <AuthenticatedRoute path='/manage_edit_dac_daa/:dacId' component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
     {DAAUtils.isEnabled() &&  <AuthenticatedRoute path='/manage_add_dac_daa' component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
-    <AuthenticatedRoute path='/admin_manage_institutions/:institutionId' component={InstitutionDetails} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path='/admin_manage_institutions' component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path='/admin_manage_institutions/create_new' component={InstitutionDetails} props={{...props, formMode: FORM_MODES.createNew}} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path='/admin_manage_institutions/institutions/:institutionId' component={InstitutionDetails} props={{...props, formMode: FORM_MODES.editExisting}} rolesAllowed={[USER_ROLES.admin]} />    <AuthenticatedRoute path='/admin_manage_institutions' component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path='/datasets' component={ControlledAccessGrants} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path='/dar_collection/:collectionId' component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>
@@ -87,14 +88,14 @@ const Routes = (props) => (
     <AuthenticatedRoute path='/member_console' component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
     <AuthenticatedRoute path='/dar_vote_review/:collectionId' component={DarCollectionReview} props={Object.assign({readOnly: true}, props)}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>
-    <AuthenticatedRoute path='/dar_application_review/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true})}
+    <AuthenticatedRoute path='/dar_application_review/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true, draftDar: false, isProgressReportApplication: false})}
       rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path='/progress_report_application/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true, isProgressReportApplication: true})}
+    <AuthenticatedRoute path='/progress_report_application/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {existingDarsReadOnlyMode: true, draftDar: false, isProgressReportApplication: true})}
                           rolesAllowed={[USER_ROLES.researcher]} />
     {/* Order is important for processing links with embedded dataRequestIds */}
-    <AuthenticatedRoute path='/dar_application/:dataRequestId' component={DataAccessRequestApplication} props={Object.assign({}, props, {draftDar: true})}
+    <AuthenticatedRoute path='/dar_application/:dataRequestId' component={DataAccessRequestApplication} props={Object.assign({}, props, {draftDar: true, isProgressReportApplication: false})}
       rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={Object.assign({}, props, {draftDar: true, isProgressReportApplication: false})} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path='/signing_official_console/researchers' component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {DAAUtils.isEnabled() && <AuthenticatedRoute path='/signing_official_console/researchers_daa_associations' component={ensureSoHasDaaAcknowledgement(ManageResearcherDAAs, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path='/signing_official_console/dar_requests' component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />

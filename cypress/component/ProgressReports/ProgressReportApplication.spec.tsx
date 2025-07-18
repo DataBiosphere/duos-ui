@@ -20,7 +20,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Mock Storage methods that might be used
     cy.window().then((win) => {
       win.localStorage.clear();
-      win.sessionStorage.clear();
+      win.localStorage.clear();
     });
 
     cy.stub(Storage, 'getCurrentUser').returns(researcher);
@@ -277,7 +277,7 @@ describe('ProgressReportApplication - Component Tests', () => {
           link: ''
         }
       ]
-    };
+    } as unknown as CombinedDataAccessRequest;
 
     mountComponent(darWithPublications, true);
 
@@ -305,7 +305,7 @@ describe('ProgressReportApplication - Component Tests', () => {
           link: ''
         }
       ]
-    };
+    } as unknown as CombinedDataAccessRequest;
 
     mountComponent(darWithPublications, true);
 
@@ -357,7 +357,7 @@ describe('ProgressReportApplication - Component Tests', () => {
           pubmed_id: ''
         }
       ]
-    };
+    } as unknown as CombinedDataAccessRequest;
 
     mountComponent(darWithPresentations, true);
 

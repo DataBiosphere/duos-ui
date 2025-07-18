@@ -85,7 +85,7 @@ export default function InstitutionTable(props) {
               <div style={Object.assign({}, Styles.TABLE.INSTITUTION_CELL)}>
                   <Link
                       to={{
-                          pathname: `/admin_manage_institutions/${inst.id}`,
+                          pathname: `/admin_manage_institutions/institutions/${inst.id}`,
                           // If we have the institution list already loaded, pass it along to the Edit Institution
                           // page so we can check for duplicate domains before hitting the backend or fetching the
                           // entire institution list again. If this value is not present or not yet loaded, the Edit

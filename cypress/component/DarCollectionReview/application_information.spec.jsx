@@ -157,7 +157,7 @@ describe('Application Information', () => {
     cy.get('#it-director-span').should('exist').contains('test@test.com');
   });
 
-  it('redners AnVIL storage information', ()=> {
+  it('renders AnVIL storage information', ()=> {
     const props = {
       anvilStorage: true
     };
@@ -167,17 +167,14 @@ describe('Application Information', () => {
     cy.get('#anvil-storage-label').should('exist').contains('Using AnVIL only for storage and analysis');
   });
 
-  it('redners expected document links', ()=> {
+  it('renders expected document links', ()=> {
     const props = {
-      irbDocumentLocation: 'some-uuid',
       collaborationLetterLocation: 'some-other-uuid',
       referenceId: 'dar-uuid',
-      irbDocumentName: 'irbdoc.txt',
       collaborationLetterName: 'collab-letter.txt',
     };
 
     mount(<ApplicationInformation {...props} />);
-    cy.get('#irb-doc').should('exist').contains('Download IRB Protocol');
     cy.get('#collab-letter').should('exist').contains('Download Collaboration Letter');
   });
 

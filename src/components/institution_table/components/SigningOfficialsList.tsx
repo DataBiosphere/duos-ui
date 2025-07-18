@@ -1,6 +1,7 @@
 import React from 'react';
 import { TextField } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
+import {Link} from 'react-router-dom';
 
 interface SigningOfficialUser {
     userId: string | number;
@@ -20,13 +21,17 @@ export const SigningOfficialsList = ({ signingOfficials = [] }: SigningOfficials
             <div style={{fontSize: 18, fontWeight: 600, paddingBottom: '1rem'}}>
                 Signing Officials
             </div>
-            <div className={'italic'} style={{display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '2rem'}}>
-                <InfoIcon fontSize="large" color="info"/>
-                Signing Officials cannot be modified from this page
+            <div className={'italic'} style={{display: 'flex', gap: '8px', paddingBottom: '2rem', width: '50%'}}>
+                <InfoIcon fontSize="large" color="info" style={{ paddingTop: '0.25rem'}}/>
+                <div>
+                    Administrators can manage Signing Officials from the{' '}
+                    <Link to='/admin_manage_users'>Manage Users</Link>
+                    {' '}page by assigning or removing the &#34;Signing Official&#34; role for users associated with this institution.
+                </div>
             </div>
             {!hasSigningOfficials && (
                 <div style={{marginBottom: 10}} className={'italic'}>
-                    This institution does not have any signing officials
+                    This institution does not have any Signing Officials
                 </div>
             )}
             {hasSigningOfficials && signingOfficials.map((so) => (

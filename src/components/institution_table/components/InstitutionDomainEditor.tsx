@@ -45,7 +45,7 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
     return (
         <div style={{paddingTop: 20}}>
             <div style={{fontWeight: 600, marginBottom: '0.5rem', fontSize: 18}}>Domains</div>
-            <div>
+            <div style={{marginBottom: 10}}>
                 {domains.map(domain => (
                     <DomainChip
                         key={domain}
@@ -61,7 +61,7 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
             }
 
             {isEditing && (
-                <div style={{display: 'flex', flexDirection: 'column', marginTop: 10}}>
+                <div style={{display: 'flex', flexDirection: 'column'}}>
                     <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <TextField
                             variant='outlined'

@@ -137,9 +137,9 @@ export default function ApplicationInformation(props) {
     rus,
     cloudProviderDescription,
     referenceId,
-    irbDocumentLocation,
+    _irbDocumentLocation,
     collaborationLetterLocation,
-    irbDocumentName,
+    _irbDocumentName,
     collaborationLetterName
   } = props;
 
@@ -230,7 +230,6 @@ export default function ApplicationInformation(props) {
         }
       </div>
       <div className="document-link-container" style={{margin: '1rem 0'}}>
-        {generateLinkContents('irb-doc', referenceId, 'irbDocument', 'Download IRB Protocol', irbDocumentName, irbDocumentLocation)}
         {generateLinkContents('collab-letter', referenceId, 'collaborationDocument', 'Download Collaboration Letter', collaborationLetterName, collaborationLetterLocation)}
       </div>
     </div>
