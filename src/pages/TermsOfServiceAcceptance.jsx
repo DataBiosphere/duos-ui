@@ -1,8 +1,6 @@
-import React from 'react';
-import {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Auth} from 'src/libs/auth/auth';
 import {TosService} from 'src/libs/tosService';
-import {Storage} from 'src/libs/storage';
 import SimpleButton from 'src/components/SimpleButton';
 import {Theme} from 'src/libs/theme';
 
