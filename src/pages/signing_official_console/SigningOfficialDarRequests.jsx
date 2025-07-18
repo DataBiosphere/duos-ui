@@ -5,7 +5,7 @@ import lockIcon from '../../images/lock-icon.png';
 import { Collections } from '../../libs/ajax/Collections';
 import { USER_ROLES } from '../../libs/utils';
 import { DarCollectionTable } from '../../components/dar_collection_table/DarCollectionTable';
-import { consoleTypes, DarCollectionTableColumnOptions } from '../../utils/darCollectionUtils';
+import { consoleTypes, DarCollectionTableColumnOptions } from '../../utils/DarCollectionUtils';
 
 export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([]);
