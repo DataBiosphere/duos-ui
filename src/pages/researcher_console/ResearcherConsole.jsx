@@ -8,9 +8,8 @@ import {
 } from 'src/components/dar_collection_table/DarCollectionTable';
 import accessIcon from 'src/images/lock-icon.png';
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils';
-import { DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils';
+import { consoleTypes, DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils';
 import SearchBar from 'src/components/SearchBar';
-import { consoleTypes } from '../../utils/darCollectionUtils';
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 
