@@ -63,7 +63,8 @@ export const Storage = {
   },
 
   userIsLogged: () => {
-    return localStorage.getItem(UserIsLogged) === 'true';
+    const oidcUser = localStorage.getItem(OidcUser) ? JSON.parse(localStorage.getItem(OidcUser)) : null;
+    return oidcUser && oidcUser.expires_at > Math.floor(Date.now() / 1000);
   },
 
   setUserIsLogged: value => {
