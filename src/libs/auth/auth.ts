@@ -46,19 +46,19 @@ declare global {
   interface Window {
     Appcues?: {
       /** Identifies the current user with an ID and an optional set of properties. */
-      identify: (userId: string, properties?: never) => void;
+      identify: (userId: string, properties?: unknown) => void;
       /** Notifies the SDK that the state of the application has changed. */
       page: () => void;
       /** Forces specific Appcues content to appear for the current user by passing in the ID. */
       show: (contentId: string) => void;
       /** Fire the callback function when the given event is triggered by the SDK */
-      on: ((eventName: Exclude<string, 'all'>, callbackFn: (event: never) => void | Promise<void>) => void) &
-          ((eventName: 'all', callbackFn: (eventName: string, event: never) => void | Promise<void>) => void);
+      on: ((eventName: Exclude<string, 'all'>, callbackFn: (event: unknown) => void | Promise<void>) => void) &
+          ((eventName: 'all', callbackFn: (eventName: string, event: unknown) => void | Promise<void>) => void);
       /** Clears all known information about the current user in this session */
       reset: () => void;
       /** Tracks a custom event (by name) taken by the current user. */
       track: (eventName: MetricsEventName) => void;
     };
-    forceSignIn: never;
+    forceSignIn: unknown;
   }
 }
