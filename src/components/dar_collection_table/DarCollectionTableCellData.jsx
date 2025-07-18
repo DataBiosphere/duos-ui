@@ -4,7 +4,7 @@ import {formatDate} from '../../libs/utils';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
-import { consoleTypes, styles } from '../../utils/darCollectionUtils';
+import { consoleTypes, styles } from '../../utils/DarCollectionUtils';
 import {Link} from 'react-router-dom';
 
 
