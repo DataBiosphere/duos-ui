@@ -145,7 +145,7 @@ describe('Researcher Info', () => {
   it('saves new collaborators properly', () => {
     mount(<WrappedResearcherInfo {...props}/>);
     addNewCollaborator('internal-lab-staff');
-    cy.get('#0_collaboratorApproval_yes').check();
+    cy.get('#0_collaboratorApproval_true').check();
     // save collaborator and switch to summary view
     cy.get('.collaborator-form-add-save-button').click();
     cy.get('#0_summary').should('exist');
@@ -158,7 +158,7 @@ describe('Researcher Info', () => {
   it('deletes saved collaborators properly', () => {
     mount(<WrappedResearcherInfo {...props}/>);
     addNewCollaborator('internal-lab-staff');
-    cy.get('#0_collaboratorApproval_yes').check();
+    cy.get('#0_collaboratorApproval_true').check();
     // save collaborator and switch to summary view
     cy.get('.collaborator-form-add-save-button').click();
     cy.get('#0_deleteMember').click();
@@ -169,7 +169,7 @@ describe('Researcher Info', () => {
   it('cancels adding new collaborators properly', () => {
     mount(<WrappedResearcherInfo {...props}/>);
     addNewCollaborator('internal-lab-staff');
-    cy.get('#0_collaboratorApproval_yes').check();
+    cy.get('#0_collaboratorApproval_true').check();
     // save collaborator and switch to summary view
     cy.get('.collaborator-form-cancel-button').click();
     cy.get('#0_summary').should('not.exist');
@@ -178,7 +178,7 @@ describe('Researcher Info', () => {
   it('updates collaborator properly', () => {
     mount(<WrappedResearcherInfo {...props}/>);
     addNewCollaborator('internal-lab-staff');
-    cy.get('#0_collaboratorApproval_yes').check();
+    cy.get('#0_collaboratorApproval_true').check();
     // save collaborator and switch to summary view
     cy.get('.collaborator-form-add-save-button').click();
     // edit and switch to form view

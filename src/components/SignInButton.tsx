@@ -51,7 +51,6 @@ export const SignInButton = (props: SignInButtonProps) => {
     const {tosAccepted} = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
       // User has authenticated, but has not accepted ToS
-      Storage.setUserIsLogged(false);
       if (isNil(redirectPath)) {
         history.push(`/tos_acceptance`);
       } else {
