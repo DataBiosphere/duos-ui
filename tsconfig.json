@@ -19,5 +19,6 @@
       "src/*": ["./src/*"]
     }
   },
-  "plugins": ["@typescript-eslint"]
+  "plugins": ["@typescript-eslint"],
+  "include": ["src/custom.d.ts"]
 }
