@@ -129,7 +129,7 @@ export const NavigationTabsComponent = (props) => {
                     id="link_help"
                     className="navbar-duos-link"
                     href="https://support.terra.bio/hc/en-us/articles/28486067349531-Frequently-Asked-Questions-about-DUOS"
-                    target="_blank"
+                    target="_blank" rel="noreferrer"
                   >
                     <div className="navbar-duos-icon-help" style={navbarDuosIcon}></div>
                     <span style={navbarDuosText}>FAQs</span>
@@ -171,7 +171,7 @@ export const NavigationTabsComponent = (props) => {
             }}
           >
             <a href="https://support.terra.bio/hc/en-us/categories/28485138480539-Managing-Data-Access-with-DUOS"
-               id="terra-support-docs-link" target="_blank"
+               id="terra-support-docs-link" target="_blank" rel="noreferrer"
                style={{ color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20 }}>Help</a>
             <button onClick={showRequestModal} style={styles.navButton}>
               <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>

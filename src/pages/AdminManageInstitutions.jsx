@@ -35,6 +35,7 @@ export default function AdminManageInstitutions(props) {
     };
 
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearchChange = (query) => {
