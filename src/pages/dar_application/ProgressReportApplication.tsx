@@ -19,7 +19,11 @@ import {Navigation, Notifications} from 'src/libs/utils';
 import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
 import {translateDataUseRestrictionsFromDataUseArray} from 'src/libs/dataUseTranslation';
-import {validatePRFormData, validationFailed} from 'src/utils/darFormUtils';
+import {
+    needsIrbApprovalDocument,
+    validatePRFormData,
+    validationFailed
+} from 'src/utils/darFormUtils';
 import {FormValidationState} from 'src/pages/dar_application/FormValidationState';
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils';
 import { DAR } from 'src/libs/ajax/DAR';
@@ -266,6 +270,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                   countriesOfOperation={countriesOfOperation}
                 />
             </div>
+            {needsIrbApprovalDocument(formState.datasets) &&
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <IrbDocumentUpload
                     readOnly={readOnlyMode}
@@ -275,7 +280,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     onIrbDocumentChange={onIrbDocumentChange}
                     referenceId={dar.referenceId}
                 />
-            </div>
+            </div>}
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
                 <DataManagementIncident
                     readOnly={readOnlyMode}
