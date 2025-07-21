@@ -154,7 +154,7 @@ beforeEach(() => {
       });
     });
 
-    it('Sets isAttested to false when postDar returns 400 error', () => {
+    it('Makes DAR editable POST to submit returns 400 error', () => {
       // Mock postDar to reject with 400 error
       cy.stub(DAR, 'postDar').rejects({
         response: {
@@ -173,6 +173,16 @@ beforeEach(() => {
       cy.get('#anvilUse_yes').click();
 
       cy.get('#datasetIds').type('asdf{enter}');
+
+      // Add an Internal Collaborator that lacks a Library Card,
+      // which triggers a 400 error on submit
+      cy.get('#add-internalCollaborators-btn').click();
+      cy.get('#0_collaboratorName').type('No LibraryCard');
+      cy.get('#0_collaboratorEraCommonsId').type('nolibcard123');
+      cy.get('#0_collaboratorTitle').type('Research Assistant');
+      cy.get('#0_collaboratorEmail').type('nolibrarycard@broadinstitute.org');
+      // Skip approval for now and save directly
+      cy.get('#collaborator-internalCollaborators-add-save').click();
 
       cy.get('#projectTitle').type('Title');
       cy.get('#rus').type('asdf');
@@ -200,6 +210,9 @@ beforeEach(() => {
       // Now the form should be attested and addendum tab should be visible
       cy.get('#addendum').should('exist');
 
+      // Verify that collaborator form is read-only when attested
+      cy.get('#0_summary').should('exist'); // Summary should be shown (read-only mode)
+
       // Try to submit and expect 400 error to reset attestation
       cy.get('#btn_openSubmitModal').click();
       cy.get('#btn_submit').click();
@@ -210,6 +223,10 @@ beforeEach(() => {
 
       // Should be able to attest again
       cy.get('#btn_attest').should('exist').and('not.be.disabled');
+
+      // Verify we can attest again (proving the form is editable)
+      cy.get('#btn_attest').click({ force: true });
+      cy.get('#addendum').should('exist');
     });
 
     it('Required fields should not be errored when you open page', () => {
