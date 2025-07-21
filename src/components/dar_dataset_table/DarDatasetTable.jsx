@@ -1,5 +1,4 @@
 import React, { useState, useEffect, Fragment, useCallback } from 'react';
-import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
@@ -7,60 +6,14 @@ import SimpleTable from '../SimpleTable';
 import cellData from './DarDatasetTableCellData';
 import {compact, isNil, map, uniq} from 'lodash/fp';
 import {binCollectionToBuckets} from '../../utils/BucketUtils';
+import {styles} from '../../utils/darDatasetUtils';
 import {Notifications} from '../../libs/utils';
 import { isEmpty } from 'lodash';
 
 
 const storageDarDatasetSort = 'storageDarDatasetSort';
 
-export const styles = {
-  containerOverride: Styles.TABLE.CARDCONTAINER,
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
-    fontWeight: 400,
-    display: 'flex',
-    padding: '1rem 2%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-wrap',
-    backgroundColor: 'white',
-    border: '1px solid #DEDEDE',
-    borderRadius: '4px',
-    margin: '0.5% 0'
-  },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
-    color: '#7B7B7B',
-    fontFamily: 'Montserrat',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    letterSpacing: '0.2px',
-    textTransform: 'uppercase',
-    backgroundColor: 'B8CDD3',
-    border: 'none'
-  }),
-  cellWidth: {
-    dataUseGroup: '30%',
-    votes: '15%',
-    numberOfDatasets: '15%',
-    datasets: '40%',
-  },
-  color: {
-    dataUseGroup: '#000000',
-    votes: '#000000',
-    numberOfDatasets: '#000000',
-    datasets: '#000000',
-  },
-  fontSize: {
-    dataUseGroup: '1.4rem',
-    votes: '1.4rem',
-    numberOfDatasets: '1.4rem',
-    datasets: '1.4rem',
-  },
-};
-
-export const DarDatasetTableColumnOptions = {
+const DarDatasetTableColumnOptions = {
   DATA_USE_GROUP: 'dataUseGroup',
   NUMBER_OF_DATASETS: 'numberOfDatasets',
   DATASETS: 'datasets',

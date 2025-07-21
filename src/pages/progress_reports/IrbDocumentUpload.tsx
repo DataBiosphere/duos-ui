@@ -4,7 +4,6 @@ import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 import {DownloadLink} from 'src/components/DownloadLink';
 import {DAR} from 'src/libs/ajax/DAR';
 import {DuosDatePicker} from 'src/components/DuosDatePicker';
-import {DateValidationError} from '@mui/x-date-pickers';
 import {Dayjs} from 'dayjs';
 import {DarErrors} from 'src/pages/dar_application/FormValidationState';
 
@@ -94,10 +93,10 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
             <DuosDatePicker
               inputFormat={'YYYY-MM-DD'}
               defaultValue={expirationDateValue}
-              onChange={(value: string | null) => {
-                handleExpirationChange({ key: 'irbProtocolExpiration', value: value || '' });
+              onChange={(value: Dayjs | string | undefined) => {
+                handleExpirationChange({ key: 'irbProtocolExpiration', value: value?.toString() || '' });
               }}
-              onError={(_error: DateValidationError, value: Dayjs | null) => {
+              onError={(_error: string | null, value: Dayjs | string | undefined) => {
                 console.warn('IRB Date picker error:', _error, value);
               }}
               readOnly={readOnly}

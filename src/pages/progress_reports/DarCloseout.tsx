@@ -37,6 +37,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
       }
     }
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

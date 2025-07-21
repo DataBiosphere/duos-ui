@@ -3,21 +3,11 @@ import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import SimpleTable from '../SimpleTable';
 import cellData from './DACDatasetTableCellData';
-import {styles} from './DACDatasetConstants';
+import {styles, DACDatasetTableColumnOptions} from './DACDatasetConstants';
 import {isNil} from 'lodash/fp';
 import {goToPage as updatePage, recalculateVisibleTable} from '../../libs/utils';
 import {useCallback} from 'react';
 
-export const DACDatasetTableColumnOptions = {
-  DUOS_ID: 'duosId',
-  PHS_ID: 'phsId',
-  DATASET_NAME: 'datasetName',
-  STUDY_NAME: 'studyName',
-  DATA_SUBMITTER: 'dataSubmitter',
-  DATA_CUSTODIAN: 'dataCustodian',
-  DATA_USE: 'dataUse',
-  STATUS: 'status',
-};
 
 const columnHeaderConfig = {
   duosId: {label: 'DUOS ID', cellStyle: {width: styles.cellWidths.duosId}, cellDataFn: cellData.duosIdCellData, sortable: true},
@@ -92,6 +82,7 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
       setVisibleList: setVisibleDatasets,
       sort,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType]);
 
   //Helper function to update page

@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { cloneDeep, isFunction, isNil, isArray } from 'lodash/fp';
 import {
+  getKey,
   validateFormProps,
   customRadioPropValidation,
   customSelectPropValidation,
@@ -17,7 +18,7 @@ import {
   FormInputTextarea,
   FormInputRadioButton,
   FormInputFile,
-  getKey, FormDatePicker
+  FormDatePicker
 } from './formComponents';
 
 import './forms.css';
@@ -31,33 +32,11 @@ import {
 } from './formValidation';
 import dayjs from 'dayjs';
 
-export const commonRequiredProps = [
-  'id',
-];
-export const commonOptionalProps = [
-  'name',
-  'disabled',
-  'description',
-  'helpText',
-  'title',
-  'ariaLevel',
-  'ariaDescribedby',
-  'defaultValue',
-  'hideTitle',
-  'style',
-  'titleStyle',
-  'validators',
-  'onChange',
-  'type',
-  'key',
-  'isRendered',
-  'validation',
-  'onValidationChange'
-];
 
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                  MAIN FORM FIELD TYPES                                  ====== //
 // ----------------------------------------------------------------------------------------------------- //
+// eslint-disable-next-line react-refresh/only-export-components
 export const FormFieldTypes = {
   MULTITEXT: {
     defaultValue: [],
@@ -212,6 +191,7 @@ export const FormFieldTypes = {
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                     FORM VALIDATORS                                     ====== //
 // ----------------------------------------------------------------------------------------------------- //
+// eslint-disable-next-line react-refresh/only-export-components
 export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,

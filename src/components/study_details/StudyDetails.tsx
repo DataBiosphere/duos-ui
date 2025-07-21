@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {DataSet} from '../../libs/ajax/DataSet';
 import {DatasetTerm, StudyTerm} from '../../types/model';
+// @ts-expect-error backArrowIcon is a static asset that isn't picked up by TypeScript
 import backArrowIcon from '../../images/back_arrow.svg';
 import {Link} from 'react-router-dom';
 import {
@@ -13,7 +14,7 @@ import {TerraDataRepo} from '../../libs/ajax/TerraDataRepo';
 import {chain, intersection, isEmpty, Dictionary} from 'lodash';
 import {EnumerateSnapshotModel, SnapshotSummaryModel} from '../../types/tdrModel';
 import {DatasetSearchFooter} from '../data_search/DatasetSearchFooter';
-import {applyForAccess} from '../data_search/DatasetSearchTable';
+import {applyForAccess} from '../../utils/accessUtils';
 import {History} from 'history';
 
 const styles = {

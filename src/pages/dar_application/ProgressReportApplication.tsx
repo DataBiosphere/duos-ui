@@ -215,6 +215,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
       onFormChange({ datasets: approvedDatasets });
       onSelectedDatasetChange(approvedDatasets);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [datasets]);
 
     return (

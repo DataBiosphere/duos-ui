@@ -6,7 +6,7 @@ import ReactTooltip from 'react-tooltip';
 import PaginationBar from '../PaginationBar';
 import { Link } from 'react-router-dom';
 
-export const tableHeaderTemplate = (
+export const TableHeader = (
   <>
     <div style={Styles.TABLE.ID_CELL}>ID</div>
     <div style={Styles.TABLE.INSTITUTION_CELL}>Institution</div>
@@ -20,7 +20,7 @@ export const tableHeaderTemplate = (
 
 const loadingMarginOverwrite = {margin: '1rem 2%'};
 
-export const tableRowLoadingTemplate = (
+export const TableRowLoading = (
   <>
     <div style={{...Styles.TABLE.ID_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
     <div style={{...Styles.TABLE.INSTITUTION_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
@@ -65,7 +65,7 @@ export default function InstitutionTable(props) {
     <div className='institution-table-component'>
       <div style={Styles.TABLE.CONTAINER}>
         <div style={Styles.TABLE.HEADER_ROW}>
-          {tableHeaderTemplate}
+          <TableHeader />
         </div>
         {filteredList.slice((currentPage - 1) * tableSize, (currentPage * tableSize)).map((inst, index) => {
           const signingOfficialsList = [];
