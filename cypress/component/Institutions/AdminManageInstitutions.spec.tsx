@@ -110,11 +110,6 @@ describe('AdminManageInstitutions', () => {
     });
   });
 
-  /*
-   * Note: SearchBar functionality via cypress looks finicky. It works normally in the browser,
-   * but to see the onChange effect, we need to add an extra space after the search term. That component
-   * is outside the scope of this test, so we will leave it as is.
-   */
   it('filters institutions on search', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(mockInstitutions));
     mount(<BrowserRouter><AdminManageInstitutions/></BrowserRouter>);
@@ -122,12 +117,12 @@ describe('AdminManageInstitutions', () => {
     const institution2 = mockInstitutions[1];
     cy.get('[data-cy="search-bar"]').clear();
     cy.get('[data-cy="search-bar"]').click();
-    cy.get('[data-cy="search-bar"]').type(institution1.name + ' ');
+    cy.get('[data-cy="search-bar"]').type(institution1.name);
     cy.get('[data-cy="search-bar"]').blur();
     cy.get('[data-cy="admin-manage-institutions"]').should('not.contain', institution2.name);
     cy.get('[data-cy="search-bar"]').clear();
     cy.get('[data-cy="search-bar"]').click();
-    cy.get('[data-cy="search-bar"]').type(institution2.name + ' ');
+    cy.get('[data-cy="search-bar"]').type(institution2.name);
     cy.get('[data-cy="search-bar"]').blur();
     cy.get('[data-cy="admin-manage-institutions"]').should('not.contain', institution1.name);
     cy.get('[data-cy="search-bar"]').clear();
