@@ -121,6 +121,7 @@ describe('Institution Details Tests', () => {
             domains: ['broadinstitute.org', 'broad.mit.edu']
         };
 
+        cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([]));
         cy.stub(InstitutionAPI, 'postInstitution').callsFake((institution) => {
             expect(institution.name).to.equal('The Broad Institute');
             expect(institution.domains).to.deep.equal(['broadinstitute.org', 'broad.mit.edu']);
@@ -137,12 +138,12 @@ describe('Institution Details Tests', () => {
             .type('The Broad Institute');
 
         // Add domains
-        cy.contains('Domain').should('be.visible');
-        cy.get('input[placeholder="Domain"]')
+        cy.contains('Domains').should('be.visible');
+        cy.get('input[placeholder="e.g., example.com"]')
             .should('be.visible')
             .type('broadinstitute.org');
         cy.contains('button', 'Add').click();
-        cy.get('input[placeholder="Domain"]')
+        cy.get('input[placeholder="e.g., example.com"]')
             .should('be.visible')
             .type('broad.mit.edu');
         cy.contains('button', 'Add').click();
@@ -164,5 +165,98 @@ describe('Institution Details Tests', () => {
 
         cy.get('input[placeholder="Institution Name"]').type('The Broad Institute');
         cy.contains('button', 'Create').should('not.be.disabled');
+    });
+
+    describe('Institution Name Validation', () => {
+        const existingInstitutions = [
+            { id: 1, name: 'Broad Institute', domains: ['broadinstitute.org'] },
+            { id: 2, name: 'MIT', domains: ['mit.edu'] },
+            { id: 3, name: 'Harvard University', domains: ['harvard.edu'] }
+        ];
+
+        it('should show error when institution name is empty', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            cy.get('input[placeholder="Institution Name"]').type('Test').clear();
+            cy.contains('Institution name is required').should('be.visible');
+            cy.contains('button', 'Create').should('be.disabled');
+        });
+
+        it('should show error when institution name already exists (case insensitive)', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            cy.get('input[placeholder="Institution Name"]').type('broad institute');
+            cy.contains('An institution with this name already exists').should('be.visible');
+            cy.contains('button', 'Create').should('be.disabled');
+        });
+
+        it('should show error when institution name already exists (exact match)', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            cy.get('input[placeholder="Institution Name"]').type('MIT');
+            cy.contains('An institution with this name already exists').should('be.visible');
+            cy.contains('button', 'Create').should('be.disabled');
+        });
+
+        it('should allow unique institution names', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            cy.get('input[placeholder="Institution Name"]').type('Stanford University');
+            cy.contains('An institution with this name already exists').should('not.exist');
+            cy.contains('button', 'Create').should('not.be.disabled');
+        });
+
+        it('should allow editing current institution name (same name)', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 1}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
+
+            cy.get('button').contains('Edit').click();
+
+            // Should not show error when keeping the same name
+            cy.get('input[value="Broad Institute"]').should('not.have.class', 'Mui-error');
+            cy.contains('button', 'Save').should('not.be.disabled');
+        });
+
+        it('should prevent editing to another existing institution name', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 1}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
+
+            cy.get('button').contains('Edit').click();
+            cy.get('input[value="Broad Institute"]').clear().type('MIT');
+
+            cy.contains('An institution with this name already exists').should('be.visible');
+            cy.contains('button', 'Save').should('be.disabled');
+        });
+
+        it('should clear validation errors when canceling edit', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 1}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
+
+            cy.get('button').contains('Edit').click();
+            cy.get('input[value="Broad Institute"]').clear().type('MIT');
+            cy.contains('An institution with this name already exists').should('be.visible');
+
+            cy.contains('button', 'Cancel').click();
+            cy.get('.MuiFormHelperText-root').should('not.exist');
+        });
+
+        it('should validate name on every character input', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            // Start typing "MIT"
+            cy.get('input[placeholder="Institution Name"]').type('M');
+            cy.contains('An institution with this name already exists').should('not.exist');
+
+            cy.get('input[placeholder="Institution Name"]').type('I');
+            cy.contains('An institution with this name already exists').should('not.exist');
+
+            cy.get('input[placeholder="Institution Name"]').type('T');
+            cy.contains('An institution with this name already exists').should('be.visible');
+        });
     });
 });
