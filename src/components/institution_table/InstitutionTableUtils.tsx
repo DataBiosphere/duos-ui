@@ -1,6 +1,6 @@
 import ReactTooltip from 'react-tooltip';
 import React from 'react';
-import {Institution} from 'src/types/model';
+import {Institution, SimplifiedDuosUser} from 'src/types/model';
 import {Link} from 'react-router-dom';
 import {Storage} from 'src/libs/storage';
 import {isEmpty} from 'lodash';
@@ -164,7 +164,7 @@ export const columnConfig: ColumnConfig = {
     cellStyle: {width: columnWidths.domains},
     cellDataFn: (row: Institution) => {
       if (row?.domains) {
-        return row.domains.toSorted().join(', ');
+        return row.domains.toSorted((a: string, b: string) => {return a.localeCompare(b)}).join(', ');
       } else {
         return '- -';
       }
@@ -172,7 +172,7 @@ export const columnConfig: ColumnConfig = {
     sortable: true,
     sortValueFn: (row: Institution) => {
       if (row?.domains) {
-        return row.domains.toSorted().join(', ');
+        return row.domains.toSorted((a: string, b: string) => {return a.localeCompare(b)}).join(', ');
       } else {
         return 'zzz';
       }
@@ -183,7 +183,7 @@ export const columnConfig: ColumnConfig = {
     cellStyle: {width: columnWidths.signingOfficials},
     cellDataFn: (row: Institution) => {
       if (row.signingOfficials && row.signingOfficials.length > 0) {
-        const fullNames = row.signingOfficials.map((user) => `${user.displayName} (${user.email})`).join(', ');
+        const fullNames = row.signingOfficials.map((user: SimplifiedDuosUser) => `${user.displayName} (${user.email})`).join(', ');
         if (fullNames.length > 40) {
           return <div>
             <span data-tip data-for={`signing-officials-tooltip-${row.id}`} className='tooltip-text'>
@@ -196,7 +196,7 @@ export const columnConfig: ColumnConfig = {
             >
               <span>
                 <ul>
-                  {row.signingOfficials.map((user) => {
+                  {row.signingOfficials.map((user: SimplifiedDuosUser) => {
                     return <li key={user.email}>
                       {user.displayName} ({user.email})
                     </li>
