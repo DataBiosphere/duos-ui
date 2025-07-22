@@ -3,7 +3,6 @@
     "allowJs": true,
     "checkJs": false,
     "esModuleInterop": true,
-    "include": ["src/custom.d.ts"],
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "node",
@@ -20,5 +19,6 @@
       "src/*": ["./src/*"]
     }
   },
-  "plugins": ["@typescript-eslint"]
+  "plugins": ["@typescript-eslint"],
+  "include": ["src/custom.d.ts"]
 }
