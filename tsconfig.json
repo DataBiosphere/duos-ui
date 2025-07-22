@@ -12,12 +12,13 @@
     "removeComments": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2022",
+    "target": "es2023",
     "useUnknownInCatchVariables": true,
     "resolveJsonModule": true,
     "paths": {
       "src/*": ["./src/*"]
     }
   },
-  "plugins": ["@typescript-eslint"]
+  "plugins": ["@typescript-eslint"],
+  "include": ["src/**/*","src/declaration.d.ts","src/custom.d.ts"]
 }
