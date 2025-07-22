@@ -21,7 +21,7 @@ interface FormFieldChange {
 
 interface PublicationAddEditProps {
     readonly id: number;
-    publication?: Publication;
+    readonly publication?: Publication;
     readonly publications: Publication[];
     readonly closeAction: () => void;
     readonly onPublicationChange: (publications: Publication[]) => void;
@@ -79,26 +79,24 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         onChange={onChange}
                         validation={validation.authors}
                     />
-                    <>
-                        <FormField
-                            id='pubmed_id'
-                            title={`Publication PubMed ID`}
-                            defaultValue={publication?.pubmedId}
-                            placeholder='PubMed ID'
-                            validators={[FormValidators.REQUIRED]}
-                            onChange={onChange}
-                            validation={validation.pubmedId}
-                        />
-                        <FormField
-                            id='bibliographic_citation'
-                            title={`Publication Bibliographic Citation`}
-                            defaultValue={publication?.bibliographicCitation}
-                            placeholder='Bibliographic Citation'
-                            validators={[FormValidators.REQUIRED]}
-                            onChange={onChange}
-                            validation={validation.bibliographicCitation}
-                        />
-                    </>
+                    <FormField
+                        id='pubmed_id'
+                        title={`Publication PubMed ID`}
+                        defaultValue={publication?.pubmedId}
+                        placeholder='PubMed ID'
+                        validators={[FormValidators.REQUIRED]}
+                        onChange={onChange}
+                        validation={validation.pubmedId}
+                    />
+                    <FormField
+                        id='bibliographic_citation'
+                        title={`Publication Bibliographic Citation`}
+                        defaultValue={publication?.bibliographicCitation}
+                        placeholder='Bibliographic Citation'
+                        validators={[FormValidators.REQUIRED]}
+                        onChange={onChange}
+                        validation={validation.bibliographicCitation}
+                    />
                     <FormField
                         id='dataset_citation'
                         title={`Dataset citation used in this publication`}
@@ -136,13 +134,13 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         {publication === undefined ? 'Add' : 'Save'}
                     </button>
                     {/* cancel button */}
-                    <div
+                    <button
                         className='collaborator-form-cancel-button f-left btn'
-                        role='button'
+                        type='button'
                         onClick={closeAction}
                     >
                         Cancel
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>

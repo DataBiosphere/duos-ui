@@ -20,7 +20,7 @@ interface FormFieldChange {
 
 interface PresentationAddEditProps {
     readonly id: number;
-    presentation?: Presentation;
+    readonly presentation?: Presentation;
     readonly presentations: Presentation[];
     readonly closeAction: () => void;
     readonly onPresentationChange: (presentations: Presentation[]) => void;
@@ -124,13 +124,13 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
                         {presentation === undefined ? 'Add' : 'Save'}
                     </button>
                     {/* cancel button */}
-                    <div
+                    <button
                         className='collaborator-form-cancel-button f-left btn'
-                        role='button'
+                        type='button'
                         onClick={closeAction}
                     >
                         Cancel
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>
