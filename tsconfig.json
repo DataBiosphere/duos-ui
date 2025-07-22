@@ -13,13 +13,13 @@
     "sourceMap": true,
     "strict": true,
     "skipLibCheck": true,
-    "target": "es2022",
+    "target": "es2023",
     "useUnknownInCatchVariables": true,
     "resolveJsonModule": true,
     "paths": {
       "src/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*","src/declaration.d.ts","src/custom.d.ts"],
-  "plugins": ["@typescript-eslint"]
+  "plugins": ["@typescript-eslint"],
+  "include": ["src/**/*","src/declaration.d.ts","src/custom.d.ts"]
 }

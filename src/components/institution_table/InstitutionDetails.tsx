@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {Institution} from 'src/types/model';
 import backArrowIcon from 'src/images/back_arrow.svg';
-import {Link, useHistory, useLocation} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
 import {Button, TextField} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import {AxiosError} from 'axios';
 import {Notifications} from 'src/libs/utils';
 import {Spinner} from 'src/components/Spinner';
-import {extractConsentError} from 'src/utils/ErrorUtils';
+import {extractConsentError, extractError} from 'src/utils/ErrorUtils';
 import {InstitutionDomainEditor} from 'src/components/institution_table/components/InstitutionDomainEditor';
 import {SigningOfficialsList} from 'src/components/institution_table/components/SigningOfficialsList';
 import {FORM_MODES, InstitutionFormMode} from 'src/components/institution_table/InstitutionFormMode';
@@ -30,9 +30,8 @@ interface InstitutionDetailsUpdate {
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const { institutionId } = props.match.params;
     const formMode = props.formMode;
-    const location = useLocation();
     const history = useHistory();
-    const institutionList = location.state?.institutionList || [];
+    const [institutionList, setInstitutionList] = useState<Institution[]>([])
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(formMode === FORM_MODES.createNew);
@@ -45,25 +44,24 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     useEffect( () => {
         const loadInstitution = async () => {
             try {
-                const resp = await InstitutionAPI.getById(institutionId);
-                setInstitution(resp);
+                const institutions: Institution[] = await InstitutionAPI.list();
+                setInstitutionList(institutions);
+                if (institutionId && formMode === FORM_MODES.editExisting) {
+                    const institution = institutions.find((inst) => inst.id.toString() === institutionId.toString());
+                    setInstitution(institution);
+                } else {
+                    setLoading(false);
+                    setIsEditing(true);
+                }
             } catch (error) {
-                const axiosError = error as AxiosError;
-                const consentError = extractConsentError(axiosError);
                 Notifications.showError({
-                    text: `Failed to load institution details: ${consentError ? consentError.message : 'An unexpected error occurred'}`,
+                    text: `Failed to load institution details: ${extractError(error)}'}`,
                 });
             } finally {
                 setLoading(false);
             }
         }
-
-        if(institutionId && formMode === FORM_MODES.editExisting) {
-            loadInstitution();
-        } else {
-            setLoading(false);
-            setIsEditing(true);
-        }
+        loadInstitution();
     }, [formMode, institutionId]);
 
     const updateInstitution = async (updatedInstitution: InstitutionDetailsUpdate) => {

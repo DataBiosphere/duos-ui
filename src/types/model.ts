@@ -109,18 +109,20 @@ export type OrganizationType = 'For-Profit' | 'Nonprofit';
 export interface Institution {
   id: number;
   name: string;
-  itDirectorName: string;
-  itDirectorEmail: string;
-  institutionUrl: string;
-  dunsNumber: number;
-  orgChartUrl: string;
-  verificationUrl: string;
-  verificationFilename: string;
-  organizationType: OrganizationType;
-  createUser: number;
-  createDate: Date;
-  updateUser: number;
-  updateDate: Date;
+  itDirectorName?: string;
+  itDirectorEmail?: string;
+  institutionUrl?: string;
+  dunsNumber?: number;
+  orgChartUrl?: string;
+  verificationUrl?: string;
+  verificationFilename?: string;
+  organizationType?: OrganizationType;
+  createUser: DuosUser;
+  createUserId: number;
+  createDate: string;
+  updateUser?: DuosUser;
+  updateUserId?: number;
+  updateDate?: string;
   signingOfficials: SimplifiedDuosUser[];
   domains?: string[];
 }
@@ -248,26 +250,31 @@ export const getAccessManagementSummary = (accessManagement: string): AccessMana
   }
 };
 
-interface DataUseRequirements {
-  required: string[];
-}
-
-interface DataUseProperties {
-  [key: string]: DataUsePropertyFields;
-}
-
-interface DataUsePropertyFields {
-  type: string;
-  [key: string]: string | DataUsePropertyFields;
-}
 export interface DataUse {
-  $id: string;
-  $schema: string;
-  title: string;
-  version: number;
-  type: string;
-  anyOf: DataUseRequirements[];
-  properties: DataUseProperties;
+    generalUse: boolean;
+    hmbResearch: boolean;
+    diseaseRestrictions: string[];
+    populationOriginsAncestry: boolean;
+    methodsResearch: boolean;
+    nonProfitUse: boolean;
+    other: string;
+    secondaryOther: string;
+    ethicsApprovalRequired: boolean;
+    collaboratorRequired: boolean;
+    geographicalRestrictions: string;
+    geneticStudiesOnly: boolean;
+    publicationResults: boolean;
+    publicationMoratorium: string;
+    controls: boolean;
+    gender: string;
+    pediatric: boolean;
+    population: boolean;
+    illegalBehavior: boolean;
+    sexualDiseases: boolean;
+    stigmatizeDiseases: boolean;
+    vulnerablePopulations: boolean;
+    psychologicalTraits: boolean;
+    notHealth: boolean;
 }
 
 export interface DatasetProperty {

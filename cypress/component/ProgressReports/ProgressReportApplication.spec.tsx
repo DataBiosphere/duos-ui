@@ -92,13 +92,30 @@ describe('ProgressReportApplication - Component Tests', () => {
       name: 'Test Dataset',
       dacApproval: true,
       dataUse: {
-        $id: 'test-data-use',
-        $schema: 'http://json-schema.org/draft-07/schema#',
-        title: 'test',
-        version: 1,
-        type: 'object',
-        anyOf: [],
-        properties: {}
+        generalUse: true,
+        hmbResearch: false,
+        diseaseRestrictions: [],
+        populationOriginsAncestry: false,
+        methodsResearch: false,
+        nonProfitUse: false,
+        other: '',
+        secondaryOther: '',
+        ethicsApprovalRequired: false,
+        collaboratorRequired: false,
+        geographicalRestrictions: '',
+        geneticStudiesOnly: false,
+        publicationResults: false,
+        publicationMoratorium: '',
+        controls: false,
+        gender: '',
+        pediatric: false,
+        population: false,
+        illegalBehavior: false,
+        sexualDiseases: false,
+        stigmatizeDiseases: false,
+        vulnerablePopulations: false,
+        psychologicalTraits: false,
+        notHealth: false
       },
       datasetName: '',
       createUserId: 0,
@@ -368,6 +385,20 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that presentations are actually displayed in the DOM
     cy.contains('Presentation 1').should('be.visible');
     cy.contains('Presentation 2').should('be.visible');
+  });
+
+  it('does not display IRB document upload when not required by dataUse', () => {
+    // mock Datasets included in mount component don't include IRB document requirement
+    mountComponent({}, true);
+    cy.contains('IRB Documentation').should('not.exist');
+  });
+
+  it('displays IRB document upload when required by dataUse', () => {
+    // IRB document is required
+    mockDatasets[0].dataUse.ethicsApprovalRequired = true;
+    mountComponent({}, true);
+
+    cy.contains('IRB Documentation').should('be.visible');
   });
 
   it('defaults dmiYesNo to false when dar.dmi is undefined', () => {
