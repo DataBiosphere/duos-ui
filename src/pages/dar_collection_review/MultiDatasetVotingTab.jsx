@@ -58,6 +58,7 @@ export default function MultiDatasetVotingTab(props) {
       <MultiDatasetVoteSlab
         title={bucket.label}
         bucket={bucket}
+        collection={collection}
         dacDatasetIds={dacDatasetIds}
         isChair={isChair}
         isApprovalDisabled={isApprovalDisabled}
