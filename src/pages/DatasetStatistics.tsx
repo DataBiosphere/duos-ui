@@ -6,7 +6,6 @@ import {formatDate, Notifications} from 'src/libs/utils';
 import {Styles, Theme} from 'src/libs/theme';
 import {ReadMore} from 'src/components/ReadMore';
 import {Button} from '@mui/material';
-import {History} from 'history';
 import {
   DatasetStatisticsDar,
   DatasetStats,
@@ -65,7 +64,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     try {
       const draftResponse = await DAR.postDarDraft({datasetId: [datasetTerm?.datasetId]});
       if (draftResponse.referenceId) {
-        history.push(`/dar_application/${draftResponse.referenceId}`);
+        history.pushState({}, '', `/dar_application/${draftResponse.referenceId}`);
       } else if (draftResponse.message) {
         showError(draftResponse.message + ' Please contact customer support for help.');
       } else {
@@ -188,8 +187,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
           {dars?.map((dar: DatasetStatisticsDar) => (
             <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
-                // @ts-expect-error next-line props for non ts component
-                props={props}
                 readLessText='Show less'
                 readMoreText='Show More'
                 readStyle={{fontWeight: 500, margin: '20px', height: 0}}

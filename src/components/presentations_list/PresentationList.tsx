@@ -1,28 +1,28 @@
 import React, { useState } from 'react';
-import PublicationAddEdit from './PublicationAddEdit';
-import PublicationRow from './PublicationRow';
+import PresentationAddEdit from './PresentationAddEdit';
+import PresentationRow from './PresentationRow';
 import {DarErrors} from 'src/pages/dar_application/FormValidationState';
-import {Publication} from 'src/types/model';
+import {Presentation} from 'src/types/model';
 
-interface PublicationListProps {
-    publications: Publication[];
+interface PresentationListProps {
+    presentations: Presentation[];
     readonly columnsToShow?: string[];
-    readonly onPublicationChange: (publications: Publication[]) => void;
+    readonly onPresentationChange: (presentations: Presentation[]) => void;
     readonly disabled?: boolean;
     readonly validation?: DarErrors;
 }
 
-export default function PublicationList(props: PublicationListProps): React.JSX.Element {
+export default function PresentationList(props: PresentationListProps): React.JSX.Element {
     const {
-        publications,
+        presentations,
         columnsToShow = [],
-        onPublicationChange,
+        onPresentationChange,
         disabled = false,
         validation
     } = props;
 
     const [showAddEdit, setShowAddEdit] = useState(false);
-    const [editState, setEditState] = useState(publications.map(() => false));
+    const [editState, setEditState] = useState(presentations.map(() => false));
 
     const toggleEditState = (index: number) => {
         const editStateCopy = [...editState];
@@ -30,18 +30,18 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
         setEditState(editStateCopy);
     }
 
-    const handleDeletePublication = (index: number) => {
-        const updatedPublications = publications.filter((_, i) => i !== index);
-        onPublicationChange(updatedPublications);
+    const handleDeletePresentation = (index: number) => {
+        const updatedPresentations = presentations.filter((_, i) => i !== index);
+        onPresentationChange(updatedPresentations);
     }
 
-    const getValidationState = () => validation?.publications
+    const getValidationState = () => validation?.presentations;
 
     return (
-        <div className="publication-list-component">
+        <div className="presentation-list-component">
             <div className="row no-margin">
                 <button
-                    id={`add-publication-btn`}
+                    id={`add-presentation-btn`}
                     type="button"
                     className="button button-white"
                     style={{
@@ -54,30 +54,30 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
                     onClick={() => !disabled && setShowAddEdit(true) }
                     disabled={disabled}
                 >
-                    Add Publication
+                    Add Presentation
                 </button>
                 {showAddEdit && (
-                    <PublicationAddEdit
+                    <PresentationAddEdit
                         id={-1}
-                        publications={publications}
+                        presentations={presentations}
                         closeAction={() => setShowAddEdit(false)}
-                        onPublicationChange={onPublicationChange}
+                        onPresentationChange={onPresentationChange}
                     />
                 )}
             </div>
             <div className="form-group row no-margin">
-                {publications.map((publication: Publication, index: number) => {
-                    return <PublicationRow
+                {presentations.map((presentation: Presentation, index: number) => {
+                    return <PresentationRow
                         key={index}
                         id={index}
                         editMode={editState[index]}
-                        publication={publication}
-                        publications={publications}
+                        presentation={presentation}
+                        presentations={presentations}
                         columnsToShow={columnsToShow}
                         editAction={() => toggleEditState(index)}
-                        deleteAction={() => { handleDeletePublication(index); }}
+                        deleteAction={() => { handleDeletePresentation(index); }}
                         closeAction={() => { toggleEditState(index); setShowAddEdit(false); }}
-                        onPublicationChange={onPublicationChange}
+                        onPresentationChange={onPresentationChange}
                         disabled={disabled}
                     />
                 })}

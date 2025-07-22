@@ -22,8 +22,6 @@ jobs:
         env:
           DESTINATION_REF: ${{ github.event.pull_request.base.ref }}
       - name: TypeScript check
-        run: |
-          CHANGED_FILES=$(git diff "origin/$DESTINATION_REF" --diff-filter=d --name-only)
-          echo "$CHANGED_FILES" | node scripts/parse-tsc-output.js
+        run: npx tsc --noEmit
         env:
           DESTINATION_REF: ${{ github.event.pull_request.base.ref }}

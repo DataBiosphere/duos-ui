@@ -302,7 +302,7 @@ const calcDUAErrors = (formData, datasets, dataUseTranslations, errors) => {
   }
 }
 
-export const calcPublicationOrPresentationErrors = (newPublication, publicationText) => {
+export const calcPublicationErrors = (newPublication) => {
   const validation = {};
   if (isEmpty(newPublication?.title)) {
     validation.title = requiredError;
@@ -315,15 +315,31 @@ export const calcPublicationOrPresentationErrors = (newPublication, publicationT
   if (isEmpty(newPublication?.authors)) {
     validation.authors = requiredError;
   }
-  if (isPublication(publicationText)) {
-    if (isEmpty(newPublication?.pubmed_id)) {
-      validation.pubmed_id = requiredError;
-    }
-    if (isEmpty(newPublication?.bibliographic_citation)) {
-      validation.bibliographic_citation = requiredError;
-    }
-  } else if (isEmpty(newPublication?.link)) {
-      validation.link = requiredError;
+  if (isEmpty(newPublication?.pubmedId)) {
+    validation.pubmedId = requiredError;
+  }
+  if (isEmpty(newPublication?.bibliographicCitation)) {
+    validation.bibliographicCitation = requiredError;
+  }
+
+  return validation;
+}
+
+export const calcPresentationErrors = (newPresentation) => {
+  const validation = {};
+  if (isEmpty(newPresentation?.title)) {
+    validation.title = requiredError;
+  }
+  if (isEmpty(newPresentation?.date)) {
+    validation.date = requiredError;
+  } else if (!FormValidators.DATE.isValid(newPresentation?.date)) {
+    validation.date = validationError('date');
+  }
+  if (isEmpty(newPresentation?.authors)) {
+    validation.authors = requiredError;
+  }
+  if (isEmpty(newPresentation?.link)) {
+    validation.link = requiredError;
   }
   return validation;
 }

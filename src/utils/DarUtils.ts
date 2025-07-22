@@ -7,7 +7,6 @@ import {
     Publication
 } from 'src/types/model';
 import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
-import {PublicationOrPresentation} from 'src/components/publications_list/PublicationOrPresentation';
 
 export function getApprovedElectionDatasetIds(elections: Array<Election>) : Array<number> {
     const approvedDatasetIds = [];
@@ -57,30 +56,30 @@ export function convertFormStateToDAR(formState: FormState): Partial<CombinedDat
 }
 
 export function getPublicationList(formState: FormState): Publication[] {
-    const publications: PublicationOrPresentation[] = formState.publications ?? [];
-    return publications.map((pub: PublicationOrPresentation) => {
+    const publications: Publication[] = formState.publications ?? [];
+    return publications.map((pub: Publication) => {
         const expectedPublication: Publication = {} as Publication;
         expectedPublication.title = pub.title;
-        expectedPublication.pubmedId = pub.pubmed_id;
+        expectedPublication.pubmedId = pub.pubmedId;
         expectedPublication.date = pub.date;
         expectedPublication.authors = pub.authors;
-        expectedPublication.bibliographicCitation = pub.bibliographic_citation
-        expectedPublication.datasetCitation = pub.dataset_citation;
-        expectedPublication.citation = pub.did_cite;
+        expectedPublication.bibliographicCitation = pub.bibliographicCitation
+        expectedPublication.datasetCitation = pub.datasetCitation;
+        expectedPublication.citation = pub.citation;
         return expectedPublication;
     });
 }
 
 export function getPresentationList(formState: FormState): Presentation[] {
-    const presentations: PublicationOrPresentation[] = formState.presentations ?? [];
-    return presentations.map((pub: PublicationOrPresentation) => {
+    const presentations: Presentation[] = formState.presentations ?? [];
+    return presentations.map((presentation: Presentation) => {
         const expectedPresentation: Presentation= {} as Presentation;
-        expectedPresentation.title = pub.title;
-        expectedPresentation.date = pub.date;
-        expectedPresentation.authors = pub.authors;
-        expectedPresentation.datasetCitation = pub.dataset_citation;
-        expectedPresentation.citation = pub.did_cite;
-        expectedPresentation.link = pub.link;
+        expectedPresentation.title = presentation.title;
+        expectedPresentation.date = presentation.date;
+        expectedPresentation.authors = presentation.authors;
+        expectedPresentation.datasetCitation = presentation.datasetCitation;
+        expectedPresentation.citation = presentation.citation;
+        expectedPresentation.link = presentation.link;
         return expectedPresentation;
     });
 }
