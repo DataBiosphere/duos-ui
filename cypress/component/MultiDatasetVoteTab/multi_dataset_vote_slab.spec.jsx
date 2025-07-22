@@ -59,6 +59,236 @@ const votesForClosedElection = {
   }
 };
 
+const collection = {
+  'darCollectionId': 638,
+  'darCode': 'DAR-705',
+  'createDate': 1750783085180,
+  'dars': {
+    '77dc615b-08fb-42b1-8c43-3d48d13aaee0': {
+      'id': 1938,
+      'referenceId': '77dc615b-08fb-42b1-8c43-3d48d13aaee0',
+      'collectionId': 638,
+      'data': {
+        'referenceId': '77dc615b-08fb-42b1-8c43-3d48d13aaee0',
+        'projectTitle': 'Multi DAC Testing Part 2',
+        'rus': 'Multi DAC Testing Part 2',
+        'nonTechRus': 'Multi DAC Testing Part 2',
+        'datasetIds': [
+          2170,
+          1981
+        ],
+        'anvilUse': true,
+      },
+      'draft': false,
+      'progressReport': false,
+      'expired': false,
+      'expiresAt': 1782319085180,
+      'userId': 3351,
+      'createDate': 1750783027276,
+      'sortDate': 1750783085180,
+      'submissionDate': 1750783085180,
+      'updateDate': 1750783085180,
+      'datasetIds': [
+        2170,
+        1981
+      ],
+      'eraCommonsId': 'eraCommonsId',
+    },
+    '1644d72e-9d85-4897-a52a-015387da2d52': {
+      'id': 1942,
+      'referenceId': '1644d72e-9d85-4897-a52a-015387da2d52',
+      'collectionId': 638,
+      'parentId': 1938,
+      'data': {
+        'referenceId': '1644d72e-9d85-4897-a52a-015387da2d52',
+        'projectTitle': 'Multi DAC Testing Part 2',
+        'rus': 'Multi DAC Testing Part 2',
+        'nonTechRus': 'Multi DAC Testing Part 2',
+        'hmb': true,
+        'datasetIds': [
+          2170,
+          1981
+        ],
+        'progressReportSummary': 'Multi DAC Testing Part 2: PR Creation',
+        'anvilUse': true,
+      },
+      'draft': false,
+      'progressReport': true,
+      'expired': false,
+      'expiresAt': 1782323548285,
+      'userId': 3351,
+      'createDate': 1750787548285,
+      'sortDate': 1750787548285,
+      'submissionDate': 1750787548285,
+      'updateDate': 1750787548285,
+      'datasetIds': [
+        1981,
+        2170
+      ],
+    },
+    '5326fd77-84be-4f72-9743-ddbca1940a8c': {
+      'id': 2064,
+      'referenceId': '5326fd77-84be-4f72-9743-ddbca1940a8c',
+      'collectionId': 638,
+      'parentId': 1942,
+      'data': {
+        'referenceId': '5326fd77-84be-4f72-9743-ddbca1940a8c',
+        'projectTitle': 'Multi DAC Testing Part 2',
+        'rus': 'Multi DAC Testing Part 2',
+        'nonTechRus': 'Multi DAC Testing Part 2',
+        'hmb': true,
+        'datasetIds': [
+          2170,
+          1981
+        ],
+        'progressReportSummary': 'DMI Testing',
+        'dmi': {
+          'incidents': [
+            'dmiCombination',
+            'dmiPublication',
+            'dmiOther'
+          ],
+          'description': 'DMI Testing'
+        },
+        'anvilUse': true,
+      },
+      'draft': false,
+      'progressReport': true,
+      'expired': false,
+      'expiresAt': 1784753184281,
+      'userId': 3351,
+      'createDate': 1753217184281,
+      'sortDate': 1753217184281,
+      'submissionDate': 1753217184281,
+      'updateDate': 1753217184281,
+      'datasetIds': [
+        1981,
+        2170
+      ],
+      'eraCommonsId': 'eraCommonsId'
+    }
+  },
+  'datasets': [
+    {
+      'datasetId': 2170,
+      'name': 'ANVIL_ccdg_asc_ndd_daly_talkowski_control_NIMH_asd_exome_20221201_ANV5_202304211741',
+      'datasetName': 'ANVIL_ccdg_asc_ndd_daly_talkowski_control_NIMH_asd_exome_20221201_ANV5_202304211741',
+      'createDate': 'Dec 14, 2023',
+      'createUserId': 5100,
+      'updateDate': 1702589568232,
+      'updateUserId': 3396,
+      'alias': 712,
+      'datasetIdentifier': 'DUOS-000712',
+      'dataUse': {
+        'generalUse': true,
+        'hmbResearch': false,
+        'diseaseRestrictions': [],
+        'populationOriginsAncestry': false,
+        'ethicsApprovalRequired': false,
+        'collaboratorRequired': false,
+        'geographicalRestrictions': '',
+        'geneticStudiesOnly': false,
+        'publicationResults': false
+      },
+      'dacId': 3,
+      'deletable': false,
+      'properties': [
+        {
+          'propertyId': 10467,
+          'datasetId': 2170,
+          'propertyName': 'Access Management',
+          'propertyValue': 'controlled',
+          'schemaProperty': 'accessManagement',
+          'propertyType': 'String'
+        },
+        {
+          'propertyId': 10466,
+          'datasetId': 2170,
+          'propertyName': 'URL',
+          'propertyValue': 'https://app.terra.bio',
+          'schemaProperty': 'url',
+          'propertyType': 'String'
+        },
+        {
+          'propertyId': 10463,
+          'datasetId': 2170,
+          'propertyName': 'Data Location',
+          'propertyValue': 'TDR Location',
+          'schemaProperty': 'dataLocation',
+          'propertyType': 'String'
+        },
+        {
+          'propertyId': 10464,
+          'datasetId': 2170,
+          'propertyName': '# of participants',
+          'propertyValue': 370,
+          'schemaProperty': 'numberOfParticipants',
+          'propertyType': 'Number'
+        },
+      ],
+      'dacApproval': true,
+      'studyId': 5932,
+      'indexedDate': 1751050056779
+    },
+    {
+      'datasetId': 1981,
+      'name': 'consent group 1 disease specific',
+      'datasetName': 'consent group 1 disease specific',
+      'createDate': 'Nov 17, 2023',
+      'createUserId': 5101,
+      'updateDate': 1714390043729,
+      'updateUserId': 3351,
+      'alias': 688,
+      'datasetIdentifier': 'DUOS-000688',
+      'dataUse': {
+        'generalUse': false,
+        'hmbResearch': false,
+        'diseaseRestrictions': [
+          'http://purl.obolibrary.org/obo/DOID_11249'
+        ],
+        'populationOriginsAncestry': false,
+        'ethicsApprovalRequired': true,
+        'collaboratorRequired': false,
+        'geneticStudiesOnly': false,
+        'publicationResults': false,
+        'controls': false,
+        'population': false
+      },
+      'dacId': 4,
+      'deletable': false,
+      'properties': [
+        {
+          'propertyId': 9338,
+          'datasetId': 1981,
+          'propertyName': '# of participants',
+          'propertyValue': 123,
+          'schemaProperty': 'numberOfParticipants',
+          'propertyType': 'Number'
+        },
+        {
+          'propertyId': 9337,
+          'datasetId': 1981,
+          'propertyName': 'Data Location',
+          'propertyValue': 'Not Determined',
+          'schemaProperty': 'dataLocation',
+          'propertyType': 'String'
+        },
+        {
+          'propertyId': 9340,
+          'datasetId': 1981,
+          'propertyName': 'Access Management',
+          'propertyValue': 'controlled',
+          'schemaProperty': 'accessManagement',
+          'propertyType': 'String'
+        }
+      ],
+      'dacApproval': true,
+      'studyId': 5856,
+      'indexedDate': 1753200001810
+    }
+  ]
+};
+
 describe('MultiDatasetVoteSlab - Tests', function() {
   it('Renders data use pills', function() {
     mount(
@@ -72,6 +302,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           ],
           elections: []
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={true}
       />
@@ -94,6 +325,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={false}
       />
@@ -117,6 +349,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1],
           votes: [votesForOpenElection1]
         }}
+        collection={collection}
         dacDatasetIds={[10]}
         isChair={true}
       />
@@ -138,6 +371,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={false}
       />
@@ -161,6 +395,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={true}
       />
@@ -186,6 +421,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [closedElection],
           votes: [votesForClosedElection]
         }}
+        collection={collection}
         dacDatasetIds={[30]}
         isChair={false}
       />
@@ -207,6 +443,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection2, closedElection],
           votes: [votesForOpenElection2, votesForClosedElection]
         }}
+        collection={collection}
         dacDatasetIds={[20, 30]}
         isChair={false}
       />
@@ -230,6 +467,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={false}
         readOnly={true}
@@ -252,6 +490,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [closedElection],
           votes: [votesForClosedElection]
         }}
+        collection={collection}
         dacDatasetIds={[30]}
         isChair={false}
       />
@@ -269,6 +508,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [closedElection],
           votes: [votesForClosedElection]
         }}
+        collection={collection}
         dacDatasetIds={[30]}
         isChair={true}
       />
@@ -286,6 +526,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [closedElection],
           votes: [votesForClosedElection]
         }}
+        collection={collection}
         dacDatasetIds={[30]}
         isChair={true}
       />
@@ -305,6 +546,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, closedElection],
           votes: [votesForOpenElection2, votesForClosedElection]
         }}
+        collection={collection}
         dacDatasetIds={[10, 30]}
         isChair={true}
       />
@@ -330,6 +572,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection2, votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={true}
       />
@@ -351,6 +594,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={true}
       />
@@ -371,6 +615,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection2, closedElection],
           votes: [votesForOpenElection2, votesForClosedElection]
         }}
+        collection={collection}
         dacDatasetIds={[10, 30]}
         isChair={true}
       />
@@ -391,6 +636,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[10, 20]}
         isChair={true}
       />
@@ -413,6 +659,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection2],
           votes: [votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[20]}
         isChair={false}
       />
@@ -434,6 +681,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection2],
           votes: [votesForOpenElection2]
         }}
+        collection={collection}
         dacDatasetIds={[20]}
         isChair={true}
       />

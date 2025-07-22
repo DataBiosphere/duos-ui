@@ -5,16 +5,12 @@ import {Storage} from 'src/libs/storage';
 import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel';
 import {ChairVoteInfo} from 'src/components/collection_voting_slab/ResearchProposalVoteSlab';
 import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision';
-import {
-  extractDacDataAccessVotesFromBucket,
-  extractUserDataAccessVotesFromBucket,
-} from 'src/utils/DarCollectionUtils';
+import {extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket,} from 'src/utils/DarCollectionUtils';
 import {Alert} from 'src/components/Alert';
 import {convertLabelToKey} from 'src/libs/utils';
-import {DataUsePills} from './DataUsePill';
+import {DataUsePills} from 'src/components/collection_voting_slab/DataUsePill';
 import PropTypes from 'prop-types';
-
-import MemberVoteSummary from './MemberVoteSummary';
+import MemberVoteSummary from 'src/components/collection_voting_slab/MemberVoteSummary';
 
 const styles = {
   baseStyle: {
@@ -128,7 +124,7 @@ export default function MultiDatasetVoteSlab(props) {
   function DatasetDisplayTable() {
     return (
       <>
-        <table className={'layout-table'} role="presentation" style={{width: '-webkit-fill-available'}}>
+        <table className={'layout-table'} style={{width: '-webkit-fill-available'}}>
           <tbody>
           <tr>
             <td style={{width: '50%', verticalAlign: 'text-top',}}>
@@ -163,8 +159,8 @@ export default function MultiDatasetVoteSlab(props) {
             title={adminPage
               ? 'DAC Member Votes'
               : isChair
-                ? "My DAC Member's Votes (detail)"
-                : "Other DAC Member's Votes"}
+                ? 'My DAC Member\'s Votes (detail)'
+                : 'Other DAC Member\'s Votes'}
             isLoading={isLoading}
             adminPage={adminPage}
             isChair={isChair}/>
