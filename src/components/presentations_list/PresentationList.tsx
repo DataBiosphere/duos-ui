@@ -5,7 +5,7 @@ import {DarErrors} from 'src/pages/dar_application/FormValidationState';
 import {Presentation} from 'src/types/model';
 
 interface PresentationListProps {
-    presentations: Presentation[];
+    readonly presentations: Presentation[];
     readonly columnsToShow?: string[];
     readonly onPresentationChange: (presentations: Presentation[]) => void;
     readonly disabled?: boolean;

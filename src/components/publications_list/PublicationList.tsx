@@ -5,7 +5,7 @@ import {DarErrors} from 'src/pages/dar_application/FormValidationState';
 import {Publication} from 'src/types/model';
 
 interface PublicationListProps {
-    publications: Publication[];
+    readonly publications: Publication[];
     readonly columnsToShow?: string[];
     readonly onPublicationChange: (publications: Publication[]) => void;
     readonly disabled?: boolean;
