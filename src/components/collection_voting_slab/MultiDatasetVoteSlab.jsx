@@ -1,22 +1,17 @@
-import React from 'react';
-import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
-import {
-  isNil,
-  isEmpty,
-  get
-} from 'lodash/fp';
-import { Storage } from '../../libs/storage';
-import { useEffect, useState } from 'react';
-import DatasetsRequestedPanel from './DatasetsRequestedPanel';
-import { ChairVoteInfo } from './ResearchProposalVoteSlab';
-import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
+import React, {useEffect, useState} from 'react';
+import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox';
+import {get, isEmpty, isNil} from 'lodash/fp';
+import {Storage} from 'src/libs/storage';
+import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel';
+import {ChairVoteInfo} from 'src/components/collection_voting_slab/ResearchProposalVoteSlab';
+import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision';
 import {
   extractDacDataAccessVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
-} from '../../utils/DarCollectionUtils';
-import { Alert } from '../Alert';
-import { convertLabelToKey } from '../../libs/utils';
-import { DataUsePills } from './DataUsePill';
+} from 'src/utils/DarCollectionUtils';
+import {Alert} from 'src/components/Alert';
+import {convertLabelToKey} from 'src/libs/utils';
+import {DataUsePills} from './DataUsePill';
 
 import MemberVoteSummary from './MemberVoteSummary';
 
@@ -62,6 +57,7 @@ export default function MultiDatasetVoteSlab(props) {
   const {
     title,
     bucket,
+    collection,
     dacDatasetIds,
     isChair,
     isApprovalDisabled,
@@ -72,8 +68,16 @@ export default function MultiDatasetVoteSlab(props) {
     reloadFn
   } = props;
   const { algorithmResult, key } = bucket;
+  const [isDMI, setIsDMI] = useState(false);
 
   useEffect(() => {
+    // Most Recent DAR sorted by submission date, descending order
+    // Similar logic is used in DarCollectionSummary objects, but not in DarCollection
+    const sorted = Object.values(collection.dars).sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate));
+    const mostRecentDar = sorted.at(0);
+    if (mostRecentDar?.progressReport && mostRecentDar.data?.dmi) {
+      setIsDMI(true);
+    }
     const user = Storage.getCurrentUser();
     setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
     setCurrentUserVotes(
@@ -144,7 +148,7 @@ export default function MultiDatasetVoteSlab(props) {
                 adminPage={adminPage}/>
               </td>
               <td style={{width: '50%', verticalAlign: 'text-top'}}>
-                {!isEmpty(algorithmResult) && <CollectionAlgorithmDecision
+                {!isDMI && !isEmpty(algorithmResult) && <CollectionAlgorithmDecision
                   algorithmResult={algorithmResult}
                 />}
               </td>
