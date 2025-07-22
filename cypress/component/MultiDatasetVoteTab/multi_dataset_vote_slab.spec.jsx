@@ -244,7 +244,7 @@ const collection = {
         'generalUse': false,
         'hmbResearch': false,
         'diseaseRestrictions': [
-          'http://purl.obolibrary.org/obo/DOID_11249'
+          'https://purl.obolibrary.org/obo/DOID_11249'
         ],
         'populationOriginsAncestry': false,
         'ethicsApprovalRequired': true,
