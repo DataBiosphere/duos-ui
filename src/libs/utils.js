@@ -421,6 +421,31 @@ export const getSearchFilterFunctions = () => {
         includes(loweredTerm, toLower(datasetTerm.study?.studyName)) ||
         includes(loweredTerm, toLower(status));
     }, targetList),
+    institutions: (term, targetList) => filter(institution => {
+      const loweredTerm = toLower(term);
+      const soStrings = institution.signingOfficials?.map((so) => {
+        return so.displayName + ' ' + so.email;
+      }).join(' ');
+      const domains = institution.domains?.join(' ') || '';
+      return includes(loweredTerm, toLower(institution.name)) ||
+        includes(loweredTerm, toLower(institution.id)) ||
+        includes(loweredTerm, toLower(institution.itDirectorName)) ||
+        includes(loweredTerm, toLower(institution.itDirectorEmail)) ||
+        includes(loweredTerm, toLower(institution.institutionUrl)) ||
+        includes(loweredTerm, toLower(institution.dunsNumber)) ||
+        includes(loweredTerm, toLower(institution.orgChartUrl)) ||
+        includes(loweredTerm, toLower(institution.verificationUrl)) ||
+        includes(loweredTerm, toLower(institution.verificationFilename)) ||
+        includes(loweredTerm, toLower(institution.organizationType)) ||
+        includes(loweredTerm, toLower(institution.createUser?.displayName)) ||
+        includes(loweredTerm, toLower(institution.createUser?.email)) ||
+        includes(loweredTerm, toLower(institution.updateUser?.displayName)) ||
+        includes(loweredTerm, toLower(institution.updateUser?.email)) ||
+        includes(loweredTerm, toLower(institution.updateDate)) ||
+        includes(loweredTerm, toLower(institution.createDate)) ||
+        includes(loweredTerm, toLower(domains)) ||
+        includes(loweredTerm, toLower(soStrings));
+    }, targetList),
   };
 };
 
@@ -498,7 +523,7 @@ export const sortVisibleTable = ({list = [], sort}) => {
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {
-        if (aVal === null || bVal === null || aVal.type === 'div' || bVal.type === 'div') {
+        if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
           return (aVal > bVal ? -1 : 1) * sort.dir;
         } else {
           return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);

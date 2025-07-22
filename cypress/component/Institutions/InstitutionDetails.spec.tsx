@@ -37,7 +37,7 @@ describe('Institution Details Tests', () => {
     });
 
     it('should render institution details', () => {
-        cy.stub(InstitutionAPI, 'getById').returns(Promise.resolve(mockInstitution));
+        cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]));
 
         mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 123}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
 
@@ -50,7 +50,7 @@ describe('Institution Details Tests', () => {
     });
 
     it('should enter edit mode when Edit button is clicked', () => {
-        cy.stub(InstitutionAPI, 'getById').returns(Promise.resolve(mockInstitution));
+        cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]));
 
         mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 123}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
 
@@ -63,7 +63,7 @@ describe('Institution Details Tests', () => {
     });
 
     it('should cancel editing and revert changes', () => {
-        cy.stub(InstitutionAPI, 'getById').returns(Promise.resolve(mockInstitution));
+        cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]));
 
         mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 123}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
 
@@ -77,7 +77,7 @@ describe('Institution Details Tests', () => {
     });
 
     it('should save changes when Save button is clicked', () => {
-        cy.stub(InstitutionAPI, 'getById').returns(Promise.resolve(mockInstitution));
+        cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]));
         cy.stub(InstitutionAPI, 'patchInstitution').returns(Promise.resolve(mockInstitution))
 
         mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 123}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
@@ -104,7 +104,7 @@ describe('Institution Details Tests', () => {
             }
         };
 
-        cy.stub(InstitutionAPI, 'getById').returns(Promise.resolve(mockInstitution));
+        cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]));
         cy.stub(InstitutionAPI, 'patchInstitution').rejects(conflictError);
 
         mount(<BrowserRouter><InstitutionDetails match={{params: {institutionId: 123}}} formMode={FORM_MODES.editExisting}/></BrowserRouter>);
