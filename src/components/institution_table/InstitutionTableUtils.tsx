@@ -67,12 +67,12 @@ export interface CellData {
  * Standardized table column widths that can be adjusted and re-used across different components.
  */
 const columnWidths = {
-  id: '10%',
+  id: '5%',
   name: '25%',
   domains: '15%',
   signingOfficials: '25%',
-  updateUser: '15%',
-  updateDate: '10%'
+  updateUser: '18%',
+  updateDate: '12%'
 }
 
 const baseTemplateStyle = {
