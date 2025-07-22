@@ -145,9 +145,6 @@ export const columnConfig: ColumnConfig = {
         return <Link
             to={{pathname: `/admin_manage_institutions/institutions/${row.id}`}}
             style={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
               textDecoration: 'none',
               color: '#1f75b6',
               cursor: 'pointer'
