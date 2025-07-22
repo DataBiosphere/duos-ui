@@ -24,7 +24,7 @@ import NIHPilotInfo from 'src/pages/NIHPilotInfo';
 import Status from 'src/pages/Status';
 import BackgroundSignIn from 'src/pages/BackgroundSignIn';
 import ConsentTextGenerator from 'src/pages/ConsentTextGenerator';
-import AdminManageInstitutions from 'src/pages/AdminManageInstitutions.js';
+import AdminManageInstitutions from 'src/pages/AdminManageInstitutions';
 import AdminManageLC from 'src/pages/AdminManageLC';
 import DatasetStatistics from 'src/pages/DatasetStatistics';
 import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview';
