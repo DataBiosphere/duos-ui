@@ -8,7 +8,7 @@ import {DuosUser, Presentation, Publication} from 'src/types/model';
 import {Location} from 'history';
 import {DarErrors, ValidationError} from 'src/pages/dar_application/FormValidationState';
 import {ERACommonsDisplay} from 'src/components/era_commons/ERACommonsDisplay';
-import PresentationList from "src/components/presentations_list/PresentationList";
+import PresentationList from 'src/components/presentations_list/PresentationList';
 
 interface SummarySectionProps {
     readonly readOnly: boolean;
