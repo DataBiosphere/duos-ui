@@ -37,9 +37,8 @@ export default function AdminManageInstitutions() {
   }, []);
 
   const handleSearchChange = (query: { current: { value: string } }) => {
-    const value = query.current.value;
-    setSearchTerm(value);
-    setFilteredList(filter(institutionList, searchTerm));
+    setSearchTerm(query.current.value);
+    setFilteredList(filter(institutionList, query.current.value));
   };
 
   const filter = (list: Institution[], value: string): Institution[] => {
