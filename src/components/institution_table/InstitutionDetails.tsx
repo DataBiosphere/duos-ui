@@ -65,16 +65,26 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         loadInstitution();
     }, [formMode, institutionId]);
 
-    const validateInstitutionName = (name: string): string => {
-        const trimmedName = name.trim();
+    const normalizeInstitutionName = (name: string): string => {
+        // Trim whitespace from start and end
+        let normalized = name.trim();
 
-        if (trimmedName.length === 0) {
+        // Replace curly quotes with straight quotes
+        normalized = normalized.replace(/[‘’]/g, "'");  // Replace curly single quotes
+
+        return normalized;
+    };
+
+    const validateInstitutionName = (name: string): string => {
+        const normalizedName = normalizeInstitutionName(name);
+
+        if (normalizedName.length === 0) {
             return 'Institution name is required';
         }
 
         // Check if name already exists (excluding current institution in edit mode)
         const existingInstitution = institutionList.find(inst =>
-            inst.name.toLowerCase() === trimmedName.toLowerCase() &&
+            inst.name.toLowerCase() === normalizedName.toLowerCase() &&
             inst.id !== institution?.id
         );
 
@@ -152,12 +162,19 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const saveChanges = async () => {
         if (institutionUpdates) {
             setSaving(true);
+
+            // Ensure name is normalized before saving
+            const normalizedUpdates = {
+                ...institutionUpdates,
+                name: normalizeInstitutionName(institutionUpdates.name)
+            };
+
             switch(formMode) {
                 case FORM_MODES.createNew:
-                    await createNewInstitution(institutionUpdates);
+                    await createNewInstitution(normalizedUpdates);
                     break;
                 case FORM_MODES.editExisting:
-                    await updateInstitution(institutionUpdates);
+                    await updateInstitution(normalizedUpdates);
                     break;
                 default:
                     Notifications.showError({ text: 'An unexpected error occurred: unrecognized form mode' });
@@ -187,10 +204,12 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     const handleNameChange = (value: string) => {
         if (institutionUpdates) {
+            // Don't normalize while typing - let user type freely
             setInstitutionUpdates({...institutionUpdates, name: value});
 
-            // Validate the name and set error message
-            const error = validateInstitutionName(value);
+            // Validate using the normalized version but don't change the input value
+            const normalizedName = normalizeInstitutionName(value);
+            const error = validateInstitutionName(normalizedName);
             setNameError(error);
         }
     }
@@ -272,6 +291,17 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         style={{width: 300}}
                         onChange={(e) => {
                             handleNameChange(e.target.value);
+                        }}
+                        onBlur={(e) => {
+                            // Normalize the name when user finishes editing
+                            if (isEditing && institutionUpdates) {
+                                const normalizedName = normalizeInstitutionName(e.target.value);
+                                setInstitutionUpdates({...institutionUpdates, name: normalizedName});
+
+                                // Re-validate with the normalized name
+                                const error = validateInstitutionName(normalizedName);
+                                setNameError(error);
+                            }
                         }}
                         sx={{
                             '& .MuiInputBase-input.Mui-disabled': {
