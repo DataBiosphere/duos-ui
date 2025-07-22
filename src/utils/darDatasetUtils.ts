@@ -1,6 +1,7 @@
-import {Styles} from '../../libs/theme';
+import {Styles} from 'src/libs/theme';
 
 export const styles = {
+  containerOverride: Styles.TABLE.CARDCONTAINER,
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.6rem',
@@ -26,15 +27,11 @@ export const styles = {
     backgroundColor: 'B8CDD3',
     border: 'none'
   }),
-  cellWidths: {
-    duosId: '10%',
-    phsId: '10%',
-    datasetName: '15%',
-    studyName: '15%',
-    dataSubmitter: '15%',
-    dataCustodian: '15%',
-    dataUse: '10%',
-    status: '10%'
+  cellWidth: {
+    dataUseGroup: '30%',
+    votes: '15%',
+    numberOfDatasets: '15%',
+    datasets: '40%',
   },
   color: {
     dataUseGroup: '#000000',
@@ -48,15 +45,4 @@ export const styles = {
     numberOfDatasets: '1.4rem',
     datasets: '1.4rem',
   },
-};
-
-export const DACDatasetTableColumnOptions = {
-  DUOS_ID: 'duosId',
-  PHS_ID: 'phsId',
-  DATASET_NAME: 'datasetName',
-  STUDY_NAME: 'studyName',
-  DATA_SUBMITTER: 'dataSubmitter',
-  DATA_CUSTODIAN: 'dataCustodian',
-  DATA_USE: 'dataUse',
-  STATUS: 'status',
 };

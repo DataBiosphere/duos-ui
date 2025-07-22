@@ -92,7 +92,7 @@ export default function DatasetSubmissionsTable(props) {
           text: `Removed dataset '${termName}' successfully.`,
         });
         props.history.push('/datalibrary');});
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: `Error removing ${termName} as a dataset`,
       });
@@ -151,6 +151,7 @@ export default function DatasetSubmissionsTable(props) {
       };
     });
     setRows(rows);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [terms]);
 
   useEffect(() => {
@@ -159,7 +160,7 @@ export default function DatasetSubmissionsTable(props) {
         setTerms(props.terms);
         setIsLoading(props.isLoading);
         redrawRows(open,selectedTerm);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({text: 'Error: Unable to retrieve datasets from server'});
       }
     };

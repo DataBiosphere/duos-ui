@@ -1,5 +1,30 @@
-import { FormFieldTypes, commonRequiredProps, commonOptionalProps } from './forms';
+import { FormFieldTypes } from './forms';
 import { isNil, isFunction, isArray, isString } from 'lodash/fp';
+
+const commonRequiredProps = [
+  'id',
+];
+
+const commonOptionalProps = [
+  'name',
+  'disabled',
+  'description',
+  'helpText',
+  'title',
+  'ariaLevel',
+  'ariaDescribedby',
+  'defaultValue',
+  'hideTitle',
+  'style',
+  'titleStyle',
+  'validators',
+  'onChange',
+  'type',
+  'key',
+  'isRendered',
+  'validation',
+  'onValidationChange'
+];
 
 export const validateFormProps = (props) => {
   const type = (!isNil(props.type) ? props.type : FormFieldTypes.TEXT);
@@ -75,4 +100,8 @@ export const customRadioPropValidation = (props) => {
     }
 
   });
+};
+
+export const getKey = ({ name, id }) => {
+  return (!isNil(name) ? name : id);
 };

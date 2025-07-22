@@ -1,4 +1,4 @@
-import {styles} from './DarDatasetTable';
+import {styles} from '../../utils/darDatasetUtils';
 
 export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   return {

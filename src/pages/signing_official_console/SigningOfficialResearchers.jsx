@@ -23,7 +23,7 @@ export default function SigningOfficialResearchers() {
         setResearchers(researcherList);
         setSigningOfficial(soUser);
         setIsLoading(false);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
         setIsLoading(false);
       }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import {isNil} from 'lodash/fp';
-import { Styles } from '../../libs/theme';
+import { DarCollectionTableColumnOptions, styles, consoleTypes } from '../../utils/DarCollectionUtils';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import cellData, { consoleTypes } from './DarCollectionTableCellData'
+import cellData from './DarCollectionTableCellData'
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
@@ -15,79 +15,7 @@ import { Notifications } from '@mui/icons-material';
 
 const storageDarCollectionSort = 'storageDarCollectionSort';
 
-export const styles = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
-    fontWeight: 400,
-    display: 'flex',
-    padding: '1rem 2%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-wrap',
-    backgroundColor: 'white',
-    border: '1px solid #DEDEDE',
-    margin: '0.5% 0'
-  },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
-    color: '#7B7B7B',
-    fontFamily: 'Montserrat',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    letterSpacing: '0.2px',
-    textTransform: 'uppercase',
-    backgroundColor: 'B8CDD3',
-    border: 'none'
-  }),
-  cellWidth: {
-    darCode: '10%',
-    dacNames: '8%',
-    projectTitle: '13%',
-    submissionDate: '9.5%',
-    researcher: '9%',
-    institution: '11.5%',
-    datasetCount: '6.5%',
-    expirationDate: '10%',
-    status: '9%',
-    actions: '8.5%'
-  },
-  color: {
-    darCode: '#000000',
-    dacNames: '#000000',
-    projectTitle: '#000000',
-    submissionDate: '#000000',
-    researcher: '#000000',
-    institution: '#354052',
-    datasetCount: '#354052',
-    status: '#000000',
-    actions: '#000000'
-  },
-  fontSize: {
-    darCode: '1.6rem',
-    dacNames: '1.4rem',
-    projectTitle: '1.4rem',
-    submissionDate: '1.4rem',
-    researcher: '1.4rem',
-    institution: '1.4rem',
-    datasetCount: '2.0rem',
-    status: '1.6rem',
-    actions: '1.6rem'
-  },
-};
 
-export const DarCollectionTableColumnOptions = {
-  DAR_CODE: 'darCode',
-  DAC: 'dacNames',
-  NAME: 'name',
-  SUBMISSION_DATE: 'submissionDate',
-  RESEARCHER: 'researcher',
-  INSTITUTION: 'institution',
-  DATASET_COUNT: 'datasetCount',
-  EXPIRES_AT: 'expiresAt',
-  STATUS: 'status',
-  ACTIONS: 'actions'
-};
 
 const columnHeaderConfig = {
   darCode: {

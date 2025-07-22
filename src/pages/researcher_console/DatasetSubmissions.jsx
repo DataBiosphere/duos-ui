@@ -70,7 +70,7 @@ export default function DatasetSubmissions(props) {
         const queryTerms = await DataSet.searchDatasetIndex(query);
         setTerms(queryTerms);
         setFilteredTerms(queryTerms);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({text: 'Error initializing datasets table'});
       }
       setIsLoading(false);

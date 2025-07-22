@@ -21,7 +21,7 @@ export const OntologyService = {
         storage.setData(obolibraryURL, JSON.stringify(data));
         return data;
       }
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError('Error: Ontology Search Request failed');
     }
   },

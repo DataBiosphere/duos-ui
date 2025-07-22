@@ -12,13 +12,14 @@ const defaultSignal: AbortSignal = AbortSignal.timeout(30000);
 export const Metrics = {
   captureEvent: (
     event: MetricsEventName,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details: Record<string, any> = {},
     signal: AbortSignal = defaultSignal,
     refreshAppcues: boolean = true
   ) => captureEventFn(event, details, signal, refreshAppcues).catch(() => {
   }),
   syncProfile: (signal: AbortSignal = defaultSignal) => syncProfile(signal),
-  identify: (anonId: String, signal: AbortSignal = defaultSignal) => identify(anonId, signal),
+  identify: (anonId: string, signal: AbortSignal = defaultSignal) => identify(anonId, signal),
 };
 
 /**
@@ -30,7 +31,8 @@ export const Metrics = {
  * @param refreshAppcues - The refresh Appcues flag.
  * @returns {Promise} - A Promise that resolves when the event is captured.
  */
-const captureEventFn = async (event: MetricsEventName, details: {} = {}, signal: AbortSignal, refreshAppcues: boolean): Promise<any> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const captureEventFn = async (event: MetricsEventName, details: object = {}, signal: AbortSignal, refreshAppcues: boolean): Promise<any> => {
   const isSignedIn = Storage.userIsLogged();
   const isRegistered = isSignedIn && Storage.getCurrentUser();
 
@@ -73,6 +75,7 @@ const captureEventFn = async (event: MetricsEventName, details: {} = {}, signal:
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the profile is synced.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const syncProfile = async (signal: AbortSignal): Promise<any> => {
   const config: AxiosRequestConfig = {
     method: 'POST',
@@ -92,7 +95,8 @@ const syncProfile = async (signal: AbortSignal): Promise<any> => {
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the user is identified.
  */
-const identify = async (anonId: String, signal: AbortSignal): Promise<any> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
   const body = {anonId};
 
   if (window.Appcues) {

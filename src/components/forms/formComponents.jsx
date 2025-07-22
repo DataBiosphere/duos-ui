@@ -1,29 +1,26 @@
-import React from 'react';
-import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
-import Creatable from 'react-select/creatable';
-import { DuosDatePicker } from '../DuosDatePicker';
-import Select from 'react-select';
-import AsyncSelect from 'react-select/async';
-import AsyncCreatable from 'react-select/async-creatable';
-import { FormField } from './forms';
-import { RadioButton } from '../RadioButton';
-import PublishIcon from '@mui/icons-material/Publish';
+import PublishIcon from '@mui/icons-material/Publish'
 
-import './formComponents.css';
-import { isArray } from 'lodash';
+import './formComponents.css'
+import { isArray } from 'lodash'
+import { cloneDeep, isEmpty, isNil, isString } from 'lodash/fp'
+import React, { useState } from 'react'
+import Select from 'react-select'
+import AsyncSelect from 'react-select/async'
+import AsyncCreatable from 'react-select/async-creatable'
+import Creatable from 'react-select/creatable'
+import { DuosDatePicker } from '../DuosDatePicker'
+import { RadioButton } from '../RadioButton'
+import { FormField } from './forms'
+import { getKey } from './formUtils'
 
-import { isValid, validateFormValue, validationMessage } from './formValidation';
-import { useState } from 'react';
+import { isValid, validateFormValue, validationMessage } from './formValidation'
+
 
 const styles = {
   inputStyle: {
     padding: '25px 15px',
     width: '100%'
   }
-};
-
-export const getKey = ({ name, id }) => {
-  return (!isNil(name) ? name : id);
 };
 
 const updateValidation = (config, value) => {
@@ -229,12 +226,9 @@ export const FormInputMultiText = (config) => {
 
 const normalizeSelectOptions = (options, optionsAreString) => {
   // normalized options empty if async
-  const normalizedOptions = options &&
-    optionsAreString
-    ? options.map((option) => { return {key: option, displayText: option }; })
+  return options && optionsAreString
+    ? options.map((option) => { return { key: option, displayText: option }; })
     : options;
-
-  return normalizedOptions;
 };
 
 // ensure form value is a valid select object

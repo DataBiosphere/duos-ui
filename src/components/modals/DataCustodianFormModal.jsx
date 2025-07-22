@@ -46,7 +46,7 @@ const FormFieldRow = (props) => {
     }
   };
 
-  let template = <div style={{ marginBottom: '2%', width:'100%' }}>
+  const template = <div style={{ marginBottom: '2%', width:'100%' }}>
     <label>Users</label>
     <Creatable
       key='select-user'
@@ -59,7 +59,7 @@ const FormFieldRow = (props) => {
       placeholder='Select or type a new user email'
       isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
       getOptionLabel={(option) =>
-        `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email
+        `${option.displayName || 'New User'} (${option.email || 'No email provided'})`
       }
     />
   </div>;

@@ -20,7 +20,7 @@ export default function ManageUsersDropdown(props) {
       await DAA.bulkAddDaasToUser(moreData.id, daaList);
       Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${moreData.name}`});
       refreshResearchers(setResearchers);
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error approving access to request data from all DACs to user: ${moreData.name}`});
     }
   };
@@ -30,7 +30,7 @@ export default function ManageUsersDropdown(props) {
       await DAA.bulkRemoveDaasFromUser(moreData.id, daaList);
       Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${moreData.name}`});
       refreshResearchers(setResearchers);
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${moreData.name}`});
     }
   };

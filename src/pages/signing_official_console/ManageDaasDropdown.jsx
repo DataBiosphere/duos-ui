@@ -21,7 +21,7 @@ export default function ManageDaasDropdown(props) {
       await DAA.bulkAddUsersToDaa(moreData.id, userList);
       Notifications.showSuccess({text: `Approved all users access to request from: ${moreData.name}`});
       refreshResearchers(setResearchers);
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error approving all users access to request from: ${moreData.name}`});
     }
   };
@@ -31,7 +31,7 @@ export default function ManageDaasDropdown(props) {
       await DAA.bulkRemoveUsersFromDaa(moreData.id, userList);
       Notifications.showSuccess({text: `Removed all users' approval to request from: ${moreData.name}`});
       refreshResearchers(setResearchers);
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error removing all users' approval to request from: ${moreData.name}`});
     }
   };

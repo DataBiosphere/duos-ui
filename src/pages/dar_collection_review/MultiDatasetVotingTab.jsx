@@ -1,17 +1,11 @@
-import React from 'react';
-import {useEffect, useState} from 'react';
-import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab';
-import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab';
-import {find, get, filter, flow, map, isNil} from 'lodash/fp';
-import { User } from '../../libs/ajax/User';
-import {Alert} from '../../components/Alert';
+import { filter, find, flow, get, isNil, map } from 'lodash/fp'
+import React, { useEffect, useState } from 'react'
+import { Alert } from '../../components/Alert'
+import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab'
+import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab'
+import { User } from '../../libs/ajax/User'
 
-export const votingColors = {
-  yes: 'rgb(31, 163, 113)',
-  no: 'rgb(218, 0, 3)',
-  other: 'rgb(151, 151, 151)',
-  default: 'rgb(255, 255, 255)'
-};
+
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',

@@ -1,6 +1,6 @@
 import React from 'react';
 import {isNil, isEmpty} from 'lodash/fp';
-import {styles} from './ManageDacTable';
+import {styles} from './manageDacTableUtils';
 import TableIconButton from '../TableIconButton';
 import {Styles} from '../../libs/theme';
 import {Delete} from '@mui/icons-material';

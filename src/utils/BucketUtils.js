@@ -16,10 +16,12 @@ import {
   pick,
   toLower,
   uniq,
-  values
+  values,
 } from 'lodash/fp';
-import { Match } from '../libs/ajax/Match';
-import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
+import {Match} from '../libs/ajax/Match';
+import {
+  translateDataUseRestrictionsFromDataUseArray,
+} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
 import {processMatchData} from './VoteUtils';
 
@@ -45,14 +47,11 @@ import {processMatchData} from './VoteUtils';
 export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
   const buckets = [];
+  //  Find the most recent DAR
+  const recentDar = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) : [];
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
-  const referenceIds = flow(
-    map(d => d.referenceId),
-    uniq
-  )(collection.dars);
-  const matchData = referenceIds.length > 0 ? await Match.findMatchBatch(referenceIds) : [];
-
+  const matchData = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : [];
   // If we need to restrict the datasets to a particular DAC, do that here.
   const datasets = filterDatasetsByDACs(dacIds, get('datasets')(collection));
 
@@ -119,7 +118,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     })(matchData);
 
     // Step 3: Populate elections for datasets in this bucket
-    b.elections = findElectionsForDatasets(collection, b.datasetIds);
+    b.elections = findElectionsForDatasets(recentDar, b.datasetIds);
 
     // Step 4: Populate votes for each bucket
     b.votes.push(processVotesForBucket(b.elections));
@@ -152,22 +151,17 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
 };
 
 /**
- * Find all elections (in a dar collection) with a dataset id in the provided list of dataset ids
+ * Find all elections (in a dar) with a dataset id in the provided list of dataset ids
  * @private
- * @param collection
+ * @param dar
  * @param datasetIds
  * @returns {[]}
  */
-const findElectionsForDatasets = (collection, datasetIds) => {
-  // In a collection, DARs and elections are each a map of id => object
-  // Iterate through all values of each map find elections associated to the provided dataset ids.
-  const darMap = get('dars')(collection); // Map of dar reference id -> dar
-  return flow(
-    values, // List of DARs
-    flatMap(dar => get('elections')(dar)), // List of maps of election id -> election
-    flatMap(eMap => values(eMap)), // List of election objects
-    filter(e => includes(get('datasetId')(e))(datasetIds))
-  )(darMap);
+const findElectionsForDatasets = (dar, datasetIds) => {
+  return dar.elections ?
+      Object.values(dar.elections).
+          filter(e => datasetIds.includes(e.datasetId)) :
+      [];
 };
 
 /**
