@@ -154,6 +154,81 @@ beforeEach(() => {
       });
     });
 
+    it('Makes DAR editable POST to submit returns 400 error', () => {
+      // Mock postDar to reject with 400 error
+      cy.stub(DAR, 'postDar').rejects({
+        response: {
+          status: 400,
+          data: {
+            code: 'VALIDATION_ERROR',
+            message: 'Bad request error message'
+          }
+        }
+      });
+
+      cy.get('#piCountryOfOperation').type('United{enter}');
+      cy.get('#signingOfficial').type('SO 2{enter}');
+      cy.get('#itDirector').type('Some IT Director');
+      cy.get('#itDirectorEmail').type('it@good.org');
+      cy.get('#anvilUse_yes').click();
+
+      cy.get('#datasetIds').type('asdf{enter}');
+
+      // Add an Internal Collaborator that lacks a Library Card,
+      // which triggers a 400 error on submit
+      cy.get('#add-internalCollaborators-btn').click();
+      cy.get('#0_collaboratorName').type('No LibraryCard');
+      cy.get('#0_collaboratorEraCommonsId').type('nolibcard123');
+      cy.get('#0_collaboratorTitle').type('Research Assistant');
+      cy.get('#0_collaboratorEmail').type('nolibrarycard@broadinstitute.org');
+      // Skip approval for now and save directly
+      cy.get('#collaborator-internalCollaborators-add-save').click();
+
+      cy.get('#projectTitle').type('Title');
+      cy.get('#rus').type('asdf');
+      cy.get('#nonTechRus').type('asdf asdf');
+
+      cy.get('#diseases_no').click();
+      cy.get('#hmb_yes').click();
+
+      cy.get('#controls_no').click();
+      cy.get('#population_no').click();
+      cy.get('#oneGender_no').click();
+      cy.get('#forProfit_no').click();
+      cy.get('#pediatric_no').click();
+      cy.get('#vulnerablePopulation_no').click();
+      cy.get('#illegalBehavior_no').click();
+      cy.get('#sexualDiseases_no').click();
+      cy.get('#psychiatricTraits_no').click();
+      cy.get('#notHealth_no').click();
+      cy.get('#stigmatizedDiseases_no').click();
+
+      // First attest to enable submit button
+      cy.get('#btn_attest').click();
+      cy.get('#btn_openSubmitModal').should('exist');
+
+      // Now the form should be attested and addendum tab should be visible
+      cy.get('#addendum').should('exist');
+
+      // Verify that collaborator form is read-only when attested
+      cy.get('#0_summary').should('exist'); // Summary should be shown (read-only mode)
+
+      // Try to submit and expect 400 error to reset attestation
+      cy.get('#btn_openSubmitModal').click();
+      cy.get('#btn_submit').click();
+
+      // After 400 error, the form should no longer be attested
+      // The addendum tab should be hidden again
+      cy.get('#addendum').should('not.exist');
+
+      // Should be able to attest again
+      cy.get('#btn_attest').should('exist').and('not.be.disabled');
+
+      // Verify we can attest again (proving the form is editable)
+      cy.get('#btn_attest').click({ force: true });
+      cy.get('#addendum').should('exist');
+    });
+
     it('Required fields should not be errored when you open page', () => {
       cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('not.have.class', 'errored');
@@ -183,7 +258,7 @@ beforeEach(() => {
     });
 
     it('Required fields get errors on submit', () => {
-      cy.get('#btn_attest').click();
+      cy.get('#btn_attest').click({ force: true });
 
       // since we're setting a default value, this should not error on initial validation
       cy.get('#piCountryOfOperation').should('not.have.class', 'errored');

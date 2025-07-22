@@ -426,6 +426,12 @@ const DataAccessRequestApplication = (props) => {
       }, Navigation.console(Storage.getCurrentUser(), history).response);
     } catch (error) {
       setShowDialogSubmit(false);
+
+      // Make DAR editable if we get a 400 status (Bad Request) error
+      if (error.response && error.response.status === 400) {
+        setIsAttested(false);
+      }
+
       if (error.response.data.code && error.response.data.message) {
         Notifications.showError(
             {
