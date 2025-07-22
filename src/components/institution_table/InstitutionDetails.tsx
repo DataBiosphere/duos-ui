@@ -40,6 +40,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         name: '',
         domains: [],
     });
+    const [nameError, setNameError] = useState<string>('');
 
     useEffect( () => {
         const loadInstitution = async () => {
@@ -63,6 +64,26 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         }
         loadInstitution();
     }, [formMode, institutionId]);
+
+    const validateInstitutionName = (name: string): string => {
+        const trimmedName = name.trim();
+
+        if (trimmedName.length === 0) {
+            return 'Institution name is required';
+        }
+
+        // Check if name already exists (excluding current institution in edit mode)
+        const existingInstitution = institutionList.find(inst =>
+            inst.name.toLowerCase() === trimmedName.toLowerCase() &&
+            inst.id !== institution?.id
+        );
+
+        if (existingInstitution) {
+            return 'An institution with this name already exists';
+        }
+
+        return '';
+    };
 
     const updateInstitution = async (updatedInstitution: InstitutionDetailsUpdate) => {
         try {
@@ -124,6 +145,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             name: institution?.name || '',
             domains: institution?.domains ? [...institution.domains] : [],
         });
+        setNameError(''); // Clear any previous name errors
         setIsEditing(true);
     };
 
@@ -156,6 +178,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
+        setNameError(''); // Clear any name errors
         setInstitutionUpdates({
             name: institution?.name || '',
             domains: institution?.domains ? [...institution.domains] : [],
@@ -165,6 +188,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     const handleNameChange = (value: string) => {
         if (institutionUpdates) {
             setInstitutionUpdates({...institutionUpdates, name: value});
+
+            // Validate the name and set error message
+            const error = validateInstitutionName(value);
+            setNameError(error);
         }
     }
 
@@ -222,7 +249,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         onClick={handleEditToggle}
                         style={{fontSize: 14}}
                         startIcon={!isEditing && <EditIcon />}
-                        disabled={saving || (isEditing && (!institutionUpdates || institutionUpdates.name.trim().length === 0))}
+                        disabled={saving || (isEditing && (!institutionUpdates || institutionUpdates.name.trim().length === 0 || nameError.length > 0))}
                     >
                         {getConfirmButtonText()}
                     </Button>
@@ -237,6 +264,8 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         size="small"
                         placeholder={'Institution Name'}
                         disabled={!isEditing}
+                        error={isEditing && nameError.length > 0}
+                        helperText={isEditing && nameError.length > 0 ? nameError : ''}
                         InputProps={{
                             style: {fontSize: 14}
                         }}

@@ -2,7 +2,6 @@ import {Button, Chip, TextField} from '@mui/material';
 import React, {useState} from 'react';
 import {Institution} from 'src/types/model';
 import validator from 'validator';
-import * as punycode from 'punycode';
 
 interface DomainEditorProps {
     domains: string[];
