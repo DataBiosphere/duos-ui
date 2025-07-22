@@ -96,6 +96,7 @@ const bucket2 = {
 };
 
 const collection = {
+  dars: {},
   datasets: [
     {datasetId: 300},
     {datasetId: 400}
@@ -106,6 +107,7 @@ const collection = {
 };
 
 const collectionMissingLibraryCard = {
+  dars: {},
   datasets: [
     {datasetId: 300}
   ],
