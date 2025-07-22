@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { votingColors } from '../../pages/dar_collection_review/MultiDatasetVotingTab';
+import { votingColors } from 'src/libs/VotingColors.ts'
 
 const styles = {
   baseStyle: {
@@ -28,9 +28,9 @@ export default function CollectionVoteButton(props) {
     updateStyle(baseColor, votingColors.default, true, disabled);
   }, [baseColor, disabled]);
 
-  useEffect(() => {
-    isSelected ? selectedButtonStyle() : defaultButtonStyle();
-  }, [defaultButtonStyle, isSelected, selectedButtonStyle]);
+  useEffect(() =>
+    isSelected ? selectedButtonStyle() : defaultButtonStyle()
+  , [defaultButtonStyle, isSelected, selectedButtonStyle]);
 
   const updateStyle = (backgroundColor, labelColor, showSelectedStyle, disabled) => {
     setAdditionalStyle({

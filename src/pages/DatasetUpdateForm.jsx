@@ -19,7 +19,7 @@ export const DatasetUpdateForm = (props) => {
       try {
         setDataset(await DataSet.getDataSetsByDatasetId(datasetId));
         setFailedInit(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Failed to load dataset' });
       }
     };

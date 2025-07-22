@@ -34,11 +34,10 @@ export default function ConsentTextGenerator() {
     document.getElementById('other_text').value = '';
   };
 
-  const generate = () => {
+  const generate = () =>
     isTypeOfResearchValid() ?
       generateHelper()
       : Notifications.showError({text: 'Please complete question 1'});
-  };
 
   const generateHelper = async () => {
     const dataUse = {
@@ -47,11 +46,11 @@ export default function ConsentTextGenerator() {
       publicationResults: pub, collaboratorRequired: col, ethicsApprovalRequired: irb,
       geographicalRestrictions: gs
     };
-    let sdsl = [];
+    const sdsl = [];
     if (other) {
       sdsl.push(otherText);
     }
-    let translatedDataUse = await DataUseTranslation.translateDataUseRestrictions(dataUse);
+    const translatedDataUse = await DataUseTranslation.translateDataUseRestrictions(dataUse);
     translatedDataUse.forEach((sentence) => {
       return (typeof sentence === 'object') ?
         sdsl.push(' ' + sentence.description)
@@ -88,7 +87,12 @@ export default function ConsentTextGenerator() {
             value="general"
             defaultChecked={general}
             onClick={() => {
-              setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
+              setGeneral(true);
+              setHmb(false);
+              setDiseases(false);
+              setOther(false);
+              setOntologies([]);
+              clearOtherTextBox();
             }}
             label="General Research Use (GRU): "
             description="use is permitted for any research purpose"
@@ -98,7 +102,12 @@ export default function ConsentTextGenerator() {
             value="hmb"
             defaultChecked={hmb}
             onClick={() => {
-              setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
+              setHmb(true);
+              setGeneral(false);
+              setDiseases(false);
+              setOther(false);
+              setOntologies([]);
+              clearOtherTextBox();
             }}
             label="Health/Medical/Biomedical Use (HMB): "
             description="use is permitted for any health, medical, or biomedical purpose"
@@ -108,7 +117,11 @@ export default function ConsentTextGenerator() {
             value="diseases"
             defaultChecked={diseases}
             onClick={() => {
-              setDiseases(true), setHmb(false), setGeneral(false), setOther(false), clearOtherTextBox();
+              setDiseases(true);
+              setHmb(false);
+              setGeneral(false);
+              setOther(false);
+              clearOtherTextBox();
             }}
             label="Disease-related studies (DS): "
             description="use is permitted for research on the specified disease"
@@ -130,7 +143,11 @@ export default function ConsentTextGenerator() {
           value="other"
           defaultChecked={other}
           onClick={() => {
-            setOther(true), setHmb(false), setDiseases(false), setGeneral(false), setOntologies([]);
+            setOther(true);
+            setHmb(false);
+            setDiseases(false);
+            setGeneral(false);
+            setOntologies([]);
           }}
           label="Other Use: "
           description="permitted research use is defined as follows: "

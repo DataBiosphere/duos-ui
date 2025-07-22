@@ -1,7 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import {CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser} from 'src/types/model';
 import {History, Location} from 'history';
-import {CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState} from 'src/pages/progress_reports/ProgressReportFormState';
+import {
+    CLOSEOUT_KEYS,
+    DMI_INCIDENT_KEYS,
+    FormState,
+    ValidFormState
+} from 'src/pages/progress_reports/ProgressReportFormState';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets';
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges';
@@ -9,6 +14,7 @@ import DataManagementIncident from 'src/pages/progress_reports/DataManagementInc
 import DarCloseout from 'src/pages/progress_reports/DarCloseout';
 import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport';
+import IrbDocumentUpload from 'src/pages/progress_reports/IrbDocumentUpload';
 import {Navigation, Notifications} from 'src/libs/utils';
 import {Storage} from 'src/libs/storage';
 import {DataUseAcknowledgements} from 'src/pages/dar_application/DataUseAcknowlegements';
@@ -31,8 +37,10 @@ type ProgressReportApplicationProps = {
 };
 
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
-    const initialState = {
+    const initialState: FormState = {
         ...dar,
+        publications: (dar.publications || []),
+        presentations: (dar.presentations || []),
         dmiCombination:false,
         dmiIdentification: false,
         dmiSharing: false,
@@ -115,6 +123,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const [formValidation, setFormValidation] = useState<FormValidationState>({darErrors:{}});
     const [nihValid, setNihValid] = useState<boolean>(true);
     const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([]);
+    const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null);
 
     const eRACommonsDestination = 'progress_report_application/' + dar.collectionId;
 
@@ -146,6 +155,14 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         });
         onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds });
     }
+
+    const onIrbDocumentChange = (document: File | null, expiration: string) => {
+        setUploadedIrbDocument(document);
+        onFormChange({
+            irbProtocolExpiration: expiration,
+            ...(document && { irbDocumentName: document.name })
+        });
+    };
 
     // Check if the DAR is a closeout review
     // TODO: modify this logic for DAC chair when backend supports it
@@ -198,6 +215,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
       onFormChange({ datasets: approvedDatasets });
       onSelectedDatasetChange(approvedDatasets);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [datasets]);
 
     return (
@@ -233,8 +251,10 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                     dataUseTranslations={dataUseTranslations}
                     formData={formState}
                     readOnlyMode={readOnlyMode}
-                    onChange={({key, value}) => {
-                        onFormChange({[key]: value})
+                    onChange={(params: ValidFormState) => {
+                        if (params) {
+                            onFormChange({[params.key]: params.value})
+                        }
                     }}
                     validation={formValidation.darErrors}
                 />
@@ -245,6 +265,16 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                   formState={formState}
                   onFormChange={onFormChange}
                   countriesOfOperation={countriesOfOperation}
+                />
+            </div>
+            <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <IrbDocumentUpload
+                    readOnly={readOnlyMode}
+                    formState={formState}
+                    validation={formValidation.darErrors || {}}
+                    uploadedIrbDocument={uploadedIrbDocument}
+                    onIrbDocumentChange={onIrbDocumentChange}
+                    referenceId={dar.referenceId}
                 />
             </div>
             <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
@@ -285,6 +315,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
                         Navigation.console(Storage.getCurrentUser(), history);
                     }}
                     disabled={validationFailed(formValidation)}
+                    uploadedIrbDocument={uploadedIrbDocument}
+                    parentDar={dar}
                 />
             </div>}
         </div>

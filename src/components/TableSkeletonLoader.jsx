@@ -2,7 +2,7 @@ import React from 'react';
 import { Styles } from '../libs/theme';
 
 export default function TableSkeletonLoader(props) {
-  const { tableHeaderTemplate, tableRowLoadingTemplate } = props;
+  const { tableHeader, tableRowLoading } = props;
 
   const blockStyleOverwrite = {
     display: 'flex',
@@ -17,14 +17,14 @@ export default function TableSkeletonLoader(props) {
     const end = 10;
 
     const template = [
-      <div key={`row-loader-0`} style={Styles.TABLE.HEADER_ROW}>{tableHeaderTemplate}</div>
+      <div key={`row-loader-0`} style={Styles.TABLE.HEADER_ROW}>{tableHeader}</div>
     ];
 
     while (start <= end) {
       const targetStyle = start > 1 ? modifiedTableRowStyle : tableRowStyle;
       const rowTemplate = (
         <div style={targetStyle} key={`row-loader-${start}`}>
-          {tableRowLoadingTemplate}
+          {tableRowLoading}
         </div>
       );
       template.push(rowTemplate);

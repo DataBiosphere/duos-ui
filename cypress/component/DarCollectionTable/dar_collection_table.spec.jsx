@@ -1,6 +1,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
-import { DarCollectionTableColumnOptions, DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable';
+import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable';
+import { DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils.js'
 
 const collections = [
   {

@@ -19,7 +19,7 @@ import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 import DpaMarkdown from '../../assets/DPA.md';
-import {confirmModalType} from './SigningOfficialTable';
+import { confirmModalType } from '../../libs/libraryCardUtils';
 
 
 //Styles specific to this table
@@ -216,7 +216,7 @@ export default function DataCustodianTable(props) {
     const init = async () => {
       try {
         setResearchers(props.researchers);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({
           text: 'Failed to initialize researcher table',
         });
@@ -321,7 +321,7 @@ export default function DataCustodianTable(props) {
       Notifications.showSuccess({
         text: `Issued ${messageName} as Data Submitter`,
       });
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: `Error issuing ${messageName} as Data Submitter`,
       });
@@ -351,7 +351,7 @@ export default function DataCustodianTable(props) {
       Notifications.showSuccess({
         text: `Removed ${messageName} as a Data Submitter`,
       });
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: `Error removing ${messageName} as a Data Submitter`,
       });

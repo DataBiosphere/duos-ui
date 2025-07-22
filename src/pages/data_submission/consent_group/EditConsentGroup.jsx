@@ -1,24 +1,11 @@
 import React,{ useState } from 'react';
-import { isNil, isString, isEmpty } from 'lodash/fp';
+import { isNil, isEmpty } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../../components/forms/forms';
+import { selectedPrimaryGroup } from './consentGroupUtils';
 import { DAR } from '../../../libs/ajax/DAR';
 import { cloneDeep } from 'lodash';
 
-export const selectedPrimaryGroup = (consentGroup) => {
-  if (!isNil(consentGroup.generalResearchUse) && consentGroup.generalResearchUse) {
-    return 'generalResearchUse';
-  } else if (!isNil(consentGroup.hmb) && consentGroup.hmb) {
-    return 'hmb';
-  } else if (!isNil(consentGroup.diseaseSpecificUse)) {
-    return 'diseaseSpecificUse';
-  } else if (!isNil(consentGroup.poa) && consentGroup.poa) {
-    return 'poa';
-  } else if (!isNil(consentGroup.otherPrimary) && isString(consentGroup.otherPrimary)) {
-    return 'otherPrimary';
-  }
 
-  return undefined;
-};
 
 const searchOntologies = (query, callback) => {
   let options = [];

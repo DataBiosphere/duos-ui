@@ -109,6 +109,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
 // Wraps component and ensures that SO agrees to the
 // Broad and NIH agreements before proceeding to the given
 // component.
+// eslint-disable-next-line react-refresh/only-export-components
 export const ensureSoHasDaaAcknowledgement = (Component, isLibraryCardIssueTable = false, isDataSubmitterTab = false) => {
   const _ignored = isLibraryCardIssueTable;
   const WrappedComponent = (props) => (

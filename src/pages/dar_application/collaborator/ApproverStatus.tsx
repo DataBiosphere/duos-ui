@@ -2,7 +2,7 @@ import {FormField, FormFieldTypes, FormValidators} from 'src/components/forms/fo
 import React from 'react';
 import {ValidationError} from 'src/pages/dar_application/FormValidationState';
 
-type ApproverStatusType = boolean | 'yes' | 'no' | undefined;
+type ApproverStatusType = boolean | 'true' | 'false' |  undefined;
 
 interface ApproverStatusProps {
     readonly index: number;
@@ -14,14 +14,30 @@ interface ApproverStatusProps {
 }
 export default function ApproverStatus(props: ApproverStatusProps): React.JSX.Element {
     const {index, approverStatus, validation, onValidationChange, onChange} = props;
-    const calculateDefaultValue = () => {
-        if (approverStatus === true || approverStatus === 'yes') {
-            return 'yes';
-        }
-        if (approverStatus === false || approverStatus === 'no') {
-            return 'no';
-        }
+
+    const isYes = (approverStatus: ApproverStatusType) => {
+        return (approverStatus === true ||  approverStatus === 'true')
+    }
+
+    const isNo = (approverStatus: ApproverStatusType) => {
+        return (approverStatus === false || approverStatus === 'false')
+    }
+
+    const getApproverStatusValue = (approverStatus: ApproverStatusType) => {
+        if (isYes(approverStatus)) return 'true';
+        if (isNo(approverStatus)) return 'false';
         return undefined;
+    }
+
+    const calculateDefaultValue = () => {
+        return getApproverStatusValue(approverStatus)
+    }
+
+    const localOnChange = ({key, value}: {key: string, value: ApproverStatusType}) => {
+        const approverStatusType = getApproverStatusValue(value);
+        if (onChange) {
+            onChange({key: key, value: approverStatusType});
+        }
     }
 
     return (
@@ -35,8 +51,8 @@ export default function ApproverStatus(props: ApproverStatusProps): React.JSX.El
                 the PI designates to download data and/or share the requested data with other Internal Lab Staff
                 (ie., staff members and trainees under the direct supervision of the PI).`}
                 options={[
-                    {name: 'yes', text: 'Yes'},
-                    {name: 'no', text: 'No'}
+                    {name: 'true', text: 'Yes'},
+                    {name: 'false', text: 'No'}
                 ]}
                 disabled={props.readOnly}
                 validators={[FormValidators.REQUIRED]}
@@ -44,7 +60,7 @@ export default function ApproverStatus(props: ApproverStatusProps): React.JSX.El
                 defaultValue={calculateDefaultValue}
                 validation={validation}
                 onValidationChange={onValidationChange}
-                onChange={onChange}
+                onChange={localOnChange}
             />
             <p className='control-label rp-choice-questions' style={{fontSize: 14, marginTop: 5, marginBottom: 5}}>
                 Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well

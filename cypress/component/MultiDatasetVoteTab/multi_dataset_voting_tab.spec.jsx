@@ -2,7 +2,8 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import {Storage} from 'src/libs/storage';
 import { User } from 'src/libs/ajax/User';
-import MultiDatasetVotingTab, {votingColors} from 'src/pages/dar_collection_review/MultiDatasetVotingTab';
+import { votingColors } from 'src/libs/VotingColors.ts'
+import MultiDatasetVotingTab from 'src/pages/dar_collection_review/MultiDatasetVotingTab';
 import {ControlledAccessType} from 'src/libs/dataUseTranslation';
 
 const darInfo = {

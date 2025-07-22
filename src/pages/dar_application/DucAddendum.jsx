@@ -7,7 +7,7 @@ import { binCollectionToBuckets } from '../../utils/BucketUtils';
 import { useCallback } from 'react';
 import { isEmpty, flatten } from 'lodash/fp';
 
-export const commonStyles = {
+const commonStyles = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.6rem',

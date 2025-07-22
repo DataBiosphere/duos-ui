@@ -1,19 +1,21 @@
-export const firstNonEmptyPropertyValue = (dataset: any, propertyNames: string[]): string => {
+import {Dataset, DatasetProperty, StudyProperty} from 'src/types/model';
+
+export const firstNonEmptyPropertyValue = (dataset: Partial<Dataset>, propertyNames: string[]): string => {
   for (const propertyName of propertyNames) {
     const propertyValue: string[] = [];
-    if ('study' in dataset && 'properties' in dataset.study) {
-      const property = dataset.study.properties.find((property: any) => property.key === propertyName);
+    if (dataset?.study?.properties) {
+      const property = dataset.study.properties?.find((property: StudyProperty) => property.key === propertyName);
       const value = property?.value;
       if (value !== undefined) {
-        const valueAsIterable = typeof value === 'string' ? [value] : value;
+        const valueAsIterable = [value];
         propertyValue.push(...valueAsIterable);
       }
     }
-    if ('properties' in dataset && propertyValue.length === 0) {
-      const property = dataset.properties.find((property: any) => property.propertyName === propertyName);
+    if (dataset?.properties && propertyValue.length === 0) {
+      const property = dataset?.properties?.find((property: DatasetProperty) => property.propertyName === propertyName);
       const value = property?.propertyValue;
       if (value !== undefined) {
-        const valueAsIterable = typeof value === 'string' ? [value] : value;
+        const valueAsIterable = [value];
         propertyValue.push(...valueAsIterable);
       }
     }

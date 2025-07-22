@@ -300,13 +300,12 @@ export default function ResearcherInfo(props) {
               type={FormFieldTypes.RADIOGROUP}
               title='1.8 Cloud Use Statement'
               titleStyle={titleStyle}
-              description={[
-                <span key='anvil-use-description'>
-                  Will you perform all of your data storage and analysis for this project on the
-                  <a rel='noopener noreferrer' href='https://anvil.terra.bio/' target='_blank'> AnVIL</a>
-                  ?
+              description={
+                <span key='anvil-use-description' style={{display: 'flex', flexDirection: 'row', alignItems: 'baseline'}}>
+                  Will you perform all of your data storage and analysis for this project on the&nbsp;
+                  <a rel='noopener noreferrer' href='https://anvil.terra.bio/' target='_blank'> AnVIL</a>?
                 </span>
-              ]}
+              }
               options={[
                 {name: 'yes', text: 'Yes'},
                 {name: 'no', text: 'No'}

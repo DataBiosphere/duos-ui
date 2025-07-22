@@ -3,7 +3,7 @@ import { mount } from 'cypress/react';
 import ResearchProposalVoteSlab from 'src/components/collection_voting_slab/ResearchProposalVoteSlab';
 import { Votes } from 'src/libs/ajax/Votes';
 import {Storage} from 'src/libs/storage';
-import {votingColors} from 'src/pages/dar_collection_review/MultiDatasetVotingTab';
+import { votingColors } from 'src/libs/VotingColors.ts'
 
 const darInfoPrimaryUseManualReviewFalse = {
   'rus': 'test',

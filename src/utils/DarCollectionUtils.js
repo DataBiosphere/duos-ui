@@ -1,4 +1,5 @@
 import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten} from 'lodash/fp';
+import { Styles } from 'src/libs/theme.js'
 import { formatDate, Notifications } from '../libs/utils';
 import { Collections } from '../libs/ajax/Collections';
 
@@ -298,13 +299,85 @@ export const updateFinalVote = ({key, votePayload, voteIds, dataUseBuckets, setD
   }
 };
 
-export default {
-  processVotesForBucket,
-  extractDacDataAccessVotesFromBucket,
-  extractDacRPVotesFromBucket,
-  extractUserDataAccessVotesFromBucket,
-  extractUserRPVotesFromBucket,
-  collapseVotesByUser,
-  updateFinalVote,
-  rpVoteKey
+export const consoleTypes = {
+  ADMIN: 'admin',
+  MEMBER: 'member',
+  MANAGE_ACCESS: 'manageAccess',
+  CHAIR: 'chair',
+  SIGNING_OFFICIAL: 'signingOfficial',
+  RESEARCHER: 'researcher',
+};
+
+export const styles = {
+  baseStyle: {
+    fontFamily: 'Montserrat',
+    fontSize: '1.6rem',
+    fontWeight: 400,
+    display: 'flex',
+    padding: '1rem 2%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    whiteSpace: 'pre-wrap',
+    backgroundColor: 'white',
+    border: '1px solid #DEDEDE',
+    margin: '0.5% 0'
+  },
+  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
+    justifyContent: 'space-between',
+    color: '#7B7B7B',
+    fontFamily: 'Montserrat',
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    letterSpacing: '0.2px',
+    textTransform: 'uppercase',
+    backgroundColor: 'B8CDD3',
+    border: 'none'
+  }),
+  cellWidth: {
+    darCode: '10%',
+    dacNames: '8%',
+    projectTitle: '13%',
+    submissionDate: '9.5%',
+    researcher: '9%',
+    institution: '11.5%',
+    datasetCount: '6.5%',
+    expirationDate: '10%',
+    status: '9%',
+    actions: '8.5%'
+  },
+  color: {
+    darCode: '#000000',
+    dacNames: '#000000',
+    projectTitle: '#000000',
+    submissionDate: '#000000',
+    researcher: '#000000',
+    institution: '#354052',
+    datasetCount: '#354052',
+    status: '#000000',
+    actions: '#000000'
+  },
+  fontSize: {
+    darCode: '1.6rem',
+    dacNames: '1.4rem',
+    projectTitle: '1.4rem',
+    submissionDate: '1.4rem',
+    researcher: '1.4rem',
+    institution: '1.4rem',
+    datasetCount: '2.0rem',
+    status: '1.6rem',
+    actions: '1.6rem'
+  },
+};
+
+export const DarCollectionTableColumnOptions = {
+  DAR_CODE: 'darCode',
+  DAC: 'dacNames',
+  NAME: 'name',
+  SUBMISSION_DATE: 'submissionDate',
+  RESEARCHER: 'researcher',
+  INSTITUTION: 'institution',
+  DATASET_COUNT: 'datasetCount',
+  EXPIRES_AT: 'expiresAt',
+  STATUS: 'status',
+  ACTIONS: 'actions'
 };

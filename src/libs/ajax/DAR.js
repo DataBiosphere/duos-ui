@@ -86,6 +86,17 @@ export const DAR = {
     });
   },
 
+  getDARDocumentAsBlob: async (referenceId, fileType) => {
+    const authOpts = Object.assign(Config.authOpts(), { responseType: 'blob' });
+    authOpts.headers = Object.assign(authOpts.headers, {
+      'Content-Type': 'application/octet-stream',
+      'Accept': 'application/octet-stream'
+    });
+    const url = `${await getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`;
+    const response = await axios.get(url, authOpts);
+    return response.data;
+  },
+
   //NOTE: endpoints requires a dar id
   uploadDARDocument: async (file, darId, fileType) => {
     if (isFileEmpty(file)) {

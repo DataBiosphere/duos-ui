@@ -7,8 +7,9 @@ import manageInstitutionsIcon from '../images/icon_manage_dac.png';
 import SearchBar from '../components/SearchBar';
 import InstitutionTable from '../components/institution_table/InstitutionTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/institution_table/InstitutionTable';
+import { TableHeader, TableRowLoading } from '../components/institution_table/InstitutionTable';
 import {Link} from 'react-router-dom';
+
 
 export default function AdminManageInstitutions(props) {
   const [institutionList, setInstitutionList] = useState([]);
@@ -34,6 +35,7 @@ export default function AdminManageInstitutions(props) {
     };
 
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearchChange = (query) => {
@@ -95,8 +97,8 @@ export default function AdminManageInstitutions(props) {
           institutionList={institutionList}
       />}
       {isLoading && <DarTableSkeletonLoader
-        tableHeaderTemplate={tableHeaderTemplate}
-        tableRowLoadingTemplate={tableRowLoadingTemplate}
+        tableHeader={<TableHeader />}
+        tableRowLoading={<TableRowLoading />}
       />}
     </div>
   );

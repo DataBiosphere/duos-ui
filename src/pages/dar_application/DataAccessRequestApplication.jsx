@@ -28,7 +28,7 @@ import {ConditionalAccordion} from 'src/components/forms/ConditionalAccordion.js
 import {ProgressReportApplication} from 'src/pages/dar_application/ProgressReportApplication';
 import {ScrollableTabs} from 'src/pages/dar_application/ScrollableTabs';
 import {validateDARFormData, validationFailed} from 'src/utils/darFormUtils.js';
-import {assign, cloneDeep, head, isArray, isEmpty, isNil, isString, keys, merge, set} from 'lodash';
+import {assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set} from 'lodash';
 import {Countries} from 'src/libs/ajax/Countries.js';
 import PropTypes from 'prop-types';
 
@@ -259,17 +259,13 @@ const DataAccessRequestApplication = (props) => {
         dar.data.elections = dar.elections;
         dar.data.datasetIds = dar.datasetIds;
       })
-
       // TS thinks that collection.dars is an object, but it is a map
       const darMap = new Map(Object.entries(dars));
-      setReverseOrderedDARs(
-          [...darMap.values()].sort((a, b) => b.id - a.id)
-      );
-      const darReferenceId = head(keys(dars));
-      // TODO - future improvement
-      //  in theory, we should be able to replace this call with the info returned from the collection
-      // form data = the first DAR's data
-      formData = await DAR.getPartialDarRequest(darReferenceId);
+      const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
+      setReverseOrderedDARs(newReverseOrderedDARs);
+      // form data = the "root" DAR's data
+      const darId = Object.values(dars).sort((a,b) => a.id - b.id)[0].referenceId
+      formData = await DAR.getPartialDarRequest(darId);
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
@@ -671,6 +667,7 @@ const DataAccessRequestApplication = (props) => {
                       updateUploadedIrbDocument={updateIrbDocument}
                       setDatasets={setDatasets}
                       setSelectedDatasets={setSelectedDatasets}
+                      referenceId={formData.referenceId}
                       draftDar={draftDar}
                   />
                 </ConditionalAccordion>

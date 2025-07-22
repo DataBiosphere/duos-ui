@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms';
 import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
-import { ValidationError } from "src/pages/dar_application/FormValidationState";
-import {validationFailed, calcPublicationOrPresentationErrors, isPublication} from "src/utils/darFormUtils";
+import { ValidationError } from 'src/pages/dar_application/FormValidationState';
+import {validationFailed, calcPublicationOrPresentationErrors, isPublication} from 'src/utils/darFormUtils';
 
 interface FormFieldChange {
     key: string;
@@ -126,7 +126,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         className='collaborator-form-add-save-button f-left btn'
                         type='button'
                         onClick={() => {
-                            if (id < 0) {
+                            if (id < 0 && newPublication !== undefined) {
                                 onPublicationChange([...publications, newPublication]);
                                 setNewPublication(undefined);
                             } else if (newPublication !== undefined) {
