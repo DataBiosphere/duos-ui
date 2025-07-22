@@ -20,5 +20,5 @@
     }
   },
   "plugins": ["@typescript-eslint"],
-  "include": ["src/custom.d.ts"]
+  "include": ["src/**/*","src/declaration.d.ts","src/custom.d.ts"]
 }
