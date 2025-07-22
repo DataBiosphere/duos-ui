@@ -164,11 +164,19 @@ export const columnConfig: ColumnConfig = {
     cellStyle: {width: columnWidths.domains},
     cellDataFn: (row: Institution) => {
       if (row?.domains) {
-        return row.domains.join(', ');
+        return row.domains.toSorted().join(', ');
       } else {
         return '- -';
       }
     },
+    sortable: true,
+    sortValueFn: (row: Institution) => {
+      if (row?.domains) {
+        return row.domains.toSorted().join(', ');
+      } else {
+        return 'zzz';
+      }
+    }
   },
   signingOfficials: {
     label: 'Signing Officials',
