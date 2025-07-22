@@ -30,17 +30,12 @@ export default function BackgroundSignIn(props) {
         onSignIn();
     };
 
-    const setIsLogged = () => {
-      Storage.setUserIsLogged(true);
-    };
-
     const performLogin = () => {
       setLoading(true);
       Storage.setOidcUser({ id_token: accessToken });
       getUser().then(
         user => {
           user = Object.assign(user, setUserRoleStatuses(user, Storage));
-          setIsLogged();
           setLoading(false);
           redirect(user);
         },
@@ -57,7 +52,6 @@ export default function BackgroundSignIn(props) {
               getUser().then(
                 user => {
                   user = Object.assign(user, setUserRoleStatuses(user, Storage));
-                  setIsLogged();
                   redirect(user);
                   setLoading(false);
                 },

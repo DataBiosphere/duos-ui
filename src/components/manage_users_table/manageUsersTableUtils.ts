@@ -1,4 +1,4 @@
-import {Styles} from '../../libs/theme';
+import {Styles} from 'src/libs/theme';
 
 export const styles = {
   baseStyle: {
@@ -26,37 +26,23 @@ export const styles = {
     backgroundColor: 'B8CDD3',
     border: 'none'
   }),
-  cellWidths: {
-    duosId: '10%',
-    phsId: '10%',
-    datasetName: '15%',
-    studyName: '15%',
-    dataSubmitter: '15%',
-    dataCustodian: '15%',
-    dataUse: '10%',
-    status: '10%'
+  cellWidth: {
+    username: '20%',
+    usernameMargin: '5%',
+    email: '20%',
+    emailMargin: '5%',
+    institution: '20%',
+    institutionMargin: '5%',
+    perms: '20%',
   },
   color: {
-    dataUseGroup: '#000000',
-    votes: '#000000',
-    numberOfDatasets: '#000000',
-    datasets: '#000000',
+    username: '#000000',
+    email: '#000000',
+    perms: '#000000',
   },
   fontSize: {
-    dataUseGroup: '1.4rem',
-    votes: '1.4rem',
-    numberOfDatasets: '1.4rem',
-    datasets: '1.4rem',
+    username: '1.6rem',
+    email: '1.4rem',
+    perms: '1.4rem',
   },
-};
-
-export const DACDatasetTableColumnOptions = {
-  DUOS_ID: 'duosId',
-  PHS_ID: 'phsId',
-  DATASET_NAME: 'datasetName',
-  STUDY_NAME: 'studyName',
-  DATA_SUBMITTER: 'dataSubmitter',
-  DATA_CUSTODIAN: 'dataCustodian',
-  DATA_USE: 'dataUse',
-  STATUS: 'status',
 };

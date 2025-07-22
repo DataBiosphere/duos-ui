@@ -1,6 +1,7 @@
-import React, {useCallback, useEffect, useState} from "react";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import React, {useCallback, useEffect, useState} from 'react';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import {findIndex} from 'lodash/fp';
 
 type ApplicationTab = {
     id: string,
@@ -10,13 +11,13 @@ type ApplicationTab = {
 
 type ScrollableTabsProps = {
     applicationTabs: ApplicationTab[],
-    formSelectedTabId?: number
+    formSelectedTabId?: string
 };
 
 export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: ScrollableTabsProps) => {
     const [selectedStepNumber, setSelectedStepNumber] = useState<number>(1);
 
-    const goToStep = useCallback((tabId) => {
+    const goToStep = useCallback((tabId: string) => {
         window.scrollTo({
             top: document.getElementById(tabId)?.offsetTop,
             behavior: 'smooth'
@@ -27,7 +28,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
     useEffect(() => {
         if (formSelectedTabId !== undefined) {
             // setLocalSelectedStep(applicationTabs.findIndex(tab => tab.id === formSelectedTabId) + 1);
-            setSelectedStepNumber(formSelectedTabId);
+            setSelectedStepNumber(findIndex(tab => tab.id === formSelectedTabId, applicationTabs));
             goToStep(formSelectedTabId);
         }
     }, [goToStep, formSelectedTabId, applicationTabs]);
@@ -41,7 +42,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
         // So, we can't really use a callback
         const sectionIndex = applicationTabs
             .map((appTab) => document.getElementById(appTab.id)?.offsetTop)
-            .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
+            .findIndex(scrollTop => (scrollTop || 0) > scrollPos + scrollBuffer);
         if (sectionIndex === 0) {
             setSelectedStepNumber(1);
         } else if (sectionIndex === -1) {
@@ -51,7 +52,18 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
         }
     };
 
-    window.addEventListener('scroll', onScroll);  // eslint-disable-line -- codacy says event listeners are dangerous
+    useEffect(() => {
+        // eslint-disable-next-line -- codacy says event listeners are dangerous
+        window.addEventListener('scroll', onScroll);
+
+        return () => {
+            // Cleanup listener on unmount
+            // eslint-disable-next-line -- codacy says event listeners are dangerous
+            window.removeEventListener('scroll', onScroll);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[]);
+
 
     return (
         <div className='multi-step-buttons-container'>

@@ -2,20 +2,13 @@ import React from 'react';
 import {includes, isEmpty, isNil, toLower, uniq} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
-import {styles} from './DarCollectionTable';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
+import { consoleTypes, styles } from '../../utils/DarCollectionUtils';
 import {Link} from 'react-router-dom';
 
-export const consoleTypes = {
-  ADMIN: 'admin',
-  MEMBER: 'member',
-  MANAGE_ACCESS: 'manageAccess',
-  CHAIR: 'chair',
-  SIGNING_OFFICIAL: 'signingOfficial',
-  RESEARCHER: 'researcher',
-};
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function projectTitleCellData({name = '- -', darCollectionId, label= 'project-title'}) {
   return {
     data: isEmpty(name) ? '- -' : name,
@@ -29,6 +22,7 @@ export function projectTitleCellData({name = '- -', darCollectionId, label= 'pro
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsExpanded, updateCollectionIsExpanded, status, consoleType, label = 'dar-code'}) {
   let darCodeData;
 
@@ -95,6 +89,7 @@ export function DacCellData({dacNames, darCollectionId, label = 'dacNames'}) {
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function submissionDateCellData({submissionDate, darCollectionId, label = 'submission-date'}) {
   const dateString = isNil(submissionDate) ? '- -' :
     toLower(submissionDate) === 'unsubmitted' ? '- -' : formatDate(submissionDate);
@@ -109,6 +104,7 @@ export function submissionDateCellData({submissionDate, darCollectionId, label =
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function researcherCellData({researcherName = '- -', darCollectionId, label = 'researcher'}) {
   return {
     data: researcherName,
@@ -121,6 +117,7 @@ export function researcherCellData({researcherName = '- -', darCollectionId, lab
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function institutionCellData({institutionName = '- -', darCollectionId, label = 'institution'}) {
   return {
     data: institutionName,
@@ -134,6 +131,7 @@ export function institutionCellData({institutionName = '- -', darCollectionId, l
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function datasetCountCellData({collection, darCollectionId, label = 'datasets'}) {
   return {
     data: collection.datasetCount || '- -',
@@ -147,6 +145,7 @@ export function datasetCountCellData({collection, darCollectionId, label = 'data
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function expiresAtCellData({collection, darCollectionId, label = 'expiration-date'}) {
   const dateString = isNil(collection.expiresAt) ? '- -' : formatDate(collection.expiresAt);
   return {
@@ -160,6 +159,7 @@ export function expiresAtCellData({collection, darCollectionId, label = 'expirat
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function statusCellData({status = '- -', darCollectionId, label = 'status'}) {
   return {
     data: status,
@@ -173,6 +173,7 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status}) {
   const actionComponent = <Actions
     collection={collection}

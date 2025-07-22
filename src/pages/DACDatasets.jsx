@@ -5,7 +5,8 @@ import {Storage} from '../libs/storage';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import SearchBar from '../components/SearchBar';
-import {DACDatasetsTable, DACDatasetTableColumnOptions} from '../components/dac_dataset_table/DACDatasetsTable';
+import {DACDatasetsTable} from '../components/dac_dataset_table/DACDatasetsTable';
+import {DACDatasetTableColumnOptions} from '../components/dac_dataset_table/DACDatasetConstants.js';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../libs/utils';
 import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
 import style from './DACDatasets.module.css';
@@ -49,11 +50,11 @@ export default function DACDatasets(props) {
             setDatasets(datasetTerms);
             setFilteredList(datasetTerms);
           }
-        } catch (error) {
+        } catch (_error) {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' });
         }
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({text: 'Error initializing datasets table'});
       }
     };

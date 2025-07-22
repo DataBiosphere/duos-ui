@@ -6,8 +6,8 @@ import { Collections } from '../libs/ajax/Collections';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils';
 import { Styles } from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
-import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
-import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
+import { DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
+import { consoleTypes, DarCollectionTableColumnOptions } from '../utils/DarCollectionUtils';
 
 export default function MemberConsole(props) {
   const [collections, setCollections] = useState([]);

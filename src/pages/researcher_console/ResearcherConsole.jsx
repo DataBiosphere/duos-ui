@@ -4,13 +4,12 @@ import { Styles } from 'src/libs/theme';
 import { DAR } from 'src/libs/ajax/DAR';
 import { Collections } from 'src/libs/ajax/Collections';
 import {
-  DarCollectionTable,
-  DarCollectionTableColumnOptions
+  DarCollectionTable
 } from 'src/components/dar_collection_table/DarCollectionTable';
 import accessIcon from 'src/images/lock-icon.png';
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils';
+import { consoleTypes, DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils';
 import SearchBar from 'src/components/SearchBar';
-import { consoleTypes } from 'src/components/dar_collection_table/DarCollectionTableCellData';
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf';
 

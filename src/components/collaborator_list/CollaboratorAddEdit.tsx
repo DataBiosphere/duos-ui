@@ -146,7 +146,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
                         approverStatus={newCollaborator?.approverStatus}
                         readOnly={readOnly}
                         validation={validation.approverStatus}
-                        onChange={(!readOnly ? ({ key: _key, value }: { key: string; value: boolean | 'yes' | 'no' | undefined }) => {
+                        onChange={(!readOnly ? ({ key: _key, value }: { key: string; value: boolean | 'true' | 'false' | undefined }) => {
                             onChange({ key: 'approverStatus', value: String(value || '') });
                         } : null)}/>
                     )}

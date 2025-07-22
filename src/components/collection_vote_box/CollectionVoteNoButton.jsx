@@ -1,7 +1,7 @@
 import React from 'react';
+import { votingColors } from 'src/libs/VotingColors.ts'
 import CollectionVoteButton from './CollectionVoteButton';
 import { CancelOutlined } from '@mui/icons-material';
-import { votingColors } from '../../pages/dar_collection_review/MultiDatasetVotingTab';
 
 export default function CollectionVoteNoButton(props) {
   const { onClick, disabled, isSelected } = props;

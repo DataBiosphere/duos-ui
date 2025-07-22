@@ -15,7 +15,7 @@ interface NotificationRequiredProps extends NotificationProps {
 
 interface NotificationProps {
   severity?: AlertColor;
-  text: string;
+  text: string | React.ReactNode;
   timeout?: number;
   layout?: ToastPosition | SnackbarOrigin;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

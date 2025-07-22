@@ -16,6 +16,7 @@ const props = {
     params: {},
   },
   draftDar: true,
+  isProgressReportApplication: false,
 };
 
 const user = {
@@ -238,7 +239,7 @@ beforeEach(() => {
       cy.get('#0_collaboratorEraCommonsId').type('asdgasdg');
       cy.get('#0_collaboratorTitle').type('asdgasdgasdgas');
       cy.get('#0_collaboratorEmail').type('asdgasdgasdgasdga'); // not a valid email
-      cy.get('#0_collaboratorApproval_no').click();
+      cy.get('#0_collaboratorApproval_false').click();
 
       // should remove errors, except for email
       cy.get('#0_collaboratorName').should('not.have.class', 'errored');

@@ -5,18 +5,17 @@ import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import {useEffect, useRef, useState} from 'react';
 import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'lodash';
+import { applyForAccess } from '../../utils/accessUtils.js'
 import { defaultFilters } from './DatasetFilterConstants';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
 import { datasetSearchTableTabs } from './DatasetSearchTableConstants';
 import TableHeaderSection from '../TableHeaderSection';
 import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
 import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import {DatasetSearchFooter} from './DatasetSearchFooter';
-import ReactMarkdown from 'react-markdown';
 
 const styles = {
   subTab: {
@@ -30,25 +29,6 @@ const styles = {
     fontWeight: 'bold',
     borderBottom: `5px solid #00609f`
   },
-};
-
-export const applyForAccess = async (selected, history) => {
-  try {
-    const draftResponse = await DAR.postDarDraft({ datasetId: selected });
-    if (draftResponse.referenceId) {
-      history.push(`/dar_application/${draftResponse.referenceId}`);
-    } else if (draftResponse.code && draftResponse.message) {
-      Notifications.showError(
-          {
-            text: <ReactMarkdown>{draftResponse.message}</ReactMarkdown>,
-            timeout: 6000
-            });
-    } else {
-      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
-    }
-  } catch (_error) {
-    Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
-  }
 };
 
 export const DatasetSearchTable = (props) => {
