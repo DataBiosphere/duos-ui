@@ -12,6 +12,7 @@ import {
 import {Alert} from 'src/components/Alert';
 import {convertLabelToKey} from 'src/libs/utils';
 import {DataUsePills} from './DataUsePill';
+import PropTypes from 'prop-types';
 
 import MemberVoteSummary from './MemberVoteSummary';
 
@@ -67,7 +68,7 @@ export default function MultiDatasetVoteSlab(props) {
     updateFinalVote,
     reloadFn
   } = props;
-  const { algorithmResult, key } = bucket;
+  const {algorithmResult, key} = bucket;
   const [isDMI, setIsDMI] = useState(false);
 
   useEffect(() => {
@@ -95,8 +96,8 @@ export default function MultiDatasetVoteSlab(props) {
   const VoteInfoSubsection = () => {
     const electionIds = currentUserVotes.map((vote) => vote.electionId);
     const allOpenElections = bucket.elections
-        .filter((election) => electionIds.includes(election.electionId))
-        .filter((election) => election.status?.toLowerCase() === 'open');
+      .filter((election) => electionIds.includes(election.electionId))
+      .filter((election) => election.status?.toLowerCase() === 'open');
 
     return (
       <div style={styles.voteInfo}>
@@ -127,35 +128,36 @@ export default function MultiDatasetVoteSlab(props) {
   function DatasetDisplayTable() {
     return (
       <>
-        <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available'}}>
+        <table className={'layout-table'} role="presentation" style={{width: '-webkit-fill-available'}}>
           <tbody>
-            <tr>
-              <td style={{width: '50%', verticalAlign: 'text-top',}}>
-                <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
-                  <span style={styles.slatTitleText}>{title}</span>
-                </div>
-                <DataUseSummary/></td>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}>
-                <div style={styles.question}>
-                  <p>Should data access be granted to this applicant?</p>
-                </div><VoteInfoSubsection/></td>
-            </tr>
-            <tr>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}><ChairVoteInfo
-                dacVotes={dacVotes}
-                isChair={isChair}
-                isLoading={isLoading}
-                adminPage={adminPage}/>
-              </td>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}>
-                {!isDMI && !isEmpty(algorithmResult) && <CollectionAlgorithmDecision
-                  algorithmResult={algorithmResult}
-                />}
-              </td>
-            </tr>
+          <tr>
+            <td style={{width: '50%', verticalAlign: 'text-top',}}>
+              <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
+                <span style={styles.slatTitleText}>{title}</span>
+              </div>
+              <DataUseSummary/></td>
+            <td style={{width: '50%', verticalAlign: 'text-top'}}>
+              <div style={styles.question}>
+                <p>Should data access be granted to this applicant?</p>
+              </div>
+              <VoteInfoSubsection/></td>
+          </tr>
+          <tr>
+            <td style={{width: '50%', verticalAlign: 'text-top'}}><ChairVoteInfo
+              dacVotes={dacVotes}
+              isChair={isChair}
+              isLoading={isLoading}
+              adminPage={adminPage}/>
+            </td>
+            <td style={{width: '50%', verticalAlign: 'text-top'}}>
+              {!isDMI && !isEmpty(algorithmResult) && <CollectionAlgorithmDecision
+                algorithmResult={algorithmResult}
+              />}
+            </td>
+          </tr>
           </tbody>
         </table>
-        <div style={{paddingLeft:'20px'}}>
+        <div style={{paddingLeft: '20px'}}>
           <MemberVoteSummary
             dacVotes={dacVotes}
             title={adminPage
@@ -180,14 +182,28 @@ export default function MultiDatasetVoteSlab(props) {
     />);
   }
 
-  return(
+  return (
     <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
-      {!isLoading ? <div style={{display:'inline'}}>
-        <DatasetDisplayTable/>
-        <DatasetsRequested/>
-      </div> :
-        <div className={'text-placeholder'} style={{ height: '100px' }}></div>}
+      {!isLoading ? <div style={{display: 'inline'}}>
+          <DatasetDisplayTable/>
+          <DatasetsRequested/>
+        </div> :
+        <div className={'text-placeholder'} style={{height: '100px'}}></div>}
     </div>
   );
 
 }
+
+MultiDatasetVoteSlab.propTypes = {
+  title: PropTypes.string.isRequired,
+  bucket: PropTypes.object.isRequired,
+  collection: PropTypes.shape({dars: PropTypes.object.isRequired}).isRequired,
+  dacDatasetIds: PropTypes.array,
+  isChair: PropTypes.bool,
+  isApprovalDisabled: PropTypes.bool,
+  isLoading: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  adminPage: PropTypes.bool,
+  updateFinalVote: PropTypes.func,
+  reloadFn: PropTypes.func,
+};
