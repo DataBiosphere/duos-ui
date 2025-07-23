@@ -27,17 +27,17 @@ type Bucket = {
 };
 
 interface MultiDatasetVoteSlabProps {
-  title: string;
-  bucket: Bucket;
-  collection: Collection;
-  dacDatasetIds?: number[];
-  isChair?: boolean;
-  isApprovalDisabled?: boolean;
-  isLoading?: boolean;
-  readOnly?: boolean;
-  adminPage?: boolean;
-  updateFinalVote?: (...args: unknown[]) => void;
-  reloadFn?: (...args: unknown[]) => void;
+  readonly title: string;
+  readonly bucket: Bucket;
+  readonly collection: Collection;
+  readonly dacDatasetIds?: number[];
+  readonly isChair?: boolean;
+  readonly isApprovalDisabled?: boolean;
+  readonly isLoading?: boolean;
+  readonly readOnly?: boolean;
+  readonly adminPage?: boolean;
+  readonly updateFinalVote?: (...args: unknown[]) => void;
+  readonly reloadFn?: (...args: unknown[]) => void;
 }
 
 const styles = {
