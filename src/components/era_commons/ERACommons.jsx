@@ -87,7 +87,7 @@ export default function ERACommons(props) {
   }, [researcherProfile, onNihStatusUpdate])
 
   const redirectToNihLogin = async () => {
-    const returnUrl = window.location.origin + '/' + destination + '?nih-username-token=<token>'
+    const returnUrl = window.location.origin + '/' + destination + '?nih-username-token=<token>' // eslint-disable-line
     window.location.href = `${await Config.getNihUrl()}?${queryString.stringify({ 'return-url': returnUrl })}`
   }
 
