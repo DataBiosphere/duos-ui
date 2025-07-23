@@ -278,8 +278,7 @@ describe('Institution Domain Editor Tests', () => {
             internationalDomains.forEach((domain) => {
                 cy.get('input').clear().type(domain);
                 cy.contains('button', 'Add').click();
-                // Should convert to ASCII using punycode
-                expectedDomains.push(domain); // The component should handle punycode conversion internally
+                expectedDomains.push(domain);
                 cy.get('@domainsChangeHandler').should('have.been.called');
             });
         });
