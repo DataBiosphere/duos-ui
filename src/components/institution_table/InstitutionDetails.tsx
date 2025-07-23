@@ -69,8 +69,8 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         // Trim whitespace from start and end
         let normalized = name.trim();
 
-        // Replace curly quotes with straight quotes
-        normalized = normalized.replace(/[‘’]/g, "'");  // Replace curly single quotes
+        // Replace curly single quotes with straight straight Iquotes
+        normalized = normalized.replace(/[‘’]/g, "'");
 
         return normalized;
     };
@@ -80,6 +80,11 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
         if (normalizedName.length === 0) {
             return 'Institution name is required';
+        }
+
+        // Check for double quotes (straight or curly)
+        if (/[“"”]/.test(name)) {
+            return 'Institution name cannot contain double quotation marks (")';
         }
 
         // Check if name already exists (excluding current institution in edit mode)

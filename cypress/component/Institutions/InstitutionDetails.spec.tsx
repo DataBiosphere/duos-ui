@@ -258,5 +258,154 @@ describe('Institution Details Tests', () => {
             cy.get('input[placeholder="Institution Name"]').type('T');
             cy.contains('An institution with this name already exists').should('be.visible');
         });
+
+        it('should reject institution names with straight double quotes', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            cy.get('input[placeholder="Institution Name"]').type('University "Research" Center');
+            cy.contains('Institution name cannot contain double quotation marks (")').should('be.visible');
+            cy.contains('button', 'Create').should('be.disabled');
+        });
+
+        it('should reject institution names with double quotes', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            cy.get('input[placeholder="Institution Name"]').type('University "Research" Center');
+            cy.contains('Institution name cannot contain double quotation marks (")').should('be.visible');
+            cy.contains('button', 'Create').should('be.disabled');
+        });
+
+        it('should allow single quotes in institution names', () => {
+            cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+            mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+            cy.get('input[placeholder="Institution Name"]').type("St. Mary's College");
+            cy.contains('Institution name cannot contain double quotation marks (")').should('not.exist');
+            cy.contains('button', 'Create').should('not.be.disabled');
+        });
+
+        describe('Name Normalization', () => {
+            it('should trim whitespace from institution names on blur', () => {
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+                mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+                // Type name with leading/trailing spaces
+                cy.get('input[placeholder="Institution Name"]').type('   New University   ');
+
+                // Should allow typing with spaces while editing
+                cy.get('input[placeholder="Institution Name"]').should('have.value', '   New University   ');
+
+                // Blur the field to trigger normalization
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                // Verify the trimmed value is set after blur
+                cy.get('input[placeholder="Institution Name"]').should('have.value', 'New University');
+
+                // Should not show validation error for unique name
+                cy.contains('An institution with this name already exists').should('not.exist');
+                cy.contains('button', 'Create').should('not.be.disabled');
+            });
+
+            it('should replace curly single quotes with straight quotes on blur', () => {
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+                mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+                // Type name with curly single quotes
+                cy.get('input[placeholder="Institution Name"]').type("St. Mary’s College");
+
+                // Should allow typing with curly quotes while editing
+                cy.get('input[placeholder="Institution Name"]').should('have.value', "St. Mary’s College");
+
+                // Blur to trigger normalization
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                // Verify curly quotes are replaced with straight quotes after blur
+                cy.get('input[placeholder="Institution Name"]').should('have.value', "St. Mary’s College");
+
+                cy.contains('button', 'Create').should('not.be.disabled');
+            });
+
+            it('should handle combined normalization (trim + single quote replacement) on blur', () => {
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+                mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+                // Type name with whitespace and curly single quotes (no double quotes since they're not allowed)
+                cy.get('input[placeholder="Institution Name"]').type("   St. Mary’s College   ");
+
+                // Should allow typing with both issues while editing
+                cy.get('input[placeholder="Institution Name"]').should('have.value', "   St. Mary’s College   ");
+
+                // Blur to trigger normalization
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                // Verify both normalization steps are applied after blur
+                cy.get('input[placeholder="Institution Name"]').should('have.value', "St. Mary’s College");
+
+                cy.contains('button', 'Create').should('not.be.disabled');
+            });
+
+            it('should detect duplicates after normalization on blur', () => {
+                const institutionsWithQuotes = [
+                    { id: 1, name: "University Research Center", domains: ['urc.edu'] },
+                    { id: 2, name: 'MIT', domains: ['mit.edu'] }
+                ];
+
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(institutionsWithQuotes));
+                mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+                // Type the same name but with whitespace
+                cy.get('input[placeholder="Institution Name"]').type('  University Research Center  ');
+
+                // Should not show error while typing
+                cy.contains('An institution with this name already exists').should('not.exist');
+
+                // Blur to trigger normalization and validation
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                // Should detect as duplicate after normalization
+                cy.contains('An institution with this name already exists').should('be.visible');
+                cy.contains('button', 'Create').should('be.disabled');
+            });
+
+            it('should normalize empty/whitespace-only names correctly on blur', () => {
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions));
+                mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+                // Type only whitespace
+                cy.get('input[placeholder="Institution Name"]').type('   ');
+
+                // Blur to trigger normalization
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                // Should show required error after normalization
+                cy.contains('Institution name is required').should('be.visible');
+                cy.contains('button', 'Create').should('be.disabled');
+            });
+
+            it('should validate during typing with normalized name but not change input', () => {
+                const institutionsWithSimilarNames = [
+                    { id: 1, name: 'University Research Center', domains: ['urc.edu'] },
+                    { id: 2, name: 'MIT', domains: ['mit.edu'] }
+                ];
+
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(institutionsWithSimilarNames));
+                mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+                // Start typing a name that will be a duplicate after normalization
+                cy.get('input[placeholder="Institution Name"]').type('University Research');
+                // Input should still contain the raw value
+                cy.get('input[placeholder="Institution Name"]').should('have.value', 'University Research');
+                // But validation should not trigger yet for partial input
+                cy.contains('An institution with this name already exists').should('not.exist');
+
+                // Complete the name
+                cy.get('input[placeholder="Institution Name"]').type(' Center');
+                // Should trigger validation even while typing since it matches after normalization
+                cy.contains('An institution with this name already exists').should('be.visible');
+                cy.contains('button', 'Create').should('be.disabled');
+            });
+        });
     });
 });
