@@ -293,6 +293,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         InputProps={{
                             style: {fontSize: 14}
                         }}
+                        FormHelperTextProps={{
+                            style: {fontSize: 14}
+                        }}
                         style={{width: 300}}
                         onChange={(e) => {
                             handleNameChange(e.target.value);

@@ -114,13 +114,16 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
 
             {isEditing && (
                 <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
                         <TextField
                             variant='outlined'
                             value={tempDomain}
                             placeholder={'e.g., example.com'}
                             size="small"
                             InputProps={{
+                                style: {fontSize: 14}
+                            }}
+                            FormHelperTextProps={{
                                 style: {fontSize: 14}
                             }}
                             style={{width: 250}}
@@ -152,14 +155,14 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
                         <Button
                             variant="contained"
                             onClick={handleDomainAdd}
-                            style={{marginLeft: 10, fontSize: 14, width: 'auto'}}
+                            style={{marginLeft: 10, marginTop: 1, fontSize: 14, width: 'auto'}}
                             disabled={!tempDomain.trim()}
                         >
                             Add
                         </Button>
                     </div>
                     {errorMessage && (
-                        <div style={{color: 'red', fontSize: 12, marginTop: 4, marginLeft: 2}}>
+                        <div style={{color: 'red', fontSize: 14, marginTop: 4, marginLeft: 2}}>
                             {errorMessage}
                         </div>
                     )}
