@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication';
-import {Publication} from 'src/types/model';
+import {Presentation} from 'src/types/model';
 
-interface PublicationSummaryProps {
-    publication: Publication;
+interface PresentationSummaryProps {
+    presentation: Presentation;
     readonly columnsToShow: string[];
     readonly editAction: () => void;
     readonly deleteAction: () => void;
     readonly disabled: boolean;
 }
 
-export default function PublicationSummary(props: PublicationSummaryProps): React.JSX.Element {
-    const { publication, columnsToShow, editAction, deleteAction, disabled } = props;
+export default function PresentationSummary(props: PresentationSummaryProps): React.JSX.Element {
+    const { presentation, columnsToShow, editAction, deleteAction, disabled } = props;
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -26,9 +26,9 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
         <div className='collaborator-summary-card'>
             {/* data elements to show in the row summary */}
             {columnsToShow.map((column, index) => {
-                const columnContent = publication[column as keyof Publication];
+                const columnContent = presentation[column as keyof Presentation];
                 return columnContent && (
-                    <div key={'publication_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
+                    <div key={'presentation_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
                         <span>
                             {columnContent}
                         </span>
@@ -56,7 +56,7 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
                 onClick={() => !disabled && setShowDeleteModal(true) }
             >
                 <span
-                    className='glyphicon glyphicon-trash publication-delete-icon'
+                    className='glyphicon glyphicon-trash presentation-delete-icon'
                     aria-hidden='true'
                     data-tip='Delete dataset'
                     data-for='tip_delete'
@@ -65,8 +65,8 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
             </a>
             {/* delete modal */}
             <DeletePresentationOrPublication
-                name={publication.title}
-                objectName='publication'
+                name={presentation.title}
+                objectName='presentation'
                 showDelete={showDeleteModal}
                 confirmAction={() => { deleteAction(); setShowDeleteModal(false); }}
                 closeAction={() => setShowDeleteModal(false)}
