@@ -161,8 +161,12 @@ export default function MultiDatasetVoteSlab({
   const [currentUserVotes, setCurrentUserVotes] = useState<Vote[]>([]);
   const [dacVotes, setDacVotes] = useState<Vote[]>([]);
   const [isDMI, setIsDMI] = useState(false);
-
-  const { algorithmResult, key } = bucket;
+  const { algorithmResult } = bucket;
+  const getMemberVoteSectionTitle = () => {
+    if (adminPage) return "DAC Member Votes";
+    if (isChair) return "My DAC Member's Votes (detail)";
+    return "Other DAC Member's Votes";
+  };
 
   useEffect(() => {
     const sorted = Object.values(collection.dars).sort(
@@ -232,13 +236,7 @@ export default function MultiDatasetVoteSlab({
         <div style={{ paddingLeft: '20px' }}>
           <MemberVoteSummary
             dacVotes={dacVotes}
-            title={
-              adminPage
-                ? 'DAC Member Votes'
-                : isChair
-                ? 'My DAC Member\'s Votes (detail)'
-                : 'Other DAC Member\'s Votes'
-            }
+            title={getMemberVoteSectionTitle()}
             isLoading={isLoading}
             adminPage={adminPage}
             isChair={isChair}
