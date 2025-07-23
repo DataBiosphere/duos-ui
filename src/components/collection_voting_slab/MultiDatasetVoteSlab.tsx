@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox';
-import {get, isEmpty, isNil} from 'lodash/fp';
+import {get} from 'lodash/fp';
+import {isEmpty, isNil} from 'lodash';
 import {Storage} from 'src/libs/storage';
 import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel';
 import {ChairVoteInfo} from 'src/components/collection_voting_slab/ResearchProposalVoteSlab';
@@ -35,8 +36,8 @@ interface MultiDatasetVoteSlabProps {
   isLoading?: boolean;
   readOnly?: boolean;
   adminPage?: boolean;
-  updateFinalVote?: (...args: any[]) => void;
-  reloadFn?: (...args: any[]) => void;
+  updateFinalVote?: (...args: unknown[]) => void;
+  reloadFn?: (...args: unknown[]) => void;
 }
 
 const styles = {
@@ -99,7 +100,8 @@ export default function MultiDatasetVoteSlab(props: MultiDatasetVoteSlabProps) {
         (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
     );
     const mostRecentDar = sorted.at(0);
-    if (mostRecentDar?.progressReport && mostRecentDar.data?.dmi) {
+    const darData = mostRecentDar?.data;
+    if (darData && Object.keys(darData).includes('dmi')) {
       setIsDMI(true);
     }
     const user = Storage.getCurrentUser();
@@ -126,6 +128,8 @@ export default function MultiDatasetVoteSlab(props: MultiDatasetVoteSlabProps) {
         <div style={styles.voteInfo}>
           <div>
             {!adminPage && !allOpenElections && !readOnly && <Alert
+              id={'vote-disabled-alert'}
+              description={'Voting is disabled since this election is not open.'}
               title={'Voting is disabled since this election is not open.'}
               type={'danger'}
             />}
@@ -170,7 +174,6 @@ export default function MultiDatasetVoteSlab(props: MultiDatasetVoteSlabProps) {
                 <ChairVoteInfo
                     dacVotes={dacVotes}
                     isChair={isChair}
-                    isLoading={isLoading}
                     adminPage={adminPage}/>
               </td>
               <td style={{width: '50%', verticalAlign: 'text-top'}}>
