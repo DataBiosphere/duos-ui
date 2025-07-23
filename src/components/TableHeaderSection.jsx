@@ -1,9 +1,9 @@
-import React from 'react';
-import { isNil } from 'lodash';
-import { Styles } from '../libs/theme';
+import React from 'react'
+import { isNil } from 'lodash'
+import { Styles } from '../libs/theme'
 
 export const TableHeaderSection = (props) => {
-  const { icon, title, description } = props;
+  const { icon, title, description } = props
 
   return (
     <div style={{ display: 'flex', padding: '0 0 0 2em' }}>
@@ -44,7 +44,7 @@ export const TableHeaderSection = (props) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default TableHeaderSection;
+export default TableHeaderSection

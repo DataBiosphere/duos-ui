@@ -1,28 +1,27 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Styles, Theme } from '../../libs/theme';
-import userIcon from '../../images/icon_manage_users.png';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
-import SimpleTable from '../../components/SimpleTable';
-import SimpleButton from '../../components/SimpleButton';
-import PaginationBar from '../../components/PaginationBar';
-import SearchBar from '../../components/SearchBar';
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { Styles, Theme } from '../../libs/theme'
+import userIcon from '../../images/icon_manage_users.png'
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
+import SimpleTable from '../../components/SimpleTable'
+import SimpleButton from '../../components/SimpleButton'
+import PaginationBar from '../../components/PaginationBar'
+import SearchBar from '../../components/SearchBar'
 import {
   Notifications,
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList,
-  hasDataSubmitterRole
-} from '../../libs/utils';
-import { User } from '../../libs/ajax/User';
-import ConfirmationModal from '../../components/modals/ConfirmationModal';
-import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal';
-import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
-import DpaMarkdown from '../../assets/DPA.md';
-import { confirmModalType } from '../../libs/libraryCardUtils';
+  hasDataSubmitterRole,
+} from '../../libs/utils'
+import { User } from '../../libs/ajax/User'
+import ConfirmationModal from '../../components/modals/ConfirmationModal'
+import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal'
+import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer'
+import DpaMarkdown from '../../assets/DPA.md'
+import { confirmModalType } from '../../libs/libraryCardUtils'
 
-
-//Styles specific to this table
+// Styles specific to this table
 const styles = {
   baseStyle: {
     fontFamily: 'Arial',
@@ -31,7 +30,7 @@ const styles = {
     display: 'flex',
     padding: '1rem 2%',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -43,20 +42,20 @@ const styles = {
     institution: '20%',
     // activeDARs: '10%'
   },
-};
+}
 
-//column header format for table
+// column header format for table
 const columnHeaderFormat = {
-  email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
-  name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
-  role: {label: 'Role', cellStyle: {width: styles.cellWidths.libraryCard}},
-  institution: {label: 'Submitter Status', cellStyle: {width: styles.cellWidths.institution}}
-};
+  email: { label: 'Email', cellStyle: { width: styles.cellWidths.email } },
+  name: { label: 'Name', cellStyle: { width: styles.cellWidths.name } },
+  role: { label: 'Role', cellStyle: { width: styles.cellWidths.libraryCard } },
+  institution: { label: 'Submitter Status', cellStyle: { width: styles.cellWidths.institution } },
+}
 
 const RemoveDataCustodianButton = (props) => {
-  const { researcher = {}, showConfirmationModal } = props;
-  const message = 'Are you sure you want to remove this Data Submitter?';
-  const title = 'Remove Data Submitter';
+  const { researcher = {}, showConfirmationModal } = props
+  const message = 'Are you sure you want to remove this Data Submitter?'
+  const title = 'Remove Data Submitter'
   return (
     <SimpleButton
       key={`remove-custodian-${researcher.id}`}
@@ -73,16 +72,15 @@ const RemoveDataCustodianButton = (props) => {
           message,
           title,
           confirmType: confirmModalType.delete,
-        })
-      }
+        })}
     />
-  );
-};
+  )
+}
 
 const IssueDataCustodianButton = (props) => {
-  const { researcher, showConfirmationModal } = props;
-  const message = 'Are you sure you want to make this person a Data Submitter?';
-  const title = 'Issue Data Submitter';
+  const { researcher, showConfirmationModal } = props
+  const message = 'Are you sure you want to make this person a Data Submitter?'
+  const title = 'Issue Data Submitter'
   return (
     <SimpleButton
       key={`issue-card-${researcher.userEmail}`}
@@ -99,28 +97,27 @@ const IssueDataCustodianButton = (props) => {
           message,
           title,
           confirmType: confirmModalType.issue,
-        })
-      }
+        })}
     />
-  );
-};
+  )
+}
 
-const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
+const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers
 
 const SubmitterCell = ({
   researcher,
-  showConfirmationModal
+  showConfirmationModal,
 }) => {
-  const id = researcher.userId || researcher.email;
+  const id = researcher.userId || researcher.email
   const button = hasDataSubmitterRole(researcher)
     ? RemoveDataCustodianButton({
-      researcher,
-      showConfirmationModal,
-    })
+        researcher,
+        showConfirmationModal,
+      })
     : IssueDataCustodianButton({
-      researcher,
-      showConfirmationModal
-    });
+        researcher,
+        showConfirmationModal,
+      })
   return {
     isComponent: true,
     id,
@@ -135,25 +132,25 @@ const SubmitterCell = ({
       >
         {button}
       </div>
-    )
-  };
-};
+    ),
+  }
+}
 
 const roleCell = (roles, id) => {
   const roleString = flow(
-    map((role) => role.name),
-    sortBy((name) => name),
+    map(role => role.name),
+    sortBy(name => name),
     sortedUniq,
-    join(', ')
-  )(roles);
+    join(', '),
+  )(roles)
 
   return {
     data: roleString || '- -',
     id,
     style: {},
     label: 'user-role',
-  };
-};
+  }
+}
 
 const emailCell = (email, id) => {
   return {
@@ -161,8 +158,8 @@ const emailCell = (email, id) => {
     id,
     style: {},
     label: 'user-email',
-  };
-};
+  }
+}
 
 const displayNameCell = (displayName, id) => {
   return {
@@ -170,32 +167,31 @@ const displayNameCell = (displayName, id) => {
     id,
     style: {},
     label: 'display-name',
-  };
-};
-
+  }
+}
 
 export default function DataCustodianTable(props) {
-  const [researchers, setResearchers] = useState(props.researchers || []);
-  const [tableSize, setTableSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
-  const [filteredResearchers, setFilteredResearchers] = useState([]);
-  const [visibleResearchers, setVisibleResearchers] = useState([]);
-  const [selectedResearcher, setSelectedResearcher] = useState({});
-  const [showModal, setShowModal] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const searchRef = useRef('');
-  const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
-  const [confirmationTitle, setConfirmationTitle] = useState('');
-  const [confirmType, setConfirmType] = useState(confirmModalType.delete);
-  const { signingOfficial, unregisteredResearchers, isLoading } = props;
+  const [researchers, setResearchers] = useState(props.researchers || [])
+  const [tableSize, setTableSize] = useState(10)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageCount, setPageCount] = useState(1)
+  const [filteredResearchers, setFilteredResearchers] = useState([])
+  const [visibleResearchers, setVisibleResearchers] = useState([])
+  const [selectedResearcher, setSelectedResearcher] = useState({})
+  const [showModal, setShowModal] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const searchRef = useRef('')
+  const [confirmationModalMsg, setConfirmationModalMsg] = useState('')
+  const [confirmationTitle, setConfirmationTitle] = useState('')
+  const [confirmType, setConfirmType] = useState(confirmModalType.delete)
+  const { signingOfficial, unregisteredResearchers, isLoading } = props
 
   const handleSearchChange = tableSearchHandler(
     researchers,
     setFilteredResearchers,
     setCurrentPage,
-    'signingOfficialResearchers'
-  );
+    'signingOfficialResearchers',
+  )
 
   const showConfirmationModal = ({
     researcher,
@@ -203,36 +199,36 @@ export default function DataCustodianTable(props) {
     title,
     confirmType,
   }) => {
-    setSelectedResearcher(researcher);
-    setShowConfirmation(true);
-    setConfirmationModalMsg(message);
-    setConfirmationTitle(title);
-    setConfirmType(confirmType);
-  };
+    setSelectedResearcher(researcher)
+    setShowConfirmation(true)
+    setConfirmationModalMsg(message)
+    setConfirmationTitle(title)
+    setConfirmType(confirmType)
+  }
 
-
-  //init hook, need to make ajax calls here
+  // init hook, need to make ajax calls here
   useEffect(() => {
     const init = async () => {
       try {
-        setResearchers(props.researchers);
-      } catch (_error) {
+        setResearchers(props.researchers)
+      }
+      catch (_error) {
         Notifications.showError({
           text: 'Failed to initialize researcher table',
-        });
+        })
       }
-    };
-    init();
-  }, [props.researchers]);
+    }
+    init()
+  }, [props.researchers])
 
   useEffect(() => {
     searchOnFilteredList(
       searchRef.current.value,
       researchers,
       researcherFilterFunction,
-      setFilteredResearchers
-    );
-  }, [researchers]);
+      setFilteredResearchers,
+    )
+  }, [researchers])
 
   useEffect(() => {
     recalculateVisibleTable({
@@ -243,33 +239,37 @@ export default function DataCustodianTable(props) {
       setPageCount,
       setCurrentPage,
       setVisibleList: setVisibleResearchers,
-    });
-  }, [tableSize, pageCount, filteredResearchers, currentPage]);
+    })
+  }, [tableSize, pageCount, filteredResearchers, currentPage])
 
   const goToPage = useCallback(
     (value) => {
       if (value >= 1 && value <= pageCount) {
-        setCurrentPage(value);
+        setCurrentPage(value)
       }
     },
-    [pageCount]
-  );
+    [pageCount],
+  )
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !Number.isNaN(parseInt(value))) {
-      setTableSize(value);
+      setTableSize(value)
     }
-  }, []);
+  }, [])
 
-  const paginationBar =  (<PaginationBar pageCount={pageCount}
-    currentPage={currentPage}
-    tableSize={tableSize}
-    goToPage={goToPage} changeTableSize= {changeTableSize }/>
-  );
+  const paginationBar = (
+    <PaginationBar
+      pageCount={pageCount}
+      currentPage={currentPage}
+      tableSize={tableSize}
+      goToPage={goToPage}
+      changeTableSize={changeTableSize}
+    />
+  )
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map((researcher) => {
-      const {displayName, email, id, roles} = researcher;
+      const { displayName, email, id, roles } = researcher
       return [
         displayNameCell(displayName, id),
         emailCell(email, id),
@@ -278,87 +278,91 @@ export default function DataCustodianTable(props) {
           showConfirmationModal,
           institutionId: signingOfficial.institutionId,
         }),
-        roleCell(roles, id)
-      ];
-    });
-  };
+        roleCell(roles, id),
+      ]
+    })
+  }
 
   const columnHeaderData = [
     columnHeaderFormat.name,
     columnHeaderFormat.email,
     columnHeaderFormat.institution,
     columnHeaderFormat.role,
-  ];
+  ]
 
   const showModalOnClick = () => {
-    setSelectedResearcher({ institutionId: signingOfficial.institutionId });
-    setShowModal(true);
-  };
+    setSelectedResearcher({ institutionId: signingOfficial.institutionId })
+    setShowModal(true)
+  }
 
   const issueCustodian = async (selectedResearcher, researchers) => {
-    let messageName;
-    const {userId, displayName} = selectedResearcher;
+    let messageName
+    const { userId, displayName } = selectedResearcher
     try {
-      const updatedResearcher = await User.addRoleToUser(userId, 8);
-      const listCopy = cloneDeep(researchers);
+      const updatedResearcher = await User.addRoleToUser(userId, 8)
+      const listCopy = cloneDeep(researchers)
       const targetIndex = findIndex(
-        (researcher) => userId === researcher.userId
-      )(listCopy);
+        researcher => userId === researcher.userId,
+      )(listCopy)
       if (targetIndex === -1) {
         const targetResearcher = find(
-          (researcher) => userId === researcher.userId
-        )(props.unregisteredResearchers) || selectedResearcher;
-        listCopy.unshift(targetResearcher);
-        messageName = targetResearcher.email;
-      } else {
-        listCopy[targetIndex] = updatedResearcher;
-        messageName = displayName;
+          researcher => userId === researcher.userId,
+        )(props.unregisteredResearchers) || selectedResearcher
+        listCopy.unshift(targetResearcher)
+        messageName = targetResearcher.email
+      }
+      else {
+        listCopy[targetIndex] = updatedResearcher
+        messageName = displayName
       }
 
-      setResearchers(listCopy);
-      setShowConfirmation(false);
-      setShowModal(false);
+      setResearchers(listCopy)
+      setShowConfirmation(false)
+      setShowModal(false)
       Notifications.showSuccess({
         text: `Issued ${messageName} as Data Submitter`,
-      });
-    } catch (_error) {
+      })
+    }
+    catch (_error) {
       Notifications.showError({
         text: `Error issuing ${messageName} as Data Submitter`,
-      });
+      })
     }
-  };
+  }
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
-    const { displayName, email, userId } = selectedResearcher;
-    const updatedResearcher = await User.deleteRoleFromUser(userId, 8);
-    const searchableKey = !isNil(userId) ? 'userId' : 'email';
-    const listCopy = cloneDeep(researchers);
-    const messageName = displayName || email;
+    const { displayName, email, userId } = selectedResearcher
+    const updatedResearcher = await User.deleteRoleFromUser(userId, 8)
+    const searchableKey = !isNil(userId) ? 'userId' : 'email'
+    const listCopy = cloneDeep(researchers)
+    const messageName = displayName || email
     try {
       const targetIndex = findIndex((researcher) => {
-        return !isNil(researcher) && selectedResearcher[searchableKey] === researcher[searchableKey];
-      })(listCopy);
+        return !isNil(researcher) && selectedResearcher[searchableKey] === researcher[searchableKey]
+      })(listCopy)
       if (
-        isNil(userId) ||
-        researchers[targetIndex].institutionId !== signingOfficial.institutionId
+        isNil(userId)
+        || researchers[targetIndex].institutionId !== signingOfficial.institutionId
       ) {
-        listCopy.splice(targetIndex, 1);
-      } else {
-        listCopy[targetIndex] = updatedResearcher;
+        listCopy.splice(targetIndex, 1)
       }
-      setResearchers(listCopy);
-      setShowConfirmation(false);
+      else {
+        listCopy[targetIndex] = updatedResearcher
+      }
+      setResearchers(listCopy)
+      setShowConfirmation(false)
       Notifications.showSuccess({
         text: `Removed ${messageName} as a Data Submitter`,
-      });
-    } catch (_error) {
+      })
+    }
+    catch (_error) {
       Notifications.showError({
         text: `Error removing ${messageName} as a Data Submitter`,
-      });
+      })
     }
-  };
+  }
 
-  const dpaContent = ScrollableMarkdownContainer({markdown: DpaMarkdown});
+  const dpaContent = ScrollableMarkdownContainer({ markdown: DpaMarkdown })
 
   return (
     <div style={Styles.PAGE}>
@@ -434,7 +438,7 @@ export default function DataCustodianTable(props) {
       />
       <DataCustodianFormModal
         showModal={showModal}
-        createOnClick={(researcher) => issueCustodian(researcher, researchers)}
+        createOnClick={researcher => issueCustodian(researcher, researchers)}
         closeModal={() => setShowModal(false)}
         researcher={selectedResearcher}
         users={unregisteredResearchers}
@@ -450,14 +454,16 @@ export default function DataCustodianTable(props) {
             : {}
         }
         message={
-          confirmType === confirmModalType.issue ? (
-            <div>
-              {dpaContent}
-              {confirmationModalMsg}
-            </div>
-          ) : (
-            confirmationModalMsg
-          )
+          confirmType === confirmModalType.issue
+            ? (
+                <div>
+                  {dpaContent}
+                  {confirmationModalMsg}
+                </div>
+              )
+            : (
+                confirmationModalMsg
+              )
         }
         header={`${
           selectedResearcher.displayName || selectedResearcher.email
@@ -469,9 +475,8 @@ export default function DataCustodianTable(props) {
         onConfirm={() =>
           confirmType === confirmModalType.issue
             ? issueCustodian(selectedResearcher, researchers)
-            : removeDataCustodian(selectedResearcher, researchers)
-        }
+            : removeDataCustodian(selectedResearcher, researchers)}
       />
     </div>
-  );
+  )
 }

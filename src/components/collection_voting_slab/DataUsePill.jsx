@@ -1,6 +1,6 @@
-import React from 'react';
-import {isNil} from 'lodash';
-import { ControlledAccessType } from '../../libs/dataUseTranslation';
+import React from 'react'
+import { isNil } from 'lodash'
+import { ControlledAccessType } from '../../libs/dataUseTranslation'
 
 const styles = {
   baseStyle: {
@@ -9,7 +9,7 @@ const styles = {
     margin: '1rem 0 1rem 0',
     display: 'flex',
     gap: '1.5rem',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   code: {
     color: '#FFFFFF',
@@ -20,7 +20,7 @@ const styles = {
     borderRadius: '5rem',
     alignItems: 'center',
     justifyContent: 'center',
-    display: 'flex'
+    display: 'flex',
   },
   subheading: {
     fontWeight: 'bold',
@@ -28,23 +28,23 @@ const styles = {
   description: {
     color: '#333F52',
     fontWeight: '500',
-  }
-};
+  },
+}
 
 export const DataUsePill = (props) => {
-  const { dataUse, index } = props;
+  const { dataUse, index } = props
 
   return (
     <div key={`data_use_pill_${dataUse.type}_${dataUse.code}_${index}`} style={styles.baseStyle}>
       <span style={styles.code}>{!isNil(dataUse) ? [dataUse.code] : []}</span>
       <span style={styles.description}>{!isNil(dataUse) ? [dataUse.description] : []}</span>
     </div>
-  );
-};
+  )
+}
 
 export const DataUsePills = (dataUses) => {
-  const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions);
-  const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers);
+  const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions)
+  const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers)
 
   return (
     <div>
@@ -60,5 +60,5 @@ export const DataUsePills = (dataUses) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}

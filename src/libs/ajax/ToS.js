@@ -1,13 +1,12 @@
-import { Config } from '../config';
-import axios from 'axios';
-import { getApiUrl } from '../ajax';
-
+import { Config } from '../config'
+import axios from 'axios'
+import { getApiUrl } from '../ajax'
 
 export const ToS = {
   getDUOSText: async () => {
-    const url = `${await getApiUrl()}/tos/text/duos`;
-    const res = await axios.get(url, Config.textPlain());
-    return res.data;
+    const url = `${await getApiUrl()}/tos/text/duos`
+    const res = await axios.get(url, Config.textPlain())
+    return res.data
   },
   /**
    * Returns a json structure of various statuses for an authenticated user.
@@ -23,18 +22,18 @@ export const ToS = {
    * @returns {Promise<any>}
    */
   getStatus: async () => {
-    const url = `${await getApiUrl()}/api/sam/register/self/diagnostics`;
-    const res = await axios.get(url, Config.authOpts());
-    return res.data;
+    const url = `${await getApiUrl()}/api/sam/register/self/diagnostics`
+    const res = await axios.get(url, Config.authOpts())
+    return res.data
   },
   acceptToS: async () => {
-    const url = `${await getApiUrl()}/api/sam/register/self/tos`;
-    const res = await axios.post(url, {}, Config.authOpts());
-    return res.data;
+    const url = `${await getApiUrl()}/api/sam/register/self/tos`
+    const res = await axios.post(url, {}, Config.authOpts())
+    return res.data
   },
   rejectToS: async () => {
-    const url = `${await getApiUrl()}/api/sam/register/self/tos`;
-    const res = await axios.delete(url, Config.authOpts());
-    return res.data;
-  }
-};
+    const url = `${await getApiUrl()}/api/sam/register/self/tos`
+    const res = await axios.delete(url, Config.authOpts())
+    return res.data
+  },
+}

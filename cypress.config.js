@@ -1,4 +1,4 @@
-import { defineConfig } from 'cypress';
+import { defineConfig } from 'cypress'
 
 export default defineConfig({
   chromeWebSecurity: false,
@@ -17,4 +17,4 @@ export default defineConfig({
       bundler: 'vite',
     },
   },
-});
+})

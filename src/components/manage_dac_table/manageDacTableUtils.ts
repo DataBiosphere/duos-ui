@@ -1,4 +1,4 @@
-import {Styles} from 'src/libs/theme';
+import { Styles } from 'src/libs/theme'
 
 export const styles = {
   baseStyle: {
@@ -14,7 +14,7 @@ export const styles = {
     border: '1px solid #DEDEDE',
     borderRadius: '4px',
     margin: '0.5% 0',
-    overflow: 'visible'
+    overflow: 'visible',
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -45,4 +45,4 @@ export const styles = {
     datasets: '1.4rem',
     actions: '1.6rem',
   },
-};
+}

@@ -1,29 +1,29 @@
-import React, { ReactNode } from 'react';
-import { mount } from 'cypress/react';
-import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication';
-import {CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject} from 'src/types/model';
-import { History, Location, Action } from 'history';
-import { Storage } from 'src/libs/storage';
+import React, { ReactNode } from 'react'
+import { mount } from 'cypress/react'
+import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
+import { CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject } from 'src/types/model'
+import { History, Location, Action } from 'history'
+import { Storage } from 'src/libs/storage'
 
 describe('ProgressReportApplication - Component Tests', () => {
-  let mockHistory: History;
+  let mockHistory: History
 
   beforeEach(() => {
-    cy.initApplicationConfig();
+    cy.initApplicationConfig()
 
     // Mock the utility functions that the component uses
     cy.stub(window, 'fetch').resolves({
       ok: true,
-      json: () => Promise.resolve([])
-    });
+      json: () => Promise.resolve([]),
+    })
 
     // Mock Storage methods that might be used
     cy.window().then((win) => {
-      win.localStorage.clear();
-      win.localStorage.clear();
-    });
+      win.localStorage.clear()
+      win.localStorage.clear()
+    })
 
-    cy.stub(Storage, 'getCurrentUser').returns(researcher);
+    cy.stub(Storage, 'getCurrentUser').returns(researcher)
 
     // Create mock history with stubs inside beforeEach
     mockHistory = {
@@ -33,7 +33,7 @@ describe('ProgressReportApplication - Component Tests', () => {
         search: '',
         hash: '',
         state: null,
-        key: 'testkey'
+        key: 'testkey',
       },
       push: cy.stub(),
       replace: cy.stub(),
@@ -42,17 +42,17 @@ describe('ProgressReportApplication - Component Tests', () => {
       forward: cy.stub(),
       block: cy.stub(),
       listen: cy.stub(),
-      createHref: cy.stub()
-    };
-  });
+      createHref: cy.stub(),
+    }
+  })
 
   const location: Location = {
     pathname: '/progress-report-application',
     search: '',
     hash: '',
     state: {},
-    key: 'testKey'
-  };
+    key: 'testKey',
+  }
 
   const researcher: DuosUser = {
     createDate: new Date(),
@@ -73,8 +73,8 @@ describe('ProgressReportApplication - Component Tests', () => {
       userId: 1,
       userRoleId: 1,
     }],
-    userId: 1
-  };
+    userId: 1,
+  }
 
   const fso: FileStorageObject = {
     fileStorageObjectId: 1,
@@ -83,7 +83,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     category: 'irbCollaborationLetter',
     mediaType: 'image/pdf',
     createUserId: 3,
-    createDate: new Date().getDate()
+    createDate: new Date().getDate(),
   }
 
   const mockDatasets: Dataset[] = [
@@ -115,7 +115,7 @@ describe('ProgressReportApplication - Component Tests', () => {
         stigmatizeDiseases: false,
         vulnerablePopulations: false,
         psychologicalTraits: false,
-        notHealth: false
+        notHealth: false,
       },
       datasetName: '',
       createUserId: 0,
@@ -130,7 +130,7 @@ describe('ProgressReportApplication - Component Tests', () => {
           enabled: true,
           adminEnabled: false,
           userEmail: '',
-          userSubjectId: ''
+          userSubjectId: '',
         },
         isAdmin: false,
         isAlumni: false,
@@ -138,7 +138,7 @@ describe('ProgressReportApplication - Component Tests', () => {
         isDataSubmitter: false,
         isMember: false,
         isResearcher: false,
-        isSigningOfficial: false
+        isSigningOfficial: false,
       },
       dacId: 2,
       translatedDataUse: '',
@@ -154,7 +154,7 @@ describe('ProgressReportApplication - Component Tests', () => {
         piName: 'Test Dataset Submission',
         publicVisibility: true,
         dataTypes: [
-          'CITE-seq'
+          'CITE-seq',
         ],
         name: '',
         datasetIds: [],
@@ -164,11 +164,11 @@ describe('ProgressReportApplication - Component Tests', () => {
         createDate: '',
         createUserId: 0,
         updateDate: '',
-        updateUserId: 0
+        updateUserId: 0,
       },
       createDate: new Date('2023-10-01T00:00:00Z'),
-    }
-  ];
+    },
+  ]
 
   const baseDar: Partial<CombinedDataAccessRequest> = {
     userId: 1,
@@ -181,11 +181,11 @@ describe('ProgressReportApplication - Component Tests', () => {
     createDate: 1748736000,
     sortDate: 1748736000,
     submissionDate: 1748736000,
-    updateDate: 1748736000
-  };
+    updateDate: 1748736000,
+  }
 
   const mountComponent = (dar: Partial<CombinedDataAccessRequest> = {}, readOnly = true) => {
-    const fullDar = { ...baseDar, ...dar } as CombinedDataAccessRequest;
+    const fullDar = { ...baseDar, ...dar } as CombinedDataAccessRequest
 
     const props = {
       dar: fullDar,
@@ -194,80 +194,80 @@ describe('ProgressReportApplication - Component Tests', () => {
       history: mockHistory,
       location,
       researcher,
-      countriesOfOperation: []
-    };
+      countriesOfOperation: [],
+    }
 
-    return mount(<ProgressReportApplication {...props} /> as ReactNode);
-  };
+    return mount(<ProgressReportApplication {...props} /> as ReactNode)
+  }
 
   it('renders the component without errors', () => {
     // Mount component with basic DAR
-    const basicDar = {};
+    const basicDar = {}
 
-    mountComponent(basicDar, true);
+    mountComponent(basicDar, true)
 
     // Just check that the component renders by looking for the step container
-    cy.get('.accordion-step-container').should('exist');
-  });
+    cy.get('.accordion-step-container').should('exist')
+  })
 
   it('defaults intellectualPropertyYesNo to false when dar.intellectualPropertySummary is undefined', () => {
     // Mount component with DAR that has undefined intellectualPropertySummary
-    const darWithoutIntellectualProperty = {};
+    const darWithoutIntellectualProperty = {}
 
-    mountComponent(darWithoutIntellectualProperty, true);
+    mountComponent(darWithoutIntellectualProperty, true)
 
     // Check that the intellectual property "No" radio button is checked (false state)
-    cy.get('#intellectualPropertyYesNo_no').should('be.checked');
-    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#intellectualPropertyYesNo_no').should('be.checked')
+    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
+  })
 
   it('sets intellectualPropertyYesNo to true when dar.intellectualPropertySummary has a value', () => {
     // Mount component with DAR that has intellectualPropertySummary
     const darWithIntellectualProperty = {
-      intellectualPropertySummary: 'Some intellectual property description'
-    };
+      intellectualPropertySummary: 'Some intellectual property description',
+    }
 
-    mountComponent(darWithIntellectualProperty, true);
+    mountComponent(darWithIntellectualProperty, true)
 
     // Check that the intellectual property "Yes" radio button is checked (true state)
-    cy.get('#intellectualPropertyYesNo_yes').should('be.checked');
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked');
-  });
+    cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
+    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
+  })
 
   it('in non-read-only mode, has neither intellectualPropertyYesNo radio button checked when dar.intellectualPropertySummary is undefined', () => {
     // Mount component with DAR that has undefined intellectualPropertySummary
-    const darWithoutIntellectualProperty = {};
+    const darWithoutIntellectualProperty = {}
 
-    mountComponent(darWithoutIntellectualProperty, false);
+    mountComponent(darWithoutIntellectualProperty, false)
 
     // Check that neither radio button is checked when the value is undefined
-    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked');
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked');
-  });
+    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
+    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
+  })
 
   it('defaults publicationsYesNo to false when dar.publications is undefined or empty', () => {
     // Test with undefined publications
-    const darWithoutPublications = {};
+    const darWithoutPublications = {}
 
-    mountComponent(darWithoutPublications, true);
+    mountComponent(darWithoutPublications, true)
 
     // Check that the publications "No" radio button is checked (false state)
-    cy.get('#publicationsYesNo_no').should('be.checked');
-    cy.get('#publicationsYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#publicationsYesNo_no').should('be.checked')
+    cy.get('#publicationsYesNo_yes').should('not.be.checked')
+  })
 
   it('defaults publicationsYesNo to false when dar.publications is empty array', () => {
     // Test with empty publications array
     const darWithEmptyPublications = {
-      publications: []
-    };
+      publications: [],
+    }
 
-    mountComponent(darWithEmptyPublications, true);
+    mountComponent(darWithEmptyPublications, true)
 
     // Check that the publications "No" radio button is checked (false state)
-    cy.get('#publicationsYesNo_no').should('be.checked');
-    cy.get('#publicationsYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#publicationsYesNo_no').should('be.checked')
+    cy.get('#publicationsYesNo_yes').should('not.be.checked')
+  })
 
   it('sets publicationsYesNo to true when dar.publications has items', () => {
     // Test with publications array containing items
@@ -281,7 +281,7 @@ describe('ProgressReportApplication - Component Tests', () => {
           bibliographic_citation: 'Citation 1',
           dataset_citation: 'Dataset Citation 1',
           did_cite: true,
-          link: ''
+          link: '',
         },
         {
           title: 'Publication 2',
@@ -291,21 +291,21 @@ describe('ProgressReportApplication - Component Tests', () => {
           bibliographic_citation: 'Citation 2',
           dataset_citation: 'Dataset Citation 2',
           did_cite: false,
-          link: ''
-        }
-      ]
-    } as unknown as CombinedDataAccessRequest;
+          link: '',
+        },
+      ],
+    } as unknown as CombinedDataAccessRequest
 
-    mountComponent(darWithPublications, true);
+    mountComponent(darWithPublications, true)
 
     // Check that the publications "Yes" radio button is checked (true state)
-    cy.get('#publicationsYesNo_yes').should('be.checked');
-    cy.get('#publicationsYesNo_no').should('not.be.checked');
+    cy.get('#publicationsYesNo_yes').should('be.checked')
+    cy.get('#publicationsYesNo_no').should('not.be.checked')
 
     // Check that publications are actually displayed in the DOM
-    cy.contains('Publication 1').should('be.visible');
-    cy.contains('Publication 2').should('be.visible');
-  });
+    cy.contains('Publication 1').should('be.visible')
+    cy.contains('Publication 2').should('be.visible')
+  })
 
   it('displays publications in read-only when they exist', () => {
     // Test scenario where publications exist but radio might not be set correctly
@@ -319,36 +319,36 @@ describe('ProgressReportApplication - Component Tests', () => {
           bibliographic_citation: 'Test Citation',
           dataset_citation: 'Test Dataset Citation',
           did_cite: true,
-          link: ''
-        }
-      ]
-    } as unknown as CombinedDataAccessRequest;
+          link: '',
+        },
+      ],
+    } as unknown as CombinedDataAccessRequest
 
-    mountComponent(darWithPublications, true);
+    mountComponent(darWithPublications, true)
 
     // Publications should be visible regardless of radio button state
-    cy.contains('Test Publication').should('be.visible');
-  });
+    cy.contains('Test Publication').should('be.visible')
+  })
 
   it('defaults presentationsYesNo to false when dar.presentations is undefined', () => {
-    const darWithoutPresentations = {};
+    const darWithoutPresentations = {}
 
-    mountComponent(darWithoutPresentations, true);
+    mountComponent(darWithoutPresentations, true)
 
     // Check that the presentations "No" radio button is checked (false state)
-    cy.get('#presentationsYesNo_no').should('be.checked');
-    cy.get('#presentationsYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#presentationsYesNo_no').should('be.checked')
+    cy.get('#presentationsYesNo_yes').should('not.be.checked')
+  })
 
   it('defaults presentationsYesNo to false when dar.presentations is undefined', () => {
-    const darWithEmptyPresentations = {};
+    const darWithEmptyPresentations = {}
 
-    mountComponent(darWithEmptyPresentations, true);
+    mountComponent(darWithEmptyPresentations, true)
 
     // Check that the presentations "No" radio button is checked (false state)
-    cy.get('#presentationsYesNo_no').should('be.checked');
-    cy.get('#presentationsYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#presentationsYesNo_no').should('be.checked')
+    cy.get('#presentationsYesNo_yes').should('not.be.checked')
+  })
 
   it('sets presentationsYesNo to true when dar.presentations has items', () => {
     const darWithPresentations = {
@@ -361,7 +361,7 @@ describe('ProgressReportApplication - Component Tests', () => {
           dataset_citation: 'Dataset Citation 1',
           did_cite: true,
           bibliographic_citation: 'Bibliographic Citation 1',
-          pubmed_id: ''
+          pubmed_id: '',
         },
         {
           title: 'Presentation 2',
@@ -371,55 +371,55 @@ describe('ProgressReportApplication - Component Tests', () => {
           dataset_citation: 'Dataset Citation 2',
           did_cite: false,
           bibliographic_citation: 'Bibliographic Citation 2',
-          pubmed_id: ''
-        }
-      ]
-    } as unknown as CombinedDataAccessRequest;
+          pubmed_id: '',
+        },
+      ],
+    } as unknown as CombinedDataAccessRequest
 
-    mountComponent(darWithPresentations, true);
+    mountComponent(darWithPresentations, true)
 
     // Check that the presentations "Yes" radio button is checked (true state)
-    cy.get('#presentationsYesNo_yes').should('be.checked');
-    cy.get('#presentationsYesNo_no').should('not.be.checked');
+    cy.get('#presentationsYesNo_yes').should('be.checked')
+    cy.get('#presentationsYesNo_no').should('not.be.checked')
 
     // Check that presentations are actually displayed in the DOM
-    cy.contains('Presentation 1').should('be.visible');
-    cy.contains('Presentation 2').should('be.visible');
-  });
+    cy.contains('Presentation 1').should('be.visible')
+    cy.contains('Presentation 2').should('be.visible')
+  })
 
   it('does not display IRB document upload when not required by dataUse', () => {
     // mock Datasets included in mount component don't include IRB document requirement
-    mountComponent({}, true);
-    cy.contains('IRB Documentation').should('not.exist');
-  });
+    mountComponent({}, true)
+    cy.contains('IRB Documentation').should('not.exist')
+  })
 
   it('displays IRB document upload when required by dataUse', () => {
     // IRB document is required
-    mockDatasets[0].dataUse.ethicsApprovalRequired = true;
-    mountComponent({}, true);
+    mockDatasets[0].dataUse.ethicsApprovalRequired = true
+    mountComponent({}, true)
 
-    cy.contains('IRB Documentation').should('be.visible');
-  });
+    cy.contains('IRB Documentation').should('be.visible')
+  })
 
   it('defaults dmiYesNo to false when dar.dmi is undefined', () => {
-    const darWithoutDmi = {};
+    const darWithoutDmi = {}
 
-    mountComponent(darWithoutDmi, true);
+    mountComponent(darWithoutDmi, true)
 
     // Check that the DMI "No" radio button is checked (false state)
-    cy.get('#dmiYesNo_no').should('be.checked');
-    cy.get('#dmiYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#dmiYesNo_no').should('be.checked')
+    cy.get('#dmiYesNo_yes').should('not.be.checked')
+  })
 
   it('defaults dmiYesNo to false when dar.dmi.incidents is undefined', () => {
-    const darWithEmptyDmiIncidents = {};
+    const darWithEmptyDmiIncidents = {}
 
-    mountComponent(darWithEmptyDmiIncidents, true);
+    mountComponent(darWithEmptyDmiIncidents, true)
 
     // Check that the DMI "No" radio button is checked (false state)
-    cy.get('#dmiYesNo_no').should('be.checked');
-    cy.get('#dmiYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#dmiYesNo_no').should('be.checked')
+    cy.get('#dmiYesNo_yes').should('not.be.checked')
+  })
 
   it('sets dmiYesNo to true when dar.dmi.incidents has items', () => {
     // Test with dmi incidents array containing realistic incident types
@@ -427,60 +427,60 @@ describe('ProgressReportApplication - Component Tests', () => {
     const darWithDmiIncidents = {
       dmi: {
         incidents: ['dmiCombination', 'dmiSharing', 'dmiSecurity'],
-        description: 'There were incidents involving inappropriate dataset combination, unauthorized data sharing, and security breaches during the research period.'
-      }
-    };
+        description: 'There were incidents involving inappropriate dataset combination, unauthorized data sharing, and security breaches during the research period.',
+      },
+    }
 
-    mountComponent(darWithDmiIncidents, true);
+    mountComponent(darWithDmiIncidents, true)
 
     // Check that the DMI "Yes" radio button is checked (true state)
-    cy.get('#dmiYesNo_yes').should('be.checked');
-    cy.get('#dmiYesNo_no').should('not.be.checked');
-  });
+    cy.get('#dmiYesNo_yes').should('be.checked')
+    cy.get('#dmiYesNo_no').should('not.be.checked')
+  })
 
   it('defaults closeoutYesNo to false when dar.closeoutSupplement is undefined', () => {
     // Test with undefined closeoutSupplement
-    const darWithoutCloseout = {};
+    const darWithoutCloseout = {}
 
-    mountComponent(darWithoutCloseout, true);
+    mountComponent(darWithoutCloseout, true)
 
     // Check that the closeout "No" radio button is checked (false state)
-    cy.get('#closeoutYesNo_no').should('be.checked');
-    cy.get('#closeoutYesNo_yes').should('not.be.checked');
-  });
+    cy.get('#closeoutYesNo_no').should('be.checked')
+    cy.get('#closeoutYesNo_yes').should('not.be.checked')
+  })
 
   it('sets closeoutYesNo to true when closeoutSupplement is in dar and reasons is a non-empty list', () => {
     const darWithCloseout = {
       closeoutSupplement: {
         reasons: ['closeoutProjectCompleted'],
         otherText: '',
-        signingOfficialId: 1
-      }
-    };
+        signingOfficialId: 1,
+      },
+    }
 
-    mountComponent(darWithCloseout, true);
+    mountComponent(darWithCloseout, true)
 
     // Check that the closeout "Yes" radio button is checked (true state)
-    cy.get('#closeoutYesNo_yes').should('be.checked');
-    cy.get('#closeoutYesNo_no').should('not.be.checked');
-  });
+    cy.get('#closeoutYesNo_yes').should('be.checked')
+    cy.get('#closeoutYesNo_no').should('not.be.checked')
+  })
 
   it('displays intellectual property summary in read-only mode when it exists', () => {
     // Test scenario where intellectual property summary exists
     const darWithIntellectualProperty = {
-      intellectualPropertySummary: 'Test intellectual property description with important details'
-    };
+      intellectualPropertySummary: 'Test intellectual property description with important details',
+    }
 
-    mountComponent(darWithIntellectualProperty, true);
+    mountComponent(darWithIntellectualProperty, true)
 
     // Check that the intellectual property "Yes" radio button is checked (true state)
-    cy.get('#intellectualPropertyYesNo_yes').should('be.checked');
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked');
+    cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
+    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
 
     // Check that the intellectual property summary is visible in the form
-    cy.get('#intellectualPropertySummary').should('be.visible');
-    cy.get('#intellectualPropertySummary').should('contain.value', 'Test intellectual property description with important details');
-  });
+    cy.get('#intellectualPropertySummary').should('be.visible')
+    cy.get('#intellectualPropertySummary').should('contain.value', 'Test intellectual property description with important details')
+  })
 
   it('shows only approved datasets in create-mode progress report', () => {
     // Create multiple datasets with different approval states
@@ -516,8 +516,8 @@ describe('ProgressReportApplication - Component Tests', () => {
         datasetName: 'DAC Approved but Not Election Approved Dataset',
         datasetIdentifier: 'DUOS-000004',
         dacApproval: true,
-      }
-    ];
+      },
+    ]
 
     // Create elections where only datasets 1 and 2 are approved
     const darWithElections = {
@@ -538,9 +538,9 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 1001,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
+              displayName: 'Test Voter 1',
+            },
+          },
         },
         1002: {
           electionId: 1002,
@@ -557,9 +557,9 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 1002,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
+              displayName: 'Test Voter 1',
+            },
+          },
         },
         1003: {
           electionId: 1003,
@@ -576,9 +576,9 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 1003,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
+              displayName: 'Test Voter 1',
+            },
+          },
         },
         1004: {
           electionId: 1004,
@@ -595,15 +595,15 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 1004,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
-        }
-      }
-    };
+              displayName: 'Test Voter 1',
+            },
+          },
+        },
+      },
+    }
 
     // Mount component with datasets and elections
-    const fullDar = { ...baseDar, ...darWithElections } as unknown as CombinedDataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithElections } as unknown as CombinedDataAccessRequest
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -611,10 +611,10 @@ describe('ProgressReportApplication - Component Tests', () => {
       history: mockHistory,
       location,
       researcher,
-      countriesOfOperation: []
-    };
+      countriesOfOperation: [],
+    }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode);
+    mount(<ProgressReportApplication {...props} /> as ReactNode)
 
     // Verify that only approved datasets are shown
     // The component should only show datasets that are:
@@ -624,19 +624,19 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     // Should show dataset 1 and 2 (both DAC approved AND election approved)
     cy.get('[data-cy="remove-datasets"]').within(() => {
-      cy.contains('Approved Dataset 1').should('exist');
-      cy.contains('Approved Dataset 2').should('exist');
+      cy.contains('Approved Dataset 1').should('exist')
+      cy.contains('Approved Dataset 2').should('exist')
 
       // Should NOT show dataset 3 (not DAC approved)
-      cy.contains('Not DAC Approved Dataset').should('not.exist');
+      cy.contains('Not DAC Approved Dataset').should('not.exist')
 
       // Should NOT show dataset 4 (DAC approved but election denied)
-      cy.contains('DAC Approved but Not Election Approved Dataset').should('not.exist');
-    });
+      cy.contains('DAC Approved but Not Election Approved Dataset').should('not.exist')
+    })
 
     // Verify the count of displayed datasets using the actual CSS class
-    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 2);
-  });
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 2)
+  })
 
   it('in create-mode, shows no datasets when none are approved through elections', () => {
     // Create datasets where all have DAC approval but none have election approval
@@ -656,8 +656,8 @@ describe('ProgressReportApplication - Component Tests', () => {
         datasetName: 'DAC Approved Dataset 2',
         datasetIdentifier: 'DUOS-000002',
         dacApproval: true,
-      }
-    ];
+      },
+    ]
 
     // Create elections where all datasets are denied
     const darWithDeniedElections = {
@@ -678,9 +678,9 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 2001,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
+              displayName: 'Test Voter 1',
+            },
+          },
         },
         2002: {
           electionId: 2002,
@@ -697,14 +697,14 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 2002,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
-        }
-      }
-    };
+              displayName: 'Test Voter 1',
+            },
+          },
+        },
+      },
+    }
 
-    const fullDar = { ...baseDar, ...darWithDeniedElections } as unknown as CombinedDataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithDeniedElections } as unknown as CombinedDataAccessRequest
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -712,20 +712,20 @@ describe('ProgressReportApplication - Component Tests', () => {
       history: mockHistory,
       location,
       researcher,
-      countriesOfOperation: []
-    };
+      countriesOfOperation: [],
+    }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode);
+    mount(<ProgressReportApplication {...props} /> as ReactNode)
 
     // Should show no datasets since none are approved through elections
     cy.get('[data-cy="remove-datasets"]').within(() => {
-      cy.contains('DAC Approved Dataset 1').should('not.exist');
-      cy.contains('DAC Approved Dataset 2').should('not.exist');
-    });
+      cy.contains('DAC Approved Dataset 1').should('not.exist')
+      cy.contains('DAC Approved Dataset 2').should('not.exist')
+    })
 
     // The dataset list should be empty or show a message about no datasets
-    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 0);
-  });
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 0)
+  })
 
   it('in create-mode, only shows datasets that pass all approval criteria', () => {
     // This test ensures the filtering logic works correctly by testing the exact criteria:
@@ -765,8 +765,8 @@ describe('ProgressReportApplication - Component Tests', () => {
         datasetName: 'No Election Approval',
         datasetIdentifier: 'DUOS-000004',
         dacApproval: true,
-      }
-    ];
+      },
+    ]
 
     const darWithFilteringTest = {
       datasetIds: [1, 3, 4], // Note: dataset 2 is NOT included in DAR
@@ -786,9 +786,9 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 3001,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
+              displayName: 'Test Voter 1',
+            },
+          },
         },
         3003: {
           electionId: 3003,
@@ -805,9 +805,9 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 3003,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
+              displayName: 'Test Voter 1',
+            },
+          },
         },
         3004: {
           electionId: 3004,
@@ -824,14 +824,14 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 3004,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
-        }
-      }
-    };
+              displayName: 'Test Voter 1',
+            },
+          },
+        },
+      },
+    }
 
-    const fullDar = { ...baseDar, ...darWithFilteringTest } as unknown as CombinedDataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithFilteringTest } as unknown as CombinedDataAccessRequest
     const props = {
       dar: fullDar,
       datasets: testDatasets,
@@ -839,21 +839,21 @@ describe('ProgressReportApplication - Component Tests', () => {
       history: mockHistory,
       location,
       researcher,
-      countriesOfOperation: []
-    };
+      countriesOfOperation: [],
+    }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode);
+    mount(<ProgressReportApplication {...props} /> as ReactNode)
 
     // Only dataset 1 should be shown (meets all criteria)
     cy.get('[data-cy="remove-datasets"]').within(() => {
-      cy.contains('All Criteria Met').should('exist');
-      cy.contains('Not in DAR datasetIds').should('not.exist');
-      cy.contains('No DAC Approval').should('not.exist');
-      cy.contains('No Election Approval').should('not.exist');
-    });
+      cy.contains('All Criteria Met').should('exist')
+      cy.contains('Not in DAR datasetIds').should('not.exist')
+      cy.contains('No DAC Approval').should('not.exist')
+      cy.contains('No Election Approval').should('not.exist')
+    })
 
-    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 1);
-  });
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 1)
+  })
 
   it('shows only datasets with IDs included in DAR.datasetIds as available datasets (read-only mode)', () => {
     // Create multiple datasets where some are DAC approved but only some are in the DAR datasetIds
@@ -889,8 +889,8 @@ describe('ProgressReportApplication - Component Tests', () => {
         datasetName: 'Another Dataset NOT In DAR',
         datasetIdentifier: 'DUOS-000004',
         dacApproval: true, // DAC approved but NOT in DAR datasetIds
-      }
-    ];
+      },
+    ]
 
     // Create elections where all datasets are approved (to isolate the datasetIds filtering)
     const darWithSelectiveDatasetIds = {
@@ -911,9 +911,9 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 1001,
               type: 'FINAL',
-              displayName: 'Test Voter 1'
-            }
-          }
+              displayName: 'Test Voter 1',
+            },
+          },
         },
         1002: {
           electionId: 1002,
@@ -930,15 +930,15 @@ describe('ProgressReportApplication - Component Tests', () => {
               createDate: 1700000000000,
               electionId: 1002,
               type: 'FINAL',
-              displayName: 'Test Voter 2'
-            }
-          }
+              displayName: 'Test Voter 2',
+            },
+          },
         },
         // Note: No elections for datasets 3 and 4 since they're not in the DAR
-      }
-    };
+      },
+    }
 
-    const fullDar = { ...baseDar, ...darWithSelectiveDatasetIds } as unknown as CombinedDataAccessRequest;
+    const fullDar = { ...baseDar, ...darWithSelectiveDatasetIds } as unknown as CombinedDataAccessRequest
 
     const props = {
       dar: fullDar,
@@ -947,31 +947,31 @@ describe('ProgressReportApplication - Component Tests', () => {
       history: mockHistory,
       location,
       researcher,
-      countriesOfOperation: []
-    };
+      countriesOfOperation: [],
+    }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode);
+    mount(<ProgressReportApplication {...props} /> as ReactNode)
 
-    cy.get('[data-cy="remove-datasets"]').should('exist');
+    cy.get('[data-cy="remove-datasets"]').should('exist')
 
     // Should show only datasets 1 and 2 (which are in dar.datasetIds)
     cy.get('[data-cy="remove-datasets"]').within(() => {
-      cy.contains('Dataset In DAR 1').should('exist');
-      cy.contains('Dataset In DAR 2').should('exist');
+      cy.contains('Dataset In DAR 1').should('exist')
+      cy.contains('Dataset In DAR 2').should('exist')
 
       // Should NOT show datasets 3 and 4 (not in dar.datasetIds, even though they have DAC approval)
-      cy.contains('Dataset NOT In DAR').should('not.exist');
-      cy.contains('Another Dataset NOT In DAR').should('not.exist');
-    });
+      cy.contains('Dataset NOT In DAR').should('not.exist')
+      cy.contains('Another Dataset NOT In DAR').should('not.exist')
+    })
 
     // Verify exactly 2 datasets are displayed (only those in dar.datasetIds)
-    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 2);
+    cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').should('have.length', 2)
 
     // In read-only mode, verify that the datasets are displayed but not editable
     cy.get('[data-cy="remove-datasets"] .collaborator-summary-card').each(($card) => {
       // Should not have remove buttons or other interactive elements in read-only mode
-      cy.wrap($card).find('button').should('not.exist');
-      cy.wrap($card).find('input[type="checkbox"]').should('not.exist');
-    });
-  });
-});
+      cy.wrap($card).find('button').should('not.exist')
+      cy.wrap($card).find('input[type="checkbox"]').should('not.exist')
+    })
+  })
+})

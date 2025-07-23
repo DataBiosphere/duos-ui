@@ -1,6 +1,6 @@
-import React from 'react';
-import { BaseModal } from '../../components/BaseModal';
-import { DacUsers } from './DacUsers';
+import React from 'react'
+import { BaseModal } from '../../components/BaseModal'
+import { DacUsers } from './DacUsers'
 
 export const DacMembersModal = ({ showModal, onCloseRequest, dac }) => {
   return (
@@ -18,5 +18,5 @@ export const DacMembersModal = ({ showModal, onCloseRequest, dac }) => {
         <DacUsers dac={dac} removeButton={false} />
       </div>
     </BaseModal>
-  );
-};
+  )
+}

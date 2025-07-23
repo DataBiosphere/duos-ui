@@ -1,37 +1,37 @@
-import React from 'react';
-import { mount } from 'cypress/react';
-import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable';
+import React from 'react'
+import { mount } from 'cypress/react'
+import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable'
 
 const dacVotes = [
   {
-    'displayName': 'John Doe',
-    'updateDate': 1642032000000,
-    'vote': false,
-  }
-];
+    displayName: 'John Doe',
+    updateDate: 1642032000000,
+    vote: false,
+  },
+]
 
-describe('VoteSummaryTable - Tests', function() {
-  it('Renders four columns of data', function() {
+describe('VoteSummaryTable - Tests', function () {
+  it('Renders four columns of data', function () {
     mount(
       <VoteSummaryTable
         dacVotes={dacVotes}
         isLoading={false}
-      />
-    );
-    cy.get('.column-header').should('have.length', 4);
-  });
+      />,
+    )
+    cy.get('.column-header').should('have.length', 4)
+  })
 
-  it('Renders member decision in the vote column', function() {
+  it('Renders member decision in the vote column', function () {
     mount(
       <VoteSummaryTable
         dacVotes={dacVotes}
         isLoading={false}
-      />
-    );
-    cy.get('.table-data').contains('No');
-  });
+      />,
+    )
+    cy.get('.table-data').contains('No')
+  })
 
-  //this test works locally but fails on Github
+  // this test works locally but fails on Github
   /*
   it('Formats date of vote to YYYY-MM-DD in date column', function() {
     mount(
@@ -44,23 +44,23 @@ describe('VoteSummaryTable - Tests', function() {
   });
   */
 
-  it('Renders filler content for missing rationale', function() {
+  it('Renders filler content for missing rationale', function () {
     mount(
       <VoteSummaryTable
         dacVotes={dacVotes}
         isLoading={false}
-      />
-    );
-    cy.get('.table-data').contains('- -');
-  });
+      />,
+    )
+    cy.get('.table-data').contains('- -')
+  })
 
-  it('Renders skeleton table if isLoading is true', function() {
+  it('Renders skeleton table if isLoading is true', function () {
     mount(
       <VoteSummaryTable
         isLoading={true}
-      />
-    );
-    cy.get('.table-data').should('exist');
-    cy.get('.table-loading-placeholder').should('exist');
-  });
-});
+      />,
+    )
+    cy.get('.table-data').should('exist')
+    cy.get('.table-loading-placeholder').should('exist')
+  })
+})

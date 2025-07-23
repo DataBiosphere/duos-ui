@@ -1,4 +1,4 @@
-import {DatasetTerm, StudyTerm, UserTerm} from '../../src/types/model';
+import { DatasetTerm, StudyTerm, UserTerm } from '../../src/types/model'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -8,7 +8,7 @@ export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
     name: 'some name',
   },
   ...overrides,
-});
+})
 
 export const makeStudyTerm = (overrides: Partial<StudyTerm> = {}): StudyTerm => ({
   description: 'description',
@@ -23,8 +23,8 @@ export const makeStudyTerm = (overrides: Partial<StudyTerm> = {}): StudyTerm => 
   dataCustodianEmail: ['data custodian email'],
   publicVisibility: false,
   dataTypes: ['data type'],
-  ...overrides
-});
+  ...overrides,
+})
 
 export const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
   datasetId: 0,
@@ -35,8 +35,8 @@ export const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTe
   datasetName: 'dataset',
   participantCount: 1,
   dataUse: {
-    primary: [{code: 'foo', description: 'bar'}],
-    secondary: [{code: 'foo', description: 'bar'}]
+    primary: [{ code: 'foo', description: 'bar' }],
+    secondary: [{ code: 'foo', description: 'bar' }],
   },
   dataLocation: 'somewhere',
   url: 'some url',
@@ -52,5 +52,5 @@ export const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTe
     dacName: 'some name',
     dacEmail: 'some email',
   },
-  ...overrides
-});
+  ...overrides,
+})

@@ -1,15 +1,15 @@
-import React from 'react';
-import homeHeaderBackground from '../images/home_header_background.png';
-import duosLogoImg from '../images/duos_logo.svg';
-import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
-import broadLogo from '../images/broad_logo_allwhite.png';
-import anvilLogo from '../images/anvil-logo.svg';
-import hcaLogo from '../images/human-cell-atlas-logo.png';
-import { OverflowTooltip } from '../components/Tooltips';
-import { Link } from 'react-router-dom';
+import React from 'react'
+import homeHeaderBackground from '../images/home_header_background.png'
+import duosLogoImg from '../images/duos_logo.svg'
+import duosDiagram from '../images/DUOS_Homepage_diagram.svg'
+import broadLogo from '../images/broad_logo_allwhite.png'
+import anvilLogo from '../images/anvil-logo.svg'
+import hcaLogo from '../images/human-cell-atlas-logo.png'
+import { OverflowTooltip } from '../components/Tooltips'
+import { Link } from 'react-router-dom'
 
 const Home = (props) => {
-  const { isLogged } = props;
+  const { isLogged } = props
 
   const homeTitle = {
     color: '#FFFFFF',
@@ -17,8 +17,8 @@ const Home = (props) => {
     fontSize: '28px',
     fontWeight: 600,
     textAlign: 'center',
-    padding: '0 5rem'
-  };
+    padding: '0 5rem',
+  }
 
   const homeBannerDescription = {
     color: '#FFFFFF',
@@ -26,16 +26,16 @@ const Home = (props) => {
     fontSize: '20px',
     textAlign: 'center',
     whiteSpace: 'pre-wrap',
-    padding: '0 10rem'
-  };
+    padding: '0 10rem',
+  }
 
   const duosLogo = {
     height: '80px',
     width: '300px',
     display: 'block',
     margin: '0 auto 3rem',
-    padding: '0 3rem'
-  };
+    padding: '0 3rem',
+  }
 
   const header = {
     color: '#1F3B50',
@@ -43,8 +43,8 @@ const Home = (props) => {
     fontSize: '24px',
     fontWeight: 600,
     textAlign: 'center',
-    padding: '0 5rem'
-  };
+    padding: '0 5rem',
+  }
 
   const subHeader = {
     color: '#1F3B50',
@@ -52,8 +52,8 @@ const Home = (props) => {
     fontSize: '16px',
     textAlign: 'center',
     whiteSpace: 'pre-wrap',
-    padding: '0 5rem'
-  };
+    padding: '0 5rem',
+  }
 
   const description = {
     color: '#1F3B50',
@@ -63,16 +63,16 @@ const Home = (props) => {
     textIndent: '10px',
     whiteSpace: 'pre-wrap',
     padding: '10px 1rem',
-  };
+  }
 
   const logoGrid = {
     display: 'flex',
-    gap: '3rem',              
+    gap: '3rem',
     justifyContent: 'center',
     alignItems: 'center',
     flexWrap: 'nowrap',
     width: '100%',
-  };
+  }
 
   const baseCard = {
     width: 'clamp(240px, 26vw, 320px)',
@@ -82,155 +82,171 @@ const Home = (props) => {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',     
-  };
+    position: 'relative',
+  }
 
   const logoImg = {
     width: '100%',
     height: '100%',
     objectFit: 'contain',
     display: 'block',
-  };
+  }
 
   const handleSignIn = (redirectPath) => {
     // Set the redirectTo parameter without forcing a page reload
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('redirectTo', redirectPath);
-    window.history.replaceState({}, '', currentUrl);
-    
+    const currentUrl = new URL(window.location.href)
+    currentUrl.searchParams.set('redirectTo', redirectPath)
+    window.history.replaceState({}, '', currentUrl)
+
     // Find the existing sign-in button in the header and programmatically click it
     // This will trigger the existing authentication flow with all proper session handling
-    const signInButtons = document.querySelectorAll('button');
-    const signInButton = Array.from(signInButtons).find(button => 
-      button.textContent && button.textContent.trim() === 'Sign In'
-    );
+    const signInButtons = document.querySelectorAll('button')
+    const signInButton = Array.from(signInButtons).find(button =>
+      button.textContent && button.textContent.trim() === 'Sign In',
+    )
     if (signInButton) {
-      signInButton.click();
-    } else {
-      // Fallback - scroll to top where the sign-in button is located
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      signInButton.click()
     }
-  };
+    else {
+      // Fallback - scroll to top where the sign-in button is located
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   return (
     <>
-    <style>{`
+      <style>
+        {`
         @media (max-width: 904px) {
           .logo-grid { flex-direction: column; }
         }
-      `}</style>
-    <div className="row">
-      <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
-          <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
-          <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-            <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
-            <h1 style={homeTitle}>Data Use Oversight System</h1>
-            <div className="hidden-xs" style={homeBannerDescription}>
-              Expediting compliant data sharing, by facilitating data submissions and access requests <br/> for researchers and data access committees
+      `}
+      </style>
+      <div className="row">
+        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
+            <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
+            <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+              <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
+              <h1 style={homeTitle}>Data Use Oversight System</h1>
+              <div className="hidden-xs" style={homeBannerDescription}>
+                Expediting compliant data sharing, by facilitating data submissions and access requests
+                {' '}
+                <br />
+                {' '}
+                for researchers and data access committees
+              </div>
             </div>
           </div>
-        </div>
-        <div className="row">
-          <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
-            <h1 style={header}>What is DUOS and how does it work?</h1>
-            <h3 style={subHeader}>
-              DUOS is a multi-sided data sharing platform bringing together researchers submitting and requesting data, <br /> and data access committees and institutional officials overseeing the use of the data.
-            </h3>
-            <div>
-              <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
+          <div className="row">
+            <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
+              <h1 style={header}>What is DUOS and how does it work?</h1>
+              <h3 style={subHeader}>
+                DUOS is a multi-sided data sharing platform bringing together researchers submitting and requesting data,
+                {' '}
+                <br />
+                {' '}
+                and data access committees and institutional officials overseeing the use of the data.
+              </h3>
+              <div>
+                <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="row" style={{ background: '#eff0f2', margin: '50px 0', padding: '48px 0 60px 0' }}>
-          <div className="col-lg-4 col-md-4">
-            <p style={header}>DUOS for DACs</p>
-            <p style={description}>DACs can swiftly manage data access requests <br /> and clearly track data use compliance.</p>
-            <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-              <a id="terra-support-dac-link" href="https://support.terra.bio/hc/en-us/articles/28513346337179-Overview-DUOS-for-Data-Access-Committees-DACs" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+          <div className="row" style={{ background: '#eff0f2', margin: '50px 0', padding: '48px 0 60px 0' }}>
+            <div className="col-lg-4 col-md-4">
+              <p style={header}>DUOS for DACs</p>
+              <p style={description}>
+                DACs can swiftly manage data access requests
+                <br />
+                {' '}
+                and clearly track data use compliance.
+              </p>
+              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
+                <a id="terra-support-dac-link" href="https://support.terra.bio/hc/en-us/articles/28513346337179-Overview-DUOS-for-Data-Access-Committees-DACs" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-4 ">
+              <p style={header}>Institutional Oversight</p>
+              <p style={description}>DUOS reduces repetitive work for Signing Officials and expedites data sharing through our innovative Library Card-style agreements.</p>
+              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
+                <a href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS" target="_blank" rel="noreferrer" id="terra-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-4">
+              <p style={header}>Looking for data?</p>
+              <p style={description}>DUOS helps researchers request and access data from multiple sources with a single application.</p>
+              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
+                <a href="https://support.terra.bio/hc/en-us/articles/28510385779099-Overview-DUOS-for-Researchers" id="terra-support-researcher-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              </div>
             </div>
           </div>
-          <div className="col-lg-4 col-md-4 ">
-            <p style={header}>Institutional Oversight</p>
-            <p style={description}>DUOS reduces repetitive work for Signing Officials and expedites data sharing through our innovative Library Card-style agreements.</p>
-            <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-              <a href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS" target="_blank" rel="noreferrer" id="terra-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-4">
-            <p style={header}>Looking for data?</p>
-            <p style={description}>DUOS helps researchers request and access data from multiple sources with a single application.</p>
-            <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-              <a href="https://support.terra.bio/hc/en-us/articles/28510385779099-Overview-DUOS-for-Researchers" id="terra-support-researcher-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
-            </div>
-          </div>
-        </div>
 
-        <section style={{ margin: '5rem auto', padding: '0 2rem' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-            <p style={header}>Data Libraries in DUOS</p>
-            <p style={description}>
-             Click the images below to view curated Data Libraries, and search and request access to data.
-            </p>
+          <section style={{ margin: '5rem auto', padding: '0 2rem' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+              <p style={header}>Data Libraries in DUOS</p>
+              <p style={description}>
+                Click the images below to view curated Data Libraries, and search and request access to data.
+              </p>
 
-            <div style={logoGrid} className="logo-grid">
-              <OverflowTooltip id="anvil" tooltipText={isLogged ? 'AnVIL' : 'Please login to access AnVIL Data Library'}>
-                <div className="logo-card" style={baseCard}>
-                  <Link 
-                    to={isLogged ? '/datalibrary/anvil' : '#'}
-                    onClick={(e) => {
-                      if (!isLogged) {
-                        e.preventDefault();
-                        handleSignIn('/datalibrary/anvil');
-                      }
-                    }}
-                    style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                  >
-                    <img src={anvilLogo} alt="AnVIL" style={logoImg} />
-                  </Link>
-                </div>
-              </OverflowTooltip>
+              <div style={logoGrid} className="logo-grid">
+                <OverflowTooltip id="anvil" tooltipText={isLogged ? 'AnVIL' : 'Please login to access AnVIL Data Library'}>
+                  <div className="logo-card" style={baseCard}>
+                    <Link
+                      to={isLogged ? '/datalibrary/anvil' : '#'}
+                      onClick={(e) => {
+                        if (!isLogged) {
+                          e.preventDefault()
+                          handleSignIn('/datalibrary/anvil')
+                        }
+                      }}
+                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
+                    >
+                      <img src={anvilLogo} alt="AnVIL" style={logoImg} />
+                    </Link>
+                  </div>
+                </OverflowTooltip>
 
-              <OverflowTooltip id="broad" tooltipText={isLogged ? 'Broad Institute' : 'Please login to access Broad Institute Data Library'}>
-                <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
-                  <Link 
-                    to={isLogged ? '/datalibrary/broad' : '#'}
-                    onClick={(e) => {
-                      if (!isLogged) {
-                        e.preventDefault();
-                        handleSignIn('/datalibrary/broad');
-                      }
-                    }}
-                    style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                  >
-                    <img src={broadLogo} alt="Broad Institute" style={logoImg} />
-                  </Link>
-                </div>
-              </OverflowTooltip>
-       
-              <OverflowTooltip id="hca" tooltipText={isLogged ? 'Human Cell Atlas' : 'Please login to access Human Cell Atlas Data Library'}>
-                <div className="logo-card" style={baseCard}>
-                  <Link 
-                    to={isLogged ? '/datalibrary/HCA' : '#'}
-                    onClick={(e) => {
-                      if (!isLogged) {
-                        e.preventDefault();
-                        handleSignIn('/datalibrary/HCA');
-                      }
-                    }}
-                    style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                  >
-                    <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
-                  </Link>
-                </div>
-              </OverflowTooltip>
+                <OverflowTooltip id="broad" tooltipText={isLogged ? 'Broad Institute' : 'Please login to access Broad Institute Data Library'}>
+                  <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
+                    <Link
+                      to={isLogged ? '/datalibrary/broad' : '#'}
+                      onClick={(e) => {
+                        if (!isLogged) {
+                          e.preventDefault()
+                          handleSignIn('/datalibrary/broad')
+                        }
+                      }}
+                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
+                    >
+                      <img src={broadLogo} alt="Broad Institute" style={logoImg} />
+                    </Link>
+                  </div>
+                </OverflowTooltip>
+
+                <OverflowTooltip id="hca" tooltipText={isLogged ? 'Human Cell Atlas' : 'Please login to access Human Cell Atlas Data Library'}>
+                  <div className="logo-card" style={baseCard}>
+                    <Link
+                      to={isLogged ? '/datalibrary/HCA' : '#'}
+                      onClick={(e) => {
+                        if (!isLogged) {
+                          e.preventDefault()
+                          handleSignIn('/datalibrary/HCA')
+                        }
+                      }}
+                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
+                    >
+                      <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
+                    </Link>
+                  </div>
+                </OverflowTooltip>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
-    </div>
     </>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

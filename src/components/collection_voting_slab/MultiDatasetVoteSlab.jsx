@@ -1,24 +1,24 @@
-import React from 'react';
-import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
+import React from 'react'
+import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox'
 import {
   isNil,
   isEmpty,
-  get
-} from 'lodash/fp';
-import { Storage } from '../../libs/storage';
-import { useEffect, useState } from 'react';
-import DatasetsRequestedPanel from './DatasetsRequestedPanel';
-import { ChairVoteInfo } from './ResearchProposalVoteSlab';
-import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
+  get,
+} from 'lodash/fp'
+import { Storage } from '../../libs/storage'
+import { useEffect, useState } from 'react'
+import DatasetsRequestedPanel from './DatasetsRequestedPanel'
+import { ChairVoteInfo } from './ResearchProposalVoteSlab'
+import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision'
 import {
   extractDacDataAccessVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
-} from '../../utils/DarCollectionUtils';
-import { Alert } from '../Alert';
-import { convertLabelToKey } from '../../libs/utils';
-import { DataUsePills } from './DataUsePill';
+} from '../../utils/DarCollectionUtils'
+import { Alert } from '../Alert'
+import { convertLabelToKey } from '../../libs/utils'
+import { DataUsePills } from './DataUsePill'
 
-import MemberVoteSummary from './MemberVoteSummary';
+import MemberVoteSummary from './MemberVoteSummary'
 
 const styles = {
   baseStyle: {
@@ -29,8 +29,8 @@ const styles = {
     border: '#84a3db 2px solid',
     padding: '20px',
     td: {
-      padding: '10px 10px 20px 20px'
-    }
+      padding: '10px 10px 20px 20px',
+    },
   },
   slabTitle: {
     display: 'flex',
@@ -44,7 +44,7 @@ const styles = {
     paddingLeft: '-10%',
     color: '#333F52',
     marginTop: '-5px',
-    columnGap: '2rem'
+    columnGap: '2rem',
   },
   question: {
     fontSize: 17,
@@ -54,11 +54,11 @@ const styles = {
   dataUses: {},
   voteInfo: {},
   chairVoteInfo: {},
-};
+}
 
 export default function MultiDatasetVoteSlab(props) {
-  const [currentUserVotes, setCurrentUserVotes] = useState([]);
-  const [dacVotes, setDacVotes] = useState([]);
+  const [currentUserVotes, setCurrentUserVotes] = useState([])
+  const [dacVotes, setDacVotes] = useState([])
   const {
     title,
     bucket,
@@ -69,38 +69,40 @@ export default function MultiDatasetVoteSlab(props) {
     readOnly,
     adminPage,
     updateFinalVote,
-    reloadFn
-  } = props;
-  const { algorithmResult, key } = bucket;
+    reloadFn,
+  } = props
+  const { algorithmResult, key } = bucket
 
   useEffect(() => {
-    const user = Storage.getCurrentUser();
-    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
+    const user = Storage.getCurrentUser()
+    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage))
     setCurrentUserVotes(
-      extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage)
-    );
-  }, [bucket, isChair, adminPage]);
+      extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage),
+    )
+  }, [bucket, isChair, adminPage])
 
   const DataUseSummary = () => {
-    const dataUses = get('dataUses')(bucket);
+    const dataUses = get('dataUses')(bucket)
     return !isNil(dataUses)
       ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
-      : <></>;
-  };
+      : <></>
+  }
 
   const VoteInfoSubsection = () => {
-    const electionIds = currentUserVotes.map((vote) => vote.electionId);
+    const electionIds = currentUserVotes.map(vote => vote.electionId)
     const allOpenElections = bucket.elections
-        .filter((election) => electionIds.includes(election.electionId))
-        .filter((election) => election.status?.toLowerCase() === 'open');
+      .filter(election => electionIds.includes(election.electionId))
+      .filter(election => election.status?.toLowerCase() === 'open')
 
     return (
       <div style={styles.voteInfo}>
         <div>
-          {!adminPage && !allOpenElections && !readOnly && <Alert
-            title={'Voting is disabled since this election is not open.'}
-            type={'danger'}
-          />}
+          {!adminPage && !allOpenElections && !readOnly && (
+            <Alert
+              title="Voting is disabled since this election is not open."
+              type="danger"
+            />
+          )}
         </div>
         <div>
           <CollectionSubmitVoteBox
@@ -116,74 +118,85 @@ export default function MultiDatasetVoteSlab(props) {
           />
         </div>
       </div>
-    );
-
-  };
+    )
+  }
 
   function DatasetDisplayTable() {
     return (
       <>
-        <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available'}}>
+        <table className="layout-table" role="presentation" style={{ width: '-webkit-fill-available' }}>
           <tbody>
             <tr>
-              <td style={{width: '50%', verticalAlign: 'text-top',}}>
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
                 <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
                   <span style={styles.slatTitleText}>{title}</span>
                 </div>
-                <DataUseSummary/></td>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}>
+                <DataUseSummary />
+              </td>
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
                 <div style={styles.question}>
                   <p>Should data access be granted to this applicant?</p>
-                </div><VoteInfoSubsection/></td>
+                </div>
+                <VoteInfoSubsection />
+              </td>
             </tr>
             <tr>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}><ChairVoteInfo
-                dacVotes={dacVotes}
-                isChair={isChair}
-                isLoading={isLoading}
-                adminPage={adminPage}/>
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
+                <ChairVoteInfo
+                  dacVotes={dacVotes}
+                  isChair={isChair}
+                  isLoading={isLoading}
+                  adminPage={adminPage}
+                />
               </td>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}>
-                {!isEmpty(algorithmResult) && <CollectionAlgorithmDecision
-                  algorithmResult={algorithmResult}
-                />}
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
+                {!isEmpty(algorithmResult) && (
+                  <CollectionAlgorithmDecision
+                    algorithmResult={algorithmResult}
+                  />
+                )}
               </td>
             </tr>
           </tbody>
         </table>
-        <div style={{paddingLeft:'20px'}}>
+        <div style={{ paddingLeft: '20px' }}>
           <MemberVoteSummary
             dacVotes={dacVotes}
             title={adminPage
               ? 'DAC Member Votes'
               : isChair
-                ? "My DAC Member's Votes (detail)"
-                : "Other DAC Member's Votes"}
+                ? 'My DAC Member\'s Votes (detail)'
+                : 'Other DAC Member\'s Votes'}
             isLoading={isLoading}
             adminPage={adminPage}
-            isChair={isChair}/>
+            isChair={isChair}
+          />
         </div>
       </>
-    );
+    )
   }
 
   function DatasetsRequested() {
-    return (<DatasetsRequestedPanel
-      dacDatasetIds={dacDatasetIds}
-      bucketDatasets={bucket.datasets}
-      isLoading={isLoading}
-      adminPage={adminPage}
-    />);
+    return (
+      <DatasetsRequestedPanel
+        dacDatasetIds={dacDatasetIds}
+        bucketDatasets={bucket.datasets}
+        isLoading={isLoading}
+        adminPage={adminPage}
+      />
+    )
   }
 
-  return(
-    <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
-      {!isLoading ? <div style={{display:'inline'}}>
-        <DatasetDisplayTable/>
-        <DatasetsRequested/>
-      </div> :
-        <div className={'text-placeholder'} style={{ height: '100px' }}></div>}
+  return (
+    <div style={styles.baseStyle} data-cy="dataset-vote-slab">
+      {!isLoading
+        ? (
+            <div style={{ display: 'inline' }}>
+              <DatasetDisplayTable />
+              <DatasetsRequested />
+            </div>
+          )
+        : <div className="text-placeholder" style={{ height: '100px' }}></div>}
     </div>
-  );
-
+  )
 }

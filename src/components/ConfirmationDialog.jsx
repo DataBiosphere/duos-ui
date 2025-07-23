@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import Modal from 'react-modal';
-import { Alert } from './Alert';
-import CloseIconComponent from '../components/CloseIconComponent';
-import './ConfirmationDialog.css';
+import React, { useEffect, useState } from 'react'
+import Modal from 'react-modal'
+import { Alert } from './Alert'
+import CloseIconComponent from '../components/CloseIconComponent'
+import './ConfirmationDialog.css'
 
 const customStyles = {
   overlay: {
@@ -11,7 +11,7 @@ const customStyles = {
     left: '0',
     right: '0',
     bottom: '0',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 
   content: {
@@ -24,20 +24,20 @@ const customStyles = {
     overflow: 'auto',
     outline: 'none',
     padding: '20px 20px 20px 20px',
-  }
-};
+  },
+}
 
-Modal.setAppElement('#root');
+Modal.setAppElement('#root')
 
-export const ConfirmationDialog = (props) => { 
-  const [alertMessage, setLocalAlertMessage] = useState(undefined);
-  const [alertTitle, setLocalAlertTitle] = useState(undefined);
+export const ConfirmationDialog = (props) => {
+  const [alertMessage, setLocalAlertMessage] = useState(undefined)
+  const [alertTitle, setLocalAlertTitle] = useState(undefined)
 
   useEffect(() => {
-    setLocalAlertMessage(props.alertMessage);
-    setLocalAlertTitle(props.alertTitle);
-  }, [props.alertMessage, props.alertTitle]);
-  const { disableOkBtn = false, disableNoBtn = false } = props;
+    setLocalAlertMessage(props.alertMessage)
+    setLocalAlertTitle(props.alertTitle)
+  }, [props.alertMessage, props.alertTitle])
+  const { disableOkBtn = false, disableNoBtn = false } = props
 
   return (
     <Modal
@@ -47,7 +47,7 @@ export const ConfirmationDialog = (props) => {
       contentLabel="Modal"
       style={{
         ...customStyles,
-        ...props.style
+        ...props.style,
       }}
     >
       <div className="dialog-header">
@@ -69,18 +69,18 @@ export const ConfirmationDialog = (props) => {
           props.type !== 'informative' && (
             <button
               data-value={false}
-              id='btn_cancel'
+              id="btn_cancel"
               className={`col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background ${props.type !== 'informative' ? '' : 'hidden'}`}
               onClick={props.action.handler(false)}
               disabled={disableNoBtn}
             >
-             No
+              No
             </button>
           )
         }
         <button
           data-value={true}
-          id='btn_action'
+          id="btn_action"
           className={`col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ${props.color}-background ${props.type === 'informative' ? 'f-right' : ''}`}
           onClick={props.action.handler(true)}
           disabled={disableOkBtn}
@@ -89,6 +89,5 @@ export const ConfirmationDialog = (props) => {
         </button>
       </div>
     </Modal>
-  );
-};
-
+  )
+}

@@ -8,19 +8,19 @@ const eventList = {
 
   pageView: 'page:view',
   dataLibrary: 'page:view:data-library',
-  dar: 'page:view:dar'
-};
+  dar: 'page:view:dar',
+}
 
-export default eventList;
+export default eventList
 
 // Helper type to create BaseMetricsEventName.
-type MetricsEventsMap<EventName> = { [key: string]: EventName | MetricsEventsMap<EventName> };
+type MetricsEventsMap<EventName> = { [key: string]: EventName | MetricsEventsMap<EventName> }
 // Union type of all event names configured in eventsList.
-type BaseMetricsEventName = typeof eventList extends MetricsEventsMap<infer EventName> ? EventName : never;
+type BaseMetricsEventName = typeof eventList extends MetricsEventsMap<infer EventName> ? EventName : never
 // Each route has its own page view event, where the event name includes the name of the route.
-type PageViewMetricsEventName = `${typeof eventList.pageView}:${string}`;
+type PageViewMetricsEventName = `${typeof eventList.pageView}:${string}`
 
 /**
  * Union type of all metrics event names.
  */
-export type MetricsEventName = BaseMetricsEventName | PageViewMetricsEventName;
+export type MetricsEventName = BaseMetricsEventName | PageViewMetricsEventName

@@ -1,224 +1,224 @@
-import externalAccessIcon from 'src/images/external_access.svg';
-import openAccessIcon from 'src/images/open_access.svg';
-import controlledAccessIcon from 'src/images/controlled_access.svg';
+import externalAccessIcon from 'src/images/external_access.svg'
+import openAccessIcon from 'src/images/open_access.svg'
+import controlledAccessIcon from 'src/images/controlled_access.svg'
 
-export type UserRoleName =
-  | 'Admin'
-  | 'Chairperson'
-  | 'Member'
-  | 'Researcher'
-  | 'Alumni'
-  | 'SigningOfficial'
-  | 'DataSubmitter'
-  | 'All';
+export type UserRoleName
+  = | 'Admin'
+    | 'Chairperson'
+    | 'Member'
+    | 'Researcher'
+    | 'Alumni'
+    | 'SigningOfficial'
+    | 'DataSubmitter'
+    | 'All'
 
 export interface UserRole {
-  roleId: number;
-  name: UserRoleName;
-  userId: number;
-  userRoleId: number;
+  roleId: number
+  name: UserRoleName
+  userId: number
+  userRoleId: number
 }
 
 export interface UserStatusInfo {
-  adminEnabled: boolean;
-  enabled: boolean;
-  userEmail: string;
-  userSubjectId: string;
+  adminEnabled: boolean
+  enabled: boolean
+  userEmail: string
+  userSubjectId: string
 }
 
 export interface UserProperty {
   propertyId: number
-  userId: number;
-  propertyKey: string;
-  propertyValue: string;
+  userId: number
+  propertyKey: string
+  propertyValue: string
 }
 
 export interface DuosUser {
-  createDate: Date;
-  displayName: string;
-  email: string;
-  emailPreference: boolean;
-  eraCommonsId?: string;
-  institutionId?: number;
-  isAdmin: boolean;
-  isAlumni: boolean;
-  isChairPerson: boolean;
-  isDataSubmitter: boolean;
-  isMember: boolean;
-  isResearcher: boolean;
-  isSigningOfficial: boolean;
-  libraryCard?: LibraryCard;
-  properties?: UserProperty[];
-  roles: UserRole[];
-  userId: number;
-  userStatusInfo?: UserStatusInfo;
+  createDate: Date
+  displayName: string
+  email: string
+  emailPreference: boolean
+  eraCommonsId?: string
+  institutionId?: number
+  isAdmin: boolean
+  isAlumni: boolean
+  isChairPerson: boolean
+  isDataSubmitter: boolean
+  isMember: boolean
+  isResearcher: boolean
+  isSigningOfficial: boolean
+  libraryCard?: LibraryCard
+  properties?: UserProperty[]
+  roles: UserRole[]
+  userId: number
+  userStatusInfo?: UserStatusInfo
 }
 
 export interface SimplifiedDuosUser {
-  userId: number;
-  displayName: string;
-  email: string;
+  userId: number
+  displayName: string
+  email: string
 }
 
 export interface DAAObject {
   // Define the shape of a DAA object as needed
-  daaId: number;
-  createUserId: number;
-  createDate: string;
-  updateUserId: number;
-  updateDate: string;
-  initialDacId: number;
-  file: FileStorageObject;
-  dacs: Array<DacObject>;
+  daaId: number
+  createUserId: number
+  createDate: string
+  updateUserId: number
+  updateDate: string
+  initialDacId: number
+  file: FileStorageObject
+  dacs: Array<DacObject>
 }
 
 export interface DacObject {
-  dacId: number;
-  name: string;
-  description: string;
-  email: string;
-  associatedDaa: DAAObject;
-  createDate: string;
-  updateDate: string;
-  chairpersons: DuosUser[];
-  members: DuosUser[];
+  dacId: number
+  name: string
+  description: string
+  email: string
+  associatedDaa: DAAObject
+  createDate: string
+  updateDate: string
+  chairpersons: DuosUser[]
+  members: DuosUser[]
 }
 
 export interface DataAccessAgreement {
-  daaId: number;
-  createUserId: number;
-  createDate: number;
-  updateUserId?: number;
-  updateDate?: number;
-  file?: FileStorageObject;
-  dacs?: DacObject[];
+  daaId: number
+  createUserId: number
+  createDate: number
+  updateUserId?: number
+  updateDate?: number
+  file?: FileStorageObject
+  dacs?: DacObject[]
 }
 
 export interface LibraryCard {
-  id: number;
-  userId: number;
-  userName: string;
-  userEmail: string;
-  createDate: Date;
-  createUserId: number;
-  daaIds?: number[];
+  id: number
+  userId: number
+  userName: string
+  userEmail: string
+  createDate: Date
+  createUserId: number
+  daaIds?: number[]
 }
 
-export type OrganizationType = 'For-Profit' | 'Nonprofit';
+export type OrganizationType = 'For-Profit' | 'Nonprofit'
 
 export interface Institution {
-  id: number;
-  name: string;
-  itDirectorName?: string;
-  itDirectorEmail?: string;
-  institutionUrl?: string;
-  dunsNumber?: number;
-  orgChartUrl?: string;
-  verificationUrl?: string;
-  verificationFilename?: string;
-  organizationType?: OrganizationType;
-  createUser: DuosUser;
-  createUserId: number;
-  createDate: string;
-  updateUser?: DuosUser;
-  updateUserId?: number;
-  updateDate?: string;
-  signingOfficials: SimplifiedDuosUser[];
-  domains?: string[];
+  id: number
+  name: string
+  itDirectorName?: string
+  itDirectorEmail?: string
+  institutionUrl?: string
+  dunsNumber?: number
+  orgChartUrl?: string
+  verificationUrl?: string
+  verificationFilename?: string
+  organizationType?: OrganizationType
+  createUser: DuosUser
+  createUserId: number
+  createDate: string
+  updateUser?: DuosUser
+  updateUserId?: number
+  updateDate?: string
+  signingOfficials: SimplifiedDuosUser[]
+  domains?: string[]
 }
 
 export interface Dataset {
-  name: string;
+  name: string
   // @deprecated datasetName is deprecated, use name instead
-  datasetName?: string;
-  datasetId: number;
-  createUserId: number;
-  createUser: DuosUser;
-  createDate: Date;
-  dacId: number;
-  translatedDataUse: string;
-  deletable: boolean;
-  properties: DatasetProperty[];
-  study: Study;
-  alias: number;
-  datasetIdentifier: string;
-  objectId?: string;
-  dataUse: DataUse;
-  dacApproval?: boolean;
-  nihCertificationFile?: FileStorageObject;
-  updateUserId?: number;
-  updateDate?: Date;
-  indexedDate?: Date;
+  datasetName?: string
+  datasetId: number
+  createUserId: number
+  createUser: DuosUser
+  createDate: Date
+  dacId: number
+  translatedDataUse: string
+  deletable: boolean
+  properties: DatasetProperty[]
+  study: Study
+  alias: number
+  datasetIdentifier: string
+  objectId?: string
+  dataUse: DataUse
+  dacApproval?: boolean
+  nihCertificationFile?: FileStorageObject
+  updateUserId?: number
+  updateDate?: Date
+  indexedDate?: Date
 }
 
 interface DacTerm {
-  dacId: number;
-  dacName: string;
-  dacEmail: string;
+  dacId: number
+  dacName: string
+  dacEmail: string
 }
 
 interface InstitutionTerm {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 
 export interface UserTerm {
-  userId: number;
-  displayName: string;
-  institution: InstitutionTerm;
+  userId: number
+  displayName: string
+  institution: InstitutionTerm
 }
 
 export interface StudyTerm {
-  description: string;
-  studyName: string;
-  studyId: number;
-  phsId: string;
-  phenotype: string;
-  species: string;
-  piName: string;
-  dataSubmitterEmail: string;
-  dataSubmitterId: number;
-  dataCustodianEmail: string[];
-  publicVisibility: boolean;
-  dataTypes: string[];
+  description: string
+  studyName: string
+  studyId: number
+  phsId: string
+  phenotype: string
+  species: string
+  piName: string
+  dataSubmitterEmail: string
+  dataSubmitterId: number
+  dataCustodianEmail: string[]
+  publicVisibility: boolean
+  dataTypes: string[]
 }
 
 interface DataUseTerm {
-  code: string;
-  description: string;
+  code: string
+  description: string
 }
 
 interface DataUseSummary {
-  primary: DataUseTerm[];
-  secondary: DataUseTerm[];
+  primary: DataUseTerm[]
+  secondary: DataUseTerm[]
 }
 
 export interface DatasetTerm {
-  datasetId: number;
-  createUserId: number;
-  createUserDisplayName: string;
-  datasetIdentifier: string;
-  deletable: boolean;
-  datasetName: string;
-  participantCount: number;
-  dataUse: DataUseSummary;
-  dataLocation: string;
-  url: string;
-  dacId: number;
-  dacApproval: boolean;
-  accessManagement: string;
-  approvedUserIds: number[];
-  study: StudyTerm;
-  submitter: UserTerm;
-  updateUser: UserTerm;
-  dac: DacTerm;
-  piName: string;
+  datasetId: number
+  createUserId: number
+  createUserDisplayName: string
+  datasetIdentifier: string
+  deletable: boolean
+  datasetName: string
+  participantCount: number
+  dataUse: DataUseSummary
+  dataLocation: string
+  url: string
+  dacId: number
+  dacApproval: boolean
+  accessManagement: string
+  approvedUserIds: number[]
+  study: StudyTerm
+  submitter: UserTerm
+  updateUser: UserTerm
+  dac: DacTerm
+  piName: string
 }
 
 export interface AccessManagementSummary {
-  name: string;
-  icon: string;
-  description: string;
+  name: string
+  icon: string
+  description: string
 }
 
 export const getAccessManagementSummary = (accessManagement: string): AccessManagementSummary => {
@@ -227,138 +227,138 @@ export const getAccessManagementSummary = (accessManagement: string): AccessMana
       return {
         name: 'External',
         icon: externalAccessIcon,
-        description: 'External access request required'
-      };
+        description: 'External access request required',
+      }
     case 'open':
       return {
         name: 'Open',
         icon: openAccessIcon,
-        description: 'Open access'
-      };
+        description: 'Open access',
+      }
     case 'controlled':
       return {
         name: 'Controlled',
         icon: controlledAccessIcon,
-        description: 'Controlled access'
-      };
+        description: 'Controlled access',
+      }
     default:
       return {
         name: '',
         icon: '',
-        description: 'Unknown access management'
-      };
+        description: 'Unknown access management',
+      }
   }
-};
+}
 
 export interface DataUse {
-    generalUse: boolean;
-    hmbResearch: boolean;
-    diseaseRestrictions: string[];
-    populationOriginsAncestry: boolean;
-    methodsResearch: boolean;
-    nonProfitUse: boolean;
-    other: string;
-    secondaryOther: string;
-    ethicsApprovalRequired: boolean;
-    collaboratorRequired: boolean;
-    geographicalRestrictions: string;
-    geneticStudiesOnly: boolean;
-    publicationResults: boolean;
-    publicationMoratorium: string;
-    controls: boolean;
-    gender: string;
-    pediatric: boolean;
-    population: boolean;
-    illegalBehavior: boolean;
-    sexualDiseases: boolean;
-    stigmatizeDiseases: boolean;
-    vulnerablePopulations: boolean;
-    psychologicalTraits: boolean;
-    notHealth: boolean;
+  generalUse: boolean
+  hmbResearch: boolean
+  diseaseRestrictions: string[]
+  populationOriginsAncestry: boolean
+  methodsResearch: boolean
+  nonProfitUse: boolean
+  other: string
+  secondaryOther: string
+  ethicsApprovalRequired: boolean
+  collaboratorRequired: boolean
+  geographicalRestrictions: string
+  geneticStudiesOnly: boolean
+  publicationResults: boolean
+  publicationMoratorium: string
+  controls: boolean
+  gender: string
+  pediatric: boolean
+  population: boolean
+  illegalBehavior: boolean
+  sexualDiseases: boolean
+  stigmatizeDiseases: boolean
+  vulnerablePopulations: boolean
+  psychologicalTraits: boolean
+  notHealth: boolean
 }
 
 export interface DatasetProperty {
-  propertyName: string;
-  propertyValue: string;
+  propertyName: string
+  propertyValue: string
 }
 
 export interface Study {
-  studyId: number;
-  name: string;
-  description: string;
-  dataTypes: string[];
-  piName: string;
-  publicVisibility: boolean;
-  datasetIds: number[];
-  datasets: Dataset[];
-  properties: StudyProperty[];
-  alternativeDataSharingPlan: FileStorageObject;
-  createDate: string; //Date?
-  createUserId: number;
-  updateDate: string; //Date?
-  updateUserId: number;
+  studyId: number
+  name: string
+  description: string
+  dataTypes: string[]
+  piName: string
+  publicVisibility: boolean
+  datasetIds: number[]
+  datasets: Dataset[]
+  properties: StudyProperty[]
+  alternativeDataSharingPlan: FileStorageObject
+  createDate: string // Date?
+  createUserId: number
+  updateDate: string // Date?
+  updateUserId: number
 }
 
 export interface StudyProperty {
-  key: string;
-  value: string;
-  type: string;
+  key: string
+  value: string
+  type: string
 }
 
-export type FileStorageCategory =
-  | 'irbCollaborationLetter'
-  | 'dataUseLetter'
-  | 'alternativeDataSharingPlan'
-  | 'nihInstitutionalCertification'
-  | 'dataAccessAgreement'
-  | 'draftUploadedFile';
+export type FileStorageCategory
+  = | 'irbCollaborationLetter'
+    | 'dataUseLetter'
+    | 'alternativeDataSharingPlan'
+    | 'nihInstitutionalCertification'
+    | 'dataAccessAgreement'
+    | 'draftUploadedFile'
 
 export interface FileStorageObject {
-  fileStorageObjectId: number;
-  entityId: string;
-  fileName: string;
-  category: FileStorageCategory;
-  mediaType: string;
-  createUserId: number;
-  createDate: number;
-  updateUserId?: number;
-  updateDate?: number;
-  deleteUserId?: number;
-  deleteDate?: number;
-  deleted?: boolean;
+  fileStorageObjectId: number
+  entityId: string
+  fileName: string
+  category: FileStorageCategory
+  mediaType: string
+  createUserId: number
+  createDate: number
+  updateUserId?: number
+  updateDate?: number
+  deleteUserId?: number
+  deleteDate?: number
+  deleted?: boolean
 }
 
 export interface ApprovedDataset {
-  darId: string;
-  datasetId: number;
-  datasetName: string;
-  dacName: string;
-  expirationDate: number;
+  darId: string
+  datasetId: number
+  datasetName: string
+  dacName: string
+  expirationDate: number
 }
 
 export interface AcknowledgementMap {
-  [key: string]: Acknowledgement;
+  [key: string]: Acknowledgement
 }
 
 export interface Acknowledgement {
-  userId: number;
-  ackKey: string;
-  firstAcknowledged: number;
-  lastAcknowledged: number;
+  userId: number
+  ackKey: string
+  firstAcknowledged: number
+  lastAcknowledged: number
 }
 
 export interface DatasetStats {
-  dataset: Dataset;
-  dars: Array<DatasetStatisticsDar>;
-  elections: Array<Election>;
+  dataset: Dataset
+  dars: Array<DatasetStatisticsDar>
+  elections: Array<Election>
 }
 
 export interface DatasetStatisticsDar {
-  updateDate: number;
-  projectTitle: string;
-  darCode: string;
-  nonTechRus: string;
-  referenceId: string;
+  updateDate: number
+  projectTitle: string
+  darCode: string
+  nonTechRus: string
+  referenceId: string
 }
 
 /**
@@ -366,164 +366,164 @@ export interface DatasetStatisticsDar {
  * in DataAccessRequest.data field. This model simplifies usages in ProgressReport forms.
  */
 export interface CombinedDataAccessRequest extends DataAccessRequest {
-  projectTitle: string;
-  checkNihDataOnly: boolean;
-  rus: string;
-  nonTechRus: string;
-  diseases: boolean;
-  methods: boolean;
-  controls: boolean;
-  population: boolean;
-  other: boolean;
-  otherText: string;
-  ontologies: string[];
-  forProfit: boolean;
-  oneGender: boolean;
-  gender: string;
-  pediatric: boolean;
-  illegalBehavior: boolean;
-  addiction: boolean;
-  sexualDiseases: boolean;
-  stigmatizedDiseases: boolean;
-  vulnerablePopulation: boolean;
-  populationMigration: boolean;
-  psychiatricTraits: boolean;
-  notHealth: boolean;
-  hmb: boolean;
-  poa: boolean;
-  status: string;
-  darCode: string;
-  validRestriction: boolean;
-  progressReportSummary: string;
-  intellectualPropertySummary: string;
-  publications?: Array<Publication>;
-  presentations?: Array<Presentation>;
-  dmi?: DataManagementIncident;
-  researchPlans?: string;
-  closeoutSupplement?: Closeout;
-  anvilUse: boolean;
-  cloudUse: boolean;
-  localUse: boolean;
-  cloudProvider: string;
-  cloudProviderType: string;
-  cloudProviderDescription: string;
-  geneticStudiesOnly: boolean;
-  irb: boolean;
-  irbDocumentLocation?: string;
-  irbDocumentName?: string;
-  irbProtocolExpiration?: string;
-  itDirector: string;
-  itDirectorEmail: string;
-  signingOfficial: string;
-  signingOfficialEmail: string;
-  publication: boolean;
-  collaboration: boolean;
-  collaborationLetterLocation?: string;
-  collaborationLetterName?: string;
-  forensicActivities?: boolean;
-  sharingDistribution?: boolean;
-  labCollaborators?: Array<Collaborator>;
-  internalCollaborators?: Array<Collaborator>;
-  externalCollaborators?: Array<Collaborator>;
-  dsAcknowledgement: boolean;
-  gsoAcknowledgement: boolean;
-  pubAcknowledgement: boolean;
-  piName: string;
-  piEmail: string;
-  piCountryOfOperation: string;
+  projectTitle: string
+  checkNihDataOnly: boolean
+  rus: string
+  nonTechRus: string
+  diseases: boolean
+  methods: boolean
+  controls: boolean
+  population: boolean
+  other: boolean
+  otherText: string
+  ontologies: string[]
+  forProfit: boolean
+  oneGender: boolean
+  gender: string
+  pediatric: boolean
+  illegalBehavior: boolean
+  addiction: boolean
+  sexualDiseases: boolean
+  stigmatizedDiseases: boolean
+  vulnerablePopulation: boolean
+  populationMigration: boolean
+  psychiatricTraits: boolean
+  notHealth: boolean
+  hmb: boolean
+  poa: boolean
+  status: string
+  darCode: string
+  validRestriction: boolean
+  progressReportSummary: string
+  intellectualPropertySummary: string
+  publications?: Array<Publication>
+  presentations?: Array<Presentation>
+  dmi?: DataManagementIncident
+  researchPlans?: string
+  closeoutSupplement?: Closeout
+  anvilUse: boolean
+  cloudUse: boolean
+  localUse: boolean
+  cloudProvider: string
+  cloudProviderType: string
+  cloudProviderDescription: string
+  geneticStudiesOnly: boolean
+  irb: boolean
+  irbDocumentLocation?: string
+  irbDocumentName?: string
+  irbProtocolExpiration?: string
+  itDirector: string
+  itDirectorEmail: string
+  signingOfficial: string
+  signingOfficialEmail: string
+  publication: boolean
+  collaboration: boolean
+  collaborationLetterLocation?: string
+  collaborationLetterName?: string
+  forensicActivities?: boolean
+  sharingDistribution?: boolean
+  labCollaborators?: Array<Collaborator>
+  internalCollaborators?: Array<Collaborator>
+  externalCollaborators?: Array<Collaborator>
+  dsAcknowledgement: boolean
+  gsoAcknowledgement: boolean
+  pubAcknowledgement: boolean
+  piName: string
+  piEmail: string
+  piCountryOfOperation: string
 }
 
 export interface DataAccessRequest {
-  id: number;
-  referenceId: string;
-  collectionId: number;
-  parentId?: number;
-  data: object;
-  draft: boolean;
-  progressReport: boolean;
-  expired: boolean;
-  expiresAt: number;
-  userId: number;
-  createDate: number;
-  sortDate: number;
-  submissionDate: number;
-  updateDate: number;
-  datasetIds: number[];
-  elections: Record<number, Election>;
-  eraCommonsId: string;
-  closeoutSigningOfficialApprovedDate: number;
-  closeoutSigningOfficialApprovedUserId: number;
+  id: number
+  referenceId: string
+  collectionId: number
+  parentId?: number
+  data: object
+  draft: boolean
+  progressReport: boolean
+  expired: boolean
+  expiresAt: number
+  userId: number
+  createDate: number
+  sortDate: number
+  submissionDate: number
+  updateDate: number
+  datasetIds: number[]
+  elections: Record<number, Election>
+  eraCommonsId: string
+  closeoutSigningOfficialApprovedDate: number
+  closeoutSigningOfficialApprovedUserId: number
 }
 
 export interface DataManagementIncident {
-  incidents: string[];
-  description: string;
+  incidents: string[]
+  description: string
 }
 
 export interface Closeout {
-  reasons: string[];
-  otherText: string;
-  signingOfficialId: number;
+  reasons: string[]
+  otherText: string
+  signingOfficialId: number
 }
 
 export interface Presentation {
-  title: string;
-  link: string;
-  date: string;
-  authors: string;
-  datasetCitation: string;
-  citation: boolean;
+  title: string
+  link: string
+  date: string
+  authors: string
+  datasetCitation: string
+  citation: boolean
 }
 
 export interface Publication {
-  title: string;
-  pubmedId: string;
-  date: string;
-  authors: string;
-  bibliographicCitation: string;
-  datasetCitation: string;
-  citation: boolean;
+  title: string
+  pubmedId: string
+  date: string
+  authors: string
+  bibliographicCitation: string
+  datasetCitation: string
+  citation: boolean
 }
 
 export interface Collaborator {
-  approverStatus: boolean;
-  countryOfOperation: string;
-  email: string;
-  eraCommonsId: string;
-  name: string;
+  approverStatus: boolean
+  countryOfOperation: string
+  email: string
+  eraCommonsId: string
+  name: string
   title: string
-  uuid: string;
+  uuid: string
 }
 
 export interface Election {
-  electionId: number;
-  electionType: string;
-  finalVote: boolean;
-  status:	string;
-  createDate: string;
-  lastUpdate: string;
-  finalVoteDate: string;
-  referenceId: string;
-  finalRationale: string;
-  finalAccessVote: boolean;
-  datasetId: number;
-  displayId: string;
-  dulName: string;
-  version: number;
-  archived: boolean;
-  votes: Map<number, Vote>;
+  electionId: number
+  electionType: string
+  finalVote: boolean
+  status: string
+  createDate: string
+  lastUpdate: string
+  finalVoteDate: string
+  referenceId: string
+  finalRationale: string
+  finalAccessVote: boolean
+  datasetId: number
+  displayId: string
+  dulName: string
+  version: number
+  archived: boolean
+  votes: Map<number, Vote>
 }
 
 export interface Vote {
-  voteId: number;
-  vote: boolean;
-  userId: number;
-  createDate: string;
-  updateDate: string;
-  electionId: number;
-  rationale: string;
-  type: string;
-  isReminderSent: boolean;
-  hasConcerns: boolean;
-  displayName: string;
+  voteId: number
+  vote: boolean
+  userId: number
+  createDate: string
+  updateDate: string
+  electionId: number
+  rationale: string
+  type: string
+  isReminderSent: boolean
+  hasConcerns: boolean
+  displayName: string
 }

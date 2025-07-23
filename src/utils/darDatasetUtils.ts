@@ -1,4 +1,4 @@
-import {Styles} from 'src/libs/theme';
+import { Styles } from 'src/libs/theme'
 
 export const styles = {
   containerOverride: Styles.TABLE.CARDCONTAINER,
@@ -14,7 +14,7 @@ export const styles = {
     backgroundColor: 'white',
     border: '1px solid #DEDEDE',
     borderRadius: '4px',
-    margin: '0.5% 0'
+    margin: '0.5% 0',
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -25,7 +25,7 @@ export const styles = {
     letterSpacing: '0.2px',
     textTransform: 'uppercase',
     backgroundColor: 'B8CDD3',
-    border: 'none'
+    border: 'none',
   }),
   cellWidth: {
     dataUseGroup: '30%',
@@ -45,4 +45,4 @@ export const styles = {
     numberOfDatasets: '1.4rem',
     datasets: '1.4rem',
   },
-};
+}

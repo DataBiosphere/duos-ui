@@ -1,28 +1,27 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import ReactTooltip from 'react-tooltip';
-import './SearchBox.css';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import ReactTooltip from 'react-tooltip'
+import './SearchBox.css'
 
 export class SearchBox extends Component {
-
   constructor(props) {
-    super(props);
-    this.myRef = React.createRef();
+    super(props)
+    this.myRef = React.createRef()
   }
 
   changeHandler = (e) => {
-    const value = e.target.value;
-    this.props.searchHandler(value);
-    this.props.pageHandler(1);
-  };
+    const value = e.target.value
+    this.props.searchHandler(value)
+    this.props.pageHandler(1)
+  }
 
   reset = () => {
-    this.myRef.current.value = '';
-    this.props.searchHandler('');
-  };
+    this.myRef.current.value = ''
+    this.props.searchHandler('')
+  }
 
   componentDidMount() {
-    ReactTooltip.rebuild();
+    ReactTooltip.rebuild()
   }
 
   render() {
@@ -39,19 +38,19 @@ export class SearchBox extends Component {
           borderRadius: '5px',
           height: '4rem',
           paddingLeft: '2%',
-          fontFamily: 'Montserrat'
+          fontFamily: 'Montserrat',
         }}
       />
-    );
+    )
   }
 }
 
 SearchBox.propTypes = {
   searchHandler: PropTypes.func,
   pageHandler: PropTypes.func,
-};
+}
 
 SearchBox.defaultProps = {
   searchHandler: () => { },
-  pageHandler: () => { }
-};
+  pageHandler: () => { },
+}
