@@ -80,7 +80,7 @@ export default function MultiDatasetVoteSlab(props) {
     setCurrentUserVotes(
       extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage)
     );
-  }, [bucket, isChair, adminPage]);
+  }, [bucket, isChair, adminPage, collection.dars]);
 
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);
@@ -121,10 +121,11 @@ export default function MultiDatasetVoteSlab(props) {
 
   };
 
-  function DatasetDisplayTable() {
-    return (
-      <>
+  return (
+    <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
+      <div style={{display: 'inline'}}>
         <table className={'layout-table'} style={{width: '-webkit-fill-available'}}>
+          <thead/>
           <tbody>
           <tr>
             <td style={{width: '50%', verticalAlign: 'text-top',}}>
@@ -165,29 +166,14 @@ export default function MultiDatasetVoteSlab(props) {
             adminPage={adminPage}
             isChair={isChair}/>
         </div>
-      </>
-    );
-  }
-
-  function DatasetsRequested() {
-    return (<DatasetsRequestedPanel
-      dacDatasetIds={dacDatasetIds}
-      bucketDatasets={bucket.datasets}
-      isLoading={isLoading}
-      adminPage={adminPage}
-    />);
-  }
-
-  return (
-    <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
-      {!isLoading ? <div style={{display: 'inline'}}>
-          <DatasetDisplayTable/>
-          <DatasetsRequested/>
-        </div> :
-        <div className={'text-placeholder'} style={{height: '100px'}}></div>}
+        <DatasetsRequestedPanel
+          dacDatasetIds={dacDatasetIds}
+          bucketDatasets={bucket.datasets}
+          isLoading={isLoading}
+          adminPage={adminPage}/>
+      </div>
     </div>
   );
-
 }
 
 MultiDatasetVoteSlab.propTypes = {
