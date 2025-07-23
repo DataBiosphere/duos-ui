@@ -80,7 +80,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         validation={validation.authors}
                     />
                     <FormField
-                        id='pubmed_id'
+                        id='pubmedId'
                         title={`Publication PubMed ID`}
                         defaultValue={publication?.pubmedId}
                         placeholder='PubMed ID'
@@ -89,7 +89,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         validation={validation.pubmedId}
                     />
                     <FormField
-                        id='bibliographic_citation'
+                        id='bibliographicCitation'
                         title={`Publication Bibliographic Citation`}
                         defaultValue={publication?.bibliographicCitation}
                         placeholder='Bibliographic Citation'
@@ -98,7 +98,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         validation={validation.bibliographicCitation}
                     />
                     <FormField
-                        id='dataset_citation'
+                        id='datasetCitation'
                         title={`Dataset citation used in this publication`}
                         defaultValue={publication?.datasetCitation}
                         placeholder='Dataset Citation'
