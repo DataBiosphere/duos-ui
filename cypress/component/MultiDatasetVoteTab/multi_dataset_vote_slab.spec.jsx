@@ -664,7 +664,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('[data-cy="collection-algorithm-decision"]').should('exist');
   });
 
-  it('Does not renders the algorithm decision when the latest dar has a DMI', function() {
+  it('Does not render the algorithm decision when the latest dar has a DMI', function() {
     // The first dar in the list is the original parent DAR, which does not have a DMI.
     mount(
       <MultiDatasetVoteSlab
