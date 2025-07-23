@@ -1,23 +1,21 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
+import { get } from 'lodash/fp';
+import { isEmpty, isNil } from 'lodash';
+import { Storage } from 'src/libs/storage';
+import { convertLabelToKey } from 'src/libs/utils';
+import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils';
+import { DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model';
+
+// Components
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox';
-import {get} from 'lodash/fp';
-import {isEmpty, isNil} from 'lodash';
-import {Storage} from 'src/libs/storage';
 import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel';
-import {ChairVoteInfo} from 'src/components/collection_voting_slab/ResearchProposalVoteSlab';
+import { ChairVoteInfo } from 'src/components/collection_voting_slab/ResearchProposalVoteSlab';
 import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision';
-import {extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket} from 'src/utils/DarCollectionUtils';
-import {Alert} from 'src/components/Alert';
-import {convertLabelToKey} from 'src/libs/utils';
-import {DataUsePills} from 'src/components/collection_voting_slab/DataUsePill';
+import { Alert } from 'src/components/Alert';
+import { DataUsePills } from 'src/components/collection_voting_slab/DataUsePill';
 import MemberVoteSummary from 'src/components/collection_voting_slab/MemberVoteSummary';
-import {DataAccessRequest, Dataset, DataUse, Election, Vote} from 'src/types/model';
 
-
-type Collection = {
-  dars: { [key: string]: DataAccessRequest };
-};
-
+// Types
 type Bucket = {
   key: string;
   algorithmResult?: unknown;
@@ -29,7 +27,7 @@ type Bucket = {
 interface MultiDatasetVoteSlabProps {
   readonly title: string;
   readonly bucket: Bucket;
-  readonly collection: Collection;
+  readonly collection: DarCollection;
   readonly dacDatasetIds?: number[];
   readonly isChair?: boolean;
   readonly isApprovalDisabled?: boolean;
@@ -40,6 +38,23 @@ interface MultiDatasetVoteSlabProps {
   readonly reloadFn?: (...args: unknown[]) => void;
 }
 
+interface DataUseSummaryProps {
+  readonly bucket: Bucket;
+}
+
+interface VoteInfoSubsectionProps {
+  readonly currentUserVotes: Vote[];
+  readonly bucket: Bucket;
+  readonly isChair?: boolean;
+  readonly isApprovalDisabled?: boolean;
+  readonly isLoading?: boolean;
+  readonly readOnly?: boolean;
+  readonly adminPage?: boolean;
+  readonly updateFinalVote?: (...args: unknown[]) => void;
+  readonly reloadFn?: (...args: unknown[]) => void;
+}
+
+// Styles
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
@@ -76,132 +91,167 @@ const styles = {
   chairVoteInfo: {},
 };
 
-export default function MultiDatasetVoteSlab(props: MultiDatasetVoteSlabProps) {
+// Components
+const DataUseSummary = ({ bucket }: DataUseSummaryProps) => {
+  const dataUses = get('dataUses')(bucket);
+  return !isNil(dataUses) 
+    ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
+    : <></>;
+};
+
+const VoteInfoSubsection = ({
+  currentUserVotes,
+  bucket,
+  isChair,
+  isApprovalDisabled,
+  isLoading,
+  readOnly,
+  adminPage,
+  updateFinalVote,
+  reloadFn,
+}: VoteInfoSubsectionProps) => {
+  const electionIds = currentUserVotes.map((vote) => vote.electionId);
+  const allOpenElections = bucket.elections
+    .filter((election) => electionIds.includes(election.electionId))
+    .filter((election) => election.status?.toLowerCase() === 'open');
+
+  return (
+    <div style={styles.voteInfo}>
+      <div>
+        {!adminPage && !allOpenElections && !readOnly && (
+          <Alert
+            id={'vote-disabled-alert'}
+            description={'Voting is disabled since this election is not open.'}
+            title={'Voting is disabled since this election is not open.'}
+            type={'danger'}
+          />
+        )}
+      </div>
+      <div>
+        <CollectionSubmitVoteBox
+          votes={currentUserVotes}
+          isFinal={isChair}
+          isDisabled={adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections}
+          isApprovalDisabled={isApprovalDisabled}
+          isLoading={isLoading}
+          adminPage={adminPage}
+          bucketKey={convertLabelToKey(get('key')(bucket))}
+          updateFinalVote={updateFinalVote}
+          reloadFn={reloadFn}
+        />
+      </div>
+    </div>
+  );
+};
+
+// Main Component
+export default function MultiDatasetVoteSlab({
+  title,
+  bucket,
+  collection,
+  dacDatasetIds,
+  isChair,
+  isApprovalDisabled,
+  isLoading,
+  readOnly,
+  adminPage,
+  updateFinalVote,
+  reloadFn
+}: MultiDatasetVoteSlabProps) {
   const [currentUserVotes, setCurrentUserVotes] = useState<Vote[]>([]);
   const [dacVotes, setDacVotes] = useState<Vote[]>([]);
-  const {
-    title,
-    bucket,
-    collection,
-    dacDatasetIds,
-    isChair,
-    isApprovalDisabled,
-    isLoading,
-    readOnly,
-    adminPage,
-    updateFinalVote,
-    reloadFn
-  } = props;
-  const {algorithmResult, key} = bucket;
   const [isDMI, setIsDMI] = useState(false);
+
+  const { algorithmResult, key } = bucket;
 
   useEffect(() => {
     const sorted = Object.values(collection.dars).sort(
-        (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
+      (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
     );
     const mostRecentDar = sorted.at(0);
     const darData = mostRecentDar?.data;
+    
     if (darData && Object.keys(darData).includes('dmi')) {
       setIsDMI(true);
     }
+    
     const user = Storage.getCurrentUser();
     setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
     setCurrentUserVotes(
-        extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage)
+      extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage)
     );
   }, [bucket, isChair, adminPage, collection.dars]);
 
-  const DataUseSummary = () => {
-    const dataUses = get('dataUses')(bucket);
-    return !isNil(dataUses)
-        ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
-        : <></>;
-  };
-
-  const VoteInfoSubsection = () => {
-    const electionIds = currentUserVotes.map((vote) => vote.electionId);
-    const allOpenElections = bucket.elections
-        .filter((election) => electionIds.includes(election.electionId))
-        .filter((election) => election.status?.toLowerCase() === 'open');
-
-    return (
-        <div style={styles.voteInfo}>
-          <div>
-            {!adminPage && !allOpenElections && !readOnly && <Alert
-              id={'vote-disabled-alert'}
-              description={'Voting is disabled since this election is not open.'}
-              title={'Voting is disabled since this election is not open.'}
-              type={'danger'}
-            />}
-          </div>
-          <div>
-            <CollectionSubmitVoteBox
-                votes={currentUserVotes}
-                isFinal={isChair}
-                isDisabled={adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections}
-                isApprovalDisabled={isApprovalDisabled}
-                isLoading={isLoading}
-                adminPage={adminPage}
-                bucketKey={key}
-                updateFinalVote={updateFinalVote}
-                reloadFn={reloadFn}
-            />
-          </div>
-        </div>
-    );
-  };
-
   return (
-      <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
-        <div style={{display: 'inline'}}>
-          <table className={'layout-table'} style={{width: '-webkit-fill-available'}}>
-            <thead/>
-            <tbody>
+    <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
+      <div style={{ display: 'inline' }}>
+        <table className={'layout-table'} style={{ width: '-webkit-fill-available' }}>
+          <thead />
+          <tbody>
             <tr>
-              <td style={{width: '50%', verticalAlign: 'text-top',}}>
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
                 <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
                   <span style={styles.slatTitleText}>{title}</span>
                 </div>
-                <DataUseSummary/></td>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}>
+                <DataUseSummary bucket={bucket} />
+              </td>
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
                 <div style={styles.question}>
                   <p>Should data access be granted to this applicant?</p>
                 </div>
-                <VoteInfoSubsection/></td>
+                <VoteInfoSubsection
+                  currentUserVotes={currentUserVotes}
+                  bucket={bucket}
+                  isChair={isChair}
+                  isApprovalDisabled={isApprovalDisabled}
+                  isLoading={isLoading}
+                  readOnly={readOnly}
+                  adminPage={adminPage}
+                  updateFinalVote={updateFinalVote}
+                  reloadFn={reloadFn}
+                />
+              </td>
             </tr>
             <tr>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}>
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
                 <ChairVoteInfo
-                    dacVotes={dacVotes}
-                    isChair={isChair}
-                    adminPage={adminPage}/>
+                  dacVotes={dacVotes}
+                  isChair={isChair}
+                  adminPage={adminPage}
+                />
               </td>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}>
-                {!isDMI && !isEmpty(algorithmResult) && <CollectionAlgorithmDecision
-                  algorithmResult={algorithmResult}
-                />}
+              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
+                {!isDMI && !isEmpty(algorithmResult) && (
+                  <CollectionAlgorithmDecision algorithmResult={algorithmResult} />
+                )}
               </td>
             </tr>
-            </tbody>
-          </table>
-          <div style={{paddingLeft: '20px'}}>
-            <MemberVoteSummary
-                dacVotes={dacVotes}
-                title={adminPage
-                    ? 'DAC Member Votes'
-                    : isChair
-                        ? 'My DAC Member\'s Votes (detail)'
-                        : 'Other DAC Member\'s Votes'}
-                isLoading={isLoading}
-                adminPage={adminPage}
-                isChair={isChair}/>
-          </div>
-          <DatasetsRequestedPanel
-              dacDatasetIds={dacDatasetIds}
-              bucketDatasets={bucket.datasets}
-              isLoading={isLoading}
-              adminPage={adminPage}/>
+          </tbody>
+        </table>
+        
+        <div style={{ paddingLeft: '20px' }}>
+          <MemberVoteSummary
+            dacVotes={dacVotes}
+            title={
+              adminPage
+                ? 'DAC Member Votes'
+                : isChair
+                ? 'My DAC Member\'s Votes (detail)'
+                : 'Other DAC Member\'s Votes'
+            }
+            isLoading={isLoading}
+            adminPage={adminPage}
+            isChair={isChair}
+          />
         </div>
+        
+        <DatasetsRequestedPanel
+          dacDatasetIds={dacDatasetIds}
+          bucketDatasets={bucket.datasets}
+          isLoading={isLoading}
+          adminPage={adminPage}
+        />
       </div>
+    </div>
   );
 }
