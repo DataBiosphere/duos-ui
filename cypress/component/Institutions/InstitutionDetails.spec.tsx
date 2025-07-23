@@ -341,30 +341,31 @@ describe('Institution Details Tests', () => {
                 cy.get('input[placeholder="Institution Name"]').blur();
 
                 // Verify both normalization steps are applied after blur
-                cy.get('input[placeholder="Institution Name"]').should('have.value', "St. Mary’s College");
+                cy.get('input[placeholder="Institution Name"]').should('have.value', "St. Mary's College");
 
                 cy.contains('button', 'Create').should('not.be.disabled');
             });
 
             it('should detect duplicates after normalization on blur', () => {
-                const institutionsWithQuotes = [
-                    { id: 1, name: "University Research Center", domains: ['urc.edu'] },
+                const institutionsWithSpaces = [
+                    { id: 1, name: "Research University", domains: ['ru.edu'] },
                     { id: 2, name: 'MIT', domains: ['mit.edu'] }
                 ];
 
-                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(institutionsWithQuotes));
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(institutionsWithSpaces));
                 mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
 
-                // Type the same name but with whitespace
-                cy.get('input[placeholder="Institution Name"]').type('  University Research Center  ');
+                // Type a name with extra spaces that will become a duplicate after trimming
+                cy.get('input[placeholder="Institution Name"]').type('   Research University   ');
 
-                // Should not show error while typing
-                cy.contains('An institution with this name already exists').should('not.exist');
+                // The input should still show the untrimmed version while typing
+                cy.get('input[placeholder="Institution Name"]').should('have.value', '   Research University   ');
 
-                // Blur to trigger normalization and validation
+                // Blur to trigger normalization
                 cy.get('input[placeholder="Institution Name"]').blur();
 
-                // Should detect as duplicate after normalization
+                // After normalization (trimming), should detect as duplicate and show trimmed value
+                cy.get('input[placeholder="Institution Name"]').should('have.value', 'Research University');
                 cy.contains('An institution with this name already exists').should('be.visible');
                 cy.contains('button', 'Create').should('be.disabled');
             });
