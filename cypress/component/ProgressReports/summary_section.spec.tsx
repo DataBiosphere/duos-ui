@@ -3,8 +3,7 @@ import { mount } from 'cypress/react';
 import SummarySection from 'src/pages/progress_reports/SummarySection';
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants';
 import { Location } from 'history';
-import { DuosUser } from 'src/types/model';
-import { PublicationOrPresentation } from 'src/components/publications_list/PublicationOrPresentation';
+import {DuosUser, Publication} from 'src/types/model';
 import {FormState} from 'src/pages/progress_reports/ProgressReportFormState';
 
 describe('Summary Section - Component Tests', () => {
@@ -40,25 +39,25 @@ describe('Summary Section - Component Tests', () => {
     userId: 1
   };
 
-  const initialPublications: PublicationOrPresentation[] = [
+  const initialPublications: Publication[] = [
     {
       title: 'Test Publication 1',
       date: '2022-01-01',
-      bibliographic_citation: 'Citation 1',
-      did_cite: true,
-      pubmed_id: '12345',
+      bibliographicCitation: 'Citation 1',
+      citation: true,
+      pubmedId: '12345',
       authors: 'Author 1, Author 2',
-      dataset_citation: 'Dataset Citation 1',
+      datasetCitation: 'Dataset Citation 1',
       link: 'http://example.com/1'
     },
     {
       title: 'Test Publication 2',
       date: '2022-02-01',
-      bibliographic_citation: 'Citation 2',
-      did_cite: true,
-      pubmed_id: '67890',
+      bibliographicCitation: 'Citation 2',
+      citation: true,
+      pubmedId: '67890',
       authors: 'Author 3, Author 4',
-      dataset_citation: 'Dataset Citation 2',
+      datasetCitation: 'Dataset Citation 2',
       link: 'http://example.com/2'
     }
   ];

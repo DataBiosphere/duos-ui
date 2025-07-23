@@ -15,7 +15,7 @@
   height: 24px;
   width: 250px;
   color: #333F52;
-  font-family: Montserrat;
+  font-family: Montserrat, sans-serif;
   font-size: 20px;
   font-weight: bold;
   line-height: 24px;
@@ -27,7 +27,7 @@
   height: 28px;
   width: 365px;
   color: #333F52;
-  font-family: Montserrat;
+  font-family: Montserrat, sans-serif;
   font-size: 14px;
   letter-spacing: 0;
   line-height: 24px;
@@ -38,7 +38,7 @@
   height: 48px;
   width: 365px;
   color: #333F52;
-  font-family: Montserrat;
+  font-family: Montserrat, sans-serif;
   font-size: 14px;
   font-style: italic;
   letter-spacing: 0;
