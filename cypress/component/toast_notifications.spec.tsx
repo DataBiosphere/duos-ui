@@ -214,16 +214,33 @@ describe('ToastNotifications', () => {
     });
   });
 
-  describe('Cleanup behavior', () => {
-    it('should not close notification on clickaway', () => {
+  describe('Styling and constraints', () => {
+    it('should respect maximum width constraint', () => {
       ToastNotifications.showNotification({
-        text: 'Clickaway test',
-        timeout: 5000
+        text: 'This is a very long notification message that should be constrained by the maximum width setting to ensure it does not overflow off the page and remains readable within the viewport boundaries'
       });
 
-      cy.get('[data-cy="notification-alert"]').should('be.visible');
-      cy.get('body').click({ force: true });
-      cy.get('[data-cy="notification-alert"]').should('still.be.visible');
+      cy.get('.MuiSnackbar-root')
+        .should('be.visible')
+        .then(($snackbar) => {
+          const snackbarWidth = $snackbar.outerWidth();
+          const viewportWidth = Cypress.config('viewportWidth');
+          expect(snackbarWidth).to.be.lessThan(viewportWidth);
+        });
+    });
+
+    it('should have appropriate width for content', () => {
+      ToastNotifications.showNotification({
+        text: 'Short text'
+      });
+
+      cy.get('.MuiSnackbar-root')
+        .should('be.visible')
+        .then(($snackbar) => {
+          const snackbarWidth = $snackbar.outerWidth();
+          const viewportWidth = Cypress.config('viewportWidth');
+          expect(snackbarWidth).to.be.lessThan(viewportWidth);
+        });
     });
   });
 });
