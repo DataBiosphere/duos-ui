@@ -232,7 +232,7 @@ const dar = {
         other: false,
         ontologies: [
           {
-            id: 'http://purl.obolibrary.org/obo/DOID_8577',
+            id: 'https://purl.obolibrary.org/obo/DOID_8577',
             label: 'sleep apnea',
             definition: null,
             synonyms: null,
@@ -464,7 +464,7 @@ const dar = {
       datasetIdentifier: 'DUOS-00999',
       dataUse: {
         diseaseRestrictions: [
-          'http://purl.obolibrary.org/obo/DOID_0050847',
+          'https://purl.obolibrary.org/obo/DOID_0050847',
         ],
         populationOriginsAncestry: true,
         controlSetOption: 'Yes',
@@ -565,12 +565,12 @@ const dar = {
           datasetId: 13,
           propertyKey: null,
           propertyName: 'url',
-          propertyValue: 'https://...',
+          propertyValue: 'https://example.com',
           createDate: null,
           schemaProperty: null,
           propertyType: 'String',
           propertyTypeAsString: 'string',
-          propertyValueAsString: 'https://...',
+          propertyValueAsString: 'https://example.com',
         },
       ],
       dacApproval: true,
