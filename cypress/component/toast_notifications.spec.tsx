@@ -1,5 +1,5 @@
-
-import { ToastNotifications } from 'src/libs/ToastNotifications';
+import React from 'react';
+import { ToastNotifications, ToastPosition } from 'src/libs/ToastNotifications';
 
 describe('ToastNotifications', () => {
   beforeEach(() => {
@@ -83,8 +83,7 @@ describe('ToastNotifications', () => {
       });
 
       cy.get('[data-cy="notification-alert"]').should('be.visible');
-      cy.wait(1100);
-      cy.get('[data-cy="notification-alert"]').should('not.exist');
+      cy.get('[data-cy="notification-alert"]', {timeout: 1200}).should('not.exist');
     });
 
     it('should close notification when close button is clicked', () => {
@@ -92,9 +91,7 @@ describe('ToastNotifications', () => {
 
       cy.get('[data-cy="notification-alert"]').should('be.visible');
       cy.get('[data-cy="notification-alert"] .MuiAlert-action button').click();
-
-      cy.wait(350);
-      cy.get('[data-cy="notification-alert"]').should('not.exist');
+      cy.get('[data-cy="notification-alert"]', {timeout: 350}).should('not.exist');
     });
 
     it('should apply custom styling with sx prop', () => {
@@ -177,8 +174,7 @@ describe('ToastNotifications', () => {
       });
 
       cy.get('[data-cy="notification-alert"]').should('be.visible');
-      cy.wait(600);
-      cy.get('[data-cy="notification-alert"]').should('not.exist');
+      cy.get('[data-cy="notification-alert"]', {timeout: 700}).should('not.exist');
     });
   });
 
@@ -205,7 +201,7 @@ describe('ToastNotifications', () => {
       it(`should position notification at ${layout}`, () => {
         ToastNotifications.showNotification({
           text: `${layout} notification`,
-          layout: layout as any
+          layout: layout as ToastPosition
         });
 
         cy.get('.MuiSnackbar-root')

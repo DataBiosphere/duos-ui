@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { AlertColor, Alert, Snackbar, SnackbarOrigin } from '@mui/material';
 
-type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 
 interface NotificationRequiredProps extends NotificationProps {
   severity: AlertColor;
