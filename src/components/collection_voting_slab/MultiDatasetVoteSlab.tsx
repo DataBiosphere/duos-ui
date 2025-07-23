@@ -190,7 +190,7 @@ export default function MultiDatasetVoteSlab({
     <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
       <div style={{ display: 'inline' }}>
         <table className={'layout-table'} style={{ width: '-webkit-fill-available' }}>
-          <thead><tr/></thead>
+          <thead><tr><th/></tr></thead>
           <tbody>
             <tr>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
