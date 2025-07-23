@@ -3,27 +3,50 @@ import InfoIcon from '@mui/icons-material/Info';
 import {User} from 'src/libs/ajax/User';
 import {Notifications} from 'src/libs/utils';
 import {extractConsentError, extractError} from 'src/utils/ErrorUtils';
+import {Storage} from 'src/libs/storage';
+import {DAR} from 'src/libs/ajax/DAR';
+import {AxiosError} from 'axios';
+import {DataAccessRequest} from 'src/types/model';
 
 interface CloseoutReviewProps {
-  onApprove?: () => void;
+  dar: DataAccessRequest;
   onReturn?: () => void;
-  referenceId: string;
 }
 
 export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
-    onApprove,
-    onReturn,
-    referenceId
+    dar, onReturn
 }) => {
 
   const [acknowledged, setAcknowledged] = useState<boolean | undefined>(undefined);
+  const [pendingApproval, setPendingApproval] = useState<boolean> (false);
 
+    const onApprove = async () => {
+        setPendingApproval(true);
+        const user = Storage.getCurrentUser();
+        const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined;
+        try {
+            if (user.isSigningOfficial && !isCloseoutApproved) {
+                await DAR.approveCloseout(dar.referenceId);
+            } else {
+                const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId;
+                await User.acceptAcknowledgments(acknowledgement);
+            }
+            setAcknowledged(true);
+            Notifications.showSuccess({ text: 'Closeout review approved successfully.' });
+        } catch (e) {
+            setAcknowledged(false);
+            setPendingApproval(false);
+            const err = e as AxiosError<Record<string, string>>;
+            const message = err.response?.data.message;
+            Notifications.showError({ text: 'Error approving closeout review: ' + message });
+        }
+    }
   // Required to get Chairperson acknowledgments of closeouts
   useEffect(() => {
     // Fetch the acknowledgement for the given referenceId
     const fetchAcknowledgement = async () => {
       try {
-        const key = `dar_closeout_chair_ref_${referenceId}`;
+        const key = `dar_closeout_chair_ref_${dar.referenceId}`;
         const chairAcknowledgement = await User.getAcknowledgement(key);
         if (chairAcknowledgement) {
           setAcknowledged(true);
@@ -38,7 +61,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
       }
     };
     fetchAcknowledgement();
-  }, [referenceId]);
+  }, [dar]);
 
   return (
       <div className="progress-report-step-card" style={{
@@ -80,6 +103,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
               {(!acknowledged) &&
                 (<button
                   data-cy="closeout-review-approve-button"
+                  disabled={pendingApproval}
                   type="button"
                   onClick={onApprove}
                   style={{

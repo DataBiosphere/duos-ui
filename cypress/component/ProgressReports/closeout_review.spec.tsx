@@ -1,18 +1,19 @@
 import React from 'react';
 import {mount} from 'cypress/react';
 import {CloseoutReview} from 'src/pages/progress_reports/CloseoutReview';
-import {Acknowledgement} from 'src/types/model';
+import {Acknowledgement, DataAccessRequest} from 'src/types/model';
 import {User} from 'src/libs/ajax/User';
+import {Storage} from 'src/libs/storage';
+import {DAR} from 'src/libs/ajax/DAR';
 
 describe('CloseoutReview - Component Tests', () => {
-  let onApproveSpy: () => void;
   let onReturnSpy: () => void;
+  const user = {isSigningOfficial: true};
 
   const mountComponent = (props = {}) => {
     const defaultProps = {
-      onApprove: onApproveSpy,
       onReturn: onReturnSpy,
-      referenceId: 'DAR-UUID',
+      dar: {referenceId:'DAR-UUID'} as DataAccessRequest,
       ...props
     };
 
@@ -20,11 +21,12 @@ describe('CloseoutReview - Component Tests', () => {
   };
 
   beforeEach(() => {
-    onApproveSpy = cy.stub().as('approveStub');
+    cy.stub(Storage, 'getCurrentUser').returns(user);
     onReturnSpy = cy.stub().as('returnStub');
   });
 
   it('renders the component correctly', () => {
+    cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
     // Check for the main container
@@ -39,6 +41,7 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays both buttons with correct text', () => {
+    cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
     cy.get('button').contains('Approve closeout').should('be.visible');
@@ -46,13 +49,17 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('calls onApprove when Approve closeout button is clicked', () => {
-    mountComponent();
+    cy.stub(DAR, 'approveCloseout').returns(true);
+    cy.stub(User, 'getAcknowledgement').returns(false);
 
-    cy.get('button').contains('Approve closeout').click();
-    cy.get('@approveStub').should('have.been.calledOnce');
+    mountComponent();
+    cy.get('button').contains('Approve closeout').click({force: true});
+    cy.get('.MuiAlert-message').contains('Closeout review approved successfully.').should('be.visible');
+
   });
 
   it('calls onReturn when Go to DAR Requests button is clicked', () => {
+    cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
     cy.get('button').contains('Go to DAR Requests').click();
@@ -60,6 +67,7 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('maintains proper layout with icon, text, and buttons', () => {
+    cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
     cy.get('.progress-report-step-card').within(() => {
@@ -73,6 +81,7 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays "Please note:" text in bold', () => {
+    cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
     cy.contains('Please note:')
@@ -80,6 +89,7 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays explanatory text with normal font weight', () => {
+    cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
     cy.contains('If there are issues with the content in this closeout report, please contact the researcher.')
@@ -87,6 +97,7 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays closeout approve when no acknowledgement exists', () => {
+    cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
     // Approve button should be visible
