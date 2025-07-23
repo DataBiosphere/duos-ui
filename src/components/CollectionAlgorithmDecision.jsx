@@ -52,7 +52,7 @@ export default function CollectionAlgorithmDecision(props) {
   };
 
   return (
-    <div {...containerProps}>
+    <div {...containerProps} data-cy='collection-algorithm-decision'>
       <div style={{flex: 1, padding: '1%'}}>
         <h5 id={`collection-${id}-subtitle`} style={{fontFamily: 'Montserrat', fontWeight: 800, fontSize: 17, color: '#333F52'}}>DUOS Algorithm Decision</h5>
         <div style={{fontSize: '1.5rem'}}>
