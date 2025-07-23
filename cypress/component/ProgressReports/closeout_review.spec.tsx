@@ -21,11 +21,11 @@ describe('CloseoutReview - Component Tests', () => {
   };
 
   beforeEach(() => {
+    cy.stub(Storage, 'getCurrentUser').returns(user);
     onReturnSpy = cy.stub().as('returnStub');
   });
 
   it('renders the component correctly', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
@@ -41,7 +41,6 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays both buttons with correct text', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
@@ -50,7 +49,6 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('calls onApprove when Approve closeout button is clicked', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(DAR, 'approveCloseout').returns(true);
     cy.stub(User, 'getAcknowledgement').returns(false);
 
@@ -61,7 +59,6 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('calls onReturn when Go to DAR Requests button is clicked', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
@@ -70,7 +67,6 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('maintains proper layout with icon, text, and buttons', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
@@ -85,7 +81,6 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays "Please note:" text in bold', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
@@ -94,7 +89,6 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays explanatory text with normal font weight', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
@@ -103,7 +97,6 @@ describe('CloseoutReview - Component Tests', () => {
   });
 
   it('displays closeout approve when no acknowledgement exists', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(null);
     mountComponent();
 
@@ -120,7 +113,6 @@ describe('CloseoutReview - Component Tests', () => {
       firstAcknowledged: now.getTime(),
       lastAcknowledged: now.getTime(),
     } as Acknowledgement;
-    cy.stub(Storage, 'getCurrentUser').returns(user);
     cy.stub(User, 'getAcknowledgement').returns(acknowledgement);
     mountComponent();
 
