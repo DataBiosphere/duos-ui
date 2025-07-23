@@ -88,15 +88,16 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
                         validation={validation.link}
                     />
                     <FormField
-                        id='dataset_citation'
+                        id='datasetCitation'
                         title={`Dataset citation used in this presentation`}
                         defaultValue={presentation?.datasetCitation}
                         placeholder='Dataset Citation'
                         onChange={onChange}
                     />
                     <FormField
-                        id='did_cite'
+                        id='citation'
                         type={FormFieldTypes.YESNORADIOGROUP}
+                        defaultValue={presentation?.citation}
                         title='Did you cite the dataset(s) used in this presentation?'
                         orientation='horizontal'
                         onChange={onChange}
