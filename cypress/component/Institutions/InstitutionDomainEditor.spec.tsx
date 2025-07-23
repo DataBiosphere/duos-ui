@@ -1,3 +1,4 @@
+/* eslint-disable cypress/unsafe-to-chain-command */
 import React from 'react';
 import {mount} from 'cypress/react';
 import {InstitutionDomainEditor} from 'src/components/institution_table/components/InstitutionDomainEditor';
@@ -168,7 +169,8 @@ describe('Institution Domain Editor Tests', () => {
     });
 
     describe('Domain Format Validation', () => {
-        let onDomainsChange: Cypress.Agent<sinon.SinonStub>;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let onDomainsChange: Cypress.Agent<any>;
 
         beforeEach(() => {
             onDomainsChange = cy.stub().as('domainsChangeHandler');
@@ -245,7 +247,7 @@ describe('Institution Domain Editor Tests', () => {
                 '123domain.com'
             ];
 
-            validDomains.forEach((validDomain, index) => {
+            validDomains.forEach((validDomain, _index) => {
                 cy.get('input').clear().type(validDomain);
                 cy.contains('button', 'Add').click();
                 // Should be called for each valid domain
@@ -274,7 +276,7 @@ describe('Institution Domain Editor Tests', () => {
                 'тест.рф'
             ];
 
-            let expectedDomains: string[] = [];
+            const expectedDomains: string[] = [];
             internationalDomains.forEach((domain) => {
                 cy.get('input').clear().type(domain);
                 cy.contains('button', 'Add').click();

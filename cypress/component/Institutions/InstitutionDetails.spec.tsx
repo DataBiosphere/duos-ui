@@ -1,3 +1,4 @@
+/* eslint-disable cypress/unsafe-to-chain-command */
 import React from 'react';
 import {mount} from 'cypress/react';
 import {InstitutionDetails} from 'src/components/institution_table/InstitutionDetails';
@@ -313,16 +314,16 @@ describe('Institution Details Tests', () => {
                 mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
 
                 // Type name with curly single quotes
-                cy.get('input[placeholder="Institution Name"]').type("St. Mary’s College");
+                cy.get('input[placeholder="Institution Name"]').type('St. Mary’s College');
 
                 // Should allow typing with curly quotes while editing
-                cy.get('input[placeholder="Institution Name"]').should('have.value', "St. Mary’s College");
+                cy.get('input[placeholder="Institution Name"]').should('have.value', 'St. Mary’s College');
 
                 // Blur to trigger normalization
                 cy.get('input[placeholder="Institution Name"]').blur();
 
                 // Verify curly quotes are replaced with straight quotes after blur
-                cy.get('input[placeholder="Institution Name"]').should('have.value', "St. Mary’s College");
+                cy.get('input[placeholder="Institution Name"]').should('have.value', 'St. Mary’s College');
 
                 cy.contains('button', 'Create').should('not.be.disabled');
             });
@@ -332,10 +333,10 @@ describe('Institution Details Tests', () => {
                 mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
 
                 // Type name with whitespace and curly single quotes (no double quotes since they're not allowed)
-                cy.get('input[placeholder="Institution Name"]').type("   St. Mary’s College   ");
+                cy.get('input[placeholder="Institution Name"]').type('   St. Mary’s College   ');
 
                 // Should allow typing with both issues while editing
-                cy.get('input[placeholder="Institution Name"]').should('have.value', "   St. Mary’s College   ");
+                cy.get('input[placeholder="Institution Name"]').should('have.value', '   St. Mary’s College   ');
 
                 // Blur to trigger normalization
                 cy.get('input[placeholder="Institution Name"]').blur();
@@ -348,7 +349,7 @@ describe('Institution Details Tests', () => {
 
             it('should detect duplicates after normalization on blur', () => {
                 const institutionsWithSpaces = [
-                    { id: 1, name: "Research University", domains: ['ru.edu'] },
+                    { id: 1, name: 'Research University', domains: ['ru.edu'] },
                     { id: 2, name: 'MIT', domains: ['mit.edu'] }
                 ];
 

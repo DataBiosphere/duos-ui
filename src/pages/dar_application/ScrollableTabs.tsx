@@ -53,12 +53,10 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
     };
 
     useEffect(() => {
-        // eslint-disable-next-line -- codacy says event listeners are dangerous
         window.addEventListener('scroll', onScroll);
 
         return () => {
             // Cleanup listener on unmount
-            // eslint-disable-next-line -- codacy says event listeners are dangerous
             window.removeEventListener('scroll', onScroll);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps

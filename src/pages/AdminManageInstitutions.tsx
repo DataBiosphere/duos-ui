@@ -34,7 +34,7 @@ export default function AdminManageInstitutions() {
       }
     };
     init();
-  }, []);
+  }, [searchTerm]);
 
   const handleSearchChange = (query: { current: { value: string } }) => {
     setSearchTerm(query.current.value);
