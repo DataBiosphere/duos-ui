@@ -127,6 +127,7 @@ export const FormFieldTypes = {
       'uploadText',
       'hideTextBar',
       'hideInput',
+      'readOnly',
     ],
   },
   CHECKBOX: {
@@ -165,7 +166,7 @@ export const FormFieldTypes = {
       'loadOptions',
       'optionsAreString',
       'selectOptions',
-      'isClearable'
+      'isClearable',
     ],
     customPropValidation: customSelectPropValidation,
   },
@@ -238,7 +239,7 @@ export const FormField = (config) => {
     id, name, type = FormFieldTypes.TEXT, ariaLevel,
     title, hideTitle, description, helpText,
     defaultValue, style, titleStyle, validators,
-    validation, onValidationChange
+    validation, onValidationChange,
   } = config;
 
   // if the user specifies the 'errors' prop, we should use that as the source of truth.

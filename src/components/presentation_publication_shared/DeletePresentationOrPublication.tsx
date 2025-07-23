@@ -1,20 +1,21 @@
 import React from 'react';
 import ModalWrapper from 'src/components/collaborator_list/ModalWrapper';
-import './PublicationDelete.css';
+import './DeletePresentationOrPublication.css';
 import CloseIconComponent from '../CloseIconComponent';
 import { styled } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 
-interface PublicationDeleteProps {
-    readonly publicationName: string;
+interface DeletePresentationOrPublicationProps {
+    readonly name: string;
+    readonly objectName: string;
     readonly showDelete: boolean;
     readonly confirmAction: () => void;
     readonly closeAction: () => void;
 }
 
-export default function PublicationDelete(props: PublicationDeleteProps): React.JSX.Element {
-    const { publicationName, showDelete, confirmAction, closeAction } = props;
+export function DeletePresentationOrPublication(props: DeletePresentationOrPublicationProps): React.JSX.Element {
+    const { name, objectName, showDelete, confirmAction, closeAction } = props;
 
     const duosBlue = '#0948B7';
     const duosBlueHover = 'rgb(9,72,183)';
@@ -53,8 +54,8 @@ export default function PublicationDelete(props: PublicationDeleteProps): React.
         >
             <div>
                 <CloseIconComponent closeFn={closeAction} />
-                <div className={'delete-modal-header'}>Delete Publication</div>
-                <div className={'delete-modal-title'}>Are you sure you want to delete <strong>{publicationName}</strong>?</div>
+                <div className={'delete-modal-header'}>Delete {objectName}</div>
+                <div className={'delete-modal-title'}>Are you sure you want to delete <strong>{name}</strong>?</div>
                 <div className={'delete-modal-message'}><i>This action is permanent and cannot be undone.</i></div>
                 <div className={'delete-modal-actions'}>
                     <Stack spacing={2} direction={'row'}>

@@ -1,3 +1,4 @@
+
 declare module '*.svg' {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     import React = require('react');

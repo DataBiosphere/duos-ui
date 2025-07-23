@@ -1,24 +1,23 @@
 import React from 'react';
-import { PublicationOrPresentation } from './PublicationOrPresentation';
 import PublicationAddEdit from './PublicationAddEdit';
 import PublicationSummary from './PublicationSummary';
+import {Publication} from 'src/types/model';
 
 interface PublicationRowProps {
     readonly id: number;
     readonly editMode: boolean;
-    publication: PublicationOrPresentation;
-    readonly publicationText: string;
-    readonly publications: PublicationOrPresentation[];
+    publication: Publication;
+    readonly publications: Publication[];
     readonly columnsToShow: string[];
     readonly editAction: () => void;
     readonly deleteAction: () => void;
     readonly closeAction: () => void;
-    readonly onPublicationChange: (publications: PublicationOrPresentation[]) => void;
+    readonly onPublicationChange: (publications: Publication[]) => void;
     readonly disabled: boolean;
 }
 
 export default function PublicationRow(props: PublicationRowProps): React.JSX.Element {
-    const { id, editMode, publication, publicationText, publications, columnsToShow, editAction, deleteAction, closeAction, onPublicationChange, disabled } = props;
+    const { id, editMode, publication, publications, columnsToShow, editAction, deleteAction, closeAction, onPublicationChange, disabled } = props;
 
     return (
         <div>
@@ -26,7 +25,6 @@ export default function PublicationRow(props: PublicationRowProps): React.JSX.El
                 <PublicationAddEdit
                     id={id}
                     publication={publication}
-                    publicationText={publicationText}
                     publications={publications}
                     closeAction={closeAction}
                     onPublicationChange={onPublicationChange}
