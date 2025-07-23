@@ -163,9 +163,9 @@ export default function MultiDatasetVoteSlab({
   const [isDMI, setIsDMI] = useState(false);
   const { algorithmResult } = bucket;
   const getMemberVoteSectionTitle = () => {
-    if (adminPage) return "DAC Member Votes";
-    if (isChair) return "My DAC Member's Votes (detail)";
-    return "Other DAC Member's Votes";
+    if (adminPage) return 'DAC Member Votes';
+    if (isChair) return 'My DAC Member\'s Votes (detail)';
+    return 'Other DAC Member\'s Votes';
   };
 
   useEffect(() => {
@@ -190,7 +190,7 @@ export default function MultiDatasetVoteSlab({
     <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
       <div style={{ display: 'inline' }}>
         <table className={'layout-table'} style={{ width: '-webkit-fill-available' }}>
-          <thead />
+          <thead><tr/></thead>
           <tbody>
             <tr>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
