@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { get } from 'lodash/fp';
-import { isEmpty, isNil } from 'lodash';
+import { get, isEmpty, isNil } from 'lodash';
 import { Storage } from 'src/libs/storage';
 import { convertLabelToKey } from 'src/libs/utils';
 import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils';
@@ -93,7 +92,7 @@ const styles = {
 
 // Components
 const DataUseSummary = ({ bucket }: DataUseSummaryProps) => {
-  const dataUses = get('dataUses')(bucket);
+  const dataUses = get(bucket, 'dataUses', []);
   return !isNil(dataUses) 
     ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
     : <></>;
@@ -135,7 +134,7 @@ const VoteInfoSubsection = ({
           isApprovalDisabled={isApprovalDisabled}
           isLoading={isLoading}
           adminPage={adminPage}
-          bucketKey={convertLabelToKey(get('key')(bucket))}
+          bucketKey={convertLabelToKey(get(bucket, 'key', 'collection-submit-vote-box'))}
           updateFinalVote={updateFinalVote}
           reloadFn={reloadFn}
         />
@@ -194,7 +193,7 @@ export default function MultiDatasetVoteSlab({
           <tbody>
             <tr>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
+                <div style={styles.slabTitle} key={convertLabelToKey(get(bucket, 'key', 'slab-title'))}>
                   <span style={styles.slatTitleText}>{title}</span>
                 </div>
                 <DataUseSummary bucket={bucket} />
