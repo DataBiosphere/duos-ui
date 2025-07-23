@@ -302,16 +302,21 @@ const calcDUAErrors = (formData, datasets, dataUseTranslations, errors) => {
   }
 }
 
+const validateDate = (date) => {
+  if (isEmpty(date)) {
+    return requiredError;
+  } else if (!FormValidators.DATE.isValid(date)) {
+    return validationError('date');
+  }
+  return undefined
+}
+
 export const calcPublicationErrors = (newPublication) => {
   const validation = {};
   if (isEmpty(newPublication?.title)) {
     validation.title = requiredError;
   }
-  if (isEmpty(newPublication?.date)) {
-    validation.date = requiredError;
-  } else if (!FormValidators.DATE.isValid(newPublication?.date)) {
-    validation.date = validationError('date');
-  }
+  validation.date = validateDate(newPublication?.date);
   if (isEmpty(newPublication?.authors)) {
     validation.authors = requiredError;
   }
@@ -330,11 +335,7 @@ export const calcPresentationErrors = (newPresentation) => {
   if (isEmpty(newPresentation?.title)) {
     validation.title = requiredError;
   }
-  if (isEmpty(newPresentation?.date)) {
-    validation.date = requiredError;
-  } else if (!FormValidators.DATE.isValid(newPresentation?.date)) {
-    validation.date = validationError('date');
-  }
+  validation.date = validateDate(newPresentation?.date);
   if (isEmpty(newPresentation?.authors)) {
     validation.authors = requiredError;
   }
