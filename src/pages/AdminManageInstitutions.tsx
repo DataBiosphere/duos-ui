@@ -25,7 +25,7 @@ export default function AdminManageInstitutions() {
         setIsLoading(true);
         const listOfInstitutions = await InstitutionAPI.list();
         setInstitutionList(listOfInstitutions);
-        setFilteredList(filter(listOfInstitutions, searchTerm));
+        setFilteredList(listOfInstitutions);
         setIsLoading(false);
       } catch (error) {
         const message = extractError(error);
@@ -34,7 +34,11 @@ export default function AdminManageInstitutions() {
       }
     };
     init();
-  }, [searchTerm]);
+  }, []);
+
+  useEffect(() => {
+    setFilteredList(filter(institutionList, searchTerm));
+  }, [searchTerm, institutionList]);
 
   const handleSearchChange = (query: { current: { value: string } }) => {
     setSearchTerm(query.current.value);
