@@ -3,7 +3,7 @@ import { mount } from 'cypress/react';
 import DucAddendum from 'src/pages/dar_application/DucAddendum';
 import { DAC } from 'src/libs/ajax/DAC';
 
-describe('DucAddendum Component Tests', () => {
+describe('DucAddendum', () => {
   const mockDatasets = [
     {
       datasetId: 1,

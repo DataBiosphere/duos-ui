@@ -715,7 +715,7 @@ const DataAccessRequestApplication = (props) => {
                   }
                 </div> : <div />}
 
-              {!isAttested &&
+              {isAttested &&
                 <div id={ADDENDUM_TAB_ID} className='step-container'>
                   <DucAddendum
                     doSubmit={doSubmit}
