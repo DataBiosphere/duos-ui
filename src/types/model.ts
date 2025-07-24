@@ -433,6 +433,17 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   piCountryOfOperation: string;
 }
 
+export interface DarCollection {
+  id: number;
+  darCode: string;
+  createDate: number;
+  createUserId: number;
+  updateDate?: number;
+  updateUserId?: number;
+  dars: Map<string, DataAccessRequest>;
+  datasets: Dataset[];
+}
+
 export interface DataAccessRequest {
   id: number;
   referenceId: string;
