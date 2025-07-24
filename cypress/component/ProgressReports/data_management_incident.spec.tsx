@@ -2,12 +2,13 @@ import React from 'react'
 import { mount } from 'cypress/react'
 import DataManagementIncident from 'src/pages/progress_reports/DataManagementIncident'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
+import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
 describe('Data Management Incident - Component Tests', () => {
   let onFormChangeSpy: () => void
 
   const mountComponent = (customState = {}) => {
-    const formState = { ...customState }
+    const formState = { ...customState } as FormState;
 
     const props = {
       readOnly: false,
