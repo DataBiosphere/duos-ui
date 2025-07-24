@@ -1,0 +1,5 @@
+# To configure git to use this file when using `git blame`:
+# $ git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# DT-2015: Align lint standards across IDEs
+5d432f5dcbe4b39cbe2c5128421edda2be2f956f
