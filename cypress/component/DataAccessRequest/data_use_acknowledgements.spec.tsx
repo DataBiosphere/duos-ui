@@ -1,6 +1,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements'
+import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
 describe('DataUseAcknowledgements Component', () => {
   let onChangeSpy: () => void
@@ -11,7 +12,7 @@ describe('DataUseAcknowledgements Component', () => {
       title: 'Data Use Acknowledgements',
       datasets: [],
       dataUseTranslations: [],
-      formData: {},
+      formData: {} as FormState,
       readOnlyMode: false,
       includeInstructions: true,
       onChange: onChangeSpy,
