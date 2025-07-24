@@ -6,6 +6,7 @@ import { binCollectionToBuckets } from '../../utils/BucketUtils';
 import { useCallback } from 'react';
 import { isEmpty, flatten } from 'lodash/fp';
 import {DAC} from 'src/libs/ajax/DAC.js';
+import {Notifications} from 'src/libs/utils.js';
 
 const commonStyles = {
   baseStyle: {
@@ -86,10 +87,9 @@ const columnHeaderData = (columns) => {
 
 export default function DucAddendum(props) {
   const { datasets, isLoading, save, doSubmit } = props;
-  console.log(datasets);
   const dacIds = useMemo(() => datasets.map(dataset => dataset.dacId), [datasets]);
-  const [dacs, setDacs] = useState([]);
 
+  const [dacs, setDacs] = useState([]);
   const [buckets, setBuckets] = useState([]);
   const [ducAddendumTable, setDucAddendumTable] = useState([]);
 
@@ -110,23 +110,19 @@ export default function DucAddendum(props) {
   }, [getBuckets]);
 
   useEffect(() => {
-    if (isEmpty(dacIds)) {
-      setDacs([]);
-      return;
-    }
-    const uniqueDacIds = [...new Set(dacIds)];
-    const dacPromises = uniqueDacIds.map(dacId => DAC.get(dacId));
+    const loadDacs = async () => {
+      const uniqueDacIds = [...new Set(dacIds)];
+      const dacPromises = uniqueDacIds.map(dacId => DAC.get(dacId));
 
-    Promise.all(dacPromises)
-      .then(dacsData => {
+      try {
+        const dacsData = await Promise.all(dacPromises);
         setDacs(dacsData);
-      })
-      .catch(error => {
-        Notification.error({
-            message: 'Error fetching DACs',
-            description: `There was an error fetching information about the DACs related to the selected dataset(s): ${error.message}`,
-        })
-      });
+      } catch (error) {
+        Notifications.showWarning({text: `Error loading DAC information for datasets: ${error.message}`});
+      }
+    }
+
+    loadDacs();
   }, [dacIds]);
 
   const buildDucAddendumTable = useCallback(async () => {
