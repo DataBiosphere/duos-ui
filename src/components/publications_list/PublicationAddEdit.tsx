@@ -105,8 +105,9 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                         onChange={onChange}
                     />
                     <FormField
-                        id='did_cite'
+                        id='citation'
                         type={FormFieldTypes.YESNORADIOGROUP}
+                        defaultValue={publication?.citation}
                         title='Did you cite the dataset(s) used in this publication?'
                         orientation='horizontal'
                         onChange={onChange}

@@ -275,22 +275,22 @@ describe('ProgressReportApplication - Component Tests', () => {
       publications: [
         {
           title: 'Publication 1',
-          pubmed_id: '12345',
+          pubmedId: '12345',
           date: '2023-01-01',
           authors: 'Author 1',
-          bibliographic_citation: 'Citation 1',
-          dataset_citation: 'Dataset Citation 1',
-          did_cite: true,
+          bibliographicCitation: 'Citation 1',
+          datasetCitation: 'Dataset Citation 1',
+          citation: true,
           link: ''
         },
         {
           title: 'Publication 2',
-          pubmed_id: '67890',
+          pubmedId: '67890',
           date: '2023-02-01',
           authors: 'Author 2',
-          bibliographic_citation: 'Citation 2',
-          dataset_citation: 'Dataset Citation 2',
-          did_cite: false,
+          bibliographicCitation: 'Citation 2',
+          datasetCitation: 'Dataset Citation 2',
+          citation: false,
           link: ''
         }
       ]
@@ -313,12 +313,12 @@ describe('ProgressReportApplication - Component Tests', () => {
       publications: [
         {
           title: 'Test Publication',
-          pubmed_id: '11111',
+          pubmedId: '11111',
           date: '2023-03-01',
           authors: 'Test Author',
-          bibliographic_citation: 'Test Citation',
-          dataset_citation: 'Test Dataset Citation',
-          did_cite: true,
+          bibliographicCitation: 'Test Citation',
+          datasetCitation: 'Test Dataset Citation',
+          citation: true,
           link: ''
         }
       ]
@@ -358,20 +358,20 @@ describe('ProgressReportApplication - Component Tests', () => {
           link: 'http://example.com/presentation1',
           date: '2023-01-01',
           authors: 'Author 1',
-          dataset_citation: 'Dataset Citation 1',
-          did_cite: true,
-          bibliographic_citation: 'Bibliographic Citation 1',
-          pubmed_id: ''
+          datasetCitation: 'Dataset Citation 1',
+          citation: true,
+          bibliographicCitation: 'Bibliographic Citation 1',
+          pubmedId: ''
         },
         {
           title: 'Presentation 2',
           link: 'http://example.com/presentation2',
           date: '2023-02-01',
           authors: 'Author 2',
-          dataset_citation: 'Dataset Citation 2',
-          did_cite: false,
-          bibliographic_citation: 'Bibliographic Citation 2',
-          pubmed_id: ''
+          datasetCitation: 'Dataset Citation 2',
+          citation: false,
+          bibliographicCitation: 'Bibliographic Citation 2',
+          pubmedId: ''
         }
       ]
     } as unknown as CombinedDataAccessRequest;

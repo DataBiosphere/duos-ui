@@ -188,22 +188,22 @@ describe('DarUtils', () => {
         publicationsYesNo: true,
         publications: [{
           title: 'Publication 1',
-          pubmed_id: '12345',
+          pubmedId: '12345',
           date: '2023-01-01',
           authors: ['Author A'],
-          bibliographic_citation: 'Citation 1',
-          dataset_citation: 'Dataset 1',
-          did_cite: true
+          bibliographicCitation: 'Citation 1',
+          datasetCitation: 'Dataset 1',
+          citation: true
         }],
         presentationsYesNo: true,
         presentations: [{
           title: 'Presentation 1',
-          pubmed_id: '67890',
+          pubmedId: '67890',
           date: '2023-02-01',
           authors: ['Author B'],
-          bibliographic_citation: 'Citation 2',
-          dataset_citation: 'Dataset 2',
-          did_cite: true
+          bibliographicCitation: 'Citation 2',
+          datasetCitation: 'Dataset 2',
+          citation: true
         }],
         labCollaborators: [{
           approverStatus: true,
