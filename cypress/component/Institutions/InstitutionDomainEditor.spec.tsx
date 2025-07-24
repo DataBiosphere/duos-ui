@@ -92,6 +92,27 @@ describe('Institution Domain Editor Tests', () => {
         cy.get('@domainsChangeHandler').should('have.been.calledWith', [...testDomains, newDomain]);
     });
 
+    it('should convert domain names to lowercase when adding', () => {
+        const uppercaseDomain = 'UPPERCASE.COM';
+        const expectedLowercaseDomain = 'uppercase.com';
+        const onDomainsChange = cy.stub().as('domainsChangeHandler');
+
+        mount(
+            <InstitutionDomainEditor
+                domains={testDomains}
+                isEditing={true}
+                onDomainsChange={onDomainsChange}
+                institutionList={[]}
+            />
+        );
+
+        cy.get('input').type(uppercaseDomain);
+        cy.contains('button', 'Add').click();
+
+        // Verify that the domain was added in lowercase
+        cy.get('@domainsChangeHandler').should('have.been.calledWith', [...testDomains, expectedLowercaseDomain]);
+    });
+
     it('should not add duplicate domains', () => {
         const existingDomain = testDomains[0];
         const onDomainsChange = cy.stub().as('domainsChangeHandler');
