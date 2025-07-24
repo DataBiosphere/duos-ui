@@ -2,14 +2,15 @@ import { mount } from 'cypress/react'
 import React from 'react'
 import { DraftFileUpload } from 'src/components/forms/DraftFileUpload'
 import { BrowserRouter } from 'react-router-dom'
+import { FileStorageObject } from 'src/types/model'
 
 const baseProps = {
   defaultValue: undefined,
   description: 'An important file description.',
   draftId: '',
-  onAddFile() {
+  async onAddFile() {
   },
-  onDeleteFile() {
+  async onDeleteFile() {
   },
   id: 'testFileUpload',
   title: 'File Upload Test',
@@ -29,7 +30,8 @@ const baseFso = {
   deleteUserId: -1,
   deleteDate: -1,
   deleted: false,
-}
+} as FileStorageObject
+
 describe('Draft File Upload - Tests', () => {
   it('should render a draft file upload control', () => {
     mount(<DraftFileUpload {...baseProps} />)
@@ -58,8 +60,7 @@ describe('Draft File Upload - Tests', () => {
   })
 
   it('should display file name when defaultValue is FSO.', () => {
-    const customProps = { ...baseProps }
-    customProps.defaultValue = baseFso
+    const customProps = { ...baseProps, defaultValue: baseFso }
     mount(<BrowserRouter><DraftFileUpload {...customProps} /></BrowserRouter>)
     cy.get('button').should('be.disabled')
     cy.get('span').contains('blank.pdf')
@@ -67,8 +68,7 @@ describe('Draft File Upload - Tests', () => {
   })
 
   it('should trigger onDelete when file is removed.', () => {
-    const customProps = { ...baseProps }
-    customProps.defaultValue = baseFso
+    const customProps = { ...baseProps, defaultValue: baseFso }
     customProps.onDeleteFile = cy.spy().as('onDeleteFileSpy')
     mount(<BrowserRouter><DraftFileUpload {...customProps} /></BrowserRouter>)
     cy.get('a').click({ force: true })

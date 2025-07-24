@@ -8,7 +8,7 @@ import { FileStorageObject } from 'src/types/model'
 export type DraftFileUploadProps = {
   description: string
   draftId: string
-  defaultValue: FileStorageObject
+  defaultValue?: FileStorageObject
   id: string
   onAddFile: (event: ChangeEvent<HTMLInputElement>, id: string) => Promise<void>
   onDeleteFile: (draftId: string, fileId: number, id: string) => Promise<void>
@@ -33,7 +33,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
   }
 
   const handleDeleteFile = async () => {
-    await onDeleteFile(draftId, defaultValue?.fileStorageObjectId, id)
+    await onDeleteFile(draftId, defaultValue!.fileStorageObjectId, id)
   }
 
   const deleteButton = (defaultValue)

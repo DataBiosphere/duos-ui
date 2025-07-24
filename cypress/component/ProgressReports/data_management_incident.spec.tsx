@@ -8,7 +8,7 @@ describe('Data Management Incident - Component Tests', () => {
   let onFormChangeSpy: () => void
 
   const mountComponent = (customState = {}) => {
-    const formState = { ...customState } as FormState;
+    const formState = { ...customState } as FormState
 
     const props = {
       readOnly: false,
