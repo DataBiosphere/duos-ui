@@ -297,11 +297,9 @@ describe('Institution Domain Editor Tests', () => {
                 'тест.рф'
             ];
 
-            const expectedDomains: string[] = [];
             internationalDomains.forEach((domain) => {
                 cy.get('input').clear().type(domain);
                 cy.contains('button', 'Add').click();
-                expectedDomains.push(domain);
                 cy.get('@domainsChangeHandler').should('have.been.called');
             });
         });
