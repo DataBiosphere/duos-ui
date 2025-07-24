@@ -1,4 +1,3 @@
-
 import React from 'react'
 import { useState, useEffect, Fragment } from 'react'
 import { Styles } from 'src/libs/theme'
@@ -112,19 +111,20 @@ export default function DucAddendum(props) {
 
   useEffect(() => {
     const loadDacs = async () => {
-      const dacIds = [...new Set(datasets.map(dataset => dataset.dacId))];
-      const dacPromises = dacIds.map(dacId => DAC.get(dacId));
+      const dacIds = [...new Set(datasets.map(dataset => dataset.dacId))]
+      const dacPromises = dacIds.map(dacId => DAC.get(dacId))
 
       try {
-        const dacsData = await Promise.all(dacPromises);
-        setDacs(dacsData);
-      } catch (error) {
-        Notifications.showWarning({text: `Error loading DAC information for datasets: ${error.message}`});
+        const dacsData = await Promise.all(dacPromises)
+        setDacs(dacsData)
+      }
+      catch (error) {
+        Notifications.showWarning({ text: `Error loading DAC information for datasets: ${error.message}` })
       }
     }
 
-    loadDacs();
-  }, [datasets]);
+    loadDacs()
+  }, [datasets])
 
   const buildDucAddendumTable = useCallback(async () => {
     const tableChunks = buckets.map((bucket) => {
