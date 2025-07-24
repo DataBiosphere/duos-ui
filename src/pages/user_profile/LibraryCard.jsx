@@ -35,10 +35,12 @@ export default function LibraryCard(props) {
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <p style={{ margin: '0px 0px 0px 10px' }}>
           Issued on:
+          {' '}
           {issuedOn}
         </p>
         <p style={{ margin: '0px 0px 0px 10px' }}>
           Issued by:
+          {' '}
           {issuedBy}
         </p>
       </div>
