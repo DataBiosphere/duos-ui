@@ -14,6 +14,7 @@ import {
 import {extractError} from 'src/utils/ErrorUtils';
 import {getDataLocationLink} from 'src/utils/DataLocationUtils';
 import {createDataUseDisplay} from 'src/utils/DataUseUtils';
+import {History} from 'history';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -64,7 +65,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     try {
       const draftResponse = await DAR.postDarDraft({datasetId: [datasetTerm?.datasetId]});
       if (draftResponse.referenceId) {
-        history.pushState({}, '', `/dar_application/${draftResponse.referenceId}`);
+        history.push(`/dar_application/${draftResponse.referenceId}`);
       } else if (draftResponse.message) {
         showError(draftResponse.message + ' Please contact customer support for help.');
       } else {
