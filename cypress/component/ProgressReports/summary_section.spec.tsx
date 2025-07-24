@@ -48,7 +48,6 @@ describe('Summary Section - Component Tests', () => {
       pubmedId: '12345',
       authors: 'Author 1, Author 2',
       datasetCitation: 'Dataset Citation 1',
-      link: 'http://example.com/1',
     },
     {
       title: 'Test Publication 2',
@@ -58,7 +57,6 @@ describe('Summary Section - Component Tests', () => {
       pubmedId: '67890',
       authors: 'Author 3, Author 4',
       datasetCitation: 'Dataset Citation 2',
-      link: 'http://example.com/2',
     },
   ]
 
