@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { AlertColor, Alert, Snackbar, SnackbarOrigin } from '@mui/material';
 
-type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 
 interface NotificationRequiredProps extends NotificationProps {
   severity: AlertColor;
@@ -77,7 +77,12 @@ export const ToastNotifications = {
           open={open}
           onClose={handleClose}
           // these transforms are required because the rule `html { font-size: 10px }` exists in bootstrap_replacement.css
-          sx={{ transform: 'scale(1.5)', transformOrigin: `${snackbarLayout.vertical} ${snackbarLayout.horizontal}` }}
+          sx={{
+            transform: 'scale(1.5)',
+            transformOrigin: `${snackbarLayout.vertical} ${snackbarLayout.horizontal}`,
+            maxWidth: '30vw',
+            width: 'fit-content'
+          }}
           {...props}
         >
           <Alert
