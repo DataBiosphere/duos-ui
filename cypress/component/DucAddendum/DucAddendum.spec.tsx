@@ -71,7 +71,7 @@ describe('DucAddendum', () => {
 
   it('should display `Unknown DAC` when relevant DAC cannot be loaded', () => {
     cy.stub(DAC, 'list').returns(Promise.resolve(mockDacs));
-    cy.stub(DAC, 'get').callsFake(() => { return Promise.reject('DAC not found'); });
+    cy.stub(DAC, 'get').callsFake(() => { return Promise.reject(new Error('DAC not found')); });
 
     const props = {
       datasets: [mockDatasets.at(0)],
