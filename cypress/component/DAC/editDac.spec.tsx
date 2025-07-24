@@ -12,7 +12,7 @@ import dac from './dac.json'
 import { setUserRoleStatuses } from 'src/libs/utils'
 
 // It's necessary to wrap components that contain `Link` components
-const WrappedEditDac = (props) => {
+const WrappedEditDac = (props: object) => {
   return <BrowserRouter><EditDac {...props} /></BrowserRouter>
 }
 
