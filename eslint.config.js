@@ -4,6 +4,7 @@ import ts from 'typescript-eslint'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import stylistic from '@stylistic/eslint-plugin'
 import cypress from 'eslint-plugin-cypress'
 
 /*
@@ -16,7 +17,7 @@ This is required since the project uses both JSX and TSX. The only other setting
 
 - setting the ecmaVersion to match the one in the tsconfig.json
 - setting the react version to match the one in package.json
-- adding the cypress plugin
+- adding the stylistic and cypress plugins
 - matching the typescript behavior for unused variables ( https://typescript-eslint.io/rules/no-unused-vars/ )
 - disabling the react/prop-types rule
 
@@ -24,7 +25,7 @@ This is required since the project uses both JSX and TSX. The only other setting
 export default ts.config(
   { ignores: ['build'] },
   {
-    extends: [cypress.configs.recommended, js.configs.recommended, ts.configs.recommended],
+    extends: [js.configs.recommended, ts.configs.recommended, stylistic.configs.recommended, cypress.configs.recommended],
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2022,
@@ -38,6 +39,7 @@ export default ts.config(
       react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      '@stylistic': stylistic,
       cypress,
     },
     rules: {
@@ -62,7 +64,6 @@ export default ts.config(
         }
       ],
       'react/prop-types': 'off',
-      'quotes': ['error', 'single', { 'avoidEscape': true, 'allowTemplateLiterals': true }],
     },
   },
 )
