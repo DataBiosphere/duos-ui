@@ -127,6 +127,11 @@ export default function DucAddendum(props) {
   }, [datasets])
 
   const buildDucAddendumTable = useCallback(async () => {
+    const getDacName = (dacId) => {
+      const dac = dacs.find(dac => dac.dacId === dacId)
+      return dac?.name || 'Unknown DAC'
+    }
+
     const tableChunks = buckets.map((bucket) => {
       const dataUseCodes = bucket.label
       const dataUseSummary = bucket.dataUses.map(dataUse => dataUse.description).join('. ')
@@ -157,7 +162,7 @@ export default function DucAddendum(props) {
             style: columnStyles,
           },
           {
-            data: dacs.find(dac => dac.dacId === dataset.dacId)?.name || 'Unknown DAC',
+            data: getDacName(dataset.dacId),
             id: dataset.datasetId,
             style: columnStyles,
           },
