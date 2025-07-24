@@ -1,3 +1,4 @@
+/* eslint-disable cypress/unsafe-to-chain-command */
 import React from 'react';
 import {mount} from 'cypress/react';
 import {InstitutionDomainEditor} from 'src/components/institution_table/components/InstitutionDomainEditor';
@@ -91,6 +92,27 @@ describe('Institution Domain Editor Tests', () => {
         cy.get('@domainsChangeHandler').should('have.been.calledWith', [...testDomains, newDomain]);
     });
 
+    it('should convert domain names to lowercase when adding', () => {
+        const uppercaseDomain = 'UPPERCASE.COM';
+        const expectedLowercaseDomain = 'uppercase.com';
+        const onDomainsChange = cy.stub().as('domainsChangeHandler');
+
+        mount(
+            <InstitutionDomainEditor
+                domains={testDomains}
+                isEditing={true}
+                onDomainsChange={onDomainsChange}
+                institutionList={[]}
+            />
+        );
+
+        cy.get('input').type(uppercaseDomain);
+        cy.contains('button', 'Add').click();
+
+        // Verify that the domain was added in lowercase
+        cy.get('@domainsChangeHandler').should('have.been.calledWith', [...testDomains, expectedLowercaseDomain]);
+    });
+
     it('should not add duplicate domains', () => {
         const existingDomain = testDomains[0];
         const onDomainsChange = cy.stub().as('domainsChangeHandler');
@@ -165,5 +187,195 @@ describe('Institution Domain Editor Tests', () => {
         cy.contains('button', 'Add').click();
         cy.get('@domainsChangeHandler').should('not.have.been.called');
         cy.contains('This domain is associated with another institution: Institution A').should('be.visible');
+    });
+
+    describe('Domain Format Validation', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let onDomainsChange: Cypress.Agent<any>;
+
+        beforeEach(() => {
+            onDomainsChange = cy.stub().as('domainsChangeHandler');
+        });
+
+        it('should reject invalid domain formats', () => {
+            mount(
+                <InstitutionDomainEditor
+                    domains={[]}
+                    isEditing={true}
+                    onDomainsChange={onDomainsChange}
+                    institutionList={[]}
+                />
+            );
+
+            const invalidDomains = [
+                { domain: 'invalid', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'invalid.', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: '.invalid', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'invalid..com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'invalid-.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: '-invalid.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'invalid.c', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'a'.repeat(64) + '.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'spaces in domain.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'under_score.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'special@char.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'http://domain.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'https://domain.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' },
+                { domain: 'ftp://domain.com', expectedError: 'Please enter a valid domain name (e.g., example.com)' }
+            ];
+
+            invalidDomains.forEach(({ domain, expectedError }) => {
+                cy.get('input').clear().type(domain);
+                cy.contains('button', 'Add').click();
+                cy.get('@domainsChangeHandler').should('not.have.been.called');
+                // Look for the specific error message for this domain
+                cy.contains(expectedError).should('be.visible');
+                cy.get('input').clear();
+                // Clear the error by clearing the input - this should remove the error message
+                cy.contains(expectedError).should('not.exist');
+            });
+        });
+
+        it('should accept valid domain formats', () => {
+            mount(
+                <InstitutionDomainEditor
+                    domains={[]}
+                    isEditing={true}
+                    onDomainsChange={onDomainsChange}
+                    institutionList={[]}
+                />
+            );
+
+            const validDomains = [
+                'example.com',
+                'subdomain.example.com',
+                'test.edu',
+                'university.ac.uk',
+                'research.org',
+                'institute.gov',
+                'lab.net',
+                'medical.int',
+                'hospital.mil',
+                'clinic.info',
+                'center.biz',
+                'science.name',
+                'tech.museum',
+                'bio.pro',
+                'test-domain.com',
+                'multi-word-domain.org',
+                'numbers123.com',
+                'domain123.test456.com',
+                '123domain.com'
+            ];
+
+            validDomains.forEach((validDomain, _index) => {
+                cy.get('input').clear().type(validDomain);
+                cy.contains('button', 'Add').click();
+                // Should be called for each valid domain
+                cy.get('@domainsChangeHandler').should('have.been.called');
+                // Reset the stub for the next iteration
+                cy.wrap(onDomainsChange).invoke('resetHistory');
+                // No error message should be visible
+                cy.contains('Please enter a valid domain name (e.g., example.com)').should('not.exist');
+            });
+        });
+
+        it('should handle international domain names (IDN)', () => {
+            mount(
+                <InstitutionDomainEditor
+                    domains={[]}
+                    isEditing={true}
+                    onDomainsChange={onDomainsChange}
+                    institutionList={[]}
+                />
+            );
+
+            const internationalDomains = [
+                'münchen.de',
+                'test.测试',
+                'università.it',
+                'тест.рф'
+            ];
+
+            internationalDomains.forEach((domain) => {
+                cy.get('input').clear().type(domain);
+                cy.contains('button', 'Add').click();
+                cy.get('@domainsChangeHandler').should('have.been.called');
+            });
+        });
+
+        it('should validate domain on Enter key press', () => {
+            mount(
+                <InstitutionDomainEditor
+                    domains={[]}
+                    isEditing={true}
+                    onDomainsChange={onDomainsChange}
+                    institutionList={[]}
+                />
+            );
+
+            cy.get('input').type('example.com{enter}');
+            cy.get('@domainsChangeHandler').should('have.been.calledWith', ['example.com']);
+        });
+
+        it('should not add domain on Enter if validation fails', () => {
+            mount(
+                <InstitutionDomainEditor
+                    domains={[]}
+                    isEditing={true}
+                    onDomainsChange={onDomainsChange}
+                    institutionList={[]}
+                />
+            );
+
+            cy.get('input').type('invalid{enter}');
+            cy.get('@domainsChangeHandler').should('not.have.been.called');
+            cy.contains('Please enter a valid domain name (e.g., example.com)').should('be.visible');
+        });
+
+        it('should clear error message when typing new domain after error', () => {
+            mount(
+                <InstitutionDomainEditor
+                    domains={[]}
+                    isEditing={true}
+                    onDomainsChange={onDomainsChange}
+                    institutionList={[]}
+                />
+            );
+
+            // First add invalid domain
+            cy.get('input').type('invalid');
+            cy.contains('button', 'Add').click();
+            cy.contains('Please enter a valid domain name (e.g., example.com)').should('be.visible');
+
+            // Start typing new domain should clear error
+            cy.get('input').clear().type('v');
+            cy.contains('Please enter a valid domain name (e.g., example.com)').should('not.exist');
+        });
+
+        it('should show specific error messages for different validation failures', () => {
+            mount(
+                <InstitutionDomainEditor
+                    domains={['existing.com']}
+                    isEditing={true}
+                    onDomainsChange={onDomainsChange}
+                    institutionList={[]}
+                />
+            );
+
+            // Test duplicate domain error
+            cy.get('input').type('existing.com');
+            cy.contains('button', 'Add').click();
+            cy.contains('This domain has already been added').should('be.visible');
+
+            // Test invalid format error
+            cy.get('input').clear().type('invalid');
+            cy.contains('button', 'Add').click();
+            cy.contains('Please enter a valid domain name (e.g., example.com)').should('be.visible');
+
+            // Test empty domain - button should be disabled for empty input
+            cy.get('input').clear();
+            cy.contains('button', 'Add').should('be.disabled');
+        });
     });
 });

@@ -40,6 +40,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         name: '',
         domains: [],
     });
+    const [nameError, setNameError] = useState<string>('');
 
     useEffect( () => {
         const loadInstitution = async () => {
@@ -63,6 +64,41 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         }
         loadInstitution();
     }, [formMode, institutionId]);
+
+    const normalizeInstitutionName = (name: string): string => {
+        // Trim whitespace from start and end
+        let normalized = name.trim();
+
+        // Replace curly single quotes with straight single quotes
+        normalized = normalized.replace(/[‘’]/g, "'");
+
+        return normalized;
+    };
+
+    const validateInstitutionName = (name: string): string => {
+        const normalizedName = normalizeInstitutionName(name);
+
+        if (normalizedName.length === 0) {
+            return 'Institution name is required';
+        }
+
+        // Check for double quotes (straight or curly)
+        if (/[“"”]/.test(name)) {
+            return 'Institution name cannot contain double quotation marks (")';
+        }
+
+        // Check if name already exists (excluding current institution in edit mode)
+        const existingInstitution = institutionList.find(inst =>
+            inst.name.toLowerCase() === normalizedName.toLowerCase() &&
+            inst.id !== institution?.id
+        );
+
+        if (existingInstitution) {
+            return 'An institution with this name already exists';
+        }
+
+        return '';
+    };
 
     const updateInstitution = async (updatedInstitution: InstitutionDetailsUpdate) => {
         try {
@@ -124,18 +160,26 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
             name: institution?.name || '',
             domains: institution?.domains ? [...institution.domains] : [],
         });
+        setNameError(''); // Clear any previous name errors
         setIsEditing(true);
     };
 
     const saveChanges = async () => {
         if (institutionUpdates) {
             setSaving(true);
+
+            // Ensure name is normalized before saving
+            const normalizedUpdates = {
+                ...institutionUpdates,
+                name: normalizeInstitutionName(institutionUpdates.name)
+            };
+
             switch(formMode) {
                 case FORM_MODES.createNew:
-                    await createNewInstitution(institutionUpdates);
+                    await createNewInstitution(normalizedUpdates);
                     break;
                 case FORM_MODES.editExisting:
-                    await updateInstitution(institutionUpdates);
+                    await updateInstitution(normalizedUpdates);
                     break;
                 default:
                     Notifications.showError({ text: 'An unexpected error occurred: unrecognized form mode' });
@@ -156,6 +200,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
+        setNameError(''); // Clear any name errors
         setInstitutionUpdates({
             name: institution?.name || '',
             domains: institution?.domains ? [...institution.domains] : [],
@@ -164,7 +209,13 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
 
     const handleNameChange = (value: string) => {
         if (institutionUpdates) {
+            // Don't normalize while typing - let user type freely
             setInstitutionUpdates({...institutionUpdates, name: value});
+
+            // Validate using the normalized version but don't change the input value
+            const normalizedName = normalizeInstitutionName(value);
+            const error = validateInstitutionName(normalizedName);
+            setNameError(error);
         }
     }
 
@@ -222,7 +273,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         onClick={handleEditToggle}
                         style={{fontSize: 14}}
                         startIcon={!isEditing && <EditIcon />}
-                        disabled={saving || (isEditing && (!institutionUpdates || institutionUpdates.name.trim().length === 0))}
+                        disabled={saving || (isEditing && (!institutionUpdates || institutionUpdates.name.trim().length === 0 || nameError.length > 0))}
                     >
                         {getConfirmButtonText()}
                     </Button>
@@ -237,12 +288,49 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         size="small"
                         placeholder={'Institution Name'}
                         disabled={!isEditing}
+                        error={isEditing && nameError.length > 0}
+                        helperText={isEditing && nameError.length > 0 ? nameError : ''}
                         InputProps={{
+                            style: {fontSize: 14}
+                        }}
+                        FormHelperTextProps={{
                             style: {fontSize: 14}
                         }}
                         style={{width: 300}}
                         onChange={(e) => {
                             handleNameChange(e.target.value);
+                        }}
+                        onBlur={(e) => {
+                            // Normalize the name when user finishes editing
+                            if (isEditing && institutionUpdates) {
+                                const originalName = e.target.value;
+                                const normalizedName = normalizeInstitutionName(originalName);
+
+                                // Check if normalization changed the input
+                                if (originalName !== normalizedName) {
+                                    setInstitutionUpdates({...institutionUpdates, name: normalizedName});
+
+                                    // Show user-friendly message about what was changed
+                                    const changes = [];
+                                    if (originalName.trim() !== originalName) {
+                                        changes.push('removed extra spaces');
+                                    }
+                                    if (originalName.includes('‘') || originalName.includes('’')) {
+                                        changes.push('converted curly quotes to straight quotes');
+                                    }
+
+                                    if (changes.length > 0) {
+                                        const changeMessage = changes.join(' and ');
+                                        Notifications.showInformation({
+                                            text: `Institution name has been automatically cleaned up: ${changeMessage}.`
+                                        });
+                                    }
+                                }
+
+                                // Re-validate with the normalized name
+                                const error = validateInstitutionName(normalizedName);
+                                setNameError(error);
+                            }
                         }}
                         sx={{
                             '& .MuiInputBase-input.Mui-disabled': {
