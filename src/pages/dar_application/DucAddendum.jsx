@@ -87,7 +87,6 @@ const columnHeaderData = (columns) => {
 
 export default function DucAddendum(props) {
   const { datasets, isLoading, save, doSubmit } = props;
-  const dacIds = useMemo(() => datasets.map(dataset => dataset.dacId), [datasets]);
 
   const [dacs, setDacs] = useState([]);
   const [buckets, setBuckets] = useState([]);
@@ -111,8 +110,8 @@ export default function DucAddendum(props) {
 
   useEffect(() => {
     const loadDacs = async () => {
-      const uniqueDacIds = [...new Set(dacIds)];
-      const dacPromises = uniqueDacIds.map(dacId => DAC.get(dacId));
+      const dacIds = [...new Set(datasets.map(dataset => dataset.dacId))];
+      const dacPromises = dacIds.map(dacId => DAC.get(dacId));
 
       try {
         const dacsData = await Promise.all(dacPromises);
@@ -123,7 +122,7 @@ export default function DucAddendum(props) {
     }
 
     loadDacs();
-  }, [dacIds]);
+  }, [datasets]);
 
   const buildDucAddendumTable = useCallback(async () => {
     const tableChunks = buckets.map(bucket => {
