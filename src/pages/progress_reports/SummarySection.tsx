@@ -93,6 +93,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
             description={(
               <span>
                 Have you generated any
+                {' '}
                 <strong>intellectual property</strong>
                 {' '}
                 since your last renewal as a result of using the data?
@@ -133,6 +134,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
             description={(
               <span>
                 Have you published in any
+                {' '}
                 <strong>publications</strong>
                 {' '}
                 since your last renewal as a result of using the data?
@@ -165,6 +167,7 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
             description={(
               <span>
                 Have you published in any
+                {' '}
                 <strong>presentations</strong>
                 {' '}
                 since your last renewal as a result of using the data?
