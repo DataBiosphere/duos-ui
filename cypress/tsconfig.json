@@ -5,9 +5,5 @@
       "cypress",
       "node"
     ],
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ]
+  }
 }
