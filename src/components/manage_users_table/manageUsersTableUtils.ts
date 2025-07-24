@@ -1,4 +1,4 @@
-import {Styles} from 'src/libs/theme';
+import { Styles } from 'src/libs/theme'
 
 export const styles = {
   baseStyle: {
@@ -13,7 +13,7 @@ export const styles = {
     backgroundColor: 'white',
     border: '1px solid #DEDEDE',
     borderRadius: '4px',
-    margin: '0.5% 0'
+    margin: '0.5% 0',
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -24,7 +24,7 @@ export const styles = {
     letterSpacing: '0.2px',
     textTransform: 'uppercase',
     backgroundColor: 'B8CDD3',
-    border: 'none'
+    border: 'none',
   }),
   cellWidth: {
     username: '20%',
@@ -45,4 +45,4 @@ export const styles = {
     email: '1.4rem',
     perms: '1.4rem',
   },
-};
+}

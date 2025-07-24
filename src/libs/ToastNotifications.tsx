@@ -1,25 +1,25 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { AlertColor, Alert, Snackbar, SnackbarOrigin } from '@mui/material';
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import { AlertColor, Alert, Snackbar, SnackbarOrigin } from '@mui/material'
 
-export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
 
 interface NotificationRequiredProps extends NotificationProps {
-  severity: AlertColor;
-  text: string;
-  timeout: number;
-  layout: ToastPosition | SnackbarOrigin;
+  severity: AlertColor
+  text: string
+  timeout: number
+  layout: ToastPosition | SnackbarOrigin
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  [key: string]: any
 }
 
 interface NotificationProps {
-  severity?: AlertColor;
-  text: string | React.ReactNode;
-  timeout?: number;
-  layout?: ToastPosition | SnackbarOrigin;
+  severity?: AlertColor
+  text: string | React.ReactNode
+  timeout?: number
+  layout?: ToastPosition | SnackbarOrigin
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  [key: string]: any
 }
 
 const defaultProps: NotificationRequiredProps = {
@@ -28,9 +28,9 @@ const defaultProps: NotificationRequiredProps = {
   timeout: 3500,
   layout: {
     vertical: 'bottom',
-    horizontal: 'right'
-  }
-};
+    horizontal: 'right',
+  },
+}
 
 const convertToSnackbarOrigin = (layout: ToastPosition | SnackbarOrigin): SnackbarOrigin => {
   if (typeof layout === 'string') {
@@ -38,12 +38,12 @@ const convertToSnackbarOrigin = (layout: ToastPosition | SnackbarOrigin): Snackb
       topLeft: { vertical: 'top', horizontal: 'left' },
       topRight: { vertical: 'top', horizontal: 'right' },
       bottomLeft: { vertical: 'bottom', horizontal: 'left' },
-      bottomRight: { vertical: 'bottom', horizontal: 'right' }
-    };
-    return positions[layout];
+      bottomRight: { vertical: 'bottom', horizontal: 'right' },
+    }
+    return positions[layout]
   }
-  return layout;
-};
+  return layout
+}
 
 export const ToastNotifications = {
   showNotification: ({
@@ -53,22 +53,22 @@ export const ToastNotifications = {
     layout = defaultProps.layout,
     ...props
   }: NotificationProps): void => {
-    const snackbarLayout = convertToSnackbarOrigin(layout);
-    const notificationRoot = document.createElement('div');
-    document.body.appendChild(notificationRoot);
-    const root = createRoot(notificationRoot);
+    const snackbarLayout = convertToSnackbarOrigin(layout)
+    const notificationRoot = document.createElement('div')
+    document.body.appendChild(notificationRoot)
+    const root = createRoot(notificationRoot)
 
     const NotificationComponent = (): React.JSX.Element => {
-      const [open, setOpen] = React.useState(true);
+      const [open, setOpen] = React.useState(true)
 
       const handleClose = (_event: React.SyntheticEvent | Event, reason?: string): void => {
-        if (reason === 'clickaway') return;
-        setOpen(false);
+        if (reason === 'clickaway') return
+        setOpen(false)
         setTimeout(() => {
-          root.unmount();
-          notificationRoot.remove();
-        }, 300);
-      };
+          root.unmount()
+          notificationRoot.remove()
+        }, 300)
+      }
 
       return (
         <Snackbar
@@ -81,12 +81,12 @@ export const ToastNotifications = {
             transform: 'scale(1.5)',
             transformOrigin: `${snackbarLayout.vertical} ${snackbarLayout.horizontal}`,
             maxWidth: '30vw',
-            width: 'fit-content'
+            width: 'fit-content',
           }}
           {...props}
         >
           <Alert
-            data-cy='notification-alert'
+            data-cy="notification-alert"
             onClose={handleClose}
             severity={severity}
             variant="filled"
@@ -95,33 +95,33 @@ export const ToastNotifications = {
             {text}
           </Alert>
         </Snackbar>
-      );
-    };
+      )
+    }
 
-    root.render(<NotificationComponent />);
+    root.render(<NotificationComponent />)
   },
   showError: (props: NotificationProps): void => {
     return ToastNotifications.showNotification({
       ...props,
       severity: 'error',
-    });
+    })
   },
   showSuccess: (props: NotificationProps): void => {
     return ToastNotifications.showNotification({
       ...props,
       severity: 'success',
-    });
+    })
   },
   showWarning: (props: NotificationProps): void => {
     return ToastNotifications.showNotification({
       ...props,
       severity: 'warning',
-    });
+    })
   },
   showInformation: (props: NotificationProps): void => {
     return ToastNotifications.showNotification({
       ...props,
       severity: 'info',
-    });
-  }
-};
+    })
+  },
+}

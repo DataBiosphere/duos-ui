@@ -1,77 +1,77 @@
-import React from 'react';
-import { useState, useRef, useEffect } from 'react';
-import { AddUserModal } from '../components/modals/AddUserModal';
-import { User } from '../libs/ajax/User';
-import manageUsersIcon from '../images/icon_manage_users.png';
-import { USER_ROLES } from '../libs/utils';
-import { isNil } from 'lodash/fp';
-import { ManageUsersTable } from '../components/manage_users_table/ManageUsersTable';
-import { Styles } from '../libs/theme';
-import SearchBar from '../components/SearchBar';
-import { Notification } from '../components/Notification';
+import React from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { AddUserModal } from '../components/modals/AddUserModal'
+import { User } from '../libs/ajax/User'
+import manageUsersIcon from '../images/icon_manage_users.png'
+import { USER_ROLES } from '../libs/utils'
+import { isNil } from 'lodash/fp'
+import { ManageUsersTable } from '../components/manage_users_table/ManageUsersTable'
+import { Styles } from '../libs/theme'
+import SearchBar from '../components/SearchBar'
+import { Notification } from '../components/Notification'
 
 const getUserList = async () => {
-  const users = await User.list(USER_ROLES.admin);
+  const users = await User.list(USER_ROLES.admin)
 
-  return users.map(user => {
-    user.researcher = false;
+  return users.map((user) => {
+    user.researcher = false
     if (!isNil(user.roles)) {
-      user.roles.forEach(role => {
+      user.roles.forEach((role) => {
         if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.researcher = true;
+          user.researcher = true
         }
-      });
+      })
     }
-    user.key = user.id;
-    return user;
-  });
-};
+    user.key = user.id
+    return user
+  })
+}
 
 export const AdminManageUsers = function AdminManageUsers() {
-  const [searchText, setSearchText] = useState('');
-  const [userList, setUserList] = useState([]);
-  const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState();
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState('')
+  const [userList, setUserList] = useState([])
+  const [showAddUserModal, setShowAddUserModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState()
+  const [isLoading, setIsLoading] = useState(false)
 
-  const searchRef = useRef('');
+  const searchRef = useRef('')
 
   useEffect(() => {
-    setIsLoading(true);
+    setIsLoading(true)
     getUserList().then((userList) => {
-      setIsLoading(false);
-      setUserList(userList);
-      setIsLoading(false);
+      setIsLoading(false)
+      setUserList(userList)
+      setIsLoading(false)
     }).catch(() => {
-      setIsLoading(false);
-      Notification.showError({ text: 'Error: Unable to retrieve user data from server' });
-    });
-  }, []);
+      setIsLoading(false)
+      Notification.showError({ text: 'Error: Unable to retrieve user data from server' })
+    })
+  }, [])
 
   const addUser = () => {
-    setSelectedUser(null);
-    setShowAddUserModal(true);
-  };
+    setSelectedUser(null)
+    setShowAddUserModal(true)
+  }
 
   const okModal = async () => {
-    setShowAddUserModal(false);
-    setIsLoading(true);
-    const userList = await getUserList();
-    setIsLoading(false);
-    setUserList(userList);
-  };
+    setShowAddUserModal(false)
+    setIsLoading(true)
+    const userList = await getUserList()
+    setIsLoading(false)
+    setUserList(userList)
+  }
 
   const closeModal = () => {
-    setShowAddUserModal(false);
-  };
+    setShowAddUserModal(false)
+  }
 
   const afterModalOpen = () => {
-    setShowAddUserModal(false);
-  };
+    setShowAddUserModal(false)
+  }
 
   const handleSearchUser = (query) => {
-    setSearchText(query);
-  };
+    setSearchText(query)
+  }
 
   return (
     <div style={Styles.PAGE}>
@@ -89,7 +89,7 @@ export const AdminManageUsers = function AdminManageUsers() {
           handleSearchChange={handleSearchUser}
           searchRef={searchRef}
           style={{ width: '60%', margin: '0 3% 0 0' }}
-          button={
+          button={(
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' }}>
               <a
                 id="btn_addUser"
@@ -100,7 +100,7 @@ export const AdminManageUsers = function AdminManageUsers() {
                 <span>Add User</span>
               </a>
             </div>
-          }
+          )}
         />
       </div>
       <ManageUsersTable userList={userList} isLoading={isLoading} searchText={searchText} />
@@ -113,7 +113,7 @@ export const AdminManageUsers = function AdminManageUsers() {
         user={selectedUser}
       />
     </div>
-  );
-};
+  )
+}
 
-export default AdminManageUsers;
+export default AdminManageUsers

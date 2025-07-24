@@ -1,39 +1,39 @@
-import React from 'react';
-import { Styles } from '../libs/theme';
+import React from 'react'
+import { Styles } from '../libs/theme'
 
 export default function TableSkeletonLoader(props) {
-  const { tableHeader, tableRowLoading } = props;
+  const { tableHeader, tableRowLoading } = props
 
   const blockStyleOverwrite = {
     display: 'flex',
-    height: '48px'
-  };
+    height: '48px',
+  }
 
-  const tableRowStyle = { ...Styles.TABLE.RECORD_ROW, ...blockStyleOverwrite };
-  const modifiedTableRowStyle = { ...tableRowStyle, borderTop: '1px solid rgba(109, 110, 112, 0.2)' };
+  const tableRowStyle = { ...Styles.TABLE.RECORD_ROW, ...blockStyleOverwrite }
+  const modifiedTableRowStyle = { ...tableRowStyle, borderTop: '1px solid rgba(109, 110, 112, 0.2)' }
 
   const generateLoaderTemplate = () => {
-    let start = 1;
-    const end = 10;
+    let start = 1
+    const end = 10
 
     const template = [
-      <div key={`row-loader-0`} style={Styles.TABLE.HEADER_ROW}>{tableHeader}</div>
-    ];
+      <div key="row-loader-0" style={Styles.TABLE.HEADER_ROW}>{tableHeader}</div>,
+    ]
 
     while (start <= end) {
-      const targetStyle = start > 1 ? modifiedTableRowStyle : tableRowStyle;
+      const targetStyle = start > 1 ? modifiedTableRowStyle : tableRowStyle
       const rowTemplate = (
         <div style={targetStyle} key={`row-loader-${start}`}>
           {tableRowLoading}
         </div>
-      );
-      template.push(rowTemplate);
-      start++;
+      )
+      template.push(rowTemplate)
+      start++
     }
-    template.push(<div key='row-loader-footer' style={Styles.TABLE.FOOTER} />);
+    template.push(<div key="row-loader-footer" style={Styles.TABLE.FOOTER} />)
 
-    return template;
-  };
+    return template
+  }
 
-  return <div data-cy="table-skeleton-loader" style={Styles.TABLE.CONTAINER}>{generateLoaderTemplate()}</div>;
+  return <div data-cy="table-skeleton-loader" style={Styles.TABLE.CONTAINER}>{generateLoaderTemplate()}</div>
 }

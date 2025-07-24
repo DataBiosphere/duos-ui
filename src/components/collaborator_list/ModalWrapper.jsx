@@ -1,6 +1,6 @@
-import React from 'react';
-import Modal from 'react-modal';
+import React from 'react'
+import Modal from 'react-modal'
 
 export default function ModalWrapper(props) {
-    return <Modal {...props} />;
+  return <Modal {...props} />
 }

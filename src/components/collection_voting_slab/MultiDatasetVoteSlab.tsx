@@ -1,56 +1,56 @@
-import React, { useEffect, useState } from 'react';
-import { get, isEmpty, isNil } from 'lodash';
-import { Storage } from 'src/libs/storage';
-import { convertLabelToKey } from 'src/libs/utils';
-import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils';
-import { DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model';
+import React, { useEffect, useState } from 'react'
+import { get, isEmpty, isNil } from 'lodash'
+import { Storage } from 'src/libs/storage'
+import { convertLabelToKey } from 'src/libs/utils'
+import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
+import { DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model'
 
 // Components
-import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox';
-import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel';
-import { ChairVoteInfo } from 'src/components/collection_voting_slab/ResearchProposalVoteSlab';
-import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision';
-import { Alert } from 'src/components/Alert';
-import { DataUsePills } from 'src/components/collection_voting_slab/DataUsePill';
-import MemberVoteSummary from 'src/components/collection_voting_slab/MemberVoteSummary';
+import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox'
+import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel'
+import { ChairVoteInfo } from 'src/components/collection_voting_slab/ResearchProposalVoteSlab'
+import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision'
+import { Alert } from 'src/components/Alert'
+import { DataUsePills } from 'src/components/collection_voting_slab/DataUsePill'
+import MemberVoteSummary from 'src/components/collection_voting_slab/MemberVoteSummary'
 
 // Types
 type Bucket = {
-  key: string;
-  algorithmResult?: unknown;
-  datasets: Dataset[];
-  elections: Election[];
-  dataUses?: DataUse[];
-};
+  key: string
+  algorithmResult?: unknown
+  datasets: Dataset[]
+  elections: Election[]
+  dataUses?: DataUse[]
+}
 
 interface MultiDatasetVoteSlabProps {
-  readonly title: string;
-  readonly bucket: Bucket;
-  readonly collection: DarCollection;
-  readonly dacDatasetIds?: number[];
-  readonly isChair?: boolean;
-  readonly isApprovalDisabled?: boolean;
-  readonly isLoading?: boolean;
-  readonly readOnly?: boolean;
-  readonly adminPage?: boolean;
-  readonly updateFinalVote?: (...args: unknown[]) => void;
-  readonly reloadFn?: (...args: unknown[]) => void;
+  readonly title: string
+  readonly bucket: Bucket
+  readonly collection: DarCollection
+  readonly dacDatasetIds?: number[]
+  readonly isChair?: boolean
+  readonly isApprovalDisabled?: boolean
+  readonly isLoading?: boolean
+  readonly readOnly?: boolean
+  readonly adminPage?: boolean
+  readonly updateFinalVote?: (...args: unknown[]) => void
+  readonly reloadFn?: (...args: unknown[]) => void
 }
 
 interface DataUseSummaryProps {
-  readonly bucket: Bucket;
+  readonly bucket: Bucket
 }
 
 interface VoteInfoSubsectionProps {
-  readonly currentUserVotes: Vote[];
-  readonly bucket: Bucket;
-  readonly isChair?: boolean;
-  readonly isApprovalDisabled?: boolean;
-  readonly isLoading?: boolean;
-  readonly readOnly?: boolean;
-  readonly adminPage?: boolean;
-  readonly updateFinalVote?: (...args: unknown[]) => void;
-  readonly reloadFn?: (...args: unknown[]) => void;
+  readonly currentUserVotes: Vote[]
+  readonly bucket: Bucket
+  readonly isChair?: boolean
+  readonly isApprovalDisabled?: boolean
+  readonly isLoading?: boolean
+  readonly readOnly?: boolean
+  readonly adminPage?: boolean
+  readonly updateFinalVote?: (...args: unknown[]) => void
+  readonly reloadFn?: (...args: unknown[]) => void
 }
 
 // Styles
@@ -63,8 +63,8 @@ const styles = {
     border: '#84a3db 2px solid',
     padding: '20px',
     td: {
-      padding: '10px 10px 20px 20px'
-    }
+      padding: '10px 10px 20px 20px',
+    },
   },
   slabTitle: {
     display: 'flex',
@@ -78,7 +78,7 @@ const styles = {
     paddingLeft: '-10%',
     color: '#333F52',
     marginTop: '-5px',
-    columnGap: '2rem'
+    columnGap: '2rem',
   },
   question: {
     fontSize: 17,
@@ -88,15 +88,15 @@ const styles = {
   dataUses: {},
   voteInfo: {},
   chairVoteInfo: {},
-};
+}
 
 // Components
 const DataUseSummary = ({ bucket }: DataUseSummaryProps) => {
-  const dataUses = get(bucket, 'dataUses', []);
-  return !isNil(dataUses) 
+  const dataUses = get(bucket, 'dataUses', [])
+  return !isNil(dataUses)
     ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
-    : <></>;
-};
+    : <></>
+}
 
 const VoteInfoSubsection = ({
   currentUserVotes,
@@ -109,20 +109,20 @@ const VoteInfoSubsection = ({
   updateFinalVote,
   reloadFn,
 }: VoteInfoSubsectionProps) => {
-  const electionIds = currentUserVotes.map((vote) => vote.electionId);
+  const electionIds = currentUserVotes.map(vote => vote.electionId)
   const allOpenElections = bucket.elections
-    .filter((election) => electionIds.includes(election.electionId))
-    .filter((election) => election.status?.toLowerCase() === 'open');
+    .filter(election => electionIds.includes(election.electionId))
+    .filter(election => election.status?.toLowerCase() === 'open')
 
   return (
     <div style={styles.voteInfo}>
       <div>
         {!adminPage && !allOpenElections && !readOnly && (
           <Alert
-            id={'vote-disabled-alert'}
-            description={'Voting is disabled since this election is not open.'}
-            title={'Voting is disabled since this election is not open.'}
-            type={'danger'}
+            id="vote-disabled-alert"
+            description="Voting is disabled since this election is not open."
+            title="Voting is disabled since this election is not open."
+            type="danger"
           />
         )}
       </div>
@@ -140,8 +140,8 @@ const VoteInfoSubsection = ({
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Main Component
 export default function MultiDatasetVoteSlab({
@@ -155,41 +155,41 @@ export default function MultiDatasetVoteSlab({
   readOnly,
   adminPage,
   updateFinalVote,
-  reloadFn
+  reloadFn,
 }: MultiDatasetVoteSlabProps) {
-  const [currentUserVotes, setCurrentUserVotes] = useState<Vote[]>([]);
-  const [dacVotes, setDacVotes] = useState<Vote[]>([]);
-  const [isDMI, setIsDMI] = useState(false);
-  const { algorithmResult } = bucket;
+  const [currentUserVotes, setCurrentUserVotes] = useState<Vote[]>([])
+  const [dacVotes, setDacVotes] = useState<Vote[]>([])
+  const [isDMI, setIsDMI] = useState(false)
+  const { algorithmResult } = bucket
   const getMemberVoteSectionTitle = () => {
-    if (adminPage) return 'DAC Member Votes';
-    if (isChair) return 'My DAC Member\'s Votes (detail)';
-    return 'Other DAC Member\'s Votes';
-  };
+    if (adminPage) return 'DAC Member Votes'
+    if (isChair) return 'My DAC Member\'s Votes (detail)'
+    return 'Other DAC Member\'s Votes'
+  }
 
   useEffect(() => {
     const sorted = Object.values(collection.dars).sort(
-      (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
-    );
-    const mostRecentDar = sorted.at(0);
-    const darData = mostRecentDar?.data;
-    
+      (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime(),
+    )
+    const mostRecentDar = sorted.at(0)
+    const darData = mostRecentDar?.data
+
     if (darData && Object.keys(darData).includes('dmi')) {
-      setIsDMI(true);
+      setIsDMI(true)
     }
-    
-    const user = Storage.getCurrentUser();
-    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
+
+    const user = Storage.getCurrentUser()
+    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage))
     setCurrentUserVotes(
-      extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage)
-    );
-  }, [bucket, isChair, adminPage, collection.dars]);
+      extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage),
+    )
+  }, [bucket, isChair, adminPage, collection.dars])
 
   return (
-    <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
+    <div style={styles.baseStyle} data-cy="dataset-vote-slab">
       <div style={{ display: 'inline' }}>
-        <table className={'layout-table'} style={{ width: '-webkit-fill-available' }}>
-          <thead><tr><th/></tr></thead>
+        <table className="layout-table" style={{ width: '-webkit-fill-available' }}>
+          <thead><tr><th /></tr></thead>
           <tbody>
             <tr>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
@@ -231,7 +231,7 @@ export default function MultiDatasetVoteSlab({
             </tr>
           </tbody>
         </table>
-        
+
         <div style={{ paddingLeft: '20px' }}>
           <MemberVoteSummary
             dacVotes={dacVotes}
@@ -241,7 +241,7 @@ export default function MultiDatasetVoteSlab({
             isChair={isChair}
           />
         </div>
-        
+
         <DatasetsRequestedPanel
           dacDatasetIds={dacDatasetIds}
           bucketDatasets={bucket.datasets}
@@ -250,5 +250,5 @@ export default function MultiDatasetVoteSlab({
         />
       </div>
     </div>
-  );
+  )
 }

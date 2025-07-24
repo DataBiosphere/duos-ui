@@ -1,45 +1,44 @@
-import { User } from './ajax/User';
-import {Storage} from '../libs/storage';
+import { User } from './ajax/User'
+import { Storage } from '../libs/storage'
 
 export const Acknowledgments = {
   broadLcaAcknowledgement: 'Library_Card_Agreement_2023_ApplicationVersion',
   nihLcaAcknowledgement: 'NIH_Library_Card_Agreement_11.17.22_version.pdf',
-};
+}
 
 const acknowledgementStorageKey = (ackKey) => {
-  return `acknowledgement_${ackKey}`;
-};
+  return `acknowledgement_${ackKey}`
+}
 
 export const hasAccepted = async (...acknowledgements) => {
-
   // check if the acknowledgements are in the cache
   const allAcknowledgementsInStorage = acknowledgements.every(
-    (ackKey) => Storage.getCurrentUserSettings(acknowledgementStorageKey(ackKey)) || false
-  );
+    ackKey => Storage.getCurrentUserSettings(acknowledgementStorageKey(ackKey)) || false,
+  )
 
   if (allAcknowledgementsInStorage) {
-    return true; // yay! we've cached all these acknowledgements
+    return true // yay! we've cached all these acknowledgements
   }
 
-  const userAcknowledgementsPayload = await User.getAcknowledgements();
-  const acceptedAcknowledgements = Object.keys(userAcknowledgementsPayload);
+  const userAcknowledgementsPayload = await User.getAcknowledgements()
+  const acceptedAcknowledgements = Object.keys(userAcknowledgementsPayload)
 
   // cache the results from the backend...
-  acceptedAcknowledgements.forEach((ackKey) => Storage.setCurrentUserSettings(acknowledgementStorageKey(ackKey), true));
+  acceptedAcknowledgements.forEach(ackKey => Storage.setCurrentUserSettings(acknowledgementStorageKey(ackKey), true))
 
-  return acknowledgements.every((acknowledgement) => acceptedAcknowledgements.includes(acknowledgement));
-};
+  return acknowledgements.every(acknowledgement => acceptedAcknowledgements.includes(acknowledgement))
+}
 
 export const hasSOAcceptedDAAs = async () => {
-  return await hasAccepted(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
-};
+  return await hasAccepted(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement)
+}
 
 export const acceptAcknowledgments = async (...ackKeys) => {
-  const userAcknowledgementsPayload = await User.acceptAcknowledgments(...ackKeys);
-  const acceptedAcknowledgements = Object.keys(userAcknowledgementsPayload);
+  const userAcknowledgementsPayload = await User.acceptAcknowledgments(...ackKeys)
+  const acceptedAcknowledgements = Object.keys(userAcknowledgementsPayload)
 
   // cache the results
-  acceptedAcknowledgements.forEach((ackKey) => Storage.setCurrentUserSettings(acknowledgementStorageKey(ackKey, true)));
-};
+  acceptedAcknowledgements.forEach(ackKey => Storage.setCurrentUserSettings(acknowledgementStorageKey(ackKey, true)))
+}
 
-export default Acknowledgments;
+export default Acknowledgments

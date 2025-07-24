@@ -1,11 +1,11 @@
-import {find, isEmpty} from 'lodash/fp';
-import { filter } from 'lodash';
-import {Config} from './config';
-import axios from 'axios';
+import { find, isEmpty } from 'lodash/fp'
+import { filter } from 'lodash'
+import { Config } from './config'
+import axios from 'axios'
 
 // https://storage.googleapis.com/broad-duos-banners/{{env}}_notifications.json
-const gcs = 'https://storage.googleapis.com/broad-duos-banners';
-const bannerFileName = 'notifications.json';
+const gcs = 'https://storage.googleapis.com/broad-duos-banners'
+const bannerFileName = 'notifications.json'
 
 export const NotificationService = {
 
@@ -14,13 +14,13 @@ export const NotificationService = {
    * @returns {Promise<JSON>}
    */
   getBanners: async () => {
-    const env = await Config.getEnv();
-    const url =
-      env === 'local'
+    const env = await Config.getEnv()
+    const url
+      = env === 'local'
         ? gcs + '/dev_' + bannerFileName
-        : gcs + '/' + env + '_' + bannerFileName;
-    const res = await axios.get(url);
-    return res.data;
+        : gcs + '/' + env + '_' + bannerFileName
+    const res = await axios.get(url)
+    return res.data
   },
 
   /**
@@ -29,10 +29,11 @@ export const NotificationService = {
    */
   getActiveBanners: async () => {
     try {
-      const banners = await NotificationService.getBanners();
-      return filter(banners, {active: true});
-    } catch (_error) {
-      return [];
+      const banners = await NotificationService.getBanners()
+      return filter(banners, { active: true })
+    }
+    catch (_error) {
+      return []
     }
   },
 
@@ -43,13 +44,14 @@ export const NotificationService = {
    */
   getBannerObjectById: async (id) => {
     try {
-      const banners = await NotificationService.getBanners();
+      const banners = await NotificationService.getBanners()
       if (!isEmpty(banners)) {
-        return find({active: true, id: id})(banners);
+        return find({ active: true, id: id })(banners)
       }
-    } catch(_error) {
-      return null;
+    }
+    catch (_error) {
+      return null
     }
   },
 
-};
+}

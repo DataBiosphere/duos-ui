@@ -26,14 +26,14 @@
 
 Cypress.Commands.add('auth', async (roleName) => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { auth } = require('google-auth-library');
-  const keys = Cypress.env(roleName);
-  const client = auth.fromJSON(keys);
-  client.scopes = ['email', 'profile'];
-  const url = Cypress.env('baseUrl');
-  await client.request({ url });
-  return client.credentials;
-});
+  const { auth } = require('google-auth-library')
+  const keys = Cypress.env(roleName)
+  const client = auth.fromJSON(keys)
+  client.scopes = ['email', 'profile']
+  const url = Cypress.env('baseUrl')
+  await client.request({ url })
+  return client.credentials
+})
 
 Cypress.Commands.add('initApplicationConfig', () => {
   cy.intercept({
@@ -41,19 +41,19 @@ Cypress.Commands.add('initApplicationConfig', () => {
     url: '/config.json',
     hostname: 'localhost',
   }, {
-    'env': 'ci',
-    'hash': '',
-    'tag': '',
-    'bardApiUrl': '',
-    'apiUrl': '',
-    'ontologyApiUrl': '',
-    'terraUrl': '',
-    'tdrApiUrl': '',
-    'ecmApiUrl': '',
-    'errorApiKey': '',
-    'profileUrl': '',
-    'nihUrl': '',
-    'gaId': '',
-    'features': {}
-  });
-});
+    env: 'ci',
+    hash: '',
+    tag: '',
+    bardApiUrl: '',
+    apiUrl: '',
+    ontologyApiUrl: '',
+    terraUrl: '',
+    tdrApiUrl: '',
+    ecmApiUrl: '',
+    errorApiKey: '',
+    profileUrl: '',
+    nihUrl: '',
+    gaId: '',
+    features: {},
+  })
+})

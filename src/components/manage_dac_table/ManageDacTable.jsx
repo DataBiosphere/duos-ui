@@ -1,70 +1,69 @@
-import React from 'react';
-import {useState, useEffect, useCallback} from 'react';
-import ReactTooltip from 'react-tooltip';
-import { DAC } from '../../libs/ajax/DAC';
-import {filter, isNil} from 'lodash/fp';
-import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
-import cellData from './ManageDacTableCellData';
-import { styles } from './manageDacTableUtils';
-import SimpleTable from '../SimpleTable';
-import PaginationBar from '../PaginationBar';
-
+import React from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import ReactTooltip from 'react-tooltip'
+import { DAC } from '../../libs/ajax/DAC'
+import { filter, isNil } from 'lodash/fp'
+import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils'
+import cellData from './ManageDacTableCellData'
+import { styles } from './manageDacTableUtils'
+import SimpleTable from '../SimpleTable'
+import PaginationBar from '../PaginationBar'
 
 const columnHeaderConfig = {
   name: {
     label: 'DAC Name',
     cellStyle: { width: styles.cellWidth.name },
     cellDataFn: cellData.nameCellData,
-    sortable: true
+    sortable: true,
   },
   description: {
     label: 'DAC Description',
     cellStyle: { width: styles.cellWidth.description },
     cellDataFn: cellData.descriptionCellData,
-    sortable: false
+    sortable: false,
   },
   datasets: {
     label: 'DAC Datasets',
     cellStyle: { width: styles.cellWidth.datasets },
     cellDataFn: cellData.datasetsCellData,
-    sortable: false
+    sortable: false,
   },
   actions: {
     label: 'Action',
     cellStyle: { width: styles.cellWidth.actions },
-    cellDataFn: cellData.actionsCellData
-  }
-};
+    cellDataFn: cellData.actionsCellData,
+  },
+}
 
-const columns = Object.keys(columnHeaderConfig);
+const columns = Object.keys(columnHeaderConfig)
 
 const columnHeaderData = (columns = columns) => {
-  return columns.map((col) => columnHeaderConfig[col]);
-};
+  return columns.map(col => columnHeaderConfig[col])
+}
 
 const getInitialSort = (columns = []) => {
   const sort = {
     field: 'name',
-    dir: -1
-  };
-  const sortIndex = columns.indexOf(sort.field);
+    dir: -1,
+  }
+  const sortIndex = columns.indexOf(sort.field)
 
   if (sortIndex !== -1) {
-    return { colIndex: sortIndex, dir: sort.dir};
+    return { colIndex: sortIndex, dir: sort.dir }
   }
   else {
-    return { colIndex: 0, dir: 1 };
+    return { colIndex: 0, dir: 1 }
   }
-};
+}
 
 const processDacRowData = ({ dacs, viewDatasets, viewMembers, editDac, deleteDac, userRole, columns = columns }) => {
-  if(!isNil(dacs)) {
+  if (!isNil(dacs)) {
     return dacs.map((dac) => {
       const {
         dacId,
         name,
-        description
-      } = dac;
+        description,
+      } = dac
 
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
@@ -76,23 +75,22 @@ const processDacRowData = ({ dacs, viewDatasets, viewMembers, editDac, deleteDac
           viewMembers,
           editDac,
           deleteDac,
-          userRole
-        });
-      });
-    });
+          userRole,
+        })
+      })
+    })
   }
-};
+}
 
 export const ManageDacTable = function ManageDacTable(props) {
-
   // table data
-  const [visibleDacs, setVisibleDacs] = useState([]);
+  const [visibleDacs, setVisibleDacs] = useState([])
 
   // table state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
-  const [sort, setSort] = useState(getInitialSort(props.columns));
-  const [tableSize, setTableSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageCount, setPageCount] = useState(1)
+  const [sort, setSort] = useState(getInitialSort(props.columns))
+  const [tableSize, setTableSize] = useState(10)
 
   const {
     isLoading,
@@ -103,31 +101,31 @@ export const ManageDacTable = function ManageDacTable(props) {
     setShowMembersModal,
     setShowConfirmationModal,
     setSelectedDac,
-    setSelectedDatasets
-  } = props;
+    setSelectedDatasets,
+  } = props
 
   const editDac = useCallback((selectedDac) => {
-    setShowEditPage(true);
-    setSelectedDac(selectedDac);
-  }, [setShowEditPage, setSelectedDac]);
+    setShowEditPage(true)
+    setSelectedDac(selectedDac)
+  }, [setShowEditPage, setSelectedDac])
 
   const deleteDac = useCallback((selectedDac) => {
-    setShowConfirmationModal(true);
-    setSelectedDac(selectedDac);
-  }, [setShowConfirmationModal, setSelectedDac]);
+    setShowConfirmationModal(true)
+    setSelectedDac(selectedDac)
+  }, [setShowConfirmationModal, setSelectedDac])
 
   const viewMembers = useCallback((selectedDac) => {
-    setShowMembersModal(true);
-    setSelectedDac(selectedDac);
-  }, [setShowMembersModal, setSelectedDac]);
+    setShowMembersModal(true)
+    setSelectedDac(selectedDac)
+  }, [setShowMembersModal, setSelectedDac])
 
   const viewDatasets = useCallback(async (selectedDac) => {
-    const datasets = await DAC.datasets(selectedDac.dacId);
-    const approvedDatasets = filter({ dacApproval: true })(datasets);
-    setShowDatasetsModal(true);
-    setSelectedDac(selectedDac);
-    setSelectedDatasets(approvedDatasets);
-  }, [setShowDatasetsModal, setSelectedDac, setSelectedDatasets]);
+    const datasets = await DAC.datasets(selectedDac.dacId)
+    const approvedDatasets = filter({ dacApproval: true })(datasets)
+    setShowDatasetsModal(true)
+    setSelectedDac(selectedDac)
+    setSelectedDatasets(approvedDatasets)
+  }, [setShowDatasetsModal, setSelectedDac, setSelectedDatasets])
 
   useEffect(() => {
     recalculateVisibleTable({
@@ -140,31 +138,30 @@ export const ManageDacTable = function ManageDacTable(props) {
         editDac,
         deleteDac,
         userRole,
-        columns
+        columns,
       }),
       currentPage,
-      setPageCount: (c) => setPageCount(c),
-      setCurrentPage: (p) => setCurrentPage(p),
-      setVisibleList: (l) => setVisibleDacs(l),
-      sort
-    });
-  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers]);
+      setPageCount: c => setPageCount(c),
+      setCurrentPage: p => setCurrentPage(p),
+      setVisibleList: l => setVisibleDacs(l),
+      sort,
+    })
+  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers])
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
-      setTableSize(value);
+      setTableSize(value)
     }
-  }, []);
+  }, [])
 
   const goToPage = useCallback(
     (value) => {
       updatePage(value, pageCount, (page) => {
-        setCurrentPage(page);
-      });
+        setCurrentPage(page)
+      })
     },
-    [pageCount]
-  );
-
+    [pageCount],
+  )
 
   return (
     <>
@@ -174,7 +171,7 @@ export const ManageDacTable = function ManageDacTable(props) {
         columnHeaders={columnHeaderData(columns)}
         styles={styles}
         tableSize={tableSize}
-        paginationBar={
+        paginationBar={(
           <PaginationBar
             pageCount={pageCount}
             currentPage={currentPage}
@@ -182,10 +179,10 @@ export const ManageDacTable = function ManageDacTable(props) {
             goToPage={goToPage}
             changeTableSize={changeTableSize}
           />
-        }
+        )}
         sort={sort}
         onSort={(sort) => {
-          setSort(sort);
+          setSort(sort)
         }}
       />
       <ReactTooltip
@@ -195,7 +192,7 @@ export const ManageDacTable = function ManageDacTable(props) {
         className="tooltip-wrapper"
       />
     </>
-  );
-};
+  )
+}
 
-export default ManageDacTable;
+export default ManageDacTable

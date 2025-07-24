@@ -1,37 +1,37 @@
-import React, {useEffect, useState} from 'react';
-import {Institution as InstitutionAPI} from '../../libs/ajax/Institution';
-import {Notifications} from '../../libs/utils';
-import {DuosUser, Institution} from '../../types/model';
+import React, { useEffect, useState } from 'react'
+import { Institution as InstitutionAPI } from '../../libs/ajax/Institution'
+import { Notifications } from '../../libs/utils'
+import { DuosUser, Institution } from '../../types/model'
 
 interface AffiliationAndRoleProps {
-  readonly user: DuosUser;
+  readonly user: DuosUser
 }
 
 export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
-
-  const {user} = props;
-  const [institution, setInstitution] = useState<Institution>();
-  const [roles, setRoles] = useState<string>('');
+  const { user } = props
+  const [institution, setInstitution] = useState<Institution>()
+  const [roles, setRoles] = useState<string>('')
 
   useEffect(() => {
     const init = async () => {
       try {
         // Note that although user is a required prop and roles is a required property, the parent JSX component may
         // not honor that and pass an undefined entity during load.
-        const allRoles = user?.roles?.map((role) => role.name).join(', ');
-        setRoles(allRoles);
+        const allRoles = user?.roles?.map(role => role.name).join(', ')
+        setRoles(allRoles)
         if (user?.institutionId) {
-          const institution: Institution = await InstitutionAPI.getById(user.institutionId);
+          const institution: Institution = await InstitutionAPI.getById(user.institutionId)
           if (institution) {
-            setInstitution(institution);
+            setInstitution(institution)
           }
         }
-      } catch (_error) {
-        Notifications.showError({text: 'Error: Unable to retrieve user information'});
       }
-    };
-    init();
-  }, [user]);
+      catch (_error) {
+        Notifications.showError({ text: 'Error: Unable to retrieve user information' })
+      }
+    }
+    init()
+  }, [user])
 
   const subHeadStyle = {
     color: '#000',
@@ -39,31 +39,38 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
     fontSize: '16px',
     fontStyle: 'normal',
     fontWeight: '600',
-    lineHeight: 'normal'
-  };
+    lineHeight: 'normal',
+  }
 
-  return <div>
-    <h1
+  return (
+    <div>
+      <h1
         style={{
           color: '#01549F',
           fontSize: '20px',
           fontWeight: '600',
-        }}>
-      Affiliation & Role
-    </h1>
-    <div style={{marginTop: '20px'}}/>
-    <div>
-      <p style={subHeadStyle}>Institution</p>
-      <div style={{marginTop: '15px'}}/>
-      {institution
-          ? <div data-cy='institutional-affiliation'>{institution.name}</div>
-          : <div data-cy='institutional-affiliation'>Your institutional affiliation is automatically derived from your email domain. 
-            Please use your institutional email to be affiliated with your institution. If you are using your institutional email and have not been assigned an institution
-            please use the Contact Us form and provide your email and institution. </div>
-      }
-      <div style={{marginTop: '15px'}}/>
-      <p style={subHeadStyle}>Role</p>
-      <p data-cy='user-roles'>{roles}</p>
+        }}
+      >
+        Affiliation & Role
+      </h1>
+      <div style={{ marginTop: '20px' }} />
+      <div>
+        <p style={subHeadStyle}>Institution</p>
+        <div style={{ marginTop: '15px' }} />
+        {institution
+          ? <div data-cy="institutional-affiliation">{institution.name}</div>
+          : (
+              <div data-cy="institutional-affiliation">
+                Your institutional affiliation is automatically derived from your email domain.
+                Please use your institutional email to be affiliated with your institution. If you are using your institutional email and have not been assigned an institution
+                please use the Contact Us form and provide your email and institution.
+                {' '}
+              </div>
+            )}
+        <div style={{ marginTop: '15px' }} />
+        <p style={subHeadStyle}>Role</p>
+        <p data-cy="user-roles">{roles}</p>
+      </div>
     </div>
-  </div>;
+  )
 }

@@ -39,103 +39,103 @@ Step 3: Pass both arrays into the headCells and rows props
 
 */
 
-import React, {useState, useMemo} from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { ThemeProvider } from '@mui/material/styles';
-import EnhancedTableHead from './EnhancedTableHead';
-import { theme } from './Themes';
-import Box from '@mui/material/Box';
+import React, { useState, useMemo } from 'react'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TablePagination from '@mui/material/TablePagination'
+import TableRow from '@mui/material/TableRow'
+import Paper from '@mui/material/Paper'
+import { ThemeProvider } from '@mui/material/styles'
+import EnhancedTableHead from './EnhancedTableHead'
+import { theme } from './Themes'
+import Box from '@mui/material/Box'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
-    return -1;
+    return -1
   }
   if (b[orderBy] > a[orderBy]) {
-    return 1;
+    return 1
   }
-  return 0;
+  return 0
 }
 
 function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
+    : (a, b) => -descendingComparator(a, b, orderBy)
 }
 
 function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
+  const stabilizedThis = array.map((el, index) => [el, index])
   stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
+    const order = comparator(a[0], b[0])
     if (order !== 0) {
-      return order;
+      return order
     }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
+    return a[1] - b[1]
+  })
+  return stabilizedThis.map(el => el[0])
 }
 
 export default function SortableTable(props) {
-
   const {
     rows,
     headCells,
     defaultSort = 'darCode',
-    cellAlignment = 'center'
-  } = props;
+    cellAlignment = 'center',
+  } = props
 
-  const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState(defaultSort);
-  const [selected, setSelected] = useState([]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [order, setOrder] = useState('asc')
+  const [orderBy, setOrderBy] = useState(defaultSort)
+  const [selected, setSelected] = useState([])
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const handleRequestSort = (_event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
+    const isAsc = orderBy === property && order === 'asc'
+    setOrder(isAsc ? 'desc' : 'asc')
+    setOrderBy(property)
+  }
 
   const handleClick = (_event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
+    const selectedIndex = selected.indexOf(name)
+    let newSelected = []
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(selected, name)
+    }
+    else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1))
+    }
+    else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1))
+    }
+    else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
+        selected.slice(selectedIndex + 1),
+      )
     }
 
-    setSelected(newSelected);
-  };
+    setSelected(newSelected)
+  }
 
   const handleChangePage = (_event, newPage) => {
-    setPage(newPage);
-  };
+    setPage(newPage)
+  }
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
 
+  const isSelected = name => selected.indexOf(name) !== -1
 
-  const isSelected = (name) => selected.indexOf(name) !== -1;
-
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  const emptyRows
+    = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
 
   const visibleRows = useMemo(
     () =>
@@ -144,7 +144,7 @@ export default function SortableTable(props) {
         page * rowsPerPage + rowsPerPage,
       ),
     [order, orderBy, page, rows, rowsPerPage],
-  );
+  )
 
   return (
     <ThemeProvider theme={theme}>
@@ -154,15 +154,17 @@ export default function SortableTable(props) {
           fill: '#FFF',
           strokeWidth: '1px',
           stroke: '#ABABAB',
-          filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))'
-        }} >
+          filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))',
+        }}
+      >
         <Paper
           sx={{
             width: '100%',
             mb: 2,
             fontFamily: 'Montserrat',
-            fontSize: '100'
-          }} >
+            fontSize: '100',
+          }}
+        >
           <TableContainer>
             <Table>
               <EnhancedTableHead
@@ -170,37 +172,41 @@ export default function SortableTable(props) {
                 orderBy={orderBy}
                 onRequestSort={handleRequestSort}
                 headCells={headCells}
-                sx={{ marginBottom: '15px' }} />
+                sx={{ marginBottom: '15px' }}
+              />
               <TableBody>
                 {visibleRows.map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
-                  const labelId = `enhanced-table-checkbox-${index}`;
+                  const isItemSelected = isSelected(row.name)
+                  const labelId = `enhanced-table-checkbox-${index}`
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.name)}
+                      onClick={event => handleClick(event, row.name)}
                       tabIndex={-1}
                       key={index}
-                      selected={isItemSelected}>
-                      {Object.keys(row).map((category) => (
+                      selected={isItemSelected}
+                    >
+                      {Object.keys(row).map(category => (
                         <TableCell
                           key={category}
-                          component='th'
+                          component="th"
                           id={labelId}
-                          scope='row'
-                          padding='none'
-                          align={cellAlignment}>
+                          scope="row"
+                          padding="none"
+                          align={cellAlignment}
+                        >
                           {row[category]}
                         </TableCell>
                       ))}
                     </TableRow>
-                  );
+                  )
                 })}
                 {emptyRows > 0 && (
                   <TableRow
                     style={{
                       height: 53 * emptyRows,
-                    }} >
+                    }}
+                  >
                     <TableCell colSpan={6} />
                   </TableRow>
                 )}
@@ -209,14 +215,15 @@ export default function SortableTable(props) {
           </TableContainer>
           <TablePagination
             rowsPerPageOptions={[]}
-            component='div'
+            component="div"
             count={rows.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage} />
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Paper>
-      </Box >
+      </Box>
     </ThemeProvider>
-  );
+  )
 }

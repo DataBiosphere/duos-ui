@@ -1,7 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import {getPropertyValuesFromUser} from '../libs/utils';
-import {isNil} from 'lodash/fp';
-import { isEmpty } from 'lodash';
+import React, { useState, useEffect } from 'react'
+import { getPropertyValuesFromUser } from '../libs/utils'
+import { isNil } from 'lodash/fp'
+import { isEmpty } from 'lodash'
 
 export const ResearcherReview = (props) => {
   const [state, setState] = useState({
@@ -9,22 +9,22 @@ export const ResearcherReview = (props) => {
     user: {},
     institution: {},
     properties: {
-      eraCommonsId: ''
-    }
-  });
+      eraCommonsId: '',
+    },
+  })
 
   useEffect(() => {
-    const user = props.user;
-    const userProps = getPropertyValuesFromUser(user);
-    setState((prev) => ({
+    const user = props.user
+    const userProps = getPropertyValuesFromUser(user)
+    setState(prev => ({
       ...prev,
       user: user,
       institution: !isEmpty(user.institution) ? user.institution : null,
-      properties: userProps
-    }));
-  }, [props.user]);
+      properties: userProps,
+    }))
+  }, [props.user])
 
-  const { properties, user, institution } = state;
+  const { properties, user, institution } = state
 
   return (
     <div className="container">
@@ -62,7 +62,7 @@ export const ResearcherReview = (props) => {
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ResearcherReview;
+export default ResearcherReview

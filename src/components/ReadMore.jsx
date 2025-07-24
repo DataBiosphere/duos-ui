@@ -1,11 +1,11 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
-import ReactTooltip from 'react-tooltip';
+import React from 'react'
+import { useEffect, useState } from 'react'
+import ReactTooltip from 'react-tooltip'
 
 export const ReadMore = ({
   inline = false,
-  content = [<span key='content'>{''}</span>],
-  moreContent = [<span key='moreContent'>{''}</span>],
+  content = [<span key="content"></span>],
+  moreContent = [<span key="moreContent"></span>],
   className = '',
   style = {},
   readStyle = {},
@@ -14,70 +14,70 @@ export const ReadMore = ({
   readMoreText = 'Read More',
   readLessText = 'Read Less',
 }) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
-    ReactTooltip.rebuild();
-  });
+    ReactTooltip.rebuild()
+  })
 
   const getUnderLimit = () => {
-    return !content || content.length <= charLimit;
-  };
+    return !content || content.length <= charLimit
+  }
 
   const getInlineContent = () => {
     const content = expanded
       ? content
       : content.slice(0, charLimit) + (hideUnderLimit
         ? getUnderLimit() ? '' : ' ...'
-        : ' ...');
+        : ' ...')
     return (
       <span className={className} style={style}>
         {content}
       </span>
-    );
-  };
+    )
+  }
 
   const getFormattedContent = () => {
-    return expanded ? [...content, ...moreContent] : content;
-  };
+    return expanded ? [...content, ...moreContent] : content
+  }
 
   const getContent = () => {
-    return inline ? getInlineContent() : getFormattedContent();
-  };
+    return inline ? getInlineContent() : getFormattedContent()
+  }
 
   const readMore = () => {
-    setExpanded(true);
-  };
+    setExpanded(true)
+  }
 
   const readLess = () => {
-    setExpanded(false);
-  };
+    setExpanded(false)
+  }
 
   const getReadLink = (fun, text, classes) => {
     const { linkElements, linkElementsStyle } = inline
       ? { linkElements: [text], linkElementsStyle: {} }
       : {
-        linkElements: [
-          text,
-          <span key='chevron' className={classes} style={{ padding: '0 1rem' }} aria-hidden="true" />,
-        ],
-        linkElementsStyle: readStyle,
-      };
+          linkElements: [
+            text,
+            <span key="chevron" className={classes} style={{ padding: '0 1rem' }} aria-hidden="true" />,
+          ],
+          linkElementsStyle: readStyle,
+        }
     return (
       <a onClick={() => fun()} style={linkElementsStyle}>
         {linkElements}
       </a>
-    );
-  };
+    )
+  }
 
-  const readLink = expanded ?
-    getReadLink(readLess, readLessText, 'glyphicon glyphicon-chevron-up') :
-    getReadLink(readMore, readMoreText, 'glyphicon glyphicon-chevron-down');
+  const readLink = expanded
+    ? getReadLink(readLess, readLessText, 'glyphicon glyphicon-chevron-up')
+    : getReadLink(readMore, readMoreText, 'glyphicon glyphicon-chevron-down')
 
   return (
     <div>
       {getContent()}
-      {hideUnderLimit && getUnderLimit() || readLink}
+      {(hideUnderLimit && getUnderLimit()) || readLink}
     </div>
-  );
-};
+  )
+}

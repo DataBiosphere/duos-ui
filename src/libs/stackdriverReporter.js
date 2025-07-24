@@ -1,25 +1,25 @@
-import { Storage } from './storage';
-import StackdriverErrorReporter from 'stackdriver-errors-js';
-import { Config } from './config';
-import { get } from 'lodash';
-import { isNil } from 'lodash/fp';
+import { Storage } from './storage'
+import StackdriverErrorReporter from 'stackdriver-errors-js'
+import { Config } from './config'
+import { get } from 'lodash'
+import { isNil } from 'lodash/fp'
 
-const errorHandler = new StackdriverErrorReporter();
+const errorHandler = new StackdriverErrorReporter()
 
 export const StackdriverReporter = {
 
   generateErrorConfig: async () => {
-    const errorApiKey = await Config.getErrorApiKey();
-    const project = await Config.getProject();
-    const user = Storage.getCurrentUser();
-    const hash = await Config.getHash();
-    const tag = await Config.getTag();
-    const env = await Config.getEnv();
+    const errorApiKey = await Config.getErrorApiKey()
+    const project = await Config.getProject()
+    const user = Storage.getCurrentUser()
+    const hash = await Config.getHash()
+    const tag = await Config.getTag()
+    const env = await Config.getEnv()
     const version = tag
       .replace('production_', '')
       .replace('staging_', '')
       .concat('_').concat(hash)
-      .concat('_').concat(env);
+      .concat('_').concat(env)
     return {
       key: errorApiKey,
       projectId: project,
@@ -27,34 +27,35 @@ export const StackdriverReporter = {
       version: version,
       reportUncaughtExceptions: false,
       reportUnhandledPromiseRejections: false,
-      context: {user: get(user, 'email', 'anonymous')},
-    };
+      context: { user: get(user, 'email', 'anonymous') },
+    }
   },
 
   start: async () => {
-    const config = await StackdriverReporter.generateErrorConfig();
+    const config = await StackdriverReporter.generateErrorConfig()
     if (!isNil(config) && !isNil(config.key)) {
-      errorHandler.start(config);
+      errorHandler.start(config)
     }
   },
 
   report: async (msg) => {
-    const user = Storage.getCurrentUser();
-    const formattedMsg = await StackdriverReporter.format(msg);
-    errorHandler.setUser(get(user, 'email', 'anonymous'));
+    const user = Storage.getCurrentUser()
+    const formattedMsg = await StackdriverReporter.format(msg)
+    errorHandler.setUser(get(user, 'email', 'anonymous'))
     try {
-      await errorHandler.report(formattedMsg);
-    } catch (_error) {
+      await errorHandler.report(formattedMsg)
+    }
+    catch (_error) {
       // swallow error to avoid user visible errors
     }
   },
 
   format: async (msg) => {
-    const env = await Config.getEnv();
+    const env = await Config.getEnv()
     return '['.concat(env)
       .concat('] ')
       .concat(msg)
-      .concat(' ');
-  }
+      .concat(' ')
+  },
 
-};
+}

@@ -1,84 +1,84 @@
-import React from 'react';
-import { useCallback, useState, useEffect } from 'react';
-import { find, isNil } from 'lodash/fp';
-import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
-import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
-import { DAC } from '../../libs/ajax/DAC';
-import { Notifications } from '../../libs/utils';
+import React from 'react'
+import { useCallback, useState, useEffect } from 'react'
+import { find, isNil } from 'lodash/fp'
+import { FormFieldTypes, FormField, FormValidators } from '../forms/forms'
+import { DataSet } from '../../libs/ajax/DataSet'
+import { DAR } from '../../libs/ajax/DAR'
+import { DAC } from '../../libs/ajax/DAC'
+import { Notifications } from '../../libs/utils'
 
 // TODO: Deprecated - remove this component when all datasets have been converted to studies
 export const DatasetUpdate = (props) => {
-  const { dataset, history } = props;
+  const { dataset, history } = props
 
-  const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} });
+  const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} })
 
   const searchOntologies = async (query, callback) => {
-    let options = [];
+    let options = []
     await DAR.getAutoCompleteOT(query).then(
-      items => {
+      (items) => {
         options = items.map((item) => {
-          return item.label;
-        });
-        callback(options);
-      });
-  };
+          return item.label
+        })
+        callback(options)
+      })
+  }
 
   const dacOptions = (dacs) => {
-    let options = [];
+    let options = []
     if (!isNil(dacs)) {
       options = dacs.map((dac) => {
-        return { displayText: dac.name, dacId: dac.dacId };
-      });
+        return { displayText: dac.name, dacId: dac.dacId }
+      })
     }
-    return options;
-  };
+    return options
+  }
 
   const getDiseaseLabels = async (ontologyIds) => {
-    let labels = [];
+    let labels = []
     if (!isNil(ontologyIds)) {
-      const idList = ontologyIds.join(',');
-      const result = await DAR.searchOntologyIdList(idList);
-      labels = result.map(r => r.label);
+      const idList = ontologyIds.join(',')
+      const result = await DAR.searchOntologyIdList(idList)
+      labels = result.map(r => r.label)
     }
-    return labels;
-  };
+    return labels
+  }
 
   const extract = useCallback((propertyName) => {
-    const property = find({ propertyName })(dataset.properties);
-    return property?.propertyValue;
-  }, [dataset]);
+    const property = find({ propertyName })(dataset.properties)
+    return property?.propertyValue
+  }, [dataset])
 
   const asProperty = (propertyName, propertyValue) => {
     return {
       propertyName,
-      propertyValue
-    };
-  };
+      propertyValue,
+    }
+  }
 
   const normalizeDataUse = useCallback(async (dataUse) => {
-    const du = dataUse;
+    const du = dataUse
     if (!isNil(dataUse.diseaseRestrictions)) {
-      du.hasDiseaseRestrictions = true;
-      du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);
+      du.hasDiseaseRestrictions = true
+      du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions)
     }
     if (!isNil(dataUse.other)) {
-      du.hasPrimaryOther = true;
+      du.hasPrimaryOther = true
     }
     if (!isNil(dataUse.secondaryOther)) {
-      du.hasSecondaryOther = true;
+      du.hasSecondaryOther = true
     }
-    return du;
-  }, []);
+    return du
+  }, [])
 
   const submitForm = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+    event.preventDefault()
+    event.stopPropagation()
 
-    const formElement = event.target.form;
-    const submitData = new FormData(formElement);
-    const nihFileData = submitData.get('nihInstitutionalCertificationFile');
-    const consentGroups = [{ nihInstitutionalCertificationFile: nihFileData }];
+    const formElement = event.target.form
+    const submitData = new FormData(formElement)
+    const nihFileData = submitData.get('nihInstitutionalCertificationFile')
+    const consentGroups = [{ nihInstitutionalCertificationFile: nihFileData }]
 
     const newDataset = {
       name: formData.properties.datasetName,
@@ -93,24 +93,24 @@ export const DatasetUpdate = (props) => {
         asProperty('URL', formData.properties.url),
         asProperty('Data Depositor', formData.properties.dataDepositor),
         asProperty('Principal Investigator(PI)', formData.properties.principalInvestigator),
-      ]
-    };
+      ],
+    }
 
-    const multiPartFormData = new FormData();
-    multiPartFormData.append('dataset', JSON.stringify(newDataset));
-    multiPartFormData.append('consentGroups', consentGroups);
+    const multiPartFormData = new FormData()
+    multiPartFormData.append('dataset', JSON.stringify(newDataset))
+    multiPartFormData.append('consentGroups', consentGroups)
 
     DataSet.updateDatasetV3(dataset.datasetId, multiPartFormData).then(() => {
-      history.push('/datalibrary');
-      Notifications.showSuccess({ text: 'Update submitted successfully!' });
+      history.push('/datalibrary')
+      Notifications.showSuccess({ text: 'Update submitted successfully!' })
     }, () => {
-      Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' });
-    });
-  };
+      Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' })
+    })
+  }
 
   const prefillFormData = useCallback(async (dataset) => {
-    const dac = await DAC.get(dataset?.dacId);
-    const dacs = await DAC.list();
+    const dac = await DAC.get(dataset?.dacId)
+    const dacs = await DAC.list()
     setFormData({
       datasetName: dataset.datasetName,
       properties: {
@@ -125,18 +125,18 @@ export const DatasetUpdate = (props) => {
         principalInvestigator: dataset?.study?.piName || extract('Principal Investigator(PI)'),
       },
       dataUse: await normalizeDataUse(dataset?.dataUse),
-      dac: { ...dac, dacs }
-    });
-  }, [extract, normalizeDataUse]);
+      dac: { ...dac, dacs },
+    })
+  }, [extract, normalizeDataUse])
 
   useEffect(() => {
     if (isNil(formData.datasetName)) {
-      prefillFormData(dataset);
+      prefillFormData(dataset)
     }
-  }, [prefillFormData, dataset, formData]);
+  }, [prefillFormData, dataset, formData])
 
   return (
-    <div className='data-update-section'>
+    <div className="data-update-section">
       <h2>1. Dataset Information</h2>
       <FormField
         id="datasetName"
@@ -144,7 +144,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.datasetName}
         onChange={({ value }) => {
-          formData.properties.datasetName = value;
+          formData.properties.datasetName = value
         }}
       />
       <FormField
@@ -153,7 +153,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.description}
         onChange={({ value }) => {
-          formData.properties.description = value;
+          formData.properties.description = value
         }}
       />
       <FormField
@@ -162,7 +162,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.dataDepositor}
         onChange={({ value }) => {
-          formData.properties.dataDepositor = value;
+          formData.properties.dataDepositor = value
         }}
       />
       <FormField
@@ -171,7 +171,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.principalInvestigator}
         onChange={({ value }) => {
-          formData.properties.principalInvestigator = value;
+          formData.properties.principalInvestigator = value
         }}
       />
       <FormField
@@ -180,7 +180,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.url}
         onChange={({ value }) => {
-          formData.properties.url = value;
+          formData.properties.url = value
         }}
       />
       <FormField
@@ -189,7 +189,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.dataType}
         onChange={({ value }) => {
-          formData.properties.dataType = value;
+          formData.properties.dataType = value
         }}
       />
       <FormField
@@ -198,7 +198,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.species}
         onChange={({ value }) => {
-          formData.properties.species = value;
+          formData.properties.species = value
         }}
       />
       <FormField
@@ -207,7 +207,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.phenotype}
         onChange={({ value }) => {
-          formData.properties.phenotype = value;
+          formData.properties.phenotype = value
         }}
       />
       <FormField
@@ -217,7 +217,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.nrParticipants}
         onChange={({ value }) => {
-          formData.properties.nrParticipants = value;
+          formData.properties.nrParticipants = value
         }}
       />
       <FormField
@@ -383,7 +383,7 @@ export const DatasetUpdate = (props) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DatasetUpdate;
+export default DatasetUpdate

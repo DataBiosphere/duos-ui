@@ -1,16 +1,16 @@
-import {Buffer} from 'buffer';
-import EnvironmentUtils, {envGroups} from 'src/utils/EnvironmentUtils.js';
+import { Buffer } from 'buffer'
+import EnvironmentUtils, { envGroups } from 'src/utils/EnvironmentUtils.js'
 
 export const rasEnabled = () => {
-  return EnvironmentUtils.checkEnv(envGroups.DEV);
+  return EnvironmentUtils.checkEnv(envGroups.DEV)
 }
 
 export const nihAccountLabel = () => {
-  return rasEnabled() ? 'RAS' : 'eRA Commons';
+  return rasEnabled() ? 'RAS' : 'eRA Commons'
 }
 
 export const nihAccountInstructions = () => {
-  return rasEnabled() ? 'https://datascience.nih.gov/researcher-auth-service-initiative' : 'https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm';
+  return rasEnabled() ? 'https://datascience.nih.gov/researcher-auth-service-initiative' : 'https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm'
 }
 
 /**
@@ -25,24 +25,25 @@ export const nihAccountInstructions = () => {
  * @returns JSON Object in the form of: {'eraCommonsUsername':String,'iat':Integer,'exp':Integer}
  */
 export const decodeNihToken = async (token) => {
-  const rawToken = token['nih-username-token'] || null;
+  const rawToken = token['nih-username-token'] || null
   if (rawToken === null) {
-    return null;
+    return null
   }
   try {
-    const bufferString = Buffer.from(rawToken, 'base64').toString('utf8');
+    const bufferString = Buffer.from(rawToken, 'base64').toString('utf8')
     // We want the JSON components, so introduce a delimiter to split on
-    const splittableBufferString = bufferString.replaceAll('}', '}|');
-    const parts = splittableBufferString.split('|');
+    const splittableBufferString = bufferString.replaceAll('}', '}|')
+    const parts = splittableBufferString.split('|')
     // Something is wrong if we don't have at least 2 parts
     if (parts.length < 2) {
-      return null;
+      return null
     }
-    return JSON.parse(parts[1]);
-  } catch (_error) {
-    return null;
+    return JSON.parse(parts[1])
   }
-};
+  catch (_error) {
+    return null
+  }
+}
 
 /**
  * This function takes in a date and returns the number of days until that date.
@@ -50,17 +51,17 @@ export const decodeNihToken = async (token) => {
  * @returns {number}
  */
 export const expirationCountFromDate = (expDate) => {
-  let result = -1;
+  let result = -1
   if (expDate !== null && expDate !== undefined) {
-    const currentDate = new Date().getTime();
-    const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const count = (treatAsUTC(parseInt(expDate, 10)) - treatAsUTC(currentDate)) / millisecondsPerDay;
+    const currentDate = new Date().getTime()
+    const millisecondsPerDay = 24 * 60 * 60 * 1000
+    const count = (treatAsUTC(parseInt(expDate, 10)) - treatAsUTC(currentDate)) / millisecondsPerDay
     if (count > 0) {
-      result = Math.round(count);
+      result = Math.round(count)
     }
   }
-  return result;
-};
+  return result
+}
 
 /**
  * This function takes in a date and returns a new date object with the timezone offset removed.
@@ -68,10 +69,10 @@ export const expirationCountFromDate = (expDate) => {
  * @returns {Date}
  */
 export const treatAsUTC = (date) => {
-  const result = new Date(date);
-  result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
-  return result;
-};
+  const result = new Date(date)
+  result.setMinutes(result.getMinutes() - result.getTimezoneOffset())
+  return result
+}
 
 /**
  * This function generates a summation of common ERA Commons values from a user object
@@ -79,16 +80,16 @@ export const treatAsUTC = (date) => {
  * @param user The user to derive era authentication state from
  */
 export const extractEraAuthenticationState = (user) => {
-  const properties = user.properties;
-  const authProp = properties?.find(p => p.propertyKey === 'eraAuthorized');
-  const expProp = properties?.find(p => p.propertyKey === 'eraExpiration');
-  const isAuthorized = authProp?.propertyValue ?? false;
-  const expirationCount = expProp?.propertyValue ? expirationCountFromDate(expProp.propertyValue) : 0;
-  const nihValid = isAuthorized && expirationCount > 0;
+  const properties = user.properties
+  const authProp = properties?.find(p => p.propertyKey === 'eraAuthorized')
+  const expProp = properties?.find(p => p.propertyKey === 'eraExpiration')
+  const isAuthorized = authProp?.propertyValue ?? false
+  const expirationCount = expProp?.propertyValue ? expirationCountFromDate(expProp.propertyValue) : 0
+  const nihValid = isAuthorized && expirationCount > 0
   return {
     isAuthorized,
     expirationCount,
     nihValid,
-    eraCommonsId: user.eraCommonsId
-  };
-};
+    eraCommonsId: user.eraCommonsId,
+  }
+}
