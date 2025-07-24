@@ -1,165 +1,166 @@
-import React, { useState, useEffect, Fragment, useCallback } from 'react';
-import { Storage } from '../../libs/storage';
-import PaginationBar from '../PaginationBar';
-import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
-import SimpleTable from '../SimpleTable';
-import cellData from './DarDatasetTableCellData';
-import {compact, isNil, map, uniq} from 'lodash/fp';
-import {binCollectionToBuckets} from '../../utils/BucketUtils';
-import {styles} from '../../utils/darDatasetUtils';
-import {Notifications} from '../../libs/utils';
-import { isEmpty } from 'lodash';
+import React, { useState, useEffect, Fragment, useCallback } from 'react'
+import { Storage } from '../../libs/storage'
+import PaginationBar from '../PaginationBar'
+import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils'
+import SimpleTable from '../SimpleTable'
+import cellData from './DarDatasetTableCellData'
+import { compact, isNil, map, uniq } from 'lodash/fp'
+import { binCollectionToBuckets } from '../../utils/BucketUtils'
+import { styles } from '../../utils/darDatasetUtils'
+import { Notifications } from '../../libs/utils'
+import { isEmpty } from 'lodash'
 
-
-const storageDarDatasetSort = 'storageDarDatasetSort';
+const storageDarDatasetSort = 'storageDarDatasetSort'
 
 const DarDatasetTableColumnOptions = {
   DATA_USE_GROUP: 'dataUseGroup',
   NUMBER_OF_DATASETS: 'numberOfDatasets',
   DATASETS: 'datasets',
-};
+}
 
 const columnHeaderConfig = {
   dataUseGroup: {
     label: 'Data Use Group',
     cellStyle: { width: styles.cellWidth.dataUseGroup },
     cellDataFn: cellData.dataUseGroupCellData,
-    sortable: true
+    sortable: true,
   },
   numberOfDatasets: {
     label: '# of Datasets',
     cellStyle: { width: styles.cellWidth.numberOfDatasets },
     cellDataFn: cellData.numberOfDatasetsCellData,
-    sortable: true
+    sortable: true,
   },
   datasets: {
     label: 'Datasets',
     cellStyle: { width: styles.cellWidth.datasets },
     cellDataFn: cellData.datasetsCellData,
-    sortable: false
+    sortable: false,
   },
-};
+}
 
-const columns = Object.keys(columnHeaderConfig);
+const columns = Object.keys(columnHeaderConfig)
 
 const columnHeaderData = (columns = columns) => {
-  return columns.map((col) => columnHeaderConfig[col]);
-};
+  return columns.map(col => columnHeaderConfig[col])
+}
 
 const processBucketRowData = ({
-  buckets
+  buckets,
 }) => {
-  if(!isNil(buckets)) {
+  if (!isNil(buckets)) {
     return buckets.map((bucket) => {
       const {
         key: dataUseGroup,
         votes,
         datasets,
         elections,
-        label
-      } = bucket;
+        label,
+      } = bucket
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           dataUseGroup,
           datasets,
           elections,
           votes,
-          label
-        });
-      });
-    });
+          label,
+        })
+      })
+    })
   }
-};
+}
 
 const getInitialSort = (columns = []) => {
   const sort = Storage.getCurrentUserSettings(storageDarDatasetSort) || {
     field: DarDatasetTableColumnOptions.NUMBER_OF_DATASETS,
-    dir: -1
-  };
-  const sortIndex = columns.indexOf(sort.field);
+    dir: -1,
+  }
+  const sortIndex = columns.indexOf(sort.field)
 
   if (sortIndex !== -1) {
-    return { colIndex: sortIndex, dir: sort.dir};
+    return { colIndex: sortIndex, dir: sort.dir }
   }
   else {
-    return { colIndex: 0, dir: 1 };
+    return { colIndex: 0, dir: 1 }
   }
-};
+}
 
 export const DarDatasetTable = (props) => {
-  const [visibleBuckets, setVisibleBuckets] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
-  const [sort, setSort] = useState(getInitialSort(props.columns));
-  const [tableSize, setTableSize] = useState(10);
-  const [user] = useState(Storage.getCurrentUser());
+  const [visibleBuckets, setVisibleBuckets] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageCount, setPageCount] = useState(1)
+  const [sort, setSort] = useState(getInitialSort(props.columns))
+  const [tableSize, setTableSize] = useState(10)
+  const [user] = useState(Storage.getCurrentUser())
 
-  const [buckets, setBuckets] = useState([]);
+  const [buckets, setBuckets] = useState([])
 
   const {
-    collection, isLoading, isUnfilteredView
-  } = props;
+    collection, isLoading, isUnfilteredView,
+  } = props
 
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(true)
 
   const init = useCallback(async () => {
     try {
       if (isEmpty(collection)) {
-        setBuckets([]);
-        return;
+        setBuckets([])
+        return
       }
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
-      const dacIds = isUnfilteredView ? [] : uniq(compact(map(r => r.dacId)(user.roles)));
-      const buckets = await binCollectionToBuckets(collection, dacIds);
+      const dacIds = isUnfilteredView ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
+      const buckets = await binCollectionToBuckets(collection, dacIds)
       const dataAccessBuckets = buckets.filter(
-        (b) => b.isRP !== true
-      );
-      setBuckets(dataAccessBuckets);
-      setTableSize(dataAccessBuckets.length);
-    } catch (_error) {
+        b => b.isRP !== true,
+      )
+      setBuckets(dataAccessBuckets)
+      setTableSize(dataAccessBuckets.length)
+    }
+    catch (_error) {
       Notifications.showError({
         text: 'Error initializing DAR Collection Dataset summary.',
-      });
+      })
     }
-    setIsInitializing(false);
-  }, [collection, isUnfilteredView, user]);
+    setIsInitializing(false)
+  }, [collection, isUnfilteredView, user])
 
   useEffect(() => {
     try {
-      init();
-    } catch (_error) {
-      Notifications.showError({ text: 'Failed to initialize collection' });
+      init()
     }
-  }, [init]);
+    catch (_error) {
+      Notifications.showError({ text: 'Failed to initialize collection' })
+    }
+  }, [init])
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
-      setTableSize(value);
+      setTableSize(value)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
     recalculateVisibleTable({
       tableSize,
       pageCount,
       filteredList: processBucketRowData({
-        buckets
+        buckets,
       }),
       currentPage,
       setPageCount,
       setCurrentPage,
       setVisibleList: setVisibleBuckets,
-      sort
-    });
-  }, [tableSize, currentPage, pageCount, buckets, sort]);
+      sort,
+    })
+  }, [tableSize, currentPage, pageCount, buckets, sort])
 
-  //Helper function to update page
+  // Helper function to update page
   const goToPage = useCallback(
     (value) => {
-      updatePage(value, pageCount, setCurrentPage);
+      updatePage(value, pageCount, setCurrentPage)
     },
-    [pageCount]
-  );
+    [pageCount],
+  )
 
   return (
     <Fragment>
@@ -169,7 +170,7 @@ export const DarDatasetTable = (props) => {
         columnHeaders={columnHeaderData(columns)}
         styles={styles}
         tableSize={tableSize}
-        paginationBar={
+        paginationBar={(
           <PaginationBar
             pageCount={pageCount}
             currentPage={currentPage}
@@ -177,16 +178,16 @@ export const DarDatasetTable = (props) => {
             goToPage={goToPage}
             changeTableSize={changeTableSize}
           />
-        }
+        )}
         sort={sort}
         onSort={(sort) => {
           Storage.setCurrentUserSettings(storageDarDatasetSort, {
             field: columns[sort.colIndex],
-            dir: sort.dir
-          });
-          setSort(sort);
+            dir: sort.dir,
+          })
+          setSort(sort)
         }}
       />
     </Fragment>
-  );
-};
+  )
+}

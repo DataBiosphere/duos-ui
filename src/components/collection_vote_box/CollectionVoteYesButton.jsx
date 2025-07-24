@@ -1,22 +1,22 @@
-import React from 'react';
+import React from 'react'
 import { votingColors } from 'src/libs/VotingColors.ts'
-import CollectionVoteButton from './CollectionVoteButton';
-import { CheckCircleOutlined } from '@mui/icons-material';
+import CollectionVoteButton from './CollectionVoteButton'
+import { CheckCircleOutlined } from '@mui/icons-material'
 
 export default function CollectionVoteYesButton(props) {
-  const { onClick, disabled, isSelected } = props;
+  const { onClick, disabled, isSelected } = props
 
   const styles = {
     label: {
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     icon: {
       fontSize: '28px',
-      margin: '2.5%'
-    }
-  };
+      margin: '2.5%',
+    },
+  }
 
   const Label = () => {
     return (
@@ -24,8 +24,8 @@ export default function CollectionVoteYesButton(props) {
         <CheckCircleOutlined style={styles.icon} />
         Yes
       </span>
-    );
-  };
+    )
+  }
 
   return (
     <CollectionVoteButton
@@ -36,5 +36,5 @@ export default function CollectionVoteYesButton(props) {
       disabled={disabled}
       isSelected={isSelected}
     />
-  );
+  )
 }

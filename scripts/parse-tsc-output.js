@@ -9,29 +9,29 @@
 //
 // Usage:
 //   git diff --name-only origin/develop | node scripts/parse-tsc-output.js
-import { createInterface } from 'node:readline';
-import { spawn } from 'child_process';
+import { createInterface } from 'node:readline'
+import { spawn } from 'child_process'
 
 // parses the raw tsc output and returns an object with file paths as keys and arrays of error objects as values
 const tsc_parse_errors = (lines) => {
-  const errors = {};
+  const errors = {}
 
   for (const line of lines) {
     // skip empty lines
     if (!line.trim()) {
-      continue;
+      continue
     }
 
     // match typescript compiler error output
-    const errorMatch = line.match(/^(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)$/); // NOSONAR
+    const errorMatch = line.match(/^(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)$/) // NOSONAR
 
     // if no match, skip to next line
     if (!errorMatch) {
-      continue;
+      continue
     }
 
     // destructure the match result
-    const [_m, filePath, lineNum, columnNum, errorCode, message] = errorMatch;
+    const [_m, filePath, lineNum, columnNum, errorCode, message] = errorMatch
 
     // create the error object
     const tsError = {
@@ -43,80 +43,80 @@ const tsc_parse_errors = (lines) => {
 
     // create empty array if it doesn't exist
     if (!errors[filePath]) {
-      errors[filePath] = [];
+      errors[filePath] = []
     }
 
     // for each file, push the error object
-    errors[filePath].push(tsError);
+    errors[filePath].push(tsError)
   }
 
-  return errors;
+  return errors
 }
 
 // convert tsc errors back to original format
 const tsc_errors_to_string = (path, errors) => {
-  return errors.map(({line, column, code, message}) => {
-    return `${path}(${line},${column}): error ${code}: ${message}`;
-  }).join('\n');
+  return errors.map(({ line, column, code, message }) => {
+    return `${path}(${line},${column}): error ${code}: ${message}`
+  }).join('\n')
 }
 
 // check which subset of files has TypeScript errors
 const tsc_subset_files = (files, errors) => {
-  const subset = [];
+  const subset = []
   for (const file of files) {
     if (errors[file]) {
-      subset.push(tsc_errors_to_string(file, errors[file]));
+      subset.push(tsc_errors_to_string(file, errors[file]))
     }
   }
-  return subset;
+  return subset
 }
 
 // runs tsc and parse the output
 const tsc_run_and_parse = (files) => {
   return new Promise((resolve, reject) => {
-    const cmd = ['npx', 'tsc', '--noEmit'];
+    const cmd = ['npx', 'tsc', '--noEmit']
     const tsc = spawn(cmd[0], cmd.slice(1), {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
 
-    const buffer = [];
+    const buffer = []
 
     // fill the buffer with data from stdout
     tsc.stdout.on('data', (data) => {
-      buffer.push(data);
-    });
+      buffer.push(data)
+    })
 
     // convert buffer to lines and check which files have errors
     tsc.on('close', (_code) => {
-      const lines = Buffer.concat(buffer).toString().split('\n');
-      const errors = tsc_parse_errors(lines);
-      const subset = tsc_subset_files(files, errors);
+      const lines = Buffer.concat(buffer).toString().split('\n')
+      const errors = tsc_parse_errors(lines)
+      const subset = tsc_subset_files(files, errors)
 
       // exit if there are errors
       if (subset.length > 0) {
-        console.error('TypeScript errors found in the following files:\n');
-        console.error(subset.join('\n'));
-        console.error(`\nRun \`${cmd.join(' ')}\` to see the full output.`);
-        process.exit(1);
+        console.error('TypeScript errors found in the following files:\n')
+        console.error(subset.join('\n'))
+        console.error(`\nRun \`${cmd.join(' ')}\` to see the full output.`)
+        process.exit(1)
       }
 
       resolve({
-        errors
-      });
-    });
+        errors,
+      })
+    })
 
     tsc.on('error', (error) => {
-      console.error('Failed to start TypeScript compiler: ', error);
-      reject(error);
-    });
-  });
+      console.error('Failed to start TypeScript compiler: ', error)
+      reject(error)
+    })
+  })
 }
 
-const files = [];
+const files = []
 
 // read the source file paths from stdin
 for await (const line of createInterface({ input: process.stdin })) {
-  files.push(line.trim());
+  files.push(line.trim())
 }
 
-tsc_run_and_parse(files);
+tsc_run_and_parse(files)

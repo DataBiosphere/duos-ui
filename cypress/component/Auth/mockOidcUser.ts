@@ -1,21 +1,21 @@
-import { OidcUser } from 'src/libs/auth/oidcBroker';
+import { OidcUser } from 'src/libs/auth/oidcBroker'
 
 export const mockOidcUser: OidcUser = {
   access_token: '',
   get expires_in(): number | undefined {
-    return undefined;
+    return undefined
   },
   session_state: null,
   state: undefined,
   token_type: '',
   get expired(): boolean | undefined {
-    return undefined;
+    return undefined
   },
   get scopes(): string[] {
-    return [];
+    return []
   },
   toStorageString(): string {
-    return '';
+    return ''
   },
   profile: {
     jti: undefined,
@@ -24,6 +24,6 @@ export const mockOidcUser: OidcUser = {
     iss: '',
     aud: '',
     exp: 0,
-    iat: 0
-  }
-};
+    iat: 0,
+  },
+}

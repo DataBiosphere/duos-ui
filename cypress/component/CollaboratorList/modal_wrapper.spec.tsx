@@ -1,6 +1,6 @@
-import React from 'react';
-import { mount } from 'cypress/react';
-import ModalWrapper from '../../../src/components/collaborator_list/ModalWrapper';
+import React from 'react'
+import { mount } from 'cypress/react'
+import ModalWrapper from '../../../src/components/collaborator_list/ModalWrapper'
 
 describe('ModalWrapper - Component Tests', () => {
   it('renders with default props', () => {
@@ -10,13 +10,13 @@ describe('ModalWrapper - Component Tests', () => {
         ariaHideApp={false}
       >
         <div data-cy="modal-content">Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('.ReactModal__Content').should('exist');
-    cy.get('[data-cy=modal-content]').should('be.visible');
-    cy.contains('Test Content').should('be.visible');
-  });
+    cy.get('.ReactModal__Content').should('exist')
+    cy.get('[data-cy=modal-content]').should('be.visible')
+    cy.contains('Test Content').should('be.visible')
+  })
 
   it('does not render when isOpen is false', () => {
     mount(
@@ -25,11 +25,11 @@ describe('ModalWrapper - Component Tests', () => {
         ariaHideApp={false}
       >
         <div data-cy="modal-content">Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('.ReactModal__Content').should('not.exist');
-  });
+    cy.get('.ReactModal__Content').should('not.exist')
+  })
 
   it('applies custom className', () => {
     mount(
@@ -39,11 +39,11 @@ describe('ModalWrapper - Component Tests', () => {
         className="custom-modal-class"
       >
         <div>Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('.custom-modal-class').should('exist');
-  });
+    cy.get('.custom-modal-class').should('exist')
+  })
 
   it('applies overlayClassName', () => {
     mount(
@@ -53,14 +53,14 @@ describe('ModalWrapper - Component Tests', () => {
         overlayClassName="custom-overlay-class"
       >
         <div>Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('.custom-overlay-class').should('exist');
-  });
+    cy.get('.custom-overlay-class').should('exist')
+  })
 
   it('handles onAfterOpen callback', () => {
-    const onAfterOpen = cy.stub().as('afterOpenCallback');
+    const onAfterOpen = cy.stub().as('afterOpenCallback')
 
     mount(
       <ModalWrapper
@@ -69,14 +69,14 @@ describe('ModalWrapper - Component Tests', () => {
         onAfterOpen={onAfterOpen}
       >
         <div>Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('@afterOpenCallback').should('have.been.called');
-  });
+    cy.get('@afterOpenCallback').should('have.been.called')
+  })
 
   it('handles onRequestClose callback when clicking overlay', () => {
-    const onRequestClose = cy.stub().as('requestCloseCallback');
+    const onRequestClose = cy.stub().as('requestCloseCallback')
 
     mount(
       <ModalWrapper
@@ -86,19 +86,19 @@ describe('ModalWrapper - Component Tests', () => {
         shouldCloseOnOverlayClick={true}
       >
         <div data-cy="modal-content">Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('.ReactModal__Overlay').click({ force: true });
-    cy.get('@requestCloseCallback').should('have.been.called');
-  });
+    cy.get('.ReactModal__Overlay').click({ force: true })
+    cy.get('@requestCloseCallback').should('have.been.called')
+  })
 
   it('supports custom styling', () => {
     const customStyle = {
       content: {
-        backgroundColor: 'rgb(255, 0, 0)'
-      }
-    };
+        backgroundColor: 'rgb(255, 0, 0)',
+      },
+    }
 
     mount(
       <ModalWrapper
@@ -107,11 +107,11 @@ describe('ModalWrapper - Component Tests', () => {
         style={customStyle}
       >
         <div>Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('.ReactModal__Content').should('have.css', 'background-color', 'rgb(255, 0, 0)');
-  });
+    cy.get('.ReactModal__Content').should('have.css', 'background-color', 'rgb(255, 0, 0)')
+  })
 
   it('renders with custom content label', () => {
     mount(
@@ -121,14 +121,14 @@ describe('ModalWrapper - Component Tests', () => {
         contentLabel="Test Modal Label"
       >
         <div>Test Content</div>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('.ReactModal__Content').should('have.attr', 'aria-label', 'Test Modal Label');
-  });
+    cy.get('.ReactModal__Content').should('have.attr', 'aria-label', 'Test Modal Label')
+  })
 
   it('allows nested interactive elements to work', () => {
-    const buttonClickStub = cy.stub().as('buttonClickHandler');
+    const buttonClickStub = cy.stub().as('buttonClickHandler')
 
     mount(
       <ModalWrapper
@@ -136,10 +136,10 @@ describe('ModalWrapper - Component Tests', () => {
         ariaHideApp={false}
       >
         <button data-cy="modal-button" onClick={buttonClickStub}>Click Me</button>
-      </ModalWrapper>
-    );
+      </ModalWrapper>,
+    )
 
-    cy.get('[data-cy=modal-button]').click();
-    cy.get('@buttonClickHandler').should('have.been.called');
-  });
-});
+    cy.get('[data-cy=modal-button]').click()
+    cy.get('@buttonClickHandler').should('have.been.called')
+  })
+})

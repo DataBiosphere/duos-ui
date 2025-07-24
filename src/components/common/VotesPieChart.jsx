@@ -1,30 +1,30 @@
-import React from 'react';
-import { Chart } from 'react-google-charts';
-import { isNil, isEmpty } from 'lodash/fp';
-import { map } from 'lodash';
-import { useMemo } from 'react';
+import React from 'react'
+import { Chart } from 'react-google-charts'
+import { isNil, isEmpty } from 'lodash/fp'
+import { map } from 'lodash'
+import { useMemo } from 'react'
 
 const pieSliceColors = {
   0: { color: '#1FA371' },
   1: { color: '#DA000E' },
-  2: { color: '#979797' }
-};
+  2: { color: '#979797' },
+}
 
 const processVotes = (votes) => {
-  const headerData = ['Vote', 'Total Votes'];
+  const headerData = ['Vote', 'Total Votes']
   const decisionMap = {
     'Yes': 0,
     'No': 0,
-    'Not Yet Voted': 0
-  };
+    'Not Yet Voted': 0,
+  }
 
   votes.forEach((v) => {
-    const value = v.vote ? 'Yes' : !isNil(v.vote) ? 'No' : 'Not Yet Voted';
-    decisionMap[value]++;
-  });
-  const decisionDataArray = map(decisionMap, (count, key) => [key, count]);
-  return [headerData, ...decisionDataArray];
-};
+    const value = v.vote ? 'Yes' : !isNil(v.vote) ? 'No' : 'Not Yet Voted'
+    decisionMap[value]++
+  })
+  const decisionDataArray = map(decisionMap, (count, key) => [key, count])
+  return [headerData, ...decisionDataArray]
+}
 
 export default function VotesPieChart(props) {
   const {
@@ -35,23 +35,25 @@ export default function VotesPieChart(props) {
     width = '100%',
     style = { width: '70%' },
     styleOverride,
-  } = props;
+  } = props
 
-  const processedVotes = useMemo(() => processVotes(votes), [votes]);
+  const processedVotes = useMemo(() => processVotes(votes), [votes])
   const options = {
     pieHole,
     is3d: false,
     fontName: 'Montserrat',
     pieSliceText: 'none',
     slices: pieSliceColors,
-  };
+  }
 
   if (isEmpty(votes)) {
     return (
       <div style={style} className={`${keyString}-pie-chart-no-data`}>
-        No data for {keyString}
+        No data for
+        {' '}
+        {keyString}
       </div>
-    );
+    )
   }
   return (
     <div style={{ ...style, ...styleOverride }}>
@@ -63,5 +65,5 @@ export default function VotesPieChart(props) {
         height={height}
       />
     </div>
-  );
+  )
 }

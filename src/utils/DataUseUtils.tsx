@@ -1,15 +1,15 @@
-import React, {CSSProperties, ReactNode} from 'react';
-import ReactTooltip from 'react-tooltip';
-import {DatasetTerm} from 'src/types/model';
+import React, { CSSProperties, ReactNode } from 'react'
+import ReactTooltip from 'react-tooltip'
+import { DatasetTerm } from 'src/types/model'
 
 interface DataUseCode {
-    code: string;
-    description: string;
+  code: string
+  description: string
 }
 
 interface ProcessedDataUseCodes {
-    codesAndDescriptions: DataUseCode[];
-    codeList: string[];
+  codesAndDescriptions: DataUseCode[]
+  codeList: string[]
 }
 
 /**
@@ -18,33 +18,38 @@ interface ProcessedDataUseCodes {
  * @returns {ProcessedDataUseCodes} - Object with processed data use information
  */
 export function processDataUseCodes(dataset: DatasetTerm): ProcessedDataUseCodes {
-    const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
+  const codesAndDescriptions = dataset.dataUse?.primary
+    ? dataset.dataUse.primary.map((dataUse) => {
         if (dataUse.code === 'OTHER') {
-            return {'code': `OTH1`, 'description': dataUse.description};
-        } else if (dataUse.code === 'DS') {
-            const disease = dataUse.description.substring(dataUse.description.indexOf(':') + 2);
-            return {'code': `${dataUse.code} (${disease})`, 'description': dataUse.description};
-        } else {
-            return {'code': dataUse.code, 'description': dataUse.description};
+          return { code: `OTH1`, description: dataUse.description }
         }
-    }) : [];
+        else if (dataUse.code === 'DS') {
+          const disease = dataUse.description.substring(dataUse.description.indexOf(':') + 2)
+          return { code: `${dataUse.code} (${disease})`, description: dataUse.description }
+        }
+        else {
+          return { code: dataUse.code, description: dataUse.description }
+        }
+      })
+    : []
 
-    if (dataset.dataUse?.secondary) {
-        dataset.dataUse.secondary.forEach((dataUse) => {
-            if (dataUse.code === 'OTHER') {
-                codesAndDescriptions.push({'code': `OTH2`, 'description': dataUse.description});
-            } else {
-                codesAndDescriptions.push({'code': dataUse.code, 'description': dataUse.description});
-            }
-        });
-    }
+  if (dataset.dataUse?.secondary) {
+    dataset.dataUse.secondary.forEach((dataUse) => {
+      if (dataUse.code === 'OTHER') {
+        codesAndDescriptions.push({ code: `OTH2`, description: dataUse.description })
+      }
+      else {
+        codesAndDescriptions.push({ code: dataUse.code, description: dataUse.description })
+      }
+    })
+  }
 
-    const codeList = codesAndDescriptions.map(du => du.code);
+  const codeList = codesAndDescriptions.map(du => du.code)
 
-    return {codesAndDescriptions, codeList};
+  return { codesAndDescriptions, codeList }
 }
 
-export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
+export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
 
 /**
  * Creates a data use display component with tooltips
@@ -56,34 +61,44 @@ export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
  * @returns {ReactNode} - Element displaying data use codes with tooltips
  */
 export function createDataUseDisplay({
-    dataset,
-    divClass,
-    divStyle,
-    spanClass,
-    tooltipPlace = 'right'
+  dataset,
+  divClass,
+  divStyle,
+  spanClass,
+  tooltipPlace = 'right',
 }: {
-    dataset: DatasetTerm,
-    divClass?: string,
-    divStyle?: CSSProperties,
-    spanClass?: string,
-    tooltipPlace?: TooltipPlacement
+  dataset: DatasetTerm
+  divClass?: string
+  divStyle?: CSSProperties
+  spanClass?: string
+  tooltipPlace?: TooltipPlacement
 }): ReactNode {
-    const {codesAndDescriptions, codeList} = processDataUseCodes(dataset);
+  const { codesAndDescriptions, codeList } = processDataUseCodes(dataset)
 
-    return (
-        <div style={divStyle} className={divClass}>
+  return (
+    <div style={divStyle} className={divClass}>
       <span className={spanClass} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>
         {codeList.join(', ')}
       </span>
-            <ReactTooltip
-                place={tooltipPlace}
-                effect={'solid'}
-                id={`dataset-data-use-${dataset.datasetId}`}>
-                <ul>{codesAndDescriptions.map((translation, index) => {
-                    return <li
-                        key={`${translation.code}_s_${index}`}>{translation.code}: {translation.description}</li>;
-                })}</ul>
-            </ReactTooltip>
-        </div>
-    );
+      <ReactTooltip
+        place={tooltipPlace}
+        effect="solid"
+        id={`dataset-data-use-${dataset.datasetId}`}
+      >
+        <ul>
+          {codesAndDescriptions.map((translation, index) => {
+            return (
+              <li
+                key={`${translation.code}_s_${index}`}
+              >
+                {translation.code}
+                :
+                {translation.description}
+              </li>
+            )
+          })}
+        </ul>
+      </ReactTooltip>
+    </div>
+  )
 }

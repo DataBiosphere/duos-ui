@@ -1,11 +1,11 @@
-import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp';
-import { OntologyService } from './ontologyService';
-import { Notifications } from './utils';
+import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash/fp'
+import { OntologyService } from './ontologyService'
+import { Notifications } from './utils'
 
 export const ControlledAccessType = {
   permissions: 'Permissions',
-  modifiers: 'Modifiers'
-};
+  modifiers: 'Modifiers',
+}
 
 /**
  * Primary source of truth for Data Access Request (purpose) data use translations
@@ -17,133 +17,133 @@ export const srpTranslations = {
     code: 'HMB',
     description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
     manualReview: false,
-    type: ControlledAccessType.permissions
+    type: ControlledAccessType.permissions,
   },
   poa: {
     code: 'POA',
     description: 'The dataset will be used for the study of Population Origins/Migration patterns.',
     manualReview: true,
-    type: ControlledAccessType.permissions
+    type: ControlledAccessType.permissions,
   },
   diseases: (diseases) => {
     const outputStruct = {
       code: 'DS',
       description: 'The dataset will be used for disease related studies',
       manualReview: false,
-      type: ControlledAccessType.permissions
-    };
-    if(!isEmpty(diseases)) {
-      const diseaseArray = diseases.sort().map((disease) => disease.label);
-      const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
-      outputStruct.description = outputStruct.description + ` (${diseaseString})`;
+      type: ControlledAccessType.permissions,
     }
-    return outputStruct;
+    if (!isEmpty(diseases)) {
+      const diseaseArray = diseases.sort().map(disease => disease.label)
+      const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0]
+      outputStruct.description = outputStruct.description + ` (${diseaseString})`
+    }
+    return outputStruct
   },
   researchTypeDisease: {
     code: 'DS',
     description: 'The primary purpose of the research is to learn more about a particular disease or disorder, a trait, or a set of related conditions.',
     manualReview: false,
-    type: ControlledAccessType.permissions
+    type: ControlledAccessType.permissions,
   },
   other: (otherText) => {
     return {
       code: 'OTHER',
       description: isEmpty(otherText) ? 'Other: Not provided' : otherText,
       manualReview: true,
-      type: ControlledAccessType.permissions
-    };
+      type: ControlledAccessType.permissions,
+    }
   },
   methods: {
     code: 'MDS',
     description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
     manualReview: false,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   controls: {
     code: 'CTRL',
     description: 'The reason for this request is to increase the number of controls available for a comparison group.',
     manualReview: false,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   forProfit: {
     code: 'NCU',
     description: 'The dataset will be used in a study related to a commercial purpose.',
     manualReview: false,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   notForProfit: {
     code: 'NPU',
     description: 'This dataset will not be used in a study related to a commercial purpose.',
     manualReview: false,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   genderFemale: {
     code: 'POP-F',
     description: 'The dataset will be used for the study of females.',
     manualReview: false,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   genderMale: {
     code: 'POP-M',
     description: 'The dataset will be used for the study of males.',
     manualReview: false,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   pediatric: {
     code: 'POP-P',
     description: 'The dataset will be used for the study of children.',
     manualReview: false,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   illegalBehavior: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).',
     manualReview: true,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   addiction: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.',
     manualReview: true,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   sexualDiseases: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.',
     manualReview: true,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   stigmatizedDiseases: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of stigmatizing illnesses.',
     manualReview: true,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   vulnerablePopulation: {
     code: 'OTHER',
     description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
     manualReview: true,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   population: {
     code: 'OTHER',
     description: 'The dataset will be used to study variations within the general population (e.g., general substructure of a population).',
     manualReview: true,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   psychiatricTraits: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.',
     manualReview: true,
-    type: ControlledAccessType.modifiers
+    type: ControlledAccessType.modifiers,
   },
   notHealth: {
     code: 'OTHER',
     description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
     manualReview: true,
-    type: ControlledAccessType.modifiers
-  }
-};
+    type: ControlledAccessType.modifiers,
+  },
+}
 
 /**
  * Primary source of truth for Dataset translations
@@ -168,15 +168,15 @@ export const consentTranslations = {
   },
   diseaseRestrictions: (restrictions) => {
     if (isEmpty(restrictions)) {
-      return 'Use is permitted for the specified disease(s): Not specified';
+      return 'Use is permitted for the specified disease(s): Not specified'
     }
-    const restrictionList = restrictions.join(', ');
+    const restrictionList = restrictions.join(', ')
     return {
       code: 'DS',
       alternateLabel: `DS (${restrictions.join(', ')})`,
       description: `Use is permitted for the specified disease(s): ${restrictionList}`,
       type: ControlledAccessType.permissions,
-    };
+    }
   },
   populationOriginsAncestry: {
     code: 'POA',
@@ -238,76 +238,79 @@ export const consentTranslations = {
     description: 'Use is limited to pediatric research',
     type: ControlledAccessType.modifiers,
   },
-};
+}
 
-const getOntologyName = async(urls) => {
-  const doidArr = OntologyService.extractDOIDFromUrl(urls);
-  const params = doidArr.join(',');
-  const ontology = await OntologyService.searchOntology(params);
-  return ontology.map(data => data.label);
-};
+const getOntologyName = async (urls) => {
+  const doidArr = OntologyService.extractDOIDFromUrl(urls)
+  const params = doidArr.join(',')
+  const ontology = await OntologyService.searchOntology(params)
+  return ontology.map(data => data.label)
+}
 
 export const processRestrictionStatements = async (key, dataUse) => {
-  let resp;
-  const value = dataUse[key];
+  let resp
+  const value = dataUse[key]
   if (!isNil(value) && value) {
     if (key === 'diseaseRestrictions') {
-      //condition for datasets that have ontology labels contained within the dataUse object
+      // condition for datasets that have ontology labels contained within the dataUse object
       if (!isNil(head(value)) && !isNil(value[0].label)) {
-        const labels = value.map((ont) => ont.label);
-        resp = consentTranslations.diseaseRestrictions(labels);
-      } else {
-        //condition for datasets with dataUses that do not have ontology labels saved on the dataUse object
+        const labels = value.map(ont => ont.label)
+        resp = consentTranslations.diseaseRestrictions(labels)
+      }
+      else {
+        // condition for datasets with dataUses that do not have ontology labels saved on the dataUse object
         try {
-          const ontologyUrls = uniq(value);
+          const ontologyUrls = uniq(value)
           if (!isEmpty(ontologyUrls)) {
-            const ontologyLabels = await getOntologyName(ontologyUrls);
-            resp = consentTranslations.diseaseRestrictions(ontologyLabels);
+            const ontologyLabels = await getOntologyName(ontologyUrls)
+            resp = consentTranslations.diseaseRestrictions(ontologyLabels)
           }
-        } catch (_error) {
-          Notifications.showError({ text: 'Ontology API Request Error' });
+        }
+        catch (_error) {
+          Notifications.showError({ text: 'Ontology API Request Error' })
         }
       }
-    } else {
-      resp = processDefinedLimitations(key, dataUse, consentTranslations);
+    }
+    else {
+      resp = processDefinedLimitations(key, dataUse, consentTranslations)
     }
   }
-  return resp;
-};
+  return resp
+}
 
 export const processDefinedLimitations = (
   key,
   dataUse,
-  consentTranslations
+  consentTranslations,
 ) => {
-  const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
-  const isHMBActive =
-    !!dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
-  const isPOAActive = !!dataUse.populationOriginsAncestry;
-  const isGeneralUseActive = !!dataUse.generalUse && !isHMBActive && !isPOAActive && isEmpty(dataUse.diseaseRestrictions);
-  let statement;
+  const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse']
+  const isHMBActive
+    = !!dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions)
+  const isPOAActive = !!dataUse.populationOriginsAncestry
+  const isGeneralUseActive = !!dataUse.generalUse && !isHMBActive && !isPOAActive && isEmpty(dataUse.diseaseRestrictions)
+  let statement
   if (
-    !targetKeys.includes(key) ||
-    (key === 'hmbResearch' && isHMBActive) ||
-    (key === 'populationOriginsAncestry' && isPOAActive) ||
-    (key === 'generalUse' && isGeneralUseActive)
+    !targetKeys.includes(key)
+    || (key === 'hmbResearch' && isHMBActive)
+    || (key === 'populationOriginsAncestry' && isPOAActive)
+    || (key === 'generalUse' && isGeneralUseActive)
   ) {
-    statement = consentTranslations[key];
+    statement = consentTranslations[key]
   }
-  return statement;
-};
+  return statement
+}
 
-//Helper function to handle OTHER attribute translations in dataUse
+// Helper function to handle OTHER attribute translations in dataUse
 const processOtherInDataUse = (dataUse, restrictionStatements) => {
-  //Wrapping the statements in a Promise.resolve before adding it to the array allows the restrictionStatements to be compatible with future Promise.all calls
+  // Wrapping the statements in a Promise.resolve before adding it to the array allows the restrictionStatements to be compatible with future Promise.all calls
   if (dataUse.otherRestrictions === true || !isNil(dataUse.other)) {
     restrictionStatements.push(
       Promise.resolve({
         code: 'OTH1',
         description: `Primary Other: ${isEmpty(dataUse.other) ? 'Not provided' : dataUse.other}`,
         type: ControlledAccessType.modifiers,
-      })
-    );
+      }),
+    )
   }
   if (!isNil(dataUse.secondaryOther)) {
     restrictionStatements.push(
@@ -315,41 +318,43 @@ const processOtherInDataUse = (dataUse, restrictionStatements) => {
         code: 'OTH2',
         description: `Secondary Other: ${isEmpty(dataUse.secondaryOther) ? 'Not provided' : dataUse.secondaryOther}`,
         type: ControlledAccessType.modifiers,
-      })
-    );
+      }),
+    )
   }
-  return restrictionStatements;
-};
+  return restrictionStatements
+}
 
-//Function to translate restrictions from a single dataUse
+// Function to translate restrictions from a single dataUse
 const translateDataUseRestrictions = async (dataUse) => {
-  if(!dataUse) {return [];}
-  let restrictionStatements = [];
-  const targetKeys = Object.keys(consentTranslations);
-  restrictionStatements = targetKeys.map(async(key) =>
-    await processRestrictionStatements(key, dataUse));
-  restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
-  restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements);
-  return (await Promise.all(restrictionStatements)).filter((value) => !isEmpty(value));
-};
+  if (!dataUse) {
+    return []
+  }
+  let restrictionStatements = []
+  const targetKeys = Object.keys(consentTranslations)
+  restrictionStatements = targetKeys.map(async key =>
+    await processRestrictionStatements(key, dataUse))
+  restrictionStatements = filter(statement => !isNil(statement))(restrictionStatements)
+  restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements)
+  return (await Promise.all(restrictionStatements)).filter(value => !isEmpty(value))
+}
 
-//Function to translate restrictions in an array of dataUses
+// Function to translate restrictions in an array of dataUses
 export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {
-  const targetKeys = Object.keys(consentTranslations);
+  const targetKeys = Object.keys(consentTranslations)
   try {
     const translationPromises = dataUses.map((dataUse) => {
-      const restrictionStatementPromises = targetKeys.map(key => processRestrictionStatements(key, dataUse));
-      processOtherInDataUse(dataUse, restrictionStatementPromises);
-      return Promise.all(restrictionStatementPromises);
-    });
+      const restrictionStatementPromises = targetKeys.map(key => processRestrictionStatements(key, dataUse))
+      processOtherInDataUse(dataUse, restrictionStatementPromises)
+      return Promise.all(restrictionStatementPromises)
+    })
     return filter(
-      (restriction) => !isEmpty(restriction)
-    ) (await Promise.all(translationPromises));
-  } catch(_error) {
-    throw new Error('Failed to translate Data Use Restrictions from list');
+      restriction => !isEmpty(restriction),
+    ) (await Promise.all(translationPromises))
   }
-};
-
+  catch (_error) {
+    throw new Error('Failed to translate Data Use Restrictions from list')
+  }
+}
 
 export const DataUseTranslation = {
 
@@ -366,12 +371,12 @@ export const DataUseTranslation = {
     const dataUseSummary = {
       primary: [],
       secondary: [],
-    };
+    }
 
     // Primary Codes
     if (darInfo.hmb) {
       dataUseSummary.primary = concat(dataUseSummary.primary,
-        srpTranslations.hmb);
+        srpTranslations.hmb)
     }
     /**
      * TODO: Resolve confusion on consent/ontology/orsp sides
@@ -385,66 +390,67 @@ export const DataUseTranslation = {
      * Tracing this through to Ontology, both refer to http://purl.obolibrary.org/obo/DUO_0000011 which is POA
      */
 
-    //NOTE: additional check on hmb, diseases, and other are needed for older DARs where populationMigration - poa link was not established
+    // NOTE: additional check on hmb, diseases, and other are needed for older DARs where populationMigration - poa link was not established
     if ((darInfo.poa || darInfo.populationMigration) && (!darInfo.hmb && !darInfo.diseases && !darInfo.other)) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa);
+      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa)
     }
 
     if (darInfo.diseases) {
-      const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies));
-      dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation));
+      const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies))
+      dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation))
     }
     if (darInfo.other) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(darInfo.otherText));
+      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(darInfo.otherText))
     }
 
     // Secondary Codes
     if (darInfo.methods) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods)
     }
     if (darInfo.controls) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.controls);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.controls)
     }
     if (darInfo.forProfit) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.forProfit);
-    } else {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notForProfit);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.forProfit)
+    }
+    else {
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notForProfit)
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale)
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale)
     }
     if (darInfo.pediatric) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.pediatric);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.pediatric)
     }
     if (darInfo.illegalBehavior) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.illegalBehavior);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.illegalBehavior)
     }
     if (darInfo.addiction) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.addiction);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.addiction)
     }
     if (darInfo.sexualDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.sexualDiseases);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.sexualDiseases)
     }
     if (darInfo.stigmatizedDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases)
     }
     if (darInfo.vulnerablePopulation) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation)
     }
-    if(darInfo.population) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.population);
+    if (darInfo.population) {
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.population)
     }
     if (darInfo.psychiatricTraits) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.psychiatricTraits);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.psychiatricTraits)
     }
     if (darInfo.notHealth) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notHealth);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notHealth)
     }
 
-    return dataUseSummary;
+    return dataUseSummary
   },
-  translateDataUseRestrictions
-};
+  translateDataUseRestrictions,
+}

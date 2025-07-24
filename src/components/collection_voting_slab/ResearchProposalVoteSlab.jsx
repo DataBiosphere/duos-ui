@@ -1,18 +1,18 @@
-import React,{useEffect, useState} from 'react';
-import {DataUseTranslation} from '../../libs/dataUseTranslation';
-import {isEmpty, isNil, flatMap, keys, get} from 'lodash/fp';
-import {DataUsePills} from './DataUsePill';
-import DataUseAlertBox from './DataUseAlertBox';
-import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
-import {Storage} from '../../libs/storage';
+import React, { useEffect, useState } from 'react'
+import { DataUseTranslation } from '../../libs/dataUseTranslation'
+import { isEmpty, isNil, flatMap, keys, get } from 'lodash/fp'
+import { DataUsePills } from './DataUsePill'
+import DataUseAlertBox from './DataUseAlertBox'
+import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox'
+import { Storage } from '../../libs/storage'
 import {
   extractDacRPVotesFromBucket,
   extractUserRPVotesFromBucket,
-} from '../../utils/DarCollectionUtils';
-import VotesPieChart from '../common/VotesPieChart';
-import {convertLabelToKey} from '../../libs/utils';
-import MemberVoteSummary from './MemberVoteSummary';
-import HighlightText from '../HighlightText';
+} from '../../utils/DarCollectionUtils'
+import VotesPieChart from '../common/VotesPieChart'
+import { convertLabelToKey } from '../../libs/utils'
+import MemberVoteSummary from './MemberVoteSummary'
+import HighlightText from '../HighlightText'
 
 const styles = {
   baseStyle: {
@@ -30,35 +30,35 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    columnGap: '2rem'
+    columnGap: '2rem',
   },
   dataUseCategoryLabel: {
     fontWeight: 'bold',
-    textTransform: 'capitalize'
+    textTransform: 'capitalize',
   },
   link: {
     color: '#0948B7',
     fontWeight: '500',
-    marginLeft: '7rem'
+    marginLeft: '7rem',
   },
   collapsedData: {
     color: '#333F52',
-    padding: '15px 25px'
+    padding: '15px 25px',
   },
   expandedData: {
-    paddingLeft: '15px'
+    paddingLeft: '15px',
   },
   researchPurposeTitle: {
     fontSize: '1.8rem',
     fontWeight: 'bold',
     marginTop: '2rem',
-    display: 'inline-block'
+    display: 'inline-block',
   },
   researchPurposeSummary: {
     fontSize: '1.4rem',
     fontWeight: '500',
     lineHeight: '20px',
-    margin: '1.5rem'
+    margin: '1.5rem',
   },
   chairVoteInfo: {
     display: 'flex',
@@ -68,8 +68,8 @@ const styles = {
   },
   skeletonLoader: {
     height: '60px',
-  }
-};
+  },
+}
 
 const highlightedWords = [
   {
@@ -87,56 +87,58 @@ const highlightedWords = [
       'Ancestry',
       'Controls',
       'Commercial',
-      'Profit'
-    ]
-  }
-];
+      'Profit',
+    ],
+  },
+]
 
-const DataUseSummary = ({translatedDataUse}) => {
-  return flatMap( key => {
-    const dataUses = translatedDataUse[key];
-    return <div key={key}>{DataUsePills(dataUses)}</div>;
-  })(keys(translatedDataUse));
-};
+const DataUseSummary = ({ translatedDataUse }) => {
+  return flatMap((key) => {
+    const dataUses = translatedDataUse[key]
+    return <div key={key}>{DataUsePills(dataUses)}</div>
+  })(keys(translatedDataUse))
+}
 
 const SkeletonLoader = () => {
-  return <div className='text-placeholder' style={styles.skeletonLoader}></div>;
-};
+  return <div className="text-placeholder" style={styles.skeletonLoader}></div>
+}
 
-const CollapseExpandLink = ({expanded, setExpanded}) => {
-  const linkMessage = expanded ?
-    'Hide Research Use Statement (Narrative)' :
-    'Expand to view Research Purpose and Vote';
+const CollapseExpandLink = ({ expanded, setExpanded }) => {
+  const linkMessage = expanded
+    ? 'Hide Research Use Statement (Narrative)'
+    : 'Expand to view Research Purpose and Vote'
 
   return (
     <a
       style={styles.link}
-      id='expand-rp-vote-button'
+      id="expand-rp-vote-button"
       onClick={() => setExpanded(!expanded)}
     >
       {linkMessage}
     </a>
-  );
-};
+  )
+}
 
-const ResearchPurposeSummary = ({darInfo}) => {
-  return !isNil(darInfo) ? (
-    <div style={styles.researchPurposeSummary}>
-      <HighlightText
-        highlight={highlightedWords}
-        text={darInfo.rus}
-      />
-    </div>
-  ) : (
-    <div />
-  );
-};
+const ResearchPurposeSummary = ({ darInfo }) => {
+  return !isNil(darInfo)
+    ? (
+        <div style={styles.researchPurposeSummary}>
+          <HighlightText
+            highlight={highlightedWords}
+            text={darInfo.rus}
+          />
+        </div>
+      )
+    : (
+        <div />
+      )
+}
 
 export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
   return (isChair && dacVotes.length > 0) && (
     <div
       style={styles.chairVoteInfo}
-      data-cy='chair-vote-info'
+      data-cy="chair-vote-info"
     >
       <div
         style={{
@@ -156,49 +158,51 @@ export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default function ResearchProposalVoteSlab(props) {
-  const [expanded, setExpanded] = useState(false);
-  const [currentUserVotes, setCurrentUserVotes] = useState([]);
-  const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote} = props;
-  const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
+  const [expanded, setExpanded] = useState(false)
+  const [currentUserVotes, setCurrentUserVotes] = useState([])
+  const [dacVotes, setDacVotes] = useState([])
+  const { darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote } = props
+  const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {}
   useEffect(() => {
-    const user = Storage.getCurrentUser();
-    setDacVotes(extractDacRPVotesFromBucket(bucket, user, adminPage));
-    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
-  }, [bucket, isChair, adminPage]);
+    const user = Storage.getCurrentUser()
+    setDacVotes(extractDacRPVotesFromBucket(bucket, user, adminPage))
+    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage))
+  }, [bucket, isChair, adminPage])
 
   return (
-    <div data-cy='rp-slab' style={styles.baseStyle}>
+    <div data-cy="rp-slab" style={styles.baseStyle}>
       <div style={styles.slabTitle} id={convertLabelToKey(get('key')(bucket))}>
         RUS (GA4GH DUO)
       </div>
       {isLoading && (
-        <div className='text-placeholder' style={{ height: '100px' }} />
+        <div className="text-placeholder" style={{ height: '100px' }} />
       )}
 
       {
         !isLoading && (
           <div>
             <div style={styles.collapsedData}>
-              {isLoading ? (
-                <SkeletonLoader/>
-              ) : (
-                <DataUseSummary translatedDataUse={translatedDataUse} />
-              )}
+              {isLoading
+                ? (
+                    <SkeletonLoader />
+                  )
+                : (
+                    <DataUseSummary translatedDataUse={translatedDataUse} />
+                  )}
               {!isLoading && <CollapseExpandLink expanded={expanded} setExpanded={setExpanded} />}
               {expanded && (
-                <div data-cy='rp-expanded' style={styles.expandedData}>
-                  <div data-cy='research-purpose'>
+                <div data-cy="rp-expanded" style={styles.expandedData}>
+                  <div data-cy="research-purpose">
                     <span style={styles.researchPurposeTitle}>Research Use Statement (Narrative)</span>
                     <ResearchPurposeSummary darInfo={darInfo} />
                     <DataUseAlertBox translatedDataUse={translatedDataUse} />
                     {!isEmpty(bucket) && (
                       <CollectionSubmitVoteBox
-                        question='Was the Research Use Statement (Narrative) accurately converted to a structured format?'
+                        question="Was the Research Use Statement (Narrative) accurately converted to a structured format?"
                         votes={currentUserVotes}
                         isFinal={false}
                         isDisabled={adminPage || readOnly || isEmpty(currentUserVotes)}
@@ -222,7 +226,8 @@ export default function ResearchProposalVoteSlab(props) {
               )}
             </div>
           </div>
-        )}
+        )
+      }
     </div>
-  );
+  )
 }

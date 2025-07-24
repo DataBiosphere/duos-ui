@@ -7,7 +7,7 @@ export const Models = {
     updateDate: null,
     chairpersons: [],
     members: [],
-    associatedDaa: null
+    associatedDaa: null,
   },
   dar: {
     properties: [],
@@ -54,8 +54,8 @@ export const Models = {
       vulnerablePopulation: false,
       populationMigration: false,
       psychiatricTraits: false,
-      notHealth: false
-    }
+      notHealth: false,
+    },
   },
-  error: { show: false, title: '', msg: [''] }
-};
+  error: { show: false, title: '', msg: [''] },
+}

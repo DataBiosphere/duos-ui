@@ -11,13 +11,13 @@ export const Theme = {
     background: {
       secondary: 'rgba(0, 96, 159, 0.1)',
       highlighted: 'rgba(193,107,12, 0.1)',
-    }
+    },
   },
   font: {
     weight: {
       semibold: '600',
       regular: '400',
-      medium: '500'
+      medium: '500',
     },
     size: {
       title: '28px',
@@ -30,12 +30,12 @@ export const Theme = {
       regular: '22px',
       dense: '18px',
       title: '34px',
-    }
+    },
   },
   legacy: {
     color: '#777777',
     fontFamily: '\'Roboto\', sans-serif',
-    fontSize: '15px'
+    fontSize: '15px',
   },
   lightTable: {
     margin: '25px 0 10px 0',
@@ -53,29 +53,29 @@ export const Theme = {
     padding: '12px 5px 0 5px',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
-    textOverflow: 'ellipsis'
+    textOverflow: 'ellipsis',
   },
   textTableHead: {
     minHeight: '43px',
     fontSize: '16px',
     padding: '10px',
-    fontWeight: '500'
+    fontWeight: '500',
   },
-};
+}
 
-const targetFont  = 'Montserrat';
+const targetFont = 'Montserrat'
 
 export const Styles = {
   NAVBAR: {
     DRAWER_LINK: {
       fontFamily: targetFont,
       fontWeight: 400,
-      fontSize: '1.6rem'
-    }
+      fontSize: '1.6rem',
+    },
   },
   PAGE: {
     width: '90%',
-    margin: '0 auto'
+    margin: '0 auto',
   },
   TITLE: {
     fontFamily: targetFont,
@@ -85,23 +85,23 @@ export const Styles = {
   SMALL: {
     fontFamily: targetFont,
     fontWeight: Theme.font.weight.regular,
-    fontSize: Theme.font.size.small
+    fontSize: Theme.font.size.small,
   },
   SMALL_BOLD: {
     fontFamily: targetFont,
     fontWeight: Theme.font.weight.semibold,
     fontSize: Theme.font.size.small,
-    padding: '1rem'
+    padding: '1rem',
   },
   MEDIUM: {
     fontFamily: targetFont,
     fontWeight: Theme.font.weight.semibold,
     fontSize: '18px',
-    margin: '15px 0'
+    margin: '15px 0',
   },
   MEDIUM_ROW: {
     display: 'flex',
-    fontSize: '18px'
+    fontSize: '18px',
   },
   MEDIUM_DESCRIPTION: {
     fontFamily: targetFont,
@@ -111,18 +111,18 @@ export const Styles = {
   SUB_HEADER: {
     marginTop: '20px',
     fontSize: '22px',
-    fontWeight: '500'
+    fontWeight: '500',
   },
-  MINOR_HEADER:{
+  MINOR_HEADER: {
     fontWeight: Theme.font.weight.semibold,
     fontSize: Theme.font.size.small,
     backgroundColor: Theme.palette.background.secondary,
-    padding: '1rem'
+    padding: '1rem',
   },
   JUMBO: {
     fontSize: '60px',
     paddingTop: '30px',
-    textAlign: 'center'
+    textAlign: 'center',
   },
   DESCRIPTION_BOX: {
     borderRadius: 9,
@@ -131,7 +131,7 @@ export const Styles = {
     border: '1px solid #BABEC1',
     margin: '.5rem 1rem .5rem 0',
     overflowX: 'hidden',
-    overflowY: 'scroll'
+    overflowY: 'scroll',
   },
   SQUARE_BOX: {
     alignContent: 'center',
@@ -141,7 +141,7 @@ export const Styles = {
     border: '1px solid #BABEC1',
     margin: '.5rem 1rem .5rem 0',
     overflowX: 'hidden',
-    overflowY: 'scroll'
+    overflowY: 'scroll',
   },
   READ_MORE: {
     border: '1px solid #BABEC1',
@@ -158,12 +158,12 @@ export const Styles = {
   },
   HEADER_CONTAINER: {
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
   ICON_CONTAINER: {
     flexBasis: '76px',
     height: '60px',
-    paddingRight: '16px'
+    paddingRight: '16px',
   },
   RIGHT_HEADER_SECTION: {
     display: 'flex',
@@ -173,7 +173,7 @@ export const Styles = {
   LEFT_HEADER_SECTION: {
     display: 'flex',
     flexDirection: 'row',
-    paddingTop: '3rem'
+    paddingTop: '3rem',
   },
   TABLE: {
     CONTAINER: {
@@ -205,7 +205,7 @@ export const Styles = {
       display: 'flex',
       justifyContent: 'flex-start',
       alignItems: 'center',
-      width: '100%'
+      width: '100%',
     },
     RECORD_ROW: {
       backgroundColor: '#FFFFFF',
@@ -220,37 +220,37 @@ export const Styles = {
     },
     DAR_TEXT_HOVER: {
       cursor: 'pointer',
-      color: '#0cabc5d9'
+      color: '#0cabc5d9',
     },
     RECORD_ROW_HOVER: {
-      backgroundColor: '#e2eef9'
+      backgroundColor: '#e2eef9',
     },
     DATA_REQUEST_TEXT: {
       color: '#00609F',
-      fontWeight: Theme.font.weight.semibold
+      fontWeight: Theme.font.weight.semibold,
     },
-    //NOTE: play around with the cell measurements
+    // NOTE: play around with the cell measurements
     TITLE_CELL: {
       width: '18%',
       display: 'flex',
       justifyContent: 'left',
       alignItems: 'center',
       wordBreak: 'break-word',
-      margin: '0 1%'
+      margin: '0 1%',
     },
     DATASET_CELL: {
       width: '18%',
       margin: '0 1%',
       display: 'flex',
       justifyContent: 'left',
-      alignItems: 'center'
+      alignItems: 'center',
     },
     DATA_ID_CELL: {
       width: '14%',
       margin: '0 1%',
       display: 'flex',
       justifyContent: 'left',
-      alignItems: 'center'
+      alignItems: 'center',
     },
     SUBMISSION_DATE_CELL: {
       width: '12%',
@@ -306,43 +306,43 @@ export const Styles = {
       justifyContent: 'flex-end',
       height: '51px',
       borderBottomLeftRadius: 'inherit',
-      borderBottomRightRadius: 'inherit'
+      borderBottomRightRadius: 'inherit',
     },
     FOOTER_SECTION: {
       width: '100%',
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     PAGINATION_SECTION_OFFSET: {
-      flex: 1
+      flex: 1,
     },
     PAGINATION_BUTTON_SECTION: {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      flex: 1
+      flex: 1,
     },
     PAGINATION_BUTTON: {
       margin: '2%',
       flex: 1,
-      fontFamily: 'Montserrat'
+      fontFamily: 'Montserrat',
     },
     PAGINATION_CURRENT_PAGE: {
       margin: '2% 0',
       flex: 2,
-      fontFamily: 'Montserrat'
+      fontFamily: 'Montserrat',
     },
     PAGINATION_INPUT: {
       textAlign: 'center',
       width: '20%',
-      fontFamily: 'Montserrat'
+      fontFamily: 'Montserrat',
     },
     PAGINATION_TABLE_SIZE_SECTION: {
       display: 'flex',
       flex: 1,
       alignItems: 'center',
       justifyContent: 'flex-end',
-      fontFamily: 'Montserrat'
+      fontFamily: 'Montserrat',
     },
     TABLE_TEXT_BUTTON: {
       display: 'flex',
@@ -357,7 +357,7 @@ export const Styles = {
       borderRadius: '.3rem',
       cursor: 'default',
       minHeight: '3rem',
-      margin: '2% 10% 2% 0'
+      margin: '2% 10% 2% 0',
     },
     TABLE_TEXT_BUTTON_SUCCESS: {
       display: 'flex',
@@ -372,7 +372,7 @@ export const Styles = {
       borderRadius: '.3rem',
       cursor: 'default',
       minHeight: '3rem',
-      margin: '2% 10% 2% 0'
+      margin: '2% 10% 2% 0',
     },
     TABLE_TEXT_BUTTON_OUTLINED: {
       display: 'flex',
@@ -389,24 +389,24 @@ export const Styles = {
       minHeight: '3rem',
       margin: '2% 10% 2% 0',
       border: '1px solid',
-      borderColor: Theme.palette.secondary
+      borderColor: Theme.palette.secondary,
     },
     TABLE_BUTTON_TEXT_HOVER: {
       backgroundColor: '#2FA4E7',
-      cursor: 'pointer'
+      cursor: 'pointer',
     },
     TABLE_BUTTON_TEXT_HOVER_OUTLINED: {
       cursor: 'pointer',
       borderColor: '#2FA4E7',
-      color: '#2FA4E7'
+      color: '#2FA4E7',
     },
     TABLE_BUTTON_TEXT_HOVER_SUCCESS: {
       backgroundColor: '#00D8CC',
-      cursor: 'pointer'
+      cursor: 'pointer',
     },
     TABLE_BUTTON_ICON_HOVER: {
       color: '#2FA4E7',
-      cursor: 'pointer'
+      cursor: 'pointer',
     },
     TABLE_ICON_BUTTON: {
       display: 'flex',
@@ -416,7 +416,7 @@ export const Styles = {
       borderRadius: '.3rem',
       cursor: 'pointer',
       minHeight: '3rem',
-    }
+    },
   },
   MODAL: {
     CONTENT: {
@@ -426,13 +426,13 @@ export const Styles = {
       left: '20%',
       right: '20%',
       fontFamily: targetFont,
-      padding: '2%'
+      padding: '2%',
     },
     CONFIRMATION: {
       height: '250px',
       inset: '20%',
       fontFamily: targetFont,
-      padding: '2%'
+      padding: '2%',
     },
     DAR_SUBHEADER: {
       display: 'flex',
@@ -440,7 +440,7 @@ export const Styles = {
       fontSize: '16px',
       fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',
-      color: '#1F3B50'
+      color: '#1F3B50',
     },
     TITLE_HEADER: {
       display: 'flex',
@@ -449,29 +449,29 @@ export const Styles = {
       fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',
       marginBottom: '4%',
-      color: '#1F3B50'
+      color: '#1F3B50',
     },
     DAR_DETAIL_ROW: {
       padding: '0 3%',
       margin: '2% 0',
       display: 'flex',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     DAR_LABEL: {
       color: '#1F3B50',
       fontSize: '14px',
       fontWeight: Theme.font.weight.semibold,
       width: '25%',
-      textAlign: 'right'
+      textAlign: 'right',
     },
     DAR_DETAIL: {
       fontSize: '16px',
       fontWeight: Theme.font.weight.regular,
-      width: '70%'
-    }
+      width: '70%',
+    },
   },
   ALERT: {
     fontSize: '15px',
-    textAlign: 'center'
-  }
-};
+    textAlign: 'center',
+  },
+}

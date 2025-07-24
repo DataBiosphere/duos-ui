@@ -1,17 +1,16 @@
-import React from 'react';
-import {merge} from 'lodash/fp';
+import React from 'react'
+import { merge } from 'lodash/fp'
 
 export const RadioButton = (props) => {
-
   const basicWrapperStyle = {
     fontSize: 15,
     lineHeight: '2rem',
     color: 333,
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     position: 'relative',
-  };
+  }
 
-  const wrapperStyle = props.style ? merge(basicWrapperStyle, props.style) : basicWrapperStyle;
+  const wrapperStyle = props.style ? merge(basicWrapperStyle, props.style) : basicWrapperStyle
 
   const basicUnchecked = {
     fontSize: 15,
@@ -27,15 +26,15 @@ export const RadioButton = (props) => {
     backgroundColor: 'white',
     borderRadius: '50%',
     border: '1px solid #999999',
-  };
+  }
 
-  const uncheckedStyle = props.style ? merge(basicUnchecked, props.style) : basicUnchecked;
+  const uncheckedStyle = props.style ? merge(basicUnchecked, props.style) : basicUnchecked
 
   const checkedStyle = merge(uncheckedStyle, {
     boxShadow: 'rgb(0, 0, 0) 0 0 0 1px',
     backgroundColor: '#2196F3',
     border: '2px solid white',
-  });
+  })
 
   const basicLabelStyle = {
     cursor: props.disabled ? 'not-allowed' : 'pointer',
@@ -43,18 +42,18 @@ export const RadioButton = (props) => {
     fontSize: 15,
     fontWeight: '500',
 
-  };
-  const labelStyle = props.style? merge(basicLabelStyle, props.style) : basicLabelStyle;
+  }
+  const labelStyle = props.style ? merge(basicLabelStyle, props.style) : basicLabelStyle
 
   const descriptionStyle = {
     marginLeft: '.25rem',
     fontWeight: 'normal',
-  };
+  }
 
   return (
     <div style={props.style}>
       <label style={wrapperStyle}>
-        <div style={{float: 'left'}}>
+        <div style={{ float: 'left' }}>
           <input
             id={props.id}
             type="radio"
@@ -67,11 +66,11 @@ export const RadioButton = (props) => {
           />
           <span style={props.defaultChecked ? checkedStyle : uncheckedStyle} />
         </div>
-        <div style={{marginLeft: '3rem'}}>
+        <div style={{ marginLeft: '3rem' }}>
           <span style={labelStyle}>{props.label}</span>
           <span style={descriptionStyle}>{props.description}</span>
         </div>
       </label>
     </div>
-  );
-};
+  )
+}

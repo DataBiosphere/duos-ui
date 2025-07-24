@@ -1,5 +1,5 @@
-import React from 'react';
-import {isEmpty, map} from 'lodash/fp';
+import React from 'react'
+import { isEmpty, map } from 'lodash/fp'
 
 const styles = {
   box: {
@@ -13,7 +13,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     columnGap: '1rem',
-    width: 'fit-content'
+    width: 'fit-content',
   },
   text: {
     fontSize: '1.6rem',
@@ -21,37 +21,39 @@ const styles = {
   },
   exclamationPoint: {
     fontSize: '3rem',
-    fontWeight: 'bold'
-  }
-};
+    fontWeight: 'bold',
+  },
+}
 
 const dataUseDescriptions = (translatedDataUse) => {
-  return Object.keys(translatedDataUse).flatMap(key => {
-    const dataUses = translatedDataUse[key];
-    return map.convert({cap: false})((dataUse, index) => {
-      const uniqKey = key + '-' + dataUse.code + '-' + index;
+  return Object.keys(translatedDataUse).flatMap((key) => {
+    const dataUses = translatedDataUse[key]
+    return map.convert({ cap: false })((dataUse, index) => {
+      const uniqKey = key + '-' + dataUse.code + '-' + index
       return (
         <div key={uniqKey}>
           {dataUse.description}
         </div>
-      );
-    })(manuallyReviewedDataUses(dataUses));
-  });
-};
+      )
+    })(manuallyReviewedDataUses(dataUses))
+  })
+}
 
 const manuallyReviewedDataUses = (dataUses) => {
-  return dataUses.filter((dataUse) => dataUse.manualReview);
-};
+  return dataUses.filter(dataUse => dataUse.manualReview)
+}
 
 export default function DataUseAlertBox(props) {
-  const {translatedDataUse} = props;
-  const descriptions = dataUseDescriptions(translatedDataUse);
+  const { translatedDataUse } = props
+  const descriptions = dataUseDescriptions(translatedDataUse)
 
   return (
     /* eslint-disable react/no-unknown-property */
-    !isEmpty(descriptions) && <div datacy="alert-box" style={styles.box}>
-      <span style={styles.exclamationPoint}>!</span>
-      <div style={styles.text}>{descriptions}</div>
-    </div>
-  );
+    !isEmpty(descriptions) && (
+      <div datacy="alert-box" style={styles.box}>
+        <span style={styles.exclamationPoint}>!</span>
+        <div style={styles.text}>{descriptions}</div>
+      </div>
+    )
+  )
 }

@@ -17,18 +17,17 @@ import { SupportRequestModal } from './modals/SupportRequestModal'
 import './DuosHeader.css'
 import { Notification } from './Notification'
 
-
 const styles = {
   drawerPaper: {
     backgroundColor: '#FFF',
     color: 'white',
-    fontFamily: 'Montserrat'
-  }
-};
+    fontFamily: 'Montserrat',
+  },
+}
 
 const isOnlySigningOfficial = (user) => {
-  return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter);
-};
+  return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter)
+}
 
 /**
  * Tab objects in this array support an `isRendered` function per top level Tab as well as
@@ -44,9 +43,9 @@ export const headerTabsConfig = [
       { label: 'DACs', link: '/manage_dac' },
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
-      { label: 'Library Cards', link: '/admin_manage_lc' }
+      { label: 'Library Cards', link: '/admin_manage_lc' },
     ],
-    isRendered: (user) => user.isAdmin
+    isRendered: user => user.isAdmin,
   },
   {
     label: 'SO Console',
@@ -56,9 +55,9 @@ export const headerTabsConfig = [
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => DAAUtils.isEnabled() },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
-      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() }
+      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() },
     ],
-    isRendered: (user) => user.isSigningOfficial
+    isRendered: user => user.isSigningOfficial,
   },
   {
     label: 'DAC Chair Console',
@@ -67,9 +66,9 @@ export const headerTabsConfig = [
     children: [
       { label: 'DAR Requests', link: '/chair_console' },
       { label: 'DAC Members', link: '/manage_dac' },
-      { label: "My DAC's Datasets", link: '/dac_datasets' }
+      { label: 'My DAC\'s Datasets', link: '/dac_datasets' },
     ],
-    isRendered: (user) => user.isChairPerson
+    isRendered: user => user.isChairPerson,
   },
   {
     label: 'DAC Member Console',
@@ -77,9 +76,9 @@ export const headerTabsConfig = [
     search: 'member_console',
     children: [
       { label: 'DAR Requests', link: '/member_console' },
-      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' }
+      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
     ],
-    isRendered: (user) => user.isMember
+    isRendered: user => user.isMember,
   },
   {
     label: 'Researcher Console',
@@ -89,19 +88,18 @@ export const headerTabsConfig = [
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
       { label: 'Datasets', link: '/datasets' },
-      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
+      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter },
     ],
-    isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)
-  }
-];
-
+    isRendered: user => user.isResearcher && !isOnlySigningOfficial(user),
+  },
+]
 
 const duosLogoImage = {
   height: '50px',
   padding: '0',
   marginRight: 30,
-  cursor: 'pointer'
-};
+  cursor: 'pointer',
+}
 
 const navbarDuosIcon = {
   display: 'inline-block',
@@ -109,108 +107,108 @@ const navbarDuosIcon = {
   height: '16px',
   margin: '0 8px 0 0',
   transition: 'all 0.3s ease !important',
-  verticalAlign: 'baseline'
-};
+  verticalAlign: 'baseline',
+}
 
 const navbarDuosText = {
   display: 'inline',
-  verticalAlign: 'text-bottom'
-};
+  verticalAlign: 'text-bottom',
+}
 
 // eslint-disable-next-line react-refresh/only-export-components
 const DuosHeader = (props) => {
-  const {location, classes, history} = props;
+  const { location, classes, history } = props
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
     notificationData: [],
     openDrawer: false,
-    showProfileLinks: false
-  });
+    showProfileLinks: false,
+  })
 
   useEffect(() => {
     async function fetchNotificationData() {
-      const notificationData = await NotificationService.getActiveBanners();
-      setState((prev) => ({
+      const notificationData = await NotificationService.getActiveBanners()
+      setState(prev => ({
         ...prev,
-        notificationData
-      }));
+        notificationData,
+      }))
     }
-    fetchNotificationData();
-  }, []);
+    fetchNotificationData()
+  }, [])
 
   const toggleHover = () => {
     setState({
       ...state,
-      hover: !state.hover
-    });
-  };
+      hover: !state.hover,
+    })
+  }
 
   const signOut = () => {
-    props.history.push('/home');
-    toggleDrawer(false);
-    Auth.signOut();
-  };
+    props.history.push('/home')
+    toggleDrawer(false)
+    Auth.signOut()
+  }
 
   const supportRequestModal = () => {
     setState({
       ...state,
       showSupportRequestModal: true,
-      openDrawer: false
-    });
-  };
+      openDrawer: false,
+    })
+  }
 
   const profileLinks = () => {
-    const profileState = state.showProfileLinks;
+    const profileState = state.showProfileLinks
     setState({
       ...state,
-      showProfileLinks: !profileState
-    });
-  };
+      showProfileLinks: !profileState,
+    })
+  }
 
   const okSupportRequestModal = () => {
     setState({
       ...state,
-      showSupportRequestModal: false
-    });
-  };
+      showSupportRequestModal: false,
+    })
+  }
 
   const closeSupportRequestModal = () => {
     setState({
       ...state,
-      showSupportRequestModal: false
-    });
-  };
+      showSupportRequestModal: false,
+    })
+  }
 
   const makeNotifications = () => {
-    return state.notificationData.map((d, index) => <Notification notificationData={d} key={index} index={index} />);
-  };
+    return state.notificationData.map((d, index) => <Notification notificationData={d} key={index} index={index} />)
+  }
 
   const toggleDrawer = (boolVal) => {
     setState({
       ...state,
-      openDrawer: boolVal
-    });
-  };
-
-  const goToLink = (link) => {
-    props.history.push(link);
-    toggleDrawer(false);
-  };
-
-  const isLogged = Storage.userIsLogged();
-  let currentUser = {};
-
-  if (isLogged) {
-    currentUser = Storage.getCurrentUser();
+      openDrawer: boolVal,
+    })
   }
 
-  const contactUsSource = state.hover ? contactUsHover : contactUsStandard;
-  const contactUsIcon = isLogged ? '' : <img src={contactUsSource} style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />;
-  const contactUsText = isLogged ? 'Contact Us' : <span style={{ display: 'inline', verticalAlign: 'text-bottom' }}>Contact Us</span>;
+  const goToLink = (link) => {
+    props.history.push(link)
+    toggleDrawer(false)
+  }
+
+  const isLogged = Storage.userIsLogged()
+  let currentUser = {}
+
+  if (isLogged) {
+    currentUser = Storage.getCurrentUser()
+  }
+
+  const contactUsSource = state.hover ? contactUsHover : contactUsStandard
+  const contactUsIcon = isLogged ? '' : <img src={contactUsSource} style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />
+  const contactUsText = isLogged ? 'Contact Us' : <span style={{ display: 'inline', verticalAlign: 'text-bottom' }}>Contact Us</span>
   const contactUsButton = (
     <button
-      id='btn_applyAcces'
+      id="btn_applyAcces"
       style={{
         color: state.hover ? '#2FA4E7' : '#ffffff',
         fontSize: '14px',
@@ -224,14 +222,13 @@ const DuosHeader = (props) => {
       onMouseEnter={toggleHover}
       onMouseLeave={toggleHover}
       onClick={supportRequestModal}
-      data-tip='Need help? Contact us for some assistance'
-      data-for='tip_requestAccess'
+      data-tip="Need help? Contact us for some assistance"
+      data-for="tip_requestAccess"
     >
       {contactUsIcon}
       {contactUsText}
     </button>
-  );
-
+  )
 
   const supportModal = (
     <SupportRequestModal
@@ -240,51 +237,53 @@ const DuosHeader = (props) => {
       onCloseRequest={closeSupportRequestModal}
       url={props.location.pathname}
     />
-  );
+  )
 
-  const tabs = headerTabsConfig.filter((data) => data.isRendered(currentUser));
+  const tabs = headerTabsConfig.filter(data => data.isRendered(currentUser))
 
   // returns true if the current page the app is on is a part of this tab
   const isValidTab = (tab) => {
     if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
-      return true;
+      return true
     }
     if (tab.children) {
       return tab.children.some((subtab) => {
-        return subtab.link === location.pathname || location.pathname.includes(subtab.search);
-      });
+        return subtab.link === location.pathname || location.pathname.includes(subtab.search)
+      })
     }
-    return tab.children ? tab.children.indexOf((subtab) => subtab.link === location.pathname) !== -1 : false;
-  };
+    return tab.children ? tab.children.indexOf(subtab => subtab.link === location.pathname) !== -1 : false
+  }
 
-  let initialSubTab = false;
-  let initialTab = false;
+  let initialSubTab = false
+  let initialTab = false
 
   // note: location.state.selectedMenuTab will be populated if the user navigated
   // to the current page by clicking on a tab from the nav bar.
 
   // populate initialTab based on state (if valid) or by manually searching through all tabs.
   if (location?.state?.selectedMenuTab && tabs.length > location.state.selectedMenuTab && isValidTab(tabs[location.state.selectedMenuTab])) {
-    initialTab = location.state.selectedMenuTab;
-  } else {
-    initialTab = tabs.findIndex(isValidTab);
+    initialTab = location.state.selectedMenuTab
+  }
+  else {
+    initialTab = tabs.findIndex(isValidTab)
   }
 
   // populate initialSubTab
   if (initialTab !== -1) {
     if (tabs[initialTab].link === location.pathname) {
-      initialSubTab = 0;
-    } else if (tabs[initialTab].children) {
-      initialSubTab = tabs[initialTab].children.filter((data) => data.isRendered === undefined || data.isRendered(currentUser)).findIndex((subtab) => {
-        return subtab.link === location.pathname || location.pathname.includes(subtab.search);
-      });
+      initialSubTab = 0
+    }
+    else if (tabs[initialTab].children) {
+      initialSubTab = tabs[initialTab].children.filter(data => data.isRendered === undefined || data.isRendered(currentUser)).findIndex((subtab) => {
+        return subtab.link === location.pathname || location.pathname.includes(subtab.search)
+      })
     }
   }
 
   return (
-    <nav className='navbar-duos' role='navigation'>
+    <nav className="navbar-duos" role="navigation">
       <Hidden mdDown={true}>
-        <div className='row no-margin' style={{ width: '100%' }}>
+        <div className="row no-margin" style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
             history={history}
@@ -303,35 +302,35 @@ const DuosHeader = (props) => {
             tabs={tabs}
             initialTab={initialTab}
             initialSubTab={initialSubTab}
-            orientation='horizontal'
+            orientation="horizontal"
             showProfileLinks={profileLinks}
             profileState={state.showProfileLinks}
           />
         </div>
       </Hidden>
       {
-      //NOTE: old navbar style is heavily dependent on css styles with element specific styles
-      //Hard to make that navbar flexible with material-ui's syntax
-      //For now I will use material-ui's hidden element to selectively render the two different navbars
-      //I'll look into rewriting the large navbar on a later PR
+      // NOTE: old navbar style is heavily dependent on css styles with element specific styles
+      // Hard to make that navbar flexible with material-ui's syntax
+      // For now I will use material-ui's hidden element to selectively render the two different navbars
+      // I'll look into rewriting the large navbar on a later PR
       }
       <Hidden mdUp={true}>
         {makeNotifications()}
-        <div className='navbar-main' style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="navbar-main" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <img
             style={duosLogoImage}
             src={DuosLogo}
-            alt='DUOS Logo'
+            alt="DUOS Logo"
             onClick={() => goToLink('/home')}
           />
-          <IconButton  id='collapsed-navigation-icon-button' size='small' onClick={() => toggleDrawer(true)}>
-            <MenuIcon id='navbar-menu-icon' style={{ color: 'white', fontSize: '6rem', flex: 1 }} anchor='right' />
+          <IconButton id="collapsed-navigation-icon-button" size="small" onClick={() => toggleDrawer(true)}>
+            <MenuIcon id="navbar-menu-icon" style={{ color: 'white', fontSize: '6rem', flex: 1 }} anchor="right" />
           </IconButton>
           <Drawer
-            anchor='right'
+            anchor="right"
             open={state.openDrawer}
             PaperProps={{ className: classes.drawerPaper }}
-            className='navbar-duos'
+            className="navbar-duos"
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
@@ -352,7 +351,7 @@ const DuosHeader = (props) => {
               tabs={tabs}
               initialTab={initialTab}
               initialSubTab={initialSubTab}
-              orientation='vertical'
+              orientation="vertical"
               onSubtabChange={() => toggleDrawer(false)}
               showProfileLinks={profileLinks}
               profileState={state.showProfileLinks}
@@ -362,8 +361,8 @@ const DuosHeader = (props) => {
         {supportModal}
       </Hidden>
     </nav>
-  );
-};
+  )
+}
 
 // eslint-disable-next-line react-refresh/only-export-components
-export default withRouter(withStyles(DuosHeader, styles));
+export default withRouter(withStyles(DuosHeader, styles))
