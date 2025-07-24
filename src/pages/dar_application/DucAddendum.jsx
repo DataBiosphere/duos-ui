@@ -161,7 +161,7 @@ export default function DucAddendum(props) {
             style: columnStyles
           },
           {
-            data: '',
+            data: dacs.find(dac => dac.dacId === dataset.dacId)?.name || 'Unknown DAC',
             id: dataset.datasetId,
             style: columnStyles
           },
@@ -207,7 +207,7 @@ export default function DucAddendum(props) {
 
     const fullTable = flatten(tableChunks);
     setDucAddendumTable(fullTable);
-  }, [buckets, isLoading]);
+  }, [buckets, isLoading, dacs]);
 
   useEffect(() => {
     buildDucAddendumTable();
