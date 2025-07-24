@@ -1,104 +1,102 @@
-import React, { useState, useEffect, Fragment, useCallback } from 'react';
-import {isNil} from 'lodash/fp';
-import { DarCollectionTableColumnOptions, styles, consoleTypes } from '../../utils/DarCollectionUtils';
-import { Storage } from '../../libs/storage';
-import PaginationBar from '../PaginationBar';
-import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
-import SimpleTable from '../SimpleTable';
+import React, { useState, useEffect, Fragment, useCallback } from 'react'
+import { isNil } from 'lodash/fp'
+import { DarCollectionTableColumnOptions, styles, consoleTypes } from '../../utils/DarCollectionUtils'
+import { Storage } from '../../libs/storage'
+import PaginationBar from '../PaginationBar'
+import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils'
+import SimpleTable from '../SimpleTable'
 import cellData from './DarCollectionTableCellData'
-import CollectionConfirmationModal from './CollectionConfirmationModal';
-import { cloneDeep } from 'lodash';
-import './dar_collection_table.css';
-import { DarDatasetTable } from '../dar_dataset_table/DarDatasetTable';
-import { Collections } from '../../libs/ajax/Collections';
-import { Notifications } from '@mui/icons-material';
+import CollectionConfirmationModal from './CollectionConfirmationModal'
+import { cloneDeep } from 'lodash'
+import './dar_collection_table.css'
+import { DarDatasetTable } from '../dar_dataset_table/DarDatasetTable'
+import { Collections } from '../../libs/ajax/Collections'
+import { Notifications } from '@mui/icons-material'
 
-const storageDarCollectionSort = 'storageDarCollectionSort';
-
-
+const storageDarCollectionSort = 'storageDarCollectionSort'
 
 const columnHeaderConfig = {
   darCode: {
     label: 'DAR Code',
     cellStyle: { width: styles.cellWidth.darCode },
     cellDataFn: cellData.darCodeCellData,
-    sortable: true
+    sortable: true,
   },
   dacNames: {
     label: 'DAC',
     cellStyle: { width: styles.cellWidth.dacNames },
-    cellDataFn: cellData.DacCellData
+    cellDataFn: cellData.DacCellData,
   },
   name: {
     label: 'Title',
     cellStyle: { width: styles.cellWidth.projectTitle },
     cellDataFn: cellData.projectTitleCellData,
-    sortable: true
+    sortable: true,
   },
   submissionDate: {
     label: 'Submission Date',
     cellStyle: { width: styles.cellWidth.submissionDate },
     cellDataFn: cellData.submissionDateCellData,
-    sortable: true
+    sortable: true,
   },
   researcher: {
     label: 'Researcher',
     cellStyle: { width: styles.cellWidth.researcher },
     cellDataFn: cellData.researcherCellData,
-    sortable: true
+    sortable: true,
   },
   institution: {
     label: 'Institution',
     cellStyle: { width: styles.cellWidth.institution },
     cellDataFn: cellData.institutionCellData,
-    sortable: true
+    sortable: true,
   },
   datasetCount: {
     label: 'Datasets',
     cellStyle: { width: styles.cellWidth.datasetCount },
     cellDataFn: cellData.datasetCountCellData,
-    sortable: true
+    sortable: true,
   },
   expiresAt: {
     label: 'Expiration Date',
     cellStyle: { width: styles.cellWidth.expirationDate },
     cellDataFn: cellData.expiresAtCellData,
-    sortable: true
+    sortable: true,
   },
   status: {
     label: 'Status',
     cellStyle: { width: styles.cellWidth.status },
     cellDataFn: cellData.statusCellData,
-    sortable: true
+    sortable: true,
   },
   actions: {
     label: 'Action',
     cellStyle: { width: styles.cellWidth.actions },
-    cellDataFn: cellData.consoleActionsCellData
+    cellDataFn: cellData.consoleActionsCellData,
   },
-};
+}
 
-const defaultColumns = Object.keys(columnHeaderConfig);
+const defaultColumns = Object.keys(columnHeaderConfig)
 
 const columnHeaderData = (columns = defaultColumns) => {
-  return columns.map((col) => columnHeaderConfig[col]);
-};
+  return columns.map(col => columnHeaderConfig[col])
+}
 
-const collectionsSummaryMap = [];
+const collectionsSummaryMap = []
 
 const processCollectionRowData = ({
   collections, collectionIsExpanded, updateCollectionIsExpandedById,
   showConfirmationModal, columns = defaultColumns, consoleType = '',
-  goToVote, reviewCollection, resumeCollection, relevantDatasets
+  goToVote, reviewCollection, resumeCollection, relevantDatasets,
 }) => {
-  if(!isNil(collections)) {
+  if (!isNil(collections)) {
     return collections.map((collection) => {
       const {
         darCollectionId, darCode, datasetIds,
         submissionDate, status, actions, dacNames,
-        researcherName, name, institutionName
-      } = collection;
-      collectionsSummaryMap[collection.darCollectionId] = collection;
+        researcherName, name, institutionName,
+      } = collection
+      collectionsSummaryMap[collection.darCollectionId] = collection
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasetIds, darCode, status, name,
@@ -107,46 +105,46 @@ const processCollectionRowData = ({
           goToVote, reviewCollection, relevantDatasets,
           resumeCollection, actions, dacNames,
           collectionIsExpanded: collectionIsExpanded(darCollectionId),
-          updateCollectionIsExpanded: (val) => updateCollectionIsExpandedById(darCollectionId, val),
-        });
-      });
-    });
+          updateCollectionIsExpanded: val => updateCollectionIsExpandedById(darCollectionId, val),
+        })
+      })
+    })
   }
-};
+}
 
 const getInitialSort = (columns = []) => {
   const sort = Storage.getCurrentUserSettings(storageDarCollectionSort) || {
     field: DarCollectionTableColumnOptions.SUBMISSION_DATE,
-    dir: -1
-  };
-  const sortIndex = columns.indexOf(sort.field);
+    dir: -1,
+  }
+  const sortIndex = columns.indexOf(sort.field)
 
   if (sortIndex !== -1) {
-    return { colIndex: sortIndex, dir: sort.dir};
+    return { colIndex: sortIndex, dir: sort.dir }
   }
   else {
-    return { colIndex: 0, dir: 1 };
+    return { colIndex: 0, dir: 1 }
   }
-};
+}
 
 export const DarCollectionTable = function DarCollectionTable(props) {
-  const [visibleCollection, setVisibleCollections] = useState([]);
-  const [collectionsExpandedState, setCollectionsExpandedState] = useState({});
+  const [visibleCollection, setVisibleCollections] = useState([])
+  const [collectionsExpandedState, setCollectionsExpandedState] = useState({})
 
-  const [darCollectionCache, setDarCollectionCache] = useState({});
+  const [darCollectionCache, setDarCollectionCache] = useState({})
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
-  const [sort, setSort] = useState(getInitialSort(props.columns));
-  const [tableSize, setTableSize] = useState(10);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState({});
-  const [consoleAction, setConsoleAction] = useState();
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageCount, setPageCount] = useState(1)
+  const [sort, setSort] = useState(getInitialSort(props.columns))
+  const [tableSize, setTableSize] = useState(10)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [selectedCollection, setSelectedCollection] = useState({})
+  const [consoleAction, setConsoleAction] = useState()
   const {
     collections, columns, isLoading, cancelCollection, reviseCollection,
     openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
-  } = props;
-  const isUnfilteredView = consoleType === consoleTypes.ADMIN || consoleType === consoleTypes.RESEARCHER;
+  } = props
+  const isUnfilteredView = consoleType === consoleTypes.ADMIN || consoleType === consoleTypes.RESEARCHER
 
   /*
     NOTE: This component will most likely be used in muliple consoles
@@ -156,41 +154,42 @@ export const DarCollectionTable = function DarCollectionTable(props) {
 
   const updateCollectionIsExpandedById = useCallback((id, val) => {
     if (collectionsExpandedState[id] !== val) {
-      const newCollectionsExpandedState = cloneDeep(collectionsExpandedState);
-      newCollectionsExpandedState[id] = val;
-      setCollectionsExpandedState(newCollectionsExpandedState);
+      const newCollectionsExpandedState = cloneDeep(collectionsExpandedState)
+      newCollectionsExpandedState[id] = val
+      setCollectionsExpandedState(newCollectionsExpandedState)
     }
-  }, [collectionsExpandedState]);
+  }, [collectionsExpandedState])
 
   const collectionIsExpanded = useCallback((id) => {
-    return collectionsExpandedState[id] === true;
-  }, [collectionsExpandedState]);
+    return collectionsExpandedState[id] === true
+  }, [collectionsExpandedState])
 
   const fetchDarCollection = useCallback((darCollectionId) => {
     if (!isNil(darCollectionCache[darCollectionId])) {
-      return darCollectionCache[darCollectionId];
-    } else {
-      return Collections.getCollectionById(darCollectionId).then((coll) => {
-        const cache = cloneDeep(darCollectionCache);
-        cache[darCollectionId] = coll;
-        setDarCollectionCache(cache);
-        return coll;
-      }).catch(() => {
-        const cache = cloneDeep(darCollectionCache);
-        cache[darCollectionId] = {}; // save it in the cache as empty
-        setDarCollectionCache(cache);
-
-        Notifications.showError('Could not load DAR Collection.');
-        return null;
-      });
+      return darCollectionCache[darCollectionId]
     }
-  }, [darCollectionCache, setDarCollectionCache]);
+    else {
+      return Collections.getCollectionById(darCollectionId).then((coll) => {
+        const cache = cloneDeep(darCollectionCache)
+        cache[darCollectionId] = coll
+        setDarCollectionCache(cache)
+        return coll
+      }).catch(() => {
+        const cache = cloneDeep(darCollectionCache)
+        cache[darCollectionId] = {} // save it in the cache as empty
+        setDarCollectionCache(cache)
+
+        Notifications.showError('Could not load DAR Collection.')
+        return null
+      })
+    }
+  }, [darCollectionCache, setDarCollectionCache])
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
-      setTableSize(value);
+      setTableSize(value)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
     recalculateVisibleTable({
@@ -205,32 +204,32 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         consoleType,
         openCollection,
         goToVote,
-        relevantDatasets
+        relevantDatasets,
       }),
       currentPage,
       setPageCount,
       setCurrentPage,
       setVisibleList: setVisibleCollections,
-      sort
-    });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById]);
+      sort,
+    })
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById])
 
   const showConfirmationModal = (collectionSummary, action = '') => {
-    setConsoleAction(action);
-    setSelectedCollection(collectionSummary);
-    setShowConfirmation(true);
-  };
+    setConsoleAction(action)
+    setSelectedCollection(collectionSummary)
+    setShowConfirmation(true)
+  }
 
-  //Helper function to update page
+  // Helper function to update page
   const goToPage = useCallback(
     (value) => {
-      updatePage(value, pageCount, setCurrentPage);
+      updatePage(value, pageCount, setCurrentPage)
     },
-    [pageCount]
-  );
+    [pageCount],
+  )
 
-  const showDatasetDropdownWrapper = useCallback(({renderedRow, rowData}) => {
-    const darCollectionId = rowData[0].id;
+  const showDatasetDropdownWrapper = useCallback(({ renderedRow, rowData }) => {
+    const darCollectionId = rowData[0].id
 
     if (collectionIsExpanded(darCollectionId)) {
       return (
@@ -250,10 +249,10 @@ export const DarCollectionTable = function DarCollectionTable(props) {
             />
           </div>
         </div>
-      );
+      )
     }
-    return renderedRow;
-  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, isUnfilteredView]);
+    return renderedRow
+  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, isUnfilteredView])
 
   return (
     <Fragment>
@@ -263,7 +262,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         columnHeaders={columnHeaderData(columns)}
         styles={styles}
         tableSize={tableSize}
-        paginationBar={
+        paginationBar={(
           <PaginationBar
             pageCount={pageCount}
             currentPage={currentPage}
@@ -271,15 +270,15 @@ export const DarCollectionTable = function DarCollectionTable(props) {
             goToPage={goToPage}
             changeTableSize={changeTableSize}
           />
-        }
+        )}
         rowWrapper={showDatasetDropdownWrapper}
         sort={sort}
         onSort={(sort) => {
           Storage.setCurrentUserSettings(storageDarCollectionSort, {
             field: columns[sort.colIndex],
-            dir: sort.dir
-          });
-          setSort(sort);
+            dir: sort.dir,
+          })
+          setSort(sort)
         }}
       />
       {
@@ -308,5 +307,5 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         consoleAction={consoleAction}
       />
     </Fragment>
-  );
-};
+  )
+}

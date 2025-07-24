@@ -32,7 +32,7 @@ export default ts.config(
       globals: {
         ...globals.browser,
         ...globals.node,
-      }
+      },
     },
     settings: { react: { version: '18.3' } },
     plugins: {
@@ -60,8 +60,8 @@ export default ts.config(
           caughtErrorsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
           varsIgnorePattern: '^_',
-          ignoreRestSiblings: true
-        }
+          ignoreRestSiblings: true,
+        },
       ],
       'react/prop-types': 'off',
     },

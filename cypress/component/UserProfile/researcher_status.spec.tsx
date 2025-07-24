@@ -1,9 +1,9 @@
-import { mount } from 'cypress/react';
-import React from 'react';
-import ResearcherStatus, {ResearcherStatusProps} from 'src/pages/user_profile/ResearcherStatus';
-import { DAAObject, DuosUser, FileStorageObject, SimplifiedDuosUser } from 'src/types/model';
-import { User } from 'src/libs/ajax/User';
-import { DAA } from 'src/libs/ajax/DAA';
+import { mount } from 'cypress/react'
+import React from 'react'
+import ResearcherStatus, { ResearcherStatusProps } from 'src/pages/user_profile/ResearcherStatus'
+import { DAAObject, DuosUser, FileStorageObject, SimplifiedDuosUser } from 'src/types/model'
+import { User } from 'src/libs/ajax/User'
+import { DAA } from 'src/libs/ajax/DAA'
 
 describe('ResearcherStatus', () => {
   const user: DuosUser = {
@@ -24,15 +24,15 @@ describe('ResearcherStatus', () => {
         roleId: 1,
         userId: 1,
         userRoleId: 1,
-        name: 'Researcher'
-      }
-    ]
-  };
+        name: 'Researcher',
+      },
+    ],
+  }
 
   const signingOfficialUser: SimplifiedDuosUser = {
     userId: 3,
     displayName: 'Signing Official',
-    email: 'so@test.com'
+    email: 'so@test.com',
   }
 
   const fso: FileStorageObject = {
@@ -42,7 +42,7 @@ describe('ResearcherStatus', () => {
     category: 'irbCollaborationLetter',
     mediaType: 'image/pdf',
     createUserId: 3,
-    createDate: new Date().getDate()
+    createDate: new Date().getDate(),
   }
 
   const daa: DAAObject = {
@@ -57,14 +57,14 @@ describe('ResearcherStatus', () => {
   }
 
   beforeEach(() => {
-    cy.initApplicationConfig();
-    cy.stub(DAA, 'getDaaById').resolves(daa);
-    cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser]);
-    cy.viewport(800, 600);
-  });
+    cy.initApplicationConfig()
+    cy.stub(DAA, 'getDaaById').resolves(daa)
+    cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser])
+    cy.viewport(800, 600)
+  })
 
   it('Renders the Researcher Status With Library Card Info', () => {
-    const pageProps = {location: {}} as ResearcherStatusProps['pageProps'];
+    const pageProps = { location: {} } as ResearcherStatusProps['pageProps']
     const userWithCard = {
       ...user, ...{
         libraryCard: {
@@ -74,25 +74,25 @@ describe('ResearcherStatus', () => {
           userEmail: 'test.usre@test.com',
           createDate: new Date(),
           createUserId: 3,
-          daaIds: [1]
-        }
-      }
+          daaIds: [1],
+        },
+      },
     }
-    cy.stub(User, 'getMe').resolves(userWithCard);
+    cy.stub(User, 'getMe').resolves(userWithCard)
 
-    mount(<ResearcherStatus user={userWithCard} pageProps={pageProps}/>);
-    cy.contains('Researcher Status');
-    cy.contains('eRA Commons Account');
-    cy.contains('Library Cards issued to you');
-    cy.contains('Issued on: ' + userWithCard.libraryCard?.createDate.toISOString().slice(0, 10));
-    cy.contains('Issued by: ' + signingOfficialUser.displayName);
-  });
+    mount(<ResearcherStatus user={userWithCard} pageProps={pageProps} />)
+    cy.contains('Researcher Status')
+    cy.contains('eRA Commons Account')
+    cy.contains('Library Cards issued to you')
+    cy.contains('Issued on: ' + userWithCard.libraryCard?.createDate.toISOString().slice(0, 10))
+    cy.contains('Issued by: ' + signingOfficialUser.displayName)
+  })
 
   it('Renders the Researcher Status Without Library Card Info', () => {
-    const pageProps = {location: {}} as ResearcherStatusProps['pageProps'];
-    cy.stub(User, 'getMe').resolves(user);
+    const pageProps = { location: {} } as ResearcherStatusProps['pageProps']
+    cy.stub(User, 'getMe').resolves(user)
 
-    mount(<ResearcherStatus user={user} pageProps={pageProps}/>);
-    cy.contains('No Library Card Found');
-  });
-});
+    mount(<ResearcherStatus user={user} pageProps={pageProps} />)
+    cy.contains('No Library Card Found')
+  })
+})

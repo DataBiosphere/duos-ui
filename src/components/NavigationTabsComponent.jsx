@@ -6,7 +6,6 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'
 
-
 const styles = {
   mainTab: {
     padding: '0 25px',
@@ -24,7 +23,7 @@ const styles = {
     textTransform: 'none',
     color: 'white',
     background: 'rgba(255, 255, 255, 0.1)',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   subTab: {
     padding: '0 25px',
@@ -32,7 +31,7 @@ const styles = {
     textTransform: 'none',
     fontFamily: 'Montserrat, sans-serif',
     color: '#00609f',
-    minHeight: '65px'
+    minHeight: '65px',
   },
   subTabActive: {
     padding: '0 25px',
@@ -41,15 +40,15 @@ const styles = {
     fontFamily: 'Montserrat, sans-serif',
     color: '#00609f',
     minHeight: '65px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   navButton: {
     background: 'transparent',
     color: 'white',
     border: 'none',
-    minHeight: '80px'
-  }
-};
+    minHeight: '80px',
+  },
+}
 
 export const NavigationTabsComponent = (props) => {
   const {
@@ -60,15 +59,15 @@ export const NavigationTabsComponent = (props) => {
     currentUser, signOut, isLogged,
     contactUsButton, showRequestModal, supportrequestModal,
     tabs, initialTab, initialSubTab,
-    onSubtabChange, showProfileLinks, profileState
-  } = props;
-  const [selectedMenuTab, setSelectedMenuTab] = useState(false);
-  const [selectedSubTab, setSelectedSubTab] = useState(false);
+    onSubtabChange, showProfileLinks, profileState,
+  } = props
+  const [selectedMenuTab, setSelectedMenuTab] = useState(false)
+  const [selectedSubTab, setSelectedSubTab] = useState(false)
 
   useEffect(() => {
     setSelectedMenuTab(initialTab === -1 ? false : initialTab)
     setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab)
-  }, [initialTab, initialSubTab]);
+  }, [initialTab, initialSubTab])
 
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
@@ -82,7 +81,7 @@ export const NavigationTabsComponent = (props) => {
                 to="/home"
                 className="navbar-brand"
               >
-                <img style={duosLogoImage} src={DuosLogo} alt="DUOS Logo"/>
+                <img style={duosLogoImage} src={DuosLogo} alt="DUOS Logo" />
               </Link>
             )
           }
@@ -129,7 +128,8 @@ export const NavigationTabsComponent = (props) => {
                     id="link_help"
                     className="navbar-duos-link"
                     href="https://support.terra.bio/hc/en-us/articles/28486067349531-Frequently-Asked-Questions-about-DUOS"
-                    target="_blank" rel="noreferrer"
+                    target="_blank"
+                    rel="noreferrer"
                   >
                     <div className="navbar-duos-icon-help" style={navbarDuosIcon}></div>
                     <span style={navbarDuosText}>FAQs</span>
@@ -138,41 +138,53 @@ export const NavigationTabsComponent = (props) => {
                 {contactUsButton}
                 {supportrequestModal}
                 {/* Sign-in button location when window is narrow and menu is vertical */}
-                {!isLogged && orientation === 'vertical' && <li style={{ marginRight: 0 }}>
-                  <SignInButton
-                    props={props}
-                    history={history}/>
-                </li>}
+                {!isLogged && orientation === 'vertical' && (
+                  <li style={{ marginRight: 0 }}>
+                    <SignInButton
+                      props={props}
+                      history={history}
+                    />
+                  </li>
+                )}
               </ul>
             )
           }
         </div>
         {/* Navbar right side */}
         {/* Sign-in button location when window is wider and menu is not vertical */}
-        {!isLogged && orientation !== 'vertical' &&
-          <div
-            style={{
-              minWidth: '185px',
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: orientation === 'vertical' ? 'column' : 'row'
-            }}>
-            <SignInButton
-              props={props}
-              history={history}/>
-          </div>
-        }
+        {!isLogged && orientation !== 'vertical'
+          && (
+            <div
+              style={{
+                minWidth: '185px',
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: orientation === 'vertical' ? 'column' : 'row',
+              }}
+            >
+              <SignInButton
+                props={props}
+                history={history}
+              />
+            </div>
+          )}
         {isLogged && (
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              flexDirection: orientation === 'vertical' ? 'column' : 'row'
+              flexDirection: orientation === 'vertical' ? 'column' : 'row',
             }}
           >
-            <a href="https://support.terra.bio/hc/en-us/categories/28485138480539-Managing-Data-Access-with-DUOS"
-               id="terra-support-docs-link" target="_blank" rel="noreferrer"
-               style={{ color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20 }}>Help</a>
+            <a
+              href="https://support.terra.bio/hc/en-us/categories/28485138480539-Managing-Data-Access-with-DUOS"
+              id="terra-support-docs-link"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20 }}
+            >
+              Help
+            </a>
             <button onClick={showRequestModal} style={styles.navButton}>
               <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>
             </button>
@@ -185,10 +197,14 @@ export const NavigationTabsComponent = (props) => {
                 </div>
                 <small id="dacUserMail">{currentUser.email}</small>
               </a>
-              <ul className="dropdown-menu navbar-dropdown" role="menu" style={{
-                display: `${profileState ? 'block' : 'none'}`,
-                top: orientation === 'vertical' ? '-100%' : '100%'
-              }}>
+              <ul
+                className="dropdown-menu navbar-dropdown"
+                role="menu"
+                style={{
+                  display: `${profileState ? 'block' : 'none'}`,
+                  top: orientation === 'vertical' ? '-100%' : '100%',
+                }}
+              >
                 <li>
                   <Link id="link_profile" to="/profile" onClick={onSubtabChange}>Your Profile</Link>
                 </li>
@@ -214,19 +230,21 @@ export const NavigationTabsComponent = (props) => {
           >
             {tabs[selectedMenuTab].children.map((tab, tabIndex) => {
               // Default to displaying the sub tab if no render function exists for it
-              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered();
-              const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser))) ?
-                true :
-                tab.isRenderedForUser(currentUser)
-              return (isRendered && isRenderedForUser) ? (
-                <Tab
-                  key={`${tab.link}_${tabIndex}`}
-                  label={tab.label}
-                  style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
-                  to={{ pathname: tab.link, state: { selectedMenuTab: selectedMenuTab } }}
-                  component={Link}
-                />
-              ) : null
+              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered()
+              const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser)))
+                ? true
+                : tab.isRenderedForUser(currentUser)
+              return (isRendered && isRenderedForUser)
+                ? (
+                    <Tab
+                      key={`${tab.link}_${tabIndex}`}
+                      label={tab.label}
+                      style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
+                      to={{ pathname: tab.link, state: { selectedMenuTab: selectedMenuTab } }}
+                      component={Link}
+                    />
+                  )
+                : null
             })}
           </Tabs>
         </Box>

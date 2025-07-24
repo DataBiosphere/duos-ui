@@ -1,16 +1,16 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import './SearchSelect.css';
-import {FormField, FormFieldTypes} from './forms/forms';
+import React from 'react'
+import { useState, useEffect } from 'react'
+import './SearchSelect.css'
+import { FormField, FormFieldTypes } from './forms/forms'
 
 export const SearchSelect = (props) => {
-  const { onSelection, placeholder, options, value, isClearable } = props;
-  const [selectedInstitution, setSelectedInstitution] = useState();
+  const { onSelection, placeholder, options, value, isClearable } = props
+  const [selectedInstitution, setSelectedInstitution] = useState()
 
   useEffect(() => {
-    const selected = options.find(o => o.key === value);
-    setSelectedInstitution(selected);
-  }, [value, options]);
+    const selected = options.find(o => o.key === value)
+    setSelectedInstitution(selected)
+  }, [value, options])
 
   return (
     <FormField
@@ -20,7 +20,7 @@ export const SearchSelect = (props) => {
         return {
           institutionId: i?.key,
           displayText: i?.displayText,
-        };
+        }
       })}
       placeholder={placeholder}
       isCreatable={false}
@@ -29,7 +29,8 @@ export const SearchSelect = (props) => {
         displayText: selectedInstitution?.displayText,
       }}
       isClearable={isClearable}
-      onChange={onSelection}>
+      onChange={onSelection}
+    >
     </FormField>
-  );
-};
+  )
+}

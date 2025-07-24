@@ -1,7 +1,7 @@
-import React from 'react';
-import ConsentGroupForm from 'src/pages/data_submission/consent_group/ConsentGroupForm';
-import { cloneDeep } from 'lodash/fp';
-import { mount } from 'cypress/react';
+import React from 'react'
+import ConsentGroupForm from 'src/pages/data_submission/consent_group/ConsentGroupForm'
+import { cloneDeep } from 'lodash/fp'
+import { mount } from 'cypress/react'
 
 const dacs = [
   {
@@ -12,7 +12,7 @@ const dacs = [
     dacId: 2,
     name: 'DAC 0002',
   },
-];
+]
 
 const props = {
   idx: 0,
@@ -28,31 +28,31 @@ const props = {
         consentGroupName: 'name',
       },
       disableFields: false,
-    }
+    },
   ],
   studyEditMode: false,
   validation: {},
-  onValidationChange: () => {}
-};
+  onValidationChange: () => {},
+}
 
-let propCopy = {};
+let propCopy = {}
 
 beforeEach(() => {
-  propCopy = cloneDeep(props);
-});
+  propCopy = cloneDeep(props)
+})
 
 describe('Consent Group', function () {
   it('Edits without saving', function () {
-    cy.spy(propCopy, 'saveConsentGroup');
+    cy.spy(propCopy, 'saveConsentGroup')
 
-    mount(<ConsentGroupForm {...propCopy}/>);
+    mount(<ConsentGroupForm {...propCopy} />)
 
-    cy.get('#0_editConsentGroup').click();
-    cy.get('#0_consentGroupName').type('Hello!');
-    cy.get('#0_url').type('https://www.asdf.gov');
+    cy.get('#0_editConsentGroup').click()
+    cy.get('#0_consentGroupName').type('Hello!')
+    cy.get('#0_url').type('https://www.asdf.gov')
 
-    cy.wrap(propCopy.saveConsentGroup).should('not.have.been.called');
-  });
+    cy.wrap(propCopy.saveConsentGroup).should('not.have.been.called')
+  })
 
   /* TO DO: Re-enable test once DS Form schema is updated.
 
@@ -109,45 +109,42 @@ describe('Consent Group', function () {
       cy.get('#0_consentGroupSummary').should('exist');
     });
 
-  }),*/
+  }), */
 
   it('Deletes properly', function () {
-    cy.spy(propCopy, 'deleteConsentGroup');
+    cy.spy(propCopy, 'deleteConsentGroup')
 
-    mount(<ConsentGroupForm {...propCopy}/>);
+    mount(<ConsentGroupForm {...propCopy} />)
 
-    cy.get('#0_editConsentGroup').click();
-    cy.get('#0_consentGroupName').type('Hello!');
-    cy.get('#0_url').type('https://www.asdf.gov');
-    cy.get('#0_primaryConsent_hmb').check();
-    cy.get('#0_col').check();
-    cy.get('#0_deleteConsentGroup').click();
-    cy.wrap(propCopy.deleteConsentGroup).should('have.been.called');
-  });
+    cy.get('#0_editConsentGroup').click()
+    cy.get('#0_consentGroupName').type('Hello!')
+    cy.get('#0_url').type('https://www.asdf.gov')
+    cy.get('#0_primaryConsent_hmb').check()
+    cy.get('#0_col').check()
+    cy.get('#0_deleteConsentGroup').click()
+    cy.wrap(propCopy.deleteConsentGroup).should('have.been.called')
+  })
 
   it('Shows conditional fields only when checked', function () {
+    mount(<ConsentGroupForm {...propCopy} />)
 
-    mount(<ConsentGroupForm {...propCopy}/>);
+    cy.get('#0_editConsentGroup').click()
+    cy.get('#0_primaryConsent_generalResearchUse').click()
 
-    cy.get('#0_editConsentGroup').click();
-    cy.get('#0_primaryConsent_generalResearchUse').click();
+    cy.get('#0_gsText').should('not.exist')
+    cy.get('#0_gs').check()
+    cy.get('#0_gsText').should('exist')
 
-    cy.get('#0_gsText').should('not.exist');
-    cy.get('#0_gs').check();
-    cy.get('#0_gsText').should('exist');
+    cy.get('#0_otherSecondaryText').should('not.exist')
+    cy.get('#0_otherSecondary').check()
+    cy.get('#0_otherSecondaryText').should('exist')
 
-    cy.get('#0_otherSecondaryText').should('not.exist');
-    cy.get('#0_otherSecondary').check();
-    cy.get('#0_otherSecondaryText').should('exist');
+    cy.get('#0_otherPrimaryText').should('not.exist')
+    cy.get('#0_primaryConsent_otherPrimary').check()
+    cy.get('#0_otherPrimaryText').should('exist')
 
-    cy.get('#0_otherPrimaryText').should('not.exist');
-    cy.get('#0_primaryConsent_otherPrimary').check();
-    cy.get('#0_otherPrimaryText').should('exist');
-
-    cy.get('#0_diseaseSpecificUseText').should('not.exist');
-    cy.get('#0_primaryConsent_diseaseSpecificUse').check();
-    cy.get('#0_diseaseSpecificUseText').should('exist');
-
-
-  });
-});
+    cy.get('#0_diseaseSpecificUseText').should('not.exist')
+    cy.get('#0_primaryConsent_diseaseSpecificUse').check()
+    cy.get('#0_diseaseSpecificUseText').should('exist')
+  })
+})

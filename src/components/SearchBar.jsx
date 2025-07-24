@@ -1,13 +1,13 @@
-import React from 'react';
-import { useRef } from 'react';
-import { Styles } from '../libs/theme';
-import { defaultTo } from 'lodash/fp';
+import React from 'react'
+import { useRef } from 'react'
+import { Styles } from '../libs/theme'
+import { defaultTo } from 'lodash/fp'
 
 export default function SearchBar(props) {
-  const { handleSearchChange } = props;
-  const searchTerms = useRef('');
+  const { handleSearchChange } = props
+  const searchTerms = useRef('')
 
-  const button = props.button ? props.button : <div />;
+  const button = props.button ? props.button : <div />
 
   const style = {
     width: '100%',
@@ -18,8 +18,8 @@ export default function SearchBar(props) {
     paddingLeft: '2%',
     fontFamily: 'Montserrat',
     fontSize: '1.5rem',
-    ...props.style
-  };
+    ...props.style,
+  }
 
   return (
     <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
@@ -33,5 +33,5 @@ export default function SearchBar(props) {
       />
       {button}
     </div>
-  );
+  )
 }

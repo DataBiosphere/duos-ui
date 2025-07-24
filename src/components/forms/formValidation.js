@@ -1,49 +1,49 @@
-import { isEmailAddress } from '../../libs/utils';
-import { isString, isEmpty, isNil, isArray } from 'lodash';
-import dayjs from 'dayjs';
+import { isEmailAddress } from '../../libs/utils'
+import { isString, isEmpty, isNil, isArray } from 'lodash'
+import dayjs from 'dayjs'
 
 export const requiredValidator = {
   id: 'required',
   isValid: (value) => {
-    return value !== undefined && value !== null &&
-      (isString(value) ? value.trim() !== '' : true);
+    return value !== undefined && value !== null
+      && (isString(value) ? value.trim() !== '' : true)
   },
   msg: 'Please enter a value',
-};
+}
 
 export const urlValidator = {
   id: 'uri',
   isValid: (val) => {
-    return validURLObject(val);
+    return validURLObject(val)
   },
   msg: 'Please enter a valid url (e.g., https://duos.org)',
-};
+}
 
 export const emailValidator = {
   id: 'email',
   isValid: isEmailAddress,
-  msg: 'Please enter a valid email address (e.g., person@example.com)'
-};
+  msg: 'Please enter a valid email address (e.g., person@example.com)',
+}
 
 export const dateValidator = {
   id: 'date',
-  isValid: (val) => isValidDate(val),
+  isValid: val => isValidDate(val),
   msg: 'Please enter a date (YYYY-MM-DD), e.g. 2018-11-13',
-};
+}
 
 export const dayJSValidator = {
   id: 'dayjs',
-  isValid: (val) => isValidDayjsDate(val),
+  isValid: val => isValidDayjsDate(val),
   msg: 'Please select a valid date.',
-};
+}
 
 export const uniqueValidator = {
   id: 'unique',
   isValid: (val, list) => !list.includes(val),
-  msg: 'Please enter a unique value that doesn\'t exist in the system'
-};
+  msg: 'Please enter a unique value that doesn\'t exist in the system',
+}
 
-const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, dayJSValidator, uniqueValidator];
+const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, dayJSValidator, uniqueValidator]
 
 /**
  * Validates the form value
@@ -57,31 +57,32 @@ export const validateFormValue = (formValue, validators) => {
   if (isEmpty(formValue) && !validators?.includes(requiredValidator)) {
     return {
       valid: true,
-    };
+    }
   }
 
-  const failedValidators = [];
+  const failedValidators = []
 
   validators?.forEach((validator) => {
-    let failed = false;
+    let failed = false
     if (isArray(formValue)) {
       failed = formValue.some((val) => {
-        return !validator.isValid(val);
-      });
-    } else {
-      failed = !validator.isValid(formValue);
+        return !validator.isValid(val)
+      })
+    }
+    else {
+      failed = !validator.isValid(formValue)
     }
 
     if (failed) {
-      failedValidators.push(validator.id);
+      failedValidators.push(validator.id)
     }
-  });
+  })
 
   return {
     valid: failedValidators.length === 0,
     failed: failedValidators,
-  };
-};
+  }
+}
 
 /**
  * Gives a human readable validation message. Gives generic message if the validator cannot be found.
@@ -90,14 +91,13 @@ export const validateFormValue = (formValue, validators) => {
  * @returns Human readable message, e.g., 'Please enter a value'.
  */
 export const validationMessage = (failedValidator) => {
-
   const validator = validators.find((val) => {
-    return val.id === failedValidator;
-  });
+    return val.id === failedValidator
+  })
 
   // unknown validation, return generic message
-  return validator.msg || 'Invalid value.';
-};
+  return validator.msg || 'Invalid value.'
+}
 
 /**
  * Returns a boolean if an errors occurred on validation. If validation has not ran yet,
@@ -106,12 +106,11 @@ export const validationMessage = (failedValidator) => {
 export const isValid = (validation) => {
   // default to true if validation has not ran.
   if (isNil(validation) || isNil(validation.valid)) {
-    return true;
+    return true
   }
 
-  return validation.valid;
-};
-
+  return validation.valid
+}
 
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                    HELPER FUNCTIONS                                     ====== //
@@ -119,21 +118,22 @@ export const isValid = (validation) => {
 
 const validURLObject = (val) => {
   try {
-    new URL(val);
-  } catch (_) {
-    return false;
+    new URL(val)
+  }
+  catch (_) {
+    return false
   }
 
-  return true;
-};
+  return true
+}
 
 // regex source: https://regexland.com/regex-dates/
-const dateRegex = /^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$/;
+const dateRegex = /^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$/
 
 const isValidDate = (val) => {
-  return dateRegex.test(val);
-};
+  return dateRegex.test(val)
+}
 
 const isValidDayjsDate = (val) => {
-  return dayjs(val, 'YYYY-MM-DD', true).isValid();
-};
+  return dayjs(val, 'YYYY-MM-DD', true).isValid()
+}

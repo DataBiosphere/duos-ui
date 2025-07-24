@@ -1,8 +1,8 @@
-import React from 'react';
-import Modal from 'react-modal';
-import { Alert } from './Alert';
-import CloseIconComponent from './CloseIconComponent';
-import './ConfirmationDialog_new.css';
+import React from 'react'
+import Modal from 'react-modal'
+import { Alert } from './Alert'
+import CloseIconComponent from './CloseIconComponent'
+import './ConfirmationDialog_new.css'
 
 const customStyles = {
   overlay: {
@@ -11,7 +11,7 @@ const customStyles = {
     left: '0',
     right: '0',
     bottom: '0',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 
   content: {
@@ -24,12 +24,11 @@ const customStyles = {
     overflow: 'auto',
     outline: 'none',
     padding: '20px 20px 20px 20px',
-  }
-};
+  },
+}
 
 export const ConfirmationDialog = (props) => {
-
-  const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props;
+  const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props
 
   return (
     <Modal
@@ -73,5 +72,5 @@ export const ConfirmationDialog = (props) => {
         </a>
       </div>
     </Modal>
-  );
-};
+  )
+}

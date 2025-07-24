@@ -1,227 +1,230 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { FormField, FormFieldTypes } from 'src/components/forms/forms';
-import { PageHeading } from 'src/components/PageHeading';
-import { Notification } from 'src/components/Notification';
-import { User } from 'src/libs/ajax/User';
-import { Storage } from 'src/libs/storage';
-import { NotificationService } from 'src/libs/notificationService';
-import { Notifications, setUserRoleStatuses } from 'src/libs/utils';
-import AffiliationAndRoles from './AffiliationAndRoles';
-import ResearcherStatus from './ResearcherStatus';
-import AcceptedAcknowledgements from './AcceptedAcknowledgements';
-import ga4ghLogo from 'src/images/ga4gh-logo.png';
-import userProfileIcon from 'src/images/user-profile.png';
+import React from 'react'
+import { useState, useEffect } from 'react'
+import { FormField, FormFieldTypes } from 'src/components/forms/forms'
+import { PageHeading } from 'src/components/PageHeading'
+import { Notification } from 'src/components/Notification'
+import { User } from 'src/libs/ajax/User'
+import { Storage } from 'src/libs/storage'
+import { NotificationService } from 'src/libs/notificationService'
+import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import AffiliationAndRoles from './AffiliationAndRoles'
+import ResearcherStatus from './ResearcherStatus'
+import AcceptedAcknowledgements from './AcceptedAcknowledgements'
+import ga4ghLogo from 'src/images/ga4gh-logo.png'
+import userProfileIcon from 'src/images/user-profile.png'
 
 export default function UserProfile(props) {
-
-  const [user, setUser] = useState({});
-  const [name, setName] = useState('');
-  const [updatedName, setUpdatedName] = useState('');
+  const [user, setUser] = useState({})
+  const [name, setName] = useState('')
+  const [updatedName, setUpdatedName] = useState('')
 
   const [profile, setProfile] = useState({
     profileName: '',
     email: undefined,
     emailPreference: undefined,
-    id: undefined
-  });
+    id: undefined,
+  })
 
-  const [notificationData, setNotificationData] = useState({});
+  const [notificationData, setNotificationData] = useState({})
 
-  const updateRef = ({_key, value}) => {
-    setName(value);
-    setUpdatedName(value);
-  };
+  const updateRef = ({ _key, value }) => {
+    setName(value)
+    setUpdatedName(value)
+  }
 
   const updateName = () => {
     if (updatedName) {
       const payload = {
-        displayName: updatedName
-      };
+        displayName: updatedName,
+      }
 
       User.updateSelf(payload).then((response) => {
-        setUserRoleStatuses(response, Storage);
-        Notifications.showSuccess({ text: 'Name updated successfully!' });
+        setUserRoleStatuses(response, Storage)
+        Notifications.showSuccess({ text: 'Name updated successfully!' })
       }, () => {
-        Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' });
-      });
-    } else {
-      Notifications.showInformation({ text: 'There are no changes to save.' });
+        Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' })
+      })
     }
-  };
+    else {
+      Notifications.showInformation({ text: 'There are no changes to save.' })
+    }
+  }
 
   const updateEmailPreference = (value) => {
     const payload = {
-      emailPreference: value
-    };
+      emailPreference: value,
+    }
 
     User.updateSelf(payload).then((response) => {
-      setUserRoleStatuses(response, Storage);
-      Notifications.showSuccess({ text: 'Email preference updated successfully!' });
+      setUserRoleStatuses(response, Storage)
+      Notifications.showSuccess({ text: 'Email preference updated successfully!' })
     }, () => {
-      Notifications.showError({ text: 'Some errors occurred, the user\'s email preference was not updated.' });
-    });
+      Notifications.showError({ text: 'Some errors occurred, the user\'s email preference was not updated.' })
+    })
   }
 
   useEffect(() => {
     const init = async () => {
       try {
-        const user = Storage.getCurrentUser();
-        setUser(user);
+        const user = Storage.getCurrentUser()
+        setUser(user)
         setProfile({
           profileName: user.displayName,
           email: user.email,
           emailPreference: user.emailPreference,
-          id: user.userId
-        });
-        setName(user.displayName);
-        setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
-      } catch (_error) {
-        Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
+          id: user.userId,
+        })
+        setName(user.displayName)
+        setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
       }
-    };
+      catch (_error) {
+        Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
+      }
+    }
 
-    init();
-  }, []);
+    init()
+  }, [])
 
   const goToRequestRole = () => {
     props.history.push({
       pathname: '/request_role',
-      state: { data: profile }
-    });
-  };
+      state: { data: profile },
+    })
+  }
 
-  return <div
-    style={{
-      flexDirection: 'column',
-      padding: '50px 275px 70px'
-    }}
-  >
-    <div className='header'>
-      <Notification>
-        {notificationData}
-      </Notification>
-      <div
-        style={{
-          flexDirection: 'column'
-        }}
-      >
-        <div
-          style={{
-            marginBottom: '40px'
-          }}
-        >
-          <PageHeading
-            id='researcherProfile'
-            color='common'
-            title='Your Profile'
-            descriptionStyle={{ fontSize: '10000px' }}
-            style={{
-              float: 'left',
-            }}
-            imgSrc={userProfileIcon}
-            iconSize='large'
-          />
-        </div>
-        <div
-          style={{
-            display: 'flex'
-          }}
-        >
-          <img
-            src={ga4ghLogo}
-            style={{
-              width: '166px',
-              height: '48px',
-              top: '213px',
-              left: '230px',
-              marginRight: '50px'
-            }}
-          />
-          <p>
-            DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found&nbsp;
-            <a href='https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md'>
-              here.
-            </a>
-          </p>
-        </div>
-      </div>
-      <hr className='section-separator' />
-    </div>
-    <h1
+  return (
+    <div
       style={{
-        color: '#01549F',
-        fontSize: '20px',
-        fontWeight: '600',
-        marginBottom: '15px',
-        marginTop: '40px'
+        flexDirection: 'column',
+        padding: '50px 275px 70px',
       }}
     >
-      Full Name
-    </h1>
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div className="header">
+        <Notification>
+          {notificationData}
+        </Notification>
+        <div
+          style={{
+            flexDirection: 'column',
+          }}
+        >
+          <div
+            style={{
+              marginBottom: '40px',
+            }}
+          >
+            <PageHeading
+              id="researcherProfile"
+              color="common"
+              title="Your Profile"
+              descriptionStyle={{ fontSize: '10000px' }}
+              style={{
+                float: 'left',
+              }}
+              imgSrc={userProfileIcon}
+              iconSize="large"
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+            }}
+          >
+            <img
+              src={ga4ghLogo}
+              style={{
+                width: '166px',
+                height: '48px',
+                top: '213px',
+                left: '230px',
+                marginRight: '50px',
+              }}
+            />
+            <p>
+              DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found&nbsp;
+              <a href="https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md">
+                here.
+              </a>
+            </p>
+          </div>
+        </div>
+        <hr className="section-separator" />
+      </div>
+      <h1
+        style={{
+          color: '#01549F',
+          fontSize: '20px',
+          fontWeight: '600',
+          marginBottom: '15px',
+          marginTop: '40px',
+        }}
+      >
+        Full Name
+      </h1>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <FormField
+          type={FormFieldTypes.TEXT}
+          id="profileName"
+          defaultValue={name}
+          onChange={updateRef}
+          style={{ width: '90%', marginTop: '10px',
+          }}
+        />
+        <button
+          className="f-right btn-primary common-background"
+          onClick={updateName}
+          style={{
+            marginTop: '10px',
+          }}
+        >
+          Save
+        </button>
+      </div>
+      <div style={{ marginTop: '10px' }} />
       <FormField
         type={FormFieldTypes.TEXT}
-        id='profileName'
-        defaultValue={name}
-        onChange={updateRef}
-        style={{ width: '90%', marginTop: '10px',
-        }}
+        id="profileEmail"
+        defaultValue={profile.email}
+        disabled={true}
       />
-      <button
-        className='f-right btn-primary common-background'
-        onClick={updateName}
+      <div style={{ marginTop: '10px' }} />
+      <p
         style={{
-          marginTop: '10px'
+          color: '#000',
+          fontSize: '16px',
+          fontWeight: '400',
         }}
       >
-        Save
-      </button>
-    </div>
-    <div style={{ marginTop: '10px' }} />
-    <FormField
-      type={FormFieldTypes.TEXT}
-      id='profileEmail'
-      defaultValue={profile.email}
-      disabled={true}
-    />
-    <div style={{ marginTop: '10px' }} />
-    <p
-      style={{
-        color: '#000',
-        fontSize: '16px',
-        fontWeight: '400',
-      }}
-    >
-      Send me email notifications
-    </p>
-    <FormField
+        Send me email notifications
+      </p>
+      <FormField
         type={FormFieldTypes.YESNORADIOGROUP}
-        id='profileEmailEnabled'
+        id="profileEmailEnabled"
         defaultValue={profile.emailPreference}
-        onChange={(field) => updateEmailPreference(field.value)}
+        onChange={field => updateEmailPreference(field.value)}
       />
-    <div style={{ 'marginTop': '45px' }} />
-    <AffiliationAndRoles
-      user={user}
-    />
-    <button
-      className='f-left btn-primary common-background'
-      onClick={goToRequestRole}
-      style={{
-        marginTop: '10px',
-        marginBottom: '50px'
-      }}
-    >
-      Request a New Role
-    </button>
-    <div style={{ marginTop: '115px' }} />
-    <ResearcherStatus
-      user={user}
-      pageProps={props}
-      profile={profile}
-    />
-    <div style={{ marginTop: '60px' }} />
-    <AcceptedAcknowledgements />
-  </div>;
+      <div style={{ marginTop: '45px' }} />
+      <AffiliationAndRoles
+        user={user}
+      />
+      <button
+        className="f-left btn-primary common-background"
+        onClick={goToRequestRole}
+        style={{
+          marginTop: '10px',
+          marginBottom: '50px',
+        }}
+      >
+        Request a New Role
+      </button>
+      <div style={{ marginTop: '115px' }} />
+      <ResearcherStatus
+        user={user}
+        pageProps={props}
+        profile={profile}
+      />
+      <div style={{ marginTop: '60px' }} />
+      <AcceptedAcknowledgements />
+    </div>
+  )
 }

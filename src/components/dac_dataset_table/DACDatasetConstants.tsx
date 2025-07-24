@@ -1,4 +1,4 @@
-import {Styles} from '../../libs/theme';
+import { Styles } from '../../libs/theme'
 
 export const styles = {
   baseStyle: {
@@ -13,7 +13,7 @@ export const styles = {
     backgroundColor: 'white',
     border: '1px solid #DEDEDE',
     borderRadius: '4px',
-    margin: '0.5% 0'
+    margin: '0.5% 0',
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -24,7 +24,7 @@ export const styles = {
     letterSpacing: '0.2px',
     textTransform: 'uppercase',
     backgroundColor: 'B8CDD3',
-    border: 'none'
+    border: 'none',
   }),
   cellWidths: {
     duosId: '10%',
@@ -34,7 +34,7 @@ export const styles = {
     dataSubmitter: '15%',
     dataCustodian: '15%',
     dataUse: '10%',
-    status: '10%'
+    status: '10%',
   },
   color: {
     dataUseGroup: '#000000',
@@ -48,7 +48,7 @@ export const styles = {
     numberOfDatasets: '1.4rem',
     datasets: '1.4rem',
   },
-};
+}
 
 export const DACDatasetTableColumnOptions = {
   DUOS_ID: 'duosId',
@@ -59,4 +59,4 @@ export const DACDatasetTableColumnOptions = {
   DATA_CUSTODIAN: 'dataCustodian',
   DATA_USE: 'dataUse',
   STATUS: 'status',
-};
+}

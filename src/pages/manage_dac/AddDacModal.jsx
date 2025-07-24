@@ -1,19 +1,19 @@
-import {filter, isEmpty, difference, union, map} from 'lodash';
-import React, { useState } from 'react';
-import AsyncSelect from 'react-select/async';
-import { DAC } from '../../libs/ajax/DAC';
-import { Models } from '../../libs/models';
-import { PromiseSerial } from '../../libs/utils';
-import { Alert } from '../../components/Alert';
-import { BaseModal } from '../../components/BaseModal';
-import { DacUsers } from './DacUsers';
-import editDACIcon from '../../images/icon_edit_dac.png';
-import addDACIcon from '../../images/icon_add_dac.png';
+import { filter, isEmpty, difference, union, map } from 'lodash'
+import React, { useState } from 'react'
+import AsyncSelect from 'react-select/async'
+import { DAC } from '../../libs/ajax/DAC'
+import { Models } from '../../libs/models'
+import { PromiseSerial } from '../../libs/utils'
+import { Alert } from '../../components/Alert'
+import { BaseModal } from '../../components/BaseModal'
+import { DacUsers } from './DacUsers'
+import editDACIcon from '../../images/icon_edit_dac.png'
+import addDACIcon from '../../images/icon_add_dac.png'
 
-export const CHAIR = 'chair';
-export const MEMBER = 'member';
-const CHAIRPERSON = 'Chairperson';
-const ADMIN = 'Admin';
+export const CHAIR = 'chair'
+export const MEMBER = 'member'
+const CHAIRPERSON = 'Chairperson'
+const ADMIN = 'Admin'
 
 export const AddDacModal = (props) => {
   const [state, setState] = useState({
@@ -27,18 +27,18 @@ export const AddDacModal = (props) => {
     membersSelectedOptions: [],
     memberIdsToAdd: [],
     memberIdsToRemove: [],
-    searchInputChanged: false
-  });
-
+    searchInputChanged: false,
+  })
 
   const okHandler = async () => {
-    let currentDac = state.dac;
+    let currentDac = state.dac
     if (state.dirtyFlag) {
       if (props.userRole === ADMIN) {
         if (state.isEditMode) {
-          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
-        } else {
-          currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email)
+        }
+        else {
+          currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email)
         }
       }
 
@@ -47,26 +47,27 @@ export const AddDacModal = (props) => {
       // back in a different role.
       // Chairs are a special case since we cannot remove all chairs from a DAC
       // so we handle that case first.
-      const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-      const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-      const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
-      const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
-      const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
-      const responses = await PromiseSerial(allOperations);
-      const errorCodes = filter(responses, r => JSON.stringify(r) !== '200');
+      const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id))
+      const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id))
+      const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id))
+      const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id))
+      const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id))
+      const allOperations = ops0.concat(ops1, ops2, ops3, ops4)
+      const responses = await PromiseSerial(allOperations)
+      const errorCodes = filter(responses, r => JSON.stringify(r) !== '200')
       if (!isEmpty(errorCodes)) {
-        handleErrors('There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.');
+        handleErrors('There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.')
       }
-      props.onOKRequest('addDac');
-    } else {
-      closeHandler();
+      props.onOKRequest('addDac')
     }
-  };
+    else {
+      closeHandler()
+    }
+  }
 
   const closeHandler = () => {
-    props.onCloseRequest('addDac');
-  };
+    props.onCloseRequest('addDac')
+  }
 
   const handleErrors = (message) => {
     setState(prev => ({
@@ -74,10 +75,10 @@ export const AddDacModal = (props) => {
       error: {
         title: 'Error',
         show: true,
-        msg: message
-      }
-    }));
-  };
+        msg: message,
+      },
+    }))
+  }
 
   const chairSearch = (query, callback) => {
     // A valid chair is any user:
@@ -93,9 +94,9 @@ export const AddDacModal = (props) => {
         map(state.dac.members, 'userId'),
         state.memberIdsToAdd),
       state.memberIdsToRemove,
-      state.chairIdsToRemove);
-    userSearch(invalidChairs, query, callback);
-  };
+      state.chairIdsToRemove)
+    userSearch(invalidChairs, query, callback)
+  }
 
   const memberSearch = (query, callback) => {
     // A valid member is any user:
@@ -111,76 +112,78 @@ export const AddDacModal = (props) => {
         map(state.dac.chairpersons, 'userId'),
         state.chairIdsToAdd),
       state.memberIdsToRemove,
-      state.chairIdsToRemove);
-    userSearch(invalidMembers, query, callback);
-  };
+      state.chairIdsToRemove)
+    userSearch(invalidMembers, query, callback)
+  }
 
   const userSearch = (invalidUserIds, query, callback) => {
     DAC.autocompleteUsers(query).then(
-      items => {
-        const filteredUsers = filter(items, item => { return !invalidUserIds.includes(item.userId); });
+      (items) => {
+        const filteredUsers = filter(items, (item) => {
+          return !invalidUserIds.includes(item.userId)
+        })
         const options = filteredUsers.map(function (item) {
           return {
             key: item.userId,
             value: item.userId,
             label: item.displayName + ' (' + item.email + ')',
-            item: item
-          };
-        });
-        callback(options);
+            item: item,
+          }
+        })
+        callback(options)
       },
-      rejected => {
-        handleErrors(rejected);
-      });
-  };
+      (rejected) => {
+        handleErrors(rejected)
+      })
+  }
 
   const onChairSearchChange = (data) => {
     setState(prev => ({
       ...prev,
       chairIdsToAdd: map(data, 'item.userId'),
       chairsSelectedOptions: data,
-      dirtyFlag: true
-    }));
-  };
+      dirtyFlag: true,
+    }))
+  }
 
   const onMemberSearchChange = (data) => {
     setState(prev => ({
       ...prev,
       memberIdsToAdd: map(data, 'item.userId'),
       membersSelectedOptions: data,
-      dirtyFlag: true
-    }));
-  };
+      dirtyFlag: true,
+    }))
+  }
 
   const onSearchInputChanged = () => {
     setState(prev => ({
       ...prev,
-      searchInputChanged: true
-    }));
-  };
+      searchInputChanged: true,
+    }))
+  }
 
   const onSearchMenuClosed = () => {
     setState(prev => ({
       ...prev,
-      searchInputChanged: false
-    }));
-  };
+      searchInputChanged: false,
+    }))
+  }
 
   const handleChange = (event) => {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
+    const target = event.target
+    const value = target.value
+    const name = target.name
 
-    setState(prev => {
-      const newDac = Object.assign({}, prev.dac);
-      newDac[name] = value;
+    setState((prev) => {
+      const newDac = Object.assign({}, prev.dac)
+      newDac[name] = value
       return {
         ...prev,
         dac: newDac,
-        dirtyFlag: true
-      };
-    });
-  };
+        dirtyFlag: true,
+      }
+    })
+  }
 
   const removeDacMember = (_dacId, userId, role) => {
     switch (role) {
@@ -189,50 +192,52 @@ export const AddDacModal = (props) => {
           setState(prev => ({
             ...prev,
             chairIdsToRemove: difference(prev.chairIdsToRemove, [userId]),
-            dirtyFlag: true
-          }));
-        } else {
+            dirtyFlag: true,
+          }))
+        }
+        else {
           setState(prev => ({
             ...prev,
             chairIdsToRemove: union(prev.chairIdsToRemove, [userId]),
-            dirtyFlag: true
-          }));
+            dirtyFlag: true,
+          }))
         }
-        break;
+        break
       case MEMBER:
         if (state.memberIdsToRemove.includes(userId)) {
           setState(prev => ({
             ...prev,
             memberIdsToRemove: difference(prev.memberIdsToRemove, [userId]),
-            dirtyFlag: true
-          }));
-        } else {
+            dirtyFlag: true,
+          }))
+        }
+        else {
           setState(prev => ({
             ...prev,
             memberIdsToRemove: union(prev.memberIdsToRemove, [userId]),
-            dirtyFlag: true
-          }));
+            dirtyFlag: true,
+          }))
         }
-        break;
+        break
       default:
-        break;
+        break
     }
-  };
+  }
 
   return (
     <BaseModal
-      id='addDacModal'
+      id="addDacModal"
       showModal={props.showModal}
       onRequestClose={closeHandler}
       onAfterOpen={props.onAfterOpen}
       imgSrc={state.isEditMode ? editDACIcon : addDACIcon}
-      color='common'
+      color="common"
       title={state.isEditMode ? 'Edit Data Access Committee' : 'Add Data Access Committee'}
       description={state.isEditMode ? 'Edit a Data Access Committee' : 'Create a new Data Access Committee in the system'}
       disableOkBtn={!state.dirtyFlag}
       action={{
         label: state.isEditMode ? 'Save' : 'Add',
-        handler: okHandler
+        handler: okHandler,
       }}
     >
       <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
@@ -283,16 +288,18 @@ export const AddDacModal = (props) => {
           </div>
         </div>
         {
-          (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" >
-            <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
-            <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-              <DacUsers
-                dac={state.dac}
-                removeButton={true}
-                removeHandler={removeDacMember}
-              />
+          (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && (
+            <div className="form-group">
+              <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
+              <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                <DacUsers
+                  dac={state.dac}
+                  removeButton={true}
+                  removeHandler={removeDacMember}
+                />
+              </div>
             </div>
-          </div>
+          )
         }
 
         <div className="form-group">
@@ -303,7 +310,7 @@ export const AddDacModal = (props) => {
               isDisabled={false}
               isMulti
               loadOptions={(query, callback) => chairSearch(query, callback)}
-              onChange={(option) => onChairSearchChange(option)}
+              onChange={option => onChairSearchChange(option)}
               onInputChange={() => onSearchInputChanged()}
               onMenuClose={() => onSearchMenuClosed()}
               noOptionsMessage={() => 'Select a DUOS User...'}
@@ -323,7 +330,7 @@ export const AddDacModal = (props) => {
               isDisabled={false}
               isMulti={true}
               loadOptions={(query, callback) => memberSearch(query, callback)}
-              onChange={(option) => onMemberSearchChange(option)}
+              onChange={option => onMemberSearchChange(option)}
               onInputChange={() => onSearchInputChanged()}
               onMenuClose={() => onSearchMenuClosed()}
               noOptionsMessage={() => 'Select a DUOS User...'}
@@ -336,10 +343,12 @@ export const AddDacModal = (props) => {
         </div>
       </form>
       {
-        state.error.show && <div>
-          <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
-        </div>
+        state.error.show && (
+          <div>
+            <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+          </div>
+        )
       }
     </BaseModal>
-  );
-};
+  )
+}

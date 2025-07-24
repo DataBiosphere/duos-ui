@@ -1,6 +1,6 @@
-import {DatasetTerm} from 'src/types/model';
-import {processDataUseCodes, createDataUseDisplay} from 'src/utils/DataUseUtils';
-import {mount} from 'cypress/react';
+import { DatasetTerm } from 'src/types/model'
+import { processDataUseCodes, createDataUseDisplay } from 'src/utils/DataUseUtils'
+import { mount } from 'cypress/react'
 
 describe('DataUseUtils', () => {
   describe('processDataUseCodes', () => {
@@ -10,24 +10,24 @@ describe('DataUseUtils', () => {
         datasetName: 'Test Dataset with Secondary',
         dataUse: {
           primary: [
-            {code: 'GRU', description: 'General Research Use'}
+            { code: 'GRU', description: 'General Research Use' },
           ],
           secondary: [
-            {code: 'NPU', description: 'Not for Profit Use Only'}
-          ]
-        }
-      };
+            { code: 'NPU', description: 'Not for Profit Use Only' },
+          ],
+        },
+      }
 
-      const result = processDataUseCodes(dataset as DatasetTerm);
+      const result = processDataUseCodes(dataset as DatasetTerm)
 
-      expect(result.codesAndDescriptions).to.have.length(2);
-      expect(result.codesAndDescriptions[0].code).to.equal('GRU');
-      expect(result.codesAndDescriptions[1].code).to.equal('NPU');
+      expect(result.codesAndDescriptions).to.have.length(2)
+      expect(result.codesAndDescriptions[0].code).to.equal('GRU')
+      expect(result.codesAndDescriptions[1].code).to.equal('NPU')
 
-      expect(result.codeList).to.have.length(2);
-      expect(result.codeList).to.deep.equal(['GRU', 'NPU']);
-    });
-  });
+      expect(result.codeList).to.have.length(2)
+      expect(result.codeList).to.deep.equal(['GRU', 'NPU'])
+    })
+  })
 
   describe('createDataUseDisplay', () => {
     it('should render data use display with correct codes', () => {
@@ -36,17 +36,17 @@ describe('DataUseUtils', () => {
         datasetName: 'Test Dataset for Display',
         dataUse: {
           primary: [
-            {code: 'GRU', description: 'General Research Use'},
-            {code: 'HMB', description: 'Health/Medical/Biomedical Research'}
+            { code: 'GRU', description: 'General Research Use' },
+            { code: 'HMB', description: 'Health/Medical/Biomedical Research' },
           ],
-          secondary: []
-        }
-      };
+          secondary: [],
+        },
+      }
 
-      mount(createDataUseDisplay({dataset: dataset as DatasetTerm}));
+      mount(createDataUseDisplay({ dataset: dataset as DatasetTerm }))
 
-      cy.get('span').should('contain', 'GRU, HMB');
-      cy.get('[data-for="dataset-data-use-8"]').should('exist');
-    });
-  });
-});
+      cy.get('span').should('contain', 'GRU, HMB')
+      cy.get('[data-for="dataset-data-use-8"]').should('exist')
+    })
+  })
+})

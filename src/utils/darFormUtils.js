@@ -1,352 +1,347 @@
-
-
 // ********************** DUL LOGIC ********************** //
 
-import {isEmpty, isNil, isEqual, isString, isArray} from 'lodash';
-import { FormValidators } from '../components/forms/forms';
-import {extractEraAuthenticationState} from 'src/utils/ERACommonsUtils.js';
+import { isEmpty, isNil, isEqual, isString, isArray } from 'lodash'
+import { FormValidators } from '../components/forms/forms'
+import { extractEraAuthenticationState } from 'src/utils/ERACommonsUtils.js'
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
   return datasets?.some((ds) => {
-    const dataUse = ds?.dataUse;
+    const dataUse = ds?.dataUse
     if (!isEmpty(dataUse)) {
-      return dataUse[flag] === true;
+      return dataUse[flag] === true
     }
-    return false;
-  });
-};
+    return false
+  })
+}
 
 export const needsIrbApprovalDocument = (datasets) => {
-  return datasetsContainDataUseFlag(datasets, 'ethicsApprovalRequired');
-};
+  return datasetsContainDataUseFlag(datasets, 'ethicsApprovalRequired')
+}
 
 export const needsCollaborationLetter = (datasets) => {
-  return datasetsContainDataUseFlag(datasets, 'collaboratorRequired');
-};
+  return datasetsContainDataUseFlag(datasets, 'collaboratorRequired')
+}
 
 export const needsGsoAcknowledgement = (datasets) => {
-  return datasetsContainDataUseFlag(datasets, 'geneticStudiesOnly');
-};
+  return datasetsContainDataUseFlag(datasets, 'geneticStudiesOnly')
+}
 
 export const needsPubAcknowledgement = (datasets) => {
-  return datasetsContainDataUseFlag(datasets, 'publicationResults');
-};
+  return datasetsContainDataUseFlag(datasets, 'publicationResults')
+}
 
 export const needsDsAcknowledgement = (dataUseTranslations) => {
   // if any data use translations are different, then this must be displayed.
-  return dataUseTranslations.length > 1 && !dataUseTranslations.every((translation) => isEqual(dataUseTranslations[0], translation));
-};
+  return dataUseTranslations.length > 1 && !dataUseTranslations.every(translation => isEqual(dataUseTranslations[0], translation))
+}
 
 export const newIrbDocumentExpirationDate = () => {
-  const today = new Date();
-  return `${(today.getFullYear() + 1).toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-};
-
+  const today = new Date()
+  return `${(today.getFullYear() + 1).toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
+}
 
 // ********************** DAR FORM VALIDATION ********************** //
 
 export const validationFailed = (validation) => {
-  return Object.keys(validation).some((key) => !isEmpty(validation[key]));
-};
+  return Object.keys(validation).some(key => !isEmpty(validation[key]))
+}
 
 const validationError = (failed) => {
   if (isArray(failed)) {
-    return { valid: false, failed: failed };
+    return { valid: false, failed: failed }
   }
 
-  return { valid: false, failed: [failed] };
-};
+  return { valid: false, failed: [failed] }
+}
 
 const requiredError = {
   valid: false,
-  failed: ['required']
-};
+  failed: ['required'],
+}
 
 const isStringEmpty = (str) => {
-  return isNil(str) || (isString(str) && str.trim() === '');
-};
+  return isNil(str) || (isString(str) && str.trim() === '')
+}
 
-export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=true}) => {
-  const errors = {};
+export const computeCollaboratorErrors = ({ collaborator, needsApproverStatus = true }) => {
+  const errors = {}
   // if collaborator is undefined or a required field is empty, include an error
   if (isStringEmpty(collaborator?.name)) {
-    errors.name = requiredError;
+    errors.name = requiredError
   }
 
   if (isStringEmpty(collaborator?.eraCommonsId)) {
-    errors.eraCommonsId = requiredError;
+    errors.eraCommonsId = requiredError
   }
 
   if (isStringEmpty(collaborator?.title)) {
-    errors.title = requiredError;
+    errors.title = requiredError
   }
 
   if (isStringEmpty(collaborator?.countryOfOperation)) {
-    errors.countryOfOperation = requiredError;
+    errors.countryOfOperation = requiredError
   }
 
   if (isStringEmpty(collaborator?.email)) {
-    errors.email = requiredError;
-  } else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
-    errors.email = validationError('email');
+    errors.email = requiredError
+  }
+  else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
+    errors.email = validationError('email')
   }
 
   if (needsApproverStatus) {
     if (isEmpty(collaborator?.approverStatus)) {
-      errors.approverStatus = requiredError;
+      errors.approverStatus = requiredError
     }
   }
 
-
-  return errors;
-};
+  return errors
+}
 
 // errors for the Researcher Info section
 const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted) => {
-  const errors = {};
-
+  const errors = {}
 
   if (isStringEmpty(formData.researcher)) {
-    errors.researcher = requiredError;
+    errors.researcher = requiredError
   }
 
   if (formData.nihValid === false) {
-    errors.nihEraId = requiredError;
+    errors.nihEraId = requiredError
   }
 
   if (isStringEmpty(formData.piCountryOfOperation)) {
-    errors.piCountryOfOperation = requiredError;
+    errors.piCountryOfOperation = requiredError
   }
 
   if (isStringEmpty(formData.signingOfficial)) {
-    errors.signingOfficial = requiredError;
+    errors.signingOfficial = requiredError
   }
 
   if (isStringEmpty(formData.itDirector)) {
-    errors.itDirector = requiredError;
+    errors.itDirector = requiredError
   }
 
   if (isStringEmpty(formData.itDirectorEmail)) {
-    errors.itDirectorEmail = requiredError;
+    errors.itDirectorEmail = requiredError
   }
 
   if (!labCollaboratorsCompleted) {
-    errors.labCollaboratorsCompleted = requiredError;
+    errors.labCollaboratorsCompleted = requiredError
   }
 
   if (!internalCollaboratorsCompleted) {
-    errors.internalCollaborators = requiredError;
+    errors.internalCollaborators = requiredError
   }
 
   if (!externalCollaboratorsCompleted) {
-    errors.externalCollaborators = requiredError;
+    errors.externalCollaborators = requiredError
   }
 
-
   if (isNil(formData.anvilUse)) {
-    errors.anvilUse = requiredError;
-  } else {
+    errors.anvilUse = requiredError
+  }
+  else {
     if (!formData.anvilUse && !formData.localUse && !formData.cloudUse) {
-      errors.dataStorageAndAnalysis = requiredError; // one of them must be selected, this makes the whole section red until selected.
+      errors.dataStorageAndAnalysis = requiredError // one of them must be selected, this makes the whole section red until selected.
     }
     // Cloud use sub-conditions only apply when Cloud Use Statement (section 1.8) selection is "No"
     if (!formData.anvilUse) {
       if (formData.cloudUse && (isStringEmpty(formData.cloudProvider))) {
-        errors.cloudProvider = requiredError;
+        errors.cloudProvider = requiredError
       }
       if (formData.cloudUse && (isStringEmpty(formData.cloudProviderType))) {
-        errors.cloudProviderType = requiredError;
+        errors.cloudProviderType = requiredError
       }
       if (formData.cloudUse && (isStringEmpty(formData.cloudProviderDescription))) {
-        errors.cloudProviderDescription = requiredError;
+        errors.cloudProviderDescription = requiredError
       }
     }
   }
 
-  return errors;
-};
-
-
+  return errors
+}
 
 // errors for the Data Access Request section
 const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, collaborationLetter) => {
-  const errors = {};
+  const errors = {}
 
   if (isEmpty(formData.datasetIds) || isEmpty(datasets)) {
-    errors.datasetIds = requiredError;
+    errors.datasetIds = requiredError
   }
 
   if (isStringEmpty(formData.projectTitle)) {
-    errors.projectTitle = requiredError;
+    errors.projectTitle = requiredError
   }
 
   if (isStringEmpty(formData.rus)) {
-    errors.rus = requiredError;
+    errors.rus = requiredError
   }
 
   if (isNil(formData.diseases)) {
-    errors.diseases = requiredError;
+    errors.diseases = requiredError
   }
 
   if (formData.diseases === true && isEmpty(formData.ontologies)) {
-    errors.ontologies = requiredError;
+    errors.ontologies = requiredError
   }
 
   if (isStringEmpty(formData.nonTechRus)) {
-    errors.nonTechRus = requiredError;
+    errors.nonTechRus = requiredError
   }
 
   if ((needsCollaborationLetter(datasets) && (isNil(collaborationLetter) && isEmpty(formData['collaborationLetterLocation'])))) {
-    errors.collaborationLetter = requiredError;
+    errors.collaborationLetter = requiredError
   }
 
   if ((needsIrbApprovalDocument(datasets) && (isNil(irbDocument) && isEmpty(formData['irbDocumentLocation'])))) {
-    errors.irbDocument = requiredError;
+    errors.irbDocument = requiredError
   }
 
-  calcDUAErrors(formData, datasets, dataUseTranslations, errors);
+  calcDUAErrors(formData, datasets, dataUseTranslations, errors)
 
-  return errors;
-};
+  return errors
+}
 
 const calcSummaryErrors = (nihValid, errors, formData) => {
   if (nihValid === false) {
-    errors.nihEraId = requiredError;
+    errors.nihEraId = requiredError
   }
   if (isEmpty(formData.progressReportSummary)) {
-    errors.progressReportSummary = requiredError;
+    errors.progressReportSummary = requiredError
   }
   if (isNil(formData.intellectualPropertyYesNo)) {
-    errors.intellectualPropertyYesNo = requiredError;
+    errors.intellectualPropertyYesNo = requiredError
   }
   if (formData.intellectualPropertyYesNo && isEmpty(formData.intellectualPropertySummary)) {
-    errors.intellectualPropertySummary = requiredError;
+    errors.intellectualPropertySummary = requiredError
   }
   if (isNil(formData.publicationsYesNo)) {
-    errors.publicationsYesNo = requiredError;
+    errors.publicationsYesNo = requiredError
   }
   if (formData.publicationsYesNo && isEmpty(formData.publications)) {
-    errors.publications = requiredError;
+    errors.publications = requiredError
   }
   if (isNil(formData.presentationsYesNo)) {
-    errors.presentationsYesNo = requiredError;
+    errors.presentationsYesNo = requiredError
   }
   if (formData.presentationsYesNo && isEmpty(formData.presentations)) {
-    errors.presentations = requiredError;
+    errors.presentations = requiredError
   }
 }
 
-const calcDmiErrors = (formData, errors) =>{
+const calcDmiErrors = (formData, errors) => {
   if (isNil(formData.dmiYesNo)) {
-    errors.dmiYesNo = requiredError;
+    errors.dmiYesNo = requiredError
   }
   const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,
     formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
-  if (formData.dmiYesNo && !dmiFields.some((field) => field)) {
-    errors.dmiAcknowledgement = requiredError;
-    errors.dmiCombination = requiredError;
-    errors.dmiFalsification = requiredError;
-    errors.dmiIdentification = requiredError;
-    errors.dmiOther = requiredError;
-    errors.dmiPublication = requiredError;
-    errors.dmiSecurity = requiredError;
-    errors.dmiSharing = requiredError;
+  if (formData.dmiYesNo && !dmiFields.some(field => field)) {
+    errors.dmiAcknowledgement = requiredError
+    errors.dmiCombination = requiredError
+    errors.dmiFalsification = requiredError
+    errors.dmiIdentification = requiredError
+    errors.dmiOther = requiredError
+    errors.dmiPublication = requiredError
+    errors.dmiSecurity = requiredError
+    errors.dmiSharing = requiredError
   }
   if (formData.dmiYesNo && isEmpty(formData.dmiDescription)) {
-    errors.dmiDescription = requiredError;
+    errors.dmiDescription = requiredError
   }
 }
 
-const calcCloseoutErrors= (formData, errors) => {
-  const closeoutFields = [formData.closeoutOther, formData.closeoutProjectSuperseded, formData.closeoutProjectTransferred, formData.closeoutRequestorMovedInstitution, formData.closeoutProjectCompleted];
+const calcCloseoutErrors = (formData, errors) => {
+  const closeoutFields = [formData.closeoutOther, formData.closeoutProjectSuperseded, formData.closeoutProjectTransferred, formData.closeoutRequestorMovedInstitution, formData.closeoutProjectCompleted]
   if (isNil(formData.closeoutYesNo)) {
-    errors.closeoutYesNo = requiredError;
+    errors.closeoutYesNo = requiredError
   }
   if (formData.closeoutOther && isEmpty(formData.closeoutOtherText)) {
     errors.closeoutOtherText = requiredError
   }
   if (formData.closeoutYesNo) {
     if (formData.closeoutSigningOfficial?.userId === undefined) {
-      errors.closeoutSigningOfficial = requiredError;
+      errors.closeoutSigningOfficial = requiredError
     }
-    if (!closeoutFields.some((field) => field)) {
-      errors.closeoutProjectCompleted = requiredError;
-      errors.closeoutRequestorMovedInstitution = requiredError;
-      errors.closeoutProjectTransferred = requiredError;
-      errors.closeoutProjectSuperseded = requiredError;
-      errors.closeoutOther = requiredError;
+    if (!closeoutFields.some(field => field)) {
+      errors.closeoutProjectCompleted = requiredError
+      errors.closeoutRequestorMovedInstitution = requiredError
+      errors.closeoutProjectTransferred = requiredError
+      errors.closeoutProjectSuperseded = requiredError
+      errors.closeoutOther = requiredError
     }
   }
 }
 
 const calcPRErrors = (nihValid, formData, datasets, dataUseTranslations) => {
-  const errors = {};
-  calcSummaryErrors(nihValid, errors, formData);
-  calcDUAErrors(formData, datasets, dataUseTranslations, errors);
-  calcDmiErrors(formData, errors);
-  calcCloseoutErrors(formData, errors);
-  return errors;
-};
+  const errors = {}
+  calcSummaryErrors(nihValid, errors, formData)
+  calcDUAErrors(formData, datasets, dataUseTranslations, errors)
+  calcDmiErrors(formData, errors)
+  calcCloseoutErrors(formData, errors)
+  return errors
+}
 
 const calcDUAErrors = (formData, datasets, dataUseTranslations, errors) => {
   if ((needsGsoAcknowledgement(datasets) && !formData.gsoAcknowledgement)) {
-    errors.gsoAcknowledgement = requiredError;
+    errors.gsoAcknowledgement = requiredError
   }
 
   if ((needsPubAcknowledgement(datasets) && !formData.pubAcknowledgement)) {
-    errors.pubAcknowledgement = requiredError;
+    errors.pubAcknowledgement = requiredError
   }
 
   if ((needsDsAcknowledgement(dataUseTranslations) && !formData.dsAcknowledgement)) {
-    errors.dsAcknowledgement = requiredError;
+    errors.dsAcknowledgement = requiredError
   }
 }
 
 const validateDate = (date) => {
   if (isEmpty(date)) {
-    return requiredError;
-  } else if (!FormValidators.DATE.isValid(date)) {
-    return validationError('date');
+    return requiredError
+  }
+  else if (!FormValidators.DATE.isValid(date)) {
+    return validationError('date')
   }
   return undefined
 }
 
 export const calcPublicationErrors = (newPublication) => {
-  const validation = {};
+  const validation = {}
   if (isEmpty(newPublication?.title)) {
-    validation.title = requiredError;
+    validation.title = requiredError
   }
-  validation.date = validateDate(newPublication?.date);
+  validation.date = validateDate(newPublication?.date)
   if (isEmpty(newPublication?.authors)) {
-    validation.authors = requiredError;
+    validation.authors = requiredError
   }
   if (isEmpty(newPublication?.pubmedId)) {
-    validation.pubmedId = requiredError;
+    validation.pubmedId = requiredError
   }
   if (isEmpty(newPublication?.bibliographicCitation)) {
-    validation.bibliographicCitation = requiredError;
+    validation.bibliographicCitation = requiredError
   }
 
-  return validation;
+  return validation
 }
 
 export const calcPresentationErrors = (newPresentation) => {
-  const validation = {};
+  const validation = {}
   if (isEmpty(newPresentation?.title)) {
-    validation.title = requiredError;
+    validation.title = requiredError
   }
-  validation.date = validateDate(newPresentation?.date);
+  validation.date = validateDate(newPresentation?.date)
   if (isEmpty(newPresentation?.authors)) {
-    validation.authors = requiredError;
+    validation.authors = requiredError
   }
   if (isEmpty(newPresentation?.link)) {
-    validation.link = requiredError;
+    validation.link = requiredError
   }
-  return validation;
+  return validation
 }
 
 export const isPublication = (publicationText) => {
-    return publicationText === 'Publication';
+  return publicationText === 'Publication'
 }
 
 const requiredRusFields = [
@@ -361,26 +356,26 @@ const requiredRusFields = [
   'psychiatricTraits',
   'notHealth',
   'stigmatizedDiseases',
-];
+]
 
 // errors for the RUS section
 const calcRusErrors = (formData) => {
-  const errors = {};
+  const errors = {}
 
   if (formData.oneGender === true) {
     if (['M', 'F'].includes(formData.gender) === false) {
-      errors.gender = requiredError;
+      errors.gender = requiredError
     }
   }
 
   requiredRusFields.forEach((field) => {
     if (isNil(formData[field])) {
-      errors[field] = requiredError;
+      errors[field] = requiredError
     }
-  });
+  })
 
-  return errors;
-};
+  return errors
+}
 
 /**
  * Takes in DAR Application FormData
@@ -400,23 +395,23 @@ export const validateDARFormData = ({
   researcher,
   labCollaboratorsCompleted,
   internalCollaboratorsCompleted,
-  externalCollaboratorsCompleted
+  externalCollaboratorsCompleted,
 }) => {
   return {
     researcherInfoErrors: calcResearcherInfoErrors(formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted),
     darErrors: calcDarErrors(formData, datasets, dataUseTranslations, irbDocument, collaborationLetter),
     rusErrors: calcRusErrors(formData),
     nihValid: extractEraAuthenticationState(researcher).nihValid,
-  };
-};
+  }
+}
 
 export const validatePRFormData = (
-    nihValid,
-    formData,
-    datasets,
-    dataUseTranslations,
-    ) => {
-    return {
-        darErrors: calcPRErrors(nihValid, formData, datasets, dataUseTranslations)
-    };
+  nihValid,
+  formData,
+  datasets,
+  dataUseTranslations,
+) => {
+  return {
+    darErrors: calcPRErrors(nihValid, formData, datasets, dataUseTranslations),
+  }
 }
