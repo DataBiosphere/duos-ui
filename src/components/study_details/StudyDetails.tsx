@@ -51,7 +51,7 @@ const styles = {
   containerOverride: {},
 }
 
-interface StudyDetailsProps {
+export interface StudyDetailsProps {
   history: History
   match: {
     params: {
@@ -59,6 +59,7 @@ interface StudyDetailsProps {
     }
   }
 }
+
 export const StudyDetails = (props: StudyDetailsProps) => {
   const { history } = props
   const { studyId } = props.match.params

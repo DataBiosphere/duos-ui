@@ -1,6 +1,6 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import { StudyDetails } from 'src/components/study_details/StudyDetails'
+import { StudyDetails, StudyDetailsProps } from 'src/components/study_details/StudyDetails'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { BrowserRouter } from 'react-router-dom'
@@ -39,7 +39,7 @@ const datasets = [
 ]
 
 // It's necessary to wrap components that contain `Link` components
-const WrappedStudyDetailsComponent = (props) => {
+const WrappedStudyDetailsComponent = (props: StudyDetailsProps) => {
   return (
     <BrowserRouter>
       <StudyDetails {...props} />
@@ -54,7 +54,7 @@ describe('Study details test', () => {
     const props = {
       history: {},
       match: { params: { studyId: 1 } },
-    }
+    } as StudyDetailsProps
     mount(<WrappedStudyDetailsComponent {...props} />)
   })
 
