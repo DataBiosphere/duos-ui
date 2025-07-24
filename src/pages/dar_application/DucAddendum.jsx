@@ -1,8 +1,8 @@
-import React, {useState, useEffect, Fragment, useMemo} from 'react';
-import { Styles } from '../../libs/theme';
-import SimpleTable from '../../components/SimpleTable';
+import React, {useState, useEffect, Fragment} from 'react';
+import { Styles } from 'src/libs/theme';
+import SimpleTable from 'src/components/SimpleTable';
 import './dar_application.css';
-import { binCollectionToBuckets } from '../../utils/BucketUtils';
+import { binCollectionToBuckets } from 'src/utils/BucketUtils';
 import { useCallback } from 'react';
 import { isEmpty, flatten } from 'lodash/fp';
 import {DAC} from 'src/libs/ajax/DAC.js';
