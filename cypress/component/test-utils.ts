@@ -1,4 +1,4 @@
-import { DatasetTerm, StudyTerm, UserTerm } from '../../src/types/model'
+import { DatasetTerm, StudyTerm, UserTerm } from 'src/types/model'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -52,5 +52,6 @@ export const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTe
     dacName: 'some name',
     dacEmail: 'some email',
   },
+  piName: 'pi name',
   ...overrides,
 })
