@@ -69,7 +69,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
         // Trim whitespace from start and end
         let normalized = name.trim();
 
-        // Replace curly single quotes with straight straight Iquotes
+        // Replace curly single quotes with straight single quotes
         normalized = normalized.replace(/[‘’]/g, "'");
 
         return normalized;
@@ -303,8 +303,29 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                         onBlur={(e) => {
                             // Normalize the name when user finishes editing
                             if (isEditing && institutionUpdates) {
-                                const normalizedName = normalizeInstitutionName(e.target.value);
-                                setInstitutionUpdates({...institutionUpdates, name: normalizedName});
+                                const originalName = e.target.value;
+                                const normalizedName = normalizeInstitutionName(originalName);
+
+                                // Check if normalization changed the input
+                                if (originalName !== normalizedName) {
+                                    setInstitutionUpdates({...institutionUpdates, name: normalizedName});
+
+                                    // Show user-friendly message about what was changed
+                                    const changes = [];
+                                    if (originalName.trim() !== originalName) {
+                                        changes.push('removed extra spaces');
+                                    }
+                                    if (originalName.includes('‘') || originalName.includes('’')) {
+                                        changes.push('converted curly quotes to straight quotes');
+                                    }
+
+                                    if (changes.length > 0) {
+                                        const changeMessage = changes.join(' and ');
+                                        Notifications.showInformation({
+                                            text: `Institution name has been automatically cleaned up: ${changeMessage}.`
+                                        });
+                                    }
+                                }
 
                                 // Re-validate with the normalized name
                                 const error = validateInstitutionName(normalizedName);

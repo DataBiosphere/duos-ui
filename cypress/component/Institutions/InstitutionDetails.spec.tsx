@@ -3,6 +3,7 @@ import React from 'react';
 import {mount} from 'cypress/react';
 import {InstitutionDetails} from 'src/components/institution_table/InstitutionDetails';
 import {Institution as InstitutionAPI} from 'src/libs/ajax/Institution';
+import {Notifications} from 'src/libs/utils';
 import {BrowserRouter} from 'react-router-dom';
 import {FORM_MODES} from 'src/components/institution_table/InstitutionFormMode';
 
@@ -407,6 +408,38 @@ describe('Institution Details Tests', () => {
                 // Should trigger validation even while typing since it matches after normalization
                 cy.contains('An institution with this name already exists').should('be.visible');
                 cy.contains('button', 'Create').should('be.disabled');
+            });
+
+            it('should notify user when institution name is normalized', () => {
+                cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([]));
+                cy.stub(Notifications, 'showInformation').as('showNotification');
+                mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{params: {}}}/></BrowserRouter>);
+
+                // Test normalization with spaces that get trimmed
+                cy.get('input[placeholder="Institution Name"]').type('  University of Test  ');
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                cy.get('@showNotification').should('have.been.calledWith', {
+                    text: 'Institution name has been automatically cleaned up: removed extra spaces.'
+                });
+
+                // Clear and test normalization with curly quotes
+                cy.get('input[placeholder="Institution Name"]').clear();
+                cy.get('input[placeholder="Institution Name"]').type('University ‘Research’ Center');
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                cy.get('@showNotification').should('have.been.calledWith', {
+                    text: 'Institution name has been automatically cleaned up: converted curly quotes to straight quotes.'
+                });
+
+                // Clear and test with both spaces and quotes
+                cy.get('input[placeholder="Institution Name"]').clear();
+                cy.get('input[placeholder="Institution Name"]').type('  University ‘of’ Test  ');
+                cy.get('input[placeholder="Institution Name"]').blur();
+
+                cy.get('@showNotification').should('have.been.calledWith', {
+                    text: 'Institution name has been automatically cleaned up: removed extra spaces and converted curly quotes to straight quotes.'
+                });
             });
         });
     });
