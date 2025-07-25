@@ -51,6 +51,7 @@ const ConfirmationModal = (props) => {
       shouldCloseOnEsc={true}
       shouldCloseOnOverlayClick={true}
       className="confirmation-modal"
+      overlayClassName="confirmation-modal-overlay"
       style={{ content: styleOverride }}
     >
       <div>
