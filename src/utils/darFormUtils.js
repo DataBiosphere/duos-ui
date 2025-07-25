@@ -37,7 +37,8 @@ export const needsDsAcknowledgement = (dataUseTranslations) => {
 
 export const newIrbDocumentExpirationDate = () => {
   const today = new Date()
-  return `${(today.getFullYear() + 1).toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
+  // Set the date to one year from today, month is 0 indexed
+  return `${(today.getFullYear() + 1).toString().padStart(4, '0')}-${(today.getMonth()+1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
 }
 
 // ********************** DAR FORM VALIDATION ********************** //
