@@ -524,7 +524,10 @@ export const FormInputFile = (config) => {
             }}
             disabled={disabled}
           />
-          <label htmlFor={`${id}`} className={`form-file-label ${!isValid(validation) ? 'errored' : ''}`}>
+          <label
+            {...(!disabled && { htmlFor: `${id}` })}
+            className={`form-file-label ${!isValid(validation) ? 'errored' : ''}`}
+          >
             <PublishIcon />
             {uploadText}
           </label>
