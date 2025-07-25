@@ -1,7 +1,8 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
-import { DAC } from 'src/libs/ajax/DAC'
+import { makeDatasetTerm } from '../test-utils'
+import { DataSet } from 'src/libs/ajax/DataSet'
 
 describe('DucAddendum', () => {
   const mockDatasets = [
@@ -19,15 +20,21 @@ describe('DucAddendum', () => {
     },
   ]
 
-  const mockDacs = [
-    {
-      dacId: 1,
-      name: 'DAC 0001',
-    },
-    {
-      dacId: 2,
-      name: 'DAC 0002',
-    },
+  const mockDatasetTerms = [
+    makeDatasetTerm({
+      dac: {
+        dacId: 1,
+        dacName: 'DAC 0001',
+        dacEmail: 'foo@bar.com',
+      },
+    }),
+    makeDatasetTerm({
+      dac: {
+        dacId: 2,
+        dacName: 'DAC 0002',
+        dacEmail: 'bar@foo.com',
+      },
+    }),
   ]
 
   beforeEach(() => {
@@ -35,10 +42,7 @@ describe('DucAddendum', () => {
   })
 
   it('should render addendum table with selected datasets', () => {
-    cy.stub(DAC, 'list').returns(Promise.resolve(mockDacs))
-    cy.stub(DAC, 'get').callsFake((dacId) => {
-      return Promise.resolve(mockDacs.find(dac => dac.dacId === dacId))
-    })
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve(mockDatasetTerms))
 
     const props = {
       datasets: mockDatasets,
@@ -69,10 +73,9 @@ describe('DucAddendum', () => {
       .next().should('have.text', 'DAC 0002')
   })
 
-  it('should display `Unknown DAC` when relevant DAC cannot be loaded', () => {
-    cy.stub(DAC, 'list').returns(Promise.resolve(mockDacs))
-    cy.stub(DAC, 'get').callsFake(() => {
-      return Promise.reject(new Error('DAC not found'))
+  it('should display a warning when relevant DAC cannot be loaded', () => {
+    cy.stub(DataSet, 'searchDatasetIndex').callsFake(() => {
+      return Promise.reject(new Error('DAC information could not be found'))
     })
 
     const props = {
@@ -84,7 +87,28 @@ describe('DucAddendum', () => {
 
     mount(<DucAddendum {...props} />)
 
-    cy.contains('Unknown DAC').should('be.visible')
+    cy.contains('N/A').should('be.visible')
     cy.contains('Error loading DAC information for datasets').should('be.visible')
+  })
+
+  it('should display `N/A` when the DAC information is missing entirely', () => {
+    const datasetTermsMissingDAC = makeDatasetTerm({
+      dac: undefined,
+    })
+
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTermsMissingDAC]))
+
+    const props = {
+      datasets: [mockDatasets.at(0)],
+      isLoading: false,
+      save: cy.stub(),
+      doSubmit: cy.stub(),
+    }
+
+    mount(<DucAddendum {...props} />)
+
+    cy.contains('DUOS-1001')
+      .next().should('have.text', 'Test Dataset 1')
+      .next().should('have.text', 'N/A')
   })
 })

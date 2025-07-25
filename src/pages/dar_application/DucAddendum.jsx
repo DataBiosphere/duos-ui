@@ -6,8 +6,8 @@ import './dar_application.css'
 import { binCollectionToBuckets } from 'src/utils/BucketUtils'
 import { useCallback } from 'react'
 import { isEmpty, flatten } from 'lodash/fp'
-import { DAC } from 'src/libs/ajax/DAC.js'
 import { Notifications } from 'src/libs/utils.js'
+import { DataSet } from 'src/libs/ajax/DataSet.js'
 
 const commonStyles = {
   baseStyle: {
@@ -110,26 +110,47 @@ export default function DucAddendum(props) {
   }, [getBuckets])
 
   useEffect(() => {
-    const loadDacs = async () => {
-      const dacIds = [...new Set(datasets.map(dataset => dataset.dacId))]
-      const dacPromises = dacIds.map(dacId => DAC.get(dacId))
+    const loadDatasetTerms = async () => {
+      const datasetQuery = DataSet.searchDatasetIndex({
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  _type: 'dataset',
+                },
+              },
+              {
+                terms: {
+                  _id: datasets.map(dataset => dataset.datasetId),
+                },
+              },
+            ],
+          },
+        },
+      })
 
       try {
-        const dacsData = await Promise.all(dacPromises)
-        setDacs(dacsData)
+        const datasetTerms = await datasetQuery
+
+        const dacs = datasetTerms.map((datasetTerm) => {
+          return datasetTerm.dac
+        })
+
+        setDacs(dacs)
       }
       catch (error) {
         Notifications.showWarning({ text: `Error loading DAC information for datasets: ${error.message}` })
       }
     }
 
-    loadDacs()
+    loadDatasetTerms()
   }, [datasets])
 
   const buildDucAddendumTable = useCallback(async () => {
     const getDacName = (dacId) => {
-      const dac = dacs.find(dac => dac.dacId === dacId)
-      return dac?.name || 'Unknown DAC'
+      const dac = dacs.find(dac => dac?.dacId === dacId)
+      return dac?.dacName || 'N/A'
     }
 
     const tableChunks = buckets.map((bucket) => {
