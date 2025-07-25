@@ -499,12 +499,13 @@ export const FormInputFile = (config) => {
     placeholder = 'Filename.txt',
     accept = '',
     validation,
+    disabled = false,
   } = config
 
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       {hideInput === false && (
-        <div className="form-file-upload">
+        <div className={`form-file-upload ${disabled ? 'disabled' : ''}`}>
           <input
             id={id}
             name={name || id}
@@ -521,6 +522,7 @@ export const FormInputFile = (config) => {
                 onFormInputChange(config, e.target.files[0])
               }
             }}
+            disabled={disabled}
           />
           <label htmlFor={`${id}`} className={`form-file-label ${!isValid(validation) ? 'errored' : ''}`}>
             <PublishIcon />
