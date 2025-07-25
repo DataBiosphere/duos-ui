@@ -7,7 +7,7 @@ const TestFormInputFile = ({
   id,
   disabled = false,
   uploadText = 'Upload a file',
-  validation = { valid: true }
+  validation = { valid: true },
 }: {
   id: string
   disabled?: boolean
@@ -27,7 +27,9 @@ const TestFormInputFile = ({
           {...(!disabled && { htmlFor: id })}
           className={`form-file-label ${!validation.valid ? 'errored' : ''}`}
         >
-          <span>📁</span> {/* Using emoji instead of MUI icon to avoid import issues */}
+          <span>📁</span>
+          {' '}
+          {/* Using emoji instead of MUI icon to avoid import issues */}
           {uploadText}
         </label>
       </div>
@@ -68,7 +70,7 @@ describe('FormInputFile Component', () => {
     // Verify visual disabled state
     cy.get('.form-file-upload').should('have.class', 'disabled')
     // Note: CSS opacity might be computed differently, so let's just check it's less than 1
-    cy.get('.form-file-upload').should('satisfy', $el => {
+    cy.get('.form-file-upload').should('satisfy', ($el) => {
       const opacity = window.getComputedStyle($el[0]).opacity
       return parseFloat(opacity) < 1
     })
