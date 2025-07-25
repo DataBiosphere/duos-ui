@@ -10,7 +10,7 @@ describe('ConfirmationModal z-index Tests', () => {
       title: 'Test Modal',
       message: 'Test message',
       header: 'Test Header',
-      onConfirm: () => {}
+      onConfirm: () => {},
     }
 
     mount(<ConfirmationModal {...mockProps} />)
@@ -33,7 +33,7 @@ describe('ConfirmationModal z-index Tests', () => {
       title: 'Delete DAR',
       message: 'Are you sure you want to delete this DAR?',
       header: 'DAR-123 - Test Project',
-      onConfirm: cy.stub()
+      onConfirm: cy.stub(),
     }
 
     mount(<ConfirmationModal {...mockProps} />)
