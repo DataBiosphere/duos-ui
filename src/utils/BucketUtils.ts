@@ -18,24 +18,19 @@ import {
 } from 'lodash/fp'
 import { isNil } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
-import {
-  translateDataUseRestrictionsFromDataUseArray,
-} from 'src/libs/dataUseTranslation'
+import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation'
 import { processVotesForBucket } from './DarCollectionUtils'
 import { processMatchData } from './VoteUtils'
-
-import { DataAccessRequest, DataUse, DarCollection, Dataset, Election, Vote } from 'src/types/model'
-
-interface MatchResult {
-  consent: string
-  match: boolean
-  abstain?: boolean
-  algorithmVersion?: string
-  rationales: string[]
-  createDate: string
-  failed: boolean
-  id: string
-}
+import {
+  AlgorithmResult,
+  DarCollection,
+  DataAccessRequest,
+  Dataset,
+  DataUse,
+  Election,
+  MatchResult,
+  Vote,
+} from 'src/types/model'
 
 interface DataUseTranslation {
   code: string
@@ -54,15 +49,6 @@ export interface Bucket {
   matchResults: MatchResult[]
   algorithmResult?: AlgorithmResult
   isRP?: boolean
-}
-
-interface AlgorithmResult {
-  result: string
-  createDate?: string
-  rationales?: string[]
-  id: string
-  failed?: boolean
-  match?: boolean
 }
 
 interface VoteGroup {

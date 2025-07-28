@@ -538,3 +538,23 @@ export interface Vote {
   hasConcerns: boolean
   displayName: string
 }
+
+export interface MatchResult {
+  consent: string
+  match: boolean
+  abstain?: boolean
+  algorithmVersion?: string
+  rationales: string[]
+  createDate: string
+  failed: boolean
+  id: string
+}
+
+export interface AlgorithmResult {
+  result: string
+  createDate?: string
+  rationales?: string[]
+  id: string
+  failed?: boolean
+  match?: boolean
+}
