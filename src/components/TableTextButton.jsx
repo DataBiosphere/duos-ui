@@ -1,18 +1,17 @@
-import React from 'react';
-import { Styles } from '../libs/theme';
-import { applyHoverEffects, setDivAttributes, setStyle } from '../libs/utils';
+import React from 'react'
+import { Styles } from '../libs/theme'
+import { applyHoverEffects, setDivAttributes, setStyle } from '../libs/utils'
 
 export default function TableTextButton(props) {
-
-  //default function for mouseEnter
+  // default function for mouseEnter
   const onMouseEnterFn = (e) => {
-    applyHoverEffects(e, hoverStyle);
-  };
+    applyHoverEffects(e, hoverStyle)
+  }
 
-  //default function for mouseLeave
+  // default function for mouseLeave
   const onMouseLeaveFn = (e) => {
-    applyHoverEffects(e, style);
-  };
+    applyHoverEffects(e, style)
+  }
 
   const {
     onClick,
@@ -22,12 +21,12 @@ export default function TableTextButton(props) {
     onMouseLeave = onMouseLeaveFn,
     label,
     keyProp = `${label}-button`,
-    dataTip
-  } = props;
-  const baseStyle = props.style || Styles.TABLE.TABLE_TEXT_BUTTON;
-  const style = setStyle(disabled, baseStyle, 'backgroundColor');
-  const divAttributes = setDivAttributes(disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, keyProp);
+    dataTip,
+  } = props
+  const baseStyle = props.style || Styles.TABLE.TABLE_TEXT_BUTTON
+  const style = setStyle(disabled, baseStyle, 'backgroundColor')
+  const divAttributes = setDivAttributes(disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, keyProp)
   return (
     <div key={keyProp} {...divAttributes}>{label}</div>
-  );
+  )
 }

@@ -1,22 +1,22 @@
-import React from 'react';
-import CollectionVoteButton from './CollectionVoteButton';
-import { CancelOutlined } from '@mui/icons-material';
-import { votingColors } from '../../pages/dar_collection_review/MultiDatasetVotingTab';
+import React from 'react'
+import { votingColors } from 'src/libs/VotingColors.ts'
+import CollectionVoteButton from './CollectionVoteButton'
+import { CancelOutlined } from '@mui/icons-material'
 
 export default function CollectionVoteNoButton(props) {
-  const { onClick, disabled, isSelected } = props;
+  const { onClick, disabled, isSelected } = props
 
   const styles = {
     label: {
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     icon: {
       fontSize: '28px',
-      margin: '2.5%'
-    }
-  };
+      margin: '2.5%',
+    },
+  }
 
   const Label = () => {
     return (
@@ -24,8 +24,8 @@ export default function CollectionVoteNoButton(props) {
         <CancelOutlined style={styles.icon} />
         No
       </span>
-    );
-  };
+    )
+  }
 
   return (
     <CollectionVoteButton
@@ -36,5 +36,5 @@ export default function CollectionVoteNoButton(props) {
       disabled={disabled}
       isSelected={isSelected}
     />
-  );
+  )
 }

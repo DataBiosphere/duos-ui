@@ -1,62 +1,57 @@
-import React from 'react';
-import {includes, isEmpty, isNil, toLower, uniq} from 'lodash/fp';
-import {formatDate} from '../../libs/utils';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
-import {styles} from './DarCollectionTable';
-import Actions from './Actions';
-import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
-import {Link} from 'react-router-dom';
+import React from 'react'
+import { includes, isEmpty, isNil, toLower, uniq } from 'lodash/fp'
+import { formatDate } from '../../libs/utils'
+import { ExpandMore, ExpandLess } from '@mui/icons-material'
+import Actions from './Actions'
+import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink'
+import { consoleTypes, styles } from '../../utils/DarCollectionUtils'
+import { Link } from 'react-router-dom'
 
-export const consoleTypes = {
-  ADMIN: 'admin',
-  MEMBER: 'member',
-  MANAGE_ACCESS: 'manageAccess',
-  CHAIR: 'chair',
-  SIGNING_OFFICIAL: 'signingOfficial',
-  RESEARCHER: 'researcher',
-};
-
-export function projectTitleCellData({name = '- -', darCollectionId, label= 'project-title'}) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function projectTitleCellData({ name = '- -', darCollectionId, label = 'project-title' }) {
   return {
     data: isEmpty(name) ? '- -' : name,
     id: darCollectionId,
-    style : {
+    style: {
       color: '#354052',
       fontSize: styles.fontSize.projectTitle,
-      paddingRight: '2%'
+      paddingRight: '2%',
     },
-    label
-  };
+    label,
+  }
 }
 
-export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsExpanded, updateCollectionIsExpanded, status, consoleType, label = 'dar-code'}) {
-  let darCodeData;
+// eslint-disable-next-line react-refresh/only-export-components
+export function darCodeCellData({ darCode = '- -', darCollectionId, collectionIsExpanded, updateCollectionIsExpanded, status, consoleType, label = 'dar-code' }) {
+  let darCodeData
 
   switch (consoleType) {
     case consoleTypes.ADMIN:
-      darCodeData = <DarCollectionAdminReviewLink darCollectionId={darCollectionId} darCode={darCode} />;
-      break;
+      darCodeData = <DarCollectionAdminReviewLink darCollectionId={darCollectionId} darCode={darCode} />
+      break
     case consoleTypes.CHAIR:
     case consoleTypes.MEMBER:
     case consoleTypes.SIGNING_OFFICIAL:
-      darCodeData = dacLinkToCollection(darCode, status, darCollectionId);
-      break;
+      darCodeData = dacLinkToCollection(darCode, status, darCollectionId)
+      break
     default :
-      darCodeData = darCode;
+      darCodeData = darCode
   }
 
-  const ExpandComponent = collectionIsExpanded ? ExpandLess : ExpandMore;
+  const ExpandComponent = collectionIsExpanded ? ExpandLess : ExpandMore
 
   return {
     data: (
-      <div style={{display: 'flex', alignItems: 'center'}}>
-        {toLower(status) !== 'draft' && <ExpandComponent
-          id={`${darCollectionId}_dropdown`}
-          className={`sort-icon dar-expand-dropdown-arrow ${collectionIsExpanded ? 'sort-icon-up' : 'sort-icon-down'}`}
-          onClick={() => {
-            updateCollectionIsExpanded(!collectionIsExpanded);
-          }}
-        />}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {toLower(status) !== 'draft' && (
+          <ExpandComponent
+            id={`${darCollectionId}_dropdown`}
+            className={`sort-icon dar-expand-dropdown-arrow ${collectionIsExpanded ? 'sort-icon-up' : 'sort-icon-down'}`}
+            onClick={() => {
+              updateCollectionIsExpanded(!collectionIsExpanded)
+            }}
+          />
+        )}
         {darCodeData}
       </div>
     ),
@@ -66,23 +61,23 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
       color: styles.color.darCode,
       fontSize: styles.fontSize.darCode,
       fontWeight: '500',
-      overflowWrap: 'break-word'
+      overflowWrap: 'break-word',
     },
-    label
-  };
+    label,
+  }
 }
 
-const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
-  const hasOpenElections = includes('open')(toLower(status));
-  const path = hasOpenElections ?
-    `/dar_collection/${darCollectionId}` :
-    `/dar_vote_review/${darCollectionId}`;
+const dacLinkToCollection = (darCode, status = '', darCollectionId) => {
+  const hasOpenElections = includes('open')(toLower(status))
+  const path = hasOpenElections
+    ? `/dar_collection/${darCollectionId}`
+    : `/dar_vote_review/${darCollectionId}`
 
-  return <Link to={path}>{darCode}</Link>;
-};
+  return <Link to={path}>{darCode}</Link>
+}
 
-export function DacCellData({dacNames, darCollectionId, label = 'dacNames'}) {
-  const dacString = uniq(dacNames).join('\n');
+export function DacCellData({ dacNames, darCollectionId, label = 'dacNames' }) {
+  const dacString = uniq(dacNames).join('\n')
 
   return {
     data: dacString,
@@ -91,13 +86,15 @@ export function DacCellData({dacNames, darCollectionId, label = 'dacNames'}) {
       color: '#354052',
       fontSize: styles.fontSize.dacNames,
     },
-    label
-  };
+    label,
+  }
 }
 
-export function submissionDateCellData({submissionDate, darCollectionId, label = 'submission-date'}) {
-  const dateString = isNil(submissionDate) ? '- -' :
-    toLower(submissionDate) === 'unsubmitted' ? '- -' : formatDate(submissionDate);
+// eslint-disable-next-line react-refresh/only-export-components
+export function submissionDateCellData({ submissionDate, darCollectionId, label = 'submission-date' }) {
+  const dateString = isNil(submissionDate)
+    ? '- -'
+    : toLower(submissionDate) === 'unsubmitted' ? '- -' : formatDate(submissionDate)
   return {
     data: dateString,
     id: darCollectionId,
@@ -106,22 +103,24 @@ export function submissionDateCellData({submissionDate, darCollectionId, label =
       fontSize: styles.fontSize.submissionDate,
     },
     label,
-  };
+  }
 }
 
-export function researcherCellData({researcherName = '- -', darCollectionId, label = 'researcher'}) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function researcherCellData({ researcherName = '- -', darCollectionId, label = 'researcher' }) {
   return {
     data: researcherName,
     id: darCollectionId,
     style: {
       color: '#354052',
-      fontSize: styles.fontSize.researcher
+      fontSize: styles.fontSize.researcher,
     },
-    label
-  };
+    label,
+  }
 }
 
-export function institutionCellData({institutionName = '- -', darCollectionId, label = 'institution'}) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function institutionCellData({ institutionName = '- -', darCollectionId, label = 'institution' }) {
   return {
     data: institutionName,
     id: darCollectionId,
@@ -131,10 +130,11 @@ export function institutionCellData({institutionName = '- -', darCollectionId, l
       paddingRight: '1%',
     },
     label,
-  };
+  }
 }
 
-export function datasetCountCellData({collection, darCollectionId, label = 'datasets'}) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function datasetCountCellData({ collection, darCollectionId, label = 'datasets' }) {
   return {
     data: collection.datasetCount || '- -',
     id: darCollectionId,
@@ -143,12 +143,13 @@ export function datasetCountCellData({collection, darCollectionId, label = 'data
       fontSize: styles.fontSize.datasetCount,
       fontWeight: 600,
     },
-    label
-  };
+    label,
+  }
 }
 
-export function expiresAtCellData({collection, darCollectionId, label = 'expiration-date'}) {
-  const dateString = isNil(collection.expiresAt) ? '- -' : formatDate(collection.expiresAt);
+// eslint-disable-next-line react-refresh/only-export-components
+export function expiresAtCellData({ collection, darCollectionId, label = 'expiration-date' }) {
+  const dateString = isNil(collection.expiresAt) ? '- -' : formatDate(collection.expiresAt)
   return {
     data: dateString,
     id: darCollectionId,
@@ -157,44 +158,48 @@ export function expiresAtCellData({collection, darCollectionId, label = 'expirat
       fontSize: styles.fontSize.expirationDate,
     },
     label,
-  };
+  }
 }
 
-export function statusCellData({status = '- -', darCollectionId, label = 'status'}) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function statusCellData({ status = '- -', darCollectionId, label = 'status' }) {
   return {
     data: status,
     id: darCollectionId,
     style: {
       color: '#333F52',
       fontWeight: 600,
-      fontSize: styles.fontSize.status
+      fontSize: styles.fontSize.status,
     },
-    label
-  };
+    label,
+  }
 }
 
-export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status}) {
-  const actionComponent = <Actions
-    collection={collection}
-    consoleType={consoleType}
-    showConfirmationModal={showConfirmationModal}
-    goToVote={goToVote}
-    reviewCollection={reviewCollection}
-    resumeCollection={resumeCollection}
-    actions={actions}
-    status={status}
-  />;
+// eslint-disable-next-line react-refresh/only-export-components
+export function consoleActionsCellData({ collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status }) {
+  const actionComponent = (
+    <Actions
+      collection={collection}
+      consoleType={consoleType}
+      showConfirmationModal={showConfirmationModal}
+      goToVote={goToVote}
+      reviewCollection={reviewCollection}
+      resumeCollection={resumeCollection}
+      actions={actions}
+      status={status}
+    />
+  )
 
   return {
     isComponent: true,
     id: collection.darCollectionId,
     style: {
       color: styles.color.actions,
-      fontSize: styles.fontSize.actions
+      fontSize: styles.fontSize.actions,
     },
     label: 'table-actions',
-    data: actionComponent
-  };
+    data: actionComponent,
+  }
 }
 
 export default {
@@ -208,4 +213,4 @@ export default {
   expiresAtCellData,
   statusCellData,
   consoleActionsCellData,
-};
+}

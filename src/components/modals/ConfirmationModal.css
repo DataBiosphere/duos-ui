@@ -8,6 +8,17 @@
     background-color: white;
     border: 1px solid lightgrey;
     border-radius: 4px;
+    z-index: 1080;
+}
+
+.confirmation-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.75);
+    z-index: 1075;
 }
 
 .confirmation-modal-header {

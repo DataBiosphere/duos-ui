@@ -1,9 +1,9 @@
-import React from 'react';
-import { mount } from 'cypress/react';
-import { StudyDetails } from 'src/components/study_details/StudyDetails';
-import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo';
-import { DataSet } from 'src/libs/ajax/DataSet';
-import { BrowserRouter } from 'react-router-dom';
+import React from 'react'
+import { mount } from 'cypress/react'
+import { StudyDetails, StudyDetailsProps } from 'src/components/study_details/StudyDetails'
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { BrowserRouter } from 'react-router-dom'
 
 const datasets = [
   {
@@ -19,7 +19,7 @@ const datasets = [
       species: 'species',
       piName: 'piName',
       dataCustodianEmail: ['custodian1@foo.bar', 'custodian2@foo.bar'],
-    }
+    },
   },
   {
     datasetId: 123457,
@@ -34,46 +34,47 @@ const datasets = [
       species: 'species',
       piName: 'piName',
       dataCustodianEmail: ['custodian1@foo.bar', 'custodian2@foo.bar'],
-    }
-  }
-];
+    },
+  },
+]
 
 // It's necessary to wrap components that contain `Link` components
-const WrappedStudyDetailsComponent = (props) => {
-  return <BrowserRouter>
-    <StudyDetails {...props}/>
-  </BrowserRouter>;
-};
-
+const WrappedStudyDetailsComponent = (props: StudyDetailsProps) => {
+  return (
+    <BrowserRouter>
+      <StudyDetails {...props} />
+    </BrowserRouter>
+  )
+}
 
 describe('Study details test', () => {
   beforeEach(() => {
-    cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({});
-    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve(datasets));
+    cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve(datasets))
     const props = {
       history: {},
-      match: { params: { studyId: 1 } }
-    };
-    mount(<WrappedStudyDetailsComponent {...props} />);
-  });
+      match: { params: { studyId: 1 } },
+    } as StudyDetailsProps
+    mount(<WrappedStudyDetailsComponent {...props} />)
+  })
 
   it('shows the appropriate data for fields', () => {
-    cy.contains(datasets[0].study.studyName).should('exist');
-    cy.contains(datasets[0].study.description).should('exist');
-    cy.contains((datasets[0].participantCount + datasets[1].participantCount).toString()).should('exist');
-    cy.contains(datasets[0].study.phenotype).should('exist');
-    cy.contains(datasets[0].study.species).should('exist');
-    cy.contains(datasets[0].study.piName).should('exist');
-    cy.contains(datasets[0].study.dataCustodianEmail.join(', ')).should('exist');
-    cy.get('[role=row]').should('have.length', datasets.length + 1);
-  });
+    cy.contains(datasets[0].study.studyName).should('exist')
+    cy.contains(datasets[0].study.description).should('exist')
+    cy.contains((datasets[0].participantCount + datasets[1].participantCount).toString()).should('exist')
+    cy.contains(datasets[0].study.phenotype).should('exist')
+    cy.contains(datasets[0].study.species).should('exist')
+    cy.contains(datasets[0].study.piName).should('exist')
+    cy.contains(datasets[0].study.dataCustodianEmail.join(', ')).should('exist')
+    cy.get('[role=row]').should('have.length', datasets.length + 1)
+  })
 
   it('displays DatasetSearchFooter when dataset is selected', () => {
-    cy.get('.row-data-0').find('input').click();
-    cy.contains('1 dataset selected from 1 study').should('exist');
-  });
+    cy.get('.row-data-0').find('input').click()
+    cy.contains('1 dataset selected from 1 study').should('exist')
+  })
 
   it('allows navigation back to datalibrary', () => {
-    cy.get('#link_datalibrary').should('have.attr', 'href', '/datalibrary');
-  });
-});
+    cy.get('#link_datalibrary').should('have.attr', 'href', '/datalibrary')
+  })
+})

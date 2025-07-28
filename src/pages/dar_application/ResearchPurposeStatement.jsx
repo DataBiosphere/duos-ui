@@ -1,7 +1,7 @@
-import React from 'react';
-import isEmpty from 'lodash/fp/isEmpty';
-import './dar_application.css';
-import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms';
+import React from 'react'
+import isEmpty from 'lodash/fp/isEmpty'
+import './dar_application.css'
+import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms'
 
 const ResearchPurposeRow = (props) => {
   const {
@@ -13,8 +13,7 @@ const ResearchPurposeRow = (props) => {
     validation,
     disabled,
     onValidationChange,
-  } = props;
-
+  } = props
 
   return (
     <div className="rp-row flex flex-row">
@@ -36,11 +35,10 @@ const ResearchPurposeRow = (props) => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default function ResearchPurposeStatement(props) {
-
   const {
     darCode,
     formFieldChange,
@@ -48,25 +46,25 @@ export default function ResearchPurposeStatement(props) {
     validation,
     readOnlyMode,
     formValidationChange,
-  } = props;
+  } = props
 
-  const onValidationChange = formValidationChange;
+  const onValidationChange = formValidationChange
 
-  //NOTE: inputs have both isEmpty and isNil checks
-  //currently values are initialized as emptry strings as a way to maintain controlled inputs in components
-  //however the inputs, when given a value, can either be a string (as seen with gender), or a boolean
-  //isEmpty will give a false negative with booleans and isNil will give a false positive with empty strings
+  // NOTE: inputs have both isEmpty and isNil checks
+  // currently values are initialized as emptry strings as a way to maintain controlled inputs in components
+  // however the inputs, when given a value, can either be a string (as seen with gender), or a boolean
+  // isEmpty will give a false negative with booleans and isNil will give a false positive with empty strings
 
   const onChange = ({ key, value }) => {
-    formFieldChange({ key, value });
-  };
+    formFieldChange({ key, value })
+  }
 
   return (
     <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
       <fieldset disabled={!isEmpty(darCode)}>
 
         <div className="form-group">
-          <h3 style={{'marginTop': 0}}>In order to ensure appropriate review, please answer the questions below:</h3>
+          <h3 style={{ marginTop: 0 }}>In order to ensure appropriate review, please answer the questions below:</h3>
 
           <h4>I am proposing to:</h4>
 
@@ -120,7 +118,7 @@ export default function ResearchPurposeStatement(props) {
                 id="gender"
                 options={[
                   { text: 'Male', name: 'M' },
-                  { text: 'Female', name: 'F' }
+                  { text: 'Female', name: 'F' },
                 ]}
                 disabled={readOnlyMode}
                 defaultValue={formData.gender}
@@ -142,14 +140,15 @@ export default function ResearchPurposeStatement(props) {
           />
 
           <ResearchPurposeRow
-            title={
+            title={(
               <span>
-                Targeting a vulnerable population as defined in{' '}
+                Targeting a vulnerable population as defined in
+                {' '}
                 <a href="https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-C/part-456" target="_blank" rel="noreferrer">
                   456 CFR
                 </a>
               </span>
-            }
+            )}
             description="(children, prisoners, pregnant women, mentally disabled persons, or [“SIGNIFICANTLY”] economically or educationally disadvantaged persons)"
             id="vulnerablePopulation"
             defaultValue={formData.vulnerablePopulation}
@@ -213,5 +212,5 @@ export default function ResearchPurposeStatement(props) {
         </div>
       </fieldset>
     </div>
-  );
+  )
 }

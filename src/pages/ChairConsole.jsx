@@ -1,53 +1,59 @@
-import React from 'react';
-import {useState, useEffect, useRef, useCallback } from 'react';
-import SearchBar from '../components/SearchBar';
-import { User } from '../libs/ajax/User';
-import { Collections } from '../libs/ajax/Collections';
-import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils';
-import { Styles } from '../libs/theme';
-import lockIcon from '../images/lock-icon.png';
-import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
-import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../utils/DarCollectionUtils';
-import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
+import React from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import SearchBar from '../components/SearchBar'
+import { User } from '../libs/ajax/User'
+import { Collections } from '../libs/ajax/Collections'
+import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils'
+import { Styles } from '../libs/theme'
+import lockIcon from '../images/lock-icon.png'
+import { DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable'
+import {
+  cancelCollectionFn,
+  consoleTypes,
+  DarCollectionTableColumnOptions,
+  openCollectionFn,
+  updateCollectionFn,
+} from '../utils/DarCollectionUtils'
 
 export default function ChairConsole(props) {
-  const [collections, setCollections] = useState([]);
-  const [filteredList, setFilteredList] = useState([]);
-  const [relevantDatasets, setRelevantDatasets] = useState();
-  const [isLoading, setIsLoading] = useState(true);
-  const searchRef = useRef('');
-  const filterFn = getSearchFilterFunctions().darCollections;
-  const { history } = props;
+  const [collections, setCollections] = useState([])
+  const [filteredList, setFilteredList] = useState([])
+  const [relevantDatasets, setRelevantDatasets] = useState()
+  const [isLoading, setIsLoading] = useState(true)
+  const searchRef = useRef('')
+  const filterFn = getSearchFilterFunctions().darCollections
+  const { history } = props
 
-  const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
+  const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
     searchTerms,
     collections,
     filterFn,
-    setFilteredList
-  ), [collections, filterFn]);
+    setFilteredList,
+  ), [collections, filterFn])
 
   useEffect(() => {
-    const init = async() => {
+    const init = async () => {
       try {
         const [collections, datasets] = await Promise.all([
           Collections.getCollectionSummariesByRoleName(USER_ROLES.chairperson),
-          User.getUserRelevantDatasets()
-        ]);
-        setCollections(collections);
-        setRelevantDatasets(datasets);
-        setFilteredList(collections);
-        setIsLoading(false);
-      } catch(_error) {
-        Notifications.showError({text: 'Error initializing Collections table'});
+          User.getUserRelevantDatasets(),
+        ])
+        setCollections(collections)
+        setRelevantDatasets(datasets)
+        setFilteredList(collections)
+        setIsLoading(false)
       }
-    };
-    init();
-  }, []);
+      catch (_error) {
+        Notifications.showError({ text: 'Error initializing Collections table' })
+      }
+    }
+    init()
+  }, [])
 
-  const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
-  const cancelCollection = cancelCollectionFn({updateCollections, role: USER_ROLES.chairperson});
-  const openCollection = openCollectionFn({updateCollections, role: USER_ROLES.chairperson});
-  const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
+  const updateCollections = updateCollectionFn({ collections, filterFn, searchRef, setCollections, setFilteredList })
+  const cancelCollection = cancelCollectionFn({ updateCollections, role: USER_ROLES.chairperson })
+  const openCollection = openCollectionFn({ updateCollections, role: USER_ROLES.chairperson })
+  const goToVote = useCallback(collectionId => history.push(`/dar_collection/${collectionId}`), [history])
 
   return (
     <div style={Styles.PAGE}>
@@ -89,5 +95,5 @@ export default function ChairConsole(props) {
         consoleType={consoleTypes.CHAIR}
       />
     </div>
-  );
+  )
 }

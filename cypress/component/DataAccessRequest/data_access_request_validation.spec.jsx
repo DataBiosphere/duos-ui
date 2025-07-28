@@ -1,21 +1,23 @@
-import {React} from 'react';
-import {mount} from 'cypress/react';
-import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication';
-import { MemoryRouter } from 'react-router-dom';
-import { DAR } from 'src/libs/ajax/DAR';
-import { DataSet } from 'src/libs/ajax/DataSet';
-import { Metrics } from 'src/libs/ajax/Metrics';
-import { Navigation } from 'src/libs/utils';
-import { NotificationService } from 'src/libs/notificationService';
-import { Storage } from 'src/libs/storage';
-import { User } from 'src/libs/ajax/User';
-import {Countries} from 'src/libs/ajax/Countries';
+import { React } from 'react'
+import { mount } from 'cypress/react'
+import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
+import { MemoryRouter } from 'react-router-dom'
+import { DAR } from 'src/libs/ajax/DAR'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import { Navigation } from 'src/libs/utils'
+import { NotificationService } from 'src/libs/notificationService'
+import { Storage } from 'src/libs/storage'
+import { User } from 'src/libs/ajax/User'
+import { Countries } from 'src/libs/ajax/Countries'
 
 const props = {
   match: {
     params: {},
   },
-};
+  draftDar: true,
+  isProgressReportApplication: false,
+}
 
 const user = {
   userId: 5,
@@ -28,16 +30,16 @@ const user = {
       propertyId: 10350,
       userId: 5,
       propertyKey: 'eraAuthorized',
-      propertyValue: 'true'
+      propertyValue: 'true',
     },
     {
       propertyId: 10351,
       userId: 5,
       propertyKey: 'eraExpiration',
-      propertyValue: '999980741397751'
+      propertyValue: '999980741397751',
     },
   ],
-};
+}
 
 const userNoLibraryCard = {
   userId: 5,
@@ -49,17 +51,16 @@ const userNoLibraryCard = {
       propertyId: 10350,
       userId: 5,
       propertyKey: 'eraAuthorized',
-      propertyValue: 'true'
+      propertyValue: 'true',
     },
     {
       propertyId: 10351,
       userId: 5,
       propertyKey: 'eraExpiration',
-      propertyValue: '999980741397751'
+      propertyValue: '999980741397751',
     },
   ],
-};
-
+}
 
 const datasets = [
   {
@@ -69,255 +70,324 @@ const datasets = [
     dataUse: {
 
     },
-  }
-];
+  },
+]
 
 const userSigningOfficials = [
   {
     userId: 6,
     displayName: 'SO 1',
-    email: 'so1@gmail.com'
+    email: 'so1@gmail.com',
   },
   {
     userId: 7,
     displayName: 'SO 2',
-    email: 'so2@gmail.com'
-  }
-];
-
+    email: 'so2@gmail.com',
+  },
+]
 
 describe('Data Access Request - Validation', () => {
-beforeEach(() => {
-  cy.stub(Countries, 'getCountries').returns(Promise.resolve(['United States of America (the)', 'Canada']));
-});
+  beforeEach(() => {
+    cy.stub(Countries, 'getCountries').returns(Promise.resolve(['United States of America (the)', 'Canada']))
+  })
 
   describe('With Library Cards', () => {
     beforeEach(() => {
-      cy.initApplicationConfig();
-      cy.stub(Metrics, 'captureEvent').returns(Promise.resolve());
-      cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
-      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));
-      cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets));
-      cy.stub(Storage, 'getCurrentUser').returns(user);
-      cy.stub(User, 'getMe').returns(user);
-      cy.stub(Navigation, 'console').returns({});
+      cy.initApplicationConfig()
+      cy.stub(Metrics, 'captureEvent').returns(Promise.resolve())
+      cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials)
+      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets))
+      cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets))
+      cy.stub(Storage, 'getCurrentUser').returns(user)
+      cy.stub(User, 'getMe').returns(user)
+      cy.stub(Navigation, 'console').returns({})
       cy.intercept('POST', '/api/dar/**', {
         statusCode: 200,
-        body: {}
-      }).as('postDar');
-      cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' });
-      cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
-      cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
-      cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}));
+        body: {},
+      }).as('postDar')
+      cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' })
+      cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' })
+      cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' })
+      cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}))
       mount(
         <MemoryRouter initialEntries={['/']}>
           <DataAccessRequestApplication {...props} />
-        </MemoryRouter>
-      );
-    });
+        </MemoryRouter>,
+      )
+    })
 
     it('Submits given valid DAR', () => {
-      cy.get('#piCountryOfOperation').type('United{enter}');
-      cy.get('#signingOfficial').type('SO 2{enter}');
-      cy.get('#itDirector').type('Some IT Director');
-      cy.get('#itDirectorEmail').type('it@good.org');
-      cy.get('#anvilUse_yes').click();
+      cy.get('#piCountryOfOperation').type('United{enter}')
+      cy.get('#signingOfficial').type('SO 2{enter}')
+      cy.get('#itDirector').type('Some IT Director')
+      cy.get('#itDirectorEmail').type('it@good.org')
+      cy.get('#anvilUse_yes').click()
 
-      cy.get('#datasetIds').type('asdf{enter}');
+      cy.get('#datasetIds').type('asdf{enter}')
 
-      cy.get('#projectTitle').type('Title');
-      cy.get('#rus').type('asdf');
-      cy.get('#nonTechRus').type('asdf asdf');
+      cy.get('#projectTitle').type('Title')
+      cy.get('#rus').type('asdf')
+      cy.get('#nonTechRus').type('asdf asdf')
 
-      cy.get('#diseases_no').click();
-      cy.get('#hmb_yes').click();
+      cy.get('#diseases_no').click()
+      cy.get('#hmb_yes').click()
 
-      cy.get('#controls_no').click();
-      cy.get('#population_no').click();
-      cy.get('#oneGender_no').click();
-      cy.get('#forProfit_no').click();
-      cy.get('#pediatric_no').click();
-      cy.get('#vulnerablePopulation_no').click();
-      cy.get('#illegalBehavior_no').click();
-      cy.get('#sexualDiseases_no').click();
-      cy.get('#psychiatricTraits_no').click();
-      cy.get('#notHealth_no').click();
-      cy.get('#stigmatizedDiseases_no').click();
+      cy.get('#controls_no').click()
+      cy.get('#population_no').click()
+      cy.get('#oneGender_no').click()
+      cy.get('#forProfit_no').click()
+      cy.get('#pediatric_no').click()
+      cy.get('#vulnerablePopulation_no').click()
+      cy.get('#illegalBehavior_no').click()
+      cy.get('#sexualDiseases_no').click()
+      cy.get('#psychiatricTraits_no').click()
+      cy.get('#notHealth_no').click()
+      cy.get('#stigmatizedDiseases_no').click()
 
-      cy.get('#btn_attest').click();
-      cy.get('#btn_openSubmitModal').click();
-      cy.get('#btn_submit').click();
+      cy.get('#btn_attest').click()
+      cy.get('#btn_openSubmitModal').click()
+      cy.get('#btn_submit').click()
       cy.wait('@postDar').then((interception) => {
-        expect(interception.response.statusCode).to.equal(200);
-      });
-    });
+        expect(interception.response.statusCode).to.equal(200)
+      })
+    })
+
+    it('Makes DAR editable POST to submit returns 400 error', () => {
+      // Mock postDar to reject with 400 error
+      cy.stub(DAR, 'postDar').rejects({
+        response: {
+          status: 400,
+          data: {
+            code: 'VALIDATION_ERROR',
+            message: 'Bad request error message',
+          },
+        },
+      })
+
+      cy.get('#piCountryOfOperation').type('United{enter}')
+      cy.get('#signingOfficial').type('SO 2{enter}')
+      cy.get('#itDirector').type('Some IT Director')
+      cy.get('#itDirectorEmail').type('it@good.org')
+      cy.get('#anvilUse_yes').click()
+
+      cy.get('#datasetIds').type('asdf{enter}')
+
+      // Add an Internal Collaborator that lacks a Library Card,
+      // which triggers a 400 error on submit
+      cy.get('#add-internalCollaborators-btn').click()
+      cy.get('#0_collaboratorName').type('No LibraryCard')
+      cy.get('#0_collaboratorEraCommonsId').type('nolibcard123')
+      cy.get('#0_collaboratorTitle').type('Research Assistant')
+      cy.get('#0_collaboratorEmail').type('nolibrarycard@broadinstitute.org')
+      // Skip approval for now and save directly
+      cy.get('#collaborator-internalCollaborators-add-save').click()
+
+      cy.get('#projectTitle').type('Title')
+      cy.get('#rus').type('asdf')
+      cy.get('#nonTechRus').type('asdf asdf')
+
+      cy.get('#diseases_no').click()
+      cy.get('#hmb_yes').click()
+
+      cy.get('#controls_no').click()
+      cy.get('#population_no').click()
+      cy.get('#oneGender_no').click()
+      cy.get('#forProfit_no').click()
+      cy.get('#pediatric_no').click()
+      cy.get('#vulnerablePopulation_no').click()
+      cy.get('#illegalBehavior_no').click()
+      cy.get('#sexualDiseases_no').click()
+      cy.get('#psychiatricTraits_no').click()
+      cy.get('#notHealth_no').click()
+      cy.get('#stigmatizedDiseases_no').click()
+
+      // First attest to enable submit button
+      cy.get('#btn_attest').click()
+      cy.get('#btn_openSubmitModal').should('exist')
+
+      // Now the form should be attested and addendum tab should be visible
+      cy.get('#addendum').should('exist')
+
+      // Verify that collaborator form is read-only when attested
+      cy.get('#0_summary').should('exist') // Summary should be shown (read-only mode)
+
+      // Try to submit and expect 400 error to reset attestation
+      cy.get('#btn_openSubmitModal').click()
+      cy.get('#btn_submit').click()
+
+      // After 400 error, the form should no longer be attested
+      // The addendum tab should be hidden again
+      cy.get('#addendum').should('not.exist')
+
+      // Should be able to attest again
+      cy.get('#btn_attest').should('exist').and('not.be.disabled')
+
+      // Verify we can attest again (proving the form is editable)
+      cy.get('#btn_attest').click({ force: true })
+      cy.get('#addendum').should('exist')
+    })
 
     it('Required fields should not be errored when you open page', () => {
-      cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
-      cy.get('#signingOfficial').should('not.have.class', 'errored');
-      cy.get('#itDirector').should('not.have.class', 'errored');
-      cy.get('#itDirectorEmail').should('not.have.class', 'errored');
-      cy.get('#anvilUse').should('not.have.class', 'errored');
+      cy.get('#piCountryOfOperation').should('not.have.class', 'errored')
+      cy.get('#signingOfficial').should('not.have.class', 'errored')
+      cy.get('#itDirector').should('not.have.class', 'errored')
+      cy.get('#itDirectorEmail').should('not.have.class', 'errored')
+      cy.get('#anvilUse').should('not.have.class', 'errored')
 
-      cy.get('#datasetIds').should('not.have.class', 'errored');
+      cy.get('#datasetIds').should('not.have.class', 'errored')
 
-      cy.get('#projectTitle').should('not.have.class', 'errored');
-      cy.get('#rus').should('not.have.class', 'errored');
-      cy.get('#nonTechRus').should('not.have.class', 'errored');
+      cy.get('#projectTitle').should('not.have.class', 'errored')
+      cy.get('#rus').should('not.have.class', 'errored')
+      cy.get('#nonTechRus').should('not.have.class', 'errored')
 
-      cy.get('#diseases').should('not.have.class', 'errored');
+      cy.get('#diseases').should('not.have.class', 'errored')
 
-      cy.get('#controls').should('not.have.class', 'errored');
-      cy.get('#population').should('not.have.class', 'errored');
-      cy.get('#oneGender').should('not.have.class', 'errored');
-      cy.get('#forProfit').should('not.have.class', 'errored');
-      cy.get('#pediatric').should('not.have.class', 'errored');
-      cy.get('#vulnerablePopulation').should('not.have.class', 'errored');
-      cy.get('#illegalBehavior').should('not.have.class', 'errored');
-      cy.get('#sexualDiseases').should('not.have.class', 'errored');
-      cy.get('#psychiatricTraits').should('not.have.class', 'errored');
-      cy.get('#notHealth').should('not.have.class', 'errored');
-      cy.get('#stigmatizedDiseases').should('not.have.class', 'errored');
-    });
+      cy.get('#controls').should('not.have.class', 'errored')
+      cy.get('#population').should('not.have.class', 'errored')
+      cy.get('#oneGender').should('not.have.class', 'errored')
+      cy.get('#forProfit').should('not.have.class', 'errored')
+      cy.get('#pediatric').should('not.have.class', 'errored')
+      cy.get('#vulnerablePopulation').should('not.have.class', 'errored')
+      cy.get('#illegalBehavior').should('not.have.class', 'errored')
+      cy.get('#sexualDiseases').should('not.have.class', 'errored')
+      cy.get('#psychiatricTraits').should('not.have.class', 'errored')
+      cy.get('#notHealth').should('not.have.class', 'errored')
+      cy.get('#stigmatizedDiseases').should('not.have.class', 'errored')
+    })
 
     it('Required fields get errors on submit', () => {
-      cy.get('#btn_attest').click();
+      cy.get('#btn_attest').click({ force: true })
 
       // since we're setting a default value, this should not error on initial validation
-      cy.get('#piCountryOfOperation').should('not.have.class', 'errored');
-      cy.get('#signingOfficial').should('have.class', 'errored');
-      cy.get('#itDirector').should('have.class', 'errored');
-      cy.get('#itDirectorEmail').should('have.class', 'errored');
-      cy.get('#anvilUse').should('have.class', 'errored');
+      cy.get('#piCountryOfOperation').should('not.have.class', 'errored')
+      cy.get('#signingOfficial').should('have.class', 'errored')
+      cy.get('#itDirector').should('have.class', 'errored')
+      cy.get('#itDirectorEmail').should('have.class', 'errored')
+      cy.get('#anvilUse').should('have.class', 'errored')
 
-      cy.get('#datasetIds').should('have.class', 'errored');
+      cy.get('#datasetIds').should('have.class', 'errored')
 
-      cy.get('#projectTitle').should('have.class', 'errored');
-      cy.get('#rus').should('have.class', 'errored');
-      cy.get('#nonTechRus').should('have.class', 'errored');
+      cy.get('#projectTitle').should('have.class', 'errored')
+      cy.get('#rus').should('have.class', 'errored')
+      cy.get('#nonTechRus').should('have.class', 'errored')
 
-      cy.get('#diseases').should('have.class', 'errored');
+      cy.get('#diseases').should('have.class', 'errored')
 
-      cy.get('#controls').should('have.class', 'errored');
-      cy.get('#population').should('have.class', 'errored');
-      cy.get('#oneGender').should('have.class', 'errored');
-      cy.get('#forProfit').should('have.class', 'errored');
-      cy.get('#pediatric').should('have.class', 'errored');
-      cy.get('#vulnerablePopulation').should('have.class', 'errored');
-      cy.get('#illegalBehavior').should('have.class', 'errored');
-      cy.get('#sexualDiseases').should('have.class', 'errored');
-      cy.get('#psychiatricTraits').should('have.class', 'errored');
-      cy.get('#notHealth').should('have.class', 'errored');
-      cy.get('#stigmatizedDiseases').should('have.class', 'errored');
-    });
+      cy.get('#controls').should('have.class', 'errored')
+      cy.get('#population').should('have.class', 'errored')
+      cy.get('#oneGender').should('have.class', 'errored')
+      cy.get('#forProfit').should('have.class', 'errored')
+      cy.get('#pediatric').should('have.class', 'errored')
+      cy.get('#vulnerablePopulation').should('have.class', 'errored')
+      cy.get('#illegalBehavior').should('have.class', 'errored')
+      cy.get('#sexualDiseases').should('have.class', 'errored')
+      cy.get('#psychiatricTraits').should('have.class', 'errored')
+      cy.get('#notHealth').should('have.class', 'errored')
+      cy.get('#stigmatizedDiseases').should('have.class', 'errored')
+    })
 
     it('Internal / external / lab collaborators error properly', () => {
-      cy.get('#add-labCollaborators-btn').click();
+      cy.get('#add-labCollaborators-btn').click()
 
       // should not be errored when open
-      cy.get('#0_collaboratorName').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorEraCommonsId').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorTitle').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorEmail').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorApproval').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorCountryOfOperation').should('not.have.class', 'errored');
+      cy.get('#0_collaboratorName').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorEraCommonsId').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorTitle').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorEmail').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorApproval').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorCountryOfOperation').should('not.have.class', 'errored')
 
-      cy.get('#collaborator-labCollaborators-add-save').click();
+      cy.get('#collaborator-labCollaborators-add-save').click()
 
       // if clicked and nothing filled out, required field should error
-      cy.get('#0_collaboratorName').should('have.class', 'errored');
-      cy.get('#0_collaboratorEraCommonsId').should('have.class', 'errored');
-      cy.get('#0_collaboratorTitle').should('have.class', 'errored');
-      cy.get('#0_collaboratorEmail').should('have.class', 'errored');
+      cy.get('#0_collaboratorName').should('have.class', 'errored')
+      cy.get('#0_collaboratorEraCommonsId').should('have.class', 'errored')
+      cy.get('#0_collaboratorTitle').should('have.class', 'errored')
+      cy.get('#0_collaboratorEmail').should('have.class', 'errored')
       // we set a default value on countryOfOperation, so it does not error.
-      cy.get('#0_collaboratorApproval').should('have.class', 'errored');
+      cy.get('#0_collaboratorApproval').should('have.class', 'errored')
 
       // fill out fields
-      cy.get('#0_collaboratorName').type('asdf');
-      cy.get('#0_collaboratorEraCommonsId').type('asdgasdg');
-      cy.get('#0_collaboratorTitle').type('asdgasdgasdgas');
-      cy.get('#0_collaboratorEmail').type('asdgasdgasdgasdga'); // not a valid email
-      cy.get('#0_collaboratorApproval_no').click();
+      cy.get('#0_collaboratorName').type('asdf')
+      cy.get('#0_collaboratorEraCommonsId').type('asdgasdg')
+      cy.get('#0_collaboratorTitle').type('asdgasdgasdgas')
+      cy.get('#0_collaboratorEmail').type('asdgasdgasdgasdga') // not a valid email
+      cy.get('#0_collaboratorApproval_false').click()
 
       // should remove errors, except for email
-      cy.get('#0_collaboratorName').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorEraCommonsId').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorTitle').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorApproval').should('not.have.class', 'errored');
-      cy.get('#0_collaboratorEmail').should('have.class', 'errored');
-      cy.get('#0_collaboratorCountryOfOperation').should('not.have.class', 'errored');
+      cy.get('#0_collaboratorName').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorEraCommonsId').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorTitle').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorApproval').should('not.have.class', 'errored')
+      cy.get('#0_collaboratorEmail').should('have.class', 'errored')
+      cy.get('#0_collaboratorCountryOfOperation').should('not.have.class', 'errored')
 
       // shouldn't submit since invalid email format
-      cy.get('#collaborator-labCollaborators-add-save').click();
+      cy.get('#collaborator-labCollaborators-add-save').click()
 
       // fix email
-      cy.get('#0_collaboratorEmail').type('@gmail.com');
-      cy.get('#0_collaboratorEmail').should('not.have.class', 'errored');
+      cy.get('#0_collaboratorEmail').type('@gmail.com')
+      cy.get('#0_collaboratorEmail').should('not.have.class', 'errored')
 
       // should save fine
-      cy.get('#0_summary').should('not.exist');
-      cy.get('#collaborator-labCollaborators-add-save').click();
-      cy.get('#0_summary').should('exist');
-
-    });
-  });
+      cy.get('#0_summary').should('not.exist')
+      cy.get('#collaborator-labCollaborators-add-save').click()
+      cy.get('#0_summary').should('exist')
+    })
+  })
 
   describe('Without Library Cards', () => {
     beforeEach(() => {
-      cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
-      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));
-      cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets));
-      cy.stub(Storage, 'getCurrentUser').returns(userNoLibraryCard);
-      cy.stub(User, 'getMe').returns(userNoLibraryCard);
-      cy.stub(Navigation, 'console').returns({});
-      cy.stub(DAR, 'postDar').returns({});
-      cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' });
-      cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
-      cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
-      cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}));
+      cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials)
+      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets))
+      cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets))
+      cy.stub(Storage, 'getCurrentUser').returns(userNoLibraryCard)
+      cy.stub(User, 'getMe').returns(userNoLibraryCard)
+      cy.stub(Navigation, 'console').returns({})
+      cy.stub(DAR, 'postDar').returns({})
+      cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' })
+      cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' })
+      cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' })
+      cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}))
 
       mount(
         <MemoryRouter initialEntries={['/']}>
           <DataAccessRequestApplication {...props} />
-        </MemoryRouter>
-      );
-    });
+        </MemoryRouter>,
+      )
+    })
 
     it('Cannot submit without library card', () => {
-      cy.get('#signingOfficial').type('SO 2{enter}');
-      cy.get('#itDirector').type('Some IT Director');
-      cy.get('#itDirectorEmail').type('it@good.org');
-      cy.get('#piCountryOfOperation').type('United{enter}');
-      cy.get('#anvilUse_yes').click();
+      cy.get('#signingOfficial').type('SO 2{enter}')
+      cy.get('#itDirector').type('Some IT Director')
+      cy.get('#itDirectorEmail').type('it@good.org')
+      cy.get('#piCountryOfOperation').type('United{enter}')
+      cy.get('#anvilUse_yes').click()
 
-      cy.get('#datasetIds').type('asdf{enter}');
+      cy.get('#datasetIds').type('asdf{enter}')
 
-      cy.get('#projectTitle').type('Title');
-      cy.get('#rus').type('asdf');
-      cy.get('#nonTechRus').type('asdf asdf');
+      cy.get('#projectTitle').type('Title')
+      cy.get('#rus').type('asdf')
+      cy.get('#nonTechRus').type('asdf asdf')
 
-      cy.get('#diseases_no').click();
-      cy.get('#hmb_yes').click();
+      cy.get('#diseases_no').click()
+      cy.get('#hmb_yes').click()
 
-      cy.get('#controls_no').click();
-      cy.get('#population_no').click();
-      cy.get('#oneGender_no').click();
-      cy.get('#forProfit_no').click();
-      cy.get('#pediatric_no').click();
-      cy.get('#vulnerablePopulation_no').click();
-      cy.get('#illegalBehavior_no').click();
-      cy.get('#sexualDiseases_no').click();
-      cy.get('#psychiatricTraits_no').click();
-      cy.get('#notHealth_no').click();
-      cy.get('#stigmatizedDiseases_no').click();
+      cy.get('#controls_no').click()
+      cy.get('#population_no').click()
+      cy.get('#oneGender_no').click()
+      cy.get('#forProfit_no').click()
+      cy.get('#pediatric_no').click()
+      cy.get('#vulnerablePopulation_no').click()
+      cy.get('#illegalBehavior_no').click()
+      cy.get('#sexualDiseases_no').click()
+      cy.get('#psychiatricTraits_no').click()
+      cy.get('#notHealth_no').click()
+      cy.get('#stigmatizedDiseases_no').click()
 
-      cy.get('#btn_attest').click();
+      cy.get('#btn_attest').click()
 
-
-      cy.get('#btn_openSubmitModal').should('not.exist');
-
-
-    });
-  });
-});
-
+      cy.get('#btn_openSubmitModal').should('not.exist')
+    })
+  })
+})

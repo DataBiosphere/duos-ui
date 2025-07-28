@@ -1,50 +1,51 @@
-import React from 'react';
-import {useState, useEffect, useRef, useCallback } from 'react';
-import SearchBar from '../components/SearchBar';
-import { User } from '../libs/ajax/User';
-import { Collections } from '../libs/ajax/Collections';
-import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils';
-import { Styles } from '../libs/theme';
-import lockIcon from '../images/lock-icon.png';
-import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
-import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
+import React from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import SearchBar from '../components/SearchBar'
+import { User } from '../libs/ajax/User'
+import { Collections } from '../libs/ajax/Collections'
+import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils'
+import { Styles } from '../libs/theme'
+import lockIcon from '../images/lock-icon.png'
+import { DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable'
+import { consoleTypes, DarCollectionTableColumnOptions } from '../utils/DarCollectionUtils'
 
 export default function MemberConsole(props) {
-  const [collections, setCollections] = useState([]);
-  const [filteredList, setFilteredList] = useState([]);
-  const [relevantDatasets, setRelevantDatasets] = useState();
-  const [isLoading, setIsLoading] = useState(true);
-  const searchRef = useRef('');
-  const filterFn = getSearchFilterFunctions().darCollections;
-  const { history } = props;
+  const [collections, setCollections] = useState([])
+  const [filteredList, setFilteredList] = useState([])
+  const [relevantDatasets, setRelevantDatasets] = useState()
+  const [isLoading, setIsLoading] = useState(true)
+  const searchRef = useRef('')
+  const filterFn = getSearchFilterFunctions().darCollections
+  const { history } = props
 
   const handleSearchChange = useCallback(
-    (searchTerms) =>
+    searchTerms =>
       searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList),
-    [collections, filterFn]
-  );
+    [collections, filterFn],
+  )
 
   useEffect(() => {
     const init = async () => {
       try {
         const [collections, datasets] = await Promise.all([
           Collections.getCollectionSummariesByRoleName(USER_ROLES.member),
-          User.getUserRelevantDatasets(), //still need this on this console for status cell
-        ]);
-        setCollections(collections);
-        setRelevantDatasets(datasets);
-        setFilteredList(collections);
-        setIsLoading(false);
-      } catch (_error) {
+          User.getUserRelevantDatasets(), // still need this on this console for status cell
+        ])
+        setCollections(collections)
+        setRelevantDatasets(datasets)
+        setFilteredList(collections)
+        setIsLoading(false)
+      }
+      catch (_error) {
         Notifications.showError({
           text: 'Error initializing Collections table',
-        });
+        })
       }
-    };
-    init();
-  }, []);
+    }
+    init()
+  }, [])
 
-  const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
+  const goToVote = useCallback(collectionId => history.push(`/dar_collection/${collectionId}`), [history])
 
   return (
     <div style={Styles.PAGE}>
@@ -84,5 +85,5 @@ export default function MemberConsole(props) {
         consoleType={consoleTypes.MEMBER}
       />
     </div>
-  );
+  )
 }

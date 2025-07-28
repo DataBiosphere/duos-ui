@@ -1,6 +1,6 @@
-import {forEach as lodashForEach} from 'lodash';
-import {DAR} from './ajax/DAR';
-import {Theme} from './theme';
+import { forEach as lodashForEach } from 'lodash'
+import { DAR } from './ajax/DAR'
+import { Theme } from './theme'
 import {
   capitalize,
   cloneDeep,
@@ -17,93 +17,93 @@ import {
   isNil,
   join,
   map,
-  toLower
-} from 'lodash/fp';
-import {headerTabsConfig} from '../components/DuosHeader';
-import {ToastNotifications} from './ToastNotifications';
+  toLower,
+} from 'lodash/fp'
+import { headerTabsConfig } from '../components/DuosHeader'
+import { ToastNotifications } from './ToastNotifications'
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
   SELECTED_SIGNING_OFFICIAL_ID: 'selectedSigningOfficialId',
   INSTITUTION_ID: 'institutionId',
-  SUGGESTED_INSTITUTION: 'suggestedInstitution'
-};
+  SUGGESTED_INSTITUTION: 'suggestedInstitution',
+}
 
-///////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
+/// ////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
 export const isCollectionCanceled = (collection) => {
-  const {dars} = collection;
-  return every((dar) => toLower(dar.data.status) === 'canceled')(dars);
-};
+  const { dars } = collection
+  return every(dar => toLower(dar.data.status) === 'canceled')(dars)
+}
 
-///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
+/// ////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
 
 export const goToPage = (value, pageCount, setCurrentPage) => {
   if (value >= 1 && value <= pageCount) {
-    setCurrentPage(value);
+    setCurrentPage(value)
   }
-};
+}
 
 export const findPropertyValue = (propName, researcher) => {
-  const props = researcher.properties;
-  const prop = isNil(props) ?
-    null
-    : find({propertyKey: propName})(props);
-  return isNil(prop) ? '' : prop.propertyValue;
-};
+  const props = researcher.properties
+  const prop = isNil(props)
+    ? null
+    : find({ propertyKey: propName })(props)
+  return isNil(prop) ? '' : prop.propertyValue
+}
 
 export const getPropertyValuesFromUser = (user) => {
   const researcherProps = {
     institutionId: findPropertyValue(UserProperties.INSTITUTION_ID, user),
     suggestedInstitution: findPropertyValue(UserProperties.SUGGESTED_INSTITUTION, user),
     selectedSigningOfficialId: findPropertyValue(UserProperties.SELECTED_SIGNING_OFFICIAL_ID, user),
-    suggestedSigningOfficial: findPropertyValue(UserProperties.SUGGESTED_SIGNING_OFFICIAL, user)
-  };
+    suggestedSigningOfficial: findPropertyValue(UserProperties.SUGGESTED_SIGNING_OFFICIAL, user),
+  }
 
-  researcherProps.institutionId = user.institutionId;
-  return researcherProps;
-};
+  researcherProps.institutionId = user.institutionId
+  return researcherProps
+}
 
 export const applyHoverEffects = (e, style) => {
   lodashForEach(style, (value, key) => {
-    e.target.style[key] = value;
-  });
-};
+    e.target.style[key] = value
+  })
+}
 
-//currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
-//go through the list of datasets and get the name of the dataset whose id is in the datasetId list
+// currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
+// go through the list of datasets and get the name of the dataset whose id is in the datasetId list
 export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {
-  const data = !isNil(datasetId) && !isEmpty(datasetId) ? find({'value': first(datasetId).toString()})(datasets) : null;
-  return isNil(data) ? '- -' : getDatasetNames([data]);
-};
+  const data = !isNil(datasetId) && !isEmpty(datasetId) ? find({ value: first(datasetId).toString() })(datasets) : null
+  return isNil(data) ? '- -' : getDatasetNames([data])
+}
 
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
-    return '---';
+    return '---'
   }
 
   if (toLower(dateval) === 'unsubmitted') {
-    return dateval;
+    return dateval
   }
 
-  const dateFormat = new Date(dateval);
-  const year = dateFormat.getFullYear();
-  const month = ('0' + (dateFormat.getMonth() + 1)).slice(-2);
-  const day = ('0' + dateFormat.getDate()).slice(-2);
-  const datestr = year + '-' + month + '-' + day;
-  return datestr;
-};
+  const dateFormat = new Date(dateval)
+  const year = dateFormat.getFullYear()
+  const month = ('0' + (dateFormat.getMonth() + 1)).slice(-2)
+  const day = ('0' + dateFormat.getDate()).slice(-2)
+  const datestr = year + '-' + month + '-' + day
+  return datestr
+}
 
-//Custom empty check needed on File
-//lodash's isEmpty checks for enumerated keys, something a File does not have (ends up being an empty array)
-//leads to incorrect evaluation of File
+// Custom empty check needed on File
+// lodash's isEmpty checks for enumerated keys, something a File does not have (ends up being an empty array)
+// leads to incorrect evaluation of File
 export const isFileEmpty = (file) => {
-  return isNil(file) || file.size < 1 || file.length < 1;
-};
+  return isNil(file) || file.size < 1 || file.length < 1
+}
 
 export const isEmailAddress = (email) => {
-  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/;
-  return re.test(email);
-};
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/
+  return re.test(email)
+}
 
 export const USER_ROLES = {
   admin: 'Admin',
@@ -114,23 +114,23 @@ export const USER_ROLES = {
   signingOfficial: 'SigningOfficial',
   dataSubmitter: 'DataSubmitter',
   serviceAccount: 'ServiceAccount',
-  all: 'All'
-};
+  all: 'All',
+}
 
 export const getDatasetNames = (datasets) => {
   if (!datasets) {
-    return '';
+    return ''
   }
   const datasetNames = datasets.map((dataset) => {
-    return ((dataset.label) ? dataset.label : dataset.name);
-  });
-  return datasetNames.join('\n');
-};
+    return ((dataset.label) ? dataset.label : dataset.name)
+  })
+  return datasetNames.join('\n')
+}
 
-//helper function to generate keys for rendered elements; splits on commas and whitespace
+// helper function to generate keys for rendered elements; splits on commas and whitespace
 export const convertLabelToKey = (label = '') => {
-  return label.split(/[\s,]+/).join('-');
-};
+  return label.split(/[\s,]+/).join('-')
+}
 
 /**
  * Sets the user's role status.
@@ -140,53 +140,57 @@ export const convertLabelToKey = (label = '') => {
  * @returns converted DuosUser
  */
 export const setUserRoleStatuses = (user, Storage) => {
-  const currentUserRoles = (user.roles) ? user.roles.map(roles => roles.name) : [];
-  user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
-  user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
-  user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
-  user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
-  user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
-  user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1;
-  user.isDataSubmitter = currentUserRoles.indexOf(USER_ROLES.dataSubmitter) > -1;
-  user.isServiceAccount = currentUserRoles.indexOf(USER_ROLES.serviceAccount) > -1;
-  Storage.setCurrentUser(user);
-  return user;
-};
+  const currentUserRoles = (user.roles) ? user.roles.map(roles => roles.name) : []
+  user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1
+  user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1
+  user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1
+  user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1
+  user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1
+  user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1
+  user.isDataSubmitter = currentUserRoles.indexOf(USER_ROLES.dataSubmitter) > -1
+  user.isServiceAccount = currentUserRoles.indexOf(USER_ROLES.serviceAccount) > -1
+  Storage.setCurrentUser(user)
+  return user
+}
 
 export const Navigation = {
-  back: async (user, history) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    const page =
-      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
-        : firstConsole ? firstConsole.link
-          : '/';
-    history.push(page);
-  },
+  /**
+   * This function is used to redirect the user to one of the following locations in order of priority:
+   * - The redirectTo query parameter in the URL if it exists
+   * - The first console tab that is rendered for the user if it exists
+   * - The root path ("/") if no redirectTo or console tab is available
+   *
+   * @param user The user object to determine which console tabs are available
+   * @param history The history object to use for navigation (optional)
+   * @returns {Promise<void>}
+   */
   console: async (user, history) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    const page =
-      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
-        : firstConsole ? firstConsole.link
-          : '/';
-    history.push(page);
-  }
-};
+    const queryParams = new URLSearchParams(window.location.search)
+    const redirectTo = queryParams?.get('redirectTo')
+    const firstConsole = headerTabsConfig.find(config => config.isRendered(user))
+    const page = redirectTo || (firstConsole ? firstConsole.link : '/')
+    if (history) {
+      history.push(page)
+    }
+    else {
+      window.location = page
+    }
+  },
+}
 
 export const download = (fileName, text) => {
-  const break_line = '\r\n \r\n';
-  text = break_line + text;
-  const blob = new Blob([text], {type: 'text/plain'});
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName + '-restriction';
-  a.click();
-};
+  const break_line = '\r\n \r\n'
+  text = break_line + text
+  const blob = new Blob([text], { type: 'text/plain' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName + '-restriction'
+  a.click()
+}
 
 export const Notifications = {
-  ...ToastNotifications
+  ...ToastNotifications,
 }
 
 /**
@@ -199,357 +203,393 @@ export const Notifications = {
  */
 export const PromiseSerial = funcs =>
   funcs.reduce((promise, func) =>
-      promise.then(result =>
-        func().then(Array.prototype.concat.bind(result))),
-    Promise.resolve([]));
+    promise.then(result =>
+      func().then(Array.prototype.concat.bind(result))),
+  Promise.resolve([]))
 
 //////////////////////////////////
-//DAR CONSOLES UTILITY FUNCTIONS//
+// DAR CONSOLES UTILITY FUNCTIONS//
 /////////////////////////////////
 
 export const getElectionDate = (election) => {
-  let formattedString = '- -';
+  let formattedString = '- -'
   if (election) {
-    //NOTE: some elections have a createDate attribute but not a lastUpdate attributes
-    const targetDate = election.lastUpdate || election.createDate;
-    formattedString = formatDate(targetDate);
+    // NOTE: some elections have a createDate attribute but not a lastUpdate attributes
+    const targetDate = election.lastUpdate || election.createDate
+    formattedString = formatDate(targetDate)
   }
-  return formattedString;
-};
+  return formattedString
+}
 
 export const wasVoteSubmitted = (vote) => {
-  //NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
-  //current code will always provide lastUpdate
-  const targetDate = vote.lastUpdate || vote.createDate || vote.updateDate || vote.lastUpdateDate;
-  return !isNil(targetDate);
-};
+  // NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
+  // current code will always provide lastUpdate
+  const targetDate = vote.lastUpdate || vote.createDate || vote.updateDate || vote.lastUpdateDate
+  return !isNil(targetDate)
+}
 
 export const wasFinalVoteTrue = (voteData) => {
-  const {type, vote} = voteData;
-  //vote status capitalizes final, election status does not
-  return toLower(type) === 'final' && vote === true;
-};
+  const { type, vote } = voteData
+  // vote status capitalizes final, election status does not
+  return toLower(type) === 'final' && vote === true
+}
 
 export const processElectionStatus = (election, votes, showVotes) => {
-  let output;
-  const electionStatus = !isNil(get('status')(election)) ? toLower(election.status) : null;
+  let output
+  const electionStatus = !isNil(get('status')(election)) ? toLower(election.status) : null
   if (isNil(electionStatus)) {
-    output = 'Unreviewed';
-  } else if (electionStatus === 'open') {
-    //Null check since react doesn't necessarily perform prop updates immediately
-    if (!isEmpty(votes) && !isNil(election)) {
-      const dacVotes = filter((vote) => toLower(vote.type) === 'dac' && vote.electionId === election.electionId)(votes);
-      const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
-      const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`;
-      output = `Open${showVotes ? outputSuffix : ''}`;
-    }
-    //some elections have electionStatus === Final, others have electionStatus === Closed
-    //both are, in this step of the process, technically referring to a closed election
-    //therefore both values must be checked for
-  } else if (electionStatus === 'final' || electionStatus === 'closed') {
-    const finalVote = find(wasFinalVoteTrue)(votes);
-    output = finalVote ? 'Approved' : 'Denied';
-  } else {
-    output = capitalize(electionStatus);
+    output = 'Unreviewed'
   }
-  return output;
-};
+  else if (electionStatus === 'open') {
+    // Null check since react doesn't necessarily perform prop updates immediately
+    if (!isEmpty(votes) && !isNil(election)) {
+      const dacVotes = filter(vote => toLower(vote.type) === 'dac' && vote.electionId === election.electionId)(votes)
+      const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length
+      const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`
+      output = `Open${showVotes ? outputSuffix : ''}`
+    }
+    // some elections have electionStatus === Final, others have electionStatus === Closed
+    // both are, in this step of the process, technically referring to a closed election
+    // therefore both values must be checked for
+  }
+  else if (electionStatus === 'final' || electionStatus === 'closed') {
+    const finalVote = find(wasFinalVoteTrue)(votes)
+    output = finalVote ? 'Approved' : 'Denied'
+  }
+  else {
+    output = capitalize(electionStatus)
+  }
+  return output
+}
 
 export const calcTablePageCount = (tableSize, filteredList) => {
   if (isEmpty(filteredList)) {
-    return 1;
+    return 1
   }
-  return Math.ceil(filteredList.length / tableSize);
-};
+  return Math.ceil(filteredList.length / tableSize)
+}
 
 export const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
   if (!isEmpty(filteredList)) {
-    const startIndex = (currentPage - 1) * tableSize;
-    const endIndex = currentPage * tableSize;
-    return filteredList.slice(startIndex, endIndex);
+    const startIndex = (currentPage - 1) * tableSize
+    const endIndex = currentPage * tableSize
+    return filteredList.slice(startIndex, endIndex)
   }
-};
+}
 
 export const getSearchFilterFunctions = () => {
   return {
-    dar: (term, targetList) => filter(electionData => {
-      const {election, dac, votes} = electionData;
-      const dar = electionData.dar ? electionData.dar.data : undefined;
-      const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
-      const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
-      const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
-      return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
+    dar: (term, targetList) => filter((electionData) => {
+      const { election, dac, votes } = electionData
+      const dar = electionData.dar ? electionData.dar.data : undefined
+      const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : []
+      const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : []
+      const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : []
+      return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs)
     }, targetList),
-    libraryCard: (term, targetList) => filter(libraryCard => {
-      const {userName, createDate, updateDate, userEmail} = libraryCard;
-      return includes(term, toLower(userName)) ||
-        includes(term, formatDate(createDate)) ||
-        includes(term, formatDate(updateDate)) ||
-        includes(term, toLower(userEmail));
+    libraryCard: (term, targetList) => filter((libraryCard) => {
+      const { userName, createDate, updateDate, userEmail } = libraryCard
+      return includes(term, toLower(userName))
+        || includes(term, formatDate(createDate))
+        || includes(term, formatDate(updateDate))
+        || includes(term, toLower(userEmail))
     }, targetList),
-    signingOfficialResearchers: (term, targetList) => filter(researcher => {
-      const {displayName, eraCommonsId, email} = researcher;
-      const roles = researcher.roles || [];
-      const baseAttributes = [displayName, eraCommonsId, email];
+    signingOfficialResearchers: (term, targetList) => filter((researcher) => {
+      const { displayName, eraCommonsId, email } = researcher
+      const roles = researcher.roles || []
+      const baseAttributes = [displayName, eraCommonsId, email]
       const includesRoles = roles.reduce((memo, current) => {
-        const roleName = current.name;
-        return memo || includes(term, toLower(roleName));
-      }, false);
+        const roleName = current.name
+        return memo || includes(term, toLower(roleName))
+      }, false)
 
       const includesBaseAttributes = baseAttributes.reduce(
         (memo, current) => {
-          return memo || includes(term, toLower(current));
-        }, false);
+          return memo || includes(term, toLower(current))
+        }, false)
 
-      return includesRoles || includesBaseAttributes;
+      return includesRoles || includesBaseAttributes
     })(targetList),
     darCollections: (term, targetList) =>
-      isEmpty(term) ? targetList :
-        filter(collection => {
-          const {
-            darCode,
-            datasetCount,
-            institutionName,
-            name,
-            researcherName,
-            status,
-            submissionDate,
-            expiresAt
-          } = collection;
-          const formattedSubmissionDate = formatDate(submissionDate);
-          const formattedExpiresAt = formatDate(expiresAt);
-          const matched = find((phrase) => {
-            const termArr = term.split(' ');
-            return find(term => includes(toLower(term), toLower(phrase)))(termArr);
-          })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate, formattedExpiresAt]);
-          return !isNil(matched);
-        })(targetList),
+      isEmpty(term)
+        ? targetList
+        : filter((collection) => {
+            const {
+              darCode,
+              datasetCount,
+              institutionName,
+              name,
+              researcherName,
+              status,
+              submissionDate,
+              expiresAt,
+            } = collection
+            const formattedSubmissionDate = formatDate(submissionDate)
+            const formattedExpiresAt = formatDate(expiresAt)
+            const matched = find((phrase) => {
+              const termArr = term.split(' ')
+              return find(term => includes(toLower(term), toLower(phrase)))(termArr)
+            })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate, formattedExpiresAt])
+            return !isNil(matched)
+          })(targetList),
     users: (term, targetList) => {
-      const lowerCaseTerm = toLower(term);
-      const isMatch = (userField) => includes(lowerCaseTerm, toLower(userField));
+      const lowerCaseTerm = toLower(term)
+      const isMatch = userField => includes(lowerCaseTerm, toLower(userField))
 
-      return filter(user => {
+      return filter((user) => {
         const {
-          displayName, email, roles, institution, libraryCard
-        } = user;
+          displayName, email, roles, institution, libraryCard,
+        } = user
 
-        const matchable = [displayName, email];
+        const matchable = [displayName, email]
         if (!isNil(roles)) {
-          matchable.push(...map((r) => r.name)(roles));
+          matchable.push(...map(r => r.name)(roles))
         }
         if (!isNil(institution)) {
-          matchable.push(institution.name);
+          matchable.push(institution.name)
         }
 
         if (!isNil(libraryCard)) {
-          const hasLibraryCard = !isNil(libraryCard);
+          const hasLibraryCard = !isNil(libraryCard)
 
           if (hasLibraryCard) {
-            matchable.push('LibraryCard');
+            matchable.push('LibraryCard')
           }
         }
 
-        const match = find(isMatch)(matchable);
-        return !isNil(match);
-      })(targetList);
+        const match = find(isMatch)(matchable)
+        return !isNil(match)
+      })(targetList)
     },
-    datasets: (term, targetList) => filter(dataset => {
+    datasets: (term, targetList) => filter((dataset) => {
       /**
        * This filter function assumes that the dataset has been
        * pre-populated with data use codes and translations
        */
-      const loweredTerm = toLower(term);
-      const name = dataset.name || dataset.datasetName;
-      const alias = dataset.alias;
-      const identifier = dataset.datasetIdentifier;
-      const allPropValues = dataset.properties?.map((p) => p.propertyValue).join('');
+      const loweredTerm = toLower(term)
+      const name = dataset.name || dataset.datasetName
+      const alias = dataset.alias
+      const identifier = dataset.datasetIdentifier
+      const allPropValues = dataset.properties?.map(p => p.propertyValue).join('')
       // Approval status
       const status = !isNil(dataset.dacApproval)
         ? dataset.dacApproval
           ? 'accepted'
           : 'rejected'
-        : 'yes no';
-      const studyName = dataset.study?.studyName;
-      const phsId = dataset.study?.phsId;
-      const dataUse = [];
-      dataUse.push(dataset.dataUse?.primary?.flatMap(du => [du.code, du.description]));
-      dataUse.push(dataset.dataUse?.secondary?.flatMap(du => [du.code, du.description]));
-      return includes(loweredTerm, toLower(alias)) ||
-        includes(loweredTerm, toLower(name)) ||
-        includes(loweredTerm, toLower(identifier)) ||
-        includes(loweredTerm, toLower(allPropValues)) ||
-        includes(loweredTerm, toLower(dataset.codeList)) ||
-        includes(loweredTerm, toLower(status)) ||
-        includes(loweredTerm, toLower(studyName)) ||
-        includes(loweredTerm, toLower(phsId)) ||
-        includes(loweredTerm, toLower(dataUse.join(' ')));
+        : 'yes no'
+      const studyName = dataset.study?.studyName
+      const phsId = dataset.study?.phsId
+      const dataUse = []
+      dataUse.push(dataset.dataUse?.primary?.flatMap(du => [du.code, du.description]))
+      dataUse.push(dataset.dataUse?.secondary?.flatMap(du => [du.code, du.description]))
+      return includes(loweredTerm, toLower(alias))
+        || includes(loweredTerm, toLower(name))
+        || includes(loweredTerm, toLower(identifier))
+        || includes(loweredTerm, toLower(allPropValues))
+        || includes(loweredTerm, toLower(dataset.codeList))
+        || includes(loweredTerm, toLower(status))
+        || includes(loweredTerm, toLower(studyName))
+        || includes(loweredTerm, toLower(phsId))
+        || includes(loweredTerm, toLower(dataUse.join(' ')))
     }, targetList),
-    datasetTerms: (term, targetList) => filter(datasetTerm => {
+    datasetTerms: (term, targetList) => filter((datasetTerm) => {
       /**
        * This filter function is intended for Dataset Index Terms
        */
-      const loweredTerm = toLower(term);
+      const loweredTerm = toLower(term)
       // Approval status
       const status = !isNil(datasetTerm.dacApproval)
         ? datasetTerm.dacApproval
           ? 'accepted'
           : 'rejected'
-        : 'pending';
-      const primaryCodes = datasetTerm.dataUse?.primary.map(du => du.code);
-      const secondaryCodes = datasetTerm.dataUse?.secondary.map(du => du.code);
-      const codes = join(', ')(concat(primaryCodes)(secondaryCodes));
-      const dataTypes = join(', ')(datasetTerm.study?.dataTypes);
-      const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail);
-      return includes(loweredTerm, toLower(datasetTerm.datasetName)) ||
-        includes(loweredTerm, toLower(datasetTerm.datasetIdentifier)) ||
-        includes(loweredTerm, toLower(datasetTerm.dac?.dacName)) ||
-        includes(loweredTerm, toLower(datasetTerm.dac?.dacEmail)) ||
-        includes(loweredTerm, toLower(datasetTerm.dataLocation)) ||
-        includes(loweredTerm, toLower(codes)) ||
-        includes(loweredTerm, toLower(datasetTerm.createUserDisplayName)) ||
-        includes(loweredTerm, toLower(datasetTerm.url)) ||
-        includes(loweredTerm, toLower(datasetTerm.study?.description)) ||
-        includes(loweredTerm, toLower(datasetTerm.study?.dataSubmitterEmail)) ||
-        includes(loweredTerm, toLower(dataTypes)) ||
-        includes(loweredTerm, toLower(custodians)) ||
-        includes(loweredTerm, toLower(datasetTerm.study?.phenotype)) ||
-        includes(loweredTerm, toLower(datasetTerm.study?.piName)) ||
-        includes(loweredTerm, toLower(datasetTerm.study?.species)) ||
-        includes(loweredTerm, toLower(datasetTerm.study?.studyName)) ||
-        includes(loweredTerm, toLower(status));
+        : 'pending'
+      const primaryCodes = datasetTerm.dataUse?.primary.map(du => du.code)
+      const secondaryCodes = datasetTerm.dataUse?.secondary.map(du => du.code)
+      const codes = join(', ')(concat(primaryCodes)(secondaryCodes))
+      const dataTypes = join(', ')(datasetTerm.study?.dataTypes)
+      const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail)
+      return includes(loweredTerm, toLower(datasetTerm.datasetName))
+        || includes(loweredTerm, toLower(datasetTerm.datasetIdentifier))
+        || includes(loweredTerm, toLower(datasetTerm.dac?.dacName))
+        || includes(loweredTerm, toLower(datasetTerm.dac?.dacEmail))
+        || includes(loweredTerm, toLower(datasetTerm.dataLocation))
+        || includes(loweredTerm, toLower(codes))
+        || includes(loweredTerm, toLower(datasetTerm.createUserDisplayName))
+        || includes(loweredTerm, toLower(datasetTerm.url))
+        || includes(loweredTerm, toLower(datasetTerm.study?.description))
+        || includes(loweredTerm, toLower(datasetTerm.study?.dataSubmitterEmail))
+        || includes(loweredTerm, toLower(dataTypes))
+        || includes(loweredTerm, toLower(custodians))
+        || includes(loweredTerm, toLower(datasetTerm.study?.phenotype))
+        || includes(loweredTerm, toLower(datasetTerm.study?.piName))
+        || includes(loweredTerm, toLower(datasetTerm.study?.species))
+        || includes(loweredTerm, toLower(datasetTerm.study?.studyName))
+        || includes(loweredTerm, toLower(status))
     }, targetList),
-  };
-};
+    institutions: (term, targetList) => filter((institution) => {
+      const loweredTerm = toLower(term)
+      const soStrings = institution.signingOfficials?.map((so) => {
+        return so.displayName + ' ' + so.email
+      }).join(' ')
+      const domains = institution.domains?.join(' ') || ''
+      return includes(loweredTerm, toLower(institution.name))
+        || includes(loweredTerm, toLower(institution.id))
+        || includes(loweredTerm, toLower(institution.itDirectorName))
+        || includes(loweredTerm, toLower(institution.itDirectorEmail))
+        || includes(loweredTerm, toLower(institution.institutionUrl))
+        || includes(loweredTerm, toLower(institution.dunsNumber))
+        || includes(loweredTerm, toLower(institution.orgChartUrl))
+        || includes(loweredTerm, toLower(institution.verificationUrl))
+        || includes(loweredTerm, toLower(institution.verificationFilename))
+        || includes(loweredTerm, toLower(institution.organizationType))
+        || includes(loweredTerm, toLower(institution.createUser?.displayName))
+        || includes(loweredTerm, toLower(institution.createUser?.email))
+        || includes(loweredTerm, toLower(institution.updateUser?.displayName))
+        || includes(loweredTerm, toLower(institution.updateUser?.email))
+        || includes(loweredTerm, toLower(institution.updateDate))
+        || includes(loweredTerm, toLower(institution.createDate))
+        || includes(loweredTerm, toLower(domains))
+        || includes(loweredTerm, toLower(soStrings))
+    }, targetList),
+  }
+}
 
 export const tableSearchHandler = (list, setFilteredList, setCurrentPage, modelName) => {
-  const filterFnMap = getSearchFilterFunctions();
+  const filterFnMap = getSearchFilterFunctions()
   return (searchTerms) => {
-    const rawSearchTerms = getOr(searchTerms, 'current.value', searchTerms);
-    const searchTermValues = toLower(rawSearchTerms).split(/\s|,/);
+    const rawSearchTerms = getOr(searchTerms, 'current.value', searchTerms)
+    const searchTermValues = toLower(rawSearchTerms).split(/\s|,/)
     if (isEmpty(searchTermValues)) {
-      setFilteredList(list);
-    } else {
-      let newFilteredList = cloneDeep(list);
-      lodashFPForEach((splitTerm) => {
-        const term = splitTerm.trim();
-        if (!isEmpty(term)) {
-          const filterFn = filterFnMap[modelName];
-          newFilteredList = filterFn(term, newFilteredList);
-        }
-      })(searchTermValues);
-      setFilteredList(newFilteredList);
+      setFilteredList(list)
     }
-    setCurrentPage(1);
-  };
-};
+    else {
+      let newFilteredList = cloneDeep(list)
+      lodashFPForEach((splitTerm) => {
+        const term = splitTerm.trim()
+        if (!isEmpty(term)) {
+          const filterFn = filterFnMap[modelName]
+          newFilteredList = filterFn(term, newFilteredList)
+        }
+      })(searchTermValues)
+      setFilteredList(newFilteredList)
+    }
+    setCurrentPage(1)
+  }
+}
 
 export const searchOntologies = (query, callback) => {
-  let options = [];
+  let options = []
   DAR.getAutoCompleteOT(query).then(
-    items => {
+    (items) => {
       options = items.map(function (item) {
         return {
           key: item.id,
           value: item.id,
           label: item.label,
           item: item,
-        };
-      });
-      callback(options);
-    });
-};
+        }
+      })
+      callback(options)
+    })
+}
 
 export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
-  const appliedStyle = disabled ? {[targetColorAttribute]: Theme.palette.disabled} : {};
+  const appliedStyle = disabled ? { [targetColorAttribute]: Theme.palette.disabled } : {}
   try {
-    return Object.assign(baseStyle, appliedStyle);
-  } catch (_e) {
-    return baseStyle;
+    return Object.assign(baseStyle, appliedStyle)
   }
-};
+  catch (_e) {
+    return baseStyle
+  }
+}
 
 export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, id) => {
-  let attributes;
+  let attributes
   if (!disabled) {
-    attributes = {onClick, onMouseEnter, onMouseLeave, style, 'data-tip': dataTip, id};
-  } else {
-    attributes = {style, disabled, 'data-tip': dataTip};
+    attributes = { onClick, onMouseEnter, onMouseLeave, style, 'data-tip': dataTip, id }
+  }
+  else {
+    attributes = { style, disabled, 'data-tip': dataTip }
   }
   if (!isEmpty(dataTip)) {
-    attributes['data-tip'] = dataTip;
+    attributes['data-tip'] = dataTip
   }
-  return attributes;
-};
+  return attributes
+}
 
-//each item in the list is an array of metadata representing a single table row
-//the metadata for each cell needs a data (exactly what is displayed in the table)
-//or value (string or number alternative) property which determines sorting
-export const sortVisibleTable = ({list = [], sort}) => {
+// each item in the list is an array of metadata representing a single table row
+// the metadata for each cell needs a data (exactly what is displayed in the table)
+// or value (string or number alternative) property which determines sorting
+export const sortVisibleTable = ({ list = [], sort }) => {
   // Sort: { dir, colIndex }
   if (!sort || sort.colIndex === undefined) {
-    return list;
-  } else {
+    return list
+  }
+  else {
     return list.sort((a, b) => {
-      const aVal = a[sort.colIndex].value || a[sort.colIndex].data;
-      const bVal = b[sort.colIndex].value || b[sort.colIndex].data;
+      const aVal = a[sort.colIndex].value || a[sort.colIndex].data
+      const bVal = b[sort.colIndex].value || b[sort.colIndex].data
       if (typeof aVal === 'number') {
-        return (aVal > bVal ? -1 : 1) * sort.dir;
-      } else {
-        if (aVal === null || bVal === null || aVal.type === 'div' || bVal.type === 'div') {
-          return (aVal > bVal ? -1 : 1) * sort.dir;
-        } else {
-          return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);
+        return (aVal > bVal ? -1 : 1) * sort.dir
+      }
+      else {
+        if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
+          return (aVal > bVal ? -1 : 1) * sort.dir
+        }
+        else {
+          return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir)
         }
       }
-    });
+    })
   }
-};
+}
 
-//Functions that are commonly used between tables//
+// Functions that are commonly used between tables//
 export const recalculateVisibleTable = async ({
-  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList, sort
+  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList, sort,
 }) => {
   try {
     // Sort data before applying paging
     if (sort) {
-      filteredList = sortVisibleTable({list: filteredList, sort});
+      filteredList = sortVisibleTable({ list: filteredList, sort })
     }
 
     // Set paging variables and truncate the list
-    setPageCount(calcTablePageCount(tableSize, filteredList));
+    setPageCount(calcTablePageCount(tableSize, filteredList))
     if (currentPage > pageCount) {
-      setCurrentPage(pageCount);
+      setCurrentPage(pageCount)
     }
     const visibleList = calcVisibleWindow(
       currentPage,
       tableSize,
-      filteredList
-    );
-    setVisibleList(visibleList);
-  } catch (_error) {
-    Notifications.showError({text: 'Error updating table'});
+      filteredList,
+    )
+    setVisibleList(visibleList)
   }
-};
+  catch (_error) {
+    Notifications.showError({ text: 'Error updating table' })
+  }
+}
 
 export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFilteredList) => {
-  let searchList = (!isNil(originalList) ? [...originalList] : []);
+  let searchList = (!isNil(originalList) ? [...originalList] : [])
   if (!isEmpty(searchTerms)) {
-    const terms = searchTerms.split(' ');
-    lodashFPForEach((term => searchList = filterFn(term, searchList)))(terms);
+    const terms = searchTerms.split(' ')
+    lodashFPForEach(term => searchList = filterFn(term, searchList))(terms)
   }
-  setFilteredList(searchList);
-};
+  setFilteredList(searchList)
+}
 
 export const hasDataSubmitterRole = (user) => {
-  const roles = get('roles')(user);
-  const dsRole = find({'roleId': 8})(roles);
-  return !isNil(dsRole);
-};
+  const roles = get('roles')(user)
+  const dsRole = find({ roleId: 8 })(roles)
+  return !isNil(dsRole)
+}
 
 export const partition = (array, size) => {
-  const result = [];
+  const result = []
   for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
+    result.push(array.slice(i, i + size))
   }
-  return result;
-};
+  return result
+}

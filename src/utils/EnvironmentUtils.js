@@ -1,6 +1,5 @@
-import {Storage} from 'src/libs/storage';
-import {includes} from 'lodash/fp';
-
+import { Storage } from 'src/libs/storage'
+import { includes } from 'lodash/fp'
 
 /**
  * Predefined groups of environments for which certain features might be valid for.
@@ -16,7 +15,7 @@ export const envGroups = {
   NON_PROD: ['local', 'dev', 'staging'],
   NON_STAGING: ['local', 'dev'],
   DEV: ['local', 'dev'],
-};
+}
 
 /**
  * Returns true if the current application `Storage.ENV` variable exists as an element
@@ -32,9 +31,9 @@ export const envGroups = {
  * @returns {boolean}
  */
 export const checkEnv = (envGroup) => {
-  const env = Storage.getEnv();
-  return env ? includes(env)(envGroup) : false;
-};
+  const env = Storage.getEnv()
+  return env ? includes(env)(envGroup) : false
+}
 
 /**
  * Returns true if the current environment is development or local.
@@ -44,10 +43,10 @@ export const checkEnv = (envGroup) => {
  * isDevEnv()
  * @returns {boolean}
  */
-export const isDevEnv = () => checkEnv(envGroups.DEV);
+export const isDevEnv = () => checkEnv(envGroups.DEV)
 
 export default {
   checkEnv,
   isDevEnv,
-  envGroups
-};
+  envGroups,
+}

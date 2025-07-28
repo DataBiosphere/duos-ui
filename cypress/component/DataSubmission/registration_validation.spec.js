@@ -1,107 +1,105 @@
-import {compileSchema, validateForm} from 'src/pages/data_submission/RegistrationValidation.js';
+import { compileSchema, validateForm } from 'src/pages/data_submission/RegistrationValidation.js'
 
 const formData = {
-  'studyType': 'Observational',
-  'studyName': 'name',
-  'studyDescription': 'description',
-  'dataTypes': ['types'],
-  'phenotypeIndication': 'phenotype',
-  'species': 'species',
-  'piName': 'PI Name',
-  'dataCustodianEmail': ['email@abc.com'],
-  'publicVisibility': true,
-  'dataSubmitterUserId': 1,
-  'nihAnvilUse': 'I am not NHGRI funded and do not plan to store data in AnVIL',
-  'consentGroups': [{
-    'numberOfParticipants': 2,
-    'consentGroupName': 'name',
-    'generalResearchUse': true,
-    'dataAccessCommitteeId': 1,
-    'url': 'https://asdf.com'
-  }]
-};
+  studyType: 'Observational',
+  studyName: 'name',
+  studyDescription: 'description',
+  dataTypes: ['types'],
+  phenotypeIndication: 'phenotype',
+  species: 'species',
+  piName: 'PI Name',
+  dataCustodianEmail: ['email@abc.com'],
+  publicVisibility: true,
+  dataSubmitterUserId: 1,
+  nihAnvilUse: 'I am not NHGRI funded and do not plan to store data in AnVIL',
+  consentGroups: [{
+    numberOfParticipants: 2,
+    consentGroupName: 'name',
+    generalResearchUse: true,
+    dataAccessCommitteeId: 1,
+    url: 'https://asdf.com',
+  }],
+}
 
-let schema = undefined;
+let schema = undefined
 
 beforeEach(function () {
   cy.fixture('dataset-registration-schema_v1').then(function (data) {
-    schema = data;
-  });
-});
+    schema = data
+  })
+})
 
 describe('Dataset Registration Schema Validator', () => {
-
   it('Compiles schema and generates a validate function', () => {
-    const validateFunction = compileSchema(schema);
-    cy.wrap(validateFunction).should('not.be.null');
-  });
+    const validateFunction = compileSchema(schema)
+    cy.wrap(validateFunction).should('not.be.null')
+  })
 
   it('Validates a valid instance of a schema', () => {
-    const [valid, validation] = validateForm(schema, formData);
-    cy.wrap(valid).should('be.true');
-    cy.wrap(validation).should('be.empty');
-  });
+    const [valid, validation] = validateForm(schema, formData)
+    cy.wrap(valid).should('be.true')
+    cy.wrap(validation).should('be.empty')
+  })
 
   it('Invalidates an invalid instance of a schema', () => {
-    const [valid, validation] = validateForm(schema, {});
-    cy.wrap(valid).should('be.false');
-    cy.wrap(validation).should('not.be.empty');
-  });
+    const [valid, validation] = validateForm(schema, {})
+    cy.wrap(valid).should('be.false')
+    cy.wrap(validation).should('not.be.empty')
+  })
 
   it('Validates a valid date field', () => {
-    const form = Object.assign({}, formData, {targetDeliveryDate: '2021-01-01', targetPublicReleaseDate: '2021-01-01'});
-    const [valid, validation] = validateForm(schema, form);
-    cy.wrap(valid).should('be.true');
-    cy.wrap(validation).should('be.empty');
-  });
+    const form = Object.assign({}, formData, { targetDeliveryDate: '2021-01-01', targetPublicReleaseDate: '2021-01-01' })
+    const [valid, validation] = validateForm(schema, form)
+    cy.wrap(valid).should('be.true')
+    cy.wrap(validation).should('be.empty')
+  })
 
   it('Invalidates an invalid date field', () => {
-    const form = Object.assign({}, formData, {targetDeliveryDate: '20210101', targetPublicReleaseDate: '20210101'});
-    const [valid, validation] = validateForm(schema, form);
-    cy.wrap(valid).should('be.false');
-    cy.wrap(validation).should('not.be.empty');
-  });
+    const form = Object.assign({}, formData, { targetDeliveryDate: '20210101', targetPublicReleaseDate: '20210101' })
+    const [valid, validation] = validateForm(schema, form)
+    cy.wrap(valid).should('be.false')
+    cy.wrap(validation).should('not.be.empty')
+  })
 
   it('Validates a valid email field', () => {
-    const form = Object.assign({}, formData, {dataCustodianEmail: ['user@test.com']});
-    const [valid, validation] = validateForm(schema, form);
-    cy.wrap(valid).should('be.true');
-    cy.wrap(validation).should('be.empty');
-  });
+    const form = Object.assign({}, formData, { dataCustodianEmail: ['user@test.com'] })
+    const [valid, validation] = validateForm(schema, form)
+    cy.wrap(valid).should('be.true')
+    cy.wrap(validation).should('be.empty')
+  })
 
   it('Invalidates an invalid email field', () => {
-    const form = Object.assign({}, formData, {dataCustodianEmail: ['user']});
-    const [valid, validation] = validateForm(schema, form);
-    cy.wrap(valid).should('be.false');
-    cy.wrap(validation).should('not.be.empty');
-  });
+    const form = Object.assign({}, formData, { dataCustodianEmail: ['user'] })
+    const [valid, validation] = validateForm(schema, form)
+    cy.wrap(valid).should('be.false')
+    cy.wrap(validation).should('not.be.empty')
+  })
 
   it('Validates a valid uri field', () => {
     const consentGroup = {
-      'numberOfParticipants': 2,
-      'consentGroupName': 'name',
-      'generalResearchUse': true,
-      'dataAccessCommitteeId': 1,
-      'url': 'https://some.site.org'
-    };
-    const form = Object.assign({}, formData, {consentGroups: [consentGroup]});
-    const [valid, validation] = validateForm(schema, form);
-    cy.wrap(valid).should('be.true');
-    cy.wrap(validation).should('be.empty');
-  });
+      numberOfParticipants: 2,
+      consentGroupName: 'name',
+      generalResearchUse: true,
+      dataAccessCommitteeId: 1,
+      url: 'https://some.site.org',
+    }
+    const form = Object.assign({}, formData, { consentGroups: [consentGroup] })
+    const [valid, validation] = validateForm(schema, form)
+    cy.wrap(valid).should('be.true')
+    cy.wrap(validation).should('be.empty')
+  })
 
   it('Invalidates an invalid uri field', () => {
     const consentGroup = {
-      'numberOfParticipants': 2,
-      'consentGroupName': 'name',
-      'generalResearchUse': true,
-      'dataAccessCommitteeId': 1,
-      'url': 'some place . org'
-    };
-    const form = Object.assign({}, formData, {consentGroups: [consentGroup]});
-    const [valid, validation] = validateForm(schema, form);
-    cy.wrap(valid).should('be.false');
-    cy.wrap(validation).should('not.be.empty');
-  });
-
-});
+      numberOfParticipants: 2,
+      consentGroupName: 'name',
+      generalResearchUse: true,
+      dataAccessCommitteeId: 1,
+      url: 'some place . org',
+    }
+    const form = Object.assign({}, formData, { consentGroups: [consentGroup] })
+    const [valid, validation] = validateForm(schema, form)
+    cy.wrap(valid).should('be.false')
+    cy.wrap(validation).should('not.be.empty')
+  })
+})

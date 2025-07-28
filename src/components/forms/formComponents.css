@@ -120,6 +120,22 @@
   height: 16px;
 }
 
+.form-file-upload.disabled > * {
+  cursor: not-allowed !important;
+}
+
+.form-file-upload.disabled {
+  color: #0948B7 !important;
+  opacity: 0.5;
+}
+
+.form-file-upload.disabled:hover {
+  color: #0948B7 !important;
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+
 /* ----------------------------------------------------
   External Overrides
 ------------------------------------------------------*/

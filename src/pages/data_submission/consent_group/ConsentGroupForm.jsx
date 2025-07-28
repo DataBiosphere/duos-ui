@@ -1,9 +1,9 @@
-import React from 'react';
-import { useState } from 'react';
-import ConsentGroupSummary from './ConsentGroupSummary';
-import { EditConsentGroup } from './EditConsentGroup';
-import { computeConsentGroupValidationErrors } from './ConsentGroupErrors';
-import { isEmpty, cloneDeep, set } from 'lodash';
+import React from 'react'
+import { useState } from 'react'
+import ConsentGroupSummary from './ConsentGroupSummary'
+import { EditConsentGroup } from './EditConsentGroup'
+import { computeConsentGroupValidationErrors } from './ConsentGroupErrors'
+import { isEmpty, cloneDeep, set } from 'lodash'
 
 export const ConsentGroupForm = (props) => {
   const {
@@ -15,10 +15,10 @@ export const ConsentGroupForm = (props) => {
     disableDelete,
     consentGroupsState,
     studyEditMode,
-    datasetNames
-  } = props;
+    datasetNames,
+  } = props
 
-  const curConsentGroup = consentGroupsState[idx].consentGroup;
+  const curConsentGroup = consentGroupsState[idx].consentGroup
   const [consentGroup, setConsentGroup] = useState({
     datasetId: curConsentGroup.datasetId || null,
     consentGroupName: curConsentGroup.consentGroupName || '',
@@ -54,20 +54,20 @@ export const ConsentGroupForm = (props) => {
     fileTypes: curConsentGroup.fileTypes || [{}],
 
     dataAccessCommitteeId: curConsentGroup.dataAccessCommitteeId || null, // string
-  });
+  })
 
-  const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
-  const [validation, setValidation] = useState({});
+  const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null)
+  const [validation, setValidation] = useState({})
 
-  const onValidationChange = ({key, validation}) => {
+  const onValidationChange = ({ key, validation }) => {
     setValidation((val) => {
-      const newValidation = cloneDeep(val);
-      set(newValidation, key, validation);
-      return newValidation;
-    });
-  };
+      const newValidation = cloneDeep(val)
+      set(newValidation, key, validation)
+      return newValidation
+    })
+  }
 
-  const [editMode, setEditMode] = useState(consentGroupsState[idx].editMode);
+  const [editMode, setEditMode] = useState(consentGroupsState[idx].editMode)
 
   return (
     <div
@@ -79,29 +79,31 @@ export const ConsentGroupForm = (props) => {
       }}
       id={idx + '_consentGroupForm'}
     >
-      {editMode ? (
-        <EditConsentGroup
-          {...props}
-          consentGroup={consentGroup}
-          setConsentGroup={setConsentGroup}
-          disableFields={consentGroupsState[idx].disableFields}
-          nihInstitutionalCertificationFile={nihInstitutionalCertificationFile}
-          setNihInstitutionalCertificationFile={(file) => {
-            setNihInstitutionalCertificationFile(file);
-            updateNihInstitutionalCertificationFile(file);
-          }}
-          validation={validation}
-          onValidationChange={onValidationChange}
-          dacs={dacs}
-        />
-      ) : (
-        <ConsentGroupSummary
-          {...props}
-          consentGroup={consentGroup}
-          id={idx + '_consentGroupSummary'}
-          nihInstitutionalCertificationFile={nihInstitutionalCertificationFile}
-        />
-      )}
+      {editMode
+        ? (
+            <EditConsentGroup
+              {...props}
+              consentGroup={consentGroup}
+              setConsentGroup={setConsentGroup}
+              disableFields={consentGroupsState[idx].disableFields}
+              nihInstitutionalCertificationFile={nihInstitutionalCertificationFile}
+              setNihInstitutionalCertificationFile={(file) => {
+                setNihInstitutionalCertificationFile(file)
+                updateNihInstitutionalCertificationFile(file)
+              }}
+              validation={validation}
+              onValidationChange={onValidationChange}
+              dacs={dacs}
+            />
+          )
+        : (
+            <ConsentGroupSummary
+              {...props}
+              consentGroup={consentGroup}
+              id={idx + '_consentGroupSummary'}
+              nihInstitutionalCertificationFile={nihInstitutionalCertificationFile}
+            />
+          )}
       <div
         style={{
           display: 'flex',
@@ -110,59 +112,67 @@ export const ConsentGroupForm = (props) => {
           marginTop: '2rem',
         }}
       >
-        {(!studyEditMode || !consentGroupsState[idx].disableFields) && <a
-          id={idx + '_deleteConsentGroup'}
-          onClick={() => deleteConsentGroup()}
-          disabled={disableDelete}
-        >
-          <span
-            className="cm-icon-button glyphicon glyphicon-trash"
-            aria-hidden="true"
-            data-tip="Delete dataset"
-            data-for="tip_delete"
-          />
-          <span style={{ marginLeft: '1rem' }}>Delete this entry</span>
-        </a>}
-        <div>
-          {studyEditMode && editMode && consentGroupsState[idx].disableFields && <button
-            className="study-edit-form-cancel-button f-left btn"
-            type="button"
-            onClick={() => setEditMode(false)}
+        {(!studyEditMode || !consentGroupsState[idx].disableFields) && (
+          <a
+            id={idx + '_deleteConsentGroup'}
+            onClick={() => deleteConsentGroup()}
+            disabled={disableDelete}
           >
-            Cancel
-          </button>}
+            <span
+              className="cm-icon-button glyphicon glyphicon-trash"
+              aria-hidden="true"
+              data-tip="Delete dataset"
+              data-for="tip_delete"
+            />
+            <span style={{ marginLeft: '1rem' }}>Delete this entry</span>
+          </a>
+        )}
+        <div>
+          {studyEditMode && editMode && consentGroupsState[idx].disableFields && (
+            <button
+              className="study-edit-form-cancel-button f-left btn"
+              type="button"
+              onClick={() => setEditMode(false)}
+            >
+              Cancel
+            </button>
+          )}
         </div>
         <div>
-          {!editMode && <button
-            id={idx + '_editConsentGroup'}
-            type="button"
-            onClick={() => {
-              setEditMode(true);
-            }}
-            className="f-right btn-primary common-background"
-          >
-            Edit
-          </button>}
-          {editMode && <button
-            id={idx + '_saveConsentGroup'}
-            type="button"
-            onClick={() => {
-              const errors = computeConsentGroupValidationErrors(consentGroup, datasetNames);
-              const valid = isEmpty(errors);
-              setValidation(errors);
-              if (valid) {
-                saveConsentGroup({ value: consentGroup, valid: true });
-                setEditMode(false);
-              }
-            }}
-            className="f-right btn-primary common-background"
-          >
-            Save
-          </button>}
+          {!editMode && (
+            <button
+              id={idx + '_editConsentGroup'}
+              type="button"
+              onClick={() => {
+                setEditMode(true)
+              }}
+              className="f-right btn-primary common-background"
+            >
+              Edit
+            </button>
+          )}
+          {editMode && (
+            <button
+              id={idx + '_saveConsentGroup'}
+              type="button"
+              onClick={() => {
+                const errors = computeConsentGroupValidationErrors(consentGroup, datasetNames)
+                const valid = isEmpty(errors)
+                setValidation(errors)
+                if (valid) {
+                  saveConsentGroup({ value: consentGroup, valid: true })
+                  setEditMode(false)
+                }
+              }}
+              className="f-right btn-primary common-background"
+            >
+              Save
+            </button>
+          )}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ConsentGroupForm;
+export default ConsentGroupForm

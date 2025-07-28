@@ -16,12 +16,14 @@ import {
   pick,
   toLower,
   uniq,
-  values
-} from 'lodash/fp';
-import { Match } from '../libs/ajax/Match';
-import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
-import {processVotesForBucket} from './DarCollectionUtils';
-import {processMatchData} from './VoteUtils';
+  values,
+} from 'lodash/fp'
+import { Match } from '../libs/ajax/Match'
+import {
+  translateDataUseRestrictionsFromDataUseArray,
+} from '../libs/dataUseTranslation'
+import { processVotesForBucket } from './DarCollectionUtils'
+import { processMatchData } from './VoteUtils'
 
 /**
  * Entry method into bundling up datasets into groups based on common data use restrictions.
@@ -43,28 +45,24 @@ import {processMatchData} from './VoteUtils';
  * @returns {Promise<*[Bucket]>}
  */
 export const binCollectionToBuckets = async (collection, dacIds = []) => {
-
-  const buckets = [];
+  const buckets = []
+  //  Find the most recent DAR
+  const recentDar = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) : []
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
-  const referenceIds = flow(
-    map(d => d.referenceId),
-    uniq
-  )(collection.dars);
-  const matchData = referenceIds.length > 0 ? await Match.findMatchBatch(referenceIds) : [];
-
+  const matchData = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
   // If we need to restrict the datasets to a particular DAC, do that here.
-  const datasets = filterDatasetsByDACs(dacIds, get('datasets')(collection));
+  const datasets = filterDatasetsByDACs(dacIds, get('datasets')(collection))
 
   // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
   // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
   // empty elements per translation (one for any missing potential translation), so we need to filter those out.
-  const rawDataUses = compact(map(d => d.dataUse)(datasets));
-  const translatedDataUses = await translateDataUseRestrictionsFromDataUseArray(rawDataUses);
-  const flatTranslatedDataUses = map(t => compact(t))(translatedDataUses);
+  const rawDataUses = compact(map(d => d.dataUse)(datasets))
+  const translatedDataUses = await translateDataUseRestrictionsFromDataUseArray(rawDataUses)
+  const flatTranslatedDataUses = map(t => compact(t))(translatedDataUses)
 
   // Step 1: Create buckets for unique dataset groups
-  forEach(dataset => {
+  forEach((dataset) => {
     // Put each dataset into a bucket. If the dataset's data use is missing, unique or has an "Other" restriction, then
     // it gets its own bucket. If the data use is already in a bucket, then it gets merged in.
     const bucket = {
@@ -76,99 +74,94 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
       dataUses: [],
       elections: [],
       votes: [],
-      matchResults: []
-    };
+      matchResults: [],
+    }
 
     if (isUndefined(dataset.dataUse) || isOther(dataset.dataUse)) {
-      buckets.push(bucket);
-    } else {
+      buckets.push(bucket)
+    }
+    else {
       /* TODO: investigate whether this can be done more efficiently */
-      let added = false;
-      forEach(b => {
+      let added = false
+      forEach((b) => {
         if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
-          b.datasets.push(dataset);
-          b.datasetIds.push(dataset.datasetId);
-          added = true;
+          b.datasets.push(dataset)
+          b.datasetIds.push(dataset.datasetId)
+          added = true
         }
-      })(buckets);
+      })(buckets)
       if (!added) {
-        buckets.push(bucket);
+        buckets.push(bucket)
       }
     }
 
     // Step 1.b: Populate translated dataUses
     if (dataset.dataUse) {
-      const index = rawDataUses.findIndex(du => du === dataset.dataUse);
+      const index = rawDataUses.findIndex(du => du === dataset.dataUse)
       if (index >= 0 && !isUndefined(flatTranslatedDataUses[index])) {
-        bucket.dataUses = flatTranslatedDataUses[index];
+        bucket.dataUses = flatTranslatedDataUses[index]
       }
     }
-
-  })(datasets);
+  })(datasets)
 
   // The following steps are all bucket-centric, so we can process those in a single loop
   // Steps 2-6
-  forEach(b => {
+  forEach((b) => {
     // Step 2: Find match results for each dataset in bucket
-    forEach(m => {
-      forEach(dataset => {
+    forEach((m) => {
+      forEach((dataset) => {
         if (toLower(dataset.datasetIdentifier) === toLower(m.consent)) {
-          b.matchResults.push(m);
+          b.matchResults.push(m)
         }
-      })(b.datasets);
-    })(matchData);
+      })(b.datasets)
+    })(matchData)
 
     // Step 3: Populate elections for datasets in this bucket
-    b.elections = findElectionsForDatasets(collection, b.datasetIds);
+    b.elections = findElectionsForDatasets(recentDar, b.datasetIds)
 
     // Step 4: Populate votes for each bucket
-    b.votes.push(processVotesForBucket(b.elections));
+    b.votes.push(processVotesForBucket(b.elections))
 
     // Step 5: Generate bucket key and label
     if (!isEmpty(b.dataUses)) {
       b.label = flow(
-        map((du) => du.alternateLabel || du.code),
-        join(', ')
-      )(b.dataUses);
-    } else {
-      b.label = 'Undefined Data Use';
+        map(du => du.alternateLabel || du.code),
+        join(', '),
+      )(b.dataUses)
     }
-    b.key = 'bucket-' + join('-')(b.datasetIds);
+    else {
+      b.label = 'Undefined Data Use'
+    }
+    b.key = 'bucket-' + join('-')(b.datasetIds)
 
     // Step 6: Coalesce match results into a single result per bucket
-    b.algorithmResult = calculateAlgorithmResultForBucket(b);
-
-  })(buckets);
+    b.algorithmResult = calculateAlgorithmResultForBucket(b)
+  })(buckets)
 
   // Step 7: Populate RUS Vote bucket with RP votes
-  const rpVotes = createRpVoteStructureFromBuckets(buckets);
+  const rpVotes = createRpVoteStructureFromBuckets(buckets)
   buckets.unshift({
     isRP: true,
     key: 'RUS Vote',
-    votes: rpVotes
-  });
+    votes: rpVotes,
+  })
 
-  return buckets;
-};
+  return buckets
+}
 
 /**
- * Find all elections (in a dar collection) with a dataset id in the provided list of dataset ids
+ * Find all elections (in a dar) with a dataset id in the provided list of dataset ids
  * @private
- * @param collection
+ * @param dar
  * @param datasetIds
  * @returns {[]}
  */
-const findElectionsForDatasets = (collection, datasetIds) => {
-  // In a collection, DARs and elections are each a map of id => object
-  // Iterate through all values of each map find elections associated to the provided dataset ids.
-  const darMap = get('dars')(collection); // Map of dar reference id -> dar
-  return flow(
-    values, // List of DARs
-    flatMap(dar => get('elections')(dar)), // List of maps of election id -> election
-    flatMap(eMap => values(eMap)), // List of election objects
-    filter(e => includes(get('datasetId')(e))(datasetIds))
-  )(darMap);
-};
+const findElectionsForDatasets = (dar, datasetIds) => {
+  return dar.elections
+    ? Object.values(dar.elections)
+        .filter(e => datasetIds.includes(e.datasetId))
+    : []
+}
 
 /**
  * Optionally filter a list of collection datasets by the dac ids provided.
@@ -178,12 +171,12 @@ const findElectionsForDatasets = (collection, datasetIds) => {
  * @returns {[]}
  */
 const filterDatasetsByDACs = (dacIds, datasets) => {
-  return isEmpty(dacIds) ?
-    datasets :
-    filter(
-      dataset => includes(dataset.dacId)(dacIds)
-    )(datasets);
-};
+  return isEmpty(dacIds)
+    ? datasets
+    : filter(
+        dataset => includes(dataset.dacId)(dacIds),
+      )(datasets)
+}
 
 /**
  * Generate the summary of algorithm results suitable for display in the UI
@@ -201,37 +194,39 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
 const calculateAlgorithmResultForBucket = (bucket) => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
-  const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3';
-  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse);
+  const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3'
+  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse)
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
   // Check algorithm version: V3 does not need to be checked for 'unmatchable'
-  const matchVals = (algorithmVersionV3 || !unmatchable) ? flow(
-    map(m => m.match),
-    uniq
-  )(bucket.matchResults) : [];
+  const matchVals = (algorithmVersionV3 || !unmatchable)
+    ? flow(
+        map(m => m.match),
+        uniq,
+      )(bucket.matchResults)
+    : []
 
-  const abstain = processV3Abstain(bucket.matchResults);
+  const abstain = processV3Abstain(bucket.matchResults)
 
   // check results based on matchVals
   if (isEmpty(matchVals)) {
-    return {result: 'N/A', createDate: undefined, rationales: undefined, id: bucket.key};
+    return { result: 'N/A', createDate: undefined, rationales: undefined, id: bucket.key }
   }
   else if ((matchVals.length === 1)) {
     const rationales = flow(
       flatMap(match => match.rationales),
-      uniq
-    )(bucket.matchResults);
-    const {createDate, failed, id, match} = bucket.matchResults[0];
-    const matchResult = {createDate, rationales, failed, id, match};
+      uniq,
+    )(bucket.matchResults)
+    const { createDate, failed, id, match } = bucket.matchResults[0]
+    const matchResult = { createDate, rationales, failed, id, match }
     if (abstain) {
       return {
         result: 'Abstain',
         createDate,
         rationales,
         id,
-      };
+      }
     }
     else {
       return {
@@ -239,7 +234,7 @@ const calculateAlgorithmResultForBucket = (bucket) => {
         createDate,
         rationales,
         id,
-      };
+      }
     }
   }
   else {
@@ -248,10 +243,10 @@ const calculateAlgorithmResultForBucket = (bucket) => {
       result: 'Unable to determine a system match',
       createDate: undefined,
       rationales: ['Algorithm matched both true and false for this combination of datasets'],
-      id: bucket.key
-    };
+      id: bucket.key,
+    }
   }
-};
+}
 
 /**
 * Process the match results for V3 Abstain. If we have a V3 result and we have
@@ -259,10 +254,10 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 * @param matchResults
 */
 const processV3Abstain = (matchResults) => {
-  const abstainList = map(m => m.abstain)(matchResults);
-  const abstainValList = filter(a => a === true)(abstainList);
-  return abstainValList.length > 0;
-};
+  const abstainList = map(m => m.abstain)(matchResults)
+  const abstainValList = filter(a => a === true)(abstainList)
+  return abstainValList.length > 0
+}
 
 /**
  * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
@@ -272,10 +267,10 @@ const processV3Abstain = (matchResults) => {
  * @returns boolean
  */
 const isOther = (dataUse) => {
-  const primaryOther = !isEmpty(getOr('')('other')(dataUse));
-  const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse));
-  return primaryOther || secondaryOther;
-};
+  const primaryOther = !isEmpty(getOr('')('other')(dataUse))
+  const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse))
+  return primaryOther || secondaryOther
+}
 
 /**
  * Calculate abstention for a data use. There are a number of cases where there should
@@ -299,9 +294,9 @@ export const shouldAbstain = (dataUse) => {
     'publicationResults',
     'sexualDiseases',
     'stigmatizeDiseases',
-    'vulnerablePopulations'];
-  return isOther(dataUse) || any(f => getOr(false)(f)(dataUse))(abstainFields);
-};
+    'vulnerablePopulations']
+  return isOther(dataUse) || any(f => getOr(false)(f)(dataUse))(abstainFields)
+}
 
 /**
  * Create a structure of RP votes from all votes in a list of buckets.
@@ -312,42 +307,42 @@ export const shouldAbstain = (dataUse) => {
  */
 const createRpVoteStructureFromBuckets = (buckets) => {
   // List of rp vote groups broken out by election into chair, member, and final votes.
-  const rpVotes = [];
+  const rpVotes = []
 
   const rpElectionVoteArrays = flow(
     flatMap(b => b.elections),
     filter(e => toLower(e.electionType) === 'rp'),
     map(e => e.votes),
     // election.votes is a hash of vote id => vote object
-    map(hash => values(hash))
-  )(buckets);
+    map(hash => values(hash)),
+  )(buckets)
 
-  forEach(vArray => {
+  forEach((vArray) => {
     const rpVoteGroup = {
       chairpersonVotes: [],
       memberVotes: [],
-      finalVotes: []
-    };
-    forEach(v => {
-      const lowerCaseType = toLower(v.type);
+      finalVotes: [],
+    }
+    forEach((v) => {
+      const lowerCaseType = toLower(v.type)
       switch (lowerCaseType) {
         case 'chairperson':
           // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' votes
-          rpVoteGroup.chairpersonVotes.push(v);
-          rpVoteGroup.finalVotes.push(v);
-          break;
+          rpVoteGroup.chairpersonVotes.push(v)
+          rpVoteGroup.finalVotes.push(v)
+          break
         case 'dac':
-          rpVoteGroup.memberVotes.push(v);
-          break;
+          rpVoteGroup.memberVotes.push(v)
+          break
         default:
-          break;
+          break
       }
-    })(vArray);
-    rpVotes.push({rp: rpVoteGroup});
-  })(rpElectionVoteArrays);
+    })(vArray)
+    rpVotes.push({ rp: rpVoteGroup })
+  })(rpElectionVoteArrays)
 
-  return rpVotes;
-};
+  return rpVotes
+}
 
 /**
  * Constrain the equality check to a limited number of fields. These
@@ -385,9 +380,9 @@ export const isEqualDataUse = (a, b) => {
     'stigmatizeDiseases',
     'vulnerablePopulations',
     'psychologicalTraits',
-    'notHealth'
-  ];
-  const aCopy = pick(fields)(a);
-  const bCopy = pick(fields)(b);
-  return isEqual(aCopy)(bCopy);
-};
+    'notHealth',
+  ]
+  const aCopy = pick(fields)(a)
+  const bCopy = pick(fields)(b)
+  return isEqual(aCopy)(bCopy)
+}

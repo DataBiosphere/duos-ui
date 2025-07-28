@@ -1,7 +1,7 @@
-import DOMPurify from 'dompurify';
-import './PrivacyPolicy.css';
-import ReactMarkdown from 'react-markdown';
-import React from 'react';
+import DOMPurify from 'dompurify'
+import './PrivacyPolicy.css'
+import ReactMarkdown from 'react-markdown'
+import React from 'react'
 
 const privacyPolicy = `
 If there are any questions about privacy, please email [privacy@broadinstitute.org](mailto:privacy@broadinstitute.org).
@@ -58,12 +58,15 @@ We follow the laws of all the countries where we operate. We follow the laws of 
         * DUOS shall make the Data Protection Officer available address concerns or questions upon request.
 8. Privacy Policy Changes
     1. This Privacy Policy may be updated periodically. We will notify you of any material changes to this Privacy Policy by posting the revised policy on the Site. You are advised to periodically review this page to ensure continuing familiarity with the most current version of our Privacy Policy. Any changes to our Privacy Policy will become effective upon our posting of the revised Privacy Policy on the Site. Use of the Site following such changes constitutes your acceptance of the revised Privacy Policy then in effect. You will be able to determine when this Privacy Policy was last revised by checking the "Last Updated" information that appears at the top of this page.
-`;
+`
 
-const content = <ReactMarkdown
-  components={{ a: (props) => <a target={'_blank'} {...props} /> }}>
-  {DOMPurify.sanitize(privacyPolicy)}
-</ReactMarkdown>;
+const content = (
+  <ReactMarkdown
+    components={{ a: props => <a target="_blank" {...props} /> }}
+  >
+    {DOMPurify.sanitize(privacyPolicy)}
+  </ReactMarkdown>
+)
 
 export default function PrivacyPolicy() {
   return (
@@ -71,5 +74,5 @@ export default function PrivacyPolicy() {
       <h1 style={{ paddingBottom: '1.5rem' }}>DUOS Privacy Policy</h1>
       {content}
     </div>
-  );
+  )
 }

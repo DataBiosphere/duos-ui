@@ -1,13 +1,13 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { isEmpty } from 'lodash/fp';
+import React from 'react'
+import { useState, useEffect } from 'react'
+import { isEmpty } from 'lodash/fp'
 
-import { Notifications } from '../../libs/utils';
-import { User } from '../../libs/ajax/User';
-import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms';
-import initialFormData from './NIHDataManagement';
+import { Notifications } from '../../libs/utils'
+import { User } from '../../libs/ajax/User'
+import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms'
+import initialFormData from './NIHDataManagement'
 
-import './ds_common.css';
+import './ds_common.css'
 
 export default function DataSubmissionStudyInformation(props) {
   const {
@@ -16,27 +16,28 @@ export default function DataSubmissionStudyInformation(props) {
     onValidationChange,
     formData,
     studyEditMode,
-  } = props;
-  const [user, setUser] = useState();
+  } = props
+  const [user, setUser] = useState()
 
-  //init hook, need to make ajax calls here
+  // init hook, need to make ajax calls here
   useEffect(() => {
     const updateUserAndFields = async () => {
-      const me = await User.getMe();
-      setUser(me);
-      onChange({key: 'dataSubmitterUserId', value: me.userId, isValid: true});
-    };
+      const me = await User.getMe()
+      setUser(me)
+      onChange({ key: 'dataSubmitterUserId', value: me.userId, isValid: true })
+    }
 
     const init = async () => {
       try {
-        updateUserAndFields();
-      } catch (error) {
-        Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
+        updateUserAndFields()
       }
-    };
+      catch (_error) {
+        Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
+      }
+    }
 
-    init();
-  }, [onChange]);
+    init()
+  }, [onChange])
 
   return (
     <div className="data-submitter-section">
@@ -59,7 +60,7 @@ export default function DataSubmissionStudyInformation(props) {
           'Observational', 'Interventional', 'Descriptive',
           'Analytical', 'Prospective', 'Retrospective',
           'Case report', 'Case series', 'Cross-sectional',
-          'Cohort study'
+          'Cohort study',
         ]}
         isCreatable={true}
         validation={validation.studyType}
@@ -131,25 +132,29 @@ export default function DataSubmissionStudyInformation(props) {
         onChange={onChange}
         onValidationChange={onValidationChange}
       />
-      {!isEmpty(user) && <FormField
-        id="dataSubmitterName"
-        title="Data Submitter Name"
-        description="The individual completing this form will be saved with the study."
-        defaultValue={studyEditMode ? formData?.dataSubmitterName : user?.displayName}
-        validation={validation.dataSubmitterName}
-        disabled={true}
-        onChange={onChange}
-        onValidationChange={onValidationChange}
-      />}
-      {!isEmpty(user) && <FormField
-        id="dataSubmitterEmail"
-        title="Data Submitter Email"
-        defaultValue={studyEditMode ? formData?.dataSubmitterEmail : user?.email}
-        validation={validation.dataSubmitterEmail}
-        disabled={true}
-        onChange={onChange}
-        onValidationChange={onValidationChange}
-      />}
+      {!isEmpty(user) && (
+        <FormField
+          id="dataSubmitterName"
+          title="Data Submitter Name"
+          description="The individual completing this form will be saved with the study."
+          defaultValue={studyEditMode ? formData?.dataSubmitterName : user?.displayName}
+          validation={validation.dataSubmitterName}
+          disabled={true}
+          onChange={onChange}
+          onValidationChange={onValidationChange}
+        />
+      )}
+      {!isEmpty(user) && (
+        <FormField
+          id="dataSubmitterEmail"
+          title="Data Submitter Email"
+          defaultValue={studyEditMode ? formData?.dataSubmitterEmail : user?.email}
+          validation={validation.dataSubmitterEmail}
+          disabled={true}
+          onChange={onChange}
+          onValidationChange={onValidationChange}
+        />
+      )}
       <FormField
         id="dataCustodianEmail"
         title="Data Custodian Email"
@@ -205,7 +210,7 @@ export default function DataSubmissionStudyInformation(props) {
         name="publicVisibility"
         options={[
           { name: true, text: 'Yes, I want my dataset info to be visible and available for requests' },
-          { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' }
+          { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' },
         ]}
         defaultValue={studyEditMode ? formData?.publicVisibility : undefined}
         onChange={onChange}
@@ -213,5 +218,5 @@ export default function DataSubmissionStudyInformation(props) {
         onValidationChange={onValidationChange}
       />
     </div>
-  );
+  )
 }

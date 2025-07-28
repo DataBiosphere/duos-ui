@@ -1,64 +1,63 @@
-import React from 'react';
-import {Styles} from '../libs/theme';
-import {RadioButton} from '../components/RadioButton';
-import AsyncSelect from 'react-select/async';
-import {isNil, isEmpty, head} from 'lodash/fp';
-import {Notifications, searchOntologies} from '../libs/utils';
-import {DataUseTranslation} from '../libs/dataUseTranslation';
-import {useState} from 'react';
+import React from 'react'
+import { Styles } from '../libs/theme'
+import { RadioButton } from '../components/RadioButton'
+import AsyncSelect from 'react-select/async'
+import { isNil, isEmpty, head } from 'lodash/fp'
+import { Notifications, searchOntologies } from '../libs/utils'
+import { DataUseTranslation } from '../libs/dataUseTranslation'
+import { useState } from 'react'
 
-const buttonStyle = { marginBottom: '2rem', color: '#777' };
-const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' };
+const buttonStyle = { marginBottom: '2rem', color: '#777' }
+const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' }
 
 export default function ConsentTextGenerator() {
-  const [general, setGeneral] = useState(false);
-  const [hmb, setHmb] = useState(false);
-  const [diseases, setDiseases] = useState(false);
-  const [ontologies, setOntologies] = useState([]);
-  const [other, setOther] = useState(false);
-  const [otherText, setOtherText] = useState('');
-  const [nmds, setNmds] = useState(false);
-  const [gso, setGso] = useState(false);
-  const [pub, setPub] = useState(false);
-  const [col, setCol] = useState(false);
-  const [irb, setIrb] = useState(false);
-  const [gs, setGs] = useState(false);
-  const [npu, setNpu] = useState(false);
-  const [sdsl, setSdsl] = useState('');
+  const [general, setGeneral] = useState(false)
+  const [hmb, setHmb] = useState(false)
+  const [diseases, setDiseases] = useState(false)
+  const [ontologies, setOntologies] = useState([])
+  const [other, setOther] = useState(false)
+  const [otherText, setOtherText] = useState('')
+  const [nmds, setNmds] = useState(false)
+  const [gso, setGso] = useState(false)
+  const [pub, setPub] = useState(false)
+  const [col, setCol] = useState(false)
+  const [irb, setIrb] = useState(false)
+  const [gs, setGs] = useState(false)
+  const [npu, setNpu] = useState(false)
+  const [sdsl, setSdsl] = useState('')
 
   const isTypeOfResearchValid = () => {
-    return (general || hmb || (diseases && (!isNil(head(ontologies)))) || (other && (!isEmpty(otherText))));
-  };
+    return (general || hmb || (diseases && (!isNil(head(ontologies)))) || (other && (!isEmpty(otherText))))
+  }
 
   const clearOtherTextBox = () => {
-    document.getElementById('other_text').value = '';
-  };
+    document.getElementById('other_text').value = ''
+  }
 
-  const generate = () => {
-    isTypeOfResearchValid() ?
-      generateHelper()
-      : Notifications.showError({text: 'Please complete question 1'});
-  };
+  const generate = () =>
+    isTypeOfResearchValid()
+      ? generateHelper()
+      : Notifications.showError({ text: 'Please complete question 1' })
 
   const generateHelper = async () => {
     const dataUse = {
       generalUse: general, diseaseRestrictions: ontologies, populationOriginsAncestry: null,
       hmbResearch: hmb, methodsResearch: nmds, geneticStudiesOnly: gso, nonProfitUse: npu,
       publicationResults: pub, collaboratorRequired: col, ethicsApprovalRequired: irb,
-      geographicalRestrictions: gs
-    };
-    let sdsl = [];
-    if (other) {
-      sdsl.push(otherText);
+      geographicalRestrictions: gs,
     }
-    let translatedDataUse = await DataUseTranslation.translateDataUseRestrictions(dataUse);
+    const sdsl = []
+    if (other) {
+      sdsl.push(otherText)
+    }
+    const translatedDataUse = await DataUseTranslation.translateDataUseRestrictions(dataUse)
     translatedDataUse.forEach((sentence) => {
-      return (typeof sentence === 'object') ?
-        sdsl.push(' ' + sentence.description)
-        : sdsl.push(' ' + sentence);
-    });
-    setSdsl(sdsl);
-  };
+      return (typeof sentence === 'object')
+        ? sdsl.push(' ' + sentence.description)
+        : sdsl.push(' ' + sentence)
+    })
+    setSdsl(sdsl)
+  }
 
   return (
     <div style={{ ...Styles.PAGE, color: '#1f3b50' }}>
@@ -71,7 +70,9 @@ export default function ConsentTextGenerator() {
         <a href="https://github.com/EBISPOT/DUO" target="_blank" rel="noopener noreferrer">
           Data Use Ontology (DUO)
         </a>
-        {' '}and{' '}
+        {' '}
+        and
+        {' '}
         <a href="https://drive.google.com/file/d/102_I0_phOGs9YSmPx7It9CSt1sHFJ87C/view" target="_blank" rel="noreferrer noopener">
           Machine Readable Consent Guidance (MRCG)
         </a>
@@ -88,7 +89,12 @@ export default function ConsentTextGenerator() {
             value="general"
             defaultChecked={general}
             onClick={() => {
-              setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
+              setGeneral(true)
+              setHmb(false)
+              setDiseases(false)
+              setOther(false)
+              setOntologies([])
+              clearOtherTextBox()
             }}
             label="General Research Use (GRU): "
             description="use is permitted for any research purpose"
@@ -98,7 +104,12 @@ export default function ConsentTextGenerator() {
             value="hmb"
             defaultChecked={hmb}
             onClick={() => {
-              setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
+              setHmb(true)
+              setGeneral(false)
+              setDiseases(false)
+              setOther(false)
+              setOntologies([])
+              clearOtherTextBox()
             }}
             label="Health/Medical/Biomedical Use (HMB): "
             description="use is permitted for any health, medical, or biomedical purpose"
@@ -108,7 +119,11 @@ export default function ConsentTextGenerator() {
             value="diseases"
             defaultChecked={diseases}
             onClick={() => {
-              setDiseases(true), setHmb(false), setGeneral(false), setOther(false), clearOtherTextBox();
+              setDiseases(true)
+              setHmb(false)
+              setGeneral(false)
+              setOther(false)
+              clearOtherTextBox()
             }}
             label="Disease-related studies (DS): "
             description="use is permitted for research on the specified disease"
@@ -120,7 +135,7 @@ export default function ConsentTextGenerator() {
             isDisabled={!diseases}
             isMulti
             loadOptions={(query, callback) => searchOntologies(query, callback)}
-            onChange={(option) => (option ? setOntologies(option) : setOntologies)}
+            onChange={option => (option ? setOntologies(option) : setOntologies)}
             value={ontologies}
             placeholder="Please enter one or more diseases"
             classNamePrefix="select"
@@ -130,7 +145,11 @@ export default function ConsentTextGenerator() {
           value="other"
           defaultChecked={other}
           onClick={() => {
-            setOther(true), setHmb(false), setDiseases(false), setGeneral(false), setOntologies([]);
+            setOther(true)
+            setHmb(false)
+            setDiseases(false)
+            setGeneral(false)
+            setOntologies([])
           }}
           label="Other Use: "
           description="permitted research use is defined as follows: "
@@ -138,7 +157,7 @@ export default function ConsentTextGenerator() {
         />
         <textarea
           className="form-control"
-          onBlur={(e) => setOtherText(e.target.value)}
+          onBlur={e => setOtherText(e.target.value)}
           maxLength="512"
           rows="2"
           required={other}
@@ -159,7 +178,7 @@ export default function ConsentTextGenerator() {
           <input
             type="checkbox"
             checked={nmds}
-            onChange={(e) => setNmds(e.target.checked)}
+            onChange={e => setNmds(e.target.checked)}
             id="checkNMDS"
           />
           <label style={labelStyle} className="regular-checkbox" htmlFor="checkNMDS">
@@ -170,7 +189,7 @@ export default function ConsentTextGenerator() {
           <input
             type="checkbox"
             checked={gso}
-            onChange={(e) => setGso(e.target.checked)}
+            onChange={e => setGso(e.target.checked)}
             id="checkGSO"
           />
           <label style={labelStyle} className="regular-checkbox" htmlFor="checkGSO">
@@ -181,7 +200,7 @@ export default function ConsentTextGenerator() {
           <input
             type="checkbox"
             checked={pub}
-            onChange={(e) => setPub(e.target.checked)}
+            onChange={e => setPub(e.target.checked)}
             id="checkPUB"
           />
           <label style={labelStyle} className="regular-checkbox" htmlFor="checkPUB">
@@ -192,7 +211,7 @@ export default function ConsentTextGenerator() {
           <input
             type="checkbox"
             checked={col}
-            onChange={(e) => setCol(e.target.checked)}
+            onChange={e => setCol(e.target.checked)}
             id="checkCOL"
           />
           <label style={labelStyle} className="regular-checkbox" htmlFor="checkCOL">
@@ -203,7 +222,7 @@ export default function ConsentTextGenerator() {
           <input
             type="checkbox"
             checked={irb}
-            onChange={(e) => setIrb(e.target.checked)}
+            onChange={e => setIrb(e.target.checked)}
             id="checkIRB"
           />
           <label style={labelStyle} className="regular-checkbox" htmlFor="checkIRB">
@@ -214,7 +233,7 @@ export default function ConsentTextGenerator() {
           <input
             type="checkbox"
             checked={gs}
-            onChange={(e) => setGs(e.target.checked)}
+            onChange={e => setGs(e.target.checked)}
             id="checkGS"
           />
           <label style={labelStyle} className="regular-checkbox" htmlFor="checkGS">
@@ -225,7 +244,7 @@ export default function ConsentTextGenerator() {
           <input
             type="checkbox"
             checked={npu}
-            onChange={(e) => setNpu(e.target.checked)}
+            onChange={e => setNpu(e.target.checked)}
             id="checkNPU"
           />
           <label style={labelStyle} className="regular-checkbox" htmlFor="checkNPU">
@@ -250,5 +269,5 @@ export default function ConsentTextGenerator() {
       />
       <div style={{ marginBottom: '2rem' }} />
     </div>
-  );
+  )
 }

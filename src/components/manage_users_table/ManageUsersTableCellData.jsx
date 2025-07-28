@@ -1,10 +1,10 @@
-import React from 'react';
-import {isNil, map, sortedUniq} from 'lodash';
-import {styles} from './ManageUsersTable';
-import {Link} from 'react-router-dom';
-import ReactTooltip from 'react-tooltip';
+import React from 'react'
+import { isNil, map, sortedUniq } from 'lodash'
+import { styles } from './manageUsersTableUtils'
+import { Link } from 'react-router-dom'
+import ReactTooltip from 'react-tooltip'
 
-export function usernameCellData({displayName, userId, label= 'user-name'}) {
+export function usernameCellData({ displayName, userId, label = 'user-name' }) {
   return {
     // clicking on username lets you edit user
     data: (
@@ -30,13 +30,13 @@ export function usernameCellData({displayName, userId, label= 'user-name'}) {
     style: {
       color: '#354052',
       fontSize: styles.fontSize.username,
-      paddingRight: '2%'
+      paddingRight: '2%',
     },
-    label
-  };
+    label,
+  }
 }
 
-export function emailCellData({userId, email, label = 'email'}) {
+export function emailCellData({ userId, email, label = 'email' }) {
   return {
     data: email,
     value: email,
@@ -44,35 +44,35 @@ export function emailCellData({userId, email, label = 'email'}) {
     style: {
       color: styles.color.email,
       fontSize: styles.fontSize.email,
-      fontWeight: '500'
+      fontWeight: '500',
     },
-    label
-  };
+    label,
+  }
 }
 
-export function permissionsCellData({userId, roles, libraryCard, label = 'permissions'}) {
-  const hasLibraryCard = !isNil(libraryCard);
-  const roleNames = map(roles, 'name').filter((roleName) => roleName !== 'Researcher');
-  const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames);
+export function permissionsCellData({ userId, roles, libraryCard, label = 'permissions' }) {
+  const hasLibraryCard = !isNil(libraryCard)
+  const roleNames = map(roles, 'name').filter(roleName => roleName !== 'Researcher')
+  const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames)
 
   // need to split, e.g., SigningOfficial -> Signing Official
-  const formattedPerms = perms.map((perm) => perm.replace(/([A-Z])/g, ' $1').trim());
+  const formattedPerms = perms.map(perm => perm.replace(/([A-Z])/g, ' $1').trim())
 
   return {
     isComponent: true,
     data: sortedUniq(formattedPerms).join('   ') || 'None',
     label,
     id: userId,
-  };
+  }
 }
 
-export function institutionCellData({userId, institution, label = 'insitution'}) {
+export function institutionCellData({ userId, institution, label = 'insitution' }) {
   return {
     isComponent: true,
     data: institution?.name || 'N/A',
     label,
     id: userId,
-  };
+  }
 }
 
 export default {
@@ -80,4 +80,4 @@ export default {
   emailCellData,
   permissionsCellData,
   institutionCellData,
-};
+}

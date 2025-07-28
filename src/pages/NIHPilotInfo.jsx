@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export default function NIHPilotInfo() {
   return (
@@ -39,5 +39,5 @@ export default function NIHPilotInfo() {
         </div>
       </div>
     </div>
-  );
+  )
 }

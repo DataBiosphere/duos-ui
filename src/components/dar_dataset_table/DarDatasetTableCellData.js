@@ -1,48 +1,48 @@
-import {styles} from './DarDatasetTable';
+import { styles } from '../../utils/darDatasetUtils'
 
-export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
+export function dataUseGroupCellData({ dataUseGroup, label = 'data-use' }) {
   return {
     data: label,
     id: dataUseGroup,
-    style : {
+    style: {
       color: '#354052',
       fontSize: styles.fontSize.dataUseGroup,
       fontWeight: 'bold',
-      paddingRight: '2%'
+      paddingRight: '2%',
     },
-    label
-  };
+    label,
+  }
 }
 
-export function numberOfDatasetsCellData({datasets = [], dataUseGroup, label= 'number-of-datasets'}) {
+export function numberOfDatasetsCellData({ datasets = [], dataUseGroup, label = 'number-of-datasets' }) {
   return {
     data: `${datasets.length}`,
     id: dataUseGroup,
-    style : {
+    style: {
       color: '#354052',
       fontSize: styles.fontSize.numberOfDatasets,
       fontWeight: 'bold',
-      paddingRight: '2%'
+      paddingRight: '2%',
     },
-    label
-  };
+    label,
+  }
 }
 
-export function datasetsCellData({datasets = [], dataUseGroup, label= 'datasets'}) {
+export function datasetsCellData({ datasets = [], dataUseGroup, label = 'datasets' }) {
   return {
-    data: `${datasets.map((ds) => ds.datasetIdentifier).join(', ')}`,
+    data: `${datasets.map(ds => ds.datasetIdentifier).join(', ')}`,
     id: dataUseGroup,
-    style : {
+    style: {
       color: '#354052',
       fontSize: styles.fontSize.datasets,
-      paddingRight: '2%'
+      paddingRight: '2%',
     },
-    label
-  };
+    label,
+  }
 }
 
 export default {
   dataUseGroupCellData,
   numberOfDatasetsCellData,
   datasetsCellData,
-};
+}

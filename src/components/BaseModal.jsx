@@ -1,8 +1,8 @@
-import React from 'react';
-import Modal from 'react-modal';
-import './BaseModal.css';
-import { PageSubHeading } from './PageSubHeading';
-import CloseIconComponent from './CloseIconComponent';
+import React from 'react'
+import Modal from 'react-modal'
+import './BaseModal.css'
+import { PageSubHeading } from './PageSubHeading'
+import CloseIconComponent from './CloseIconComponent'
 
 const customStyles = {
   overlay: {
@@ -27,13 +27,13 @@ const customStyles = {
     borderRadius: '4px',
     outline: 'none',
     padding: '10px 20px 20px 20px',
-  }
-};
+  },
+}
 
-Modal.setAppElement('#root');
+Modal.setAppElement('#root')
 
 export const BaseModal = (props) => {
-  const { disableOkBtn = false } = props;
+  const { disableOkBtn = false } = props
   return (
     <div>
       <Modal
@@ -41,9 +41,9 @@ export const BaseModal = (props) => {
         onAfterOpen={props.afterOpen}
         onRequestClose={props.onRequestClose}
         style={customStyles}
-        contentLabel='Modal'
+        contentLabel="Modal"
       >
-        <div className='modal-header'>
+        <div className="modal-header">
           <CloseIconComponent
             closeFn={props.onRequestClose}
           />
@@ -56,13 +56,13 @@ export const BaseModal = (props) => {
             description={props.description}
           />
         </div>
-        <div className='modal-content'>
+        <div className="modal-content">
           {props.children}
         </div>
 
-        <div className='modal-footer'>
+        <div className="modal-footer">
           <button
-            id='btn_action'
+            id="btn_action"
             className={`col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ${props.color}-background`}
             onClick={props.action.handler}
             disabled={disableOkBtn}
@@ -72,8 +72,8 @@ export const BaseModal = (props) => {
           {
             props.type !== 'informative' && (
               <button
-                id='btn-cancel'
-                className='col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background'
+                id="btn-cancel"
+                className="col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background"
                 onClick={props.onRequestClose}
               >
                 Cancel
@@ -83,5 +83,5 @@ export const BaseModal = (props) => {
         </div>
       </Modal>
     </div>
-  );
-};
+  )
+}

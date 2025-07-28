@@ -1,13 +1,15 @@
-import React from 'react';
-import { useState, useEffect, Fragment } from 'react';
-import { Styles } from '../../libs/theme';
-import SimpleTable from '../../components/SimpleTable';
-import './dar_application.css';
-import { binCollectionToBuckets } from '../../utils/BucketUtils';
-import { useCallback } from 'react';
-import { isEmpty, flatten } from 'lodash/fp';
+import React from 'react'
+import { useState, useEffect, Fragment } from 'react'
+import { Styles } from 'src/libs/theme'
+import SimpleTable from 'src/components/SimpleTable'
+import './dar_application.css'
+import { binCollectionToBuckets } from 'src/utils/BucketUtils'
+import { useCallback } from 'react'
+import { isEmpty, flatten } from 'lodash/fp'
+import { Notifications } from 'src/libs/utils.js'
+import { DataSet } from 'src/libs/ajax/DataSet.js'
 
-export const commonStyles = {
+const commonStyles = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.6rem',
@@ -36,16 +38,16 @@ export const commonStyles = {
     width: '100%',
     border: '1px solid black',
     borderWidth: '1px 1px 0 1px',
-  }
-};
+  },
+}
 
 const headerStyles = {
   ...commonStyles,
   cellWidth: {
     dataUseCodes: '20%',
-    dataUseSummary: '80%'
+    dataUseSummary: '80%',
   },
-};
+}
 
 const columnStyles = {
   ...commonStyles,
@@ -53,106 +55,149 @@ const columnStyles = {
     datasetId: '20%',
     datasetName: '30%',
     whichDac: '20%',
-    acknowledgment: '30%'
+    acknowledgment: '30%',
   },
-};
+}
 
 const columnConfig = {
   datasetId: {
     label: 'Dataset ID',
     cellStyle: { width: columnStyles.cellWidth.datasetId },
-    sortable: false
+    sortable: false,
   },
   datasetName: {
     label: 'Dataset Name',
     cellStyle: { width: columnStyles.cellWidth.datasetName },
-    sortable: false
+    sortable: false,
   },
   whichDac: {
     label: 'DAC',
     cellStyle: { width: columnStyles.cellWidth.whichDac },
-    sortable: false
+    sortable: false,
   },
   acknowledgment: {
     label: 'Acknowledgment',
     cellStyle: { width: columnStyles.cellWidth.acknowledgment },
-    sortable: false
-  }
-};
+    sortable: false,
+  },
+}
 
 const columnHeaderData = (columns) => {
-  return Object.values(columns);
-};
+  return Object.values(columns)
+}
 
 export default function DucAddendum(props) {
-  const { datasets, isLoading, save, doSubmit } = props;
+  const { datasets, isLoading, save, doSubmit } = props
 
-  const [buckets, setBuckets] = useState([]);
-  const [ducAddendumTable, setDucAddendumTable] = useState([]);
+  const [dacs, setDacs] = useState([])
+  const [buckets, setBuckets] = useState([])
+  const [ducAddendumTable, setDucAddendumTable] = useState([])
 
   const getBuckets = useCallback(async () => {
     if (isEmpty(datasets)) {
-      setBuckets([]);
-      return;
+      setBuckets([])
+      return
     }
-    const buckets = await binCollectionToBuckets({ datasets });
+    const buckets = await binCollectionToBuckets({ datasets })
     const dataAccessBuckets = buckets.filter(
-      (bucket) => bucket.isRP !== true
-    );
-    setBuckets(dataAccessBuckets);
-  }, [datasets]);
+      bucket => bucket.isRP !== true,
+    )
+    setBuckets(dataAccessBuckets)
+  }, [datasets])
 
   useEffect(() => {
-    getBuckets();
-  }, [getBuckets]);
+    getBuckets()
+  }, [getBuckets])
+
+  useEffect(() => {
+    const loadDatasetTerms = async () => {
+      const datasetQuery = DataSet.searchDatasetIndex({
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  _type: 'dataset',
+                },
+              },
+              {
+                terms: {
+                  _id: datasets.map(dataset => dataset.datasetId),
+                },
+              },
+            ],
+          },
+        },
+      })
+
+      try {
+        const datasetTerms = await datasetQuery
+
+        const dacs = datasetTerms.map((datasetTerm) => {
+          return datasetTerm.dac
+        })
+
+        setDacs(dacs)
+      }
+      catch (error) {
+        Notifications.showWarning({ text: `Error loading DAC information for datasets: ${error.message}` })
+      }
+    }
+
+    loadDatasetTerms()
+  }, [datasets])
 
   const buildDucAddendumTable = useCallback(async () => {
-    const tableChunks = buckets.map(bucket => {
+    const getDacName = (dacId) => {
+      const dac = dacs.find(dac => dac?.dacId === dacId)
+      return dac?.dacName || 'N/A'
+    }
 
-      const dataUseCodes = bucket.label;
-      const dataUseSummary = bucket.dataUses.map(dataUse => dataUse.description).join('. ');
+    const tableChunks = buckets.map((bucket) => {
+      const dataUseCodes = bucket.label
+      const dataUseSummary = bucket.dataUses.map(dataUse => dataUse.description).join('. ')
 
       const headerConfig = {
         dataUseCodes: {
           label: dataUseCodes,
           cellStyle: { width: headerStyles.cellWidth.dataUseCodes, color: '#337ab7', fontSize: '1.6rem', margin: '1rem' },
-          sortable: false
+          sortable: false,
         },
         dataUseSummary: {
           label: dataUseSummary,
           cellStyle: { width: headerStyles.cellWidth.dataUseSummary, color: '#000000' },
-          sortable: false
+          sortable: false,
         },
-      };
+      }
 
-      const datasetData = bucket.datasets.map(dataset => {
+      const datasetData = bucket.datasets.map((dataset) => {
         return [
           {
             data: dataset.datasetIdentifier,
             id: dataset.datasetId,
-            style: columnStyles
+            style: columnStyles,
           },
           {
             data: dataset.datasetName?.replaceAll('_', '_\u200b'),
             id: dataset.datasetId,
-            style: columnStyles
+            style: columnStyles,
+          },
+          {
+            data: getDacName(dataset.dacId),
+            id: dataset.datasetId,
+            style: columnStyles,
           },
           {
             data: '',
             id: dataset.datasetId,
-            style: columnStyles
+            style: columnStyles,
           },
-          {
-            data: '',
-            id: dataset.datasetId,
-            style: columnStyles
-          }
-        ];
-      });
+        ]
+      })
 
       return (
         <Fragment key={`duc-addendum-bucket-${dataUseCodes}`}>
-          <Fragment key='duc-addendum-column-headers'>
+          <Fragment key="duc-addendum-column-headers">
             <SimpleTable
               isLoading={isLoading}
               columnHeaders={columnHeaderData(headerConfig)}
@@ -160,7 +205,7 @@ export default function DucAddendum(props) {
               styles={headerStyles}
             />
           </Fragment>
-          <Fragment key='duc-addendum-table-data'>
+          <Fragment key="duc-addendum-table-data">
             <SimpleTable
               isLoading={false}
               columnHeaders={columnHeaderData(columnConfig)}
@@ -169,26 +214,25 @@ export default function DucAddendum(props) {
             />
           </Fragment>
         </Fragment>
-      );
-    });
+      )
+    })
 
     tableChunks.push(
       <div
-        key='duc-addendum-table-divider'
+        key="duc-addendum-table-divider"
         style={{
           borderTop: '1px solid black',
           borderWidth: '1px 0 0 0',
         }}
-      />
-    );
-
-    const fullTable = flatten(tableChunks);
-    setDucAddendumTable(fullTable);
-  }, [buckets, isLoading]);
+      />,
+    )
+    const fullTable = flatten(tableChunks)
+    setDucAddendumTable(fullTable)
+  }, [buckets, isLoading, dacs])
 
   useEffect(() => {
-    buildDucAddendumTable();
-  }, [buildDucAddendumTable]);
+    buildDucAddendumTable()
+  }, [buildDucAddendumTable])
 
   return (
     <div className="dar-step-card">
@@ -202,5 +246,5 @@ export default function DucAddendum(props) {
         <a id="btn_save" onClick={() => save()} className="button button-white">Save</a>
       </div>
     </div>
-  );
+  )
 }

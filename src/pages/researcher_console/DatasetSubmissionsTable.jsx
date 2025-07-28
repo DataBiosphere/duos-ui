@@ -1,20 +1,20 @@
-import * as React from 'react';
-import {useCallback, useEffect, useState} from 'react';
-import {Notifications} from '../../libs/utils';
-import loadingIndicator from '../../images/loading-indicator.svg';
-import SortableTable from '../../components/sortable_table/SortableTable';
-import { concat, join, isNil} from 'lodash/fp';
-import Button from '@mui/material/Button';
-import { Link } from 'react-router-dom';
-import { DataSet } from '../../libs/ajax/DataSet';
-import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog';
-
+import * as React from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Notifications } from '../../libs/utils'
+import loadingIndicator from '../../images/loading-indicator.svg'
+import SortableTable from '../../components/sortable_table/SortableTable'
+import { concat, join, isNil } from 'lodash/fp'
+import Button from '@mui/material/Button'
+import { Link } from 'react-router-dom'
+import { DataSet } from '../../libs/ajax/DataSet'
+import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog'
 
 export default function DatasetSubmissionsTable(props) {
-
-  const spinner = <div style={{textAlign: 'center', height: '44', width: '180'}}>
-    <img src={loadingIndicator} alt={'Loading'}/>
-  </div>;
+  const spinner = (
+    <div style={{ textAlign: 'center', height: '44', width: '180' }}>
+      <img src={loadingIndicator} alt="Loading" />
+    </div>
+  )
 
   const columns = [
     {
@@ -64,81 +64,88 @@ export default function DatasetSubmissionsTable(props) {
       numeric: false,
       disablePadding: false,
       label: 'Actions',
-    }
-  ];
+    },
+  ]
 
-  const [terms, setTerms] = useState([]);
-  const [selectedTerm, setSelectedTerm] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [rows, setRows] = useState([]);
-  const [open, setOpen] = useState(false);
+  const [terms, setTerms] = useState([])
+  const [selectedTerm, setSelectedTerm] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [rows, setRows] = useState([])
+  const [open, setOpen] = useState(false)
 
   const handleClick = (term) => {
-    setOpen(true);
-    setSelectedTerm(term);
-  };
+    setOpen(true)
+    setSelectedTerm(term)
+  }
 
   const handleClose = () => {
-    setOpen(false);
-  };
+    setOpen(false)
+  }
 
   const removeDataset = async (termToDelete) => {
-    const termName = termToDelete.datasetName;
-    const termId = termToDelete.datasetId;
-    setOpen(false);
+    const termName = termToDelete.datasetName
+    const termId = termToDelete.datasetId
+    setOpen(false)
     try {
       DataSet.deleteDataset(termId).then(() => {
         Notifications.showSuccess({
           text: `Removed dataset '${termName}' successfully.`,
-        });
-        props.history.push('/datalibrary');});
-    } catch (error) {
+        })
+        props.history.push('/datalibrary')
+      })
+    }
+    catch (_error) {
       Notifications.showError({
         text: `Error removing ${termName} as a dataset`,
-      });
+      })
     }
-  };
+  }
 
   // Datasets can be filtered from the parent component and redrawn frequently.
   const redrawRows = useCallback((open, selectedTerm) => {
     const rows = terms.map((term) => {
-      const status = isNil(term.dacApproval) ? 'Pending' : (term.dacApproval ? 'Accepted' : 'Rejected');
-      const primaryCodes = term.dataUse?.primary?.map(du => du.code);
-      const secondaryCodes = term.dataUse?.secondary?.map(du => du.code);
-      const editLink = (term.study?.studyId) ? '/study_update/' + term.study.studyId : '/dataset_update/' + term.datasetId;
-      const editButton = (status === 'Accepted') ?
-        <div/> :
-        <div>
-          <Button
-            href={editLink}
-            sx={{
-              fontSize: '1.25rem',
-              border: '1px solid #0948B7',
-              borderRadius: 1,
-              height: 25
-            }}>
-            Edit
-          </Button>
-        </div>;
-      const deleteButton = (status !== 'Accepted' && term.deletable) ?
-        <div>
-          <Link
-            style={{marginLeft: '15px'}}
-            id={`${term.datasetId}_delete`}
-            className={'glyphicon glyphicon-trash'}
-            onClick={() => handleClick(term)}
-            to={`#`}
-          />
-          <ConfirmationDialog
-            title="Delete dataset"
-            openState={open}
-            close={handleClose}
-            action={() => removeDataset(selectedTerm)}
-            description={`Are you sure you want to delete the dataset '${selectedTerm.datasetIdentifier}'?`}
-          />
-        </div> :
-        <div/>;
-      const custodians = join(', ')(term.study?.dataCustodianEmail);
+      const status = isNil(term.dacApproval) ? 'Pending' : (term.dacApproval ? 'Accepted' : 'Rejected')
+      const primaryCodes = term.dataUse?.primary?.map(du => du.code)
+      const secondaryCodes = term.dataUse?.secondary?.map(du => du.code)
+      const editLink = (term.study?.studyId) ? '/study_update/' + term.study.studyId : '/dataset_update/' + term.datasetId
+      const editButton = (status === 'Accepted')
+        ? <div />
+        : (
+            <div>
+              <Button
+                href={editLink}
+                sx={{
+                  fontSize: '1.25rem',
+                  border: '1px solid #0948B7',
+                  borderRadius: 1,
+                  height: 25,
+                }}
+              >
+                Edit
+              </Button>
+            </div>
+          )
+      const deleteButton = (status !== 'Accepted' && term.deletable)
+        ? (
+            <div>
+              <Link
+                style={{ marginLeft: '15px' }}
+                id={`${term.datasetId}_delete`}
+                className="glyphicon glyphicon-trash"
+                onClick={() => handleClick(term)}
+                to="#"
+              />
+              <ConfirmationDialog
+                title="Delete dataset"
+                openState={open}
+                close={handleClose}
+                action={() => removeDataset(selectedTerm)}
+                description={`Are you sure you want to delete the dataset '${selectedTerm.datasetIdentifier}'?`}
+              />
+            </div>
+          )
+        : <div />
+      const custodians = join(', ')(term.study?.dataCustodianEmail)
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,
@@ -147,30 +154,35 @@ export default function DatasetSubmissionsTable(props) {
         dac: term.dac?.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,
-        actions: editButton, deleteButton
-      };
-    });
-    setRows(rows);
-  }, [terms]);
+        actions: editButton, deleteButton,
+      }
+    })
+    setRows(rows)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [terms])
 
   useEffect(() => {
     const init = async () => {
       try {
-        setTerms(props.terms);
-        setIsLoading(props.isLoading);
-        redrawRows(open,selectedTerm);
-      } catch (error) {
-        Notifications.showError({text: 'Error: Unable to retrieve datasets from server'});
+        setTerms(props.terms)
+        setIsLoading(props.isLoading)
+        redrawRows(open, selectedTerm)
       }
-    };
-    init();
-  }, [props, redrawRows, open, selectedTerm]);
+      catch (_error) {
+        Notifications.showError({ text: 'Error: Unable to retrieve datasets from server' })
+      }
+    }
+    init()
+  }, [props, redrawRows, open, selectedTerm])
 
-  const sortableTable = <SortableTable
-    headCells={columns}
-    rows={rows}
-    defaultSort={columns[0].id}
-    cellAlignment={'left'}/>;
+  const sortableTable = (
+    <SortableTable
+      headCells={columns}
+      rows={rows}
+      defaultSort={columns[0].id}
+      cellAlignment="left"
+    />
+  )
 
-  return isLoading ? spinner : sortableTable;
+  return isLoading ? spinner : sortableTable
 }

@@ -1,6 +1,6 @@
-import React from 'react';
-import { CollaboratorSummary } from './CollaboratorSummary';
-import CollaboratorForm from './CollaboratorForm';
+import React from 'react'
+import { CollaboratorSummary } from './CollaboratorSummary'
+import CollaboratorForm from './CollaboratorForm'
 
 export const CollaboratorRow = (props) => {
   const {
@@ -10,25 +10,29 @@ export const CollaboratorRow = (props) => {
     onCollaboratorValidationChange,
     collaborator,
     editMode,
-  } = props;
+  } = props
 
   return (
     <div id={index + '_collaboratorForm'}>
-      {editMode === true && <CollaboratorForm
-        {...props}
-        collaborator={collaborator}
-        index={index}
-        validation={validation}
-        countriesOfOperation={countriesOfOperation}
-        onCollaboratorValidationChange={onCollaboratorValidationChange}
-      />}
-      {!editMode && <CollaboratorSummary
-        {...props}
-        collaborator={collaborator}
-        index={index}
-      />}
+      {editMode === true && (
+        <CollaboratorForm
+          {...props}
+          collaborator={collaborator}
+          index={index}
+          validation={validation}
+          countriesOfOperation={countriesOfOperation}
+          onCollaboratorValidationChange={onCollaboratorValidationChange}
+        />
+      )}
+      {!editMode && (
+        <CollaboratorSummary
+          {...props}
+          collaborator={collaborator}
+          index={index}
+        />
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default CollaboratorRow;
+export default CollaboratorRow
