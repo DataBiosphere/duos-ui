@@ -65,7 +65,7 @@ interface AlgorithmResult {
   match?: boolean
 }
 
-interface RpVoteGroup {
+interface VoteGroup {
   chairpersonVotes: Vote[]
   memberVotes: Vote[]
   finalVotes: Vote[]
@@ -355,15 +355,15 @@ export const shouldAbstain = (dataUse?: DataUse): boolean => {
 }
 
 /**
- * Create a structure of RP votes from all votes in a list of buckets.
+ * Create a structure of RP (research purpose) votes from all votes in a list of buckets.
  *
  * @private
  * @param buckets
- * @returns {Array<{rp: RpVoteGroup}>}
+ * @returns {Array<{rp: VoteGroup}>}
  */
-const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: RpVoteGroup }> => {
+const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGroup }> => {
   // List of rp vote groups broken out by election into chair, member, and final votes.
-  const rpVotes: Array<{ rp: RpVoteGroup }> = []
+  const rpVotes: Array<{ rp: VoteGroup }> = []
 
   const rpElectionVoteArrays: Vote[][] = flow(
     flatMap((b: Bucket) => b.elections),
@@ -374,7 +374,7 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: RpVote
   )(buckets)
 
   forEach((vArray: Vote[]) => {
-    const rpVoteGroup: RpVoteGroup = {
+    const rpVoteGroup: VoteGroup = {
       chairpersonVotes: [],
       memberVotes: [],
       finalVotes: [],
@@ -383,7 +383,7 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: RpVote
     forEach((v: Vote) => {
       const lowerCaseType = toLower(v.type)
       switch (lowerCaseType) {
-        case 'radar':
+        case 'radar_approve':
           // 'RADAR' votes count as final votes count as Chair and Final votes for ALL elections.
           rpVoteGroup.chairpersonVotes.push(v)
           rpVoteGroup.finalVotes.push(v)
@@ -403,7 +403,6 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: RpVote
     })(vArray)
     rpVotes.push({ rp: rpVoteGroup })
   })(rpElectionVoteArrays)
-
   return rpVotes
 }
 
@@ -420,7 +419,6 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: RpVote
  */
 export const isEqualDataUse = (a?: DataUse, b?: DataUse): boolean => {
   if (!a || !b) return a === b
-
   const fields: (keyof DataUse)[] = [
     'generalUse',
     'hmbResearch',
