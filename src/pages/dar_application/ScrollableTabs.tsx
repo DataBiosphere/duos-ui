@@ -37,21 +37,31 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
   // but, we don't adjust the scroll position
   const onScroll = () => {
     const scrollPos = window.scrollY
-    const scrollBuffer = window.innerHeight * 0.25
-    // Has to be recalculated based on whether accordions are open or not
-    // So, we can't really use a callback
-    const sectionIndex = applicationTabs
-      .map(appTab => document.getElementById(appTab.id)?.offsetTop)
-      .findIndex(scrollTop => (scrollTop || 0) > scrollPos + scrollBuffer)
-    if (sectionIndex === 0) {
-      setSelectedStepNumber(1)
+    const scrollBuffer = window.innerHeight * 0.5
+
+    // Find the section that is currently most visible
+    let currentSectionIndex = 0
+
+    for (let i = 0; i < applicationTabs.length; i++) {
+      const element = document.getElementById(applicationTabs[i].id)
+      if (!element) continue
+
+      const elementTop = element.offsetTop
+      const elementHeight = element.offsetHeight
+      const elementBottom = elementTop + elementHeight
+
+      // Check if this section is in the viewport with the scroll buffer
+      if (scrollPos + scrollBuffer >= elementTop && scrollPos + scrollBuffer < elementBottom) {
+        currentSectionIndex = i + 1
+        break
+      }
+      // If we've scrolled past the current section, check if we should move to the next one
+      else if (scrollPos + scrollBuffer >= elementTop) {
+        currentSectionIndex = i + 1
+      }
     }
-    else if (sectionIndex === -1) {
-      setSelectedStepNumber(applicationTabs.length)
-    }
-    else {
-      setSelectedStepNumber(sectionIndex)
-    }
+
+    setSelectedStepNumber(currentSectionIndex)
   }
 
   useEffect(() => {
