@@ -4,15 +4,12 @@ import {
   flatMap,
   flow,
   forEach,
-  get,
   includes,
   isEmpty,
   isEqual,
-  isUndefined,
   join,
   map,
   pick,
-  toLower,
   uniq,
   values,
 } from 'lodash/fp'
@@ -85,7 +82,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   // bucket based on the dataset that the match applies to in step 1.a
   const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
   // If we need to restrict the datasets to a particular DAC, do that here.
-  const datasets: Dataset[] = filterDatasetsByDACs(dacIds, get('datasets')(collection))
+  const datasets: Dataset[] = filterDatasetsByDACs(dacIds, collection.datasets)
 
   // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
   // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
@@ -110,7 +107,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
       matchResults: [],
     }
 
-    if (isUndefined(dataset.dataUse) || isOther(dataset.dataUse)) {
+    if (isNil(dataset.dataUse) || isOther(dataset.dataUse)) {
       buckets.push(bucket)
     }
     else {
@@ -131,7 +128,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
     // Step 1.b: Populate translated dataUses
     if (dataset.dataUse) {
       const index = rawDataUses.findIndex(du => du === dataset.dataUse)
-      if (index >= 0 && !isUndefined(flatTranslatedDataUses[index])) {
+      if (index >= 0 && !isNil(flatTranslatedDataUses[index])) {
         bucket.dataUses = flatTranslatedDataUses[index]
       }
     }
@@ -143,7 +140,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
     // Step 2: Find match results for each dataset in bucket
     forEach((m: MatchResult) => {
       forEach((dataset: Dataset) => {
-        if (toLower(dataset.datasetIdentifier) === toLower(m.consent)) {
+        if (dataset.datasetIdentifier.toLowerCase() === m.consent.toLowerCase()) {
           b.matchResults.push(m)
         }
       })(b.datasets)
@@ -353,7 +350,7 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
 
   const rpElectionVoteArrays: Vote[][] = flow(
     flatMap((b: Bucket) => b.elections),
-    filter((e: Election) => toLower(e.electionType) === 'rp'),
+    filter((e: Election) => e.electionType.toLowerCase() === 'rp'),
     map((e: Election) => e.votes),
     // election.votes is a hash of vote id => vote object
     map((hash: Record<string, Vote>) => values(hash)),
@@ -366,7 +363,7 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
       finalVotes: [],
     }
     forEach((v: Vote) => {
-      const lowerCaseType = toLower(v.type)
+      const lowerCaseType = v.type.toLowerCase()
       switch (lowerCaseType) {
         case 'chairperson':
           // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' votes
