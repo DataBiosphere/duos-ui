@@ -1,12 +1,10 @@
 import {
-  any,
   compact,
   filter,
   flatMap,
   flow,
   forEach,
   get,
-  getOr,
   includes,
   isEmpty,
   isEqual,
@@ -18,12 +16,61 @@ import {
   uniq,
   values,
 } from 'lodash/fp'
-import { Match } from '../libs/ajax/Match'
+import { isNil } from 'lodash'
+import { Match } from 'src/libs/ajax/Match'
 import {
   translateDataUseRestrictionsFromDataUseArray,
-} from '../libs/dataUseTranslation'
+} from 'src/libs/dataUseTranslation'
 import { processVotesForBucket } from './DarCollectionUtils'
 import { processMatchData } from './VoteUtils'
+
+import { DataAccessRequest, DataUse, DarCollection, Dataset, Election, Vote } from 'src/types/model'
+
+interface MatchResult {
+  consent: string
+  match: boolean
+  abstain?: boolean
+  algorithmVersion?: string
+  rationales: string[]
+  createDate: string
+  failed: boolean
+  id: string
+}
+
+interface DataUseTranslation {
+  code: string
+  alternateLabel?: string
+}
+
+export interface Bucket {
+  key: string
+  label: string
+  datasets: Dataset[]
+  datasetIds: number[]
+  dataUse?: DataUse
+  dataUses: DataUseTranslation[]
+  elections: Election[]
+  votes: any[]
+  matchResults: MatchResult[]
+  algorithmResult?: AlgorithmResult
+  isRP?: boolean
+}
+
+interface AlgorithmResult {
+  result: string
+  createDate?: string
+  rationales?: string[]
+  id: string
+  failed?: boolean
+  match?: boolean
+}
+
+interface RpVoteGroup {
+  chairpersonVotes: Vote[]
+  memberVotes: Vote[]
+  finalVotes: Vote[]
+  radarVotes: Vote[]
+}
 
 /**
  * Entry method into bundling up datasets into groups based on common data use restrictions.
@@ -42,30 +89,30 @@ import { processMatchData } from './VoteUtils'
  * @param collection The full Data Access Request Collection
  * @param dacIds An optional array of dac ids. If provided, bucket contents will be filtered to datasets matching
  *        the provided dac ids. This will extend to elections and votes as well.
- * @returns {Promise<*[Bucket]>}
+ * @returns {Promise<Bucket[]>}
  */
-export const binCollectionToBuckets = async (collection, dacIds = []) => {
-  const buckets = []
+export const binCollectionToBuckets = async (collection: DarCollection, dacIds: number[] = []): Promise<Bucket[]> => {
+  const buckets: Bucket[] = []
   //  Find the most recent DAR
-  const recentDar = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) : []
+  const recentDar: DataAccessRequest = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) : {} as DataAccessRequest
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
-  const matchData = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
+  const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
   // If we need to restrict the datasets to a particular DAC, do that here.
-  const datasets = filterDatasetsByDACs(dacIds, get('datasets')(collection))
+  const datasets: Dataset[] = filterDatasetsByDACs(dacIds, get('datasets')(collection))
 
   // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
   // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
   // empty elements per translation (one for any missing potential translation), so we need to filter those out.
-  const rawDataUses = compact(map(d => d.dataUse)(datasets))
-  const translatedDataUses = await translateDataUseRestrictionsFromDataUseArray(rawDataUses)
-  const flatTranslatedDataUses = map(t => compact(t))(translatedDataUses)
+  const rawDataUses: DataUse[] = compact(map((d: Dataset) => d.dataUse)(datasets))
+  const translatedDataUses: DataUseTranslation[][] = await translateDataUseRestrictionsFromDataUseArray(rawDataUses)
+  const flatTranslatedDataUses: DataUseTranslation[][] = map((t: DataUseTranslation[]) => compact(t))(translatedDataUses)
 
   // Step 1: Create buckets for unique dataset groups
-  forEach((dataset) => {
+  forEach((dataset: Dataset) => {
     // Put each dataset into a bucket. If the dataset's data use is missing, unique or has an "Other" restriction, then
     // it gets its own bucket. If the data use is already in a bucket, then it gets merged in.
-    const bucket = {
+    const bucket: Bucket = {
       key: '',
       label: '',
       datasets: [dataset],
@@ -83,7 +130,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     else {
       /* TODO: investigate whether this can be done more efficiently */
       let added = false
-      forEach((b) => {
+      forEach((b: Bucket) => {
         if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
           b.datasets.push(dataset)
           b.datasetIds.push(dataset.datasetId)
@@ -106,10 +153,10 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
   // The following steps are all bucket-centric, so we can process those in a single loop
   // Steps 2-6
-  forEach((b) => {
+  forEach((b: Bucket) => {
     // Step 2: Find match results for each dataset in bucket
-    forEach((m) => {
-      forEach((dataset) => {
+    forEach((m: MatchResult) => {
+      forEach((dataset: Dataset) => {
         if (toLower(dataset.datasetIdentifier) === toLower(m.consent)) {
           b.matchResults.push(m)
         }
@@ -125,7 +172,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     // Step 5: Generate bucket key and label
     if (!isEmpty(b.dataUses)) {
       b.label = flow(
-        map(du => du.alternateLabel || du.code),
+        map((du: DataUseTranslation) => du.alternateLabel || du.code),
         join(', '),
       )(b.dataUses)
     }
@@ -144,6 +191,12 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     isRP: true,
     key: 'RUS Vote',
     votes: rpVotes,
+    label: '',
+    datasets: [],
+    datasetIds: [],
+    dataUses: [],
+    elections: [],
+    matchResults: [],
   })
 
   return buckets
@@ -154,12 +207,12 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
  * @private
  * @param dar
  * @param datasetIds
- * @returns {[]}
+ * @returns {Election[]}
  */
-const findElectionsForDatasets = (dar, datasetIds) => {
+const findElectionsForDatasets = (dar: DataAccessRequest, datasetIds: number[]): Election[] => {
   return dar.elections
     ? Object.values(dar.elections)
-        .filter(e => datasetIds.includes(e.datasetId))
+        .filter((e: Election) => datasetIds.includes(e.datasetId))
     : []
 }
 
@@ -168,13 +221,13 @@ const findElectionsForDatasets = (dar, datasetIds) => {
  * @private
  * @param dacIds List of dac ids. Can be empty
  * @param datasets List of datasets to filter
- * @returns {[]}
+ * @returns {Dataset[]}
  */
-const filterDatasetsByDACs = (dacIds, datasets) => {
+const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] => {
   return isEmpty(dacIds)
     ? datasets
     : filter(
-        dataset => includes(dataset.dacId)(dacIds),
+        (dataset: Dataset) => includes(dataset.dacId)(dacIds),
       )(datasets)
 }
 
@@ -189,20 +242,20 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
  *
  * @private
  * @param bucket
- * @returns {{result: string, rationales: string[], id, createDate: undefined}|{result: (string|string), rationales: *, id: *, createDate: *}|{result: string, rationales: undefined, id, createDate: undefined}}
+ * @returns {AlgorithmResult}
  */
-const calculateAlgorithmResultForBucket = (bucket) => {
+const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
-  const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3'
+  const algorithmVersionV3 = bucket.matchResults.length > 0 && bucket.matchResults[0].algorithmVersion === 'v3'
   const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse)
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
   // Check algorithm version: V3 does not need to be checked for 'unmatchable'
-  const matchVals = (algorithmVersionV3 || !unmatchable)
+  const matchVals: boolean[] = (algorithmVersionV3 || !unmatchable)
     ? flow(
-        map(m => m.match),
+        map((m: MatchResult) => m.match),
         uniq,
       )(bucket.matchResults)
     : []
@@ -214,8 +267,8 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     return { result: 'N/A', createDate: undefined, rationales: undefined, id: bucket.key }
   }
   else if ((matchVals.length === 1)) {
-    const rationales = flow(
-      flatMap(match => match.rationales),
+    const rationales: string[] = flow(
+      flatMap((match: MatchResult) => match.rationales),
       uniq,
     )(bucket.matchResults)
     const { createDate, failed, id, match } = bucket.matchResults[0]
@@ -249,13 +302,13 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 }
 
 /**
-* Process the match results for V3 Abstain. If we have a V3 result and we have
-* an ABSTAIN case, we can return true if the number of abstentions > 0
-* @param matchResults
-*/
-const processV3Abstain = (matchResults) => {
-  const abstainList = map(m => m.abstain)(matchResults)
-  const abstainValList = filter(a => a === true)(abstainList)
+ * Process the match results for V3 Abstain. If we have a V3 result and we have
+ * an ABSTAIN case, we can return true if the number of abstentions > 0
+ * @param matchResults
+ */
+const processV3Abstain = (matchResults: MatchResult[]): boolean => {
+  const abstainList = map((m: MatchResult) => m.abstain)(matchResults)
+  const abstainValList = filter((a: boolean | undefined) => a === true)(abstainList)
   return abstainValList.length > 0
 }
 
@@ -266,9 +319,10 @@ const processV3Abstain = (matchResults) => {
  * @param dataUse
  * @returns boolean
  */
-const isOther = (dataUse) => {
-  const primaryOther = !isEmpty(getOr('')('other')(dataUse))
-  const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse))
+const isOther = (dataUse?: DataUse): boolean => {
+  if (!dataUse) return false
+  const primaryOther = !isEmpty(dataUse.other)
+  const secondaryOther = !isEmpty(dataUse.secondaryOther)
   return primaryOther || secondaryOther
 }
 
@@ -278,7 +332,8 @@ const isOther = (dataUse) => {
  * @param dataUse
  * @returns boolean
  */
-export const shouldAbstain = (dataUse) => {
+export const shouldAbstain = (dataUse?: DataUse): boolean => {
+  if (!dataUse) return false
   const abstainFields = [
     'addiction',
     'collaboratorRequired',
@@ -295,7 +350,8 @@ export const shouldAbstain = (dataUse) => {
     'sexualDiseases',
     'stigmatizeDiseases',
     'vulnerablePopulations']
-  return isOther(dataUse) || any(f => getOr(false)(f)(dataUse))(abstainFields)
+  const abstainMatch = !isNil(Object.keys(dataUse).find((f: string) => abstainFields.includes(f)))
+  return isOther(dataUse) || abstainMatch
 }
 
 /**
@@ -303,29 +359,36 @@ export const shouldAbstain = (dataUse) => {
  *
  * @private
  * @param buckets
- * @returns [{rp: {chairpersonVotes: [], memberVotes : [], finalVotes: []}}]
+ * @returns {Array<{rp: RpVoteGroup}>}
  */
-const createRpVoteStructureFromBuckets = (buckets) => {
+const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: RpVoteGroup }> => {
   // List of rp vote groups broken out by election into chair, member, and final votes.
-  const rpVotes = []
+  const rpVotes: Array<{ rp: RpVoteGroup }> = []
 
-  const rpElectionVoteArrays = flow(
-    flatMap(b => b.elections),
-    filter(e => toLower(e.electionType) === 'rp'),
-    map(e => e.votes),
+  const rpElectionVoteArrays: Vote[][] = flow(
+    flatMap((b: Bucket) => b.elections),
+    filter((e: Election) => toLower(e.electionType) === 'rp'),
+    map((e: Election) => e.votes),
     // election.votes is a hash of vote id => vote object
-    map(hash => values(hash)),
+    map((hash: Record<string, Vote>) => values(hash)),
   )(buckets)
 
-  forEach((vArray) => {
-    const rpVoteGroup = {
+  forEach((vArray: Vote[]) => {
+    const rpVoteGroup: RpVoteGroup = {
       chairpersonVotes: [],
       memberVotes: [],
       finalVotes: [],
+      radarVotes: [],
     }
-    forEach((v) => {
+    forEach((v: Vote) => {
       const lowerCaseType = toLower(v.type)
       switch (lowerCaseType) {
+        case 'radar':
+          // 'RADAR' votes count as final votes count as Chair and Final votes for ALL elections.
+          rpVoteGroup.chairpersonVotes.push(v)
+          rpVoteGroup.finalVotes.push(v)
+          rpVoteGroup.radarVotes?.push(v)
+          break
         case 'chairperson':
           // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' votes
           rpVoteGroup.chairpersonVotes.push(v)
@@ -355,8 +418,10 @@ const createRpVoteStructureFromBuckets = (buckets) => {
  * @param b Data Use
  * @returns {boolean}
  */
-export const isEqualDataUse = (a, b) => {
-  const fields = [
+export const isEqualDataUse = (a?: DataUse, b?: DataUse): boolean => {
+  if (!a || !b) return a === b
+
+  const fields: (keyof DataUse)[] = [
     'generalUse',
     'hmbResearch',
     'diseaseRestrictions',

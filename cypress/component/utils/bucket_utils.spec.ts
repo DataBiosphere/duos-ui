@@ -1,5 +1,5 @@
 import { binCollectionToBuckets, Bucket, isEqualDataUse, shouldAbstain } from 'src/utils/BucketUtils'
-import { forEach, isEmpty, isUndefined } from 'lodash/fp'
+import { isEmpty, isUndefined } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
 import { DarCollection } from 'src/types/model'
 
@@ -400,7 +400,8 @@ const match_results = [
 describe('BucketUtils', () => {
   it('instantiates a collection into buckets', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
       buckets.forEach((b) => {
         cy.wrap(b.key).should('not.be.empty')
@@ -421,72 +422,78 @@ describe('BucketUtils', () => {
 
   it('there should be a bucket with two GRU datasets', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       const gruBucket = buckets.find(b => b.label === 'GRU')
       cy.wrap(gruBucket).should('not.be.empty')
-      cy.wrap(gruBucket.datasets).should('not.be.empty')
-      cy.wrap(gruBucket.datasets.length).should('eq', 2)
+      cy.wrap(gruBucket?.datasets).should('not.be.empty')
+      cy.wrap(gruBucket?.datasets.length).should('eq', 2)
     })
   })
 
   it('there should be a bucket with a primary OTHER dataset', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       const other = buckets.find(b => b.label === 'OTH1')
       cy.wrap(other).should('not.be.empty')
-      cy.wrap(other.datasets).should('not.be.empty')
-      cy.wrap(other.datasets.length).should('eq', 1)
+      cy.wrap(other?.datasets).should('not.be.empty')
+      cy.wrap(other?.datasets.length).should('eq', 1)
     })
   })
 
   it('there should be a bucket with a secondary OTHER dataset', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       const secondaryOther = buckets.find(b => b.label === 'OTH2')
       cy.wrap(secondaryOther).should('not.be.empty')
-      cy.wrap(secondaryOther.datasets).should('not.be.empty')
-      cy.wrap(secondaryOther.datasets.length).should('eq', 1)
+      cy.wrap(secondaryOther?.datasets).should('not.be.empty')
+      cy.wrap(secondaryOther?.datasets.length).should('eq', 1)
     })
   })
 
   it('there should be a bucket with a an undefined data use', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       const missingDataUse = buckets.find(b => !b.isRP && isUndefined(b.dataUse))
       cy.wrap(missingDataUse).should('not.be.empty')
-      cy.wrap(missingDataUse.datasets).should('not.be.empty')
-      cy.wrap(missingDataUse.datasets.length).should('eq', 1)
-      cy.wrap(missingDataUse.dataUse).should('be.undefined')
-      cy.wrap(missingDataUse.dataUses).should('be.empty')
+      cy.wrap(missingDataUse?.datasets).should('not.be.empty')
+      cy.wrap(missingDataUse?.datasets.length).should('eq', 1)
+      cy.wrap(missingDataUse?.dataUse).should('be.undefined')
+      cy.wrap(missingDataUse?.dataUses).should('be.empty')
     })
   })
 
   it('buckets should be filtered to datasets containing one dac id: 1', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection, [1])).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection, [1])).then((b) => {
+      const buckets = b as Bucket[]
       const dataAccessBuckets = buckets.filter(b => !b.isRP)
       cy.wrap(dataAccessBuckets).should('exist')
       cy.wrap(dataAccessBuckets.length).should('eq', 1)
       cy.wrap(dataAccessBuckets[0].datasetIds.length).should('eq', 1)
-      forEach((b) => {
-        forEach((e) => {
+      buckets.forEach((b) => {
+        b.elections.forEach((e) => {
           cy.wrap(b.datasetIds).should('contain', e.datasetId)
-        })(b.elections)
-      })(buckets)
+        })
+      })
     })
   })
 
   it('buckets should be filtered to datasets containing two dac ids: 1 & 5', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection, [1, 5])).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection, [1, 5])).then((b) => {
+      const buckets = b as Bucket[]
       const dataAccessBuckets = buckets.filter(b => !b.isRP)
       cy.wrap(dataAccessBuckets).should('exist')
       cy.wrap(dataAccessBuckets.length).should('eq', 2)
-      forEach((b) => {
-        forEach((e) => {
+      buckets.forEach((b) => {
+        b.elections.forEach((e) => {
           cy.wrap(b.datasetIds).should('contain', e.datasetId)
-        })(b.elections)
-      })(buckets)
+        })
+      })
     })
   })
 
@@ -516,13 +523,14 @@ describe('BucketUtils', () => {
       },
     ]
     cy.stub(Match, 'findMatchBatch').returns(failing_matches)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
       let rationaleCheck = false
       buckets.forEach((b) => {
         if (!isEmpty(b.matchResults)) {
-          cy.wrap(b.algorithmResult.rationales).should('not.be.empty')
-          cy.wrap(b.algorithmResult.rationales.length).should('eq', 5)
+          cy.wrap(b.algorithmResult?.rationales).should('not.be.empty')
+          cy.wrap(b.algorithmResult?.rationales?.length).should('eq', 5)
           rationaleCheck = true
         }
       })
@@ -982,23 +990,24 @@ describe('BucketUtils', () => {
           dacId: 5,
         },
       ],
-    }
-    cy.wrap(binCollectionToBuckets(collection)).then((buckets) => {
+    } as unknown as DarCollection
+    cy.wrap(binCollectionToBuckets(collection)).then((b) => {
+      const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
       // The provided dar collection should have 1 RP bucket and 3 Data Use buckets
       cy.wrap(buckets.length).should('eq', 4)
       cy.wrap(buckets[0].isRP).should('eq', true)
       // HMB + Other
       cy.wrap(buckets[1].isRP).should('eq', undefined)
-      cy.wrap(buckets[1].dataUse.hmbResearch).should('eq', true)
-      cy.wrap(buckets[1].dataUse.other).should('not.be.empty')
+      cy.wrap(buckets[1].dataUse?.hmbResearch).should('eq', true)
+      cy.wrap(buckets[1].dataUse?.other).should('not.be.empty')
       // General Use
       cy.wrap(buckets[2].isRP).should('eq', undefined)
-      cy.wrap(buckets[2].dataUse.generalUse).should('eq', true)
+      cy.wrap(buckets[2].dataUse?.generalUse).should('eq', true)
       // HMB
       cy.wrap(buckets[3].isRP).should('eq', undefined)
-      cy.wrap(buckets[3].dataUse.hmbResearch).should('eq', true)
-      cy.wrap(buckets[3].dataUse.other).should('eq', undefined)
+      cy.wrap(buckets[3].dataUse?.hmbResearch).should('eq', true)
+      cy.wrap(buckets[3].dataUse?.other).should('eq', undefined)
     })
   })
 })
