@@ -251,30 +251,30 @@ export const getAccessManagementSummary = (accessManagement: string): AccessMana
 }
 
 export interface DataUse {
-  generalUse: boolean
-  hmbResearch: boolean
-  diseaseRestrictions: string[]
-  populationOriginsAncestry: boolean
-  methodsResearch: boolean
-  nonProfitUse: boolean
-  other: string
-  secondaryOther: string
-  ethicsApprovalRequired: boolean
-  collaboratorRequired: boolean
-  geographicalRestrictions: string
-  geneticStudiesOnly: boolean
-  publicationResults: boolean
-  publicationMoratorium: string
-  controls: boolean
-  gender: string
-  pediatric: boolean
-  population: boolean
-  illegalBehavior: boolean
-  sexualDiseases: boolean
-  stigmatizeDiseases: boolean
-  vulnerablePopulations: boolean
-  psychologicalTraits: boolean
-  notHealth: boolean
+  generalUse?: boolean
+  hmbResearch?: boolean
+  diseaseRestrictions?: string[]
+  populationOriginsAncestry?: boolean
+  methodsResearch?: boolean
+  nonProfitUse?: boolean
+  other?: string
+  secondaryOther?: string
+  ethicsApprovalRequired?: boolean
+  collaboratorRequired?: boolean
+  geographicalRestrictions?: string
+  geneticStudiesOnly?: boolean
+  publicationResults?: boolean
+  publicationMoratorium?: string
+  controls?: boolean
+  gender?: string
+  pediatric?: boolean
+  population?: boolean
+  illegalBehavior?: boolean
+  sexualDiseases?: boolean
+  stigmatizeDiseases?: boolean
+  vulnerablePopulations?: boolean
+  psychologicalTraits?: boolean
+  notHealth?: boolean
 }
 
 export interface DatasetProperty {
