@@ -1,11 +1,13 @@
 import React from 'react'
 import { useState, useEffect, Fragment } from 'react'
-import { Styles } from '../../libs/theme'
-import SimpleTable from '../../components/SimpleTable'
+import { Styles } from 'src/libs/theme'
+import SimpleTable from 'src/components/SimpleTable'
 import './dar_application.css'
-import { binCollectionToBuckets } from '../../utils/BucketUtils'
+import { binCollectionToBuckets } from 'src/utils/BucketUtils'
 import { useCallback } from 'react'
 import { isEmpty, flatten } from 'lodash/fp'
+import { Notifications } from 'src/libs/utils.js'
+import { DataSet } from 'src/libs/ajax/DataSet.js'
 
 const commonStyles = {
   baseStyle: {
@@ -87,6 +89,7 @@ const columnHeaderData = (columns) => {
 export default function DucAddendum(props) {
   const { datasets, isLoading, save, doSubmit } = props
 
+  const [dacs, setDacs] = useState([])
   const [buckets, setBuckets] = useState([])
   const [ducAddendumTable, setDucAddendumTable] = useState([])
 
@@ -106,7 +109,50 @@ export default function DucAddendum(props) {
     getBuckets()
   }, [getBuckets])
 
+  useEffect(() => {
+    const loadDatasetTerms = async () => {
+      const datasetQuery = DataSet.searchDatasetIndex({
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  _type: 'dataset',
+                },
+              },
+              {
+                terms: {
+                  _id: datasets.map(dataset => dataset.datasetId),
+                },
+              },
+            ],
+          },
+        },
+      })
+
+      try {
+        const datasetTerms = await datasetQuery
+
+        const dacs = datasetTerms.map((datasetTerm) => {
+          return datasetTerm.dac
+        })
+
+        setDacs(dacs)
+      }
+      catch (error) {
+        Notifications.showWarning({ text: `Error loading DAC information for datasets: ${error.message}` })
+      }
+    }
+
+    loadDatasetTerms()
+  }, [datasets])
+
   const buildDucAddendumTable = useCallback(async () => {
+    const getDacName = (dacId) => {
+      const dac = dacs.find(dac => dac?.dacId === dacId)
+      return dac?.dacName || 'N/A'
+    }
+
     const tableChunks = buckets.map((bucket) => {
       const dataUseCodes = bucket.label
       const dataUseSummary = bucket.dataUses.map(dataUse => dataUse.description).join('. ')
@@ -137,7 +183,7 @@ export default function DucAddendum(props) {
             style: columnStyles,
           },
           {
-            data: '',
+            data: getDacName(dataset.dacId),
             id: dataset.datasetId,
             style: columnStyles,
           },
@@ -180,10 +226,9 @@ export default function DucAddendum(props) {
         }}
       />,
     )
-
     const fullTable = flatten(tableChunks)
     setDucAddendumTable(fullTable)
-  }, [buckets, isLoading])
+  }, [buckets, isLoading, dacs])
 
   useEffect(() => {
     buildDucAddendumTable()
