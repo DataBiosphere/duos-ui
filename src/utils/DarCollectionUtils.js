@@ -17,6 +17,7 @@ export const processVotesForBucket = (darElections = []) => {
     memberVotes: [],
     chairpersonVotes: [],
     agreementVotes: [],
+    radarVotes: [],
   }
   darElections.forEach((election) => {
     const { electionType, votes, status = [] } = election
@@ -29,7 +30,7 @@ export const processVotesForBucket = (darElections = []) => {
       votes[vote.voteId] = vote
     })
     const dateSortedVotes = updatedVotes.toSorted(vote => vote.updateDate)
-    let targetFinal, targetChair, targetMember, targetFinalType
+    let targetFinal, targetChair, targetMember, targetFinalType, targetRadar
 
     if (electionType === 'RP') {
       targetFinalType = 'chairperson'
@@ -42,10 +43,14 @@ export const processVotesForBucket = (darElections = []) => {
       targetMember = dataAccess.memberVotes
       targetChair = dataAccess.chairpersonVotes
       targetFinal = dataAccess.finalVotes
+      targetRadar = dataAccess.radarVotes
     }
-    forEach((vote) => {
+    dateSortedVotes.forEach((vote) => {
       const lowerCaseType = toLower(vote.type)
       switch (lowerCaseType) {
+        case 'radar_approve':
+          targetRadar.push(vote)
+          break
         case 'chairperson':
           targetChair.push(vote)
           break
@@ -58,7 +63,7 @@ export const processVotesForBucket = (darElections = []) => {
       if (lowerCaseType === targetFinalType) {
         targetFinal.push(vote)
       }
-    })(dateSortedVotes)
+    })
   })
   return { rp, dataAccess }
 }
@@ -156,7 +161,7 @@ export const collapseVotesByUser = (votes) => {
 // helper method to collapse votes by converting them to an object with differing rationales and dates in arrays
 const collapseVotes = ({ votes }) => {
   const collapsedVotes = {}
-  forEach((vote) => {
+  votes.forEach((vote) => {
     const matchingVote = collapsedVotes[`${vote.vote}`]
     const lastUpdate = vote.updateDate || vote.createDate
     if (isNil(matchingVote)) {
@@ -173,7 +178,7 @@ const collapseVotes = ({ votes }) => {
       addIfUnique(vote.rationale, matchingVote.rationales)
       addIfUnique(lastUpdate, matchingVote.lastUpdates)
     }
-  })(votes)
+  })
   return collapsedVotes
 }
 
@@ -197,9 +202,9 @@ const convertToVoteObjects = ({ collapsedVotes }) => {
 
 const appendAll = (values) => {
   let result = ''
-  forEach((value) => {
+  values.forEach((value) => {
     result += `${value}\n`
-  })(values)
+  })
   return !isEmpty(result) ? result : null
 }
 

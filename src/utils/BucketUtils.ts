@@ -50,7 +50,7 @@ export interface Bucket {
   dataUse?: DataUse
   dataUses: DataUseTranslation[]
   elections: Election[]
-  votes: any[]
+  votes: Record<string, VoteGroup>[]
   matchResults: MatchResult[]
   algorithmResult?: AlgorithmResult
   isRP?: boolean
@@ -69,7 +69,7 @@ interface VoteGroup {
   chairpersonVotes: Vote[]
   memberVotes: Vote[]
   finalVotes: Vote[]
-  radarVotes: Vote[]
+  radarVotes?: Vote[]
 }
 
 /**
@@ -378,17 +378,10 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
       chairpersonVotes: [],
       memberVotes: [],
       finalVotes: [],
-      radarVotes: [],
     }
     forEach((v: Vote) => {
       const lowerCaseType = toLower(v.type)
       switch (lowerCaseType) {
-        case 'radar_approve':
-          // 'RADAR' votes count as final votes count as Chair and Final votes for ALL elections.
-          rpVoteGroup.chairpersonVotes.push(v)
-          rpVoteGroup.finalVotes.push(v)
-          rpVoteGroup.radarVotes?.push(v)
-          break
         case 'chairperson':
           // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' votes
           rpVoteGroup.chairpersonVotes.push(v)
