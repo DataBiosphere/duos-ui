@@ -7,7 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 const mockApplicationTabs = [
   { id: 'researcher-info', name: 'Researcher Information', showStep: true },
   { id: 'data-access-request', name: 'Data Access Request', showStep: true },
-  { id: 'research-purpose-statement', name: 'Research Purpose Statement', showStep: true }
+  { id: 'research-purpose-statement', name: 'Research Purpose Statement', showStep: true },
 ]
 
 describe('ScrollableTabs - Basic Tests', () => {
@@ -15,7 +15,7 @@ describe('ScrollableTabs - Basic Tests', () => {
     mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={mockApplicationTabs} />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
     // Check that the component renders
@@ -26,7 +26,7 @@ describe('ScrollableTabs - Basic Tests', () => {
     mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={mockApplicationTabs} />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
     cy.get('[role="tab"]').should('have.length', 3)
@@ -45,7 +45,7 @@ describe('ScrollableTabs Component - Integration Tests', () => {
             <div id="research-purpose-statement" style={{ height: '1000px', backgroundColor: 'purple' }}>Research Purpose Statement</div>
           </div>
         </div>
-      </BrowserRouter>
+      </BrowserRouter>,
     )
   })
 
@@ -54,7 +54,7 @@ describe('ScrollableTabs Component - Integration Tests', () => {
     mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={mockApplicationTabs} formSelectedTabId="data-access-request" />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
     cy.get('.Mui-selected').contains('Data Access Request').should('exist')
     cy.get('.Mui-selected').contains('Researcher Information').should('not.exist')
@@ -63,7 +63,7 @@ describe('ScrollableTabs Component - Integration Tests', () => {
     mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={mockApplicationTabs} formSelectedTabId="research-purpose-statement" />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
     cy.get('.Mui-selected').contains('Research Purpose Statement').should('exist')
   })
@@ -98,7 +98,7 @@ describe('ScrollableTabs Component - Integration Tests', () => {
     mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={tabsWithoutSteps} />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
     cy.get('.step').should('not.exist')
