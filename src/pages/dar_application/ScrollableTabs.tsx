@@ -27,8 +27,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
   // CASE 1 - the form scrolls to a new tab based on validation errors
   useEffect(() => {
     if (formSelectedTabId !== undefined) {
-      // setLocalSelectedStep(applicationTabs.findIndex(tab => tab.id === formSelectedTabId) + 1);
-      setSelectedStepNumber(findIndex(tab => tab.id === formSelectedTabId, applicationTabs))
+      setSelectedStepNumber(findIndex(tab => tab.id === formSelectedTabId, applicationTabs) + 1)
       goToStep(formSelectedTabId)
     }
   }, [goToStep, formSelectedTabId, applicationTabs])
