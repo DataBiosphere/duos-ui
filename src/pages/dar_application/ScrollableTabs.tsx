@@ -40,7 +40,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
     const scrollBuffer = window.innerHeight * 0.5
 
     // Find the section that is currently most visible
-    let currentSectionIndex = 0
+    let currentSectionIndex = 1 // Start with 1 since MUI Tabs expects 1-based indexing
 
     for (let i = 0; i < applicationTabs.length; i++) {
       const element = document.getElementById(applicationTabs[i].id)
@@ -60,6 +60,9 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
         currentSectionIndex = i + 1
       }
     }
+
+    // Ensure the index is within valid bounds for MUI Tabs (1 to applicationTabs.length)
+    currentSectionIndex = Math.max(1, Math.min(currentSectionIndex, applicationTabs.length))
 
     setSelectedStepNumber(currentSectionIndex)
   }
