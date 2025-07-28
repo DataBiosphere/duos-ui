@@ -647,7 +647,7 @@ const DataAccessRequestApplication = (props) => {
               </div>
             )}
 
-            <div id={`${DAR_UPDATE_TAB_ID_PREFIX}-0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
+            <div id={`${DAR_UPDATE_TAB_ID_PREFIX}0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {existingDarsReadOnlyMode && (
                 <h3>
                   {formData.darCode}
