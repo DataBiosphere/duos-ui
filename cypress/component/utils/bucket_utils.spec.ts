@@ -1,6 +1,7 @@
-import { binCollectionToBuckets, isEqualDataUse, shouldAbstain } from 'src/utils/BucketUtils'
+import { binCollectionToBuckets, Bucket, isEqualDataUse, shouldAbstain } from 'src/utils/BucketUtils'
 import { forEach, isEmpty, isUndefined } from 'lodash/fp'
 import { Match } from 'src/libs/ajax/Match'
+import { DarCollection } from 'src/types/model'
 
 const dar_collection = {
   darCollectionId: 1,
@@ -371,7 +372,7 @@ const dar_collection = {
       dacId: 5,
     },
   ],
-}
+} as unknown as DarCollection
 
 const match_results = [
   {
