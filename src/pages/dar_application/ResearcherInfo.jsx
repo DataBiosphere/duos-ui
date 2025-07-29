@@ -209,7 +209,7 @@ export default function ResearcherInfo(props) {
             <div>
               Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
               this data access request, including any that are downloaded or utilized in the cloud.
-              please do not list External Collaborators or Internal Collaborators at a PI or equivalent
+              Please do not list External Collaborators or Internal Collaborators at a PI or equivalent
               level here. If your DAR is approved, you will be responsible for the appropriate use of the
               data by each individual listed in this section.
             </div>
