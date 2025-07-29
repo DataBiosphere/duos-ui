@@ -1,7 +1,7 @@
 import { binCollectionToBuckets, Bucket, shouldAbstain } from 'src/utils/BucketUtils'
 import { isEmpty, isUndefined } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
-import { DarCollection, DatasetTerm, DataUseTerm } from 'src/types/model'
+import { DarCollection, DatasetTerm, DataUseSummary, DataUseTerm } from 'src/types/model'
 import { DataSet } from 'src/libs/ajax/DataSet'
 
 const dar_collection = {
@@ -606,9 +606,9 @@ describe('BucketUtils', () => {
 
   it('correctly determines matchable data use objects', () => {
     const dataUses = [
-      { generalUse: true, recontactMay: true },
-      { generalUse: true, recontactMust: true },
-      { generalUse: true, genomicSummaryResults: true },
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'NCU', description: 'NCU' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'NMDS', description: 'NMDS' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'NCTRL', description: 'NCTRL' }] } as DataUseSummary,
     ]
     dataUses.forEach((d) => {
       cy.wrap(shouldAbstain(d)).should('eq', false)
@@ -617,23 +617,15 @@ describe('BucketUtils', () => {
 
   it('correctly determines unmatchable data use objects', () => {
     const dataUses = [
-      { generalUse: true, addiction: true },
-      { generalUse: true, collaboratorRequired: true },
-      { generalUse: true, ethicsApprovalRequired: true },
-      { generalUse: true, gender: 'F' },
-      { generalUse: true, gender: 'M' },
-      { generalUse: true, geographicalRestrictions: 'true' },
-      { generalUse: true, illegalBehavior: true },
-      { generalUse: true, manualReview: true },
-      { generalUse: true, nonBiomedical: true },
-      { generalUse: true, other: 'true' },
-      { generalUse: true, pediatric: true },
-      { generalUse: true, psychologicalTraits: true },
-      { generalUse: true, publicationResults: true },
-      { generalUse: true, secondaryOther: 'true' },
-      { generalUse: true, sexualDiseases: true },
-      { generalUse: true, stigmatizeDiseases: true },
-      { generalUse: true, vulnerablePopulations: true },
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'OTHER', description: 'OTHER' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'POP-M', description: 'POP-M' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'POP-F', description: 'POP-M' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'COL', description: 'COL' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'IRB', description: 'IRB' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'GSO', description: 'GSO' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'PUB', description: 'PUB' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'MOR', description: 'MOR' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'POP-PD', description: 'POP-PD' }] } as DataUseSummary,
     ]
     dataUses.forEach((d) => {
       cy.wrap(shouldAbstain(d)).should('eq', true)
@@ -1088,7 +1080,6 @@ describe('BucketUtils', () => {
       cy.wrap(buckets[0].isRP).should('eq', true)
       // HMB + Other
       cy.wrap(buckets[1].isRP).should('eq', undefined)
-      console.log(buckets[1].dataUse)
       cy.wrap(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).should('exist')
       cy.wrap(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).should('exist')
       // General Use

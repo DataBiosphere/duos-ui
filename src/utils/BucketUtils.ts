@@ -1,4 +1,4 @@
-import { filter, flatMap, flow, forEach, includes, isEmpty, isEqual, join, map, pick, uniq, values } from 'lodash/fp'
+import { filter, flatMap, flow, forEach, includes, isEmpty, join, map, uniq, values } from 'lodash/fp'
 import { isNil } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet.js'
@@ -10,7 +10,6 @@ import {
   DataAccessRequest,
   Dataset,
   DatasetTerm,
-  DataUse,
   DataUseSummary,
   DataUseTerm,
   Election,
@@ -212,7 +211,7 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
   const algorithmVersionV3 = bucket.matchResults.length > 0 && bucket.matchResults[0].algorithmVersion === 'v3'
-  const unmatchable = isOtherDataUseSummary(bucket.dataUse) || shouldAbstainDataUseSummary(bucket.dataUse)
+  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse)
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
@@ -283,24 +282,10 @@ const processV3Abstain = (matchResults: MatchResult[]): boolean => {
  * @param dataUse
  * @returns boolean
  */
-const isOther = (dataUse?: DataUse): boolean => {
-  if (!dataUse) return false
-  const primaryOther = !isEmpty(dataUse.other)
-  const secondaryOther = !isEmpty(dataUse.secondaryOther)
-  return primaryOther || secondaryOther
-}
-
-const isOtherDataUseSummary = (dataUse?: DataUseSummary): boolean => {
+const isOther = (dataUse?: DataUseSummary): boolean => {
   const primaryOther = dataUse?.primary?.some((dut: DataUseTerm) => dut.code === 'OTHER') || false
   const secondaryOther = dataUse?.secondary?.some((dut: DataUseTerm) => dut.code === 'OTHER') || false
   return primaryOther || secondaryOther
-}
-
-const shouldAbstainDataUseSummary = (dataUse?: DataUseSummary): boolean => {
-  const codeList: string[] = ['OTHER', 'POP-M', 'POP-F', 'COL', 'IRB', 'GSO', 'PUB', 'MOR', 'POP-PD']
-  return dataUse?.secondary?.some((dut: DataUseTerm) => {
-    return codeList.some((code: string) => code === dut.code)
-  }) || false
 }
 
 /**
@@ -309,26 +294,11 @@ const shouldAbstainDataUseSummary = (dataUse?: DataUseSummary): boolean => {
  * @param dataUse
  * @returns boolean
  */
-export const shouldAbstain = (dataUse?: DataUse): boolean => {
-  if (!dataUse) return false
-  const abstainFields = [
-    'addiction',
-    'collaboratorRequired',
-    'ethicsApprovalRequired',
-    'gender',
-    'geneticStudiesOnly',
-    'geographicalRestrictions',
-    'illegalBehavior',
-    'manualReview',
-    'nonBiomedical',
-    'pediatric',
-    'psychologicalTraits',
-    'publicationResults',
-    'sexualDiseases',
-    'stigmatizeDiseases',
-    'vulnerablePopulations']
-  const abstainMatch = !isNil(Object.keys(dataUse).find((f: string) => abstainFields.includes(f)))
-  return isOther(dataUse) || abstainMatch
+export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
+  const codeList: string[] = ['OTHER', 'POP-M', 'POP-F', 'COL', 'IRB', 'GSO', 'PUB', 'MOR', 'POP-PD']
+  return isOther(dataUse) || dataUse?.secondary?.some((dut: DataUseTerm) => {
+    return codeList.some((code: string) => code === dut.code)
+  }) || false
 }
 
 /**
