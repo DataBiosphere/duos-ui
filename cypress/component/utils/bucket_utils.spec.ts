@@ -606,9 +606,9 @@ describe('BucketUtils', () => {
 
   it('correctly determines matchable data use objects', () => {
     const dataUses = [
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'NCU', description: 'NCU' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'NMDS', description: 'NMDS' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'NCTRL', description: 'NCTRL' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NCU', description: 'NCU' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NMDS', description: 'NMDS' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NCTRL', description: 'NCTRL' }] } as DataUseSummary,
     ]
     dataUses.forEach((d) => {
       cy.wrap(shouldAbstain(d)).should('eq', false)
@@ -617,15 +617,15 @@ describe('BucketUtils', () => {
 
   it('correctly determines unmatchable data use objects', () => {
     const dataUses = [
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'OTHER', description: 'OTHER' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'POP-M', description: 'POP-M' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'POP-F', description: 'POP-M' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'COL', description: 'COL' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'IRB', description: 'IRB' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'GSO', description: 'GSO' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'PUB', description: 'PUB' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'MOR', description: 'MOR' }] } as DataUseSummary,
-      { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [{ code: 'POP-PD', description: 'POP-PD' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'OTHER', description: 'OTHER' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-M', description: 'POP-M' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-F', description: 'POP-M' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'COL', description: 'COL' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'IRB', description: 'IRB' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'GSO', description: 'GSO' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'PUB', description: 'PUB' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'MOR', description: 'MOR' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-PD', description: 'POP-PD' }] } as DataUseSummary,
     ]
     dataUses.forEach((d) => {
       cy.wrap(shouldAbstain(d)).should('eq', true)
