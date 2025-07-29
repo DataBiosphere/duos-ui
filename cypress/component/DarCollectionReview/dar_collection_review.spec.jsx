@@ -1,13 +1,14 @@
 /* eslint-disable cypress/no-assigning-return-values */
 import { React } from 'react'
 import { mount } from 'cypress/react'
-import DarCollectionReview from '../../../src/pages/dar_collection_review/DarCollectionReview'
-import { Collections } from '../../../src/libs/ajax/Collections'
-import { Match } from '../../../src/libs/ajax/Match'
-import { User } from '../../../src/libs/ajax/User'
-import { Storage } from '../../../src/libs/storage'
-import { Navigation } from '../../../src/libs/utils'
-import { OntologyService } from '../../../src/libs/ontologyService'
+import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview'
+import { Collections } from 'src/libs/ajax/Collections'
+import { Match } from 'src/libs/ajax/Match'
+import { User } from 'src/libs/ajax/User'
+import { Storage } from 'src/libs/storage'
+import { Navigation } from 'src/libs/utils'
+import { OntologyService } from 'src/libs/ontologyService'
+import { DataSet } from 'src/libs/ajax/DataSet'
 
 const dar = {
   darCollectionId: 777,
@@ -677,6 +678,21 @@ const dacDatasets = [{
   },
 }]
 
+const terms = [{
+  datasetId: 13,
+  objectId: null,
+  name: 'Sleep Apnea',
+  datasetName: 'Sleep Apnea',
+  datasetIdentifier: 'DUOS-00999',
+  dataUse: {
+    primary: [{
+      code: 'POA',
+      description: 'POA',
+    }],
+  },
+  dacId: 1,
+}]
+
 beforeEach(() => {
   cy.stub(Collections, 'getCollectionById').returns(dar)
   cy.stub(Storage, 'getCurrentUser').returns(user)
@@ -685,6 +701,7 @@ beforeEach(() => {
   cy.stub(OntologyService, 'searchOntology').returns(ontologyResponse)
   cy.stub(Match, 'findMatchBatch').returns(matchResponse)
   cy.stub(User, 'getUserRelevantDatasets').returns(dacDatasets)
+  cy.stub(DataSet, 'searchDatasetIndex').returns(terms)
 })
 
 describe('DAR Review', () => {
