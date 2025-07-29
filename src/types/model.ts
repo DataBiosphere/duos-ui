@@ -183,14 +183,16 @@ export interface StudyTerm {
   dataTypes: string[]
 }
 
-interface DataUseTerm {
+export interface DataUseTerm {
   code: string
   description: string
+  manualReview?: boolean
+  type?: string
 }
 
-interface DataUseSummary {
-  primary: DataUseTerm[]
-  secondary: DataUseTerm[]
+export interface DataUseSummary {
+  primary?: DataUseTerm[]
+  secondary?: DataUseTerm[]
 }
 
 export interface DatasetTerm {

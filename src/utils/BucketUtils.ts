@@ -1,21 +1,7 @@
-import {
-  compact,
-  filter,
-  flatMap,
-  flow,
-  forEach,
-  includes,
-  isEmpty,
-  isEqual,
-  join,
-  map,
-  pick,
-  uniq,
-  values,
-} from 'lodash/fp'
+import { filter, flatMap, flow, forEach, includes, isEmpty, isEqual, join, map, pick, uniq, values } from 'lodash/fp'
 import { isNil } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
-import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation'
+import { DataSet } from 'src/libs/ajax/DataSet.js'
 import { processVotesForBucket } from './DarCollectionUtils'
 import { processMatchData } from './VoteUtils'
 import {
@@ -23,24 +9,25 @@ import {
   DarCollection,
   DataAccessRequest,
   Dataset,
+  DatasetTerm,
   DataUse,
+  DataUseSummary,
+  DataUseTerm,
   Election,
   MatchResult,
   Vote,
 } from 'src/types/model'
-
-interface DataUseTranslation {
-  code: string
-  alternateLabel?: string
-}
+import { Notifications } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
+import { ControlledAccessType } from 'src/libs/dataUseTranslation'
 
 export interface Bucket {
   key: string
   label: string
   datasets: Dataset[]
   datasetIds: number[]
-  dataUse?: DataUse
-  dataUses: DataUseTranslation[]
+  dataUse?: DataUseSummary
+  dataUses?: DataUseTerm[]
   elections: Election[]
   votes: Record<string, VoteGroup>[]
   matchResults: MatchResult[]
@@ -76,75 +63,69 @@ interface VoteGroup {
  */
 export const binCollectionToBuckets = async (collection: DarCollection, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
-  //  Find the most recent DAR
+  // Find the most recent DAR
   const recentDar: DataAccessRequest = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) : {} as DataAccessRequest
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
   const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
   // If we need to restrict the datasets to a particular DAC, do that here.
   const datasets: Dataset[] = filterDatasetsByDACs(dacIds, collection.datasets)
+  // Find the DatasetTerms which have preprocessed DataUse objects.
+  const terms = await getDatasetTerms(datasets)
+  // Terms don't come with type-specification so we need to modify that manually
+  terms.forEach((term) => {
+    term.dataUse?.primary?.forEach((dut: DataUseTerm) => {
+      // Set the type for primary data use terms to permissions
+      dut.type = ControlledAccessType.permissions
+    })
+    term.dataUse?.secondary?.forEach((dut: DataUseTerm) => {
+      // Set the type for secondary data use terms to permissions
+      dut.type = ControlledAccessType.modifiers
+    })
+  })
+  // Create a map of DataUse to a list of datasets. This will serve as the basis for bucketing datasets by DataUse.
+  // Note that we need to use a string value of the DataUse object to ensure that we can use it as a key in a Map.
+  const datasetTermMap: Map<string, Dataset[]> = new Map<string, Dataset[]>()
+  terms.forEach((term: DatasetTerm) => {
+    const stringValue = JSON.stringify(term.dataUse)
+    if (datasetTermMap.has(stringValue)) {
+      datasetTermMap.get(stringValue)?.push(datasets.filter((dataset: Dataset) => dataset.datasetId === term.datasetId)[0])
+    }
+    else {
+      datasetTermMap.set(stringValue, [datasets.filter((dataset: Dataset) => dataset.datasetId === term.datasetId)[0]])
+    }
+  })
 
-  // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
-  // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
-  // empty elements per translation (one for any missing potential translation), so we need to filter those out.
-  const rawDataUses: DataUse[] = compact(map((d: Dataset) => d.dataUse)(datasets))
-  const translatedDataUses: DataUseTranslation[][] = await translateDataUseRestrictionsFromDataUseArray(rawDataUses)
-  const flatTranslatedDataUses: DataUseTranslation[][] = map((t: DataUseTranslation[]) => compact(t))(translatedDataUses)
-
-  // Step 1: Create buckets for unique dataset groups
-  forEach((dataset: Dataset) => {
-    // Put each dataset into a bucket. If the dataset's data use is missing, unique or has an "Other" restriction, then
-    // it gets its own bucket. If the data use is already in a bucket, then it gets merged in.
+  // Iterate through the datasetTermMap to create buckets
+  const iterator = datasetTermMap.keys()
+  for (const key of iterator) {
+    const dataUseSummary: DataUseSummary = isNil(key) ? undefined : JSON.parse(key)
+    const datasets: Dataset[] = datasetTermMap.get(key) || []
     const bucket: Bucket = {
       key: '',
       label: '',
-      datasets: [dataset],
-      datasetIds: [dataset.datasetId],
-      dataUse: dataset.dataUse,
-      dataUses: [],
+      datasets: datasets,
+      datasetIds: datasets?.map((dataset: Dataset) => dataset.datasetId),
+      dataUse: dataUseSummary,
+      dataUses: [...dataUseSummary?.primary || [], ...dataUseSummary?.secondary || []],
       elections: [],
       votes: [],
       matchResults: [],
     }
+    buckets.push(bucket)
+  }
 
-    if (isNil(dataset.dataUse) || isOther(dataset.dataUse)) {
-      buckets.push(bucket)
-    }
-    else {
-      /* TODO: investigate whether this can be done more efficiently */
-      let added = false
-      forEach((b: Bucket) => {
-        if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
-          b.datasets.push(dataset)
-          b.datasetIds.push(dataset.datasetId)
-          added = true
-        }
-      })(buckets)
-      if (!added) {
-        buckets.push(bucket)
-      }
-    }
-
-    // Step 1.b: Populate translated dataUses
-    if (dataset.dataUse) {
-      const index = rawDataUses.findIndex(du => du === dataset.dataUse)
-      if (index >= 0 && !isNil(flatTranslatedDataUses[index])) {
-        bucket.dataUses = flatTranslatedDataUses[index]
-      }
-    }
-  })(datasets)
-
-  // The following steps are all bucket-centric, so we can process those in a single loop
+  // The following steps are all bucket-centric, so we can process them in a single loop
   // Steps 2-6
-  forEach((b: Bucket) => {
+  buckets.forEach((b: Bucket) => {
     // Step 2: Find match results for each dataset in bucket
-    forEach((m: MatchResult) => {
-      forEach((dataset: Dataset) => {
+    matchData.forEach((m: MatchResult) => {
+      b.datasets.forEach((dataset: Dataset) => {
         if (dataset.datasetIdentifier.toLowerCase() === m.consent.toLowerCase()) {
           b.matchResults.push(m)
         }
-      })(b.datasets)
-    })(matchData)
+      })
+    })
 
     // Step 3: Populate elections for datasets in this bucket
     b.elections = findElectionsForDatasets(recentDar, b.datasetIds)
@@ -155,7 +136,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
     // Step 5: Generate bucket key and label
     if (!isEmpty(b.dataUses)) {
       b.label = flow(
-        map((du: DataUseTranslation) => du.alternateLabel || du.code),
+        map((du: DataUseTerm) => du.code),
         join(', '),
       )(b.dataUses)
     }
@@ -166,7 +147,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
 
     // Step 6: Coalesce match results into a single result per bucket
     b.algorithmResult = calculateAlgorithmResultForBucket(b)
-  })(buckets)
+  })
 
   // Step 7: Populate RUS Vote bucket with RP votes
   const rpVotes = createRpVoteStructureFromBuckets(buckets)
@@ -231,7 +212,7 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
   const algorithmVersionV3 = bucket.matchResults.length > 0 && bucket.matchResults[0].algorithmVersion === 'v3'
-  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse)
+  const unmatchable = isOtherDataUseSummary(bucket.dataUse) || shouldAbstainDataUseSummary(bucket.dataUse)
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
@@ -309,6 +290,19 @@ const isOther = (dataUse?: DataUse): boolean => {
   return primaryOther || secondaryOther
 }
 
+const isOtherDataUseSummary = (dataUse?: DataUseSummary): boolean => {
+  const primaryOther = dataUse?.primary?.some((dut: DataUseTerm) => dut.code === 'OTHER') || false
+  const secondaryOther = dataUse?.secondary?.some((dut: DataUseTerm) => dut.code === 'OTHER') || false
+  return primaryOther || secondaryOther
+}
+
+const shouldAbstainDataUseSummary = (dataUse?: DataUseSummary): boolean => {
+  const codeList: string[] = ['OTHER', 'POP-M', 'POP-F', 'COL', 'IRB', 'GSO', 'PUB', 'MOR', 'POP-PD']
+  return dataUse?.secondary?.some((dut: DataUseTerm) => {
+    return codeList.some((code: string) => code === dut.code)
+  }) || false
+}
+
 /**
  * Calculate abstention for a data use. There are a number of cases where there should
  * not be an algorithm decision if a field is true, including any "Other" state.
@@ -383,45 +377,38 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
 }
 
 /**
- * Constrain the equality check to a limited number of fields. These
- * fields are the ones that are used in the v4 algorithm decisions and are what
- * determine whether it falls into a Data Use bucket. We limit the fields
- * because there are several captured values that have no impact on decision-making.
+ * Helper function to retrieve DatasetTerms for a list of datasets. This is primarily used to get the pre-processed
+ * data use information so the UI doesn't have to reprocess it.
  *
- * @public
- * @param a Data Use
- * @param b Data Use
- * @returns {boolean}
+ * @param datasets List of datasets to retrieve DatasetTerms for
  */
-export const isEqualDataUse = (a?: DataUse, b?: DataUse): boolean => {
-  if (!a || !b) return a === b
-  const fields: (keyof DataUse)[] = [
-    'generalUse',
-    'hmbResearch',
-    'diseaseRestrictions',
-    'populationOriginsAncestry',
-    'methodsResearch',
-    'nonProfitUse',
-    'other',
-    'secondaryOther',
-    'ethicsApprovalRequired',
-    'collaboratorRequired',
-    'geographicalRestrictions',
-    'geneticStudiesOnly',
-    'publicationResults',
-    'publicationMoratorium',
-    'controls',
-    'gender',
-    'pediatric',
-    'population',
-    'illegalBehavior',
-    'sexualDiseases',
-    'stigmatizeDiseases',
-    'vulnerablePopulations',
-    'psychologicalTraits',
-    'notHealth',
-  ]
-  const aCopy = pick(fields)(a)
-  const bCopy = pick(fields)(b)
-  return isEqual(aCopy)(bCopy)
+const getDatasetTerms = async (datasets: Dataset[]): Promise<DatasetTerm[]> => {
+  const datasetQuery = DataSet.searchDatasetIndex({
+    from: 0,
+    size: 10000,
+    query: {
+      bool: {
+        must: [
+          {
+            match: {
+              _type: 'dataset',
+            },
+          },
+          {
+            terms: {
+              _id: datasets.map(dataset => dataset.datasetId),
+            },
+          },
+        ],
+      },
+    },
+  })
+  try {
+    return await datasetQuery
+  }
+  catch (error) {
+    const errorMessage = extractError(error)
+    Notifications.showError({ text: `Error loading Dataset Term information for datasets: ${errorMessage}` })
+  }
+  return []
 }
