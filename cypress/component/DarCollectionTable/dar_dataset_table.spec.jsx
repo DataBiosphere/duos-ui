@@ -1,8 +1,9 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import { DarDatasetTable } from '../../../src/components/dar_dataset_table/DarDatasetTable.jsx'
+import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable.jsx'
 import darCollection from './darCollection.json'
-import { Match } from '../../../src/libs/ajax/Match.js'
+import { Match } from 'src/libs/ajax/Match.js'
+import { DataSet } from 'src/libs/ajax/DataSet'
 
 describe('DarDatasetTable - Tests', function () {
   beforeEach(() => {
@@ -11,6 +12,28 @@ describe('DarDatasetTable - Tests', function () {
 
   it('renders a single row of the data', function () {
     cy.stub(Match, 'findMatchBatch').returns([])
+    cy.stub(DataSet, 'searchDatasetIndex').returns([{
+      datasetId: 2352,
+      name: 'Group 5',
+      datasetName: 'Group 5',
+      createDate: 'Feb 13, 2024',
+      createUserId: 5147,
+      updateDate: 1707858294844,
+      updateUserId: 5146,
+      alias: 850,
+      datasetIdentifier: 'DUOS-000850',
+      dataUse: {
+        primary: [{
+          code: 'GRU',
+          description: 'General Research Use',
+        }],
+        secondary: [{
+          code: 'NPU',
+          description: 'Non-Profit Use',
+        }],
+      },
+      dacId: 8,
+    }])
     mount(
       <DarDatasetTable
         summary={darCollection}
