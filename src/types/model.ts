@@ -151,7 +151,7 @@ export interface Dataset {
   indexedDate?: Date
 }
 
-interface DacTerm {
+export interface DacTerm {
   dacId: number
   dacName: string
   dacEmail: string

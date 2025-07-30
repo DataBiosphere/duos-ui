@@ -5,7 +5,7 @@ import { DataSet } from 'src/libs/ajax/DataSet.js'
 import { processVotesForBucket } from './DarCollectionUtils'
 import { processMatchData } from './VoteUtils'
 import {
-  AlgorithmResult,
+  AlgorithmResult, DacTerm,
   DarCollection,
   DataAccessRequest,
   Dataset,
@@ -32,6 +32,7 @@ export interface Bucket {
   matchResults: MatchResult[]
   algorithmResult?: AlgorithmResult
   isRP?: boolean
+  dacs?: DacTerm[]
 }
 
 interface VoteGroup {
@@ -71,8 +72,9 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   const datasets: Dataset[] = filterDatasetsByDACs(dacIds, collection.datasets)
   // Find the DatasetTerms which have preprocessed DataUse objects.
   const terms = await getDatasetTerms(datasets)
+  console.log('BucketUtils: binCollectionToBuckets, terms:', terms)
   // Terms don't come with type-specification so we need to modify that manually
-  terms.forEach((term) => {
+  terms?.forEach((term) => {
     term.dataUse?.primary?.forEach((dut: DataUseTerm) => {
       // Set the type for primary data use terms to permissions
       dut.type = ControlledAccessType.permissions
@@ -85,7 +87,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   // Create a map of DataUse to a list of datasets. This will serve as the basis for bucketing datasets by DataUse.
   // Note that we need to use a string value of the DataUse object to ensure that we can use it as a key in a Map.
   const datasetTermMap: Map<string, Dataset[]> = new Map<string, Dataset[]>()
-  terms.forEach((term: DatasetTerm) => {
+  terms?.forEach((term: DatasetTerm) => {
     const stringValue = JSON.stringify(term.dataUse)
     if (datasetTermMap.has(stringValue)) {
       datasetTermMap.get(stringValue)?.push(datasets.filter((dataset: Dataset) => dataset.datasetId === term.datasetId)[0])
@@ -100,16 +102,23 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   for (const key of iterator) {
     const dataUseSummary: DataUseSummary = isNil(key) ? undefined : JSON.parse(key)
     const datasets: Dataset[] = datasetTermMap.get(key) || []
+    const datasetIds = datasets?.map((dataset: Dataset) => dataset.datasetId)
+    const dacIds = datasets?.map((dataset: Dataset) => dataset.dacId) || []
+    const dacs: DacTerm[] = terms
+      .filter((term: DatasetTerm) => dacIds.includes(term.dacId))
+      .map((term: DatasetTerm) => term.dac)
+
     const bucket: Bucket = {
       key: '',
       label: '',
       datasets: datasets,
-      datasetIds: datasets?.map((dataset: Dataset) => dataset.datasetId),
+      datasetIds: datasetIds,
       dataUse: dataUseSummary,
       dataUses: [...dataUseSummary?.primary || [], ...dataUseSummary?.secondary || []],
       elections: [],
       votes: [],
       matchResults: [],
+      dacs: dacs,
     }
     buckets.push(bucket)
   }

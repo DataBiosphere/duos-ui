@@ -3,6 +3,7 @@ import { mount } from 'cypress/react'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
 import { makeDatasetTerm } from '../test-utils'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { AxiosError, AxiosResponse } from 'axios'
 
 describe('DucAddendum', () => {
   const mockDatasets = [
@@ -22,18 +23,22 @@ describe('DucAddendum', () => {
 
   const mockDatasetTerms = [
     makeDatasetTerm({
+      datasetId: 1,
       dac: {
         dacId: 1,
         dacName: 'DAC 0001',
         dacEmail: 'foo@bar.com',
       },
+      dacId: 1,
     }),
     makeDatasetTerm({
+      datasetId: 2,
       dac: {
         dacId: 2,
         dacName: 'DAC 0002',
         dacEmail: 'bar@foo.com',
       },
+      dacId: 2,
     }),
   ]
 
@@ -74,8 +79,9 @@ describe('DucAddendum', () => {
   })
 
   it('should display a warning when relevant DAC cannot be loaded', () => {
+    const errorMessage = 'Error loading DAC information for datasets'
     cy.stub(DataSet, 'searchDatasetIndex').callsFake(() => {
-      return Promise.reject(new Error('DAC information could not be found'))
+      return Promise.reject(new AxiosError('DAC information could not be found', '500', undefined, undefined, { data: { message: errorMessage } } as AxiosResponse))
     })
 
     const props = {
@@ -87,12 +93,13 @@ describe('DucAddendum', () => {
 
     mount(<DucAddendum {...props} />)
 
-    cy.contains('N/A').should('be.visible')
-    cy.contains('Error loading DAC information for datasets').should('be.visible')
+    cy.get('[data-cy="notification-alert"]').should('be.visible')
+    cy.get('[data-cy="notification-alert"]').should('contain', errorMessage)
   })
 
   it('should display `N/A` when the DAC information is missing entirely', () => {
     const datasetTermsMissingDAC = makeDatasetTerm({
+      datasetId: 1,
       dac: undefined,
     })
 
