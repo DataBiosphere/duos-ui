@@ -31,7 +31,7 @@ export const styles = {
     name: '25%',
     description: '60%',
     datasets: '10%',
-    actions: '5%',
+    actions: '7%',
   },
   color: {
     name: '#337ab7',
