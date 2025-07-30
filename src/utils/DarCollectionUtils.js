@@ -1,4 +1,4 @@
-import { flow, isEmpty, map, filter, find, forEach, flatMap, toLower, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten } from 'lodash/fp'
+import { cloneDeep, concat, filter, find, findIndex, flatMap, flatten, flow, forEach, groupBy, includes, isEmpty, isNil, map, toLower } from 'lodash/fp'
 import { Styles } from 'src/libs/theme.js'
 import { formatDate, Notifications } from '../libs/utils'
 import { Collections } from '../libs/ajax/Collections'
@@ -113,7 +113,7 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   )(voteArrays)
 }
 
-// Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+// Gets this user's data access votes from this bucket; radar, final and chairperson votes if isChair is true, member votes if false
 // Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : []
@@ -121,7 +121,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
     map(voteData => voteData.dataAccess),
     filter(dataAccessData => !isEmpty(dataAccessData)),
     flatMap(filteredData => adminPage || isChair
-      ? concat(filteredData.finalVotes, filteredData.chairpersonVotes)
+      ? filteredData.finalVotes.concat(filteredData.chairpersonVotes, filteredData.radarVotes)
       : filteredData.memberVotes),
   )(votes)
   return !adminPage
@@ -130,7 +130,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
 }
 
 // Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
-// Note that filtering by DAC does not occur when viewing through th admin review page
+// Note that filtering by DAC does not occur when viewing through the admin review page
 export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : []
 
@@ -329,8 +329,8 @@ export const styles = {
     border: '1px solid #DEDEDE',
     margin: '0.5% 0',
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
+  columnStyle: {
+    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
     color: '#7B7B7B',
     fontFamily: 'Montserrat',
     fontSize: '1.2rem',
@@ -339,7 +339,7 @@ export const styles = {
     textTransform: 'uppercase',
     backgroundColor: 'B8CDD3',
     border: 'none',
-  }),
+  },
   cellWidth: {
     darCode: '10%',
     dacNames: '8%',

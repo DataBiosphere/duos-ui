@@ -72,7 +72,6 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   const datasets: Dataset[] = filterDatasetsByDACs(dacIds, collection.datasets)
   // Find the DatasetTerms which have preprocessed DataUse objects.
   const terms = await getDatasetTerms(datasets)
-  console.log('BucketUtils: binCollectionToBuckets, terms:', terms)
   // Terms don't come with type-specification so we need to modify that manually
   terms?.forEach((term) => {
     term.dataUse?.primary?.forEach((dut: DataUseTerm) => {
