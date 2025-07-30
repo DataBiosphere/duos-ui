@@ -539,9 +539,6 @@ export default function ManageEditDac(props) {
           </div>
         </div>
       </div>
-      <div style={{ float: 'left', padding: '10px', width: '40%' }}>
-        <DACBotComponent dacId={dacId} />
-      </div>
     </div>
   )
 }
