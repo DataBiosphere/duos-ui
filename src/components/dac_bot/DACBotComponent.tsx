@@ -5,7 +5,8 @@ import { DACBotCheckboxComponent } from './DACBotCheckboxComponent'
 import { Storage } from '../../libs/storage'
 
 export type DACBotComponentProps = {
-  dacId: number
+  'dacId': number
+  'data-cy'?: string
 }
 
 enum RuleState {
@@ -31,7 +32,7 @@ export type DACbotChangeResult = {
 }
 
 export const DACBotComponent = (props: DACBotComponentProps) => {
-  const { dacId } = props
+  const { dacId, 'data-cy': dataCy } = props
   const [DACbotRules, setDACbotRules] = useState<Array<DACbotRule>>([])
   const [isLoading, setIsLoading] = useState(true)
   const userIsChair = Storage.getCurrentUser().roles.filter((r: { dacId: number, name: string }) => {
@@ -64,7 +65,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
   }, [dacId, fetchData, setDACbotRules, setIsLoading])
 
   return (
-    <div>
+    <div data-cy={dataCy} data-dac-id={dacId.toString()}>
       <h4>Automatic Approval of DAC Requests</h4>
       DUOS offers Data Access Committees the option to automate Data Access Requests for a limited set of data use
       terms, namely datasets that are tagged with either and only the data use terms General Research Use or
