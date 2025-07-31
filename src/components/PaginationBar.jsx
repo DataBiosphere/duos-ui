@@ -49,6 +49,7 @@ export default function PaginationBar(props) {
           <span>
             {' '}
             of
+            {' '}
             {pageCount}
           </span>
         </div>
