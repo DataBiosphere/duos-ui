@@ -70,7 +70,7 @@ export function actionsCellData({ dac, deleteDac, userRole }) {
           }}
           data-tip={`Edit rule automation for DARs in ${dac.name}`}
         >
-          <img class="radar-icon" src={radarIcon} />
+          <img class="radar-icon" src={radarIcon} alt="Edit rule automation" />
         </Link>
       </div>
       <div style={{ paddingTop: '5px' }}>
