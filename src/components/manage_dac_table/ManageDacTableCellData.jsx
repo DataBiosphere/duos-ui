@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom'
 import editPencilIcon from '../../images/edit_pencil.svg'
 import radarIcon from '../../images/google-svg/radar.svg'
 import { DAAUtils } from '../../utils/DAAUtils'
+import { isDevEnv } from '../../utils/EnvironmentUtils'
 
 export function nameCellData({ name = '- -', dac, viewMembers, dacId, label = 'dac-name' }) {
   return {
@@ -62,17 +63,19 @@ export function actionsCellData({ dac, deleteDac, userRole }) {
 
   const actions = (
     <>
-      <div style={{ paddingTop: '5px', paddingRight: '4px' }}>
-        <Link
-          to={{
-            pathname: `/manage_radar/${dac.dacId}`,
-            state: { userRole: userRole },
-          }}
-          data-tip={`Edit rule automation for DARs in ${dac.name}`}
-        >
-          <img className="radar-icon" src={radarIcon} alt="Edit rule automation" />
-        </Link>
-      </div>
+      {isDevEnv() && (
+        <div style={{ paddingTop: '5px', paddingRight: '4px' }}>
+          <Link
+            to={{
+              pathname: `/manage_radar/${dac.dacId}`,
+              state: { userRole: userRole },
+            }}
+            data-tip={`Edit rule automation for DARs in ${dac.name}`}
+          >
+            <img className="radar-icon" src={radarIcon} alt="Edit rule automation" />
+          </Link>
+        </div>
+      )}
       <div style={{ paddingTop: '5px' }}>
         <Link
           to={{
