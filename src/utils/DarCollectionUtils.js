@@ -121,13 +121,13 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
   const userDataAccessVotes = votes.map((voteGroup) => {
     // If admin page or chair, we want to include all final, chair, and radar votes
     if (adminOrChair) {
-      const chairpersonVotes = voteGroup.dataAccess.chairpersonVotes || []
-      const finalVotes = voteGroup.dataAccess.finalVotes || []
-      const radarVotes = voteGroup.dataAccess.radarVotes || []
+      const chairpersonVotes = voteGroup.dataAccess?.chairpersonVotes || []
+      const finalVotes = voteGroup.dataAccess?.finalVotes || []
+      const radarVotes = voteGroup.dataAccess?.radarVotes || []
       return chairpersonVotes.concat(finalVotes, radarVotes)
     }
     else {
-      return voteGroup.dataAccess.memberVotes || []
+      return voteGroup.dataAccess?.memberVotes || []
     }
   }).flat(Infinity)
   if (adminPage) {
@@ -143,19 +143,21 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
 // Note that filtering by DAC does not occur when viewing through the admin review page
 export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : []
-
-  let output = flow(
-    map(voteData => voteData.rp),
-    filter(rpData => !isEmpty(rpData)),
-    flatMap(filteredData => adminPage || isChair
-      ? filteredData.chairpersonVotes
-      : filteredData.memberVotes),
-  )(votes)
-
-  output = !adminPage
-    ? filter(vote => vote.userId === user.userId)(output)
-    : filter(vote => !isNil(vote.vote))(output)
-  return output
+  const adminOrChair = adminPage || isChair
+  const userRPVotes = votes?.map((voteGroup) => {
+    if (adminOrChair) {
+      return voteGroup.rp?.chairpersonVotes || []
+    }
+    else {
+      return voteGroup.rp?.memberVotes || []
+    }
+  }).flat(Infinity)
+  if (adminPage) {
+    return userRPVotes?.filter(vote => !isNil(vote.vote)) || []
+  }
+  else {
+    return userRPVotes?.filter(vote => vote.userId === user.userId) || []
+  }
 }
 
 // collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
