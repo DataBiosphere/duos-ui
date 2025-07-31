@@ -117,16 +117,26 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
 // Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : []
-  const output = flow(
-    map(voteData => voteData.dataAccess),
-    filter(dataAccessData => !isEmpty(dataAccessData)),
-    flatMap(filteredData => adminPage || isChair
-      ? filteredData.finalVotes.concat(filteredData.chairpersonVotes, filteredData.radarVotes)
-      : filteredData.memberVotes),
-  )(votes)
-  return !adminPage
-    ? filter(vote => vote.userId === user.userId)(output)
-    : filter(vote => !isNil(vote.vote))(output)
+  const adminOrChair = adminPage || isChair
+  const userDataAccessVotes = votes.map((voteGroup) => {
+    // If admin page or chair, we want to include all final, chair, and radar votes
+    if (adminOrChair) {
+      const chairpersonVotes = voteGroup.dataAccess.chairpersonVotes || []
+      const finalVotes = voteGroup.dataAccess.finalVotes || []
+      const radarVotes = voteGroup.dataAccess.radarVotes || []
+      return chairpersonVotes.concat(finalVotes, radarVotes)
+    }
+    else {
+      return voteGroup.dataAccess.memberVotes || []
+    }
+  }).flat(Infinity)
+  if (adminPage) {
+    // If admin page, we want to include all votes regardless of userId
+    return userDataAccessVotes
+  }
+  else {
+    return userDataAccessVotes.filter(vote => vote.userId === user.userId)
+  }
 }
 
 // Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
