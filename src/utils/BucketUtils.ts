@@ -1,4 +1,4 @@
-import { filter, flatMap, flow, forEach, includes, isEmpty, map, toLower, uniq, values } from 'lodash/fp'
+import { filter, flatMap, flow, forEach, includes, isEmpty, map, uniq, values } from 'lodash/fp'
 import { isNil } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet.js'
