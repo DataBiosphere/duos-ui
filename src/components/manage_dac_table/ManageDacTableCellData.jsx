@@ -1,14 +1,14 @@
 import React from 'react'
 import { isNil, isEmpty } from 'lodash/fp'
 import { styles } from './manageDacTableUtils'
-import TableIconButton from '../TableIconButton'
-import { Styles } from '../../libs/theme'
+import TableIconButton from 'src/components/TableIconButton'
+import { Styles } from 'src/libs/theme'
 import { Delete } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
-import editPencilIcon from '../../images/edit_pencil.svg'
-import radarIcon from '../../images/google-svg/radar.svg'
-import { DAAUtils } from '../../utils/DAAUtils'
-import { isDevEnv } from '../../utils/EnvironmentUtils'
+import editPencilIcon from 'src/images/edit_pencil.svg'
+import radarIcon from 'src/images/google-svg/radar.svg'
+import { DAAUtils } from 'src/utils/DAAUtils'
+import { isDevEnv } from 'src/utils/EnvironmentUtils'
 
 export function nameCellData({ name = '- -', dac, viewMembers, dacId, label = 'dac-name' }) {
   return {
