@@ -31,7 +31,7 @@
     "stackdriver-errors-js": "0.12.0",
     "tss-react": "4.9.18",
     "uuid": "11.1.0",
-    "validator": "^13.15.15"
+    "validator": "13.15.15"
   },
   "scripts": {
     "analyze": "VISUALIZER_PLUGIN=true vite build",
