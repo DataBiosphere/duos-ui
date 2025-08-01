@@ -5,6 +5,7 @@ import CollectionVoteNoButton from './CollectionVoteNoButton'
 import { Notifications } from 'src/libs/utils'
 import { Votes } from 'src/libs/ajax/Votes'
 import radarIcon from 'src/images/google-svg/radar.svg'
+import PropTypes from 'prop-types'
 
 const styles = {
   baseStyle: {
@@ -249,4 +250,17 @@ export default function CollectionSubmitVoteBox(props) {
       </table>
     </div>
   )
+}
+
+CollectionSubmitVoteBox.propTypes = {
+  question: PropTypes.string.isRequired,
+  votes: PropTypes.arrayOf(PropTypes.object).isRequired,
+  isFinal: PropTypes.bool.isRequired,
+  isApprovalDisabled: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  isDisabled: PropTypes.bool,
+  adminPage: PropTypes.bool,
+  bucketKey: PropTypes.string,
+  updateFinalVote: PropTypes.func,
+  reloadFn: PropTypes.func,
 }
