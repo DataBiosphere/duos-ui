@@ -129,10 +129,10 @@ const VoteInfoSubsection = ({
       <div>
         <CollectionSubmitVoteBox
           votes={currentUserVotes}
-          isFinal={isChair}
+          isFinal={isChair || false}
           isDisabled={adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections}
-          isApprovalDisabled={isApprovalDisabled}
-          isLoading={isLoading}
+          isApprovalDisabled={isApprovalDisabled || true}
+          isLoading={isLoading || false}
           adminPage={adminPage}
           bucketKey={convertLabelToKey(get(bucket, 'key', 'collection-submit-vote-box'))}
           updateFinalVote={updateFinalVote}

@@ -189,7 +189,7 @@ export default function CollectionSubmitVoteBox(props) {
         <thead>
           <tr>
             <th>
-              <div style={styles.question}>{question}</div>
+              {question && <div style={styles.question}>{question}</div>}
             </th>
           </tr>
         </thead>
@@ -253,7 +253,7 @@ export default function CollectionSubmitVoteBox(props) {
 }
 
 CollectionSubmitVoteBox.propTypes = {
-  question: PropTypes.string.isRequired,
+  question: PropTypes.string,
   votes: PropTypes.arrayOf(PropTypes.object).isRequired,
   isFinal: PropTypes.bool.isRequired,
   isApprovalDisabled: PropTypes.bool.isRequired,
