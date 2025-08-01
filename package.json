@@ -29,7 +29,7 @@
     "react-select": "5.10.2",
     "react-tooltip": "4.5.1",
     "stackdriver-errors-js": "0.12.0",
-    "tss-react": "4.9.18",
+    "tss-react": "4.9.19",
     "uuid": "11.1.0",
     "validator": "^13.15.15"
   },
@@ -59,7 +59,7 @@
     "@types/validator": "^13.15.2",
     "@vitejs/plugin-react": "4.6.0",
     "buffer": "6.0.3",
-    "cypress": "14.5.1",
+    "cypress": "14.5.3",
     "eslint": "9.20.1",
     "eslint-plugin-cypress": "5.1.0",
     "eslint-plugin-react": "7.37.5",
