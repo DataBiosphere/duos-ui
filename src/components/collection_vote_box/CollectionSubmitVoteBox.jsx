@@ -264,3 +264,11 @@ CollectionSubmitVoteBox.propTypes = {
   updateFinalVote: PropTypes.func,
   reloadFn: PropTypes.func,
 }
+
+VoteSubsectionHeading.propTypes = {
+  vote: PropTypes.bool,
+  adminPage: PropTypes.bool.isRequired,
+  isFinal: PropTypes.bool.isRequired,
+  isVotingDisabled: PropTypes.bool.isRequired,
+  isRadar: PropTypes.bool.isRequired,
+}
