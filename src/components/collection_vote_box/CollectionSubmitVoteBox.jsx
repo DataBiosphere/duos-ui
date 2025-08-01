@@ -255,9 +255,9 @@ export default function CollectionSubmitVoteBox(props) {
 CollectionSubmitVoteBox.propTypes = {
   question: PropTypes.string,
   votes: PropTypes.arrayOf(PropTypes.object).isRequired,
-  isFinal: PropTypes.bool.isRequired,
-  isApprovalDisabled: PropTypes.bool.isRequired,
-  isLoading: PropTypes.bool.isRequired,
+  isFinal: PropTypes.bool,
+  isApprovalDisabled: PropTypes.bool,
+  isLoading: PropTypes.bool,
   isDisabled: PropTypes.bool,
   adminPage: PropTypes.bool,
   bucketKey: PropTypes.string,
