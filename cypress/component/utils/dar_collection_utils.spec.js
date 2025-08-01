@@ -364,6 +364,48 @@ describe('extractUserDataAccessVotesFromBucket', () => {
     expect(votes).to.not.deep.include({ vote: false, userId: 2 })
     expect(votes).to.not.deep.include({ userId: 3 })
   })
+
+  it('returns radar votes if they exist: chairperson only', () => {
+    const bucket = {
+      votes: [
+        {
+          dataAccess: {
+            memberVotes: [{ userId: 1 }, { vote: false, userId: 3 }],
+            chairpersonVotes: [{ vote: false, userId: 1 }, { userId: 2 }],
+            radarVotes: [{ vote: true, userId: 1 }],
+          },
+        },
+      ],
+    }
+    const user = { userId: 1 }
+    const votes = extractUserDataAccessVotesFromBucket(bucket, user, true)
+    expect(votes).to.have.lengthOf(2)
+    expect(votes).to.deep.include({ vote: true, userId: 1 }) // includes radar vote
+    expect(votes).to.deep.include({ vote: false, userId: 1 }) // includes chairperson vote
+    expect(votes).to.not.deep.include({ userId: 1 }) // excluded member vote
+    expect(votes).to.not.deep.include({ userId: 2 }) // excluded chairperson vote
+  })
+
+  it('returns radar votes if they exist: chairperson or admin', () => {
+    const bucket = {
+      votes: [
+        {
+          dataAccess: {
+            memberVotes: [{ userId: 1 }, { vote: false, userId: 3 }],
+            chairpersonVotes: [{ vote: false, userId: 1 }, { userId: 2 }],
+            radarVotes: [{ vote: true, userId: 1 }],
+          },
+        },
+      ],
+    }
+    const user = { userId: 1 }
+    const votes = extractUserDataAccessVotesFromBucket(bucket, user, true, true)
+    expect(votes).to.have.lengthOf(3)
+    expect(votes).to.deep.include({ vote: true, userId: 1 }) // includes radar vote
+    expect(votes).to.deep.include({ vote: false, userId: 1 }) // includes chairperson vote
+    expect(votes).to.deep.include({ userId: 2 }) // included chairperson vote visible to admin
+    expect(votes).to.not.deep.include({ userId: 1 }) // excluded member vote
+  })
 })
 
 describe('extractUserRPVotesFromBucket', () => {

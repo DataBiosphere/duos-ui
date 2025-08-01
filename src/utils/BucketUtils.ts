@@ -1,4 +1,4 @@
-import { filter, flatMap, flow, forEach, includes, isEmpty, join, map, uniq, values } from 'lodash/fp'
+import { filter, flatMap, flow, forEach, includes, isEmpty, map, toLower, uniq, values } from 'lodash/fp'
 import { isNil } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet.js'
@@ -141,22 +141,14 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
     b.votes.push(processVotesForBucket(b.elections))
 
     // Step 5: Generate bucket key and label
-    if (!isEmpty(b.dataUses)) {
-      b.label = flow(
-        map((du: DataUseTerm) => du.code),
-        join(', '),
-      )(b.dataUses)
-    }
-    else {
-      b.label = 'Undefined Data Use'
-    }
-    b.key = 'bucket-' + join('-')(b.datasetIds)
+    b.key = 'bucket-' + b.datasetIds.join('-')
+    b.label = b.dataUses?.map((du: DataUseTerm) => du.code).join(', ') || 'Undefined Data Use'
 
     // Step 6: Coalesce match results into a single result per bucket
     b.algorithmResult = calculateAlgorithmResultForBucket(b)
   })
 
-  // Step 7: Populate RUS Vote bucket with RP votes
+  // Step 7: Populate RUS Vote bucket with RP votes and move to the top of the bucket array
   const rpVotes = createRpVoteStructureFromBuckets(buckets)
   buckets.unshift({
     isRP: true,
