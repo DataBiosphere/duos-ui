@@ -121,7 +121,7 @@ const ManageRadar = (props: ManageRadarProps) => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '60%' }}>
+      <div style={{ maxWidth: '80%' }}>
         <DACBotComponent data-cy="dac-bot-component" dacId={dacId} />
       </div>
     </div>
