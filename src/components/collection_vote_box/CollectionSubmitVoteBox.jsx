@@ -1,9 +1,10 @@
 import { React, useEffect, useState } from 'react'
-import { isEmpty, isNil, map, every } from 'lodash/fp'
+import { isEmpty, isNil } from 'lodash/fp'
 import CollectionVoteYesButton from './CollectionVoteYesButton'
 import CollectionVoteNoButton from './CollectionVoteNoButton'
-import { Notifications } from '../../libs/utils'
-import { Votes } from '../../libs/ajax/Votes'
+import { Notifications } from 'src/libs/utils'
+import { Votes } from 'src/libs/ajax/Votes'
+import radarIcon from 'src/images/google-svg/radar.svg'
 
 const styles = {
   baseStyle: {
@@ -41,7 +42,7 @@ const styles = {
   },
 }
 
-const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) => {
+const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled, isRadar }) => {
   const voteResultText = isNil(vote)
     ? 'NOT SELECTED'
     : vote
@@ -63,10 +64,24 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
   // determines if text is needed to remind the user that their vote will be final once submitting
   const votableChairView = !adminPage && !isVotingDisabled && isFinal
 
+  const radarSpan = isRadar
+    ? (
+        <img
+          data-cy="radar-icon"
+          className="radar-icon"
+          src={radarIcon}
+          alt="Rule Automated Data Access Decision"
+          title="Rule Automated Data Access Decision"
+        />
+      )
+    : null
+
   return (
     <div data-cy="vote-subsection-heading">
+      {radarSpan}
       {heading}
-      {votableChairView && <span style={{ fontWeight: 'normal' }}>(Vote and Rationale cannot be updated after submitting)</span>}
+      {votableChairView
+        && <span style={{ fontWeight: 'normal' }}>(Vote and Rationale cannot be updated after submitting)</span>}
     </div>
   )
 }
@@ -76,7 +91,18 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [isVotingDisabled, setIsVotingDisabled] = useState(false)
-  const { question, votes, isFinal, isApprovalDisabled, isLoading, adminPage, bucketKey, updateFinalVote, reloadFn } = props
+  const [isRadar, setIsRadar] = useState(false)
+  const {
+    question,
+    votes,
+    isFinal,
+    isApprovalDisabled,
+    isLoading,
+    adminPage,
+    bucketKey,
+    updateFinalVote,
+    reloadFn,
+  } = props
 
   useEffect(() => {
     setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || adminPage)
@@ -86,23 +112,26 @@ export default function CollectionSubmitVoteBox(props) {
     if (!isEmpty(votes)) {
       const prevVote = votes[0]
 
-      const voteValues = map(vote => vote.vote)(votes)
+      const voteValues = votes.map(vote => vote.vote)
       if (allMatch(voteValues)) {
         setVote(prevVote.vote)
         setSubmitted(true)
       }
 
-      const rationaleValues = map(vote => vote.rationale)(votes)
+      const rationaleValues = votes.map(vote => vote.rationale)
       if (allMatch(rationaleValues)) {
         setRationale(prevVote.rationale)
       }
+
+      const isRadar = votes.some(vote => vote.type === 'RADAR_APPROVE')
+      setIsRadar(isRadar)
     }
   }, [votes])
 
   const allMatch = (values) => {
-    return every((v) => {
+    return values.every((v) => {
       return !isNil(v) && v === values[0]
-    })(values)
+    })
   }
 
   const updateVote = async (newVote, isChair) => {
@@ -134,7 +163,7 @@ export default function CollectionSubmitVoteBox(props) {
 
   const updateRationale = async () => {
     try {
-      const voteIds = map(v => v.voteId)(votes)
+      const voteIds = votes.map(v => v.voteId)
       await Votes.updateRationaleByIds(voteIds, rationale)
       Notifications.showSuccess({ text: 'Successfully updated vote rationale' })
     }
@@ -152,16 +181,18 @@ export default function CollectionSubmitVoteBox(props) {
 
   return (
     <div
-      style={Object.assign({ paddingBottom: '2%' }, styles.baseStyle)}
+      style={({ marginLeft: '3rem', paddingBottom: '2%', ...styles.baseStyle })}
       data-cy="collection-vote-box"
     >
-      <table className="layout-table" role="presentation">
-        <tbody>
+      <table>
+        <thead>
           <tr>
-            <td>
+            <th>
               <div style={styles.question}>{question}</div>
-            </td>
+            </th>
           </tr>
+        </thead>
+        <tbody>
           <tr>
             <td>
               <div>
@@ -170,6 +201,7 @@ export default function CollectionSubmitVoteBox(props) {
                   adminPage={adminPage}
                   isFinal={isFinal}
                   isVotingDisabled={isVotingDisabled}
+                  isRadar={isRadar}
                 />
                 <div style={styles.voteButtons}>
                   {!isVotingDisabled && (

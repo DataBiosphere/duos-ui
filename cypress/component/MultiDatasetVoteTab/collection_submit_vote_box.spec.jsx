@@ -345,4 +345,18 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist')
     cy.get('[datacy=no-collection-vote-button]').should('not.exist')
   })
+
+  it('shows the radar vote icon when the vote type is radar', () => {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={[{ vote: true, voteId: 1, type: 'RADAR_APPROVE', rationale: 'Radar Approve' }]}
+        isFinal={true}
+        question="question"
+        isDisabled={false}
+        isApprovalDisabled={true}
+        adminPage={true}
+      />,
+    )
+    cy.get('[data-cy=radar-icon]').should('exist')
+  })
 })
