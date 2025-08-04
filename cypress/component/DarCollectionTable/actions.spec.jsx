@@ -226,12 +226,12 @@ describe('Researcher Actions - Review Closeout Button', () => {
     cy.get(`#researcher-review-closeout-${collectionId}`).should('exist')
   })
 
-  it('does not render in production environment even with Review_Progress_Report action', () => {
+  it('does render in production environment even with Review_Progress_Report action', () => {
     cy.stub(Storage, 'getEnv').returns('prod')
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review_Progress_Report']
     mount(<Actions {...propCopy} />)
-    cy.get(`#researcher-review-closeout-${collectionId}`).should('not.exist')
+    cy.get(`#researcher-review-closeout-${collectionId}`).should('exist')
   })
 
   it('does not render if Review_Progress_Report action is not present', () => {
