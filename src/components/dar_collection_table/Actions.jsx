@@ -6,7 +6,6 @@ import SimpleButton from 'src/components/SimpleButton'
 import { useHistory } from 'react-router-dom'
 import { Notifications } from 'src/libs/utils'
 import { includes, toLower } from 'lodash/fp'
-import { checkEnv, envGroups } from 'src/utils/EnvironmentUtils'
 
 const duosBlue = '#0948B7'
 const cancelGray = '#333F52'
