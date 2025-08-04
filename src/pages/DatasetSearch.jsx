@@ -17,6 +17,7 @@ import cfdeIcon from 'src/images/cfde-logo.png'
 import firecloudIcon from 'src/images/firecloud-logo.png'
 import zoonomicsIcon from 'src/images/ZoonomicsLogoColor.png'
 import aouIcon from 'src/images/aou-logo.png'
+import schareIcon from 'src/images/SCHARE_Logo_New.png'
 import stanleyIcon from 'src/images/stanley-center-logo.png'
 import getzLabIcon from 'src/images/getz-lab-logo.svg'
 import gp2Icon from 'src/images/gp2-logo.svg'
@@ -255,6 +256,15 @@ export const DatasetSearch = (props) => {
       },
       icon: ifgcIcon,
       title: 'International Fetal Genomics Consortium Data Library',
+    },
+        'schare': {
+      query: {
+        match_phrase: {
+          'study.description': 'SCHARE',
+        },
+      },
+      icon: schareIcon,
+      title: 'SCHARE Data Library',
     },
     'stanley': {
       query: {
