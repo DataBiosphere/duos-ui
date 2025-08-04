@@ -82,6 +82,7 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
             ? (
                 <span>
                   Enabled by:
+                  {' '}
                   <Link href={`mailto:${emailAddress}`}>{displayName}</Link>
                   {' '}
                   (
