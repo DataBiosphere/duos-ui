@@ -257,7 +257,7 @@ export const DatasetSearch = (props) => {
       icon: ifgcIcon,
       title: 'International Fetal Genomics Consortium Data Library',
     },
-        'schare': {
+    'schare': {
       query: {
         match_phrase: {
           'study.description': 'SCHARE',
