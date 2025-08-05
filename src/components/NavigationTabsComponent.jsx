@@ -135,6 +135,18 @@ export const NavigationTabsComponent = (props) => {
                     <span style={navbarDuosText}>FAQs</span>
                   </a>
                 </li>
+                <li>
+                  <a
+                    id="link_blog"
+                    className="navbar-duos-link"
+                    href="https://duos.blog/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <div className="navbar-duos-icon-newspaper" style={navbarDuosIcon}></div>
+                    <span style={navbarDuosText}>Blog</span>
+                  </a>
+                </li>
                 {contactUsButton}
                 {supportrequestModal}
                 {/* Sign-in button location when window is narrow and menu is vertical */}

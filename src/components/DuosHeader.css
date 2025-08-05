@@ -144,6 +144,18 @@
   background: url('../images/navbar_icon_help_hover.svg') no-repeat 0 0;
 }
 
+.navbar-duos-icon-newspaper {
+  width: 18 px;
+  height: 18 px;
+  background: url('../images/navbar_icon_newspaper.svg') no-repeat 0 0;
+}
+
+.navbar-duos-link:hover .navbar-duos-icon-newspaper {
+  width: 18 px;
+  height: 18 px;
+  background: url('../images/navbar_icon_newspaper_hover.svg') no-repeat 0 0;
+}
+
 /* ------------------------------------- */
 /*    Bootstrap Overrides                */
 /* ------------------------------------- */
