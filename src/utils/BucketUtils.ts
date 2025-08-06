@@ -31,7 +31,7 @@ export interface Bucket {
   votes: Record<string, VoteGroup>[]
   matchResults: MatchResult[]
   algorithmResult?: AlgorithmResult
-  isRP?: boolean
+  isRP?: boolean // Whether this is an RP (Research Purpose) vote bucket
   dacs?: DacTerm[]
 }
 
