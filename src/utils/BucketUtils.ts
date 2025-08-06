@@ -330,7 +330,7 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
       const lowerCaseType = v.type.toLowerCase()
       switch (lowerCaseType) {
         case 'chairperson':
-          // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' votes
+          // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' elections
           rpVoteGroup.chairpersonVotes.push(v)
           rpVoteGroup.finalVotes.push(v)
           break
