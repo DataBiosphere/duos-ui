@@ -59,7 +59,13 @@ interface VoteGroup {
  * @param collection The full Data Access Request Collection
  * @param dacIds An optional array of dac ids. If provided, bucket contents will be filtered to datasets matching
  *        the provided dac ids. This will extend to elections and votes as well.
- * @returns {Promise<Bucket[]>}
+ * @returns List of buckets, each one containing:
+ *          list of datasets,
+ *          shared data use summary for all datasets in bucket,
+ *          map of election id to elections for all datasets,
+ *          votes for all elections,
+ *          list of match results for all dataset elections
+ *          list of DACs for all datasets in the bucket
  */
 export const binCollectionToBuckets = async (collection: DarCollection, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
