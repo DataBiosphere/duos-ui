@@ -69,14 +69,20 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       <h4>Rule Automated Data Access Request (RADAR) Settings</h4>
       <p>
         Data Access Committees may automate Data Access Requests for a limited set of data use terms, namely datasets that are
-        <b> only </b>
+        {' '}
+        <b>only</b>
+        {' '}
         tagged with either General Research Use or Health/Medical/Biomedical use and
-        <b> without </b>
+        {' '}
+        <b>without</b>
+        {' '}
         modifiers (e.g. Non-Profit Use, Genetic Studies Only, etc).
       </p>
       <p>
         Users from any of the following countries will not be approved consistent with
-        <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer"> 28 Code of Federal Regulations (CFR) Part 202</a>
+        {' '}
+        <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>
+        {' '}
         :  China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
       </p>
       <p>
