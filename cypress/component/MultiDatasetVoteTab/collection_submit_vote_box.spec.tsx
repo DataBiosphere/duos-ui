@@ -4,19 +4,26 @@ import { mount } from 'cypress/react'
 import { Votes } from 'src/libs/ajax/Votes'
 import { votingColors } from 'src/libs/VotingColors.ts'
 
-const votesMatch = [
+interface Vote {
+  vote?: boolean
+  voteId: number
+  rationale?: string
+  electionStatus?: string
+  type?: string
+}
+
+const votesMatch: Vote[] = [
   { vote: true, voteId: 1, rationale: 'test', electionStatus: 'Open' },
   { vote: true, voteId: 2, rationale: 'test', electionStatus: 'Open' },
   { vote: true, voteId: 3, rationale: 'test', electionStatus: 'Open' },
 ]
 
-const votesMixed = [
+const votesMixed: Vote[] = [
   { vote: true, voteId: 1, rationale: 'test1', electionStatus: 'Open' },
   { vote: false, voteId: 2, rationale: 'test2', electionStatus: 'Open' },
 ]
 
 describe('CollectionSubmitVoteBox - Tests', function () {
-  // Intercept configuration calls
   beforeEach(() => {
     cy.initApplicationConfig()
   })

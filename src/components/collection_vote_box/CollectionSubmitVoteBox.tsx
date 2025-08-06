@@ -1,11 +1,40 @@
-import { React, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { isEmpty, isNil } from 'lodash/fp'
 import CollectionVoteYesButton from './CollectionVoteYesButton'
 import CollectionVoteNoButton from './CollectionVoteNoButton'
 import { Notifications } from 'src/libs/utils'
 import { Votes } from 'src/libs/ajax/Votes'
 import radarIcon from 'src/images/google-svg/radar.svg'
-import PropTypes from 'prop-types'
+import { extractConsentError } from 'src/utils/ErrorUtils'
+
+interface Vote {
+  voteId: string
+  vote: boolean | null
+  rationale: string
+  electionStatus: string
+  type?: string
+}
+
+interface CollectionSubmitVoteBoxProps {
+  question?: string
+  votes: Vote[]
+  isFinal?: boolean
+  isApprovalDisabled?: boolean
+  isLoading?: boolean
+  isDisabled?: boolean
+  adminPage?: boolean
+  bucketKey?: string
+  updateFinalVote?: (bucketKey: string, voteData: { vote: boolean, rationale: string }, voteIds: string[]) => void
+  reloadFn?: () => void
+}
+
+interface VoteSubsectionHeadingProps {
+  vote: boolean | undefined
+  adminPage: boolean
+  isFinal: boolean
+  isVotingDisabled: boolean
+  isRadar: boolean
+}
 
 const styles = {
   baseStyle: {
@@ -41,28 +70,35 @@ const styles = {
     color: '#181818A6',
     width: '45rem',
   },
+  rationaleTitle: {
+    fontWeight: 'bold',
+    marginRight: '1rem',
+  },
 }
 
-const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled, isRadar }) => {
+const VoteSubsectionHeading: React.FC<VoteSubsectionHeadingProps> = ({
+  vote,
+  adminPage,
+  isFinal,
+  isVotingDisabled,
+  isRadar,
+}) => {
   const voteResultText = isNil(vote)
     ? 'NOT SELECTED'
     : vote
       ? 'YES'
       : 'NO'
 
-  let heading
+  let heading: string | undefined
   if (adminPage) {
-    // read-only admin view; display statement describing the final vote
     heading = isNil(vote)
       ? 'The vote has not been finalized'
       : `The final vote is: ${voteResultText}`
   }
   else if (isVotingDisabled) {
-    // if read-only, describe the vote
     heading = voteResultText
   }
 
-  // determines if text is needed to remind the user that their vote will be final once submitting
   const votableChairView = !adminPage && !isVotingDisabled && isFinal
 
   const radarSpan = isRadar
@@ -87,12 +123,18 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled, isR
   )
 }
 
-export default function CollectionSubmitVoteBox(props) {
-  const [vote, setVote] = useState()
-  const [rationale, setRationale] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const [isVotingDisabled, setIsVotingDisabled] = useState(false)
-  const [isRadar, setIsRadar] = useState(false)
+const allMatch = (values: (boolean | string | null | undefined)[]) => {
+  return values.every((v) => {
+    return !isNil(v) && v === values[0]
+  })
+}
+
+const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) => {
+  const [vote, setVote] = useState<boolean | undefined>()
+  const [rationale, setRationale] = useState<string>('')
+  const [submitted, setSubmitted] = useState<boolean>(false)
+  const [isVotingDisabled, setIsVotingDisabled] = useState<boolean>(false)
+  const [isRadar, setIsRadar] = useState<boolean>(false)
   const {
     question,
     votes,
@@ -106,7 +148,7 @@ export default function CollectionSubmitVoteBox(props) {
   } = props
 
   useEffect(() => {
-    setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || adminPage)
+    setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || !!adminPage)
   }, [props.isDisabled, isFinal, submitted, adminPage])
 
   useEffect(() => {
@@ -115,7 +157,7 @@ export default function CollectionSubmitVoteBox(props) {
 
       const voteValues = votes.map(vote => vote.vote)
       if (allMatch(voteValues)) {
-        setVote(prevVote.vote)
+        setVote(prevVote.vote ?? undefined)
         setSubmitted(true)
       }
 
@@ -124,25 +166,18 @@ export default function CollectionSubmitVoteBox(props) {
         setRationale(prevVote.rationale)
       }
 
-      const isRadar = votes.some(vote => vote.type === 'RADAR_APPROVE')
-      setIsRadar(isRadar)
+      const radar = votes.some(vote => vote.type === 'RADAR_APPROVE')
+      setIsRadar(radar)
     }
   }, [votes])
 
-  const allMatch = (values) => {
-    return values.every((v) => {
-      return !isNil(v) && v === values[0]
-    })
-  }
-
-  const updateVote = async (newVote, isChair) => {
+  const updateVote = async (newVote: boolean, isChair: boolean) => {
     try {
       const openElectionVotes = votes.filter(v => v.electionStatus.toLowerCase() === 'open')
       const voteIds = openElectionVotes.map(v => v.voteId)
       await Votes.updateVotesByIds(voteIds, { vote: newVote, rationale })
       setSubmitted(true)
-      // call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render
-      if (isChair) {
+      if (isChair && updateFinalVote && bucketKey) {
         updateFinalVote(bucketKey, { vote: newVote, rationale }, voteIds)
       }
       else {
@@ -150,10 +185,11 @@ export default function CollectionSubmitVoteBox(props) {
       }
       Notifications.showSuccess({ text: 'Successfully updated vote' })
     }
-    catch (error) {
-      if (error && error.status === 409) {
+    catch (error: unknown) {
+      const consentError = extractConsentError(error)
+      if (consentError && consentError.code === 409) {
         const voteText = isChair ? 'Chair vote' : 'Vote'
-        Notifications.showError({ text: `${error.response.data.message} ${voteText} not submitted, updating vote display.` })
+        Notifications.showError({ text: `${consentError.message} ${voteText} not submitted, updating vote display.` })
         reloadFn()
       }
       else {
@@ -168,21 +204,21 @@ export default function CollectionSubmitVoteBox(props) {
       await Votes.updateRationaleByIds(voteIds, rationale)
       Notifications.showSuccess({ text: 'Successfully updated vote rationale' })
     }
-    catch (error) {
-      if (error && error.status === 409) {
-        Notifications.showError({ text: `${error.response.data.message} Rationale not submitted, updating vote display.` })
+    catch (error: unknown) {
+      const consentError = extractConsentError(error)
+      if (consentError && consentError.code === 409) {
+        Notifications.showError({ text: `${consentError.message} Rationale not submitted, updating vote display.` })
         reloadFn()
       }
       else {
-        Notifications.showError(
-          { text: 'Error: Failed to update vote rationale' })
+        Notifications.showError({ text: 'Error: Failed to update vote rationale' })
       }
     }
   }
 
   return (
     <div
-      style={({ marginLeft: '3rem', paddingBottom: '2%', ...styles.baseStyle })}
+      style={{ marginLeft: '3rem', paddingBottom: '2%', ...styles.baseStyle }}
       data-cy="collection-vote-box"
     >
       <table>
@@ -199,23 +235,23 @@ export default function CollectionSubmitVoteBox(props) {
               <div>
                 <VoteSubsectionHeading
                   vote={vote}
-                  adminPage={adminPage}
-                  isFinal={isFinal}
+                  adminPage={!!adminPage}
+                  isFinal={!!isFinal}
                   isVotingDisabled={isVotingDisabled}
                   isRadar={isRadar}
                 />
                 <div style={styles.voteButtons}>
                   {!isVotingDisabled && (
                     <CollectionVoteYesButton
-                      onClick={() => updateVote(true, !isNil(updateFinalVote))}
-                      disabled={isVotingDisabled || isApprovalDisabled || isLoading}
+                      onClick={() => updateVote(true, !!updateFinalVote)}
+                      disabled={isVotingDisabled || !!isApprovalDisabled || !!isLoading}
                       isSelected={vote === true}
                     />
                   )}
                   {!isVotingDisabled && (
                     <CollectionVoteNoButton
-                      onClick={() => updateVote(false, !isNil(updateFinalVote))}
-                      disabled={isLoading || isVotingDisabled}
+                      onClick={() => updateVote(false, !!updateFinalVote)}
+                      disabled={!!isLoading || isVotingDisabled}
                       isSelected={vote === false}
                     />
                   )}
@@ -241,7 +277,7 @@ export default function CollectionSubmitVoteBox(props) {
                   onBlur={updateRationale}
                   style={styles.rationaleTextArea}
                   rows={4}
-                  disabled={isVotingDisabled || isLoading}
+                  disabled={isVotingDisabled || !!isLoading}
                 />
               </div>
             </td>
@@ -252,23 +288,4 @@ export default function CollectionSubmitVoteBox(props) {
   )
 }
 
-CollectionSubmitVoteBox.propTypes = {
-  question: PropTypes.string,
-  votes: PropTypes.arrayOf(PropTypes.object).isRequired,
-  isFinal: PropTypes.bool,
-  isApprovalDisabled: PropTypes.bool,
-  isLoading: PropTypes.bool,
-  isDisabled: PropTypes.bool,
-  adminPage: PropTypes.bool,
-  bucketKey: PropTypes.string,
-  updateFinalVote: PropTypes.func,
-  reloadFn: PropTypes.func,
-}
-
-VoteSubsectionHeading.propTypes = {
-  vote: PropTypes.bool,
-  adminPage: PropTypes.bool.isRequired,
-  isFinal: PropTypes.bool.isRequired,
-  isVotingDisabled: PropTypes.bool.isRequired,
-  isRadar: PropTypes.bool.isRequired,
-}
+export default CollectionSubmitVoteBox
