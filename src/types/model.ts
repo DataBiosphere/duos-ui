@@ -191,7 +191,7 @@ export interface DataUseTerm {
 }
 
 export interface DataUseSummary {
-  primary?: DataUseTerm[]
+  primary: DataUseTerm[]
   secondary?: DataUseTerm[]
 }
 
