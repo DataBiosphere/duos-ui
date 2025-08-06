@@ -1,10 +1,14 @@
 import { binCollectionToBuckets, Bucket, shouldAbstain } from 'src/utils/BucketUtils'
 import { isEmpty, isUndefined } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
-import { DarCollection, DatasetTerm, DataUseSummary, DataUseTerm } from 'src/types/model'
+import { Dataset, DarCollection, DataAccessRequest, DatasetTerm, DataUseSummary, DataUseTerm } from 'src/types/model'
 import { DataSet } from 'src/libs/ajax/DataSet'
 
 const dar_collection = {
+  id: 1,
+  createDate: 1,
+  updateDate: 1,
+  createUserId: 1,
   darCollectionId: 1,
   darCode: 'DAR-001',
   dars: {
@@ -336,7 +340,7 @@ const dar_collection = {
       },
       datasetIds: [1, 2, 3, 4],
     },
-  },
+  } as unknown as Map<string, DataAccessRequest>,
   datasets: [
     {
       datasetId: 1,
@@ -372,8 +376,8 @@ const dar_collection = {
       datasetIdentifier: 'DUOS-000005',
       dacId: 5,
     },
-  ],
-} as unknown as DarCollection
+  ] as Dataset[],
+} as DarCollection
 
 const match_results = [
   {
@@ -453,7 +457,7 @@ const dataset_terms = [
     datasetIdentifier: 'DUOS-000005',
     dacId: 5,
   },
-] as unknown as DatasetTerm[]
+] as DatasetTerm[]
 
 describe('BucketUtils', () => {
   it('instantiates a collection into buckets', () => {
@@ -635,6 +639,10 @@ describe('BucketUtils', () => {
   it('correctly buckets data uses when there are similar data use entries', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
     const collection = {
+      id: 1,
+      createDate: 1,
+      updateDate: 1,
+      createUserId: 1,
       darCollectionId: 1,
       darCode: 'DAR-001',
       dars: {
@@ -966,7 +974,7 @@ describe('BucketUtils', () => {
           },
           datasetIds: [1, 2, 3, 4, 5],
         },
-      },
+      } as unknown as Map<string, DataAccessRequest>,
       datasets: [
         {
           datasetId: 1,
@@ -1003,8 +1011,8 @@ describe('BucketUtils', () => {
           dataUse: { hmbResearch: true },
           dacId: 5,
         },
-      ],
-    } as unknown as DarCollection
+      ] as Dataset[],
+    } as DarCollection
     const terms = [
       {
         datasetId: 1,
@@ -1070,7 +1078,7 @@ describe('BucketUtils', () => {
         },
         dacId: 5,
       },
-    ] as unknown as DatasetTerm[]
+    ] as DatasetTerm[]
     cy.stub(DataSet, 'searchDatasetIndex').returns(terms)
     cy.wrap(binCollectionToBuckets(collection)).then((b) => {
       const buckets = b as Bucket[]
