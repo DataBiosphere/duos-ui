@@ -54,18 +54,6 @@ interface VoteGroup {
  * Step 5: Set the bucket key/label from the dataUse + dataset ids
  * Step 6: Coalesce the algorithm decision per bucket
  * Step 7: Prepend an RP Vote bucket for the DAC to vote on the research purpose
- *
- * @public
- * @param collection The full Data Access Request Collection
- * @param dacIds An optional array of dac ids. If provided, bucket contents will be filtered to datasets matching
- *        the provided dac ids. This will extend to elections and votes as well.
- * @returns List of buckets, each one containing:
- *          list of datasets,
- *          shared data use summary for all datasets in bucket,
- *          map of election id to elections for all datasets,
- *          votes for all elections,
- *          list of match results for all dataset elections
- *          list of DACs for all datasets in the bucket
  */
 export const binCollectionToBuckets = async (collection: DarCollection, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
@@ -173,10 +161,6 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
 
 /**
  * Find all elections (in a dar) with a dataset id in the provided list of dataset ids
- * @private
- * @param dar
- * @param datasetIds
- * @returns {Election[]}
  */
 const findElectionsForDatasets = (dar: DataAccessRequest, datasetIds: number[]): Election[] => {
   return dar.elections
@@ -187,10 +171,6 @@ const findElectionsForDatasets = (dar: DataAccessRequest, datasetIds: number[]):
 
 /**
  * Optionally filter a list of collection datasets by the dac ids provided.
- * @private
- * @param dacIds List of dac ids. Can be empty
- * @param datasets List of datasets to filter
- * @returns {Dataset[]}
  */
 const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] => {
   return isEmpty(dacIds)
@@ -208,10 +188,6 @@ const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] 
  *  2. Exactly one match or N matches that are all the same - easy case
  *  3. Abstain is true and match is false - decision is abstained
  *  4. N matches - not all the same - very confusing case
- *
- * @private
- * @param bucket
- * @returns {AlgorithmResult}
  */
 const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
@@ -273,7 +249,6 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
 /**
  * Process the match results for V3 Abstain. If we have a V3 result and we have
  * an ABSTAIN case, we can return true if the number of abstentions > 0
- * @param matchResults
  */
 const processV3Abstain = (matchResults: MatchResult[]): boolean => {
   const abstainList = map((m: MatchResult) => m.abstain)(matchResults)
@@ -284,9 +259,6 @@ const processV3Abstain = (matchResults: MatchResult[]): boolean => {
 /**
  * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
  * or they can have fields populated for 'other': 'other restriction' and 'secondaryOther': 'yet other restriction'
- * @private
- * @param dataUse
- * @returns boolean
  */
 const isOther = (dataUse?: DataUseSummary): boolean => {
   const primaryOther = dataUse?.primary?.some((dut: DataUseTerm) => dut.code === 'OTHER') || false
@@ -297,8 +269,6 @@ const isOther = (dataUse?: DataUseSummary): boolean => {
 /**
  * Calculate abstention for a data use. There are a number of cases where there should
  * not be an algorithm decision if a field is true, including any "Other" state.
- * @param dataUse
- * @returns boolean
  */
 export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
   const codeList: string[] = ['OTHER', 'POP-M', 'POP-F', 'COL', 'IRB', 'GSO', 'PUB', 'MOR', 'POP-PD']
@@ -309,10 +279,6 @@ export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
 
 /**
  * Create a structure of RP (research purpose) votes from all votes in a list of buckets.
- *
- * @private
- * @param buckets
- * @returns {Array<{rp: VoteGroup}>}
  */
 const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGroup }> => {
   // List of rp vote groups broken out by election into chair, member, and final votes.
@@ -355,8 +321,6 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
 /**
  * Helper function to retrieve DatasetTerms for a list of datasets. This is primarily used to get the pre-processed
  * data use information so the UI doesn't have to reprocess it.
- *
- * @param datasets List of datasets to retrieve DatasetTerms for
  */
 const getDatasetTerms = async (datasets: Dataset[]): Promise<DatasetTerm[]> => {
   const datasetQuery = DataSet.searchDatasetIndex({
