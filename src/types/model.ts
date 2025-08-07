@@ -539,6 +539,7 @@ export interface Vote {
   isReminderSent: boolean
   hasConcerns: boolean
   displayName: string
+  electionStatus?: string
 }
 
 export interface MatchResult {
