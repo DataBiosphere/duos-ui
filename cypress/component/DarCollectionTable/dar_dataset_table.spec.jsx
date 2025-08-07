@@ -1,8 +1,8 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable.jsx'
-import darCollection from './darCollection.json'
-import { Match } from 'src/libs/ajax/Match.js'
+import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable'
+import darCollection from './darCollection'
+import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet'
 
 describe('DarDatasetTable - Tests', function () {
