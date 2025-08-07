@@ -66,13 +66,28 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
 
   return (
     <div data-cy={dataCy} data-dac-id={dacId.toString()}>
-      <h4>Automatic Approval of DAC Requests</h4>
-      DUOS offers Data Access Committees the option to automate Data Access Requests for a limited set of data use
-      terms, namely datasets that are tagged with either and only the data use terms General Research Use or
-      Health/Medical/Biomedical use - not including datasets that have those terms with modifiers such as Non-Profit
-      Use only or Genetic Studies Only. If you would like Data Access Requests for this Data Access Committee to be
-      automated, please check the box below to opt in to use this feature, then select the data use terms for which
-      you would like DUOS to automate your Data Access Request decisions.
+      <h4>Rule Automated Data Access Request (RADAR) Settings</h4>
+      <p>
+        Data Access Committees may automate Data Access Requests for a limited set of data use terms, namely datasets that are
+        {' '}
+        <b>only</b>
+        {' '}
+        tagged with either General Research Use or Health/Medical/Biomedical use and
+        {' '}
+        <b>without</b>
+        {' '}
+        modifiers (e.g. Non-Profit Use, Genetic Studies Only, etc).
+      </p>
+      <p>
+        Users from any of the following countries will not be approved consistent with
+        {' '}
+        <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>
+        {' '}
+        :  China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
+      </p>
+      <p>
+        Check the box below to opt in to this feature, and then select the data use terms for which Data Access Requests you would like automated.
+      </p>
       <h5>Rules</h5>
       {!isLoading && DACbotRules.map((rule) => {
         return <DACBotCheckboxComponent dacId={dacId} rule={rule} key={rule.id} disableEdit={!userIsChair} />
