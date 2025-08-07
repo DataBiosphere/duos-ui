@@ -81,7 +81,7 @@ describe('DucAddendum', () => {
   it('should display a warning when relevant DAC cannot be loaded', () => {
     const errorMessage = 'Error loading DAC information for datasets'
     cy.stub(DataSet, 'searchDatasetIndex').callsFake(() => {
-      return Promise.reject(new AxiosError('DAC information could not be found', '500', undefined, undefined, { data: { message: errorMessage } } as AxiosResponse))
+      return Promise.reject(new AxiosError('DAC information could not be found', '500', undefined, undefined, { data: { message: errorMessage } } as AxiosResponse) as Error)
     })
 
     const props = {
