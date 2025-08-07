@@ -133,10 +133,10 @@ const VoteInfoSubsection = ({
           isDisabled={adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections}
           isApprovalDisabled={isApprovalDisabled}
           isLoading={isLoading}
-          adminPage={adminPage}
+          adminPage={adminPage ?? false}
           bucketKey={convertLabelToKey(get(bucket, 'key', 'collection-submit-vote-box'))}
-          updateFinalVote={updateFinalVote}
-          reloadFn={reloadFn}
+          updateFinalVote={updateFinalVote ?? (() => {})}
+          reloadFn={reloadFn ?? (() => {})}
         />
       </div>
     </div>
