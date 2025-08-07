@@ -253,6 +253,8 @@ export const getAccessManagementSummary = (accessManagement: string): AccessMana
 }
 
 export interface DataUse {
+  // One of the primary fields must be present: generalUse | hmbResearch | diseaseRestrictions | other
+  // Otherwise, all other fields are optional.
   generalUse?: boolean
   hmbResearch?: boolean
   diseaseRestrictions?: string[]
