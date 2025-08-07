@@ -6,14 +6,7 @@ import { Notifications } from 'src/libs/utils'
 import { Votes } from 'src/libs/ajax/Votes'
 import radarIcon from 'src/images/google-svg/radar.svg'
 import { extractConsentError } from 'src/utils/ErrorUtils'
-
-interface Vote {
-  voteId: string
-  vote: boolean | null
-  rationale: string
-  electionStatus: string
-  type?: string
-}
+import { Vote } from 'src/types/model'
 
 interface CollectionSubmitVoteBoxProps {
   question?: string
@@ -24,13 +17,13 @@ interface CollectionSubmitVoteBoxProps {
   isDisabled?: boolean
   adminPage?: boolean
   bucketKey?: string
-  updateFinalVote?: (bucketKey: string, voteData: { vote: boolean, rationale: string }, voteIds: string[]) => void
-  reloadFn?: () => void
+  updateFinalVote: (bucketKey: string, voteData: { vote: boolean, rationale: string }, voteIds: number[]) => void
+  reloadFn: () => void
 }
 
 interface VoteSubsectionHeadingProps {
   vote: boolean | undefined
-  adminPage: boolean
+  adminPage?: boolean
   isFinal: boolean
   isVotingDisabled: boolean
   isRadar: boolean
@@ -135,6 +128,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [isVotingDisabled, setIsVotingDisabled] = useState<boolean>(false)
   const [isRadar, setIsRadar] = useState<boolean>(false)
+  const [isElectionClosed, setIsElectionClosed] = useState<boolean>(false)
   const {
     question,
     votes,
@@ -146,6 +140,10 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     updateFinalVote,
     reloadFn,
   } = props
+
+  useEffect(() => {
+    setIsElectionClosed(votes.filter(v => v.electionStatus?.toLowerCase() === 'open').length === 0)
+  }, [votes])
 
   useEffect(() => {
     setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || !!adminPage)
@@ -173,7 +171,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
 
   const updateVote = async (newVote: boolean, isChair: boolean) => {
     try {
-      const openElectionVotes = votes.filter(v => v.electionStatus.toLowerCase() === 'open')
+      const openElectionVotes = votes.filter(v => v.electionStatus?.toLowerCase() === 'open')
       const voteIds = openElectionVotes.map(v => v.voteId)
       await Votes.updateVotesByIds(voteIds, { vote: newVote, rationale })
       setSubmitted(true)
@@ -218,7 +216,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
 
   return (
     <div
-      style={{ marginLeft: '3rem', paddingBottom: '2%', ...styles.baseStyle }}
+      style={{ marginLeft: '3rem', paddingBottom: '2%', ...styles.baseStyle as React.CSSProperties }}
       data-cy="collection-vote-box"
     >
       <table>
@@ -235,7 +233,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
               <div>
                 <VoteSubsectionHeading
                   vote={vote}
-                  adminPage={!!adminPage}
+                  adminPage={adminPage}
                   isFinal={!!isFinal}
                   isVotingDisabled={isVotingDisabled}
                   isRadar={isRadar}
@@ -244,14 +242,14 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                   {!isVotingDisabled && (
                     <CollectionVoteYesButton
                       onClick={() => updateVote(true, !!updateFinalVote)}
-                      disabled={isVotingDisabled || !!isApprovalDisabled || !!isLoading}
+                      disabled={isVotingDisabled || !!isApprovalDisabled || !!isLoading || isElectionClosed}
                       isSelected={vote === true}
                     />
                   )}
                   {!isVotingDisabled && (
                     <CollectionVoteNoButton
                       onClick={() => updateVote(false, !!updateFinalVote)}
-                      disabled={!!isLoading || isVotingDisabled}
+                      disabled={!!isLoading || isVotingDisabled || isElectionClosed}
                       isSelected={vote === false}
                     />
                   )}

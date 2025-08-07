@@ -2,25 +2,18 @@ import React from 'react'
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox'
 import { mount } from 'cypress/react'
 import { Votes } from 'src/libs/ajax/Votes'
-import { votingColors } from 'src/libs/VotingColors.ts'
-
-interface Vote {
-  vote?: boolean
-  voteId: number
-  rationale?: string
-  electionStatus?: string
-  type?: string
-}
+import { votingColors } from 'src/libs/VotingColors'
+import { Vote } from 'src/types/model'
 
 const votesMatch: Vote[] = [
-  { vote: true, voteId: 1, rationale: 'test', electionStatus: 'Open' },
-  { vote: true, voteId: 2, rationale: 'test', electionStatus: 'Open' },
-  { vote: true, voteId: 3, rationale: 'test', electionStatus: 'Open' },
+  { vote: true, voteId: 1, rationale: 'test', electionStatus: 'Open' } as Vote,
+  { vote: true, voteId: 2, rationale: 'test', electionStatus: 'Open' } as Vote,
+  { vote: true, voteId: 3, rationale: 'test', electionStatus: 'Open' } as Vote,
 ]
 
 const votesMixed: Vote[] = [
-  { vote: true, voteId: 1, rationale: 'test1', electionStatus: 'Open' },
-  { vote: false, voteId: 2, rationale: 'test2', electionStatus: 'Open' },
+  { vote: true, voteId: 1, rationale: 'test1', electionStatus: 'Open' } as Vote,
+  { vote: false, voteId: 2, rationale: 'test2', electionStatus: 'Open' } as Vote,
 ]
 
 describe('CollectionSubmitVoteBox - Tests', function () {
@@ -35,6 +28,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isFinal={false}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('not.be.visible')
@@ -49,6 +44,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isFinal={false}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('not.be.visible')
@@ -59,10 +56,12 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   it('renders unselected buttons if vote values are null and voting is not disabled', function () {
     mount(
       <CollectionSubmitVoteBox
-        votes={[{ voteId: 4 }]}
+        votes={[{ voteId: 4 } as Vote]}
         question="question"
         isFinal={false}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=collection-vote-box]').should('exist')
@@ -77,6 +76,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isFinal={false}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=collection-vote-box]').should('exist')
@@ -87,9 +88,12 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   it('renders unselected buttons if list of votes is null and voting is not disabled', function () {
     mount(
       <CollectionSubmitVoteBox
+        votes={[]}
         question="question"
         isFinal={false}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=collection-vote-box]').should('exist')
@@ -103,6 +107,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         votes={votesMatch}
         isFinal={false}
         question="question"
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('textarea').should('have.text', 'test')
@@ -114,6 +121,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         votes={votesMixed}
         isFinal={false}
         question="question"
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('textarea').should('not.contain.text')
@@ -125,6 +135,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         votes={votesMatch}
         isFinal={false}
         question="question"
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('textarea').should('have.text', 'test')
@@ -147,6 +160,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         votes={votesMixed}
         isFinal={false}
         question="question"
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
@@ -165,6 +181,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         votes={votesMixed}
         isFinal={true}
         question="question"
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('textarea').should('have.text', '')
@@ -182,6 +201,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         votes={votesMixed}
         isFinal={true}
         question="question"
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.stub(Votes, 'updateVotesByIds')
@@ -201,6 +223,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isFinal={true}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.stub(Votes, 'updateVotesByIds')
@@ -221,6 +245,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isFinal={true}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'YES')
@@ -235,6 +261,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isFinal={false}
         adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
         isLoading={true}
       />,
     )
@@ -255,6 +283,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         isFinal={false}
         question="question"
         isDisabled={true}
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.stub(Votes, 'updateVotesByIds')
@@ -273,6 +304,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isDisabled={false}
         isApprovalDisabled={true}
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.stub(Votes, 'updateVotesByIds')
@@ -292,6 +326,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         question="question"
         isDisabled={false}
         isApprovalDisabled={true}
+        adminPage={false}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.stub(Votes, 'updateVotesByIds')
@@ -313,6 +350,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         isDisabled={false}
         isApprovalDisabled={true}
         adminPage={true}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('exist').contains('The vote has not been finalized')
@@ -329,6 +368,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         isDisabled={false}
         isApprovalDisabled={true}
         adminPage={true}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('exist').contains('The vote has not been finalized')
@@ -345,6 +386,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         isDisabled={false}
         isApprovalDisabled={true}
         adminPage={true}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('exist').contains('The final vote is: YES')
@@ -356,14 +399,38 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   it('shows the radar vote icon when the vote type is radar', () => {
     mount(
       <CollectionSubmitVoteBox
-        votes={[{ vote: true, voteId: 1, type: 'RADAR_APPROVE', rationale: 'Radar Approve' }]}
+        votes={[{ vote: true, voteId: 1, type: 'RADAR_APPROVE', rationale: 'Radar Approve' } as Vote]}
         isFinal={true}
         question="question"
         isDisabled={false}
         isApprovalDisabled={true}
         adminPage={true}
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
       />,
     )
     cy.get('[data-cy=radar-icon]').should('exist')
+  })
+
+  it('shows disabled Yes/No buttons as member when election is closed', () => {
+    const updateFunction = cy.spy().as('updateFunction')
+    mount(
+      <CollectionSubmitVoteBox
+        votes={[{ type: 'FINAL', rationale: 'Approved', electionStatus: 'closed' } as Vote]}
+        isFinal={true}
+        question="question"
+        isDisabled={false}
+        isApprovalDisabled={true}
+        adminPage={false}
+        updateFinalVote={updateFunction}
+        reloadFn={() => {}}
+      />,
+    )
+    cy.get('[datacy=yes-collection-vote-button]').should('exist')
+    cy.get('[datacy=yes-collection-vote-button]').click()
+    cy.get('@updateFunction').should('not.have.been.called')
+    cy.get('[datacy=no-collection-vote-button]').should('exist')
+    cy.get('[datacy=no-collection-vote-button]').click()
+    cy.get('@updateFunction').should('not.have.been.called')
   })
 })
