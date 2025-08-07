@@ -11,14 +11,14 @@ import { Vote } from 'src/types/model'
 interface CollectionSubmitVoteBoxProps {
   question?: string
   votes: Vote[]
-  isFinal?: boolean
+  isFinal: boolean
   isApprovalDisabled?: boolean
-  isLoading?: boolean
-  isDisabled?: boolean
-  adminPage?: boolean
-  bucketKey?: string
+  isLoading: boolean
+  isDisabled: boolean
+  adminPage: boolean
+  bucketKey: string
   updateFinalVote: (bucketKey: string, voteData: { vote: boolean, rationale: string }, voteIds: number[]) => void
-  reloadFn: () => void
+  reloadFn?: () => void
 }
 
 interface VoteSubsectionHeadingProps {
@@ -140,7 +140,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     adminPage,
     bucketKey,
     updateFinalVote,
-    reloadFn,
+    reloadFn = () => {},
   } = props
 
   useEffect(() => {
@@ -148,7 +148,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   }, [votes])
 
   useEffect(() => {
-    setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || !!adminPage)
+    setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || adminPage)
   }, [props.isDisabled, isFinal, submitted, adminPage])
 
   useEffect(() => {
@@ -237,7 +237,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                 <VoteSubsectionHeading
                   vote={vote}
                   adminPage={adminPage}
-                  isFinal={!!isFinal}
+                  isFinal={isFinal}
                   isVotingDisabled={isVotingDisabled}
                   isRadar={isRadar}
                 />
@@ -245,14 +245,14 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                   {!isVotingDisabled && (
                     <CollectionVoteYesButton
                       onClick={() => updateVote(true, !!updateFinalVote)}
-                      disabled={isVotingDisabled || !!isApprovalDisabled || !!isLoading || isElectionClosed}
+                      disabled={isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
                       isSelected={vote === true}
                     />
                   )}
                   {!isVotingDisabled && (
                     <CollectionVoteNoButton
                       onClick={() => updateVote(false, !!updateFinalVote)}
-                      disabled={!!isLoading || isVotingDisabled || isElectionClosed}
+                      disabled={isLoading || isVotingDisabled || isElectionClosed}
                       isSelected={vote === false}
                     />
                   )}
@@ -278,7 +278,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                   onBlur={updateRationale}
                   style={styles.rationaleTextArea}
                   rows={4}
-                  disabled={isVotingDisabled || !!isLoading}
+                  disabled={isVotingDisabled || isLoading}
                 />
               </div>
             </td>
