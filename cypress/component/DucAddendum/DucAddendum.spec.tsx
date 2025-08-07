@@ -71,10 +71,12 @@ describe('DucAddendum', () => {
     // Verify dataset row content
     cy.contains('DUOS-1001')
       .next().should('have.text', 'Test Dataset 1')
+    cy.contains('Test Dataset 1')
       .next().should('have.text', 'DAC 0001')
 
     cy.contains('DUOS-1002')
       .next().should('have.text', 'Test Dataset 2')
+    cy.contains('Test Dataset 2')
       .next().should('have.text', 'DAC 0002')
   })
 
@@ -116,6 +118,7 @@ describe('DucAddendum', () => {
 
     cy.contains('DUOS-1001')
       .next().should('have.text', 'Test Dataset 1')
+    cy.contains('Test Dataset 1')
       .next().should('have.text', 'N/A')
   })
 })
