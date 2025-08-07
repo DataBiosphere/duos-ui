@@ -5,7 +5,9 @@ import { DataSet } from 'src/libs/ajax/DataSet.js'
 import { processVotesForBucket } from './DarCollectionUtils'
 import { processMatchData } from './VoteUtils'
 import {
-  AlgorithmResult, DacTerm,
+  AbstainDataUseCodes,
+  AlgorithmResult,
+  DacTerm,
   DarCollection,
   DataAccessRequest,
   Dataset,
@@ -271,7 +273,7 @@ const isOther = (dataUse?: DataUseSummary): boolean => {
  * not be an algorithm decision if a field is true, including any "Other" state.
  */
 export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
-  const codeList: string[] = ['OTHER', 'POP-M', 'POP-F', 'COL', 'IRB', 'GSO', 'PUB', 'MOR', 'POP-PD']
+  const codeList: string[] = Object.keys(AbstainDataUseCodes)
   return isOther(dataUse) || dataUse?.secondary?.some((dut: DataUseTerm) => {
     return codeList.some((code: string) => code === dut.code)
   }) || false

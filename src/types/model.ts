@@ -12,6 +12,18 @@ export type UserRoleName
     | 'DataSubmitter'
     | 'All'
 
+export enum AbstainDataUseCodes {
+  'OTHER',
+  'POP-M',
+  'POP-F',
+  'COL',
+  'IRB',
+  'GSO',
+  'PUB',
+  'MOR',
+  'POP-PD',
+}
+
 export interface UserRole {
   roleId: number
   name: UserRoleName
