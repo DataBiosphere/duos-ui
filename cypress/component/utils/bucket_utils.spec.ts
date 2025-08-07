@@ -459,6 +459,15 @@ const dataset_terms = [
   },
 ] as DatasetTerm[]
 
+// Helper function to reduce redundancy in bucket election verification
+const verifyBucketElectionsAndDatasets = (buckets: Bucket[]) => {
+  buckets.forEach((b) => {
+    b.elections.forEach((e) => {
+      cy.wrap(b.datasetIds).should('contain', e.datasetId)
+    })
+  })
+}
+
 describe('BucketUtils', () => {
   it('instantiates a collection into buckets', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
@@ -542,11 +551,7 @@ describe('BucketUtils', () => {
       cy.wrap(dataAccessBuckets).should('exist')
       cy.wrap(dataAccessBuckets.length).should('eq', 1)
       cy.wrap(dataAccessBuckets[0].datasetIds.length).should('eq', 1)
-      buckets.forEach((b) => {
-        b.elections.forEach((e) => {
-          cy.wrap(b.datasetIds).should('contain', e.datasetId)
-        })
-      })
+      verifyBucketElectionsAndDatasets(buckets)
     })
   })
 
@@ -558,11 +563,7 @@ describe('BucketUtils', () => {
       const dataAccessBuckets = buckets.filter(b => !b.isRP)
       cy.wrap(dataAccessBuckets).should('exist')
       cy.wrap(dataAccessBuckets.length).should('eq', 2)
-      buckets.forEach((b) => {
-        b.elections.forEach((e) => {
-          cy.wrap(b.datasetIds).should('contain', e.datasetId)
-        })
-      })
+      verifyBucketElectionsAndDatasets(buckets)
     })
   })
 
