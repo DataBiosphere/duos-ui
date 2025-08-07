@@ -177,6 +177,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
       const voteIds = openElectionVotes.map(v => v.voteId)
       await Votes.updateVotesByIds(voteIds, { vote: newVote, rationale })
       setSubmitted(true)
+      // call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render
       if (isChair && updateFinalVote && bucketKey) {
         updateFinalVote(bucketKey, { vote: newVote, rationale }, voteIds)
       }
