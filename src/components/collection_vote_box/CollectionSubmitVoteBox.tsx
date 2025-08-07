@@ -76,11 +76,13 @@ const VoteSubsectionHeading: React.FC<VoteSubsectionHeadingProps> = ({
   isVotingDisabled,
   isRadar,
 }) => {
-  const voteResultText = isNil(vote)
-    ? 'NOT SELECTED'
-    : vote
-      ? 'YES'
-      : 'NO'
+  let voteResultText
+  if (isNil(vote)) {
+    voteResultText = 'NOT SELECTED'
+  }
+  else {
+    voteResultText = vote ? 'YES' : 'NO'
+  }
 
   let heading: string | undefined
   if (adminPage) {
