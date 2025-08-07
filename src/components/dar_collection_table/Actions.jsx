@@ -6,7 +6,6 @@ import SimpleButton from 'src/components/SimpleButton'
 import { useHistory } from 'react-router-dom'
 import { Notifications } from 'src/libs/utils'
 import { includes, toLower } from 'lodash/fp'
-import { checkEnv, envGroups } from 'src/utils/EnvironmentUtils'
 
 const duosBlue = '#0948B7'
 const cancelGray = '#333F52'
@@ -238,10 +237,8 @@ export default function Actions(props) {
       {actions.includes('Review') && <SimpleButton {...reviewButtonAttributes} />}
       {actions.includes('Delete') && <TableIconButton {...deleteButtonAttributes} />}
       {actions.includes('Cancel') && <TableIconButton {...cancelButtonAttributes} />}
-      {checkEnv(envGroups.NON_PROD) && actions.includes('Create_Progress_Report')
-        && <SimpleButton {...createProgressReportButtonAttributes} />}
-      {checkEnv(envGroups.NON_PROD) && actions.includes('Review_Progress_Report')
-        && <SimpleButton {...reviewCloseoutButtonAttributes} />}
+      {actions.includes('Create_Progress_Report') && <SimpleButton {...createProgressReportButtonAttributes} />}
+      {actions.includes('Review_Progress_Report') && <SimpleButton {...reviewCloseoutButtonAttributes} />}
     </div>
   )
 }

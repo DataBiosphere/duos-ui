@@ -1,0 +1,6 @@
+{
+    "name": "Node.js",
+    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:22",
+    "postCreateCommand": "./scripts/setup-devcontainer.sh",
+    "remoteUser": "node"
+}
