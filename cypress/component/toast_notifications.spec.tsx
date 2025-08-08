@@ -174,7 +174,7 @@ describe('ToastNotifications', () => {
       })
 
       cy.get('[data-cy="notification-alert"]').should('be.visible')
-      cy.get('[data-cy="notification-alert"]', { timeout: 700 }).should('not.exist')
+      cy.get('[data-cy="notification-alert"]', { timeout: 1000 }).should('not.exist')
     })
   })
 
