@@ -19,6 +19,11 @@ export const Collections = {
     const res = await axios.get(url, Config.authOpts())
     return res.data
   },
+  getCollectionByIdWithElectionHistory: async (id) => {
+    const url = `${await getApiUrl()}/api/collections/${id}/electionHistory`
+    const res = await axios.get(url, Config.authOpts())
+    return res.data
+  },
   getCollectionSummariesByRoleName: async (roleName) => {
     const url = `${await getApiUrl()}/api/collections/role/${roleName}/summary`
     const res = await axios.get(url, Config.authOpts())

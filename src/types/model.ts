@@ -449,7 +449,7 @@ export interface DataAccessRequest {
   referenceId: string
   collectionId: number
   parentId?: number
-  data: object
+  data: DataAccessRequestData
   draft: boolean
   progressReport: boolean
   expired: boolean
@@ -464,6 +464,89 @@ export interface DataAccessRequest {
   eraCommonsId: string
   closeoutSigningOfficialApprovedDate: number
   closeoutSigningOfficialApprovedUserId: number
+}
+
+export interface DataAccessRequestData {
+  projectTitle: string
+  checkNihDataOnly: boolean
+  rus: string
+  nonTechRus: string
+  diseases: boolean
+  methods: boolean
+  controls: boolean
+  population: boolean
+  other: boolean
+  otherText: string
+  ontologies: OntologyEntry[]
+  forProfit: boolean
+  oneGender: boolean
+  gender: string,
+  pediatric: boolean
+  illegalBehavior: boolean
+  addiction: boolean
+  sexualDiseases: boolean
+  stigmatizedDiseases: boolean
+  vulnerablePopulation: boolean
+  populationMigration: boolean
+  psychiatricTraits: boolean
+  notHealth: boolean
+  hmb: boolean
+  status: string
+  poa: boolean
+  datasets: DatasetEntry[]
+  darCode?: string
+  restriction: object
+  validRestriction: boolean
+  progressReportSummary: string
+  intellectualPropertySummary: string
+  publications: Publication[]
+  presentations: Presentation[]
+  dmi: DataManagementIncident
+  researchPlans: string
+  closeoutSupplement: Closeout
+  anvilUse: boolean
+  cloudUse: boolean
+  localUse: boolean
+  cloudProvider: string
+  cloudProviderType: string
+  cloudProviderDescription: string
+  geneticStudiesOnly: boolean
+  irb: boolean
+  irbDocumentLocation?: string
+  irbDocumentName?: string
+  irbProtocolExpiration?: string
+  itDirector: string
+  itDirectorEmail: string
+  signingOfficial: string
+  signingOfficialEmail: string
+  publication: boolean
+  collaboration: boolean
+  collaborationLetterLocation?: string
+  collaborationLetterName?: string
+  forensicActivities: boolean
+  sharingDistribution: boolean
+  labCollaborators: Collaborator[]
+  internalCollaborators: Collaborator[]
+  externalCollaborators: Collaborator[]
+  dsAcknowledgement: boolean
+  gsoAcknowledgement: boolean
+  pubAcknowledgement: boolean
+  piName: string
+  piEmail: string
+  piCountryOfOperation: string
+}
+
+export interface OntologyEntry {
+  id: string
+  label: string
+  definition: string
+  synonyms: string[]
+}
+
+export interface DatasetEntry {
+  key: string
+  value: string
+  label: string
 }
 
 export interface DataManagementIncident {
@@ -537,4 +620,10 @@ export interface Vote {
   isReminderSent: boolean
   hasConcerns: boolean
   displayName: string
+}
+
+export interface VoteHistoryRow extends Vote {
+  darTitle: string;
+  progressReport: boolean;
+  electionDate: string;
 }

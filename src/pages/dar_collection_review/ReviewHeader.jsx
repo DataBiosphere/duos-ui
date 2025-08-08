@@ -48,6 +48,7 @@ export default function ReviewHeader(props) {
     projectTitle,
     userName,
     institutionName,
+    approvedDatasets,
     readOnly = false,
     isLoading,
   } = props
@@ -69,6 +70,13 @@ export default function ReviewHeader(props) {
           </div>
           <div className="secondary-header-row" style={appliedSecondaryHeaderStyle}>
             <p style={styles.user}>{`${userName}, ${institutionName}`}</p>
+          </div>
+          <div className="secondary-header-row" style={appliedSecondaryHeaderStyle}>
+            <p style={styles.user}>
+              {approvedDatasets.length > 0 
+              ? `${approvedDatasets.length} Dataset${approvedDatasets.length > 1 ? 's' : ''} approved: ${approvedDatasets.join(', ')}`
+              : 'No datasets approved'
+              }</p>
           </div>
         </div>
       )}
