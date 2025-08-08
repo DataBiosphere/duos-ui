@@ -64,6 +64,7 @@ export default ts.config(
         },
       ],
       'react/prop-types': 'off',
+      '@stylistic/jsx-one-expression-per-line': ['off'],
     },
   },
 )
