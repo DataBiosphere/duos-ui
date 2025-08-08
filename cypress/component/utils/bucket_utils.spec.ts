@@ -1,8 +1,14 @@
-import { binCollectionToBuckets, isEqualDataUse, shouldAbstain } from 'src/utils/BucketUtils'
-import { forEach, isEmpty, isUndefined } from 'lodash/fp'
+import { binCollectionToBuckets, Bucket, shouldAbstain } from 'src/utils/BucketUtils'
+import { isEmpty, isUndefined } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
+import { Dataset, DarCollection, DataAccessRequest, DatasetTerm, DataUseSummary, DataUseTerm } from 'src/types/model'
+import { DataSet } from 'src/libs/ajax/DataSet'
 
 const dar_collection = {
+  id: 1,
+  createDate: 1,
+  updateDate: 1,
+  createUserId: 1,
   darCollectionId: 1,
   darCode: 'DAR-001',
   dars: {
@@ -334,7 +340,7 @@ const dar_collection = {
       },
       datasetIds: [1, 2, 3, 4],
     },
-  },
+  } as unknown as Map<string, DataAccessRequest>,
   datasets: [
     {
       datasetId: 1,
@@ -370,8 +376,8 @@ const dar_collection = {
       datasetIdentifier: 'DUOS-000005',
       dacId: 5,
     },
-  ],
-}
+  ] as Dataset[],
+} as DarCollection
 
 const match_results = [
   {
@@ -396,10 +402,78 @@ const match_results = [
   },
 ]
 
+const dataset_terms = [
+  {
+    datasetId: 1,
+    datasetName: 'ds 1',
+    datasetIdentifier: 'DUOS-000001',
+    dataUse: {
+      primary: [{
+        code: 'GRU',
+        description: 'General Research Use',
+      }],
+    },
+    dacId: 1,
+  },
+  {
+    datasetId: 2,
+    datasetName: 'ds 2',
+    datasetIdentifier: 'DUOS-000002',
+    dataUse: {
+      primary: [{
+        code: 'GRU',
+        description: 'General Research Use',
+      }],
+    },
+    dacId: 2,
+  },
+  {
+    datasetId: 3,
+    datasetName: 'ds 3',
+    datasetIdentifier: 'DUOS-000003',
+    dataUse: {
+      primary: [{
+        code: 'OTHER',
+        description: 'Other Restrictions',
+      }],
+    },
+    dacId: 3,
+  },
+  {
+    datasetId: 4,
+    datasetName: 'ds 4',
+    datasetIdentifier: 'DUOS-000004',
+    dataUse: {
+      secondary: [{
+        code: 'OTHER',
+        description: 'Other Restrictions',
+      }],
+    },
+    dacId: 4,
+  },
+  {
+    datasetId: 5,
+    datasetName: 'ds 5',
+    datasetIdentifier: 'DUOS-000005',
+    dacId: 5,
+  },
+] as DatasetTerm[]
+
+// Helper function to reduce redundancy in bucket election verification
+const verifyBucketElectionsAndDatasets = (buckets: Bucket[]) => {
+  buckets.forEach((b) => {
+    b.elections.forEach((e) => {
+      cy.wrap(b.datasetIds).should('contain', e.datasetId)
+    })
+  })
+}
+
 describe('BucketUtils', () => {
   it('instantiates a collection into buckets', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms)
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
       buckets.forEach((b) => {
         cy.wrap(b.key).should('not.be.empty')
@@ -420,72 +494,76 @@ describe('BucketUtils', () => {
 
   it('there should be a bucket with two GRU datasets', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms)
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       const gruBucket = buckets.find(b => b.label === 'GRU')
       cy.wrap(gruBucket).should('not.be.empty')
-      cy.wrap(gruBucket.datasets).should('not.be.empty')
-      cy.wrap(gruBucket.datasets.length).should('eq', 2)
+      cy.wrap(gruBucket?.datasets).should('not.be.empty')
+      cy.wrap(gruBucket?.datasets.length).should('eq', 2)
     })
   })
 
   it('there should be a bucket with a primary OTHER dataset', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
-      const other = buckets.find(b => b.label === 'OTH1')
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms)
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
+      const other = buckets.find(b => b.label === 'OTHER')
       cy.wrap(other).should('not.be.empty')
-      cy.wrap(other.datasets).should('not.be.empty')
-      cy.wrap(other.datasets.length).should('eq', 1)
+      cy.wrap(other?.datasets).should('not.be.empty')
+      cy.wrap(other?.datasets.length).should('eq', 1)
     })
   })
 
   it('there should be a bucket with a secondary OTHER dataset', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
-      const secondaryOther = buckets.find(b => b.label === 'OTH2')
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms)
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
+      const secondaryOther = buckets.find(b => b.label === 'OTHER')
       cy.wrap(secondaryOther).should('not.be.empty')
-      cy.wrap(secondaryOther.datasets).should('not.be.empty')
-      cy.wrap(secondaryOther.datasets.length).should('eq', 1)
+      cy.wrap(secondaryOther?.datasets).should('not.be.empty')
+      cy.wrap(secondaryOther?.datasets.length).should('eq', 1)
     })
   })
 
   it('there should be a bucket with a an undefined data use', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms)
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       const missingDataUse = buckets.find(b => !b.isRP && isUndefined(b.dataUse))
       cy.wrap(missingDataUse).should('not.be.empty')
-      cy.wrap(missingDataUse.datasets).should('not.be.empty')
-      cy.wrap(missingDataUse.datasets.length).should('eq', 1)
-      cy.wrap(missingDataUse.dataUse).should('be.undefined')
-      cy.wrap(missingDataUse.dataUses).should('be.empty')
+      cy.wrap(missingDataUse?.datasets).should('not.be.empty')
+      cy.wrap(missingDataUse?.datasets.length).should('eq', 1)
+      cy.wrap(missingDataUse?.dataUse).should('be.undefined')
+      cy.wrap(missingDataUse?.dataUses).should('be.empty')
     })
   })
 
   it('buckets should be filtered to datasets containing one dac id: 1', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection, [1])).then((buckets) => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms.filter(d => d.dacId === 1))
+    cy.wrap(binCollectionToBuckets(dar_collection, [1])).then((b) => {
+      const buckets = b as Bucket[]
       const dataAccessBuckets = buckets.filter(b => !b.isRP)
       cy.wrap(dataAccessBuckets).should('exist')
       cy.wrap(dataAccessBuckets.length).should('eq', 1)
       cy.wrap(dataAccessBuckets[0].datasetIds.length).should('eq', 1)
-      forEach((b) => {
-        forEach((e) => {
-          cy.wrap(b.datasetIds).should('contain', e.datasetId)
-        })(b.elections)
-      })(buckets)
+      verifyBucketElectionsAndDatasets(buckets)
     })
   })
 
   it('buckets should be filtered to datasets containing two dac ids: 1 & 5', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
-    cy.wrap(binCollectionToBuckets(dar_collection, [1, 5])).then((buckets) => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms.filter(d => d.dacId === 1 || d.dacId === 5))
+    cy.wrap(binCollectionToBuckets(dar_collection, [1, 5])).then((b) => {
+      const buckets = b as Bucket[]
       const dataAccessBuckets = buckets.filter(b => !b.isRP)
       cy.wrap(dataAccessBuckets).should('exist')
       cy.wrap(dataAccessBuckets.length).should('eq', 2)
-      forEach((b) => {
-        forEach((e) => {
-          cy.wrap(b.datasetIds).should('contain', e.datasetId)
-        })(b.elections)
-      })(buckets)
+      verifyBucketElectionsAndDatasets(buckets)
     })
   })
 
@@ -515,13 +593,15 @@ describe('BucketUtils', () => {
       },
     ]
     cy.stub(Match, 'findMatchBatch').returns(failing_matches)
-    cy.wrap(binCollectionToBuckets(dar_collection)).then((buckets) => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms)
+    cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
+      const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
       let rationaleCheck = false
       buckets.forEach((b) => {
         if (!isEmpty(b.matchResults)) {
-          cy.wrap(b.algorithmResult.rationales).should('not.be.empty')
-          cy.wrap(b.algorithmResult.rationales.length).should('eq', 5)
+          cy.wrap(b.algorithmResult?.rationales).should('not.be.empty')
+          cy.wrap(b.algorithmResult?.rationales?.length).should('eq', 5)
           rationaleCheck = true
         }
       })
@@ -529,55 +609,11 @@ describe('BucketUtils', () => {
     })
   })
 
-  it('marks three unequal data uses as unequal', () => {
-    const dataUses = [
-      { generalUse: true },
-      { generalUse: false, hmbResearch: true, other: 'other restrictions' },
-      { generalUse: false, hmbResearch: true, secondaryOther: 'secondary other restrictions' },
-    ]
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', false)
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', false)
-    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', false)
-  })
-
-  it('marks three mixed, unequal data uses as unequal', () => {
-    const dataUses = [
-      { generalUse: true, collaborationInvestigators: true },
-      { generalUse: false, hmbResearch: true, publicationMoratorium: 'date' },
-      { generalUse: false, hmbResearch: false, stigmatizeDiseases: true },
-    ]
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', false)
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', false)
-    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', false)
-  })
-
-  it('marks three equal data uses as equal', () => {
-    const dataUses = [
-      { generalUse: true },
-      { generalUse: true },
-      { generalUse: true },
-    ]
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', true)
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', true)
-    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', true)
-  })
-
-  it('marks three mixed, equal data uses as equal', () => {
-    const dataUses = [
-      { generalUse: true, recontactMay: true },
-      { generalUse: true, recontactMust: true },
-      { generalUse: true, recontactingDataSubjects: true },
-    ]
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[1])).should('eq', true)
-    cy.wrap(isEqualDataUse(dataUses[0], dataUses[2])).should('eq', true)
-    cy.wrap(isEqualDataUse(dataUses[1], dataUses[2])).should('eq', true)
-  })
-
   it('correctly determines matchable data use objects', () => {
     const dataUses = [
-      { generalUse: true, recontactMay: true },
-      { generalUse: true, recontactMust: true },
-      { generalUse: true, genomicSummaryResults: true },
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NCU', description: 'NCU' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NMDS', description: 'NMDS' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NCTRL', description: 'NCTRL' }] } as DataUseSummary,
     ]
     dataUses.forEach((d) => {
       cy.wrap(shouldAbstain(d)).should('eq', false)
@@ -586,23 +622,15 @@ describe('BucketUtils', () => {
 
   it('correctly determines unmatchable data use objects', () => {
     const dataUses = [
-      { generalUse: true, addiction: true },
-      { generalUse: true, collaboratorRequired: true },
-      { generalUse: true, ethicsApprovalRequired: true },
-      { generalUse: true, gender: 'F' },
-      { generalUse: true, gender: 'M' },
-      { generalUse: true, geographicalRestrictions: 'true' },
-      { generalUse: true, illegalBehavior: true },
-      { generalUse: true, manualReview: true },
-      { generalUse: true, nonBiomedical: true },
-      { generalUse: true, other: 'true' },
-      { generalUse: true, pediatric: true },
-      { generalUse: true, psychologicalTraits: true },
-      { generalUse: true, publicationResults: true },
-      { generalUse: true, secondaryOther: 'true' },
-      { generalUse: true, sexualDiseases: true },
-      { generalUse: true, stigmatizeDiseases: true },
-      { generalUse: true, vulnerablePopulations: true },
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'OTHER', description: 'OTHER' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-M', description: 'POP-M' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-F', description: 'POP-M' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'COL', description: 'COL' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'IRB', description: 'IRB' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'GSO', description: 'GSO' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'PUB', description: 'PUB' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'MOR', description: 'MOR' }] } as DataUseSummary,
+      { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-PD', description: 'POP-PD' }] } as DataUseSummary,
     ]
     dataUses.forEach((d) => {
       cy.wrap(shouldAbstain(d)).should('eq', true)
@@ -612,6 +640,10 @@ describe('BucketUtils', () => {
   it('correctly buckets data uses when there are similar data use entries', () => {
     cy.stub(Match, 'findMatchBatch').returns(match_results)
     const collection = {
+      id: 1,
+      createDate: 1,
+      updateDate: 1,
+      createUserId: 1,
       darCollectionId: 1,
       darCode: 'DAR-001',
       dars: {
@@ -943,7 +975,7 @@ describe('BucketUtils', () => {
           },
           datasetIds: [1, 2, 3, 4, 5],
         },
-      },
+      } as unknown as Map<string, DataAccessRequest>,
       datasets: [
         {
           datasetId: 1,
@@ -980,24 +1012,92 @@ describe('BucketUtils', () => {
           dataUse: { hmbResearch: true },
           dacId: 5,
         },
-      ],
-    }
-    cy.wrap(binCollectionToBuckets(collection)).then((buckets) => {
+      ] as Dataset[],
+    } as DarCollection
+    const terms = [
+      {
+        datasetId: 1,
+        datasetName: 'ds 1',
+        datasetIdentifier: 'DUOS-000001',
+        dataUse: {
+          primary: [{
+            code: 'HMB',
+            description: 'Health, Medical and Biomedical Research',
+          }, {
+            code: 'OTHER',
+            description: 'Samples and information may not be sold for profit.',
+          },
+          ],
+        },
+        dacId: 1,
+      },
+      {
+        datasetId: 2,
+        datasetName: 'ds 2',
+        datasetIdentifier: 'DUOS-000002',
+        dataUse: {
+          primary: [{
+            code: 'GRU',
+            description: 'General Research Use',
+          }],
+        },
+        dacId: 2,
+      },
+      {
+        datasetId: 3,
+        datasetName: 'ds 3',
+        datasetIdentifier: 'DUOS-000003',
+        dataUse: {
+          primary: [{
+            code: 'HMB',
+            description: 'Health, Medical and Biomedical Research',
+          }],
+        },
+        dacId: 3,
+      },
+      {
+        datasetId: 4,
+        datasetName: 'ds 4',
+        datasetIdentifier: 'DUOS-000004',
+        dataUse: {
+          primary: [{
+            code: 'GRU',
+            description: 'General Research Use',
+          }],
+        },
+        dacId: 4,
+      },
+      {
+        datasetId: 5,
+        datasetName: 'ds 5',
+        datasetIdentifier: 'DUOS-000005',
+        dataUse: {
+          primary: [{
+            code: 'HMB',
+            description: 'Health, Medical and Biomedical Research',
+          }],
+        },
+        dacId: 5,
+      },
+    ] as DatasetTerm[]
+    cy.stub(DataSet, 'searchDatasetIndex').returns(terms)
+    cy.wrap(binCollectionToBuckets(collection)).then((b) => {
+      const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
       // The provided dar collection should have 1 RP bucket and 3 Data Use buckets
       cy.wrap(buckets.length).should('eq', 4)
       cy.wrap(buckets[0].isRP).should('eq', true)
       // HMB + Other
       cy.wrap(buckets[1].isRP).should('eq', undefined)
-      cy.wrap(buckets[1].dataUse.hmbResearch).should('eq', true)
-      cy.wrap(buckets[1].dataUse.other).should('not.be.empty')
+      cy.wrap(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).should('exist')
+      cy.wrap(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).should('exist')
       // General Use
       cy.wrap(buckets[2].isRP).should('eq', undefined)
-      cy.wrap(buckets[2].dataUse.generalUse).should('eq', true)
+      cy.wrap(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'GRU')).should('exist')
       // HMB
       cy.wrap(buckets[3].isRP).should('eq', undefined)
-      cy.wrap(buckets[3].dataUse.hmbResearch).should('eq', true)
-      cy.wrap(buckets[3].dataUse.other).should('eq', undefined)
+      cy.wrap(buckets[3].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).should('exist')
+      cy.wrap(buckets[3].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).should('not.exist')
     })
   })
 })

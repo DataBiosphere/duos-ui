@@ -12,6 +12,18 @@ export type UserRoleName
     | 'DataSubmitter'
     | 'All'
 
+export enum AbstainDataUseCodes {
+  'OTHER',
+  'POP-M',
+  'POP-F',
+  'COL',
+  'IRB',
+  'GSO',
+  'PUB',
+  'MOR',
+  'POP-PD',
+}
+
 export interface UserRole {
   roleId: number
   name: UserRoleName
@@ -151,7 +163,7 @@ export interface Dataset {
   indexedDate?: Date
 }
 
-interface DacTerm {
+export interface DacTerm {
   dacId: number
   dacName: string
   dacEmail: string
@@ -183,14 +195,16 @@ export interface StudyTerm {
   dataTypes: string[]
 }
 
-interface DataUseTerm {
+export interface DataUseTerm {
   code: string
   description: string
+  manualReview?: boolean
+  type?: string
 }
 
-interface DataUseSummary {
+export interface DataUseSummary {
   primary: DataUseTerm[]
-  secondary: DataUseTerm[]
+  secondary?: DataUseTerm[]
 }
 
 export interface DatasetTerm {
@@ -251,30 +265,32 @@ export const getAccessManagementSummary = (accessManagement: string): AccessMana
 }
 
 export interface DataUse {
-  generalUse: boolean
-  hmbResearch: boolean
-  diseaseRestrictions: string[]
-  populationOriginsAncestry: boolean
-  methodsResearch: boolean
-  nonProfitUse: boolean
-  other: string
-  secondaryOther: string
-  ethicsApprovalRequired: boolean
-  collaboratorRequired: boolean
-  geographicalRestrictions: string
-  geneticStudiesOnly: boolean
-  publicationResults: boolean
-  publicationMoratorium: string
-  controls: boolean
-  gender: string
-  pediatric: boolean
-  population: boolean
-  illegalBehavior: boolean
-  sexualDiseases: boolean
-  stigmatizeDiseases: boolean
-  vulnerablePopulations: boolean
-  psychologicalTraits: boolean
-  notHealth: boolean
+  // One of the primary fields must be present: generalUse | hmbResearch | diseaseRestrictions | other
+  // Otherwise, all other fields are optional.
+  generalUse?: boolean
+  hmbResearch?: boolean
+  diseaseRestrictions?: string[]
+  populationOriginsAncestry?: boolean
+  methodsResearch?: boolean
+  nonProfitUse?: boolean
+  other?: string
+  secondaryOther?: string
+  ethicsApprovalRequired?: boolean
+  collaboratorRequired?: boolean
+  geographicalRestrictions?: string
+  geneticStudiesOnly?: boolean
+  publicationResults?: boolean
+  publicationMoratorium?: string
+  controls?: boolean
+  gender?: string
+  pediatric?: boolean
+  population?: boolean
+  illegalBehavior?: boolean
+  sexualDiseases?: boolean
+  stigmatizeDiseases?: boolean
+  vulnerablePopulations?: boolean
+  psychologicalTraits?: boolean
+  notHealth?: boolean
 }
 
 export interface DatasetProperty {
@@ -537,4 +553,25 @@ export interface Vote {
   isReminderSent: boolean
   hasConcerns: boolean
   displayName: string
+  electionStatus?: string
+}
+
+export interface MatchResult {
+  consent: string
+  match: boolean
+  abstain?: boolean
+  algorithmVersion?: string
+  rationales: string[]
+  createDate: string
+  failed: boolean
+  id: string
+}
+
+export interface AlgorithmResult {
+  result: string
+  createDate?: string
+  rationales?: string[]
+  id: string
+  failed?: boolean
+  match?: boolean
 }
