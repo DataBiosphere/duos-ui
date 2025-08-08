@@ -13,6 +13,7 @@ export const TableHeaderSection = (props) => {
             <img
               id="dataset-icon"
               src={icon}
+              alt="Dataset Icon"
               style={{
                 width: icon.width,
                 height: icon.height || 64,

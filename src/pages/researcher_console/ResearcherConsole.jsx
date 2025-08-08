@@ -137,7 +137,7 @@ export default function ResearcherConsole() {
       <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0px -3%' }}>
         <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
           <div style={Styles.ICON_CONTAINER}>
-            <img id="access-icon" src={accessIcon} style={Styles.HEADER_IMG} />
+            <img id="access-icon" src={accessIcon} alt="Access Icon" style={Styles.HEADER_IMG} />
           </div>
           <div style={Styles.HEADER_CONTAINER}>
             <div style={Styles.TITLE}>My Data Access Requests</div>

@@ -132,6 +132,7 @@ export default function UserProfile(props) {
           >
             <img
               src={ga4ghLogo}
+              alt="GA4GH Logo"
               style={{
                 width: '166px',
                 height: '48px',
