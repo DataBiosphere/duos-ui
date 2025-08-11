@@ -20,6 +20,10 @@ export interface AsyncActionButtonProps {
   'id'?: string
   /** Optional error handler function called when onClick fails */
   'onError'?: (error: unknown) => void
+  /** Optional mouse enter event handler */
+  'onMouseEnter'?: (event: React.MouseEvent<HTMLButtonElement>) => void
+  /** Optional mouse leave event handler */
+  'onMouseLeave'?: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
@@ -32,6 +36,8 @@ export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
   disabled = false,
   id,
   onError,
+  onMouseEnter,
+  onMouseLeave,
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -90,6 +96,8 @@ export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
       aria-busy={isLoading}
       data-cy={effectiveDataCy}
       id={id}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {isLoading
         ? (
