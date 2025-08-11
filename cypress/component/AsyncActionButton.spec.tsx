@@ -209,7 +209,6 @@ describe('AsyncActionButton', () => {
       .should('have.attr', 'type', 'button')
       .should('have.attr', 'aria-label', 'Accessible action button')
       .should('have.attr', 'aria-busy', 'false')
-      .should('have.attr', 'role', 'button')
   })
 
   it('calls onError callback when action fails', () => {

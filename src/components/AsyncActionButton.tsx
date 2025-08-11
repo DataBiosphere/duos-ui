@@ -88,7 +88,6 @@ export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
       className={className}
       aria-label={effectiveAriaLabel}
       aria-busy={isLoading}
-      role="button"
       data-cy={effectiveDataCy}
       id={id}
     >
