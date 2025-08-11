@@ -354,18 +354,23 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const addDucAddendumTab = () => {
-    const tabs = [
-      ...ApplicationTabs,
-      { name: 'Addendum', id: ADDENDUM_TAB_ID, showStep: false },
-    ]
-    setApplicationTabs(tabs)
+    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0 ? true : false
+    if (!hasAddendumTab) {
+      const tabs = [
+        ...applicationTabs,
+        { name: 'Addendum', id: ADDENDUM_TAB_ID, showStep: false },
+      ]
+      setApplicationTabs(tabs)
+    }
   }
 
-  const goToDucAddendum = useCallback(async () => {
-    if (isAttested) {
-      setTab(ADDENDUM_TAB_ID)
+  const removeAddendumTab = () => {
+    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0 ? true : false
+    if (hasAddendumTab) {
+      const tabs = applicationTabs.filter(tab => tab.id != ADDENDUM_TAB_ID)
+      setApplicationTabs(tabs)
     }
-  }, [setTab, isAttested])
+  }
 
   const attemptSubmit = async () => {
     const validation = validateDARFormData({
@@ -394,7 +399,7 @@ const DataAccessRequestApplication = (props) => {
       Metrics.captureEvent(eventList.dar, { action: 'attest' })
       setIsAttested(true)
       addDucAddendumTab()
-      await goToDucAddendum()
+      setTab(ADDENDUM_TAB_ID)
     }
 
     return !isInvalidForm
@@ -737,7 +742,10 @@ const DataAccessRequestApplication = (props) => {
                             <DataAccessAgreements
                               datasets={selectedDatasets}
                               isDraft={draftDar}
-                              cancelAttest={() => setIsAttested(false)}
+                              cancelAttest={() => {
+                                setIsAttested(false)
+                                removeAddendumTab()
+                              }}
                               isAttested={isAttested}
                               attest={attemptSubmit}
                               save={() => setShowDialogSave(true)}
@@ -746,7 +754,10 @@ const DataAccessRequestApplication = (props) => {
                         : (
                             <DataUseAgreements
                               isDraft={draftDar}
-                              cancelAttest={() => setIsAttested(false)}
+                              cancelAttest={() => {
+                                setIsAttested(false)
+                                removeAddendumTab()
+                              }}
                               isAttested={isAttested}
                               attest={attemptSubmit}
                               save={() => setShowDialogSave(true)}
