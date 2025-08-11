@@ -398,8 +398,8 @@ const DataAccessRequestApplication = (props) => {
       // noinspection ES6MissingAwait
       Metrics.captureEvent(eventList.dar, { action: 'attest' })
       setIsAttested(true)
-      addDucAddendumTab()
       setTab(ADDENDUM_TAB_ID)
+      addDucAddendumTab()
     }
 
     return !isInvalidForm
