@@ -28,12 +28,6 @@ const styles = {
     color: '#333F52',
     justifyContent: 'space-between',
   }),
-  cellWidths: {
-    vote: '10%',
-    name: '15%',
-    date: '10%',
-    rationale: '50%',
-  },
   containerOverride: {
     marginTop: '0',
     borderTop: '0',
@@ -48,16 +42,16 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
         requestType: { label: 'Request Type', cellStyle: { width: '10%' }, sortable: true },
         darCode: { label: 'DAR Title', cellStyle: { width: '20%' }, sortable: true },
         electionDate: { label: 'Election Date', cellStyle: { width: '10%' }, sortable: true },
-        voteDate: { label: 'Vote Date', cellStyle: { width: '10%' }, sortable: true },
-        voter: { label: 'Voter', cellStyle: { width: '15%' }, sortable: true },
-        voteType: { label: 'Vote Type', cellStyle: { width: '10%' }, sortable: true },
         vote: { label: 'Vote', cellStyle: { width: '10%' }, sortable: true },
+        name: { label: 'Voter', cellStyle: { width: '15%' }, sortable: true },
+        voteDate: { label: 'Vote Date', cellStyle: { width: '10%' }, sortable: true },
+        voteType: { label: 'Vote Type', cellStyle: { width: '10%' }, sortable: true },
         rationale: { label: 'Rationale', cellStyle: { width: '20%' }, sortable: true }
     };
 
     const columnHeaderData = () => {
-        const { requestType, darCode, electionDate, voteDate, voter, voteType, vote, rationale } = columnHeaderFormat;
-        return [requestType, darCode, electionDate, voteDate, voter, voteType, vote, rationale];
+        const { requestType, darCode, electionDate, vote, name, voteDate, voteType, rationale } = columnHeaderFormat;
+        return [requestType, darCode, electionDate, vote, name, voteDate, voteType, rationale];
     };
 
     const processVoteHistoryRowData = (voteHistory: VoteHistoryRow[]) => {
@@ -67,10 +61,10 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
             { data: row.progressReport ? 'Progress Report' : 'Initial Dar', cellStyle: { width: '10%' }, label: 'Request Type', id: i },
             { data: row.darTitle, cellStyle: { width: '20%' }, label: 'DAR Title', id: i },
             { data: formatDate(row.electionDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
-            { data: formatDate(row.createDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
-            { data: row.displayName, cellStyle: { width: '15%' }, label: 'Voter', id: i },
-            { data: row.type, cellStyle: { width: '10%' }, label: 'Vote Type', id: i },
             { data: row.vote == true ? 'Yes' : row.vote == false ? 'No' : "--", cellStyle: { width: '10%' }, label: 'Vote', id: i },
+            { data: row.displayName, cellStyle: { width: '15%' }, label: 'Name', id: i },
+            { data: formatDate(row.createDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
+            { data: row.type, cellStyle: { width: '10%' }, label: 'Vote Type', id: i },
             { data: row.rationale || '--', cellStyle: { width: '20%' }, label: 'Rationale', id: i },
         ]);
         return rowData;

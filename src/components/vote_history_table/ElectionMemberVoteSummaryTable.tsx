@@ -3,8 +3,8 @@ import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme';
 import { formatDate } from '../../libs/utils'
 import { ElectionWithMemberVotes, Vote } from 'src/types/model';
-import MemberVoteHistoryTable from './MemberVoteHistoryTable';
 import { ExpandMore, ExpandLess } from '@mui/icons-material'
+import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 
 interface ElectionWithMemberVotesTableProps {
     electionsWithMemberVotes: ElectionWithMemberVotes[];
@@ -29,12 +29,6 @@ const styles = {
       color: '#333F52',
       justifyContent: 'space-between',
     }),
-    cellWidths: {
-      vote: '10%',
-      name: '15%',
-      date: '10%',
-      rationale: '50%',
-    },
     containerOverride: {
       marginTop: '0',
       borderTop: '0',
@@ -109,6 +103,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
         
         return electionsWithMemberVotes.map((election: ElectionWithMemberVotes, i) => {
             const ExpandComponent = electionIsExpanded(election.electionId) ? ExpandLess : ExpandMore;
+            console.log('votes', election.memberVotes)
             return [
                 { data: (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -138,14 +133,16 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
 
 
     const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode; rowData: TableData[] }) => {
-        const electionId = rowData[0].electionId || -1; // Default to -1 if electionId is not present
+        const electionId = rowData[0].electionId || -1;
         if (electionIsExpanded(electionId)) {
             return (
                 <div key={`expanded-${electionId}`}>
                     {renderedRow}
                     <div style={{ width: '80%', margin: 'auto' }}>
-                        <MemberVoteHistoryTable
-                            memberVoteHistory={rowData[0].memberVotes || []}
+                        <VoteSummaryTable
+                            isChair={false}
+                            isLoading={false}
+                            dacVotes={rowData[0].memberVotes || []}
                         />
                     </div>
                 </div>

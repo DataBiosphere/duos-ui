@@ -3,7 +3,7 @@ import SimpleTable from '../SimpleTable'
 import { Styles } from '../../libs/theme'
 import { isNil, isEmpty } from 'lodash/fp'
 import { useEffect, useState } from 'react'
-import { sortVisibleTable } from '../../libs/utils'
+import { formatDate, sortVisibleTable } from '../../libs/utils'
 import { Email } from '../../libs/ajax/Email'
 import { Notifications } from '../../libs/utils'
 
@@ -72,7 +72,7 @@ const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, se
           isChair,
         }),
         nameCellData({ name: displayName, voteId }),
-        dateCellData({ date: lastUpdated, voteId }),
+        dateCellData({ date: lastUpdated ? lastupdated : formatDate(dacVote.updateDate), voteId }),
         rationaleCellData({ rationale, voteId }),
       ]
     })
