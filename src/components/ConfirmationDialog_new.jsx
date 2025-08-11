@@ -1,7 +1,8 @@
 import React from 'react'
 import Modal from 'react-modal'
-import { Alert } from './Alert'
-import CloseIconComponent from './CloseIconComponent'
+import { Alert } from 'src/components/Alert'
+import CloseIconComponent from 'src/components/CloseIconComponent'
+import { AsyncActionButton } from 'src/components/AsyncActionButton'
 import './ConfirmationDialog_new.css'
 
 const customStyles = {
@@ -62,14 +63,14 @@ export const ConfirmationDialog = (props) => {
         >
           No
         </a>
-        <a
+        <AsyncActionButton
           id="btn_submit"
           className="button button-blue"
           onClick={props.action.handler(true)}
           disabled={disableOkBtn}
         >
           {props.action.label}
-        </a>
+        </AsyncActionButton>
       </div>
     </Modal>
   )
