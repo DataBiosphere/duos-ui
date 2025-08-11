@@ -109,7 +109,6 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
 
   // filter for this DAC if this is a DAC page, and get dataset names
   const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter(datasetId => {
-    console.log(dacIds);
     if (dacIds.length === 0) return true; // if no DACs (admin), return all datasets
     const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId);
     return dacIds.contains(dataset?.dacId);

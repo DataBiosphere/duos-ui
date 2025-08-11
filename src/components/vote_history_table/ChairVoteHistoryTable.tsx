@@ -46,13 +46,13 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     
     const columnHeaderFormat = {
         requestType: { label: 'Request Type', cellStyle: { width: '10%' }, sortable: true },
-        darCode: { label: 'Title', cellStyle: { width: '15%' }, sortable: true },
+        darCode: { label: 'DAR Title', cellStyle: { width: '20%' }, sortable: true },
         electionDate: { label: 'Election Date', cellStyle: { width: '10%' }, sortable: true },
-        voteDate: { label: 'Vote Date', cellStyle: { width: '10' }, sortable: true },
+        voteDate: { label: 'Vote Date', cellStyle: { width: '10%' }, sortable: true },
         voter: { label: 'Voter', cellStyle: { width: '15%' }, sortable: true },
         voteType: { label: 'Vote Type', cellStyle: { width: '10%' }, sortable: true },
         vote: { label: 'Vote', cellStyle: { width: '10%' }, sortable: true },
-        rationale: { label: 'Rationale', cellStyle: { width: '15%' }, sortable: true }
+        rationale: { label: 'Rationale', cellStyle: { width: '20%' }, sortable: true }
     };
 
     const columnHeaderData = () => {
@@ -65,13 +65,13 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
         
         const rowData = voteHistory.map((row: VoteHistoryRow, i) => [
             { data: row.progressReport ? 'Progress Report' : 'Initial Dar', cellStyle: { width: '10%' }, label: 'Request Type', id: i },
-            { data: row.darTitle, cellStyle: { width: '15%' }, label: 'Title', id: i },
+            { data: row.darTitle, cellStyle: { width: '20%' }, label: 'DAR Title', id: i },
             { data: formatDate(row.electionDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
             { data: formatDate(row.createDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
             { data: row.displayName, cellStyle: { width: '15%' }, label: 'Voter', id: i },
             { data: row.type, cellStyle: { width: '10%' }, label: 'Vote Type', id: i },
             { data: row.vote == true ? 'Yes' : row.vote == false ? 'No' : "--", cellStyle: { width: '10%' }, label: 'Vote', id: i },
-            { data: row.rationale || 'N/A', cellStyle: { width: '15%' }, label: 'Rationale', id: i },
+            { data: row.rationale || '--', cellStyle: { width: '20%' }, label: 'Rationale', id: i },
         ]);
         return rowData;
     };

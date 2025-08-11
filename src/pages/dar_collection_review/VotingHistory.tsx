@@ -1,10 +1,10 @@
 import React from 'react'
 import ChairVoteHistoryTable from 'src/components/vote_history_table/ChairVoteHistoryTable';
-import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable.jsx'
+import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionMemberVoteSummaryTable';
 import { Styles } from 'src/libs/theme'
-import {DarCollection, DataAccessRequest, Election, Vote, VoteHistoryRow} from 'src/types/model';
+import {DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vote, VoteHistoryRow} from 'src/types/model';
 
-interface DarCollectionVoteSummaryProps {
+interface VotingHistoryProps {
     darCollection: DarCollection
     isLoading: boolean
     isAdmin: boolean
@@ -64,7 +64,7 @@ const styles = {
 }
 
 
-const extractVotesByRole = (darCollection: DarCollection, isChair: boolean) => {
+const extractChairVotes = (darCollection: DarCollection) => {
     if (!darCollection?.dars) {
         return []
     }
@@ -76,7 +76,7 @@ const extractVotesByRole = (darCollection: DarCollection, isChair: boolean) => {
             .filter(([key, election]: [string, Election]) => election.electionType == 'DataAccess')
             .forEach(([key, election]: [string, Election]) => {
                 Object.entries(election.votes || {}).forEach(([key, vote]: [string, Vote]) => {
-                    if (isChairVote(vote) === isChair) {
+                    if (isChairVote(vote)) {
                         votesByRole.push({
                             ...vote,
                             darTitle: dar.data.projectTitle,
@@ -91,16 +91,42 @@ const extractVotesByRole = (darCollection: DarCollection, isChair: boolean) => {
     return votesByRole
 }
 
+const extractElectionsWithMemberVotes = (darCollection: DarCollection) => {
+    if (!darCollection?.dars) {
+        return []
+    }
+
+    const dacMemberVotes: ElectionWithMemberVotes[] = []
+
+    Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
+            Object.values(dar.elections || {})
+            .filter((election: Election) => election.electionType == 'DataAccess')
+            .forEach((election: Election) => {
+                const electionWithMemberVotes: ElectionWithMemberVotes = {
+                    ...election,
+                    darTitle: dar.data.projectTitle,
+                    progressReport: dar.progressReport,
+                    memberVotes: [],
+                }
+                Object.values(election.votes || []).forEach(( vote: Vote) => {
+                    if (vote.type === 'DAC') {
+                        electionWithMemberVotes.memberVotes.push(vote)
+                    }
+                })
+                dacMemberVotes.push(electionWithMemberVotes)
+            })
+        })
+
+    return dacMemberVotes
+}
+
 const isChairVote = (vote: Vote) => {
     return (vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE') && vote.vote != null;
 }
 
-export default function DarCollectionVoteSummary({
-                                                     darCollection,
-                                                     isLoading = false
-                                                 }: DarCollectionVoteSummaryProps) {
-    const chairVotes = extractVotesByRole(darCollection, true)
-    const memberVotes = extractVotesByRole(darCollection, false)
+export default function VotingHistory({darCollection}: VotingHistoryProps) {
+    const chairVotes : VoteHistoryRow[] = extractChairVotes(darCollection)
+    const memberVotes : ElectionWithMemberVotes[] = extractElectionsWithMemberVotes(darCollection)
     
 
     return (
@@ -118,10 +144,8 @@ export default function DarCollectionVoteSummary({
 
             <div style={styles.tableSection}>
                 <div style={styles.tableTitle}>Member Votes</div>
-                <VoteSummaryTable
-                    dacVotes={memberVotes}
-                    isLoading={isLoading}
-                    isChair={false}
+                <ElectionWithMemberVotesTable
+                    electionsWithMemberVotes={memberVotes}
                 />
             </div>
         </div>
