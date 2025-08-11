@@ -15,6 +15,7 @@ import NIHAdministrativeInformation from 'src/pages/data_submission/NIHAdministr
 import NIHDataManagement from 'src/pages/data_submission/NIHDataManagement'
 import NihAnvilUse from 'src/pages/data_submission/NihAnvilUse'
 import { uniqueValidator } from 'src/components/forms/formValidation'
+import { AsyncActionButton } from 'src/components/AsyncActionButton'
 
 export const DataSubmissionForm = (props) => {
   const {
@@ -107,8 +108,7 @@ export const DataSubmissionForm = (props) => {
 
   const submit = async () => {
     if (!allConsentGroupsSaved) {
-      Notifications.showError({ text: 'Please save all consent groups and try again.' })
-      return
+      throw new Error('Please save all consent groups and try again.')
     }
 
     const registration = cloneDeep(formData)
@@ -140,19 +140,20 @@ export const DataSubmissionForm = (props) => {
     setFormValidation(validation)
 
     if (!valid) {
-      Notifications.showError({ text: 'There are errors in your form. Please fix and try again.' })
-      return
+      throw new Error('There are errors in your form. Please fix and try again.')
     }
 
     // no validation issues, matches json schema: continue to submission
     const multiPartFormData = createMultiPartFormData(registration)
 
-    DataSet.registerDataset(multiPartFormData).then(() => {
-      history.push('/datalibrary')
-      Notifications.showSuccess({ text: 'Submitted succesfully!' })
-    }, (e) => {
-      Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message })
-    })
+    await DataSet.registerDataset(multiPartFormData)
+    history.push('/datalibrary')
+    Notifications.showSuccess({ text: 'Submitted successfully!' })
+  }
+
+  const onError = (error) => {
+    const message = error?.response?.data?.message || error.message || 'Submission failed'
+    Notifications.showError({ text: 'Could not submit: ' + message })
   }
 
   const onChange = useCallback(({ key, value }) => {
@@ -208,7 +209,14 @@ export const DataSubmissionForm = (props) => {
             <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode} datasetNames={datasetNames} />
 
             <div className="flex flex-row" style={{ justifyContent: 'flex-end', marginBottom: '2rem' }}>
-              <a className="button button-white" onClick={submit}>Submit</a>
+              <AsyncActionButton
+                onClick={submit}
+                onError={onError}
+                className="button button-white"
+                data-cy="data-submission-submit-button"
+              >
+                Submit
+              </AsyncActionButton>
             </div>
           </form>
         </div>
