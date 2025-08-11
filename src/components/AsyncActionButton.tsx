@@ -102,7 +102,17 @@ export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
       {isLoading
         ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ transform: 'scale(0.6)', transformOrigin: 'center' }}>
+              <div style={{
+                transform: 'scale(0.6)',
+                transformOrigin: 'center',
+                width: '1em',
+                height: '1em',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '-0.5em',
+              }}
+              >
                 <Spinner />
               </div>
             </div>
