@@ -5,6 +5,7 @@ import './ConfirmationModal.css'
 import { styled } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
+import { AsyncActionButton } from '../AsyncActionButton'
 
 const ConfirmationModal = (props) => {
   const { showConfirmation, closeConfirmation, title, message, header, onConfirm, styleOverride = {} } = props
@@ -26,21 +27,32 @@ const ConfirmationModal = (props) => {
     },
   }))
 
-  const PrimaryButton = styled(Button)(({ theme }) => ({
-    'fontFamily': 'Montserrat, sans-serif',
-    'color': theme.palette.getContrastText(duosBlue),
-    'backgroundColor': duosBlue,
-    'borderRadius': '4px',
-    'fontSize': '1.45rem',
-    '&:hover': {
-      backgroundColor: duosBlueHover,
-    },
-  }))
+  const setHoverState = (e, backgroundColor) => {
+    if (!e.currentTarget.disabled) {
+      e.currentTarget.style.backgroundColor = backgroundColor
+    }
+  }
 
   const actionButtons = (
     <Stack spacing={2} direction="row">
       <SecondaryButton variant="outlined" className="confirmation-modal-secondary-button" onClick={closeFn}>Cancel</SecondaryButton>
-      <PrimaryButton variant="contained" className="confirmation-modal-primary-button" onClick={onConfirm}>Confirm</PrimaryButton>
+      <AsyncActionButton
+        onClick={onConfirm}
+        className="confirmation-modal-primary-button"
+        style={{
+          fontFamily: 'Montserrat, sans-serif',
+          color: 'white',
+          backgroundColor: duosBlue,
+          borderRadius: '4px',
+          fontSize: '1.45rem',
+          border: 'none',
+          fontWeight: 500,
+        }}
+        onMouseEnter={e => setHoverState(e, duosBlueHover)}
+        onMouseLeave={e => setHoverState(e, duosBlue)}
+      >
+        Confirm
+      </AsyncActionButton>
     </Stack>
   )
 
