@@ -76,6 +76,8 @@ const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, se
         rationaleCellData({ rationale, voteId }),
       ]
     })
+  } else {
+    return []
   }
 }
 

@@ -610,20 +610,26 @@ export interface Election {
 
 export interface Vote {
   voteId: number
-  vote: boolean
   userId: number
   createDate: string
-  updateDate: string
   electionId: number
-  rationale: string
-  type: string
-  isReminderSent: boolean
-  hasConcerns: boolean
   displayName: string
+  type: string 
+  vote?: boolean
+  rationale?: string
+  updateDate?: string
+  isReminderSent?: boolean
+  hasConcerns?: boolean
 }
 
 export interface VoteHistoryRow extends Vote {
   darTitle: string;
   progressReport: boolean;
   electionDate: string;
+}
+
+export interface ElectionWithMemberVotes extends Election {
+  darTitle: string;
+  progressReport: boolean;
+  memberVotes: Vote[];
 }

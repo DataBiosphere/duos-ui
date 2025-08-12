@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme';
-import { formatDate } from '../../libs/utils'
+import { formatDate, sortVisibleTable } from '../../libs/utils'
 import { ElectionWithMemberVotes, Vote } from 'src/types/model';
 import { ExpandMore, ExpandLess } from '@mui/icons-material'
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
@@ -9,6 +9,17 @@ import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 interface ElectionWithMemberVotesTableProps {
     electionsWithMemberVotes: ElectionWithMemberVotes[];
 }
+
+interface RowData {
+    data: string | JSX.Element
+    cellStyle: React.CSSProperties
+    label: string
+    id: number | string
+    electionId?: number;
+    memberVotes?: Vote[];
+    onClick?: () => void;
+  }
+
 const styles = {
     baseStyle: {
       fontFamily: 'Montserrat',
@@ -68,7 +79,8 @@ interface TableData {
 
 const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> = ({ electionsWithMemberVotes }) => {
     const [expandedElections, setExpandedElections] = useState<Set<number>>(new Set());
-    const [sort, setSort] = useState({ colIndex: 2, dir: 1 }); // Default sort by election date descending
+    const [sortedElections, setSortedElections] = useState<RowData[][]>([]);
+    const [sort, setSort] = useState({ colIndex: 2, dir: -1 }); // Default sort by election date descending
 
     const toggleElectionExpansion = (electionId: number) => {
         const newExpanded = new Set(expandedElections);
@@ -151,13 +163,19 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
         }
         return renderedRow;
     }, [electionIsExpanded]);
-        
 
+    useEffect(() => {
+            setSortedElections(sortVisibleTable({
+                    list: processElectionRowData(electionsWithMemberVotes),
+                    sort,
+                  }))
+         }, [sort])
+        
 
     return (
         <SimpleTable 
             columnHeaders={columnHeaderData()} 
-            rowData={processElectionRowData(electionsWithMemberVotes)} 
+            rowData={sortedElections} 
             styles={styles}
             rowWrapper={showMemberVoteDropdownWrapper}
             sort={sort}

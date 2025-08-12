@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SimpleTable from '../SimpleTable';
 import { VoteHistoryRow } from 'src/types/model';
 import { Styles } from 'src/libs/theme';
-import { formatDate } from 'src/libs/utils';
+import { formatDate, sortVisibleTable } from 'src/libs/utils';
 
 interface ChairVoteHistoryTableProps {
     voteHistory: VoteHistoryRow[];
 }
+
+interface RowData {
+    data: string | JSX.Element
+    cellStyle: React.CSSProperties
+    label: string
+    id: number | string
+  }
 
 const styles = {
   baseStyle: {
@@ -37,7 +44,8 @@ const styles = {
 }
 
 const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHistory}) => {
-    const [sort, setSort] = useState({ colIndex: 5, dir: 1 }) // Default sort by voteDate descending
+    const [sortedVotes, setSortedVotes] = useState<RowData[][]>([]);
+    const [sort, setSort] = useState({ colIndex: 5, dir: -1 }) // Default sort by voteDate descending
     
     const columnHeaderFormat = {
         requestType: { label: 'Request Type', cellStyle: { width: '15%' }, sortable: true },
@@ -71,10 +79,17 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
         return rowData;
     };
 
+    useEffect(() => {
+        setSortedVotes(sortVisibleTable({
+                list: processVoteHistoryRowData(voteHistory),
+                sort,
+              }))
+     }, [sort])
+
     return (
         <SimpleTable 
             columnHeaders={columnHeaderData()} 
-            rowData={processVoteHistoryRowData(voteHistory)} 
+            rowData={sortedVotes} 
             styles={styles}
             sort={sort}
             onSort={setSort}
