@@ -40,11 +40,11 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     const [sort, setSort] = useState({ colIndex: 5, dir: 1 }) // Default sort by voteDate descending
     
     const columnHeaderFormat = {
-        requestType: { label: 'Request Type', cellStyle: { width: '10%' }, sortable: true },
+        requestType: { label: 'Request Type', cellStyle: { width: '15%' }, sortable: true },
         darCode: { label: 'DAR Title', cellStyle: { width: '20%' }, sortable: true },
-        electionDate: { label: 'Election Date', cellStyle: { width: '10%' }, sortable: true },
+        electionDate: { label: 'Election Date', cellStyle: { width: '15%' }, sortable: true },
         vote: { label: 'Vote', cellStyle: { width: '10%' }, sortable: true },
-        name: { label: 'Voter', cellStyle: { width: '15%' }, sortable: true },
+        name: { label: 'Name', cellStyle: { width: '15%' }, sortable: true },
         voteDate: { label: 'Vote Date', cellStyle: { width: '10%' }, sortable: true },
         voteType: { label: 'Vote Type', cellStyle: { width: '10%' }, sortable: true },
         rationale: { label: 'Rationale', cellStyle: { width: '20%' }, sortable: true }

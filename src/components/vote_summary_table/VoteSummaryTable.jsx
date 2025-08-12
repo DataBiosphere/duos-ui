@@ -142,7 +142,7 @@ function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }) {
 }
 
 export default function VoteSummaryTable(props) {
-  const [sort, setSort] = useState({ colIndex: 0, dir: 1 })
+  const [sort, setSort] = useState({ colIndex: 0, dir: -1 })
   const [visibleVotes, setVisibleVotes] = useState([])
   const [tableSize, setTableSize] = useState(5)
   const { dacVotes, isLoading, isChair = false } = props

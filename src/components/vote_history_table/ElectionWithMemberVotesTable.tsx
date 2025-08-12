@@ -85,12 +85,12 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     }, [expandedElections]);
 
     const columnHeaderFormat = {
-        requestType: { label: 'Request Type', cellStyle: { width: '10%' }, sortable: true },
+        requestType: { label: 'Request Type', cellStyle: { width: '15%' }, sortable: true },
         darTitle: { label: 'DAR Title', cellStyle: { width: '20%' }, sortable: true },
-        electionDate: { label: 'Election Date', cellStyle: { width: '10%' }, sortable: true },
-        electionStatus: { label: 'Election Status', cellStyle: { width: '10%' }, sortable: true },
+        electionDate: { label: 'Election Date', cellStyle: { width: '15%' }, sortable: true },
+        electionStatus: { label: 'Election Status', cellStyle: { width: '15%' }, sortable: true },
         votes: { label: 'Votes Cast', cellStyle: { width: '10%' }, sortable: true },
-        voteSummary: { label: 'Vote Summary', cellStyle: { width: '40%' }, sortable: true }
+        voteSummary: { label: 'Vote Summary', cellStyle: { width: '20%' }, sortable: true }
     };
 
     const columnHeaderData = () => {
