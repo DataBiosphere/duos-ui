@@ -17,10 +17,7 @@ const noTopMarginStyle = { marginTop: 0, paddingTop: 0 }
 const profileLink = <Link to="/profile" style={linkStyle}>Your Profile</Link>
 const profileUnsubmitted = (
   <span>
-    Please submit
-    {profileLink}
-    {' '}
-    to be able to create a Data Access Request
+    Please submit {profileLink} to be able to create a Data Access Request
   </span>
 )
 const profileSubmitted = (
