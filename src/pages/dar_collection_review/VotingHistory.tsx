@@ -1,6 +1,6 @@
 import React from 'react'
 import ChairVoteHistoryTable from 'src/components/vote_history_table/ChairVoteHistoryTable';
-import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionMemberVoteSummaryTable';
+import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionWithMemberVotesTable';
 import { Styles } from 'src/libs/theme'
 import {DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vote, VoteHistoryRow} from 'src/types/model';
 

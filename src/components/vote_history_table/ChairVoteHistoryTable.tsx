@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SimpleTable from '../SimpleTable';
 import { VoteHistoryRow } from 'src/types/model';
 import { Styles } from 'src/libs/theme';
@@ -37,6 +37,7 @@ const styles = {
 }
 
 const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHistory}) => {
+    const [sort, setSort] = useState({ colIndex: 5, dir: 1 }) // Default sort by voteDate descending
     
     const columnHeaderFormat = {
         requestType: { label: 'Request Type', cellStyle: { width: '10%' }, sortable: true },
@@ -75,6 +76,8 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
             columnHeaders={columnHeaderData()} 
             rowData={processVoteHistoryRowData(voteHistory)} 
             styles={styles}
+            sort={sort}
+            onSort={setSort}
         />
     );
 };

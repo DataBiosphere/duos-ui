@@ -68,6 +68,7 @@ interface TableData {
 
 const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> = ({ electionsWithMemberVotes }) => {
     const [expandedElections, setExpandedElections] = useState<Set<number>>(new Set());
+    const [sort, setSort] = useState({ colIndex: 2, dir: 1 }); // Default sort by election date descending
 
     const toggleElectionExpansion = (electionId: number) => {
         const newExpanded = new Set(expandedElections);
@@ -159,6 +160,8 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
             rowData={processElectionRowData(electionsWithMemberVotes)} 
             styles={styles}
             rowWrapper={showMemberVoteDropdownWrapper}
+            sort={sort}
+            onSort={setSort}
         />
     );
 };

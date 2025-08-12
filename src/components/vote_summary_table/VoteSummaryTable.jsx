@@ -72,7 +72,7 @@ const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, se
           isChair,
         }),
         nameCellData({ name: displayName, voteId }),
-        dateCellData({ date: lastUpdated ? lastupdated : formatDate(dacVote.updateDate), voteId }),
+        dateCellData({ date: lastUpdated ? lastUpdated : formatDate(dacVote.updateDate), voteId }),
         rationaleCellData({ rationale, voteId }),
       ]
     })

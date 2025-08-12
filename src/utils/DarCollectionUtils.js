@@ -158,7 +158,7 @@ const collapseVotes = ({ votes }) => {
   const collapsedVotes = {}
   forEach((vote) => {
     const matchingVote = collapsedVotes[`${vote.vote}`]
-    const lastUpdate = vote.updateDate || vote.createDate
+    const lastUpdate = vote.updateDate
     if (isNil(matchingVote)) {
       collapsedVotes[`${vote.vote}`] = {
         userId: vote.userId,
