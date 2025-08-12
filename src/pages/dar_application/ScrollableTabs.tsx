@@ -67,6 +67,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
   }
 
   useEffect(() => {
+    window.removeEventListener('scroll', onScroll)
     window.addEventListener('scroll', onScroll)
 
     return () => {
@@ -74,7 +75,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
       window.removeEventListener('scroll', onScroll)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [applicationTabs])
 
   return (
     <div className="multi-step-buttons-container">
