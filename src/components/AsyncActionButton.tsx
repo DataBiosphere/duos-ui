@@ -24,6 +24,8 @@ export interface AsyncActionButtonProps {
   'onMouseEnter'?: (event: React.MouseEvent<HTMLButtonElement>) => void
   /** Optional mouse leave event handler */
   'onMouseLeave'?: (event: React.MouseEvent<HTMLButtonElement>) => void
+  /** Whether to hide the button after successful completion - defaults to true */
+  'hideOnSuccess'?: boolean
 }
 
 export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
@@ -38,6 +40,7 @@ export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
   onError,
   onMouseEnter,
   onMouseLeave,
+  hideOnSuccess = true,
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -57,7 +60,7 @@ export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
   }, [onClick, isLoading, disabled, onError])
 
   // Don't render if the action was successful
-  if (isSuccess) {
+  if (isSuccess && hideOnSuccess) {
     return null
   }
 

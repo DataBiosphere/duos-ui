@@ -243,4 +243,108 @@ describe('AsyncActionButton', () => {
 
     cy.get('@mockOnError').should('not.have.been.called')
   })
+
+  it('hides button after successful action when hideOnSuccess is true', () => {
+    const mockOnClick = cy.stub().resolves()
+
+    mount(
+      <AsyncActionButton onClick={mockOnClick} hideOnSuccess={true}>
+        Hide True Button
+      </AsyncActionButton>,
+    )
+
+    cy.get('[data-cy="async-action-button-hide-true-button"]')
+      .should('be.visible')
+      .click()
+
+    cy.get('[data-cy="async-action-button-hide-true-button"]')
+      .should('not.exist')
+  })
+
+  it('keeps button visible after successful action when hideOnSuccess is false', () => {
+    const mockOnClick = cy.stub().resolves()
+
+    mount(
+      <AsyncActionButton onClick={mockOnClick} hideOnSuccess={false}>
+        Stay Visible Button
+      </AsyncActionButton>,
+    )
+
+    cy.get('[data-cy="async-action-button-stay-visible-button"]')
+      .should('be.visible')
+      .click()
+
+    cy.get('[data-cy="async-action-button-stay-visible-button"]')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .should('have.attr', 'aria-busy', 'false')
+      .should('contain', 'Stay Visible Button')
+  })
+
+  it('allows multiple clicks when hideOnSuccess is false', () => {
+    const mockOnClick = cy.stub().resolves()
+    cy.wrap(mockOnClick).as('mockOnClick')
+
+    mount(
+      <AsyncActionButton onClick={mockOnClick} hideOnSuccess={false}>
+        Multi Use Button
+      </AsyncActionButton>,
+    )
+
+    cy.get('[data-cy="async-action-button-multi-use-button"]').click()
+
+    cy.get('[data-cy="async-action-button-multi-use-button"]')
+      .should('be.visible')
+      .should('not.be.disabled')
+
+    cy.get('[data-cy="async-action-button-multi-use-button"]').click()
+    cy.get('@mockOnClick').should('have.been.calledTwice')
+  })
+
+  it('shows loading state correctly when hideOnSuccess is false', () => {
+    let resolvePromise: () => void
+    const asyncAction = new Promise<void>((resolve) => {
+      resolvePromise = resolve
+    })
+    const mockOnClick = cy.stub().returns(asyncAction)
+
+    mount(
+      <AsyncActionButton onClick={mockOnClick} hideOnSuccess={false}>
+        Loading Stay Button
+      </AsyncActionButton>,
+    )
+
+    cy.get('[data-cy="async-action-button-loading-stay-button"]').click()
+    cy.get('[data-cy="async-action-button-loading-stay-button"]')
+      .should('be.disabled')
+      .should('have.attr', 'aria-busy', 'true')
+      .find('img[alt="spinner"]')
+      .should('be.visible')
+    cy.then(() => {
+      resolvePromise()
+    })
+    cy.get('[data-cy="async-action-button-loading-stay-button"]')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .should('have.attr', 'aria-busy', 'false')
+      .should('contain', 'Loading Stay Button')
+  })
+
+  it('keeps button visible after error regardless of hideOnSuccess value', () => {
+    const error = new Error('Test error')
+    const mockOnClick = cy.stub().rejects(error)
+
+    mount(
+      <AsyncActionButton onClick={mockOnClick} hideOnSuccess={true}>
+        Error With Hide Button
+      </AsyncActionButton>,
+    )
+
+    cy.get('[data-cy="async-action-button-error-with-hide-button"]').click()
+    cy.get('[data-cy="async-action-button-error-with-hide-button"]')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .should('have.attr', 'aria-busy', 'false')
+      .should('contain', 'Error With Hide Button')
+  })
 })
