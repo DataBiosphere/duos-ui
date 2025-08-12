@@ -354,7 +354,7 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const addDucAddendumTab = () => {
-    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0 ? true : false
+    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0
     if (!hasAddendumTab) {
       const tabs = [
         ...applicationTabs,
@@ -365,7 +365,7 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const removeAddendumTab = () => {
-    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0 ? true : false
+    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0
     if (hasAddendumTab) {
       const tabs = applicationTabs.filter(tab => tab.id != ADDENDUM_TAB_ID)
       setApplicationTabs(tabs)
