@@ -25,10 +25,7 @@ const profileUnsubmitted = (
 )
 const profileSubmitted = (
   <span>
-    Please make sure
-    {profileLink}
-    {' '}
-    is updated as it will be used to pre-populate parts of the Data Access Request
+    Please make sure {profileLink} is updated as it will be used to pre-populate parts of the Data Access Request
   </span>
 )
 const libraryCardLink = (
