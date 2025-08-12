@@ -1,6 +1,7 @@
 import React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { votingColors } from 'src/libs/VotingColors.ts'
+import { AsyncActionButton } from 'src/components/AsyncActionButton'
 
 const styles = {
   baseStyle: {
@@ -18,7 +19,7 @@ const styles = {
 
 export default function CollectionVoteButton(props) {
   const [additionalStyle, setAdditionalStyle] = useState({})
-  const { onClick, label, disabled, isSelected, baseColor, datacy } = props
+  const { onClick, label, disabled, isSelected, baseColor, datacy, onError } = props
 
   const defaultButtonStyle = useCallback(() => {
     updateStyle(votingColors.default, styles.defaultLabelColor, false, disabled)
@@ -41,16 +42,24 @@ export default function CollectionVoteButton(props) {
     })
   }
 
+  const handleAsyncClick = useCallback(async () => {
+    if (!disabled && onClick) {
+      await onClick()
+    }
+  }, [disabled, onClick])
+
   return (
-    <button
-      /* eslint-disable react/no-unknown-property */
-      datacy={datacy}
+    <AsyncActionButton
+      data-cy={datacy}
       style={{ ...styles.baseStyle, ...additionalStyle }}
-      onClick={() => !disabled && onClick()}
+      onClick={handleAsyncClick}
+      disabled={disabled}
+      onError={onError}
       onMouseEnter={() => !disabled && selectedButtonStyle()}
       onMouseLeave={() => !disabled && !isSelected && defaultButtonStyle()}
+      hideOnSuccess={false}
     >
       {label}
-    </button>
+    </AsyncActionButton>
   )
 }
