@@ -1,6 +1,5 @@
-import React from 'react'
-import { useCallback, useEffect, useState } from 'react'
-import { votingColors } from 'src/libs/VotingColors.ts'
+import React, { useCallback, useEffect, useState } from 'react'
+import { votingColors } from 'src/libs/VotingColors'
 import { AsyncActionButton } from 'src/components/AsyncActionButton'
 
 const styles = {
@@ -15,11 +14,35 @@ const styles = {
     marginTop: '15px',
   },
   defaultLabelColor: '#333F52',
+} as const
+
+interface CollectionVoteButtonProps {
+  /** Function to execute when button is clicked */
+  readonly onClick?: () => Promise<void>
+  /** The text label to display on the button */
+  readonly label: string
+  /** Whether the button is disabled */
+  readonly disabled?: boolean
+  /** Whether the button is in selected state */
+  readonly isSelected?: boolean
+  /** The base color for button styling when selected */
+  readonly baseColor?: string
+  /** Data attribute for Cypress testing */
+  readonly datacy?: string
+  /** Error handler function called when onClick fails */
+  readonly onError?: (error: unknown) => void
 }
 
-export default function CollectionVoteButton(props) {
-  const [additionalStyle, setAdditionalStyle] = useState({})
-  const { onClick, label, disabled, isSelected, baseColor, datacy, onError } = props
+export default function CollectionVoteButton({
+  onClick,
+  label,
+  disabled = false,
+  isSelected = false,
+  baseColor = votingColors.default,
+  datacy,
+  onError,
+}: CollectionVoteButtonProps) {
+  const [additionalStyle, setAdditionalStyle] = useState<React.CSSProperties>({})
 
   const defaultButtonStyle = useCallback(() => {
     updateStyle(votingColors.default, styles.defaultLabelColor, false, disabled)
@@ -33,7 +56,12 @@ export default function CollectionVoteButton(props) {
     isSelected ? selectedButtonStyle() : defaultButtonStyle(),
   [defaultButtonStyle, isSelected, selectedButtonStyle])
 
-  const updateStyle = (backgroundColor, labelColor, showSelectedStyle, disabled) => {
+  const updateStyle = (
+    backgroundColor: string,
+    labelColor: string,
+    showSelectedStyle: boolean,
+    disabled: boolean,
+  ) => {
     setAdditionalStyle({
       backgroundColor,
       color: labelColor,
