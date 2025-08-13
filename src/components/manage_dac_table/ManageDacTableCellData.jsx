@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom'
 import editPencilIcon from 'src/images/edit_pencil.svg'
 import radarIcon from 'src/images/google-svg/radar.svg'
 import { DAAUtils } from 'src/utils/DAAUtils'
-import { isDevEnv } from 'src/utils/EnvironmentUtils'
 
 export function nameCellData({ name = '- -', dac, viewMembers, dacId, label = 'dac-name' }) {
   return {
