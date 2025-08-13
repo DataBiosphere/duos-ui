@@ -63,19 +63,17 @@ export function actionsCellData({ dac, deleteDac, userRole }) {
 
   const actions = (
     <>
-      {isDevEnv() && (
-        <div style={{ paddingTop: '5px', paddingRight: '4px' }}>
-          <Link
-            to={{
-              pathname: `/manage_radar/${dac.dacId}`,
-              state: { userRole: userRole },
-            }}
-            data-tip={`Edit rule automation for DARs in ${dac.name}`}
-          >
-            <img className="radar-icon" src={radarIcon} alt="Edit rule automation" />
-          </Link>
-        </div>
-      )}
+      <div style={{ paddingTop: '5px', paddingRight: '4px' }}>
+        <Link
+          to={{
+            pathname: `/manage_radar/${dac.dacId}`,
+            state: { userRole: userRole },
+          }}
+          data-tip={`Edit rule automation for DARs in ${dac.name}`}
+        >
+          <img className="radar-icon" src={radarIcon} alt="Edit rule automation" />
+        </Link>
+      </div>
       <div style={{ paddingTop: '5px' }}>
         <Link
           to={{
