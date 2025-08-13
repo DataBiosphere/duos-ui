@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SimpleTable from '../SimpleTable';
 import { VoteHistoryRow } from 'src/types/model';
 import { Styles } from 'src/libs/theme';
-import { formatDate, sortVisibleTable } from 'src/libs/utils';
+import { sortVisibleTable } from 'src/libs/utils';
 
 interface ChairVoteHistoryTableProps {
     voteHistory: VoteHistoryRow[];
@@ -69,10 +69,10 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
         const rowData = voteHistory.map((row: VoteHistoryRow, i) => [
             { data: row.progressReport ? 'Progress Report' : 'Initial Dar', cellStyle: { width: '10%' }, label: 'Request Type', id: i },
             { data: row.darTitle, cellStyle: { width: '20%' }, label: 'DAR Title', id: i },
-            { data: formatDate(row.electionDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
+            { data: row.electionDate, cellStyle: { width: '10%' }, label: 'Election Date', id: i },
             { data: row.vote == true ? 'Yes' : row.vote == false ? 'No' : "--", cellStyle: { width: '10%' }, label: 'Vote', id: i },
             { data: row.displayName, cellStyle: { width: '15%' }, label: 'Name', id: i },
-            { data: formatDate(row.createDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
+            { data: row.updateDate, cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
             { data: row.type, cellStyle: { width: '10%' }, label: 'Vote Type', id: i },
             { data: row.rationale || '--', cellStyle: { width: '20%' }, label: 'Rationale', id: i },
         ]);
