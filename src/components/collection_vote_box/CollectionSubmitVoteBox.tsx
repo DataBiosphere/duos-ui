@@ -172,30 +172,29 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   }, [votes])
 
   const updateVote = async (newVote: boolean, isChair: boolean) => {
-    try {
-      const openElectionVotes = votes.filter(v => v.electionStatus?.toLowerCase() === 'open')
-      const voteIds = openElectionVotes.map(v => v.voteId)
-      await Votes.updateVotesByIds(voteIds, { vote: newVote, rationale })
-      setSubmitted(true)
-      // call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render
-      if (isChair && updateFinalVote && bucketKey) {
-        updateFinalVote(bucketKey, { vote: newVote, rationale }, voteIds)
-      }
-      else {
-        setVote(newVote)
-      }
-      Notifications.showSuccess({ text: 'Successfully updated vote' })
+    const openElectionVotes = votes.filter(v => v.electionStatus?.toLowerCase() === 'open')
+    const voteIds = openElectionVotes.map(v => v.voteId)
+    await Votes.updateVotesByIds(voteIds, { vote: newVote, rationale })
+    setSubmitted(true)
+    // call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render
+    if (isChair && updateFinalVote && bucketKey) {
+      updateFinalVote(bucketKey, { vote: newVote, rationale }, voteIds)
     }
-    catch (error: unknown) {
-      const consentError = extractConsentError(error)
-      if (consentError && consentError.code === 409) {
-        const voteText = isChair ? 'Chair vote' : 'Vote'
-        Notifications.showError({ text: `${consentError.message} ${voteText} not submitted, updating vote display.` })
-        reloadFn()
-      }
-      else {
-        Notifications.showError({ text: 'Error: Failed to update vote' })
-      }
+    else {
+      setVote(newVote)
+    }
+    Notifications.showSuccess({ text: 'Successfully updated vote' })
+  }
+
+  const onVoteError = (error: unknown, isChair: boolean) => {
+    const consentError = extractConsentError(error)
+    if (consentError && consentError.code === 409) {
+      const voteText = isChair ? 'Chair vote' : 'Vote'
+      Notifications.showError({ text: `${consentError.message} ${voteText} not submitted, updating vote display.` })
+      reloadFn()
+    }
+    else {
+      Notifications.showError({ text: 'Error: Failed to update vote' })
     }
   }
 
@@ -244,14 +243,16 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                 <div style={styles.voteButtons}>
                   {!isVotingDisabled && (
                     <CollectionVoteYesButton
-                      onClick={() => updateVote(true, !!updateFinalVote)}
+                      onClick={async () => await updateVote(true, !!updateFinalVote)}
+                      onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
                       disabled={isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
                       isSelected={vote === true}
                     />
                   )}
                   {!isVotingDisabled && (
                     <CollectionVoteNoButton
-                      onClick={() => updateVote(false, !!updateFinalVote)}
+                      onClick={async () => await updateVote(false, !!updateFinalVote)}
+                      onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
                       disabled={isLoading || isVotingDisabled || isElectionClosed}
                       isSelected={vote === false}
                     />

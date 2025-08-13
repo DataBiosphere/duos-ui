@@ -36,8 +36,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('not.be.visible')
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
   })
 
   it('renders unselected buttons if vote values are different and voting is not final', function () {
@@ -55,8 +55,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('not.be.visible')
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
   })
 
   it('renders unselected buttons if vote values are null and voting is not disabled', function () {
@@ -74,8 +74,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
       />,
     )
     cy.get('[data-cy=collection-vote-box]').should('exist')
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
   })
 
   it('renders unselected buttons if list of votes is empty and voting is not disabled', function () {
@@ -93,8 +93,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
       />,
     )
     cy.get('[data-cy=collection-vote-box]').should('exist')
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
   })
 
   it('renders unselected buttons if list of votes is null and voting is not disabled', function () {
@@ -112,8 +112,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
       />,
     )
     cy.get('[data-cy=collection-vote-box]').should('exist')
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
   })
 
   it('renders existing rationale if rationale is the same for all votes', function () {
@@ -171,8 +171,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     cy.get('textarea').type(' hello')
     cy.get('textarea').blur()
     cy.get('textarea').should('have.text', 'testsample text hello')
-    cy.get('[datacy=yes-collection-vote-button]').click()
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes)
+    cy.get('[data-cy=yes-collection-vote-button]').click()
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes)
     cy.get('textarea').type('{backspace}{backspace}')
     cy.get('textarea').blur()
     cy.get('textarea').should('have.text', 'testsample text hel')
@@ -192,14 +192,13 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         reloadFn={() => {}}
       />,
     )
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=yes-collection-vote-button]').click()
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').click()
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').click()
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').click()
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no)
   })
 
   it('can edit rationale textarea multiple times before voting when vote is final', function () {
@@ -245,7 +244,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     cy.get('textarea').type('sample text')
     cy.get('textarea').blur()
     cy.get('textarea').should('have.text', 'sample text')
-    cy.get('[datacy=no-collection-vote-button]').click()
+    cy.get('[data-cy=no-collection-vote-button]').click()
     cy.get('textarea').should('be.disabled')
   })
 
@@ -266,12 +265,12 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     cy.stub(Votes, 'updateVotesByIds')
 
     cy.get('[data-cy=vote-subsection-heading]').should('have.text', '(Vote and Rationale cannot be updated after submitting)')
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').click()
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').click()
     cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NO')
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist')
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=yes-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=no-collection-vote-button]').should('not.exist')
   })
 
   it('renders vote result text instead of buttons when vote values match and isFinal is true', function () {
@@ -289,8 +288,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
       />,
     )
     cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'YES')
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist')
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=yes-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=no-collection-vote-button]').should('not.exist')
   })
 
   it('disables vote buttons and text area if page is loading', function () {
@@ -309,11 +308,10 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     )
     cy.stub(Votes, 'updateVotesByIds')
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=yes-collection-vote-button]').click()
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('exist').and('be.disabled')
+    cy.get('[data-cy=no-collection-vote-button]').should('exist').and('be.disabled')
     cy.get('textarea').should('be.disabled')
   })
 
@@ -335,8 +333,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
 
     cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NOT SELECTED')
     cy.get('textarea').should('be.disabled')
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist')
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=yes-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=no-collection-vote-button]').should('not.exist')
   })
 
   it('disables yes vote button if isApprovalDisabled is true', function () {
@@ -356,11 +354,13 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     )
     cy.stub(Votes, 'updateVotesByIds')
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=yes-collection-vote-button]').click()
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=yes-collection-vote-button]').should('exist').should('be.disabled')
+    cy.get('[data-cy=no-collection-vote-button]').should('exist').should('not.be.disabled')
+    cy.get('[data-cy=yes-collection-vote-button]').click({ force: true })
+    cy.get('[data-cy=yes-collection-vote-button]').should('exist').should('be.disabled')
+    cy.get('[data-cy=no-collection-vote-button]').should('exist').and('not.be.disabled')
   })
 
   it('does not disable no vote button if isApprovalDisabled is true', function () {
@@ -378,13 +378,12 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         reloadFn={() => {}}
       />,
     )
-    cy.stub(Votes, 'updateVotesByIds')
-
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').click()
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no)
+    cy.stub(Votes, 'updateVotesByIds').resolves()
+    cy.get('[data-cy=yes-collection-vote-button]').should('exist').and('be.disabled')
+    cy.get('[data-cy=no-collection-vote-button]').should('exist').and('not.be.disabled')
+    cy.get('[data-cy=no-collection-vote-button]').click()
+    cy.get('[data-cy=yes-collection-vote-button]').should('exist').and('be.disabled')
+    cy.get('[data-cy=no-collection-vote-button]').should('exist').and('not.be.disabled')
     cy.get('textarea').should('not.be.disabled')
   })
 
@@ -405,8 +404,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     )
     cy.get('[data-cy=vote-subsection-heading]').should('exist')
     cy.get('[data-cy=vote-subsection-heading]').contains('The vote has not been finalized')
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist')
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=yes-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=no-collection-vote-button]').should('not.exist')
   })
 
   it('renders a different heading if user is viewing from the admin page (RP)', () => {
@@ -426,8 +425,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     )
     cy.get('[data-cy=vote-subsection-heading]').should('exist')
     cy.get('[data-cy=vote-subsection-heading]').contains('The vote has not been finalized')
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist')
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=yes-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=no-collection-vote-button]').should('not.exist')
   })
 
   it('shows the final vote and renders the component read-only for admin page', () => {
@@ -448,8 +447,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     cy.get('[data-cy=vote-subsection-heading]').should('exist')
     cy.get('[data-cy=vote-subsection-heading]').contains('The final vote is: YES')
     cy.get('textarea').should('be.disabled')
-    cy.get('[datacy=yes-collection-vote-button]').should('not.exist')
-    cy.get('[datacy=no-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=yes-collection-vote-button]').should('not.exist')
+    cy.get('[data-cy=no-collection-vote-button]').should('not.exist')
   })
 
   it('shows the radar vote icon when the vote type is radar', () => {
@@ -486,11 +485,11 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         reloadFn={() => {}}
       />,
     )
-    cy.get('[datacy=yes-collection-vote-button]').should('exist')
-    cy.get('[datacy=yes-collection-vote-button]').click()
+    cy.get('[data-cy=yes-collection-vote-button]').should('exist').and('be.disabled')
+    cy.get('[data-cy=yes-collection-vote-button]').click({ force: true })
     cy.get('@updateFunction').should('not.have.been.called')
-    cy.get('[datacy=no-collection-vote-button]').should('exist')
-    cy.get('[datacy=no-collection-vote-button]').click()
+    cy.get('[data-cy=no-collection-vote-button]').should('exist').and('be.disabled')
+    cy.get('[data-cy=no-collection-vote-button]').click({ force: true })
     cy.get('@updateFunction').should('not.have.been.called')
   })
 })

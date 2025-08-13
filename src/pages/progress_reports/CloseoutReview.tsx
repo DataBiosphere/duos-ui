@@ -7,6 +7,7 @@ import { Storage } from 'src/libs/storage'
 import { DAR } from 'src/libs/ajax/DAR'
 import { AxiosError } from 'axios'
 import { DataAccessRequest } from 'src/types/model'
+import { AsyncActionButton } from 'src/components/AsyncActionButton'
 
 interface CloseoutReviewProps {
   dar: DataAccessRequest
@@ -17,31 +18,29 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
   dar, onReturn,
 }) => {
   const [acknowledged, setAcknowledged] = useState<boolean | undefined>(undefined)
-  const [pendingApproval, setPendingApproval] = useState<boolean> (false)
 
-  const onApprove = async () => {
-    setPendingApproval(true)
+  const onApprove = async (): Promise<void> => {
     const user = Storage.getCurrentUser()
     const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined
-    try {
-      if (user.isSigningOfficial && !isCloseoutApproved) {
-        await DAR.approveCloseout(dar.referenceId)
-      }
-      else {
-        const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId
-        await User.acceptAcknowledgments(acknowledgement)
-      }
-      setAcknowledged(true)
-      Notifications.showSuccess({ text: 'Closeout review approved successfully.' })
+
+    if (user.isSigningOfficial && !isCloseoutApproved) {
+      await DAR.approveCloseout(dar.referenceId)
     }
-    catch (e) {
-      setAcknowledged(false)
-      setPendingApproval(false)
-      const err = e as AxiosError<Record<string, string>>
-      const message = err.response?.data.message
-      Notifications.showError({ text: 'Error approving closeout review: ' + message })
+    else {
+      const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId
+      await User.acceptAcknowledgments(acknowledgement)
     }
+    setAcknowledged(true)
+    Notifications.showSuccess({ text: 'Closeout review approved successfully.' })
   }
+
+  const onError = (error: unknown) => {
+    setAcknowledged(false)
+    const err = error as AxiosError<Record<string, string>>
+    const message = err.response?.data.message
+    Notifications.showError({ text: 'Error approving closeout review: ' + message })
+  }
+
   // Required to get Chairperson acknowledgments of closeouts
   useEffect(() => {
     // Fetch the acknowledgement for the given referenceId
@@ -112,11 +111,10 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
             {/* Hide the Approve button if there is no closeout acknowledgement */}
             {(!acknowledged)
               && (
-                <button
-                  data-cy="closeout-review-approve-button"
-                  disabled={pendingApproval}
-                  type="button"
+                <AsyncActionButton
                   onClick={onApprove}
+                  onError={onError}
+                  data-cy="closeout-review-approve-button"
                   style={{
                     backgroundColor: '#4D72AA',
                     color: 'white',
@@ -125,24 +123,11 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
                     padding: '10px 20px',
                     fontSize: '14px',
                     fontWeight: '500',
-                    cursor: 'pointer',
                     minWidth: '136px',
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3d5a8a'
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3d5a8a'
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = '#4D72AA'
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.backgroundColor = '#4D72AA'
                   }}
                 >
                   Approve closeout
-                </button>
+                </AsyncActionButton>
               )}
             <button
               type="button"
