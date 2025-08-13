@@ -68,8 +68,8 @@ describe('ManageDacTableCellData Actions Tests', () => {
       cy.get('img.radar-icon').should('have.attr', 'alt', 'Edit rule automation')
     })
 
-    it('should hide RADAR action in staging environment', () => {
-      // Mock the environment to return 'staging'
+    it('should show RADAR action in staging environment', () => {
+      // Mock the environment to return 'local'
       cy.stub(Storage, 'getEnv').returns('staging')
 
       const mockProps = {
@@ -86,14 +86,12 @@ describe('ManageDacTableCellData Actions Tests', () => {
         </WrappedActionCell>,
       )
 
-      // Should not show RADAR icon in staging environment
-      cy.get('img.radar-icon').should('not.exist')
-
-      // Should still show edit icon
-      cy.get('img#edit-pencil-icon').should('exist')
+      // Should show RADAR icon in local environment
+      cy.get('img.radar-icon').should('exist')
+      cy.get('img.radar-icon').should('have.attr', 'alt', 'Edit rule automation')
     })
 
-    it('should hide RADAR action in production environment', () => {
+    it('should show RADAR action in prod environment', () => {
       // Mock the environment to return 'prod'
       cy.stub(Storage, 'getEnv').returns('prod')
 
@@ -111,14 +109,12 @@ describe('ManageDacTableCellData Actions Tests', () => {
         </WrappedActionCell>,
       )
 
-      // Should not show RADAR icon in production environment
-      cy.get('img.radar-icon').should('not.exist')
-
-      // Should still show edit icon
-      cy.get('img#edit-pencil-icon').should('exist')
+      // Should show RADAR icon in local environment
+      cy.get('img.radar-icon').should('exist')
+      cy.get('img.radar-icon').should('have.attr', 'alt', 'Edit rule automation')
     })
 
-    it('should hide RADAR action when environment is undefined', () => {
+    it('should show RADAR action when environment is undefined', () => {
       // Mock the environment to return undefined
       cy.stub(Storage, 'getEnv').returns(undefined)
 
@@ -136,8 +132,8 @@ describe('ManageDacTableCellData Actions Tests', () => {
         </WrappedActionCell>,
       )
 
-      // Should not show RADAR icon when environment is undefined
-      cy.get('img.radar-icon').should('not.exist')
+      // Should show RADAR icon when environment is undefined
+      cy.get('img.radar-icon').should('exist')
 
       // Should still show edit icon
       cy.get('img#edit-pencil-icon').should('exist')
@@ -145,10 +141,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
   })
 
   describe('RADAR Link Navigation', () => {
-    it('should have correct link path in dev environment', () => {
-      // Mock the environment to return 'dev'
-      cy.stub(Storage, 'getEnv').returns('dev')
-
+    it('should have correct link path', () => {
       const mockProps = {
         dac: mockDac,
         deleteDac: cy.stub(),
@@ -169,61 +162,28 @@ describe('ManageDacTableCellData Actions Tests', () => {
     })
   })
 
-  describe('Actions Layout', () => {
-    it('should maintain proper action layout when RADAR is hidden', () => {
-      // Mock the environment to return 'prod'
-      cy.stub(Storage, 'getEnv').returns('prod')
+  it('should show all actions', () => {
+    const mockProps = {
+      dac: mockDac,
+      deleteDac: cy.stub(),
+      userRole: 'Admin',
+    }
 
-      const mockProps = {
-        dac: mockDac,
-        deleteDac: cy.stub(),
-        userRole: 'Admin',
-      }
+    const cellData = actionsCellData(mockProps)
 
-      const cellData = actionsCellData(mockProps)
+    mount(
+      <WrappedActionCell>
+        {cellData.data}
+      </WrappedActionCell>,
+    )
 
-      mount(
-        <WrappedActionCell>
-          {cellData.data}
-        </WrappedActionCell>,
-      )
+    // Should have RADAR icon
+    cy.get('img.radar-icon').should('exist')
 
-      // Should still have the main actions container
-      cy.get('div').should('exist')
+    // Should have edit icon
+    cy.get('img#edit-pencil-icon').should('exist')
 
-      // Should have edit icon
-      cy.get('img#edit-pencil-icon').should('exist')
-
-      // Should not have RADAR icon
-      cy.get('img.radar-icon').should('not.exist')
-    })
-
-    it('should show all actions when RADAR is visible in dev', () => {
-      // Mock the environment to return 'dev'
-      cy.stub(Storage, 'getEnv').returns('dev')
-
-      const mockProps = {
-        dac: mockDac,
-        deleteDac: cy.stub(),
-        userRole: 'Admin',
-      }
-
-      const cellData = actionsCellData(mockProps)
-
-      mount(
-        <WrappedActionCell>
-          {cellData.data}
-        </WrappedActionCell>,
-      )
-
-      // Should have RADAR icon
-      cy.get('img.radar-icon').should('exist')
-
-      // Should have edit icon
-      cy.get('img#edit-pencil-icon').should('exist')
-
-      // Both should be within the flex container
-      cy.get('div[style*="display: flex"]').should('exist')
-    })
+    // Both should be within the flex container
+    cy.get('div[style*="display: flex"]').should('exist')
   })
 })
