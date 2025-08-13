@@ -83,8 +83,8 @@ export default function CollectionVoteButton({
       onClick={handleAsyncClick}
       disabled={disabled}
       onError={onError}
-      onMouseEnter={() => !disabled && selectedButtonStyle()}
-      onMouseLeave={() => !disabled && !isSelected && defaultButtonStyle()}
+      onMouseEnter={() => selectedButtonStyle()}
+      onMouseLeave={() => !isSelected && defaultButtonStyle()}
       hideOnSuccess={false}
     >
       {label}

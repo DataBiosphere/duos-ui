@@ -198,8 +198,6 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes)
     cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
     cy.get('[data-cy=no-collection-vote-button]').click()
-    // FIXME: color not updating correctly in test due to useEffect but works in app
-    // cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
     cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no)
   })
 
