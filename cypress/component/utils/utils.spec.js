@@ -478,12 +478,16 @@ describe('processElectionStatus utils - tests', () => {
           }
       ]
   ]
-    const sort = { colIndex: 1, dir: -1 }
 
-    sortVisibleTable({list: rowData, sort})
+    sortVisibleTable({list: rowData, sort: { colIndex: 1, dir: -1 }})
 
     expect(rowData[0][1].data).to.equal('DAR Title 3')
     expect(rowData[1][1].data).to.equal('DAR Title 2')
     expect(rowData[2][1].data).to.equal('DAR Title 1')
+
+    sortVisibleTable({list: rowData, sort: {colIndex: 2, dir: 1}})
+    expect(rowData[0][2].data).to.equal('2023-01-01')
+    expect(rowData[1][2].data).to.equal('2023-01-02')
+    expect(rowData[2][2].data).to.equal('2023-01-03')
   })
 })
