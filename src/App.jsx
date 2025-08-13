@@ -12,6 +12,7 @@ import { SpinnerComponent as Spinner } from 'src/components/SpinnerComponent'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { Storage } from 'src/libs/storage'
 import Routes from 'src/Routes'
+import { setUserRoleStatuses } from 'src/libs/utils.js'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -75,16 +76,13 @@ function App() {
       const queryParams = new URLSearchParams(window.location.search)
       const code = queryParams.get('code')
       const state = queryParams.get('state')
+      // These parameters indicate a successful RAS authentication.
       if (code && state) {
         const linkInfo = await AuthenticateNIH.getECMProviderLinkInfo(code, state)
-        if (linkInfo?.externalUserId && linkInfo?.expirationTimestamp) {
-          const nihUser = {
-            linkedNihUsername: linkInfo.externalUserId,
-            linkExpireTime: `${new Date(linkInfo.expirationTimestamp).getTime()}`,
-            status: 'true',
-          }
-          await AuthenticateNIH.saveNihUsr(nihUser)
-        }
+        const duosUser = await AuthenticateNIH.getSyncedUser()
+        // After account linking, we need to refresh the locally saved user.
+        Storage.setCurrentUser(duosUser)
+        setUserRoleStatuses(duosUser, Storage)
         if (linkInfo?.additionalState?.redirectTo) {
           window.location.href = linkInfo.additionalState.redirectTo
         }

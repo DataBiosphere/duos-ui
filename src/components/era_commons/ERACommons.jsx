@@ -177,10 +177,7 @@ export default function ERACommons(props) {
                 effect="solid"
                 id="tip_clear_era_commons_link"
               >
-                Clear
-                {accountLabel}
-                {' '}
-                Account Link
+                Clear {accountLabel} Account Link from DUOS and Terra
               </ReactTooltip>
             </div>
           )}
