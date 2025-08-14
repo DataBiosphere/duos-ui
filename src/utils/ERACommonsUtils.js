@@ -2,7 +2,7 @@ import { Buffer } from 'buffer'
 import EnvironmentUtils, { envGroups } from 'src/utils/EnvironmentUtils.js'
 
 export const rasEnabled = () => {
-  return EnvironmentUtils.checkEnv(envGroups.DEV)
+  return EnvironmentUtils.checkEnv(envGroups.NON_PROD)
 }
 
 export const nihAccountLabel = () => {
