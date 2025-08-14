@@ -147,7 +147,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
   }
 
   const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode, rowData: TableData[] }) => {
-    const electionId = rowData[0].electionId || -1
+    const electionId = rowData[0].electionId ?? -1
     if (electionIsExpanded(electionId)) {
       return (
         <div key={`expanded-${electionId}`}>

@@ -69,10 +69,10 @@ const extractChairVotes = (darCollection: DarCollection) => {
   const votesByRole: VoteHistoryRow[] = []
 
   Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
-    Object.values(dar.elections || {})
+    Object.values(dar.elections ?? {})
       .filter((election: Election) => election.electionType == 'DataAccess')
       .forEach((election: Election) => {
-        Object.values(election.votes || {}).forEach((vote: Vote) => {
+        Object.values(election.votes ?? {}).forEach((vote: Vote) => {
           if (isChairVote(vote)) {
             votesByRole.push({
               ...vote,
@@ -96,7 +96,7 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection) => {
   const dacMemberVotes: ElectionWithMemberVotes[] = []
 
   Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
-    Object.values(dar.elections || {})
+    Object.values(dar.elections ?? {})
       .filter((election: Election) => election.electionType == 'DataAccess')
       .forEach((election: Election) => {
         const electionWithMemberVotes: ElectionWithMemberVotes = {
@@ -105,7 +105,7 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection) => {
           progressReport: dar.progressReport,
           memberVotes: [],
         }
-        Object.values(election.votes || []).forEach((vote: Vote) => {
+        Object.values(election.votes ?? []).forEach((vote: Vote) => {
           if (vote.type === 'DAC') {
             electionWithMemberVotes.memberVotes.push(vote)
           }
