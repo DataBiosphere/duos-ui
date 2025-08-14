@@ -141,7 +141,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
                 { data: processVoteSummary(election.memberVotes), cellStyle: { width: '40%' }, label: 'Vote Summary', id: i }
             ]
         });
-    };
+    }
 
 
     const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode; rowData: TableData[] }) => {
@@ -168,7 +168,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
                     list: processElectionRowData(electionsWithMemberVotes),
                     sort,
                   }))
-         }, [sort])
+         }, [sort, expandedElections])
         
 
     return (
