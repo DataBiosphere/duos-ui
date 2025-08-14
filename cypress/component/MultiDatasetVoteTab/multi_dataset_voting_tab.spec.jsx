@@ -149,8 +149,8 @@ describe('MultiDatasetVoteTab - Tests', function () {
 
     cy.get('[data-cy=dataset-vote-slab]').should('be.visible')
     cy.contains('GRU')
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no)
+    cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
+    cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no)
   })
 
   it('Renders multiple dataset voting slabs', function () {

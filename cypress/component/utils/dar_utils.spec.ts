@@ -5,6 +5,8 @@ import {
   getDataManagementIncidents,
   getPresentationList,
   getPublicationList,
+  FINAL,
+  RADAR_APPROVE,
 } from 'src/utils/DarUtils'
 import { Collaborator, Election, Vote } from 'src/types/model'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
@@ -24,7 +26,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 101,
           votes: {
-            1: { voteId: 1, type: 'FINAL', vote: true, userId: 10, electionId: 1 } as Vote,
+            1: { voteId: 1, type: FINAL, vote: true, userId: 10, electionId: 1 } as Vote,
           } as object,
         } as Election,
         {
@@ -32,7 +34,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 102,
           votes: {
-            2: { voteId: 2, type: 'FINAL', userId: 11, electionId: 2 } as Vote,
+            2: { voteId: 2, type: RADAR_APPROVE, userId: 11, electionId: 2 } as Vote,
           } as object,
         } as Election,
         {
@@ -40,7 +42,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 103,
           votes: {
-            3: { voteId: 3, type: 'FINAL', vote: false, userId: 12, electionId: 3 } as Vote,
+            3: { voteId: 3, type: FINAL, vote: false, userId: 12, electionId: 3 } as Vote,
           } as object,
         } as Election,
       ]
@@ -56,7 +58,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 101,
           votes: {
-            1: { voteId: 1, type: 'FINAL', vote: true, userId: 10, electionId: 1 } as Vote,
+            1: { voteId: 1, type: FINAL, vote: true, userId: 10, electionId: 1 } as Vote,
           } as object,
         } as Election,
         {
@@ -64,7 +66,7 @@ describe('DarUtils', () => {
           electionType: 'RP',
           datasetId: 102,
           votes: {
-            2: { voteId: 2, type: 'FINAL', vote: true, userId: 11, electionId: 2 } as Vote,
+            2: { voteId: 2, type: FINAL, vote: true, userId: 11, electionId: 2 } as Vote,
           } as object,
         } as Election,
       ]
@@ -80,7 +82,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 101,
           votes: {
-            1: { voteId: 1, type: 'FINAL', vote: true, userId: 10, electionId: 1 } as Vote,
+            1: { voteId: 1, type: RADAR_APPROVE, vote: true, userId: 10, electionId: 1 } as Vote,
             2: { voteId: 2, type: 'Chairperson', vote: false, userId: 11, electionId: 1 } as Vote,
           } as object,
         } as Election,
@@ -90,7 +92,7 @@ describe('DarUtils', () => {
           datasetId: 102,
           votes: {
             3: { voteId: 3, type: 'DAC', vote: true, userId: 12, electionId: 2 } as Vote,
-            4: { voteId: 4, type: 'FINAL', vote: false, userId: 13, electionId: 2 } as Vote,
+            4: { voteId: 4, type: FINAL, vote: false, userId: 13, electionId: 2 } as Vote,
           } as object,
         } as Election,
       ]
@@ -122,7 +124,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 103,
           votes: {
-            3: { voteId: 3, type: 'FINAL', vote: true, userId: 12, electionId: 3 } as Vote,
+            3: { voteId: 3, type: FINAL, vote: true, userId: 12, electionId: 3 } as Vote,
           } as object,
         } as Election,
       ]
@@ -144,7 +146,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 102,
           votes: {
-            1: { voteId: 1, type: 'FINAL', vote: true, userId: 10, electionId: 2 } as Vote,
+            1: { voteId: 1, type: FINAL, vote: true, userId: 10, electionId: 2 } as Vote,
           } as object,
         } as Election,
       ]
@@ -160,7 +162,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 101,
           votes: {
-            1: { voteId: 1, type: 'FINAL', vote: true, userId: 10, electionId: 1 } as Vote,
+            1: { voteId: 1, type: FINAL, vote: true, userId: 10, electionId: 1 } as Vote,
           } as object,
         } as Election,
         {
@@ -168,7 +170,7 @@ describe('DarUtils', () => {
           electionType: 'DataAccess',
           datasetId: 101,
           votes: {
-            2: { voteId: 2, type: 'FINAL', vote: true, userId: 11, electionId: 2 } as Vote,
+            2: { voteId: 2, type: RADAR_APPROVE, vote: true, userId: 11, electionId: 2 } as Vote,
           } as object,
         } as Election,
       ]

@@ -4,7 +4,7 @@ import CollectionVoteButton from './CollectionVoteButton'
 import { CheckCircleOutlined } from '@mui/icons-material'
 
 export default function CollectionVoteYesButton(props) {
-  const { onClick, disabled, isSelected } = props
+  const { onClick, disabled, isSelected, onError } = props
 
   const styles = {
     label: {
@@ -31,10 +31,11 @@ export default function CollectionVoteYesButton(props) {
     <CollectionVoteButton
       datacy="yes-collection-vote-button"
       label={<Label />}
-      onClick={() => onClick()}
+      onClick={onClick}
       baseColor={votingColors.yes}
       disabled={disabled}
       isSelected={isSelected}
+      onError={onError}
     />
   )
 }

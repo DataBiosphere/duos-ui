@@ -28,13 +28,13 @@ interface MultiDatasetVoteSlabProps {
   readonly bucket: Bucket
   readonly collection: DarCollection
   readonly dacDatasetIds?: number[]
-  readonly isChair?: boolean
-  readonly isApprovalDisabled?: boolean
-  readonly isLoading?: boolean
-  readonly readOnly?: boolean
-  readonly adminPage?: boolean
-  readonly updateFinalVote?: (...args: unknown[]) => void
-  readonly reloadFn?: (...args: unknown[]) => void
+  readonly isChair: boolean
+  readonly isApprovalDisabled: boolean
+  readonly isLoading: boolean
+  readonly readOnly: boolean
+  readonly adminPage: boolean
+  readonly updateFinalVote: (...args: unknown[]) => void
+  readonly reloadFn: (...args: unknown[]) => void
 }
 
 interface DataUseSummaryProps {
@@ -44,13 +44,13 @@ interface DataUseSummaryProps {
 interface VoteInfoSubsectionProps {
   readonly currentUserVotes: Vote[]
   readonly bucket: Bucket
-  readonly isChair?: boolean
-  readonly isApprovalDisabled?: boolean
-  readonly isLoading?: boolean
-  readonly readOnly?: boolean
-  readonly adminPage?: boolean
-  readonly updateFinalVote?: (...args: unknown[]) => void
-  readonly reloadFn?: (...args: unknown[]) => void
+  readonly isChair: boolean
+  readonly isApprovalDisabled: boolean
+  readonly isLoading: boolean
+  readonly readOnly: boolean
+  readonly adminPage: boolean
+  readonly updateFinalVote: (...args: unknown[]) => void
+  readonly reloadFn: (...args: unknown[]) => void
 }
 
 // Styles

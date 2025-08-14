@@ -1,4 +1,4 @@
-import { flow, isEmpty, map, filter, find, forEach, flatMap, toLower, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten } from 'lodash/fp'
+import { cloneDeep, concat, filter, find, findIndex, flatMap, flatten, flow, forEach, groupBy, includes, isEmpty, isNil, map, toLower } from 'lodash/fp'
 import { Styles } from 'src/libs/theme.js'
 import { formatDate, Notifications } from '../libs/utils'
 import { Collections } from '../libs/ajax/Collections'
@@ -17,6 +17,7 @@ export const processVotesForBucket = (darElections = []) => {
     memberVotes: [],
     chairpersonVotes: [],
     agreementVotes: [],
+    radarVotes: [],
   }
   darElections.forEach((election) => {
     const { electionType, votes, status = [] } = election
@@ -29,7 +30,7 @@ export const processVotesForBucket = (darElections = []) => {
       votes[vote.voteId] = vote
     })
     const dateSortedVotes = updatedVotes.toSorted(vote => vote.updateDate)
-    let targetFinal, targetChair, targetMember, targetFinalType
+    let targetFinal, targetChair, targetMember, targetFinalType, targetRadar
 
     if (electionType === 'RP') {
       targetFinalType = 'chairperson'
@@ -42,10 +43,14 @@ export const processVotesForBucket = (darElections = []) => {
       targetMember = dataAccess.memberVotes
       targetChair = dataAccess.chairpersonVotes
       targetFinal = dataAccess.finalVotes
+      targetRadar = dataAccess.radarVotes
     }
-    forEach((vote) => {
+    dateSortedVotes.forEach((vote) => {
       const lowerCaseType = toLower(vote.type)
       switch (lowerCaseType) {
+        case 'radar_approve':
+          targetRadar.push(vote)
+          break
         case 'chairperson':
           targetChair.push(vote)
           break
@@ -58,7 +63,7 @@ export const processVotesForBucket = (darElections = []) => {
       if (lowerCaseType === targetFinalType) {
         targetFinal.push(vote)
       }
-    })(dateSortedVotes)
+    })
   })
   return { rp, dataAccess }
 }
@@ -108,39 +113,51 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   )(voteArrays)
 }
 
-// Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+// Gets this user's data access votes from this bucket; radar, final and chairperson votes if isChair is true, member votes if false
 // Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : []
-  const output = flow(
-    map(voteData => voteData.dataAccess),
-    filter(dataAccessData => !isEmpty(dataAccessData)),
-    flatMap(filteredData => adminPage || isChair
-      ? concat(filteredData.finalVotes, filteredData.chairpersonVotes)
-      : filteredData.memberVotes),
-  )(votes)
-  return !adminPage
-    ? filter(vote => vote.userId === user.userId)(output)
-    : filter(vote => !isNil(vote.vote))(output)
+  const adminOrChair = adminPage || isChair
+  const userDataAccessVotes = votes.map((voteGroup) => {
+    // If admin page or chair, we want to include all final, chair, and radar votes
+    if (adminOrChair) {
+      const chairpersonVotes = voteGroup.dataAccess?.chairpersonVotes || []
+      const finalVotes = voteGroup.dataAccess?.finalVotes || []
+      const radarVotes = voteGroup.dataAccess?.radarVotes || []
+      return chairpersonVotes.concat(finalVotes, radarVotes)
+    }
+    else {
+      return voteGroup.dataAccess?.memberVotes || []
+    }
+  }).flat(Infinity)
+  if (adminPage) {
+    // If admin page, we want to include all votes regardless of userId
+    return userDataAccessVotes
+  }
+  else {
+    return userDataAccessVotes.filter(vote => vote.userId === user.userId)
+  }
 }
 
 // Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
-// Note that filtering by DAC does not occur when viewing through th admin review page
+// Note that filtering by DAC does not occur when viewing through the admin review page
 export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : []
-
-  let output = flow(
-    map(voteData => voteData.rp),
-    filter(rpData => !isEmpty(rpData)),
-    flatMap(filteredData => adminPage || isChair
-      ? filteredData.chairpersonVotes
-      : filteredData.memberVotes),
-  )(votes)
-
-  output = !adminPage
-    ? filter(vote => vote.userId === user.userId)(output)
-    : filter(vote => !isNil(vote.vote))(output)
-  return output
+  const adminOrChair = adminPage || isChair
+  const userRPVotes = votes?.map((voteGroup) => {
+    if (adminOrChair) {
+      return voteGroup.rp?.chairpersonVotes || []
+    }
+    else {
+      return voteGroup.rp?.memberVotes || []
+    }
+  }).flat(Infinity)
+  if (adminPage) {
+    return userRPVotes?.filter(vote => !isNil(vote.vote)) || []
+  }
+  else {
+    return userRPVotes?.filter(vote => vote.userId === user.userId) || []
+  }
 }
 
 // collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
@@ -156,7 +173,7 @@ export const collapseVotesByUser = (votes) => {
 // helper method to collapse votes by converting them to an object with differing rationales and dates in arrays
 const collapseVotes = ({ votes }) => {
   const collapsedVotes = {}
-  forEach((vote) => {
+  votes.forEach((vote) => {
     const matchingVote = collapsedVotes[`${vote.vote}`]
     const lastUpdate = vote.updateDate
     if (isNil(matchingVote)) {
@@ -173,7 +190,7 @@ const collapseVotes = ({ votes }) => {
       addIfUnique(vote.rationale, matchingVote.rationales)
       addIfUnique(lastUpdate, matchingVote.lastUpdates)
     }
-  })(votes)
+  })
   return collapsedVotes
 }
 
@@ -197,9 +214,9 @@ const convertToVoteObjects = ({ collapsedVotes }) => {
 
 const appendAll = (values) => {
   let result = ''
-  forEach((value) => {
+  values.forEach((value) => {
     result += `${value}\n`
-  })(values)
+  })
   return !isEmpty(result) ? result : null
 }
 
@@ -324,8 +341,8 @@ export const styles = {
     border: '1px solid #DEDEDE',
     margin: '0.5% 0',
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
+  columnStyle: {
+    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
     color: '#7B7B7B',
     fontFamily: 'Montserrat',
     fontSize: '1.2rem',
@@ -334,7 +351,7 @@ export const styles = {
     textTransform: 'uppercase',
     backgroundColor: 'B8CDD3',
     border: 'none',
-  }),
+  },
   cellWidth: {
     darCode: '10%',
     dacNames: '8%',

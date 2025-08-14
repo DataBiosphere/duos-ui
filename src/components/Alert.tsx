@@ -13,7 +13,7 @@ export interface AlertProps {
 export const Alert = (props: AlertProps) => {
   const { id, type, title, description, onClose } = props
   return (
-    <div id={`${id}_alert`} className={`alert-wrapper ${type}`} style={{ border: '1px solid red', borderRadius: '5px' }}>
+    <div id={`${id}_alert`} className={`alert-wrapper ${type}`} style={{ border: '1px solid', borderRadius: '5px' }}>
       {onClose && (
         <span
           style={{ float: 'right', fontWeight: 'bolder', fontSize: 24, cursor: 'pointer' }}

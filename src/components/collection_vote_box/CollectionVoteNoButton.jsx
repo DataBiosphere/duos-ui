@@ -4,7 +4,7 @@ import CollectionVoteButton from './CollectionVoteButton'
 import { CancelOutlined } from '@mui/icons-material'
 
 export default function CollectionVoteNoButton(props) {
-  const { onClick, disabled, isSelected } = props
+  const { onClick, disabled, isSelected, onError } = props
 
   const styles = {
     label: {
@@ -31,10 +31,11 @@ export default function CollectionVoteNoButton(props) {
     <CollectionVoteButton
       datacy="no-collection-vote-button"
       label={<Label />}
-      onClick={() => onClick()}
+      onClick={onClick}
       baseColor={votingColors.no}
       disabled={disabled}
       isSelected={isSelected}
+      onError={onError}
     />
   )
 }

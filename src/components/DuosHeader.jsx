@@ -65,7 +65,7 @@ export const headerTabsConfig = [
     search: 'chair_console',
     children: [
       { label: 'DAR Requests', link: '/chair_console' },
-      { label: 'DAC Members', link: '/manage_dac' },
+      { label: 'Manage DACs', link: '/manage_dac' },
       { label: 'My DAC\'s Datasets', link: '/dac_datasets' },
     ],
     isRendered: user => user.isChairPerson,
@@ -204,7 +204,7 @@ const DuosHeader = (props) => {
   }
 
   const contactUsSource = state.hover ? contactUsHover : contactUsStandard
-  const contactUsIcon = isLogged ? '' : <img src={contactUsSource} style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />
+  const contactUsIcon = isLogged ? '' : <img src={contactUsSource} alt="Contact Us Icon" style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />
   const contactUsText = isLogged ? 'Contact Us' : <span style={{ display: 'inline', verticalAlign: 'text-bottom' }}>Contact Us</span>
   const contactUsButton = (
     <button

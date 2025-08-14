@@ -1,13 +1,12 @@
-import React from 'react'
-import { useState, useEffect, Fragment } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { Styles } from 'src/libs/theme'
 import SimpleTable from 'src/components/SimpleTable'
 import './dar_application.css'
 import { binCollectionToBuckets } from 'src/utils/BucketUtils'
-import { useCallback } from 'react'
-import { isEmpty, flatten } from 'lodash/fp'
+import { flatten, isEmpty } from 'lodash/fp'
 import { Notifications } from 'src/libs/utils.js'
-import { DataSet } from 'src/libs/ajax/DataSet.js'
+import { extractError } from 'src/utils/ErrorUtils.js'
+import PropTypes from 'prop-types'
 
 const commonStyles = {
   baseStyle: {
@@ -23,8 +22,8 @@ const commonStyles = {
     border: '1px solid #DEDEDE',
     borderWidth: '1px 0 1px 0',
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
+  columnStyle: {
+    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
     color: '#7B7B7B',
     fontFamily: 'Montserrat',
     fontSize: '1.2rem',
@@ -33,7 +32,7 @@ const commonStyles = {
     textTransform: 'uppercase',
     border: 'none',
     margin: 0,
-  }),
+  },
   containerOverride: {
     width: '100%',
     border: '1px solid black',
@@ -98,62 +97,31 @@ export default function DucAddendum(props) {
       setBuckets([])
       return
     }
-    const buckets = await binCollectionToBuckets({ datasets })
-    const dataAccessBuckets = buckets.filter(
-      bucket => bucket.isRP !== true,
-    )
-    setBuckets(dataAccessBuckets)
+    try {
+      const buckets = await binCollectionToBuckets({ datasets })
+      const dataAccessBuckets = buckets.filter(
+        bucket => bucket.isRP !== true,
+      )
+      setBuckets(dataAccessBuckets)
+      setDacs(dataAccessBuckets.flatMap(bucket => bucket.dacs))
+    }
+    catch (error) {
+      const errorMessage = extractError(error)
+      Notifications.showError('Error retrieving datasets for addendum table: ' + errorMessage)
+    }
   }, [datasets])
 
   useEffect(() => {
     getBuckets()
   }, [getBuckets])
 
-  useEffect(() => {
-    const loadDatasetTerms = async () => {
-      const datasetQuery = DataSet.searchDatasetIndex({
-        query: {
-          bool: {
-            must: [
-              {
-                match: {
-                  _type: 'dataset',
-                },
-              },
-              {
-                terms: {
-                  _id: datasets.map(dataset => dataset.datasetId),
-                },
-              },
-            ],
-          },
-        },
-      })
-
-      try {
-        const datasetTerms = await datasetQuery
-
-        const dacs = datasetTerms.map((datasetTerm) => {
-          return datasetTerm.dac
-        })
-
-        setDacs(dacs)
-      }
-      catch (error) {
-        Notifications.showWarning({ text: `Error loading DAC information for datasets: ${error.message}` })
-      }
-    }
-
-    loadDatasetTerms()
-  }, [datasets])
-
   const buildDucAddendumTable = useCallback(async () => {
     const getDacName = (dacId) => {
-      const dac = dacs.find(dac => dac?.dacId === dacId)
+      const dac = dacs?.find(dac => dac?.dacId === dacId)
       return dac?.dacName || 'N/A'
     }
 
-    const tableChunks = buckets.map((bucket) => {
+    const tableChunks = buckets?.map((bucket) => {
       const dataUseCodes = bucket.label
       const dataUseSummary = bucket.dataUses.map(dataUse => dataUse.description).join('. ')
 
@@ -247,4 +215,11 @@ export default function DucAddendum(props) {
       </div>
     </div>
   )
+}
+
+DucAddendum.propTypes = {
+  datasets: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  save: PropTypes.func.isRequired,
+  doSubmit: PropTypes.func.isRequired,
 }
