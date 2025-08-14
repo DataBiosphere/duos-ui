@@ -610,8 +610,8 @@ export interface Election {
   electionType: string
   finalVote: boolean
   status: string
-  createDate: string
-  lastUpdate: string
+  createDate: string | number
+  lastUpdate: string | number
   finalVoteDate: string
   referenceId: string
   finalRationale: string
@@ -627,13 +627,13 @@ export interface Election {
 export interface Vote {
   voteId: number
   userId: number
-  createDate: string
+  createDate: string | number
   electionId: number
   displayName: string
   type: string
   vote?: boolean
   rationale?: string
-  updateDate?: string
+  updateDate?: string | number
   isReminderSent?: boolean
   hasConcerns?: boolean
   electionStatus?: string
@@ -662,7 +662,7 @@ export interface AlgorithmResult {
 export interface VoteHistoryRow extends Vote {
   darTitle: string
   progressReport: boolean
-  electionDate: string
+  electionDate: string | number
 }
 
 export interface ElectionWithMemberVotes extends Election {
