@@ -77,7 +77,7 @@ const tabsForUser = (user, buckets, adminPage = false) => {
   if (!isEmpty(myChairVotes)) {
     updatedTabs.chairVote = 'Chair Vote'
   }
-  if (!isEmpty(myMemberVotes) || !isEmpty(myChairVotes)) {
+  if (userIsDacChair(user)) {
     updatedTabs.votingHistory = 'Voting History'
   }
   return updatedTabs
@@ -119,6 +119,10 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
   return approvedDatasetNames || []
 }
 
+const userIsDacChair = (user) => {
+  return user.roles?.some(role => role.roleId === 2)
+}
+
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId
   const [collection, setCollection] = useState({})
@@ -140,7 +144,7 @@ export default function DarCollectionReview(props) {
     const user = Storage.getCurrentUser()
     try {
       let collection
-      if (adminPage || userIsDacMember(user)) {
+      if (adminPage || userIsDacChair(user)) {
         collection = await Collections.getCollectionByIdWithElectionHistory(collectionId)
       }
       else {
@@ -170,10 +174,6 @@ export default function DarCollectionReview(props) {
       Navigation.console(user, props.history)
     }
   }, [adminPage, props.history, collectionId])
-
-  const userIsDacMember = (user) => {
-    return user.roles?.some(role => role.roleName === 'Member' || role.roleName === 'Chairperson')
-  }
 
   // Remember, votes are contained within buckets, so updating final votes will update the bucket
   // define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket

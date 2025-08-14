@@ -770,12 +770,10 @@ describe('DAR Review', () => {
 
     cy.get('.tab-selection-Chair').should('not.exist')
 
-    const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
     const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member')
 
-    voteHistoryTab.should('exist').should('be.visible')
     applicationTab.should('exist').should('be.visible')
     fullDarTab.should('exist').should('be.visible')
     memberContainer.should('exist').should('be.visible')
