@@ -69,7 +69,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
     })
 
     it('should show RADAR action in staging environment', () => {
-      // Mock the environment to return 'local'
+      // Mock the environment to return 'staging'
       cy.stub(Storage, 'getEnv').returns('staging')
 
       const mockProps = {
