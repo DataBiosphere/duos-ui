@@ -41,7 +41,7 @@ const styles = {
       fontSize: '1.4rem',
       color: '#333F52',
       justifyContent: 'space-between',
-    }
+    },
   },
   containerOverride: {
     marginTop: '0',
