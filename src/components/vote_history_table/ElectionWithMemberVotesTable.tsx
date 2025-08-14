@@ -116,7 +116,6 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
         
         return electionsWithMemberVotes.map((election: ElectionWithMemberVotes, i) => {
             const ExpandComponent = electionIsExpanded(election.electionId) ? ExpandLess : ExpandMore;
-            console.log('votes', election.memberVotes)
             return [
                 { data: (
                     <div style={{ display: 'flex', alignItems: 'center' }}>

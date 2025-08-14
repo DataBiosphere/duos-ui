@@ -13,9 +13,9 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
             type: 'Chair',
             darTitle: 'DAR Title 1',
             progressReport: true,
-            electionDate: '2023-01-03',
+            electionDate: Date.parse('2023-01-03T10:30:00-05:00'),
             vote: true,
-            updateDate: '2023-01-04',
+            updateDate: Date.parse('2023-01-04T10:30:00-05:00'),
             rationale: 'Approved',
         },
         {
@@ -27,9 +27,9 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
             type: 'Chair',
             darTitle: 'DAR Title 2',
             progressReport: false,
-            electionDate: '2023-01-01',
+            electionDate: Date.parse('2023-01-01T10:30:00-05:00'),
             vote: false,
-            updateDate: '2023-01-02',
+            updateDate: Date.parse('2023-01-02T10:30:00-05:00'),
             rationale: 'Rejected',
         },
         {
@@ -41,9 +41,9 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
             type: 'Chair',
             darTitle: 'DAR Title 3',
             progressReport: true,
-            electionDate: '2023-01-02',
+            electionDate: Date.parse('2023-01-02T10:30:00-05:00'),
             vote: false,
-            updateDate: '2023-01-03',
+            updateDate: Date.parse('2023-01-03T10:30:00-05:00'),
         },
     ];
 
