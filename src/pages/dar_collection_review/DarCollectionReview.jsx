@@ -67,7 +67,7 @@ const tabsForUser = (user, buckets, adminPage = false) => {
   const myChairVotes = flow(
     flatMap(b => b.votes),
     flatMap(v => v.dataAccess),
-    flatMap(da => da.chairpersonVotes),
+    flatMap(cda => da.chairpersonVotes),
     filter(v => v.userId === user.userId),
   )(dataAccessBuckets)
   const updatedTabs = { applicationInformation: 'Application Information', fullDAR: 'Full DAR' }
@@ -162,7 +162,7 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(false)
       setReferenceIdForDocuments(referenceIdForDocuments)
     }
-    catch (error) {
+    catch (_error) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       })
