@@ -34,12 +34,15 @@ const styles = {
     alignItems: 'center',
     whiteSpace: 'pre-line',
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
-    color: '#333F52',
-    justifyContent: 'space-between',
-  }),
+  columnStyle: {
+    ...Styles.TABLE.HEADER_ROW,
+    ...{
+      fontFamily: 'Montserrat',
+      fontSize: '1.4rem',
+      color: '#333F52',
+      justifyContent: 'space-between',
+    }
+  },
   containerOverride: {
     marginTop: '0',
     borderTop: '0',
