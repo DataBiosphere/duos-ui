@@ -67,7 +67,7 @@ const tabsForUser = (user, buckets, adminPage = false) => {
   const myChairVotes = flow(
     flatMap(b => b.votes),
     flatMap(v => v.dataAccess),
-    flatMap(cda => da.chairpersonVotes),
+    flatMap(da => da.chairpersonVotes),
     filter(v => v.userId === user.userId),
   )(dataAccessBuckets)
   const updatedTabs = { applicationInformation: 'Application Information', fullDAR: 'Full DAR' }
@@ -85,46 +85,46 @@ const tabsForUser = (user, buckets, adminPage = false) => {
 
 const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
   // most recently submitted DAR
-  const dars = Object.values(darCollection.dars);
-  if (dars.length === 0) return [];
-  const mostRecentDar = dars.filter(d => !d.draft).reduce((latest, current) => 
-      new Date(current.submissionDate) > new Date(latest.submissionDate) ? current : latest
-  );
+  const dars = Object.values(darCollection.dars)
+  if (dars.length === 0) return []
+  const mostRecentDar = dars.filter(d => !d.draft).reduce((latest, current) =>
+    new Date(current.submissionDate) > new Date(latest.submissionDate) ? current : latest,
+  )
 
   // most recent closed election
-  const elections = Object.values(mostRecentDar.elections || {});
-  const closedDataAccessElections = elections.filter(e => e.electionType == 'DataAccess' && e.status === 'Closed');
-  if (closedDataAccessElections.length === 0) return [];
-  const latestElection = closedDataAccessElections.reduce((latest, current) => 
-      new Date(current.createDate) > new Date(latest.createDate) ? current : latest
-  );
+  const elections = Object.values(mostRecentDar.elections || {})
+  const closedDataAccessElections = elections.filter(e => e.electionType == 'DataAccess' && e.status === 'Closed')
+  if (closedDataAccessElections.length === 0) return []
+  const latestElection = closedDataAccessElections.reduce((latest, current) =>
+    new Date(current.createDate) > new Date(latest.createDate) ? current : latest,
+  )
 
   // datasets approved in that election
-  var approvedDatasetIds = [];
-  Object.values(latestElection.votes || {}).forEach(vote => {
-      if ((vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE') && vote.vote === true) {
-          approvedDatasetIds.push(latestElection.datasetId);
-      }
-  });
+  const approvedDatasetIds = []
+  Object.values(latestElection.votes || {}).forEach((vote) => {
+    if ((vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE') && vote.vote === true) {
+      approvedDatasetIds.push(latestElection.datasetId)
+    }
+  })
 
   // filter for this DAC if this is a DAC page, and get dataset names
-  const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter(datasetId => {
-    if (dacIds.length === 0) return true; // if no DACs (admin), return all datasets
-    const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId);
-    return dacIds.contains(dataset?.dacId);
-  }).map(datasetId => {
-      const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId);
-      return dataset?.name;
-  });
-  return approvedDatasetNames || [];
-};
+  const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter((datasetId) => {
+    if (dacIds.length === 0) return true // if no DACs (admin), return all datasets
+    const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
+    return dacIds.contains(dataset?.dacId)
+  }).map((datasetId) => {
+    const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
+    return dataset?.name
+  })
+  return approvedDatasetNames || []
+}
 
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId
   const [collection, setCollection] = useState({})
   const [darInfo, setDarInfo] = useState({})
   const [referenceIdForDocuments, setReferenceIdForDocuments] = useState()
-  const [approvedDatasets, setApprovedDatasets] = useState([]);
+  const [approvedDatasets, setApprovedDatasets] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [subcomponentLoading, setSubcomponentLoading] = useState(true)
   const [tabs, setTabs] = useState({
@@ -139,10 +139,11 @@ export default function DarCollectionReview(props) {
   const init = useCallback(async () => {
     const user = Storage.getCurrentUser()
     try {
-      var collection
+      let collection
       if (adminPage || userIsDacMember(user)) {
         collection = await Collections.getCollectionByIdWithElectionHistory(collectionId)
-      } else {
+      }
+      else {
         collection = await Collections.getCollectionById(collectionId)
       }
       const darInfo = find(d => !isEmpty(d.data))(collection.dars).data
@@ -151,7 +152,7 @@ export default function DarCollectionReview(props) {
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
       const dacIds = adminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
       const processedBuckets = await binCollectionToBuckets(collection, dacIds)
-      const approvedDatasetNames = getApprovedDatasetsFromLatestDar(collection || {dars:[]}, dacIds);
+      const approvedDatasetNames = getApprovedDatasetsFromLatestDar(collection || { dars: [] }, dacIds)
       setDataUseBuckets(processedBuckets)
       setCollection(collection)
       setDarInfo(darInfo)
@@ -171,7 +172,7 @@ export default function DarCollectionReview(props) {
   }, [adminPage, props.history, collectionId])
 
   const userIsDacMember = (user) => {
-    return user.roles && user.roles.some(role => role.roleName === 'Member' || role.roleName === 'Chairperson')
+    return user.roles?.some(role => role.roleName === 'Member' || role.roleName === 'Chairperson')
   }
 
   // Remember, votes are contained within buckets, so updating final votes will update the bucket
@@ -291,8 +292,6 @@ export default function DarCollectionReview(props) {
         {selectedTab === tabs.votingHistory && (
           <VotingHistory
             darCollection={collection}
-            isLoading={isLoading || subcomponentLoading}
-            isAdmin={adminPage}
           />
         )}
       </div>

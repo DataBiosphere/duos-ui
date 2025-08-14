@@ -496,7 +496,7 @@ export interface DataAccessRequestData {
   ontologies: OntologyEntry[]
   forProfit: boolean
   oneGender: boolean
-  gender: string,
+  gender: string
   pediatric: boolean
   illegalBehavior: boolean
   addiction: boolean
@@ -630,7 +630,7 @@ export interface Vote {
   createDate: string
   electionId: number
   displayName: string
-  type: string 
+  type: string
   vote?: boolean
   rationale?: string
   updateDate?: string
@@ -660,13 +660,13 @@ export interface AlgorithmResult {
 }
 
 export interface VoteHistoryRow extends Vote {
-  darTitle: string;
-  progressReport: boolean;
-  electionDate: string;
+  darTitle: string
+  progressReport: boolean
+  electionDate: string
 }
 
 export interface ElectionWithMemberVotes extends Election {
-  darTitle: string;
-  progressReport: boolean;
-  memberVotes: Vote[];
+  darTitle: string
+  progressReport: boolean
+  memberVotes: Vote[]
 }

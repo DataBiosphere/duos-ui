@@ -1,11 +1,10 @@
 import React, { useCallback } from 'react'
 import SimpleTable from '../SimpleTable'
-import { Styles } from '../../libs/theme'
+import { Styles } from 'src/libs/theme'
 import { isNil, isEmpty } from 'lodash/fp'
 import { useEffect, useState } from 'react'
-import { formatDate, sortVisibleTable } from '../../libs/utils'
-import { Email } from '../../libs/ajax/Email'
-import { Notifications } from '../../libs/utils'
+import { formatDate, Notifications, sortVisibleTable } from 'src/libs/utils'
+import { Email } from 'src/libs/ajax/Email'
 
 const styles = {
   baseStyle: {
@@ -76,9 +75,8 @@ const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, se
         rationaleCellData({ rationale, voteId }),
       ]
     })
-  } else {
-    return []
   }
+  return []
 }
 
 const voteToString = (vote) => {

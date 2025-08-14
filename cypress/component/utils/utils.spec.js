@@ -400,92 +400,92 @@ describe('processElectionStatus utils - tests', () => {
   it('sortVisibleTables returns the correct order', () => {
     const rowData = [
       [
-          {
-              "data": "Progress Report",
-              "cellStyle": {
-                  "width": "10%"
-              },
-              "label": "Request Type",
-              "id": 0
+        {
+          data: 'Progress Report',
+          cellStyle: {
+            width: '10%',
           },
-          {
-              "data": "DAR Title 1",
-              "cellStyle": {
-                  "width": "20%"
-              },
-              "label": "DAR Title",
-              "id": 0
+          label: 'Request Type',
+          id: 0,
+        },
+        {
+          data: 'DAR Title 1',
+          cellStyle: {
+            width: '20%',
           },
-          {
-              "data": "2023-01-03",
-              "cellStyle": {
-                  "width": "10%"
-              },
-              "label": "Election Date",
-              "id": 0
-          }
+          label: 'DAR Title',
+          id: 0,
+        },
+        {
+          data: '2023-01-03',
+          cellStyle: {
+            width: '10%',
+          },
+          label: 'Election Date',
+          id: 0,
+        },
       ],
       [
-          {
-              "data": "Progress Report",
-              "cellStyle": {
-                  "width": "10%"
-              },
-              "label": "Request Type",
-              "id": 2
+        {
+          data: 'Progress Report',
+          cellStyle: {
+            width: '10%',
           },
-          {
-              "data": "DAR Title 3",
-              "cellStyle": {
-                  "width": "20%"
-              },
-              "label": "DAR Title",
-              "id": 2
+          label: 'Request Type',
+          id: 2,
+        },
+        {
+          data: 'DAR Title 3',
+          cellStyle: {
+            width: '20%',
           },
-          {
-              "data": "2023-01-02",
-              "cellStyle": {
-                  "width": "10%"
-              },
-              "label": "Election Date",
-              "id": 2
-          }
+          label: 'DAR Title',
+          id: 2,
+        },
+        {
+          data: '2023-01-02',
+          cellStyle: {
+            width: '10%',
+          },
+          label: 'Election Date',
+          id: 2,
+        },
       ],
       [
-          {
-              "data": "Initial Dar",
-              "cellStyle": {
-                  "width": "10%"
-              },
-              "label": "Request Type",
-              "id": 1
+        {
+          data: 'Initial Dar',
+          cellStyle: {
+            width: '10%',
           },
-          {
-              "data": "DAR Title 2",
-              "cellStyle": {
-                  "width": "20%"
-              },
-              "label": "DAR Title",
-              "id": 1
+          label: 'Request Type',
+          id: 1,
+        },
+        {
+          data: 'DAR Title 2',
+          cellStyle: {
+            width: '20%',
           },
-          {
-              "data": "2023-01-01",
-              "cellStyle": {
-                  "width": "10%"
-              },
-              "label": "Election Date",
-              "id": 1
-          }
-      ]
-  ]
+          label: 'DAR Title',
+          id: 1,
+        },
+        {
+          data: '2023-01-01',
+          cellStyle: {
+            width: '10%',
+          },
+          label: 'Election Date',
+          id: 1,
+        },
+      ],
+    ]
 
-    sortVisibleTable({list: rowData, sort: { colIndex: 1, dir: -1 }})
+    sortVisibleTable({ list: rowData, sort: { colIndex: 1, dir: -1 } })
 
     expect(rowData[0][1].data).to.equal('DAR Title 3')
     expect(rowData[1][1].data).to.equal('DAR Title 2')
     expect(rowData[2][1].data).to.equal('DAR Title 1')
 
-    sortVisibleTable({list: rowData, sort: {colIndex: 2, dir: 1}})
+    sortVisibleTable({ list: rowData, sort: { colIndex: 2, dir: 1 } })
     expect(rowData[0][2].data).to.equal('2023-01-01')
     expect(rowData[1][2].data).to.equal('2023-01-02')
     expect(rowData[2][2].data).to.equal('2023-01-03')

@@ -748,7 +748,7 @@ describe('DAR Review', () => {
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
     const chairContainer = cy.get('.collection-review-page').find('.tab-selection-Chair')
     const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member')
-  
+
     voteHistoryTab.should('exist').should('be.visible')
     applicationTab.should('exist').should('be.visible')
     fullDarTab.should('exist').should('be.visible')
@@ -769,12 +769,12 @@ describe('DAR Review', () => {
     mount(<DarCollectionReview {...props} />)
 
     cy.get('.tab-selection-Chair').should('not.exist')
-    
+
     const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
     const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member')
-  
+
     voteHistoryTab.should('exist').should('be.visible')
     applicationTab.should('exist').should('be.visible')
     fullDarTab.should('exist').should('be.visible')
@@ -812,11 +812,10 @@ describe('DAR Review', () => {
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
     const chairContainer = cy.get('.collection-review-page').find('.tab-selection-Chair')
-  
+
     voteHistoryTab.should('exist').should('be.visible')
     applicationTab.should('exist').should('be.visible')
     fullDarTab.should('exist').should('be.visible')
     chairContainer.should('exist').should('be.visible')
   })
 })
-
