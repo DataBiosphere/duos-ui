@@ -77,7 +77,7 @@ const tabsForUser = (user, buckets, adminPage = false) => {
   if (!isEmpty(myChairVotes)) {
     updatedTabs.chairVote = 'Chair Vote'
   }
-  if (userIsDacChair(user)) {
+  if (userIsDacUser(user)) {
     updatedTabs.votingHistory = 'Voting History'
   }
   return updatedTabs
@@ -119,8 +119,8 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
   return approvedDatasetNames || []
 }
 
-const userIsDacChair = (user) => {
-  return user.roles?.some(role => role.roleId === 2)
+const userIsDacUser = (user) => {
+  return user.roles?.some(role => role.roleId === 2 || role.roleId === 1)
 }
 
 export default function DarCollectionReview(props) {
@@ -145,7 +145,7 @@ export default function DarCollectionReview(props) {
     const user = Storage.getCurrentUser()
     try {
       let collection
-      if (adminPage || userIsDacChair(user)) {
+      if (adminPage || userIsDacUser(user)) {
         collection = await Collections.getCollectionByIdWithElectionHistory(collectionId)
       }
       else {
