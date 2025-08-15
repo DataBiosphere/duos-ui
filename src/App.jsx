@@ -12,9 +12,8 @@ import { SpinnerComponent as Spinner } from 'src/components/SpinnerComponent'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { Storage } from 'src/libs/storage'
 import Routes from 'src/Routes'
-import { setUserRoleStatuses } from 'src/libs/utils'
+import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
-import { Notification } from 'src/components/Notification'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -93,7 +92,7 @@ function App() {
           }
         }
         catch (error) {
-          Notification.error({
+          Notifications.showError({
             message: 'Error during RAS authentication: ' + extractError(error),
             description: 'There was an error processing your RAS authentication. Please try again.',
           })

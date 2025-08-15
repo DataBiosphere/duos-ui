@@ -42,8 +42,6 @@ describe('Main App Functions', () => {
     cy.stub(StackdriverReporter, 'start')
     cy.stub(Config, 'getGAId').returns('UA-12345678-1')
     cy.stub(Storage, 'setCurrentUser')
-    cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
-    cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
   })
 
   it('should render main layout components on the home page', () => {
@@ -69,6 +67,8 @@ describe('Main App Functions', () => {
   })
 
   it('should process RAS query params (code, state) when they exist', () => {
+    cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
+    cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
     const code = 'code'
     const state = 'state'
     const initialLocation = {
@@ -82,5 +82,39 @@ describe('Main App Functions', () => {
     )
     cy.wrap(AuthenticateNIH.getECMProviderLinkInfo).should('have.been.calledOnceWith', code, state)
     cy.wrap(AuthenticateNIH.getSyncedUser).should('have.been.calledOnce')
+  })
+
+  it('should displays an error when ECM fails', () => {
+    cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').throws(new Error('Authentication failed'))
+    const code = 'code'
+    const state = 'state'
+    const initialLocation = {
+      pathname: '/',
+      search: `?code=${code}&state=${state}`,
+    }
+    mount(
+      <MemoryRouter initialEntries={[initialLocation]}>
+        <App />
+      </MemoryRouter>,
+    )
+    cy.wrap(AuthenticateNIH.getECMProviderLinkInfo).should('have.been.calledOnceWith', code, state)
+    cy.get('[data-cy="notification-alert"]').should('be.visible')
+  })
+
+  it('should displays an error when account syncing fails', () => {
+    cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
+    cy.stub(AuthenticateNIH, 'getSyncedUser').throws(new Error('Authentication failed'))
+    const code = 'code'
+    const state = 'state'
+    const initialLocation = {
+      pathname: '/',
+      search: `?code=${code}&state=${state}`,
+    }
+    mount(
+      <MemoryRouter initialEntries={[initialLocation]}>
+        <App />
+      </MemoryRouter>,
+    )
+    cy.get('[data-cy="notification-alert"]').should('be.visible')
   })
 })
