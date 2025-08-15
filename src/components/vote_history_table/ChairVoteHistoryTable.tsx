@@ -76,7 +76,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     if (!voteHistory) return []
 
     const rowData = voteHistory.map((row: VoteHistoryRow, i) => [
-      { data: row.progressReport ? 'Progress Report' : 'Initial Dar', cellStyle: { width: '10%' }, label: 'Request Type', id: i },
+      { data: row.progressReport ? 'Progress Report' : 'Initial DAR', cellStyle: { width: '10%' }, label: 'Request Type', id: i },
       { data: row.darTitle, cellStyle: { width: '20%' }, label: 'DAR Title', id: i },
       { data: formatDate(row.electionDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
       { data: getVoteText(row.vote), cellStyle: { width: '10%' }, label: 'Vote', id: i },

@@ -109,7 +109,6 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
 
   // filter for this DAC if this is a DAC page, and get dataset names
   const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter((datasetId) => {
-    if (dacIds.length === 0) return true // if no DACs (admin), return all datasets
     const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
     return dacIds.contains(dataset?.dacId)
   }).map((datasetId) => {
@@ -121,6 +120,14 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
 
 const userIsDacChair = (user) => {
   return user.roles?.some(role => role.roleId === 2)
+}
+
+const getAllDacIds = (datasets) => {
+  return uniq(compact(map(d => d.dacId)(datasets)))
+}
+
+const getUsersDacIds = (user) => {
+  return uniq(compact(map(r => r.dacId)(user.roles)))
 }
 
 export default function DarCollectionReview(props) {
@@ -138,6 +145,7 @@ export default function DarCollectionReview(props) {
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation)
   const [researcherProfile, setResearcherProfile] = useState({})
   const [dataUseBuckets, setDataUseBuckets] = useState([])
+  const [dacIds, setDacIds] = useState([])
   const { adminPage = false, readOnly = false } = props
 
   const init = useCallback(async () => {
@@ -154,7 +162,7 @@ export default function DarCollectionReview(props) {
       const referenceIdForDocuments = find(d => !isEmpty(d.referenceId))(collection.dars).referenceId
       const researcherProfile = await User.getById(collection.createUserId)
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
-      const dacIds = adminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
+      const dacIds = adminPage ? getAllDacIds(collection.datasets) : getUsersDacIds(user)
       const processedBuckets = await binCollectionToBuckets(collection, dacIds)
       const approvedDatasetNames = getApprovedDatasetsFromLatestDar(collection || { dars: [] }, dacIds)
       setDataUseBuckets(processedBuckets)
@@ -163,6 +171,7 @@ export default function DarCollectionReview(props) {
       setResearcherProfile(researcherProfile)
       setApprovedDatasets(approvedDatasetNames)
       setTabs(tabsForUser(user, processedBuckets, adminPage))
+      setDacIds(dacIds)
       setIsLoading(false)
       setSubcomponentLoading(false)
       setReferenceIdForDocuments(referenceIdForDocuments)
@@ -292,6 +301,7 @@ export default function DarCollectionReview(props) {
         {selectedTab === tabs.votingHistory && (
           <VotingHistory
             darCollection={collection}
+            dacIds={dacIds}
           />
         )}
       </div>

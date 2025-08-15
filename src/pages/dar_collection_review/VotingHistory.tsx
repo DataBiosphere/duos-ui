@@ -6,6 +6,7 @@ import { DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vo
 
 interface VotingHistoryProps {
   readonly darCollection: DarCollection
+  readonly dacIds: number[]
 }
 
 const styles = {
@@ -61,7 +62,7 @@ const styles = {
   },
 }
 
-const extractChairVotes = (darCollection: DarCollection) => {
+const extractChairVotes = (darCollection: DarCollection, filteredDatasetIds: number[]) => {
   if (!darCollection?.dars) {
     return []
   }
@@ -70,7 +71,7 @@ const extractChairVotes = (darCollection: DarCollection) => {
 
   Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
     Object.values(dar.elections ?? {})
-      .filter((election: Election) => election.electionType == 'DataAccess')
+      .filter((election: Election) => election.electionType == 'DataAccess' && filteredDatasetIds.includes(election.datasetId))
       .forEach((election: Election) => {
         Object.values(election.votes ?? {}).forEach((vote: Vote) => {
           if (isChairVote(vote)) {
@@ -88,7 +89,7 @@ const extractChairVotes = (darCollection: DarCollection) => {
   return votesByRole
 }
 
-const extractElectionsWithMemberVotes = (darCollection: DarCollection) => {
+const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredDatasetIds: number[]) => {
   if (!darCollection?.dars) {
     return []
   }
@@ -97,7 +98,7 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection) => {
 
   Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
     Object.values(dar.elections ?? {})
-      .filter((election: Election) => election.electionType == 'DataAccess')
+      .filter((election: Election) => election.electionType == 'DataAccess' && filteredDatasetIds.includes(election.datasetId))
       .forEach((election: Election) => {
         const electionWithMemberVotes: ElectionWithMemberVotes = {
           ...election,
@@ -121,9 +122,11 @@ const isChairVote = (vote: Vote) => {
   return (vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE') && vote.vote != null
 }
 
-export default function VotingHistory({ darCollection }: VotingHistoryProps) {
-  const chairVotes: VoteHistoryRow[] = extractChairVotes(darCollection)
-  const memberVotes: ElectionWithMemberVotes[] = extractElectionsWithMemberVotes(darCollection)
+export default function VotingHistory({ darCollection, dacIds }: VotingHistoryProps) {
+  const filteredDatasetIds: number[] = darCollection.datasets.filter(dataset => dacIds.includes(dataset.dacId))
+    .map(dataset => dataset.datasetId)
+  const chairVotes: VoteHistoryRow[] = extractChairVotes(darCollection, filteredDatasetIds)
+  const memberVotes: ElectionWithMemberVotes[] = extractElectionsWithMemberVotes(darCollection, filteredDatasetIds)
 
   return (
     <div style={styles.baseStyle}>
