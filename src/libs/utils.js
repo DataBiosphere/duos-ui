@@ -78,7 +78,7 @@ export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {
 
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
-    return '---'
+    return '- -'
   }
 
   if (toLower(dateval) === 'unsubmitted') {

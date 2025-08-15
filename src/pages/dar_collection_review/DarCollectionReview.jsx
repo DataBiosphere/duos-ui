@@ -109,6 +109,7 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
 
   // filter for this DAC if this is a DAC page, and get dataset names
   const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter((datasetId) => {
+    if (dacIds.length === 0) return true // admin page
     const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
     return dacIds.includes(dataset?.dacId)
   }).map((datasetId) => {
@@ -120,14 +121,6 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
 
 const userIsDacChair = (user) => {
   return user.roles?.some(role => role.roleId === 2)
-}
-
-const getAllDacIds = (datasets) => {
-  return uniq(compact(map(d => d.dacId)(datasets)))
-}
-
-const getUsersDacIds = (user) => {
-  return uniq(compact(map(r => r.dacId)(user.roles)))
 }
 
 export default function DarCollectionReview(props) {
@@ -162,7 +155,7 @@ export default function DarCollectionReview(props) {
       const referenceIdForDocuments = find(d => !isEmpty(d.referenceId))(collection.dars).referenceId
       const researcherProfile = await User.getById(collection.createUserId)
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
-      const dacIds = adminPage ? getAllDacIds(collection.datasets) : getUsersDacIds(user)
+      const dacIds = adminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
       const processedBuckets = await binCollectionToBuckets(collection, dacIds)
       const approvedDatasetNames = getApprovedDatasetsFromLatestDar(collection || { dars: [] }, dacIds)
       setDataUseBuckets(processedBuckets)

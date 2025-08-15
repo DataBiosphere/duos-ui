@@ -70,10 +70,10 @@ const extractChairVotes = (darCollection: DarCollection, filteredDatasetIds: num
   const votesByRole: VoteHistoryRow[] = []
 
   Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
-    Object.values(dar.elections ?? {})
+    Object.values(dar.elections ?? [])
       .filter((election: Election) => election.electionType == 'DataAccess' && filteredDatasetIds.includes(election.datasetId))
       .forEach((election: Election) => {
-        Object.values(election.votes ?? {}).forEach((vote: Vote) => {
+        Object.values(election.votes ?? []).forEach((vote: Vote) => {
           if (isChairVote(vote)) {
             votesByRole.push({
               ...vote,
@@ -96,8 +96,8 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
 
   const dacMemberVotes: ElectionWithMemberVotes[] = []
 
-  Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
-    Object.values(dar.elections ?? {})
+  Object.values(darCollection.dars ?? []).forEach((dar: DataAccessRequest) => {
+    Object.values(dar.elections ?? [])
       .filter((election: Election) => election.electionType == 'DataAccess' && filteredDatasetIds.includes(election.datasetId))
       .forEach((election: Election) => {
         const electionWithMemberVotes: ElectionWithMemberVotes = {
@@ -123,8 +123,12 @@ const isChairVote = (vote: Vote) => {
 }
 
 export default function VotingHistory({ darCollection, dacIds }: VotingHistoryProps) {
-  const filteredDatasetIds: number[] = darCollection.datasets.filter(dataset => dacIds.includes(dataset.dacId))
-    .map(dataset => dataset.datasetId)
+  const filteredDatasetIds: number[] = darCollection.datasets.filter((dataset) => {
+    if (dacIds.length === 0) {
+      return true // admin pages show all datasets
+    }
+    return dacIds.includes(dataset.dacId)
+  }).map(dataset => dataset.datasetId)
   const chairVotes: VoteHistoryRow[] = extractChairVotes(darCollection, filteredDatasetIds)
   const memberVotes: ElectionWithMemberVotes[] = extractElectionsWithMemberVotes(darCollection, filteredDatasetIds)
 

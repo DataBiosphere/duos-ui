@@ -81,7 +81,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
     cy.get('.row-data-1 > :nth-child(7)').contains('Chair')
     cy.get('.row-data-1 > :nth-child(8)').contains('--')
 
-    cy.get('.row-data-2 > :nth-child(1)').contains('Initial Dar')
+    cy.get('.row-data-2 > :nth-child(1)').contains('Initial DAR')
     cy.get('.row-data-2 > :nth-child(2)').contains('DAR Title 2')
     cy.get('.row-data-2 > :nth-child(3)').contains('2023-01-01')
     cy.get('.row-data-2 > :nth-child(4)').contains('No')

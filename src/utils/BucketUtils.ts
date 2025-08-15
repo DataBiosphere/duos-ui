@@ -175,9 +175,11 @@ const findElectionsForDatasets = (dar: DataAccessRequest, datasetIds: number[]):
  * Optionally filter a list of collection datasets by the dac ids provided.
  */
 const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] => {
-  return filter(
-    (dataset: Dataset) => includes(dataset.dacId)(dacIds),
-  )(datasets)
+  return isEmpty(dacIds)
+    ? datasets
+    : filter(
+        (dataset: Dataset) => includes(dataset.dacId)(dacIds),
+      )(datasets)
 }
 
 /**
