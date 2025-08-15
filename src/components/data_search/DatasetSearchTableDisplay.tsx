@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { isEmpty, capitalize, isUndefined } from 'lodash'
 import { DatasetTerm } from 'src/types/model'
-import SimpleTable from '../SimpleTable'
-import { Styles } from '../../libs/theme'
+import SimpleTable from 'src/components/SimpleTable'
+import { Styles } from 'src/libs/theme'
 import {
   type CellData,
   DatasetSearchTableTab,
-} from './DatasetSearchTableConstants'
-import { SnapshotSummaryModel } from '../../types/tdrModel'
-import { Storage } from '../../libs/storage'
+} from 'src/components/data_search/DatasetSearchTableConstants'
+import { SnapshotSummaryModel } from 'src/types/tdrModel'
+import { Storage } from 'src/libs/storage'
 
 const styles = {
   baseStyle: {

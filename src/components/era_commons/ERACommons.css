@@ -8,11 +8,12 @@
 }
 
 .nih-logo-style {
-    height: 27px;
+    height: 20px;
     width: 38px;
+    margin-top: 3px;
     background-repeat: no-repeat;
     background-size: contain;
-    background-image: url(../../images/nih-2012-logo.png);
+    background-image: url(../../images/nhgri-logo-color.svg);
     display: inline-block;
 }
 

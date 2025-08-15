@@ -9,6 +9,7 @@ import duosIcon from 'src/images/duos-network-logo.svg'
 import mgbIcon from 'src/images/mass-general-brigham-logo.svg'
 import elwaziIcon from 'src/images/elwazi-logo-color.svg'
 import nhgriIcon from 'src/images/nhgri-logo-color.svg'
+import nhlbiIcon from 'src/images/nhlbi-logo.svg'
 import anvilIcon from 'src/images/anvil-logo.svg'
 import terraIcon from 'src/images/terra-logo.svg'
 import hcaIcon from 'src/images/human-cell-atlas-logo.png'
@@ -173,6 +174,105 @@ export const DatasetSearch = (props) => {
       },
       icon: nhgriIcon,
       title: 'NHGRI Data Library',
+    },
+    'nhlbi': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Data Library',
+    },
+    'nhlbi-blood-disorders-and-blood-safety': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Blood Disorders and Blood Safety',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Blood Disorders and Blood Safety Data Library',
+    },
+    'nhlbi-health-disparities': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Health Disparities',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Health Disparities Data Library',
+    },
+    'nhlbi-heart-and-vascular-diseases': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Heart and Vascular Diseases',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Heart and Vascular Diseases Data Library',
+    },
+    'nhlbi-lung-diseases': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Lung Diseases',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Lung Diseases Data Library',
+    },
+    'nhlbi-obesity-nutrition-and-physical-activity': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Obesity, Nutrition, and Physical Activity',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Obesity, Nutrition, and Physical Activity Data Library',
+    },
+    'nhlbi-population-and-epidemiology-studies': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Population and Epidemiology Studies',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Population and Epidemiology Studies Data Library',
+    },
+    'nhlbi-precision-medicine-activities': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Precision Medicine Activities',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Precision Medicine Activities Data Library',
+    },
+    'nhlbi-research-spectrum': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Research Spectrum',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Research Spectrum Data Library',
+    },
+    'nhlbi-sleep-science-and-sleep-disorders': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Sleep Science and Sleep Disorders',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Sleep Science and Sleep Disorders Data Library',
+    },
+    'nhlbi-womens-health': {
+      query: {
+        match_phrase: {
+          'study.description': 'NHLBI Women\'s Health',
+        },
+      },
+      icon: nhlbiIcon,
+      title: 'NHLBI Women\'s Health Data Library',
     },
     'anvil': {
       query: {

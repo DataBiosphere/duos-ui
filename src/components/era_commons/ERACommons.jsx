@@ -149,7 +149,7 @@ export default function ERACommons(props) {
             target="_blank"
           >
             <div className={rasEnabled() ? 'nih-logo-style' : 'era-logo-style'} />
-            <span style={{ verticalAlign: '50%' }}>Authenticate your account</span>
+            <span style={{ verticalAlign: '40%' }}>Authenticate your account</span>
           </a>
         )}
       {nihError && (
@@ -177,7 +177,11 @@ export default function ERACommons(props) {
                 effect="solid"
                 id="tip_clear_era_commons_link"
               >
-                Clear {accountLabel} Account Link from DUOS and Terra
+                Clear
+                {' '}
+                {accountLabel}
+                {' '}
+                Account Link
               </ReactTooltip>
             </div>
           )}

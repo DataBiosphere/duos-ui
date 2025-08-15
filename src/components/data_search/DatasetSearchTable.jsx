@@ -5,17 +5,17 @@ import * as React from 'react'
 import { Box, Button } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'lodash'
-import { applyForAccess } from '../../utils/accessUtils.js'
-import { defaultFilters } from './DatasetFilterConstants'
-import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo'
-import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay'
-import { datasetSearchTableTabs } from './DatasetSearchTableConstants'
-import TableHeaderSection from '../TableHeaderSection'
-import { DataSet } from '../../libs/ajax/DataSet'
-import DatasetFilterList from './DatasetFilterList'
-import { Notifications } from '../../libs/utils'
-import { Styles } from '../../libs/theme'
-import { DatasetSearchFooter } from './DatasetSearchFooter'
+import { applyForAccess } from 'src/utils/accessUtils.js'
+import { defaultFilters } from 'src/components/data_search/DatasetFilterConstants'
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { DatasetSearchTableDisplay } from 'src/components/data_search/DatasetSearchTableDisplay'
+import { datasetSearchTableTabs } from 'src/components/data_search/DatasetSearchTableConstants'
+import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import DatasetFilterList from 'src/components/data_search/DatasetFilterList'
+import { Notifications } from 'src/libs/utils'
+import { Styles } from 'src/libs/theme'
+import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 
 const styles = {
   subTab: {
@@ -252,7 +252,7 @@ export const DatasetSearchTable = (props) => {
             />
             <div />
             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-              <Button variant="contained" onClick={() => setSearchTerm('')} sx={{ width: '100px' }}>
+              <Button variant="contained" onClick={() => setSearchTerm('')} sx={{ width: '10em', fontSize: 14 }}>
                 Clear Search
               </Button>
             </Box>
