@@ -1,0 +1,509 @@
+/* eslint-disable @stylistic/quote-props */
+import React from 'react'
+import { mount } from 'cypress/react'
+import VotingHistory from 'src/pages/dar_collection_review/VotingHistory'
+import { DarCollection } from 'src/types/model'
+import { RADAR_APPROVE } from 'src/utils/DarUtils'
+
+const darCollection: DarCollection = {
+  id: 1234,
+  darCollectionId: 777,
+  darCode: 'DAR-XXX',
+  createDate: 1669229413840,
+  createUser: {
+    userId: 7,
+    email: 'Bob.Jones@prodigy.com',
+    displayName: 'Bob Jones',
+    createDate: 1668229413840,
+    roles: null,
+    properties: [
+    ],
+    emailPreference: true,
+    institutionId: 90210,
+    eraCommonsId: 'HERMAN',
+    institution: {
+    },
+    libraryCard: {
+    },
+  },
+  createUserId: 7,
+  dars: {
+    'dars-id-123': {
+      id: 2147,
+      referenceId: 'dars-id-123',
+      collectionId: 777,
+      data: {
+        projectTitle: 'string',
+        checkNihDataOnly: false,
+        rus: 'string',
+        nonTechRus: 'string',
+        diseases: false,
+        methods: false,
+        controls: false,
+        population: false,
+        other: false,
+        otherText: 'string',
+        ontologies: [],
+        forProfit: false,
+        oneGender: false,
+        gender: 'string',
+        pediatric: false,
+        illegalBehavior: false,
+        addiction: false,
+        sexualDiseases: false,
+        stigmatizedDiseases: false,
+        vulnerablePopulation: false,
+        populationMigration: false,
+        psychiatricTraits: false,
+        notHealth: false,
+        hmb: false,
+        status: 'string',
+        poa: false,
+        datasets: [],
+        restriction: {},
+        validRestriction: false,
+        progressReportSummary: 'string',
+        intellectualPropertySummary: 'string',
+        publications: [],
+        presentations: [],
+        researchPlans: 'string',
+        anvilUse: false,
+        cloudUse: false,
+        localUse: false,
+        cloudProvider: 'string',
+        cloudProviderType: 'string',
+        cloudProviderDescription: 'string',
+        geneticStudiesOnly: false,
+        irb: false,
+        itDirector: 'string',
+        itDirectorEmail: 'string',
+        signingOfficial: 'string',
+        signingOfficialEmail: 'string',
+        publication: false,
+        collaboration: false,
+        forensicActivities: false,
+        sharingDistribution: false,
+        labCollaborators: [],
+        internalCollaborators: [],
+        externalCollaborators: [],
+        dsAcknowledgement: false,
+        gsoAcknowledgement: false,
+        pubAcknowledgement: false,
+        piName: 'string',
+        piEmail: 'string',
+        piCountryOfOperation: 'string',
+      },
+      progressReport: true,
+      expired: false,
+      expiresAt: 111111,
+      eraCommonsId: 'HERMAN',
+      rationale: '',
+      status: 'Pending',
+      draft: false,
+      userId: 7,
+      createDate: 1667970929000,
+      sortDate: 1669229413840,
+      submissionDate: 1669229413840,
+      updateDate: 1669229413840,
+      closeoutSigningOfficialApprovedDate: null,
+      closeoutSigningOfficialApprovedUserId: null,
+      datasetIds: [13, 14],
+      elections: {
+        8888: {
+          electionId: 8888,
+          electionType: 'DataAccess',
+          status: 'Open',
+          createDate: new Date('2022-11-21T10:30:00-05:00').getTime(),
+          referenceId: 'dars-id-123',
+          datasetId: 13,
+          displayId: 'E-8888',
+          dulName: 'Data Use Limitation',
+          version: 1,
+          archived: false,
+          votes: {
+            8675: {
+              voteId: 8675,
+              vote: true,
+              userId: 4444,
+              createDate: 1669062648000,
+              updateDate: 1669120753000,
+              electionId: 8888,
+              rationale: '',
+              type: 'DAC',
+              displayName: 'Beth Johnson',
+            },
+            8676: {
+              voteId: 8676,
+              userId: 11111,
+              createDate: 1669062648000,
+              electionId: 8888,
+              type: 'DAC',
+              displayName: 'DAC Member 1',
+            },
+            8677: {
+              voteId: 8677,
+              userId: 11111,
+              createDate: 1669062648000,
+              electionId: 8888,
+              type: 'Chairperson',
+              displayName: 'Ted Lasso',
+            },
+            8678: {
+              voteId: 8678,
+              userId: 11111,
+              createDate: 1669062648000,
+              electionId: 8888,
+              type: 'FINAL',
+              displayName: 'Ted Lasso',
+            },
+            8679: {
+              voteId: 8679,
+              userId: 11111,
+              createDate: 1669062648000,
+              electionId: 8888,
+              type: 'AGREEMENT',
+              displayName: 'Ted Lasso',
+            },
+            8680: {
+              voteId: 8680,
+              userId: 9988,
+              createDate: 1669062648000,
+              electionId: 8888,
+              type: 'DAC',
+              displayName: 'DAC Member 2',
+            },
+            8681: {
+              voteId: 8681,
+              userId: 9988,
+              createDate: 1669062648000,
+              electionId: 8888,
+              updateDate: 1669120753000,
+              vote: true,
+              rationale: '',
+              type: 'Chairperson',
+              displayName: 'Stuart Williams',
+            },
+            8682: {
+              voteId: 8682,
+              userId: 9988,
+              createDate: 1669062648000,
+              electionId: 8888,
+              updateDate: 1669120753000,
+              vote: true,
+              rationale: '',
+              type: 'FINAL',
+              displayName: 'Stuart Williams',
+            },
+            8683: {
+              voteId: 8683,
+              userId: 9988,
+              createDate: 1669062648000,
+              electionId: 8888,
+              updateDate: 1669120753000,
+              vote: true,
+              rationale: '',
+              type: 'AGREEMENT',
+              displayName: 'Stuart Williams',
+            },
+            8684: {
+              voteId: 8684,
+              userId: 4585,
+              createDate: 1669062648000,
+              electionId: 8888,
+              updateDate: 1669120753000,
+              vote: true,
+              rationale: '',
+              type: 'RADAR_APPROVE',
+              displayName: 'Sue Smith',
+            },
+          },
+        },
+        1776: {
+          electionId: 1776,
+          electionType: 'RP',
+          status: 'Open',
+          createDate: new Date('2023-01-10T10:30:00-05:00').getTime(),
+          referenceId: 'dars-id-123',
+          datasetId: 13,
+          displayId: 'E-1776',
+          dulName: 'Data Use Limitation',
+          version: 1,
+          archived: false,
+          votes: {
+            8688: {
+              voteId: 8688,
+              userId: 9988,
+              createDate: 1669062648000,
+              electionId: 1776,
+              type: 'DAC',
+              displayName: 'Stuart Williams',
+            },
+            8689: {
+              voteId: 8689,
+              userId: 9988,
+              createDate: 1669062648000,
+              electionId: 1776,
+              type: 'Chairperson',
+              displayName: 'Stuart Williams',
+            },
+            8690: {
+              voteId: 8690,
+              userId: 4585,
+              createDate: 1669062648000,
+              electionId: 1776,
+              type: 'DAC',
+              displayName: 'Sue Smtih',
+            },
+            8685: {
+              voteId: 8685,
+              userId: 4444,
+              createDate: 1669062648000,
+              electionId: 1776,
+              type: 'DAC',
+              displayName: 'Beth Johnson',
+            },
+            8686: {
+              voteId: 8686,
+              userId: 11111,
+              createDate: 1669062648000,
+              electionId: 1776,
+              type: 'DAC',
+              displayName: 'Ted Lasso',
+            },
+          },
+        },
+        8889: {
+          electionId: 8889,
+          electionType: 'DataAccess',
+          status: 'Open',
+          createDate: new Date('2023-01-03T10:30:00-05:00').getTime(),
+          referenceId: 'dars-id-123',
+          datasetId: 14,
+          displayId: 'E-8889',
+          dulName: 'Data Use Limitation',
+          version: 1,
+          archived: false,
+          votes: {
+            86751: {
+              voteId: 86751,
+              vote: true,
+              userId: 10,
+              createDate: 1669062648000,
+              updateDate: 1669120753000,
+              electionId: 8889,
+              rationale: '',
+              type: 'DAC',
+              displayName: 'DAC 2 Member 1',
+            },
+            86761: {
+              voteId: 86761,
+              userId: 11,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'DAC',
+              displayName: 'DAC 2 Member 2',
+            },
+            86771: {
+              voteId: 86771,
+              userId: 11,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'Chairperson',
+              displayName: 'Ted Lasso',
+            },
+            86781: {
+              voteId: 86781,
+              userId: 11,
+              createDate: 1669062648000,
+              electionId: 8888,
+              type: 'FINAL',
+              displayName: 'Ted Lasso',
+            },
+            86791: {
+              voteId: 86791,
+              userId: 11,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'AGREEMENT',
+              displayName: 'Ted Lasso',
+            },
+            86801: {
+              voteId: 8680,
+              userId: 9,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'DAC',
+              displayName: 'Stuart Williams',
+            },
+            86811: {
+              voteId: 86811,
+              userId: 9,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'Chairperson',
+              displayName: 'Stuart Williams',
+            },
+            86821: {
+              voteId: 86821,
+              userId: 9,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'FINAL',
+              displayName: 'Stuart Williams',
+            },
+            86831: {
+              voteId: 86831,
+              userId: 9,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'AGREEMENT',
+              displayName: 'Stuart Williams',
+            },
+            86841: {
+              voteId: 86841,
+              userId: 4,
+              createDate: 1669062648000,
+              electionId: 8889,
+              type: 'DAC',
+              displayName: 'Sue Smtih',
+            },
+          },
+        },
+      },
+    },
+  },
+  datasets: [
+    {
+      datasetId: 13,
+      name: 'Sleep Apnea',
+      datasetName: 'Sleep Apnea',
+      createDate: new Date(1567123200000),
+      createUser: {
+        userId: 100,
+        createDate: new Date(1111),
+        displayName: '',
+        email: '',
+        emailPreference: false,
+        isAdmin: false,
+        isAlumni: false,
+        isChairPerson: false,
+        isDataSubmitter: false,
+        isMember: false,
+        isResearcher: false,
+        isSigningOfficial: false,
+        roles: [],
+      },
+      createUserId: 100,
+      alias: 999,
+      datasetIdentifier: 'DUOS-00999',
+      dataUse: {},
+      dacId: 1,
+      translatedDataUse: 'Samples are restricted for use under the following conditions:\nData use is limited for studying: sleep apnea [DS]\nFuture use for population origins or ancestry research is prohibited. [POA]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nFuture use as a control set for diseases other than those specified is prohibited. [NCTRL]',
+      deletable: false,
+      properties: [],
+      dacApproval: true,
+      study: {
+        piName: 'Lisa Simpson, Betty White',
+        studyId: 0,
+        name: '',
+        description: '',
+        dataTypes: [],
+        publicVisibility: false,
+        datasetIds: [],
+        datasets: [],
+        properties: [],
+        createDate: '',
+        createUserId: 0,
+      },
+    },
+    {
+      datasetId: 14,
+      name: 'Sleep Apnea 2',
+      datasetName: 'Sleep Apnea 2',
+      createDate: new Date(1567123200000),
+      createUserId: 100,
+      createUser:
+      {
+        userId: 100,
+        createDate: new Date(1111),
+        displayName: '',
+        email: '',
+        emailPreference: false,
+        isAdmin: false,
+        isAlumni: false,
+        isChairPerson: false,
+        isDataSubmitter: false,
+        isMember: false,
+        isResearcher: false,
+        isSigningOfficial: false,
+        roles: [],
+      },
+      alias: 999,
+      datasetIdentifier: 'DUOS-00998',
+      dataUse: {},
+      dacId: 2,
+      translatedDataUse: 'Samples are restricted for use under the following conditions:\nData use is limited for studying: sleep apnea [DS]\nFuture use for population origins or ancestry research is prohibited. [POA]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nFuture use as a control set for diseases other than those specified is prohibited. [NCTRL]',
+      deletable: false,
+      properties: [],
+      dacApproval: true,
+      study: {
+        piName: 'Lisa Simpson, Betty White',
+        studyId: 0,
+        name: '',
+        description: '',
+        dataTypes: [],
+        publicVisibility: false,
+        datasetIds: [],
+        datasets: [],
+        properties: [],
+        createDate: '',
+        createUserId: 0,
+      },
+    },
+  ],
+}
+
+const dacIds: number[] = [1]
+
+describe('VotingHistory Component', () => {
+  it('Renders VotingHistory component with correct headers', () => {
+    mount(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+    cy.get(':nth-child(1) > div').contains('Votes')
+    cy.get(':nth-child(2) > div').contains('Chair Votes')
+    cy.get(':nth-child(3) > div').contains('Member Votes')
+  })
+  it('Renders VotingHistory component with correct elections and votes', () => {
+    mount(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+    // elections should be filtered by DAC IDs
+    // election with datasetId 14 should not be present (created 2023-01-03)
+    // election with datasetId 13 should be present (created 2022-11-21)
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains('2022-11-21')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', '2023-01-03')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').contains('2022-11-21')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').should('not.contain', '2023-01-03')
+    // elections should be filtered by Data Access type
+    // election with type RP should not be present (created 2023-01-10)
+    // election with type Data Access should be present (created 2022-11-21)
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains('2022-11-21')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', '2023-01-10')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').contains('2022-11-21')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').should('not.contain', '2023-01-10')
+    // Chair table only includes final or radar approve votes
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains('FINAL')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains('RADAR_APPROVE')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', 'DAC')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', 'AGREEMENT')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', 'Chairperson')
+    // Chair table only includes populated votes
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains('Stuart Williams')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', 'Ted Lasso')
+    // votes in member table should be filtered by DAC type and contains populated and unpopulated votes
+    cy.get('[data-testid="ExpandMoreIcon"]').first().click()
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').contains('Beth Johnson')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').contains('DAC Member 1')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').contains('DAC Member 2')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').should('not.contain', 'Ted Lasso')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').should('not.contain', 'Stuart Williams')
+    cy.get(':nth-child(3) > :nth-child(2) > .table-data').should('not.contain', 'Sue Smith')
+  })
+})
