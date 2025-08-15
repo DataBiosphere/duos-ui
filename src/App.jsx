@@ -12,7 +12,9 @@ import { SpinnerComponent as Spinner } from 'src/components/SpinnerComponent'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { Storage } from 'src/libs/storage'
 import Routes from 'src/Routes'
-import { setUserRoleStatuses } from 'src/libs/utils.js'
+import { setUserRoleStatuses } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
+import { Notification } from 'src/components/Notification'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -68,8 +70,8 @@ function App() {
 
   /**
    * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
-   * information and user linkage information. With that, we can save the updated NIH username and expiration time,
-   * and then redirect the user to the original page they authenticated from.
+   * information and user linkage information. With that, we can sync the users account linkage and then redirect the
+   * user to the original page they authenticated from.
    */
   useEffect(() => {
     const checkRASAuthentication = async () => {
@@ -78,15 +80,23 @@ function App() {
       const state = queryParams.get('state')
       // These parameters indicate a successful RAS authentication.
       if (code && state) {
-        const linkInfo = await AuthenticateNIH.getECMProviderLinkInfo(code, state)
-        const duosUser = await AuthenticateNIH.getSyncedUser()
-        // After account linking, we need to refresh the locally saved user.
-        Storage.setCurrentUser(duosUser)
-        setUserRoleStatuses(duosUser, Storage)
-        if (linkInfo?.additionalState?.redirectTo) {
-          // The redirectTo URL is expected to be a full URL, so we need to remove the origin part
-          // to use history.push for the redirect.
-          history.push(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
+        try {
+          const linkInfo = await AuthenticateNIH.getECMProviderLinkInfo(code, state)
+          const duosUser = await AuthenticateNIH.getSyncedUser()
+          // After account linking, we need to refresh the locally saved user.
+          Storage.setCurrentUser(duosUser)
+          setUserRoleStatuses(duosUser, Storage)
+          if (linkInfo?.additionalState?.redirectTo) {
+            // The redirectTo URL is expected to be a full URL, so we need to remove the origin part
+            // to use history.push for the redirect.
+            history.push(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
+          }
+        }
+        catch (error) {
+          Notification.error({
+            message: 'Error during RAS authentication: ' + extractError(error),
+            description: 'There was an error processing your RAS authentication. Please try again.',
+          })
         }
       }
     }
