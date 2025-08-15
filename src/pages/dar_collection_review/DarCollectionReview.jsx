@@ -110,7 +110,7 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
   // filter for this DAC if this is a DAC page, and get dataset names
   const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter((datasetId) => {
     const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
-    return dacIds.contains(dataset?.dacId)
+    return dacIds.includes(dataset?.dacId)
   }).map((datasetId) => {
     const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
     return dataset?.name
@@ -176,7 +176,8 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(false)
       setReferenceIdForDocuments(referenceIdForDocuments)
     }
-    catch (_error) {
+    catch (error) {
+      console.error('Error initializing DarCollectionReview:', error)
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       })

@@ -308,11 +308,11 @@ export interface Study {
   datasetIds: number[]
   datasets: Dataset[]
   properties: StudyProperty[]
-  alternativeDataSharingPlan: FileStorageObject
+  alternativeDataSharingPlan?: FileStorageObject
   createDate: string // Date?
   createUserId: number
-  updateDate: string // Date?
-  updateUserId: number
+  updateDate?: string // Date?
+  updateUserId?: number
 }
 
 export interface StudyProperty {
@@ -513,13 +513,13 @@ export interface DataAccessRequestData {
   darCode?: string
   restriction: object
   validRestriction: boolean
-  progressReportSummary: string
-  intellectualPropertySummary: string
-  publications: Publication[]
-  presentations: Presentation[]
-  dmi: DataManagementIncident
+  progressReportSummary?: string
+  intellectualPropertySummary?: string
+  publications?: Publication[]
+  presentations?: Presentation[]
+  dmi?: DataManagementIncident
   researchPlans: string
-  closeoutSupplement: Closeout
+  closeoutSupplement?: Closeout
   anvilUse: boolean
   cloudUse: boolean
   localUse: boolean
@@ -608,14 +608,14 @@ export interface Collaborator {
 export interface Election {
   electionId: number
   electionType: string
-  finalVote: boolean
+  finalVote?: boolean
   status: string
   createDate: string | number
-  lastUpdate: string | number
-  finalVoteDate: string
+  lastUpdate?: string | number
+  finalVoteDate?: string
   referenceId: string
-  finalRationale: string
-  finalAccessVote: boolean
+  finalRationale?: string
+  finalAccessVote?: boolean
   datasetId: number
   displayId: string
   dulName: string
