@@ -252,7 +252,7 @@ export const DatasetSearchTable = (props) => {
             />
             <div />
             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-              <Button variant="contained" onClick={() => setSearchTerm('')} sx={{ width: '100px' }}>
+              <Button variant="contained" onClick={() => setSearchTerm('')} sx={{ width: '10em', fontSize: 14 }}>
                 Clear Search
               </Button>
             </Box>
