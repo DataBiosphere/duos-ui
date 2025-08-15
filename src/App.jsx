@@ -73,7 +73,7 @@ function App() {
    */
   useEffect(() => {
     const checkRASAuthentication = async () => {
-      const queryParams = new URLSearchParams(window.location.search)
+      const queryParams = new URLSearchParams(location.search)
       const code = queryParams.get('code')
       const state = queryParams.get('state')
       // These parameters indicate a successful RAS authentication.
@@ -84,7 +84,9 @@ function App() {
         Storage.setCurrentUser(duosUser)
         setUserRoleStatuses(duosUser, Storage)
         if (linkInfo?.additionalState?.redirectTo) {
-          window.location.href = linkInfo.additionalState.redirectTo
+          // The redirectTo URL is expected to be a full URL, so we need to remove the origin part
+          // to use history.push for the redirect.
+          history.push(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
         }
       }
     }
