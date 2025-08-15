@@ -1,0 +1,86 @@
+import React from 'react'
+import { mount } from 'cypress/react'
+import App from 'src/App'
+import ReactGA from 'react-ga4'
+import StackdriverReporter from 'src/libs/stackdriverReporter'
+import { Config } from 'src/libs/config'
+import { MemoryRouter } from 'react-router-dom'
+import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
+import { Storage } from 'src/libs/storage'
+
+const user = {
+  userId: 2,
+  displayName: 'Admin',
+  institution: {
+    id: 150,
+    name: 'The Broad Institute of MIT and Harvard',
+  },
+  roles: [
+    {
+      userId: 2,
+      roleId: 4,
+      name: 'Admin',
+    },
+  ],
+}
+
+const linkInfo = {
+  externalUserId: 'externalUserId',
+  expirationTimestamp: '2023-10-01T00:00:00Z',
+  authenticated: true,
+  additionalState: {
+    redirectTo: 'http://localhost:3000',
+  },
+}
+
+describe('Main App Functions', () => {
+  beforeEach(() => {
+    cy.viewport(800, 600)
+    cy.initApplicationConfig()
+    cy.stub(ReactGA, 'send')
+    cy.stub(ReactGA, 'initialize')
+    cy.stub(StackdriverReporter, 'start')
+    cy.stub(Config, 'getGAId').returns('UA-12345678-1')
+    cy.stub(Storage, 'setCurrentUser')
+    cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
+    cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
+  })
+
+  it('should render main layout components on the home page', () => {
+    mount(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+    cy.get('.body').should('exist')
+    cy.get('.wrap').should('exist')
+    cy.get('.main').should('exist')
+    cy.get('.body').contains('Data Use Oversight System').should('exist')
+  })
+
+  it ('should initialize ReactGA and StackdriverReporter', () => {
+    mount(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+    cy.wrap(ReactGA.initialize).should('have.been.calledOnceWith', 'UA-12345678-1')
+    cy.wrap(StackdriverReporter.start).should('have.been.calledOnce')
+  })
+
+  it('should process RAS query params (code, state) when they exist', () => {
+    const code = 'code'
+    const state = 'state'
+    const initialLocation = {
+      pathname: '/',
+      search: `?code=${code}&state=${state}`,
+    }
+    mount(
+      <MemoryRouter initialEntries={[initialLocation]}>
+        <App />
+      </MemoryRouter>,
+    )
+    cy.wrap(AuthenticateNIH.getECMProviderLinkInfo).should('have.been.calledOnceWith', code, state)
+    cy.wrap(AuthenticateNIH.getSyncedUser).should('have.been.calledOnce')
+  })
+})
