@@ -8,8 +8,8 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
 import { flatten, uniq, compact, orderBy } from 'lodash'
-import { DatasetTerm, getAccessManagementSummary } from '../../types/model'
-import { FiltersTypes, generateDefaultParticipantCountValues } from './DatasetFilterConstants'
+import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
+import { FiltersTypes, generateDefaultParticipantCountValues } from 'src/components/data_search/DatasetFilterConstants'
 
 interface FilterItemHeaderProps {
   title: React.ReactNode
