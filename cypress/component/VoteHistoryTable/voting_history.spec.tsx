@@ -1,9 +1,7 @@
-/* eslint-disable @stylistic/quote-props */
 import React from 'react'
 import { mount } from 'cypress/react'
 import VotingHistory from 'src/pages/dar_collection_review/VotingHistory'
 import { DarCollection } from 'src/types/model'
-import { RADAR_APPROVE } from 'src/utils/DarUtils'
 
 const darCollection: DarCollection = {
   id: 1234,

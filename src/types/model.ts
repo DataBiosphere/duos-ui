@@ -610,8 +610,8 @@ export interface Election {
   electionType: string
   finalVote?: boolean
   status: string
-  createDate: string | number
-  lastUpdate?: string | number
+  createDate: number
+  lastUpdate: number
   finalVoteDate?: string
   referenceId: string
   finalRationale?: string

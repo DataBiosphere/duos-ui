@@ -169,8 +169,7 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(false)
       setReferenceIdForDocuments(referenceIdForDocuments)
     }
-    catch (error) {
-      console.error('Error initializing DarCollectionReview:', error)
+    catch (_error) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       })

@@ -14,7 +14,7 @@ interface RowData {
   data: string
   cellStyle: React.CSSProperties
   label: string
-  id: number | string
+  id: number
   electionId?: number
   memberVotes?: Vote[]
   onClick?: () => void
@@ -67,7 +67,7 @@ const processVoteSummary = (memberVotes: Vote[]) => {
   }
   const positives = memberVotes.filter(v => v.vote === true).length
   const negatives = memberVotes.filter(v => v.vote === false).length
-  return positives + ' Approved, ' + negatives + ' Denied'
+  return positives + ' Yes, ' + negatives + ' No'
 }
 
 interface TableData {
