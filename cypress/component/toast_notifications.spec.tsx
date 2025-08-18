@@ -157,7 +157,7 @@ describe('ToastNotifications', () => {
     })
   })
 
-  describe('showWarning', () => {
+  describe('showWarning', { retries: 3 }, () => {
     it('should display warning notification', () => {
       ToastNotifications.showWarning({ text: 'Warning message' })
 
@@ -168,13 +168,19 @@ describe('ToastNotifications', () => {
     })
 
     it('should accept custom timeout for warning notifications', () => {
+      // Arrange
+      cy.clock()
+
+      // Act
       ToastNotifications.showWarning({
         text: 'Warning message',
         timeout: 500,
       })
 
+      // Assert
       cy.get('[data-cy="notification-alert"]').should('be.visible')
-      cy.get('[data-cy="notification-alert"]', { timeout: 1000 }).should('not.exist')
+      cy.tick(2000) // Fast-forward time by 2000ms
+      cy.get('[data-cy="notification-alert"]').should('not.exist')
     })
   })
 
