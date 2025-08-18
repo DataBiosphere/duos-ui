@@ -4,9 +4,11 @@ import App from 'src/App'
 import ReactGA from 'react-ga4'
 import StackdriverReporter from 'src/libs/stackdriverReporter'
 import { Config } from 'src/libs/config'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route } from 'react-router-dom'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
 import { Storage } from 'src/libs/storage'
+import { createMemoryHistory } from 'history'
+import { Router } from 'react-router'
 
 const user = {
   userId: 2,
@@ -29,7 +31,7 @@ const linkInfo = {
   expirationTimestamp: '2023-10-01T00:00:00Z',
   authenticated: true,
   additionalState: {
-    redirectTo: 'http://localhost:3000',
+    redirectTo: 'http://localhost:3000/profile',
   },
 }
 
@@ -66,24 +68,6 @@ describe('Main App Functions', () => {
     cy.wrap(StackdriverReporter.start).should('have.been.calledOnce')
   })
 
-  it('should process RAS query params (code, state) when they exist', () => {
-    cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
-    cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
-    const code = 'code'
-    const state = 'state'
-    const initialLocation = {
-      pathname: '/',
-      search: `?code=${code}&state=${state}`,
-    }
-    mount(
-      <MemoryRouter initialEntries={[initialLocation]}>
-        <App />
-      </MemoryRouter>,
-    )
-    cy.wrap(AuthenticateNIH.getECMProviderLinkInfo).should('have.been.calledOnceWith', code, state)
-    cy.wrap(AuthenticateNIH.getSyncedUser).should('have.been.calledOnce')
-  })
-
   it('should displays an error when ECM fails', () => {
     cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').throws(new Error('Authentication failed'))
     const code = 'code'
@@ -116,5 +100,36 @@ describe('Main App Functions', () => {
       </MemoryRouter>,
     )
     cy.get('[data-cy="notification-alert"]').should('be.visible')
+  })
+
+  it('should process RAS query params (code, state) and navigate to the profile page when the parameter specifies it', () => {
+    cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
+    cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
+    const pageVisitStub = cy.stub()
+    const code = 'code'
+    const state = 'state'
+    const initialLocation = {
+      pathname: '/',
+      search: `?code=${code}&state=${state}`,
+    }
+    const history = createMemoryHistory()
+    mount(
+      <Router history={history}>
+        <Route
+          path="*"
+          render={({ history }) => {
+            pageVisitStub(history.location.pathname)
+            return <div>Page</div>
+          }}
+        />
+        <App />
+      </Router>,
+    )
+    history.push(initialLocation)
+    cy.wrap(AuthenticateNIH.getECMProviderLinkInfo).should('have.been.calledOnceWith', code, state)
+    cy.wrap(AuthenticateNIH.getSyncedUser).should('have.been.calledOnce')
+    // Endure that we've navigated to both the home page and the profile page
+    cy.wrap(pageVisitStub).should('have.been.calledWith', '/')
+    cy.wrap(pageVisitStub).should('have.been.calledWith', '/profile')
   })
 })
