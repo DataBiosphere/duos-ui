@@ -11,10 +11,11 @@ import { Storage } from 'src/libs/storage.js'
 import {
   decodeNihToken,
   extractEraAuthenticationState,
-  rasEnabled,
   nihAccountLabel,
+  rasEnabled,
 } from '../../utils/ERACommonsUtils.js'
 import ReactTooltip from 'react-tooltip'
+import AsyncActionButton from 'src/components/AsyncActionButton.js'
 
 export default function ERACommons(props) {
   const {
@@ -165,13 +166,26 @@ export default function ERACommons(props) {
           {expirationCount >= 0 && (
             <div className="era-commons-id-value">
               <span data-cy="era-commons-id-value">{eraCommonsId}</span>
-              <button data-cy="era-delete-icon" className="era-delete-icon" type="button" onClick={deleteNihAccount}>
+              <AsyncActionButton
+                className="era-delete-icon"
+                onClick={deleteNihAccount}
+                onError={displayError}
+                data-cy="era-delete-icon"
+                style={{
+                  cursor: 'pointer',
+                  color: '#333',
+                  backgroundColor: 'white',
+                  border: 'none',
+                  padding: '0',
+                  minWidth: '10px',
+                }}
+              >
                 <span
                   className="glyphicon glyphicon-remove-circle"
                   data-tip="Clear account"
                   data-for="tip_clear_era_commons_link"
                 />
-              </button>
+              </AsyncActionButton>
               <ReactTooltip
                 place="right"
                 effect="solid"
