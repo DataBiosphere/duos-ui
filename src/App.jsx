@@ -7,19 +7,19 @@ import { Config } from 'src/libs/config'
 import DuosFooter from 'src/components/DuosFooter'
 import DuosHeader from 'src/components/DuosHeader'
 import { useHistory, useLocation } from 'react-router-dom'
-import loadingImage from 'src/images/loading-indicator.svg'
-import { SpinnerComponent as Spinner } from 'src/components/SpinnerComponent'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { Storage } from 'src/libs/storage'
 import Routes from 'src/Routes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
+import { Spinner } from 'src/components/Spinner'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [env, setEnv] = useState('')
   const history = useHistory()
   const location = useLocation()
+  const [isLoading, setIsLoading] = useState(false)
 
   const trackPageView = (location) => {
     ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search })
@@ -33,7 +33,7 @@ function App() {
     const setEnvironment = async () => {
       const environment = await Config.getEnv()
       setEnv(environment)
-      await Storage.setEnv(environment)
+      Storage.setEnv(environment)
     }
     setEnvironment()
   })
@@ -79,6 +79,7 @@ function App() {
       const state = queryParams.get('state')
       // These parameters indicate a successful RAS authentication.
       if (code && state) {
+        setIsLoading(true)
         try {
           const linkInfo = await AuthenticateNIH.getECMProviderLinkInfo(code, state)
           const duosUser = await AuthenticateNIH.getSyncedUser()
@@ -97,18 +98,26 @@ function App() {
             description: 'There was an error processing your RAS authentication. Please try again.',
           })
         }
+        finally {
+          setIsLoading(false)
+        }
       }
     }
     checkRASAuthentication()
-  }, [])
+  }, [history, location.search])
 
+  const loadingSyle = {
+    position: 'fixed',
+    top: '45%',
+    left: '45%',
+  }
   return (
     <div className="body">
       <div className="wrap">
         <div className="main">
           <DuosHeader />
-          <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
-          <Routes isLogged={isLoggedIn} env={env} />
+          {isLoading && <div style={loadingSyle}><Spinner /></div>}
+          {!isLoading && <Routes isLogged={isLoggedIn} env={env} />}
         </div>
       </div>
       <DuosFooter />
