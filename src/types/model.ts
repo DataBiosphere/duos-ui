@@ -456,7 +456,7 @@ export interface DarCollection {
   createUserId: number
   updateDate?: number
   updateUserId?: number
-  dars: Map<string, DataAccessRequest>
+  dars: Record<string, DataAccessRequest>
   datasets: Dataset[]
 }
 
@@ -478,8 +478,8 @@ export interface DataAccessRequest {
   datasetIds: number[]
   elections: Record<number, Election>
   eraCommonsId: string
-  closeoutSigningOfficialApprovedDate: number
-  closeoutSigningOfficialApprovedUserId: number
+  closeoutSigningOfficialApprovedDate?: number
+  closeoutSigningOfficialApprovedUserId?: number
 }
 
 export interface DataAccessRequestData {
@@ -621,7 +621,7 @@ export interface Election {
   dulName: string
   version: number
   archived: boolean
-  votes: Map<number, Vote>
+  votes: Record<number, Vote>
 }
 
 export interface Vote {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionWithMemberVotesTable'
-import { ElectionWithMemberVotes, Vote } from 'src/types/model'
+import { ElectionWithMemberVotes } from 'src/types/model'
 
 describe('ElectionWithMemberVotesTable Component Tests', () => {
   const electionWithMemberVotes1: ElectionWithMemberVotes = {
@@ -20,7 +20,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     dulName: 'Data Use Agreement',
     version: 2,
     archived: false,
-    votes: new Map<number, Vote>(),
+    votes: {},
     darTitle: 'Study on Environmental Impact',
     progressReport: true,
     memberVotes: [
@@ -69,7 +69,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     dulName: 'Data Use Limitation',
     version: 1,
     archived: false,
-    votes: new Map<number, Vote>(),
+    votes: {},
     darTitle: 'Genomic Data Analysis',
     progressReport: false,
     memberVotes: [
@@ -114,7 +114,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     dulName: 'Data Sharing Agreement',
     version: 3,
     archived: false,
-    votes: new Map<number, Vote>(),
+    votes: {},
     darTitle: 'Clinical Trial Data Analysis',
     progressReport: true,
     memberVotes: [

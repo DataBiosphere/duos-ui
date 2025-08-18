@@ -5,25 +5,8 @@ import { DarCollection } from 'src/types/model'
 
 const darCollection: DarCollection = {
   id: 1234,
-  darCollectionId: 777,
   darCode: 'DAR-XXX',
   createDate: 1669229413840,
-  createUser: {
-    userId: 7,
-    email: 'Bob.Jones@prodigy.com',
-    displayName: 'Bob Jones',
-    createDate: 1668229413840,
-    roles: null,
-    properties: [
-    ],
-    emailPreference: true,
-    institutionId: 90210,
-    eraCommonsId: 'HERMAN',
-    institution: {
-    },
-    libraryCard: {
-    },
-  },
   createUserId: 7,
   dars: {
     'dars-id-123': {
@@ -95,16 +78,12 @@ const darCollection: DarCollection = {
       expired: false,
       expiresAt: 111111,
       eraCommonsId: 'HERMAN',
-      rationale: '',
-      status: 'Pending',
       draft: false,
       userId: 7,
       createDate: 1667970929000,
       sortDate: 1669229413840,
       submissionDate: 1669229413840,
       updateDate: 1669229413840,
-      closeoutSigningOfficialApprovedDate: null,
-      closeoutSigningOfficialApprovedUserId: null,
       datasetIds: [13, 14],
       elections: {
         8888: {
@@ -112,6 +91,7 @@ const darCollection: DarCollection = {
           electionType: 'DataAccess',
           status: 'Open',
           createDate: new Date('2022-11-21T10:30:00-05:00').getTime(),
+          lastUpdate: new Date('2022-11-21T10:30:00-05:00').getTime(),
           referenceId: 'dars-id-123',
           datasetId: 13,
           displayId: 'E-8888',
@@ -221,6 +201,7 @@ const darCollection: DarCollection = {
           electionType: 'RP',
           status: 'Open',
           createDate: new Date('2023-01-10T10:30:00-05:00').getTime(),
+          lastUpdate: new Date('2022-11-21T10:30:00-05:00').getTime(),
           referenceId: 'dars-id-123',
           datasetId: 13,
           displayId: 'E-1776',
@@ -275,6 +256,7 @@ const darCollection: DarCollection = {
           electionType: 'DataAccess',
           status: 'Open',
           createDate: new Date('2023-01-03T10:30:00-05:00').getTime(),
+          lastUpdate: new Date('2022-11-21T10:30:00-05:00').getTime(),
           referenceId: 'dars-id-123',
           datasetId: 14,
           displayId: 'E-8889',
@@ -313,7 +295,7 @@ const darCollection: DarCollection = {
               voteId: 86781,
               userId: 11,
               createDate: 1669062648000,
-              electionId: 8888,
+              electionId: 8889,
               type: 'FINAL',
               displayName: 'Ted Lasso',
             },
