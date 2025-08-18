@@ -177,11 +177,10 @@ export default function ERACommons(props) {
                 effect="solid"
                 id="tip_clear_era_commons_link"
               >
-                Clear
-                {' '}
-                {accountLabel}
-                {' '}
-                Account Link
+                Clear {accountLabel} Account Link.<br />
+                This will <strong>remove</strong> your {accountLabel} account link from your profile
+                and will be reflected both in <strong>DUOS</strong> and in <strong>Terra</strong>.<br />
+                You can re-authenticate at any time.
               </ReactTooltip>
             </div>
           )}
