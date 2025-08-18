@@ -168,14 +168,14 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     cy.get('.row-data-1 > :nth-child(3)').contains('2023-02-01')
     cy.get('.row-data-1 > :nth-child(4)').contains('In Progress')
     cy.get('.row-data-1 > :nth-child(5)').contains('2/2')
-    cy.get('.row-data-1 > :nth-child(6)').contains('1 Approved, 1 Denied')
+    cy.get('.row-data-1 > :nth-child(6)').contains('1 Yes, 1 No')
 
     cy.get('.row-data-2 > :nth-child(1)').contains('Initial DAR')
     cy.get('.row-data-2 > :nth-child(2)').contains('Genomic Data Analysis')
     cy.get('.row-data-2 > :nth-child(3)').contains('2023-01-15')
     cy.get('.row-data-2 > :nth-child(4)').contains('Closed')
     cy.get('.row-data-2 > :nth-child(5)').contains('1/2')
-    cy.get('.row-data-2 > :nth-child(6)').contains('1 Approved')
+    cy.get('.row-data-2 > :nth-child(6)').contains('1 Yes')
   })
 
   it('should expand and collapse election rows', () => {
