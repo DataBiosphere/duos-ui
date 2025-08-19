@@ -510,8 +510,8 @@ describe('collapseVotesByUser', () => {
 
   it('collapses votes by the same user without appending identical dates / rationales', () => {
     const votes = [
-      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1 },
-      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 2 },
+      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', updateDate: '30000', voteId: 1 },
+      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', updateDate: '30000', voteId: 2 },
     ]
 
     const collapsedVotes = collapseVotesByUser(votes)
@@ -522,14 +522,14 @@ describe('collapseVotesByUser', () => {
       displayName: 'John',
       vote: true,
       rationale: 'rationale\n',
-      lastUpdated: `${formatDate('20000')}\n`,
+      lastUpdated: `${formatDate('30000')}\n`,
     })
   })
 
   it('collapses votes by the same user and appends different dates', () => {
     const votes = [
-      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1 },
-      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '30000', voteId: 2 },
+      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '10000', updateDate: '20000', voteId: 1 },
+      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '10000', updateDate: '30000', voteId: 2 },
     ]
     const collapsedVotes = collapseVotesByUser(votes)
     const formattedDate = `${formatDate('20000')}\n${formatDate('30000')}\n`
@@ -559,25 +559,26 @@ describe('collapseVotesByUser', () => {
       displayName: 'John',
       vote: true,
       rationale: 'rationale1\nrationale2\n',
-      lastUpdated: `${formatDate('20000')}\n`,
+      lastUpdated: null,
     })
   })
 
   it('does not append null dates / rationales', () => {
     const votes = [
-      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1 },
+      { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', updateDate: '30000', voteId: 1 },
       { userId: 1, displayName: 'John', vote: true, voteId: 2 },
     ]
 
     const collapsedVotes = collapseVotesByUser(votes)
     expect(collapsedVotes).to.have.lengthOf(1)
+    console.log(collapsedVotes)
     expect(collapsedVotes).to.deep.include({
       userId: 1,
       voteId: 1,
       vote: true,
       displayName: 'John',
       rationale: 'rationale\n',
-      lastUpdated: `${formatDate('20000')}\n`,
+      lastUpdated: `${formatDate('30000')}\n`,
     })
   })
 })

@@ -308,11 +308,11 @@ export interface Study {
   datasetIds: number[]
   datasets: Dataset[]
   properties: StudyProperty[]
-  alternativeDataSharingPlan: FileStorageObject
+  alternativeDataSharingPlan?: FileStorageObject
   createDate: string // Date?
   createUserId: number
-  updateDate: string // Date?
-  updateUserId: number
+  updateDate?: string // Date?
+  updateUserId?: number
 }
 
 export interface StudyProperty {
@@ -456,7 +456,7 @@ export interface DarCollection {
   createUserId: number
   updateDate?: number
   updateUserId?: number
-  dars: Map<string, DataAccessRequest>
+  dars: Record<string, DataAccessRequest>
   datasets: Dataset[]
 }
 
@@ -465,7 +465,7 @@ export interface DataAccessRequest {
   referenceId: string
   collectionId: number
   parentId?: number
-  data: object
+  data: DataAccessRequestData
   draft: boolean
   progressReport: boolean
   expired: boolean
@@ -478,8 +478,91 @@ export interface DataAccessRequest {
   datasetIds: number[]
   elections: Record<number, Election>
   eraCommonsId: string
-  closeoutSigningOfficialApprovedDate: number
-  closeoutSigningOfficialApprovedUserId: number
+  closeoutSigningOfficialApprovedDate?: number
+  closeoutSigningOfficialApprovedUserId?: number
+}
+
+export interface DataAccessRequestData {
+  projectTitle: string
+  checkNihDataOnly: boolean
+  rus: string
+  nonTechRus: string
+  diseases: boolean
+  methods: boolean
+  controls: boolean
+  population: boolean
+  other: boolean
+  otherText: string
+  ontologies: OntologyEntry[]
+  forProfit: boolean
+  oneGender: boolean
+  gender: string
+  pediatric: boolean
+  illegalBehavior: boolean
+  addiction: boolean
+  sexualDiseases: boolean
+  stigmatizedDiseases: boolean
+  vulnerablePopulation: boolean
+  populationMigration: boolean
+  psychiatricTraits: boolean
+  notHealth: boolean
+  hmb: boolean
+  status: string
+  poa: boolean
+  datasets: DatasetEntry[]
+  darCode?: string
+  restriction: object
+  validRestriction: boolean
+  progressReportSummary?: string
+  intellectualPropertySummary?: string
+  publications?: Publication[]
+  presentations?: Presentation[]
+  dmi?: DataManagementIncident
+  researchPlans: string
+  closeoutSupplement?: Closeout
+  anvilUse: boolean
+  cloudUse: boolean
+  localUse: boolean
+  cloudProvider: string
+  cloudProviderType: string
+  cloudProviderDescription: string
+  geneticStudiesOnly: boolean
+  irb: boolean
+  irbDocumentLocation?: string
+  irbDocumentName?: string
+  irbProtocolExpiration?: string
+  itDirector: string
+  itDirectorEmail: string
+  signingOfficial: string
+  signingOfficialEmail: string
+  publication: boolean
+  collaboration: boolean
+  collaborationLetterLocation?: string
+  collaborationLetterName?: string
+  forensicActivities: boolean
+  sharingDistribution: boolean
+  labCollaborators: Collaborator[]
+  internalCollaborators: Collaborator[]
+  externalCollaborators: Collaborator[]
+  dsAcknowledgement: boolean
+  gsoAcknowledgement: boolean
+  pubAcknowledgement: boolean
+  piName: string
+  piEmail: string
+  piCountryOfOperation: string
+}
+
+export interface OntologyEntry {
+  id: string
+  label: string
+  definition: string
+  synonyms: string[]
+}
+
+export interface DatasetEntry {
+  key: string
+  value: string
+  label: string
 }
 
 export interface DataManagementIncident {
@@ -525,34 +608,34 @@ export interface Collaborator {
 export interface Election {
   electionId: number
   electionType: string
-  finalVote: boolean
+  finalVote?: boolean
   status: string
-  createDate: string
-  lastUpdate: string
-  finalVoteDate: string
+  createDate: number
+  lastUpdate: number
+  finalVoteDate?: string
   referenceId: string
-  finalRationale: string
-  finalAccessVote: boolean
+  finalRationale?: string
+  finalAccessVote?: boolean
   datasetId: number
   displayId: string
   dulName: string
   version: number
   archived: boolean
-  votes: Map<number, Vote>
+  votes: Record<number, Vote>
 }
 
 export interface Vote {
   voteId: number
-  vote: boolean
   userId: number
-  createDate: string
-  updateDate: string
+  createDate: string | number
   electionId: number
-  rationale: string
-  type: string
-  isReminderSent: boolean
-  hasConcerns: boolean
   displayName: string
+  type: string
+  vote?: boolean
+  rationale?: string
+  updateDate?: string | number
+  isReminderSent?: boolean
+  hasConcerns?: boolean
   electionStatus?: string
 }
 
@@ -574,4 +657,16 @@ export interface AlgorithmResult {
   id: string
   failed?: boolean
   match?: boolean
+}
+
+export interface VoteHistoryRow extends Vote {
+  darTitle: string
+  progressReport: boolean
+  electionDate: string | number
+}
+
+export interface ElectionWithMemberVotes extends Election {
+  darTitle: string
+  progressReport: boolean
+  memberVotes: Vote[]
 }

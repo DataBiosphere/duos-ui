@@ -42,12 +42,20 @@ const styles = {
 const appliedPrimaryHeaderStyle = Object.assign({}, styles.containerRow, styles.primaryHeaderRow)
 const appliedSecondaryHeaderStyle = Object.assign({}, styles.containerRow, styles.secondaryHeaderRow)
 
+const getApprovedDatasetsText = (approvedDatasets) => {
+  if (approvedDatasets.length > 0) {
+    return `${approvedDatasets.length} Dataset${approvedDatasets.length > 1 ? 's' : ''} approved: ${approvedDatasets.join(', ')}`
+  }
+  return 'No datasets approved'
+}
+
 export default function ReviewHeader(props) {
   const {
     darCode,
     projectTitle,
     userName,
     institutionName,
+    approvedDatasets,
     readOnly = false,
     isLoading,
   } = props
@@ -69,6 +77,11 @@ export default function ReviewHeader(props) {
           </div>
           <div className="secondary-header-row" style={appliedSecondaryHeaderStyle}>
             <p style={styles.user}>{`${userName}, ${institutionName}`}</p>
+          </div>
+          <div className="secondary-header-row" style={appliedSecondaryHeaderStyle}>
+            <p style={styles.user}>
+              {getApprovedDatasetsText(approvedDatasets)}
+            </p>
           </div>
         </div>
       )}

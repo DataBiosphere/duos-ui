@@ -384,6 +384,14 @@ const dar = {
               type: 'DAC',
               displayName: 'Sue Smtih',
             },
+            8674: {
+              voteId: 8685,
+              userId: 33333,
+              createDate: 1669062648000,
+              electionId: 8888,
+              type: 'DAC',
+              displayName: 'DAC Member1',
+            },
           },
         },
         1776: {
@@ -612,7 +620,7 @@ const props = {
   env: 'local',
 }
 
-const user = {
+const chair = {
   userId: 11111,
   displayName: 'Ted Lasso',
   roles: [
@@ -622,6 +630,33 @@ const user = {
       userId: 11111,
       roleId: 2,
       name: 'Chairperson',
+    },
+  ],
+}
+
+const admin = {
+  userId: 22222,
+  displayName: 'Admin1',
+  roles: [
+    {
+      userRoleId: 587,
+      userId: 22222,
+      roleId: 4,
+      name: 'Admin',
+    },
+  ],
+}
+
+const member = {
+  userId: 33333,
+  displayName: 'DAC Member1',
+  roles: [
+    {
+      dacId: 1,
+      userRoleId: 588,
+      userId: 33333,
+      roleId: 1,
+      name: 'Member',
     },
   ],
 }
@@ -695,7 +730,7 @@ const terms = [{
 
 beforeEach(() => {
   cy.stub(Collections, 'getCollectionById').returns(dar)
-  cy.stub(Storage, 'getCurrentUser').returns(user)
+  cy.stub(Collections, 'getCollectionByIdWithElectionHistory').returns(dar)
   cy.stub(User, 'getById').returns(researcher)
   cy.stub(Navigation, 'console').returns({})
   cy.stub(OntologyService, 'searchOntology').returns(ontologyResponse)
@@ -705,18 +740,82 @@ beforeEach(() => {
 })
 
 describe('DAR Review', () => {
-  it('renders the collections-review-page div', () => {
+  it('renders the collections-review-page div with tabs for Chairs', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(chair)
     mount(<DarCollectionReview {...props} />)
+    const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
+    const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
+    const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
     const chairContainer = cy.get('.collection-review-page').find('.tab-selection-Chair')
     const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member')
+
+    voteHistoryTab.should('exist').should('be.visible')
+    applicationTab.should('exist').should('be.visible')
+    fullDarTab.should('exist').should('be.visible')
     chairContainer.should('exist').should('be.visible')
     memberContainer.should('exist').should('be.visible')
     cy.get('.dataset-list-item').should('not.exist')
+
     chairContainer.click().then(() => {
       cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea')
     })
     memberContainer.click().then(() => {
       cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea')
     })
+  })
+
+  it('renders the collections-review-page div with tabs for Members', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(member)
+    mount(<DarCollectionReview {...props} />)
+
+    cy.get('.tab-selection-Chair').should('not.exist')
+
+    const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
+    const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
+    const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
+    const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member')
+
+    voteHistoryTab.should('exist').should('be.visible')
+    applicationTab.should('exist').should('be.visible')
+    fullDarTab.should('exist').should('be.visible')
+    memberContainer.should('exist').should('be.visible')
+    cy.get('.dataset-list-item').should('not.exist')
+
+    memberContainer.click().then(() => {
+      cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea')
+    })
+  })
+
+  it('renders the collections-review-page div with tabs for Researchers', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(researcher)
+    mount(<DarCollectionReview {...props} />)
+
+    cy.get('.tab-selection-Voting').should('not.exist')
+    cy.get('.tab-selection-Chair').should('not.exist')
+    cy.get('.tab-selection-Member').should('not.exist')
+
+    const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
+    const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
+
+    applicationTab.should('exist').should('be.visible')
+    fullDarTab.should('exist').should('be.visible')
+  })
+
+  it('renders the collections-review-page div with tabs for Admins', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(admin)
+    const propsCopy = Object.assign({}, props, { adminPage: true })
+    mount(<DarCollectionReview {...propsCopy} />)
+
+    cy.get('.tab-selection-Member').should('not.exist')
+
+    const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
+    const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
+    const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
+    const chairContainer = cy.get('.collection-review-page').find('.tab-selection-Chair')
+
+    voteHistoryTab.should('exist').should('be.visible')
+    applicationTab.should('exist').should('be.visible')
+    fullDarTab.should('exist').should('be.visible')
+    chairContainer.should('exist').should('be.visible')
   })
 })

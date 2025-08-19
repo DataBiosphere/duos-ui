@@ -60,7 +60,7 @@ interface VoteGroup {
 export const binCollectionToBuckets = async (collection: DarCollection, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
   // Find the most recent DAR
-  const recentDar: DataAccessRequest = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) : {} as DataAccessRequest
+  const recentDar: DataAccessRequest = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) ?? {} as DataAccessRequest : {} as DataAccessRequest
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
   const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []

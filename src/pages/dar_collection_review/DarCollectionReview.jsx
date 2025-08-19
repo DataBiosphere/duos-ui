@@ -13,6 +13,7 @@ import { Storage } from '../../libs/storage'
 import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from '../../libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
+import VotingHistory from './VotingHistory'
 
 const tabContainerColor = 'rgb(115,154,164)'
 
@@ -51,6 +52,7 @@ const tabsForUser = (user, buckets, adminPage = false) => {
       applicationInformation: 'Application Information',
       fullDAR: 'Full DAR',
       chairVote: 'Chair Vote',
+      votingHistory: 'Voting History',
     }
   }
   const dataAccessBuckets = filter(
@@ -75,7 +77,50 @@ const tabsForUser = (user, buckets, adminPage = false) => {
   if (!isEmpty(myChairVotes)) {
     updatedTabs.chairVote = 'Chair Vote'
   }
+  if (userIsDacUser(user)) {
+    updatedTabs.votingHistory = 'Voting History'
+  }
   return updatedTabs
+}
+
+const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
+  // most recently submitted DAR
+  const dars = Object.values(darCollection.dars)
+  if (dars.length === 0) return []
+  const mostRecentDar = dars.filter(d => !d.draft).reduce((latest, current) =>
+    new Date(current.submissionDate) > new Date(latest.submissionDate) ? current : latest,
+  )
+
+  // most recent closed election
+  const elections = Object.values(mostRecentDar.elections || {})
+  const closedDataAccessElections = elections.filter(e => e.electionType == 'DataAccess' && e.status === 'Closed')
+  if (closedDataAccessElections.length === 0) return []
+  const latestElection = closedDataAccessElections.reduce((latest, current) =>
+    new Date(current.createDate) > new Date(latest.createDate) ? current : latest,
+  )
+
+  // datasets approved in that election
+  const approvedDatasetIds = []
+  Object.values(latestElection.votes || {}).forEach((vote) => {
+    if ((vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE') && vote.vote === true) {
+      approvedDatasetIds.push(latestElection.datasetId)
+    }
+  })
+
+  // filter for this DAC if this is a DAC page, and get dataset names
+  const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter((datasetId) => {
+    if (dacIds.length === 0) return true // admin page
+    const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
+    return dacIds.includes(dataset?.dacId)
+  }).map((datasetId) => {
+    const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
+    return dataset?.name
+  })
+  return approvedDatasetNames || []
+}
+
+const userIsDacUser = (user) => {
+  return user.roles?.some(role => role.roleId === 2 || role.roleId === 1)
 }
 
 export default function DarCollectionReview(props) {
@@ -83,6 +128,7 @@ export default function DarCollectionReview(props) {
   const [collection, setCollection] = useState({})
   const [darInfo, setDarInfo] = useState({})
   const [referenceIdForDocuments, setReferenceIdForDocuments] = useState()
+  const [approvedDatasets, setApprovedDatasets] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [subcomponentLoading, setSubcomponentLoading] = useState(true)
   const [tabs, setTabs] = useState({
@@ -92,23 +138,33 @@ export default function DarCollectionReview(props) {
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation)
   const [researcherProfile, setResearcherProfile] = useState({})
   const [dataUseBuckets, setDataUseBuckets] = useState([])
+  const [dacIds, setDacIds] = useState([])
   const { adminPage = false, readOnly = false } = props
 
   const init = useCallback(async () => {
     const user = Storage.getCurrentUser()
     try {
-      const collection = await Collections.getCollectionById(collectionId)
+      let collection
+      if (adminPage || userIsDacUser(user)) {
+        collection = await Collections.getCollectionByIdWithElectionHistory(collectionId)
+      }
+      else {
+        collection = await Collections.getCollectionById(collectionId)
+      }
       const darInfo = find(d => !isEmpty(d.data))(collection.dars).data
       const referenceIdForDocuments = find(d => !isEmpty(d.referenceId))(collection.dars).referenceId
       const researcherProfile = await User.getById(collection.createUserId)
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
       const dacIds = adminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
       const processedBuckets = await binCollectionToBuckets(collection, dacIds)
+      const approvedDatasetNames = getApprovedDatasetsFromLatestDar(collection || { dars: [] }, dacIds)
       setDataUseBuckets(processedBuckets)
       setCollection(collection)
       setDarInfo(darInfo)
       setResearcherProfile(researcherProfile)
+      setApprovedDatasets(approvedDatasetNames)
       setTabs(tabsForUser(user, processedBuckets, adminPage))
+      setDacIds(dacIds)
       setIsLoading(false)
       setSubcomponentLoading(false)
       setReferenceIdForDocuments(referenceIdForDocuments)
@@ -160,6 +216,7 @@ export default function DarCollectionReview(props) {
           projectTitle={darInfo.projectTitle || '- -'}
           userName={researcherProfile.displayName || '- -'}
           institutionName={get('institution.name')(researcherProfile) || '- -'}
+          approvedDatasets={approvedDatasets}
           isLoading={isLoading}
           readOnly={readOnly || adminPage}
         />
@@ -232,6 +289,12 @@ export default function DarCollectionReview(props) {
             readOnly={readOnly}
             updateFinalVote={updateFinalVoteFn}
             reloadFn={init}
+          />
+        )}
+        {selectedTab === tabs.votingHistory && (
+          <VotingHistory
+            darCollection={collection}
+            dacIds={dacIds}
           />
         )}
       </div>

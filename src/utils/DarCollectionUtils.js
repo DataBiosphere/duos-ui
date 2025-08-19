@@ -71,7 +71,7 @@ export const processVotesForBucket = (darElections = []) => {
 // Gets data access votes from this bucket by members of this user's DAC
 // Note that filtering by DAC does not occur if user is viewing on admin review page
 export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => {
-  const votes = !isNil(bucket) ? bucket.votes : []
+  const votes = bucket?.votes ?? []
 
   let memberVotesArrays = flow(
     map(voteData => voteData.dataAccess),
@@ -175,7 +175,7 @@ const collapseVotes = ({ votes }) => {
   const collapsedVotes = {}
   votes.forEach((vote) => {
     const matchingVote = collapsedVotes[`${vote.vote}`]
-    const lastUpdate = vote.updateDate || vote.createDate
+    const lastUpdate = vote.updateDate
     if (isNil(matchingVote)) {
       collapsedVotes[`${vote.vote}`] = {
         userId: vote.userId,

@@ -1,11 +1,10 @@
 import React, { useCallback } from 'react'
 import SimpleTable from '../SimpleTable'
-import { Styles } from '../../libs/theme'
+import { Styles } from 'src/libs/theme'
 import { isNil, isEmpty } from 'lodash/fp'
 import { useEffect, useState } from 'react'
-import { sortVisibleTable } from '../../libs/utils'
-import { Email } from '../../libs/ajax/Email'
-import { Notifications } from '../../libs/utils'
+import { formatDate, Notifications, sortVisibleTable } from 'src/libs/utils'
+import { Email } from 'src/libs/ajax/Email'
 
 const styles = {
   baseStyle: {
@@ -72,11 +71,12 @@ const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, se
           isChair,
         }),
         nameCellData({ name: displayName, voteId }),
-        dateCellData({ date: lastUpdated, voteId }),
+        dateCellData({ date: lastUpdated ?? formatDate(dacVote.updateDate), voteId }),
         rationaleCellData({ rationale, voteId }),
       ]
     })
   }
+  return []
 }
 
 const voteToString = (vote) => {
@@ -142,7 +142,7 @@ function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }) {
 }
 
 export default function VoteSummaryTable(props) {
-  const [sort, setSort] = useState({ colIndex: 0, dir: 1 })
+  const [sort, setSort] = useState({ colIndex: 0, dir: -1 })
   const [visibleVotes, setVisibleVotes] = useState([])
   const [tableSize, setTableSize] = useState(5)
   const { dacVotes, isLoading, isChair = false } = props
