@@ -7,6 +7,7 @@ import { Theme } from 'src/libs/theme'
 import { convertFormStateToDAR } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { DAR } from 'src/libs/ajax/DAR'
+import AsyncActionButton from 'src/components/AsyncActionButton'
 
 interface SubmitProgressReportProps {
   readonly formState: FormState
@@ -89,17 +90,17 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   return (
     <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
       <span>
-        <button
-          type="button"
+        <AsyncActionButton
+          id="btn_submit"
           className="button button-blue"
           style={{ marginRight: '2rem', cursor: 'pointer', ...(disabled ? disabledStyle : {}) }}
           data-cy="pr-submit-button"
           disabled={disabled}
-          title="Complete required form fields to enable submission."
+          aria-label="Complete required form fields to enable submission."
           onClick={submit}
         >
           Submit
-        </button>
+        </AsyncActionButton>
       </span>
       <button
         type="button"
