@@ -163,7 +163,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
 
       const rationaleValues = votes.map(vote => vote.rationale)
       if (allMatch(rationaleValues)) {
-        setRationale(prevVote.rationale)
+        setRationale(prevVote.rationale ?? '')
       }
 
       const radar = votes.some(vote => vote.type === 'RADAR_APPROVE')
