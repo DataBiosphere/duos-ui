@@ -12,10 +12,7 @@ export const ERACommonsDisplay = (props: ERACommonsDisplayProps) => {
     <div>
       <label className="era-control-label">
         <span data-cy="era-commons-header">
-          NIH
-          {nihAccountLabel()}
-          {' '}
-          ID
+          NIH {nihAccountLabel()} ID
         </span>
       </label>
       <div>
