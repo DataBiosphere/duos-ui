@@ -7,7 +7,7 @@ import { Storage } from 'src/libs/storage'
 import { DAR } from 'src/libs/ajax/DAR'
 import { AxiosError } from 'axios'
 import { DataAccessRequest } from 'src/types/model'
-import { AsyncActionButton } from 'src/components/AsyncActionButton'
+import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
 interface CloseoutReviewProps {
   dar: DataAccessRequest
@@ -111,7 +111,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
             {/* Hide the Approve button if there is no closeout acknowledgement */}
             {(!acknowledged)
               && (
-                <AsyncActionButton
+                <AsyncSpinnerButton
                   onClick={onApprove}
                   onError={onError}
                   data-cy="closeout-review-approve-button"
@@ -127,7 +127,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
                   }}
                 >
                   Approve closeout
-                </AsyncActionButton>
+                </AsyncSpinnerButton>
               )}
             <button
               type="button"

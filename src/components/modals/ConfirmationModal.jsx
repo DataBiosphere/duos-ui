@@ -5,7 +5,7 @@ import './ConfirmationModal.css'
 import { styled } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
-import { AsyncActionButton } from '../AsyncActionButton'
+import { AsyncSpinnerButton } from '../AsyncSpinnerButton.js'
 
 const ConfirmationModal = (props) => {
   const { showConfirmation, closeConfirmation, title, message, header, onConfirm, styleOverride = {} } = props
@@ -36,7 +36,7 @@ const ConfirmationModal = (props) => {
   const actionButtons = (
     <Stack spacing={2} direction="row">
       <SecondaryButton variant="outlined" className="confirmation-modal-secondary-button" onClick={closeFn}>Cancel</SecondaryButton>
-      <AsyncActionButton
+      <AsyncSpinnerButton
         onClick={onConfirm}
         className="confirmation-modal-primary-button"
         style={{
@@ -52,7 +52,7 @@ const ConfirmationModal = (props) => {
         onMouseLeave={e => setHoverState(e, duosBlue)}
       >
         Confirm
-      </AsyncActionButton>
+      </AsyncSpinnerButton>
     </Stack>
   )
 

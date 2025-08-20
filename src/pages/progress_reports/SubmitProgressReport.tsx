@@ -7,7 +7,7 @@ import { Theme } from 'src/libs/theme'
 import { convertFormStateToDAR } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { DAR } from 'src/libs/ajax/DAR'
-import AsyncActionButton from 'src/components/AsyncActionButton'
+import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 
 interface SubmitProgressReportProps {
   readonly formState: FormState
@@ -90,7 +90,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   return (
     <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
       <span>
-        <AsyncActionButton
+        <AsyncSpinnerButton
           id="btn_submit"
           className="button button-blue"
           style={{ marginRight: '2rem', cursor: 'pointer', ...(disabled ? disabledStyle : {}) }}
@@ -100,7 +100,7 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
           onClick={submit}
         >
           Submit
-        </AsyncActionButton>
+        </AsyncSpinnerButton>
       </span>
       <button
         type="button"
