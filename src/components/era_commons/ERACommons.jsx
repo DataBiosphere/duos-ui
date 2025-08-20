@@ -133,10 +133,7 @@ export default function ERACommons(props) {
       {header && (
         <label className="era-control-label">
           <span data-cy="era-commons-header">
-            NIH
-            {accountLabel}
-            {' '}
-            ID
+            NIH {accountLabel} ID
             {required ? <span data-cy="era-commons-required">*</span> : ''}
           </span>
         </label>
