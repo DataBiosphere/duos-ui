@@ -307,12 +307,6 @@ const DuosHeader = (props) => {
           />
         </div>
       </Box>
-      {
-      // NOTE: old navbar style is heavily dependent on css styles with element specific styles
-      // Hard to make that navbar flexible with material-ui's syntax
-      // For now I will use material-ui's hidden element to selectively render the two different navbars
-      // I'll look into rewriting the large navbar on a later PR
-      }
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
         {makeNotifications()}
         <div className="navbar-main" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
