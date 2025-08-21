@@ -68,6 +68,7 @@ export const ConfirmationDialog = (props) => {
           className="button button-blue"
           onClick={props.action.handler(true)}
           disabled={disableOkBtn}
+          hideOnSuccess={false}
         >
           {props.action.label}
         </AsyncSpinnerButton>
