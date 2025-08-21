@@ -1,11 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Box from '@mui/material/Box'
 import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
-import { visuallyHidden } from '@mui/utils'
 import { ThemeProvider } from '@mui/material/styles'
 import { theme } from './Themes'
 
@@ -42,6 +40,11 @@ export default function EnhancedTableHead(props) {
                       active={orderBy === headCell.id}
                       direction={orderBy === headCell.id ? order : 'asc'}
                       onClick={createSortHandler(headCell.id)}
+                      aria-label={
+                        orderBy === headCell.id
+                          ? `${headCell.label}, ${order === 'desc' ? 'sorted descending' : 'sorted ascending'}`
+                          : `${headCell.label}, unsorted`
+                      }
                       sx={{
                         fontSize: '16px',
                         fontWeight: '400',
@@ -50,13 +53,6 @@ export default function EnhancedTableHead(props) {
                       }}
                     >
                       {headCell.label}
-                      {orderBy === headCell.id
-                        ? (
-                            <Box component="span" sx={visuallyHidden}>
-                              {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                            </Box>
-                          )
-                        : null}
                     </TableSortLabel>
                   )
                 : (
@@ -64,6 +60,11 @@ export default function EnhancedTableHead(props) {
                       active={orderBy === headCell.id}
                       direction={orderBy === headCell.id ? order : 'asc'}
                       onClick={createSortHandler(headCell.id)}
+                      aria-label={
+                        orderBy === headCell.id
+                          ? `${headCell.label}, ${order === 'desc' ? 'sorted descending' : 'sorted ascending'}`
+                          : `${headCell.label}, unsorted`
+                      }
                       sx={{
                         fontSize: '16px',
                         fontWeight: '400',
@@ -71,13 +72,6 @@ export default function EnhancedTableHead(props) {
                         paddingLeft: '12px' }}
                     >
                       {headCell.label}
-                      {orderBy === headCell.id
-                        ? (
-                            <Box component="span" sx={visuallyHidden}>
-                              {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                            </Box>
-                          )
-                        : null}
                     </TableSortLabel>
                   )}
             </TableCell>
