@@ -4,6 +4,7 @@ import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } 
 import { selectedPrimaryGroup } from './consentGroupUtils'
 import { DAR } from '../../../libs/ajax/DAR'
 import { cloneDeep } from 'lodash'
+import NumberInput from 'src/components/forms/typescript/NumberInput'
 
 const searchOntologies = (query, callback) => {
   let options = []
@@ -603,6 +604,14 @@ export const EditConsentGroup = (props) => {
           defaultValue={consentGroup.numberOfParticipants}
           validation={validation.numberOfParticipants}
           onChange={onChange}
+        />
+        <NumberInput
+          id={idx + '_numberOfParticipants'}
+          name="numberOfParticipants"
+          title="# of Participants"
+          required={true}
+          defaultValue={consentGroup.numberOfParticipants}
+          onChange={(event) => { console.log(event) }}
         />
       </div>
 
