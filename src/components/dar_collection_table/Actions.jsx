@@ -13,11 +13,9 @@ const cancelGray = '#333F52'
 // CSS for responsive actions container
 const actionsContainerStyle = {
   display: 'flex',
-  padding: '10px 5px',
   justifyContent: 'flex-start',
   alignItems: 'center',
   flexWrap: 'wrap',
-  gap: '5px',
 }
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER
@@ -26,7 +24,6 @@ const baseCancelButtonStyle = Object.assign(
   Styles.TABLE.TABLE_ICON_BUTTON,
   { color: cancelGray },
   { alignItems: 'center' },
-  { marginRight: '5px' },
 )
 
 const hoverPrimaryButtonStyle = {
