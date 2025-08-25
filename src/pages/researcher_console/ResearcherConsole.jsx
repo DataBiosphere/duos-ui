@@ -19,7 +19,43 @@ export default function ResearcherConsole() {
   const [isLoading, setIsLoading] = useState(true)
   const [researcherCollections, setResearcherCollections] = useState()
   const [filteredList, setFilteredList] = useState()
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const searchRef = useRef('')
+
+  // Define base columns array
+  const baseColumns = [
+    DarCollectionTableColumnOptions.DAR_CODE,
+    DarCollectionTableColumnOptions.NAME,
+    DarCollectionTableColumnOptions.SUBMISSION_DATE,
+    DarCollectionTableColumnOptions.DATASET_COUNT,
+    DarCollectionTableColumnOptions.EXPIRES_AT,
+    DarCollectionTableColumnOptions.STATUS,
+    DarCollectionTableColumnOptions.ACTIONS,
+  ]
+
+  // Define responsive columns based on window width
+  const getResponsiveColumns = (width) => {
+    // Hide dataset count column if viewport width < 1200px
+    if (width < 1200) {
+      return baseColumns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
+    }
+    return baseColumns
+  }
+
+  // Initialize columns based on current window width
+  const [responsiveColumns, setResponsiveColumns] = useState(() => getResponsiveColumns(window.innerWidth))
+
+  // Handle window resize for responsive column hiding
+  useEffect(() => {
+    const handleResize = () => {
+      const newWidth = window.innerWidth
+      setWindowWidth(newWidth)
+      setResponsiveColumns(getResponsiveColumns(newWidth))
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
@@ -164,23 +200,18 @@ export default function ResearcherConsole() {
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
       <div className="table-container">
-        <DarCollectionTable
-          collections={filteredList}
-          columns={[
-            DarCollectionTableColumnOptions.DAR_CODE,
-            DarCollectionTableColumnOptions.NAME,
-            DarCollectionTableColumnOptions.SUBMISSION_DATE,
-            DarCollectionTableColumnOptions.DATASET_COUNT,
-            DarCollectionTableColumnOptions.EXPIRES_AT,
-            DarCollectionTableColumnOptions.STATUS,
-            DarCollectionTableColumnOptions.ACTIONS,
-          ]}
-          isLoading={isLoading}
-          cancelCollection={cancelCollection}
-          reviseCollection={reviseCollection}
-          deleteDraft={deleteDraft}
-          consoleType={consoleTypes.RESEARCHER}
-        />
+        {responsiveColumns.length > 0 && (
+          <DarCollectionTable
+            key={`dar-table-${responsiveColumns.length}-${responsiveColumns.join('-')}`}
+            collections={filteredList}
+            columns={responsiveColumns}
+            isLoading={isLoading}
+            cancelCollection={cancelCollection}
+            reviseCollection={reviseCollection}
+            deleteDraft={deleteDraft}
+            consoleType={consoleTypes.RESEARCHER}
+          />
+        )}
       </div>
     </div>
   )

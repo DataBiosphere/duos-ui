@@ -10,6 +10,44 @@ import { consoleTypes, DarCollectionTableColumnOptions } from '../../utils/DarCo
 export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+
+  // Define base columns array for signing official console
+  const baseColumns = [
+    DarCollectionTableColumnOptions.DAR_CODE,
+    DarCollectionTableColumnOptions.NAME,
+    DarCollectionTableColumnOptions.SUBMISSION_DATE,
+    DarCollectionTableColumnOptions.RESEARCHER,
+    DarCollectionTableColumnOptions.INSTITUTION,
+    DarCollectionTableColumnOptions.EXPIRES_AT,
+    DarCollectionTableColumnOptions.DATASET_COUNT,
+    DarCollectionTableColumnOptions.STATUS,
+    DarCollectionTableColumnOptions.ACTIONS,
+  ]
+
+  // Define responsive columns based on window width
+  const getResponsiveColumns = (width) => {
+    // Hide dataset count column if viewport width < 1450px
+    if (width < 1450) {
+      return baseColumns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
+    }
+    return baseColumns
+  }
+
+  // Initialize columns based on current window width
+  const [responsiveColumns, setResponsiveColumns] = useState(() => getResponsiveColumns(window.innerWidth))
+
+  // Handle window resize for responsive column hiding
+  useEffect(() => {
+    const handleResize = () => {
+      const newWidth = window.innerWidth
+      setWindowWidth(newWidth)
+      setResponsiveColumns(getResponsiveColumns(newWidth))
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const init = async () => {
@@ -43,24 +81,17 @@ export default function SigningOfficialDarRequests() {
         </div>
       </div>
       <div className="signing-official-tabs">
-        <DarCollectionTable
-          collections={collectionList}
-          columns={[
-            DarCollectionTableColumnOptions.DAR_CODE,
-            DarCollectionTableColumnOptions.NAME,
-            DarCollectionTableColumnOptions.SUBMISSION_DATE,
-            DarCollectionTableColumnOptions.RESEARCHER,
-            DarCollectionTableColumnOptions.INSTITUTION,
-            DarCollectionTableColumnOptions.EXPIRES_AT,
-            DarCollectionTableColumnOptions.DATASET_COUNT,
-            DarCollectionTableColumnOptions.STATUS,
-            DarCollectionTableColumnOptions.ACTIONS,
-          ]}
-          isLoading={isLoading}
-          cancelCollection={null}
-          reviseCollection={null}
-          consoleType={consoleTypes.SIGNING_OFFICIAL}
-        />
+        {responsiveColumns.length > 0 && (
+          <DarCollectionTable
+            key={`so-dar-table-${responsiveColumns.length}-${responsiveColumns.join('-')}`}
+            collections={collectionList}
+            columns={responsiveColumns}
+            isLoading={isLoading}
+            cancelCollection={null}
+            reviseCollection={null}
+            consoleType={consoleTypes.SIGNING_OFFICIAL}
+          />
+        )}
       </div>
     </div>
   )

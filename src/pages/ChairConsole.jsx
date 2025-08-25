@@ -20,9 +20,47 @@ export default function ChairConsole(props) {
   const [filteredList, setFilteredList] = useState([])
   const [relevantDatasets, setRelevantDatasets] = useState()
   const [isLoading, setIsLoading] = useState(true)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
   const { history } = props
+
+  // Define base columns array for chair console
+  const baseColumns = [
+    DarCollectionTableColumnOptions.DAR_CODE,
+    DarCollectionTableColumnOptions.NAME,
+    DarCollectionTableColumnOptions.SUBMISSION_DATE,
+    DarCollectionTableColumnOptions.RESEARCHER,
+    DarCollectionTableColumnOptions.INSTITUTION,
+    DarCollectionTableColumnOptions.DATASET_COUNT,
+    DarCollectionTableColumnOptions.EXPIRES_AT,
+    DarCollectionTableColumnOptions.STATUS,
+    DarCollectionTableColumnOptions.ACTIONS,
+  ]
+
+  // Define responsive columns based on window width
+  const getResponsiveColumns = (width) => {
+    // Hide dataset count column if viewport width < 1450px
+    if (width < 1450) {
+      return baseColumns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
+    }
+    return baseColumns
+  }
+
+  // Initialize columns based on current window width
+  const [responsiveColumns, setResponsiveColumns] = useState(() => getResponsiveColumns(window.innerWidth))
+
+  // Handle window resize for responsive column hiding
+  useEffect(() => {
+    const handleResize = () => {
+      const newWidth = window.innerWidth
+      setWindowWidth(newWidth)
+      setResponsiveColumns(getResponsiveColumns(newWidth))
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
     searchTerms,
@@ -73,27 +111,20 @@ export default function ChairConsole(props) {
         </div>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
-      <DarCollectionTable
-        collections={filteredList}
-        columns={[
-          DarCollectionTableColumnOptions.DAR_CODE,
-          DarCollectionTableColumnOptions.NAME,
-          DarCollectionTableColumnOptions.SUBMISSION_DATE,
-          DarCollectionTableColumnOptions.RESEARCHER,
-          DarCollectionTableColumnOptions.INSTITUTION,
-          DarCollectionTableColumnOptions.DATASET_COUNT,
-          DarCollectionTableColumnOptions.EXPIRES_AT,
-          DarCollectionTableColumnOptions.STATUS,
-          DarCollectionTableColumnOptions.ACTIONS,
-        ]}
-        isLoading={isLoading}
-        relevantDatasets={relevantDatasets}
-        cancelCollection={cancelCollection}
-        reviseCollection={null}
-        openCollection={openCollection}
-        goToVote={goToVote}
-        consoleType={consoleTypes.CHAIR}
-      />
+      {responsiveColumns.length > 0 && (
+        <DarCollectionTable
+          key={`chair-dar-table-${responsiveColumns.length}-${responsiveColumns.join('-')}`}
+          collections={filteredList}
+          columns={responsiveColumns}
+          isLoading={isLoading}
+          relevantDatasets={relevantDatasets}
+          cancelCollection={cancelCollection}
+          reviseCollection={null}
+          openCollection={openCollection}
+          goToVote={goToVote}
+          consoleType={consoleTypes.CHAIR}
+        />
+      )}
     </div>
   )
 }
