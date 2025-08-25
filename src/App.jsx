@@ -57,7 +57,7 @@ function App() {
       await StackdriverReporter.start()
     }
     stackdriverStart()
-  })
+  }, [])
 
   useEffect(() => {
     const setUserIsLogged = () => {

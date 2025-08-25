@@ -9,6 +9,7 @@ import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
 import { createMemoryHistory } from 'history'
 import { Router } from 'react-router'
+import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 
 const user = {
   userId: 2,
@@ -51,6 +52,66 @@ describe('Main App Functions', () => {
     cy.stub(StackdriverReporter, 'start')
     cy.stub(Config, 'getGAId').returns('UA-12345678-1')
     cy.stub(Storage, 'setCurrentUser')
+    cy.stub(ServiceStatus, 'getConsentStatus').returns(Promise.resolve(
+      {
+        ok: true,
+        degraded: false,
+        systems: {
+          deadlocks: {
+            healthy: true,
+            time: 1756131889372,
+            duration: 1,
+          },
+          sam: {
+            healthy: true,
+            details: {
+              ok: true,
+              systems: {
+                Database: {
+                  ok: true,
+                },
+              },
+            },
+            time: 1756131889372,
+            duration: 0,
+          },
+          sendgrid: {
+            healthy: true,
+            details: {
+              page: {
+                id: '3tgl2vf85cht',
+                name: 'SendGrid',
+                url: 'https://status.sendgrid.com',
+                time_zone: 'America/Los_Angeles',
+                updated_at: '2025-08-25T07:16:01.435-07:00',
+              },
+              status: {
+                indicator: 'none',
+                description: 'All Systems Operational',
+              },
+            },
+            time: 1756131889372,
+            duration: 0,
+          },
+        },
+      }))
+
+    cy.stub(ServiceStatus, 'getOntologyStatus').returns(Promise.resolve({
+      ok: true,
+      degraded: false,
+      systems: {
+        'elastic-search': {
+          healthy: true,
+          message: 'ClusterHealth is GREEN',
+          error: null,
+          details: null,
+          time: 1756131890182,
+          duration: 4,
+          timestamp: '2025-08-25T14:24:50.182Z',
+        },
+      },
+    },
+    ))
   })
 
   it('should render main layout components on the home page', () => {
@@ -65,7 +126,7 @@ describe('Main App Functions', () => {
     cy.get('.body').contains('Data Use Oversight System').should('exist')
   })
 
-  it ('should initialize ReactGA and StackdriverReporter', () => {
+  it('should initialize ReactGA and StackdriverReporter', () => {
     mount(
       <MemoryRouter initialEntries={['/']}>
         <App />
@@ -75,7 +136,7 @@ describe('Main App Functions', () => {
     cy.wrap(StackdriverReporter.start).should('have.been.calledOnce')
   })
 
-  it('should displays an error when ECM fails', () => {
+  it('should display an error when ECM fails', () => {
     cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').throws(new Error('Authentication failed'))
     mount(
       <MemoryRouter initialEntries={[initialLocation]}>
