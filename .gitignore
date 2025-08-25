@@ -9,6 +9,7 @@ jsconfig.json
 
 # dependencies
 /node_modules
+/.pnpm-store
 
 # IDE
 ./idea

@@ -1,6 +1,5 @@
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import useOnMount from '@mui/utils/useOnMount'
 import * as React from 'react'
 import { Box, Button } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
@@ -201,12 +200,13 @@ export const DatasetSearchTable = (props) => {
     setFilters(newFilters)
   }
 
-  useOnMount(() => {
+  useEffect(() => {
     if (isEmpty(datasets)) {
       return
     }
     getExportableDatasets(datasets)
-  })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const searchAndFilter = useRef(
     debounce((fullQuery) => {
