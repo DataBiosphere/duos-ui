@@ -15,7 +15,7 @@ import {
   rasEnabled,
 } from '../../utils/ERACommonsUtils.js'
 import ReactTooltip from 'react-tooltip'
-import AsyncActionButton from 'src/components/AsyncActionButton.js'
+import AsyncActionButton from 'src/components/AsyncActionButton'
 
 export default function ERACommons(props) {
   const {
