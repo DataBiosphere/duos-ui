@@ -15,7 +15,7 @@ import {
   rasEnabled,
 } from '../../utils/ERACommonsUtils.js'
 import ReactTooltip from 'react-tooltip'
-import AsyncActionButton from 'src/components/AsyncActionButton'
+import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 
 export default function ERACommons(props) {
   const {
@@ -163,7 +163,7 @@ export default function ERACommons(props) {
           {expirationCount >= 0 && (
             <div className="era-commons-id-value">
               <span data-cy="era-commons-id-value">{eraCommonsId}</span>
-              <AsyncActionButton
+              <AsyncSpinnerButton
                 className="era-delete-icon"
                 onClick={deleteNihAccount}
                 onError={displayError}
@@ -182,7 +182,7 @@ export default function ERACommons(props) {
                   data-tip="Clear account"
                   data-for="tip_clear_era_commons_link"
                 />
-              </AsyncActionButton>
+              </AsyncSpinnerButton>
               <ReactTooltip
                 place="right"
                 effect="solid"
