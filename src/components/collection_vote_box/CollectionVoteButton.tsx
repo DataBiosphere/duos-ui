@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { votingColors } from 'src/libs/VotingColors'
-import { AsyncActionButton } from 'src/components/AsyncActionButton'
+import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
 const styles = {
   baseStyle: {
@@ -77,7 +77,7 @@ export default function CollectionVoteButton({
   }, [disabled, onClick])
 
   return (
-    <AsyncActionButton
+    <AsyncSpinnerButton
       data-cy={datacy}
       style={{ ...styles.baseStyle, ...additionalStyle }}
       onClick={handleAsyncClick}
@@ -88,6 +88,6 @@ export default function CollectionVoteButton({
       hideOnSuccess={false}
     >
       {label}
-    </AsyncActionButton>
+    </AsyncSpinnerButton>
   )
 }

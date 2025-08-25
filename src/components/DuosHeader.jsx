@@ -1,7 +1,6 @@
 import MenuIcon from '@mui/icons-material/Menu'
-import { IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
-import Hidden from '@mui/material/Hidden'
 import React, { useEffect, useState } from 'react'
 import { withRouter } from 'react-router-dom'
 import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent.jsx'
@@ -282,7 +281,7 @@ const DuosHeader = (props) => {
 
   return (
     <nav className="navbar-duos" role="navigation">
-      <Hidden mdDown={true}>
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
         <div className="row no-margin" style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
@@ -307,14 +306,8 @@ const DuosHeader = (props) => {
             profileState={state.showProfileLinks}
           />
         </div>
-      </Hidden>
-      {
-      // NOTE: old navbar style is heavily dependent on css styles with element specific styles
-      // Hard to make that navbar flexible with material-ui's syntax
-      // For now I will use material-ui's hidden element to selectively render the two different navbars
-      // I'll look into rewriting the large navbar on a later PR
-      }
-      <Hidden mdUp={true}>
+      </Box>
+      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
         {makeNotifications()}
         <div className="navbar-main" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <img
@@ -359,7 +352,7 @@ const DuosHeader = (props) => {
           </Drawer>
         </div>
         {supportModal}
-      </Hidden>
+      </Box>
     </nav>
   )
 }

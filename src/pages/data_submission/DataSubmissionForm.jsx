@@ -15,7 +15,7 @@ import NIHAdministrativeInformation from 'src/pages/data_submission/NIHAdministr
 import NIHDataManagement from 'src/pages/data_submission/NIHDataManagement'
 import NihAnvilUse from 'src/pages/data_submission/NihAnvilUse'
 import { uniqueValidator } from 'src/components/forms/formValidation'
-import { AsyncActionButton } from 'src/components/AsyncActionButton'
+import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton.js'
 
 export const DataSubmissionForm = (props) => {
   const {
@@ -209,14 +209,15 @@ export const DataSubmissionForm = (props) => {
             <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode} datasetNames={datasetNames} />
 
             <div className="flex flex-row" style={{ justifyContent: 'flex-end', marginBottom: '2rem' }}>
-              <AsyncActionButton
+              <AsyncSpinnerButton
                 onClick={submit}
                 onError={onError}
                 className="button button-white"
                 data-cy="data-submission-submit-button"
+                hideOnSuccess={false}
               >
                 Submit
-              </AsyncActionButton>
+              </AsyncSpinnerButton>
             </div>
           </form>
         </div>

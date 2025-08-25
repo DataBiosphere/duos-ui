@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { Spinner } from 'src/components/Spinner'
 
-export interface AsyncActionButtonProps {
+export interface AsyncSpinnerButtonProps {
   /** The text to display on the button */
   'children': React.ReactNode
   /** Function to execute when button is clicked - should return a Promise */
@@ -28,7 +28,7 @@ export interface AsyncActionButtonProps {
   'hideOnSuccess'?: boolean
 }
 
-export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
+export const AsyncSpinnerButton: React.FC<AsyncSpinnerButtonProps> = ({
   children,
   onClick,
   style,
@@ -127,4 +127,4 @@ export const AsyncActionButton: React.FC<AsyncActionButtonProps> = ({
   )
 }
 
-export default AsyncActionButton
+export default AsyncSpinnerButton
