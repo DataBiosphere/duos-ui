@@ -10,20 +10,13 @@ import { includes, toLower } from 'lodash/fp'
 const duosBlue = '#0948B7'
 const cancelGray = '#333F52'
 
-// CSS for responsive actions container
-const actionsContainerStyle = {
-  display: 'flex',
-  justifyContent: 'flex-start',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-}
-
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER
 const baseCancelButtonStyle = Object.assign(
   {},
   Styles.TABLE.TABLE_ICON_BUTTON,
   { color: cancelGray },
   { alignItems: 'center' },
+  { marginRight: '5px' },
 )
 
 const hoverPrimaryButtonStyle = {
@@ -226,10 +219,15 @@ export default function Actions(props) {
 
   return (
     <div
-      className={`${consoleType}-actions dar-actions-container`}
+      className={`${consoleType}-actions`}
       key={`${consoleType}-actions-${collectionId}`}
       id={`${consoleType}-actions-${collectionId}`}
-      style={actionsContainerStyle}
+      style={{
+        display: 'flex',
+        padding: '10px 5px',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+      }}
     >
       {actions.includes('Open') && <SimpleButton {...openButtonAttributes} />}
       {actions.includes('Vote') && <SimpleButton {...voteButtonAttributes} />}

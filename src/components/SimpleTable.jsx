@@ -110,13 +110,7 @@ const DataRows = ({ rowData, baseStyle, columnHeaders, rowWrapper = ({ renderedR
           let output
           // columnHeaders determine width of the columns,
           // therefore extract width from columnHeader and apply to cell style
-          // Add defensive check to prevent undefined access
-          const columnHeader = columnHeaders[cellIndex]
-          if (!columnHeader || !columnHeader.cellStyle) {
-            console.warn(`Missing column header for cell index ${cellIndex}. Row has ${row.length} cells, columnHeaders has ${columnHeaders.length} headers.`)
-            return null
-          }
-          const columnWidthStyle = { width: columnHeader.cellStyle.width }
+          const columnWidthStyle = { width: columnHeaders[cellIndex].cellStyle.width }
           const appliedStyle = Object.assign({}, style, columnWidthStyle)
           // assume component is in hyperscript format
           // wrap component in dive with columnWidth applied

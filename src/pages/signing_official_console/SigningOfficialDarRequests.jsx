@@ -27,11 +27,19 @@ export default function SigningOfficialDarRequests() {
 
   // Define responsive columns based on window width
   const getResponsiveColumns = (width) => {
+    let columns = [...baseColumns]
+
     // Hide dataset count column if viewport width < 1450px
     if (width < 1450) {
-      return baseColumns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
+      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
     }
-    return baseColumns
+
+    // Hide submission date column if viewport width < 1250px
+    if (width < 1250) {
+      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.SUBMISSION_DATE)
+    }
+
+    return columns
   }
 
   // Initialize columns based on current window width
