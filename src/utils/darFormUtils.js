@@ -2,7 +2,7 @@
 
 import { isEmpty, isNil, isEqual, isString, isArray } from 'lodash'
 import { FormValidators } from '../components/forms/forms'
-import { extractEraAuthenticationState } from 'src/utils/ERACommonsUtils.js'
+import { extractEraAuthenticationState } from 'src/components/era_commons/ERACommonsUtils'
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
   return datasets?.some((ds) => {

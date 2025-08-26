@@ -4,16 +4,13 @@ import { isNil } from 'lodash/fp'
 import queryString from 'query-string'
 import './ERACommons.css'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
-import { User } from 'src/libs/ajax/User.js'
-import { Config } from 'src/libs/config.js'
+import { User } from 'src/libs/ajax/User'
+import { Config } from 'src/libs/config'
 import '../Animations.css'
-import { Storage } from 'src/libs/storage.js'
-import {
-  decodeNihToken,
-  extractEraAuthenticationState,
-  nihAccountLabel,
-  rasEnabled,
-} from '../../utils/ERACommonsUtils.js'
+import { Storage } from 'src/libs/storage'
+import { decodeNihToken } from '../../utils/ERACommonsUtils'
+import { extractEraAuthenticationState, nihAccountLabel, rasEnabled } from 'src/components/era_commons/ERACommonsUtils'
+
 import ReactTooltip from 'react-tooltip'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 

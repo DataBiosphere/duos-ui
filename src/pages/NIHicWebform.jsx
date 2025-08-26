@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react'
 import { searchOntologies } from '../libs/utils'
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf'
 import eraIcon from '../images/era-commons-logo.png'
-import { nihAccountLabel } from '../utils/ERACommonsUtils.js'
+import { nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 
 export default function NIHICWebform() {
   const [multicenter, setMulticenter] = useState()
