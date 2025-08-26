@@ -53,4 +53,9 @@ export const AuthenticateNIH = {
     return undefined
   },
 
+  getSyncedUser: async () => {
+    const url = `${await getApiUrl()}/api/nih/sync`
+    const res = await axios.get(url, merge(Config.authOpts(), { headers: { 'Content-Type': 'application/json' } }))
+    return await res.data
+  },
 }
