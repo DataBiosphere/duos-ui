@@ -490,4 +490,13 @@ describe('processElectionStatus utils - tests', () => {
     expect(rowData[1][2].data).to.equal('2023-01-02')
     expect(rowData[2][2].data).to.equal('2023-01-03')
   })
+
+  it('sortVisibleTables shouldn\'t error when no data is passed', () => {
+    Cypress.on('window:before:load', (win) => {
+      cy.stub(win.console, 'error').callsFake((message) => {
+        throw new Error(`Console Error: ${message}`)
+      })
+    })
+    sortVisibleTable({ list: undefined, sort: { colIndex: 1, dir: -1 } })
+  })
 })
