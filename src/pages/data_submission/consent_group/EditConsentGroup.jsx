@@ -595,17 +595,6 @@ export const EditConsentGroup = (props) => {
         onValidationChange={onValidationChange}
       />
       <div style={{ width: '50%' }}>
-        <FormField
-          id={idx + '_numberOfParticipants'}
-          name="numberOfParticipants"
-          title="# of Participants"
-          placeholder="Number"
-          type={FormFieldTypes.NUMBER}
-          validators={[FormValidators.REQUIRED]}
-          defaultValue={consentGroup.numberOfParticipants}
-          validation={validation.numberOfParticipants}
-          onChange={onChange}
-        />
         <NumberInput
           id={idx + '_numberOfParticipants'}
           name="numberOfParticipants"
