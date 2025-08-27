@@ -10,7 +10,7 @@ import { Buffer } from 'buffer'
  * care about and parse the era commons part as a JSON object.
  * @param token
  * @returns JSON Object in the form of: {'eraCommonsUsername':String,'iat':Integer,'exp':Integer}
- * @deprecated This function is deprecated and will be removed in future releases
+ * @deprecated This function is deprecated and will be removed when we fully migrate to RAS
  */
 export const decodeNihToken = async (token) => {
   const rawToken = token['nih-username-token'] || null
