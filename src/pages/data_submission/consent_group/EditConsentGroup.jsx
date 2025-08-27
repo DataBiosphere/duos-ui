@@ -612,7 +612,7 @@ export const EditConsentGroup = (props) => {
           title="# of Participants"
           required={true}
           defaultValue={consentGroup.numberOfParticipants}
-          onChange={(event) => { console.log(event) }}
+          onChange={event => onChange({ key: event.target.name, value: event.target.value })}
           inputRef={numberOfParticipantsRef}
         />
       </div>
