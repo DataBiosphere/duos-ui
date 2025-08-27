@@ -1,5 +1,5 @@
 import React from 'react'
-import { nihAccountLabel } from 'src/utils/ERACommonsUtils'
+import { nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import './ERACommons.css'
 export type ERACommonsDisplayProps = {
   eraCommonsId: string | undefined

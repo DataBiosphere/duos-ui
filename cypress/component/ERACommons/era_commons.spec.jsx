@@ -83,7 +83,7 @@ describe('ERA Commons Component', function () {
     const iat = new Date().getTime()
     const exp = iat + (30 * 24 * 60 * 60 * 1000) // iat + 30 days
     clonedResearcher.properties = [
-      { propertyKey: 'eraAuthorized', propertyValue: true },
+      { propertyKey: 'eraAuthorized', propertyValue: 'true' },
       { propertyKey: 'eraExpiration', propertyValue: exp },
     ]
     cy.stub(User, 'getMe').returns(clonedResearcher)
@@ -133,7 +133,7 @@ describe('ERA Commons Component', function () {
     const eraAuthedUser = Object.assign({}, researcher, {
       eraCommonsId: 'testing',
       properties: [
-        { propertyKey: 'eraAuthorized', propertyValue: true },
+        { propertyKey: 'eraAuthorized', propertyValue: 'true' },
         { propertyKey: 'eraExpiration', propertyValue: Date.now() + (30 * 24 * 60 * 60 * 1000) }, // iat + 30 days
       ],
     })

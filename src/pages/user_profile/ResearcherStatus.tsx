@@ -7,7 +7,7 @@ import { isNil } from 'lodash'
 import LibraryCard from 'src/pages/user_profile/LibraryCard'
 import DAAs from './DAAs'
 import { DAAUtils } from 'src/utils/DAAUtils'
-import { nihAccountInstructions, nihAccountLabel } from 'src/utils/ERACommonsUtils.js'
+import { nihAccountInstructions, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import { DAAObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
 
