@@ -8,7 +8,7 @@ import { User } from 'src/libs/ajax/User'
 import { Config } from 'src/libs/config'
 import '../Animations.css'
 import { Storage } from 'src/libs/storage'
-import { decodeNihToken } from '../../utils/ERACommonsUtils'
+import { decodeNihToken } from 'src/utils/ERACommonsUtils'
 import { extractEraAuthenticationState, nihAccountLabel, rasEnabled } from 'src/components/era_commons/ERACommonsUtils'
 
 import ReactTooltip from 'react-tooltip'
