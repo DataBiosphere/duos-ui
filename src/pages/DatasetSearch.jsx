@@ -411,6 +411,15 @@ export const DatasetSearch = (props) => {
       icon: gp2Icon,
       title: 'Global Parkinson\'s Genetics Program Data Library',
     },
+    'broadibd': {
+      query: {
+        match_phrase: {
+          'study.description': 'IBD',
+        },
+      },
+      icon: broadIcon,
+      title: 'Broad Institute IBD Data Library',
+    },
     'ged': {
       query: {
         match_phrase: {
