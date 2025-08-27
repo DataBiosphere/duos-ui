@@ -15,6 +15,7 @@ export interface NumberInputProps {
   defaultValue?: number
   required?: boolean
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  inputRef?: React.Ref<HTMLInputElement>
 }
 
 export const NumberInput: React.FC<NumberInputProps> = ({
@@ -25,6 +26,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   defaultValue,
   required = true,
   onChange = () => {},
+  inputRef,
 }) => {
   const [hasError, setHasError] = React.useState(false)
   const [fieldValue, setFieldValue] = React.useState<string>(defaultValue?.toString() || '')
@@ -61,6 +63,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
         onChange={onChangeDefault}
         // because type="number" non-numeric characters will not trigger onChange, so also use onBlur
         onBlur={onChangeDefault}
+        ref={inputRef}
       />
       {hasError && (
         <>

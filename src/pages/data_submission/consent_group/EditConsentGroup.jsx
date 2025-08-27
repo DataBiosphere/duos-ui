@@ -28,6 +28,7 @@ export const EditConsentGroup = (props) => {
     onValidationChange,
     idx,
     dacs,
+    numberOfParticipantsRef,
   } = props
 
   const [showOtherSecondaryText, setShowOtherSecondaryText] = useState(!isNil(consentGroup.otherSecondary))
@@ -612,6 +613,7 @@ export const EditConsentGroup = (props) => {
           required={true}
           defaultValue={consentGroup.numberOfParticipants}
           onChange={(event) => { console.log(event) }}
+          inputRef={numberOfParticipantsRef}
         />
       </div>
 

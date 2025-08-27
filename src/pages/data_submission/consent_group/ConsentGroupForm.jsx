@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import ConsentGroupSummary from './ConsentGroupSummary'
 import { EditConsentGroup } from './EditConsentGroup'
 import { computeConsentGroupValidationErrors } from './ConsentGroupErrors'
@@ -69,6 +69,8 @@ export const ConsentGroupForm = (props) => {
 
   const [editMode, setEditMode] = useState(consentGroupsState[idx].editMode)
 
+  const numberOfParticipantsRef = useRef(null)
+
   return (
     <div
       style={{
@@ -94,6 +96,7 @@ export const ConsentGroupForm = (props) => {
               validation={validation}
               onValidationChange={onValidationChange}
               dacs={dacs}
+              numberOfParticipantsRef={numberOfParticipantsRef}
             />
           )
         : (
@@ -156,6 +159,7 @@ export const ConsentGroupForm = (props) => {
               id={idx + '_saveConsentGroup'}
               type="button"
               onClick={() => {
+                numberOfParticipantsRef.current?.reportValidity()
                 const errors = computeConsentGroupValidationErrors(consentGroup, datasetNames)
                 const valid = isEmpty(errors)
                 setValidation(errors)
