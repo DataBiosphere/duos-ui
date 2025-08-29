@@ -447,6 +447,24 @@ export const DatasetSearch = (props) => {
       icon: broadIcon,
       title: 'Broad Institute Schizophrenia & Bipolar Disorder Data Library',
     },
+    'esp': {
+      query: {
+        match_phrase: {
+          'study.description': 'ESP',
+        },
+      },
+      icon: broadIcon,
+      title: 'Broad Institute Epilepsy Data Library',
+    },
+    'fgc': {
+      query: {
+        match_phrase: {
+          'study.description': 'FGC',
+        },
+      },
+      icon: broadIcon,
+      title: 'Fetal Genomics Consortium Data Library',
+    },
     'broadibd': {
       query: {
         match_phrase: {
