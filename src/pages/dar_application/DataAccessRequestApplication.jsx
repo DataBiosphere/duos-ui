@@ -12,6 +12,7 @@ import { PageHeading } from 'src/components/PageHeading'
 import { User } from 'src/libs/ajax/User'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
+import { Collections } from 'src/libs/ajax/Collections'
 import { NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { get, map } from 'lodash/fp'
@@ -199,6 +200,13 @@ const DataAccessRequestApplication = (props) => {
     setUploadedIrbDocument(document)
   }
 
+  const getCollection = async (collectionId, collection) => {
+    if (collection) {
+      return Promise.resolve(collection)
+    }
+    return await Collections.getCollectionById(collectionId)
+  }
+
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])
   const [selectedDatasets, setSelectedDatasets] = useState([])
@@ -224,8 +232,10 @@ const DataAccessRequestApplication = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const { collectionId } = match.params
         if (existingDarsReadOnlyMode) {
-          setResearcher(collection.createUser)
+          const { createUser } = await getCollection(collectionId, collection)
+          setResearcher(createUser)
         }
         else {
           const response = await User.getMe()
@@ -240,33 +250,34 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
-  }, [match.params, existingDarsReadOnlyMode, collection.createUser])
+  }, [match.params, existingDarsReadOnlyMode, collection])
 
   const init = useCallback(async () => {
-    const { dataRequestId } = match.params
+    const { dataRequestId, collectionId } = match.params
     let formData = {}
 
-    // Review existing DAR application - retrieves all datasets in the collection
-    // Besides the datasets, DARs split off from the collection should have the same formData
-    const { dars, datasets } = collection
+    if (!isNil(collectionId)) {
+      // Review existing DAR application - retrieves all datasets in the collection
+      // Besides the datasets, DARs split off from the collection should have the same formData
+      const { dars, datasets } = await getCollection(collectionId, collection)
 
-    // Add elections to DAR data passed into form, to enable showing approved datasets
-    Object.values(dars).map((dar) => {
-      dar.data.elections = dar.elections
-      dar.data.datasetIds = dar.datasetIds
-    })
-    // TS thinks that collection.dars is an object, but it is a map
-    const darMap = new Map(Object.entries(dars))
-    const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
-    setReverseOrderedDARs(newReverseOrderedDARs)
-    // form data = the "root" DAR's data
-    const darId = Object.values(dars).sort((a, b) => a.id - b.id)[0].referenceId
-    formData = await DAR.getPartialDarRequest(darId)
+      // Add elections to DAR data passed into form, to enable showing approved datasets
+      Object.values(dars).map((dar) => {
+        dar.data.elections = dar.elections
+        dar.data.datasetIds = dar.datasetIds
+      })
+      // TS thinks that collection.dars is an object, but it is a map
+      const darMap = new Map(Object.entries(dars))
+      const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
+      setReverseOrderedDARs(newReverseOrderedDARs)
+      // form data = the "root" DAR's data
+      const darId = Object.values(dars).sort((a, b) => a.id - b.id)[0].referenceId
+      formData = await DAR.getPartialDarRequest(darId)
 
-    // This is a collection, so we need to get the datasets and datasetIds from the collection
-    formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
-
-    if (!isNil(dataRequestId)) {
+      // This is a collection, so we need to get the datasets and datasetIds from the collection
+      formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
+    }
+    else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId)
@@ -792,4 +803,5 @@ DataAccessRequestApplication.propTypes = {
   draftDar: PropTypes.bool.isRequired,
   isProgressReportApplication: PropTypes.bool.isRequired,
   existingDarsReadOnlyMode: PropTypes.bool,
+  collection: PropTypes.object,
 }
