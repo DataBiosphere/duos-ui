@@ -12,7 +12,6 @@ import { PageHeading } from 'src/components/PageHeading'
 import { User } from 'src/libs/ajax/User'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
-import { Collections } from 'src/libs/ajax/Collections'
 import { NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { get, map } from 'lodash/fp'
@@ -115,14 +114,14 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   })
 
-  const { history, location, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication } = props
+  const { history, location, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication, collection } = props
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} })
 
   const [nihValid, setNihValid] = useState(true)
   const [showNihValidationError, setShowNihValidationError] = useState(false)
 
-  const [disableOkBtn, setDisableOkButton] = useState(false)
+  const [disableOkBtn, setDisableOkBtn] = useState(false)
 
   const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true)
   const [internalCollaboratorsCompleted, setInternalCollaboratorsCompleted] = useState(true)
@@ -225,9 +224,7 @@ const DataAccessRequestApplication = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { collectionId } = match.params
         if (existingDarsReadOnlyMode) {
-          const collection = await Collections.getCollectionById(collectionId)
           setResearcher(collection.createUser)
         }
         else {
@@ -243,35 +240,33 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
-  }, [match.params, existingDarsReadOnlyMode])
+  }, [match.params, existingDarsReadOnlyMode, collection.createUser])
 
   const init = useCallback(async () => {
-    const { dataRequestId, collectionId } = match.params
+    const { dataRequestId } = match.params
     let formData = {}
 
-    if (!isNil(collectionId)) {
-      // Review existing DAR application - retrieves all datasets in the collection
-      // Besides the datasets, DARs split off from the collection should have the same formData
-      const collection = await Collections.getCollectionById(collectionId)
-      const { dars, datasets } = collection
+    // Review existing DAR application - retrieves all datasets in the collection
+    // Besides the datasets, DARs split off from the collection should have the same formData
+    const { dars, datasets } = collection
 
-      // Add elections to DAR data passed into form, to enable showing approved datasets
-      Object.values(dars).map((dar) => {
-        dar.data.elections = dar.elections
-        dar.data.datasetIds = dar.datasetIds
-      })
-      // TS thinks that collection.dars is an object, but it is a map
-      const darMap = new Map(Object.entries(dars))
-      const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
-      setReverseOrderedDARs(newReverseOrderedDARs)
-      // form data = the "root" DAR's data
-      const darId = Object.values(dars).sort((a, b) => a.id - b.id)[0].referenceId
-      formData = await DAR.getPartialDarRequest(darId)
+    // Add elections to DAR data passed into form, to enable showing approved datasets
+    Object.values(dars).map((dar) => {
+      dar.data.elections = dar.elections
+      dar.data.datasetIds = dar.datasetIds
+    })
+    // TS thinks that collection.dars is an object, but it is a map
+    const darMap = new Map(Object.entries(dars))
+    const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
+    setReverseOrderedDARs(newReverseOrderedDARs)
+    // form data = the "root" DAR's data
+    const darId = Object.values(dars).sort((a, b) => a.id - b.id)[0].referenceId
+    formData = await DAR.getPartialDarRequest(darId)
 
-      // This is a collection, so we need to get the datasets and datasetIds from the collection
-      formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
-    }
-    else if (!isNil(dataRequestId)) {
+    // This is a collection, so we need to get the datasets and datasetIds from the collection
+    formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
+
+    if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId)
@@ -290,7 +285,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData)
     setIsLoading(false)
-  }, [match.params, existingDarsReadOnlyMode, researcher])
+  }, [match.params, collection, researcher, existingDarsReadOnlyMode])
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {
@@ -367,7 +362,7 @@ const DataAccessRequestApplication = (props) => {
   const removeAddendumTab = () => {
     const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0
     if (hasAddendumTab) {
-      const tabs = applicationTabs.filter(tab => tab.id != ADDENDUM_TAB_ID)
+      const tabs = applicationTabs.filter(tab => tab.id !== ADDENDUM_TAB_ID)
       setApplicationTabs(tabs)
     }
   }
@@ -462,26 +457,26 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const onSaveConfirmation = selectedOk => () => {
-    setDisableOkButton(true)
+    setDisableOkBtn(true)
     if (selectedOk === true) {
       saveDarDraft()
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
     else {
       setShowDialogSave(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
   }
 
   const onSubmitConfirmation = selectedOk => () => {
-    setDisableOkButton(true)
+    setDisableOkBtn(true)
     if (selectedOk === true) {
       submitDARFormData()
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
     else {
       setShowDialogSubmit(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
   }
 
@@ -509,11 +504,11 @@ const DataAccessRequestApplication = (props) => {
       }
       batchFormFieldChange(darPartialResponse)
       setShowDialogSave(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
     catch (error) {
       setShowDialogSave(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
       if (error.response.data.code && error.response.data.message) {
         Notifications.showError({ text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
           severity: 'error',
