@@ -18,7 +18,6 @@ export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
 
@@ -60,7 +59,6 @@ export default function AdminManageDarCollections() {
   useEffect(() => {
     const handleResize = () => {
       const newWidth = window.innerWidth
-      setWindowWidth(newWidth)
       setResponsiveColumns(getResponsiveColumns(newWidth))
     }
 

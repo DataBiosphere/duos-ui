@@ -10,7 +10,6 @@ import { consoleTypes, DarCollectionTableColumnOptions } from '../../utils/DarCo
 export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   // Define base columns array for signing official console
   const baseColumns = [
@@ -49,7 +48,6 @@ export default function SigningOfficialDarRequests() {
   useEffect(() => {
     const handleResize = () => {
       const newWidth = window.innerWidth
-      setWindowWidth(newWidth)
       setResponsiveColumns(getResponsiveColumns(newWidth))
     }
 

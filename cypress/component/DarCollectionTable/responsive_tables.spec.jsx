@@ -1,3 +1,5 @@
+/* eslint-disable cypress/no-unnecessary-waiting */
+
 import React from 'react'
 import { mount } from 'cypress/react'
 import { BrowserRouter } from 'react-router-dom'
@@ -17,8 +19,8 @@ const mockCollections = [
     expiresAt: '2024-12-31',
     status: 'submitted',
     actions: ['Review'],
-    dacNames: 'Test DAC'
-  }
+    dacNames: 'Test DAC',
+  },
 ]
 
 // Mock collection data with multiple pages for pagination testing
@@ -33,7 +35,7 @@ const mockCollectionsForPagination = Array.from({ length: 25 }, (_, index) => ({
   expiresAt: '2024-12-31',
   status: 'submitted',
   actions: ['Review'],
-  dacNames: `Test DAC ${index + 1}`
+  dacNames: `Test DAC ${index + 1}`,
 }))
 
 // Helper function to mount components with router
@@ -41,7 +43,7 @@ const mountWithRouter = (component) => {
   return mount(
     <BrowserRouter>
       {component}
-    </BrowserRouter>
+    </BrowserRouter>,
   )
 }
 
@@ -68,7 +70,7 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Should render column headers
@@ -96,7 +98,7 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Should not contain Dataset Count
@@ -123,7 +125,7 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Should not contain Dataset Count or Expiration Date
@@ -150,7 +152,7 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Essential columns should always be present
@@ -158,7 +160,7 @@ describe('Responsive DAR Collection Tables', () => {
       cy.get('.column-header').should('contain', 'Title')
       cy.get('.column-header').should('contain', 'Status')
       cy.get('.column-header').should('contain', 'Action')
-      
+
       // Dataset Count should not be present when not in essential columns
       cy.get('.column-header').should('not.contain', 'Datasets')
     })
@@ -179,7 +181,7 @@ describe('Responsive DAR Collection Tables', () => {
             openCollection={() => {}}
             deleteDraft={() => {}}
           />
-        </div>
+        </div>,
       )
     }
 
@@ -205,18 +207,18 @@ describe('Responsive DAR Collection Tables', () => {
       cy.wait(50)
       cy.viewport(1200, 800) // Small desktop
       cy.wait(50)
-      cy.viewport(768, 800)  // Tablet
+      cy.viewport(768, 800) // Tablet
       cy.wait(50)
-      cy.viewport(480, 800)  // Mobile
+      cy.viewport(480, 800) // Mobile
       cy.wait(50)
-      cy.viewport(320, 800)  // Small mobile
+      cy.viewport(320, 800) // Small mobile
       cy.wait(50)
       cy.viewport(1600, 800) // Back to desktop
 
       // Should not crash and should still render headers
       cy.get('.column-header').should('exist')
       cy.get('.column-header').should('contain', 'DAR Code')
-      
+
       // Table should still be functional after rapid resizing
       cy.get('.column-header').should('have.length.greaterThan', 0)
     })
@@ -243,7 +245,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Essential columns should still be readable
       cy.get('.column-header').should('contain', 'DAR Code')
       cy.get('.column-header').should('contain', 'Action')
-      
+
       // Dataset Count should definitely not be present on very narrow viewports
       cy.get('.column-header').should('not.contain', 'Datasets')
     })
@@ -276,7 +278,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Should maintain core functionality
       cy.get('.column-header').should('contain', 'DAR Code')
       cy.get('.column-header').should('contain', 'Action')
-      
+
       // Dataset Count should not be present on tablet/mobile viewports
       cy.get('.column-header').should('not.contain', 'Datasets')
     })
@@ -312,7 +314,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Verify no layout breaks occurred
       cy.get('.column-header').should('contain', 'DAR Code')
       cy.get('.column-header').should('contain', 'Action')
-      
+
       // Dataset Count should not appear during mobile-first scaling
       cy.get('.column-header').should('not.contain', 'Datasets')
     })
@@ -330,7 +332,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Portrait orientation (phone)
       cy.viewport(375, 812)
       cy.get('.column-header').should('exist')
-      
+
       // Landscape orientation (phone rotated)
       cy.viewport(812, 375)
       cy.wait(100)
@@ -348,7 +350,7 @@ describe('Responsive DAR Collection Tables', () => {
 
       // Should maintain table integrity
       cy.get('.column-header').should('contain', 'DAR Code')
-      
+
       // Dataset Count should not be present during orientation changes on mobile/tablet
       cy.get('.column-header').should('not.contain', 'Datasets')
     })
@@ -364,7 +366,7 @@ describe('Responsive DAR Collection Tables', () => {
 
       // Test on narrow viewport
       cy.viewport(320, 568)
-      
+
       // Headers should still be properly labeled
       cy.get('.column-header').should('exist')
       cy.get('.column-header').each(($header) => {
@@ -379,7 +381,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Test with columns that include Dataset Count - use responsive wrapper
       const ResponsiveTestWrapper = () => {
         const [windowWidth, setWindowWidth] = React.useState(window.innerWidth)
-        
+
         const baseColumns = [
           DarCollectionTableColumnOptions.DAR_CODE,
           DarCollectionTableColumnOptions.NAME,
@@ -421,20 +423,20 @@ describe('Responsive DAR Collection Tables', () => {
 
       // Test at various narrow viewport sizes (all < 1200px for researcher breakpoint)
       const narrowViewports = [
-        [320, 568],   // iPhone SE
-        [375, 667],   // iPhone 8
-        [414, 896],   // iPhone 11 Pro Max
-        [768, 1024],  // iPad Portrait
-        [1024, 768],  // iPad Landscape
+        [320, 568], // iPhone SE
+        [375, 667], // iPhone 8
+        [414, 896], // iPhone 11 Pro Max
+        [768, 1024], // iPad Portrait
+        [1024, 768], // iPad Landscape
       ]
 
       narrowViewports.forEach(([width, height]) => {
         cy.viewport(width, height)
         cy.wait(50)
-        
+
         // Dataset Count should not be visible on any narrow viewport (< 1200px)
         cy.get('.column-header').should('not.contain', 'Datasets')
-        
+
         // But essential columns should still be present
         cy.get('.column-header').should('contain', 'DAR Code')
         cy.get('.column-header').should('contain', 'Action')
@@ -455,16 +457,16 @@ describe('Responsive DAR Collection Tables', () => {
       mountTableWithResizeHandling(columnsWithDatasetCount)
 
       // Test progression from narrow to wide
-      cy.viewport(1100, 800)  // Below 1200px breakpoint for researcher
+      cy.viewport(1100, 800) // Below 1200px breakpoint for researcher
       cy.get('.column-header').should('not.contain', 'Dataset Count')
-      
-      cy.viewport(1300, 800)  // Above 1200px breakpoint for researcher
+
+      cy.viewport(1300, 800) // Above 1200px breakpoint for researcher
       cy.wait(100)
       // Note: This test assumes the component would show Dataset Count above breakpoint
       // In our current implementation, it's filtered by the parent component
       cy.get('.column-header').should('exist')
-      
-      cy.viewport(1600, 800)  // Wide desktop
+
+      cy.viewport(1600, 800) // Wide desktop
       cy.wait(100)
       cy.get('.column-header').should('exist')
     })
@@ -483,22 +485,22 @@ describe('Responsive DAR Collection Tables', () => {
       // Start on desktop with pagination
       cy.viewport(1600, 800)
       cy.get('.column-header').should('exist')
-      
+
       // Resize through different viewports while maintaining pagination
       cy.viewport(1200, 800) // Medium desktop
       cy.wait(100)
       cy.get('.column-header').should('exist')
-      
-      cy.viewport(768, 1024)  // Tablet
+
+      cy.viewport(768, 1024) // Tablet
       cy.wait(100)
       cy.get('.column-header').should('exist')
       cy.get('.column-header').should('not.contain', 'Dataset Count')
-      
-      cy.viewport(414, 896)   // Mobile
+
+      cy.viewport(414, 896) // Mobile
       cy.wait(100)
       cy.get('.column-header').should('exist')
       cy.get('.column-header').should('not.contain', 'Dataset Count')
-      
+
       // Should maintain table functionality throughout resize
       cy.get('.column-header').should('contain', 'DAR Code')
       cy.get('.column-header').should('contain', 'Action')
@@ -515,20 +517,20 @@ describe('Responsive DAR Collection Tables', () => {
       // Test sequence of extreme viewport changes
       const viewports = [
         [1920, 1080], // Large desktop
-        [320, 240],   // Very small
+        [320, 240], // Very small
         [2560, 1440], // 4K display
-        [280, 653],   // Galaxy Fold
-        [1366, 768],  // Common laptop
-        [375, 812],   // iPhone X
+        [280, 653], // Galaxy Fold
+        [1366, 768], // Common laptop
+        [375, 812], // iPhone X
       ]
 
       viewports.forEach(([width, height], index) => {
         cy.viewport(width, height)
         cy.wait(50)
-        
+
         // Should not crash
         cy.get('.column-header').should('exist')
-        
+
         // Should maintain minimum functionality
         if (index === viewports.length - 1) {
           cy.get('.column-header').should('contain', 'DAR Code')
@@ -556,18 +558,18 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Test mobile viewport
       cy.viewport(375, 667)
-      
+
       // Columns should be visible and properly sized
       cy.get('.column-header').should('be.visible')
       cy.get('.column-header').each(($header) => {
         cy.wrap($header).should('have.css', 'width').and('not.equal', '0px')
       })
-      
+
       // Dataset Count should not be present on mobile viewports
       cy.get('.column-header').should('not.contain', 'Dataset Count')
     })
@@ -593,19 +595,19 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Test narrow viewport with many columns
       cy.viewport(480, 800)
-      
+
       // Table should handle overflow gracefully
       cy.get('.column-header').should('exist')
       cy.get('.column-header').should('have.length.at.least', 3)
-      
+
       // Dataset Count should not be present when many columns are used on narrow viewport
       cy.get('.column-header').should('not.contain', 'Dataset Count')
-      
+
       // Should not cause horizontal scroll issues
       cy.get('body').should('have.css', 'overflow-x').and('match', /(visible|auto|hidden)/)
     })
@@ -626,7 +628,7 @@ describe('Responsive DAR Collection Tables', () => {
             openCollection={() => {}}
             deleteDraft={() => {}}
           />
-        </div>
+        </div>,
       )
     }
 
@@ -648,21 +650,23 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Start on desktop viewport
       cy.viewport(1600, 800)
-      
+
       // Navigate to page 2 if pagination controls exist
       cy.get('body').then(($body) => {
         if ($body.find('[data-cy="pagination-next"]').length > 0) {
           cy.get('[data-cy="pagination-next"]').click()
           cy.wait(100)
-        } else if ($body.find('.pagination-next').length > 0) {
+        }
+        else if ($body.find('.pagination-next').length > 0) {
           cy.get('.pagination-next').click()
           cy.wait(100)
-        } else if ($body.find('[aria-label="Next page"]').length > 0) {
+        }
+        else if ($body.find('[aria-label="Next page"]').length > 0) {
           cy.get('[aria-label="Next page"]').click()
           cy.wait(100)
         }
@@ -772,7 +776,7 @@ describe('Responsive DAR Collection Tables', () => {
       const AdminResponsiveWrapper = () => {
         const [windowWidth, setWindowWidth] = React.useState(window.innerWidth)
         const [currentPage, setCurrentPage] = React.useState(1)
-        
+
         const baseColumns = [
           DarCollectionTableColumnOptions.DAR_CODE,
           DarCollectionTableColumnOptions.NAME,
@@ -786,17 +790,17 @@ describe('Responsive DAR Collection Tables', () => {
         // Implement admin console responsive logic (1450px and 1250px breakpoints)
         const getResponsiveColumns = (width) => {
           let columns = [...baseColumns]
-          
+
           // Hide dataset count column if viewport width < 1450px
           if (width < 1450) {
             columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
           }
-          
+
           // Hide expiration date column if viewport width < 1250px
           if (width < 1250) {
             columns = columns.filter(column => column !== DarCollectionTableColumnOptions.EXPIRES_AT)
           }
-          
+
           return columns
         }
 
@@ -866,7 +870,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Create a responsive admin wrapper for testing specific breakpoints
       const AdminBreakpointWrapper = () => {
         const [windowWidth, setWindowWidth] = React.useState(window.innerWidth)
-        
+
         const adminColumns = [
           DarCollectionTableColumnOptions.DAR_CODE,
           DarCollectionTableColumnOptions.DAC,
@@ -883,17 +887,17 @@ describe('Responsive DAR Collection Tables', () => {
         // Implement admin console responsive logic
         const getResponsiveColumns = (width) => {
           let columns = [...adminColumns]
-          
+
           // Hide dataset count column if viewport width < 1450px
           if (width < 1450) {
             columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
           }
-          
+
           // Hide expiration date column if viewport width < 1250px
           if (width < 1250) {
             columns = columns.filter(column => column !== DarCollectionTableColumnOptions.EXPIRES_AT)
           }
-          
+
           return columns
         }
 
@@ -935,13 +939,15 @@ describe('Responsive DAR Collection Tables', () => {
         // Verify column visibility based on breakpoint
         if (expectDatasetCount) {
           cy.get('.column-header').should('contain', 'Datasets')
-        } else {
+        }
+        else {
           cy.get('.column-header').should('not.contain', 'Datasets')
         }
 
         if (expectExpirationDate) {
           cy.get('.column-header').should('contain', 'Expiration Date')
-        } else {
+        }
+        else {
           cy.get('.column-header').should('not.contain', 'Expiration Date')
         }
 
@@ -957,7 +963,7 @@ describe('Responsive DAR Collection Tables', () => {
     it('should reproduce and catch the pagination reset bug', () => {
       // This test specifically reproduces the reported bug:
       // "The actual tables in the UI are returning to page 1 after a resize that removes a column, even if they were on page 2"
-      
+
       const columnsWithDatasetCount = [
         DarCollectionTableColumnOptions.DAR_CODE,
         DarCollectionTableColumnOptions.NAME,
@@ -976,17 +982,17 @@ describe('Responsive DAR Collection Tables', () => {
         // Simulate the exact responsive logic from AdminManageDarCollections.jsx
         const getResponsiveColumns = React.useCallback((width) => {
           let filteredColumns = [...columnsWithDatasetCount]
-          
+
           // Remove Dataset Count below 1450px (Admin console breakpoint)
           if (width < 1450) {
             filteredColumns = filteredColumns.filter(col => col !== DarCollectionTableColumnOptions.DATASET_COUNT)
           }
-          
+
           // Remove Expiration Date below 1250px (Admin console breakpoint)
           if (width < 1250) {
             filteredColumns = filteredColumns.filter(col => col !== DarCollectionTableColumnOptions.EXPIRES_AT)
           }
-          
+
           return filteredColumns
         }, [])
 
@@ -994,20 +1000,20 @@ describe('Responsive DAR Collection Tables', () => {
           const handleResize = () => {
             const newWidth = window.innerWidth
             setWindowWidth(newWidth)
-            
+
             // BUG SIMULATION: This is what currently happens - page resets when columns change
             // In the real implementation, this happens because the component re-renders
             // with a new key when columns change, causing pagination to reset
             const oldColumns = getResponsiveColumns(windowWidth)
             const newColumns = getResponsiveColumns(newWidth)
-            
+
             if (oldColumns.length !== newColumns.length) {
               // This simulates the bug - pagination resets when column count changes
               console.log('Bug reproduced: Page reset due to column change')
               setCurrentPage(1) // This is the bug we need to fix
             }
           }
-          
+
           window.addEventListener('resize', handleResize)
           return () => window.removeEventListener('resize', handleResize)
         }, [windowWidth, getResponsiveColumns])
@@ -1076,18 +1082,19 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Start on desktop
       cy.viewport(1440, 900)
-      
+
       // Change page size if controls exist
       cy.get('body').then(($body) => {
         if ($body.find('[data-cy="page-size-select"]').length > 0) {
           cy.get('[data-cy="page-size-select"]').select('25')
           cy.wait(100)
-        } else if ($body.find('.page-size-dropdown').length > 0) {
+        }
+        else if ($body.find('.page-size-dropdown').length > 0) {
           cy.get('.page-size-dropdown').select('25')
           cy.wait(100)
         }
@@ -1096,7 +1103,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Resize through different viewports
       cy.viewport(768, 1024) // Tablet
       cy.wait(100)
-      cy.viewport(414, 896)  // Mobile
+      cy.viewport(414, 896) // Mobile
       cy.wait(100)
       cy.viewport(1440, 900) // Back to desktop
 
@@ -1122,19 +1129,19 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Test on mobile viewport
       cy.viewport(320, 568)
-      
+
       // Pagination controls should still be accessible
       cy.get('.column-header').should('exist')
-      
+
       // Check if pagination exists and is usable on narrow viewport
       cy.get('body').then(($body) => {
         const hasPagination = $body.find('[class*="pagination"], [data-cy*="pagination"]').length > 0
-        
+
         if (hasPagination) {
           // Pagination should be responsive and not break layout
           cy.get('[class*="pagination"], [data-cy*="pagination"]').should('be.visible')
@@ -1165,12 +1172,12 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Start on desktop
       cy.viewport(1600, 800)
-      
+
       // Click on sortable column header if it exists
       cy.get('.column-header').contains('DAR Code').then(($header) => {
         if ($header.hasClass('sortable') || $header.find('.sortable').length > 0) {
@@ -1214,12 +1221,12 @@ describe('Responsive DAR Collection Tables', () => {
           reviseCollection={() => {}}
           openCollection={() => {}}
           deleteDraft={() => {}}
-        />
+        />,
       )
 
       // Start on desktop
       cy.viewport(1440, 900)
-      
+
       // Apply filters if they exist
       cy.get('body').then(($body) => {
         if ($body.find('[data-cy*="filter"], [class*="filter"]').length > 0) {
@@ -1231,7 +1238,7 @@ describe('Responsive DAR Collection Tables', () => {
       // Resize through viewports
       cy.viewport(768, 1024) // Tablet
       cy.wait(100)
-      cy.viewport(414, 896)  // Mobile
+      cy.viewport(414, 896) // Mobile
       cy.wait(100)
 
       // Table should maintain functionality

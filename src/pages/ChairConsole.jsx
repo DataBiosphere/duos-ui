@@ -20,7 +20,6 @@ export default function ChairConsole(props) {
   const [filteredList, setFilteredList] = useState([])
   const [relevantDatasets, setRelevantDatasets] = useState()
   const [isLoading, setIsLoading] = useState(true)
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
   const { history } = props
@@ -62,7 +61,6 @@ export default function ChairConsole(props) {
   useEffect(() => {
     const handleResize = () => {
       const newWidth = window.innerWidth
-      setWindowWidth(newWidth)
       setResponsiveColumns(getResponsiveColumns(newWidth))
     }
 
