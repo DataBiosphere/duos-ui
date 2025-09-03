@@ -134,6 +134,7 @@ export default function DatasetSubmissionsTable(props) {
                 className="glyphicon glyphicon-trash"
                 onClick={() => handleClick(term)}
                 to="#"
+                aria-label={`Delete set '${selectedTerm.datasetIdentifier}'`}
               />
               <ConfirmationDialog
                 title="Delete dataset"
