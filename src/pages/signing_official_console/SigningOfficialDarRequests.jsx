@@ -53,7 +53,7 @@ export default function SigningOfficialDarRequests() {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  })
 
   useEffect(() => {
     const init = async () => {

@@ -56,7 +56,7 @@ export default function ResearcherConsole() {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  })
 
   // callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(

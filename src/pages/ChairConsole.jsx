@@ -66,7 +66,7 @@ export default function ChairConsole(props) {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  })
 
   const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
     searchTerms,

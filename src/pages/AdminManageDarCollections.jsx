@@ -64,7 +64,7 @@ export default function AdminManageDarCollections() {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  })
 
   const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
     searchTerms,

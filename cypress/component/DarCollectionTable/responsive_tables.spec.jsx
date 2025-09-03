@@ -614,24 +614,6 @@ describe('Responsive DAR Collection Tables', () => {
   })
 
   describe('Pagination Preservation During Resize', () => {
-    // Helper function to create a table with resize event listeners
-    const mountTableWithResizeHandling = (columns, consoleType = consoleTypes.RESEARCHER, collections = mockCollections) => {
-      return mountWithRouter(
-        <div id="resize-test-container">
-          <DarCollectionTable
-            collections={collections}
-            columns={columns}
-            isLoading={false}
-            consoleType={consoleType}
-            cancelCollection={() => {}}
-            reviseCollection={() => {}}
-            openCollection={() => {}}
-            deleteDraft={() => {}}
-          />
-        </div>,
-      )
-    }
-
     it('should preserve current page when viewport is resized', () => {
       const columns = [
         DarCollectionTableColumnOptions.DAR_CODE,
@@ -926,13 +908,13 @@ describe('Responsive DAR Collection Tables', () => {
 
       // Test the exact breakpoints that cause issues in the real UI
       const breakpointTests = [
-        { width: 1500, expectDatasetCount: true, expectExpirationDate: true, description: 'Wide desktop' },
-        { width: 1400, expectDatasetCount: false, expectExpirationDate: true, description: 'Below 1450px breakpoint' },
-        { width: 1200, expectDatasetCount: false, expectExpirationDate: false, description: 'Below 1250px breakpoint' },
-        { width: 1000, expectDatasetCount: false, expectExpirationDate: false, description: 'Mobile/tablet' },
+        { width: 1500, expectDatasetCount: true, expectExpirationDate: true }, // Wide desktop
+        { width: 1400, expectDatasetCount: false, expectExpirationDate: true }, // Below 1450px breakpoint
+        { width: 1200, expectDatasetCount: false, expectExpirationDate: false }, // Below 1250px breakpoint
+        { width: 1000, expectDatasetCount: false, expectExpirationDate: false }, // Mobile/tablet
       ]
 
-      breakpointTests.forEach(({ width, expectDatasetCount, expectExpirationDate, description }) => {
+      breakpointTests.forEach(({ width, expectDatasetCount, expectExpirationDate }) => {
         cy.viewport(width, 800)
         cy.wait(200)
 
