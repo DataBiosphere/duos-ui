@@ -47,9 +47,9 @@ export default function ChairConsole(props) {
       columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
     }
 
-    // Hide submission date column if viewport width < 1250px
+    // Hide expiration date column if viewport width < 1250px
     if (width < 1250) {
-      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.SUBMISSION_DATE)
+      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.EXPIRES_AT)
     }
 
     return columns
