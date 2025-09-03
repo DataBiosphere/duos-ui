@@ -1,38 +1,24 @@
 #!/usr/bin/env bash
-set -e
+#
+# Pulls service account credentials for Cypress tests. Requires gcloud and jq.
+#
+# USAGE: ./scripts/render-accounts.sh
+#
 
-## Run from root
-##    ./scripts/render-accounts.sh [optional vault token]
-## Pulls service account files for Cypress tests
-## Log into vault first:
-##    vault login -method=github token=$(cat ~/.github-token)
-## Requires jq:
-##    brew install jq
+set -eu
+set -o pipefail
 
-# Defaults
-VAULT_TOKEN=$(cat ~/.vault-token)
-VAULT_TOKEN=${1:-$VAULT_TOKEN}
-
-docker pull broadinstitute/dsde-toolbox:dev
-
-# render role service account credential files
-
-listOfRoles="admin
+LIST_OF_ROLES="admin
 chair
 member
 researcher
 signing-official"
 
-secretPath="/secret/dsde/firecloud/dev/consent/automation"
-outputPath="cypress/fixtures"
+PROJECT="broad-dsde-qa"
+OUTPUT_DIR="cypress/fixtures"
 
-for role in $listOfRoles; do
-  echo "Writing $role file from $secretPath/duos-automation-$role.json"
-  docker run -it --rm \
-    -v "$HOME":/root \
-    broadinstitute/dsde-toolbox:dev vault read \
-    --format=json \
-    "$secretPath"/duos-automation-"$role".json |
-    jq .data \
-    >"$outputPath"/duos-automation-"$role".json
+for ROLE in $LIST_OF_ROLES; do
+  FILE="$OUTPUT_DIR/duos-automation-$ROLE.json"
+  echo "Writing $ROLE secret to $FILE"
+  gcloud secrets versions access latest --project="$PROJECT" --secret="duos-automation-${ROLE}-sa" | jq . > "$FILE"
 done
