@@ -114,7 +114,7 @@ export default function AdminManageDarCollections() {
       </div>
       {responsiveColumns.length > 0 && (
         <DarCollectionTable
-          key={`admin-dar-table-${responsiveColumns.length}-${responsiveColumns.join('-')}`}
+          key="admin-dar-table"
           collections={filteredList}
           columns={responsiveColumns}
           isLoading={isLoading}

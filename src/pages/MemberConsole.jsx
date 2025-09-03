@@ -113,7 +113,7 @@ export default function MemberConsole(props) {
       </div>
       {responsiveColumns.length > 0 && (
         <DarCollectionTable
-          key={`member-dar-table-${responsiveColumns.length}-${responsiveColumns.join('-')}`}
+          key="member-dar-table"
           collections={filteredList}
           columns={responsiveColumns}
           isLoading={isLoading}

@@ -121,7 +121,7 @@ export default function ChairConsole(props) {
       </div>
       {responsiveColumns.length > 0 && (
         <DarCollectionTable
-          key={`chair-dar-table-${responsiveColumns.length}-${responsiveColumns.join('-')}`}
+          key="chair-dar-table"
           collections={filteredList}
           columns={responsiveColumns}
           isLoading={isLoading}

@@ -91,7 +91,7 @@ export default function SigningOfficialDarRequests() {
       <div className="signing-official-tabs">
         {responsiveColumns.length > 0 && (
           <DarCollectionTable
-            key={`so-dar-table-${responsiveColumns.length}-${responsiveColumns.join('-')}`}
+            key="so-dar-table"
             collections={collectionList}
             columns={responsiveColumns}
             isLoading={isLoading}

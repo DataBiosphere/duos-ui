@@ -21,6 +21,43 @@ export default function ResearcherConsole() {
   const [filteredList, setFilteredList] = useState()
   const searchRef = useRef('')
 
+  // Define base columns array for researcher console
+  const baseColumns = [
+    DarCollectionTableColumnOptions.DAR_CODE,
+    DarCollectionTableColumnOptions.NAME,
+    DarCollectionTableColumnOptions.SUBMISSION_DATE,
+    DarCollectionTableColumnOptions.DATASET_COUNT,
+    DarCollectionTableColumnOptions.EXPIRES_AT,
+    DarCollectionTableColumnOptions.STATUS,
+    DarCollectionTableColumnOptions.ACTIONS,
+  ]
+
+  // Define responsive columns based on window width
+  const getResponsiveColumns = (width) => {
+    let columns = [...baseColumns]
+
+    // Hide dataset count column if viewport width < 1200px for researcher
+    if (width < 1200) {
+      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
+    }
+
+    return columns
+  }
+
+  // Initialize columns based on current window width
+  const [responsiveColumns, setResponsiveColumns] = useState(() => getResponsiveColumns(window.innerWidth))
+
+  // Handle window resize for responsive column hiding
+  useEffect(() => {
+    const handleResize = () => {
+      const newWidth = window.innerWidth
+      setResponsiveColumns(getResponsiveColumns(newWidth))
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   // callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
     searchRef.current.value,
@@ -165,16 +202,9 @@ export default function ResearcherConsole() {
       </div>
       <div className="table-container">
         <DarCollectionTable
+          key="researcher-dar-table"
           collections={filteredList}
-          columns={[
-            DarCollectionTableColumnOptions.DAR_CODE,
-            DarCollectionTableColumnOptions.NAME,
-            DarCollectionTableColumnOptions.SUBMISSION_DATE,
-            DarCollectionTableColumnOptions.DATASET_COUNT,
-            DarCollectionTableColumnOptions.EXPIRES_AT,
-            DarCollectionTableColumnOptions.STATUS,
-            DarCollectionTableColumnOptions.ACTIONS,
-          ]}
+          columns={responsiveColumns}
           isLoading={isLoading}
           cancelCollection={cancelCollection}
           reviseCollection={reviseCollection}
