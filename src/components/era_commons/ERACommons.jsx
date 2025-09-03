@@ -3,18 +3,16 @@ import { get } from 'lodash'
 import { isNil } from 'lodash/fp'
 import queryString from 'query-string'
 import './ERACommons.css'
-import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
-import { User } from 'src/libs/ajax/User.js'
-import { Config } from 'src/libs/config.js'
+import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
+import { User } from 'src/libs/ajax/User'
+import { Config } from 'src/libs/config'
 import '../Animations.css'
-import { Storage } from 'src/libs/storage.js'
-import {
-  decodeNihToken,
-  extractEraAuthenticationState,
-  rasEnabled,
-  nihAccountLabel,
-} from '../../utils/ERACommonsUtils.js'
+import { Storage } from 'src/libs/storage'
+import { decodeNihToken } from 'src/utils/ERACommonsUtils'
+import { extractEraAuthenticationState, nihAccountLabel, rasEnabled } from 'src/components/era_commons/ERACommonsUtils'
+
 import ReactTooltip from 'react-tooltip'
+import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 
 export default function ERACommons(props) {
   const {
@@ -132,10 +130,7 @@ export default function ERACommons(props) {
       {header && (
         <label className="era-control-label">
           <span data-cy="era-commons-header">
-            NIH
-            {accountLabel}
-            {' '}
-            ID
+            NIH {accountLabel} ID
             {required ? <span data-cy="era-commons-required">*</span> : ''}
           </span>
         </label>
@@ -165,23 +160,35 @@ export default function ERACommons(props) {
           {expirationCount >= 0 && (
             <div className="era-commons-id-value">
               <span data-cy="era-commons-id-value">{eraCommonsId}</span>
-              <button data-cy="era-delete-icon" className="era-delete-icon" type="button" onClick={deleteNihAccount}>
+              <AsyncSpinnerButton
+                className="era-delete-icon"
+                onClick={deleteNihAccount}
+                onError={displayError}
+                data-cy="era-delete-icon"
+                style={{
+                  cursor: 'pointer',
+                  color: '#333',
+                  backgroundColor: 'white',
+                  border: 'none',
+                  padding: '0',
+                  minWidth: '10px',
+                }}
+              >
                 <span
                   className="glyphicon glyphicon-remove-circle"
                   data-tip="Clear account"
                   data-for="tip_clear_era_commons_link"
                 />
-              </button>
+              </AsyncSpinnerButton>
               <ReactTooltip
                 place="right"
                 effect="solid"
                 id="tip_clear_era_commons_link"
               >
-                Clear
-                {' '}
-                {accountLabel}
-                {' '}
-                Account Link
+                Clear {accountLabel} Account Link.<br />
+                This will <strong>remove</strong> your {accountLabel} account link from your profile
+                and will be reflected both in <strong>DUOS</strong> and in <strong>Terra</strong>.<br />
+                You can re-authenticate at any time.
               </ReactTooltip>
             </div>
           )}

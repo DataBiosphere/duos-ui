@@ -59,3 +59,5 @@ export const StackdriverReporter = {
   },
 
 }
+
+export default StackdriverReporter

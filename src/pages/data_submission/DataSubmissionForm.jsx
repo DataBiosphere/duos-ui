@@ -214,6 +214,7 @@ export const DataSubmissionForm = (props) => {
                 onError={onError}
                 className="button button-white"
                 data-cy="data-submission-submit-button"
+                hideOnSuccess={false}
               >
                 Submit
               </AsyncSpinnerButton>

@@ -6,7 +6,7 @@ import CollaboratorList from './collaborator/CollaboratorList'
 import { isEmpty, isNil } from 'lodash/fp'
 import { FormField, FormValidators, FormFieldTypes } from 'src/components/forms/forms'
 import './dar_application.css'
-import { nihAccountLabel, nihAccountInstructions } from 'src/utils/ERACommonsUtils'
+import { nihAccountLabel, nihAccountInstructions } from 'src/components/era_commons/ERACommonsUtils'
 import {
   ERACommonsDisplay,
 } from '../../components/era_commons/ERACommonsDisplay'

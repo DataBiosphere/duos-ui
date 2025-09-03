@@ -6,11 +6,11 @@ import {
 import React, { useEffect, useState } from 'react'
 import { isEmpty, isNil } from 'lodash/fp'
 import { v4 as uuidV4 } from 'uuid'
-import { computeCollaboratorErrors } from 'src/utils/darFormUtils.js'
+import { computeCollaboratorErrors } from 'src/utils/darFormUtils'
 import DeleteCollaboratorModal from './DeleteCollaboratorModal'
-import { nihAccountLabel } from 'src/utils/ERACommonsUtils.js'
-import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus.js'
-import { Countries } from 'src/libs/ajax/Countries.js'
+import { nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
+import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus'
+import { Countries } from 'src/libs/ajax/Countries'
 
 export default function CollaboratorForm(props) {
   const {

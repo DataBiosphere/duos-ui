@@ -522,7 +522,7 @@ export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter
 // or value (string or number alternative) property which determines sorting
 export const sortVisibleTable = ({ list, sort }) => {
   // Sort: { dir, colIndex }
-  if (!sort || sort.colIndex === undefined) {
+  if (!list || !sort || sort.colIndex === undefined) {
     return list
   }
   else {

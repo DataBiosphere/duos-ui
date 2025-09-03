@@ -1,5 +1,5 @@
 import React from 'react'
-import { nihAccountLabel } from 'src/utils/ERACommonsUtils'
+import { nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import './ERACommons.css'
 export type ERACommonsDisplayProps = {
   eraCommonsId: string | undefined
@@ -12,10 +12,7 @@ export const ERACommonsDisplay = (props: ERACommonsDisplayProps) => {
     <div>
       <label className="era-control-label">
         <span data-cy="era-commons-header">
-          NIH
-          {nihAccountLabel()}
-          {' '}
-          ID
+          NIH {nihAccountLabel()} ID
         </span>
       </label>
       <div>
