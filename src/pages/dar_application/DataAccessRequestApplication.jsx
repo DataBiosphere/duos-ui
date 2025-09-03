@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
 import { DataUseAgreements } from 'src/pages/dar_application/DataUseAgreements'
@@ -200,12 +200,34 @@ const DataAccessRequestApplication = (props) => {
     setUploadedIrbDocument(document)
   }
 
-  const getCollection = async (collectionId, collection) => {
-    if (collection) {
-      return Promise.resolve(collection)
+  // Custom hook to manage async fetch with caching
+  const useCacheAsyncFetch = (initialCache = {}) => {
+    const cacheRef = useRef(initialCache)
+    const fetchingRef = useRef({})
+
+    return async (id, fetchFn) => {
+      if (cacheRef.current[id]) {
+        return cacheRef.current[id]
+      }
+      if (fetchingRef.current[id]) {
+        return fetchingRef.current[id]
+      }
+      fetchingRef.current[id] = fetchFn(id)
+      const result = await fetchingRef.current[id]
+      cacheRef.current[id] = result
+      fetchingRef.current[id] = null
+      return result
     }
-    return await Collections.getCollectionById(collectionId)
   }
+
+  // Initialize cache with collection if available
+  const initialCache = {
+    [collection?.darCollectionId]: collection,
+  }
+  const fetchAsyncData = useCacheAsyncFetch(initialCache)
+
+  const getDarCollection = collectionId => fetchAsyncData(collectionId, Collections.getCollectionById)
+  const getPartialDarRequest = darId => fetchAsyncData(darId, DAR.getPartialDarRequest)
 
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])
@@ -234,7 +256,7 @@ const DataAccessRequestApplication = (props) => {
       try {
         const { collectionId } = match.params
         if (existingDarsReadOnlyMode) {
-          const { createUser } = await getCollection(collectionId, collection)
+          const { createUser } = await getDarCollection(collectionId)
           setResearcher(createUser)
         }
         else {
@@ -250,7 +272,8 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
-  }, [match.params, existingDarsReadOnlyMode, collection])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match.params, existingDarsReadOnlyMode])
 
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = match.params
@@ -259,20 +282,21 @@ const DataAccessRequestApplication = (props) => {
     if (!isNil(collectionId)) {
       // Review existing DAR application - retrieves all datasets in the collection
       // Besides the datasets, DARs split off from the collection should have the same formData
-      const { dars, datasets } = await getCollection(collectionId, collection)
+      const { dars, datasets } = await getDarCollection(collectionId)
 
       // Add elections to DAR data passed into form, to enable showing approved datasets
-      Object.values(dars).map((dar) => {
+      const darEntries = dars ? Object.values(dars) : []
+      darEntries.forEach((dar) => {
         dar.data.elections = dar.elections
         dar.data.datasetIds = dar.datasetIds
       })
       // TS thinks that collection.dars is an object, but it is a map
-      const darMap = new Map(Object.entries(dars))
+      const darMap = new Map(Object.entries(dars || {}))
       const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
       setReverseOrderedDARs(newReverseOrderedDARs)
       // form data = the "root" DAR's data
-      const darId = Object.values(dars).sort((a, b) => a.id - b.id)[0].referenceId
-      formData = await DAR.getPartialDarRequest(darId)
+      const darId = darEntries.length > 0 ? darEntries.sort((a, b) => a.id - b.id)[0].referenceId : undefined
+      formData = darId ? await getPartialDarRequest(darId) : {}
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
@@ -280,7 +304,7 @@ const DataAccessRequestApplication = (props) => {
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
-      formData = await DAR.getPartialDarRequest(dataRequestId)
+      formData = await getPartialDarRequest(dataRequestId)
     }
     else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
@@ -296,7 +320,8 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData)
     setIsLoading(false)
-  }, [match.params, collection, researcher, existingDarsReadOnlyMode])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match.params, researcher, existingDarsReadOnlyMode])
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {
