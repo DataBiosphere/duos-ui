@@ -427,7 +427,7 @@ export const DatasetSearch = (props) => {
         },
       },
       icon: broadIcon,
-      title: 'Psychiatric Biomarkers Netowrk Data Library',
+      title: 'Psychiatric Biomarkers Network Data Library',
     },
     'pgc': {
       query: {
