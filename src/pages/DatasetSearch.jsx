@@ -411,6 +411,60 @@ export const DatasetSearch = (props) => {
       icon: gp2Icon,
       title: 'Global Parkinson\'s Genetics Program Data Library',
     },
+    'broadasd': {
+      query: {
+        match_phrase: {
+          'study.description': 'ASD',
+        },
+      },
+      icon: broadIcon,
+      title: 'Broad Institute Autism Spectrum Disorder (ASD) Data Library',
+    },
+    'pbn': {
+      query: {
+        match_phrase: {
+          'study.description': 'PBN',
+        },
+      },
+      icon: broadIcon,
+      title: 'Psychiatric Biomarkers Network Data Library',
+    },
+    'pgc': {
+      query: {
+        match_phrase: {
+          'study.description': 'PGC',
+        },
+      },
+      icon: broadIcon,
+      title: 'Psychiatric Genomics Consortium - PsychChip Data Library',
+    },
+    'broadsczbd': {
+      query: {
+        match_phrase: {
+          'study.description': 'SCZ',
+        },
+      },
+      icon: broadIcon,
+      title: 'Broad Institute Schizophrenia & Bipolar Disorder Data Library',
+    },
+    'esp': {
+      query: {
+        match_phrase: {
+          'study.description': 'ESP',
+        },
+      },
+      icon: broadIcon,
+      title: 'Broad Institute Epilepsy Data Library',
+    },
+    'fgc': {
+      query: {
+        match_phrase: {
+          'study.description': 'FGC',
+        },
+      },
+      icon: broadIcon,
+      title: 'Fetal Genomics Consortium Data Library',
+    },
     'broadibd': {
       query: {
         match_phrase: {
