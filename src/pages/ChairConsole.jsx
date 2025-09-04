@@ -24,7 +24,7 @@ export default function ChairConsole(props) {
   const filterFn = getSearchFilterFunctions().darCollections
   const { history } = props
 
-  // Define base columns array for chair console
+  // Default columns for chair console
   const baseColumns = [
     DarCollectionTableColumnOptions.DAR_CODE,
     DarCollectionTableColumnOptions.NAME,

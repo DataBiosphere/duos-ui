@@ -18,7 +18,7 @@ export default function MemberConsole(props) {
   const filterFn = getSearchFilterFunctions().darCollections
   const { history } = props
 
-  // Define base columns array for member console
+  // Default columns for member console
   const baseColumns = [
     DarCollectionTableColumnOptions.DAR_CODE,
     DarCollectionTableColumnOptions.NAME,

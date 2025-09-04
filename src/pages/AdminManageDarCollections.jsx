@@ -21,7 +21,7 @@ export default function AdminManageDarCollections() {
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
 
-  // Define base columns array for admin console
+  // Default columns for admin console
   const baseColumns = [
     DarCollectionTableColumnOptions.DAR_CODE,
     DarCollectionTableColumnOptions.DAC,

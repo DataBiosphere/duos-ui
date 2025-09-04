@@ -11,7 +11,7 @@ export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Define base columns array for signing official console
+  // Default columns for signing official console
   const baseColumns = [
     DarCollectionTableColumnOptions.DAR_CODE,
     DarCollectionTableColumnOptions.NAME,

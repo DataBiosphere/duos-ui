@@ -110,7 +110,8 @@ const DataRows = ({ rowData, baseStyle, columnHeaders, rowWrapper = ({ renderedR
           let output
           // columnHeaders determine width of the columns,
           // therefore extract width from columnHeader and apply to cell style
-          // Add defensive check to prevent crash when column headers don't match row data length
+          // Add defensive check to prevent crash when column headers don't match row data length,
+          // e.g. when hiding columns in narrow viewports
           const columnHeader = columnHeaders[cellIndex]
           if (!columnHeader || !columnHeader.cellStyle) {
             return null // Skip rendering this cell if column header is missing

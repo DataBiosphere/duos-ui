@@ -21,7 +21,7 @@ export default function ResearcherConsole() {
   const [filteredList, setFilteredList] = useState()
   const searchRef = useRef('')
 
-  // Define base columns array for researcher console
+  // Default columns for researcher console
   const baseColumns = [
     DarCollectionTableColumnOptions.DAR_CODE,
     DarCollectionTableColumnOptions.NAME,
