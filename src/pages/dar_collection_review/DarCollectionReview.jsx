@@ -84,39 +84,55 @@ const tabsForUser = (user, buckets, adminPage = false) => {
 }
 
 const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
-  // most recently submitted DAR
-  const dars = Object.values(darCollection.dars)
-  if (dars.length === 0) return []
-  const mostRecentDar = dars.filter(d => !d.draft).reduce((latest, current) =>
-    new Date(current.submissionDate) > new Date(latest.submissionDate) ? current : latest,
-  )
+  const getMostRecentSubmittedDar = (darCollection) => {
+    const dars = Object.values(darCollection.dars || {})
+    const submittedDars = dars.filter(d => !d.draft)
+    if (submittedDars.length === 0) return submittedDars
+    return submittedDars.reduce((latest, current) =>
+      new Date(current.submissionDate) > new Date(latest.submissionDate) ? current : latest,
+    )
+  }
 
-  // most recent closed election
-  const elections = Object.values(mostRecentDar.elections || {})
-  const closedDataAccessElections = elections.filter(e => e.electionType == 'DataAccess' && e.status === 'Closed')
-  if (closedDataAccessElections.length === 0) return []
-  const latestElection = closedDataAccessElections.reduce((latest, current) =>
-    new Date(current.createDate) > new Date(latest.createDate) ? current : latest,
-  )
+  const getClosedDataAccessElections = (mostRecentDar) => {
+    const elections = Object.values(mostRecentDar.elections || {})
+    return elections.filter(
+      e => e.electionType === 'DataAccess' && e.status === 'Closed',
+    )
+  }
 
-  // datasets approved in that election
-  const approvedDatasetIds = []
-  Object.values(latestElection.votes || {}).forEach((vote) => {
-    if ((vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE') && vote.vote === true) {
-      approvedDatasetIds.push(latestElection.datasetId)
-    }
+  const getApprovedDatasetIdFromElection = (election) => {
+    const electionVotes = Object.values(election.votes || {})
+    const hasApprovedVote = electionVotes.some(
+      vote => vote.vote === true && (vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE'),
+    )
+    if (hasApprovedVote) return election.datasetId
+    return null
+  }
+
+  const getApprovedDatasetNames = (darCollection, approvedDatasetIdsSet, dacIds) => {
+    return Array.from(approvedDatasetIdsSet)
+      .filter((datasetId) => {
+        if (dacIds.length === 0) return true // admin page
+        const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
+        return dacIds.includes(dataset?.dacId)
+      })
+      .map((datasetId) => {
+        const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
+        return dataset?.name
+      }) || []
+  }
+
+  const mostRecentDar = getMostRecentSubmittedDar(darCollection)
+  const darElections = getClosedDataAccessElections(mostRecentDar)
+  const approvedDatasetIdsSet = new Set()
+
+  // Loop through elections and collect approved dataset IDs
+  darElections.forEach((darElection) => {
+    const approvedDatasetId = getApprovedDatasetIdFromElection(darElection)
+    if (approvedDatasetId) approvedDatasetIdsSet.add(approvedDatasetId)
   })
 
-  // filter for this DAC if this is a DAC page, and get dataset names
-  const approvedDatasetNames = [...new Set(approvedDatasetIds)].filter((datasetId) => {
-    if (dacIds.length === 0) return true // admin page
-    const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
-    return dacIds.includes(dataset?.dacId)
-  }).map((datasetId) => {
-    const dataset = darCollection.datasets?.find(ds => ds.datasetId === datasetId)
-    return dataset?.name
-  })
-  return approvedDatasetNames || []
+  return getApprovedDatasetNames(darCollection, approvedDatasetIdsSet, dacIds)
 }
 
 const userIsDacUser = (user) => {
