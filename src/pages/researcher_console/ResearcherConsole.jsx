@@ -41,6 +41,11 @@ export default function ResearcherConsole() {
       columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
     }
 
+    // Hide expiration date column if viewport width < 1000px for researcher
+    if (width < 1000) {
+      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.EXPIRES_AT)
+    }
+
     return columns
   }
 
