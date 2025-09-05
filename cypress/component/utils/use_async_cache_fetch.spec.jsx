@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import useAsyncCacheFetch from 'src/utils/useAsyncCacheFetch'
+import PropTypes from 'prop-types'
 
 const TestAsyncCacheFetch = ({ fetchFn }) => {
   const fetch = useAsyncCacheFetch()
@@ -16,6 +17,10 @@ const TestAsyncCacheFetch = ({ fetchFn }) => {
       <div data-cy="result">{result}</div>
     </div>
   )
+}
+
+TestAsyncCacheFetch.propTypes = {
+  fetchFn: PropTypes.func.isRequired,
 }
 
 describe('useAsyncCacheFetch', () => {
