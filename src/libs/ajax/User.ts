@@ -1,7 +1,7 @@
 import { cloneDeep, flow, unset, mergeAll } from 'lodash/fp'
 import { Config } from '../config'
 import axios from 'axios'
-import { getApiUrl, fetchOk, fetchAny } from '../ajax'
+import { getApiUrl, fetchOk } from '../ajax'
 import { CreateDuosUserResponse, DuosUserResponse, UpdateDuosUserResponse } from 'src/types/responseTypes'
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes'
 import {
@@ -130,20 +130,14 @@ export const User = {
 
   addRoleToUser: async (userId: number, roleId: number): Promise<DuosUserResponse> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await fetchAny(
-      url,
-      mergeAll([Config.authOpts(), { method: 'PUT' }]),
-    )
-    return res.json()
+    const res = await axios.put(url, null, Config.authOpts())
+    return res.data
   },
 
   deleteRoleFromUser: async (userId: number, roleId: number): Promise<DuosUserResponse> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await fetchAny(
-      url,
-      mergeAll([Config.authOpts(), { method: 'DELETE' }]),
-    )
-    return res.json()
+    const res = await axios.delete(url, Config.authOpts())
+    return res.data
   },
 
   getUserRelevantDatasets: async (): Promise<Dataset[]> => {
