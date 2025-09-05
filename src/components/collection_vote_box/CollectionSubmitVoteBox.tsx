@@ -184,6 +184,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
       setVote(newVote)
     }
     Notifications.showSuccess({ text: 'Successfully updated vote' })
+    reloadFn()
   }
 
   const onVoteError = (error: unknown, isChair: boolean) => {
