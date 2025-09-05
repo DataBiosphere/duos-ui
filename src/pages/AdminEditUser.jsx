@@ -94,7 +94,7 @@ export const AdminEditUser = (props) => {
     }
     catch (error) {
       const errorText = extractError(error)
-      Notifications.showError({ text: errorText ? errorText : 'Error: Failed to update user' })
+      Notifications.showError({ text: errorText || 'Error: Failed to update user' })
     }
   }
 
