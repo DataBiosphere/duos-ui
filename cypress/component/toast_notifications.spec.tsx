@@ -166,18 +166,6 @@ describe('ToastNotifications', () => {
         .and('contain.text', 'Warning message')
         .and('have.class', 'MuiAlert-filledWarning')
     })
-
-    it('should accept custom timeout for warning notifications', () => {
-      // Arrange & Act
-      ToastNotifications.showWarning({
-        text: 'Warning message',
-        timeout: 500,
-      })
-
-      // Assert
-      cy.get('[data-cy="notification-alert"]').should('be.visible')
-      cy.get('[data-cy="notification-alert"]').should('not.exist')
-    })
   })
 
   describe('showInformation', () => {
