@@ -3,6 +3,7 @@ import ChairVoteHistoryTable from 'src/components/vote_history_table/ChairVoteHi
 import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionWithMemberVotesTable'
 import { Styles } from 'src/libs/theme'
 import { DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vote, VoteHistoryRow } from 'src/types/model'
+import { VOTE_TYPES } from 'src/utils/DarUtils'
 
 interface VotingHistoryProps {
   readonly darCollection: DarCollection
@@ -119,7 +120,7 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
 }
 
 const isChairVote = (vote: Vote) => {
-  return (vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE') && vote.vote != null
+  return (vote.type === VOTE_TYPES.FINAL || vote.type === VOTE_TYPES.RADAR_APPROVE) && vote.vote != null
 }
 
 export default function VotingHistory({ darCollection, dacIds }: VotingHistoryProps) {

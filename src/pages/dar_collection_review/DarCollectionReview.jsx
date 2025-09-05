@@ -12,6 +12,7 @@ import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from '../../libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
+import { APPROVED_VOTETYPES, ElectionStatus, ElectionType } from 'src/utils/DarUtils.js'
 
 const tabContainerColor = 'rgb(115,154,164)'
 
@@ -94,16 +95,18 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
   const getClosedDataAccessElections = (mostRecentDar) => {
     const elections = Object.values(mostRecentDar.elections || {})
     return elections.filter(
-      e => e.electionType === 'DataAccess' && e.status === 'Closed',
+      e => e.electionType === ElectionType.DATA_ACCESS && e.status === ElectionStatus.CLOSED,
     )
   }
 
   const getApprovedDatasetIdFromElection = (election) => {
     const electionVotes = Object.values(election.votes || {})
     const hasApprovedVote = electionVotes.some(
-      vote => vote.vote === true && (vote.type === 'FINAL' || vote.type === 'RADAR_APPROVE'),
+      vote => vote.vote === true && APPROVED_VOTETYPES.includes(vote.type),
     )
-    if (hasApprovedVote) return election.datasetId
+    if (hasApprovedVote) {
+      return election.datasetId
+    }
     return null
   }
 
@@ -127,7 +130,9 @@ const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
   // Loop through elections and collect approved dataset IDs
   darElections.forEach((darElection) => {
     const approvedDatasetId = getApprovedDatasetIdFromElection(darElection)
-    if (approvedDatasetId) approvedDatasetIdsSet.add(approvedDatasetId)
+    if (approvedDatasetId) {
+      approvedDatasetIdsSet.add(approvedDatasetId)
+    }
   })
 
   return getApprovedDatasetNames(darCollection, approvedDatasetIdsSet, dacIds)

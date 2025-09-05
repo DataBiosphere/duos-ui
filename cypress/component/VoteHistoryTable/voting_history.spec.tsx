@@ -2,6 +2,7 @@ import React from 'react'
 import { mount } from 'cypress/react'
 import VotingHistory from 'src/pages/dar_collection_review/VotingHistory'
 import { DarCollection } from 'src/types/model'
+import { VOTE_TYPES } from 'src/utils/DarUtils'
 
 const darCollection: DarCollection = {
   id: 1234,
@@ -131,7 +132,7 @@ const darCollection: DarCollection = {
               userId: 11111,
               createDate: 1669062648000,
               electionId: 8888,
-              type: 'FINAL',
+              type: VOTE_TYPES.FINAL,
               displayName: 'Ted Lasso',
             },
             8679: {
@@ -169,7 +170,7 @@ const darCollection: DarCollection = {
               updateDate: 1669120753000,
               vote: true,
               rationale: '',
-              type: 'FINAL',
+              type: VOTE_TYPES.FINAL,
               displayName: 'Stuart Williams',
             },
             8683: {
@@ -191,7 +192,7 @@ const darCollection: DarCollection = {
               updateDate: 1669120753000,
               vote: true,
               rationale: '',
-              type: 'RADAR_APPROVE',
+              type: VOTE_TYPES.RADAR_APPROVE,
               displayName: 'Sue Smith',
             },
           },
@@ -296,7 +297,7 @@ const darCollection: DarCollection = {
               userId: 11,
               createDate: 1669062648000,
               electionId: 8889,
-              type: 'FINAL',
+              type: VOTE_TYPES.FINAL,
               displayName: 'Ted Lasso',
             },
             86791: {
@@ -328,7 +329,7 @@ const darCollection: DarCollection = {
               userId: 9,
               createDate: 1669062648000,
               electionId: 8889,
-              type: 'FINAL',
+              type: VOTE_TYPES.FINAL,
               displayName: 'Stuart Williams',
             },
             86831: {
@@ -469,8 +470,8 @@ describe('VotingHistory Component', () => {
     cy.get(':nth-child(3) > :nth-child(2) > .table-data').contains('2022-11-21')
     cy.get(':nth-child(3) > :nth-child(2) > .table-data').should('not.contain', '2023-01-10')
     // Chair table only includes final or radar approve votes
-    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains('FINAL')
-    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains('RADAR_APPROVE')
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains(VOTE_TYPES.FINAL)
+    cy.get(':nth-child(2) > :nth-child(2) > .table-data').contains(VOTE_TYPES.RADAR_APPROVE)
     cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', 'DAC')
     cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', 'AGREEMENT')
     cy.get(':nth-child(2) > :nth-child(2) > .table-data').should('not.contain', 'Chairperson')
