@@ -20,7 +20,3 @@ import './commands'
 // require('./commands')
 // Example use:
 // cy.mount(<MyComponent />)
-
-// Import mount method from cypress/react
-import { mount } from 'cypress/react'
-Cypress.Commands.add('mount', mount)
