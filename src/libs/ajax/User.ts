@@ -130,20 +130,14 @@ export const User = {
 
   addRoleToUser: async (userId: number, roleId: number): Promise<DuosUserResponse> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await fetchAny(
-      url,
-      mergeAll([Config.authOpts(), { method: 'PUT' }]),
-    )
-    return res.json()
+    const res = await axios.put(url, null, Config.authOpts())
+    return res.data
   },
 
   deleteRoleFromUser: async (userId: number, roleId: number): Promise<DuosUserResponse> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await fetchAny(
-      url,
-      mergeAll([Config.authOpts(), { method: 'DELETE' }]),
-    )
-    return res.json()
+    const res = await axios.delete(url, Config.authOpts())
+    return res.data
   },
 
   getUserRelevantDatasets: async (): Promise<Dataset[]> => {

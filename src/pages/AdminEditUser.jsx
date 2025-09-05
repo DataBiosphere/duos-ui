@@ -8,6 +8,7 @@ import { ResearcherReview } from '../components/ResearcherReview'
 import editUserIcon from '../images/icon_edit_user.png'
 import { PageHeading } from '../components/PageHeading'
 import { SearchSelect } from '../components/SearchSelect'
+import { extractError } from 'src/utils/ErrorUtils.js'
 
 const adminRole = { roleId: 4, name: USER_ROLES.admin }
 const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
@@ -91,8 +92,9 @@ export const AdminEditUser = (props) => {
       await updateRolesIfDifferent(userId, state.updatedRoles)
       props.history.push('/admin_manage_users')
     }
-    catch (_error) {
-      Notifications.showError({ text: 'Error: Failed to update user' })
+    catch (error) {
+      const errorText = extractError(error)
+      Notifications.showError({ text: errorText ? errorText : 'Error: Failed to update user' })
     }
   }
 
@@ -102,20 +104,20 @@ export const AdminEditUser = (props) => {
     // Always make sure researcher is a role we already have or need to add.
     const updatedRoleIds = union([researcherRole.roleId])(map('roleId')(updatedRoles))
 
-    lodashMap(updatedRoleIds, (roleId) => {
+    await Promise.all(lodashMap(updatedRoleIds, async (roleId) => {
       if (!contains(roleId)(currentRoleIds)) {
-        User.addRoleToUser(userId, roleId)
+        await User.addRoleToUser(userId, roleId)
       }
-    })
+    }))
 
-    lodashMap(currentRoleIds, (roleId) => {
+    await Promise.all(lodashMap(currentRoleIds, async (roleId) => {
       if (!contains(roleId)(updatedRoleIds)) {
         // Safety check ... never delete the researcher role!!!
         if (roleId !== researcherRole.roleId) {
-          User.deleteRoleFromUser(userId, roleId)
+          await User.deleteRoleFromUser(userId, roleId)
         }
       }
-    })
+    }))
   }
 
   const emailPreferenceChanged = (e) => {
