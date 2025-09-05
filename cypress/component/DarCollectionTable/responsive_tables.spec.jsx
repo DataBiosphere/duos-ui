@@ -63,6 +63,27 @@ const getAdminResponsiveColumns = (width, baseColumns) => {
   return columns
 }
 
+// Helper function for bug reproduction resize handling
+const createResizeHandler = (
+  windowWidth,
+  setWindowWidth,
+  setCurrentPage,
+  getResponsiveColumnsWithBug,
+) => {
+  return () => {
+    const newWidth = window.innerWidth
+    setWindowWidth(newWidth)
+
+    const oldColumns = getResponsiveColumnsWithBug(windowWidth)
+    const newColumns = getResponsiveColumnsWithBug(newWidth)
+
+    if (oldColumns.length !== newColumns.length) {
+      console.log('Bug reproduced: Page reset due to column change')
+      setCurrentPage(1)
+    }
+  }
+}
+
 // Wrapper component to test table doesn't e.g. go from page 2 to 1 when hiding column on resize
 const BugReproductionWrapper = ({ collections = mockCollectionsForPagination }) => {
   const [windowWidth, setWindowWidth] = React.useState(1300)
@@ -83,18 +104,12 @@ const BugReproductionWrapper = ({ collections = mockCollectionsForPagination }) 
   }, [columnsWithDatasetCount])
 
   React.useEffect(() => {
-    const handleResize = () => {
-      const newWidth = window.innerWidth
-      setWindowWidth(newWidth)
-
-      const oldColumns = getResponsiveColumnsWithBug(windowWidth)
-      const newColumns = getResponsiveColumnsWithBug(newWidth)
-
-      if (oldColumns.length !== newColumns.length) {
-        console.log('Bug reproduced: Page reset due to column change')
-        setCurrentPage(1)
-      }
-    }
+    const handleResize = createResizeHandler(
+      windowWidth,
+      setWindowWidth,
+      setCurrentPage,
+      getResponsiveColumnsWithBug,
+    )
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -129,6 +144,79 @@ const HookTestComponent = ({ consoleType }) => {
     <div data-testid="hook-test-component">
       <div data-testid="column-count">{responsiveColumns.length}</div>
       <div data-testid="columns">{responsiveColumns.join(',')}</div>
+    </div>
+  )
+}
+
+// Helper component for admin table with hook integration testing
+const AdminTableWithHook = () => {
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.ADMIN)
+  return (
+    <DarCollectionTable
+      collections={mockCollections}
+      columns={responsiveColumns}
+      isLoading={false}
+      consoleType={consoleTypes.ADMIN}
+      cancelCollection={() => {}}
+      reviseCollection={() => {}}
+      openCollection={() => {}}
+      deleteDraft={() => {}}
+    />
+  )
+}
+
+// Helper function for researcher responsive columns
+const getResearcherResponsiveColumns = (width, baseColumns) => {
+  if (width < 1200) {
+    return baseColumns.filter(col => col !== DarCollectionTableColumnOptions.DATASET_COUNT)
+  }
+  return baseColumns
+}
+
+// Helper function for responsive table resize handling
+const createSimpleResizeHandler = (setWindowWidth) => {
+  return () => {
+    setWindowWidth(window.innerWidth)
+  }
+}
+
+// Responsive table wrapper component for pagination testing
+const ResponsiveTableWrapper = () => {
+  const [windowWidth, setWindowWidth] = React.useState(1600)
+  const [currentPage, setCurrentPage] = React.useState(1)
+
+  const columnsWithDatasetCount = React.useMemo(() => [
+    DarCollectionTableColumnOptions.DAR_CODE,
+    DarCollectionTableColumnOptions.NAME,
+    DarCollectionTableColumnOptions.SUBMISSION_DATE,
+    DarCollectionTableColumnOptions.DATASET_COUNT,
+    DarCollectionTableColumnOptions.STATUS,
+    DarCollectionTableColumnOptions.ACTIONS,
+  ], [])
+
+  React.useEffect(() => {
+    const handleResize = createSimpleResizeHandler(setWindowWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return (
+    <div data-testid="responsive-wrapper">
+      <div data-testid="current-page">Page: {currentPage}</div>
+      <div data-testid="window-width">Width: {windowWidth}</div>
+      <DarCollectionTable
+        key="responsive-table-test"
+        collections={mockCollectionsForPagination}
+        columns={getResearcherResponsiveColumns(windowWidth, columnsWithDatasetCount)}
+        isLoading={false}
+        consoleType={consoleTypes.RESEARCHER}
+        cancelCollection={() => {}}
+        reviseCollection={() => {}}
+        openCollection={() => {}}
+        deleteDraft={() => {}}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   )
 }
@@ -192,22 +280,6 @@ describe('useResponsiveDarCollectionColumns Hook', () => {
 
   describe('Hook Integration with Table Components', () => {
     it('should integrate seamlessly with DarCollectionTable for admin console', () => {
-      const AdminTableWithHook = () => {
-        const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.ADMIN)
-        return (
-          <DarCollectionTable
-            collections={mockCollections}
-            columns={responsiveColumns}
-            isLoading={false}
-            consoleType={consoleTypes.ADMIN}
-            cancelCollection={() => {}}
-            reviseCollection={() => {}}
-            openCollection={() => {}}
-            deleteDraft={() => {}}
-          />
-        )
-      }
-
       mountWithRouter(<AdminTableWithHook />)
 
       cy.viewport(1500, 800)
@@ -394,55 +466,6 @@ describe('Responsive DAR Collection Tables', () => {
 
   describe('Pagination Preservation During Resize', () => {
     it('should NOT reset to page 1 when column removal occurs during resize', () => {
-      const columnsWithDatasetCount = [
-        DarCollectionTableColumnOptions.DAR_CODE,
-        DarCollectionTableColumnOptions.NAME,
-        DarCollectionTableColumnOptions.SUBMISSION_DATE,
-        DarCollectionTableColumnOptions.DATASET_COUNT,
-        DarCollectionTableColumnOptions.STATUS,
-        DarCollectionTableColumnOptions.ACTIONS,
-      ]
-
-      const ResponsiveTableWrapper = () => {
-        const [windowWidth, setWindowWidth] = React.useState(1600)
-        const [currentPage, setCurrentPage] = React.useState(1)
-
-        const getResearcherResponsiveColumns = (width, baseColumns) => {
-          if (width < 1200) {
-            return baseColumns.filter(col => col !== DarCollectionTableColumnOptions.DATASET_COUNT)
-          }
-          return baseColumns
-        }
-
-        React.useEffect(() => {
-          const handleResize = () => {
-            setWindowWidth(window.innerWidth)
-          }
-          window.addEventListener('resize', handleResize)
-          return () => window.removeEventListener('resize', handleResize)
-        }, [])
-
-        return (
-          <div data-testid="responsive-wrapper">
-            <div data-testid="current-page">Page: {currentPage}</div>
-            <div data-testid="window-width">Width: {windowWidth}</div>
-            <DarCollectionTable
-              key="responsive-table-test"
-              collections={mockCollectionsForPagination}
-              columns={getResearcherResponsiveColumns(windowWidth, columnsWithDatasetCount)}
-              isLoading={false}
-              consoleType={consoleTypes.RESEARCHER}
-              cancelCollection={() => {}}
-              reviseCollection={() => {}}
-              openCollection={() => {}}
-              deleteDraft={() => {}}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )
-      }
-
       mountWithRouter(<ResponsiveTableWrapper />)
 
       cy.viewport(1600, 800)
