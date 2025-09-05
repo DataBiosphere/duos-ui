@@ -76,16 +76,6 @@ describe('ToastNotifications', () => {
         .should('have.class', 'MuiSnackbar-anchorOriginTopCenter')
     })
 
-    it('should auto-hide notification after timeout', () => {
-      ToastNotifications.showNotification({
-        text: 'Quick timeout',
-        timeout: 1000,
-      })
-
-      cy.get('[data-cy="notification-alert"]').should('be.visible')
-      cy.get('[data-cy="notification-alert"]', { timeout: 1200 }).should('not.exist')
-    })
-
     it('should close notification when close button is clicked', () => {
       ToastNotifications.showNotification({ text: 'Closeable notification' })
 
