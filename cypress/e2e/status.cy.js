@@ -12,8 +12,7 @@ describe('Status', function () {
     cy.contains('Status').click()
     headers.forEach((h) => {
       cy.contains(h).parent().children().next('svg')
-        .should('have.attr', 'fill')
-        .and('match', /(red|green)/)
+        .should('have.attr', 'data-testid', 'TaskAltOutlinedIcon')
     })
   })
 })
