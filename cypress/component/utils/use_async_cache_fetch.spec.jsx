@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
-import useAsyncCacheFetch from 'src/utils/useAsyncCacheFetch'
 import PropTypes from 'prop-types'
+import useAsyncCacheFetch from 'src/utils/useAsyncCacheFetch'
 
 const TestAsyncCacheFetch = ({ fetchFn }) => {
-  const fetch = useAsyncCacheFetch()
+  const { fetchWithCache } = useAsyncCacheFetch()
   const [result, setResult] = useState(null)
 
   const handleFetch = async () => {
-    const data = await fetch('test', fetchFn)
+    const data = await fetchWithCache('test', fetchFn)
     setResult(data)
   }
 

@@ -1,10 +1,10 @@
-import { useRef } from 'react'
+import { useRef, useCallback } from 'react'
 
 const useAsyncCacheFetch = (initialCache = {}) => {
   const cacheRef = useRef(initialCache)
   const fetchingRef = useRef({})
 
-  return async (id, fetchFn) => {
+  const fetchWithCache = useCallback(async (id, fetchFn) => {
     if (cacheRef.current[id]) {
       return cacheRef.current[id]
     }
@@ -16,7 +16,20 @@ const useAsyncCacheFetch = (initialCache = {}) => {
     cacheRef.current[id] = result
     fetchingRef.current[id] = null
     return result
-  }
+  }, [])
+
+  const clearCache = useCallback((id) => {
+    if (id) {
+      delete cacheRef.current[id]
+      delete fetchingRef.current[id]
+    }
+    else {
+      cacheRef.current = {}
+      fetchingRef.current = {}
+    }
+  }, [])
+
+  return { fetchWithCache, clearCache }
 }
 
 export default useAsyncCacheFetch

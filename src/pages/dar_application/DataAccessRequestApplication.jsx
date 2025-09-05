@@ -205,10 +205,11 @@ const DataAccessRequestApplication = (props) => {
   const initialCache = {
     [collection?.darCollectionId]: collection,
   }
-  const fetchAsyncData = useAsyncCacheFetch(initialCache)
 
-  const getDarCollection = collectionId => fetchAsyncData(collectionId, Collections.getCollectionById)
-  const getPartialDarRequest = darId => fetchAsyncData(darId, DAR.getPartialDarRequest)
+  const { fetchWithCache } = useAsyncCacheFetch(initialCache)
+
+  const getDarCollection = collectionId => fetchWithCache(collectionId, Collections.getCollectionById)
+  const getPartialDarRequest = darId => fetchWithCache(darId, DAR.getPartialDarRequest)
 
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])
