@@ -1,14 +1,12 @@
-import React from 'react'
-import { useCallback, useEffect, useState } from 'react'
-import { Notifications } from '../../libs/utils'
+import React, { useCallback, useEffect, useState } from 'react'
 import { User } from '../../libs/ajax/User'
 import TabControl from '../../components/TabControl'
 import ReviewHeader from './ReviewHeader'
 import ApplicationInformation from './ApplicationInformation'
-import { find, isEmpty, flatMap, flow, filter, map, get, toLower, uniq, compact } from 'lodash/fp'
+import { isEmpty, flatMap, flow, filter, map, get, toLower, uniq, compact } from 'lodash/fp'
 import { updateFinalVote } from '../../utils/DarCollectionUtils'
 import { binCollectionToBuckets } from '../../utils/BucketUtils'
-import { Navigation } from '../../libs/utils'
+import { Notifications, Navigation } from '../../libs/utils'
 import { Storage } from '../../libs/storage'
 import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from '../../libs/ajax/Collections'
@@ -167,13 +165,26 @@ export default function DarCollectionReview(props) {
       else {
         collection = await Collections.getCollectionById(collectionId)
       }
-      const darInfo = find(d => !isEmpty(d.data))(collection.dars).data
-      const referenceIdForDocuments = find(d => !isEmpty(d.referenceId))(collection.dars).referenceId
-      const researcherProfile = await User.getById(collection.createUserId)
+
+      // Find darInfo and referenceIdForDocuments in one pass
+      let darInfo, referenceIdForDocuments
+      for (const d of Object.values(collection.dars)) {
+        if (!darInfo && !isEmpty(d.data)) darInfo = d.data
+        if (!referenceIdForDocuments && !isEmpty(d.referenceId)) referenceIdForDocuments = d.referenceId
+        if (darInfo && referenceIdForDocuments) break
+      }
+
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
       const dacIds = adminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
-      const processedBuckets = await binCollectionToBuckets(collection, dacIds)
+
+      // Parallelize async calls
+      const [researcherProfile, processedBuckets] = await Promise.all([
+        User.getById(collection.createUserId),
+        binCollectionToBuckets(collection, dacIds),
+      ])
+
       const approvedDatasetNames = getApprovedDatasetsFromLatestDar(collection || { dars: [] }, dacIds)
+
       setDataUseBuckets(processedBuckets)
       setCollection(collection)
       setDarInfo(darInfo)
@@ -189,7 +200,7 @@ export default function DarCollectionReview(props) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       })
-      Navigation.console(user, props.history)
+      await Navigation.console(user, props.history)
     }
   }, [adminPage, props.history, collectionId])
 
@@ -281,6 +292,7 @@ export default function DarCollectionReview(props) {
             draftDar={false}
             isProgressReportApplication={false}
             researcherProfile={researcherProfile}
+            collection={collection}
             {...props}
           />
         )}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
 import { DataUseAgreements } from 'src/pages/dar_application/DataUseAgreements'
@@ -115,14 +115,14 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   })
 
-  const { history, location, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication } = props
+  const { history, location, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication, collection } = props
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} })
 
   const [nihValid, setNihValid] = useState(true)
   const [showNihValidationError, setShowNihValidationError] = useState(false)
 
-  const [disableOkBtn, setDisableOkButton] = useState(false)
+  const [disableOkBtn, setDisableOkBtn] = useState(false)
 
   const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true)
   const [internalCollaboratorsCompleted, setInternalCollaboratorsCompleted] = useState(true)
@@ -200,6 +200,35 @@ const DataAccessRequestApplication = (props) => {
     setUploadedIrbDocument(document)
   }
 
+  // Custom hook to manage async fetch with caching
+  const useCacheAsyncFetch = (initialCache = {}) => {
+    const cacheRef = useRef(initialCache)
+    const fetchingRef = useRef({})
+
+    return async (id, fetchFn) => {
+      if (cacheRef.current[id]) {
+        return cacheRef.current[id]
+      }
+      if (fetchingRef.current[id]) {
+        return fetchingRef.current[id]
+      }
+      fetchingRef.current[id] = fetchFn(id)
+      const result = await fetchingRef.current[id]
+      cacheRef.current[id] = result
+      fetchingRef.current[id] = null
+      return result
+    }
+  }
+
+  // Initialize cache with collection if available
+  const initialCache = {
+    [collection?.darCollectionId]: collection,
+  }
+  const fetchAsyncData = useCacheAsyncFetch(initialCache)
+
+  const getDarCollection = collectionId => fetchAsyncData(collectionId, Collections.getCollectionById)
+  const getPartialDarRequest = darId => fetchAsyncData(darId, DAR.getPartialDarRequest)
+
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])
   const [selectedDatasets, setSelectedDatasets] = useState([])
@@ -227,8 +256,8 @@ const DataAccessRequestApplication = (props) => {
       try {
         const { collectionId } = match.params
         if (existingDarsReadOnlyMode) {
-          const collection = await Collections.getCollectionById(collectionId)
-          setResearcher(collection.createUser)
+          const { createUser } = await getDarCollection(collectionId)
+          setResearcher(createUser)
         }
         else {
           const response = await User.getMe()
@@ -243,6 +272,7 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match.params, existingDarsReadOnlyMode])
 
   const init = useCallback(async () => {
@@ -252,21 +282,21 @@ const DataAccessRequestApplication = (props) => {
     if (!isNil(collectionId)) {
       // Review existing DAR application - retrieves all datasets in the collection
       // Besides the datasets, DARs split off from the collection should have the same formData
-      const collection = await Collections.getCollectionById(collectionId)
-      const { dars, datasets } = collection
+      const { dars, datasets } = await getDarCollection(collectionId)
 
       // Add elections to DAR data passed into form, to enable showing approved datasets
-      Object.values(dars).map((dar) => {
+      const darEntries = dars ? Object.values(dars) : []
+      darEntries.forEach((dar) => {
         dar.data.elections = dar.elections
         dar.data.datasetIds = dar.datasetIds
       })
       // TS thinks that collection.dars is an object, but it is a map
-      const darMap = new Map(Object.entries(dars))
+      const darMap = new Map(Object.entries(dars || {}))
       const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
       setReverseOrderedDARs(newReverseOrderedDARs)
       // form data = the "root" DAR's data
-      const darId = Object.values(dars).sort((a, b) => a.id - b.id)[0].referenceId
-      formData = await DAR.getPartialDarRequest(darId)
+      const darId = darEntries.length > 0 ? darEntries.sort((a, b) => a.id - b.id)[0].referenceId : undefined
+      formData = darId ? await getPartialDarRequest(darId) : {}
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
@@ -274,7 +304,7 @@ const DataAccessRequestApplication = (props) => {
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
-      formData = await DAR.getPartialDarRequest(dataRequestId)
+      formData = await getPartialDarRequest(dataRequestId)
     }
     else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
@@ -290,7 +320,8 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData)
     setIsLoading(false)
-  }, [match.params, existingDarsReadOnlyMode, researcher])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match.params, researcher, existingDarsReadOnlyMode])
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {
@@ -367,7 +398,7 @@ const DataAccessRequestApplication = (props) => {
   const removeAddendumTab = () => {
     const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0
     if (hasAddendumTab) {
-      const tabs = applicationTabs.filter(tab => tab.id != ADDENDUM_TAB_ID)
+      const tabs = applicationTabs.filter(tab => tab.id !== ADDENDUM_TAB_ID)
       setApplicationTabs(tabs)
     }
   }
@@ -462,26 +493,26 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const onSaveConfirmation = selectedOk => () => {
-    setDisableOkButton(true)
+    setDisableOkBtn(true)
     if (selectedOk === true) {
       saveDarDraft()
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
     else {
       setShowDialogSave(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
   }
 
   const onSubmitConfirmation = selectedOk => () => {
-    setDisableOkButton(true)
+    setDisableOkBtn(true)
     if (selectedOk === true) {
       submitDARFormData()
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
     else {
       setShowDialogSubmit(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
   }
 
@@ -509,11 +540,11 @@ const DataAccessRequestApplication = (props) => {
       }
       batchFormFieldChange(darPartialResponse)
       setShowDialogSave(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
     }
     catch (error) {
       setShowDialogSave(false)
-      setDisableOkButton(false)
+      setDisableOkBtn(false)
       if (error.response.data.code && error.response.data.message) {
         Notifications.showError({ text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
           severity: 'error',
@@ -797,4 +828,5 @@ DataAccessRequestApplication.propTypes = {
   draftDar: PropTypes.bool.isRequired,
   isProgressReportApplication: PropTypes.bool.isRequired,
   existingDarsReadOnlyMode: PropTypes.bool,
+  collection: PropTypes.object,
 }
