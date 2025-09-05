@@ -1,7 +1,7 @@
 import { cloneDeep, flow, unset, mergeAll } from 'lodash/fp'
 import { Config } from '../config'
 import axios from 'axios'
-import { getApiUrl, fetchOk, fetchAny } from '../ajax'
+import { getApiUrl, fetchOk } from '../ajax'
 import { CreateDuosUserResponse, DuosUserResponse, UpdateDuosUserResponse } from 'src/types/responseTypes'
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes'
 import {
