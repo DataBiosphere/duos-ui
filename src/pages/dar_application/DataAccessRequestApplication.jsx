@@ -31,7 +31,7 @@ import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils.js
 import { assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set } from 'lodash'
 import { Countries } from 'src/libs/ajax/Countries.js'
 import PropTypes from 'prop-types'
-import useAsyncCacheFetch from 'src/utils/useAsyncCacheFetch'
+import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'

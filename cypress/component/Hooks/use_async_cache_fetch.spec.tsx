@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { mount } from 'cypress/react'
-import useAsyncCacheFetch from 'src/utils/useAsyncCacheFetch'
+import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 
 type TestAsyncCacheFetchProps<T> = {
   fetchFn: (id: string) => Promise<T>
