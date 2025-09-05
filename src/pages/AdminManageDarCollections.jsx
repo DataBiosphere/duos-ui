@@ -9,10 +9,10 @@ import { DarCollectionTable } from '../components/dar_collection_table/DarCollec
 import {
   cancelCollectionFn,
   consoleTypes,
-  DarCollectionTableColumnOptions,
   openCollectionFn,
   updateCollectionFn,
 } from '../utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
 
 export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([])
@@ -21,50 +21,8 @@ export default function AdminManageDarCollections() {
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
 
-  // Default columns for admin console
-  const baseColumns = [
-    DarCollectionTableColumnOptions.DAR_CODE,
-    DarCollectionTableColumnOptions.DAC,
-    DarCollectionTableColumnOptions.NAME,
-    DarCollectionTableColumnOptions.SUBMISSION_DATE,
-    DarCollectionTableColumnOptions.RESEARCHER,
-    DarCollectionTableColumnOptions.INSTITUTION,
-    DarCollectionTableColumnOptions.DATASET_COUNT,
-    DarCollectionTableColumnOptions.EXPIRES_AT,
-    DarCollectionTableColumnOptions.STATUS,
-    DarCollectionTableColumnOptions.ACTIONS,
-  ]
-
-  // Define responsive columns based on window width
-  const getResponsiveColumns = (width) => {
-    let columns = [...baseColumns]
-
-    // Hide dataset count column if viewport width < 1450px
-    if (width < 1450) {
-      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
-    }
-
-    // Hide expiration date column if viewport width < 1250px
-    if (width < 1250) {
-      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.EXPIRES_AT)
-    }
-
-    return columns
-  }
-
-  // Initialize columns based on current window width
-  const [responsiveColumns, setResponsiveColumns] = useState(() => getResponsiveColumns(window.innerWidth))
-
-  // Handle window resize for responsive column hiding
-  useEffect(() => {
-    const handleResize = () => {
-      const newWidth = window.innerWidth
-      setResponsiveColumns(getResponsiveColumns(newWidth))
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  })
+  // Get responsive columns for admin console
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.ADMIN)
 
   const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
     searchTerms,

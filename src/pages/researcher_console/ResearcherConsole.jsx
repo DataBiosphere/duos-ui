@@ -8,7 +8,8 @@ import {
 } from 'src/components/dar_collection_table/DarCollectionTable'
 import accessIcon from 'src/images/lock-icon.png'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
-import { consoleTypes, DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils'
+import { consoleTypes } from 'src/utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import SearchBar from 'src/components/SearchBar'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
@@ -21,47 +22,8 @@ export default function ResearcherConsole() {
   const [filteredList, setFilteredList] = useState()
   const searchRef = useRef('')
 
-  // Default columns for researcher console
-  const baseColumns = [
-    DarCollectionTableColumnOptions.DAR_CODE,
-    DarCollectionTableColumnOptions.NAME,
-    DarCollectionTableColumnOptions.SUBMISSION_DATE,
-    DarCollectionTableColumnOptions.DATASET_COUNT,
-    DarCollectionTableColumnOptions.EXPIRES_AT,
-    DarCollectionTableColumnOptions.STATUS,
-    DarCollectionTableColumnOptions.ACTIONS,
-  ]
-
-  // Define responsive columns based on window width
-  const getResponsiveColumns = (width) => {
-    let columns = [...baseColumns]
-
-    // Hide dataset count column if viewport width < 1200px for researcher
-    if (width < 1200) {
-      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.DATASET_COUNT)
-    }
-
-    // Hide expiration date column if viewport width < 1000px for researcher
-    if (width < 1000) {
-      columns = columns.filter(column => column !== DarCollectionTableColumnOptions.EXPIRES_AT)
-    }
-
-    return columns
-  }
-
-  // Initialize columns based on current window width
-  const [responsiveColumns, setResponsiveColumns] = useState(() => getResponsiveColumns(window.innerWidth))
-
-  // Handle window resize for responsive column hiding
-  useEffect(() => {
-    const handleResize = () => {
-      const newWidth = window.innerWidth
-      setResponsiveColumns(getResponsiveColumns(newWidth))
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  })
+  // Get responsive columns for researcher console
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.RESEARCHER)
 
   // callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
