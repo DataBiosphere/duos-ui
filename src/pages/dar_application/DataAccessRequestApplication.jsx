@@ -201,8 +201,6 @@ const DataAccessRequestApplication = (props) => {
     setUploadedIrbDocument(document)
   }
 
-  // Custom hook to manage async fetch with caching
-
   // Initialize cache with collection if available
   const initialCache = {
     [collection?.darCollectionId]: collection,
