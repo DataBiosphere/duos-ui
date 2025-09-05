@@ -6,7 +6,7 @@ type TestAsyncCacheFetchProps<T> = {
   fetchFn: (id: string) => Promise<T>
 }
 
-function TestAsyncCacheFetch<T>({ fetchFn }: TestAsyncCacheFetchProps<T>) {
+function TestAsyncCacheFetch<T>({ fetchFn }: Readonly<TestAsyncCacheFetchProps<T>>) {
   const { fetchWithCache, clearCache } = useAsyncCacheFetch<string, T>()
   const [result, setResult] = useState<T | null>(null)
 
