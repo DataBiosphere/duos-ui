@@ -1,16 +1,16 @@
 import React from 'react'
-import { DAR } from '../../libs/ajax/DAR'
+import { DAR } from 'src/libs/ajax/DAR'
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
 import {
   needsIrbApprovalDocument,
   needsCollaborationLetter,
   newIrbDocumentExpirationDate,
-} from '../../utils/darFormUtils'
+} from 'src/utils/darFormUtils'
 import SelectableDatasets from './SelectableDatasets'
-import { DuosDatePicker } from '../../components/DuosDatePicker.js'
+import { DuosDatePicker } from 'src/components/DuosDatePicker.js'
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements.js'
-import { DownloadLink } from '../../components/DownloadLink'
+import { DownloadLink } from 'src/components/DownloadLink'
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' }
 
