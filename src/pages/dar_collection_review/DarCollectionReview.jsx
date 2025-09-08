@@ -12,7 +12,7 @@ import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from '../../libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
-import { APPROVED_VOTETYPES, ElectionStatus, ElectionType } from 'src/utils/DarUtils.js'
+import { APPROVED_VOTETYPES, ElectionStatus, ElectionType } from 'src/utils/DarUtils'
 
 const tabContainerColor = 'rgb(115,154,164)'
 

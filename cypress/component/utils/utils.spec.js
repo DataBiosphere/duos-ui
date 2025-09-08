@@ -1,4 +1,4 @@
-import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable } from 'src/libs/utils.js'
+import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable } from 'src/libs/utils'
 import { toLower } from 'lodash/fp'
 import { forEach } from 'lodash'
 import { VOTE_TYPES } from 'src/utils/DarUtils.js'
