@@ -5,11 +5,15 @@ import lockIcon from '../../images/lock-icon.png'
 import { Collections } from '../../libs/ajax/Collections'
 import { USER_ROLES } from '../../libs/utils'
 import { DarCollectionTable } from '../../components/dar_collection_table/DarCollectionTable'
-import { consoleTypes, DarCollectionTableColumnOptions } from '../../utils/DarCollectionUtils'
+import { consoleTypes } from '../../utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from '../../hooks/useResponsiveDarCollectionColumns'
 
 export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // Get responsive columns for signing official console
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.SIGNING_OFFICIAL)
 
   useEffect(() => {
     const init = async () => {
@@ -43,24 +47,17 @@ export default function SigningOfficialDarRequests() {
         </div>
       </div>
       <div className="signing-official-tabs">
-        <DarCollectionTable
-          collections={collectionList}
-          columns={[
-            DarCollectionTableColumnOptions.DAR_CODE,
-            DarCollectionTableColumnOptions.NAME,
-            DarCollectionTableColumnOptions.SUBMISSION_DATE,
-            DarCollectionTableColumnOptions.RESEARCHER,
-            DarCollectionTableColumnOptions.INSTITUTION,
-            DarCollectionTableColumnOptions.EXPIRES_AT,
-            DarCollectionTableColumnOptions.DATASET_COUNT,
-            DarCollectionTableColumnOptions.STATUS,
-            DarCollectionTableColumnOptions.ACTIONS,
-          ]}
-          isLoading={isLoading}
-          cancelCollection={null}
-          reviseCollection={null}
-          consoleType={consoleTypes.SIGNING_OFFICIAL}
-        />
+        {responsiveColumns.length > 0 && (
+          <DarCollectionTable
+            key="so-dar-table"
+            collections={collectionList}
+            columns={responsiveColumns}
+            isLoading={isLoading}
+            cancelCollection={null}
+            reviseCollection={null}
+            consoleType={consoleTypes.SIGNING_OFFICIAL}
+          />
+        )}
       </div>
     </div>
   )
