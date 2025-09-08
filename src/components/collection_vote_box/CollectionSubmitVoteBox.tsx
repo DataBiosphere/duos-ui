@@ -7,6 +7,7 @@ import { Votes } from 'src/libs/ajax/Votes'
 import radarIcon from 'src/images/google-svg/radar.svg'
 import { extractConsentError } from 'src/utils/ErrorUtils'
 import { Vote } from 'src/types/model'
+import { VOTE_TYPES } from 'src/utils/DarUtils'
 
 interface CollectionSubmitVoteBoxProps {
   question?: string
@@ -166,7 +167,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
         setRationale(prevVote.rationale ?? '')
       }
 
-      const radar = votes.some(vote => vote.type === 'RADAR_APPROVE')
+      const radar = votes.some(vote => vote.type === VOTE_TYPES.RADAR_APPROVE)
       setIsRadar(radar)
     }
   }, [votes])
@@ -184,6 +185,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
       setVote(newVote)
     }
     Notifications.showSuccess({ text: 'Successfully updated vote' })
+    reloadFn()
   }
 
   const onVoteError = (error: unknown, isChair: boolean) => {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
 import { DataUseAgreements } from 'src/pages/dar_application/DataUseAgreements'
@@ -31,6 +31,7 @@ import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils.js
 import { assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set } from 'lodash'
 import { Countries } from 'src/libs/ajax/Countries.js'
 import PropTypes from 'prop-types'
+import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -200,34 +201,15 @@ const DataAccessRequestApplication = (props) => {
     setUploadedIrbDocument(document)
   }
 
-  // Custom hook to manage async fetch with caching
-  const useCacheAsyncFetch = (initialCache = {}) => {
-    const cacheRef = useRef(initialCache)
-    const fetchingRef = useRef({})
-
-    return async (id, fetchFn) => {
-      if (cacheRef.current[id]) {
-        return cacheRef.current[id]
-      }
-      if (fetchingRef.current[id]) {
-        return fetchingRef.current[id]
-      }
-      fetchingRef.current[id] = fetchFn(id)
-      const result = await fetchingRef.current[id]
-      cacheRef.current[id] = result
-      fetchingRef.current[id] = null
-      return result
-    }
-  }
-
   // Initialize cache with collection if available
   const initialCache = {
     [collection?.darCollectionId]: collection,
   }
-  const fetchAsyncData = useCacheAsyncFetch(initialCache)
 
-  const getDarCollection = collectionId => fetchAsyncData(collectionId, Collections.getCollectionById)
-  const getPartialDarRequest = darId => fetchAsyncData(darId, DAR.getPartialDarRequest)
+  const { fetchWithCache } = useAsyncCacheFetch(initialCache)
+
+  const getDarCollection = collectionId => fetchWithCache(collectionId, Collections.getCollectionById)
+  const getPartialDarRequest = darId => fetchWithCache(darId, DAR.getPartialDarRequest)
 
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])

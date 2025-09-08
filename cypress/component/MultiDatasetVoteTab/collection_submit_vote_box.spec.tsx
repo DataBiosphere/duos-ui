@@ -4,6 +4,7 @@ import { mount } from 'cypress/react'
 import { Votes } from 'src/libs/ajax/Votes'
 import { votingColors } from 'src/libs/VotingColors'
 import { Vote } from 'src/types/model'
+import { VOTE_TYPES } from 'src/utils/DarUtils'
 
 const votesMatch: Vote[] = [
   { vote: true, voteId: 1, rationale: 'test', electionStatus: 'Open' } as Vote,
@@ -455,7 +456,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     mount(
       <CollectionSubmitVoteBox
         question="question"
-        votes={[{ vote: true, voteId: 1, type: 'RADAR_APPROVE', rationale: 'Radar Approve' } as Vote]}
+        votes={[{ vote: true, voteId: 1, type: VOTE_TYPES.RADAR_APPROVE, rationale: 'Radar Approve' } as Vote]}
         isFinal={true}
         isLoading={false}
         isDisabled={false}
@@ -474,7 +475,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     mount(
       <CollectionSubmitVoteBox
         question="question"
-        votes={[{ type: 'FINAL', rationale: 'Approved', electionStatus: 'closed' } as Vote]}
+        votes={[{ type: VOTE_TYPES.FINAL, rationale: 'Approved', electionStatus: 'closed' } as Vote]}
         isFinal={true}
         isLoading={false}
         isDisabled={false}

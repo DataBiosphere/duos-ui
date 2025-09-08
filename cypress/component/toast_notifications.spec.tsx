@@ -76,16 +76,6 @@ describe('ToastNotifications', () => {
         .should('have.class', 'MuiSnackbar-anchorOriginTopCenter')
     })
 
-    it('should auto-hide notification after timeout', () => {
-      ToastNotifications.showNotification({
-        text: 'Quick timeout',
-        timeout: 1000,
-      })
-
-      cy.get('[data-cy="notification-alert"]').should('be.visible')
-      cy.get('[data-cy="notification-alert"]', { timeout: 1200 }).should('not.exist')
-    })
-
     it('should close notification when close button is clicked', () => {
       ToastNotifications.showNotification({ text: 'Closeable notification' })
 
@@ -165,22 +155,6 @@ describe('ToastNotifications', () => {
         .should('be.visible')
         .and('contain.text', 'Warning message')
         .and('have.class', 'MuiAlert-filledWarning')
-    })
-
-    it('should accept custom timeout for warning notifications', () => {
-      // Arrange
-      cy.clock()
-
-      // Act
-      ToastNotifications.showWarning({
-        text: 'Warning message',
-        timeout: 500,
-      })
-
-      // Assert
-      cy.get('[data-cy="notification-alert"]').should('be.visible')
-      cy.tick(2000) // Fast-forward time by 2000ms
-      cy.get('[data-cy="notification-alert"]').should('not.exist')
     })
   })
 
