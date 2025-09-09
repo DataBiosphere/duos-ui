@@ -7,3 +7,34 @@
 .dar-expand-dropdown-arrow:hover {
   cursor: pointer;
 }
+
+  .dar-actions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  @media (max-width: 768px) {
+    .dar-actions-container {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+    }
+    .dar-actions-container button {
+      width: 100% !important;
+      margin-right: 0 !important;
+      margin-bottom: 0 !important;
+      box-sizing: border-box !important;
+    }
+  }
+
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .dar-actions-container {
+      gap: 3px !important;
+    }
+    .dar-actions-container button {
+      margin-right: 3px !important;
+      font-size: 1.3rem !important;
+      padding: 2% 5% !important;
+    }
+  }

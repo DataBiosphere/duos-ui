@@ -1,6 +1,7 @@
-import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable } from '../../../src/libs/utils'
+import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable } from 'src/libs/utils'
 import { toLower } from 'lodash/fp'
 import { forEach } from 'lodash'
+import { VOTE_TYPES } from 'src/utils/DarUtils.js'
 
 const sampleLCList = [
   {
@@ -281,7 +282,7 @@ describe('processElectionStatus utils - tests', () => {
     }
     const votes = [
       {
-        type: 'FINAL',
+        type: VOTE_TYPES.FINAL,
         vote: true,
       },
     ]
@@ -295,7 +296,7 @@ describe('processElectionStatus utils - tests', () => {
     }
     const votes = [
       {
-        type: 'FINAL',
+        type: VOTE_TYPES.FINAL,
         vote: true,
       },
     ]
@@ -313,7 +314,7 @@ describe('processElectionStatus utils - tests', () => {
         vote: true,
       },
       {
-        type: 'FINAL',
+        type: VOTE_TYPES.FINAL,
         vote: false,
       },
     ]
@@ -330,7 +331,7 @@ describe('processElectionStatus utils - tests', () => {
         vote: true,
       },
       {
-        type: 'FINAL',
+        type: VOTE_TYPES.FINAL,
         vote: false,
       },
     ]
@@ -381,7 +382,7 @@ describe('processElectionStatus utils - tests', () => {
     }
     const votes = [
       {
-        type: 'FINAL',
+        type: VOTE_TYPES.FINAL,
         vote: true,
         createDate: 1651241829000,
         electionId: 1,

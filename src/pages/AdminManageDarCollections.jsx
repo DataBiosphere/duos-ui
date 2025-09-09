@@ -9,10 +9,10 @@ import { DarCollectionTable } from '../components/dar_collection_table/DarCollec
 import {
   cancelCollectionFn,
   consoleTypes,
-  DarCollectionTableColumnOptions,
   openCollectionFn,
   updateCollectionFn,
 } from '../utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
 
 export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([])
@@ -20,6 +20,9 @@ export default function AdminManageDarCollections() {
   const [isLoading, setIsLoading] = useState(true)
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
+
+  // Get responsive columns for admin console
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.ADMIN)
 
   const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
     searchTerms,
@@ -65,26 +68,18 @@ export default function AdminManageDarCollections() {
         </div>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
-      <DarCollectionTable
-        collections={filteredList}
-        columns={[
-          DarCollectionTableColumnOptions.DAR_CODE,
-          DarCollectionTableColumnOptions.DAC,
-          DarCollectionTableColumnOptions.NAME,
-          DarCollectionTableColumnOptions.SUBMISSION_DATE,
-          DarCollectionTableColumnOptions.RESEARCHER,
-          DarCollectionTableColumnOptions.INSTITUTION,
-          DarCollectionTableColumnOptions.DATASET_COUNT,
-          DarCollectionTableColumnOptions.EXPIRES_AT,
-          DarCollectionTableColumnOptions.STATUS,
-          DarCollectionTableColumnOptions.ACTIONS,
-        ]}
-        isLoading={isLoading}
-        cancelCollection={cancelCollection}
-        reviseCollection={null}
-        openCollection={openCollection}
-        consoleType={consoleTypes.ADMIN}
-      />
+      {responsiveColumns.length > 0 && (
+        <DarCollectionTable
+          key="admin-dar-table"
+          collections={filteredList}
+          columns={responsiveColumns}
+          isLoading={isLoading}
+          cancelCollection={cancelCollection}
+          reviseCollection={null}
+          openCollection={openCollection}
+          consoleType={consoleTypes.ADMIN}
+        />
+      )}
     </div>
   )
 }

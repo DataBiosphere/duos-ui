@@ -9,6 +9,7 @@ import { Storage } from 'src/libs/storage'
 import { Navigation } from 'src/libs/utils'
 import { OntologyService } from 'src/libs/ontologyService'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { VOTE_TYPES } from 'src/utils/DarUtils.js'
 
 const dar = {
   darCollectionId: 777,
@@ -333,7 +334,7 @@ const dar = {
               userId: 11111,
               createDate: 1669062648000,
               electionId: 8888,
-              type: 'FINAL',
+              type: VOTE_TYPES.FINAL,
               displayName: 'Ted Lasso',
             },
             8679: {
@@ -365,7 +366,7 @@ const dar = {
               userId: 9988,
               createDate: 1669062648000,
               electionId: 8888,
-              type: 'FINAL',
+              type: VOTE_TYPES.FINAL,
               displayName: 'Stuart Williams',
             },
             8683: {

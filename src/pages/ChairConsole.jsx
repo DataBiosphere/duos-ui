@@ -10,10 +10,10 @@ import { DarCollectionTable } from '../components/dar_collection_table/DarCollec
 import {
   cancelCollectionFn,
   consoleTypes,
-  DarCollectionTableColumnOptions,
   openCollectionFn,
   updateCollectionFn,
 } from '../utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
 
 export default function ChairConsole(props) {
   const [collections, setCollections] = useState([])
@@ -23,6 +23,9 @@ export default function ChairConsole(props) {
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
   const { history } = props
+
+  // Get responsive columns for chair console
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.CHAIR)
 
   const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
     searchTerms,
@@ -73,27 +76,20 @@ export default function ChairConsole(props) {
         </div>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
-      <DarCollectionTable
-        collections={filteredList}
-        columns={[
-          DarCollectionTableColumnOptions.DAR_CODE,
-          DarCollectionTableColumnOptions.NAME,
-          DarCollectionTableColumnOptions.SUBMISSION_DATE,
-          DarCollectionTableColumnOptions.RESEARCHER,
-          DarCollectionTableColumnOptions.INSTITUTION,
-          DarCollectionTableColumnOptions.DATASET_COUNT,
-          DarCollectionTableColumnOptions.EXPIRES_AT,
-          DarCollectionTableColumnOptions.STATUS,
-          DarCollectionTableColumnOptions.ACTIONS,
-        ]}
-        isLoading={isLoading}
-        relevantDatasets={relevantDatasets}
-        cancelCollection={cancelCollection}
-        reviseCollection={null}
-        openCollection={openCollection}
-        goToVote={goToVote}
-        consoleType={consoleTypes.CHAIR}
-      />
+      {responsiveColumns.length > 0 && (
+        <DarCollectionTable
+          key="chair-dar-table"
+          collections={filteredList}
+          columns={responsiveColumns}
+          isLoading={isLoading}
+          relevantDatasets={relevantDatasets}
+          cancelCollection={cancelCollection}
+          reviseCollection={null}
+          openCollection={openCollection}
+          goToVote={goToVote}
+          consoleType={consoleTypes.CHAIR}
+        />
+      )}
     </div>
   )
 }

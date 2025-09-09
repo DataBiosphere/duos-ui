@@ -7,7 +7,8 @@ import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROL
 import { Styles } from '../libs/theme'
 import lockIcon from '../images/lock-icon.png'
 import { DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable'
-import { consoleTypes, DarCollectionTableColumnOptions } from '../utils/DarCollectionUtils'
+import { consoleTypes } from '../utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
 
 export default function MemberConsole(props) {
   const [collections, setCollections] = useState([])
@@ -17,6 +18,9 @@ export default function MemberConsole(props) {
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
   const { history } = props
+
+  // Get responsive columns for member console
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.MEMBER)
 
   const handleSearchChange = useCallback(
     searchTerms =>
@@ -65,25 +69,18 @@ export default function MemberConsole(props) {
         </div>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
-      <DarCollectionTable
-        collections={filteredList}
-        columns={[
-          DarCollectionTableColumnOptions.DAR_CODE,
-          DarCollectionTableColumnOptions.NAME,
-          DarCollectionTableColumnOptions.SUBMISSION_DATE,
-          DarCollectionTableColumnOptions.RESEARCHER,
-          DarCollectionTableColumnOptions.INSTITUTION,
-          DarCollectionTableColumnOptions.DATASET_COUNT,
-          DarCollectionTableColumnOptions.EXPIRES_AT,
-          DarCollectionTableColumnOptions.STATUS,
-          DarCollectionTableColumnOptions.ACTIONS,
-        ]}
-        isLoading={isLoading}
-        relevantDatasets={relevantDatasets}
-        reviseCollection={null}
-        goToVote={goToVote}
-        consoleType={consoleTypes.MEMBER}
-      />
+      {responsiveColumns.length > 0 && (
+        <DarCollectionTable
+          key="member-dar-table"
+          collections={filteredList}
+          columns={responsiveColumns}
+          isLoading={isLoading}
+          relevantDatasets={relevantDatasets}
+          reviseCollection={null}
+          goToVote={goToVote}
+          consoleType={consoleTypes.MEMBER}
+        />
+      )}
     </div>
   )
 }

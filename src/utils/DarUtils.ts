@@ -8,14 +8,25 @@ import {
 } from 'src/types/model'
 import { CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
-export const FINAL = 'FINAL'
-export const RADAR_APPROVE = 'RADAR_APPROVE'
-const APPROVED_VOTETYPES = [FINAL, RADAR_APPROVE]
+export const VOTE_TYPES = {
+  FINAL: 'FINAL',
+  RADAR_APPROVE: 'RADAR_APPROVE',
+}
+export const APPROVED_VOTETYPES = [
+  VOTE_TYPES.FINAL,
+  VOTE_TYPES.RADAR_APPROVE,
+]
+export const ElectionType = {
+  DATA_ACCESS: 'DataAccess',
+}
+export const ElectionStatus = {
+  CLOSED: 'Closed',
+}
 
 export function getApprovedElectionDatasetIds(elections: Array<Election>): Array<number> {
   const approvedDatasetIds = []
   for (const election of elections) {
-    if (election.electionType === 'DataAccess') {
+    if (election.electionType === ElectionType.DATA_ACCESS) {
       const votes = Object.values(election.votes)
       const anyApprovedFinalVotes = votes.some(vote => (APPROVED_VOTETYPES.includes(vote.type)) && vote.vote)
       if (anyApprovedFinalVotes) {

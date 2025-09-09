@@ -8,7 +8,8 @@ import {
 } from 'src/components/dar_collection_table/DarCollectionTable'
 import accessIcon from 'src/images/lock-icon.png'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
-import { consoleTypes, DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils'
+import { consoleTypes } from 'src/utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import SearchBar from 'src/components/SearchBar'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
@@ -20,6 +21,9 @@ export default function ResearcherConsole() {
   const [researcherCollections, setResearcherCollections] = useState()
   const [filteredList, setFilteredList] = useState()
   const searchRef = useRef('')
+
+  // Get responsive columns for researcher console
+  const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.RESEARCHER)
 
   // callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
@@ -165,16 +169,9 @@ export default function ResearcherConsole() {
       </div>
       <div className="table-container">
         <DarCollectionTable
+          key="researcher-dar-table"
           collections={filteredList}
-          columns={[
-            DarCollectionTableColumnOptions.DAR_CODE,
-            DarCollectionTableColumnOptions.NAME,
-            DarCollectionTableColumnOptions.SUBMISSION_DATE,
-            DarCollectionTableColumnOptions.DATASET_COUNT,
-            DarCollectionTableColumnOptions.EXPIRES_AT,
-            DarCollectionTableColumnOptions.STATUS,
-            DarCollectionTableColumnOptions.ACTIONS,
-          ]}
+          columns={responsiveColumns}
           isLoading={isLoading}
           cancelCollection={cancelCollection}
           reviseCollection={reviseCollection}

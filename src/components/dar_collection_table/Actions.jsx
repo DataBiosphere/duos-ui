@@ -6,6 +6,7 @@ import SimpleButton from 'src/components/SimpleButton'
 import { useHistory } from 'react-router-dom'
 import { Notifications } from 'src/libs/utils'
 import { includes, toLower } from 'lodash/fp'
+import './dar_collection_table.css'
 
 const duosBlue = '#0948B7'
 const cancelGray = '#333F52'
@@ -219,7 +220,7 @@ export default function Actions(props) {
 
   return (
     <div
-      className={`${consoleType}-actions`}
+      className={`${consoleType}-actions dar-actions-container`}
       key={`${consoleType}-actions-${collectionId}`}
       id={`${consoleType}-actions-${collectionId}`}
       style={{
