@@ -787,7 +787,7 @@ const DataAccessRequestApplication = (props) => {
                       save={() => setShowDialogSave(true)}
                       isLoading={isLoading}
                       formData={formData}
-                      datasets={datasets}
+                      datasets={selectedDatasets}
                       dataUseTranslations={dataUseTranslations}
                     />
                   </div>
