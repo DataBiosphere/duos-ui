@@ -64,6 +64,8 @@ interface FilterItemRangeProps {
   max?: number
   minCategory: string
   maxCategory: string
+  minInputProps?: React.InputHTMLAttributes<HTMLInputElement>
+  maxInputProps?: React.InputHTMLAttributes<HTMLInputElement>
   filterHandler: (category: string, filter: string | number) => void
 }
 
@@ -185,6 +187,8 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
         max={filters.participantCountMax}
         minCategory="participantCountMin"
         maxCategory="participantCountMax"
+        minInputProps={{ id: "participantCountMin", "aria-label": "Minimum participants" }}
+        maxInputProps={{ id: "participantCountMax", "aria-label": "Maximum participants" }}
         filterHandler={filterHandler}
       />
     </Box>
