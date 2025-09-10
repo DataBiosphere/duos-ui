@@ -11,7 +11,7 @@ import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
 import { Countries } from 'src/libs/ajax/Countries'
 import { Collections } from 'src/libs/ajax/Collections'
-import darCollection from '../DarCollectionTable/darCollection.json'
+import darCollection from './darCollection.json'
 
 const props = {
   match: {
@@ -97,6 +97,7 @@ describe('Data Access Request - Validation', () => {
 
   describe('With Library Cards', () => {
     beforeEach(() => {
+      cy.viewport(1200, 900)
       cy.initApplicationConfig()
       cy.stub(Metrics, 'captureEvent').returns(Promise.resolve())
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials)
@@ -232,6 +233,8 @@ describe('Data Access Request - Validation', () => {
       cy.get('#itDirector').should('not.have.class', 'errored')
       cy.get('#itDirectorEmail').should('not.have.class', 'errored')
       cy.get('#anvilUse').should('not.have.class', 'errored')
+      cy.get('[data-cy="selectable-datasets"]').should('not.have.class', 'errored')
+      cy.get('[data-cy="selectable-datasets"]').should('contain', datasets[0].datasetIdentifier)
       cy.get('#projectTitle').should('not.have.class', 'errored')
       cy.get('#rus').should('not.have.class', 'errored')
       cy.get('#nonTechRus').should('not.have.class', 'errored')
@@ -260,7 +263,9 @@ describe('Data Access Request - Validation', () => {
       cy.get('#itDirector').should('have.class', 'errored')
       cy.get('#itDirectorEmail').should('have.class', 'errored')
       cy.get('#anvilUse').should('have.class', 'errored')
-
+      // This component cannot be set to errored since it is not a form input
+      cy.get('[data-cy="selectable-datasets"]').should('not.have.class', 'errored')
+      cy.get('[data-cy="selectable-datasets"]').should('contain', datasets[0].datasetIdentifier)
       cy.get('#projectTitle').should('have.class', 'errored')
       cy.get('#rus').should('have.class', 'errored')
       cy.get('#nonTechRus').should('have.class', 'errored')
@@ -332,6 +337,7 @@ describe('Data Access Request - Validation', () => {
 
   describe('Without Library Cards', () => {
     beforeEach(() => {
+      cy.viewport(1200, 900)
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials)
       cy.stub(Collections, 'getCollectionById').returns(Promise.resolve(darCollection))
       cy.stub(DAR, 'getPartialDarRequest').returns(Promise.resolve(darCollection.dars['011467b7-5544-499f-9210-3c2035810639']))

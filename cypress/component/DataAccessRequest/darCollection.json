@@ -1,0 +1,411 @@
+{
+  "darCollectionId": 211,
+  "darCode": "DAR-259",
+  "createDate": 1730825497654,
+  "createUser": {
+    "userId": 3351,
+    "email": "grushton@test.com",
+    "displayName": "Greg Rushton Admin",
+    "createDate": 1452101967000,
+    "properties": [
+      {
+        "propertyId": 18367,
+        "userId": 3351,
+        "propertyKey": "eraAuthorized",
+        "propertyValue": "true"
+      },
+      {
+        "propertyId": 18368,
+        "userId": 3351,
+        "propertyKey": "eraExpiration",
+        "propertyValue": "1758824522629"
+      }
+    ],
+    "emailPreference": false,
+    "institutionId": 150,
+    "eraCommonsId": "GREGORYRUSHTON",
+    "institution": {
+      "id": 150,
+      "name": "The Broad Institute of MIT and Harvard",
+      "createDate": 1617716382481,
+      "updateDate": 1620133344596
+    },
+    "libraryCard": {
+      "id": 92,
+      "userId": 3351,
+      "institutionId": 150,
+      "eraCommonsId": "GREGORYRUSHTON",
+      "userName": "Gregory Rushton",
+      "userEmail": "grushton@test.com",
+      "createDate": 1694797680476,
+      "createUserId": 3351,
+      "daaIds": []
+    }
+  },
+  "createUserId": 3351,
+  "dars": {
+    "011467b7-5544-499f-9210-3c2035810639": {
+      "id": 1764,
+      "referenceId": "011467b7-5544-499f-9210-3c2035810639",
+      "collectionId": 211,
+      "data": {
+        "referenceId": "011467b7-5544-499f-9210-3c2035810639",
+        "projectTitle": "Export Testing: DUOS_2807",
+        "checkNihDataOnly": false,
+        "rus": "Export Testing: DUOS_2807",
+        "nonTechRus": "Export Testing: DUOS_2807",
+        "diseases": false,
+        "controls": false,
+        "population": false,
+        "otherText": "",
+        "ontologies": [],
+        "forProfit": false,
+        "oneGender": false,
+        "gender": "",
+        "pediatric": false,
+        "illegalBehavior": false,
+        "sexualDiseases": false,
+        "stigmatizedDiseases": false,
+        "vulnerablePopulation": false,
+        "psychiatricTraits": false,
+        "notHealth": false,
+        "hmb": true,
+        "darCode": "DAR-672",
+        "createDate": 1730825497654,
+        "sortDate": 1730825497654,
+        "datasetIds": [
+          2352
+        ],
+        "anvilUse": true,
+        "cloudProvider": "",
+        "cloudProviderType": "",
+        "cloudProviderDescription": "",
+        "irbDocumentLocation": "",
+        "irbDocumentName": "",
+        "irbProtocolExpiration": "",
+        "itDirector": "Export Testing: DUOS_2807",
+        "signingOfficial": "Greg Rushton Admin (grushton@test.com)",
+        "collaborationLetterLocation": "",
+        "collaborationLetterName": "",
+        "labCollaborators": [
+          {
+            "approverStatus": false,
+            "email": "ccai@test.com",
+            "eraCommonsId": "Export Testing: DUOS_2807",
+            "name": "Cinye",
+            "title": "Export Testing: DUOS_2807",
+            "uuid": "335692d8-eaa1-4388-bf57-479312b519f8"
+          },
+          {
+            "approverStatus": false,
+            "email": "monster.pshapiro.dev@test.com",
+            "eraCommonsId": "monster.pshapiro.dev@test.com",
+            "name": "Phil",
+            "title": "monster.pshapiro.dev@test.com",
+            "uuid": "f1123c97-47d3-47d3-91ce-cd2c802de8fc"
+          },
+          {
+            "approverStatus": false,
+            "email": "rjohanek@test.com",
+            "eraCommonsId": "rjohanek@test.com",
+            "name": "Rae",
+            "title": "rjohanek@test.com",
+            "uuid": "a7e2bb55-fd14-49fa-afab-28c322d6def5"
+          },
+          {
+            "approverStatus": false,
+            "email": "fboulnois.dev@test.com",
+            "eraCommonsId": "fboulnois.dev@test.com",
+            "name": "Florian",
+            "title": "fboulnois.dev@test.com",
+            "uuid": "d681ad93-973d-4e16-bac2-be8c79a87901"
+          },
+          {
+            "approverStatus": false,
+            "email": "vsliwa@test.com",
+            "eraCommonsId": "vsliwa@test.com",
+            "name": "Victoria",
+            "title": "vsliwa@test.com",
+            "uuid": "1ef31bd4-0862-4dc3-9a82-9b8445c46e6a"
+          },
+          {
+            "approverStatus": false,
+            "email": "brubensttest@test.com",
+            "eraCommonsId": "brubensttest@test.com",
+            "name": "Sky",
+            "title": "brubensttest@test.com",
+            "uuid": "baa1f85a-65ce-4fc2-8c7e-344eb7bdd96c"
+          }
+        ],
+        "internalCollaborators": [],
+        "externalCollaborators": [],
+        "dsAcknowledgement": false,
+        "gsoAcknowledgement": false,
+        "pubAcknowledgement": false,
+        "piName": "Export Testing: DUOS_2807"
+      },
+      "draft": false,
+      "userId": 3351,
+      "createDate": 1730825175328,
+      "sortDate": 1730825497654,
+      "submissionDate": 1730825497654,
+      "updateDate": 1730825497654,
+      "elections": {
+        "3056": {
+          "electionId": 3056,
+          "electionType": "DataAccess",
+          "status": "Closed",
+          "createDate": 1730825517597,
+          "referenceId": "011467b7-5544-499f-9210-3c2035810639",
+          "datasetId": 2352,
+          "votes": {
+            "52467": {
+              "voteId": 52467,
+              "userId": 5101,
+              "createDate": 1730825517597,
+              "electionId": 3056,
+              "type": "DAC",
+              "displayName": "Florian Boulnois"
+            },
+            "52468": {
+              "voteId": 52468,
+              "userId": 5146,
+              "createDate": 1730825517597,
+              "electionId": 3056,
+              "type": "DAC",
+              "displayName": "Aarohi Nadkarni"
+            },
+            "52485": {
+              "voteId": 52485,
+              "userId": 3351,
+              "electionId": 3056,
+              "type": "DAC",
+              "displayName": "Greg Rushton Admin"
+            },
+            "52469": {
+              "voteId": 52469,
+              "userId": 5146,
+              "createDate": 1730825517597,
+              "electionId": 3056,
+              "type": "Chairperson",
+              "displayName": "Aarohi Nadkarni"
+            },
+            "52486": {
+              "voteId": 52486,
+              "vote": true,
+              "userId": 3351,
+              "updateDate": 1730825640383,
+              "electionId": 3056,
+              "rationale": "",
+              "type": "Chairperson",
+              "displayName": "Greg Rushton Admin"
+            },
+            "52470": {
+              "voteId": 52470,
+              "userId": 5146,
+              "createDate": 1730825517597,
+              "electionId": 3056,
+              "type": "FINAL",
+              "displayName": "Aarohi Nadkarni"
+            },
+            "52487": {
+              "voteId": 52487,
+              "vote": true,
+              "userId": 3351,
+              "updateDate": 1730825640383,
+              "electionId": 3056,
+              "rationale": "",
+              "type": "FINAL",
+              "displayName": "Greg Rushton Admin"
+            },
+            "52471": {
+              "voteId": 52471,
+              "userId": 5146,
+              "createDate": 1730825517597,
+              "electionId": 3056,
+              "type": "AGREEMENT",
+              "displayName": "Aarohi Nadkarni"
+            },
+            "52488": {
+              "voteId": 52488,
+              "userId": 3351,
+              "electionId": 3056,
+              "type": "AGREEMENT",
+              "displayName": "Greg Rushton Admin"
+            }
+          }
+        },
+        "3057": {
+          "electionId": 3057,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1730825517597,
+          "referenceId": "011467b7-5544-499f-9210-3c2035810639",
+          "datasetId": 2352,
+          "votes": {
+            "52472": {
+              "voteId": 52472,
+              "userId": 5101,
+              "createDate": 1730825517597,
+              "electionId": 3057,
+              "type": "DAC",
+              "displayName": "Florian Boulnois"
+            },
+            "52489": {
+              "voteId": 52489,
+              "userId": 3351,
+              "electionId": 3057,
+              "type": "DAC",
+              "displayName": "Greg Rushton Admin"
+            },
+            "52473": {
+              "voteId": 52473,
+              "userId": 5146,
+              "createDate": 1730825517597,
+              "electionId": 3057,
+              "type": "DAC",
+              "displayName": "Aarohi Nadkarni"
+            },
+            "52490": {
+              "voteId": 52490,
+              "vote": true,
+              "userId": 3351,
+              "updateDate": 1730825635973,
+              "electionId": 3057,
+              "rationale": "",
+              "type": "Chairperson",
+              "displayName": "Greg Rushton Admin"
+            },
+            "52474": {
+              "voteId": 52474,
+              "userId": 5146,
+              "createDate": 1730825517597,
+              "electionId": 3057,
+              "type": "Chairperson",
+              "displayName": "Aarohi Nadkarni"
+            }
+          }
+        }
+      },
+      "datasetIds": [
+        2352
+      ]
+    }
+  },
+  "datasets": [
+    {
+      "datasetId": 2352,
+      "name": "Group 5",
+      "datasetName": "Group 5",
+      "createDate": "Feb 13, 2024",
+      "createUserId": 5147,
+      "updateDate": 1707858294844,
+      "updateUserId": 5146,
+      "alias": 850,
+      "datasetIdentifier": "DUOS-000850",
+      "dataUse": {
+        "generalUse": true,
+        "nonProfitUse": true
+      },
+      "dacId": 8,
+      "deletable": false,
+      "properties": [
+        {
+          "propertyId": 11506,
+          "datasetId": 2352,
+          "propertyName": "Data Location",
+          "propertyValue": "TDR Location",
+          "schemaProperty": "dataLocation",
+          "propertyType": "String"
+        },
+        {
+          "propertyId": 11510,
+          "datasetId": 2352,
+          "propertyName": "Access Management",
+          "propertyValue": "controlled",
+          "schemaProperty": "accessManagement",
+          "propertyType": "String"
+        },
+        {
+          "propertyId": 11508,
+          "datasetId": 2352,
+          "propertyName": "File Types",
+          "propertyValue": [
+            {}
+          ],
+          "schemaProperty": "fileTypes",
+          "propertyType": "Json"
+        },
+        {
+          "propertyId": 11509,
+          "datasetId": 2352,
+          "propertyName": "URL",
+          "propertyValue": "https://jade.datarepo-dev.test.com/datasets/1234",
+          "schemaProperty": "url",
+          "propertyType": "String"
+        },
+        {
+          "propertyId": 11507,
+          "datasetId": 2352,
+          "propertyName": "# of participants",
+          "propertyValue": 21,
+          "schemaProperty": "numberOfParticipants",
+          "propertyType": "Number"
+        }
+      ],
+      "dacApproval": true,
+      "study": {
+        "studyId": 6019,
+        "name": "duos_2807_testing_dataset",
+        "description": "asdfasd",
+        "publicVisibility": true,
+        "piName": "Aarohi Nadkarni",
+        "dataTypes": [
+          "Hybrid Capture"
+        ],
+        "datasetIds": [
+          2352
+        ],
+        "properties": [
+          {
+            "studyPropertyId": 8160,
+            "studyId": 6019,
+            "key": "alternativeDataSharingPlanReasons",
+            "type": "Json",
+            "value": []
+          },
+          {
+            "studyPropertyId": 8159,
+            "studyId": 6019,
+            "key": "collaboratingSites",
+            "type": "Json",
+            "value": []
+          },
+          {
+            "studyPropertyId": 8157,
+            "studyId": 6019,
+            "key": "nihAnvilUse",
+            "type": "String",
+            "value": "I am not NHGRI funded and do not plan to store data in AnVIL"
+          },
+          {
+            "studyPropertyId": 8156,
+            "studyId": 6019,
+            "key": "dataCustodianEmail",
+            "type": "Json",
+            "value": []
+          },
+          {
+            "studyPropertyId": 8158,
+            "studyId": 6019,
+            "key": "nihICsSupportingStudy",
+            "type": "Json",
+            "value": []
+          }
+        ],
+        "createDate": 1707858268269,
+        "createUserId": 5147
+      }
+    }
+  ]
+}
