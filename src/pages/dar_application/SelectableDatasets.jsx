@@ -103,7 +103,7 @@ export default function SelectableDatasets(props) {
   }
 
   return (
-    <div>
+    <div data-cy="selectable-datasets">
       {datasetList()}
     </div>
   )
