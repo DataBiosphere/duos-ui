@@ -4,11 +4,10 @@ import App from 'src/App'
 import ReactGA from 'react-ga4'
 import StackdriverReporter from 'src/libs/stackdriverReporter'
 import { Config } from 'src/libs/config'
-import { MemoryRouter, Route } from 'react-router-dom'
+import { MemoryRouter, Route, Router } from 'react-router-dom'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
 import { createMemoryHistory } from 'history'
-import { Router } from 'react-router'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 
 const user = {
