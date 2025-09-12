@@ -10,10 +10,14 @@ import { NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
 import { Countries } from 'src/libs/ajax/Countries'
+import { Collections } from 'src/libs/ajax/Collections'
+import darCollection from './darCollection.json'
 
 const props = {
   match: {
-    params: {},
+    params: {
+      collectionId: darCollection.darCollectionId,
+    },
   },
   draftDar: true,
   isProgressReportApplication: false,
@@ -93,10 +97,12 @@ describe('Data Access Request - Validation', () => {
 
   describe('With Library Cards', () => {
     beforeEach(() => {
+      cy.viewport(1200, 900)
       cy.initApplicationConfig()
       cy.stub(Metrics, 'captureEvent').returns(Promise.resolve())
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials)
-      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets))
+      cy.stub(Collections, 'getCollectionById').returns(Promise.resolve(darCollection))
+      cy.stub(DAR, 'getPartialDarRequest').returns(Promise.resolve(darCollection.dars['011467b7-5544-499f-9210-3c2035810639']))
       cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets))
       cy.stub(Storage, 'getCurrentUser').returns(user)
       cy.stub(User, 'getMe').returns(user)
@@ -122,9 +128,6 @@ describe('Data Access Request - Validation', () => {
       cy.get('#itDirector').type('Some IT Director')
       cy.get('#itDirectorEmail').type('it@good.org')
       cy.get('#anvilUse_yes').click()
-
-      cy.get('#datasetIds').type('asdf{enter}')
-
       cy.get('#projectTitle').type('Title')
       cy.get('#rus').type('asdf')
       cy.get('#nonTechRus').type('asdf asdf')
@@ -169,9 +172,6 @@ describe('Data Access Request - Validation', () => {
       cy.get('#itDirector').type('Some IT Director')
       cy.get('#itDirectorEmail').type('it@good.org')
       cy.get('#anvilUse_yes').click()
-
-      cy.get('#datasetIds').type('asdf{enter}')
-
       // Add an Internal Collaborator that lacks a Library Card,
       // which triggers a 400 error on submit
       cy.get('#add-internalCollaborators-btn').click()
@@ -233,9 +233,8 @@ describe('Data Access Request - Validation', () => {
       cy.get('#itDirector').should('not.have.class', 'errored')
       cy.get('#itDirectorEmail').should('not.have.class', 'errored')
       cy.get('#anvilUse').should('not.have.class', 'errored')
-
-      cy.get('#datasetIds').should('not.have.class', 'errored')
-
+      cy.get('[data-cy="selectable-datasets"]').should('not.have.class', 'errored')
+      cy.get('[data-cy="selectable-datasets"]').should('contain', datasets[0].datasetIdentifier)
       cy.get('#projectTitle').should('not.have.class', 'errored')
       cy.get('#rus').should('not.have.class', 'errored')
       cy.get('#nonTechRus').should('not.have.class', 'errored')
@@ -264,9 +263,9 @@ describe('Data Access Request - Validation', () => {
       cy.get('#itDirector').should('have.class', 'errored')
       cy.get('#itDirectorEmail').should('have.class', 'errored')
       cy.get('#anvilUse').should('have.class', 'errored')
-
-      cy.get('#datasetIds').should('have.class', 'errored')
-
+      // This component cannot be set to errored since it is not a form input
+      cy.get('[data-cy="selectable-datasets"]').should('not.have.class', 'errored')
+      cy.get('[data-cy="selectable-datasets"]').should('contain', datasets[0].datasetIdentifier)
       cy.get('#projectTitle').should('have.class', 'errored')
       cy.get('#rus').should('have.class', 'errored')
       cy.get('#nonTechRus').should('have.class', 'errored')
@@ -338,8 +337,10 @@ describe('Data Access Request - Validation', () => {
 
   describe('Without Library Cards', () => {
     beforeEach(() => {
+      cy.viewport(1200, 900)
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials)
-      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets))
+      cy.stub(Collections, 'getCollectionById').returns(Promise.resolve(darCollection))
+      cy.stub(DAR, 'getPartialDarRequest').returns(Promise.resolve(darCollection.dars['011467b7-5544-499f-9210-3c2035810639']))
       cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets))
       cy.stub(Storage, 'getCurrentUser').returns(userNoLibraryCard)
       cy.stub(User, 'getMe').returns(userNoLibraryCard)
@@ -363,8 +364,6 @@ describe('Data Access Request - Validation', () => {
       cy.get('#itDirectorEmail').type('it@good.org')
       cy.get('#piCountryOfOperation').type('United{enter}')
       cy.get('#anvilUse_yes').click()
-
-      cy.get('#datasetIds').type('asdf{enter}')
 
       cy.get('#projectTitle').type('Title')
       cy.get('#rus').type('asdf')

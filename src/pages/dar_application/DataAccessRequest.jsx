@@ -1,21 +1,18 @@
 import React from 'react'
-import { DataSet } from '../../libs/ajax/DataSet'
-import { DAR } from '../../libs/ajax/DAR'
+import { DAR } from 'src/libs/ajax/DAR'
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
 import {
   needsIrbApprovalDocument,
   needsCollaborationLetter,
   newIrbDocumentExpirationDate,
-} from '../../utils/darFormUtils'
+} from 'src/utils/darFormUtils'
 import SelectableDatasets from './SelectableDatasets'
-import { DAAUtils } from '../../utils/DAAUtils'
-import { DuosDatePicker } from '../../components/DuosDatePicker.js'
+import { DuosDatePicker } from 'src/components/DuosDatePicker.js'
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements.js'
-import { DownloadLink } from '../../components/DownloadLink'
+import { DownloadLink } from 'src/components/DownloadLink'
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' }
-const noTopMarginStyle = { marginTop: '0', paddingTop: '0' }
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -44,48 +41,6 @@ const autocompleteOntologies = (query, callback) => {
     })
 }
 
-const searchDatasets = (query, callback, currentDatasets) => {
-  const currentDatasetIds = currentDatasets.map(ds => ds.datasetId)
-
-  DataSet.autocompleteDatasets(query).then((items) => {
-    const processedDatasets = items.map((ds) => {
-      // We are working with two different dataset representations, a legacy dataset object and
-      // a simplified auto-complete dataset object. We need to standardize the keys to ensure
-      // legacy functionality is maintained.
-      return {
-        id: ds.id || ds.datasetId,
-        datasetId: ds.id || ds.datasetId,
-        identifier: ds.identifier || ds.datasetIdentifier,
-        datasetIdentifier: ds.identifier || ds.datasetIdentifier,
-        datasetName: ds.name || ds.datasetName,
-        name: ds.name || ds.datasetName,
-        ...ds,
-      }
-    })
-    const options = processedDatasets.filter(ds => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
-      return formatSearchDataset(item)
-    })
-    callback(options)
-  })
-}
-
-const formatSearchDataset = (ds) => {
-  return {
-    key: ds.datasetId,
-    value: ds.datasetId,
-    dataset: ds,
-    displayText: ds.datasetIdentifier,
-    label: (
-      <span>
-        <span style={{ fontWeight: 'bold' }}>{ds.datasetIdentifier}</span>
-        {' '}
-        |
-        {ds.name}
-      </span>
-    ),
-  }
-}
-
 export default function DataAccessRequest(props) {
   const {
     formFieldChange,
@@ -97,7 +52,6 @@ export default function DataAccessRequest(props) {
     updateUploadedIrbDocument,
     uploadedCollaborationLetter,
     updateCollaborationLetter,
-    setDatasets,
     setSelectedDatasets,
     validation,
     readOnlyMode,
@@ -152,50 +106,14 @@ export default function DataAccessRequest(props) {
     <div datacy="data-access-request">
       <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
 
-        {DAAUtils.isEnabled()
-          ? (
-              <div>
-                <label style={{ ...titleStyle, display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
-                <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
-                <SelectableDatasets
-                  disabled={readOnlyMode}
-                  datasets={datasets}
-                  setSelectedDatasets={setSelectedDatasets}
-                />
-              </div>
-            )
-          : (
-              <FormField
-                id="datasetIds"
-                key="datasetIds"
-                type={FormFieldTypes.SELECT}
-                disabled={readOnlyMode}
-                isAsync={true}
-                isMulti={true}
-                title="2.1 Select Dataset(s)"
-                titleStyle={readOnlyMode ? { ...titleStyle, ...noTopMarginStyle } : titleStyle}
-                validators={[FormValidators.REQUIRED]}
-                validation={validation.datasetIds}
-                onValidationChange={onValidationChange}
-                description={includeInstructions ? 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:' : ''}
-                defaultValue={datasets?.map(ds => formatSearchDataset(ds))}
-                selectConfig={{
-                  // return custom html for displaying dataset options
-                  formatOptionLabel: opt => opt.label,
-                  // return string value of dataset for accessibility / html keys
-                  getOptionLabel: opt => opt.displayText,
-                }}
-                loadOptions={(query, callback) => searchDatasets(query, callback, datasets)}
-                placeholder="Dataset Name, Sample Collection ID, or PI"
-                onChange={async ({ key, value }) => {
-                  const datasets = value.map(val => val.dataset)
-                  const datasetIds = datasets?.map(ds => ds.datasetId)
-                  const fullDatasets = await DataSet.getDatasetsByIds(datasetIds)
-                  onChange({ key, value: datasetIds })
-                  setDatasets(fullDatasets)
-                }}
-              />
-            )}
+        <div>
+          <h3>2.1 Select Dataset(s)</h3>
+          <SelectableDatasets
+            disabled={readOnlyMode}
+            datasets={datasets}
+            setSelectedDatasets={setSelectedDatasets}
+          />
+        </div>
 
         <FormField
           id="projectTitle"

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { mergeAll } from 'lodash/fp'
 import { Config } from 'src/libs/config'
-import { getApiUrl, fetchOk } from 'src/libs/ajax'
+import { fetchOk, getApiUrl } from 'src/libs/ajax'
 
 // FIXME: temporary read-only mode for NHGRI datasets
 const setNhgriExternalAccess = (datasets) => {
@@ -39,12 +39,6 @@ export const DataSet = {
     return await res.json()
   },
 
-  autocompleteDatasets: async (query) => {
-    const url = `${await getApiUrl()}/api/dataset/autocomplete?query=${query}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
-  },
-
   searchDatasetIndex: async (query) => {
     const url = `${await getApiUrl()}/api/dataset/search/index`
     const res = await axios.post(url, query, Config.authOpts())
@@ -59,8 +53,7 @@ export const DataSet = {
 
   deleteDataset: async (datasetObjectId) => {
     const url = `${await getApiUrl()}/api/dataset/${datasetObjectId}`
-    const res = await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]))
-    return await res
+    return await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]))
   },
 
   updateDatasetV3: async (datasetId, datasetAndFiles) => {
@@ -78,12 +71,5 @@ export const DataSet = {
   updateStudy: async (studyId, studyObject) => {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`
     return await axios.put(url, studyObject, Config.multiPartOpts())
-  },
-
-  getDatasetByDatasetIdentifier: async (datasetIdentifier) => {
-    const id = datasetIdentifier.toUpperCase()
-    const url = `${await getApiUrl()}/api/tdr/${id}`
-    const res = await axios.get(url, Config.authOpts())
-    return res.data
   },
 }

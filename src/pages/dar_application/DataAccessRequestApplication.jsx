@@ -219,6 +219,7 @@ const DataAccessRequestApplication = (props) => {
   useEffect(() => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets)
+      setSelectedDatasets(datasets)
     })
     if (!existingDarsReadOnlyMode) {
       const tabName = DAAUtils.isEnabled() ? 'Data Access Agreements (DAA)' : 'Data Use Agreement'
@@ -388,7 +389,7 @@ const DataAccessRequestApplication = (props) => {
   const attemptSubmit = async () => {
     const validation = validateDARFormData({
       formData,
-      datasets: (draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets,
+      datasets: draftDar ? selectedDatasets : datasets,
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
@@ -501,9 +502,7 @@ const DataAccessRequestApplication = (props) => {
   const saveDarDraft = async () => {
     const formattedFormData = cloneDeep(formData)
     // DAR datasetIds needs to be a list of ids
-    if (DAAUtils.isEnabled()) {
-      formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
-    }
+    formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
 
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = match.params
@@ -788,7 +787,7 @@ const DataAccessRequestApplication = (props) => {
                       save={() => setShowDialogSave(true)}
                       isLoading={isLoading}
                       formData={formData}
-                      datasets={DAAUtils.isEnabled() ? selectedDatasets : datasets}
+                      datasets={selectedDatasets}
                       dataUseTranslations={dataUseTranslations}
                     />
                   </div>
