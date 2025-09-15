@@ -48,9 +48,9 @@ export const headerTabsConfig = [
   },
   {
     label: 'SO Console',
-    link: '/signing_official_console/researchers',
+    link: '/signing_official_console/library_cards',
     children: [
-      { label: 'Library Cards', link: '/signing_official_console/researchers' },
+      { label: 'Library Cards', link: '/signing_official_console/library_cards' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => DAAUtils.isEnabled() },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },

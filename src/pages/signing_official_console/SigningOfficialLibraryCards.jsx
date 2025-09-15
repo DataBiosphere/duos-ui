@@ -1,12 +1,10 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
-import { Notifications } from '../../libs/utils'
-import { Styles } from '../../libs/theme'
+import React, { useEffect, useState } from 'react'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { Styles } from 'src/libs/theme'
 import SigningOfficialTable from './SigningOfficialTable'
-import { User } from '../../libs/ajax/User'
-import { USER_ROLES } from '../../libs/utils'
+import { User } from 'src/libs/ajax/User'
 
-export default function SigningOfficialResearchers() {
+export default function SigningOfficialLibraryCards() {
   const [signingOfficial, setSigningOfficial] = useState({})
   const [researchers, setResearchers] = useState([])
 

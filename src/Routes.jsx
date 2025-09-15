@@ -16,7 +16,7 @@ import PrivacyPolicy from 'src/pages/PrivacyPolicy'
 import ResearcherConsole from 'src/pages/researcher_console/ResearcherConsole'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import RequestForm from 'src/pages/user_profile/RequestForm'
-import SigningOfficialResearchers from 'src/pages/signing_official_console/SigningOfficialResearchers'
+import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
@@ -119,7 +119,7 @@ const Routes = props => (
       rolesAllowed={[USER_ROLES.researcher]}
     />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={Object.assign({}, props, { draftDar: true, isProgressReportApplication: false })} rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/library_cards" component={ensureSoHasDaaAcknowledgement(SigningOfficialLibraryCards, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {DAAUtils.isEnabled() && <AuthenticatedRoute path="/signing_official_console/researchers_daa_associations" component={ensureSoHasDaaAcknowledgement(ManageResearcherDAAs, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {DAAUtils.isEnabled() && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, false, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
