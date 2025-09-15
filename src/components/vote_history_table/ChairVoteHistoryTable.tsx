@@ -93,7 +93,6 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
       list: processVoteHistoryRowData(voteHistory),
       sort,
     }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sort, voteHistory])
 
   return (
