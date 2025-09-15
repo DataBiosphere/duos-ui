@@ -8,19 +8,18 @@ import React from 'react'
 import { Buffer } from 'buffer'
 
 // Example token from https://broad-shibboleth-prod.appspot.com/dev/login?return-url=%2Fexample-return%3Ftoken%3D%3Ctoken%3E
-const encodedToken
-= `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
-lcmFDb21tb25zVXNlcm5hbWUiOiJ0ZXN0aW5nIiw
-iaWF0IjoxNzA5NTYxMjc2LCJleHAiOjE3MDk1NjQ
-4NzZ9.HKnqebvJVL63jKZDqheYWRSNaLvB92b0Dk
-CQl_ZSbZ1EIOgEI0nz3VeX3usC9AbNHvdYbyZbEX
-4kqGo5NwjstP0FXRpl8UTamLtC6XlmzyAp6Kdr_5
-HfB6pK5T80dDNOX7Z0LHvZvbdeDOltq-RY00ZMY_
-RaNiiP6NoJusI_IRRl12CdLJSg6aBCZ9iiIQAzEq
-0gS8Fph06AyWzdol7XgBU7luOZ8jd8NyJG3r2xtH
-KNCf8PHBSwiotFxBCcDM-eAakIobz-XjJ7uAYM_Z
-M-C5Sq4vsz3jwhUWBmf8_J55bFAhM_n-AooxphpO
-bEc9G_sDJjolIqSjt_UwgT1JFPFA`
+const encodedToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
+                            lcmFDb21tb25zVXNlcm5hbWUiOiJ0ZXN0aW5nIiw
+                            iaWF0IjoxNzA5NTYxMjc2LCJleHAiOjE3MDk1NjQ
+                            4NzZ9.HKnqebvJVL63jKZDqheYWRSNaLvB92b0Dk
+                            CQl_ZSbZ1EIOgEI0nz3VeX3usC9AbNHvdYbyZbEX
+                            4kqGo5NwjstP0FXRpl8UTamLtC6XlmzyAp6Kdr_5
+                            HfB6pK5T80dDNOX7Z0LHvZvbdeDOltq-RY00ZMY_
+                            RaNiiP6NoJusI_IRRl12CdLJSg6aBCZ9iiIQAzEq
+                            0gS8Fph06AyWzdol7XgBU7luOZ8jd8NyJG3r2xtH
+                            KNCf8PHBSwiotFxBCcDM-eAakIobz-XjJ7uAYM_Z
+                            M-C5Sq4vsz3jwhUWBmf8_J55bFAhM_n-AooxphpO
+                            bEc9G_sDJjolIqSjt_UwgT1JFPFA`
 
 const researcher = {
   id: 1,
