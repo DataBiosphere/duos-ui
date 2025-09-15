@@ -386,7 +386,7 @@ export default function SigningOfficialTable(props) {
               fontWeight: 600,
               fontSize: '2.8rem' }}
             >
-              My Institution&apos;s Researchers
+              My Institution&apos;s Library Cards
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
