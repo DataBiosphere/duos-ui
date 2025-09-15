@@ -12,7 +12,7 @@ jobs:
       - name: Extract Node.js version
         run: echo "NODE_VERSION=$(sed -n 's/FROM node:\([0-9.]*\).*/\1/p' Dockerfile)" >> $GITHUB_ENV
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install dependencies
