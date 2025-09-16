@@ -64,6 +64,7 @@ export const DataUseAgreements: React.FC<DataUseAgreementsProps> = (props: DataU
           <li>
             Report any inadvertent data release, breach of data security, or other data management incidents in
             accordance with the terms specified in the
+            {' '}
             <a
               target="_blank"
               rel="noreferrer"
@@ -74,6 +75,7 @@ export const DataUseAgreements: React.FC<DataUseAgreementsProps> = (props: DataU
             </a>
             {' '}
             and
+            {' '}
             <a target="_blank" rel="noreferrer" href={NIHDataUseCertificationAgreementLink}>
               NIH
               Data Use Certification
