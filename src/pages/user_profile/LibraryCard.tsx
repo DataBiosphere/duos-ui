@@ -2,7 +2,12 @@ import React from 'react'
 
 // NOTE: This component will be deprecated upon promotion of dynamic DAAs. It will be replaced by DAAs.jsx.
 
-export default function LibraryCard(props) {
+interface LibraryCardProps {
+  readonly issuedOn: string
+  readonly issuedBy: string
+}
+
+export default function LibraryCard(props: LibraryCardProps) {
   const {
     issuedOn,
     issuedBy,
@@ -34,14 +39,10 @@ export default function LibraryCard(props) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <p style={{ margin: '0px 0px 0px 10px' }}>
-          Issued on:
-          {' '}
-          {issuedOn}
+          Issued on: {issuedOn}
         </p>
         <p style={{ margin: '0px 0px 0px 10px' }}>
-          Issued by:
-          {' '}
-          {issuedBy}
+          Issued by: {issuedBy}
         </p>
       </div>
     </div>

@@ -77,7 +77,6 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
           <LibraryCard
             issuedOn={issuedOn}
             issuedBy={issuedBy}
-            daas={daaObjects}
           />
         )
   }
@@ -112,7 +111,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         A&nbsp;
         <a href={accountLink}>
           {accountLabel}
-&nbsp;Account
+          &nbsp;Account
         </a>
 &nbsp;is required to submit a Data Access Requeset (DAR).
       </p>
@@ -123,7 +122,11 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         header: false,
       })}
       <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>Library Cards issued to you</p>
+      <p style={subheadStyle}>Library Card issued to you</p>
+      <p>
+        A Library Card is a Signing Official’s pre-authorization of a researcher to submit Data Access Requests (DARs)
+        in DUOS. A valid Library Card is required to initiate a DAR.
+      </p>
       <div style={{ marginTop: '15px' }} />
       {hasCard
         ? cardComponent()

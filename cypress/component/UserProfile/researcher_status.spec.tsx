@@ -83,7 +83,7 @@ describe('ResearcherStatus', () => {
     mount(<ResearcherStatus user={userWithCard} pageProps={pageProps} />)
     cy.contains('Researcher Status')
     cy.contains('eRA Commons Account')
-    cy.contains('Library Cards issued to you')
+    cy.contains('Library Card issued to you')
     cy.contains('Issued on: ' + userWithCard.libraryCard?.createDate.toISOString().slice(0, 10))
     cy.contains('Issued by: ' + signingOfficialUser.displayName)
   })
