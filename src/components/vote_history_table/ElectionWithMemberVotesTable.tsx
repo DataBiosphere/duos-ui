@@ -170,6 +170,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
       list: processElectionRowData(electionsWithMemberVotes),
       sort,
     }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sort, expandedElections, electionsWithMemberVotes])
 
   return (
