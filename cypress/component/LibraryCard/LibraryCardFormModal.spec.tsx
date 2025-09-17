@@ -9,7 +9,7 @@ describe('Library Card Form Modal Tests', () => {
     cy.viewport(1000, 800)
     props = {
       showModal: true,
-      createOnClick: cy.stub().as('createOnClick'),
+      addButton: cy.stub().as('addButton'),
       closeModal: cy.stub().as('closeModal'),
       users: [],
     }
@@ -39,10 +39,10 @@ describe('Library Card Form Modal Tests', () => {
     cy.get('input').should('exist')
     cy.get('input').type(userOptions[0].displayName)
     cy.get('[data-cy=library-card-form-modal]').should('contain', userOptions[0].email)
-    // select the second option since the first is always the 'New User...' option
-    cy.get('[id$=option-1]').click()
+    // select the first option
+    cy.get('input').type('{enter}')
     cy.get('[id=Add-button]').click()
-    cy.get('@createOnClick').should('have.been.called')
+    cy.get('@addButton').should('have.been.called')
   })
 
   it('Multiple users should be selectable in the user selection list', () => {
@@ -58,19 +58,19 @@ describe('Library Card Form Modal Tests', () => {
 
     // select the first option
     cy.get('input').type('Test User')
-    cy.get('[id$=option-1]').click()
+    cy.get('input').type('{enter}')
 
     // select the second option
     cy.get('input').type('Test User')
-    cy.get('[id$=option-2]').click()
+    cy.get('input').type('{enter}')
 
     // select the third option
     cy.get('input').type('Test User')
-    cy.get('[id$=option-3]').click()
+    cy.get('input').type('{enter}')
 
     // click add and confirm the call was made with all selected users
     cy.get('[id=Add-button]').click()
-    cy.get('@createOnClick').should('have.been.calledWith', [
+    cy.get('@addButton').should('have.been.calledWith', [
       { userId: 1, userEmail: 'user1@test.com', userName: 'Test User 1' },
       { userId: 2, userEmail: 'user2@test.com', userName: 'Test User 2' },
       { userId: 3, userEmail: 'user3@test.com', userName: 'Test User 3' },
