@@ -187,8 +187,8 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
         max={filters.participantCountMax}
         minCategory="participantCountMin"
         maxCategory="participantCountMax"
-        minInputProps={{ id: "participantCountMin", "aria-label": "Minimum participants" }}
-        maxInputProps={{ id: "participantCountMax", "aria-label": "Maximum participants" }}
+        minInputProps={{ 'id': 'participantCountMin', 'aria-label': 'Minimum participants' }}
+        maxInputProps={{ 'id': 'participantCountMax', 'aria-label': 'Maximum participants' }}
         filterHandler={filterHandler}
       />
     </Box>

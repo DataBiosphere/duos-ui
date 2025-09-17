@@ -187,7 +187,7 @@ export default function UserProfile(props) {
       <div style={{ marginTop: '10px' }} />
       <label htmlFor="profileEmail" style={{ marginRight: 8 }}>
         Profile Email
-      </label>      
+      </label>
       <FormField
         type={FormFieldTypes.TEXT}
         id="profileEmail"

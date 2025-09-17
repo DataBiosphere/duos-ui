@@ -64,7 +64,7 @@ export const PaginatorBar = (props) => {
               num => (
                 <PaginatorButton
                   key={num}
-                  props={{ className: `pagination-btn ${currentPage === num ? 'active' : ''}`, 'aria-current': currentPage === num ? 'page' : undefined, 'aria-label': `Page ${num}${currentPage === num ? ', current page' : ''}`, ...getPageItemProps({ pageValue: num, onPageChange: props.onPageChange }) }}
+                  props={{ className: `pagination-btn ${currentPage === num ? 'active' : ''}`, ariaCurrent: currentPage === num ? 'page' : undefined, ariaLabel: `Page ${num}${currentPage === num ? ', current page' : ''}`, ...getPageItemProps({ pageValue: num, onPageChange: props.onPageChange }) }}
                   label={num}
                 />
               ),
