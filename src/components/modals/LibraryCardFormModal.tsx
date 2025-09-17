@@ -26,7 +26,7 @@ interface FormFieldRowProps {
 
 export interface LibraryCardFormModalProps {
   showModal: boolean
-  addButton: (cards: LibraryCard[]) => Promise<void>
+  createOnClick: (cards: LibraryCard[]) => Promise<void>
   closeModal: () => void
   users: UserOption[]
 }
@@ -76,7 +76,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
 }
 
 const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
-  const { showModal, addButton, closeModal, users } = props
+  const { showModal, createOnClick, closeModal, users } = props
   const [selectedUsers, setSelectedUsers] = useState<UserOption[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -96,7 +96,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
         } as LibraryCard
       })
 
-      await addButton(cards)
+      await createOnClick(cards)
       setSelectedUsers([])
     }
     finally {

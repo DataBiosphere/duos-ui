@@ -9,7 +9,7 @@ describe('Library Card Form Modal Tests', () => {
     cy.viewport(1000, 800)
     props = {
       showModal: true,
-      addButton: cy.stub().as('addButton'),
+      createOnClick: cy.stub().as('createOnClick'),
       closeModal: cy.stub().as('closeModal'),
       users: [],
     }
@@ -42,7 +42,7 @@ describe('Library Card Form Modal Tests', () => {
     // select the first option
     cy.get('input').type('{enter}')
     cy.get('[id=Add-button]').click()
-    cy.get('@addButton').should('have.been.called')
+    cy.get('@createOnClick').should('have.been.called')
   })
 
   it('Multiple users should be selectable in the user selection list', () => {
@@ -70,7 +70,7 @@ describe('Library Card Form Modal Tests', () => {
 
     // click add and confirm the call was made with all selected users
     cy.get('[id=Add-button]').click()
-    cy.get('@addButton').should('have.been.calledWith', [
+    cy.get('@createOnClick').should('have.been.calledWith', [
       { userId: 1, userEmail: 'user1@test.com', userName: 'Test User 1' },
       { userId: 2, userEmail: 'user2@test.com', userName: 'Test User 2' },
       { userId: 3, userEmail: 'user3@test.com', userName: 'Test User 3' },
