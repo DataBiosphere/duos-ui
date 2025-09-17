@@ -28,11 +28,14 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
   }, [])
   const accountLabel = nihAccountLabel()
   const accountLink = nihAccountInstructions()
+  const [signingOfficialUsers, setSigningOfficialUsers] = useState<SimplifiedDuosUser[]>([])
 
   useEffect(() => {
     const init = async () => {
       try {
         if (!isNil(user)) {
+          const signingOfficialUsers = await User.getSOsForCurrentUser()
+          setSigningOfficialUsers(signingOfficialUsers)
           if (isNil(user.libraryCard)) {
             setHasCard(false)
           }
@@ -40,7 +43,6 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
             setHasCard(true)
             const card = user.libraryCard
             const daaIds = card.daaIds ?? []
-            const signingOfficialUsers = await User.getSOsForCurrentUser()
             setIssuedOn(new Date(card.createDate).toISOString().slice(0, 10))
             const createUser = signingOfficialUsers.find((so: SimplifiedDuosUser) => so.userId === card.createUserId)
             if (createUser) {
@@ -108,13 +110,13 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         Account
       </p>
       <p>
-        A&nbsp;
+        A{' '}
         <a href={accountLink}>
-          {accountLabel}
-          &nbsp;Account
+          {accountLabel} Account
         </a>
-&nbsp;is required to submit a Data Access Requeset (DAR).
+        {' '}is required to submit a Data Access Request (DAR).
       </p>
+
       {ERACommons({
         destination: 'profile',
         onNihStatusUpdate: nihStatusUpdate,
@@ -123,6 +125,22 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
       })}
       <div style={{ marginTop: '20px' }} />
       <p style={subheadStyle}>Library Card issued to you</p>
+      {signingOfficialUsers.length === 0
+        ? (
+            <p>
+              No Signing Official found for your institution. Please refer to <a href="https://duos.blog/2025/08/06/how-to-get-a-library-card-from-your-signing-official/" target="_blank" rel="noreferrer">this help article</a> for instructions on how to get a Library Card.
+            </p>
+          )
+        : (
+            <>
+              <p>Signing Official(s):</p>
+              <ul>
+                {signingOfficialUsers.map(so => (
+                  <li key={so.userId}>{so.displayName} - {so.email}</li>
+                ))}
+              </ul>
+            </>
+          )}
       <p>
         A Library Card is a Signing Official’s pre-authorization of a researcher to submit Data Access Requests (DARs)
         in DUOS. A valid Library Card is required to initiate a DAR.
