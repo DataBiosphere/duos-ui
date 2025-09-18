@@ -94,7 +94,6 @@ describe('ERA Commons Component', function () {
       { propertyKey: 'eraExpiration', propertyValue: exp },
     ]
     cy.stub(User, 'getMe').returns(clonedResearcher)
-    cy.stub(AuthenticateNIH, 'saveNihUsr').returns(clonedResearcher.properties)
     mount(
       <ERACommons
         destination=""
