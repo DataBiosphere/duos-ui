@@ -116,7 +116,6 @@ const dar_collection = {
       eraCommonsId: 'test-era-commons-id',
       expiresAt: time,
       createDate: time,
-      sortDate: time,
       submissionDate: time,
       updateDate: time,
       elections: {

@@ -85,7 +85,6 @@ const collection = {
       expiresAt: 1782319085180,
       userId: 3351,
       createDate: 1750783027276,
-      sortDate: 1750783085180,
       submissionDate: 1750783085180,
       updateDate: 1750783085180,
       datasetIds: [
@@ -118,7 +117,6 @@ const collection = {
       expiresAt: 1782323548285,
       userId: 3351,
       createDate: 1750787548285,
-      sortDate: 1750787548285,
       submissionDate: 1750787548285,
       updateDate: 1750787548285,
       datasetIds: [
@@ -158,7 +156,6 @@ const collection = {
       expiresAt: 1784753184281,
       userId: 3351,
       createDate: 1753217184281,
-      sortDate: 1753217184281,
       submissionDate: 1753217184281,
       updateDate: 1753217184281,
       datasetIds: [

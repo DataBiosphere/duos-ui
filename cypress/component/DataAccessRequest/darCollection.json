@@ -72,7 +72,6 @@
         "hmb": true,
         "darCode": "DAR-672",
         "createDate": 1730825497654,
-        "sortDate": 1730825497654,
         "datasetIds": [
           2352
         ],
@@ -147,7 +146,6 @@
       "draft": false,
       "userId": 3351,
       "createDate": 1730825175328,
-      "sortDate": 1730825497654,
       "submissionDate": 1730825497654,
       "updateDate": 1730825497654,
       "elections": {

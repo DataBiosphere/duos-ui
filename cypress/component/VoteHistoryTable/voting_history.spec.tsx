@@ -82,7 +82,6 @@ const darCollection: DarCollection = {
       draft: false,
       userId: 7,
       createDate: 1667970929000,
-      sortDate: 1669229413840,
       submissionDate: 1669229413840,
       updateDate: 1669229413840,
       datasetIds: [13, 14],
