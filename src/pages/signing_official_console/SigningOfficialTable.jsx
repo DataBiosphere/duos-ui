@@ -361,8 +361,8 @@ export default function SigningOfficialTable(props) {
       setShowConfirmation(false)
       Notifications.showSuccess({ text: `Removed library card issued to ${messageName}` })
     }
-    catch (_error) {
-      const errorMessage = extractError(_error)
+    catch (error) {
+      const errorMessage = extractError(error)
       Notifications.showError({ text: `Error deleting library card issued to ${messageName}: ${errorMessage}` })
     }
   }
