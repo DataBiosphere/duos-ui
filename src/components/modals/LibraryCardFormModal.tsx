@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { cloneDeep, includes, isEmpty, isNil } from 'lodash/fp'
+import { isNil } from 'lodash'
 import { Styles, Theme } from 'src/libs/theme'
 import CloseIconComponent from 'src/components/CloseIconComponent'
 import ModalWrapper from 'src/components/collaborator_list/ModalWrapper'
-import Creatable from 'react-select/creatable'
+import AsyncSelect from 'react-select/async'
 import SimpleButton from 'src/components/SimpleButton'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
 import { MultiValue } from 'react-select'
@@ -31,58 +31,44 @@ export interface LibraryCardFormModalProps {
   users: UserOption[]
 }
 
-interface FilterOptions {
-  searchTerm?: string
-  input?: string
-  action: string
-}
-
 const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
   const { selectedUsers, dropdownOptions, updateUsers } = props
 
-  const cardlessOptions = dropdownOptions.filter(option => isNil(option.libraryCard))
-  const [filteredDropdown, setFilteredDropdown] = useState<UserOption[]>(cardlessOptions)
+  // Represents users that do not already have library cards
+  const cardlessUserOptions = dropdownOptions.filter(option => isNil(option.libraryCard))
 
-  // filter function for users dropdown
-  const userListFilter = ({ searchTerm, input }: FilterOptions) => {
-    const term = searchTerm ?? input ?? ''
-    let filteredCopy: UserOption[]
+  // Filter function for auto-completing user dropdown
+  const filterUserOptions = (term: string) => {
+    return cardlessUserOptions.filter((user) => {
+      const filterTarget = (user.displayName + ' ' + user.email).toLowerCase()
+      return filterTarget.includes(term.toLowerCase())
+    })
+  }
 
-    if (isEmpty(term)) {
-      filteredCopy = dropdownOptions
-    }
-    else {
-      const copiedDropdown = cloneDeep(filteredDropdown)
-      filteredCopy = copiedDropdown.filter((user) => {
-        const userNameFilter = !isEmpty(user.displayName) ? includes(term)(user.displayName) : false
-        const emailFilter = !isEmpty(user.email) ? includes(term)(user.email) : false
-        return userNameFilter ?? emailFilter
-      })
-    }
-    setFilteredDropdown(filteredCopy)
+  const loadOptions = (inputValue: string, callback: (options: UserOption[]) => void) => {
+    setTimeout(() => {
+      callback(filterUserOptions(inputValue))
+    }, 0)
   }
 
   return (
     <div style={{ display: 'flex' }}>
       <div style={{ marginBottom: '2%', width: '100%' }}>
         <p><strong>Users</strong></p>
-        <Creatable
+        <AsyncSelect
+          classNamePrefix="select"
+          className="select-autocomplete"
           key="select-user"
           isClearable={true}
           isMulti={true}
           onChange={updateUsers}
           value={selectedUsers}
-          createOptionPosition="first"
-          onInputChange={(input: string, { action }: { action: string }) =>
-            userListFilter({ input, action })}
-          getNewOptionData={(input: string) => {
-            return { email: input } as UserOption
-          }}
-          options={cardlessOptions}
-          placeholder="Select or type new user emails"
+          defaultOptions={cardlessUserOptions}
+          loadOptions={loadOptions}
+          placeholder="Select a DUOS User..."
           isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
           /* eslint-disable-next-line no-constant-binary-expression */
-          getOptionLabel={(option: UserOption) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email || ''}
+          getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
         />
       </div>
     </div>
@@ -155,11 +141,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
           dropdownOptions={users}
         />
         <div style={{ display: 'inline-block', marginBottom: '1rem' }}>
-          By clicking
-          {' '}
-          {'\'ADD\''}
-          {' '}
-          you agree to the terms of the agreements above for all users.
+          By clicking &#39;ADD&#39; you agree to the terms of the agreements above for all users.
         </div>
         <div
           style={{
