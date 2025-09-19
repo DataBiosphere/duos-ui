@@ -100,8 +100,7 @@ export const DataSubmissionForm = (props) => {
         const files = formFiles[field]
         if (Array.isArray(files)) {
           files.forEach((file, idx) => {
-            const duosFileType = Object.keys(file)[0]
-            const duosFileObj = Object.values(file)[0]
+  const [[duosFileType, duosFileObj]] = Object.entries(file)
             // Consent has code to look for the string as formatted below
             const fieldKey = `${field}[${idx}].${duosFileType}`
             multiPartFormData.append(fieldKey, duosFileObj, duosFileObj.fileName)
