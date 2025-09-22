@@ -9,7 +9,7 @@ import { Buffer } from 'buffer'
 
 // Example token from https://broad-shibboleth-prod.appspot.com/dev/login?return-url=%2Fexample-return%3Ftoken%3D%3Ctoken%3E
 const encodedToken
-= `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
+  = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
 lcmFDb21tb25zVXNlcm5hbWUiOiJ0ZXN0aW5nIiw
 iaWF0IjoxNzA5NTYxMjc2LCJleHAiOjE3MDk1NjQ
 4NzZ9.HKnqebvJVL63jKZDqheYWRSNaLvB92b0Dk
