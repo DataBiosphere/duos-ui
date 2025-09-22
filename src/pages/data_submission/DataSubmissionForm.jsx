@@ -94,12 +94,28 @@ export const DataSubmissionForm = (props) => {
   // compute multipart/form-data object, includes registration information and all files
   const createMultiPartFormData = (registration) => {
     const multiPartFormData = new FormData()
-
     multiPartFormData.append('dataset', JSON.stringify(registration))
-
     for (const field of Object.keys(formFiles)) {
       if (!isNil(formFiles[field])) {
-        multiPartFormData.append(field, formFiles[field])
+        const files = formFiles[field]
+        if (Array.isArray(files)) {
+          files.forEach((file, idx) => {
+            const [[duosFileType, duosFileObj]] = Object.entries(file)
+            // Consent has code to look for the string as formatted below
+            const fieldKey = `${field}[${idx}].${duosFileType}`
+            multiPartFormData.append(fieldKey, duosFileObj, duosFileObj.fileName)
+          })
+        }
+        else {
+          const file = formFiles[field]
+          if ('alternativeDataSharingPlanFile' === field) {
+            // Consent has code to look for the string as formatted below
+            multiPartFormData.append('alternativeDataSharingPlan', file, file.fileName)
+          }
+          else {
+            multiPartFormData.append(field, file, file.fileName)
+          }
+        }
       }
     }
 

@@ -39,8 +39,8 @@ describe('Library Card Form Modal Tests', () => {
     cy.get('input').should('exist')
     cy.get('input').type(userOptions[0].displayName)
     cy.get('[data-cy=library-card-form-modal]').should('contain', userOptions[0].email)
-    // select the second option since the first is always the 'New User...' option
-    cy.get('[id$=option-1]').click()
+    // select the first option
+    cy.get('input').type('{enter}')
     cy.get('[id=Add-button]').click()
     cy.get('@createOnClick').should('have.been.called')
   })
@@ -58,15 +58,15 @@ describe('Library Card Form Modal Tests', () => {
 
     // select the first option
     cy.get('input').type('Test User')
-    cy.get('[id$=option-1]').click()
+    cy.get('input').type('{enter}')
 
     // select the second option
     cy.get('input').type('Test User')
-    cy.get('[id$=option-2]').click()
+    cy.get('input').type('{enter}')
 
     // select the third option
     cy.get('input').type('Test User')
-    cy.get('[id$=option-3]').click()
+    cy.get('input').type('{enter}')
 
     // click add and confirm the call was made with all selected users
     cy.get('[id=Add-button]').click()

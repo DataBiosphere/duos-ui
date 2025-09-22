@@ -70,7 +70,7 @@ describe('SigningOfficialTable', () => {
 
     // Select user
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName)
-    cy.get('[id$=option-1]').click()
+    cy.get('input[id^=react-select-]').type('{enter}')
 
     // Submit the form
     cy.get('[id=Add-button]').click()
@@ -104,7 +104,7 @@ describe('SigningOfficialTable', () => {
 
     // Select user
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName)
-    cy.get('[id$=option-1]').click()
+    cy.get('input[id^=react-select-]').type('{enter}')
 
     // Submit the form
     cy.get('[id=Add-button]').click()
@@ -146,9 +146,9 @@ describe('SigningOfficialTable', () => {
 
     // Select users
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName)
-    cy.get('[id$=option-1]').click()
+    cy.get('input[id^=react-select-]').type('{enter}')
     cy.get('input[id^=react-select-]').type(mockResearcher2.displayName)
-    cy.get('[id$=option-2]').click()
+    cy.get('input[id^=react-select-]').type('{enter}')
 
     // Submit the form
     cy.get('[id=Add-button]').click()

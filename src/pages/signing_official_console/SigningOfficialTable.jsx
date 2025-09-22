@@ -1,18 +1,12 @@
-import React from 'react'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Info } from '@mui/icons-material'
 import { Styles, Theme } from 'src/libs/theme'
-import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
+import { cloneDeep, findIndex, flow, isNil, join, map, sortBy, sortedUniq } from 'lodash/fp'
 import SimpleTable from 'src/components/SimpleTable'
 import SimpleButton from 'src/components/SimpleButton'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
-import {
-  Notifications,
-  recalculateVisibleTable,
-  getSearchFilterFunctions,
-  searchOnFilteredList,
-} from 'src/libs/utils'
+import { getSearchFilterFunctions, Notifications, recalculateVisibleTable, searchOnFilteredList } from 'src/libs/utils'
 import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { LibraryCard } from 'src/libs/ajax/LibraryCard'
@@ -20,10 +14,9 @@ import { confirmModalType } from 'src/libs/libraryCardUtils'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
-import {
-  NIHDataUseCertificationAgreement,
-} from 'src/components/external_docs/NIHDataUseCertificationAgreement'
+import { NIHDataUseCertificationAgreement } from 'src/components/external_docs/NIHDataUseCertificationAgreement'
 import { processLibraryCards } from 'src/utils/LibraryCardUtils'
+import { extractError } from 'src/utils/ErrorUtils.js'
 
 // Styles specific to this table
 const styles = {
@@ -37,9 +30,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
-  }),
+  columnStyle: { ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between' },
   cellWidths: {
     email: '25%',
     name: '20%',
@@ -370,8 +361,9 @@ export default function SigningOfficialTable(props) {
       setShowConfirmation(false)
       Notifications.showSuccess({ text: `Removed library card issued to ${messageName}` })
     }
-    catch (_error) {
-      Notifications.showError({ text: `Error deleting library card issued to ${messageName}` })
+    catch (error) {
+      const errorMessage = extractError(error)
+      Notifications.showError({ text: `Error deleting library card issued to ${messageName}: ${errorMessage}` })
     }
   }
 
@@ -386,16 +378,13 @@ export default function SigningOfficialTable(props) {
               fontWeight: 600,
               fontSize: '2.8rem' }}
             >
-              My Institution&apos;s Researchers
+              My Institution&apos;s Library Cards
             </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px',
-            })}
-            >
-              Issue or Remove Library Card privileges to allow researchers to submit DARs.
+            <div style={({ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px' })}>
+              Issue or Remove Library Card privileges to allow researchers to submit DARs.{' '}
               <a
                 rel="noopener noreferrer"
-                href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS"
+                href="https://duos.blog/preauthorize_researchers_librarycards"
                 target="_blank"
                 id="so-console-info-link"
                 style={{ verticalAlign: 'super' }}
@@ -403,10 +392,7 @@ export default function SigningOfficialTable(props) {
                 <Info fontSize="large" />
               </a>
             </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px', marginTop: '1rem',
-            })}
-            >
+            <div style={({ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem' })}>
               Issuing Library Card privileges is done in accordance with the
               {' '}
               <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad Library Card Agreement</a>
@@ -423,10 +409,7 @@ export default function SigningOfficialTable(props) {
               {' '}
               include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
             </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px', marginTop: '1rem',
-            })}
-            >
+            <div style={({ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem' })}>
               Note: NIH DACs are not currently using DUOS to review Data Access Requests (DARs). Signing Officials agree to review Library Cards for their institutions annually, and add/remove Library Cards as necessary.
             </div>
           </div>
@@ -466,10 +449,7 @@ export default function SigningOfficialTable(props) {
         title={confirmationTitle}
         // The issue modal requires a larger view than normal
         styleOverride={confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {}}
-        message={confirmType === confirmModalType.delete
-          ? <div>{confirmationModalMsg}</div>
-          // Library Card Agreement Text
-          : <div>{confirmationModalMsg}</div>}
+        message={<div>{confirmationModalMsg}</div>}
         header={`${selectedCard.userName || selectedCard.userEmail} - ${
           !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
         }`}
