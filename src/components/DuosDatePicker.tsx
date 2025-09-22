@@ -219,6 +219,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
               },
             }}
             slots={{ day: WeekendFormattedDay, actionBar: CancelSelectActionBar }}
+            enableAccessibleFieldDOMStructure={false}
           />
         )}
       </LocalizationProvider>

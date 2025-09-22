@@ -50,7 +50,7 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props} />)
       cy.get('#lbl_optionalDate').contains('Optional Date')
       cy.get('#lbl_optionalDate').should('not.contain', '*')
-      cy.get('input').type('{end}{del}99')
+      cy.get('input').type('{end}{del}9999')
       cy.get('.formField-optionalDate .error-message').contains(FormValidators.DATEJS.msg)
     })
     it('should render a calendar picker control initialized with an error', () => {
@@ -827,14 +827,17 @@ describe('FormField - Tests', () => {
     it('should not allow mounting if unknown prop', (done) => {
       // this event will automatically be unbound when this
       // test ends because it's attached to 'cy'
+      let called = false
       cy.on('uncaught:exception', (err) => {
+        if (!called) {
         // ensure the error is about an unknown field
-        expect(err.message).to.include('unknown')
-
-        // using mocha's async done callback to finish
-        // this test so we prove that an uncaught exception
-        // was thrown
-        done()
+          expect(err.message).to.include('unknown')
+          called = true
+          // using mocha's async done callback to finish
+          // this test so we prove that an uncaught exception
+          // was thrown
+          done()
+        }
 
         // return false to prevent the error from
         // failing this test
@@ -850,9 +853,13 @@ describe('FormField - Tests', () => {
     })
 
     it('errors if required prop not given', (done) => {
+      let called = false
       cy.on('uncaught:exception', (err) => {
-        expect(err.message).to.include('id')
-        done()
+        if (!called) {
+          expect(err.message).to.include('id')
+          called = true
+          done()
+        }
         return false
       })
 
@@ -865,9 +872,13 @@ describe('FormField - Tests', () => {
     })
 
     it('errors based on custom validation', (done) => {
+      let called = false
       cy.on('uncaught:exception', (err) => {
-        expect(err.message).to.include('example failure')
-        done()
+        if (!called) {
+          expect(err.message).to.include('example failure')
+          called = true
+          done()
+        }
         return false
       })
 
