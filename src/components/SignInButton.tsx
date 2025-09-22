@@ -242,6 +242,7 @@ export const SignInButton = (props: SignInButtonProps) => {
           style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
           href="https://support.terra.bio/hc/en-us/articles/28504837523995-How-to-Register-for-DUOS"
           data-for="tip_google-help"
+          data-tip="Need account help? Click here!"
           aria-label="Need account help? Click here!"
         />
         <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
