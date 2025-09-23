@@ -2,6 +2,7 @@ import axios from 'axios'
 import { mergeAll } from 'lodash/fp'
 import { Config } from 'src/libs/config'
 import { fetchOk, getApiUrl } from 'src/libs/ajax'
+import { fileDownload } from 'src/utils/FileDownload.js'
 
 // FIXME: temporary read-only mode for NHGRI datasets
 const setNhgriExternalAccess = (datasets) => {
@@ -71,5 +72,17 @@ export const DataSet = {
   updateStudy: async (studyId, studyObject) => {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`
     return await axios.put(url, studyObject, Config.multiPartOpts())
+  },
+
+  getNIHInstitutionalCertification: async (datasetId, filename) => {
+    const authOpts = Object.assign(Config.authOpts(), { responseType: 'blob' })
+    authOpts.headers = Object.assign(authOpts.headers, {
+      'Content-Type': 'application/octet-stream',
+      'Accept': 'application/octet-stream',
+    })
+    const url = `${await getApiUrl()}/api/dataset/${datasetId}/nihInstitutionalCertification`
+    axios.get(url, authOpts).then((response) => {
+      fileDownload(response.data, filename)
+    })
   },
 }

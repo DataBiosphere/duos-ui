@@ -137,6 +137,7 @@ export default function DACDatasets(props) {
           DACDatasetTableColumnOptions.DATA_SUBMITTER,
           DACDatasetTableColumnOptions.DATA_CUSTODIAN,
           DACDatasetTableColumnOptions.DATA_USE,
+          DACDatasetTableColumnOptions.CERTIFICATION_LINK,
           DACDatasetTableColumnOptions.STATUS,
         ]}
         isLoading={isLoading}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Storage } from '../../libs/storage'
 import PaginationBar from '../PaginationBar'
 import SimpleTable from '../SimpleTable'
@@ -6,7 +6,6 @@ import cellData from './DACDatasetTableCellData'
 import { styles, DACDatasetTableColumnOptions } from './DACDatasetConstants'
 import { isNil } from 'lodash/fp'
 import { goToPage as updatePage, recalculateVisibleTable } from '../../libs/utils'
-import { useCallback } from 'react'
 
 const columnHeaderConfig = {
   duosId: { label: 'DUOS ID', cellStyle: { width: styles.cellWidths.duosId }, cellDataFn: cellData.duosIdCellData, sortable: true },
@@ -16,6 +15,7 @@ const columnHeaderConfig = {
   dataSubmitter: { label: 'Data Submitter', cellStyle: { width: styles.cellWidths.dataSubmitter }, cellDataFn: cellData.dataSubmitterCellData, sortable: true },
   dataCustodian: { label: 'Data Custodian', cellStyle: { width: styles.cellWidths.dataCustodian }, cellDataFn: cellData.dataCustodianCellData, sortable: true },
   dataUse: { label: 'Data Use', cellStyle: { width: styles.cellWidths.dataUse }, cellDataFn: cellData.dataUseCellData, sortable: false },
+  certificationLink: { label: 'NIH Institutional Certification', cellStyle: { width: styles.cellWidths.certificationLink }, cellDataFn: cellData.nihCertificationLinkData, sortable: true },
   status: { label: 'Status', cellStyle: { width: styles.cellWidths.status }, cellDataFn: cellData.statusCellData, sortable: false },
 }
 

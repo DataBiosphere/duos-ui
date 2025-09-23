@@ -529,7 +529,7 @@ export const sortVisibleTable = ({ list, sort }) => {
     return list.sort((a, b) => {
       const aVal = a[sort.colIndex].value || a[sort.colIndex].data
       const bVal = b[sort.colIndex].value || b[sort.colIndex].data
-      if (typeof aVal === 'number') {
+      if (typeof aVal === 'number' || typeof aVal === 'boolean') {
         return (aVal > bVal ? -1 : 1) * sort.dir
       }
       else {
@@ -567,6 +567,7 @@ export const recalculateVisibleTable = async ({
     setVisibleList(visibleList)
   }
   catch (_error) {
+    console.error(_error)
     Notifications.showError({ text: 'Error updating table' })
   }
 }

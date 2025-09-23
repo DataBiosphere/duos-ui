@@ -425,6 +425,14 @@ describe('processElectionStatus utils - tests', () => {
           label: 'Election Date',
           id: 0,
         },
+        {
+          data: false,
+          cellStyle: {
+            width: '20%',
+          },
+          label: 'Boolean Value',
+          id: 0,
+        },
       ],
       [
         {
@@ -450,6 +458,14 @@ describe('processElectionStatus utils - tests', () => {
           },
           label: 'Election Date',
           id: 2,
+        },
+        {
+          data: true,
+          cellStyle: {
+            width: '20%',
+          },
+          label: 'Boolean Value',
+          id: 0,
         },
       ],
       [
@@ -477,6 +493,14 @@ describe('processElectionStatus utils - tests', () => {
           label: 'Election Date',
           id: 1,
         },
+        {
+          data: false,
+          cellStyle: {
+            width: '20%',
+          },
+          label: 'Boolean Value',
+          id: 0,
+        },
       ],
     ]
 
@@ -490,6 +514,16 @@ describe('processElectionStatus utils - tests', () => {
     expect(rowData[0][2].data).to.equal('2023-01-01')
     expect(rowData[1][2].data).to.equal('2023-01-02')
     expect(rowData[2][2].data).to.equal('2023-01-03')
+
+    sortVisibleTable({ list: rowData, sort: { colIndex: 3, dir: 1 } })
+    expect(rowData[0][3].data).to.equal(true)
+    expect(rowData[1][3].data).to.equal(false)
+    expect(rowData[2][3].data).to.equal(false)
+
+    sortVisibleTable({ list: rowData, sort: { colIndex: 3, dir: -1 } })
+    expect(rowData[0][3].data).to.equal(false)
+    expect(rowData[1][3].data).to.equal(false)
+    expect(rowData[2][3].data).to.equal(true)
   })
 
   it('sortVisibleTables shouldn\'t error when no data is passed', () => {

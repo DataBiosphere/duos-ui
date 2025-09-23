@@ -1,4 +1,4 @@
-import { Styles } from '../../libs/theme'
+import { Styles } from 'src/libs/theme'
 
 export const styles = {
   baseStyle: {
@@ -28,6 +28,7 @@ export const styles = {
   }),
   cellWidths: {
     duosId: '10%',
+    certificationLink: '10%',
     phsId: '10%',
     datasetName: '15%',
     studyName: '15%',
@@ -52,6 +53,7 @@ export const styles = {
 
 export const DACDatasetTableColumnOptions = {
   DUOS_ID: 'duosId',
+  CERTIFICATION_LINK: 'certificationLink',
   PHS_ID: 'phsId',
   DATASET_NAME: 'datasetName',
   STUDY_NAME: 'studyName',
