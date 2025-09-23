@@ -13,11 +13,11 @@ type SearchSelectProps = {
   options: Option[]
   value: string
   isClearable: boolean
-  disabled: boolean
+  disabled?: boolean
 }
 
 export const SearchSelect: React.FC<SearchSelectProps> = (props: SearchSelectProps) => {
-  const { onSelection, placeholder, options, value, isClearable, disabled } = props
+  const { onSelection, placeholder, options, value, isClearable, disabled = false } = props
   const [selectedInstitution, setSelectedInstitution] = useState<Option | undefined>()
 
   useEffect(() => {

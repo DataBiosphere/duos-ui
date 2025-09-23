@@ -216,7 +216,7 @@ export const AdminEditUser = (props) => {
 
             <div className="form-group">
               <label id="lbl_institution" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Institution</label>
-              <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+              <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8" style={{ cursor: 'not-allowed' }}>
                 <SearchSelect
                   id="select_institution"
                   label="institution"
@@ -231,6 +231,7 @@ export const AdminEditUser = (props) => {
                   value={institutionId}
                   isClearable={false}
                   className="form-control"
+                  disabled={true}
                 />
               </div>
             </div>
