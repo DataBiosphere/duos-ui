@@ -24,6 +24,7 @@ import getzLabIcon from 'src/images/getz-lab-logo.svg'
 import gp2Icon from 'src/images/gp2-logo.svg'
 import asapIcon from 'src/images/asap-logo.svg'
 import gedIcon from 'src/images/ged-logo.png'
+import ncpiIcon from 'src/images/ncpi-logo.png'
 import homeIcon from 'src/images/icon_dataset_.png'
 import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
@@ -482,6 +483,15 @@ export const DatasetSearch = (props) => {
       },
       icon: gedIcon,
       title: 'Genetics of Eating Disorders Data Library',
+    },
+    'ncpi-duo': {
+      query: {
+        match_phrase: {
+          'study.description': 'NCPI DUO',
+        },
+      },
+      icon: ncpiIcon,
+      title: 'NCPI DUO Data Library',
     },
     '/custom': {
       query: {
