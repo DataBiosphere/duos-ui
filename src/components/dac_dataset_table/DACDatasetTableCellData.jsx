@@ -3,6 +3,7 @@ import style from 'src/pages/DACDatasets.module.css'
 import { styles } from './DACDatasetConstants'
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus'
 import { createDataUseDisplay, processDataUseCodes } from 'src/utils/DataUseUtils.js'
+import { DataSet } from 'src/libs/ajax/DataSet.js'
 
 export const consoleTypes = { CHAIR: 'chair' }
 
@@ -11,6 +12,33 @@ export function duosIdCellData({ dataset, label = 'duosIdCellData' }) {
     data: <div className={style['cell-data']}>{dataset.datasetIdentifier}</div>,
     value: dataset.datasetIdentifier,
     id: `identifier-cell-data-${dataset.datasetId}`,
+    cellStyle: { width: styles.cellWidths.duosId },
+    label,
+  }
+}
+
+export function nihCertificationLinkData({
+  dataset,
+  label = 'nihCertificationLink',
+}) {
+  return {
+    data: dataset.hasInstitutionCertification
+      ? (
+          <div>
+            <button
+              onClick={async () => {
+                DataSet.getNIHInstitutionalCertification(dataset.datasetId)
+              }}
+              className="button button-white"
+              style={{ padding: '10px 12px' }}
+            >
+              <span className="glyphicon glyphicon-download-alt"></span>
+            </button>
+          </div>
+        )
+      : <div></div>,
+    value: dataset.hasInstitutionCertification,
+    id: `identifier-cell-data-${dataset.datasetId}-file`,
     cellStyle: { width: styles.cellWidths.duosId },
     label,
   }
@@ -102,4 +130,5 @@ export default {
   dataCustodianCellData,
   dataUseCellData,
   statusCellData,
+  nihCertificationLinkData,
 }

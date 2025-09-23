@@ -225,6 +225,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     datasetName: string
     studyName: string
     duosId: string
+    certificationLink: string
     accessType: string
     dataType: string
     participantCount: string
@@ -238,6 +239,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     datasetName: 'calc(25% - 150px)',
     studyName: '10%',
     duosId: '10%',
+    certificationLink: '10%',
     accessType: '10%',
     dataType: '15%',
     participantCount: '10%',
