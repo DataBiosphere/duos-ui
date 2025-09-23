@@ -567,7 +567,6 @@ export const recalculateVisibleTable = async ({
     setVisibleList(visibleList)
   }
   catch (_error) {
-    console.error(_error)
     Notifications.showError({ text: 'Error updating table' })
   }
 }
