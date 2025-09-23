@@ -120,6 +120,8 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
           },
         },
       },
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       MuiPickersYear: {
         styleOverrides: {
           yearButton: {
@@ -163,6 +165,8 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   const CancelSelectActionBar = (props: PickersActionBarProps) => {
     // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
     // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     const { onAccept, onCancel, onSetToday, onClear, actions, ...other } = props
     const buttons = actions?.map((actionType: React.Key | null | undefined) => {
       switch (actionType) {
@@ -186,7 +190,8 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
     })
     return <DialogActions {...other}>{buttons}</DialogActions>
   }
-
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   const WeekendFormattedDay = (props: PickersDayProps<Dayjs>) => {
     const isWeekendDay = props.day.day() === 0 || props.day.day() === 6
     const weekendStyle = isWeekendDay
@@ -219,6 +224,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
               },
             }}
             slots={{ day: WeekendFormattedDay, actionBar: CancelSelectActionBar }}
+            enableAccessibleFieldDOMStructure={false}
           />
         )}
       </LocalizationProvider>
