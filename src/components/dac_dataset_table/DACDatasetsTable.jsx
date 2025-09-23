@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Storage } from '../../libs/storage'
+import { Storage } from 'src/libs/storage'
 import PaginationBar from '../PaginationBar'
 import SimpleTable from '../SimpleTable'
 import cellData from './DACDatasetTableCellData'
 import { styles, DACDatasetTableColumnOptions } from './DACDatasetConstants'
 import { isNil } from 'lodash/fp'
-import { goToPage as updatePage, recalculateVisibleTable } from '../../libs/utils'
+import { goToPage as updatePage, recalculateVisibleTable } from 'src/libs/utils'
 
 const columnHeaderConfig = {
   duosId: { label: 'DUOS ID', cellStyle: { width: styles.cellWidths.duosId }, cellDataFn: cellData.duosIdCellData, sortable: true },
