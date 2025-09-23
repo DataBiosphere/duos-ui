@@ -13,6 +13,7 @@ import { Collections } from '../../libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
 import { APPROVED_VOTETYPES, ElectionStatus, ElectionType } from 'src/utils/DarUtils'
+import { extractError } from 'src/utils/ErrorUtils.js'
 
 const tabContainerColor = 'rgb(115,154,164)'
 
@@ -145,6 +146,7 @@ const userIsDacUser = (user) => {
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId
   const [collection, setCollection] = useState({})
+  const [collectionWithHistory, setCollectionWithHistory] = useState({})
   const [darInfo, setDarInfo] = useState({})
   const [referenceIdForDocuments, setReferenceIdForDocuments] = useState()
   const [approvedDatasets, setApprovedDatasets] = useState([])
@@ -163,12 +165,9 @@ export default function DarCollectionReview(props) {
   const init = useCallback(async () => {
     const user = Storage.getCurrentUser()
     try {
-      let collection
+      const collection = await Collections.getCollectionById(collectionId)
       if (adminPage || userIsDacUser(user)) {
-        collection = await Collections.getCollectionByIdWithElectionHistory(collectionId)
-      }
-      else {
-        collection = await Collections.getCollectionById(collectionId)
+        setCollectionWithHistory(await Collections.getCollectionByIdWithElectionHistory(collectionId))
       }
 
       // Find darInfo and referenceIdForDocuments in one pass
@@ -221,8 +220,9 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(true)
       init()
     }
-    catch (_error) {
-      Notifications.showError({ text: 'Failed to initialize collection' })
+    catch (error) {
+      const message = extractError(error)
+      Notifications.showError({ text: 'Failed to initialize collection: ' + message })
     }
   }, [init])
 
@@ -326,7 +326,7 @@ export default function DarCollectionReview(props) {
         )}
         {selectedTab === tabs.votingHistory && (
           <VotingHistory
-            darCollection={collection}
+            darCollection={collectionWithHistory}
             dacIds={dacIds}
           />
         )}
