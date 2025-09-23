@@ -27,11 +27,7 @@ export function nihCertificationLinkData({
           <div>
             <button
               onClick={async () => {
-                const datasetInfo = await DataSet.getDataSetsByDatasetId(
-                  dataset.datasetId)
-                const fileName = datasetInfo.nihInstitutionalCertificationFile.fileName
-                DataSet.getNIHInstitutionalCertification(dataset.datasetId,
-                  fileName)
+                DataSet.getNIHInstitutionalCertification(dataset.datasetId)
               }}
               className="button button-white"
               style={{ padding: '10px 12px' }}

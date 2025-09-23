@@ -74,7 +74,9 @@ export const DataSet = {
     return await axios.put(url, studyObject, Config.multiPartOpts())
   },
 
-  getNIHInstitutionalCertification: async (datasetId, filename) => {
+  getNIHInstitutionalCertification: async (datasetId) => {
+    const datasetInfo = await DataSet.getDataSetsByDatasetId(datasetId)
+    const fileName = datasetInfo.nihInstitutionalCertificationFile.fileName
     const authOpts = Object.assign(Config.authOpts(), { responseType: 'blob' })
     authOpts.headers = Object.assign(authOpts.headers, {
       'Content-Type': 'application/octet-stream',
@@ -82,7 +84,7 @@ export const DataSet = {
     })
     const url = `${await getApiUrl()}/api/dataset/${datasetId}/nihInstitutionalCertification`
     axios.get(url, authOpts).then((response) => {
-      fileDownload(response.data, filename)
+      fileDownload(response.data, fileName)
     })
   },
 }
