@@ -192,6 +192,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   }
 
   const onVoteError = (error: unknown, isChair: boolean) => {
+    setVoteInProgress(false)
     const consentError = extractConsentError(error)
     if (consentError && consentError.code === 409) {
       const voteText = isChair ? 'Chair vote' : 'Vote'
