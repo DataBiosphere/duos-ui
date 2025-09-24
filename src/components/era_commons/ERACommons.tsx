@@ -128,8 +128,7 @@ export default function ERACommons({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     catch (error: never) {
-      const errorMessage
-            = 'Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email
+      const errorMessage = 'Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email
       displayError(errorMessage)
     }
   }
