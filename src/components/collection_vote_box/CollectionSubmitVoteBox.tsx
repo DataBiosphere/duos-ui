@@ -183,9 +183,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     if (isChair && updateFinalVote && bucketKey) {
       updateFinalVote(bucketKey, { vote: newVote, rationale }, voteIds)
     }
-    else {
-      setVote(newVote)
-    }
+    setVote(newVote)
     Notifications.showSuccess({ text: 'Successfully updated vote' })
     reloadFn()
     setVoteInProgress(false)
