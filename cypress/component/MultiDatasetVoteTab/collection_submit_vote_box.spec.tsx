@@ -165,6 +165,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         reloadFn={() => {}}
       />,
     )
+    cy.stub(Votes, 'updateVotesByIds')
+    cy.stub(Votes, 'updateRationaleByIds')
+
     cy.get('textarea').should('have.text', 'test')
     cy.get('textarea').type('sample text')
     cy.get('textarea').blur()
@@ -193,6 +196,9 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         reloadFn={() => {}}
       />,
     )
+    cy.stub(Votes, 'updateVotesByIds')
+    cy.stub(Votes, 'updateRationaleByIds')
+
     cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
     cy.get('[data-cy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
     cy.get('[data-cy=yes-collection-vote-button]').click()
@@ -216,6 +222,8 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         reloadFn={() => {}}
       />,
     )
+    cy.stub(Votes, 'updateRationaleByIds')
+
     cy.get('textarea').should('have.text', '')
     cy.get('textarea').type('sample text')
     cy.get('textarea').blur()
@@ -240,6 +248,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
       />,
     )
     cy.stub(Votes, 'updateVotesByIds')
+    cy.stub(Votes, 'updateRationaleByIds')
 
     cy.get('textarea').should('have.text', '')
     cy.get('textarea').type('sample text')
@@ -353,6 +362,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
         reloadFn={() => {}}
       />,
     )
+    cy.stub(Votes, 'updateRationaleByIds')
     cy.stub(Votes, 'updateVotesByIds')
 
     cy.get('[data-cy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default)
