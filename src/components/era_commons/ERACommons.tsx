@@ -129,7 +129,7 @@ export default function ERACommons({
     // @ts-expect-error
     catch (error: never) {
       const errorMessage
-                = 'Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email
+            = 'Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email
       displayError(errorMessage)
     }
   }
