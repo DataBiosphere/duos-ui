@@ -23,7 +23,7 @@ interface SummarySectionProps {
   onNihStatusUpdate?: (valid: boolean) => void
 }
 
-export default function SummarySection(props: SummarySectionProps): React.JSX.Element {
+export default function SummarySection(props: Readonly<SummarySectionProps>): React.JSX.Element {
   const { readOnly, formState, onFormChange, eRACommonsDestination, location, researcher, onValidationChange, validation, nihValid, onNihStatusUpdate } = props
 
   const [publications, setPublications] = useState<Publication[]>(formState.publications || [])
@@ -57,9 +57,9 @@ export default function SummarySection(props: SummarySectionProps): React.JSX.El
                   destination={eRACommonsDestination}
                   researcherProfile={researcher}
                   nihValid={nihValid}
-                  onNihStatusUpdate={onNihStatusUpdate}
+                  onNihStatusUpdate={onNihStatusUpdate ?? (() => {})}
                   location={location}
-                  validationError={validation?.nihEraId}
+                  validationError={validation?.nihEraId as unknown as boolean}
                   header={true}
                   required={!readOnly} // In read-only mode, this is not required
                 />

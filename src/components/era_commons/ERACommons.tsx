@@ -17,7 +17,8 @@ import { DuosUser } from 'src/types/model'
 // -------------------- Types --------------------
 
 interface ERACommonsProps {
-  onNihStatusUpdate: (status: boolean) => void
+  onNihStatusUpdate: (valid: boolean) => void | undefined
+  nihValid?: boolean
   header?: boolean
   required?: boolean
   destination?: string
