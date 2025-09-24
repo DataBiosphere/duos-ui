@@ -1,14 +1,13 @@
 import { map as lodashMap, concat, filter, matches as lodashMatches } from 'lodash'
 import { union, contains, map, isEmpty } from 'lodash/fp'
 import React, { useState, useEffect, useRef } from 'react'
-import { Institution } from '../libs/ajax/Institution'
 import { User } from '../libs/ajax/User'
 import { Notifications, USER_ROLES } from '../libs/utils'
 import { ResearcherReview } from '../components/ResearcherReview'
 import editUserIcon from '../images/icon_edit_user.png'
 import { PageHeading } from '../components/PageHeading'
-import { SearchSelect } from '../components/SearchSelect'
 import { extractError } from 'src/utils/ErrorUtils.js'
+import PropTypes from 'prop-types'
 
 const adminRole = { roleId: 4, name: USER_ROLES.admin }
 const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
@@ -23,8 +22,7 @@ export const AdminEditUser = (props) => {
     displayNameValid: false,
     updatedRoles: [researcherRole],
     emailPreference: false,
-    institutionOptions: [],
-    institutionId: null,
+    institutionName: '',
   })
   const [fetchingComplete, setFetchingComplete] = useState(false)
 
@@ -34,13 +32,6 @@ export const AdminEditUser = (props) => {
     const fetchData = async () => {
       try {
         const user = await User.getById(props.match.params.userId)
-        const institutionList = await Institution.list()
-        const institutionOptions = institutionList.map((institution) => {
-          return {
-            key: institution.id,
-            displayText: institution.name,
-          }
-        })
         const currentRoles = lodashMap(user.roles, (ur) => {
           return { roleId: ur.roleId, name: ur.name }
         })
@@ -52,12 +43,11 @@ export const AdminEditUser = (props) => {
           user: user,
           updatedRoles: updatedRoles,
           emailPreference: user.emailPreference,
-          institutionOptions: institutionOptions,
-          institutionId: user.institutionId,
+          institutionName: user?.institution?.name || '',
         }))
         setFetchingComplete(true)
       }
-      catch (_e) {
+      catch {
         Notifications.showError({ text: 'Error: Unable to retrieve current user from server' })
       }
     }
@@ -84,7 +74,6 @@ export const AdminEditUser = (props) => {
       userId: userId,
       displayName: state.displayName,
       emailPreference: state.emailPreference,
-      institutionId: state.institutionId,
     }
 
     try {
@@ -134,7 +123,7 @@ export const AdminEditUser = (props) => {
     const checkState = e.target.checked
     // True? add role to state.updatedRoles
     // False? remove role from state.updatedRoles
-    let newRoles = [researcherRole]
+    let newRoles
     if (checkState) {
       newRoles = concat(state.updatedRoles, role)
     }
@@ -164,7 +153,19 @@ export const AdminEditUser = (props) => {
     })
   }
 
-  const { displayName, email, displayNameValid, institutionId, institutionOptions } = state
+  const { displayName, email, displayNameValid, institutionName } = state
+
+  AdminEditUser.propTypes = {
+    match: PropTypes.shape({
+      params: PropTypes.shape({
+        userId: PropTypes.string.isRequired,
+      }).isRequired,
+    }).isRequired,
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+    }).isRequired,
+  }
+
   return (
     <div className="container container-wide">
       <div className="row no-margin">
@@ -181,7 +182,7 @@ export const AdminEditUser = (props) => {
         <div className="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding">
           <form className="form-horizontal css-form" name="userForm" encType="multipart/form-data">
             <div className="form-group first-form-group">
-              <label id="lbl_name" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Name</label>
+              <label id="lbl_name" htmlFor="txt_name" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Name</label>
               <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
                 <input
                   type="text"
@@ -199,7 +200,7 @@ export const AdminEditUser = (props) => {
             </div>
 
             <div className="form-group">
-              <label id="lbl_email" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Google account id</label>
+              <label id="lbl_email" htmlFor="txt_email" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Google account id</label>
               <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
                 <input
                   type="email"
@@ -215,28 +216,23 @@ export const AdminEditUser = (props) => {
             </div>
 
             <div className="form-group">
-              <label id="lbl_institution" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Institution</label>
+              <label id="lbl_institution" htmlFor="txt_institution" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Institution</label>
               <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                <SearchSelect
-                  id="select_institution"
-                  label="institution"
-                  onSelection={(selection) => {
-                    setState({
-                      ...state,
-                      institutionId: selection?.value?.institutionId,
-                    })
-                  }}
-                  options={institutionOptions || []}
-                  placeholder="Please Select an Institution"
-                  value={institutionId}
-                  isClearable={false}
-                  className="form-control"
+                <input
+                  type="text"
+                  name="institution"
+                  id="txt_institution"
+                  className="form-control col-lg-12 vote-input"
+                  placeholder="e.g. Example Institute of Technology"
+                  required={true}
+                  value={institutionName}
+                  disabled={true}
                 />
               </div>
             </div>
 
             <div className="form-group">
-              <label className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Roles</label>
+              <label htmlFor="chk_researcher" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Roles</label>
               <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8 bold">
                 <div className="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                   <div className="checkbox">
