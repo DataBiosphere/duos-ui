@@ -132,6 +132,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   const [isVotingDisabled, setIsVotingDisabled] = useState<boolean>(false)
   const [isRadar, setIsRadar] = useState<boolean>(false)
   const [isElectionClosed, setIsElectionClosed] = useState<boolean>(false)
+  const [voteInProgress, setVoteInProgress] = useState<boolean>(false)
   const {
     question,
     votes,
@@ -173,6 +174,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   }, [votes])
 
   const updateVote = async (newVote: boolean, isChair: boolean) => {
+    setVoteInProgress(true)
     const openElectionVotes = votes.filter(v => v.electionStatus?.toLowerCase() === 'open')
     const voteIds = openElectionVotes.map(v => v.voteId)
     await Votes.updateVotesByIds(voteIds, { vote: newVote, rationale })
@@ -186,6 +188,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     }
     Notifications.showSuccess({ text: 'Successfully updated vote' })
     reloadFn()
+    setVoteInProgress(false)
   }
 
   const onVoteError = (error: unknown, isChair: boolean) => {
@@ -247,7 +250,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                     <CollectionVoteYesButton
                       onClick={async () => await updateVote(true, !!updateFinalVote)}
                       onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
-                      disabled={isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
+                      disabled={voteInProgress || isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
                       isSelected={vote === true}
                     />
                   )}
@@ -255,7 +258,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                     <CollectionVoteNoButton
                       onClick={async () => await updateVote(false, !!updateFinalVote)}
                       onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
-                      disabled={isLoading || isVotingDisabled || isElectionClosed}
+                      disabled={voteInProgress || isLoading || isVotingDisabled || isElectionClosed}
                       isSelected={vote === false}
                     />
                   )}
