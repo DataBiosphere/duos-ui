@@ -74,7 +74,6 @@ export const AdminEditUser = (props) => {
       userId: userId,
       displayName: state.displayName,
       emailPreference: state.emailPreference,
-      institutionId: state.institutionId,
     }
 
     try {
