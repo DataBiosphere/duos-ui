@@ -18,13 +18,14 @@ axios.interceptors.response.use(function (response) {
 }, function (error) {
   // Default to a 502 when we can't get a real response object.
   const status = getOr(502)('response.status')(error)
-  const url = error.config.url
-  const data = error.config.data
-  if (status === 401 && !(url.endsWith('/api/user/me') && data === undefined)) {
+  const reportUrl = getOr(null)('response.config.url')(error)
+  const method = getOr(null)('response.config.method')(error)
+  console.error(reportUrl, method)
+  debugger
+  if (status === 401 && !(reportUrl?.endsWith('/api/user/me') && (method?.toLowerCase() === 'get'))) {
     redirectOnLogout()
   }
 
-  const reportUrl = getOr(null)('response.config.url')(error)
   if (!isNil(reportUrl) && status >= 500) {
     reportError(reportUrl, status)
   }
