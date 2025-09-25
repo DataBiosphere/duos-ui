@@ -18,11 +18,13 @@ axios.interceptors.response.use(function (response) {
 }, function (error) {
   // Default to a 502 when we can't get a real response object.
   const status = getOr(502)('response.status')(error)
-  if (status === 401) {
+  const reportUrl = getOr(null)('response.config.url')(error)
+  const method = getOr(null)('response.config.method')(error)
+  const isMeCheck = reportUrl?.endsWith('/api/user/me') && (method?.toLowerCase() === 'get')
+  if (status === 401 && !isMeCheck) {
     redirectOnLogout()
   }
 
-  const reportUrl = getOr(null)('response.config.url')(error)
   if (!isNil(reportUrl) && status >= 500) {
     reportError(reportUrl, status)
   }
