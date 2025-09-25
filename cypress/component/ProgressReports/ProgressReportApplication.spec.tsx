@@ -107,6 +107,7 @@ describe('ProgressReportApplication - Component Tests', () => {
         geneticStudiesOnly: false,
         publicationResults: false,
         publicationMoratorium: '',
+        aiLlmUse: false,
         controls: false,
         gender: '',
         pediatric: false,

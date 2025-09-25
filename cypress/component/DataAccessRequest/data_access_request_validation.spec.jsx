@@ -135,6 +135,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#diseases_no').click()
       cy.get('#hmb_yes').click()
 
+      cy.get('#aiLlmUse_no').click()
       cy.get('#controls_no').click()
       cy.get('#population_no').click()
       cy.get('#oneGender_no').click()
@@ -189,6 +190,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#diseases_no').click()
       cy.get('#hmb_yes').click()
 
+      cy.get('#aiLlmUse_no').click()
       cy.get('#controls_no').click()
       cy.get('#population_no').click()
       cy.get('#oneGender_no').click()
@@ -241,6 +243,7 @@ describe('Data Access Request - Validation', () => {
 
       cy.get('#diseases').should('not.have.class', 'errored')
 
+      cy.get('#aiLlmUse').should('not.have.class', 'errored')
       cy.get('#controls').should('not.have.class', 'errored')
       cy.get('#population').should('not.have.class', 'errored')
       cy.get('#oneGender').should('not.have.class', 'errored')
@@ -272,6 +275,7 @@ describe('Data Access Request - Validation', () => {
 
       cy.get('#diseases').should('have.class', 'errored')
 
+      cy.get('#aiLlmUse').should('have.class', 'errored')
       cy.get('#controls').should('have.class', 'errored')
       cy.get('#population').should('have.class', 'errored')
       cy.get('#oneGender').should('have.class', 'errored')
@@ -372,6 +376,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#diseases_no').click()
       cy.get('#hmb_yes').click()
 
+      cy.get('#aiLlmUse_no').click()
       cy.get('#controls_no').click()
       cy.get('#population_no').click()
       cy.get('#oneGender_no').click()
