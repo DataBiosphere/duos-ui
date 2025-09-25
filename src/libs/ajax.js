@@ -20,9 +20,8 @@ axios.interceptors.response.use(function (response) {
   const status = getOr(502)('response.status')(error)
   const reportUrl = getOr(null)('response.config.url')(error)
   const method = getOr(null)('response.config.method')(error)
-  console.error(reportUrl, method)
-  debugger
-  if (status === 401 && !(reportUrl?.endsWith('/api/user/me') && (method?.toLowerCase() === 'get'))) {
+  const isMeCheck = reportUrl?.endsWith('/api/user/me') && (method?.toLowerCase() === 'get')
+  if (status === 401 && !isMeCheck) {
     redirectOnLogout()
   }
 
