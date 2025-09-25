@@ -103,7 +103,6 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
       .forEach((election: Election) => {
         const electionWithMemberVotes: ElectionWithMemberVotes = {
           ...election,
-          datasetId: election.datasetId,
           progressReport: dar.progressReport,
           memberVotes: [],
         }
