@@ -16,6 +16,7 @@ interface Researcher {
   properties?: Array<{ propertyKey: string, propertyValue: string | number }>
 }
 
+// Example token from https://broad-shibboleth-prod.appspot.com/dev/login?return-url=%2Fexample-return%3Ftoken%3D%3Ctoken%3E
 const encodedToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
 lcmFDb21tb25zVXNlcm5hbWUiOiJ0ZXN0aW5nIiw
 iaWF0IjoxNzA5NTYxMjc2LCJleHAiOjE3MDk1NjQ
@@ -71,7 +72,7 @@ describe('ERA Commons Component', function () {
         destination=""
         header={true}
         onNihStatusUpdate={() => {}}
-        required={true}
+        required={true} // Triggers the required flag on the NIH eRA Commons ID
         location={undefined}
         validationError={false}
       />,
@@ -87,7 +88,7 @@ describe('ERA Commons Component', function () {
     const clonedResearcher: Researcher = { ...researcher }
     clonedResearcher.eraCommonsId = 'testing'
     const iat = new Date().getTime()
-    const exp = iat + (30 * 24 * 60 * 60 * 1000)
+    const exp = iat + (30 * 24 * 60 * 60 * 1000) // iat + 30 days
     clonedResearcher.properties = [
       { propertyKey: 'eraAuthorized', propertyValue: 'true' },
       { propertyKey: 'eraExpiration', propertyValue: exp },
@@ -118,7 +119,7 @@ describe('ERA Commons Component', function () {
         destination=""
         header={true}
         onNihStatusUpdate={() => {}}
-        required={true}
+        required={true} // Triggers the required flag on the NIH eRA Commons ID
         validationError={false}
         location={{ search: '?nih-username-token=invalid' }}
       />,
@@ -134,7 +135,7 @@ describe('ERA Commons Component', function () {
       eraCommonsId: 'testing',
       properties: [
         { propertyKey: 'eraAuthorized', propertyValue: 'true' },
-        { propertyKey: 'eraExpiration', propertyValue: Date.now() + (30 * 24 * 60 * 60 * 1000) },
+        { propertyKey: 'eraExpiration', propertyValue: Date.now() + (30 * 24 * 60 * 60 * 1000) }, // iat + 30 days
       ],
     }
     cy.stub(User, 'getMe').returns(eraAuthedUser)
