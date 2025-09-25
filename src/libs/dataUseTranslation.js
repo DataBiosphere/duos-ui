@@ -59,6 +59,12 @@ export const srpTranslations = {
     manualReview: false,
     type: ControlledAccessType.modifiers,
   },
+  aiLlmUse: {
+    code: 'AI',
+    description: 'The research involves the use of Artificial Intelligence (AI) or Large Language Models (LLMs).',
+    manualReview: true,
+    type: ControlledAccessType.modifiers,
+  },
   controls: {
     code: 'CTRL',
     description: 'The reason for this request is to increase the number of controls available for a comparison group.',
@@ -406,6 +412,9 @@ export const DataUseTranslation = {
     // Secondary Codes
     if (darInfo.methods) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods)
+    }
+    if (darInfo.aiLlmUse) {
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.aiLlmUse)
     }
     if (darInfo.controls) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.controls)

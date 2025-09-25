@@ -281,6 +281,7 @@ export interface DataUse {
   geneticStudiesOnly?: boolean
   publicationResults?: boolean
   publicationMoratorium?: string
+  aiLlmUse?: boolean
   controls?: boolean
   gender?: string
   pediatric?: boolean
@@ -388,6 +389,7 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   nonTechRus: string
   diseases: boolean
   methods: boolean
+  aiLlmUse: boolean
   controls: boolean
   population: boolean
   other: boolean
@@ -489,6 +491,7 @@ export interface DataAccessRequestData {
   nonTechRus: string
   diseases: boolean
   methods: boolean
+  aiLlmUse: boolean
   controls: boolean
   population: boolean
   other: boolean
