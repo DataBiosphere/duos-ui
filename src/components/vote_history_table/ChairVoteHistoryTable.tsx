@@ -52,7 +52,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
 
   const columnHeaderFormat = {
     requestType: { label: 'Request Type', cellStyle: { width: '15%' }, sortable: true },
-    darCode: { label: 'DAR Title', cellStyle: { width: '20%' }, sortable: true },
+    datasetId: { label: 'Dataset ID', cellStyle: { width: '20%' }, sortable: true },
     electionDate: { label: 'Election Date', cellStyle: { width: '15%' }, sortable: true },
     vote: { label: 'Vote', cellStyle: { width: '10%' }, sortable: true },
     name: { label: 'Name', cellStyle: { width: '15%' }, sortable: true },
@@ -62,8 +62,8 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
   }
 
   const columnHeaderData = () => {
-    const { requestType, darCode, electionDate, vote, name, voteDate, voteType, rationale } = columnHeaderFormat
-    return [requestType, darCode, electionDate, vote, name, voteDate, voteType, rationale]
+    const { requestType, datasetId, electionDate, vote, name, voteDate, voteType, rationale } = columnHeaderFormat
+    return [requestType, datasetId, electionDate, vote, name, voteDate, voteType, rationale]
   }
 
   const getVoteText = (vote: boolean | null | undefined) => {
@@ -77,7 +77,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
 
     const rowData = voteHistory.map((row: VoteHistoryRow, i) => [
       { data: row.progressReport ? 'Progress Report' : 'Initial DAR', cellStyle: { width: '10%' }, label: 'Request Type', id: i },
-      { data: row.darTitle, cellStyle: { width: '20%' }, label: 'DAR Title', id: i },
+      { data: row.datasetId, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
       { data: formatDate(row.electionDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
       { data: getVoteText(row.vote), cellStyle: { width: '10%' }, label: 'Vote', id: i },
       { data: row.displayName, cellStyle: { width: '15%' }, label: 'Name', id: i },

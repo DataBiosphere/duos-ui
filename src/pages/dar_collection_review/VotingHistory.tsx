@@ -78,7 +78,7 @@ const extractChairVotes = (darCollection: DarCollection, filteredDatasetIds: num
           if (isChairVote(vote)) {
             votesByRole.push({
               ...vote,
-              darTitle: dar.data.projectTitle,
+              datasetId: election.datasetId,
               progressReport: dar.progressReport,
               electionDate: election.createDate,
             })
@@ -103,7 +103,7 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
       .forEach((election: Election) => {
         const electionWithMemberVotes: ElectionWithMemberVotes = {
           ...election,
-          darTitle: dar.data.projectTitle,
+          datasetId: election.datasetId,
           progressReport: dar.progressReport,
           memberVotes: [],
         }
