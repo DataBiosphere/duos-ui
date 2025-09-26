@@ -3,7 +3,7 @@ import { get, isEmpty, isNil } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
 import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
-import { DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model'
+import { DacTerm, DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model'
 
 // Components
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox'
@@ -21,6 +21,7 @@ type Bucket = {
   datasets: Dataset[]
   elections: Election[]
   dataUses?: DataUse[]
+  dacs?: DacTerm[]
 }
 
 interface MultiDatasetVoteSlabProps {
@@ -245,6 +246,7 @@ export default function MultiDatasetVoteSlab({
         <DatasetsRequestedPanel
           dacDatasetIds={dacDatasetIds}
           bucketDatasets={bucket.datasets}
+          dacs={bucket.dacs}
           isLoading={isLoading}
           adminPage={adminPage}
         />
