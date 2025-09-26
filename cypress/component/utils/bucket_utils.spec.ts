@@ -1,7 +1,17 @@
 import { binCollectionToBuckets, Bucket, shouldAbstain } from 'src/utils/BucketUtils'
 import { isEmpty, isUndefined } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
-import { Dataset, DarCollection, DataAccessRequest, DatasetTerm, DataUseSummary, DataUseTerm, DuosUser, Study } from 'src/types/model'
+import {
+  DacTerm,
+  DarCollection,
+  DataAccessRequest,
+  Dataset,
+  DatasetTerm,
+  DataUseSummary,
+  DataUseTerm,
+  DuosUser,
+  Study,
+} from 'src/types/model'
 import { DataSet } from 'src/libs/ajax/DataSet'
 
 const createUser = {
