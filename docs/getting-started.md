@@ -17,15 +17,15 @@ Connect your GitHub account to your Broad profile:
 1. Go to [Broad people](https://people.broadinstitute.org/me) and select the **My Profile** tab.
 2. Link your profile to GitHub by clicking under **Other Profiles**.
 3. [Check if the account is successfully linked](https://github.broadinstitute.org/).
-4. Open each of the following GitHub groups and **Request to join** by going to the Members tab: [Broad Institute Read](https://github.com/orgs/broadinstitute/teams/broad-institute-read), [Prometheus](https://github.com/orgs/broadinstitute/teams/prometheus), [DSDE Engineering](https://github.com/orgs/broadinstitute/teams/dsde-engineering)
+4. Open the following GitHub group and **Request to join** by going to the Members tab: [Broad Institute Read](https://github.com/orgs/broadinstitute/teams/broad-institute-read)
 5. To avoid being overwhelmed with notifications, [add your Broad email address](https://github.com/settings/emails), [route the notifications](https://github.com/settings/notifications) to that email, and [unfollow projects](https://github.com/watching) that are not relevant to your team.
 
 ## 3. Request Required Access
 
 Ensure that you have access to the required team resources. If you encounter a permission error, it is likely because you are missing appropriate access.
 
-- DataBiosphere: Join the `#github` Slack channel, click the lightning bolt in the channel header, and select `Join DataBiosphere`.  Once you've been granted access to DataBiosphere, ask a team member to add your GitHub user to the [broadinstitute/duos](https://github.com/orgs/broadinstitute/teams/duos/members) and [databiosphere/duos](https://github.com/orgs/DataBiosphere/teams/duos/members) groups. This will give you access to our code repositories. You should also be a member of [broadwrite](https://github.com/orgs/DataBiosphere/teams/broadwrite); this should be done automatically when you're added to the DataBiosphere organization.
-- Google Groups: Ask a team member for access to the [duos](https://groups.google.com/a/broadinstitute.org/g/ninjaturtles) Google Group. Verify that you're a member of [dsde-engineering](https://groups.google.com/a/broadinstitute.org/g/dsde-engineering), [dsp-engineering-internal](https://groups.google.com/a/broadinstitute.org/g/dsp-engineering-internal), and [workbench-dev](https://groups.google.com/a/broadinstitute.org/g/workbench-dev). These Google Groups are used for scheduling, email, and Google Drive document sharing, and are also used to control membership in GitHub teams in the `broadinstitute` organization.
+- Within the `#dsp-devops-champions` Slack channel, message the DevOps team to Open a request to be added to the [DataBiosphere GitHub Org](https://github.com/orgs/DataBiosphere/people). Once DevOps approves and notifies that you have been invited, check your email that is associated with your GitHub profile and accept the invitation. NOTE: You have 7-days to accept the invitation once DevOps has invited you. 
+- Google Groups: Ask a team member for access to the [duos](https://groups.google.com/a/broadinstitute.org/g/ninjaturtles) Google Group. Verify that you're a member of [dsde-engineering](https://groups.google.com/a/broadinstitute.org/g/dsde-engineering). These Google Groups are used for scheduling, email, and Google Drive document sharing, and are also used to control membership in GitHub teams in the `broadinstitute` organization.
 - Jira: Ask a team member to add you to the [DUOS board](https://broadworkbench.atlassian.net/jira/software/c/projects/DUOS/boards/123). We use Jira to track all of our work including milestones, tasks, issues, and bugs.
 
 ## 4. Create Terra Accounts
