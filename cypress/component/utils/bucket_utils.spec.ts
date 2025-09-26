@@ -686,6 +686,7 @@ const dataset_terms = [
       }],
     },
     dacId: 1,
+    dac: { dacId: 1, dacName: 'Test DAC 1', dacEmail: 'email1' } as DacTerm,
   },
   {
     datasetId: 2,
@@ -698,6 +699,7 @@ const dataset_terms = [
       }],
     },
     dacId: 2,
+    dac: { dacId: 2, dacName: 'Test DAC 2', dacEmail: 'email2' } as DacTerm,
   },
   {
     datasetId: 3,
@@ -710,6 +712,7 @@ const dataset_terms = [
       }],
     },
     dacId: 3,
+    dac: { dacId: 3, dacName: 'Test DAC 3', dacEmail: 'email3' } as DacTerm,
   },
   {
     datasetId: 4,
@@ -722,12 +725,14 @@ const dataset_terms = [
       }],
     },
     dacId: 4,
+    dac: { dacId: 4, dacName: 'Test DAC 4', dacEmail: 'email4' } as DacTerm,
   },
   {
     datasetId: 5,
     datasetName: 'ds 5',
     datasetIdentifier: 'DUOS-000005',
     dacId: 5,
+    dac: { dacId: 5, dacName: 'Test DAC5', dacEmail: 'email5' } as DacTerm,
   },
 ] as DatasetTerm[]
 
