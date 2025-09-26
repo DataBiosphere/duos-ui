@@ -150,7 +150,7 @@ const styles = {
     cursor: 'pointer',
     background: 'none',
     border: 'none',
-    textAlign: 'left',
+    textAlign: 'left' as const,
   },
   skeletonLoader: {
     height: '30px',
