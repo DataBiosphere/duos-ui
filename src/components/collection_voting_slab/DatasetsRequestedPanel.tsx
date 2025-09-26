@@ -106,13 +106,15 @@ const CollapseExpandLink: React.FC<CollapseExpandLinkProps> = ({
     ? `- View ${hiddenDatasetCount} less`
     : `+ View ${hiddenDatasetCount} more`
   return (
-    <a
+    <button
       data-cy="collapse-expand-link"
-      style={styles.link}
+      type="button"
+      style={styles.expandList}
       onClick={expanded ? onCollapse : onExpand}
+      aria-expanded={expanded}
     >
       {linkMessage}
-    </a>
+    </button>
   )
 }
 
@@ -142,9 +144,13 @@ const styles = {
     flexDirection: 'column' as const,
     rowGap: '0.75rem',
   },
-  link: {
+  expandList: {
     color: '#0948B7',
     fontWeight: '500',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    textAlign: 'left',
   },
   skeletonLoader: {
     height: '30px',
