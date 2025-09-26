@@ -3,7 +3,7 @@ import { filter, includes } from 'lodash/fp'
 import { DacTerm, Dataset } from 'src/types/model'
 import SectionHeading from 'src/components/collection_voting_slab/SectionHeading'
 import DatasetList from 'src/components/collection_voting_slab/DatasetList'
-import CollapseExpandLink from 'src/components/collection_voting_slab/CollapsibleLinks'
+import CollapseExpandLink from 'src/components/collection_voting_slab/CollapsibleExpandLink'
 
 type DatasetsRequestedPanelProps = {
   readonly bucketDatasets: Dataset[]
