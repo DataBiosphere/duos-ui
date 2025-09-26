@@ -102,7 +102,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
 
   const columnHeaderFormat = {
     requestType: { label: 'Request Type', cellStyle: { width: '15%' }, sortable: true },
-    datasetId: { label: 'Dataset ID', cellStyle: { width: '20%' }, sortable: true },
+    datasetIdentifier: { label: 'Dataset ID', cellStyle: { width: '20%' }, sortable: true },
     electionDate: { label: 'Election Date', cellStyle: { width: '15%' }, sortable: true },
     electionStatus: { label: 'Election Status', cellStyle: { width: '15%' }, sortable: true },
     votes: { label: 'Votes Cast', cellStyle: { width: '10%' }, sortable: true },
@@ -110,8 +110,8 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
   }
 
   const columnHeaderData = () => {
-    const { requestType, datasetId, electionDate, electionStatus, votes, voteSummary } = columnHeaderFormat
-    return [requestType, datasetId, electionDate, electionStatus, votes, voteSummary]
+    const { requestType, datasetIdentifier, electionDate, electionStatus, votes, voteSummary } = columnHeaderFormat
+    return [requestType, datasetIdentifier, electionDate, electionStatus, votes, voteSummary]
   }
 
   const processElectionRowData = (electionsWithMemberVotes: ElectionWithMemberVotes[]) => {
@@ -137,7 +137,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
         memberVotes: election.memberVotes,
         onClick: () => toggleElectionExpansion(election.electionId),
         },
-        { data: election.datasetId, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
+        { data: election.datasetIdentifier, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
         { data: formatDate(election.createDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
         { data: election.status, cellStyle: { width: '10%' }, label: 'Election Status', id: i },
         { data: processVotesCast(election.memberVotes), cellStyle: { width: '10%' }, label: 'Votes', id: i },

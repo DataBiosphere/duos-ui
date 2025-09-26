@@ -12,7 +12,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
       electionId: 201,
       displayName: 'Alice Johnson',
       type: 'Chair',
-      datasetId: 401,
+      datasetIdentifier: 'DUOS-00401',
       progressReport: true,
       electionDate: new Date('2023-01-03T10:30:00-05:00').getTime(),
       vote: true,
@@ -26,7 +26,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
       electionId: 202,
       displayName: 'Bob Smith',
       type: 'Chair',
-      datasetId: 402,
+      datasetIdentifier: 'DUOS-00402',
       progressReport: false,
       electionDate: new Date('2023-01-01T10:30:00-05:00').getTime(),
       vote: false,
@@ -40,7 +40,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
       electionId: 203,
       displayName: 'Charlie Brown',
       type: 'Chair',
-      datasetId: 403,
+      datasetIdentifier: 'DUOS-00403',
       progressReport: true,
       electionDate: new Date('2023-01-02T10:30:00-05:00').getTime(),
       vote: false,
@@ -64,7 +64,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
   it('should render rows with correct default sort (by election date descending)', () => {
     mount(<ChairVoteHistoryTable voteHistory={testData} />)
     cy.get('.row-data-0 > :nth-child(1)').contains('Progress Report')
-    cy.get('.row-data-0 > :nth-child(2)').contains('401')
+    cy.get('.row-data-0 > :nth-child(2)').contains('DUOS-00401')
     cy.get('.row-data-0 > :nth-child(3)').contains('2023-01-03')
     cy.get('.row-data-0 > :nth-child(4)').contains('Yes')
     cy.get('.row-data-0 > :nth-child(5)').contains('Alice Johnson')
@@ -73,7 +73,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
     cy.get('.row-data-0 > :nth-child(8)').contains('Approved')
 
     cy.get('.row-data-1 > :nth-child(1)').contains('Progress Report')
-    cy.get('.row-data-1 > :nth-child(2)').contains('403')
+    cy.get('.row-data-1 > :nth-child(2)').contains('DUOS-00403')
     cy.get('.row-data-1 > :nth-child(3)').contains('2023-01-02')
     cy.get('.row-data-1 > :nth-child(4)').contains('No')
     cy.get('.row-data-1 > :nth-child(5)').contains('Charlie Brown')
@@ -82,7 +82,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
     cy.get('.row-data-1 > :nth-child(8)').contains('--')
 
     cy.get('.row-data-2 > :nth-child(1)').contains('Initial DAR')
-    cy.get('.row-data-2 > :nth-child(2)').contains('402')
+    cy.get('.row-data-2 > :nth-child(2)').contains('DUOS-00402')
     cy.get('.row-data-2 > :nth-child(3)').contains('2023-01-01')
     cy.get('.row-data-2 > :nth-child(4)').contains('No')
     cy.get('.row-data-2 > :nth-child(5)').contains('Bob Smith')
