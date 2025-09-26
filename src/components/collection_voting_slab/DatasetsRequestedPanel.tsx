@@ -86,6 +86,36 @@ const DatasetList: React.FC<DatasetListProps> = ({ visibleDatasets, isLoading, d
       )
 }
 
+type CollapseExpandLinkProps = {
+  hiddenDatasetCount: number
+  expanded: boolean
+  onExpand: () => void
+  onCollapse: () => void
+  styles: typeof styles
+}
+
+const CollapseExpandLink: React.FC<CollapseExpandLinkProps> = ({
+  hiddenDatasetCount,
+  expanded,
+  onExpand,
+  onCollapse,
+  styles,
+}) => {
+  if (hiddenDatasetCount <= 0) return null
+  const linkMessage = expanded
+    ? `- View ${hiddenDatasetCount} less`
+    : `+ View ${hiddenDatasetCount} more`
+  return (
+    <a
+      data-cy="collapse-expand-link"
+      style={styles.link}
+      onClick={expanded ? onCollapse : onExpand}
+    >
+      {linkMessage}
+    </a>
+  )
+}
+
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
@@ -153,27 +183,6 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
     setVisibleDatasets(collapsedViewDatasets)
   }
 
-  const CollapseExpandLink = () => {
-    const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity
-    const linkMessage = expanded
-      ? `- View ${hiddenDatasetCount} less`
-      : `+ View ${hiddenDatasetCount} more`
-
-    return (
-      <>
-        {hiddenDatasetCount > 0 && (
-          <a
-            data-cy="collapse-expand-link"
-            style={styles.link}
-            onClick={expanded ? collapseDatasetList : expandDatasetList}
-          >
-            {linkMessage}
-          </a>
-        )}
-      </>
-    )
-  }
-
   const expandDatasetList = () => {
     setExpanded(true)
     setVisibleDatasets(filteredDatasets)
@@ -193,7 +202,13 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
         dacs={dacs}
         styles={styles}
       />
-      <CollapseExpandLink />
+      <CollapseExpandLink
+        hiddenDatasetCount={datasetCount - collapsedDatasetCapacity}
+        expanded={expanded}
+        onExpand={expandDatasetList}
+        onCollapse={collapseDatasetList}
+        styles={styles}
+      />
     </div>
   )
 }
