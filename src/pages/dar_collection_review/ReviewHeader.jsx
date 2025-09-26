@@ -62,7 +62,7 @@ export default function ReviewHeader(props) {
   return (
     <>
       {!isLoading && (
-        <div className="header-container" style={{ marginBottom: '3rem' }}>
+        <div className="header-container">
           <div className="primary-header-row" style={appliedPrimaryHeaderStyle}>
             <span style={styles.header}>
               Data Access Request Review

@@ -262,7 +262,7 @@ export default function DarCollectionReview(props) {
 
   return (
     <div className="collection-review-page">
-      <div className="review-page-header" style={{ width: '90%', margin: '0 auto 3% auto' }}>
+      <div className="review-page-header" style={{ width: '90%', margin: '0 auto auto auto' }}>
         <ReviewHeader
           darCode={collection.darCode || '- -'}
           projectTitle={darInfo.projectTitle || '- -'}
@@ -274,13 +274,14 @@ export default function DarCollectionReview(props) {
         />
         {!canVote && (
           <Notification
+            customStyle={{ paddingLeft: 0 }}
             notificationData={{
               message: 'This vote page is read-only. Click vote on the DAR table entry or look at the voting history tab for details.',
             }}
           />
         )}
       </div>
-      <div className="review-page-body" style={{ padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }}>
+      <div className="review-page-body" style={{ marginTop: '1rem', padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }}>
         <TabControl
           labels={Object.values(tabs)}
           selectedTab={selectedTab}
