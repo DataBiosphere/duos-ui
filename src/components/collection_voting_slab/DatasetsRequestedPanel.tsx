@@ -12,6 +12,22 @@ type DatasetsRequestedPanelProps = {
   readonly adminPage: boolean
 }
 
+type SectionHeadingProps = {
+  isLoading: boolean
+  datasetCount: number
+}
+
+const SectionHeading: React.FC<SectionHeadingProps> = ({ isLoading, datasetCount }) => (
+  <div style={styles.heading}>
+    Datasets Requested
+    {!isLoading && (
+      <span style={styles.datasetCount} data-cy="dataset-count">
+        ({datasetCount})
+      </span>
+    )}
+  </div>
+)
+
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
@@ -78,17 +94,6 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
 
     setVisibleDatasets(collapsedViewDatasets)
   }
-
-  const SectionHeading = () => (
-    <div style={styles.heading}>
-      Datasets Requested
-      {!isLoading && (
-        <span style={styles.datasetCount} data-cy="dataset-count">
-          ({datasetCount})
-        </span>
-      )}
-    </div>
-  )
 
   const DatasetList = () => {
     const datasetRows = visibleDatasets.map((dataset: Dataset) => {
@@ -179,7 +184,7 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
 
   return (
     <div style={styles.baseStyle}>
-      <SectionHeading />
+      <SectionHeading isLoading={isLoading} datasetCount={datasetCount} />
       <DatasetList />
       <CollapseExpandLink />
     </div>
