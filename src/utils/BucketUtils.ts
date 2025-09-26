@@ -102,6 +102,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
     const dacs: DacTerm[] = terms
       .filter((term: DatasetTerm) => dacIds.includes(term.dacId))
       .map((term: DatasetTerm) => term.dac)
+      .filter((dac: DacTerm, index: number, self: DacTerm[]) => self.findIndex((d: DacTerm) => d.dacId === dac.dacId) === index)
 
     const bucket: Bucket = {
       key: '',
