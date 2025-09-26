@@ -10,6 +10,7 @@ import { Navigation } from 'src/libs/utils'
 import { OntologyService } from 'src/libs/ontologyService'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { VOTE_TYPES } from 'src/utils/DarUtils.js'
+import { BrowserRouter } from 'react-router-dom'
 
 const dar = {
   darCollectionId: 777,
@@ -743,7 +744,7 @@ beforeEach(() => {
 describe('DAR Review', () => {
   it('renders the collections-review-page div with tabs for Chairs', () => {
     cy.stub(Storage, 'getCurrentUser').returns(chair)
-    mount(<DarCollectionReview {...props} />)
+    mount(<BrowserRouter><DarCollectionReview {...props} /></BrowserRouter>)
     const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
@@ -755,19 +756,19 @@ describe('DAR Review', () => {
     fullDarTab.should('exist').should('be.visible')
     chairContainer.should('exist').should('be.visible')
     memberContainer.should('exist').should('be.visible')
-    cy.get('.dataset-list-item').should('not.exist')
+    cy.get('[data-cy=dataset-list]').should('not.exist')
 
     chairContainer.click().then(() => {
-      cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea')
+      cy.get('[data-cy=dataset-list]').should('exist').should('be.visible').contains('Sleep Apnea')
     })
     memberContainer.click().then(() => {
-      cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea')
+      cy.get('[data-cy=dataset-list]').should('exist').should('be.visible').contains('Sleep Apnea')
     })
   })
 
   it('renders the collections-review-page div with tabs for Members', () => {
     cy.stub(Storage, 'getCurrentUser').returns(member)
-    mount(<DarCollectionReview {...props} />)
+    mount(<BrowserRouter><DarCollectionReview {...props} /></BrowserRouter>)
 
     cy.get('.tab-selection-Chair').should('not.exist')
 
@@ -780,10 +781,10 @@ describe('DAR Review', () => {
     applicationTab.should('exist').should('be.visible')
     fullDarTab.should('exist').should('be.visible')
     memberContainer.should('exist').should('be.visible')
-    cy.get('.dataset-list-item').should('not.exist')
+    cy.get('[data-cy=dataset-list]').should('not.exist')
 
     memberContainer.click().then(() => {
-      cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea')
+      cy.get('[data-cy=dataset-list]').should('exist').should('be.visible').contains('Sleep Apnea')
     })
   })
 
