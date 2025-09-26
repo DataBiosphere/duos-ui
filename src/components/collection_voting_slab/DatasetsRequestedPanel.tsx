@@ -28,6 +28,64 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({ isLoading, datasetCount
   </div>
 )
 
+type DatasetListProps = {
+  visibleDatasets: Dataset[]
+  isLoading: boolean
+  dacs?: DacTerm[]
+  styles: typeof styles
+}
+
+const DatasetList: React.FC<DatasetListProps> = ({ visibleDatasets, isLoading, dacs, styles }) => {
+  const datasetId = (dataset: Dataset) => !isNil(dataset.datasetIdentifier) ? dataset.datasetIdentifier : '- -'
+  const datasetName = (dataset: Dataset) => !isNil(dataset.name) ? dataset.name : '- -'
+  const user: DuosUser = Storage.getCurrentUser()
+  const userIsChair: boolean = user.isChairPerson
+
+  const datasetRows = visibleDatasets.map((dataset: Dataset) => {
+    const dac = dacs?.find(dacItem => dacItem.dacId === dataset.dacId)
+    const dacLink = userIsChair
+      ? (
+          <Link to={`/manage_edit_dac/${dac?.dacId}`}>
+            {dac?.dacName}
+          </Link>
+        )
+      : dac?.dacName
+    const datasetLink = (
+      <Link to={`/dataset/DUOS-D${dataset.datasetId}`}>
+        {datasetId(dataset)}
+      </Link>
+    )
+    return (
+      <tr key={dataset.datasetId}>
+        <td>{datasetLink}</td>
+        <td>{datasetName(dataset)}</td>
+        <td>{dacLink}</td>
+      </tr>
+    )
+  })
+
+  return isLoading
+    ? (
+        <div className="text-placeholder" style={styles.skeletonLoader} />
+      )
+    : (
+        <div data-cy="dataset-list">
+          <table style={{ width: '-webkit-fill-available' }}>
+            <thead>
+              <tr>
+                <th>Dataset Identifier</th>
+                <th>Dataset Name</th>
+                <th>DAC</th>
+              </tr>
+            </thead>
+            <tbody>
+              {datasetRows}
+            </tbody>
+          </table>
+        </div>
+      )
+}
+
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
@@ -95,62 +153,6 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
     setVisibleDatasets(collapsedViewDatasets)
   }
 
-  const DatasetList = () => {
-    const datasetRows = visibleDatasets.map((dataset: Dataset) => {
-      const dac = dacs?.find(dacItem => dacItem.dacId === dataset.dacId)
-      const user: DuosUser = Storage.getCurrentUser()
-      const userIsChair: boolean = user.isChairPerson
-      const dacLink = userIsChair
-        ? (
-            <Link to={`/manage_edit_dac/${dac?.dacId}`}>
-              {dac?.dacName}
-            </Link>
-          )
-        : dac?.dacName
-      const datasetLink = (
-        <Link to={`/dataset/DUOS-D${dataset.datasetId}`}>
-          {datasetId(dataset)}
-        </Link>
-      )
-      return (
-        <tr key={dataset.datasetId}>
-          <td>{datasetLink}</td>
-          <td>{datasetName(dataset)}</td>
-          <td>{dacLink}</td>
-        </tr>
-      )
-    })
-
-    return isLoading
-      ? (
-          <div className="text-placeholder" style={styles.skeletonLoader} />
-        )
-      : (
-          <div data-cy="dataset-list">
-            <table style={{ width: '-webkit-fill-available' }}>
-              <thead>
-                <tr>
-                  <th>Dataset Identifier</th>
-                  <th>Dataset Name</th>
-                  <th>DAC</th>
-                </tr>
-              </thead>
-              <tbody>
-                {datasetRows}
-              </tbody>
-            </table>
-          </div>
-        )
-  }
-
-  const datasetId = (dataset: Dataset) => {
-    return !isNil(dataset.datasetIdentifier) ? dataset.datasetIdentifier : '- -'
-  }
-
-  const datasetName = (dataset: Dataset) => {
-    return !isNil(dataset.name) ? dataset.name : '- -'
-  }
-
   const CollapseExpandLink = () => {
     const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity
     const linkMessage = expanded
@@ -185,7 +187,12 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
   return (
     <div style={styles.baseStyle}>
       <SectionHeading isLoading={isLoading} datasetCount={datasetCount} />
-      <DatasetList />
+      <DatasetList
+        visibleDatasets={visibleDatasets}
+        isLoading={isLoading}
+        dacs={dacs}
+        styles={styles}
+      />
       <CollapseExpandLink />
     </div>
   )
