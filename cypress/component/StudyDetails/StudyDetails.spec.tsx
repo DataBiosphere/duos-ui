@@ -59,6 +59,7 @@ describe('Study details test', () => {
   })
 
   it('shows the appropriate data for fields', () => {
+    cy.contains('DUOS-S' + datasets[0].study.studyId).should('exist')
     cy.contains(datasets[0].study.studyName).should('exist')
     cy.contains(datasets[0].study.description).should('exist')
     cy.contains((datasets[0].participantCount + datasets[1].participantCount).toString()).should('exist')
