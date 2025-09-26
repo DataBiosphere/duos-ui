@@ -168,7 +168,7 @@ export default function DarCollectionReview(props) {
   const [dataUseBuckets, setDataUseBuckets] = useState([])
   const [dacIds, setDacIds] = useState([])
   const { adminPage = false, readOnly = false } = props
-  const [canVote, setCanVote] = useState(false)
+  const [canVote, setCanVote] = useState(undefined)
 
   const init = useCallback(async () => {
     const user = await Storage.getCurrentUser()
@@ -272,7 +272,7 @@ export default function DarCollectionReview(props) {
           isLoading={isLoading}
           readOnly={readOnly || adminPage}
         />
-        {!canVote && (
+        {canVote === false && (
           <Notification
             customStyle={{ paddingLeft: 0 }}
             notificationData={{
