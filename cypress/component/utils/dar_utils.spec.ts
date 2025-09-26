@@ -1,13 +1,15 @@
 import {
   convertFormStateToDAR,
+  ElectionStatus, ElectionType,
   getApprovedElectionDatasetIds,
   getCloseoutInfo,
   getDataManagementIncidents,
   getPresentationList,
   getPublicationList,
+  userHasOpenDataAccessElection,
   VOTE_TYPES,
 } from 'src/utils/DarUtils'
-import { Collaborator, Election, Vote } from 'src/types/model'
+import { Collaborator, DarCollection, DataAccessRequest, Election, Vote } from 'src/types/model'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
 describe('DarUtils', () => {
@@ -263,6 +265,97 @@ describe('DarUtils', () => {
       expect(result.irbProtocolExpiration).to.equal(formState.irbProtocolExpiration)
       expect(result.collaborationLetterLocation).to.equal(formState.collaborationLetterLocation)
       expect(result.collaborationLetterName).to.equal(formState.collaborationLetterName)
+    })
+  })
+
+  describe('hasOpenElection', () => {
+    const baseVote = {
+      voteId: 1,
+      userId: 42,
+      electionStatus: ElectionStatus.OPEN,
+    } as Vote
+
+    const openElection = {
+      electionId: 1,
+      status: ElectionStatus.OPEN,
+      electionType: ElectionType.DATA_ACCESS,
+      votes: {
+        1: { ...baseVote },
+      } as object,
+    } as Election
+
+    const closedElection = {
+      electionId: 2,
+      status: ElectionStatus.CLOSED,
+      electionType: ElectionType.DATA_ACCESS,
+      votes: {
+        1: { ...baseVote },
+      } as object,
+    } as Election
+
+    const nonMatchingVote = {
+      electionId: 3,
+      status: ElectionStatus.OPEN,
+      electionType: ElectionType.DATA_ACCESS,
+      votes: {
+        1: { ...baseVote, userId: 99 },
+      } as object,
+    } as Election
+
+    const nonOpenVote = {
+      electionId: 4,
+      status: ElectionStatus.OPEN,
+      electionType: ElectionType.DATA_ACCESS,
+      votes: {
+        1: { ...baseVote, electionStatus: ElectionStatus.CLOSED },
+      } as object,
+    } as Election
+
+    const nonDataAccessElection = {
+      electionId: 5,
+      status: ElectionStatus.OPEN,
+      electionType: 'OtherType',
+      votes: {
+        1: { ...baseVote },
+      } as object,
+    } as Election
+
+    const makeCollection = (elections: Election[]) => ({
+      dars: {
+        1: { elections: { ...elections.reduce((acc, e, i) => ({ ...acc, [i]: e }), {}) } } as object as DataAccessRequest,
+      } as object,
+    } as DarCollection)
+
+    it('returns true if there is an open DataAccess election with a matching open vote for the user', () => {
+      expect(userHasOpenDataAccessElection(makeCollection([openElection]), 42)).to.equal(true)
+    })
+
+    it('returns false if there are no dars', () => {
+      expect(userHasOpenDataAccessElection({ dars: undefined } as object as DarCollection, 42)).to.equal(false)
+    })
+
+    it('returns false if election is closed', () => {
+      expect(userHasOpenDataAccessElection(makeCollection([closedElection]), 42)).to.equal(false)
+    })
+
+    it('returns false if vote userId does not match', () => {
+      expect(userHasOpenDataAccessElection(makeCollection([nonMatchingVote]), 42)).to.equal(false)
+    })
+
+    it('returns false if vote.electionStatus is not OPEN', () => {
+      expect(userHasOpenDataAccessElection(makeCollection([nonOpenVote]), 42)).to.equal(false)
+    })
+
+    it('returns false if electionType is not DataAccess', () => {
+      expect(userHasOpenDataAccessElection(makeCollection([nonDataAccessElection]), 42)).to.equal(false)
+    })
+
+    it('returns true if at least one election matches among many', () => {
+      expect(userHasOpenDataAccessElection(makeCollection([closedElection, nonMatchingVote, openElection]), 42)).to.equal(true)
+    })
+
+    it('returns false if no elections exist', () => {
+      expect(userHasOpenDataAccessElection({ dars: { 1: { elections: {} } as DataAccessRequest } } as object as DarCollection, 42)).to.equal(false)
     })
   })
 })

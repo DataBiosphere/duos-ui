@@ -8,14 +8,12 @@ import ReportIcon from '@mui/icons-material/Report'
 import style from './Notification.module.css'
 
 export const Notification = (props) => {
-  const { notificationData, index = 1 } = props
+  const { notificationData, index = 1, customStyle } = props
   let notificationDiv = <div key={index} style={{ display: 'none' }} />
 
   if (!isEmpty(notificationData)) {
     const iconStyle = {
-      marginRight: '2rem',
-      marginLeft: '1rem',
-      marginTop: '.5rem',
+      marginRight: '1rem',
       height: 30,
       width: 30,
     }
@@ -42,10 +40,11 @@ export const Notification = (props) => {
     notificationDiv = (
       <div
         key={index}
-        className={'row no-margin alert alert-' + notificationData.level}
+        className={'row alert alert-' + notificationData.level}
+        style={{ margin: 0, padding: '1.5rem', alignItems: 'center', ...customStyle }}
       >
         <div style={{ float: 'left' }}>{icon}</div>
-        <div className={style['underlined']}>{content}</div>
+        <div className={style['underlined']} style={{ margin: '0.5rem auto' }}>{content}</div>
       </div>
     )
   }

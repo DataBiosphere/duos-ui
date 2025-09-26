@@ -12,8 +12,15 @@ import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from '../../libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
-import { APPROVED_VOTETYPES, ElectionStatus, ElectionType } from 'src/utils/DarUtils'
+import {
+  APPROVED_VOTETYPES,
+  ElectionStatus,
+  ElectionType,
+  userHasOpenDataAccessElection,
+} from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
+import PropTypes from 'prop-types'
+import { Notification } from 'src/components/Notification.jsx'
 
 const tabContainerColor = 'rgb(115,154,164)'
 
@@ -161,9 +168,10 @@ export default function DarCollectionReview(props) {
   const [dataUseBuckets, setDataUseBuckets] = useState([])
   const [dacIds, setDacIds] = useState([])
   const { adminPage = false, readOnly = false } = props
+  const [canVote, setCanVote] = useState(undefined)
 
   const init = useCallback(async () => {
-    const user = Storage.getCurrentUser()
+    const user = await Storage.getCurrentUser()
     try {
       const collection = await Collections.getCollectionById(collectionId)
       if (adminPage || userIsDacUser(user)) {
@@ -199,8 +207,9 @@ export default function DarCollectionReview(props) {
       setIsLoading(false)
       setSubcomponentLoading(false)
       setReferenceIdForDocuments(referenceIdForDocuments)
+      setCanVote(userHasOpenDataAccessElection(collection, user.userId))
     }
-    catch (_error) {
+    catch {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       })
@@ -213,6 +222,17 @@ export default function DarCollectionReview(props) {
   const updateFinalVoteFn = useCallback((key, votePayload, voteIds) => {
     return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })
   }, [dataUseBuckets])
+
+  DarCollectionReview.propTypes = {
+    match: PropTypes.shape({
+      params: PropTypes.shape({
+        collectionId: PropTypes.string.isRequired,
+      }).isRequired,
+    }).isRequired,
+    history: PropTypes.object.isRequired,
+    adminPage: PropTypes.bool,
+    readOnly: PropTypes.bool,
+  }
 
   useEffect(() => {
     try {
@@ -233,7 +253,7 @@ export default function DarCollectionReview(props) {
         init()
       }
     }
-    catch (_error) {
+    catch {
       Notifications.showError({
         text: 'Failed to initialize collection for chair tab',
       })
@@ -242,7 +262,7 @@ export default function DarCollectionReview(props) {
 
   return (
     <div className="collection-review-page">
-      <div className="review-page-header" style={{ width: '90%', margin: '0 auto 3% auto' }}>
+      <div className="review-page-header" style={{ width: '90%', margin: '0 auto auto auto' }}>
         <ReviewHeader
           darCode={collection.darCode || '- -'}
           projectTitle={darInfo.projectTitle || '- -'}
@@ -252,8 +272,16 @@ export default function DarCollectionReview(props) {
           isLoading={isLoading}
           readOnly={readOnly || adminPage}
         />
+        {canVote === false && (
+          <Notification
+            customStyle={{ paddingLeft: 0 }}
+            notificationData={{
+              message: 'This vote page is read-only. Click vote on the DAR table entry or look at the voting history tab for details.',
+            }}
+          />
+        )}
       </div>
-      <div className="review-page-body" style={{ padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }}>
+      <div className="review-page-body" style={{ marginTop: '1rem', padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }}>
         <TabControl
           labels={Object.values(tabs)}
           selectedTab={selectedTab}
