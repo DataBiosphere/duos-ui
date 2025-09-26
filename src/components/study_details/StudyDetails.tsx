@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { DataSet } from '../../libs/ajax/DataSet'
-import { DatasetTerm, StudyTerm } from '../../types/model'
-import backArrowIcon from '../../images/back_arrow.svg'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { DatasetTerm, StudyTerm } from 'src/types/model'
+import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link } from 'react-router-dom'
-import {
-  makeDatasetTableHeader,
-  makeDatasetTableRows,
-} from '../data_search/DatasetSearchTableConstants'
-import SimpleTable from '../SimpleTable'
-import { Styles } from '../../libs/theme'
-import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo'
-import { chain, intersection, isEmpty, Dictionary } from 'lodash'
-import { EnumerateSnapshotModel, SnapshotSummaryModel } from '../../types/tdrModel'
-import { DatasetSearchFooter } from '../data_search/DatasetSearchFooter'
-import { applyForAccess } from '../../utils/accessUtils'
+import { makeDatasetTableHeader, makeDatasetTableRows } from 'src/components/data_search/DatasetSearchTableConstants'
+import SimpleTable from 'src/components/SimpleTable'
+import { Styles } from 'src/libs/theme'
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { chain, Dictionary, intersection, isEmpty } from 'lodash'
+import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
+import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
+import { applyForAccess } from 'src/utils/accessUtils'
 import { History } from 'history'
 
 const styles = {
@@ -37,8 +34,8 @@ const styles = {
     height: '4rem',
     marginTop: 5,
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
+  columnStyle: {
+    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
     fontFamily: 'Montserrat',
     fontSize: '1.2rem',
     fontWeight: 'bold',
@@ -47,7 +44,7 @@ const styles = {
     border: 'none',
     textTransform: 'uppercase',
     lineHeight: '16px',
-  }),
+  },
   containerOverride: {},
 }
 
@@ -149,6 +146,11 @@ export const StudyDetails = (props: StudyDetailsProps) => {
           <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%' }}>
             <div style={{ fontSize: 20, fontWeight: 600 }}>
               Back to library
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
+              <Link to={`/DUOS-S${study?.studyId}`}>
+                DUOS-S{study?.studyId}
+              </Link>
             </div>
             <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
               {study?.studyName}

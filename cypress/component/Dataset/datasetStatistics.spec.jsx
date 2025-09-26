@@ -10,6 +10,44 @@ describe('Dataset Statistics Tests', () => {
     cy.viewport(600, 800)
   })
 
+  it('Renders the correct dataset from a DUOS-xxx identifier path paramter', () => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: datasetTerm.datasetIdentifier,
+        },
+      },
+      history: {
+        push() {
+        },
+      },
+    }
+    mount(<DatasetStatistics {...props} />)
+    cy.contains(datasetTerm.datasetIdentifier).should('exist')
+  })
+
+  it('Renders the correct dataset from a DUOS-Dxxx identifier path parameter', () => {
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: 'DUOS-D' + datasetTerm.datasetId,
+        },
+      },
+      history: {
+        push() {
+        },
+      },
+    }
+    mount(<DatasetStatistics {...props} />)
+    cy.contains(datasetTerm.datasetIdentifier).should('exist')
+  })
+
   it('Displays Controlled Access Dataset Apply Button', () => {
     const controlled = { ...datasetTerm, accessManagement: 'controlled' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([controlled]))

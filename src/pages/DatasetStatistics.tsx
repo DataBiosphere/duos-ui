@@ -82,6 +82,20 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     }
   }
 
+  const getMatchPhrase = (datasetIdentifier: string) => {
+    if (datasetIdentifier.startsWith('DUOS-D')) {
+      const id = parseInt(datasetIdentifier.replace('DUOS-D', ''))
+      return {
+        datasetId: id,
+      }
+    }
+    else {
+      return {
+        datasetIdentifier: datasetIdentifier,
+      }
+    }
+  }
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -94,9 +108,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
                 },
               },
               {
-                match_phrase: {
-                  datasetIdentifier: datasetIdentifier,
-                },
+                match_phrase: getMatchPhrase(datasetIdentifier),
               },
             ],
           },
@@ -192,7 +204,11 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             {(datasetTerm.accessManagement === AccessManagement.CONTROLLED || datasetTerm.accessManagement === AccessManagement.EXTERNAL)
               && (
                 <LabeledField label="Data Use">
-                  {createDataUseDisplay({ dataset: datasetTerm, divStyle: { display: 'inline-block' }, tooltipPlace: 'right' })}
+                  {createDataUseDisplay({
+                    dataset: datasetTerm,
+                    divStyle: { display: 'inline-block' },
+                    tooltipPlace: 'right',
+                  })}
                 </LabeledField>
               )}
             <LabeledField label="Data Location">
@@ -223,14 +239,21 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               </div>
             )}
           {dars?.map((dar: DatasetStatisticsDar) => (
-            <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
+            <div
+              style={Styles.READ_MORE as React.CSSProperties}
+              id={`${dar.darCode}`}
+              key={`${dar.darCode}`}
+            >
               <ReadMore
                 readLessText="Show less"
                 readMoreText="Show More"
                 readStyle={{ fontWeight: 500, margin: '20px', height: 0 }}
                 content={[
                   <div key="dar" style={{ display: 'flex' }}>
-                    <div style={{ ...Styles.MEDIUM, width: '12%', margin: '15px' }}>{dar.darCode}</div>
+                    <div
+                      style={{ ...Styles.MEDIUM, width: '12%', margin: '15px' }}
+                    >{dar.darCode}
+                    </div>
                     <div style={{ ...Styles.MEDIUM, margin: '15px' }}>{dar.projectTitle}</div>
                   </div>,
                   LINE,
