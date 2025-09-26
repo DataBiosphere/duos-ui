@@ -1,10 +1,10 @@
 import {
   Closeout,
-  CombinedDataAccessRequest,
+  CombinedDataAccessRequest, DarCollection, DataAccessRequest,
   DataManagementIncident,
   Election,
   Presentation,
-  Publication,
+  Publication, Vote,
 } from 'src/types/model'
 import { CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
@@ -20,6 +20,7 @@ export const ElectionType = {
   DATA_ACCESS: 'DataAccess',
 }
 export const ElectionStatus = {
+  OPEN: 'Open',
   CLOSED: 'Closed',
 }
 
@@ -126,4 +127,20 @@ export function getCloseoutInfo(formState: FormState): Closeout {
   closeout.signingOfficialId = formState.closeoutSigningOfficial?.userId
 
   return closeout
+}
+
+export function userHasOpenDataAccessElection(collection: DarCollection, userId: number): boolean {
+  if (!collection.dars) return false
+  return Object.values(collection.dars).some((item: DataAccessRequest) =>
+    item?.elections && Object.values(item.elections).some(
+      (election: Election) =>
+        election.status === ElectionStatus.OPEN
+        && election.electionType === ElectionType.DATA_ACCESS
+        && election.votes
+        && Object.values(election.votes).some(
+          (vote: Vote) =>
+            vote.userId === userId && vote.electionStatus === ElectionStatus.OPEN,
+        ),
+    ),
+  )
 }
