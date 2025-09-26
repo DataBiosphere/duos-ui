@@ -38,6 +38,7 @@ export const Models = {
     dataUse: {
       diseases: false,
       methods: false,
+      aiLlmUse: false,
       controls: false,
       population: false,
       other: false,

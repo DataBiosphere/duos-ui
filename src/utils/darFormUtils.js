@@ -346,6 +346,7 @@ export const isPublication = (publicationText) => {
 }
 
 const requiredRusFields = [
+  'aiLlmUse',
   'controls',
   'population',
   'forProfit',

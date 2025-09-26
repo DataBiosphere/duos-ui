@@ -69,6 +69,7 @@ const DataAccessRequestApplication = (props) => {
     nonTechRus: '',
     oneGender: null,
     methods: null,
+    aiLlmUse: null,
     controls: null,
     population: null,
     hmb: null,
