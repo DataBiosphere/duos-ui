@@ -12,8 +12,8 @@ type DatasetListProps = {
 
 export default function DatasetList(props: DatasetListProps) {
   const { visibleDatasets, isLoading, dacs } = props
-  const datasetId = (dataset: Dataset) => !isNil(dataset.datasetIdentifier) ? dataset.datasetIdentifier : '- -'
-  const datasetName = (dataset: Dataset) => !isNil(dataset.name) ? dataset.name : '- -'
+  const datasetId = (dataset: Dataset) => isNil(dataset.datasetIdentifier) ? '- -' : dataset.datasetIdentifier
+  const datasetName = (dataset: Dataset) => isNil(dataset.name) ? '- -' : dataset.name
   const user: DuosUser = Storage.getCurrentUser()
   const userIsChair: boolean = user.isChairPerson
 
