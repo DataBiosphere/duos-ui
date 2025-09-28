@@ -44,7 +44,7 @@ const study = {
   createUserId: 1,
 } as Study
 
-const time = new Date().getTime()
+const time = Date.now()
 
 const dar_collection = {
   id: 1,
@@ -748,11 +748,11 @@ const dataset_terms = [
 
 // Helper function to reduce redundancy in bucket election verification
 const verifyBucketElectionsAndDatasets = (buckets: Bucket[]) => {
-  buckets.forEach((b) => {
-    b.elections.forEach((e) => {
+  for (const b of buckets) {
+    for (const e of b.elections) {
       cy.wrap(b.datasetIds).should('contain', e.datasetId)
-    })
-  })
+    }
+  }
 }
 
 describe('BucketUtils', () => {
@@ -762,20 +762,20 @@ describe('BucketUtils', () => {
     cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
       const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
-      buckets.forEach((b) => {
-        cy.wrap(b.key).should('not.be.empty')
-        cy.wrap(b.votes).should('not.be.empty')
-        if (!b.isRP) {
-          cy.wrap(b.label).should('not.be.empty')
-          cy.wrap(b.datasets).should('not.be.empty')
-          cy.wrap(b.datasetIds).should('not.be.empty')
-          if (b.dataUse) {
-            cy.wrap(b.dataUse).should('not.be.empty')
-            cy.wrap(b.dataUses).should('not.be.empty')
+      for (const b1 of buckets) {
+        cy.wrap(b1.key).should('not.be.empty')
+        cy.wrap(b1.votes).should('not.be.empty')
+        if (!b1.isRP) {
+          cy.wrap(b1.label).should('not.be.empty')
+          cy.wrap(b1.datasets).should('not.be.empty')
+          cy.wrap(b1.datasetIds).should('not.be.empty')
+          if (b1.dataUse) {
+            cy.wrap(b1.dataUse).should('not.be.empty')
+            cy.wrap(b1.dataUses).should('not.be.empty')
           }
-          cy.wrap(b.elections).should('not.be.empty')
+          cy.wrap(b1.elections).should('not.be.empty')
         }
-      })
+      }
     })
   })
 
@@ -885,13 +885,13 @@ describe('BucketUtils', () => {
       const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
       let rationaleCheck = false
-      buckets.forEach((b) => {
-        if (!isEmpty(b.matchResults)) {
-          cy.wrap(b.algorithmResult?.rationales).should('not.be.empty')
-          cy.wrap(b.algorithmResult?.rationales?.length).should('eq', 5)
+      for (const b1 of buckets) {
+        if (!isEmpty(b1.matchResults)) {
+          cy.wrap(b1.algorithmResult?.rationales).should('not.be.empty')
+          cy.wrap(b1.algorithmResult?.rationales?.length).should('eq', 5)
           rationaleCheck = true
         }
-      })
+      }
       cy.wrap(rationaleCheck).should('eq', true)
     })
   })
@@ -902,9 +902,9 @@ describe('BucketUtils', () => {
       { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NMDS', description: 'NMDS' }] } as DataUseSummary,
       { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NCTRL', description: 'NCTRL' }] } as DataUseSummary,
     ]
-    dataUses.forEach((d) => {
+    for (const d of dataUses) {
       cy.wrap(shouldAbstain(d)).should('eq', false)
-    })
+    }
   })
 
   it('correctly determines unmatchable data use objects', () => {
@@ -919,9 +919,9 @@ describe('BucketUtils', () => {
       { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'MOR', description: 'MOR' }] } as DataUseSummary,
       { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-PD', description: 'POP-PD' }] } as DataUseSummary,
     ]
-    dataUses.forEach((d) => {
+    for (const d of dataUses) {
       cy.wrap(shouldAbstain(d)).should('eq', true)
-    })
+    }
   })
 
   it('correctly buckets data uses when there are similar data use entries', () => {
