@@ -17,11 +17,8 @@ const user = {
 }
 
 describe('DatasetList', () => {
-  beforeEach(() => {
-    cy.stub(Storage, 'getCurrentUser').returns(user)
-  })
-
   it('renders a table with datasets', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(user)
     mount(
       <BrowserRouter>
         <DatasetList visibleDatasets={datasets} isLoading={false} dacs={dacs} />
@@ -37,6 +34,7 @@ describe('DatasetList', () => {
   })
 
   it('renders placeholder when loading', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(user)
     mount(
       <DatasetList visibleDatasets={datasets} isLoading={true} dacs={dacs} />,
     )
@@ -45,6 +43,7 @@ describe('DatasetList', () => {
   })
 
   it('renders filler for missing datasetIdentifier', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(user)
     mount(
       <BrowserRouter>
         <DatasetList
@@ -59,6 +58,7 @@ describe('DatasetList', () => {
   })
 
   it('renders filler for missing name', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(user)
     mount(
       <BrowserRouter>
         <DatasetList
@@ -73,6 +73,7 @@ describe('DatasetList', () => {
   })
 
   it('renders DAC name as link for chair user', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(user)
     mount(
       <BrowserRouter>
         <DatasetList visibleDatasets={datasets} isLoading={false} dacs={dacs} />
@@ -81,8 +82,7 @@ describe('DatasetList', () => {
     cy.get('a').contains('DAC 1').should('have.attr', 'href', '/manage_edit_dac/1')
   })
 
-  // TODO: fix this
-  it.skip('renders DAC name as plain text for non-chair user', () => {
+  it('renders DAC name as plain text for non-chair user', () => {
     cy.stub(Storage, 'getCurrentUser').returns({ isChairPerson: false })
     mount(
       <BrowserRouter>
