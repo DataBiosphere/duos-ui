@@ -61,8 +61,8 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   const buckets: Bucket[] = []
   // Find the most recent DAR
   const recentDar: DataAccessRequest = collection.dars === undefined
-    ? {}
-    : Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0)
+    ? {} as DataAccessRequest
+    : Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) || {} as DataAccessRequest
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
   const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
@@ -73,12 +73,16 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   // Terms don't come with type-specification so we need to modify that manually
   if (terms) {
     for (const term of terms) {
-      term.dataUse?.primary?.forEach((dut: DataUseTerm) => {
-        dut.type = ControlledAccessType.permissions
-      })
-      term.dataUse?.secondary?.forEach((dut: DataUseTerm) => {
-        dut.type = ControlledAccessType.modifiers
-      })
+      if (term.dataUse?.primary) {
+        for (const dut of term.dataUse.primary) {
+          dut.type = ControlledAccessType.permissions
+        }
+      }
+      if (term.dataUse?.secondary) {
+        for (const dut of term.dataUse.secondary) {
+          dut.type = ControlledAccessType.modifiers
+        }
+      }
     }
   }
   // Create a map of DataUse to a list of datasets. This will serve as the basis for bucketing datasets by DataUse.
@@ -87,11 +91,14 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   if (terms) {
     for (const term of terms) {
       const stringValue = JSON.stringify(term.dataUse)
-      if (datasetTermMap.has(stringValue)) {
-        datasetTermMap.get(stringValue)?.push(datasets.filter((dataset: Dataset) => dataset.datasetId === term.datasetId)[0])
-      }
-      else {
-        datasetTermMap.set(stringValue, [datasets.filter((dataset: Dataset) => dataset.datasetId === term.datasetId)[0]])
+      const matchingDataset = datasets.find((dataset: Dataset) => dataset.datasetId === term.datasetId)
+      if (matchingDataset) {
+        if (datasetTermMap.has(stringValue)) {
+          datasetTermMap.get(stringValue).push(matchingDataset)
+        }
+        else {
+          datasetTermMap.set(stringValue, [matchingDataset])
+        }
       }
     }
   }
@@ -279,9 +286,10 @@ const isOther = (dataUse?: DataUseSummary): boolean => {
  */
 export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
   const codeList: string[] = Object.keys(AbstainDataUseCodes)
-  return isOther(dataUse) || dataUse?.secondary?.some((dut: DataUseTerm) => {
-    return codeList.some((code: string) => code === dut.code)
-  }) || false
+  return isOther(dataUse)
+    || (dataUse?.secondary
+      ? dataUse.secondary.map((dut: DataUseTerm) => dut.code).some(code => codeList.includes(code))
+      : false)
 }
 
 /**
