@@ -94,9 +94,7 @@ const styles = {
 // Components
 const DataUseSummary = ({ bucket }: DataUseSummaryProps) => {
   const dataUses = get(bucket, 'dataUses', [])
-  return !isNil(dataUses)
-    ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
-    : <></>
+  return isNil(dataUses) ? <></> : <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
 }
 
 const VoteInfoSubsection = ({
@@ -110,9 +108,9 @@ const VoteInfoSubsection = ({
   updateFinalVote,
   reloadFn,
 }: VoteInfoSubsectionProps) => {
-  const electionIds = currentUserVotes.map(vote => vote.electionId)
+  const electionIds = new Set(currentUserVotes.map(vote => vote.electionId))
   const allOpenElections = bucket.elections
-    .filter(election => electionIds.includes(election.electionId))
+    .filter(election => electionIds.has(election.electionId))
     .filter(election => election.status?.toLowerCase() === 'open')
 
   return (
