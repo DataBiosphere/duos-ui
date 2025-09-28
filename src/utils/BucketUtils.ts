@@ -94,7 +94,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
       const matchingDataset = datasets.find((dataset: Dataset) => dataset.datasetId === term.datasetId)
       if (matchingDataset) {
         if (datasetTermMap.has(stringValue)) {
-          datasetTermMap.get(stringValue).push(matchingDataset)
+          datasetTermMap.get(stringValue)!.push(matchingDataset)
         }
         else {
           datasetTermMap.set(stringValue, [matchingDataset])
