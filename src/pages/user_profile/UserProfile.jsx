@@ -163,9 +163,6 @@ export default function UserProfile(props) {
         Full Name
       </h1>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <label htmlFor="profileName" style={{ marginRight: 8 }}>
-          Profile name
-        </label>
         <FormField
           type={FormFieldTypes.TEXT}
           id="profileName"
@@ -185,9 +182,6 @@ export default function UserProfile(props) {
         </button>
       </div>
       <div style={{ marginTop: '10px' }} />
-      <label htmlFor="profileEmail" style={{ marginRight: 8 }}>
-        Profile Email
-      </label>
       <FormField
         type={FormFieldTypes.TEXT}
         id="profileEmail"
