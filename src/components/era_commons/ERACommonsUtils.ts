@@ -1,8 +1,7 @@
-import EnvironmentUtils, { envGroups } from 'src/utils/EnvironmentUtils'
 import { DuosUser } from 'src/types/model'
 
 export const rasEnabled = (): boolean => {
-  return EnvironmentUtils.checkEnv(envGroups.NON_PROD)
+  return true
 }
 
 export const nihAccountLabel = () => {
