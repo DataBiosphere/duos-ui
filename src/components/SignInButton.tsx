@@ -14,7 +14,6 @@ import { StackdriverReporter } from '../libs/stackdriverReporter'
 import { History } from 'history'
 import { OidcUser } from '../libs/auth/oidcBroker'
 import { DuosUser } from '../types/model'
-import { DuosUserResponse } from '../types/responseTypes'
 import { ServiceStatus } from '../libs/ajax/ServiceStatus'
 import '../styles/tooltip.css'
 
@@ -73,7 +72,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     const redirectTo = getRedirectTo()
     const shouldRedirect = shouldRedirectTo(redirectTo)
     try {
-      const duosUser: DuosUserResponse = await User.getMe()
+      const duosUser: DuosUser = await User.getMe()
       if (duosUser) {
         Storage.setCurrentUser(duosUser)
         setUserRoleStatuses(duosUser, Storage)

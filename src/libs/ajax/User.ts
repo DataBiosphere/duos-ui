@@ -1,8 +1,7 @@
 import { cloneDeep, flow, unset, mergeAll } from 'lodash/fp'
-import { Config } from '../config'
+import { Config } from 'src/libs/config'
 import axios from 'axios'
-import { getApiUrl, fetchOk } from '../ajax'
-import { CreateDuosUserResponse, DuosUserResponse, UpdateDuosUserResponse } from 'src/types/responseTypes'
+import { getApiUrl, fetchOk } from 'src/libs/ajax'
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes'
 import {
   Acknowledgement,
@@ -14,25 +13,25 @@ import {
 } from 'src/types/model'
 
 export const User = {
-  getMe: async (): Promise<DuosUserResponse> => {
+  getMe: async (): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/me`
     const res = await axios.get(url, Config.authOpts())
     return res.data
   },
 
-  getById: async (id: number): Promise<DuosUserResponse> => {
+  getById: async (id: number): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/${id}`
     const res = await axios.get(url, Config.authOpts())
     return res.data
   },
 
-  list: async (roleName: 'Admin' | 'SigningOfficial'): Promise<DuosUserResponse[]> => {
+  list: async (roleName: 'Admin' | 'SigningOfficial'): Promise<DuosUser[]> => {
     const url = `${await getApiUrl()}/api/user/role/${roleName}`
     const res = await fetchOk(url, Config.authOpts())
     return res.json()
   },
 
-  create: async (request: CreateDuosUserRequest): Promise<CreateDuosUserResponse> => {
+  create: async (request: CreateDuosUserRequest): Promise<DuosUser | false | undefined> => {
     const url = `${await getApiUrl()}/api/dacuser`
     try {
       const res = await fetchOk(
@@ -52,7 +51,7 @@ export const User = {
     }
   },
 
-  updateSelf: async (payload: UpdateDuosUserRequestV1): Promise<UpdateDuosUserResponse> => {
+  updateSelf: async (payload: UpdateDuosUserRequestV1): Promise<DuosUser | false | undefined> => {
     const url = `${await getApiUrl()}/api/user`
     // We should not be updating the user's create date, associated institution, or library cards
     try {
@@ -122,19 +121,19 @@ export const User = {
     return res.json()
   },
 
-  getUnassignedUsers: async (): Promise<DuosUserResponse[]> => {
+  getUnassignedUsers: async (): Promise<DuosUser[]> => {
     const url = `${await getApiUrl()}/api/user/institution/unassigned`
     const res = await axios.get(url, Config.authOpts())
     return res.data
   },
 
-  addRoleToUser: async (userId: number, roleId: number): Promise<DuosUserResponse> => {
+  addRoleToUser: async (userId: number, roleId: number): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
     const res = await axios.put(url, null, Config.authOpts())
     return res.data
   },
 
-  deleteRoleFromUser: async (userId: number, roleId: number): Promise<DuosUserResponse> => {
+  deleteRoleFromUser: async (userId: number, roleId: number): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
     const res = await axios.delete(url, Config.authOpts())
     return res.data
