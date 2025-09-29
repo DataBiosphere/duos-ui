@@ -115,7 +115,7 @@ export const NavigationTabsComponent = (props) => {
                   <a
                     id="link_about"
                     className="navbar-duos-link"
-                    href="https://support.terra.bio/hc/en-us/articles/28485372215579-About-DUOS"
+                    href="https://duos.blog/aboutduos/"
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -127,7 +127,7 @@ export const NavigationTabsComponent = (props) => {
                   <a
                     id="link_help"
                     className="navbar-duos-link"
-                    href="https://support.terra.bio/hc/en-us/articles/28486067349531-Frequently-Asked-Questions-about-DUOS"
+                    href="https://duos.blog/help/faqs/"
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -189,8 +189,8 @@ export const NavigationTabsComponent = (props) => {
             }}
           >
             <a
-              href="https://support.terra.bio/hc/en-us/categories/28485138480539-Managing-Data-Access-with-DUOS"
-              id="terra-support-docs-link"
+              href="https://duos.blog/help/"
+              id="help-support-docs-link"
               target="_blank"
               rel="noreferrer"
               style={{ color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20 }}
