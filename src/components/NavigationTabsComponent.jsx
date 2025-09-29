@@ -190,7 +190,7 @@ export const NavigationTabsComponent = (props) => {
           >
             <a
               href="https://duos.blog/help/"
-              id="help-support-docs-link"
+              id="blog-support-docs-link"
               target="_blank"
               rel="noreferrer"
               style={{ color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20 }}
