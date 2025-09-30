@@ -64,14 +64,14 @@ const DacDatasetsModal = (props) => {
       type="informative"
       iconSize="none"
       customStyles={{ width: '80%' }}
-      title={'DAC Datasets associated with DAC: ' + dac.name}
+      title={`DAC Datasets associated with DAC: ${dac.name}`}
       action={{ label: 'Close', handler: onCloseRequest }}
     >
       <div key="dac_datasets" className="table-scroll" style={{ margin: 0 }}>
         <table key="dac_datasets_table" className="table">
           <thead key="dac_datasets_table_head">
             <tr key="dac_datasets_table_head_row">
-              <th key="1" className="table-titles dataset-color cell-size">Dataset Id</th>
+              <th key="1" className="table-titles dataset-color cell-size">Dataset ID</th>
               <th key="2" className="table-titles dataset-color cell-size">Dataset Name</th>
               <th key="3" className="table-titles dataset-color cell-size">URL</th>
               <th key="4" className="table-titles dataset-color cell-size">Structured Data Use Limitations</th>
