@@ -62,7 +62,7 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
       color: '#333F52',
       padding: '15px 25px',
       display: 'flex',
-      flexDirection: 'column' as const,
+      flexDirection: 'column',
       rowGap: '1.5rem',
     }}
     >

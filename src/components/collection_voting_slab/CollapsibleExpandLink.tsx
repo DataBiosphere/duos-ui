@@ -31,7 +31,7 @@ export default function CollapseExpandLink(props: CollapseExpandLinkProps) {
         cursor: 'pointer',
         background: 'none',
         border: 'none',
-        textAlign: 'left' as const,
+        textAlign: 'left',
       }}
       onClick={expanded ? onCollapse : onExpand}
       aria-expanded={expanded}
