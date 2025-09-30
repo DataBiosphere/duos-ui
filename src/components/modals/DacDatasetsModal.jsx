@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { BaseModal } from '../BaseModal'
 import { DataUseTranslation } from '../../libs/dataUseTranslation'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router-dom'
 
 const DacDatasetsModal = (props) => {
   const { showModal, onCloseRequest, datasets, dac } = props
@@ -102,7 +103,9 @@ const DacDatasetsModal = (props) => {
                       className="table-items cell-size"
                       style={{ position: 'relative' }}
                     >
-                      {dataset.datasetIdentifier}
+                      <Link to={`/dataset/${dataset.datasetIdentifier}`}>
+                        {dataset.datasetIdentifier}
+                      </Link>
                     </td>
                     <td key={'2_' + dataset.datasetIdentifier} className="table-items cell-size">{dataset.name}</td>
                     <td
