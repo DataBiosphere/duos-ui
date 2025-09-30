@@ -52,18 +52,18 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
 
   const columnHeaderFormat = {
     requestType: { label: 'Request Type', cellStyle: { width: '15%' }, sortable: true },
-    darCode: { label: 'DAR Title', cellStyle: { width: '20%' }, sortable: true },
+    datasetIdentifier: { label: 'Dataset ID', cellStyle: { width: '20%' }, sortable: true },
     electionDate: { label: 'Election Date', cellStyle: { width: '15%' }, sortable: true },
     vote: { label: 'Vote', cellStyle: { width: '10%' }, sortable: true },
     name: { label: 'Name', cellStyle: { width: '15%' }, sortable: true },
     voteDate: { label: 'Vote Date', cellStyle: { width: '10%' }, sortable: true },
-    voteType: { label: 'Vote Type', cellStyle: { width: '10%' }, sortable: true },
-    rationale: { label: 'Rationale', cellStyle: { width: '20%' }, sortable: true },
+    voteType: { label: 'Vote Type', cellStyle: { width: '15%' }, sortable: true },
+    rationale: { label: 'Rationale', cellStyle: { width: '15%' }, sortable: true },
   }
 
   const columnHeaderData = () => {
-    const { requestType, darCode, electionDate, vote, name, voteDate, voteType, rationale } = columnHeaderFormat
-    return [requestType, darCode, electionDate, vote, name, voteDate, voteType, rationale]
+    const { requestType, datasetIdentifier, electionDate, vote, name, voteDate, voteType, rationale } = columnHeaderFormat
+    return [requestType, datasetIdentifier, electionDate, vote, name, voteDate, voteType, rationale]
   }
 
   const getVoteText = (vote: boolean | null | undefined) => {
@@ -76,14 +76,14 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     if (!voteHistory) return []
 
     const rowData = voteHistory.map((row: VoteHistoryRow, i) => [
-      { data: row.progressReport ? 'Progress Report' : 'Initial DAR', cellStyle: { width: '10%' }, label: 'Request Type', id: i },
-      { data: row.darTitle, cellStyle: { width: '20%' }, label: 'DAR Title', id: i },
-      { data: formatDate(row.electionDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
+      { data: row.progressReport ? 'Progress Report' : 'Initial DAR', cellStyle: { width: '15%' }, label: 'Request Type', id: i },
+      { data: row.datasetIdentifier, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
+      { data: formatDate(row.electionDate), cellStyle: { width: '15%' }, label: 'Election Date', id: i },
       { data: getVoteText(row.vote), cellStyle: { width: '10%' }, label: 'Vote', id: i },
       { data: row.displayName, cellStyle: { width: '15%' }, label: 'Name', id: i },
       { data: formatDate(row.updateDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
-      { data: row.type, cellStyle: { width: '10%' }, label: 'Vote Type', id: i },
-      { data: row.rationale || '--', cellStyle: { width: '20%' }, label: 'Rationale', id: i },
+      { data: row.type, cellStyle: { width: '15%' }, label: 'Vote Type', id: i },
+      { data: row.rationale || '--', cellStyle: { width: '15%' }, label: 'Rationale', id: i },
     ])
     return rowData
   }

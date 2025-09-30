@@ -663,13 +663,13 @@ export interface AlgorithmResult {
 }
 
 export interface VoteHistoryRow extends Vote {
-  darTitle: string
+  datasetIdentifier: string
   progressReport: boolean
   electionDate: string | number
 }
 
 export interface ElectionWithMemberVotes extends Election {
-  darTitle: string
+  datasetIdentifier: string
   progressReport: boolean
   memberVotes: Vote[]
 }
