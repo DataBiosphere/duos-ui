@@ -19,8 +19,7 @@ import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { Delete } from '@mui/icons-material'
 import TableIconButton from 'src/components/TableIconButton'
 import { AxiosError } from 'axios'
-import { ConsentError } from 'src/types/responseTypes'
-import { LibraryCard } from 'src/types/model'
+import { ConsentError, LibraryCard } from 'src/types/model'
 
 export interface LibraryCardTableProps {
   libraryCards?: LibraryCard[]

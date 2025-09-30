@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import { ConsentError } from 'src/types/responseTypes'
+import { ConsentError } from 'src/types/model'
 
 export function extractError(error: unknown): string {
   const consentError = extractConsentError(error)
