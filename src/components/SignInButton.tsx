@@ -240,7 +240,7 @@ export const SignInButton = (props: SignInButtonProps) => {
         <a
           className="navbar-duos-icon-help"
           style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
-          href="https://support.terra.bio/hc/en-us/articles/28504837523995-How-to-Register-for-DUOS"
+          href="https://duos.blog/link_institutional_email_to_gmail/"
           data-for="tip_google-help"
           data-tip="Need account help? Click here!"
         />
