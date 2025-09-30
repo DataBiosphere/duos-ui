@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty'
 import React, { useEffect, useState } from 'react'
 import { BaseModal } from '../BaseModal'
 import { DataUseTranslation } from '../../libs/dataUseTranslation'
+import PropTypes from 'prop-types'
 
 const DacDatasetsModal = (props) => {
   const { showModal, onCloseRequest, datasets, dac } = props
@@ -33,7 +34,7 @@ const DacDatasetsModal = (props) => {
   }
 
   const getDbGapLinkValue = (properties) => {
-    const href = getPropertyValue(properties, 'url', '')
+    const href = getPropertyValue(properties, 'url', '').toString()
     return href.length > 0
       ? <a href={href} target="_blank" className="enabled" rel="noreferrer">Link</a>
       : <span className="disabled">---</span>
@@ -52,6 +53,13 @@ const DacDatasetsModal = (props) => {
       }
       return <span title={translatedDataUse}>{shortenedDataUse}</span>
     }
+  }
+
+  DacDatasetsModal.propTypes = {
+    showModal: PropTypes.bool.isRequired,
+    onCloseRequest: PropTypes.func.isRequired,
+    datasets: PropTypes.array.isRequired,
+    dac: PropTypes.object.isRequired,
   }
 
   return (
