@@ -13,7 +13,7 @@ Alternatively, you may install DUOS locally.
 1. Install Node LTS, but verify the [version of Node declared in the Dockerfile](https://github.com/DataBiosphere/duos-ui/blob/develop/Dockerfile#L2) and install that when setting up. You can install it with [Volta](https://docs.volta.sh/guide/understanding) or NVM.
 
 ```
-volta install node@22.19.0
+volta install node@24.9.0
 ```
 
 2. Next, install the project dependencies.
