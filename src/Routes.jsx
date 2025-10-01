@@ -4,6 +4,7 @@ import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import AuthenticatedRoute from 'src/components/AuthenticatedRoute'
 import { USER_ROLES } from 'src/libs/utils'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
+import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
 import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import AdminManageUsers from 'src/pages/AdminManageUsers'
@@ -80,6 +81,7 @@ const Routes = props => (
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_edit_user/:userId" component={AdminEditUser} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
+    <AuthenticatedRoute path="/manage_dac_datasets" component={ManageDacDatasets} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/manage_edit_dac/:dacId" component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/manage_radar/:dacId" component={ManageRadar} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/manage_add_dac" component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />

@@ -1,13 +1,13 @@
-import React from 'react'
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import ReactTooltip from 'react-tooltip'
-import { DAC } from '../../libs/ajax/DAC'
+import { DAC } from 'src/libs/ajax/DAC'
 import { filter, isNil } from 'lodash/fp'
-import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils'
-import cellData from './ManageDacTableCellData'
-import { styles } from './manageDacTableUtils'
-import SimpleTable from '../SimpleTable'
-import PaginationBar from '../PaginationBar'
+import { recalculateVisibleTable, goToPage as updatePage } from 'src/libs/utils'
+import cellData from 'src/components/manage_dac_table/ManageDacTableCellData'
+import { styles } from 'src/components/manage_dac_table/manageDacTableUtils'
+import SimpleTable from 'src/components/SimpleTable'
+import PaginationBar from 'src/components/PaginationBar'
+import PropTypes from 'prop-types'
 
 const columnHeaderConfig = {
   name: {
@@ -48,11 +48,11 @@ const getInitialSort = (columns = []) => {
   }
   const sortIndex = columns.indexOf(sort.field)
 
-  if (sortIndex !== -1) {
-    return { colIndex: sortIndex, dir: sort.dir }
+  if (sortIndex === -1) {
+    return { colIndex: 0, dir: 1 }
   }
   else {
-    return { colIndex: 0, dir: 1 }
+    return { colIndex: sortIndex, dir: sort.dir }
   }
 }
 
@@ -97,7 +97,7 @@ export const ManageDacTable = function ManageDacTable(props) {
     dacs,
     userRole,
     setShowEditPage,
-    setShowDatasetsModal,
+    setShowDatasetsPage,
     setShowMembersModal,
     setShowConfirmationModal,
     setSelectedDac,
@@ -122,10 +122,10 @@ export const ManageDacTable = function ManageDacTable(props) {
   const viewDatasets = useCallback(async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId)
     const approvedDatasets = filter({ dacApproval: true })(datasets)
-    setShowDatasetsModal(true)
+    setShowDatasetsPage(true)
     setSelectedDac(selectedDac)
     setSelectedDatasets(approvedDatasets)
-  }, [setShowDatasetsModal, setSelectedDac, setSelectedDatasets])
+  }, [setShowDatasetsPage, setSelectedDac, setSelectedDatasets])
 
   useEffect(() => {
     recalculateVisibleTable({
@@ -149,7 +149,7 @@ export const ManageDacTable = function ManageDacTable(props) {
   }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers])
 
   const changeTableSize = useCallback((value) => {
-    if (value > 0 && !isNaN(parseInt(value))) {
+    if (value > 0 && !Number.isNaN(Number.parseInt(value))) {
       setTableSize(value)
     }
   }, [])
@@ -162,6 +162,19 @@ export const ManageDacTable = function ManageDacTable(props) {
     },
     [pageCount],
   )
+
+  ManageDacTable.propTypes = {
+    isLoading: PropTypes.bool,
+    dacs: PropTypes.array,
+    userRole: PropTypes.string,
+    setShowEditPage: PropTypes.func,
+    setShowDatasetsPage: PropTypes.func,
+    setShowMembersModal: PropTypes.func,
+    setShowConfirmationModal: PropTypes.func,
+    setSelectedDac: PropTypes.func,
+    setSelectedDatasets: PropTypes.func,
+    columns: PropTypes.array,
+  }
 
   return (
     <>

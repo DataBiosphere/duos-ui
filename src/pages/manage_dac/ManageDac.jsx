@@ -1,18 +1,16 @@
-import React from 'react'
-import ManageDacTable from '../../components/manage_dac_table/ManageDacTable'
-import { useState, useEffect } from 'react'
-import { Styles } from '../../libs/theme'
-import lockIcon from '../../images/lock-icon.png'
-import { DAC } from '../../libs/ajax/DAC'
-import { Storage } from '../../libs/storage'
-import { Notifications } from '../../libs/utils'
-import DacDatasetsModal from '../../components/modals/DacDatasetsModal'
-import { DacMembersModal } from './DacMembersModal'
-import ConfirmationModal from '../../components/modals/ConfirmationModal'
-import ManageEditDac from './ManageEditDac'
-import { Link } from 'react-router-dom'
-import EditDac from './EditDac'
-import { DAAUtils } from '../../utils/DAAUtils'
+import ManageDacTable from 'src/components/manage_dac_table/ManageDacTable'
+import React, { useState, useEffect } from 'react'
+import { Styles } from 'src/libs/theme'
+import lockIcon from 'src/images/lock-icon.png'
+import { DAC } from 'src/libs/ajax/DAC'
+import { Storage } from 'src/libs/storage'
+import { Notifications } from 'src/libs/utils'
+import { DacMembersModal } from 'src/pages/manage_dac/DacMembersModal'
+import ConfirmationModal from 'src/components/modals/ConfirmationModal'
+import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
+import { Link, useHistory } from 'react-router-dom'
+import EditDac from 'src/pages/manage_dac/EditDac'
+import { DAAUtils } from 'src/utils/DAAUtils'
 
 const CHAIR = 'Chairperson'
 const ADMIN = 'Admin'
@@ -25,7 +23,7 @@ export const ManageDac = function ManageDac() {
   // modal state
   const [showEditPage, setShowEditPage] = useState(false)
   const [showAddPage, setShowAddPage] = useState(false)
-  const [showDatasetsModal, setShowDatasetsModal] = useState(false)
+  const [showDatasetsPage, setShowDatasetsPage] = useState(false)
   const [showMembersModal, setShowMembersModal] = useState(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState(false)
 
@@ -38,14 +36,14 @@ export const ManageDac = function ManageDac() {
     const roles = (currentUser.roles) ? currentUser.roles.map(r => r.name) : []
     const role = roles.includes(ADMIN) ? ADMIN : CHAIR
     setUserRole(role)
-    const chairDACIds = currentUser.roles.filter(r => r.name === CHAIR).map(r => r.dacId)
+    const chairDACIds = new Set(currentUser.roles.filter(r => r.name === CHAIR).map(r => r.dacId))
     setIsLoading(true)
     const allDacs = await DAC.list()
     if (roles.includes(ADMIN)) {
       setDacs(allDacs)
     }
     else {
-      setDacs(allDacs.filter(dac => chairDACIds.includes(dac.dacId)))
+      setDacs(allDacs.filter(dac => chairDACIds.has(dac.dacId)))
     }
     setIsLoading(false)
   }
@@ -57,12 +55,26 @@ export const ManageDac = function ManageDac() {
     init()
   }, [])
 
+  const history = useHistory()
+
+  useEffect(() => {
+    if (showDatasetsPage && selectedDatasets.length > 0) {
+      history.push({
+        pathname: '/manage_dac_datasets',
+        state: { dac: selectedDac, datasets: selectedDatasets },
+      })
+    }
+    else if (showDatasetsPage && selectedDatasets.length === 0) {
+      Notifications.showError({ text: 'DAC has no datasets.' })
+    }
+  }, [showDatasetsPage, selectedDac, selectedDatasets, history])
+
   const handleDeleteDac = async () => {
     let status
     await DAC.delete(selectedDac.dacId).then((resp) => {
       status = resp.status
     })
-    if (status === 200) {
+    if (Number(status) === 200) {
       Notifications.showSuccess({ text: 'DAC successfully deleted.' })
       setShowConfirmationModal(false)
       await initializeDACs()
@@ -83,12 +95,6 @@ export const ManageDac = function ManageDac() {
 
   const addDac = () => {
     setShowAddPage(true)
-  }
-
-  const closeViewDatasetsModal = () => {
-    setShowDatasetsModal(false)
-    setSelectedDac({})
-    setSelectedDatasets([])
   }
 
   return (
@@ -128,7 +134,7 @@ export const ManageDac = function ManageDac() {
         isLoading={isLoading}
         dacs={dacs}
         userRole={userRole}
-        setShowDatasetsModal={setShowDatasetsModal}
+        setShowDatasetsPage={setShowDatasetsPage}
         setShowMembersModal={setShowMembersModal}
         setShowConfirmationModal={setShowConfirmationModal}
         setSelectedDac={setSelectedDac}
@@ -149,15 +155,6 @@ export const ManageDac = function ManageDac() {
           onOKRequest={closeViewMembersModal}
           onCloseRequest={closeViewMembersModal}
           dac={selectedDac}
-        />
-      )}
-      {showDatasetsModal && (
-        <DacDatasetsModal
-          showModal={showDatasetsModal}
-          onOKRequest={closeViewDatasetsModal}
-          onCloseRequest={closeViewDatasetsModal}
-          dac={selectedDac}
-          datasets={selectedDatasets}
         />
       )}
       {showAddPage && (

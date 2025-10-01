@@ -4,7 +4,7 @@ import { Styles } from '../libs/theme'
 import { defaultTo } from 'lodash/fp'
 
 export default function SearchBar(props) {
-  const { handleSearchChange } = props
+  const { handleSearchChange, placeholder = 'Enter search terms' } = props
   const searchTerms = useRef('')
 
   const button = props.button ? props.button : <div />
@@ -26,7 +26,7 @@ export default function SearchBar(props) {
       <input
         data-cy="search-bar"
         type="text"
-        placeholder="Enter search terms"
+        placeholder={placeholder}
         style={style}
         onChange={() => handleSearchChange(props.searchRef ? defaultTo('')(props.searchRef.current.value) : searchTerms)}
         ref={props.searchRef || searchTerms}
