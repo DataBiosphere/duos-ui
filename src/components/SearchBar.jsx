@@ -1,10 +1,10 @@
-import React from 'react'
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { Styles } from '../libs/theme'
 import { defaultTo } from 'lodash/fp'
+import PropTypes from 'prop-types'
 
 export default function SearchBar(props) {
-  const { handleSearchChange } = props
+  const { handleSearchChange, placeholder = 'Enter search terms' } = props
   const searchTerms = useRef('')
 
   const button = props.button ? props.button : <div />
@@ -21,12 +21,20 @@ export default function SearchBar(props) {
     ...props.style,
   }
 
+  SearchBar.propTypes = {
+    handleSearchChange: PropTypes.func.isRequired,
+    placeholder: PropTypes.string,
+    button: PropTypes.node,
+    style: PropTypes.object,
+    searchRef: PropTypes.object,
+  }
+
   return (
     <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
       <input
         data-cy="search-bar"
         type="text"
-        placeholder="Enter search terms"
+        placeholder={placeholder}
         style={style}
         onChange={() => handleSearchChange(props.searchRef ? defaultTo('')(props.searchRef.current.value) : searchTerms)}
         ref={props.searchRef || searchTerms}
