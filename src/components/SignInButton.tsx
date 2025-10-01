@@ -242,6 +242,7 @@ export const SignInButton = (props: SignInButtonProps) => {
           href="https://duos.blog/link_institutional_email_to_gmail/"
           data-for="tip_google-help"
           data-tip="Need account help? Click here!"
+          aria-label="Need account help? Click here!"
         />
         <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
       </div>
