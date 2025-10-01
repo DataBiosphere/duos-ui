@@ -58,7 +58,6 @@ export default function SummarySection(props: Readonly<SummarySectionProps>): Re
                   researcherProfile={researcher}
                   nihValid={nihValid}
                   onNihStatusUpdate={onNihStatusUpdate ?? (() => {})}
-                  location={location}
                   validationError={validation?.nihEraId as unknown as boolean}
                   header={true}
                   required={!readOnly} // In read-only mode, this is not required
