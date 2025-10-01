@@ -1,7 +1,7 @@
-import React from 'react'
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { Styles } from '../libs/theme'
 import { defaultTo } from 'lodash/fp'
+import PropTypes from 'prop-types'
 
 export default function SearchBar(props) {
   const { handleSearchChange, placeholder = 'Enter search terms' } = props
@@ -19,6 +19,14 @@ export default function SearchBar(props) {
     fontFamily: 'Montserrat',
     fontSize: '1.5rem',
     ...props.style,
+  }
+
+  SearchBar.propTypes = {
+    handleSearchChange: PropTypes.func.isRequired,
+    placeholder: PropTypes.string,
+    button: PropTypes.node,
+    style: PropTypes.object,
+    searchRef: PropTypes.object,
   }
 
   return (
