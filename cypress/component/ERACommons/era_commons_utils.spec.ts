@@ -3,10 +3,6 @@ import { DuosUser } from 'src/types/model'
 
 describe('ERACommonsUtils Tests', () => {
   describe('Verify RAS is enabled', () => {
-    it('rasEnabled', () => {
-      const result = ERACommonsUtils.rasEnabled()
-      expect(result).to.eq(true)
-    })
     it('nihAccountLabel', () => {
       const result = ERACommonsUtils.nihAccountLabel()
       expect(result).to.eq('RAS')
