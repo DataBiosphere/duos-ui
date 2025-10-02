@@ -16,12 +16,12 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     finalRationale: '',
     finalAccessVote: false,
     datasetId: 202,
+    datasetIdentifier: 'DUOS-00202',
     displayId: 'E-002',
     dulName: 'Data Use Agreement',
     version: 2,
     archived: false,
     votes: {},
-    darTitle: 'Study on Environmental Impact',
     progressReport: true,
     memberVotes: [
       {
@@ -65,12 +65,12 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     finalRationale: 'All criteria met',
     finalAccessVote: true,
     datasetId: 303,
+    datasetIdentifier: 'DUOS-00303',
     displayId: 'E-003',
     dulName: 'Data Use Limitation',
     version: 1,
     archived: false,
     votes: {},
-    darTitle: 'Genomic Data Analysis',
     progressReport: false,
     memberVotes: [
       {
@@ -110,12 +110,12 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     finalRationale: '',
     finalAccessVote: false,
     datasetId: 404,
+    datasetIdentifier: 'DUOS-00404',
     displayId: 'E-004',
     dulName: 'Data Sharing Agreement',
     version: 3,
     archived: false,
     votes: {},
-    darTitle: 'Clinical Trial Data Analysis',
     progressReport: true,
     memberVotes: [
       {
@@ -146,7 +146,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
 
     cy.get('.column-header').should('have.length', 6)
     cy.get(':nth-child(1) > .cell-sort').contains('Request Type')
-    cy.get(':nth-child(2) > .cell-sort').contains('DAR Title')
+    cy.get(':nth-child(2) > .cell-sort').contains('Dataset ID')
     cy.get(':nth-child(3) > .cell-sort').contains('Election Date')
     cy.get(':nth-child(4) > .cell-sort').contains('Election Status')
     cy.get(':nth-child(5) > .cell-sort').contains('Votes Cast')
@@ -157,21 +157,21 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
     mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
 
     cy.get('.row-data-0 > :nth-child(1)').contains('Progress Report')
-    cy.get('.row-data-0 > :nth-child(2)').contains('Clinical Trial Data Analysis')
+    cy.get('.row-data-0 > :nth-child(2)').contains('DUOS-00404')
     cy.get('.row-data-0 > :nth-child(3)').contains('2023-03-10')
     cy.get('.row-data-0 > :nth-child(4)').contains('In Progress')
     cy.get('.row-data-0 > :nth-child(5)').contains('0/2')
     cy.get('.row-data-0 > :nth-child(6)').contains('No votes cast')
 
     cy.get('.row-data-1 > :nth-child(1)').contains('Progress Report')
-    cy.get('.row-data-1 > :nth-child(2)').contains('Study on Environmental Impact')
+    cy.get('.row-data-1 > :nth-child(2)').contains('DUOS-00202')
     cy.get('.row-data-1 > :nth-child(3)').contains('2023-02-01')
     cy.get('.row-data-1 > :nth-child(4)').contains('In Progress')
     cy.get('.row-data-1 > :nth-child(5)').contains('2/2')
     cy.get('.row-data-1 > :nth-child(6)').contains('1 Yes, 1 No')
 
     cy.get('.row-data-2 > :nth-child(1)').contains('Initial DAR')
-    cy.get('.row-data-2 > :nth-child(2)').contains('Genomic Data Analysis')
+    cy.get('.row-data-2 > :nth-child(2)').contains('DUOS-00303')
     cy.get('.row-data-2 > :nth-child(3)').contains('2023-01-15')
     cy.get('.row-data-2 > :nth-child(4)').contains('Closed')
     cy.get('.row-data-2 > :nth-child(5)').contains('1/2')

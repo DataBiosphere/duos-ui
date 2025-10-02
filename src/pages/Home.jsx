@@ -163,21 +163,21 @@ const Home = (props) => {
                 and clearly track data use compliance.
               </p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a id="terra-support-dac-link" href="https://support.terra.bio/hc/en-us/articles/28513346337179-Overview-DUOS-for-Data-Access-Committees-DACs" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+                <a id="blog-support-dac-link" href="https://duos.blog/help/dacguide/" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
             </div>
             <div className="col-lg-4 col-md-4 ">
               <p style={header}>Institutional Oversight</p>
               <p style={description}>DUOS reduces repetitive work for Signing Officials and expedites data sharing through our innovative Library Card-style agreements.</p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS" target="_blank" rel="noreferrer" id="terra-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+                <a href="https://duos.blog/help/preauthorize_researchers_librarycards/" target="_blank" rel="noreferrer" id="blog-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
             </div>
             <div className="col-lg-4 col-md-4">
               <p style={header}>Looking for data?</p>
               <p style={description}>DUOS helps researchers request and access data from multiple sources with a single application.</p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a href="https://support.terra.bio/hc/en-us/articles/28510385779099-Overview-DUOS-for-Researchers" id="terra-support-researcher-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+                <a href="https://duos.blog/help/researcherguide/" id="blog-support-researcher-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
             </div>
           </div>

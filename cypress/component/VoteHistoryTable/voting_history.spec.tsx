@@ -21,6 +21,7 @@ const darCollection: DarCollection = {
         nonTechRus: 'string',
         diseases: false,
         methods: false,
+        aiLlmUse: false,
         controls: false,
         population: false,
         other: false,

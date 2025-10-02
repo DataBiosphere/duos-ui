@@ -232,6 +232,7 @@ const dar = {
         nonTechRus: 'One non-technical RUS\n',
         diseases: true,
         methods: true,
+        aiLlmUse: false,
         other: false,
         ontologies: [
           {

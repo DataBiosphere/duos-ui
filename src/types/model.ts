@@ -2,6 +2,11 @@ import externalAccessIcon from 'src/images/external_access.svg'
 import openAccessIcon from 'src/images/open_access.svg'
 import controlledAccessIcon from 'src/images/controlled_access.svg'
 
+export interface ConsentError {
+  readonly message?: string
+  readonly code?: number
+}
+
 export type UserRoleName
   = | 'Admin'
     | 'Chairperson'
@@ -281,6 +286,7 @@ export interface DataUse {
   geneticStudiesOnly?: boolean
   publicationResults?: boolean
   publicationMoratorium?: string
+  aiLlmUse?: boolean
   controls?: boolean
   gender?: string
   pediatric?: boolean
@@ -388,6 +394,7 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   nonTechRus: string
   diseases: boolean
   methods: boolean
+  aiLlmUse: boolean
   controls: boolean
   population: boolean
   other: boolean
@@ -489,6 +496,7 @@ export interface DataAccessRequestData {
   nonTechRus: string
   diseases: boolean
   methods: boolean
+  aiLlmUse: boolean
   controls: boolean
   population: boolean
   other: boolean
@@ -660,13 +668,13 @@ export interface AlgorithmResult {
 }
 
 export interface VoteHistoryRow extends Vote {
-  darTitle: string
+  datasetIdentifier: string
   progressReport: boolean
   electionDate: string | number
 }
 
 export interface ElectionWithMemberVotes extends Election {
-  darTitle: string
+  datasetIdentifier: string
   progressReport: boolean
   memberVotes: Vote[]
 }

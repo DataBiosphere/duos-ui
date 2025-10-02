@@ -69,6 +69,16 @@ export default function ResearchPurposeStatement(props) {
           <h4>I am proposing to:</h4>
 
           <ResearchPurposeRow
+            title="Do research involving AI or Large Language Models (LLMs). If yes, please explain in your Research Use Statement."
+            id="aiLlmUse"
+            defaultValue={formData.aiLlmUse}
+            validation={validation.aiLlmUse}
+            disabled={readOnlyMode}
+            onValidationChange={onValidationChange}
+            onChange={onChange}
+          />
+
+          <ResearchPurposeRow
             title="Increase controls available for a comparison group (e.g. a case-control study)."
             id="controls"
             defaultValue={formData.controls}

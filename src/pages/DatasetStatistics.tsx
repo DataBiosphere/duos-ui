@@ -196,7 +196,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               </div>
             </div>
             <LabeledField label="Study">
-              {datasetTerm.study.studyName}
+              {datasetTerm.study?.studyName}
             </LabeledField>
             <LabeledField label="Access Type">
               {accessInstructions()}
@@ -221,13 +221,13 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
               {datasetTerm.participantCount}
             </LabeledField>
             <LabeledField label="Principal Investigator">
-              {datasetTerm.study.piName}
+              {datasetTerm.study?.piName}
             </LabeledField>
             <LabeledField label="Data Custodian">
-              {datasetTerm.study.dataCustodianEmail?.join(', ') ?? 'N/A'}
+              {datasetTerm.study?.dataCustodianEmail?.join(', ') ?? 'N/A'}
             </LabeledField>
             <div style={{ paddingTop: '20px' }}>
-              {datasetTerm.study.description}
+              {datasetTerm.study?.description}
             </div>
           </div>
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />

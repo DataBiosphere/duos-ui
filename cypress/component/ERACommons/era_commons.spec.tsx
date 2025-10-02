@@ -5,7 +5,6 @@ import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
 import { mount } from 'cypress/react'
 import React from 'react'
-import { Buffer } from 'buffer'
 
 interface Researcher {
   id: number
@@ -37,17 +36,6 @@ const researcher: Researcher = {
   email: 'test@email.com',
 }
 
-const buildToken = (username: string, iat: number, exp: number): string => {
-  const part1 = `{"alg":"RS256","typ":"JWT"}`
-  const part2 = {
-    eraCommonsUsername: username,
-    iat: iat,
-    exp: exp,
-  }
-  const part3 = '...'
-  return Buffer.from(`${part1}${JSON.stringify(part2)}${part3}`).toString('base64')
-}
-
 describe('ERA Commons Utility', function () {
   it('decodeNihToken works with a valid base64 encoded token', async function () {
     const token = { 'nih-username-token': encodedToken }
@@ -73,7 +61,6 @@ describe('ERA Commons Component', function () {
         header={true}
         onNihStatusUpdate={() => {}}
         required={true} // Triggers the required flag on the NIH eRA Commons ID
-        location={undefined}
         validationError={false}
       />,
     )
@@ -94,11 +81,9 @@ describe('ERA Commons Component', function () {
       { propertyKey: 'eraExpiration', propertyValue: exp },
     ]
     cy.stub(User, 'getMe').returns(clonedResearcher)
-    cy.stub(AuthenticateNIH, 'saveNihUsr').returns(clonedResearcher.properties)
     mount(
       <ERACommons
         destination=""
-        location={{ search: `?nih-username-token=${buildToken('testing', iat, exp)}` }}
         header={true}
         onNihStatusUpdate={() => {}}
         required={true}
@@ -121,7 +106,6 @@ describe('ERA Commons Component', function () {
         onNihStatusUpdate={() => {}}
         required={true} // Triggers the required flag on the NIH eRA Commons ID
         validationError={false}
-        location={{ search: '?nih-username-token=invalid' }}
       />,
     )
     cy.get('[data-cy=era-commons-authenticate-link]').should('exist')
@@ -146,7 +130,6 @@ describe('ERA Commons Component', function () {
         onNihStatusUpdate={() => {}}
         required={true}
         validationError={false}
-        location={{ search: '?nih-username-token=' + encodedToken }}
       />,
     )
     cy.stub(AuthenticateNIH, 'deleteAccountLinkage').throws(new Error('error'))

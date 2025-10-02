@@ -1,16 +1,11 @@
-import EnvironmentUtils, { envGroups } from 'src/utils/EnvironmentUtils'
 import { DuosUser } from 'src/types/model'
 
-export const rasEnabled = (): boolean => {
-  return EnvironmentUtils.checkEnv(envGroups.NON_PROD)
-}
-
 export const nihAccountLabel = () => {
-  return rasEnabled() ? 'RAS' : 'eRA Commons'
+  return 'RAS'
 }
 
 export const nihAccountInstructions = () => {
-  return rasEnabled() ? 'https://datascience.nih.gov/researcher-auth-service-initiative' : 'https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm'
+  return 'https://datascience.nih.gov/researcher-auth-service-initiative'
 }
 
 export const extractEraAuthenticationState = (user: DuosUser) => {

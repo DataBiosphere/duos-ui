@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { isNil } from 'lodash/fp'
-import queryString from 'query-string'
 import './ERACommons.css'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { User } from 'src/libs/ajax/User'
-import { Config } from 'src/libs/config'
 import '../Animations.css'
 import { Storage } from 'src/libs/storage'
-import { decodeNihToken } from 'src/utils/ERACommonsUtils'
-import { extractEraAuthenticationState, nihAccountLabel, rasEnabled } from 'src/components/era_commons/ERACommonsUtils'
+import { extractEraAuthenticationState, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 
 import ReactTooltip from 'react-tooltip'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
@@ -23,15 +19,7 @@ interface ERACommonsProps {
   required?: boolean
   destination?: string
   researcherProfile?: DuosUser
-  location?: {
-    search?: string
-  }
   validationError?: boolean
-}
-
-interface DecodedNihToken {
-  eraCommonsUsername: string
-  exp: string
 }
 
 // -------------------- Component --------------------
@@ -42,10 +30,8 @@ export default function ERACommons({
   required = false,
   destination = '',
   researcherProfile,
-  location,
   validationError = false,
 }: Readonly<ERACommonsProps>) {
-  const [search, setSearch] = useState<string>(location?.search || '')
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
   const [expirationCount, setExpirationCount] = useState<number>(0)
   const [eraCommonsId, setEraCommonsId] = useState<string | undefined>('')
@@ -55,47 +41,6 @@ export default function ERACommons({
   const currentUser = Storage.getCurrentUser()
 
   // -------------------- Effects --------------------
-
-  // On redirect back from NIH login
-  useEffect(() => {
-    const initEraAuthSuccess = async () => {
-      if (search !== '') {
-        const rawToken = queryString.parse(search)
-        const decodedToken: DecodedNihToken | null = await decodeNihToken(rawToken)
-        if (isNil(decodedToken)) {
-          displayError(
-            'The system received an invalid token, please try again or submit an error report using the "Contact Us" form.',
-          )
-          return
-        }
-
-        const nihPayload = {
-          linkedNihUsername: `${decodedToken.eraCommonsUsername}`,
-          linkExpireTime: `${decodedToken.exp}`,
-          status: true,
-        }
-
-        const newUserProps = await AuthenticateNIH.saveNihUsr(nihPayload)
-        const eraAuthState = extractEraAuthenticationState({
-          properties: newUserProps,
-          eraCommonsId: decodedToken.eraCommonsUsername,
-        } as DuosUser)
-
-        setIsAuthorized(eraAuthState.isAuthorized)
-        setExpirationCount(eraAuthState.expirationCount)
-        setEraCommonsId(eraAuthState.eraCommonsId)
-        onNihStatusUpdate(eraAuthState.nihValid)
-
-        document.getElementById('era-commons-id')?.scrollIntoView({
-          block: 'start',
-          inline: 'nearest',
-          behavior: 'smooth',
-        })
-      }
-    }
-
-    initEraAuthSuccess()
-  }, [onNihStatusUpdate, search])
 
   // Populate state from researcherProfile or current user
   useEffect(() => {
@@ -113,13 +58,6 @@ export default function ERACommons({
 
   // -------------------- Handlers --------------------
 
-  const redirectToNihLogin = async () => {
-    const returnUrl = `${window.location.origin}/${destination}?nih-username-token=<token>`
-    window.location.href = `${await Config.getNihUrl()}?${queryString.stringify({
-      'return-url': returnUrl,
-    })}`
-  }
-
   const redirectToECMAuthUrl = async () => {
     const origin = window.location.origin
     const redirectTo = `${origin}/${destination}`
@@ -129,7 +67,9 @@ export default function ERACommons({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     catch (error: never) {
-      displayError('Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email)
+      const userEmail = currentUser?.email || 'unknown user'
+      const errorMessage = 'Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + userEmail
+      displayError(errorMessage)
     }
   }
 
@@ -137,13 +77,11 @@ export default function ERACommons({
     try {
       await AuthenticateNIH.deleteAccountLinkage()
       const response = await User.getMe()
-      const eraAuthState = extractEraAuthenticationState(response.properties as unknown as DuosUser)
-
+      const eraAuthState = extractEraAuthenticationState(response as DuosUser)
       setIsAuthorized(eraAuthState.isAuthorized)
       setExpirationCount(eraAuthState.expirationCount)
       setEraCommonsId('')
       onNihStatusUpdate(eraAuthState.nihValid)
-      setSearch('')
     }
     catch {
       displayError(
@@ -178,10 +116,10 @@ export default function ERACommons({
         <a
           data-cy="era-commons-authenticate-link"
           className={validationError ? 'era-button-state-error' : 'era-button-state'}
-          onClick={rasEnabled() ? redirectToECMAuthUrl : redirectToNihLogin}
+          onClick={redirectToECMAuthUrl}
           target="_blank"
         >
-          <div className={rasEnabled() ? 'nih-logo-style' : 'era-logo-style'} />
+          <div className="nih-logo-style" />
           <span style={{ verticalAlign: '40%' }}>Authenticate your account</span>
         </a>
       )}

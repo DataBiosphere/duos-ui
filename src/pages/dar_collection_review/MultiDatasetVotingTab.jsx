@@ -1,6 +1,7 @@
 import { filter, find, flow, get, isNil, map } from 'lodash/fp'
 import React, { useEffect, useState } from 'react'
 import { Alert } from '../../components/Alert'
+import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
 import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab'
 import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab'
 import { User } from '../../libs/ajax/User'
@@ -82,6 +83,7 @@ export default function MultiDatasetVotingTab(props) {
 
   return (
     <div style={styles.baseStyle}>
+      <AILLMWarningBanner darInfo={darInfo} />
       <div style={styles.title}>Research Use Statement</div>
       {dataAccessApprovalDisabled() && !readOnly && (
         <Alert

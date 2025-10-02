@@ -12,7 +12,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
       electionId: 201,
       displayName: 'Alice Johnson',
       type: 'Chair',
-      darTitle: 'DAR Title 1',
+      datasetIdentifier: 'DUOS-00401',
       progressReport: true,
       electionDate: new Date('2023-01-03T10:30:00-05:00').getTime(),
       vote: true,
@@ -26,7 +26,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
       electionId: 202,
       displayName: 'Bob Smith',
       type: 'Chair',
-      darTitle: 'DAR Title 2',
+      datasetIdentifier: 'DUOS-00402',
       progressReport: false,
       electionDate: new Date('2023-01-01T10:30:00-05:00').getTime(),
       vote: false,
@@ -40,7 +40,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
       electionId: 203,
       displayName: 'Charlie Brown',
       type: 'Chair',
-      darTitle: 'DAR Title 3',
+      datasetIdentifier: 'DUOS-00403',
       progressReport: true,
       electionDate: new Date('2023-01-02T10:30:00-05:00').getTime(),
       vote: false,
@@ -52,7 +52,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
     mount(<ChairVoteHistoryTable voteHistory={testData} />)
     cy.get('.column-header').should('have.length', 8)
     cy.get(':nth-child(1) > .cell-sort').contains('Request Type')
-    cy.get(':nth-child(2) > .cell-sort').contains('DAR Title')
+    cy.get(':nth-child(2) > .cell-sort').contains('Dataset ID')
     cy.get(':nth-child(3) > .cell-sort').contains('Election Date')
     cy.get(':nth-child(4) > .cell-sort').contains('Vote')
     cy.get(':nth-child(5) > .cell-sort').contains('Name')
@@ -64,7 +64,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
   it('should render rows with correct default sort (by election date descending)', () => {
     mount(<ChairVoteHistoryTable voteHistory={testData} />)
     cy.get('.row-data-0 > :nth-child(1)').contains('Progress Report')
-    cy.get('.row-data-0 > :nth-child(2)').contains('DAR Title 1')
+    cy.get('.row-data-0 > :nth-child(2)').contains('DUOS-00401')
     cy.get('.row-data-0 > :nth-child(3)').contains('2023-01-03')
     cy.get('.row-data-0 > :nth-child(4)').contains('Yes')
     cy.get('.row-data-0 > :nth-child(5)').contains('Alice Johnson')
@@ -73,7 +73,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
     cy.get('.row-data-0 > :nth-child(8)').contains('Approved')
 
     cy.get('.row-data-1 > :nth-child(1)').contains('Progress Report')
-    cy.get('.row-data-1 > :nth-child(2)').contains('DAR Title 3')
+    cy.get('.row-data-1 > :nth-child(2)').contains('DUOS-00403')
     cy.get('.row-data-1 > :nth-child(3)').contains('2023-01-02')
     cy.get('.row-data-1 > :nth-child(4)').contains('No')
     cy.get('.row-data-1 > :nth-child(5)').contains('Charlie Brown')
@@ -82,7 +82,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
     cy.get('.row-data-1 > :nth-child(8)').contains('--')
 
     cy.get('.row-data-2 > :nth-child(1)').contains('Initial DAR')
-    cy.get('.row-data-2 > :nth-child(2)').contains('DAR Title 2')
+    cy.get('.row-data-2 > :nth-child(2)').contains('DUOS-00402')
     cy.get('.row-data-2 > :nth-child(3)').contains('2023-01-01')
     cy.get('.row-data-2 > :nth-child(4)').contains('No')
     cy.get('.row-data-2 > :nth-child(5)').contains('Bob Smith')

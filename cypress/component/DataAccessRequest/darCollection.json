@@ -55,6 +55,7 @@
         "rus": "Export Testing: DUOS_2807",
         "nonTechRus": "Export Testing: DUOS_2807",
         "diseases": false,
+        "aiLlmUse": false,
         "controls": false,
         "population": false,
         "otherText": "",

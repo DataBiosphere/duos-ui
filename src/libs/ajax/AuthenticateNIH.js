@@ -24,11 +24,6 @@ axios.interceptors.response.use(function (response) {
 })
 
 export const AuthenticateNIH = {
-  saveNihUsr: async (decodedData) => {
-    const url = `${await getApiUrl()}/api/nih`
-    const res = await axios.post(url, JSON.stringify(decodedData), merge(Config.authOpts(), { headers: { 'Content-Type': 'application/json' } }))
-    return await res.data
-  },
 
   deleteAccountLinkage: async () => {
     const url = `${await getApiUrl()}/api/nih`

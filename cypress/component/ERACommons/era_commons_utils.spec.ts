@@ -1,16 +1,8 @@
 import * as ERACommonsUtils from 'src/components/era_commons/ERACommonsUtils'
-import EnvironmentUtils from 'src/utils/EnvironmentUtils'
 import { DuosUser } from 'src/types/model'
 
 describe('ERACommonsUtils Tests', () => {
-  describe('Test environment-enabled cases', () => {
-    beforeEach(() => {
-      cy.stub(EnvironmentUtils, 'checkEnv').returns(true)
-    })
-    it('rasEnabled', () => {
-      const result = ERACommonsUtils.rasEnabled()
-      expect(result).to.eq(true)
-    })
+  describe('Verify RAS is enabled', () => {
     it('nihAccountLabel', () => {
       const result = ERACommonsUtils.nihAccountLabel()
       expect(result).to.eq('RAS')
@@ -18,24 +10,6 @@ describe('ERACommonsUtils Tests', () => {
     it('nihAccountInstructions', () => {
       const result = ERACommonsUtils.nihAccountInstructions()
       expect(result).to.eq('https://datascience.nih.gov/researcher-auth-service-initiative')
-    })
-  })
-
-  describe('Test environment-disabled cases', () => {
-    beforeEach(() => {
-      cy.stub(EnvironmentUtils, 'checkEnv').returns(false)
-    })
-    it('rasEnabled', () => {
-      const result = ERACommonsUtils.rasEnabled()
-      expect(result).to.eq(false)
-    })
-    it('nihAccountLabel', () => {
-      const result = ERACommonsUtils.nihAccountLabel()
-      expect(result).to.eq('eRA Commons')
-    })
-    it('nihAccountInstructions', () => {
-      const result = ERACommonsUtils.nihAccountInstructions()
-      expect(result).to.eq('https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm')
     })
   })
 

@@ -64,6 +64,7 @@ export interface DarErrors {
 }
 
 export interface RusErrors {
+  aiLlmUse?: ValidationError
   gender?: ValidationError
   controls?: ValidationError
   population?: ValidationError

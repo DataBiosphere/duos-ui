@@ -76,9 +76,10 @@ const extractChairVotes = (darCollection: DarCollection, filteredDatasetIds: num
       .forEach((election: Election) => {
         Object.values(election.votes ?? []).forEach((vote: Vote) => {
           if (isChairVote(vote)) {
+            const dataset = darCollection.datasets.find(ds => ds.datasetId === election.datasetId)
             votesByRole.push({
               ...vote,
-              darTitle: dar.data.projectTitle,
+              datasetIdentifier: dataset?.datasetIdentifier || `Dataset-${election.datasetId}`,
               progressReport: dar.progressReport,
               electionDate: election.createDate,
             })
@@ -101,9 +102,10 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
     Object.values(dar.elections ?? [])
       .filter((election: Election) => election.electionType == 'DataAccess' && filteredDatasetIds.includes(election.datasetId))
       .forEach((election: Election) => {
+        const dataset = darCollection.datasets.find(ds => ds.datasetId === election.datasetId)
         const electionWithMemberVotes: ElectionWithMemberVotes = {
           ...election,
-          darTitle: dar.data.projectTitle,
+          datasetIdentifier: dataset?.datasetIdentifier || `Dataset-${election.datasetId}`,
           progressReport: dar.progressReport,
           memberVotes: [],
         }
@@ -118,7 +120,6 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
 
   return dacMemberVotes
 }
-
 const isChairVote = (vote: Vote) => {
   return (vote.type === VOTE_TYPES.FINAL || vote.type === VOTE_TYPES.RADAR_APPROVE) && vote.vote != null
 }

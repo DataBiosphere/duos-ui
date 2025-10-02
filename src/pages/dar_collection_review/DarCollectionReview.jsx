@@ -12,6 +12,7 @@ import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from '../../libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
+import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
 import {
   APPROVED_VOTETYPES,
   ElectionStatus,
@@ -272,6 +273,7 @@ export default function DarCollectionReview(props) {
           isLoading={isLoading}
           readOnly={readOnly || adminPage}
         />
+        <AILLMWarningBanner darInfo={darInfo} />
         {canVote === false && (
           <Notification
             customStyle={{ paddingLeft: 0 }}
