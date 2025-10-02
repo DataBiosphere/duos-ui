@@ -74,13 +74,14 @@ const getSortForTab = (tabKey: string): Sort => {
 interface DatasetSearchTableDisplayProps {
   onSelect: (newSelectedIds: number[]) => void
   filteredData: DatasetTerm[]
+  allData: DatasetTerm[]  // Added: all datasets for cell calculation
   selected: number[]
   exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }
   tab: DatasetSearchTableTab<DatasetTerm | DatasetTerm[]>
 }
 
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
-  const { onSelect, exportableDatasets, filteredData, selected, tab } = props
+  const { onSelect, exportableDatasets, filteredData, allData, selected, tab } = props
   const [sort, setSort] = React.useState<Sort>(getSortForTab(tab.key))
   const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets)
 
@@ -122,10 +123,30 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     })
   }, [headers])
 
+  // Calculate cell data once for all datasets
+  const allRowData = React.useMemo(() => {
+    return tab.makeRows(allData, headers)
+  }, [allData, headers, tab])
+
+  // Create map for fast lookup of calculated row data
+  const rowDataMap = React.useMemo(() => {
+    const map = new Map()
+    allData.forEach((dataset, index) => {
+      const key = dataset.datasetId || dataset.study?.studyId || index
+      map.set(key, allRowData[index])
+    })
+    return map
+  }, [allData, allRowData])
+
+  // Filter and sort only the row data we need
   const rowData = React.useMemo(() => {
-    const baseData = tab.makeRows(filteredData, headers)
-    return sortData(baseData, sort)
-  }, [filteredData, headers, sort, sortData, tab])
+    const filteredRowData = filteredData.map(dataset => {
+      const key = dataset.datasetId || dataset.study?.studyId
+      return rowDataMap.get(key)
+    }).filter(Boolean)
+    
+    return sortData(filteredRowData, sort)
+  }, [filteredData, rowDataMap, sort, sortData])
 
   const handleSort = (newSort: Sort) => {
     const storageKey = `${storageDatasetSearchSort}_${tab.key}`

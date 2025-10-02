@@ -295,7 +295,7 @@ export const DatasetSearchTable = (props) => {
                 )
               }
               else {
-                return <DatasetSearchTableDisplay key={selectedTable.key} tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets} />
+                return <DatasetSearchTableDisplay key={selectedTable.key} tab={selectedTable} onSelect={setSelected} filteredData={filtered} allData={datasets} selected={selected} exportableDatasets={exportableDatasets} />
               }
             })()}
           </Box>

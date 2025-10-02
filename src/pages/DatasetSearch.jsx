@@ -82,7 +82,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 
   return {
     from: 0,
-    size: 10000,
+    size: 50,
     query: {
       bool: {
         must: queryChunks,
