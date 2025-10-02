@@ -24,7 +24,7 @@ interface SummarySectionProps {
 }
 
 export default function SummarySection(props: Readonly<SummarySectionProps>): React.JSX.Element {
-  const { readOnly, formState, onFormChange, eRACommonsDestination, location, researcher, onValidationChange, validation, nihValid, onNihStatusUpdate } = props
+  const { readOnly, formState, onFormChange, eRACommonsDestination, researcher, onValidationChange, validation, nihValid, onNihStatusUpdate } = props
 
   const [publications, setPublications] = useState<Publication[]>(formState.publications || [])
   const [presentations, setPresentations] = useState<Presentation[]>(formState.presentations || [])

@@ -117,7 +117,7 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   })
 
-  const { history, location, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication, collection } = props
+  const { history, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication, collection } = props
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} })
 
@@ -629,7 +629,6 @@ const DataAccessRequestApplication = (props) => {
                     datasets={datasets}
                     dar={merge(reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
                     history={history}
-                    location={location}
                     researcher={researcher}
                     countriesOfOperation={countriesOfOperation}
                   />
@@ -653,7 +652,6 @@ const DataAccessRequestApplication = (props) => {
                             readOnlyMode={true}
                             datasets={datasets}
                             dar={merge(dar?.data, dar)}
-                            location={undefined}
                             researcher={researcher}
                             countriesOfOperation={countriesOfOperation}
                           />
@@ -689,7 +687,6 @@ const DataAccessRequestApplication = (props) => {
                     formValidationChange={val => formValidationChange('researcherInfoErrors', val)}
                     eRACommonsDestination={eRACommonsDestination}
                     formFieldChange={formFieldChange}
-                    location={location}
                     nihValid={nihValid}
                     onNihStatusUpdate={setNihValid}
                     showNihValidationError={showNihValidationError}

@@ -46,7 +46,6 @@ export default function ResearcherInfo(props) {
     darCode,
     eRACommonsDestination,
     formFieldChange,
-    location,
     onNihStatusUpdate,
     formData,
     researcher,
