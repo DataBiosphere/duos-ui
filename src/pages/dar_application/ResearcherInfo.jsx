@@ -46,7 +46,6 @@ export default function ResearcherInfo(props) {
     darCode,
     eRACommonsDestination,
     formFieldChange,
-    location,
     onNihStatusUpdate,
     formData,
     researcher,
@@ -131,7 +130,6 @@ export default function ResearcherInfo(props) {
                     destination={eRACommonsDestination}
                     researcherProfile={researcher}
                     onNihStatusUpdate={onNihStatusUpdate}
-                    location={location}
                     validationError={showNihValidationError}
                     header={true}
                     required={!readOnlyMode} // In read-only mode, this is not required

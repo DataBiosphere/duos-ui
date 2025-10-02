@@ -1,6 +1,6 @@
 import { mount } from 'cypress/react'
 import React from 'react'
-import ResearcherStatus, { ResearcherStatusProps } from 'src/pages/user_profile/ResearcherStatus'
+import ResearcherStatus from 'src/pages/user_profile/ResearcherStatus'
 import { DAAObject, DuosUser, FileStorageObject, SimplifiedDuosUser } from 'src/types/model'
 import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
@@ -65,7 +65,6 @@ describe('ResearcherStatus', () => {
 
   it('Renders the Researcher Status With Library Card Info', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser])
-    const pageProps = { location: {} } as ResearcherStatusProps['pageProps']
     const userWithCard = {
       ...user, ...{
         libraryCard: {
@@ -80,7 +79,7 @@ describe('ResearcherStatus', () => {
       },
     }
 
-    mount(<ResearcherStatus user={userWithCard} pageProps={pageProps} />)
+    mount(<ResearcherStatus user={userWithCard} />)
     cy.contains('Researcher Status')
     cy.contains('RAS Account')
     cy.contains('Library Card issued to you')
@@ -90,15 +89,13 @@ describe('ResearcherStatus', () => {
 
   it('Renders the Researcher Status Without Library Card Info', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser])
-    const pageProps = { location: {} } as ResearcherStatusProps['pageProps']
 
-    mount(<ResearcherStatus user={user} pageProps={pageProps} />)
+    mount(<ResearcherStatus user={user} />)
     cy.contains('No Library Card Found')
   })
 
   it('shows message when no signing officials are found', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([])
-    const pageProps = { location: {} } as ResearcherStatusProps['pageProps']
     const userWithCard = {
       ...user, ...{
         libraryCard: {
@@ -112,14 +109,13 @@ describe('ResearcherStatus', () => {
         },
       },
     }
-    mount(<ResearcherStatus user={userWithCard} pageProps={pageProps} />)
+    mount(<ResearcherStatus user={userWithCard} />)
     cy.contains('No Signing Official found for your institution')
     cy.contains('help article')
   })
 
   it('shows the Institutional Signing Officials list', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser])
-    const pageProps = { location: {} } as ResearcherStatusProps['pageProps']
     const userWithCard = {
       ...user, ...{
         libraryCard: {
@@ -133,7 +129,7 @@ describe('ResearcherStatus', () => {
         },
       },
     }
-    mount(<ResearcherStatus user={userWithCard} pageProps={pageProps} />)
+    mount(<ResearcherStatus user={userWithCard} />)
     cy.contains('Signing Official(s):')
     cy.contains('Signing Official - so@test.com')
   })

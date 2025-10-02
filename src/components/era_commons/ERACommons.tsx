@@ -19,9 +19,6 @@ interface ERACommonsProps {
   required?: boolean
   destination?: string
   researcherProfile?: DuosUser
-  location?: {
-    search?: string
-  }
   validationError?: boolean
 }
 
@@ -33,8 +30,6 @@ export default function ERACommons({
   required = false,
   destination = '',
   researcherProfile,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  location,
   validationError = false,
 }: Readonly<ERACommonsProps>) {
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
