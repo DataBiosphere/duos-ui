@@ -16,11 +16,17 @@ const dataset = (id, dacId) => {
 const bucketDatasets = [
   dataset(1, 1),
   dataset(2, 1),
-  dataset(3, 1),
-  dataset(4, 1),
-  dataset(5, 1),
-  dataset(6, 1),
-  dataset(7, 1),
+  dataset(3, 2),
+  dataset(4, 2),
+  dataset(5, 2),
+  dataset(6, 3),
+  dataset(7, 3),
+]
+
+const dacs = [
+  { dacId: 1, dacName: 'DAC 1' },
+  { dacId: 2, dacName: 'DAC 2' },
+  { dacId: 3, dacName: 'DAC 3' },
 ]
 
 const user = {
@@ -44,7 +50,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
       <DatasetsRequestedPanel
         bucketDatasets={[]}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+        dacs={dacs}
       />,
     )
     cy.get('[data-cy=dataset-list]').find('tr').should('have.length', 1)
@@ -55,7 +61,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
     mount(
       <DatasetsRequestedPanel
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+        dacs={dacs}
       />,
     )
     cy.get('[data-cy=dataset-list]').find('tr').should('have.length', 1)
@@ -67,7 +73,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
       <DatasetsRequestedPanel
         bucketDatasets={bucketDatasets}
         dacDatasetIds={[]}
-        dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+        dacs={dacs}
       />,
     )
     cy.get('[data-cy=dataset-list]').find('tr').should('have.length', 1)
@@ -78,7 +84,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
     mount(
       <DatasetsRequestedPanel
         bucketDatasets={bucketDatasets}
-        dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+        dacs={dacs}
       />,
     )
     cy.get('[data-cy=dataset-list]').find('tr').should('have.length', 1)
@@ -90,7 +96,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
       <DatasetsRequestedPanel
         bucketDatasets={bucketDatasets}
         dacDatasetIds={[8, 9, 10]}
-        dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+        dacs={dacs}
       />,
     )
     cy.get('[data-cy=dataset-list]').find('tr').should('have.length', 1)
@@ -103,7 +109,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
           dacDatasetIds={[1, 3, 9, 10]}
-          dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+          dacs={dacs}
         />
       </BrowserRouter>,
     )
@@ -124,7 +130,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
           dacDatasetIds={[1, 2, 3, 4, 5]}
-          dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+          dacs={dacs}
         />
       </BrowserRouter>,
     )
@@ -151,7 +157,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
           dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-          dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+          dacs={dacs}
         />
       </BrowserRouter>,
     )
@@ -183,7 +189,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
           dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-          dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+          dacs={dacs}
         />
       </BrowserRouter>,
     )
@@ -222,7 +228,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
             },
           ]}
           dacDatasetIds={[1]}
-          dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+          dacs={dacs}
         />
       </BrowserRouter>,
     )
@@ -242,7 +248,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
             },
           ]}
           dacDatasetIds={[1]}
-          dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+          dacs={dacs}
         />
       </BrowserRouter>,
     )
@@ -257,7 +263,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
         bucketDatasets={bucketDatasets}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
         isLoading={true}
-        dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+        dacs={dacs}
       />,
     )
 
@@ -273,11 +279,29 @@ describe('DatasetsRequestedPanel - Tests', function () {
           dacDatasetIds={[1]}
           isLoading={false}
           adminPage={true}
-          dacs={[{ dacId: 1, dacName: 'DAC 1' }]}
+          dacs={dacs}
         />
       </BrowserRouter>,
     )
     cy.get('[data-cy=dataset-list]').find('tr').should('have.length', 6)
     cy.get('[data-cy=collapse-expand-link]').contains('View 2 more')
+  })
+
+  it('shows all DACs in bucket', function () {
+    mount(
+      <BrowserRouter>
+        <DatasetsRequestedPanel
+          bucketDatasets={bucketDatasets}
+          dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
+          isLoading={false}
+          dacs={dacs}
+        />
+      </BrowserRouter>,
+    )
+    cy.get('[data-cy=dataset-list]').should('exist')
+    cy.get('[data-cy=collapse-expand-link]').click()
+    dacs.forEach((dac) => {
+      cy.get('[data-cy=dataset-list]').should('contain.text', dac.dacName)
+    })
   })
 })
