@@ -300,8 +300,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
     )
     cy.get('[data-cy=dataset-list]').should('exist')
     cy.get('[data-cy=collapse-expand-link]').click()
-    dacs.forEach((dac) => {
+    for (const dac of dacs) {
       cy.get('[data-cy=dataset-list]').should('contain.text', dac.dacName)
-    })
+    }
   })
 })
