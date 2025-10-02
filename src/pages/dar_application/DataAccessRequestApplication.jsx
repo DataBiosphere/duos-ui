@@ -803,7 +803,6 @@ export default DataAccessRequestApplication
 DataAccessRequestApplication.propTypes = {
   match: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
   draftDar: PropTypes.bool.isRequired,
   isProgressReportApplication: PropTypes.bool.isRequired,
   existingDarsReadOnlyMode: PropTypes.bool,
