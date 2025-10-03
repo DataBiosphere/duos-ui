@@ -316,7 +316,7 @@ const DuosHeader = (props) => {
             alt="DUOS Logo"
             onClick={() => goToLink('/home')}
           />
-          <IconButton id="collapsed-navigation-icon-button" size="small" onClick={() => toggleDrawer(true)}>
+          <IconButton id="collapsed-navigation-icon-button" size="small" onClick={() => toggleDrawer(true)} aria-label="Open navigation menu">
             <MenuIcon id="navbar-menu-icon" style={{ color: 'white', fontSize: '6rem', flex: 1 }} anchor="right" />
           </IconButton>
           <Drawer

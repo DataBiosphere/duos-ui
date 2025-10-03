@@ -235,6 +235,7 @@ export const DatasetSearchTable = (props) => {
               data-cy="search-bar"
               type="text"
               placeholder="Enter search terms"
+              aria-label="Search datasets"
               style={{
                 width: '100%',
                 border: '1px solid #cecece',

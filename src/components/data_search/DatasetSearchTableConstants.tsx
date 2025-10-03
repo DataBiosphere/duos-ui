@@ -255,7 +255,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
         data-for={`${accessType}-access-tooltip`}
         style={{ display: 'flex', justifyContent: 'center', marginRight: 20 }}
       >
-        <span title={tooltipText}><img src={src as string} alt={accessType} /></span>
+        <span title={tooltipText}><img src={src as string} alt="" role="presentation" /></span>
       </div>
     )
   }

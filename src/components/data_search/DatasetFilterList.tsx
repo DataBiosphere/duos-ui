@@ -70,8 +70,10 @@ interface FilterItemRangeProps {
 }
 
 export const FilterItemRange = (props: FilterItemRangeProps) => {
-  const { allowableMin, allowableMax, min, max, minCategory, maxCategory, filterHandler } = props
-  const inputProps = { max: allowableMax, min: allowableMin }
+  const { allowableMin, allowableMax, min, max, minCategory, maxCategory, minInputProps, maxInputProps, filterHandler } = props
+  const baseInputProps = { max: allowableMax, min: allowableMin }
+  const minInputPropsComplete = { ...baseInputProps, ...minInputProps }
+  const maxInputPropsComplete = { ...baseInputProps, ...maxInputProps }
   return (
     <Box key={minCategory + '-' + maxCategory} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <TextField
@@ -83,7 +85,7 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         variant="outlined"
         helperText="minimum"
         FormHelperTextProps={{ style: { transform: 'scale(1.5)' } }}
-        inputProps={inputProps}
+        inputProps={minInputPropsComplete}
         onChange={event => filterHandler(minCategory, Number(event.target.value))}
       />
       <Box padding="0rem 1rem 1rem"> - </Box>
@@ -96,7 +98,7 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         variant="outlined"
         helperText="maximum"
         FormHelperTextProps={{ style: { transform: 'scale(1.5)' } }}
-        inputProps={inputProps}
+        inputProps={maxInputPropsComplete}
         onChange={event => filterHandler(maxCategory, Number(event.target.value))}
       />
     </Box>
@@ -140,7 +142,7 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
           const accessManagementSummary = getAccessManagementSummary(filter)
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <img src={accessManagementSummary.icon} alt={accessManagementSummary.name} style={{ width: '10px', marginRight: 6 }} />
+              <img src={accessManagementSummary.icon} alt="" role="presentation" style={{ width: '10px', marginRight: 6 }} />
               {accessManagementSummary.name}
             </div>
           )
