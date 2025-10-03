@@ -1,4 +1,4 @@
-import { filter, flatMap, flow, forEach, includes, isEmpty, map, uniq, values } from 'lodash/fp'
+import { filter, flatMap, flow, includes, isEmpty, map, uniq, values } from 'lodash/fp'
 import { isNil } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet.js'
@@ -60,7 +60,9 @@ interface VoteGroup {
 export const binCollectionToBuckets = async (collection: DarCollection, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
   // Find the most recent DAR
-  const recentDar: DataAccessRequest = collection.dars !== undefined ? Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) ?? {} as DataAccessRequest : {} as DataAccessRequest
+  const recentDar: DataAccessRequest = collection.dars === undefined
+    ? {} as DataAccessRequest
+    : Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) || {} as DataAccessRequest
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
   const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
@@ -69,29 +71,37 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
   // Find the DatasetTerms which have preprocessed DataUse objects.
   const terms = await getDatasetTerms(datasets)
   // Terms don't come with type-specification so we need to modify that manually
-  terms?.forEach((term) => {
-    term.dataUse?.primary?.forEach((dut: DataUseTerm) => {
-      // Set the type for primary data use terms to permissions
-      dut.type = ControlledAccessType.permissions
-    })
-    term.dataUse?.secondary?.forEach((dut: DataUseTerm) => {
-      // Set the type for secondary data use terms to permissions
-      dut.type = ControlledAccessType.modifiers
-    })
-  })
+  if (terms) {
+    for (const term of terms) {
+      if (term.dataUse?.primary) {
+        for (const dut of term.dataUse.primary) {
+          dut.type = ControlledAccessType.permissions
+        }
+      }
+      if (term.dataUse?.secondary) {
+        for (const dut of term.dataUse.secondary) {
+          dut.type = ControlledAccessType.modifiers
+        }
+      }
+    }
+  }
   // Create a map of DataUse to a list of datasets. This will serve as the basis for bucketing datasets by DataUse.
   // Note that we need to use a string value of the DataUse object to ensure that we can use it as a key in a Map.
   const datasetTermMap: Map<string, Dataset[]> = new Map<string, Dataset[]>()
-  terms?.forEach((term: DatasetTerm) => {
-    const stringValue = JSON.stringify(term.dataUse)
-    if (datasetTermMap.has(stringValue)) {
-      datasetTermMap.get(stringValue)?.push(datasets.filter((dataset: Dataset) => dataset.datasetId === term.datasetId)[0])
+  if (terms) {
+    for (const term of terms) {
+      const stringValue = JSON.stringify(term.dataUse)
+      const matchingDataset = datasets.find((dataset: Dataset) => dataset.datasetId === term.datasetId)
+      if (matchingDataset) {
+        if (datasetTermMap.has(stringValue)) {
+          datasetTermMap.get(stringValue)!.push(matchingDataset)
+        }
+        else {
+          datasetTermMap.set(stringValue, [matchingDataset])
+        }
+      }
     }
-    else {
-      datasetTermMap.set(stringValue, [datasets.filter((dataset: Dataset) => dataset.datasetId === term.datasetId)[0]])
-    }
-  })
-
+  }
   // Iterate through the datasetTermMap to create buckets
   const iterator = datasetTermMap.keys()
   for (const key of iterator) {
@@ -102,6 +112,8 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
     const dacs: DacTerm[] = terms
       .filter((term: DatasetTerm) => dacIds.includes(term.dacId))
       .map((term: DatasetTerm) => term.dac)
+      .filter((dac: DacTerm | undefined) => !isNil(dac))
+      .filter((dac: DacTerm, index: number, self: DacTerm[]) => self.findIndex((d: DacTerm) => d.dacId === dac.dacId) === index)
 
     const bucket: Bucket = {
       key: '',
@@ -120,15 +132,15 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
 
   // The following steps are all bucket-centric, so we can process them in a single loop
   // Steps 2-6
-  buckets.forEach((b: Bucket) => {
+  for (const b of buckets) {
     // Step 2: Find match results for each dataset in bucket
-    matchData.forEach((m: MatchResult) => {
-      b.datasets.forEach((dataset: Dataset) => {
+    for (const m of matchData) {
+      for (const dataset of b.datasets) {
         if (dataset.datasetIdentifier.toLowerCase() === m.consent.toLowerCase()) {
           b.matchResults.push(m)
         }
-      })
-    })
+      }
+    }
 
     // Step 3: Populate elections for datasets in this bucket
     b.elections = findElectionsForDatasets(recentDar, b.datasetIds)
@@ -142,7 +154,7 @@ export const binCollectionToBuckets = async (collection: DarCollection, dacIds: 
 
     // Step 6: Coalesce match results into a single result per bucket
     b.algorithmResult = calculateAlgorithmResultForBucket(b)
-  })
+  }
 
   // Step 7: Populate RUS Vote bucket with RP votes and move to the top of the bucket array
   const rpVotes = createRpVoteStructureFromBuckets(buckets)
@@ -274,9 +286,10 @@ const isOther = (dataUse?: DataUseSummary): boolean => {
  */
 export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
   const codeList: string[] = Object.keys(AbstainDataUseCodes)
-  return isOther(dataUse) || dataUse?.secondary?.some((dut: DataUseTerm) => {
-    return codeList.some((code: string) => code === dut.code)
-  }) || false
+  return isOther(dataUse)
+    || (dataUse?.secondary
+      ? dataUse.secondary.map((dut: DataUseTerm) => dut.code).some(code => codeList.includes(code))
+      : false)
 }
 
 /**
@@ -294,17 +307,16 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
     map((hash: Record<string, Vote>) => values(hash)),
   )(buckets)
 
-  forEach((vArray: Vote[]) => {
+  for (const vArray of rpElectionVoteArrays) {
     const rpVoteGroup: VoteGroup = {
       chairpersonVotes: [],
       memberVotes: [],
       finalVotes: [],
     }
-    forEach((v: Vote) => {
+    for (const v of vArray) {
       const lowerCaseType = v.type.toLowerCase()
       switch (lowerCaseType) {
         case 'chairperson':
-          // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' elections
           rpVoteGroup.chairpersonVotes.push(v)
           rpVoteGroup.finalVotes.push(v)
           break
@@ -314,9 +326,9 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
         default:
           break
       }
-    })(vArray)
+    }
     rpVotes.push({ rp: rpVoteGroup })
-  })(rpElectionVoteArrays)
+  }
   return rpVotes
 }
 
