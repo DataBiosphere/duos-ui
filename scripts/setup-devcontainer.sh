@@ -17,6 +17,12 @@ install_gcloud_cli() {
   sudo apt install -y google-cloud-cli
 }
 
+install_node_with_nvm() {
+  NODE_VERSION=$(awk 'NR==2 {gsub(/node:|-.*/,"", $2); print $2}' Dockerfile)
+  . "${NVM_DIR}/nvm.sh"
+  nvm install "$NODE_VERSION"
+}
+
 install_duos_cypress() {
   npm install
   npx cypress install
@@ -41,6 +47,7 @@ dev_container() {
   cypress_requirements
   gcloud_cli_requirements
   install_gcloud_cli
+  install_node_with_nvm
   install_duos_cypress
   install_duos_config
 }

@@ -70,7 +70,7 @@ gcloud auth application-default login
 gcloud auth configure-docker
 
 # install the appropriate version of nodejs and its dependencies
-NODE_VERSION=$(curl -L https://raw.githubusercontent.com/DataBiosphere/duos-ui/develop/Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}')
+NODE_VERSION=$(curl -L https://raw.githubusercontent.com/DataBiosphere/duos-ui/develop/Dockerfile | awk 'NR==2 {gsub(/node:|-.*/,"", $2); print "node@" $2}')
 volta setup && volta install ${NODE_VERSION}
 ```
 
