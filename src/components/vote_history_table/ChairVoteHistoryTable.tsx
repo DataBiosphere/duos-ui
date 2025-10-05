@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { VoteHistoryRow } from 'src/types/model'
 import { Styles } from 'src/libs/theme'
@@ -72,7 +72,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     return '--'
   }
 
-  const processVoteHistoryRowData = (voteHistory: VoteHistoryRow[]) => {
+  const processVoteHistoryRowData = useCallback((voteHistory: VoteHistoryRow[]) => {
     if (!voteHistory) return []
 
     const rowData = voteHistory.map((row: VoteHistoryRow, i) => [
@@ -86,14 +86,14 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
       { data: row.rationale || '--', cellStyle: { width: '20%' }, label: 'Rationale', id: i },
     ])
     return rowData
-  }
+  }, [])
 
   useEffect(() => {
     setSortedVotes(sortVisibleTable({
       list: processVoteHistoryRowData(voteHistory),
       sort,
     }))
-  }, [sort, voteHistory])
+  }, [sort, voteHistory, processVoteHistoryRowData])
 
   return (
     <SimpleTable
