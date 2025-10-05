@@ -74,7 +74,7 @@ const getSortForTab = (tabKey: string): Sort => {
 interface DatasetSearchTableDisplayProps {
   onSelect: (newSelectedIds: number[]) => void
   filteredData: DatasetTerm[]
-  allData: DatasetTerm[]  // Added: all datasets for cell calculation
+  allData: DatasetTerm[] // Added: all datasets for cell calculation
   selected: number[]
   exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }
   tab: DatasetSearchTableTab<DatasetTerm | DatasetTerm[]>
@@ -140,11 +140,11 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
 
   // Filter and sort only the row data we need
   const rowData = React.useMemo(() => {
-    const filteredRowData = filteredData.map(dataset => {
+    const filteredRowData = filteredData.map((dataset) => {
       const key = dataset.datasetId || dataset.study?.studyId
       return rowDataMap.get(key)
     }).filter(Boolean)
-    
+
     return sortData(filteredRowData, sort)
   }, [filteredData, rowDataMap, sort, sortData])
 
