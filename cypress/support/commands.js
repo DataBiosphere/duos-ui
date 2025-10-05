@@ -47,27 +47,27 @@ Cypress.Commands.add('checkAccessibility', { prevSubject: 'element' }, (subject)
     const id = $el.attr('id')
     const ariaLabel = $el.attr('aria-label')
     const ariaLabelledby = $el.attr('aria-labelledby')
-    
+
     // Check for form elements
     if (['input', 'textarea', 'select'].includes(tagName)) {
       const hasLabel = Cypress.$(`label[for="${id}"]`).length > 0
       const hasAccessibleName = ariaLabel || ariaLabelledby || hasLabel
-      
+
       if (!hasAccessibleName) {
         throw new Error(`Form element ${tagName}${id ? '#' + id : ''} lacks accessible name`)
       }
     }
-    
+
     // Check for buttons
     if (tagName === 'button' || $el.attr('role') === 'button') {
       const textContent = $el.text().trim()
       const hasIcon = $el.find('svg, img').length > 0
-      
+
       if (hasIcon && !textContent && !ariaLabel) {
         throw new Error(`Icon button lacks accessible name`)
       }
     }
-    
+
     // Check for images
     if (tagName === 'img') {
       const alt = $el.attr('alt')
@@ -75,7 +75,7 @@ Cypress.Commands.add('checkAccessibility', { prevSubject: 'element' }, (subject)
         throw new Error(`Image lacks alt attribute`)
       }
     }
-    
+
     return cy.wrap(subject)
   })
 })

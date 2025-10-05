@@ -74,12 +74,17 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
   const baseInputProps = { max: allowableMax, min: allowableMin }
   const minInputPropsComplete = { ...baseInputProps, ...minInputProps }
   const maxInputPropsComplete = { ...baseInputProps, ...maxInputProps }
+
+  // Use custom ID if provided in inputProps, otherwise use default pattern
+  const minId = minInputProps?.id || (minCategory + '-range-input')
+  const maxId = maxInputProps?.id || (maxCategory + '-range-input')
+
   return (
     <Box key={minCategory + '-' + maxCategory} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <TextField
         type="number"
         value={min}
-        id={minCategory + '-range-input'}
+        id={minId}
         size="small"
         margin="dense"
         variant="outlined"
@@ -92,7 +97,7 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
       <TextField
         type="number"
         value={max}
-        id={maxCategory + '-range-input'}
+        id={maxId}
         size="small"
         margin="dense"
         variant="outlined"
@@ -189,8 +194,8 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
         max={filters.participantCountMax}
         minCategory="participantCountMin"
         maxCategory="participantCountMax"
-        minInputProps={{ 'id': 'participantCountMin', 'aria-label': 'Minimum participants' }}
-        maxInputProps={{ 'id': 'participantCountMax', 'aria-label': 'Maximum participants' }}
+        minInputProps={{ 'aria-label': 'Minimum participants' }}
+        maxInputProps={{ 'aria-label': 'Maximum participants' }}
         filterHandler={filterHandler}
       />
     </Box>

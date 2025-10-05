@@ -14,6 +14,7 @@ describe('Accessibility Tests', function () {
       cy.get('input[placeholder*="Search"]').should('have.attr', 'aria-label')
       cy.get('input[placeholder*="Search"]').then(($input) => {
         const ariaLabel = $input.attr('aria-label')
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         expect(ariaLabel).to.not.be.empty
         expect(ariaLabel).to.include('search')
       })
@@ -49,20 +50,23 @@ describe('Accessibility Tests', function () {
     it('has accessible images with proper alt text', function () {
       cy.get('img').each(($img) => {
         cy.wrap($img).should('have.attr', 'alt')
-        
+
         const altText = $img.attr('alt')
         const role = $img.attr('role')
         const src = $img.attr('src')
-        
+
         // Check for decorative images
         if (altText === '' || role === 'presentation') {
           // This is acceptable for decorative images
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           expect(altText === '' || role === 'presentation').to.be.true
-        } else {
+        }
+        else {
           // Informative images should have meaningful alt text
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           expect(altText).to.not.be.empty
           expect(altText).to.not.match(/^(image|img|picture|photo|dataset icon)$/i)
-          
+
           // GA4GH logo should have proper alt text
           if (src && src.includes('ga4gh')) {
             expect(altText).to.include('GA4GH')
@@ -99,43 +103,46 @@ describe('Accessibility Tests', function () {
     it('has accessible form elements with proper labels', function () {
       // Check that FormField components have title attributes that create labels
       cy.get('input[id*="profileName"], input[id*="name"]').should('exist').then(($inputs) => {
-        $inputs.each((index, input) => {
+        $inputs.each((_index, input) => {
           const $input = Cypress.$(input)
           const id = $input.attr('id')
-          
+
           // Check if there's a corresponding label or aria-label
           const hasLabel = Cypress.$(`label[for="${id}"]`).length > 0
           const hasAriaLabel = $input.attr('aria-label')
           const hasAriaLabelledby = $input.attr('aria-labelledby')
-          
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           expect(hasLabel || hasAriaLabel || hasAriaLabelledby).to.be.true
         })
       })
 
       // Check email field accessibility
       cy.get('input[type="email"], input[id*="email"]').should('exist').then(($inputs) => {
-        $inputs.each((index, input) => {
+        $inputs.each((_index, input) => {
           const $input = Cypress.$(input)
           const id = $input.attr('id')
-          
+
           const hasLabel = Cypress.$(`label[for="${id}"]`).length > 0
           const hasAriaLabel = $input.attr('aria-label')
           const hasAriaLabelledby = $input.attr('aria-labelledby')
-          
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           expect(hasLabel || hasAriaLabel || hasAriaLabelledby).to.be.true
         })
       })
 
       // Check institution field accessibility
       cy.get('input[id*="institution"], select[id*="institution"]').should('exist').then(($inputs) => {
-        $inputs.each((index, input) => {
+        $inputs.each((_index, input) => {
           const $input = Cypress.$(input)
           const id = $input.attr('id')
-          
+
           const hasLabel = Cypress.$(`label[for="${id}"]`).length > 0
           const hasAriaLabel = $input.attr('aria-label')
           const hasAriaLabelledby = $input.attr('aria-labelledby')
-          
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           expect(hasLabel || hasAriaLabel || hasAriaLabelledby).to.be.true
         })
       })
@@ -144,10 +151,10 @@ describe('Accessibility Tests', function () {
     it('has accessible form validation messages', function () {
       // Check that error messages are properly associated with form fields
       cy.get('.error-message, [role="alert"], .field-error').should('exist').then(($errors) => {
-        $errors.each((index, error) => {
+        $errors.each((_index, error) => {
           const $error = Cypress.$(error)
           const errorId = $error.attr('id')
-          
+
           if (errorId) {
             // Check if any input references this error via aria-describedby
             cy.get(`input[aria-describedby*="${errorId}"], select[aria-describedby*="${errorId}"]`)
@@ -160,7 +167,8 @@ describe('Accessibility Tests', function () {
       cy.get('input[required], select[required]').each(($input) => {
         const ariaRequired = $input.attr('aria-required')
         const required = $input.attr('required')
-        
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         expect(ariaRequired === 'true' || required !== undefined).to.be.true
       })
     })
@@ -168,11 +176,12 @@ describe('Accessibility Tests', function () {
     it('has accessible form submission and action buttons', function () {
       // Check submit buttons have accessible names
       cy.get('button[type="submit"], button').contains(/submit|save|update/i).should('exist').then(($buttons) => {
-        $buttons.each((index, button) => {
+        $buttons.each((_index, button) => {
           const $button = Cypress.$(button)
           const buttonText = $button.text().trim()
           const ariaLabel = $button.attr('aria-label')
-          
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           expect(buttonText || ariaLabel).to.be.ok
           expect(buttonText || ariaLabel).to.not.match(/^(button|click|submit)$/i)
         })
@@ -180,11 +189,12 @@ describe('Accessibility Tests', function () {
 
       // Check cancel/reset buttons are accessible
       cy.get('button').contains(/cancel|reset|clear/i).should('exist').then(($buttons) => {
-        $buttons.each((index, button) => {
+        $buttons.each((_index, button) => {
           const $button = Cypress.$(button)
           const buttonText = $button.text().trim()
           const ariaLabel = $button.attr('aria-label')
-          
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           expect(buttonText || ariaLabel).to.be.ok
         })
       })
@@ -195,7 +205,7 @@ describe('Accessibility Tests', function () {
     const pagesToTest = [
       { name: 'Home', url: '/' },
       { name: 'Data Library', url: '/data_library' },
-      { name: 'About', url: '/about' }
+      { name: 'About', url: '/about' },
     ]
 
     pagesToTest.forEach((page) => {
@@ -227,16 +237,18 @@ describe('Accessibility Tests', function () {
           const id = $input.attr('id')
           const ariaLabel = $input.attr('aria-label')
           const ariaLabelledby = $input.attr('aria-labelledby')
-          const placeholder = $input.attr('placeholder')
-          
+
           if (id) {
             const hasLabel = Cypress.$(`label[for="${id}"]`).length > 0
             const hasAccessibleName = hasLabel || ariaLabel || ariaLabelledby
-            
+
             // Placeholder alone is not sufficient for accessibility
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             expect(hasAccessibleName).to.be.true
-          } else {
+          }
+          else {
             // Without an ID, the element must have aria-label or aria-labelledby
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             expect(ariaLabel || ariaLabelledby).to.be.ok
           }
         })
