@@ -33,6 +33,7 @@ import { Countries } from 'src/libs/ajax/Countries.js'
 import PropTypes from 'prop-types'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview.js'
+import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils.js'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -550,20 +551,41 @@ const DataAccessRequestApplication = (props) => {
       ? Object.values(dar.elections).find(e => e.electionType === 'DataAccess')
       : undefined
 
+    // Find the Final vote for decision and rationale
+    let finalVoteDecision = 'Pending'
+    let finalVoteRationale = 'No rationale provided.'
+    let finalVoteDate = election?.createDate
+    if (election?.votes) {
+      const votesArr = Array.isArray(election.votes)
+        ? election.votes
+        : Object.values(election.votes)
+      const finalVote = votesArr.find(v => v.type === VOTE_TYPES.FINAL)
+      if (finalVote) {
+        finalVoteDate = finalVote.createDate
+        finalVoteDecision = finalVote.vote === true ? 'Approved' : finalVote.vote === false ? 'Denied' : 'Pending'
+        finalVoteRationale = finalVote.rationale || 'No rationale provided.'
+      }
+    }
+
     return {
-      datasetName: datasets.find(d => d.datasetId === election?.datasetId)?.name || '1000Genomes',
-      voteDate: new Date(election?.createDate).toLocaleDateString(),
+      datasetName: datasets.find(d => d.datasetId === election?.datasetId)?.name || 'Unknown Dataset',
+      voteDate: new Date(finalVoteDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
       requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
-      linkedDarId: election?.referenceId,
+      linkedDarId: dar?.collectionId,
       voteResult: {
-        decision: election?.finalVote || 'Pending',
-        rationale: election?.rationale || 'No rationale provided.',
+        decision: finalVoteDecision,
+        rationale: finalVoteRationale,
       },
       status: election?.status || 'Completed',
     }
   })
 
-  console.log(datasets)
+  const dar = {
+    referenceId: formData?.darCode || '',
+    piName: formData?.piName || '',
+    institution: formData?.institution || '',
+    status: votes.some(vote => vote.status === ElectionStatus.OPEN) ? ElectionStatus.OPEN : ElectionStatus.CLOSED,
+  }
 
   const back = () => {
     history.goBack()
@@ -816,7 +838,7 @@ const DataAccessRequestApplication = (props) => {
               {!isEmpty(votes)
                 && (
                   <div id={VOTING_HISTORY_TAB_ID} className={existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
-                    <VotingHistoryOverview votes={votes} />
+                    <VotingHistoryOverview dar={dar} votes={votes} />
                   </div>
                 )}
             </div>
