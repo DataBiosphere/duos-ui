@@ -50,7 +50,7 @@ export const AdvancedFormDatasetInformation = (props: AdvancedFormDatasetInforma
         className="button-complex-outlined-secondary"
         style={{ marginBottom: '10px' }}
         onClick={addDataset}
-      >Add another dataset
+      >Add {step2?.datasets && step2?.datasets.length > 0 ? 'another' : 'a' } dataset
         <span
           className="button-icon button-icon-circle-plus-outline"
           style={{ marginLeft: '8px' }}
