@@ -21,11 +21,11 @@ export const AdvancedFormDatasetInformation = (props: AdvancedFormDatasetInforma
 
   const addDataset = useCallback(() => {
     if (step2?.datasets === undefined) {
-      onChange({ key: 'step2.datasets', value: [{}] })
+      onChange({ key: 'step2.datasets', value: [{ id: globalThis.crypto.randomUUID() }] })
     }
     else {
       const datasets = step2.datasets
-      datasets.push({} as DatasetDetails)
+      datasets.push({ id: globalThis.crypto.randomUUID() } as DatasetDetails)
       onChange({ key: 'step2.datasets', value: datasets })
     }
   }, [step2?.datasets, onChange])
@@ -45,7 +45,7 @@ export const AdvancedFormDatasetInformation = (props: AdvancedFormDatasetInforma
     <>
       <h4>Register Datasets</h4>
       <div>Create different consent groups or versions of datasets which you would like to store, share, and grant access to distinctly</div>
-      {step2?.datasets?.map((dataset: DatasetDetails, index: number) => { return <AdvancedFormDatasetDetails key={index} idx={index} dataset={dataset} draftId={id} onChange={datasetOnChange} onDelete={deleteDataset} /> })}
+      {step2?.datasets?.map((dataset: DatasetDetails, index: number) => { return <AdvancedFormDatasetDetails key={dataset.id} idx={index} dataset={dataset} draftId={id} onChange={datasetOnChange} onDelete={deleteDataset} /> })}
       <button
         className="button-complex-outlined-secondary"
         style={{ marginBottom: '10px' }}

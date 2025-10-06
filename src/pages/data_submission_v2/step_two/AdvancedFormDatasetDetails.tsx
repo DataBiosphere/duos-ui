@@ -31,6 +31,7 @@ export interface DatasetDetailsProps {
 }
 
 export interface DatasetDetails {
+  id: string
   dataDictionary: FileStorageObject
   dataUseDocumentation: FileStorageObject
   datasetName: string

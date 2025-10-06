@@ -93,7 +93,7 @@ export const AdvancedFormCommonStudyInformation = (props: AdvancedFormCommonStud
           type={FormFieldTypes.SELECT}
           selectOptions={studyTypeChoices}
           isCreatable={true}
-          defaultValue={step2?.studyInfo?.studyType ? step2?.studyInfo?.studyType : null}
+          defaultValue={step2?.studyInfo?.studyType ?? step2?.studyInfo?.studyType}
           onChange={onChange}
         />
         <FormField
