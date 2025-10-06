@@ -474,4 +474,10 @@ export const Styles = {
     fontSize: '15px',
     textAlign: 'center',
   },
+  REPEATING_SECTION: {
+    border: '1px solid #00000033',
+    borderRadius: '10px',
+    margin: '3%',
+    padding: '20px',
+  },
 }
