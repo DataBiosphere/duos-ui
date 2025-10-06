@@ -371,7 +371,7 @@ export const AdvancedFormCommonStudyInformation = (props: AdvancedFormCommonStud
             <FormField
               id="step2.studyInfo.isRequestingAlternateDataSharingPlan"
               title="NIH Data Management & Sharing Policy Details"
-              description={<div>Are you requesting an Alternative Data Sharing Plan (<a target="_blank" rel="noreferrer" href="http://www.google.com">info</a>) for samples that cannot be shared through a public repository or database?</div>}
+              description={<div>Are you requesting an Alternative Data Sharing Plan (<a target="_blank" rel="noreferrer" href="https://www.google.com">info</a>) for samples that cannot be shared through a public repository or database?</div>}
               type={FormFieldTypes.YESNORADIOGROUP}
               orientation="vertical"
               defaultValue={step2?.studyInfo?.isRequestingAlternateDataSharingPlan}
