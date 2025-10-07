@@ -17,6 +17,16 @@ install_gcloud_cli() {
   sudo apt install -y google-cloud-cli
 }
 
+install_node_with_volta() {
+  VOLTA_SHA256="fbdc4b8cb33fb6d19e5f07b22423265943d34e7e5c3d5a1efcecc9621854f9cb"
+  curl -O https://raw.githubusercontent.com/volta-cli/volta/v2.0.2/dev/unix/volta-install.sh
+  echo "${VOLTA_SHA256}  volta-install.sh" | sha256sum -c -
+  chmod +x volta-install.sh && ./volta-install.sh && rm volta-install.sh
+  export PATH="$HOME/.volta/bin:$PATH"
+  NODE_VERSION=$(awk 'NR==2 {gsub(/node:|-.*/,"", $2); print "node@" $2}' Dockerfile)
+  volta install "${NODE_VERSION}" pnpm
+}
+
 install_duos_cypress() {
   npm install
   npx cypress install
@@ -41,6 +51,7 @@ dev_container() {
   cypress_requirements
   gcloud_cli_requirements
   install_gcloud_cli
+  install_node_with_volta
   install_duos_cypress
   install_duos_config
 }
