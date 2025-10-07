@@ -86,7 +86,7 @@ export const InstitutionSelector = (props: InstitutionSelectorProps) => {
       onChange={({ key, value }: { key: string, value: { id: number } | undefined }) => {
         onChange({ key: key, value: value?.id })
       }}
-      defaultValue={!isNil(field) ? findInstitutionSelectOption(field) : null}
+      defaultValue={isNil(field) ? null : findInstitutionSelectOption(field)}
     />
   )
 }
