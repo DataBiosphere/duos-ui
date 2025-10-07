@@ -1,10 +1,7 @@
-/* src/pages/dar_application/VotingHistoryOverview.css */
 .voting-history-container {
-    background: #fff;
+    background: #eeeeee;
+    padding: 32px;
     border-radius: 8px;
-    padding: 2em;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-bottom: 2em;
 }
 
 .voting-history-title,
