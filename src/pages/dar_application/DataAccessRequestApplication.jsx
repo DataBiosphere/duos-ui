@@ -635,7 +635,7 @@ const DataAccessRequestApplication = (props) => {
 
         <div style={{ clear: 'both' }} />
         <form name="form" noValidate={true} className="forms-v2">
-          <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab} />
+          <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab} onTabChange={setTab} />
 
           <div id="form-views">
             <ConfirmationDialog

@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
+import SimpleTable from 'src/components/SimpleTable'
 import './VotingHistoryOverview.css'
 
 type Dar = {
@@ -28,9 +29,85 @@ type VotingHistoryOverviewProps = {
 }
 
 const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, votes }) => {
-  const [showFullRationale, setShowFullRationale] = useState<boolean>(false)
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
 
-  const handleRationaleClick = () => setShowFullRationale(!showFullRationale)
+  const handleRationaleClick = (idx: number) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev)
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      next.has(idx) ? next.delete(idx) : next.add(idx)
+      return next
+    })
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const headerStyle = {
+    fontWeight: 600,
+    fontSize: '1.1rem',
+    background: '#f5f7fa',
+    color: '#2a3b4d',
+    padding: '8px 0',
+    whiteSpace: 'normal',
+    wordBreak: 'break-word',
+    overflowWrap: 'anywhere',
+  }
+
+  const cellWrapStyle = {
+    whiteSpace: 'normal',
+    wordBreak: 'break-word',
+    overflowWrap: 'anywhere',
+  }
+
+  const styles = {
+    baseStyle: { display: 'flex', alignItems: 'center', minHeight: 40, ...cellWrapStyle },
+    columnStyle: { display: 'flex', background: '#f5f7fa', ...cellWrapStyle },
+    containerOverride: { width: '100%', overflowX: 'visible' },
+  }
+
+  const columnHeaders = useMemo(() => [
+    { label: 'Dataset Name', cellStyle: { ...headerStyle, width: 200 } },
+    { label: 'Vote Date', cellStyle: { ...headerStyle, width: 180 } },
+    { label: 'Request Type', cellStyle: { ...headerStyle, width: 160 } },
+    { label: 'Linked DAR ID', cellStyle: { ...headerStyle, width: 140 } },
+    { label: 'Vote Result', cellStyle: { ...headerStyle, width: 400 } },
+    { label: 'Status', cellStyle: { ...headerStyle, width: 180 } },
+  ], [headerStyle])
+
+  const rowData = votes.map((vote, idx) => [
+    { data: vote.datasetName },
+    { data: vote.voteDate },
+    { data: vote.requestType },
+    {
+      data: (
+        <a href={`/dar_application_review/${vote.linkedDarId}`} target="_blank" rel="noopener noreferrer">
+          {dar.referenceId}
+        </a>
+      ),
+    },
+    {
+      data: (
+        <div>
+          <strong>Decision:</strong> {vote.voteResult.decision}
+          <br />
+          <strong>Rationale:</strong>{' '}
+          {expandedRows.has(idx)
+            ? vote.voteResult.rationale
+            : `${vote.voteResult.rationale.substring(0, 80)}... `}
+          <button
+            type="button"
+            className="btn-link rationale-btn"
+            onClick={(e) => {
+              e.preventDefault()
+              handleRationaleClick(idx)
+            }}
+          >
+            {expandedRows.has(idx) ? 'Hide Rationale' : 'View Rationale'}
+          </button>
+        </div>
+      ),
+    },
+    { data: vote.status },
+  ])
 
   return (
     <div className="voting-history-container">
@@ -48,76 +125,14 @@ const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, vote
         </div>
       </div>
       <h4 className="voting-history-subtitle">DAR and Progress Report Voting History</h4>
-      <table className="voting-history-table">
-        <thead>
-          <tr>
-            <th scope="col">
-              Dataset Name
-              <br />
-              <small className="header-subtext">Name of the dataset voted on</small>
-            </th>
-            <th scope="col">
-              Vote Date
-              <br />
-              <small className="header-subtext">Date the vote occurred</small>
-            </th>
-            <th scope="col">
-              Request Type
-              <br />
-              <small className="header-subtext">Type of data access request</small>
-            </th>
-            <th scope="col">
-              Linked DAR ID
-              <br />
-              <small className="header-subtext">Reference to related DAR</small>
-            </th>
-            <th scope="col">
-              Vote Result
-              <br />
-              <small className="header-subtext">Decision and rationale</small>
-            </th>
-            <th scope="col">
-              Status
-              <br />
-              <small className="header-subtext">Current vote status</small>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {votes.map((vote, idx) => (
-            <tr key={'id_' + idx}>
-              <td>{vote.datasetName}</td>
-              <td>{vote.voteDate}</td>
-              <td>{vote.requestType}</td>
-              <td>
-                <a href={`/dar_application_review/${vote.linkedDarId}`} target="_blank" rel="noopener noreferrer">
-                  {dar.referenceId}
-                </a>
-              </td>
-              <td>
-                <div>
-                  <strong>Decision:</strong> {vote.voteResult.decision}<br />
-                  <strong>Rationale:</strong>{' '}
-                  {showFullRationale
-                    ? vote.voteResult.rationale
-                    : `${vote.voteResult.rationale.substring(0, 80)}... `}
-                  <button
-                    type="button"
-                    className="btn-link rationale-btn"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      handleRationaleClick()
-                    }}
-                  >
-                    {showFullRationale ? 'Hide Rationale' : 'View Rationale'}
-                  </button>
-                </div>
-              </td>
-              <td>{vote.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <SimpleTable
+        className="voting-history-table"
+        rowData={rowData}
+        columnHeaders={columnHeaders}
+        styles={styles}
+        tableSize={rowData.length}
+        isLoading={false}
+      />
     </div>
   )
 }

@@ -67,6 +67,6 @@ describe('VotingHistoryOverview', () => {
   })
 
   it('renders all vote statuses', () => {
-    cy.get('td').contains('Closed')
+    cy.get('div[role="cell"]').filter(':contains("Closed")').should('have.length', 2)
   })
 })
