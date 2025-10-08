@@ -139,7 +139,7 @@ const Home = (props) => {
             <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
               <h1 style={header}>How does DUOS expedite compliant data sharing?</h1>
               <h3 style={subHeader}>
-                Researchers use DUOS to share and request access to data, and data access committees 
+                Researchers use DUOS to share and request access to data, and data access committees
                 {' '}
                 <br />
                 {' '}
