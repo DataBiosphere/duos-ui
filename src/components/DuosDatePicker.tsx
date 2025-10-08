@@ -7,6 +7,7 @@ import {
   PickersDay,
   PickersDayProps,
   DateValidationError,
+  usePickerContext,
 } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Button } from '@mui/material'
@@ -28,7 +29,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
 
   // Convert defaultValue to Dayjs object if it's a string, or use it directly if it's already Dayjs
   const defaultValueAsDayjs = useMemo(() => {
-    if (!defaultValue) return null
+    if (!defaultValue) return dayjs()
     if (typeof defaultValue === 'string') {
       const parsed = dayjs(defaultValue, inputFormat)
       return parsed.isValid() ? parsed : null
@@ -165,21 +166,21 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   const CancelSelectActionBar = (props: PickersActionBarProps) => {
     // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
     // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const { onAccept, onCancel, onSetToday, onClear, actions, ...other } = props
+    const { actions, ...other } = props
+    const { acceptValueChanges,
+      cancelValueChanges } = usePickerContext()
     const buttons = actions?.map((actionType: React.Key | null | undefined) => {
       switch (actionType) {
         case 'cancel':
           return (
-            <Button color="secondary" variant="contained" onClick={onCancel} key={actionType}>
+            <Button color="secondary" variant="contained" onClick={cancelValueChanges} key={actionType}>
               Cancel
             </Button>
           )
 
         case 'accept':
           return (
-            <Button color="primary" variant="contained" onClick={onAccept} key={actionType}>
+            <Button color="primary" variant="contained" onClick={acceptValueChanges} key={actionType}>
               Select
             </Button>
           )
@@ -190,9 +191,8 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
     })
     return <DialogActions {...other}>{buttons}</DialogActions>
   }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const WeekendFormattedDay = (props: PickersDayProps<Dayjs>) => {
+
+  const WeekendFormattedDay = (props: PickersDayProps) => {
     const isWeekendDay = props.day.day() === 0 || props.day.day() === 6
     const weekendStyle = isWeekendDay
       ? { color: 'var(--weekend)' }
@@ -208,11 +208,13 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             closeOnSelect={false}
             label="Select a date"
             format={inputFormat}
-            defaultValue={defaultValueAsDayjs}
+            value={defaultValueAsDayjs}
             onChange={(value) => {
+              console.error('onChange', value)
               onChange(value?.format(inputFormat))
             }}
             onAccept={(value) => {
+              console.error('onAccept', value)
               onChange(value?.format(inputFormat))
             }}
             onError={value => onError && onError(value?.toString() === 'Invalid Date' ? 'Invalid Date' : '', value?.toString())}
