@@ -210,11 +210,9 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             format={inputFormat}
             value={defaultValueAsDayjs}
             onChange={(value) => {
-              console.error('onChange', value)
               onChange(value?.format(inputFormat))
             }}
             onAccept={(value) => {
-              console.error('onAccept', value)
               onChange(value?.format(inputFormat))
             }}
             onError={value => onError && onError(value?.toString() === 'Invalid Date' ? 'Invalid Date' : '', value?.toString())}
