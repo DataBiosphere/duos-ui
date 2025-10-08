@@ -143,7 +143,7 @@ const Home = (props) => {
                 {' '}
                 <br />
                 {' '}
-                and institutional officials use DUOS review and approve research uses of the data.
+                and institutional officials use DUOS to review and approve research uses of the data.
               </h3>
               <div>
                 <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
