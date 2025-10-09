@@ -147,7 +147,7 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
           const accessManagementSummary = getAccessManagementSummary(filter)
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <img src={accessManagementSummary.icon} alt="" role="presentation" style={{ width: '10px', marginRight: 6 }} />
+              <img src={accessManagementSummary.icon} alt={accessManagementSummary.name} style={{ width: '10px', marginRight: 6 }} />
               {accessManagementSummary.name}
             </div>
           )
