@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import { findIndex } from 'lodash/fp'
@@ -12,70 +12,90 @@ type ApplicationTab = {
 type ScrollableTabsProps = {
   applicationTabs: ApplicationTab[]
   formSelectedTabId?: string
+  onTabChange?: (tabId: string) => void
 }
 
-export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: ScrollableTabsProps) => {
-  const [selectedStepNumber, setSelectedStepNumber] = useState<number>(1)
+export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange }: ScrollableTabsProps) => {
+  // Use positive check for clarity (suggested improvement)
+  const selectedStepNumber
+    = typeof formSelectedTabId === 'string'
+      ? findIndex(tab => tab.id === formSelectedTabId, applicationTabs) + 1
+      : 1
 
   const goToStep = useCallback((tabId: string) => {
-    window.scrollTo({
-      top: document.getElementById(tabId)?.offsetTop,
-      behavior: 'smooth',
-    })
+    const el = document.getElementById(tabId)
+    if (el) {
+      window.scrollTo({
+        top: el.offsetTop,
+        behavior: 'smooth',
+      })
+    }
   }, [])
+
+  // Track pending tab selection after click
+  const pendingTabId = useRef<string | null>(null)
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // CASE 1 - the form scrolls to a new tab based on validation errors
   useEffect(() => {
-    if (formSelectedTabId !== undefined) {
-      setSelectedStepNumber(findIndex(tab => tab.id === formSelectedTabId, applicationTabs) + 1)
+    if (typeof formSelectedTabId === 'string') {
       goToStep(formSelectedTabId)
     }
-  }, [goToStep, formSelectedTabId, applicationTabs])
+  }, [goToStep, formSelectedTabId])
 
   // CASE 2 - the user scrolls on the page, so we auto-select a new tab
-  // but, we don't adjust the scroll position
-  const onScroll = () => {
-    const scrollPos = window.scrollY
-    const scrollBuffer = window.innerHeight * 0.5
-
-    // Find the section that is currently most visible
-    let currentSectionIndex = 1 // Start with 1 since MUI Tabs expects 1-based indexing
-
-    for (let i = 0; i < applicationTabs.length; i++) {
-      const element = document.getElementById(applicationTabs[i].id)
-      if (!element) continue
-
-      const elementTop = element.offsetTop
-      const elementHeight = element.offsetHeight
-      const elementBottom = elementTop + elementHeight
-
-      // Check if this section is in the viewport with the scroll buffer
-      if (scrollPos + scrollBuffer >= elementTop && scrollPos + scrollBuffer < elementBottom) {
-        currentSectionIndex = i + 1
-        break
-      }
-      // If we've scrolled past the current section, check if we should move to the next one
-      else if (scrollPos + scrollBuffer >= elementTop) {
-        currentSectionIndex = i + 1
-      }
-    }
-
-    // Ensure the index is within valid bounds for MUI Tabs (1 to applicationTabs.length)
-    currentSectionIndex = Math.max(1, Math.min(currentSectionIndex, applicationTabs.length))
-
-    setSelectedStepNumber(currentSectionIndex)
-  }
-
   useEffect(() => {
-    window.removeEventListener('scroll', onScroll)
-    window.addEventListener('scroll', onScroll)
+    const onScroll = () => {
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current)
+      scrollTimeout.current = setTimeout(() => {
+        const scrollPos = window.scrollY
+        const scrollBuffer = window.innerHeight * 0.5
+        let currentSectionIndex = 1
 
-    return () => {
-      // Cleanup listener on unmount
-      window.removeEventListener('scroll', onScroll)
+        for (let i = 0; i < applicationTabs.length; i++) {
+          const element = document.getElementById(applicationTabs[i].id)
+          if (!element) continue
+          const elementTop = element.offsetTop
+          const elementHeight = element.offsetHeight
+          const elementBottom = elementTop + elementHeight
+          if (scrollPos + scrollBuffer >= elementTop && scrollPos + scrollBuffer < elementBottom) {
+            currentSectionIndex = i + 1
+            break
+          }
+        }
+
+        // If buffer is past the last section's top, select the last tab
+        const lastTabId = applicationTabs.at(-1)?.id
+        const lastElement = lastTabId ? document.getElementById(lastTabId) : null
+        if (lastElement && scrollPos + scrollBuffer >= lastElement.offsetTop) {
+          currentSectionIndex = applicationTabs.length
+        }
+
+        currentSectionIndex = Math.max(1, Math.min(currentSectionIndex, applicationTabs.length))
+        const tabId = applicationTabs[currentSectionIndex - 1]?.id
+
+        if (pendingTabId.current) {
+          if (tabId === pendingTabId.current) {
+            pendingTabId.current = null
+            if (pendingTimeout.current) clearTimeout(pendingTimeout.current)
+          }
+          return
+        }
+
+        if (tabId && tabId !== formSelectedTabId && onTabChange) {
+          onTabChange(tabId)
+        }
+      }, 80)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applicationTabs])
+
+    window.addEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current)
+      if (pendingTimeout.current) clearTimeout(pendingTimeout.current)
+    }
+  }, [applicationTabs, formSelectedTabId, onTabChange])
 
   return (
     <div className="multi-step-buttons-container">
@@ -89,27 +109,32 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
         }}
         // CASE 3 - the user selects a new tab by clicking on it
         onChange={(_event, step) => {
-          setSelectedStepNumber(step)
-          goToStep(applicationTabs[step - 1].id)
+          const tabId = applicationTabs[step - 1].id
+          if (onTabChange) onTabChange(tabId)
+          goToStep(tabId)
+          pendingTabId.current = tabId
+          if (pendingTimeout.current) clearTimeout(pendingTimeout.current)
+          // Fallback: clear pending after 1s if scroll never lands
+          pendingTimeout.current = setTimeout(() => {
+            pendingTabId.current = null
+          }, 1000)
         }}
       >
-        {
-          applicationTabs.map((tabConfig, index) => {
-            const { name, showStep = true } = tabConfig
-            return (
-              <Tab
-                key={`step-${index}-${name}`}
-                label={(
-                  <div>
-                    {showStep && <div className="step">{`Step ${index + 1}`}</div>}
-                    <div className="title">{name}</div>
-                  </div>
-                )}
-                value={index + 1}
-              />
-            )
-          })
-        }
+        {applicationTabs.map((tabConfig, index) => {
+          const { name, showStep = true } = tabConfig
+          return (
+            <Tab
+              key={`step-${index}-${name}`}
+              label={(
+                <div>
+                  {showStep && <div className="step">{`Step ${index + 1}`}</div>}
+                  <div className="title">{name}</div>
+                </div>
+              )}
+              value={index + 1}
+            />
+          )
+        })}
       </Tabs>
     </div>
   )
