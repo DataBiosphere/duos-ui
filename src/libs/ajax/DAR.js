@@ -16,7 +16,7 @@ export const DAR = {
     return await res.json()
   },
 
-  // v2, v3 Draft DAR Update
+  // v2, v3 Draft Progress Report
   updateDarDraft: async (dar, referenceId) => {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, { action: 'update' })
