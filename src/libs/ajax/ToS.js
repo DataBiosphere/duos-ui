@@ -1,11 +1,11 @@
 import { Config } from '../config'
-import axios from 'axios'
 import { getApiUrl } from '../ajax'
+import { fetchGet, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 export const ToS = {
   getDUOSText: async () => {
     const url = `${await getApiUrl()}/tos/text/duos`
-    const res = await axios.get(url, Config.textPlain())
+    const res = await fetchGet(url, Config.textPlain())
     return res.data
   },
   /**
@@ -23,17 +23,17 @@ export const ToS = {
    */
   getStatus: async () => {
     const url = `${await getApiUrl()}/api/sam/register/self/diagnostics`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
   acceptToS: async () => {
     const url = `${await getApiUrl()}/api/sam/register/self/tos`
-    const res = await axios.post(url, {}, Config.authOpts())
+    const res = await fetchPost(url, {}, Config.authOpts())
     return res.data
   },
   rejectToS: async () => {
     const url = `${await getApiUrl()}/api/sam/register/self/tos`
-    const res = await axios.delete(url, Config.authOpts())
+    const res = await fetchDelete(url, Config.authOpts())
     return res.data
   },
 }

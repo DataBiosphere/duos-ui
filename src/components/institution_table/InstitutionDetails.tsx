@@ -5,7 +5,6 @@ import { Link, useHistory } from 'react-router-dom'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { Button, TextField } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
-import { AxiosError } from 'axios'
 import { Notifications } from 'src/libs/utils'
 import { Spinner } from 'src/components/Spinner'
 import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
@@ -58,7 +57,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       }
       catch (error) {
         Notifications.showError({
-          text: `Failed to load institution details: ${extractError(error)}'}`,
+          text: `Failed to load institution details: ${extractError(error)}`,
         })
       }
       finally {
@@ -73,7 +72,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     let normalized = name.trim()
 
     // Replace curly single quotes with straight single quotes
-    normalized = normalized.replace(/[‘’]/g, '\'')
+    normalized = normalized.replaceAll(/[‘’]/g, '\'')
 
     return normalized
   }
@@ -118,8 +117,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       Notifications.showSuccess({ text: 'Institution updated successfully' })
     }
     catch (error) {
-      const axiosError = error as AxiosError
-      const consentError = extractConsentError(axiosError)
+      const consentError = extractConsentError(error)
       if (consentError && consentError.code === 409) {
         Notifications.showError({
           text: 'One or more of the domains specified is already used by another institution. A domain can only be associated with one institution.',
@@ -127,7 +125,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       }
       else {
         Notifications.showError({
-          text: `An error occurred when trying to update the institution: ${consentError ? consentError.message : 'no additional error available'}`,
+          text: `An error occurred when trying to update the institution: ${consentError ? consentError.message : extractError(error)}`,
         })
       }
     }
@@ -146,8 +144,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       history.push(`/admin_manage_institutions/institutions/${resp.id}`)
     }
     catch (error) {
-      const axiosError = error as AxiosError
-      const consentError = extractConsentError(axiosError)
+      const consentError = extractConsentError(error)
       if (consentError && consentError.code === 409) {
         Notifications.showError({
           text: 'One or more of the domains specified is already used by another institution. A domain can only be associated with one institution.',
@@ -155,8 +152,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       }
       else {
         Notifications.showError({
-          text: `An error occurred when trying to create the institution: ${consentError ? consentError.message : 'no additional error available'}`,
-        })
+          text: `An error occurred when trying to create the institution: ${consentError ? consentError.message : extractError(error)}` })
       }
     }
     finally {
@@ -245,8 +241,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     return 'Edit'
   }
 
-  return !loading
-    ? (
+  return loading
+    ? <div>Loading...</div>
+    : (
         <div style={{
           display: 'flex',
           alignItems: 'flex-start',
@@ -365,5 +362,4 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
           </div>
         </div>
       )
-    : <div>Loading...</div>
 }

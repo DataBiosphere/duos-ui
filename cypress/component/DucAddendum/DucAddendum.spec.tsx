@@ -3,7 +3,6 @@ import { mount } from 'cypress/react'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
 import { makeDatasetTerm } from '../test-utils'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { AxiosError, AxiosResponse } from 'axios'
 
 describe('DucAddendum', () => {
   const mockDatasets = [
@@ -82,8 +81,13 @@ describe('DucAddendum', () => {
 
   it('should display a warning when relevant DAC cannot be loaded', () => {
     const errorMessage = 'Error loading DAC information for datasets'
+
     cy.stub(DataSet, 'searchDatasetIndex').callsFake(() => {
-      return Promise.reject(new AxiosError('DAC information could not be found', '500', undefined, undefined, { data: { message: errorMessage } } as AxiosResponse) as Error)
+      const error = new Error('DAC information could not be found')
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      error.data = { message: errorMessage }
+      return Promise.reject(error)
     })
 
     const props = {

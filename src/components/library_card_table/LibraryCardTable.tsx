@@ -18,8 +18,7 @@ import { LibraryCard as LibraryCardAPI } from 'src/libs/ajax/LibraryCard'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { Delete } from '@mui/icons-material'
 import TableIconButton from 'src/components/TableIconButton'
-import { AxiosError } from 'axios'
-import { ConsentError, LibraryCard } from 'src/types/model'
+import { LibraryCard } from 'src/types/model'
 
 export interface LibraryCardTableProps {
   libraryCards?: LibraryCard[]
@@ -86,7 +85,7 @@ const userNameCell = (userName: string | undefined, id?: number): TableCell => {
 const createDateCell = (createDate: string | Date | undefined, id?: number): TableCell => {
   return {
     id,
-    data: !isNil(createDate) ? dayjs(createDate).format('YYYY-MM-DD') : '- -',
+    data: isNil(createDate) ? '- -' : dayjs(createDate).format('YYYY-MM-DD'),
     style: { width: styles.cellWidths.createDate },
     label: 'create-date',
   }
@@ -114,7 +113,7 @@ const createActionsCell = (
   }
 }
 
-// Sub-component of filter function used in search bar, needed for useEffect hooks to re-filter cards on size changes
+// Subcomponent of filter function used in search bar, needed for useEffect hooks to re-filter cards on size changes
 const lcFilterFunction = getSearchFilterFunctions().libraryCard
 
 // Column row metadata for SimpleTable
@@ -144,9 +143,11 @@ const deleteOnClick = (
     }
   }
   catch (error: unknown) {
-    const axiosError = error as AxiosError
-    const consentError = axiosError?.response?.data as ConsentError
-    const serverError = consentError.message ?? 'Error: Failed to delete library card'
+    // fetch-based errors are generic Error objects
+    let serverError = 'Error: Failed to delete library card'
+    if (error instanceof Error && error.message) {
+      serverError = error.message
+    }
     Notifications.showError({ text: serverError })
   }
 }
@@ -205,9 +206,10 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         setVisibleCards(visibleList)
       }
       catch (error: unknown) {
-        const axiosError = error as AxiosError
-        const consentError = axiosError?.response?.data as ConsentError
-        const serverError = consentError.message ?? 'Error updating Library Card table'
+        let serverError = 'Error updating Library Card table'
+        if (error instanceof Error && error.message) {
+          serverError = error.message
+        }
         Notifications.showError({ text: serverError })
       }
     }
@@ -259,7 +261,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
 
   // Table size change hook
   const changeTableSize = (value: number | string): void => {
-    const numValue = typeof value === 'string' ? parseInt(value) : value
+    const numValue = typeof value === 'string' ? Number.parseInt(value) : value
     if (numValue > 0 && !isNaN(numValue)) {
       setTableSize(numValue)
     }

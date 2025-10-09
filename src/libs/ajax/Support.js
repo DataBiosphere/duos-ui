@@ -1,5 +1,5 @@
 import { getApiUrl } from '../ajax'
-import axios from 'axios'
+import { fetchPost } from 'src/libs/ajax/fetchAdapter'
 
 export const Support = {
 
@@ -17,20 +17,22 @@ export const Support = {
 
   createSupportRequest: async (ticket) => {
     const url = `${await getApiUrl()}/support/request`
-    return await axios.post(url, ticket, { headers: { 'Content-Type': 'application/json' } }).catch(
-      function (error) {
-        return Promise.reject(error.response)
-      },
-    )
+    try {
+      return await fetchPost(url, ticket, { headers: { 'Content-Type': 'application/json' } })
+    }
+    catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   uploadAttachment: async (file) => {
     const url = `${await getApiUrl()}/support/upload`
-    return await axios.post(url, file, { headers: { 'Content-Type': 'application/binary' } }).catch(
-      function (error) {
-        return Promise.reject(error.response)
-      },
-    )
+    try {
+      return await fetchPost(url, file, { headers: { 'Content-Type': 'application/binary' } })
+    }
+    catch (error) {
+      return Promise.reject(error)
+    }
   },
 
 }

@@ -1,7 +1,7 @@
-import axios from 'axios'
 import { Notifications } from './utils'
 import { getOntologyUrl } from './ajax'
 import { Storage as storage } from '../libs/storage'
+import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export const OntologyService = {
   searchOntology: async (obolibraryURL) => {
@@ -16,7 +16,7 @@ export const OntologyService = {
         return JSON.parse(data)
       }
       else {
-        const response = await axios.get(`${baseURL}/search`, { params })
+        const response = await fetchGet(`${baseURL}/search`, { params })
         const data = response.data
         storage.setData(obolibraryURL, JSON.stringify(data))
         return data
