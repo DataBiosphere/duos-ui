@@ -1,3 +1,5 @@
+import { reportError } from 'src/libs/ajax.js'
+
 function buildUrlWithParams(url, params = {}) {
   const query = new URLSearchParams(params).toString()
   return query ? `${url}?${query}` : url
@@ -6,7 +8,7 @@ function buildUrlWithParams(url, params = {}) {
 async function handleResponse(res, url, responseType) {
   if (!res.ok) {
     if (res.status >= 500) { // Alternative for interceptor's reportError
-      reportError(url, res.status)
+      await reportError(url, res.status)
     }
     throw new Error(`Request to ${url} failed with status ${res.status}`)
   }
