@@ -378,10 +378,10 @@ export default function SigningOfficialTable(props) {
               fontWeight: 600,
               fontSize: '2.8rem' }}
             >
-              My Institution&apos;s Library Cards
+              Pre-authorize my Institution's Researchers with Library Cards
             </div>
             <div style={({ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px' })}>
-              Issue or Remove Library Card privileges to allow researchers to submit DARs.{' '}
+              Use the table below to add or remove Library Cards so DUOS-registered researchers can submit DARs.{' '}
               <a
                 rel="noopener noreferrer"
                 href="https://duos.blog/preauthorize_researchers_librarycards"
