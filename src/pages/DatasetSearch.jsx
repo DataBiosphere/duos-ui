@@ -18,6 +18,7 @@ import cfdeIcon from 'src/images/cfde-logo.png'
 import firecloudIcon from 'src/images/firecloud-logo.png'
 import zoonomicsIcon from 'src/images/ZoonomicsLogoColor.png'
 import aouIcon from 'src/images/aou-logo.png'
+import scpIcon from 'src/images/scp_logo.png'
 import schareIcon from 'src/images/SCHARE_Logo_New.png'
 import stanleyIcon from 'src/images/stanley-center-logo.png'
 import getzLabIcon from 'src/images/getz-lab-logo.svg'
@@ -185,6 +186,15 @@ export const DatasetSearch = (props) => {
       icon: nhlbiIcon,
       title: 'NHLBI Data Library',
     },
+    'scp': {
+      query: {
+        match_phrase: {
+          'study.description': 'Single Cell Portal',
+      },
+    },
+    icon: scpIcon,
+    title: 'Single Cell Portal Data Library',
+  },
     'nhlbi-blood-disorders-and-blood-safety': {
       query: {
         match_phrase: {
