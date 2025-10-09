@@ -3,6 +3,7 @@ import { mount } from 'cypress/react'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
 import { makeDatasetTerm } from '../test-utils'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { Notifications } from 'src/libs/utils'
 
 describe('DucAddendum', () => {
   const mockDatasets = [
@@ -90,6 +91,9 @@ describe('DucAddendum', () => {
       return Promise.reject(error)
     })
 
+    const showErrorStub = cy.stub()
+    cy.stub(Notifications, 'showError').callsFake(showErrorStub)
+
     const props = {
       datasets: [mockDatasets.at(0)],
       isLoading: false,
@@ -99,8 +103,7 @@ describe('DucAddendum', () => {
 
     mount(<DucAddendum {...props} />)
 
-    cy.get('[data-cy="notification-alert"]').should('be.visible')
-    cy.get('[data-cy="notification-alert"]').should('contain', errorMessage)
+    cy.wrap(showErrorStub).should('have.been.calledWith', { text: 'Error loading Dataset Term information for datasets: DAC information could not be found' })
   })
 
   it('should display `N/A` when the DAC information is missing entirely', () => {

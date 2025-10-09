@@ -97,12 +97,10 @@ describe('Institution Details Tests', () => {
   })
 
   it('should display error notification when saving fails with 409 conflict', () => {
-    const conflictError = {
-      response: {
-        status: 409,
-        data: { message: 'This domain is already associated with another institution.' },
-      },
-    }
+    const conflictError = new Error('This domain is already associated with another institution.')
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    conflictError.code = 409
 
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
     cy.stub(InstitutionAPI, 'patchInstitution').rejects(conflictError)
@@ -112,7 +110,7 @@ describe('Institution Details Tests', () => {
     cy.get('button').contains('Edit').click()
     cy.contains('button', 'Save').click()
 
-    cy.contains('An error occurred when trying to update the institution: This domain is already associated with another institution.').should('be.visible')
+    cy.contains('One or more of the domains specified is already used by another institution. A domain can only be associated with one institution.').should('be.visible')
   })
 
   it('should allow creating a new institution', () => {

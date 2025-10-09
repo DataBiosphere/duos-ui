@@ -1,28 +1,19 @@
 import { extractError } from 'src/utils/ErrorUtils'
 
 describe('extractError', () => {
-  it('should extract message from ConsentError in AxiosError', () => {
-    const error = {
-      response: {
-        data: {
-          message: 'Consent error occurred',
-        },
-      },
-    }
+  it('should extract message from Error instance', () => {
+    const error = new Error('Fetch failed')
+    expect(extractError(error)).to.equal('Fetch failed')
+  })
+
+  it('should extract message from ConsentError shape', () => {
+    const error = { message: 'Consent error occurred' }
     expect(extractError(error)).to.equal('Consent error occurred')
   })
 
   it('should return "Unknown error" if message is missing', () => {
-    const error = {
-      response: {
-        data: {},
-      },
-    }
+    const error = {}
     expect(extractError(error)).to.equal('Unknown error')
-  })
-
-  it('should handle completely invalid error object', () => {
-    expect(extractError({})).to.equal('Unknown error')
   })
 
   it('should handle non-object error', () => {
