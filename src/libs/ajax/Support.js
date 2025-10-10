@@ -18,7 +18,7 @@ export const Support = {
   createSupportRequest: async (ticket) => {
     const url = `${await getApiUrl()}/support/request`
     try {
-      return await fetchPost(url, ticket, { headers: { 'Content-Type': 'application/json' } })
+      return await fetchPost(url, ticket)
     }
     catch (error) {
       return Promise.reject(error)

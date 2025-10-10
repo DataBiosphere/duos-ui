@@ -12,7 +12,7 @@ async function handleResponse(res, url, responseType, method = 'GET') {
       redirectOnLogout()
     }
     if (res.status >= 500) {
-      await reportError(url, res.status)
+      reportError(url, res.status)
     }
     throw new Error(`Request to ${url} failed with status ${res.status}`)
   }
@@ -44,7 +44,7 @@ async function fetchRequest({ url, method = 'GET', data, params, headers = {}, c
     return handleResponse(res, fullUrl, responseType, method)
   }
   catch {
-    await reportError(fullUrl, 502) // Default to a 502 when we can't get a real response object.
+    reportError(fullUrl, 502) // Default to a 502 when we can't get a real response object.
     throw new Error(`Request to ${fullUrl} failed with status 502`)
   }
 }

@@ -1,6 +1,5 @@
 import { Config } from 'src/libs/config'
 import { getECMUrl, getApiUrl } from 'src/libs/ajax'
-import { merge } from 'lodash'
 import { fetchGet, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 /**
@@ -38,8 +37,7 @@ export const AuthenticateNIH = {
 
   getSyncedUser: async () => {
     const url = `${await getApiUrl()}/api/nih/sync`
-    const config = merge(Config.authOpts(), { headers: { 'Content-Type': 'application/json' } })
-    const res = await fetchGet(url, config)
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 }
