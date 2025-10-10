@@ -30,6 +30,7 @@ import homeIcon from 'src/images/icon_dataset_.png'
 import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
+import PropTypes from 'prop-types'
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -190,11 +191,11 @@ export const DatasetSearch = (props) => {
       query: {
         match_phrase: {
           'study.description': 'Single Cell Portal',
+        },
       },
+      icon: scpIcon,
+      title: 'Single Cell Portal Data Library',
     },
-    icon: scpIcon,
-    title: 'Single Cell Portal Data Library',
-  },
     'nhlbi-blood-disorders-and-blood-safety': {
       query: {
         match_phrase: {
@@ -564,7 +565,7 @@ export const DatasetSearch = (props) => {
             setQueryState(query)
           })
         }
-        catch (_error) {
+        catch {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' })
         }
       }
@@ -572,6 +573,15 @@ export const DatasetSearch = (props) => {
     init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, isInstitutionSet, fullQuery, props.history, hasChangedPage])
+
+  DatasetSearch.propTypes = {
+    match: PropTypes.shape({
+      params: PropTypes.shape({
+        query: PropTypes.string,
+      }),
+    }).isRequired,
+    history: PropTypes.object.isRequired,
+  }
 
   return (
     loading
