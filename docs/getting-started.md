@@ -66,11 +66,17 @@ The GitHub token verifies team permissions. To create a token:
 2. Give the token a descriptive name, **only** give it the following two scopes and then click **Generate token**.
     * `read:org` scope under `admin:org`
     * `workflow` (this is used to kick off GitHub actions from the command line)
-3. Store this token in a file:
+3. Add this token to your environment profile so it's automatically available in all terminal sessions:
 
-```
-GITHUB_TOKEN=<<GITHUB TOKEN VALUE>>
-echo $GITHUB_TOKEN > ~/.github-token
+```bash
+# Add the token to your environment profile
+echo 'export GITHUB_TOKEN="<<GITHUB_TOKEN_VALUE>>"' >> ~/.zprofile
+
+# Reload your environment profile to use it immediately
+source ~/.zprofile
+
+# Verify it's set
+echo $GITHUB_TOKEN
 ```
 
 ---
