@@ -164,8 +164,8 @@ const Home = (props) => {
               </div>
             </div>
             <div className="col-lg-4 col-md-4 ">
-              <p style={header}>Institutional Oversight</p>
-              <p style={description}>DUOS reduces repetitive work for Signing Officials and expedites data sharing through our innovative Library Card-style agreements.</p>
+              <p style={header}>Approving your researchers to submit or request data?</p>
+              <p style={description}>Signing Officials can login to request status to approve researchers or click below to learn more about our expedite data access agreements</p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
                 <a href="https://duos.blog/help/preauthorize_researchers_librarycards/" target="_blank" rel="noreferrer" id="blog-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
