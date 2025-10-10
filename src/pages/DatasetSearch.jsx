@@ -18,6 +18,7 @@ import cfdeIcon from 'src/images/cfde-logo.png'
 import firecloudIcon from 'src/images/firecloud-logo.png'
 import zoonomicsIcon from 'src/images/ZoonomicsLogoColor.png'
 import aouIcon from 'src/images/aou-logo.png'
+import scpIcon from 'src/images/scp_logo.png'
 import schareIcon from 'src/images/SCHARE_Logo_New.png'
 import stanleyIcon from 'src/images/stanley-center-logo.png'
 import getzLabIcon from 'src/images/getz-lab-logo.svg'
@@ -29,6 +30,7 @@ import homeIcon from 'src/images/icon_dataset_.png'
 import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
+import PropTypes from 'prop-types'
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -184,6 +186,15 @@ export const DatasetSearch = (props) => {
       },
       icon: nhlbiIcon,
       title: 'NHLBI Data Library',
+    },
+    'scp': {
+      query: {
+        match_phrase: {
+          'study.description': 'Single Cell Portal',
+        },
+      },
+      icon: scpIcon,
+      title: 'Single Cell Portal Data Library',
     },
     'nhlbi-blood-disorders-and-blood-safety': {
       query: {
@@ -554,7 +565,7 @@ export const DatasetSearch = (props) => {
             setQueryState(query)
           })
         }
-        catch (_error) {
+        catch {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' })
         }
       }
@@ -562,6 +573,15 @@ export const DatasetSearch = (props) => {
     init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, isInstitutionSet, fullQuery, props.history, hasChangedPage])
+
+  DatasetSearch.propTypes = {
+    match: PropTypes.shape({
+      params: PropTypes.shape({
+        query: PropTypes.string,
+      }),
+    }).isRequired,
+    history: PropTypes.object.isRequired,
+  }
 
   return (
     loading
