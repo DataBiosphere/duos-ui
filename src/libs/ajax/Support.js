@@ -1,5 +1,6 @@
 import { getApiUrl } from '../ajax'
 import { fetchPost } from 'src/libs/ajax/fetchAdapter'
+import { extractConsentError, extractError } from 'src/utils/ErrorUtils.js'
 
 export const Support = {
 
@@ -21,7 +22,7 @@ export const Support = {
       return await fetchPost(url, ticket)
     }
     catch (error) {
-      return Promise.reject(error)
+      throw extractConsentError(error) || new Error(extractError(error))
     }
   },
 
@@ -31,7 +32,7 @@ export const Support = {
       return await fetchPost(url, file, { headers: { 'Content-Type': 'application/binary' } })
     }
     catch (error) {
-      return Promise.reject(error)
+      throw extractConsentError(error) || new Error(extractError(error))
     }
   },
 
