@@ -87,6 +87,38 @@ describe('FormField - Tests', () => {
       cy.get('.formField-fixedDate .error-message').should('not.exist')
       cy.get('@onChange').should('be.calledOnce')
     })
+    it('initialized with an specific date.', () => {
+      props = {
+        ...baseProps,
+        id: 'fixedDate',
+        title: 'Fixed Date',
+        type: FormFieldTypes.CALENDAR,
+        defaultValue: '1970-01-01',
+        validators: [FormValidators.DATEJS],
+      }
+      mount(<FormField {...props} />)
+      cy.get('#lbl_fixedDate').contains('Fixed Date')
+      cy.get('input.MuiInputBase-input').should('have.value', '1970-01-01')
+    })
+    it('Select closes calendar as expected.', () => {
+      props = {
+        ...baseProps,
+        id: 'fixedDate',
+        title: 'Fixed Date',
+        type: FormFieldTypes.CALENDAR,
+        defaultValue: '1970-01-01',
+        validators: [FormValidators.DATEJS],
+      }
+      mount(<FormField {...props} />)
+      cy.get('#lbl_fixedDate').contains('Fixed Date')
+      cy.get('input.MuiInputBase-input').should('have.value', '1970-01-01')
+      cy.get('button').click()
+      cy.get('button').contains('5').click()
+      cy.get('button').contains('Select').should('be.visible')
+      cy.get('button').contains('Select').click()
+      cy.get('button').contains('Select').should('not.be.visible')
+      cy.get('.formField-fixedDate .error-message').should('not.exist')
+    })
   })
   describe('Validation', () => {
     it('should render required indicator', () => {
