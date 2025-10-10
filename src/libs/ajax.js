@@ -5,7 +5,7 @@ import { StackdriverReporter } from './stackdriverReporter'
 
 // to log out user and redirect to home when response has 401 status
 // return responses with statuses in the 200s and reject the rest
-const redirectOnLogout = () => {
+export const redirectOnLogout = () => {
   Auth.signOut()
   window.location.href = `/home?redirectTo=${window.location.pathname}`
 }

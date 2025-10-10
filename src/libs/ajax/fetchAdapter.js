@@ -1,13 +1,17 @@
-import { reportError } from 'src/libs/ajax.js'
+import { redirectOnLogout, reportError } from 'src/libs/ajax.js'
 
 function buildUrlWithParams(url, params = {}) {
   const query = new URLSearchParams(params).toString()
   return query ? `${url}?${query}` : url
 }
 
-async function handleResponse(res, url, responseType) {
+async function handleResponse(res, url, responseType, method = 'GET') {
+  const isMeCheck = url?.endsWith('/api/user/me') && (method?.toLowerCase() === 'get')
   if (!res.ok) {
-    if (res.status >= 500) { // Alternative for interceptor's reportError
+    if (res.status === 401 && !isMeCheck) {
+      redirectOnLogout()
+    }
+    if (res.status >= 500) {
       await reportError(url, res.status)
     }
     throw new Error(`Request to ${url} failed with status ${res.status}`)
@@ -15,7 +19,6 @@ async function handleResponse(res, url, responseType) {
   if (responseType === 'blob') {
     return { data: await res.blob() }
   }
-  // Try to parse JSON, fallback to text if not JSON
   const contentType = res.headers.get('content-type')
   if (contentType?.includes('application/json')) {
     return { data: await res.json() }
@@ -23,68 +26,43 @@ async function handleResponse(res, url, responseType) {
   return { data: await res.text() }
 }
 
-export async function fetchGet(url, config = {}) {
-  const { params = {}, headers = {}, credentials, responseType } = config
-  const fullUrl = buildUrlWithParams(url, params)
-  const res = await fetch(fullUrl, {
-    method: 'GET',
-    headers,
-    credentials,
-  })
-  return handleResponse(res, fullUrl, responseType)
+function getRequestBody(data, isMultipart) {
+  if (!data) return undefined
+  return isMultipart ? data : JSON.stringify(data)
 }
 
-export async function fetchPost(url, data, config = {}) {
-  const { headers = {}, credentials } = config
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify(data),
-    credentials,
-  })
-  return handleResponse(res, url)
-}
-
-export async function fetchPut(url, data, config = {}) {
-  const { headers = {}, credentials } = config
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify(data),
-    credentials,
-  })
-  return handleResponse(res, url)
-}
-
-export async function fetchPatch(url, data, config = {}) {
-  const { headers = {}, credentials } = config
-  const res = await fetch(url, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify(data),
-    credentials,
-  })
-  return handleResponse(res, url)
-}
-
-export async function fetchDelete(url, config = {}) {
-  const { data, headers = {}, credentials } = config
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: data ? JSON.stringify(data) : undefined,
-    credentials,
-  })
-  return handleResponse(res, url)
-}
-
-export async function fetchMultipart(url, formData, config = {}, method = 'POST') {
-  const { headers = {}, credentials } = config
-  const res = await fetch(url, {
+async function fetchRequest({ url, method = 'GET', data, params, headers = {}, credentials, responseType, isMultipart }) {
+  const fullUrl = params ? buildUrlWithParams(url, params) : url
+  const fetchOptions = {
     method,
-    headers, // Do not set Content-Type for FormData
-    body: formData,
+    headers: isMultipart ? headers : { 'Content-Type': 'application/json', ...headers },
     credentials,
-  })
-  return handleResponse(res, url)
+    body: getRequestBody(data, isMultipart),
+  }
+  try {
+    const res = await fetch(fullUrl, fetchOptions)
+    return handleResponse(res, fullUrl, responseType, method)
+  }
+  catch {
+    await reportError(fullUrl, 502) // Default to a 502 when we can't get a real response object.
+    throw new Error(`Request to ${fullUrl} failed with status 502`)
+  }
 }
+
+export const fetchGet = (url, config = {}) =>
+  fetchRequest({ url, ...config, method: 'GET' })
+
+export const fetchPost = (url, data, config = {}) =>
+  fetchRequest({ url, data, ...config, method: 'POST' })
+
+export const fetchPut = (url, data, config = {}) =>
+  fetchRequest({ url, data, ...config, method: 'PUT' })
+
+export const fetchPatch = (url, data, config = {}) =>
+  fetchRequest({ url, data, ...config, method: 'PATCH' })
+
+export const fetchDelete = (url, config = {}) =>
+  fetchRequest({ url, data: config.data, ...config, method: 'DELETE' })
+
+export const fetchMultipart = (url, formData, config = {}, method = 'POST') =>
+  fetchRequest({ url, data: formData, ...config, method, isMultipart: true })
