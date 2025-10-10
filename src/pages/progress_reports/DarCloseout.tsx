@@ -106,8 +106,8 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
                 </ul>
               </p>
               <p>
-                By completing this page, upon project close-out, the PI and all approved users agree to
-                destroy all copies, versions, and derivations of the dataset(s) retrieved from
+                By completing this page, upon project close-out, the PI and all approved users acknowledge
+                they have destroyed all copies, versions, and derivations of the dataset(s) retrieved from
                 NIH-designated controlled-access databases, on both local servers and hardware, and if cloud
                 computing was used, delete the data and cloud images from cloud computing provider storage,
                 virtual machines, databases, and random access archives, except as required by publication
