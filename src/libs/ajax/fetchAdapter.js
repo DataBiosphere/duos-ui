@@ -11,7 +11,7 @@ async function handleResponse(res, url, responseType, method = 'GET') {
     if (res.status === 401 && !isMeCheck) {
       redirectOnLogout()
     }
-    reportError(url, res.status)
+    await reportError(url, res.status)
   }
   if (responseType === 'blob') {
     return { data: await res.blob() }
