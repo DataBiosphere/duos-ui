@@ -1,10 +1,10 @@
-import axios, { AxiosRequestConfig } from 'axios'
 import { getDefaultProperties } from '@databiosphere/bard-client'
 
 import { Storage } from '../storage'
 import { getBardApiUrl } from '../ajax'
 import { Token } from '../config'
 import { MetricsEventName } from 'src/libs/events'
+import { fetchPost } from 'src/libs/ajax/fetchAdapter'
 
 // Set default timeout for all metrics calls to 30 seconds
 const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
@@ -58,15 +58,10 @@ const captureEventFn = async (event: MetricsEventName, details: object = {}, sig
     },
   }
 
-  const config: AxiosRequestConfig = {
-    method: 'POST',
-    url: `${await getBardApiUrl()}/api/event`,
-    data: body,
-    headers: isRegistered ? { Authorization: `Bearer ${Token.getToken()}` } : undefined,
-    signal,
-  }
+  const url = `${await getBardApiUrl()}/api/event`
+  const headers = isRegistered ? { Authorization: `Bearer ${Token.getToken()}` } : undefined
 
-  return axios(config)
+  return fetchPost(url, body, { headers, signal })
 }
 
 /**
@@ -77,15 +72,9 @@ const captureEventFn = async (event: MetricsEventName, details: object = {}, sig
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const syncProfile = async (signal: AbortSignal): Promise<any> => {
-  const config: AxiosRequestConfig = {
-    method: 'POST',
-    url: `${await getBardApiUrl()}/api/syncProfile`,
-    headers: { Authorization: `Bearer ${Token.getToken()}` },
-    signal,
-  }
-
-  return axios(config).catch(() => {
-  })
+  const url = `${await getBardApiUrl()}/api/syncProfile`
+  const headers = { Authorization: `Bearer ${Token.getToken()}` }
+  return fetchPost(url, undefined, { headers, signal }).catch(() => {})
 }
 
 /**
@@ -110,14 +99,8 @@ const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
     window.Appcues.identify(oidcSub, appcuesProps)
   }
 
-  const config: AxiosRequestConfig = {
-    method: 'POST',
-    url: `${await getBardApiUrl()}/api/identify`,
-    data: body,
-    headers: { Authorization: `Bearer ${Token.getToken()}` },
-    signal,
-  }
+  const url = `${await getBardApiUrl()}/api/identify`
+  const headers = { Authorization: `Bearer ${Token.getToken()}` }
 
-  return axios(config).catch(() => {
-  })
+  return fetchPost(url, body, { headers, signal }).catch(() => {})
 }

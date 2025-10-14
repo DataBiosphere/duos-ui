@@ -1,8 +1,8 @@
-import axios from 'axios'
 import { mergeAll } from 'lodash/fp'
 import { Config } from 'src/libs/config'
 import { fetchOk, getApiUrl } from 'src/libs/ajax'
 import { fileDownload } from 'src/utils/FileDownload.js'
+import { fetchGet, fetchMultipart, fetchPost } from 'src/libs/ajax/fetchAdapter'
 
 // FIXME: temporary read-only mode for NHGRI datasets
 const setNhgriExternalAccess = (datasets) => {
@@ -18,19 +18,19 @@ const setNhgriExternalAccess = (datasets) => {
 export const DataSet = {
   getDatasetNames: async () => {
     const url = `${await getApiUrl()}/api/dataset/datasetNames`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return await res.data
   },
 
   getRegistrationSchema: async () => {
     const url = `${await getApiUrl()}/schemas/dataset-registration/v1`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return await res.data
   },
 
   registerDataset: async (registration) => {
     const url = `${await getApiUrl()}/api/dataset/v3`
-    const res = await axios.post(url, registration, Config.multiPartOpts())
+    const res = await fetchMultipart(url, registration, Config.multiPartOpts(), 'POST')
     return res.data
   },
 
@@ -42,7 +42,7 @@ export const DataSet = {
 
   searchDatasetIndex: async (query) => {
     const url = `${await getApiUrl()}/api/dataset/search/index`
-    const res = await axios.post(url, query, Config.authOpts())
+    const res = await fetchPost(url, query, Config.authOpts())
     return setNhgriExternalAccess(res.data)
   },
 
@@ -59,7 +59,7 @@ export const DataSet = {
 
   updateDatasetV3: async (datasetId, datasetAndFiles) => {
     const url = `${await getApiUrl()}/api/dataset/v3/${datasetId}`
-    const res = await axios.put(url, datasetAndFiles, Config.multiPartOpts())
+    const res = await fetchMultipart(url, datasetAndFiles, Config.multiPartOpts(), 'PUT')
     return res.data
   },
 
@@ -71,20 +71,25 @@ export const DataSet = {
 
   updateStudy: async (studyId, studyObject) => {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`
-    return await axios.put(url, studyObject, Config.multiPartOpts())
+    const res = await fetchMultipart(url, studyObject, Config.multiPartOpts(), 'PUT')
+    return res.data
   },
 
   getNIHInstitutionalCertification: async (datasetId) => {
     const datasetInfo = await DataSet.getDataSetsByDatasetId(datasetId)
     const fileName = datasetInfo.nihInstitutionalCertificationFile.fileName
-    const authOpts = Object.assign(Config.authOpts(), { responseType: 'blob' })
-    authOpts.headers = Object.assign(authOpts.headers, {
-      'Content-Type': 'application/octet-stream',
-      'Accept': 'application/octet-stream',
-    })
+    const authOpts = {
+      ...Config.authOpts(),
+      responseType: 'blob',
+      headers: {
+        ...Config.authOpts().headers,
+        'Content-Type': 'application/octet-stream',
+        'Accept': 'application/octet-stream',
+      },
+    }
     const url = `${await getApiUrl()}/api/dataset/${datasetId}/nihInstitutionalCertification`
-    axios.get(url, authOpts).then((response) => {
-      fileDownload(response.data, fileName)
-    })
+    const res = await fetchGet(url, authOpts)
+    fileDownload(res.data, fileName)
   },
+
 }

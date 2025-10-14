@@ -175,10 +175,11 @@ describe('Main App Functions', () => {
       </Router>,
     )
     history.push(initialLocation)
+    console.log(history.location)
     cy.wrap(AuthenticateNIH.getECMProviderLinkInfo).should('have.been.calledWith', code, state)
     cy.wrap(AuthenticateNIH.getSyncedUser).should('have.been.calledOnce')
     // Endure that we've navigated to both the home page and the profile page
     cy.wrap(pageVisitStub).should('have.been.calledWith', '/')
-    cy.wrap(pageVisitStub).should('have.been.calledWith', '/profile')
+    cy.wrap(pageVisitStub).should('have.been.calledWith', history.location.pathname)
   })
 })

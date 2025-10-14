@@ -1,7 +1,7 @@
-import { cloneDeep, flow, unset, mergeAll } from 'lodash/fp'
+import { cloneDeep, flow, unset } from 'lodash/fp'
 import { Config } from 'src/libs/config'
-import axios from 'axios'
-import { getApiUrl, fetchOk } from 'src/libs/ajax'
+import { getApiUrl } from 'src/libs/ajax'
+import { fetchGet, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes'
 import {
   Acknowledgement,
@@ -15,38 +15,29 @@ import {
 export const User = {
   getMe: async (): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/me`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
   getById: async (id: number): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/${id}`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
   list: async (roleName: 'Admin' | 'SigningOfficial'): Promise<DuosUser[]> => {
     const url = `${await getApiUrl()}/api/user/role/${roleName}`
-    const res = await fetchOk(url, Config.authOpts())
-    return res.json()
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   create: async (request: CreateDuosUserRequest): Promise<DuosUser | false | undefined> => {
     const url = `${await getApiUrl()}/api/dacuser`
     try {
-      const res = await fetchOk(
-        url,
-        mergeAll([
-          Config.authOpts(),
-          Config.jsonBody(request),
-          { method: 'POST' },
-        ]),
-      )
-      if (res.ok) {
-        return res.json()
-      }
+      const res = await fetchPost(url, request, Config.authOpts())
+      return res.data
     }
-    catch (_err) {
+    catch {
       return false
     }
   },
@@ -55,19 +46,10 @@ export const User = {
     const url = `${await getApiUrl()}/api/user`
     // We should not be updating the user's create date, associated institution, or library cards
     try {
-      const res = await fetchOk(
-        url,
-        mergeAll([
-          Config.authOpts(),
-          Config.jsonBody(payload),
-          { method: 'PUT' },
-        ]),
-      )
-      if (res.ok) {
-        return res.json()
-      }
+      const res = await fetchPut(url, payload, Config.authOpts())
+      return res.data
     }
-    catch (_err) {
+    catch {
       return false
     }
   },
@@ -86,74 +68,59 @@ export const User = {
       unset('updatedUser.libraryCard'),
     )(user)
     try {
-      const res = await fetchOk(
-        url,
-        mergeAll([
-          Config.authOpts(),
-          Config.jsonBody(filteredUser),
-          { method: 'PUT' },
-        ]),
-      )
-      if (res.ok) {
-        return res.json()
-      }
+      const res = await fetchPut(url, filteredUser, Config.authOpts())
+      return res.data
     }
-    catch (_err) {
+    catch {
       return false
     }
   },
 
   registerUser: async (): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user`
-    const res = await fetchOk(
-      url,
-      mergeAll([Config.authOpts(), { method: 'POST' }]),
-    )
-    return res.json()
+    const res = await fetchPost(url, undefined, Config.authOpts())
+    return res.data
   },
 
   getSOsForCurrentUser: async (): Promise<SimplifiedDuosUser[]> => {
     const url = `${await getApiUrl()}/api/user/signing-officials`
-    const res = await fetchOk(
-      url,
-      mergeAll([Config.authOpts(), { method: 'GET' }]),
-    )
-    return res.json()
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   getUnassignedUsers: async (): Promise<DuosUser[]> => {
     const url = `${await getApiUrl()}/api/user/institution/unassigned`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
   addRoleToUser: async (userId: number, roleId: number): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await axios.put(url, null, Config.authOpts())
+    const res = await fetchPut(url, null, Config.authOpts())
     return res.data
   },
 
   deleteRoleFromUser: async (userId: number, roleId: number): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await axios.delete(url, Config.authOpts())
+    const res = await fetchDelete(url, Config.authOpts())
     return res.data
   },
 
   getUserRelevantDatasets: async (): Promise<Dataset[]> => {
     const url = `${await getApiUrl()}/api/user/me/dac/datasets/v2`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
   getAcknowledgements: async (): Promise<AcknowledgementMap> => {
     const url = `${await getApiUrl()}/api/user/acknowledgements`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
   getAcknowledgement: async (key: string): Promise<Acknowledgement> => {
     const url = `${await getApiUrl()}/api/user/acknowledgements/${key}`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
@@ -161,15 +128,14 @@ export const User = {
     if (keys.length === 0) {
       return {}
     }
-
     const url = `${await getApiUrl()}/api/user/acknowledgements`
-    const res = await axios.post(url, keys, Config.authOpts())
+    const res = await fetchPost(url, keys, Config.authOpts())
     return res.data
   },
 
   getApprovedDatasets: async (): Promise<ApprovedDataset[]> => {
     const url = `${await getApiUrl()}/api/user/me/researcher/datasets`
-    const res = await axios.get(url, Config.authOpts())
+    const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 }

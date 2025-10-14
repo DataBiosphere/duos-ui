@@ -1,26 +1,26 @@
 import { Config } from '../config'
 import { getApiUrl } from '../ajax'
-import axios from 'axios'
+import { fetchPut } from 'src/libs/ajax/fetchAdapter'
 
 export const Votes = {
   updateVotesByIds: async (voteIds, vote) => {
-    const voteUpdate = {}
-    voteUpdate.vote = vote.vote
-    voteUpdate.rationale = vote.rationale
-    voteUpdate.voteIds = voteIds
-
+    const voteUpdate = {
+      vote: vote.vote,
+      rationale: vote.rationale,
+      voteIds: voteIds,
+    }
     const url = `${await getApiUrl()}/api/votes`
-    const res = await axios.put(url, voteUpdate, Config.authOpts())
+    const res = await fetchPut(url, voteUpdate, Config.authOpts())
     return res.data
   },
 
   updateRationaleByIds: async (voteIds, rationale) => {
-    const rationaleUpdate = {}
-    rationaleUpdate.rationale = rationale
-    rationaleUpdate.voteIds = voteIds
-
+    const rationaleUpdate = {
+      rationale: rationale,
+      voteIds: voteIds,
+    }
     const url = `${await getApiUrl()}/api/votes/rationale`
-    const res = await axios.put(url, rationaleUpdate, Config.authOpts())
+    const res = await fetchPut(url, rationaleUpdate, Config.authOpts())
     return res.data
   },
 }
