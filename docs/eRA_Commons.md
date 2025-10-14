@@ -28,7 +28,7 @@ sequenceDiagram
     ECM ->> DUOS: return LinkInfo
     Note over ECM, DUOS: response includes externalUserId and redirectTo
     DUOS ->> Consent: Request sync Consent <-> ECM
-    Consent ->> ECM: Sync eRA Commons state between Consent and ECM
+    Consent ->> ECM: Sync RAS state between Consent and ECM
     ECM ->> Consent: Return sync status
     Consent ->> Consent: Save status
     DUOS ->> User: Redirect user to original redirectTo
