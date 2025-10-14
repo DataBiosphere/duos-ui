@@ -27,8 +27,10 @@ sequenceDiagram
     Note over DUOS, ECM: include state, oauthcode
     ECM ->> DUOS: return LinkInfo
     Note over ECM, DUOS: response includes externalUserId redirectTo
-    DUOS ->> DUOS: Decode/validate ECM response
-    DUOS ->> Consent: Save eRA Commons state to Consent for local purposes
+    DUOS ->> Consent: Request sync Consent <-> ECM
+    Consent ->> ECM: Sync eRA Commons state between Consent and ECM
+    ECM ->> Consent: Return sync status
+    Consent ->> Consent: Save status
     DUOS ->> User: Redirect user to original redirectTo
     User ->> DUOS: Original page is refreshed
     DUOS ->> User: Updates user display
