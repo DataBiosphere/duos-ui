@@ -40,7 +40,7 @@ const RESEARCHER_INFO_TAB_ID = 'researcher-info'
 const DATA_ACCESS_REQUEST_TAB_ID = 'data-access-request'
 const RESEARCH_PURPOSE_STATEMENT_TAB_ID = 'research-purpose'
 const DATA_ACCESS_AGREEMENTS_TAB_ID = 'data-access-agreements'
-const DAR_UPDATE_TAB_ID_PREFIX = 'dar-update-'
+const PROGRESS_REPORT_TAB_ID_PREFIX = 'progress-report-'
 const PROGRESS_REPORT_APPLICATION_TAB_ID = 'progress-report-app'
 const ADDENDUM_TAB_ID = 'addendum'
 const VOTING_HISTORY_TAB_ID = 'voting-history-info'
@@ -315,14 +315,14 @@ const DataAccessRequestApplication = (props) => {
       let appTabs = []
       if (isProgressReportApplication) {
         // if we are creating a new progress report, we need to add another tab for the application
-        appTabs = [{ name: 'DAR Update ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
+        appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
       }
       setApplicationTabs([...appTabs,
         ...reverseOrderedDARs.map((_dar, index) => {
           const whichPRIsThis = reverseOrderedDARs.length - index - 1
           const isLast = index === reverseOrderedDARs.length - 1
-          const itemLabel = isLast ? formData?.darCode : 'DAR Update ' + whichPRIsThis
-          return { name: itemLabel, id: `${DAR_UPDATE_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
+          const itemLabel = isLast ? formData?.darCode : 'Progress Report ' + whichPRIsThis
+          return { name: itemLabel, id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
         }),
         { name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false },
       ])
@@ -668,7 +668,7 @@ const DataAccessRequestApplication = (props) => {
               <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className="dar-steps">
                 <ConditionalAccordion
                   condition={false}
-                  title={`DAR Report ${reverseOrderedDARs.length}`}
+                  title={`Progress Report ${reverseOrderedDARs.length}`}
                 >
                   <ProgressReportApplication
                     readOnlyMode={false}
@@ -687,11 +687,11 @@ const DataAccessRequestApplication = (props) => {
                 {reverseOrderedDARs.map((dar, index) => {
                   if ((index + 1 !== reverseOrderedDARs.length)) {
                     return (
-                      <div key={`dar-${index}`} id={`${DAR_UPDATE_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
+                      <div key={`dar-${index}`} id={`${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
                         <ConditionalAccordion
                           key={`dar-${index}`}
                           condition={true}
-                          title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
+                          title={`Progress Report ${reverseOrderedDARs.length - index - 1}`}
                           defaultExpanded={index === 0}
                         >
                           <ProgressReportApplication
@@ -708,7 +708,7 @@ const DataAccessRequestApplication = (props) => {
                 })}
               </div>
             )}
-            <div id={`${DAR_UPDATE_TAB_ID_PREFIX}0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
+            <div id={`${PROGRESS_REPORT_TAB_ID_PREFIX}0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {existingDarsReadOnlyMode && (
                 <h3>
                   {formData.darCode}
