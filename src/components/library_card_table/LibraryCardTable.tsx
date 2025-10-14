@@ -19,6 +19,7 @@ import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { Delete } from '@mui/icons-material'
 import TableIconButton from 'src/components/TableIconButton'
 import { LibraryCard } from 'src/types/model'
+import { extractError } from 'src/utils/ErrorUtils'
 
 export interface LibraryCardTableProps {
   libraryCards?: LibraryCard[]
@@ -143,12 +144,7 @@ const deleteOnClick = (
     }
   }
   catch (error: unknown) {
-    // fetch-based errors are generic Error objects
-    let serverError = 'Error: Failed to delete library card'
-    if (error instanceof Error && error.message) {
-      serverError = error.message
-    }
-    Notifications.showError({ text: serverError })
+    Notifications.showError({ text: extractError(error) })
   }
 }
 
