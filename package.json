@@ -10,7 +10,7 @@
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
     "dayjs": "1.11.18",
-    "dompurify": "3.2.7",
+    "dompurify": "3.3.0",
     "lodash": "4.17.21",
     "oidc-client-ts": "3.3.0",
     "query-string": "9.3.1",
