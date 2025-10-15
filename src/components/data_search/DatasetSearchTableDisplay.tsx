@@ -2,6 +2,7 @@ import * as React from 'react'
 import { isEmpty, capitalize, isUndefined } from 'lodash'
 import { DatasetTerm } from 'src/types/model'
 import SimpleTable from 'src/components/SimpleTable'
+import PaginationBar from 'src/components/PaginationBar'
 import { Styles } from 'src/libs/theme'
 import {
   type CellData,
@@ -83,6 +84,8 @@ interface DatasetSearchTableDisplayProps {
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
   const { onSelect, exportableDatasets, filteredData, allData, selected, tab } = props
   const [sort, setSort] = React.useState<Sort>(getSortForTab(tab.key))
+  const [currentPage, setCurrentPage] = React.useState(1)
+  const [tableSize, setTableSize] = React.useState(50)
   const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets)
 
   const sortData = React.useCallback((data: CellData[][], sortState: Sort) => {
@@ -139,7 +142,7 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
   }, [allData, allRowData])
 
   // Filter and sort only the row data we need
-  const rowData = React.useMemo(() => {
+  const sortedRowData = React.useMemo(() => {
     const filteredRowData = filteredData.map((dataset) => {
       const key = dataset.datasetId || dataset.study?.studyId
       return rowDataMap.get(key)
@@ -147,6 +150,18 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
 
     return sortData(filteredRowData, sort)
   }, [filteredData, rowDataMap, sort, sortData])
+
+  // Pagination logic
+  const pageSize = tableSize // Use the tableSize state instead of hardcoded 50
+  const pageCount = Math.ceil(sortedRowData.length / pageSize)
+  const startIndex = (currentPage - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  const rowData = sortedRowData.slice(startIndex, endIndex)
+
+  const changeTableSize = (newSize: number) => {
+    setTableSize(newSize)
+    setCurrentPage(1) // Reset to first page when changing size
+  }
 
   const handleSort = (newSort: Sort) => {
     const storageKey = `${storageDatasetSearchSort}_${tab.key}`
@@ -164,9 +179,14 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
         borderBottom: '1px solid black',
       }}
       >
-        {rowData.length}
+        {sortedRowData.length}
         {' '}
-        {capitalize(rowData.length !== 1 ? tab.plural : tab.singular)}
+        {capitalize(sortedRowData.length !== 1 ? tab.plural : tab.singular)}
+        {sortedRowData.length > pageSize && (
+          <span style={{ fontWeight: 400, marginLeft: '1rem' }}>
+            (showing {Math.min(pageSize, sortedRowData.length - startIndex)} of {sortedRowData.length})
+          </span>
+        )}
       </div>
       {
         isEmpty(filteredData)
@@ -184,7 +204,19 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
                 columnHeaders={headers}
                 selected={selected}
                 styles={styles}
-                tableSize={10}
+                paginationBar={(
+                  <PaginationBar
+                    currentPage={currentPage}
+                    pageCount={pageCount}
+                    tableSize={pageSize}
+                    goToPage={(newPage) => {
+                      setCurrentPage(newPage)
+                    }}
+                    changeTableSize={(newSize) => {
+                      changeTableSize(newSize)
+                    }}
+                  />
+                )}
                 summary={`faceted ${tab.singular} search table`}
                 onSort={handleSort}
                 sort={sort}

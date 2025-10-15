@@ -41,9 +41,13 @@ export const DataSet = {
   },
 
   searchDatasetIndex: async (query) => {
+    const startTime = performance.now()
     const url = `${await getApiUrl()}/api/dataset/search/index`
     const res = await axios.post(url, query, Config.authOpts())
-    return setNhgriExternalAccess(res.data)
+    const datasets = setNhgriExternalAccess(res.data)
+    const fetchTime = Math.round(performance.now() - startTime)
+    console.log(`Fetched ${datasets.length} datasets in ${fetchTime}ms`)
+    return datasets
   },
 
   getDataSetsByDatasetId: async (datasetId) => {

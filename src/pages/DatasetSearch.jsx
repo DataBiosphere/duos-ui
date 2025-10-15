@@ -85,7 +85,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 
   return {
     from: 0,
-    size: 50,
+    size: 1000,
     query: {
       bool: {
         must: queryChunks,
@@ -559,10 +559,70 @@ export const DatasetSearch = (props) => {
           return
         }
         try {
-          await DataSet.searchDatasetIndex(fullQuery).then((datasets) => {
+          await DataSet.searchDatasetIndex(fullQuery).then(async (datasets) => {
             setDatasets(datasets)
             setLoading(false)
             setQueryState(query)
+            console.log(`Data library loaded: ${datasets.length} datasets`)
+
+            // Background loading of remaining datasets in chunks
+            if (datasets.length >= 1000) {
+              let accumulatedDatasets = [...datasets]
+              let chunkCount = 0
+
+              setTimeout(() => {
+                const loadNextChunk = async (startFrom, retryCount = 0) => {
+                  const maxRetries = 3
+                  const baseDelay = 5000
+
+                  try {
+                    const chunkQuery = { ...fullQuery, from: startFrom, size: 1000 }
+                    const chunkDatasets = await DataSet.searchDatasetIndex(chunkQuery)
+
+                    if (chunkDatasets.length > 0) {
+                      accumulatedDatasets = [...accumulatedDatasets, ...chunkDatasets]
+                      chunkCount++
+
+                      // Update UI every 2 chunks (every 2000 datasets) for incremental updates
+                      if (chunkCount % 2 === 0 || chunkDatasets.length < 1000) {
+                        setDatasets([...accumulatedDatasets])
+                      }
+
+                      // Continue loading if we got a full chunk
+                      if (chunkDatasets.length === 1000) {
+                        setTimeout(() => loadNextChunk(startFrom + 1000), baseDelay)
+                      }
+                      else {
+                        console.log(`Background loading complete: ${accumulatedDatasets.length} total datasets`)
+                        setDatasets([...accumulatedDatasets])
+                      }
+                    }
+                    else {
+                      console.log(`Background loading complete: ${accumulatedDatasets.length} total datasets`)
+                      setDatasets([...accumulatedDatasets])
+                    }
+                  }
+                  catch {
+                    if (retryCount < maxRetries) {
+                      const retryDelay = baseDelay * Math.pow(2, retryCount)
+                      setTimeout(() => {
+                        loadNextChunk(startFrom, retryCount + 1)
+                      }, retryDelay)
+                    }
+                    else {
+                      // Update UI with what we have so far
+                      if (accumulatedDatasets.length > datasets.length) {
+                        setDatasets([...accumulatedDatasets])
+                      }
+                      // Continue to next chunk despite failure
+                      setTimeout(() => loadNextChunk(startFrom + 1000), baseDelay)
+                    }
+                  }
+                }
+
+                loadNextChunk(1000) // Start from dataset 1000
+              }, 3000) // Wait 3 seconds after initial load to reduce server pressure
+            }
           })
         }
         catch {

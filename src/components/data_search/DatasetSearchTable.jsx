@@ -2,17 +2,15 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import * as React from 'react'
 import { Box, Button } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
-import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'lodash'
+import { useEffect, useState } from 'react'
+import { isArray, isEmpty, chain, intersection, clone, capitalize } from 'lodash'
 import { applyForAccess } from 'src/utils/accessUtils.js'
 import { defaultFilters } from 'src/components/data_search/DatasetFilterConstants'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DatasetSearchTableDisplay } from 'src/components/data_search/DatasetSearchTableDisplay'
 import { datasetSearchTableTabs } from 'src/components/data_search/DatasetSearchTableConstants'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DataSet } from 'src/libs/ajax/DataSet'
 import DatasetFilterList from 'src/components/data_search/DatasetFilterList'
-import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 
@@ -41,11 +39,6 @@ export const DatasetSearchTable = (props) => {
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1
 
-  const anyFiltersSelected = filters =>
-    Object.values(filters).some((filter) => {
-      return isArray(filter) ? filter.length > 0 : filter !== null
-    })
-
   const getExportableDatasets = async (datasets) => {
     // Note the dataset identifier is in each sub-table row.
     const datasetIdentifiers = datasets.map(row => row.datasetIdentifier)
@@ -57,128 +50,6 @@ export const DatasetSearchTable = (props) => {
         .groupBy('duosId')
         .value()
       setExportableDatasets(datasetIdToSnapshot)
-    }
-  }
-
-  const assembleFullQuery = () => {
-    const queryChunks = [
-      {
-        match: {
-          _type: 'dataset',
-        },
-      },
-      {
-        exists: {
-          field: 'study',
-        },
-      },
-    ]
-
-    // do not apply search modifier if there is no search term
-    if (searchTerm.length > 0) {
-      const searchModifier = [
-        {
-          multi_match: {
-            query: searchTerm,
-            type: 'phrase_prefix',
-            fields: [
-              'datasetName',
-              'dataLocation',
-              'study.description',
-              'study.studyName',
-              'study.species',
-              'study.piName',
-              'study.dataCustodianEmail',
-              'study.dataTypes',
-              'dataUse.primary.code',
-              'dataUse.secondary.code',
-              'dac.dacName',
-              'datasetIdentifier',
-            ],
-          },
-        },
-      ]
-      queryChunks.push(...searchModifier)
-    }
-
-    let filterQuery = {}
-    if (anyFiltersSelected(filters)) {
-      const filterTerms = []
-
-      filterTerms.push({
-        bool: {
-          should:
-              filters.accessManagement.map(term => ({
-                term: {
-                  accessManagement: term,
-                },
-              })),
-        },
-      })
-
-      filterTerms.push({
-        bool: {
-          should:
-              filters.dataUse.map(term => ({
-                match: {
-                  'dataUse.primary.code': term,
-                },
-              })),
-        },
-      })
-
-      filterTerms.push({
-        bool: {
-          should:
-              filters.dataType.map(term => ({
-                match: {
-                  'study.dataTypes': term,
-                },
-              })),
-        },
-      })
-
-      filterTerms.push({
-        bool: {
-          should:
-              filters.dac.map(term => ({
-                match_phrase: {
-                  'dac.dacName': term,
-                },
-              })),
-        },
-      })
-
-      filterTerms.push({
-        range: {
-          participantCount: {
-            gte: filters.participantCountMin,
-            lte: filters.participantCountMax,
-          },
-        },
-      })
-
-      if (filterTerms.length > 0) {
-        filterQuery = [
-          {
-            bool: {
-              must: filterTerms,
-            },
-          },
-        ]
-      }
-    }
-
-    return {
-      from: 0,
-      size: 10000,
-      query: {
-        bool: {
-          must: queryChunks,
-          // Only add filter subquery when filters are applied.
-          ...(Object.keys(filterQuery).length > 0 && { filter: filterQuery }),
-        },
-      },
     }
   }
 
@@ -208,22 +79,9 @@ export const DatasetSearchTable = (props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const searchAndFilter = useRef(
-    debounce((fullQuery) => {
-      DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-        const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)))
-        setFiltered(newFiltered)
-      })
-    }, 150))
-
   useEffect(() => {
-    const fullQuery = assembleFullQuery()
-    try {
-      searchAndFilter.current(fullQuery)
-    }
-    catch (_error) {
-      Notifications.showError({ text: 'Failed to load Elasticsearch index' })
-    }  }, [filters, searchTerm]); // eslint-disable-line
+    setFiltered(datasets)
+  }, [datasets])
 
   return (
     <>
