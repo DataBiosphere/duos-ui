@@ -1,13 +1,10 @@
-import axios from 'axios'
 import { Config } from '../config'
+import { fetchMultipart } from 'src/libs/ajax/fetchAdapter'
 
 export const ProgressReport = {
   submitProgressReport: async (progressReport: object, parentReferenceId: string) => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/progress_report/` + parentReferenceId
-    return await axios.post(
-      url,
-      progressReport,
-      Config.multiPartOpts(),
-    )
+    // Assume progressReport is a FormData instance for multipart
+    return await fetchMultipart(url, progressReport, Config.multiPartOpts())
   },
 }

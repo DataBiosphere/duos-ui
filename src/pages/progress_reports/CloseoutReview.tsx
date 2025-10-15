@@ -5,7 +5,6 @@ import { Notifications } from 'src/libs/utils'
 import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 import { Storage } from 'src/libs/storage'
 import { DAR } from 'src/libs/ajax/DAR'
-import { AxiosError } from 'axios'
 import { DataAccessRequest } from 'src/types/model'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
@@ -36,9 +35,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
 
   const onError = (error: unknown) => {
     setAcknowledged(false)
-    const err = error as AxiosError<Record<string, string>>
-    const message = err.response?.data.message
-    Notifications.showError({ text: 'Error approving closeout review: ' + message })
+    Notifications.showError({ text: 'Error approving closeout review: ' + extractError(error) })
   }
 
   // Required to get Chairperson acknowledgments of closeouts

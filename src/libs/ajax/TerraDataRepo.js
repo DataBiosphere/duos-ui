@@ -1,5 +1,5 @@
 import { Config } from '../config'
-import axios from 'axios'
+import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 import { partition } from '../utils'
 
 export const TerraDataRepo = {
@@ -20,7 +20,7 @@ export const TerraDataRepo = {
     const snapshotPromises = partitionedIdentifiers.map((sublist) => {
       // 1000 should be safe with only 70 DUOS IDs.
       const url = `${rootTdrApiUrl}/api/repository/v1/snapshots?limit=1000&duosDatasetIds=${sublist.join('&duosDatasetIds=')}`
-      return axios.get(url, Config.authOpts())
+      return fetchGet(url, Config.authOpts())
     })
     await Promise.all(snapshotPromises).then(function (responses) {
       responses.forEach((res) => {

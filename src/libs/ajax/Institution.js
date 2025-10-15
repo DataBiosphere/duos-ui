@@ -1,7 +1,6 @@
-import { mergeAll } from 'lodash/fp'
 import { Config } from '../config'
-import axios from 'axios'
 import { getApiUrl, fetchOk } from '../ajax'
+import { fetchPost, fetchPut, fetchPatch, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 export const Institution = {
   list: async () => {
@@ -18,24 +17,25 @@ export const Institution = {
 
   postInstitution: async (institution) => {
     const url = `${await getApiUrl()}/api/institutions`
-    const res = await axios.post(url, institution, Config.authOpts())
+    const res = await fetchPost(url, institution, Config.authOpts())
     return res.data
   },
 
   putInstitution: async (id, institution) => {
     const url = `${await getApiUrl()}/api/institutions/${id}`
-    const res = await axios.put(url, institution, Config.authOpts())
+    const res = await fetchPut(url, institution, Config.authOpts())
     return res.data
   },
 
   patchInstitution: async (id, institution) => {
     const url = `${await getApiUrl()}/api/institutions/${id}`
-    const res = await axios.patch(url, institution, Config.authOpts())
+    const res = await fetchPatch(url, institution, Config.authOpts())
     return res.data
   },
 
   deleteInstitution: async (id) => {
     const url = `${await getApiUrl()}/api/institutions/${id}`
-    return await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]))
+    const res = await fetchDelete(url, Config.authOpts())
+    return res.data
   },
 }
