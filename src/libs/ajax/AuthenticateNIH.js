@@ -1,6 +1,7 @@
 import { Config } from 'src/libs/config'
 import { getECMUrl, getApiUrl } from 'src/libs/ajax'
 import { fetchGet, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
+import { merge } from 'lodash'
 
 /**
  * ECM has several different providers such as `era-commons`, `ras`, `gitHub`, `fence`, and others. DUOS has
@@ -19,7 +20,9 @@ export const AuthenticateNIH = {
 
   getECMProviderAuthUrl: async (redirectUri, redirectTo) => {
     const url = `${await getECMUrl()}/api/oauth/v1/${provider}/authorization-url?redirectUri=${redirectUri}`
-    const res = await fetchPost(url, { redirectTo: redirectTo }, Config.authOpts())
+    // ECM returns a `text/plain` response and expects an `Accept: */*` request header
+    const authOpts = merge({}, Config.authOpts(), { headers: { Accept: '*/*' } })
+    const res = await fetchPost(url, { redirectTo: redirectTo }, authOpts)
     if (res?.data) {
       return res.data
     }
