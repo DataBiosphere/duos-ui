@@ -1,4 +1,4 @@
-# RAS/eRA Commons Integration
+# RAS Integration
 
 DUOS uses ECM as an intermediary to allow users to authenticate
 with NIH. ECM provides a redirect url that we point the user to.
