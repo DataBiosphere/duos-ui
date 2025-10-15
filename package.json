@@ -57,7 +57,7 @@
     "cypress": "15.4.0",
     "cypress-vite": "1.8.0",
     "eslint": "9.37.0",
-    "eslint-plugin-cypress": "5.1.1",
+    "eslint-plugin-cypress": "5.2.0",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-react-refresh": "0.4.22",
