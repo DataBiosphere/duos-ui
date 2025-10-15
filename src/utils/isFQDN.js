@@ -1,3 +1,5 @@
+// Code from https://github.com/validatorjs/validator.js
+// Original license: https://github.com/validatorjs/validator.js/blob/master/LICENSE
 const default_fqdn_options = {
   require_tld: true,
   allow_underscores: false,
