@@ -19,7 +19,10 @@ export const AuthenticateNIH = {
 
   getECMProviderAuthUrl: async (redirectUri, redirectTo) => {
     const url = `${await getECMUrl()}/api/oauth/v1/${provider}/authorization-url?redirectUri=${redirectUri}`
-    const res = await fetchPost(url, { redirectTo: redirectTo }, Config.authOpts())
+    const configs = Config.authOpts()
+    // ECM returns a `text/plain` response and expects an `Accept: */*` request header
+    configs.headers.Accept = '*/*'
+    const res = await fetchPost(url, { redirectTo: redirectTo }, configs)
     if (res?.data) {
       return res.data
     }
