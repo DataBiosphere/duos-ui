@@ -22,22 +22,11 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
 
   const buttonStyle = disabled ? disabledStyle : {}
 
-  const renderPresentationColumnContent = (column: string, presentation: Presentation): React.ReactNode => {
-    const value: string | boolean | string[] | { name: string, email: string } | undefined = presentation[column as keyof Presentation]
-    if (column === 'presenter' && value && typeof value === 'object' && !Array.isArray(value)) {
-      return <span>{value.name}{value.email ? ` (${value.email})` : ''}</span>
-    }
-    if (Array.isArray(value)) {
-      return value.join(', ')
-    }
-    return value != null ? String(value) : null
-  }
-
   return (
     <div className="collaborator-summary-card">
       {/* data elements to show in the row summary */}
       {columnsToShow.map((column, index) => {
-        const columnContent = renderPresentationColumnContent(column, presentation)
+        const columnContent = presentation[column as keyof Presentation]
         return columnContent && (
           <div key={'presentation_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>

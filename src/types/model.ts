@@ -322,8 +322,8 @@ export interface Study {
   assets?: {
     models?: Array<AiModel>
     workspaces?: Array<Workspace>
-    publications?: Array<Publication>
-    presentations?: Array<Presentation>
+    publications?: Array<StudyPublication>
+    presentations?: Array<StudyPresentation>
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
     intellectualProperty?: Array<IntellectualProperty>
@@ -664,44 +664,53 @@ export interface Closeout {
   signingOfficialId: number
 }
 
-export interface Presentation {
-  // Existing fields
+interface BasePresentation {
   title: string
-  link?: string
   date: string
-  authors?: string
-  datasetCitation?: string
-  citation?: boolean
-  // New study fields
-  presentationId?: string
-  studyId?: string
-  presenter?: { name: string, email: string }
-  event?: string
-  location?: string
-  url?: string
-  format?: string
-  access?: string
+}
+
+export interface StudyPresentation extends BasePresentation {
+  presentationId: string
+  studyId: string
+  presenter: { name: string, email: string }
+  event: string
+  location: string
+  url: string
+  format: string
+  access: string
   tags?: string[]
 }
 
-export interface Publication {
-  // Existing fields
+export interface Presentation extends BasePresentation {
+  link: string
+  authors: string
+  datasetCitation: string
+  citation: boolean
+}
+
+interface BasePublication {
   title: string
-  date: string
-  pubmedId?: string
-  authors: string | Array<{ name: string, orcId: string }>
-  bibliographicCitation?: string
-  datasetCitation?: string
-  citation?: boolean
-  // New study fields
-  publicationId?: string
-  studyId?: string
-  journal?: string
-  doi?: string
-  url?: string
-  publicationDate?: string
-  access?: string
+}
+
+export interface StudyPublication extends BasePublication {
+  publicationId: string
+  studyId: string
+  authors: Array<{ name: string, orcId: string }>
+  journal: string
+  doi: string
+  url: string
+  published_date: string
+  access: string
   tags?: string[]
+}
+
+export interface Publication extends BasePublication {
+  pubmedId: string
+  date: string
+  authors: string
+  bibliographicCitation: string
+  datasetCitation: string
+  citation: boolean
 }
 
 export interface Collaborator {
