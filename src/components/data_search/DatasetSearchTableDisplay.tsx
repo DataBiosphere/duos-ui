@@ -117,9 +117,7 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
       sort: sort,
     })
   },
-  // Proxy filteredData for indicating changes to rows from list of deps in useEffect otherise we get a loop
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  [tableSize, pageCount, currentPage, setPageCount, setCurrentPage, filteredData, sort])
+  [tableSize, pageCount, currentPage, setPageCount, setCurrentPage, rows, sort])
 
   return (
     <>
