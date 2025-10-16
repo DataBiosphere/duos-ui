@@ -687,8 +687,8 @@ export interface Presentation {
 export interface Publication {
   // Existing fields
   title: string
+  date: string
   pubmedId?: string
-  date?: string
   authors: string | Array<{ name: string, orcId: string }>
   bibliographicCitation?: string
   datasetCitation?: string
