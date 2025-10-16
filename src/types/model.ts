@@ -319,6 +319,86 @@ export interface Study {
   createUserId: number
   updateDate?: string // Date?
   updateUserId?: number
+  assets?: {
+    models?: Array<AiModel>
+    workspaces?: Array<Workspace>
+    publications?: Array<Publication>
+    presentations?: Array<Presentation>
+    clinicalTrials?: Array<ClinicalTrial>
+    funding?: Array<FundingResource>
+    intellectualProperty?: Array<IntellectualProperty>
+  }
+}
+
+export interface AiModel {
+  modelId: string
+  studyId: string
+  name: string
+  description: string
+  url: string
+  format: string
+  license: string
+  trainedOnDatasets: string[]
+  maintainer: {
+    name: string
+    email: string
+  }
+  tags?: string[]
+}
+
+export interface Workspace {
+  workspaceId: string
+  studyId: string
+  name: string
+  platform: string
+  url: string
+  description: string
+  tools: string[]
+  access: string
+  tags?: string[]
+}
+
+export interface ClinicalTrial {
+  clinicalTrialId: string
+  studyId: string
+  title: string
+  registry: string
+  identifier: string
+  status: string
+  sponsor: string
+  startDate: string
+  endDate: string
+  interventionType: string
+  description: string
+  phase: string
+  url: string
+  tags?: string[]
+}
+
+export interface FundingResource {
+  fundingId: string
+  studyId: string
+  funderName: string
+  funderProgram: string
+  projectTitle: string
+  startDate: string
+  endDate: string
+  url: string
+  tags?: string[]
+}
+
+export interface IntellectualProperty {
+  ipId: string
+  studyId: string
+  type: string
+  title: string
+  assignee: string
+  patentNumber: string
+  filingDate: string
+  status: string
+  url: string
+  contact: string
+  tags?: string[]
 }
 
 export interface StudyProperty {
@@ -585,22 +665,43 @@ export interface Closeout {
 }
 
 export interface Presentation {
+  // Existing fields
   title: string
-  link: string
+  link?: string
   date: string
-  authors: string
-  datasetCitation: string
-  citation: boolean
+  authors?: string
+  datasetCitation?: string
+  citation?: boolean
+  // New study fields
+  presentationId?: string
+  studyId?: string
+  presenter?: { name: string, email: string }
+  event?: string
+  location?: string
+  url?: string
+  format?: string
+  access?: string
+  tags?: string[]
 }
 
 export interface Publication {
+  // Existing fields
   title: string
-  pubmedId: string
-  date: string
-  authors: string
-  bibliographicCitation: string
-  datasetCitation: string
-  citation: boolean
+  pubmedId?: string
+  date?: string
+  authors: string | Array<{ name: string, orcId: string }>
+  bibliographicCitation?: string
+  datasetCitation?: string
+  citation?: boolean
+  // New study fields
+  publicationId?: string
+  studyId?: string
+  journal?: string
+  doi?: string
+  url?: string
+  publicationDate?: string
+  access?: string
+  tags?: string[]
 }
 
 export interface Collaborator {
