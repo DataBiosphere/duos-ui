@@ -338,7 +338,7 @@ export interface Study {
     models?: Array<AiModel>
     workspaces?: Array<Workspace>
     publications?: Array<StudyPublication>
-    presentations?: Array<StudyPresentation>
+    presentations?: Array<Presentation>
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
     intellectualProperty?: Array<IntellectualProperty>
@@ -676,28 +676,23 @@ export interface Closeout {
   signingOfficialId: number
 }
 
-interface BasePresentation {
+export interface Presentation {
   title: string
   date: string
-}
-
-export interface StudyPresentation extends BasePresentation {
-  presentationId: string
-  studyId: string
-  presenter: Presenter
-  event: string
-  location: string
-  url: string
-  format: string
-  access: string
+  // ToDO: Make existing Progress Report fields required in DT-2361
+  link?: string // ToDo: Remove in DT-2361 to be replaced by url
+  authors?: string
+  datasetCitation?: string
+  citation?: boolean
+  // ToDo: Make new study fields required in DT-2361 except for tags
+  presentationId?: string
+  studyId?: string
+  presenter?: Presenter
+  event?: string
+  location?: string
+  format?: string
+  access?: string
   tags?: string[]
-}
-
-export interface Presentation extends BasePresentation {
-  link: string
-  authors: string
-  datasetCitation: string
-  citation: boolean
 }
 
 interface BasePublication {
