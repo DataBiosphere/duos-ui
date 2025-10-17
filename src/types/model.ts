@@ -312,12 +312,12 @@ interface Contact extends Person {
   email: string
 }
 
-interface Author extends Person {
+export interface Author extends Person {
   orcId: string
 }
 
-type Maintainer = Contact
-type Presenter = Contact
+export type Maintainer = Contact
+export type Presenter = Contact
 
 export interface Study {
   studyId: number

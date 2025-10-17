@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
-import { Presentation } from 'src/types/model'
+import { Presentation, Presenter } from 'src/types/model'
+import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface PresentationSummaryProps {
   presentation: Presentation
@@ -22,21 +23,24 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
 
   const buttonStyle = disabled ? disabledStyle : {}
 
-  const renderPresentationColumnContent = (column: string, presentation: Presentation): React.ReactNode => {
-    const value = presentation[column as keyof Presentation]
-    if (column === 'presenter' && value && typeof value === 'object' && !Array.isArray(value)) {
-      return <span>{value.name}{value.email ? ` (${value.email})` : ''}</span>
-    }
-    if (Array.isArray(value)) return value.join(', ')
-    if (value == null) return null
-    return typeof value === 'object' ? JSON.stringify(value) : String(value)
+  const customRenderers = {
+    presenter: (value: unknown) => {
+      const presenter = value as Presenter
+      if (!presenter || typeof presenter !== 'object') return null
+      return (
+        <span>
+          {presenter.name}
+          {presenter.email ? ` (${presenter.email})` : ''}
+        </span>
+      )
+    },
   }
 
   return (
     <div className="collaborator-summary-card">
       {/* data elements to show in the row summary */}
       {columnsToShow.map((column, index) => {
-        const columnContent = renderPresentationColumnContent(column, presentation)
+        const columnContent = renderColumnContent(column, presentation[column as keyof Presentation], customRenderers)
         return columnContent && (
           <div key={'presentation_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>
