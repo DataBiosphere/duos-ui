@@ -3,16 +3,6 @@ import { DeletePresentationOrPublication } from 'src/components/presentation_pub
 import { Presentation, Presenter } from 'src/types/model'
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
-function PresenterCell({ presenter }: { readonly presenter: Presenter | null }) {
-  if (!presenter || typeof presenter !== 'object') return null
-  return (
-    <span>
-      {presenter.name}
-      {presenter.email ? ` (${presenter.email})` : ''}
-    </span>
-  )
-}
-
 interface PresentationSummaryProps {
   presentation: Presentation
   readonly columnsToShow: string[]
@@ -34,7 +24,16 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
   const buttonStyle = disabled ? disabledStyle : {}
 
   const customRenderers = {
-    presenter: (value: unknown) => <PresenterCell presenter={value as Presenter} />,
+    presenter: (value: unknown) => {
+      const presenter = value as Presenter
+      if (!presenter || typeof presenter !== 'object') return null
+      return (
+        <span>
+          {presenter.name}
+          {presenter.email ? ` (${presenter.email})` : ''}
+        </span>
+      )
+    },
   }
 
   return (
