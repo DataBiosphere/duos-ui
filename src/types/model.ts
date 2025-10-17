@@ -700,11 +700,11 @@ export interface Publication {
   // ToDO: Make existing Progress Report fields required in DT-2358
   pubmedId?: string
   date?: string
-  authors?: string | Array<Author> // ToDo: Remove string option in DT-2358 to be replaced by Array<Author>
+  authors?: string | Array<Author> // ToDo: Remove string option in DT-2358
   bibliographicCitation?: string
   datasetCitation?: string
   citation?: boolean
-  // ToDo: Make new study fields required in DT-2358except for tags
+  // ToDo: Make new study fields required in DT-2358 except for tags
   publicationId?: string
   studyId?: string
   journal?: string
