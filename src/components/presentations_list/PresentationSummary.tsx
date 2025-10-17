@@ -23,23 +23,13 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
   const buttonStyle = disabled ? disabledStyle : {}
 
   const renderPresentationColumnContent = (column: string, presentation: Presentation): React.ReactNode => {
-    const value: string | boolean | string[] | { name: string, email: string } | undefined = presentation[column as keyof Presentation]
+    const value = presentation[column as keyof Presentation]
     if (column === 'presenter' && value && typeof value === 'object' && !Array.isArray(value)) {
       return <span>{value.name}{value.email ? ` (${value.email})` : ''}</span>
     }
-    if (Array.isArray(value)) {
-      return value.join(', ')
-    }
+    if (Array.isArray(value)) return value.join(', ')
     if (value == null) return null
-    if (typeof value === 'object') {
-      try {
-        return JSON.stringify(value)
-      }
-      catch {
-        return '[unserializable object]'
-      }
-    }
-    return String(value)
+    return typeof value === 'object' ? JSON.stringify(value) : String(value)
   }
 
   return (

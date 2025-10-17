@@ -26,24 +26,18 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
     const value = publication[column as keyof Publication]
     if (column === 'authors') {
       if (Array.isArray(value)) {
-        return value.map((author: string | { name: string, orcId: string }, i: number) =>
+        return value.map((author, i) =>
           typeof author === 'object' && author !== null
             ? <span key={author.orcId || i}>{author.name}{i < value.length - 1 ? ', ' : ''}</span>
             : String(author),
         )
       }
       if (value == null) return null
-      if (typeof value === 'object') {
-        try {
-          return JSON.stringify(value)
-        }
-        catch {
-          return '[unserializable object]'
-        }
-      }
-      return String(value)
+      return typeof value === 'object' ? JSON.stringify(value) : String(value)
     }
-    return value as React.ReactNode
+    if (Array.isArray(value)) return value.join(', ')
+    if (value == null) return null
+    return typeof value === 'object' ? JSON.stringify(value) : String(value)
   }
 
   return (
