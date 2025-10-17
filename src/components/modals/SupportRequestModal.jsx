@@ -29,7 +29,7 @@ const getInitialState = () => {
     description: '',
     attachment: '',
     email: Storage.userIsLogged() ? Storage.getCurrentUser().email : '',
-    first_name: Storage.userIsLogged() ? Storage.getCurrentUser().displayName.split(' ')[0] : '',
+    first_name: Storage.userIsLogged() ? Storage.getCurrentUser().displayName?.split(' ')[0] : '',
     height: Storage.userIsLogged() ? (window.innerHeight < 550 ? window.innerHeight : '550px') : (window.innerHeight < 700 ? window.innerHeight : '700px'),
     top: Storage.userIsLogged() ? '400px' : '1',
     valid: Storage.userIsLogged(),
