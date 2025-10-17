@@ -31,6 +31,14 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
       return value.join(', ')
     }
     if (value == null) return null
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value)
+      }
+      catch {
+        return '[unserializable object]'
+      }
+    }
     return String(value)
   }
 
