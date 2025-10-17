@@ -532,14 +532,13 @@ export const sortVisibleTable = ({ list, sort }) => {
       if (typeof aVal === 'number' || typeof aVal === 'boolean') {
         return (aVal > bVal ? -1 : 1) * sort.dir
       }
-      else {
-        if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
-          return (aVal > bVal ? -1 : 1) * sort.dir
-        }
-        else {
-          return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir)
-        }
+      else if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
+        return (aVal > bVal ? -1 : 1) * sort.dir
       }
+      else if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir)
+      }
+      return (aVal > bVal ? -1 : 1) * sort.dir
     })
   }
 }
