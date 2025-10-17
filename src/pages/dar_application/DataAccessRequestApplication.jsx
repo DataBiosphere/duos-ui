@@ -32,15 +32,18 @@ import { assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set } from
 import { Countries } from 'src/libs/ajax/Countries.js'
 import PropTypes from 'prop-types'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
+import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview.js'
+import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils.js'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
 const DATA_ACCESS_REQUEST_TAB_ID = 'data-access-request'
 const RESEARCH_PURPOSE_STATEMENT_TAB_ID = 'research-purpose'
 const DATA_ACCESS_AGREEMENTS_TAB_ID = 'data-access-agreements'
-const DAR_UPDATE_TAB_ID_PREFIX = 'dar-update-'
+const PROGRESS_REPORT_TAB_ID_PREFIX = 'progress-report-'
 const PROGRESS_REPORT_APPLICATION_TAB_ID = 'progress-report-app'
 const ADDENDUM_TAB_ID = 'addendum'
+const VOTING_HISTORY_TAB_ID = 'voting-history-info'
 const ApplicationTabs = [
   { name: 'Researcher Information', id: RESEARCHER_INFO_TAB_ID },
   { name: 'Data Access Request', id: DATA_ACCESS_REQUEST_TAB_ID },
@@ -117,7 +120,7 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   })
 
-  const { history, location, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication, collection } = props
+  const { history, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication, collection } = props
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} })
 
@@ -312,15 +315,17 @@ const DataAccessRequestApplication = (props) => {
       let appTabs = []
       if (isProgressReportApplication) {
         // if we are creating a new progress report, we need to add another tab for the application
-        appTabs = [{ name: 'DAR Update ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
+        appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
       }
       setApplicationTabs([...appTabs,
         ...reverseOrderedDARs.map((_dar, index) => {
           const whichPRIsThis = reverseOrderedDARs.length - index - 1
           const isLast = index === reverseOrderedDARs.length - 1
-          const itemLabel = isLast ? formData?.darCode : 'DAR Update ' + whichPRIsThis
-          return { name: itemLabel, id: `${DAR_UPDATE_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
-        })])
+          const itemLabel = isLast ? formData?.darCode : 'Progress Report ' + whichPRIsThis
+          return { name: itemLabel, id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
+        }),
+        { name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false },
+      ])
     }
   }, [formData?.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
 
@@ -541,6 +546,47 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
+  const votes = reverseOrderedDARs.map((dar) => {
+    const election = dar.elections
+      ? Object.values(dar.elections).find(e => e.electionType === 'DataAccess')
+      : undefined
+
+    // Find the Final vote for decision and rationale
+    let finalVoteDecision = 'Pending'
+    let finalVoteRationale = 'No rationale provided.'
+    let finalVoteDate = election?.createDate
+    if (election?.votes) {
+      const votesArr = Array.isArray(election.votes)
+        ? election.votes
+        : Object.values(election.votes)
+      const finalVote = votesArr.find(v => v.type === VOTE_TYPES.FINAL)
+      if (finalVote) {
+        finalVoteDate = finalVote.createDate
+        finalVoteDecision = finalVote.vote === true ? 'Approved' : finalVote.vote === false ? 'Denied' : 'Pending'
+        finalVoteRationale = finalVote.rationale || 'No rationale provided.'
+      }
+    }
+
+    return {
+      datasetName: datasets.find(d => d.datasetId === election?.datasetId)?.name || 'Unknown Dataset',
+      voteDate: new Date(finalVoteDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
+      linkedDarId: dar?.collectionId,
+      voteResult: {
+        decision: finalVoteDecision,
+        rationale: finalVoteRationale,
+      },
+      status: election?.status || 'Completed',
+    }
+  })
+
+  const dar = {
+    referenceId: formData?.darCode || '',
+    piName: formData?.piName || '',
+    institution: formData?.institution || '',
+    status: votes.some(vote => vote.status === ElectionStatus.OPEN) ? ElectionStatus.OPEN : ElectionStatus.CLOSED,
+  }
+
   const back = () => {
     history.goBack()
   }
@@ -589,7 +635,7 @@ const DataAccessRequestApplication = (props) => {
 
         <div style={{ clear: 'both' }} />
         <form name="form" noValidate={true} className="forms-v2">
-          <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab} />
+          <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab} onTabChange={setTab} />
 
           <div id="form-views">
             <ConfirmationDialog
@@ -622,14 +668,13 @@ const DataAccessRequestApplication = (props) => {
               <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className="dar-steps">
                 <ConditionalAccordion
                   condition={false}
-                  title={`DAR Report ${reverseOrderedDARs.length}`}
+                  title={`Progress Report ${reverseOrderedDARs.length}`}
                 >
                   <ProgressReportApplication
                     readOnlyMode={false}
                     datasets={datasets}
                     dar={merge(reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
                     history={history}
-                    location={location}
                     researcher={researcher}
                     countriesOfOperation={countriesOfOperation}
                   />
@@ -642,18 +687,17 @@ const DataAccessRequestApplication = (props) => {
                 {reverseOrderedDARs.map((dar, index) => {
                   if ((index + 1 !== reverseOrderedDARs.length)) {
                     return (
-                      <div key={`dar-${index}`} id={`${DAR_UPDATE_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
+                      <div key={`dar-${index}`} id={`${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
                         <ConditionalAccordion
                           key={`dar-${index}`}
                           condition={true}
-                          title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
+                          title={`Progress Report ${reverseOrderedDARs.length - index - 1}`}
                           defaultExpanded={index === 0}
                         >
                           <ProgressReportApplication
                             readOnlyMode={true}
                             datasets={datasets}
                             dar={merge(dar?.data, dar)}
-                            location={undefined}
                             researcher={researcher}
                             countriesOfOperation={countriesOfOperation}
                           />
@@ -664,8 +708,7 @@ const DataAccessRequestApplication = (props) => {
                 })}
               </div>
             )}
-
-            <div id={`${DAR_UPDATE_TAB_ID_PREFIX}0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
+            <div id={`${PROGRESS_REPORT_TAB_ID_PREFIX}0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {existingDarsReadOnlyMode && (
                 <h3>
                   {formData.darCode}
@@ -689,7 +732,6 @@ const DataAccessRequestApplication = (props) => {
                     formValidationChange={val => formValidationChange('researcherInfoErrors', val)}
                     eRACommonsDestination={eRACommonsDestination}
                     formFieldChange={formFieldChange}
-                    location={location}
                     nihValid={nihValid}
                     onNihStatusUpdate={setNihValid}
                     showNihValidationError={showNihValidationError}
@@ -793,6 +835,12 @@ const DataAccessRequestApplication = (props) => {
                     />
                   </div>
                 )}
+              {!isEmpty(votes)
+                && (
+                  <div id={VOTING_HISTORY_TAB_ID} className={existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                    <VotingHistoryOverview dar={dar} votes={votes} />
+                  </div>
+                )}
             </div>
           </div>
         </form>
@@ -806,7 +854,6 @@ export default DataAccessRequestApplication
 DataAccessRequestApplication.propTypes = {
   match: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
   draftDar: PropTypes.bool.isRequired,
   isProgressReportApplication: PropTypes.bool.isRequired,
   existingDarsReadOnlyMode: PropTypes.bool,

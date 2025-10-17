@@ -1,7 +1,7 @@
 import { find, isEmpty } from 'lodash/fp'
 import { filter } from 'lodash'
 import { Config } from './config'
-import axios from 'axios'
+import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 // https://storage.googleapis.com/broad-duos-banners/{{env}}_notifications.json
 const gcs = 'https://storage.googleapis.com/broad-duos-banners'
@@ -19,7 +19,7 @@ export const NotificationService = {
       = env === 'local'
         ? gcs + '/dev_' + bannerFileName
         : gcs + '/' + env + '_' + bannerFileName
-    const res = await axios.get(url)
+    const res = await fetchGet(url)
     return res.data
   },
 

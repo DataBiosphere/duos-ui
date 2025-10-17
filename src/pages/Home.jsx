@@ -130,23 +130,20 @@ const Home = (props) => {
               <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
               <h1 style={homeTitle}>Data Use Oversight System</h1>
               <div className="hidden-xs" style={homeBannerDescription}>
-                Expediting compliant data sharing, by facilitating data submissions and access requests
+                Get data faster.
                 {' '}
-                <br />
-                {' '}
-                for researchers and data access committees
               </div>
             </div>
           </div>
           <div className="row">
             <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
-              <h1 style={header}>What is DUOS and how does it work?</h1>
+              <h1 style={header}>How does DUOS expedite compliant data sharing?</h1>
               <h3 style={subHeader}>
-                DUOS is a multi-sided data sharing platform bringing together researchers submitting and requesting data,
+                Researchers use DUOS to share and request access to data, and data access committees
                 {' '}
                 <br />
                 {' '}
-                and data access committees and institutional officials overseeing the use of the data.
+                and institutional officials use DUOS to review and approve research uses of the data.
               </h3>
               <div>
                 <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
@@ -167,26 +164,26 @@ const Home = (props) => {
               </div>
             </div>
             <div className="col-lg-4 col-md-4 ">
-              <p style={header}>Institutional Oversight</p>
-              <p style={description}>DUOS reduces repetitive work for Signing Officials and expedites data sharing through our innovative Library Card-style agreements.</p>
+              <p style={header}>Approving your researchers to submit or request data?</p>
+              <p style={description}>Signing Officials can login to request status to approve researchers or click below to learn more about our expedite data access agreements</p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
                 <a href="https://duos.blog/help/preauthorize_researchers_librarycards/" target="_blank" rel="noreferrer" id="blog-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
             </div>
             <div className="col-lg-4 col-md-4">
               <p style={header}>Looking for data?</p>
-              <p style={description}>DUOS helps researchers request and access data from multiple sources with a single application.</p>
+              <p style={description}>Find and request access to 100s of datasets now!</p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a href="https://duos.blog/help/researcherguide/" id="blog-support-researcher-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+                <a href="https://duos.org/datalibrary" id="data-library-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
             </div>
           </div>
 
           <section style={{ margin: '5rem auto', padding: '0 2rem' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-              <p style={header}>Data Libraries in DUOS</p>
+              <p style={header}>Search Data Libraries in DUOS</p>
               <p style={description}>
-                Click the images below to view curated Data Libraries, and search and request access to data.
+                Explore curated Data Libraries for studies, programs, and institutions below. Contact us to request your own!
               </p>
 
               <div style={logoGrid} className="logo-grid">

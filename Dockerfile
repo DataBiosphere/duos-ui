@@ -1,5 +1,5 @@
 # builder image
-FROM node:24.9.0 AS builder
+FROM node:24.9.0-trixie AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
 # set working directory

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model'
-import { History, Location } from 'history'
+import { History } from 'history'
 import {
   CLOSEOUT_KEYS,
   DMI_INCIDENT_KEYS,
@@ -32,12 +32,11 @@ type ProgressReportApplicationProps = {
   readonly datasets: Dataset[]
   readonly readOnlyMode: boolean
   readonly history: History
-  readonly location?: Location
   readonly researcher: DuosUser
   readonly countriesOfOperation: string[]
 }
 
-export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, location, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
   const initialState: FormState = {
     ...dar,
     publications: (dar.publications || []),
@@ -213,7 +212,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           onFormChange={onFormChange}
           eRACommonsDestination={eRACommonsDestination}
           researcher={researcher}
-          location={location}
           validation={formValidation.darErrors}
           nihValid={nihValid}
           onNihStatusUpdate={setNihValid}

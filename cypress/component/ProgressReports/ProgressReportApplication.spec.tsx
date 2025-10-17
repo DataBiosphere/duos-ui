@@ -16,6 +16,9 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.stub(window, 'fetch').resolves({
       ok: true,
       json: () => Promise.resolve([]),
+      headers: {
+        get: () => 'application/json',
+      },
     })
 
     // Mock Storage methods that might be used

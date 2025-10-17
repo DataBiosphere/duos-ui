@@ -15,12 +15,12 @@ describe('Home Page - Tests', function () {
 
     it('renders the page header correctly', function () {
       cy.contains('Data Use Oversight System').should('be.visible')
-      cy.contains('Expediting compliant data sharing').should('be.visible')
+      cy.contains('Get data faster').should('be.visible')
     })
 
     it('renders the Data Libraries section with consistent message', function () {
       cy.contains('Data Libraries in DUOS').should('be.visible')
-      cy.contains('Click the images below to view curated Data Libraries').should('be.visible')
+      cy.contains('Explore curated Data Libraries for studies').should('be.visible')
     })
 
     it('displays tooltips with login required message for data libraries', function () {
@@ -71,12 +71,12 @@ describe('Home Page - Tests', function () {
 
     it('renders the page header correctly', function () {
       cy.contains('Data Use Oversight System').should('be.visible')
-      cy.contains('Expediting compliant data sharing').should('be.visible')
+      cy.contains('Get data faster').should('be.visible')
     })
 
     it('renders the Data Libraries section with clickable message', function () {
       cy.contains('Data Libraries in DUOS').should('be.visible')
-      cy.contains('Click the images below to view curated Data Libraries').should('be.visible')
+      cy.contains('Explore curated Data Libraries for studies').should('be.visible')
     })
 
     it('displays tooltips with correct text for data libraries', function () {

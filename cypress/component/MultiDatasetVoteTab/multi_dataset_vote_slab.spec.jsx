@@ -234,6 +234,16 @@ const collection = {
 
 describe('MultiDatasetVoteSlab - Tests', function () {
   it('Renders data use pills', function () {
+    cy.stub(Storage, 'getCurrentUser').returns({
+      userId: 1,
+      displayName: 'Chair',
+      institution: {
+        id: 150,
+        name: 'The Broad Institute of MIT and Harvard',
+      },
+      roles: [{ dacId: 4 }],
+      isChairPerson: true,
+    })
     mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"

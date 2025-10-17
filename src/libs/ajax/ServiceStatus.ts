@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { getApiUrl, getOntologyUrl } from '../ajax'
+import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 interface SystemHealth {
   healthy: boolean
@@ -72,13 +72,13 @@ export interface ConsentStatus extends BaseStatus {
 export const ServiceStatus = {
   getConsentStatus: async (): Promise<ConsentStatus> => {
     const url = `${await getApiUrl()}/status`
-    const result = await axios.get(url)
+    const result = await fetchGet(url)
     return result.data
   },
 
   getOntologyStatus: async (): Promise<OntologyStatus> => {
     const url = `${await getOntologyUrl()}/status`
-    const result = await axios.get(url)
+    const result = await fetchGet(url)
     return result.data
   },
 

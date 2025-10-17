@@ -3,7 +3,7 @@ import { get, isEmpty, isNil } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
 import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
-import { DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model'
+import { DacTerm, DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model'
 
 // Components
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox'
@@ -21,6 +21,7 @@ type Bucket = {
   datasets: Dataset[]
   elections: Election[]
   dataUses?: DataUse[]
+  dacs?: DacTerm[]
 }
 
 interface MultiDatasetVoteSlabProps {
@@ -93,9 +94,7 @@ const styles = {
 // Components
 const DataUseSummary = ({ bucket }: DataUseSummaryProps) => {
   const dataUses = get(bucket, 'dataUses', [])
-  return !isNil(dataUses)
-    ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
-    : <></>
+  return isNil(dataUses) ? <></> : <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
 }
 
 const VoteInfoSubsection = ({
@@ -109,9 +108,9 @@ const VoteInfoSubsection = ({
   updateFinalVote,
   reloadFn,
 }: VoteInfoSubsectionProps) => {
-  const electionIds = currentUserVotes.map(vote => vote.electionId)
+  const electionIds = new Set(currentUserVotes.map(vote => vote.electionId))
   const allOpenElections = bucket.elections
-    .filter(election => electionIds.includes(election.electionId))
+    .filter(election => electionIds.has(election.electionId))
     .filter(election => election.status?.toLowerCase() === 'open')
 
   return (
@@ -245,6 +244,7 @@ export default function MultiDatasetVoteSlab({
         <DatasetsRequestedPanel
           dacDatasetIds={dacDatasetIds}
           bucketDatasets={bucket.datasets}
+          dacs={bucket.dacs}
           isLoading={isLoading}
           adminPage={adminPage}
         />

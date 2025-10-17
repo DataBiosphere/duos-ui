@@ -13,13 +13,10 @@ import { extractError } from 'src/utils/ErrorUtils'
 
 export interface ResearcherStatusProps {
   user: DuosUser
-  pageProps: {
-    location?: Location
-  }
 }
 
 const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
-  const { user, pageProps } = props
+  const { user } = props
   const [issuedOn, setIssuedOn] = useState<string>('')
   const [issuedBy, setIssuedBy] = useState<string>('')
   const [hasCard, setHasCard] = useState<boolean>(true)
@@ -120,7 +117,6 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
       {ERACommons({
         destination: 'profile',
         onNihStatusUpdate: nihStatusUpdate,
-        location: pageProps.location,
         header: false,
       })}
       <div style={{ marginTop: '20px' }} />
