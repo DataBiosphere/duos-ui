@@ -5,7 +5,7 @@ export function renderColumnContent(
   value: unknown,
   customRenderers?: Record<string, (value: unknown) => React.ReactNode>,
 ): React.ReactNode {
-  if (customRenderers && customRenderers[column]) {
+  if (customRenderers?.[column]) {
     return customRenderers[column](value)
   }
   if (Array.isArray(value)) {

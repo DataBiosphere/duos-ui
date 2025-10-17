@@ -11,6 +11,16 @@ interface PresentationSummaryProps {
   readonly disabled: boolean
 }
 
+function PresenterCell({ presenter }: { presenter: Presenter | null }) {
+  if (!presenter || typeof presenter !== 'object') return null
+  return (
+    <span>
+      {presenter.name}
+      {presenter.email ? ` (${presenter.email})` : ''}
+    </span>
+  )
+}
+
 export default function PresentationSummary(props: PresentationSummaryProps): React.JSX.Element {
   const { presentation, columnsToShow, editAction, deleteAction, disabled } = props
 
@@ -24,16 +34,7 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
   const buttonStyle = disabled ? disabledStyle : {}
 
   const customRenderers = {
-    presenter: (value: unknown) => {
-      const presenter = value as Presenter
-      if (!presenter || typeof presenter !== 'object') return null
-      return (
-        <span>
-          {presenter.name}
-          {presenter.email ? ` (${presenter.email})` : ''}
-        </span>
-      )
-    },
+    presenter: (value: unknown) => <PresenterCell presenter={value as Presenter} />,
   }
 
   return (
