@@ -304,6 +304,21 @@ export interface DatasetProperty {
   propertyValue: string
 }
 
+interface Person {
+  name: string
+}
+
+interface Contact extends Person {
+  email: string
+}
+
+interface Author extends Person {
+  orcId: string
+}
+
+type Maintainer = Contact
+type Presenter = Contact
+
 export interface Study {
   studyId: number
   name: string
@@ -339,10 +354,7 @@ export interface AiModel {
   format: string
   license: string
   trainedOnDatasets: string[]
-  maintainer: {
-    name: string
-    email: string
-  }
+  maintainer: Maintainer
   tags?: string[]
 }
 
@@ -672,7 +684,7 @@ interface BasePresentation {
 export interface StudyPresentation extends BasePresentation {
   presentationId: string
   studyId: string
-  presenter: { name: string, email: string }
+  presenter: Presenter
   event: string
   location: string
   url: string
@@ -695,11 +707,11 @@ interface BasePublication {
 export interface StudyPublication extends BasePublication {
   publicationId: string
   studyId: string
-  authors: Array<{ name: string, orcId: string }>
+  authors: Array<Author>
   journal: string
   doi: string
   url: string
-  published_date: string
+  publishedDate: string
   access: string
   tags?: string[]
 }
