@@ -3,15 +3,7 @@ import { DeletePresentationOrPublication } from 'src/components/presentation_pub
 import { Presentation, Presenter } from 'src/types/model'
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
-interface PresentationSummaryProps {
-  presentation: Presentation
-  readonly columnsToShow: string[]
-  readonly editAction: () => void
-  readonly deleteAction: () => void
-  readonly disabled: boolean
-}
-
-function PresenterCell({ presenter }: { presenter: Presenter | null }) {
+function PresenterCell({ presenter }: { readonly presenter: Presenter | null }) {
   if (!presenter || typeof presenter !== 'object') return null
   return (
     <span>
@@ -19,6 +11,14 @@ function PresenterCell({ presenter }: { presenter: Presenter | null }) {
       {presenter.email ? ` (${presenter.email})` : ''}
     </span>
   )
+}
+
+interface PresentationSummaryProps {
+  presentation: Presentation
+  readonly columnsToShow: string[]
+  readonly editAction: () => void
+  readonly deleteAction: () => void
+  readonly disabled: boolean
 }
 
 export default function PresentationSummary(props: PresentationSummaryProps): React.JSX.Element {

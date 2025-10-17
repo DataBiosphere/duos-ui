@@ -12,5 +12,8 @@ export function renderColumnContent(
     return value.map(v => typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v)).join(', ')
   }
   if (value == null) return null
-  return typeof value === 'object' ? JSON.stringify(value) : String(value)
+  if (typeof value === 'object') {
+    return JSON.stringify(value)
+  }
+  return String(value)
 }
