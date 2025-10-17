@@ -22,11 +22,27 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
 
   const buttonStyle = disabled ? disabledStyle : {}
 
+  const renderPublicationColumnContent = (column: string, publication: Publication): React.ReactNode => {
+    const value = publication[column as keyof Publication]
+    if (column === 'authors') {
+      if (Array.isArray(value)) {
+        return value.map((author: string | { name: string, orcId: string }, i: number) =>
+          typeof author === 'object' && author !== null
+            ? <span key={author.orcId || i}>{author.name}{i < value.length - 1 ? ', ' : ''}</span>
+            : String(author),
+        )
+      }
+      if (value == null) return null
+      return String(value)
+    }
+    return value as React.ReactNode
+  }
+
   return (
     <div className="collaborator-summary-card">
       {/* data elements to show in the row summary */}
       {columnsToShow.map((column, index) => {
-        const columnContent = publication[column as keyof Publication]
+        const columnContent = renderPublicationColumnContent(column, publication)
         return columnContent && (
           <div key={'publication_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>

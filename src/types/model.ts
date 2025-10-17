@@ -337,7 +337,7 @@ export interface Study {
   assets?: {
     models?: Array<AiModel>
     workspaces?: Array<Workspace>
-    publications?: Array<StudyPublication>
+    publications?: Array<Publication>
     presentations?: Array<Presentation>
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
@@ -695,29 +695,24 @@ export interface Presentation {
   tags?: string[]
 }
 
-interface BasePublication {
+export interface Publication {
   title: string
-}
-
-export interface StudyPublication extends BasePublication {
-  publicationId: string
-  studyId: string
-  authors: Array<Author>
-  journal: string
-  doi: string
-  url: string
-  publishedDate: string
-  access: string
+  // ToDO: Make existing Progress Report fields required in DT-2358
+  pubmedId?: string
+  date?: string
+  authors?: string | Array<Author> // ToDo: Remove string option in DT-2358 to be replaced by Array<Author>
+  bibliographicCitation?: string
+  datasetCitation?: string
+  citation?: boolean
+  // ToDo: Make new study fields required in DT-2358except for tags
+  publicationId?: string
+  studyId?: string
+  journal?: string
+  doi?: string
+  url?: string
+  publishedDate?: string
+  access?: string
   tags?: string[]
-}
-
-export interface Publication extends BasePublication {
-  pubmedId: string
-  date: string
-  authors: string
-  bibliographicCitation: string
-  datasetCitation: string
-  citation: boolean
 }
 
 export interface Collaborator {
