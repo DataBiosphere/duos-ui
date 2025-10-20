@@ -75,15 +75,17 @@ const Home = (props) => {
 
   const logoGrid = {
     display: 'flex',
-    gap: '3rem',
+    flexWrap: 'wrap',
+    gap: '2rem',
     justifyContent: 'center',
     alignItems: 'center',
-    flexWrap: 'nowrap',
     width: '100%',
+    maxWidth: '1400px',
+    margin: '0 auto',
   }
 
   const baseCard = {
-    width: 'clamp(240px, 26vw, 320px)',
+    width: '320px',
     aspectRatio: '2 / 1',
     borderRadius: '6px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
@@ -125,8 +127,25 @@ const Home = (props) => {
     <>
       <style>
         {`
-        @media (max-width: 904px) {
-          .logo-grid { flex-direction: column; }
+        .logo-card {
+          width: 320px;
+        }
+        @media (max-width: 768px) {
+          .logo-card {
+            width: 280px;
+          }
+          .logo-grid {
+            gap: 1.5rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .logo-card {
+            width: 100%;
+            max-width: 320px;
+          }
+          .logo-grid {
+            gap: 1rem !important;
+          }
         }
       `}
       </style>
@@ -188,7 +207,7 @@ const Home = (props) => {
           </div>
 
           <section style={{ margin: '5rem auto', padding: '0 2rem' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
               <p style={header}>Search Data Libraries in DUOS</p>
               <p style={description}>
                 Explore curated Data Libraries for studies, programs, and institutions below. Contact us to request your own!
@@ -198,17 +217,17 @@ const Home = (props) => {
                 {featuredLibraries.map((library) => {
                   const libraryPath = `/datalibrary/${library.key}`
                   const libraryName = library.title.replace(' Data Library', '')
-                  const tooltipText = isLogged 
-                    ? libraryName 
+                  const tooltipText = isLogged
+                    ? libraryName
                     : `Please login to access ${libraryName} Data Library`
-                  
+
                   // Special styling for Broad Institute (dark background)
-                  const cardStyle = library.key === 'broad' 
+                  const cardStyle = library.key === 'broad'
                     ? { ...baseCard, background: '#1F3B50', padding: '15px' }
                     : baseCard
 
                   // Special case for Broad logo to use the imported asset
-                  const logoSrc = library.key === 'broad' 
+                  const logoSrc = library.key === 'broad'
                     ? broadLogo
                     : library.icon
 
