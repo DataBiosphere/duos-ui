@@ -1,15 +1,23 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import homeHeaderBackground from '../images/home_header_background.png'
 import duosLogoImg from '../images/duos_logo.svg'
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg'
 import broadLogo from '../images/broad_logo_allwhite.png'
-import anvilLogo from '../images/anvil-logo.svg'
-import hcaLogo from '../images/human-cell-atlas-logo.png'
 import { OverflowTooltip } from '../components/Tooltips'
 import { Link } from 'react-router-dom'
+import { getLibraryVersions } from '../libs/libraryVersions'
 
 const Home = (props) => {
   const { isLogged } = props
+
+  // Get all library versions and filter for featured ones
+  const featuredLibraries = useMemo(() => {
+    const allLibraries = getLibraryVersions(null, null, null)
+    return Object.entries(allLibraries)
+      .filter(([key, library]) => library.featured)
+      .map(([key, library]) => ({ key, ...library }))
+      .sort((a, b) => a.key.localeCompare(b.key))
+  }, [])
 
   const homeTitle = {
     color: '#FFFFFF',
@@ -187,56 +195,42 @@ const Home = (props) => {
               </p>
 
               <div style={logoGrid} className="logo-grid">
-                <OverflowTooltip id="anvil" tooltipText={isLogged ? 'AnVIL' : 'Please login to access AnVIL Data Library'}>
-                  <div className="logo-card" style={baseCard}>
-                    <Link
-                      to={isLogged ? '/datalibrary/anvil' : '#'}
-                      onClick={(e) => {
-                        if (!isLogged) {
-                          e.preventDefault()
-                          handleSignIn('/datalibrary/anvil')
-                        }
-                      }}
-                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                    >
-                      <img src={anvilLogo} alt="AnVIL" style={logoImg} />
-                    </Link>
-                  </div>
-                </OverflowTooltip>
+                {featuredLibraries.map((library) => {
+                  const libraryPath = `/datalibrary/${library.key}`
+                  const libraryName = library.title.replace(' Data Library', '')
+                  const tooltipText = isLogged 
+                    ? libraryName 
+                    : `Please login to access ${libraryName} Data Library`
+                  
+                  // Special styling for Broad Institute (dark background)
+                  const cardStyle = library.key === 'broad' 
+                    ? { ...baseCard, background: '#1F3B50', padding: '15px' }
+                    : baseCard
 
-                <OverflowTooltip id="broad" tooltipText={isLogged ? 'Broad Institute' : 'Please login to access Broad Institute Data Library'}>
-                  <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
-                    <Link
-                      to={isLogged ? '/datalibrary/broad' : '#'}
-                      onClick={(e) => {
-                        if (!isLogged) {
-                          e.preventDefault()
-                          handleSignIn('/datalibrary/broad')
-                        }
-                      }}
-                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                    >
-                      <img src={broadLogo} alt="Broad Institute" style={logoImg} />
-                    </Link>
-                  </div>
-                </OverflowTooltip>
+                  // Special case for Broad logo to use the imported asset
+                  const logoSrc = library.key === 'broad' 
+                    ? broadLogo
+                    : library.icon
 
-                <OverflowTooltip id="hca" tooltipText={isLogged ? 'Human Cell Atlas' : 'Please login to access Human Cell Atlas Data Library'}>
-                  <div className="logo-card" style={baseCard}>
-                    <Link
-                      to={isLogged ? '/datalibrary/HCA' : '#'}
-                      onClick={(e) => {
-                        if (!isLogged) {
-                          e.preventDefault()
-                          handleSignIn('/datalibrary/HCA')
-                        }
-                      }}
-                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                    >
-                      <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
-                    </Link>
-                  </div>
-                </OverflowTooltip>
+                  return (
+                    <OverflowTooltip key={library.key} id={library.key} tooltipText={tooltipText}>
+                      <div className="logo-card" style={cardStyle}>
+                        <Link
+                          to={isLogged ? libraryPath : '#'}
+                          onClick={(e) => {
+                            if (!isLogged) {
+                              e.preventDefault()
+                              handleSignIn(libraryPath)
+                            }
+                          }}
+                          style={{ textDecoration: 'none', display: 'contents', cursor: 'pointer' }}
+                        >
+                          <img src={logoSrc} alt={libraryName} style={logoImg} />
+                        </Link>
+                      </div>
+                    </OverflowTooltip>
+                  )
+                })}
               </div>
             </div>
           </section>
