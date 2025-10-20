@@ -304,6 +304,21 @@ export interface DatasetProperty {
   propertyValue: string
 }
 
+interface Person {
+  name: string
+}
+
+interface Contact extends Person {
+  email: string
+}
+
+export interface Author extends Person {
+  orcId: string
+}
+
+export type Maintainer = Contact
+export type Presenter = Contact
+
 export interface Study {
   studyId: number
   name: string
@@ -319,6 +334,83 @@ export interface Study {
   createUserId: number
   updateDate?: string // Date?
   updateUserId?: number
+  assets?: {
+    models?: Array<AiModel>
+    workspaces?: Array<Workspace>
+    publications?: Array<Publication>
+    presentations?: Array<Presentation>
+    clinicalTrials?: Array<ClinicalTrial>
+    funding?: Array<FundingResource>
+    intellectualProperty?: Array<IntellectualProperty>
+  }
+}
+
+export interface AiModel {
+  modelId: string
+  studyId: string
+  name: string
+  description: string
+  url: string
+  format: string
+  license: string
+  trainedOnDatasets: string[]
+  maintainer: Maintainer
+  tags?: string[]
+}
+
+export interface Workspace {
+  workspaceId: string
+  studyId: string
+  name: string
+  platform: string
+  url: string
+  description: string
+  tools: string[]
+  access: string
+  tags?: string[]
+}
+
+export interface ClinicalTrial {
+  clinicalTrialId: string
+  studyId: string
+  title: string
+  registry: string
+  identifier: string
+  status: string
+  sponsor: string
+  startDate: string
+  endDate: string
+  interventionType: string
+  description: string
+  phase: string
+  url: string
+  tags?: string[]
+}
+
+export interface FundingResource {
+  fundingId: string
+  studyId: string
+  funderName: string
+  funderProgram: string
+  projectTitle: string
+  startDate: string
+  endDate: string
+  url: string
+  tags?: string[]
+}
+
+export interface IntellectualProperty {
+  ipId: string
+  studyId: string
+  type: string
+  title: string
+  assignee: string
+  patentNumber: string
+  filingDate: string
+  status: string
+  url: string
+  contact: string
+  tags?: string[]
 }
 
 export interface StudyProperty {
@@ -586,21 +678,41 @@ export interface Closeout {
 
 export interface Presentation {
   title: string
-  link: string
   date: string
-  authors: string
-  datasetCitation: string
-  citation: boolean
+  // ToDO: Make existing Progress Report fields required in DT-2361
+  link?: string // ToDo: Remove in DT-2361 to be replaced by url
+  authors?: string
+  datasetCitation?: string
+  citation?: boolean
+  // ToDo: Make new study fields required in DT-2361 except for tags
+  presentationId?: string
+  studyId?: string
+  presenter?: Presenter
+  event?: string
+  location?: string
+  format?: string
+  access?: string
+  tags?: string[]
 }
 
 export interface Publication {
   title: string
-  pubmedId: string
-  date: string
-  authors: string
-  bibliographicCitation: string
-  datasetCitation: string
-  citation: boolean
+  // ToDO: Make existing Progress Report fields required in DT-2358
+  pubmedId?: string
+  date?: string
+  authors?: string | Array<Author> // ToDo: Remove string option in DT-2358
+  bibliographicCitation?: string
+  datasetCitation?: string
+  citation?: boolean
+  // ToDo: Make new study fields required in DT-2358 except for tags
+  publicationId?: string
+  studyId?: string
+  journal?: string
+  doi?: string
+  url?: string
+  publishedDate?: string
+  access?: string
+  tags?: string[]
 }
 
 export interface Collaborator {
