@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Box, CircularProgress } from '@mui/material'
 import { toLower } from 'lodash'
 import { Notifications } from 'src/libs/utils'
@@ -84,11 +84,22 @@ export const DatasetSearch = (props) => {
   const institutionName = user.institution?.name
 
   const key = query === undefined ? '/datalibrary' : toLower(query)
-  const versions = getLibraryVersions(institutionId, institutionName, query)
+  
+  // Memoize versions to prevent recreation on every render
+  const versions = useMemo(
+    () => getLibraryVersions(institutionId, institutionName, query),
+    [institutionId, institutionName, query]
+  )
+  
   const version = versions[key] === undefined ? versions['/custom'] : versions[key]
   const isInstitutionQuery = key === 'myinstitution'
 
-  const fullQuery = assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query)
+  // Memoize fullQuery to prevent recreation on every render
+  const fullQuery = useMemo(
+    () => assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query),
+    [isSigningOfficial, isInstitutionQuery, version.query]
+  )
+  
   const isInstitutionSet = institutionId === undefined && isInstitutionQuery
 
   const hasChangedPage = query !== queryState

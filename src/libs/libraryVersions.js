@@ -126,7 +126,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: scpIcon,
       title: 'Single Cell Portal Data Library',
-      featured: true,
+      featured: false,
     },
     'nhlbi-blood-disorders-and-blood-safety': {
       query: {
