@@ -2,48 +2,8 @@ import React from 'react'
 import { mount } from 'cypress/react'
 import { MemoryRouter } from 'react-router-dom'
 import Home from 'src/pages/Home'
-import * as libraryVersions from 'src/libs/libraryVersions'
 
 describe('Home Page - Tests', function () {
-  beforeEach(() => {
-    // Stub getLibraryVersions to return consistent test data
-    cy.stub(libraryVersions, 'getLibraryVersions').returns({
-      'anvil': {
-        query: { match_phrase: { 'study.description': 'anvil' } },
-        icon: '/test-anvil-icon.svg',
-        title: 'AnVIL Data Library',
-        featured: true,
-      },
-      'broad': {
-        query: { match_phrase: { 'submitter.institution.name': 'The Broad Institute of MIT and Harvard' } },
-        icon: '/test-broad-icon.png',
-        title: 'Broad Data Library',
-        featured: true,
-      },
-      'hca': {
-        query: { match_phrase: { 'study.description': 'hca dcp' } },
-        icon: '/test-hca-icon.png',
-        title: 'Human Cell Atlas Data Library',
-        featured: true,
-      },
-      'scp': {
-        query: { match_phrase: { 'study.description': 'Single Cell Portal' } },
-        icon: '/test-scp-icon.png',
-        title: 'Single Cell Portal Data Library',
-        featured: false,
-      },
-      'terra': {
-        query: null,
-        icon: '/test-terra-icon.svg',
-        title: 'Terra Data Library',
-        featured: false,
-      },
-    })
-  })
-
-  afterEach(() => {
-    cy.unstub(libraryVersions, 'getLibraryVersions')
-  })
 
   describe('When user is not logged in', function () {
     beforeEach(() => {
@@ -124,14 +84,12 @@ describe('Home Page - Tests', function () {
       cy.get('[data-for="anvil"]').find('span[title="AnVIL"]').should('exist')
       cy.get('[data-for="broad"]').find('span[title="Broad"]').should('exist')
       cy.get('[data-for="hca"]').find('span[title="Human Cell Atlas"]').should('exist')
-      cy.get('[data-for="scp"]').find('span[title="Single Cell Portal"]').should('exist')
     })
 
     it('has direct navigation links when logged in', function () {
       cy.get('a[href="/datalibrary/anvil"]').should('exist')
       cy.get('a[href="/datalibrary/broad"]').should('exist')
       cy.get('a[href="/datalibrary/hca"]').should('exist')
-      cy.get('a[href="/datalibrary/scp"]').should('exist')
     })
 
     it('navigates directly without calling handleSignIn when logged in', function () {
@@ -145,13 +103,14 @@ describe('Home Page - Tests', function () {
     it('displays logos horizontally on desktop', function () {
       cy.viewport(1200, 800)
       cy.get('.logo-grid').should('have.css', 'flex-direction', 'row')
-      cy.get('.logo-card').should('have.length', 4)
+      cy.get('.logo-card').should('have.length', 3)
     })
 
-    it('displays logos vertically on mobile', function () {
+    it('displays logos responsively on mobile', function () {
       cy.viewport(600, 800)
-      cy.get('.logo-grid').should('have.css', 'flex-direction', 'column')
-      cy.get('.logo-card').should('have.length', 4)
+      cy.get('.logo-grid').should('have.css', 'display', 'flex')
+      cy.get('.logo-grid').should('have.css', 'flex-wrap', 'wrap')
+      cy.get('.logo-card').should('have.length', 3)
     })
   })
 
@@ -163,11 +122,12 @@ describe('Home Page - Tests', function () {
         </MemoryRouter>,
       )
 
-      // Should show 4 featured libraries
-      cy.get('.logo-card').should('have.length', 4)
+      // Should show 3 featured libraries (anvil, broad, hca)
+      cy.get('.logo-card').should('have.length', 3)
 
-      // Should not display terra (featured: false)
+      // Should not display terra or scp (featured: false)
       cy.get('[data-for="terra"]').should('not.exist')
+      cy.get('[data-for="scp"]').should('not.exist')
     })
 
     it('displays featured libraries in alphabetical order', function () {
@@ -178,12 +138,19 @@ describe('Home Page - Tests', function () {
       )
 
       cy.get('.logo-card').then(($cards) => {
-        const ids = $cards.map((i, el) => {
-          return Cypress.$(el).find('[data-for]').attr('data-for')
-        }).get()
+        // Get the image alt text to determine library order
+        const libraries = $cards.map((i, el) => {
+          const img = Cypress.$(el).find('img')
+          const alt = img.attr('alt')
+          // Map display names (without " Data Library") back to keys
+          if (alt === 'AnVIL') return 'anvil'
+          if (alt === 'Broad') return 'broad'
+          if (alt === 'Human Cell Atlas') return 'hca'
+          return null
+        }).get().filter(Boolean)
 
-        // Should be sorted alphabetically: anvil, broad, hca, scp
-        expect(ids).to.deep.equal(['anvil', 'broad', 'hca', 'scp'])
+        // Should be sorted alphabetically: anvil, broad, hca
+        expect(libraries).to.deep.equal(['anvil', 'broad', 'hca'])
       })
     })
 
@@ -194,9 +161,10 @@ describe('Home Page - Tests', function () {
         </MemoryRouter>,
       )
 
-      // Find the Broad card
-      cy.get('[data-for="broad"]').parent().parent().should('have.css', 'background-color', 'rgb(31, 59, 80)')
-      cy.get('[data-for="broad"]').parent().parent().should('have.css', 'padding', '15px')
+      // Find the Broad card by looking for the Broad image (alt="Broad", not "Broad Data Library")
+      cy.get('.logo-card').filter(':has(img[alt="Broad"])')
+        .should('have.css', 'background', 'rgb(31, 59, 80) none repeat scroll 0% 0% / auto padding-box border-box')
+        .and('have.css', 'padding', '15px')
     })
 
     it('handles responsive layout correctly', function () {
@@ -213,11 +181,11 @@ describe('Home Page - Tests', function () {
 
       // Tablet
       cy.viewport(768, 1024)
-      cy.get('.logo-card').should('have.length', 4)
+      cy.get('.logo-card').should('have.length', 3)
 
       // Mobile
       cy.viewport(480, 800)
-      cy.get('.logo-card').should('have.length', 4)
+      cy.get('.logo-card').should('have.length', 3)
     })
   })
 })
