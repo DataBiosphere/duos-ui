@@ -1,0 +1,206 @@
+import React, { useState } from 'react'
+import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { validationFailed } from 'src/utils/darFormUtils'
+import { AiModel, Maintainer } from 'src/types/model'
+
+const defaultMaintainer: Maintainer = {
+  name: '',
+  email: '',
+}
+
+const defaultAiModel: AiModel = {
+  modelId: '',
+  studyId: '',
+  name: '',
+  description: '',
+  url: '',
+  format: '',
+  license: '',
+  trainedOnDatasets: [],
+  maintainer: defaultMaintainer,
+  tags: [],
+}
+
+interface FormFieldChange {
+  key: string
+  value: string
+}
+
+interface AiModelAddEditProps {
+  readonly id: number
+  readonly aiModel?: AiModel
+  readonly aiModels: AiModel[]
+  readonly closeAction: () => void
+  readonly onAiModelsChange: (models: AiModel[]) => void
+}
+
+interface Validation {
+  name?: ValidationError
+  url?: ValidationError
+  format?: ValidationError
+  license?: ValidationError
+  maintainerName?: ValidationError
+  maintainerEmail?: ValidationError
+}
+
+const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+
+const calcAiModelErrors = (model: AiModel): Validation => {
+  const v: Validation = {}
+  if (!model.name?.trim()) v.name = makeError('Required')
+  if (!model.url?.trim()) v.url = makeError('Required')
+  if (!model.format?.trim()) v.format = makeError('Required')
+  if (!model.license?.trim()) v.license = makeError('Required')
+  if (!model.maintainer?.name?.trim()) v.maintainerName = makeError('Required')
+  if (!model.maintainer?.email?.trim()) v.maintainerEmail = makeError('Required')
+  return v
+}
+
+export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.Element {
+  const { id, aiModel, aiModels, closeAction, onAiModelsChange } = props
+
+  const [newAiModel, setNewAiModel] = useState<AiModel>(aiModel || defaultAiModel)
+  const [validation, setValidation] = useState<Validation>({})
+
+  const onChange = ({ key, value }: FormFieldChange) => {
+    let updated: AiModel = { ...newAiModel }
+
+    if (key === 'trainedOnDatasets') {
+      updated.trainedOnDatasets = value.split(',').map((s: string) => s.trim()).filter(Boolean)
+    }
+    else if (key === 'tags') {
+      updated.tags = value.split(',').map((s: string) => s.trim()).filter(Boolean)
+    }
+    else if (key === 'maintainerName') {
+      updated.maintainer = { ...updated.maintainer, name: value }
+    }
+    else if (key === 'maintainerEmail') {
+      updated.maintainer = { ...updated.maintainer, email: value }
+    }
+    else {
+      // generic assignment
+      updated = { ...updated, [key]: value }
+    }
+
+    setNewAiModel(updated)
+    setValidation(calcAiModelErrors(updated))
+  }
+
+  const handleSave = () => {
+    if (id < 0) {
+      onAiModelsChange([...aiModels, newAiModel])
+    }
+    else {
+      const copy = [...aiModels]
+      copy[id] = newAiModel
+      onAiModelsChange(copy)
+    }
+    setNewAiModel(defaultAiModel)
+    closeAction()
+  }
+
+  return (
+    <div className="form-group row no-margin">
+      <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
+        <div className="row">
+          <h2>{aiModel === undefined ? 'New AI Model Information' : `Edit ${aiModel.name} Information`}</h2>
+
+          <FormField
+            id="name"
+            title="Model Name"
+            defaultValue={aiModel?.name}
+            placeholder="Name"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.name}
+          />
+          <FormField
+            id="description"
+            title="Description"
+            defaultValue={aiModel?.description}
+            placeholder="Description"
+            onChange={onChange}
+            type={FormFieldTypes.TEXTAREA}
+          />
+          <FormField
+            id="url"
+            title="Model URL"
+            defaultValue={aiModel?.url}
+            placeholder="URL"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.url}
+          />
+          <FormField
+            id="format"
+            title="Model Format"
+            defaultValue={aiModel?.format}
+            placeholder="Format (e.g. PyTorch, ONNX)"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.format}
+          />
+          <FormField
+            id="license"
+            title="License"
+            defaultValue={aiModel?.license}
+            placeholder="License (e.g. MIT)"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.license}
+          />
+          <FormField
+            id="trainedOnDatasets"
+            title="Trained On Datasets"
+            defaultValue={aiModel?.trainedOnDatasets?.join(', ')}
+            placeholder="Comma separated dataset identifiers"
+            onChange={onChange}
+          />
+          <FormField
+            id="maintainerName"
+            title="Maintainer Name"
+            defaultValue={aiModel?.maintainer?.name}
+            placeholder="Maintainer Name"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.maintainerName}
+          />
+          <FormField
+            id="maintainerEmail"
+            title="Maintainer Email"
+            defaultValue={aiModel?.maintainer?.email}
+            placeholder="Maintainer Email"
+            validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+            onChange={onChange}
+            validation={validation.maintainerEmail}
+          />
+          <FormField
+            id="tags"
+            title="Tags"
+            defaultValue={aiModel?.tags?.join(', ')}
+            placeholder="Comma separated tags"
+            onChange={onChange}
+          />
+        </div>
+        <div className="row" style={{ marginTop: 20 }}>
+          <button
+            className="collaborator-form-add-save-button f-left btn"
+            type="button"
+            onClick={handleSave}
+            disabled={validationFailed(calcAiModelErrors(newAiModel))}
+          >
+            {aiModel === undefined ? 'Add' : 'Save'}
+          </button>
+          <button
+            className="collaborator-form-cancel-button f-left btn"
+            type="button"
+            onClick={closeAction}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
