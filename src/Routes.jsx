@@ -50,6 +50,9 @@ import EditDac from 'src/pages/manage_dac/EditDac'
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
 import { InstitutionDetails } from 'src/components/institution_table/InstitutionDetails.js'
 import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode.js'
+import {
+  DataSubmissionFormV2,
+} from 'src/pages/data_submission/v2/DataSubmissionFormV2.js'
 
 const Routes = props => (
   <Switch>
@@ -128,6 +131,7 @@ const Routes = props => (
     <AuthenticatedRoute path="/dataset_submissions" component={DatasetSubmissions} props={props} rolesAllowed={[USER_ROLES.dataSubmitter]} />
     <AuthenticatedRoute path="/dataset_update/:datasetId" component={DatasetUpdateForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.dataSubmitter]} />
+    <AuthenticatedRoute path="/data_submission_form2/:studyId?" component={DataSubmissionFormV2} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.dataSubmitter]} />
     <AuthenticatedRoute path="/study_update/:studyId" component={StudyUpdateForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.dataSubmitter]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
