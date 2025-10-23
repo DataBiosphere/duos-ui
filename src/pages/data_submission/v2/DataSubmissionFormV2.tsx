@@ -3,7 +3,9 @@ import { useParams } from 'react-router'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { cloneDeep } from 'lodash/fp'
 import { set } from 'lodash'
-import { GeneralStudyInformation, Study } from 'src/pages/data_submission/v2/GeneralStudyInformation'
+import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
+import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
+import { Study } from 'src/pages/data_submission/v2/v2-models'
 
 export interface DataSubmissionFormV2Params {
   studyId?: string
@@ -15,7 +17,7 @@ export const DataSubmissionFormV2 = () => {
   const [loadingError, setLoadingError] = useState(false)
 
   const onChange = useCallback(({ key, value }: { key: string, value: unknown }) => {
-    setFormData((val) => {
+    setFormData((val: Study) => {
       const newForm = cloneDeep(val)
       set(newForm, key, value)
       return newForm
@@ -38,6 +40,7 @@ export const DataSubmissionFormV2 = () => {
     <>
       {loadingError && <div>Error Loading Page</div>}
       <GeneralStudyInformation formData={formData} onChange={onChange} />
+      <NihAnvilUseRelated formData={formData} onChange={onChange} />
     </>
   )
 }

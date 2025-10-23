@@ -8,12 +8,12 @@ import {
   DataCustodianEmail,
   AlternativeDataSharingPlanTargetDeliveryDate,
   AlternativeDataSharingPlanTargetPublicReleaseDate,
-  MasterChangeHandler,
-} from 'v2-models'
+} from 'src/pages/data_submission/v2/v2-models'
 import { getStudyPropertyByKey, setStudyPropertyByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 
-export interface GeneralStudyInformationProps extends MasterChangeHandler {
+export interface GeneralStudyInformationProps {
   formData: Study
+  onChange: ({ key, value, isValid }: { key: string, value: unknown, isValid: boolean }) => void
 }
 
 export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => {
@@ -138,7 +138,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
           placeholder="Please enter date (YYYY-MM-DD)"
           defaultValue={getStudyPropertyByKey(formData, 'alternativeDataSharingPlanTargetPublicReleaseDate')}
           validators={[FormValidators.DATE]}
-          onChange={(input: { key: Date, value: unknown, isValid: boolean }) => { setStudyPropertyByKey(formData, onChange, formData, onChange, input, new AlternativeDataSharingPlanTargetPublicReleaseDate(input.value as Date)) }}
+          onChange={(input: { key: Date, value: unknown, isValid: boolean }) => { setStudyPropertyByKey(formData, onChange, input, new AlternativeDataSharingPlanTargetPublicReleaseDate(input.value as Date)) }}
         />
       </div>
       <FormField

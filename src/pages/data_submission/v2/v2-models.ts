@@ -1,12 +1,5 @@
 import { Dataset, FileStorageObject } from 'src/types/model'
 
-export type MasterChangeHandler = {
-  onChange: ({ key, value }: {
-    key: string
-    value: unknown
-  }) => void
-}
-
 export type StudyPropertyType = 'Boolean' | 'String' | 'Number' | 'Date' | 'Json'
 
 export class StudyProperty {
