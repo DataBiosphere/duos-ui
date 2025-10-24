@@ -6,10 +6,10 @@ import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
 import { Config } from 'src/libs/config'
 import DuosFooter from 'src/components/DuosFooter'
 import DuosHeader from 'src/components/DuosHeader'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { Storage } from 'src/libs/storage'
-import Routes from 'src/Routes'
+import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
@@ -17,7 +17,7 @@ import { Spinner } from 'src/components/Spinner'
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [env, setEnv] = useState('')
-  const history = useHistory()
+  const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -39,7 +39,7 @@ function App() {
   })
 
   useEffect(() => {
-    const initializeReactGA = async (history) => {
+    const initializeReactGA = async (location) => {
       const gaId = await Config.getGAId()
       ReactGA.initialize(gaId, {
         titleCase: false,
@@ -47,10 +47,11 @@ function App() {
       // call trackPageView to register initial page load
       trackPageView(location)
       // pass trackPageView as callback function for url change listener
-      history.listen(trackPageView)
+      // TODO: Look into fixing this
+      // location.listen(trackPageView)
     }
-    initializeReactGA(history)
-  }, [history, location])
+    initializeReactGA(location)
+  }, [location])
 
   useEffect(() => {
     const stackdriverStart = async () => {
@@ -89,7 +90,7 @@ function App() {
           if (linkInfo?.additionalState?.redirectTo) {
             // The redirectTo URL is expected to be a full URL, so we need to remove the origin part
             // to use history.push for the redirect.
-            history.push(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
+            navigate(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
           }
         }
         catch (error) {
@@ -104,7 +105,7 @@ function App() {
       }
     }
     checkRASAuthentication()
-  }, [history, location.search])
+  }, [navigate, location.search])
 
   const loadingSyle = {
     position: 'fixed',
@@ -117,7 +118,7 @@ function App() {
         <div className="main">
           <DuosHeader />
           {isLoading && <div style={loadingSyle}><Spinner /></div>}
-          {!isLoading && <Routes isLogged={isLoggedIn} env={env} />}
+          {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
         </div>
       </div>
       <DuosFooter />

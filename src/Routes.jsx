@@ -1,5 +1,5 @@
 import React from 'react'
-import { Redirect, Route, Switch } from 'react-router-dom'
+import { Navigate, Route, Routes as Switch } from 'react-router-dom'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import AuthenticatedRoute from 'src/components/AuthenticatedRoute'
 import { USER_ROLES } from 'src/libs/utils'
@@ -138,8 +138,8 @@ const Routes = props => (
     <AuthenticatedRoute path="/dac_datasets" component={DACDatasets} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
     {checkEnv(envGroups.NON_PROD) && <AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]} />}
-    <Redirect from="/DUOS-S:studyId" to="/studies/:studyId" props={props} rolesAllowed={[USER_ROLES.all]} />
-    <Redirect from="/DUOS-:duosId" to="/dataset/DUOS-:duosId" props={props} rolesAllowed={[USER_ROLES.all]} />
+    <Route path="/DUOS-S:studyId" render={() => <Navigate to="/studies/:studyId" rolesAllowed={[USER_ROLES.all]} />} />
+    <Route path="/DUOS-:duosId" render={() => <Navigate to="/dataset/DUOS-:duosId" rolesAllowed={[USER_ROLES.all]} />} />
     <Route path="*" component={NotFound} />
   </Switch>
 )

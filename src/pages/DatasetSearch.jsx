@@ -31,6 +31,7 @@ import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import PropTypes from 'prop-types'
+import { useParams } from 'react-router-dom'
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -95,7 +96,8 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 }
 
 export const DatasetSearch = (props) => {
-  const { match: { params: { query } } } = props
+  const params = useParams()
+  const query = params.query || null
   const [datasets, setDatasets] = useState([])
   const [queryState, setQueryState] = useState(query)
   const [loading, setLoading] = useState(true)

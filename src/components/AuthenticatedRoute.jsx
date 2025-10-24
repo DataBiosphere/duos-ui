@@ -1,5 +1,5 @@
 import React from 'react'
-import { Redirect, Route } from 'react-router-dom'
+import { Navigate, Route } from 'react-router-dom'
 import { Storage } from '../libs/storage'
 import * as Utils from '../libs/utils'
 import Home from '../pages/Home'
@@ -17,7 +17,7 @@ const AuthenticatedRoute = ({ component: Component, props: componentProps, roles
             ? <Component {...props} {...componentProps} />
             : !Storage.userIsLogged()
                 ? <Home {...props} {...componentProps} />
-                : <Redirect to="/" />
+                : <Navigate to="/" />
       }
     />
   )

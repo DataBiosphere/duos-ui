@@ -3,7 +3,7 @@ import TableIconButton from 'src/components/TableIconButton'
 import { Styles, Theme } from 'src/libs/theme'
 import { Block, Delete } from '@mui/icons-material'
 import SimpleButton from 'src/components/SimpleButton'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Notifications } from 'src/libs/utils'
 import { includes, toLower } from 'lodash/fp'
 import './dar_collection_table.css'
@@ -52,7 +52,7 @@ export default function Actions(props) {
   const collectionId = collection.darCollectionId
   const uniqueId = (collectionId ? collectionId : collection.referenceIds[0])
 
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const openButtonAttributes = {
     keyProp: `${consoleType}-open-${uniqueId}`,
@@ -122,7 +122,7 @@ export default function Actions(props) {
   const reviewButtonAttributes = {
     keyProp: `${consoleType}-review-${uniqueId}`,
     label: 'Review',
-    onClick: () => redirectToDARApplication(collectionId, history),
+    onClick: () => redirectToDARApplication(collectionId, navigate),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -141,7 +141,7 @@ export default function Actions(props) {
   const reviewCloseoutButtonAttributes = {
     keyProp: `${consoleType}-review-closeout-${uniqueId}`,
     label: 'Review Closeout',
-    onClick: () => redirectToDARApplication(collectionId, history),
+    onClick: () => redirectToDARApplication(collectionId, navigate),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -169,7 +169,7 @@ export default function Actions(props) {
 
   const resumeButtonAttributes = {
     keyProp: `${consoleType}-resume-${uniqueId}`,
-    onClick: () => resumeDARApplication(collection.referenceIds[0], history),
+    onClick: () => resumeDARApplication(collection.referenceIds[0], navigate),
     label: 'Resume',
     baseColor: Theme.palette.secondary,
     fontColor: 'white',
@@ -200,7 +200,7 @@ export default function Actions(props) {
   const createProgressReportButtonAttributes = {
     keyProp: `${consoleType}-create-progress-report-${uniqueId}`,
     onClick: () => {
-      createProgressReport(collection.darCollectionId, history)
+      createProgressReport(collection.darCollectionId, navigate)
     },
     label: 'Update',
     baseColor: 'white',

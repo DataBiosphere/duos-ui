@@ -1,5 +1,4 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { PageHeading } from 'src/components/PageHeading'
 import { Notification } from 'src/components/Notification'
@@ -12,6 +11,7 @@ import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ga4ghLogo from 'src/images/ga4gh-logo.png'
 import userProfileIcon from 'src/images/user-profile.png'
+import { Link } from 'react-router-dom'
 
 export default function UserProfile(props) {
   const [user, setUser] = useState({})
@@ -85,12 +85,12 @@ export default function UserProfile(props) {
     init()
   }, [])
 
-  const goToRequestRole = () => {
-    props.history.push({
-      pathname: '/request_role',
-      state: { data: profile },
-    })
-  }
+  // const goToRequestRole = () => {
+  //   navigation({
+  //     pathname: '/request_role',
+  //     state: { data: profile },
+  //   })
+  // }
 
   return (
     <div
@@ -208,16 +208,17 @@ export default function UserProfile(props) {
       <AffiliationAndRoles
         user={user}
       />
-      <button
-        className="f-left btn-primary common-background"
-        onClick={goToRequestRole}
-        style={{
-          marginTop: '10px',
-          marginBottom: '50px',
-        }}
-      >
-        Request a New Role
-      </button>
+      <Link to="/request_role" state={{ data: profile }}>
+        <button
+          className="f-left btn-primary common-background"
+          style={{
+            marginTop: '10px',
+            marginBottom: '50px',
+          }}
+        >
+          Request a New Role
+        </button>
+      </Link>
       <div style={{ marginTop: '115px' }} />
       <ResearcherStatus
         user={user}

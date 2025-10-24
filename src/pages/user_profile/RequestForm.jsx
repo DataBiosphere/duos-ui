@@ -5,7 +5,7 @@ import { isNil } from 'lodash'
 import { FormField, FormFieldTypes } from '../../components/forms/forms'
 
 export default function RequestForm(props) {
-  const profile = props.location.state?.data || undefined
+  const profile = props.state?.data || undefined
   const headerStyle = {
     fontWeight: 'bold',
     color: '#333F52',
