@@ -7,9 +7,9 @@ export class StudyProperty {
   studyPropertyId?: number
   studyId?: number
   type: StudyPropertyType
-  value: unknown
+  value?: unknown
 
-  constructor(key: string, type: StudyPropertyType, value: unknown, studyId?: number, studyPropertyId?: number) {
+  constructor(key: string, type: StudyPropertyType, value?: unknown, studyId?: number, studyPropertyId?: number) {
     this.key = key
     this.studyId = studyId
     this.studyPropertyId = studyPropertyId
@@ -31,6 +31,26 @@ export class StudyProperty {
       delete obj.studyPropertyId
     }
     return obj
+  }
+}
+
+export class StringStudyProperty extends StudyProperty {
+  fieldTitle: string
+  fieldPlaceholderText: string
+  constructor(key: string, fieldTitle: string, fieldPlaceholderText: string, value?: unknown, studyId?: number, studyPropertyId?: number) {
+    super(key, 'String', value, studyId, studyPropertyId)
+    this.fieldPlaceholderText = fieldPlaceholderText
+    this.fieldTitle = fieldTitle
+  }
+}
+
+export class DateStudyProperty extends StudyProperty {
+  fieldTitle: string
+  fieldPlaceholderText: string
+  constructor(key: string, fieldTitle: string, fieldPlaceholderText: string, value?: unknown, studyId?: number, studyPropertyId?: number) {
+    super(key, 'Date', value, studyId, studyPropertyId)
+    this.fieldPlaceholderText = fieldPlaceholderText
+    this.fieldTitle = fieldTitle
   }
 }
 
@@ -58,9 +78,9 @@ export class AlternativeDataSharingPlanFileName extends StudyProperty {
   }
 }
 
-export class DbGaPStudyRegistrationName extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('dbGaPStudyRegistrationName', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class DbGaPStudyRegistrationName extends StringStudyProperty {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('dbGaPStudyRegistrationName', 'dbGaP Study Registration Name', 'Name', value, studyId, studyPropertyId)
   }
 }
 
@@ -142,15 +162,15 @@ export class AlternativeDataSharingPlan extends StudyProperty {
   }
 }
 
-export class DbGaPPhsID extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('dbGaPPhsID', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class DbGaPPhsID extends StringStudyProperty {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('dbGaPPhsID', 'dbGaP phs ID', 'Enter phs ID', value, studyId, studyPropertyId)
   }
 }
 
-export class EmbargoReleaseDate extends StudyProperty {
-  constructor(value: Date, studyId?: number, studyPropertyId?: number) {
-    super('embargoReleaseDate', 'Date' as StudyPropertyType, value, studyId, studyPropertyId)
+export class EmbargoReleaseDate extends DateStudyProperty {
+  constructor(value?: Date, studyId?: number, studyPropertyId?: number) {
+    super('embargoReleaseDate', 'Embargo Release Date', 'YYYY-MM-DD', value, studyId, studyPropertyId)
   }
 }
 
@@ -160,9 +180,9 @@ export class StudyType extends StudyProperty {
   }
 }
 
-export class SequencingCenter extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('sequencingCenter', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class SequencingCenter extends StringStudyProperty {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('sequencingCenter', 'Sequencing Center', 'Name', value, studyId, studyPropertyId)
   }
 }
 

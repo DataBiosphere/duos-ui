@@ -6,6 +6,7 @@ import { set } from 'lodash'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
+import { MasterChangeHandler } from 'src/pages/data_submission/v2/v2-common-functions'
 
 export interface DataSubmissionFormV2Params {
   studyId?: string
@@ -16,12 +17,14 @@ export const DataSubmissionFormV2 = () => {
   const [formData, setFormData] = useState({} as Study)
   const [loadingError, setLoadingError] = useState(false)
 
-  const onChange = useCallback(({ key, value }: { key: string, value: unknown }) => {
-    setFormData((val: Study) => {
-      const newForm = cloneDeep(val)
-      set(newForm, key, value)
-      return newForm
-    })
+  const onChange: MasterChangeHandler = useCallback(({ key, value, isValid }: { key: string, value: unknown, isValid: boolean }) => {
+    if (isValid) {
+      setFormData((val: Study) => {
+        const newForm = cloneDeep(val)
+        set(newForm, key, value)
+        return newForm
+      })
+    }
   }, [])
 
   useEffect(() => {
