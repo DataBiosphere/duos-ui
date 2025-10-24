@@ -78,7 +78,7 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
       <div className="form-group row no-margin">
         {aiModels.map((model: AiModel, index: number) => (
           <AiModelRow
-            key={index}
+            key={model.modelId}
             id={index}
             editMode={editState[index]}
             aiModel={model}

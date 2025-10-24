@@ -3,7 +3,7 @@ import { AiModel, Maintainer } from 'src/types/model'
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface AiModelSummaryProps {
-  aiModel: AiModel
+  readonly aiModel: AiModel
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
@@ -53,9 +53,12 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
-        <a
+        <button
+          type="button"
           style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
+          disabled={disabled}
+          aria-label="Edit AI model"
         >
           <span
             className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon"
@@ -64,16 +67,19 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
             data-for="tip_edit_ai_model"
           />
           <span style={{ marginLeft: '1rem' }}></span>
-        </a>
+        </button>
       </div>
-      <a
+      <button
+        type="button"
         style={{ marginLeft: 10, ...buttonStyle }}
         onClick={() => {
           if (disabled) return
-          if (window.confirm(`Delete AI model "${aiModel.name}"?`)) {
+          if (globalThis.confirm(`Delete AI model "${aiModel.name}"?`)) {
             deleteAction()
           }
         }}
+        disabled={disabled}
+        aria-label={`Delete AI model ${aiModel.name}`}
       >
         <span
           className="glyphicon glyphicon-trash presentation-delete-icon"
@@ -82,7 +88,7 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
           data-for="tip_delete_ai_model"
         />
         <span style={{ marginLeft: '1rem' }}></span>
-      </a>
+      </button>
     </div>
   )
 }

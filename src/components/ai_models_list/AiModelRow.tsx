@@ -6,7 +6,7 @@ import AiModelSummary from 'src/components/ai_models_list/AiModelSummary'
 interface AiModelRowProps {
   readonly id: number
   readonly editMode: boolean
-  aiModel: AiModel
+  readonly aiModel: AiModel
   readonly aiModels: AiModel[]
   readonly columnsToShow: string[]
   readonly editAction: () => void
