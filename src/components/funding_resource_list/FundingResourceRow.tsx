@@ -3,10 +3,10 @@ import { FundingResource } from 'src/types/model'
 import { FundingResourceAddEdit } from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import { FundingResourceSummary } from 'src/components/funding_resource_list/FundingResourceSummary'
 
-interface fundingResourceRowProps {
+interface FundingResourceRowProps {
   readonly id: number
   readonly editMode: boolean
-  funding: FundingResource
+  readonly funding: FundingResource
   readonly fundingResources: FundingResource[]
   readonly columnsToShow: string[]
   readonly editAction: () => void
@@ -16,7 +16,7 @@ interface fundingResourceRowProps {
   readonly disabled: boolean
 }
 
-export default function FundingResourceRow(props: fundingResourceRowProps): React.JSX.Element {
+export default function FundingResourceRow(props: FundingResourceRowProps): React.JSX.Element {
   const {
     id,
     editMode,

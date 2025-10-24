@@ -3,15 +3,15 @@ import { FundingResource } from 'src/types/model'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
-interface fundingResourceSummaryProps {
-  funding: FundingResource
+interface FundingResourceSummaryProps {
+  readonly funding: FundingResource
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly disabled: boolean
 }
 
-export const FundingResourceSummary: React.FC<fundingResourceSummaryProps> = ({
+export const FundingResourceSummary: React.FC<FundingResourceSummaryProps> = ({
   funding,
   columnsToShow,
   editAction,
@@ -58,9 +58,12 @@ export const FundingResourceSummary: React.FC<fundingResourceSummaryProps> = ({
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
-        <a
+        <button
+          type="button"
           style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
+          disabled={disabled}
+          aria-label="Edit funding resource"
         >
           <span
             className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon"
@@ -69,11 +72,14 @@ export const FundingResourceSummary: React.FC<fundingResourceSummaryProps> = ({
             data-for="tip_edit_funding"
           />
           <span style={{ marginLeft: '1rem' }} />
-        </a>
+        </button>
       </div>
-      <a
+      <button
+        type="button"
         style={{ marginLeft: 10, ...buttonStyle }}
         onClick={() => !disabled && setShowDeleteModal(true)}
+        disabled={disabled}
+        aria-label="Delete funding resource"
       >
         <span
           className="glyphicon glyphicon-trash presentation-delete-icon"
@@ -82,7 +88,7 @@ export const FundingResourceSummary: React.FC<fundingResourceSummaryProps> = ({
           data-for="tip_delete_funding"
         />
         <span style={{ marginLeft: '1rem' }} />
-      </a>
+      </button>
       <DeletePresentationOrPublication
         name={funding.funderName || funding.projectTitle}
         objectName="funding resource"
