@@ -3,21 +3,6 @@ import { FundingResource } from 'src/types/model'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
-interface FundingResourceUrlProps {
-  readonly url: string | undefined
-}
-
-const FundingResourceUrl: React.FC<FundingResourceUrlProps> = ({ url }) => {
-  if (typeof url === 'string' && url) {
-    return (
-      <a href={url} target="_blank" rel="noreferrer">
-        {url}
-      </a>
-    )
-  }
-  return <>—</>
-}
-
 interface FundingResourceSummaryProps {
   readonly funding: FundingResource
   readonly columnsToShow: string[]
@@ -43,7 +28,16 @@ export const FundingResourceSummary: React.FC<FundingResourceSummaryProps> = ({
   const buttonStyle = disabled ? disabledStyle : {}
 
   const customRenderers = {
-    url: (value: unknown) => <FundingResourceUrl url={value as string | undefined} />,
+    url: (value: unknown) => {
+      if (typeof value === 'string' && value) {
+        return (
+          <a href={value} target="_blank" rel="noreferrer">
+            {value}
+          </a>
+        )
+      }
+      return '—'
+    },
     tags: (value: unknown) => {
       if (Array.isArray(value) && value.length > 0) {
         return value.join(', ')
