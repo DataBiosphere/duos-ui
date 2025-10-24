@@ -205,6 +205,17 @@ export class NihProgramOfficerName extends StudyProperty {
 }
 
 export class NihAnvilUse extends StudyProperty {
+  static readonly YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already'
+  static readonly YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID'
+  static readonly NO_NHGRI_YES_ANVIL = 'I am not NHGRI funded but I am seeking to submit data to AnVIL'
+  static readonly NO_NHGRI_NO_ANVIL = 'I am not NHGRI funded and do not plan to store data in AnVIL'
+  static readonly NIH_ANVIL_USE_RADIOGROUP_OPTIONS = [
+    { text: NihAnvilUse.YES_NHGRI_YES_PHS_ID, name: NihAnvilUse.YES_NHGRI_YES_PHS_ID },
+    { text: NihAnvilUse.YES_NHGRI_NO_PHS_ID, name: NihAnvilUse.YES_NHGRI_NO_PHS_ID },
+    { text: NihAnvilUse.NO_NHGRI_YES_ANVIL, name: NihAnvilUse.NO_NHGRI_YES_ANVIL },
+    { text: NihAnvilUse.NO_NHGRI_NO_ANVIL, name: NihAnvilUse.NO_NHGRI_NO_ANVIL },
+  ]
+
   constructor(value: string, studyId?: number, studyPropertyId?: number) {
     super('nihAnvilUse', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
   }
