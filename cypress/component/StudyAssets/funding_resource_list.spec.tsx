@@ -11,6 +11,7 @@ const sampleFunding: FundingResource = {
   studyId: 's1',
   funderName: 'Funder A',
   funderProgram: 'Program Z',
+  grantNumber: 'GN12345',
   projectTitle: 'Project Alpha',
   startDate: '2024-01-01',
   endDate: '2024-12-31',

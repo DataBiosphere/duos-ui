@@ -13,6 +13,7 @@ interface FundingSourceAddEditProps {
 interface Validation {
   funderName?: unknown
   funderProgram?: unknown
+  grantNumber?: unknown
   projectTitle?: unknown
   startDate?: unknown
   endDate?: unknown
@@ -24,6 +25,7 @@ const defaultFunding: FundingResource = {
   studyId: '',
   funderName: '',
   funderProgram: '',
+  grantNumber: '',
   projectTitle: '',
   startDate: '',
   endDate: '',
@@ -97,12 +99,21 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
           />
           <FormField
             id="funderProgram"
-            title="Program"
+            title="Funder Program"
             defaultValue={funding?.funderProgram}
-            placeholder="Program"
+            placeholder="Funder Program"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.funderProgram}
+          />
+          <FormField
+            id="grantNumber"
+            title="Grant Number"
+            defaultValue={funding?.grantNumber}
+            placeholder="Grant Number"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.grantNumber}
           />
           <FormField
             id="projectTitle"

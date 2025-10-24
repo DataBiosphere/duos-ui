@@ -392,6 +392,7 @@ export interface FundingResource {
   studyId: string
   funderName: string
   funderProgram: string
+  grantNumber: string
   projectTitle: string
   startDate: string
   endDate: string

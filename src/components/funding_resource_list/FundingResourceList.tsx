@@ -15,7 +15,7 @@ interface FundingResourceListProps {
 export default function FundingResourceList(props: FundingResourceListProps): React.JSX.Element {
   const {
     fundingResources,
-    columnsToShow = ['funderName', 'funderProgram', 'projectTitle', 'startDate', 'endDate', 'url', 'tags'],
+    columnsToShow = ['funderName', 'funderProgram', 'grantNumber', 'projectTitle', 'startDate', 'endDate', 'url', 'tags'],
     onFundingResourceChange,
     disabled = false,
     validation,
