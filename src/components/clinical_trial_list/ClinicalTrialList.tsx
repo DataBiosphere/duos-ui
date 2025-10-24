@@ -68,7 +68,7 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
       <div className="form-group row no-margin">
         {clinicalTrials.map((clinicalTrial: ClinicalTrial, index: number) => (
           <ClinicalTrialRow
-            key={index}
+            key={clinicalTrial.clinicalTrialId}
             id={index}
             editMode={editState[index]}
             clinicalTrial={clinicalTrial}

@@ -74,7 +74,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
     const ctToSet: ClinicalTrial = {
       ...newClinicalTrial,
       [key]: key === 'tags'
-        ? value.split(',').map(t => t.trim()).filter(t => t)
+        ? value.split(',').map(t => t.trim()).filter(Boolean)
         : value,
     }
     setNewClinicalTrial(ctToSet)

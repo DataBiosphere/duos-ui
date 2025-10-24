@@ -4,7 +4,7 @@ import { ClinicalTrial } from 'src/types/model'
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface ClinicalTrialSummaryProps {
-  clinicalTrial: ClinicalTrial
+  readonly clinicalTrial: ClinicalTrial
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
@@ -38,15 +38,27 @@ export default function ClinicalTrialSummary(props: ClinicalTrialSummaryProps): 
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
-        <a style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }} onClick={() => !disabled && editAction()}>
+        <button
+          type="button"
+          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          onClick={() => !disabled && editAction()}
+          disabled={disabled}
+          aria-label="Edit clinical trial"
+        >
           <span className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon" aria-hidden="true" />
           <span style={{ marginLeft: '1rem' }}></span>
-        </a>
+        </button>
       </div>
-      <a style={{ marginLeft: 10, ...buttonStyle }} onClick={() => !disabled && setShowDeleteModal(true)}>
+      <button
+        type="button"
+        style={{ marginLeft: 10, ...buttonStyle }}
+        onClick={() => !disabled && setShowDeleteModal(true)}
+        disabled={disabled}
+        aria-label="Delete clinical trial"
+      >
         <span className="glyphicon glyphicon-trash presentation-delete-icon" aria-hidden="true" />
         <span style={{ marginLeft: '1rem' }}></span>
-      </a>
+      </button>
       <DeletePresentationOrPublication
         name={clinicalTrial.title}
         objectName="clinical trial"

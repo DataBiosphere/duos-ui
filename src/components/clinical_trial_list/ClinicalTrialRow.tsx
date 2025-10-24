@@ -6,7 +6,7 @@ import { ClinicalTrial } from 'src/types/model'
 interface ClinicalTrialRowProps {
   readonly id: number
   readonly editMode: boolean
-  clinicalTrial: ClinicalTrial
+  readonly clinicalTrial: ClinicalTrial
   readonly clinicalTrials: ClinicalTrial[]
   readonly columnsToShow: string[]
   readonly editAction: () => void
