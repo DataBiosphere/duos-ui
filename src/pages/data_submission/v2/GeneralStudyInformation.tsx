@@ -10,6 +10,8 @@ import {
   AlternativeDataSharingPlanTargetPublicReleaseDate,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
+  generateFormDateField,
+  generateFormTextField,
   getStudyPropertyByKey,
   MasterChangeHandler,
   setStudyPropertyByKey,
@@ -88,22 +90,8 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         defaultValue={formData?.dataTypes}
         onChange={onChange}
       />
-      <FormField
-        id="phenotypeIndication"
-        title="Phenotype/Indication Studied"
-        defaultValue={getStudyPropertyByKey(formData, 'phenotypeIndication')}
-        onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new PhenotypeIndication(input.value as string))
-        }}
-      />
-      <FormField
-        id="species"
-        title="Species"
-        defaultValue={getStudyPropertyByKey(formData, 'species')}
-        onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new Species(input.value as string))
-        }}
-      />
+      {generateFormTextField(formData, onChange, new PhenotypeIndication())}
+      {generateFormTextField(formData, onChange, new Species())}
       <FormField
         id="piName"
         title="Principal Investigator Name"
@@ -134,28 +122,8 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         }}
       />
       <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        <FormField
-          id="alternativeDataSharingPlanTargetDeliveryDate"
-          style={{ width: '45%' }}
-          title="Target Delivery Date"
-          placeholder="Please enter date (YYYY-MM-DD)"
-          defaultValue={getStudyPropertyByKey(formData, 'alternativeDataSharingPlanTargetDeliveryDate')}
-          validators={[FormValidators.DATE]}
-          onChange={(input: { key: Date, value: unknown, isValid: boolean }) => {
-            setStudyPropertyByKey(formData, onChange, input, new AlternativeDataSharingPlanTargetDeliveryDate(input.value as Date))
-          }}
-        />
-        <FormField
-          id="alternativeDataSharingPlanTargetPublicReleaseDate"
-          style={{ width: '45%' }}
-          title="Target Public Release Date"
-          placeholder="Please enter date (YYYY-MM-DD)"
-          defaultValue={getStudyPropertyByKey(formData, 'alternativeDataSharingPlanTargetPublicReleaseDate')}
-          validators={[FormValidators.DATE]}
-          onChange={(input: { key: Date, value: unknown, isValid: boolean }) => {
-            setStudyPropertyByKey(formData, onChange, input, new AlternativeDataSharingPlanTargetPublicReleaseDate(input.value as Date))
-          }}
-        />
+        {generateFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
+        {generateFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
       </div>
       <FormField
         id="publicVisibility"

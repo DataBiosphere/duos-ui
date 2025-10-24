@@ -66,9 +66,9 @@ export class SubmittingToAnvil extends StudyProperty {
   }
 }
 
-export class AlternativeDataSharingPlanTargetPublicReleaseDate extends StudyProperty {
-  constructor(value: Date, studyId?: number, studyPropertyId?: number) {
-    super('alternativeDataSharingPlanTargetPublicReleaseDate', 'Date' as StudyPropertyType, value, studyId, studyPropertyId)
+export class AlternativeDataSharingPlanTargetPublicReleaseDate extends DateStudyProperty {
+  constructor(value?: Date, studyId?: number, studyPropertyId?: number) {
+    super('alternativeDataSharingPlanTargetPublicReleaseDate', 'Target Public Release Date', 'Please enter date (YYYY-MM-DD)', value, studyId, studyPropertyId)
   }
 }
 
@@ -96,15 +96,15 @@ export class DataCustodianEmail extends StudyProperty {
   }
 }
 
-export class AlternativeDataSharingPlanTargetDeliveryDate extends StudyProperty {
-  constructor(value: Date, studyId?: number, studyPropertyId?: number) {
-    super('alternativeDataSharingPlanTargetDeliveryDate', 'Date' as StudyPropertyType, value, studyId, studyPropertyId)
+export class AlternativeDataSharingPlanTargetDeliveryDate extends DateStudyProperty {
+  constructor(value?: Date, studyId?: number, studyPropertyId?: number) {
+    super('alternativeDataSharingPlanTargetDeliveryDate', 'Target Delivery Date', 'Please enter date (YYYY-MM-DD)', value, studyId, studyPropertyId)
   }
 }
 
-export class PhenotypeIndication extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('phenotypeIndication', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class PhenotypeIndication extends StringStudyProperty {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('phenotypeIndication', 'Phenotype/Indication Studied', 'Enter the "Phenotype/Indication studied"', value, studyId, studyPropertyId)
   }
 }
 
@@ -120,9 +120,9 @@ export class AlternativeDataSharingPlanReasons extends StudyProperty {
   }
 }
 
-export class Species extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('species', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class Species extends StringStudyProperty {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('species', 'Species', 'Species', value, studyId, studyPropertyId)
   }
 }
 

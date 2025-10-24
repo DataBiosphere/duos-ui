@@ -25,13 +25,14 @@ export const generateFormTextField = (formData: Study, onChange: MasterChangeHan
   )
 }
 
-export const generateFormDateField = (formData: Study, onChange: MasterChangeHandler, studyProperty: DateStudyProperty, validators: Array<unknown> = []) => {
+export const generateFormDateField = (formData: Study, onChange: MasterChangeHandler, studyProperty: DateStudyProperty, validators: Array<unknown> = [], style: unknown = {}) => {
   return (
     <FormField
       id={studyProperty.key}
       title={studyProperty.fieldTitle}
       placeholder={studyProperty.fieldPlaceholderText}
       validators={validators}
+      style={style}
       defaultValue={getStudyPropertyByKey(formData, studyProperty.key)}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as Date
