@@ -13,13 +13,6 @@ export const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP 
 export const NO_NHGRI_YES_ANVIL = 'I am not NHGRI funded but I am seeking to submit data to AnVIL'
 export const NO_NHGRI_NO_ANVIL = 'I am not NHGRI funded and do not plan to store data in AnVIL'
 
-const nihAnvilUseLabels = {
-  yes_nhgri_yes_phs_id: YES_NHGRI_YES_PHS_ID,
-  yes_nhgri_no_phs_id: YES_NHGRI_NO_PHS_ID,
-  no_nhgri_yes_anvil: NO_NHGRI_YES_ANVIL,
-  no_nhgri_no_anvil: NO_NHGRI_NO_ANVIL,
-}
-
 const radioSelectionToLabels = (selection: string) => {
   if (!isNil(selection)) {
     const lowerCaseSelection = toLower(selection)
@@ -58,16 +51,15 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
         title="Will you or did you submit data to the NIH?"
         type={FormFieldTypes.RADIOGROUP}
         options={[
-          { text: YES_NHGRI_YES_PHS_ID, name: 'yes_nhgri_yes_phs_id' },
-          { text: YES_NHGRI_NO_PHS_ID, name: 'yes_nhgri_no_phs_id' },
-          { text: NO_NHGRI_YES_ANVIL, name: 'no_nhgri_yes_anvil' },
-          { text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil' },
+          { text: YES_NHGRI_YES_PHS_ID, name: YES_NHGRI_YES_PHS_ID },
+          { text: YES_NHGRI_NO_PHS_ID, name: YES_NHGRI_NO_PHS_ID },
+          { text: NO_NHGRI_YES_ANVIL, name: NO_NHGRI_YES_ANVIL },
+          { text: NO_NHGRI_NO_ANVIL, name: NO_NHGRI_NO_ANVIL },
         ]}
         defaultValue={radioSelectionToLabels(getStudyPropertyByKey(formData, 'nihAnvilUse') as string)}
         validators={[FormValidators.REQUIRED]}
-        onChange={(input: { key: string, value: string, isValid: boolean }) => {
-          input.value = nihAnvilUseLabels[input.value] as string
-          setStudyPropertyByKey(formData, onChange, input, new NihAnvilUse(input.value))
+        onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
+          setStudyPropertyByKey(formData, onChange, input, new NihAnvilUse(input.value as string))
         }}
       />
 
