@@ -4,7 +4,6 @@ import { Styles, Theme } from 'src/libs/theme'
 import { Block, Delete } from '@mui/icons-material'
 import SimpleButton from 'src/components/SimpleButton'
 import { useNavigate } from 'react-router-dom'
-import { Notifications } from 'src/libs/utils'
 import { includes, toLower } from 'lodash/fp'
 import './dar_collection_table.css'
 
@@ -12,46 +11,22 @@ const duosBlue = '#0948B7'
 const cancelGray = '#333F52'
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER
-const baseCancelButtonStyle = Object.assign(
-  {},
-  Styles.TABLE.TABLE_ICON_BUTTON,
-  { color: cancelGray },
-  { alignItems: 'center' },
-  { marginRight: '5px' },
-)
+const baseCancelButtonStyle = {
+  ...Styles.TABLE.TABLE_ICON_BUTTON,
+  color: cancelGray,
+  alignItems: 'center',
+  marginRight: '5px',
+}
 
 const hoverPrimaryButtonStyle = {
   backgroundColor: 'rgb(38 138 204)',
   color: 'white',
 }
 
-// redirect function on researcher collections to view the collection's initial DAR application
-const redirectToDARApplication = (darCollectionId, history) => {
-  try {
-    history.push(`/dar_application_review/${darCollectionId}`)
-  }
-  catch (_error) {
-    Notifications.showError({
-      text: 'Error: Cannot view target Data Access Request',
-    })
-  }
-}
-
-// redirect function on DAR draft to resume DAR application
-const resumeDARApplication = (referenceId, history) => {
-  history.push(`/dar_application/${referenceId}`)
-}
-
-// redirect function from DAR Collection to create a Progress Report Application
-const createProgressReport = (collectionId, history) => {
-  history.push(`/progress_report_application/${collectionId}`)
-}
-
 export default function Actions(props) {
   const { showConfirmationModal, collection, goToVote, consoleType, actions = [], status } = props
   const collectionId = collection.darCollectionId
   const uniqueId = (collectionId ? collectionId : collection.referenceIds[0])
-
   const navigate = useNavigate()
 
   const openButtonAttributes = {
@@ -122,7 +97,7 @@ export default function Actions(props) {
   const reviewButtonAttributes = {
     keyProp: `${consoleType}-review-${uniqueId}`,
     label: 'Review',
-    onClick: () => redirectToDARApplication(collectionId, navigate),
+    onClick: () => navigate(`/dar_application_review/${collectionId}`),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -141,7 +116,7 @@ export default function Actions(props) {
   const reviewCloseoutButtonAttributes = {
     keyProp: `${consoleType}-review-closeout-${uniqueId}`,
     label: 'Review Closeout',
-    onClick: () => redirectToDARApplication(collectionId, navigate),
+    onClick: () => navigate(`/dar_application_review/${collectionId}`),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -169,7 +144,7 @@ export default function Actions(props) {
 
   const resumeButtonAttributes = {
     keyProp: `${consoleType}-resume-${uniqueId}`,
-    onClick: () => resumeDARApplication(collection.referenceIds[0], navigate),
+    onClick: () => navigate(`/dar_application/${uniqueId}`),
     label: 'Resume',
     baseColor: Theme.palette.secondary,
     fontColor: 'white',
@@ -199,9 +174,7 @@ export default function Actions(props) {
 
   const createProgressReportButtonAttributes = {
     keyProp: `${consoleType}-create-progress-report-${uniqueId}`,
-    onClick: () => {
-      createProgressReport(collection.darCollectionId, navigate)
-    },
+    onClick: () => { navigate(`/progress_report_application/${uniqueId}`) },
     label: 'Update',
     baseColor: 'white',
     fontColor: Theme.palette.secondary,

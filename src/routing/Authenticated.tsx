@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Notifications } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
-import NotFound from 'src/pages/NotFound'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 const Authenticated = () => {
@@ -13,7 +12,6 @@ const Authenticated = () => {
     const init = () => {
       try {
         setIsLoading(true)
-        // Check if user is authenticated
         setAuthenticated(Storage.userIsLogged())
         setIsLoading(false)
       }

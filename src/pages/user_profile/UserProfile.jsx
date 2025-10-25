@@ -13,7 +13,7 @@ import ga4ghLogo from 'src/images/ga4gh-logo.png'
 import userProfileIcon from 'src/images/user-profile.png'
 import { Link } from 'react-router-dom'
 
-export default function UserProfile(props) {
+export default function UserProfile() {
   const [user, setUser] = useState({})
   const [name, setName] = useState('')
   const [updatedName, setUpdatedName] = useState('')
@@ -84,13 +84,6 @@ export default function UserProfile(props) {
 
     init()
   }, [])
-
-  // const goToRequestRole = () => {
-  //   navigation({
-  //     pathname: '/request_role',
-  //     state: { data: profile },
-  //   })
-  // }
 
   return (
     <div
@@ -222,8 +215,6 @@ export default function UserProfile(props) {
       <div style={{ marginTop: '115px' }} />
       <ResearcherStatus
         user={user}
-        pageProps={props}
-        profile={profile}
       />
       <div style={{ marginTop: '60px' }} />
       <AcceptedAcknowledgements />

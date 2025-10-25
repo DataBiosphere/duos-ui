@@ -18,6 +18,13 @@ import RequestForm from 'src/pages/user_profile/RequestForm'
 import DatasetSearch from 'src/pages/DatasetSearch'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
+import RoleBAC from 'src/routing/RoleBAC'
+import { USER_ROLES } from 'src/libs/utils'
+import ResearcherConsole from 'src/pages/researcher_console/ResearcherConsole'
+import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
+import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview'
+import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
+import NotFound from 'src/pages/NotFound'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -42,13 +49,23 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
       <Route element={<Authenticated />}>
-        <Route path="/profile" element={<UserProfile{...props} />} />
+        <Route path="/profile" element={<UserProfile />} />
         <Route path="/request_role" element={<RequestForm {...props} />} />
         <Route path="/datalibrary" element={<DatasetSearch {...props} />}>
           <Route path=":query" element={<DatasetSearch {...props} />} />
         </Route>
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
+          <Route path="/researcher_console" element={<ResearcherConsole />} />
+          <Route path="/datasets" element={<ControlledAccessGrants />} />
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview adminPage={false} readOnly={false} />} />
+          <Route path="/dar_application_review/:collectionId" element={<DataAccessRequestApplication existingDarsReadOnlyMode={true} draftDar={false} isProgressReportApplication={false} />} />
+          <Route path="/progress_report_application/:collectionId" element={<DataAccessRequestApplication existingDarsReadOnlyMode={true} draftDar={false} isProgressReportApplication={true} />} />
+          <Route path="/dar_application/:dataRequestId" element={<DataAccessRequestApplication draftDar={true} isProgressReportApplication={false} />} />
+          {/*  NOTE: Previous support for this path is no longer allowed as users cannot select datasets from this form */}
+          <Route path="/dar_application" element={<NotFound />} />
+        </Route>
       </Route>
     </Routes>
   )
