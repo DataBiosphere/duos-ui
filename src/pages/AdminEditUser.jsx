@@ -1,6 +1,6 @@
-import { map as lodashMap, concat, filter, matches as lodashMatches } from 'lodash'
-import { union, contains, map, isEmpty } from 'lodash/fp'
-import React, { useState, useEffect, useRef } from 'react'
+import { concat, filter, map as lodashMap, matches as lodashMatches } from 'lodash'
+import { contains, isEmpty, map, union } from 'lodash/fp'
+import React, { useEffect, useRef, useState } from 'react'
 import { User } from '../libs/ajax/User'
 import { Notifications, USER_ROLES } from '../libs/utils'
 import { ResearcherReview } from '../components/ResearcherReview'
@@ -8,6 +8,7 @@ import editUserIcon from '../images/icon_edit_user.png'
 import { PageHeading } from '../components/PageHeading'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import PropTypes from 'prop-types'
+import { useParams } from 'react-router-dom'
 
 const adminRole = { roleId: 4, name: USER_ROLES.admin }
 const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
@@ -15,6 +16,8 @@ const signingOfficialRole = { roleId: 7, name: USER_ROLES.signingOfficial }
 const serviceAccount = { roleId: 10, name: USER_ROLES.serviceAccount }
 
 export const AdminEditUser = (props) => {
+  const params = useParams()
+  const userId = params.userId
   const [state, setState] = useState({
     user: {},
     displayName: '',
@@ -31,7 +34,7 @@ export const AdminEditUser = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await User.getById(props.match.params.userId)
+        const user = await User.getById(userId)
         const currentRoles = lodashMap(user.roles, (ur) => {
           return { roleId: ur.roleId, name: ur.name }
         })
@@ -52,7 +55,7 @@ export const AdminEditUser = (props) => {
       }
     }
     fetchData()
-  }, [props.match.params.userId])
+  }, [userId])
 
   useEffect(() => {
     if (fetchingComplete) {

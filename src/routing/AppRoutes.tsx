@@ -25,6 +25,24 @@ import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrant
 import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
 import NotFound from 'src/pages/NotFound'
+import EnvRoute from 'src/routing/EnvRoute'
+import { AdminEditUser } from 'src/pages/AdminEditUser'
+import AdminManageUsers from 'src/pages/AdminManageUsers'
+import { InstitutionDetails } from 'src/components/institution_table/InstitutionDetails'
+import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode'
+import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
+import AdminManageLC from 'src/pages/AdminManageLC'
+import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
+import ManageDac from 'src/pages/manage_dac/ManageDac'
+import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
+import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
+import ManageRadar from 'src/pages/manage_dac/ManageRadar'
+import { DAAUtils } from 'src/utils/DAAUtils'
+import EditDac from 'src/pages/manage_dac/EditDac'
+import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
+import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
+import DataSubmissionForm from 'src/pages/data_submission/DataSubmissionForm'
+import StudyUpdateForm from 'src/pages/StudyUpdateForm'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -38,8 +56,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/home" element={<Home {...props} />} />
       <Route path="/status" element={<Status />} />
       <Route path="/liveness" element={<HealthCheck />} />
-      {checkEnv(envGroups.NON_STAGING)
-        && <Route path="/backgroundsignin" element={<BackgroundSignIn {...props} />} />}
       <Route path="/nih_ic_webform" element={<NIHICWebform />} />
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -48,6 +64,9 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/consent_text_generator" element={<ConsentTextGenerator />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
+      <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
+        <Route path="/backgroundsignin" element={<BackgroundSignIn {...props} />} />
+      </Route>
       <Route element={<Authenticated />}>
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/request_role" element={<RequestForm {...props} />} />
@@ -65,6 +84,32 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/dar_application/:dataRequestId" element={<DataAccessRequestApplication draftDar={true} isProgressReportApplication={false} />} />
           {/*  NOTE: Previous support for this path is no longer allowed as users cannot select datasets from this form */}
           <Route path="/dar_application" element={<NotFound />} />
+        </Route>
+        {/* TODO: Chairperson */}
+        {/* TODO: Member */}
+        {/* TODO: Signing Official */}
+        {/* TODO: Data Submitter */}
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
+          <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />
+          <Route path="/admin_manage_users" element={<AdminManageUsers />} />
+          <Route path="/admin_edit_user/:userId" element={<AdminEditUser />} />
+          <Route path="/admin_manage_institutions/create_new" element={<InstitutionDetails formMode={FORM_MODES.createNew} />} />
+          <Route path="/admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
+          <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
+          <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
+          <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
+          <Route path="/manage_dac" element={<ManageDac />} />
+          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
+          <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
+          <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
+          <Route path="/manage_add_dac" element={<ManageEditDac />} />
+          <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
+          <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
+          <Route path="/data_submission_form" element={<DataSubmissionForm />} />
+          <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
+          {DAAUtils.isEnabled() && <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />}
+          {DAAUtils.isEnabled() && <Route path="/manage_add_dac_daa" element={<EditDac />} />}
+          {/* TODO: SO Acknowledged needs to be here too */}
         </Route>
       </Route>
     </Routes>

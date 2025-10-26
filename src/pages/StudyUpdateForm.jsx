@@ -1,9 +1,8 @@
-import React from 'react'
-import { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Notifications } from '../libs/utils'
 import lockIcon from '../images/lock-icon.png'
 import { Styles } from '../libs/theme'
-import { cloneDeep, isNil, isEmpty } from 'lodash/fp'
+import { cloneDeep, isEmpty, isNil } from 'lodash/fp'
 
 import DataSubmissionStudyInformation from './data_submission/ds_study_information'
 import NihAnvilUse from './data_submission/NihAnvilUse'
@@ -15,10 +14,12 @@ import { User } from '../libs/ajax/User'
 import { DataSet } from '../libs/ajax/DataSet'
 import { Storage } from '../libs/storage'
 import { set } from 'lodash'
+import { useNavigate, useParams } from 'react-router-dom'
 
-export const StudyUpdateForm = (props) => {
-  const { history } = props
-  const { studyId } = props.match.params
+export const StudyUpdateForm = () => {
+  const navigate = useNavigate()
+  const params = useParams()
+  const { studyId } = params
 
   const [formData, setFormData] = useState({ properties: {} })
   const [study, setStudy] = useState({})
@@ -205,7 +206,7 @@ export const StudyUpdateForm = (props) => {
     const multiPartFormData = createMultiPartFormData(update)
 
     DataSet.updateStudy(studyId, multiPartFormData).then(() => {
-      history.push('/datalibrary')
+      navigate('/datalibrary')
       Notifications.showSuccess({ text: 'Submitted succesfully!' })
     }, (e) => {
       Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message })

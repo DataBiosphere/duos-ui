@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Institution } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { Button, TextField } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
@@ -13,11 +13,6 @@ import { SigningOfficialsList } from 'src/components/institution_table/component
 import { FORM_MODES, InstitutionFormMode } from 'src/components/institution_table/InstitutionFormMode'
 
 interface InstitutionDetailsProps {
-  match: {
-    params: {
-      institutionId?: number
-    }
-  }
   formMode: InstitutionFormMode
 }
 
@@ -27,7 +22,8 @@ interface InstitutionDetailsUpdate {
 }
 
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
-  const { institutionId } = props.match.params
+  const params = useParams()
+  const { institutionId } = params
   const formMode = props.formMode
   const navigate = useNavigate()
   const [institutionList, setInstitutionList] = useState<Institution[]>([])

@@ -152,10 +152,7 @@ export const NavigationTabsComponent = (props) => {
                 {/* Sign-in button location when window is narrow and menu is vertical */}
                 {!isLogged && orientation === 'vertical' && (
                   <li style={{ marginRight: 0 }}>
-                    <SignInButton
-                      props={props}
-                      history={history}
-                    />
+                    <SignInButton props={props} />
                   </li>
                 )}
               </ul>
@@ -174,10 +171,7 @@ export const NavigationTabsComponent = (props) => {
                 flexDirection: orientation === 'vertical' ? 'column' : 'row',
               }}
             >
-              <SignInButton
-                props={props}
-                history={history}
-              />
+              <SignInButton props={props} />
             </div>
           )}
         {isLogged && (

@@ -287,7 +287,6 @@ const DuosHeader = (props) => {
         <div className="row no-margin" style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
-            goToLink={goToLink}
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
             DuosLogo={DuosLogo}
@@ -328,7 +327,6 @@ const DuosHeader = (props) => {
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
-              goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
               makeNotifications={() => {}}
               duosLogoImage={duosLogoImage}

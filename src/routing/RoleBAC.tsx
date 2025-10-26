@@ -30,6 +30,8 @@ const RoleBAC = ({ rolesAllowed }: RoleBACProps) => {
         const accepted = checkRoles(rolesAllowed)
         setRoleAllowed(accepted)
         setIsLoading(false)
+        console.log('RoleBAC: User role check completed, access ' + (accepted ? 'granted' : 'denied'))
+        console.log('user', Storage.getCurrentUser())
       }
       catch (error) {
         console.error('Error checking authentication:', error)
@@ -49,7 +51,7 @@ const RoleBAC = ({ rolesAllowed }: RoleBACProps) => {
 
   return roleAllowed
     ? <Outlet />
-    : <Navigate to="/" state={{ from: location }} replace />
+    : <Navigate to="/" state={{ from: location }} />
 }
 
 export default RoleBAC
