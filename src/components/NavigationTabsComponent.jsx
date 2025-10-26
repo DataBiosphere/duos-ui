@@ -52,7 +52,6 @@ const styles = {
 
 export const NavigationTabsComponent = (props) => {
   const {
-    history,
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,

@@ -6,7 +6,7 @@ import { DAA } from '../../libs/ajax/DAA'
 import { Models } from '../../libs/models'
 import { Notifications, PromiseSerial } from '../../libs/utils'
 import { Alert } from '../../components/Alert'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
 import editDACIcon from '../../images/dac_icon.svg'
 import backArrowIcon from '../../images/back_arrow.svg'
@@ -24,6 +24,7 @@ export default function EditDac() {
   const params = useParams()
   const dacId = params.dacId
   const navigate = useNavigate()
+  const location = useLocation()
   const [state, setState] = useState({
     error: Models.error,
     dirtyFlag: false,
@@ -687,7 +688,7 @@ export default function EditDac() {
               <UploadDaaModal
                 showModal={showUploadModal}
                 setShowModal={setShowUploadModal}
-                userRole={props.location.state.userRole}
+                userRole={location?.state?.userRole}
                 onCloseRequest={() => setShowUploadModal(false)}
                 onAttachmentChange={handleAttachment}
               />
