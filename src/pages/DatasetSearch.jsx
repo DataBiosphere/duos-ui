@@ -97,7 +97,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 
 export const DatasetSearch = (props) => {
   const params = useParams()
-  const query = params.query || null
+  const query = params.query
   const [datasets, setDatasets] = useState([])
   const [queryState, setQueryState] = useState(query)
   const [loading, setLoading] = useState(true)
