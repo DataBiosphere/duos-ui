@@ -16,7 +16,13 @@ const Home = (props) => {
     return Object.entries(allLibraries)
       .filter(([key, library]) => library.featured)
       .map(([key, library]) => ({ key, ...library }))
-      .sort((a, b) => a.key.localeCompare(b.key))
+      .sort((a, b) => {
+        // Sort by order first, then alphabetically by key as fallback
+        if (a.order !== b.order) {
+          return a.order - b.order
+        }
+        return a.key.localeCompare(b.key)
+      })
   }, [])
 
   const homeTitle = {
@@ -86,18 +92,19 @@ const Home = (props) => {
 
   const baseCard = {
     width: '320px',
-    aspectRatio: '2 / 1',
+    height: '160px', // 2:1 aspect ratio
     borderRadius: '6px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    boxShadow: '0 1px 4px rgba(58, 36, 36, 0.06)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    overflow: 'hidden', // Prevent images from overflowing
   }
 
   const logoImg = {
-    width: '100%',
-    height: '100%',
+    maxWidth: '100%',
+    maxHeight: '100%',
     objectFit: 'contain',
     display: 'block',
   }
@@ -129,10 +136,12 @@ const Home = (props) => {
         {`
         .logo-card {
           width: 320px;
+          height: 160px;
         }
         @media (max-width: 768px) {
           .logo-card {
             width: 280px;
+            height: 140px;
           }
           .logo-grid {
             gap: 1.5rem !important;
@@ -142,6 +151,7 @@ const Home = (props) => {
           .logo-card {
             width: 100%;
             max-width: 320px;
+            height: 160px;
           }
           .logo-grid {
             gap: 1rem !important;
@@ -221,6 +231,9 @@ const Home = (props) => {
                     ? libraryName
                     : `Please login to access ${libraryName} Data Library`
 
+                  // Use the library name (title without "Data Library") as the label
+                  const label = libraryName
+
                   // Special styling for Broad Institute (dark background)
                   const cardStyle = library.key === 'broad'
                     ? { ...baseCard, background: '#1F3B50', padding: '15px' }
@@ -233,19 +246,33 @@ const Home = (props) => {
 
                   return (
                     <OverflowTooltip key={library.key} id={library.key} tooltipText={tooltipText}>
-                      <div className="logo-card" style={cardStyle}>
-                        <Link
-                          to={isLogged ? libraryPath : '#'}
-                          onClick={(e) => {
-                            if (!isLogged) {
-                              e.preventDefault()
-                              handleSignIn(libraryPath)
-                            }
-                          }}
-                          style={{ textDecoration: 'none', display: 'contents', cursor: 'pointer' }}
-                        >
-                          <img src={logoSrc} alt={libraryName} style={logoImg} />
-                        </Link>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="logo-card" style={cardStyle}>
+                          <Link
+                            to={isLogged ? libraryPath : '#'}
+                            onClick={(e) => {
+                              if (!isLogged) {
+                                e.preventDefault()
+                                handleSignIn(libraryPath)
+                              }
+                            }}
+                            style={{ textDecoration: 'none', display: 'flex', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
+                          >
+                            <img src={logoSrc} alt={libraryName} style={logoImg} />
+                          </Link>
+                        </div>
+                        {label && (
+                          <div style={{
+                            fontSize: '14px',
+                            color: '#333',
+                            textAlign: 'center',
+                            fontWeight: '500',
+                            maxWidth: '320px',
+                            wordWrap: 'break-word'
+                          }}>
+                            {label}
+                          </div>
+                        )}
                       </div>
                     </OverflowTooltip>
                   )

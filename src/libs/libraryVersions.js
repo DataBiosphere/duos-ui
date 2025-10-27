@@ -36,6 +36,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: duosIcon,
       title: 'DUOS Data Library',
       featured: true,
+      order: 1,
     },
     'broad': {
       query: {
@@ -46,6 +47,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Broad Data Library',
       featured: true,
+      order: 2,
     },
     'mgb': {
       query: {
@@ -77,6 +79,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: mgbIcon,
       title: 'Mass General Brigham Data Library',
       featured: false,
+      order: 999,
     },
     'elwazi': {
       query: {
@@ -87,6 +90,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: elwaziIcon,
       title: 'eLwazi Data Library',
       featured: true,
+      order: 3,
     },
     'myinstitution': {
       query: {
@@ -97,6 +101,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: null,
       title: institutionName + ' Data Library',
       featured: false,
+      order: 999,
     },
     'nhgri': {
       query: {
@@ -107,6 +112,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhgriIcon,
       title: 'NHGRI Data Library',
       featured: true,
+      order: 4,
     },
     'nhlbi': {
       query: {
@@ -117,6 +123,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Data Library',
       featured: false,
+      order: 999,
     },
     'scp': {
       query: {
@@ -127,6 +134,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: scpIcon,
       title: 'Single Cell Portal Data Library',
       featured: true,
+      order: 5,
     },
     'nhlbi-blood-disorders-and-blood-safety': {
       query: {
@@ -136,7 +144,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: nhlbiIcon,
       title: 'NHLBI Blood Disorders and Blood Safety Data Library',
-      featured: true,
+      featured: false,
+      order: 999,
     },
     'nhlbi-health-disparities': {
       query: {
@@ -147,7 +156,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Health Disparities Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-heart-and-vascular-diseases': {
       query: {
         match_phrase: {
@@ -157,7 +166,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Heart and Vascular Diseases Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-lung-diseases': {
       query: {
         match_phrase: {
@@ -167,7 +176,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Lung Diseases Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-obesity-nutrition-and-physical-activity': {
       query: {
         match_phrase: {
@@ -177,7 +186,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Obesity, Nutrition, and Physical Activity Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-population-and-epidemiology-studies': {
       query: {
         match_phrase: {
@@ -187,7 +196,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Population and Epidemiology Studies Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-precision-medicine-activities': {
       query: {
         match_phrase: {
@@ -197,7 +206,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Precision Medicine Activities Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-research-spectrum': {
       query: {
         match_phrase: {
@@ -207,7 +216,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Research Spectrum Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-sleep-science-and-sleep-disorders': {
       query: {
         match_phrase: {
@@ -217,7 +226,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Sleep Science and Sleep Disorders Data Library',
       featured: false,
-    },
+      order: 999,    },
     'nhlbi-womens-health': {
       query: {
         match_phrase: {
@@ -227,6 +236,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Women\'s Health Data Library',
       featured: false,
+      order: 999,
     },
     'anvil': {
       query: {
@@ -237,6 +247,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: anvilIcon,
       title: 'AnVIL Data Library',
       featured: true,
+      order: 6,
     },
     'hca': {
       query: {
@@ -247,6 +258,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: hcaIcon,
       title: 'Human Cell Atlas Data Library',
       featured: true,
+      order: 7,
     },
     'zoonomics': {
       query: {
@@ -256,14 +268,15 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: zoonomicsIcon,
       title: 'Center for Zoonomics Data Library',
-      featured: true,
+      featured: false,
+      order: 999,
     },
     'terra': {
       query: null,
       icon: terraIcon,
       title: 'Terra Data Library',
       featured: false,
-    },
+      order: 999,    },
     'cfde': {
       query: {
         match_phrase: {
@@ -272,7 +285,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: cfdeIcon,
       title: 'CFDE Data Library',
-      featured: true,
+      featured: false,
+      order: 999,
     },
     'firecloud': {
       query: {
@@ -283,7 +297,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: firecloudIcon,
       title: 'FireCloud Data Library',
       featured: false,
-    },
+      order: 999,    },
     'allofus': {
       query: {
         match_phrase: {
@@ -292,7 +306,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: aouIcon,
       title: 'All of Us Data Library',
-      featured: true,
+      featured: false,
+      order: 999,
     },
     'openaccess': {
       query: {
@@ -309,7 +324,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: duosIcon,
       title: 'DUOS Open Access Data Library',
       featured: false,
-    },
+      order: 999,    },
     'ifgc': {
       query: {
         match_phrase: {
@@ -319,6 +334,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: ifgcIcon,
       title: 'International Fetal Genomics Consortium Data Library',
       featured: true,
+      order: 8,
     },
     'schare': {
       query: {
@@ -329,6 +345,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: schareIcon,
       title: 'SCHARE Data Library',
       featured: true,
+      order: 9,
     },
     'stanley': {
       query: {
@@ -339,7 +356,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
       featured: false,
-    },
+      order: 999,    },
     'stanleycenter': {
       query: {
         match_phrase: {
@@ -349,6 +366,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
       featured: true,
+      order: 10,
     },
     'getzlab': {
       query: {
@@ -358,7 +376,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: getzLabIcon,
       title: 'Getz Lab Data Library',
-      featured: true,
+      featured: false,
+      order: 999,
     },
     'asap': {
       query: {
@@ -369,6 +388,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: asapIcon,
       title: 'Aligning Science Across Parkinson\'s Data Library',
       featured: true,
+      order: 11,
     },
     'gp2': {
       query: {
@@ -379,6 +399,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: gp2Icon,
       title: 'Global Parkinson\'s Genetics Program Data Library',
       featured: true,
+      order: 12,
     },
     'broadasd': {
       query: {
@@ -389,6 +410,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Broad Institute Autism Spectrum Disorder (ASD) Data Library',
       featured: true,
+      order: 13,
     },
     'pbn': {
       query: {
@@ -399,6 +421,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Psychiatric Biomarkers Network Data Library',
       featured: true,
+      order: 14,
     },
     'pgc': {
       query: {
@@ -409,6 +432,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Psychiatric Genomics Consortium - PsychChip Data Library',
       featured: true,
+      order: 15,
     },
     'broadsczbd': {
       query: {
@@ -419,6 +443,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Broad Institute Schizophrenia & Bipolar Disorder Data Library',
       featured: true,
+      order: 16,
     },
     'esp': {
       query: {
@@ -429,6 +454,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Broad Institute Epilepsy Data Library',
       featured: true,
+      order: 17,
     },
     'fgc': {
       query: {
@@ -439,6 +465,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Fetal Genomics Consortium Data Library',
       featured: true,
+      order: 18,
     },
     'broadibd': {
       query: {
@@ -449,6 +476,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: broadIcon,
       title: 'Broad Institute IBD Data Library',
       featured: true,
+      order: 19,
     },
     'ged': {
       query: {
@@ -459,6 +487,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: gedIcon,
       title: 'Genetics of Eating Disorders Data Library',
       featured: true,
+      order: 20,
     },
     'ncpi-duo': {
       query: {
@@ -469,7 +498,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: ncpiIcon,
       title: 'NCPI DUO Data Library',
       featured: false,
-    },
+      order: 999,    },
     '/custom': {
       query: {
         bool: {
@@ -490,6 +519,6 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: homeIcon,
       title: customQuery + ' Data Library',
       featured: false,
-    },
+      order: 999,    },
   }
 }
