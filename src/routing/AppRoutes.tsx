@@ -165,6 +165,7 @@ const AppRoutes = (props: AppRoutesProps) => {
             </>
           )}
       </Route>
+      {/* NOTE: Previous support dataset study permalink routes is now handled in NotFound */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
