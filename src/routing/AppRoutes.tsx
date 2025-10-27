@@ -43,6 +43,9 @@ import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
 import DataSubmissionForm from 'src/pages/data_submission/DataSubmissionForm'
 import StudyUpdateForm from 'src/pages/StudyUpdateForm'
+import ChairConsole from 'src/pages/ChairConsole'
+import DACDatasets from 'src/pages/DACDatasets'
+import MemberConsole from 'src/pages/MemberConsole'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -85,8 +88,27 @@ const AppRoutes = (props: AppRoutesProps) => {
           {/*  NOTE: Previous support for this path is no longer allowed as users cannot select datasets from this form */}
           <Route path="/dar_application" element={<NotFound />} />
         </Route>
-        {/* TODO: Chairperson */}
-        {/* TODO: Member */}
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
+          <Route path="/member_console" element={<MemberConsole />} />
+          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
+        </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
+          <Route path="/chair_console" element={<ChairConsole />} />
+          <Route path="/dac_datasets" element={<DACDatasets />} />
+          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
+          <Route path="/dataset_submissions" element={<DatasetSubmissions />}></Route>
+          <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />}></Route>
+          <Route path="/data_submission_form" element={<DataSubmissionForm />}></Route>
+          <Route path="/study_update/:studyId" element={<StudyUpdateForm />}></Route>
+          {/* NOTE: Previous support for Chairperson adding DACs should not have been allowed */}
+          <Route path="/manage_dac" element={<ManageDac />} />
+          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
+          <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
+          <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
+          {DAAUtils.isEnabled() && <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />}
+        </Route>
         {/* TODO: Signing Official */}
         {/* TODO: Data Submitter */}
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>

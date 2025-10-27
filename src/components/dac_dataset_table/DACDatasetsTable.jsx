@@ -6,6 +6,7 @@ import cellData from './DACDatasetTableCellData'
 import { styles, DACDatasetTableColumnOptions } from './DACDatasetConstants'
 import { isNil } from 'lodash/fp'
 import { goToPage as updatePage, recalculateVisibleTable } from 'src/libs/utils'
+import { useNavigate } from 'react-router-dom'
 
 const columnHeaderConfig = {
   duosId: { label: 'DUOS ID', cellStyle: { width: styles.cellWidths.duosId }, cellDataFn: cellData.duosIdCellData, sortable: true },
@@ -26,13 +27,13 @@ const columnHeaderData = (columns = defaultColumns) => {
 }
 
 const processDatasetRowData = ({
-  datasets, columns = defaultColumns, consoleType = '', history,
+  datasets, columns = defaultColumns, consoleType = '', navigate,
 }) => {
   if (!isNil(datasets)) {
     return datasets.map((dataset) => {
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          dataset, consoleType, history,
+          dataset, consoleType, navigate,
         })
       })
     })
@@ -57,12 +58,13 @@ const getInitialSort = (columns = []) => {
 }
 
 export const DACDatasetsTable = function DACDatasetTable(props) {
+  const navigate = useNavigate()
   const [visibleDatasets, setVisibleDatasets] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const [pageCount, setPageCount] = useState(1)
   const [sort, setSort] = useState(getInitialSort(props.columns))
   const [tableSize, setTableSize] = useState(10)
-  const { datasets, columns, isLoading, consoleType, history } = props
+  const { datasets, columns, isLoading, consoleType } = props
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
@@ -74,14 +76,13 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
     recalculateVisibleTable({
       tableSize,
       pageCount,
-      filteredList: processDatasetRowData({ datasets, columns, consoleType, history }),
+      filteredList: processDatasetRowData({ datasets, columns, consoleType, navigate }),
       currentPage,
       setPageCount,
       setCurrentPage,
       setVisibleList: setVisibleDatasets,
       sort,
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType])
 
   // Helper function to update page
