@@ -46,6 +46,11 @@ import StudyUpdateForm from 'src/pages/StudyUpdateForm'
 import ChairConsole from 'src/pages/ChairConsole'
 import DACDatasets from 'src/pages/DACDatasets'
 import MemberConsole from 'src/pages/MemberConsole'
+import SOAcknowledged from 'src/routing/SOAcknowledged'
+import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
+import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
+import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
+import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -88,29 +93,6 @@ const AppRoutes = (props: AppRoutesProps) => {
           {/*  NOTE: Previous support for this path is no longer allowed as users cannot select datasets from this form */}
           <Route path="/dar_application" element={<NotFound />} />
         </Route>
-        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
-          <Route path="/member_console" element={<MemberConsole />} />
-          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
-          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
-        </Route>
-        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
-          <Route path="/chair_console" element={<ChairConsole />} />
-          <Route path="/dac_datasets" element={<DACDatasets />} />
-          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
-          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
-          <Route path="/dataset_submissions" element={<DatasetSubmissions />}></Route>
-          <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />}></Route>
-          <Route path="/data_submission_form" element={<DataSubmissionForm />}></Route>
-          <Route path="/study_update/:studyId" element={<StudyUpdateForm />}></Route>
-          {/* NOTE: Previous support for Chairperson adding DACs should not have been allowed */}
-          <Route path="/manage_dac" element={<ManageDac />} />
-          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
-          <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
-          <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
-          {DAAUtils.isEnabled() && <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />}
-        </Route>
-        {/* TODO: Signing Official */}
-        {/* TODO: Data Submitter */}
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
           <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />
           <Route path="/admin_manage_users" element={<AdminManageUsers />} />
@@ -131,8 +113,53 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
           {DAAUtils.isEnabled() && <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />}
           {DAAUtils.isEnabled() && <Route path="/manage_add_dac_daa" element={<EditDac />} />}
-          {/* TODO: SO Acknowledged needs to be here too */}
+          <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
+          <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
+          {DAAUtils.isEnabled()
+            && (
+              <>
+                <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
+                <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
+              </>
+            )}
         </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
+          <Route path="/chair_console" element={<ChairConsole />} />
+          <Route path="/dac_datasets" element={<DACDatasets />} />
+          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
+          <Route path="/dataset_submissions" element={<DatasetSubmissions />}></Route>
+          <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />}></Route>
+          <Route path="/data_submission_form" element={<DataSubmissionForm />}></Route>
+          <Route path="/study_update/:studyId" element={<StudyUpdateForm />}></Route>
+          {/* NOTE: Previous support for Chairperson adding DACs should not have been allowed */}
+          <Route path="/manage_dac" element={<ManageDac />} />
+          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
+          <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
+          <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
+          {DAAUtils.isEnabled() && <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />}
+        </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
+          <Route path="/member_console" element={<MemberConsole />} />
+          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
+        </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
+          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
+          <Route element={<SOAcknowledged />}>
+            <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
+            <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
+            {DAAUtils.isEnabled()
+              && (
+                <>
+                  <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
+                  <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
+                </>
+              )}
+          </Route>
+        </Route>
+        {/* TODO: Data Submitter */}
       </Route>
     </Routes>
   )

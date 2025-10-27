@@ -4,6 +4,7 @@ import { Notifications } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import { UserRole } from 'src/types/model'
 import { Navigate, Outlet } from 'react-router-dom'
+import { extractError } from 'src/utils/ErrorUtils'
 
 interface RoleBACProps {
   readonly rolesAllowed: string[]
@@ -32,8 +33,9 @@ const RoleBAC = ({ rolesAllowed }: RoleBACProps) => {
         setIsLoading(false)
       }
       catch (error) {
+        const message = extractError(error)
         Notifications.showError({
-          text: 'Error: Unable to verify authentication',
+          text: 'Error: Unable to verify user roles: ' + message,
         })
         setRoleAllowed(false)
         setIsLoading(false)
