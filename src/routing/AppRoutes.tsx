@@ -155,13 +155,15 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         <Route path="/data_submission_form" element={<DataSubmissionForm />} />
         <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
-        {DAAUtils.isEnabled() && <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />}
-        {DAAUtils.isEnabled() && <Route path="/manage_add_dac_daa" element={<EditDac />} />}
         <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
         <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
         {DAAUtils.isEnabled()
           && (
             <>
+              <Route path="/manage_edit_dac_daa" element={<EditDac />}>
+                <Route path=":dacId" element={<EditDac />} />
+              </Route>
+              <Route path="/manage_add_dac_daa" element={<EditDac />} />
               <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
               <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
             </>
