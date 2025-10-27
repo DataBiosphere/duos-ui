@@ -3,16 +3,19 @@ import ClinicalTrialAddEdit from 'src/components/clinical_trial_list/ClinicalTri
 import ClinicalTrialRow from 'src/components/clinical_trial_list/ClinicalTrialRow'
 import { ClinicalTrial } from 'src/types/model'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
+import {
+  parseLegacyStatus,
+  parseLegacyPhase,
+  parseLegacyInterventionType,
+} from 'src/utils/ClinicalTrialEnumUtils'
 
-interface ClinicalTrialListProps {
+export default function ClinicalTrialList(props: {
   readonly clinicalTrials: ClinicalTrial[]
   readonly columnsToShow?: string[]
   readonly onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
-}
-
-export default function ClinicalTrialList(props: ClinicalTrialListProps): React.JSX.Element {
+}): React.JSX.Element {
   const {
     clinicalTrials,
     columnsToShow = [],
@@ -21,8 +24,16 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
     validation,
   } = props
 
+  // Normalize any legacy string values on render
+  const normalized = clinicalTrials.map(ct => ({
+    ...ct,
+    status: parseLegacyStatus(ct.status as unknown as string),
+    phase: parseLegacyPhase(ct.phase as unknown as string),
+    interventionType: parseLegacyInterventionType(ct.interventionType as unknown as string),
+  }))
+
   const [showAddEdit, setShowAddEdit] = useState(false)
-  const [editState, setEditState] = useState(clinicalTrials.map(() => false))
+  const [editState, setEditState] = useState(normalized.map(() => false))
 
   const toggleEditState = (index: number) => {
     const copy = [...editState]
@@ -31,7 +42,7 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
   }
 
   const handleDelete = (index: number) => {
-    const updated = clinicalTrials.filter((_, i) => i !== index)
+    const updated = normalized.filter((_, i) => i !== index)
     onClinicalTrialChange(updated)
   }
 
@@ -59,20 +70,20 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
         {showAddEdit && (
           <ClinicalTrialAddEdit
             id={-1}
-            clinicalTrials={clinicalTrials}
+            clinicalTrials={normalized}
             closeAction={() => setShowAddEdit(false)}
             onClinicalTrialChange={onClinicalTrialChange}
           />
         )}
       </div>
       <div className="form-group row no-margin">
-        {clinicalTrials.map((clinicalTrial: ClinicalTrial, index: number) => (
+        {normalized.map((clinicalTrial: ClinicalTrial, index: number) => (
           <ClinicalTrialRow
-            key={clinicalTrial.clinicalTrialId}
+            key={clinicalTrial.clinicalTrialId || index}
             id={index}
             editMode={editState[index]}
             clinicalTrial={clinicalTrial}
-            clinicalTrials={clinicalTrials}
+            clinicalTrials={normalized}
             columnsToShow={columnsToShow}
             editAction={() => toggleEditState(index)}
             deleteAction={() => { handleDelete(index) }}

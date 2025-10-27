@@ -2,16 +2,19 @@ import React, { useState } from 'react'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import { ClinicalTrial } from 'src/types/model'
 import { renderColumnContent } from 'src/utils/RenderUtils'
+import {
+  statusToDisplay,
+  phaseToDisplay,
+  interventionTypeToDisplay,
+} from 'src/utils/ClinicalTrialEnumUtils'
 
-interface ClinicalTrialSummaryProps {
+export default function ClinicalTrialSummary(props: {
   readonly clinicalTrial: ClinicalTrial
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly disabled: boolean
-}
-
-export default function ClinicalTrialSummary(props: ClinicalTrialSummaryProps): React.JSX.Element {
+}): React.JSX.Element {
   const { clinicalTrial, columnsToShow, editAction, deleteAction, disabled } = props
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -23,6 +26,9 @@ export default function ClinicalTrialSummary(props: ClinicalTrialSummaryProps): 
     dateRange: () => (clinicalTrial.startDate || clinicalTrial.endDate)
       ? `${clinicalTrial.startDate || 'N/A'} → ${clinicalTrial.endDate || 'N/A'}`
       : null,
+    status: () => statusToDisplay(clinicalTrial.status),
+    phase: () => phaseToDisplay(clinicalTrial.phase),
+    interventionType: () => interventionTypeToDisplay(clinicalTrial.interventionType),
   }
 
   return (
