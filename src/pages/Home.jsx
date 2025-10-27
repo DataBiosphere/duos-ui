@@ -94,7 +94,6 @@ const Home = (props) => {
     width: '320px',
     height: '160px', // 2:1 aspect ratio
     borderRadius: '6px',
-    boxShadow: '0 1px 4px rgba(58, 36, 36, 0.06)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
