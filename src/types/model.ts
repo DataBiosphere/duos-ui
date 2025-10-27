@@ -679,19 +679,17 @@ export interface Closeout {
 export interface Presentation {
   title: string
   date: string
-  // ToDO: Make existing Progress Report fields required in DT-2361
-  link?: string // ToDo: Remove in DT-2361 to be replaced by url
-  authors?: string
-  datasetCitation?: string
-  citation?: boolean
-  // ToDo: Make new study fields required in DT-2361 except for tags
-  presentationId?: string
-  studyId?: string
-  presenter?: Presenter
-  event?: string
-  location?: string
-  format?: string
-  access?: string
+  url: string
+  authors: string
+  datasetCitation: string
+  citation: boolean
+  presentationId: string
+  studyId: string
+  presenter: Presenter
+  event: string
+  location: string
+  format: string
+  access: string
   tags?: string[]
 }
 
