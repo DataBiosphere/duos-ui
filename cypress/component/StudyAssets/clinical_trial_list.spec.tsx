@@ -4,7 +4,12 @@ import ClinicalTrialAddEdit from 'src/components/clinical_trial_list/ClinicalTri
 import ClinicalTrialList from 'src/components/clinical_trial_list/ClinicalTrialList'
 import ClinicalTrialRow from 'src/components/clinical_trial_list/ClinicalTrialRow'
 import ClinicalTrialSummary from 'src/components/clinical_trial_list/ClinicalTrialSummary'
-import { ClinicalTrial } from 'src/types/model'
+import {
+  ClinicalTrial,
+  ClinicalTrialStatus,
+  ClinicalTrialInterventionType,
+  ClinicalTrialPhase,
+} from 'src/types/model'
 
 const sampleTrial: ClinicalTrial = {
   clinicalTrialId: 'ct1',
@@ -12,13 +17,13 @@ const sampleTrial: ClinicalTrial = {
   title: 'Baseline Trial',
   registry: 'ClinicalTrials.gov',
   identifier: 'NCT00000001',
-  status: 'Recruiting',
+  status: ClinicalTrialStatus.COMPLETED,
   sponsor: 'NIH',
   startDate: '2024-01-01',
   endDate: '2025-12-31',
-  interventionType: 'Drug',
+  interventionType: ClinicalTrialInterventionType.DRUG,
   description: 'Desc',
-  phase: 'Phase II',
+  phase: ClinicalTrialPhase.PHASE2,
   url: 'https://example.com/trial',
   tags: ['oncology', 'phase2'],
 }
@@ -51,17 +56,22 @@ describe('ClinicalTrialAddEdit', () => {
     cy.get('#title').type('My Trial')
     cy.get('#registry').type('Registry X')
     cy.get('#identifier').type('ID123')
-    cy.get('#status').type('Active')
+    cy.get('#status').click()
+    cy.get('#status').type('Completed{enter}')
     cy.get('#sponsor').type('Sponsor Y')
     cy.get('#startDate').type('2024-06-01')
-    cy.get('#interventionType').type('Device')
-    cy.get('#phase').type('Phase I')
+    cy.get('#interventionType').click()
+    cy.get('#interventionType').type('Drug{enter}')
+    cy.get('#phase').click()
+    cy.get('#phase').type('Phase 2{enter}')
     cy.get('#url').type('https://trial.example.com')
+
     cy.get('.collaborator-form-add-save-button').should('not.be.disabled').click()
     cy.wrap(null).then(() => {
       expect(added.length).to.eq(1)
       expect(added[0].title).to.eq('My Trial')
       expect(added[0].identifier).to.eq('ID123')
+      expect(added[0].status).to.eq(ClinicalTrialStatus.COMPLETED)
     })
   })
 
@@ -75,6 +85,7 @@ describe('ClinicalTrialAddEdit', () => {
         closeAction={cy.stub().as('close')}
         onClinicalTrialChange={(updated) => {
           expect(updated[0].title).to.eq('Baseline Trial Edited')
+          expect(updated[0].phase).to.eq(ClinicalTrialPhase.PHASE2)
         }}
       />,
     )
@@ -89,7 +100,18 @@ describe('ClinicalTrialSummary', () => {
     mount(
       <ClinicalTrialSummary
         clinicalTrial={sampleTrial}
-        columnsToShow={['title', 'registry', 'identifier', 'status', 'sponsor', 'dateRange', 'interventionType', 'phase', 'url', 'tags']}
+        columnsToShow={[
+          'title',
+          'registry',
+          'identifier',
+          'status',
+          'sponsor',
+          'dateRange',
+          'interventionType',
+          'phase',
+          'url',
+          'tags',
+        ]}
         editAction={cy.stub()}
         deleteAction={cy.stub()}
         disabled={false}
@@ -98,11 +120,11 @@ describe('ClinicalTrialSummary', () => {
     cy.contains('Baseline Trial').should('exist')
     cy.contains('ClinicalTrials.gov').should('exist')
     cy.contains('NCT00000001').should('exist')
-    cy.contains('Recruiting').should('exist')
+    cy.contains(/Completed/i).should('exist')
     cy.contains('NIH').should('exist')
     cy.contains('2024-01-01 → 2025-12-31').should('exist')
-    cy.contains('Drug').should('exist')
-    cy.contains('Phase II').should('exist')
+    cy.contains(/Drug/i).should('exist')
+    cy.contains(/Phase II|Phase 2/i).should('exist')
     cy.contains('https://example.com/trial').should('exist')
     cy.contains('oncology, phase2').should('exist')
   })
@@ -163,16 +185,20 @@ describe('ClinicalTrialList', () => {
     cy.get('#title').type('Added Trial')
     cy.get('#registry').type('Reg A')
     cy.get('#identifier').type('ID999')
-    cy.get('#status').type('Completed')
+    cy.get('#status').click()
+    cy.get('#status').type('Completed{enter}')
     cy.get('#sponsor').type('Org Z')
     cy.get('#startDate').type('2024-02-02')
-    cy.get('#interventionType').type('Biologic')
-    cy.get('#phase').type('Phase III')
+    cy.get('#interventionType').click()
+    cy.get('#interventionType').type('Device{enter}')
+    cy.get('#phase').click()
+    cy.get('#phase').type('Phase 3{enter}')
     cy.get('#url').type('https://added.example.com')
-    cy.get('.collaborator-form-add-save-button').click()
+    cy.get('.collaborator-form-add-save-button').click({ force: true })
     cy.wrap(null).then(() => {
       expect(state.length).to.eq(1)
       expect(state[0].title).to.eq('Added Trial')
+      expect(state[0].status).to.eq(ClinicalTrialStatus.COMPLETED)
     })
   })
 
