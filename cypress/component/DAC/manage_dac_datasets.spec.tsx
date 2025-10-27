@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
-import { MemoryRouter, Route } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 const datasets = [
   {
@@ -34,7 +34,9 @@ describe('ManageDacDatasets Component', () => {
   beforeEach(() => {
     mount(
       <MemoryRouter initialEntries={[{ pathname: '/manage_dac_datasets', state: locationState }]}>
-        <Route path="/manage_dac_datasets" component={ManageDacDatasets} />
+        <Routes>
+          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
+        </Routes>
       </MemoryRouter>,
     )
   })
@@ -59,7 +61,9 @@ describe('ManageDacDatasets Component', () => {
 
     mount(
       <MemoryRouter initialEntries={[{ pathname: '/manage_dac_datasets', state: locationState }]}>
-        <Route path="/manage_dac_datasets" component={ManageDacDatasets} />
+        <Routes>
+          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
+        </Routes>
       </MemoryRouter>,
     )
 
