@@ -7,16 +7,16 @@ import { ResearcherReview } from '../components/ResearcherReview'
 import editUserIcon from '../images/icon_edit_user.png'
 import { PageHeading } from '../components/PageHeading'
 import { extractError } from 'src/utils/ErrorUtils.js'
-import PropTypes from 'prop-types'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 const adminRole = { roleId: 4, name: USER_ROLES.admin }
 const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
 const signingOfficialRole = { roleId: 7, name: USER_ROLES.signingOfficial }
 const serviceAccount = { roleId: 10, name: USER_ROLES.serviceAccount }
 
-export const AdminEditUser = (props) => {
+export const AdminEditUser = () => {
   const params = useParams()
+  const navigate = useNavigate()
   const userId = params.userId
   const [state, setState] = useState({
     user: {},
@@ -82,7 +82,7 @@ export const AdminEditUser = (props) => {
     try {
       await User.update(user, userId)
       await updateRolesIfDifferent(userId, state.updatedRoles)
-      props.history.push('/admin_manage_users')
+      navigate('/admin_manage_users')
     }
     catch (error) {
       const errorText = extractError(error)
@@ -157,17 +157,6 @@ export const AdminEditUser = (props) => {
   }
 
   const { displayName, email, displayNameValid, institutionName } = state
-
-  AdminEditUser.propTypes = {
-    match: PropTypes.shape({
-      params: PropTypes.shape({
-        userId: PropTypes.string.isRequired,
-      }).isRequired,
-    }).isRequired,
-    history: PropTypes.shape({
-      push: PropTypes.func.isRequired,
-    }).isRequired,
-  }
 
   return (
     <div className="container container-wide">
@@ -324,7 +313,7 @@ export const AdminEditUser = (props) => {
                 <div style={{ marginLeft: '40px' }}>
                   <button
                     id="btn_save"
-                    onClick={() => props.history.push('/admin_manage_users')}
+                    onClick={() => navigate('/admin_manage_users')}
                     className="f-left btn-primary btn-back"
                   >
                     Back
