@@ -571,7 +571,6 @@ export interface DataAccessRequest {
   expiresAt: number
   userId: number
   createDate: number
-  sortDate: number
   submissionDate: number
   updateDate: number
   datasetIds: number[]

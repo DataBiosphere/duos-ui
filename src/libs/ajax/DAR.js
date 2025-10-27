@@ -46,8 +46,9 @@ export const DAR = {
 
   // v2, v3 DAR Creation
   postDar: async (dar) => {
-    await Metrics.captureEvent(eventList.dar, { action: 'submit' })
-    const filteredDar = omit(['createDate', 'sortDate', 'data_access_request_id'])(dar)
+    // noinspection ES6MissingAwait
+    Metrics.captureEvent(eventList.dar, { action: 'submit' })
+    const filteredDar = omit(['createDate', 'data_access_request_id'])(dar)
     const url = DAAUtils.isEnabled()
       ? `${await getApiUrl()}/api/dar/v3`
       : `${await getApiUrl()}/api/dar/v2`
