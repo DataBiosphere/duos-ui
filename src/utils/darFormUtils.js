@@ -327,7 +327,9 @@ export const calcPublicationErrors = (newPublication) => {
 }
 
 export const calcPresentationErrors = (newPresentation) => {
-  const validation = {}
+  const validation = {
+    presenter: {},
+  }
   if (isEmpty(newPresentation?.title)) {
     validation.title = requiredError
   }
@@ -335,8 +337,32 @@ export const calcPresentationErrors = (newPresentation) => {
   if (isEmpty(newPresentation?.authors)) {
     validation.authors = requiredError
   }
-  if (isEmpty(newPresentation?.link)) {
-    validation.link = requiredError
+  if (isEmpty(newPresentation?.url)) {
+    validation.url = requiredError
+  }
+  if (isEmpty(newPresentation?.datasetCitation)) {
+    validation.datasetCitation = requiredError
+  }
+  if (typeof newPresentation?.citation === 'undefined' || newPresentation?.citation === null) {
+    validation.citation = requiredError
+  }
+  if (isEmpty(newPresentation?.presenter?.name)) {
+    validation.presenter.name = requiredError
+  }
+  if (isEmpty(newPresentation?.presenter?.email)) {
+    validation.presenter.email = requiredError
+  }
+  if (isEmpty(newPresentation?.event)) {
+    validation.event = requiredError
+  }
+  if (isEmpty(newPresentation?.location)) {
+    validation.location = requiredError
+  }
+  if (isEmpty(newPresentation?.format)) {
+    validation.format = requiredError
+  }
+  if (isEmpty(newPresentation?.access)) {
+    validation.access = requiredError
   }
   return validation
 }
