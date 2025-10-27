@@ -30,11 +30,8 @@ const RoleBAC = ({ rolesAllowed }: RoleBACProps) => {
         const accepted = checkRoles(rolesAllowed)
         setRoleAllowed(accepted)
         setIsLoading(false)
-        console.log('RoleBAC: User role check completed, access ' + (accepted ? 'granted' : 'denied'))
-        console.log('user', Storage.getCurrentUser())
       }
       catch (error) {
-        console.error('Error checking authentication:', error)
         Notifications.showError({
           text: 'Error: Unable to verify authentication',
         })
