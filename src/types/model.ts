@@ -392,6 +392,7 @@ export interface FundingResource {
   studyId: string
   funderName: string
   funderProgram: string
+  grantNumber: string
   projectTitle: string
   startDate: string
   endDate: string
@@ -571,7 +572,6 @@ export interface DataAccessRequest {
   expiresAt: number
   userId: number
   createDate: number
-  sortDate: number
   submissionDate: number
   updateDate: number
   datasetIds: number[]
