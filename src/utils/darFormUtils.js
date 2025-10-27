@@ -343,7 +343,7 @@ export const calcPresentationErrors = (newPresentation) => {
   if (isEmpty(newPresentation?.datasetCitation)) {
     validation.datasetCitation = requiredError
   }
-  if (typeof newPresentation?.citation === 'undefined' || newPresentation?.citation === null) {
+  if (newPresentation?.citation === undefined || newPresentation?.citation === null) {
     validation.citation = requiredError
   }
   if (isEmpty(newPresentation?.presenter?.name)) {
