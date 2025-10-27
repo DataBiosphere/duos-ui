@@ -165,6 +165,7 @@ const AppRoutes = (props: AppRoutesProps) => {
             </>
           )}
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
