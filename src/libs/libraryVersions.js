@@ -35,7 +35,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       query: null,
       icon: duosIcon,
       title: 'DUOS Data Library',
-      featured: false,
+      featured: true,
     },
     'broad': {
       query: {
@@ -86,7 +86,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: elwaziIcon,
       title: 'eLwazi Data Library',
-      featured: false,
+      featured: true,
     },
     'myinstitution': {
       query: {
@@ -106,7 +106,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: nhgriIcon,
       title: 'NHGRI Data Library',
-      featured: false,
+      featured: true,
     },
     'nhlbi': {
       query: {
@@ -126,7 +126,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: scpIcon,
       title: 'Single Cell Portal Data Library',
-      featured: false,
+      featured: true,
     },
     'nhlbi-blood-disorders-and-blood-safety': {
       query: {
@@ -136,7 +136,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: nhlbiIcon,
       title: 'NHLBI Blood Disorders and Blood Safety Data Library',
-      featured: false,
+      featured: true,
     },
     'nhlbi-health-disparities': {
       query: {
@@ -256,7 +256,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: zoonomicsIcon,
       title: 'Center for Zoonomics Data Library',
-      featured: false,
+      featured: true,
     },
     'terra': {
       query: null,
@@ -272,7 +272,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: cfdeIcon,
       title: 'CFDE Data Library',
-      featured: false,
+      featured: true,
     },
     'firecloud': {
       query: {
@@ -292,7 +292,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: aouIcon,
       title: 'All of Us Data Library',
-      featured: false,
+      featured: true,
     },
     'openaccess': {
       query: {
@@ -318,7 +318,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: ifgcIcon,
       title: 'International Fetal Genomics Consortium Data Library',
-      featured: false,
+      featured: true,
     },
     'schare': {
       query: {
@@ -328,7 +328,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: schareIcon,
       title: 'SCHARE Data Library',
-      featured: false,
+      featured: true,
     },
     'stanley': {
       query: {
@@ -348,7 +348,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
-      featured: false,
+      featured: true,
     },
     'getzlab': {
       query: {
@@ -358,7 +358,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: getzLabIcon,
       title: 'Getz Lab Data Library',
-      featured: false,
+      featured: true,
     },
     'asap': {
       query: {
@@ -368,7 +368,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: asapIcon,
       title: 'Aligning Science Across Parkinson\'s Data Library',
-      featured: false,
+      featured: true,
     },
     'gp2': {
       query: {
@@ -378,7 +378,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: gp2Icon,
       title: 'Global Parkinson\'s Genetics Program Data Library',
-      featured: false,
+      featured: true,
     },
     'broadasd': {
       query: {
@@ -388,7 +388,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: broadIcon,
       title: 'Broad Institute Autism Spectrum Disorder (ASD) Data Library',
-      featured: false,
+      featured: true,
     },
     'pbn': {
       query: {
@@ -398,7 +398,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: broadIcon,
       title: 'Psychiatric Biomarkers Network Data Library',
-      featured: false,
+      featured: true,
     },
     'pgc': {
       query: {
@@ -408,7 +408,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: broadIcon,
       title: 'Psychiatric Genomics Consortium - PsychChip Data Library',
-      featured: false,
+      featured: true,
     },
     'broadsczbd': {
       query: {
@@ -418,7 +418,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: broadIcon,
       title: 'Broad Institute Schizophrenia & Bipolar Disorder Data Library',
-      featured: false,
+      featured: true,
     },
     'esp': {
       query: {
@@ -428,7 +428,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: broadIcon,
       title: 'Broad Institute Epilepsy Data Library',
-      featured: false,
+      featured: true,
     },
     'fgc': {
       query: {
@@ -438,7 +438,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: broadIcon,
       title: 'Fetal Genomics Consortium Data Library',
-      featured: false,
+      featured: true,
     },
     'broadibd': {
       query: {
@@ -448,7 +448,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: broadIcon,
       title: 'Broad Institute IBD Data Library',
-      featured: false,
+      featured: true,
     },
     'ged': {
       query: {
@@ -458,7 +458,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       },
       icon: gedIcon,
       title: 'Genetics of Eating Disorders Data Library',
-      featured: false,
+      featured: true,
     },
     'ncpi-duo': {
       query: {
