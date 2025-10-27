@@ -89,7 +89,7 @@ function App() {
           setUserRoleStatuses(duosUser, Storage)
           if (linkInfo?.additionalState?.redirectTo) {
             // The redirectTo URL is expected to be a full URL, so we need to remove the origin part
-            // to use history.push for the redirect.
+            // to use navigate for the redirect.
             navigate(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
           }
         }

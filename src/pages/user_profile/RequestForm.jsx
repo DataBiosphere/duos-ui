@@ -3,8 +3,10 @@ import { Support } from '../../libs/ajax/Support'
 import { Notifications } from '../../libs/utils'
 import { isNil } from 'lodash'
 import { FormField, FormFieldTypes } from '../../components/forms/forms'
+import { useNavigate } from 'react-router-dom'
 
 export default function RequestForm(props) {
+  const navigate = useNavigate()
   const profile = props.state?.data || undefined
   const headerStyle = {
     fontWeight: 'bold',
@@ -43,7 +45,7 @@ export default function RequestForm(props) {
 
   const goToPrevPage = async (event) => {
     event.preventDefault()
-    await props.history.push('/profile')
+    await navigate('/profile')
   }
 
   const handleSupportRequestsChange = ({ key, value }) => {
@@ -105,7 +107,7 @@ export default function RequestForm(props) {
           { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 },
         )
         setIsSubmitting(false)
-        await props.history.push('/profile')
+        await navigate('/profile')
       }
       catch (error) {
         Notifications.showError({
