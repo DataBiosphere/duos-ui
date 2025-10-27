@@ -146,7 +146,9 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
         <Route path="/manage_dac" element={<ManageDac />} />
         <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
-        <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
+        <Route path="/manage_edit_dac" element={<ManageEditDac />}>
+          <Route path=":dacId" element={<ManageEditDac />} />
+        </Route>
         <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
         <Route path="/manage_add_dac" element={<ManageEditDac />} />
         <Route path="/dataset_submissions" element={<DatasetSubmissions />} />

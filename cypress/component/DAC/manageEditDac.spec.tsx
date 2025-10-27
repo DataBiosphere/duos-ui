@@ -3,28 +3,45 @@ import { mount } from 'cypress/react'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import admin from './admin.json'
 import chair from './chair.json'
 import dac from './dac.json'
 import { setUserRoleStatuses } from 'src/libs/utils'
 
 // It's necessary to wrap components that contain `Link` components
-const WrappedManageEditDac = (props: object) => {
-  return <BrowserRouter><ManageEditDac {...props} /></BrowserRouter>
+const WrappedManageEditDac = (dacId: number | undefined) => {
+  return dacId
+    ? (
+        <MemoryRouter initialEntries={[`/manage_edit_dac/${dacId}`]}>
+          <Routes>
+            <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
+          </Routes>
+        </MemoryRouter>
+      )
+    : (
+        <MemoryRouter initialEntries={[`/manage_edit_dac`]}>
+          <Routes>
+            <Route path="/manage_edit_dac" element={<ManageEditDac />} />
+          </Routes>
+        </MemoryRouter>
+      )
 }
 
 /**
  * This manage page is the pre-Data Access Agreement way to edit a DAC and will be removed when DAA work is complete.
  */
 describe('ManageEditDAC Tests', () => {
+  beforeEach(() => {
+    cy.initApplicationConfig()
+  })
+
   Cypress._.each([admin, chair], (user) => {
     it('Manage Edit DAC page should load for ' + user.displayName, () => {
       cy.viewport(600, 600)
       setUserRoleStatuses(user, Storage)
       cy.stub(DAC, 'get').returns(dac)
-      const props = { match: { params: { dacId: dac.dacId } } }
-      mount(WrappedManageEditDac(props))
+      mount(WrappedManageEditDac(dac.dacId))
       cy.contains(dac.name).should('exist')
       cy.get('[data-cy="dac_name"]').should('not.be.disabled')
       cy.get('[data-cy="dac_description"]').should('not.be.disabled')
@@ -38,18 +55,7 @@ describe('ManageEditDAC Tests', () => {
     cy.viewport(600, 600)
     Storage.clearStorage()
     setUserRoleStatuses(admin, Storage)
-    const props = {
-      match: {
-        params: {
-          dacId: undefined,
-        },
-      },
-      history: {
-        push() {
-        },
-      },
-    }
-    mount(WrappedManageEditDac(props))
+    mount(WrappedManageEditDac(undefined))
     cy.get('[data-cy="dac_name"]').should('not.be.disabled')
     cy.get('[data-cy="dac_name"]').should('be.empty')
     cy.get('[data-cy="dac_description"]').should('not.be.disabled')
@@ -74,18 +80,7 @@ describe('ManageEditDAC Tests', () => {
     Storage.clearStorage()
     setUserRoleStatuses(chair, Storage)
     const dacCreate = cy.stub(DAC, 'create')
-    const props = {
-      match: {
-        params: {
-          dacId: undefined,
-        },
-      },
-      history: {
-        push() {
-        },
-      },
-    }
-    mount(WrappedManageEditDac(props))
+    mount(WrappedManageEditDac(undefined))
     cy.get('[data-cy="dac_name"]').type('New DAC Name')
     cy.get('[data-cy="dac_description"]').type('New DAC Description')
     cy.get('[data-cy="dac_email"]').type('New DAC Email')
