@@ -6,6 +6,7 @@ import { Navigation } from 'src/libs/utils'
 import { OAuth2 } from 'src/libs/ajax/OAuth2'
 import { ToS } from 'src/libs/ajax/ToS'
 import { Storage } from 'src/libs/storage'
+import { BrowserRouter } from 'react-router-dom'
 
 const text = 'TOS Text'
 const mocks = {
@@ -34,9 +35,9 @@ describe('Terms of Service Acceptance Page', function () {
     cy.stub(Auth, 'signOut').as('signOut')
 
     mount(
-      <TermsOfServiceAcceptance
-        history={mocks.history}
-      />,
+      <BrowserRouter>
+        <TermsOfServiceAcceptance history={mocks.history} />
+      </BrowserRouter>,
     )
 
     // Test that the reject button clicks and calls sign-out
