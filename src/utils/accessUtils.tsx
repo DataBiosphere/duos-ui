@@ -2,7 +2,7 @@ import { DAR } from 'src/libs/ajax/DAR'
 import { Notifications } from 'src/libs/utils'
 import ReactMarkdown from 'react-markdown'
 import * as React from 'react'
-import { NavigateFunction } from 'react-router'
+import { NavigateFunction } from 'react-router-dom'
 
 export const applyForAccess = async (selected: number[], navigate: NavigateFunction) => {
   try {
