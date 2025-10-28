@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { useCallback, useEffect, useState } from 'react'
-import { Notifications } from '../../libs/utils'
-import loadingIndicator from '../../images/loading-indicator.svg'
-import SortableTable from '../../components/sortable_table/SortableTable'
+import { Notifications } from 'src/libs/utils'
+import loadingIndicator from 'src/images/loading-indicator.svg'
+import SortableTable from 'src/components/sortable_table/SortableTable'
 import { concat, isNil, join } from 'lodash/fp'
 import Button from '@mui/material/Button'
 import { Link, useNavigate } from 'react-router-dom'
-import { DataSet } from '../../libs/ajax/DataSet'
-import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 
 export default function DatasetSubmissionsTable(props) {
   const navigate = useNavigate()
