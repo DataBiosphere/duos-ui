@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { FormField, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-import { validationFailed, calcPublicationErrors, ORCID_REGEX } from 'src/utils/darFormUtils'
+import { validationFailed, calcPublicationErrors } from 'src/utils/darFormUtils'
 import { Author, Publication } from 'src/types/model'
 
 interface FormFieldChange {
@@ -102,9 +102,9 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     }
   }
 
-  // Enable Add only when all current authors have name + valid ORCID
+  // Enable Add only when all current authors have a name
   const disableAddAuthor = newPublication.authors.some(
-    a => a.name.trim() === '' || a.orcId.trim() === '' || !ORCID_REGEX.test(a.orcId),
+    a => a.name.trim() === '',
   )
 
   const addAuthor = () => {

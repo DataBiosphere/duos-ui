@@ -313,7 +313,7 @@ interface Contact extends Person {
 }
 
 export interface Author extends Person {
-  orcId: string
+  orcId?: string
 }
 
 export type Maintainer = Contact

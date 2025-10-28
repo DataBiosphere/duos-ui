@@ -98,7 +98,7 @@ describe('PublicationList component', () => {
     cy.get('.error-message').should('have.length.greaterThan', 0)
   })
 
-  it('disables Add Author until first row valid', () => {
+  it('disables Add Author until first row has name filled', () => {
     mount(
       <PublicationAddEdit
         id={-1}
@@ -109,10 +109,10 @@ describe('PublicationList component', () => {
     )
     cy.contains('Add Author').should('be.disabled')
     cy.get('input[placeholder="Author Name"]').type('Temp Author')
+    // ORCID is optional, so Add Author should be enabled even without ORCID
+    cy.contains('Add Author').should('not.be.disabled')
+    // Test that invalid ORCID format doesn't prevent adding (validation happens on save)
     cy.get('input[placeholder="ORCID (0000-0000-0000-0000)"]').type('BAD-ORCID')
-    cy.contains('Add Author').should('be.disabled')
-    cy.get('input[placeholder="ORCID (0000-0000-0000-0000)"]').clear()
-    cy.get('input[placeholder="ORCID (0000-0000-0000-0000)"]').type('0000-0000-0000-0004')
     cy.contains('Add Author').should('not.be.disabled').click()
     cy.get('input[placeholder="Author Name"]').should('have.length', 2)
   })

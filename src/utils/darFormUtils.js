@@ -331,11 +331,7 @@ export const calcPublicationErrors = (newPublication) => {
         row.name = requiredError
         failedCodes.push(`name@${idx}`)
       }
-      if (isStringEmpty(orcId)) {
-        row.orcId = requiredError
-        failedCodes.push(`orcIdMissing@${idx}`)
-      }
-      else if (!ORCID_REGEX.test(orcId)) {
+      if (!isStringEmpty(orcId) && !ORCID_REGEX.test(orcId)) { // only validate if not empty
         row.orcId = validationError('orcIdFormat')
         failedCodes.push(`orcIdFormat@${idx}`)
       }
