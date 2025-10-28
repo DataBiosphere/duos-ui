@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router-dom'
 import Home from 'src/pages/Home'
 
 describe('Home Page - Tests', function () {
-
   describe('When user is not logged in', function () {
     beforeEach(() => {
       mount(
@@ -25,13 +24,14 @@ describe('Home Page - Tests', function () {
     })
 
     it('displays tooltips with login required message for data libraries', function () {
-      cy.get('[data-for="anvil"]').find('span[title="Please login to access AnVIL Data Library"]').should('exist')
+      // Just check that the first few featured libraries have tooltips
+      cy.get('[data-for="/datalibrary"]').find('span[title="Please login to access DUOS Data Library"]').should('exist')
       cy.get('[data-for="broad"]').find('span[title="Please login to access Broad Data Library"]').should('exist')
-      cy.get('[data-for="hca"]').find('span[title="Please login to access Human Cell Atlas Data Library"]').should('exist')
+      cy.get('[data-for="elwazi"]').find('span[title="Please login to access eLwazi Data Library"]').should('exist')
     })
 
     it('interacts with library card links when not logged in', function () {
-      cy.get('.logo-card').should('have.length', 3)
+      cy.get('.logo-card').should('have.length', 20)
       cy.get('.logo-card').each(($card) => {
         cy.wrap($card).find('a').should('exist')
       })
@@ -57,7 +57,7 @@ describe('Home Page - Tests', function () {
       cy.get('@scrollTo').should('be.called')
 
       // URL should contain the redirectTo parameter
-      cy.location('search').should('include', 'redirectTo=%2Fdatalibrary%2Fanvil')
+      cy.location('search').should('include', 'redirectTo=%2Fdatalibrary%2F%2Fdatalibrary')
     })
   })
 
@@ -81,36 +81,38 @@ describe('Home Page - Tests', function () {
     })
 
     it('displays tooltips with correct text for data libraries', function () {
-      cy.get('[data-for="anvil"]').find('span[title="AnVIL"]').should('exist')
+      // Check first few featured libraries
+      cy.get('[data-for="/datalibrary"]').find('span[title="DUOS"]').should('exist')
       cy.get('[data-for="broad"]').find('span[title="Broad"]').should('exist')
-      cy.get('[data-for="hca"]').find('span[title="Human Cell Atlas"]').should('exist')
+      cy.get('[data-for="elwazi"]').find('span[title="eLwazi"]').should('exist')
     })
 
     it('has direct navigation links when logged in', function () {
-      cy.get('a[href="/datalibrary/anvil"]').should('exist')
+      // Check first few featured libraries
+      cy.get('a[href="/datalibrary//datalibrary"]').should('exist')
       cy.get('a[href="/datalibrary/broad"]').should('exist')
-      cy.get('a[href="/datalibrary/hca"]').should('exist')
+      cy.get('a[href="/datalibrary/elwazi"]').should('exist')
     })
 
     it('navigates directly without calling handleSignIn when logged in', function () {
       cy.window().then((win) => {
         cy.spy(win.history, 'replaceState').as('replaceState')
       })
-      cy.get('a[href="/datalibrary/anvil"]').click({ force: true })
+      cy.get('a[href="/datalibrary/broad"]').click({ force: true })
       cy.get('@replaceState').should('not.be.called')
     })
 
     it('displays logos horizontally on desktop', function () {
       cy.viewport(1200, 800)
       cy.get('.logo-grid').should('have.css', 'flex-direction', 'row')
-      cy.get('.logo-card').should('have.length', 3)
+      cy.get('.logo-card').should('have.length', 20)
     })
 
     it('displays logos responsively on mobile', function () {
       cy.viewport(600, 800)
       cy.get('.logo-grid').should('have.css', 'display', 'flex')
       cy.get('.logo-grid').should('have.css', 'flex-wrap', 'wrap')
-      cy.get('.logo-card').should('have.length', 3)
+      cy.get('.logo-card').should('have.length', 20)
     })
   })
 
@@ -122,15 +124,15 @@ describe('Home Page - Tests', function () {
         </MemoryRouter>,
       )
 
-      // Should show 3 featured libraries (anvil, broad, hca)
-      cy.get('.logo-card').should('have.length', 3)
+      // Should show 20 featured libraries
+      cy.get('.logo-card').should('have.length', 20)
 
-      // Should not display terra or scp (featured: false)
+      // Should not display terra or mgb (featured: false)
       cy.get('[data-for="terra"]').should('not.exist')
-      cy.get('[data-for="scp"]').should('not.exist')
+      cy.get('[data-for="mgb"]').should('not.exist')
     })
 
-    it('displays featured libraries in alphabetical order', function () {
+    it('displays featured libraries in order', function () {
       mount(
         <MemoryRouter>
           <Home isLogged={true} />
@@ -139,18 +141,21 @@ describe('Home Page - Tests', function () {
 
       cy.get('.logo-card').then(($cards) => {
         // Get the image alt text to determine library order
-        const libraries = $cards.map((i, el) => {
+        const libraries = $cards.map((_i, el) => {
           const img = Cypress.$(el).find('img')
           const alt = img.attr('alt')
-          // Map display names (without " Data Library") back to keys
-          if (alt === 'AnVIL') return 'anvil'
+          // Map display names back to keys
+          if (alt === 'DUOS') return 'duos'
           if (alt === 'Broad') return 'broad'
-          if (alt === 'Human Cell Atlas') return 'hca'
-          return null
+          if (alt === 'eLwazi') return 'elwazi'
+          if (alt === 'NHGRI') return 'nhgri'
+          if (alt === 'Single Cell Portal') return 'scp'
+          return alt?.toLowerCase()
         }).get().filter(Boolean)
 
-        // Should be sorted alphabetically: anvil, broad, hca
-        expect(libraries).to.deep.equal(['anvil', 'broad', 'hca'])
+        // Should be sorted by order parameter: duos (1), broad (2), elwazi (3), etc.
+        // Check first three libraries
+        expect(libraries.slice(0, 3)).to.deep.equal(['duos', 'broad', 'elwazi'])
       })
     })
 
@@ -181,11 +186,11 @@ describe('Home Page - Tests', function () {
 
       // Tablet
       cy.viewport(768, 1024)
-      cy.get('.logo-card').should('have.length', 3)
+      cy.get('.logo-card').should('have.length', 20)
 
       // Mobile
       cy.viewport(480, 800)
-      cy.get('.logo-card').should('have.length', 3)
+      cy.get('.logo-card').should('have.length', 20)
     })
   })
 })

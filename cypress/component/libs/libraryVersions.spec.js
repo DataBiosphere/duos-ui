@@ -12,7 +12,7 @@ describe('Library Versions - Tests', function () {
     it('includes required properties for each library', function () {
       const versions = getLibraryVersions(null, null, null)
 
-      Object.entries(versions).forEach(([key, library]) => {
+      Object.entries(versions).forEach(([_key, library]) => {
         expect(library).to.have.property('title')
         expect(library).to.have.property('icon')
         expect(library).to.have.property('featured')
@@ -28,15 +28,18 @@ describe('Library Versions - Tests', function () {
 
       const featuredLibraries = Object.entries(versions)
         .filter(([, library]) => library.featured)
-        .map(([key]) => key)
+        .map(([_key]) => _key)
 
-      // Currently featured: anvil, broad, hca
-      expect(featuredLibraries).to.include('anvil')
+      // Currently featured: 20 libraries including /datalibrary, broad, elwazi, nhgri, scp, anvil, hca, etc.
+      expect(featuredLibraries).to.include('/datalibrary')
       expect(featuredLibraries).to.include('broad')
+      expect(featuredLibraries).to.include('elwazi')
+      expect(featuredLibraries).to.include('anvil')
       expect(featuredLibraries).to.include('hca')
+      expect(featuredLibraries).to.include('scp')
 
       // Verify count
-      expect(featuredLibraries.length).to.equal(3)
+      expect(featuredLibraries.length).to.equal(20)
     })
 
     it('marks non-featured libraries correctly', function () {
@@ -44,14 +47,12 @@ describe('Library Versions - Tests', function () {
 
       const nonFeaturedLibraries = Object.entries(versions)
         .filter(([, library]) => !library.featured)
-        .map(([key]) => key)
+        .map(([_key]) => _key)
 
       // Examples of non-featured libraries
-      expect(nonFeaturedLibraries).to.include('/datalibrary')
       expect(nonFeaturedLibraries).to.include('terra')
       expect(nonFeaturedLibraries).to.include('mgb')
       expect(nonFeaturedLibraries).to.include('nhlbi')
-      expect(nonFeaturedLibraries).to.include('scp')
     })
 
     it('includes all expected library keys', function () {
@@ -77,10 +78,10 @@ describe('Library Versions - Tests', function () {
 
       const myInstitution = versions['myinstitution']
 
-      expect(myInstitution).to.exist
+      expect(myInstitution).to.not.equal(undefined)
       expect(myInstitution.title).to.equal('Test Institution Data Library')
       expect(myInstitution.query.match_phrase['submitter.institution.id']).to.equal(123)
-      expect(myInstitution.featured).to.be.false
+      expect(myInstitution.featured).to.equal(false)
     })
 
     it('handles custom library with dynamic query', function () {
@@ -89,26 +90,26 @@ describe('Library Versions - Tests', function () {
 
       const customLibrary = versions['/custom']
 
-      expect(customLibrary).to.exist
+      expect(customLibrary).to.not.equal(undefined)
       expect(customLibrary.title).to.equal('custom search term Data Library')
       expect(customLibrary.query.bool.should).to.be.an('array')
       expect(customLibrary.query.bool.should.length).to.equal(2)
-      expect(customLibrary.featured).to.be.false
+      expect(customLibrary.featured).to.equal(false)
     })
 
     it('includes Elasticsearch query for most libraries', function () {
       const versions = getLibraryVersions(null, null, null)
 
-      Object.entries(versions).forEach(([key, library]) => {
+      Object.entries(versions).forEach(([_key, library]) => {
         // Some libraries have null query (/datalibrary, terra)
         if (library.query !== null) {
           expect(library.query).to.be.an('object')
           // Should have either match_phrase, term, or bool
-          const hasValidQuery =
-            library.query.match_phrase ||
-            library.query.term ||
-            library.query.bool
-          expect(hasValidQuery).to.exist
+          const hasValidQuery
+            = library.query.match_phrase
+              || library.query.term
+              || library.query.bool
+          expect(hasValidQuery).to.not.equal(undefined)
         }
       })
     })
@@ -131,23 +132,24 @@ describe('Library Versions - Tests', function () {
       const featuredLibraries = Object.entries(versions)
         .filter(([, library]) => library.featured)
         .map(([key, library]) => ({ key, ...library }))
-        .sort((a, b) => a.key.localeCompare(b.key))
+        .sort((a, b) => a.order - b.order || a.key.localeCompare(b.key))
 
-      // Should have 3 featured libraries
-      expect(featuredLibraries.length).to.equal(3)
+      // Should have 20 featured libraries
+      expect(featuredLibraries.length).to.equal(20)
 
-      // Should be sorted alphabetically
-      expect(featuredLibraries[0].key).to.equal('anvil')
-      expect(featuredLibraries[1].key).to.equal('broad')
-      expect(featuredLibraries[2].key).to.equal('hca')
+      // Should be sorted by order parameter
+      expect(featuredLibraries[0].key).to.equal('/datalibrary') // order: 1
+      expect(featuredLibraries[1].key).to.equal('broad') // order: 2
+      expect(featuredLibraries[2].key).to.equal('elwazi') // order: 3
 
       // Each should have required properties
-      featuredLibraries.forEach(library => {
+      featuredLibraries.forEach((library) => {
         expect(library).to.have.property('key')
         expect(library).to.have.property('title')
         expect(library).to.have.property('icon')
         expect(library).to.have.property('query')
-        expect(library.featured).to.be.true
+        expect(library).to.have.property('order')
+        expect(library.featured).to.equal(true)
       })
     })
   })
