@@ -36,6 +36,15 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
       if (value == null) return null
       return JSON.stringify(value)
     },
+    url: (value: unknown) => {
+      const href = typeof value === 'string' ? value : ''
+      if (!href) return null
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {href}
+        </a>
+      )
+    },
   }
 
   return (
