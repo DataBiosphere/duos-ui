@@ -414,10 +414,6 @@ const DataAccessRequestApplication = (props) => {
     setShowNihValidationError(!nihValid)
 
     if (isInvalidForm) {
-      console.log('DAR form is invalid, cannot submit.', validation, nihValid, hasLibraryCard)
-      console.log('draftDar', draftDar)
-      console.log('selectedDatasets', selectedDatasets)
-      console.log('datasets', datasets)
       scrollToFormErrors(validation, nihValid, hasLibraryCard)
     }
     else {
