@@ -202,7 +202,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
               {renderAuthorsError()}
               {newPublication.authors.map((a: Author, idx) => (
                 <div
-                  key={`${a.name}-${a.orcId}`}
+                  key={idx}
                   className="row"
                   style={{
                     display: 'flex',
