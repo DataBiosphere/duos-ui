@@ -139,28 +139,12 @@ describe('Home Page - Tests', function () {
         </MemoryRouter>,
       )
 
-      // Helper function to map alt text to library keys
-      const mapAltToKey = (alt) => {
-        if (alt === 'DUOS') return 'duos'
-        if (alt === 'Broad') return 'broad'
-        if (alt === 'eLwazi') return 'elwazi'
-        if (alt === 'NHGRI') return 'nhgri'
-        if (alt === 'Single Cell Portal') return 'scp'
-        return alt?.toLowerCase()
-      }
+      cy.get('.logo-card').should('have.length', 20)
 
-      cy.get('.logo-card').then(($cards) => {
-        // Get the image alt text to determine library order
-        const libraries = $cards.map((_i, el) => {
-          const img = Cypress.$(el).find('img')
-          const alt = img.attr('alt')
-          return mapAltToKey(alt)
-        }).get().filter(Boolean)
-
-        // Should be sorted by order parameter: duos (1), broad (2), elwazi (3), etc.
-        // Check first three libraries
-        expect(libraries.slice(0, 3)).to.deep.equal(['duos', 'broad', 'elwazi'])
-      })
+      // Verify first three libraries are in correct order
+      cy.get('.logo-card').eq(0).find('img').should('have.attr', 'alt', 'DUOS')
+      cy.get('.logo-card').eq(1).find('img').should('have.attr', 'alt', 'Broad')
+      cy.get('.logo-card').eq(2).find('img').should('have.attr', 'alt', 'eLwazi')
     })
 
     it('uses special styling for Broad Institute logo', function () {
