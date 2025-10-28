@@ -34,6 +34,15 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
         </span>
       )
     },
+    url: (value: unknown) => {
+      const href = typeof value === 'string' ? value : ''
+      if (!href) return null
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {href}
+        </a>
+      )
+    },
   }
 
   return (
