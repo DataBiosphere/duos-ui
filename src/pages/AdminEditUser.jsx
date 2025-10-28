@@ -1,13 +1,13 @@
 import { concat, filter, map as lodashMap, matches as lodashMatches } from 'lodash'
 import { contains, isEmpty, map, union } from 'lodash/fp'
 import React, { useEffect, useRef, useState } from 'react'
-import { User } from '../libs/ajax/User'
-import { Notifications, USER_ROLES } from '../libs/utils'
-import { ResearcherReview } from '../components/ResearcherReview'
-import editUserIcon from '../images/icon_edit_user.png'
-import { PageHeading } from '../components/PageHeading'
+import { User } from 'src/libs/ajax/User'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { ResearcherReview } from 'src/components/ResearcherReview'
+import editUserIcon from 'src/images/icon_edit_user.png'
+import { PageHeading } from 'src/components/PageHeading'
 import { extractError } from 'src/utils/ErrorUtils.js'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const adminRole = { roleId: 4, name: USER_ROLES.admin }
 const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
