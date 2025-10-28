@@ -77,7 +77,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       </Route>
       <Route element={<Authenticated />}>
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="/request_role" element={<RequestForm {...props} />} />
+        <Route path="/request_role" element={<RequestForm />} />
         <Route path="/datalibrary" element={<DatasetSearch {...props} />}>
           <Route path=":query" element={<DatasetSearch {...props} />} />
         </Route>
