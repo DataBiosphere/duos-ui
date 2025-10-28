@@ -9,12 +9,6 @@ import { Storage } from 'src/libs/storage'
 import { BrowserRouter } from 'react-router-dom'
 
 const text = 'TOS Text'
-const mocks = {
-  history: {
-    push() {
-    },
-  },
-}
 
 describe('Terms of Service Acceptance Page', function () {
   // Intercept configuration calls
@@ -33,13 +27,7 @@ describe('Terms of Service Acceptance Page', function () {
     cy.stub(Storage, 'getCurrentUser').returns({})
     cy.stub(Navigation, 'console').returns(true)
     cy.stub(Auth, 'signOut').as('signOut')
-
-    mount(
-      <BrowserRouter>
-        <TermsOfServiceAcceptance history={mocks.history} />
-      </BrowserRouter>,
-    )
-
+    mount(<BrowserRouter><TermsOfServiceAcceptance /></BrowserRouter>)
     // Test that the reject button clicks and calls sign-out
     cy.contains('reject', { matchCase: false }).should('exist')
     cy.get('[id=tos-reject]').should('exist')
