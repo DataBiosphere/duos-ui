@@ -8,7 +8,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import {
   generateFormDateField,
   generateFormTextField,
-  getStudyPropertyByKey,
+  getStudyPropertyValueByKey,
   MasterChangeHandler,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
@@ -32,13 +32,13 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
         title="Will you or did you submit data to the NIH?"
         type={FormFieldTypes.RADIOGROUP}
         options={NihAnvilUse.NIH_ANVIL_USE_RADIOGROUP_OPTIONS}
-        defaultValue={getStudyPropertyByKey(formData, 'nihAnvilUse')}
+        defaultValue={getStudyPropertyValueByKey(formData, 'nihAnvilUse')}
         validators={[FormValidators.REQUIRED]}
         onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
           setStudyPropertyByKey(formData, onChange, input, new NihAnvilUse(input.value as string))
         }}
       />
-      {getStudyPropertyByKey(formData, 'nihAnvilUse') === NihAnvilUse.YES_NHGRI_YES_PHS_ID && (
+      {getStudyPropertyValueByKey(formData, 'nihAnvilUse') === NihAnvilUse.YES_NHGRI_YES_PHS_ID && (
         <>
           {generateFormTextField(formData, onChange, new DbGaPPhsID(), [FormValidators.REQUIRED])}
           {generateFormTextField(formData, onChange, new DbGaPStudyRegistrationName())}

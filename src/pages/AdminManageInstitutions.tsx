@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
-import { Institution } from 'src/types/model'
+import { InstitutionInterface } from 'src/types/model'
 import { Styles } from '../libs/theme'
 import { getSearchFilterFunctions, Notifications } from 'src/libs/utils'
 import manageInstitutionsIcon from 'src/images/icon_manage_dac.png'
@@ -12,8 +12,8 @@ import { Link } from 'react-router-dom'
 import { extractError } from 'src/utils/ErrorUtils'
 
 export default function AdminManageInstitutions() {
-  const [institutionList, setInstitutionList] = useState<Institution[]>([])
-  const [filteredList, setFilteredList] = useState<Institution[]>([])
+  const [institutionList, setInstitutionList] = useState<InstitutionInterface[]>([])
+  const [filteredList, setFilteredList] = useState<InstitutionInterface[]>([])
   const [tableSize, setTableSize] = useState<number>(10)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -48,7 +48,7 @@ export default function AdminManageInstitutions() {
     setFilteredList(filter(institutionList, query.current.value))
   }
 
-  const filter = (list: Institution[], value: string): Institution[] => {
+  const filter = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
     if (value) {
       return getSearchFilterFunctions().institutions(value, list)
     }

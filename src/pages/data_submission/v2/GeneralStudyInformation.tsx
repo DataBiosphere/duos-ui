@@ -12,7 +12,7 @@ import {
 import {
   generateFormDateField,
   generateFormTextField,
-  getStudyPropertyByKey,
+  getStudyPropertyValueByKey,
   MasterChangeHandler,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
@@ -51,7 +51,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         isCreatable={true}
         validators={[FormValidators.REQUIRED]}
         selectConfig={{}}
-        defaultValue={getStudyPropertyByKey(formData, 'studyType')}
+        defaultValue={getStudyPropertyValueByKey(formData, 'studyType')}
         onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
           setStudyPropertyByKey(formData, onChange, input, new StudyType(input.value as string))
         }}
@@ -116,7 +116,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
           },
         }}
         placeholder="Add one or more emails"
-        defaultValue={getStudyPropertyByKey(formData, 'dataCustodianEmail')}
+        defaultValue={getStudyPropertyValueByKey(formData, 'dataCustodianEmail')}
         onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
           setStudyPropertyByKey(formData, onChange, input, new DataCustodianEmail(input.value as string[]))
         }}

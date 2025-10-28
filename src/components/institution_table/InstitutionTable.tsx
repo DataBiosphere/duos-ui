@@ -15,11 +15,11 @@ import {
   storageInstitutionSort,
   tableStyles,
 } from 'src/components/institution_table/InstitutionTableUtils'
-import { Institution } from 'src/types/model'
+import { InstitutionInterface } from 'src/types/model'
 import { recalculateVisibleTable } from 'src/libs/utils'
 
 export interface InstitutionTableProps {
-  readonly filteredList: Institution[]
+  readonly filteredList: InstitutionInterface[]
   readonly currentPage: number
   readonly setCurrentPage: (page: number) => void
   readonly tableSize: number

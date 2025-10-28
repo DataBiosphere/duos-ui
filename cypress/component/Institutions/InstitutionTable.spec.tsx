@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import InstitutionTable, { InstitutionTableProps } from 'src/components/institution_table/InstitutionTable'
-import { DuosUser, Institution } from 'src/types/model'
+import { DuosUser, InstitutionInterface } from 'src/types/model'
 import { BrowserRouter } from 'react-router-dom'
 
 const createUser: DuosUser = {
@@ -57,7 +57,7 @@ export const mockInstitutions = [
     createDate: 'Feb 1, 2023',
     createUser: createUser,
     createUserId: createUser.userId,
-  } as unknown as Institution,
+  } as unknown as InstitutionInterface,
   {
     id: 2,
     name: 'Test Institution 2',
@@ -69,7 +69,7 @@ export const mockInstitutions = [
     updateDate: 'Jul 2, 2025',
     updateUser: updateUser,
     updateUserId: updateUser.userId,
-  } as unknown as Institution,
+  } as unknown as InstitutionInterface,
 ]
 
 const defaultProps = {

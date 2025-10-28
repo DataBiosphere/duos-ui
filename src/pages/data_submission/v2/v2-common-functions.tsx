@@ -16,7 +16,7 @@ export const generateFormTextField = (formData: Study, onChange: MasterChangeHan
       title={studyProperty.fieldTitle}
       placeholder={studyProperty.fieldPlaceholderText}
       validators={validators}
-      defaultValue={getStudyPropertyByKey(formData, studyProperty.key)}
+      defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as string
         setStudyPropertyByKey(formData, onChange, input, studyProperty)
@@ -33,7 +33,7 @@ export const generateFormDateField = (formData: Study, onChange: MasterChangeHan
       placeholder={studyProperty.fieldPlaceholderText}
       validators={validators}
       style={style}
-      defaultValue={getStudyPropertyByKey(formData, studyProperty.key)}
+      defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as Date
         setStudyPropertyByKey(formData, onChange, input, studyProperty)
@@ -57,7 +57,7 @@ export const setStudyPropertyByKey = (formData: Study, onChange: MasterChangeHan
   onChange({ key: 'properties', value: formData.properties, isValid: input.isValid })
 }
 
-export const getStudyPropertyByKey = (formData: Study, key: string) => {
+export const getStudyPropertyValueByKey = (formData: Study, key: string) => {
   if (!formData?.properties) {
     return undefined
   }

@@ -2,7 +2,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import { InstitutionDomainEditor } from 'src/components/institution_table/components/InstitutionDomainEditor'
-import { Institution } from 'src/types/model'
+import { InstitutionInterface } from 'src/types/model'
 
 describe('Institution Domain Editor Tests', () => {
   const testDomains = ['example.com', 'test.edu', 'domain.org']
@@ -171,7 +171,7 @@ describe('Institution Domain Editor Tests', () => {
       { id: 1, name: 'Institution A', domains: ['a.com', 'b.com'] },
       { id: 2, name: 'Institution B', domains: ['c.com'] },
       { id: 3, name: 'Institution C' },
-    ] as Institution[]
+    ] as InstitutionInterface[]
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
     mount(

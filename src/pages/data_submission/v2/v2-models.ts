@@ -54,9 +54,9 @@ export class DateStudyProperty extends StudyProperty {
   }
 }
 
-export class NihGrantContractNumber extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('nihGrantContractNumber', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class NihGrantContractNumber extends StringStudyProperty {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('nihGrantContractNumber', 'NIH Grant or Contract Number', 'Enter the Grant or Contract Number', value, studyId, studyPropertyId)
   }
 }
 
@@ -85,6 +85,7 @@ export class DbGaPStudyRegistrationName extends StringStudyProperty {
 }
 
 export class PiInstitution extends StudyProperty {
+  static readonly key = 'piInstitution'
   constructor(value: number, studyId?: number, studyPropertyId?: number) {
     super('piInstitution', 'Number' as StudyPropertyType, value, studyId, studyPropertyId)
   }
@@ -127,6 +128,7 @@ export class Species extends StringStudyProperty {
 }
 
 export class NihICsSupportingStudy extends StudyProperty {
+  static readonly key = 'nihICsSupportingStudy'
   constructor(value: string[], studyId?: number, studyPropertyId?: number) {
     super('nihICsSupportingStudy', 'Json' as StudyPropertyType, value, studyId, studyPropertyId)
   }
@@ -145,12 +147,14 @@ export class AlternativeDataSharingPlanControlledOpenAccess extends StudyPropert
 }
 
 export class NihInstitutionCenterSubmission extends StudyProperty {
+  static readonly key = 'nihInstitutionCenterSubmission'
   constructor(value: string, studyId?: number, studyPropertyId?: number) {
     super('nihInstitutionCenterSubmission', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
   }
 }
 
 export class MultiCenterStudy extends StudyProperty {
+  static readonly key = 'multiCenterStudy'
   constructor(value: boolean, studyId?: number, studyPropertyId?: number) {
     super('multiCenterStudy', 'Boolean' as StudyPropertyType, value, studyId, studyPropertyId)
   }
@@ -193,14 +197,15 @@ export class AlternativeDataSharingPlanDataReleased extends StudyProperty {
 }
 
 export class ControlledAccessRequiredForGenomicSummaryResultsGSR extends StudyProperty {
+  static readonly key = 'controlledAccessRequiredForGenomicSummaryResultsGSR'
   constructor(value: boolean, studyId?: number, studyPropertyId?: number) {
     super('controlledAccessRequiredForGenomicSummaryResultsGSR', 'Boolean' as StudyPropertyType, value, studyId, studyPropertyId)
   }
 }
 
-export class NihProgramOfficerName extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('nihProgramOfficerName', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class NihProgramOfficerName extends StringStudyProperty {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('nihProgramOfficerName', 'nihProgramOfficerName', 'NIH Program Officer Name', value, studyId, studyPropertyId)
   }
 }
 
@@ -216,26 +221,36 @@ export class NihAnvilUse extends StudyProperty {
     { text: NihAnvilUse.NO_NHGRI_NO_ANVIL, name: NihAnvilUse.NO_NHGRI_NO_ANVIL },
   ]
 
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
     super('nihAnvilUse', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+  }
+
+  static requiresNIHAdministrativeInformation(value: string | null | undefined): boolean {
+    if (!value) {
+      return false
+    }
+    return [NihAnvilUse.YES_NHGRI_YES_PHS_ID, NihAnvilUse.YES_NHGRI_NO_PHS_ID, NihAnvilUse.NO_NHGRI_YES_ANVIL].includes(value)
   }
 }
 
-export class NihGenomicProgramAdministratorName extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('nihGenomicProgramAdministratorName', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class NihGenomicProgramAdministratorName extends StringStudyProperty {
+  static readonly key = 'nihGenomicProgramAdministratorName'
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('nihGenomicProgramAdministratorName', 'NIH Genomic Program Administrator Name', 'Enter the NIH Genomic Program Administrator\'s name ', value, studyId, studyPropertyId)
   }
 }
 
 export class CollaboratingSites extends StudyProperty {
+  static readonly key = 'collaboratingSites'
   constructor(value: string[], studyId?: number, studyPropertyId?: number) {
     super('collaboratingSites', 'Json' as StudyPropertyType, value, studyId, studyPropertyId)
   }
 }
 
-export class ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation extends StudyProperty {
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super('controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation', 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+export class ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation extends StringStudyProperty {
+  static readonly key = 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation'
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super('controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation', 'If yes, explain why controlled access is needed for GSR.', '', value, studyId, studyPropertyId)
   }
 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Institution } from 'src/types/model'
+import { InstitutionInterface } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useHistory } from 'react-router-dom'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
@@ -30,11 +30,11 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
   const { institutionId } = props.match.params
   const formMode = props.formMode
   const history = useHistory()
-  const [institutionList, setInstitutionList] = useState<Institution[]>([])
+  const [institutionList, setInstitutionList] = useState<InstitutionInterface[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(formMode === FORM_MODES.createNew)
-  const [institution, setInstitution] = useState<Institution>()
+  const [institution, setInstitution] = useState<InstitutionInterface>()
   const [institutionUpdates, setInstitutionUpdates] = useState<InstitutionDetailsUpdate>({
     name: '',
     domains: [],
@@ -44,7 +44,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
   useEffect(() => {
     const loadInstitution = async () => {
       try {
-        const institutions: Institution[] = await InstitutionAPI.list()
+        const institutions: InstitutionInterface[] = await InstitutionAPI.list()
         setInstitutionList(institutions)
         if (institutionId && formMode === FORM_MODES.editExisting) {
           const institution = institutions.find(inst => inst.id.toString() === institutionId.toString())

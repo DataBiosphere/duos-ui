@@ -7,6 +7,7 @@ import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStu
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
 import { MasterChangeHandler } from 'src/pages/data_submission/v2/v2-common-functions'
+import { NIHAdministrativeInformation } from 'src/pages/data_submission/v2/NIHAdministrativeInformation'
 
 export interface DataSubmissionFormV2Params {
   studyId?: string
@@ -44,6 +45,7 @@ export const DataSubmissionFormV2 = () => {
       {loadingError && <div>Error Loading Page</div>}
       <GeneralStudyInformation formData={formData} onChange={onChange} />
       <NihAnvilUseRelated formData={formData} onChange={onChange} />
+      <NIHAdministrativeInformation formData={formData} onChange={onChange} />
     </>
   )
 }
