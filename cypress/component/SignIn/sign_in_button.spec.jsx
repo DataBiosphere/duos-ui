@@ -9,7 +9,7 @@ import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { ToS } from 'src/libs/ajax/ToS'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import { mockOidcUser } from '../Auth/mockOidcUser'
-import { BrowserRouter, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 
 const signInText = 'Sign In'
 
