@@ -10,7 +10,7 @@ import { Navigation } from 'src/libs/utils'
 import { OntologyService } from 'src/libs/ontologyService'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { VOTE_TYPES } from 'src/utils/DarUtils.js'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 
 const dar = {
   darCollectionId: 777,
@@ -594,30 +594,6 @@ const dar = {
 }
 
 const props = {
-  history: {
-    length: 50,
-    action: 'PUSH',
-    location: {
-      pathname: '/admin_review_collection/777',
-      search: '',
-      hash: '',
-      key: 'z0i073',
-    },
-  },
-  location: {
-    pathname: '/admin_review_collection/777',
-    search: '',
-    hash: '',
-    key: 'z0i073',
-  },
-  match: {
-    path: '/admin_review_collection/:collectionId',
-    url: '/admin_review_collection/777',
-    isExact: true,
-    params: {
-      collectionId: '777',
-    },
-  },
   adminPage: false,
   isLogged: true,
   env: 'local',
@@ -791,7 +767,13 @@ describe('DAR Review', () => {
 
   it('renders the collections-review-page div with tabs for Researchers', () => {
     cy.stub(Storage, 'getCurrentUser').returns(researcher)
-    mount(<DarCollectionReview {...props} />)
+    mount(
+      <MemoryRouter initialEntries={['/dar_collection/777']}>
+        <Routes>
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview {...props} />} />
+        </Routes>
+      </MemoryRouter>,
+    )
 
     cy.get('.tab-selection-Voting').should('not.exist')
     cy.get('.tab-selection-Chair').should('not.exist')
@@ -807,7 +789,13 @@ describe('DAR Review', () => {
   it('renders the collections-review-page div with tabs for Admins', () => {
     cy.stub(Storage, 'getCurrentUser').returns(admin)
     const propsCopy = Object.assign({}, props, { adminPage: true })
-    mount(<DarCollectionReview {...propsCopy} />)
+    mount(
+      <MemoryRouter initialEntries={['/dar_collection/777']}>
+        <Routes>
+          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview {...propsCopy} />} />
+        </Routes>
+      </MemoryRouter>,
+    )
 
     cy.get('.tab-selection-Member').should('not.exist')
 
