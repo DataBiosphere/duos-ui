@@ -1,24 +1,21 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import RequestForm from 'src/pages/user_profile/RequestForm'
+import { BrowserRouter } from 'react-router-dom'
+import { Storage } from 'src/libs/storage'
 
 describe('SupportRequestsPage Tests', () => {
   beforeEach(() => {
     cy.viewport(1000, 500)
+    cy.stub(Storage, 'getCurrentUser').returns({
+      displayName: 'name',
+      email: 'user@test.com',
+      emailPreference: true,
+      id: 1,
+    })
     cy.initApplicationConfig()
     mount(
-      <RequestForm
-        location={{
-          state: {
-            data: {
-              profileName: 'name',
-              email: 'user@test.com',
-              id: 1,
-            },
-          },
-        }}
-        history={[]}
-      />,
+      <BrowserRouter><RequestForm /></BrowserRouter>,
     )
   })
 

@@ -18,13 +18,6 @@ export default function UserProfile() {
   const [name, setName] = useState('')
   const [updatedName, setUpdatedName] = useState('')
 
-  const [profile, setProfile] = useState({
-    profileName: '',
-    email: undefined,
-    emailPreference: undefined,
-    id: undefined,
-  })
-
   const [notificationData, setNotificationData] = useState({})
 
   const updateRef = ({ _key, value }) => {
@@ -68,12 +61,6 @@ export default function UserProfile() {
       try {
         const user = Storage.getCurrentUser()
         setUser(user)
-        setProfile({
-          profileName: user.displayName,
-          email: user.email,
-          emailPreference: user.emailPreference,
-          id: user.userId,
-        })
         setName(user.displayName)
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
       }
@@ -178,7 +165,7 @@ export default function UserProfile() {
       <FormField
         type={FormFieldTypes.TEXT}
         id="profileEmail"
-        defaultValue={profile.email}
+        defaultValue={user.email}
         disabled={true}
       />
       <div style={{ marginTop: '10px' }} />
@@ -194,14 +181,14 @@ export default function UserProfile() {
       <FormField
         type={FormFieldTypes.YESNORADIOGROUP}
         id="profileEmailEnabled"
-        defaultValue={profile.emailPreference}
+        defaultValue={user.emailPreference}
         onChange={field => updateEmailPreference(field.value)}
       />
       <div style={{ marginTop: '45px' }} />
       <AffiliationAndRoles
         user={user}
       />
-      <Link to="/request_role" state={{ data: profile }}>
+      <Link to="/request_role">
         <button
           className="f-left btn-primary common-background"
           style={{
