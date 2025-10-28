@@ -1,22 +1,12 @@
 import React, { useState } from 'react'
-import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { FormField, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-import { validationFailed, calcPublicationErrors } from 'src/utils/darFormUtils'
-import { Publication } from 'src/types/model'
-
-const defaultPublication: Publication = {
-  title: '',
-  date: '',
-  authors: '',
-  pubmedId: '',
-  bibliographicCitation: '',
-  datasetCitation: '',
-  citation: false,
-}
+import { validationFailed, calcPublicationErrors, ORCID_REGEX } from 'src/utils/darFormUtils'
+import { Author, Publication } from 'src/types/model'
 
 interface FormFieldChange {
   key: string
-  value: string
+  value: string | boolean
 }
 
 interface PublicationAddEditProps {
@@ -29,118 +19,333 @@ interface PublicationAddEditProps {
 
 interface Validation {
   title?: ValidationError
-  date?: ValidationError
-  authors?: ValidationError
   pubmedId?: ValidationError
+  publishedDate?: ValidationError
+  authors?: ValidationError
   bibliographicCitation?: ValidationError
+  datasetCitation?: ValidationError
+  journal?: ValidationError
+  doi?: ValidationError
+  url?: ValidationError
+  access?: ValidationError
 }
+
+const defaultPublication: Publication = {
+  title: '',
+  publishedDate: '',
+  authors: [],
+  pubmedId: '',
+  bibliographicCitation: '',
+  datasetCitation: '',
+  citation: false,
+  publicationId: '',
+  studyId: '',
+  journal: '',
+  doi: '',
+  url: '',
+  access: '',
+  tags: [],
+}
+
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
   const { id, publication, publications, closeAction, onPublicationChange } = props
+  const initialPublication = publication || defaultPublication
 
-  const [newPublication, setNewPublication] = useState<Publication>(publication || defaultPublication)
+  // Ensure at least one author row is present and bound to state
+  const [newPublication, setNewPublication] = useState<Publication>({
+    ...initialPublication,
+    authors:
+            Array.isArray(initialPublication.authors) && initialPublication.authors.length > 0
+              ? initialPublication.authors
+              : [{ name: '', orcId: '' }],
+  })
+
   const [validation, setValidation] = useState<Validation>({})
+  const [submitted, setSubmitted] = useState<boolean>(false)
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [tagsInput, setTagsInput] = useState<string>((publication?.tags ?? []).join(', '))
+
+  const applyValidation = (draft: Publication, full: boolean) => {
+    const all = calcPublicationErrors(draft)
+    if (full) {
+      setValidation(all)
+      return
+    }
+    const filtered: Validation = {}
+    Object.entries(all).forEach(([k, v]) => {
+      if (touched[k]) filtered[k as keyof Validation] = v
+    })
+    setValidation(filtered)
+  }
+
+  const updatePublication = (updated: Publication) => {
+    setNewPublication(updated)
+    if (submitted) applyValidation(updated, false)
+  }
+
+  const markTouched = (key: string) => {
+    setTouched(prev => (prev[key] ? prev : { ...prev, [key]: true }))
+  }
 
   const onChange = ({ key, value }: FormFieldChange) => {
-    const publicationToSet: Publication = { ...newPublication, [key]: value }
-    setNewPublication(publicationToSet)
-    setValidation(calcPublicationErrors(publicationToSet))
+    markTouched(key)
+    if (key === 'tags') {
+      const text = String(value)
+      setTagsInput(text)
+      updatePublication({
+        ...newPublication,
+        tags: text.split(',').map(t => t.trim()).filter(Boolean),
+      })
+    }
+    else {
+      updatePublication({ ...newPublication, [key]: value })
+    }
+  }
+
+  // Enable Add only when all current authors have name + valid ORCID
+  const disableAddAuthor = newPublication.authors.some(
+    a => a.name.trim() === '' || a.orcId.trim() === '' || !ORCID_REGEX.test(a.orcId),
+  )
+
+  const addAuthor = () => {
+    if (disableAddAuthor) return
+    markTouched('authors')
+    updatePublication({
+      ...newPublication,
+      authors: [...newPublication.authors, { name: '', orcId: '' }],
+    })
+  }
+
+  const removeAuthor = (index: number) => {
+    markTouched('authors')
+    const next = newPublication.authors.filter((_, i) => i !== index)
+    updatePublication({
+      ...newPublication,
+      authors: next.length ? next : [{ name: '', orcId: '' }],
+    })
+  }
+
+  const updateAuthorField = (index: number, field: keyof Author, value: string) => {
+    markTouched('authors')
+    const next = newPublication.authors.map((a, i) => (i === index ? { ...a, [field]: value } : a))
+    updatePublication({ ...newPublication, authors: next })
+  }
+
+  const save = () => {
+    setSubmitted(true)
+    applyValidation(newPublication, true)
+    if (validationFailed(calcPublicationErrors(newPublication))) return
+    if (id < 0) {
+      onPublicationChange([...publications, newPublication])
+    }
+    else {
+      const publicationsCopy = [...publications]
+      publicationsCopy[id] = newPublication
+      onPublicationChange(publicationsCopy)
+    }
+    closeAction()
+  }
+
+  const renderAuthorsError = () => {
+    if (!submitted && !touched.authors) return null
+    if (!validation.authors) return null
+    const failed = validation.authors.failed || []
+    if (failed.includes('required')) {
+      return (
+        <div className="error-message">
+          At least one author with name and valid ORCID is required.
+        </div>
+      )
+    }
+    return (
+      <div className="error-message">
+        {failed.map(f => (
+          <div key={f}>{f}</div>
+        ))}
+      </div>
+    )
   }
 
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{publication === undefined ? `New Publication Information` : `Edit ${publication.title} Information`}</h2>
+          <h2>
+            {publication === undefined
+              ? 'New Publication Information'
+              : `Edit ${publication.title} Information`}
+          </h2>
+
           <FormField
             id="title"
             title="Publication Title"
-            defaultValue={publication?.title}
+            defaultValue={newPublication.title}
             placeholder="Title"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.title}
+            validation={(submitted || touched.title) ? validation.title : undefined}
           />
+
           <FormField
-            id="date"
+            id="publishedDate"
             title="Publication Date"
-            defaultValue={publication?.date}
-            placeholder="Date"
+            defaultValue={newPublication.publishedDate}
+            placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
-            validation={validation.date}
+            validation={(submitted || touched.publishedDate) ? validation.publishedDate : undefined}
           />
-          <FormField
-            id="authors"
-            title="Publication Authors"
-            defaultValue={publication?.authors}
-            placeholder="Authors"
-            validators={[FormValidators.REQUIRED]}
-            onChange={onChange}
-            validation={validation.authors}
-          />
+
+          <div style={{ marginBottom: '1rem', width: '100%' }}>
+            <label style={{ fontWeight: 600, marginTop: '1rem' }}>Authors (Name + ORCID)*</label>
+            {renderAuthorsError()}
+            {newPublication.authors.map((a, idx) => (
+              <div
+                key={idx}
+                className="row"
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  marginTop: idx === 0 ? '0.5rem' : '0.75rem',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ flex: 1 }}
+                  value={a.name}
+                  placeholder="Author Name"
+                  onChange={e => updateAuthorField(idx, 'name', e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ flex: 1 }}
+                  value={a.orcId}
+                  placeholder="ORCID (0000-0000-0000-0000)"
+                  onChange={e => updateAuthorField(idx, 'orcId', e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => removeAuthor(idx)}
+                  disabled={newPublication.authors.length === 1}
+                  title={
+                    newPublication.authors.length === 1
+                      ? 'At least one author required'
+                      : 'Remove author'
+                  }
+                >
+                  <span className="glyphicon glyphicon-minus" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ marginTop: '0.75rem', width: '100%' }}
+              onClick={addAuthor}
+              disabled={disableAddAuthor}
+              title={
+                disableAddAuthor
+                  ? 'Fill all existing author name and valid ORCID first'
+                  : 'Add another author'
+              }
+            >
+              <span className="glyphicon glyphicon-plus" aria-hidden="true" /> Add Author
+            </button>
+          </div>
+
           <FormField
             id="pubmedId"
-            title="Publication PubMed ID"
-            defaultValue={publication?.pubmedId}
+            title="PubMed ID"
+            defaultValue={newPublication.pubmedId}
             placeholder="PubMed ID"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.pubmedId}
+            validation={(submitted || touched.pubmedId) ? validation.pubmedId : undefined}
           />
+
           <FormField
             id="bibliographicCitation"
-            title="Publication Bibliographic Citation"
-            defaultValue={publication?.bibliographicCitation}
-            placeholder="Bibliographic Citation"
+            title="Bibliographic Citation"
+            defaultValue={newPublication.bibliographicCitation}
+            placeholder="Citation"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.bibliographicCitation}
+            validation={(submitted || touched.bibliographicCitation) ? validation.bibliographicCitation : undefined}
           />
+
           <FormField
             id="datasetCitation"
-            title="Dataset citation used in this publication"
-            defaultValue={publication?.datasetCitation}
+            title="Dataset Citation"
+            defaultValue={newPublication.datasetCitation}
             placeholder="Dataset Citation"
+            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
+            validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
           />
+
           <FormField
-            id="citation"
-            type={FormFieldTypes.YESNORADIOGROUP}
-            defaultValue={publication?.citation}
-            title="Did you cite the dataset(s) used in this publication?"
-            orientation="horizontal"
+            id="journal"
+            title="Journal"
+            defaultValue={newPublication.journal}
+            placeholder="Journal"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={(submitted || touched.journal) ? validation.journal : undefined}
+          />
+
+          <FormField
+            id="doi"
+            title="DOI"
+            defaultValue={newPublication.doi}
+            placeholder="DOI"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={(submitted || touched.doi) ? validation.doi : undefined}
+          />
+
+          <FormField
+            id="url"
+            title="URL"
+            defaultValue={newPublication.url}
+            placeholder="https://example.org"
+            validators={[FormValidators.REQUIRED, FormValidators.URL]}
+            onChange={onChange}
+            validation={(submitted || touched.url) ? validation.url : undefined}
+          />
+
+          <FormField
+            id="access"
+            title="Access"
+            defaultValue={newPublication.access}
+            placeholder="Access"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={(submitted || touched.access) ? validation.access : undefined}
+          />
+
+          <FormField
+            id="tags"
+            title="Tags (comma separated)"
+            defaultValue={tagsInput}
+            placeholder="tag1, tag2"
             onChange={onChange}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          {/* add/save button */}
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={() => {
-              if (id < 0 && newPublication !== undefined) {
-                onPublicationChange([...publications, newPublication])
-                setNewPublication(defaultPublication)
-              }
-              else if (newPublication !== undefined) {
-                const publicationsCopy = [...publications]
-                publicationsCopy[id] = newPublication
-                onPublicationChange(publicationsCopy)
-                setNewPublication(defaultPublication)
-              }
-              closeAction()
-            }}
-            disabled={validationFailed(calcPublicationErrors(newPublication))}
-          >
-            {publication === undefined ? 'Add' : 'Save'}
+          <button type="button" className="btn btn-primary" onClick={save}>
+            <span className="glyphicon glyphicon-floppy-disk" aria-hidden="true" /> Save
           </button>
-          {/* cancel button */}
           <button
-            className="collaborator-form-cancel-button f-left btn"
             type="button"
+            className="btn btn-default"
+            style={{ marginLeft: '1rem' }}
             onClick={closeAction}
           >
-            Cancel
+            <span className="glyphicon glyphicon-remove" aria-hidden="true" /> Cancel
           </button>
         </div>
       </div>

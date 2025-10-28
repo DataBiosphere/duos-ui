@@ -697,21 +697,18 @@ export interface Presentation {
 
 export interface Publication {
   title: string
-  // ToDO: Make existing Progress Report fields required in DT-2358
-  pubmedId?: string
-  date?: string
-  authors?: string | Array<Author> // ToDo: Remove string option in DT-2358
-  bibliographicCitation?: string
-  datasetCitation?: string
-  citation?: boolean
-  // ToDo: Make new study fields required in DT-2358 except for tags
-  publicationId?: string
-  studyId?: string
-  journal?: string
-  doi?: string
-  url?: string
-  publishedDate?: string
-  access?: string
+  pubmedId: string
+  publishedDate: string
+  authors: Array<Author>
+  bibliographicCitation: string
+  datasetCitation: string
+  citation: boolean
+  publicationId: string
+  studyId: string
+  journal: string
+  doi: string
+  url: string
+  access: string
   tags?: string[]
 }
 

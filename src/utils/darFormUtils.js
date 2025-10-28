@@ -307,22 +307,57 @@ const validateDate = (date) => {
   return undefined
 }
 
+export const ORCID_REGEX = /^(\d{4}-){3}\d{3}[\dX]$/
+
 export const calcPublicationErrors = (newPublication) => {
   const validation = {}
+
   if (isEmpty(newPublication?.title)) {
     validation.title = requiredError
   }
-  validation.date = validateDate(newPublication?.date)
-  if (isEmpty(newPublication?.authors)) {
+  validation.publishedDate = validateDate(newPublication?.publishedDate)
+
+  const authorsArr = Array.isArray(newPublication?.authors) ? newPublication.authors : []
+  if (authorsArr.length === 0) {
     validation.authors = requiredError
   }
-  if (isEmpty(newPublication?.pubmedId)) {
-    validation.pubmedId = requiredError
-  }
-  if (isEmpty(newPublication?.bibliographicCitation)) {
-    validation.bibliographicCitation = requiredError
+  else {
+    const failedCodes = []
+    const perAuthor = authorsArr.map((a, idx) => {
+      const name = a?.name ?? ''
+      const orcId = a?.orcId ?? ''
+      const row = {}
+      if (isStringEmpty(name)) {
+        row.name = requiredError
+        failedCodes.push(`name@${idx}`)
+      }
+      if (isStringEmpty(orcId)) {
+        row.orcId = requiredError
+        failedCodes.push(`orcIdMissing@${idx}`)
+      }
+      else if (!ORCID_REGEX.test(orcId)) {
+        row.orcId = validationError('orcIdFormat')
+        failedCodes.push(`orcIdFormat@${idx}`)
+      }
+      return row
+    })
+    if (failedCodes.length) {
+      validation.authors = { valid: false, failed: failedCodes, perAuthor }
+    }
   }
 
+  if (isStringEmpty(newPublication?.pubmedId)) validation.pubmedId = requiredError
+  if (isStringEmpty(newPublication?.bibliographicCitation)) validation.bibliographicCitation = requiredError
+  if (isStringEmpty(newPublication?.datasetCitation)) validation.datasetCitation = requiredError
+  if (isStringEmpty(newPublication?.journal)) validation.journal = requiredError
+  if (isStringEmpty(newPublication?.doi)) validation.doi = requiredError
+  if (isStringEmpty(newPublication?.url)) {
+    validation.url = requiredError
+  }
+  else if (!FormValidators.URL.isValid(newPublication.url)) {
+    validation.url = validationError('url')
+  }
+  if (isStringEmpty(newPublication?.access)) validation.access = requiredError
   return validation
 }
 
@@ -339,10 +374,6 @@ export const calcPresentationErrors = (newPresentation) => {
     validation.link = requiredError
   }
   return validation
-}
-
-export const isPublication = (publicationText) => {
-  return publicationText === 'Publication'
 }
 
 const requiredRusFields = [
