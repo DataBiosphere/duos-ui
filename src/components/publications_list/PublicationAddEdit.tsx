@@ -197,66 +197,66 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
           />
 
           <div style={{ marginBottom: '1rem', width: '100%' }}>
-            <div style={{ fontWeight: 600, marginTop: '1rem' }} role="group" aria-label="Authors (Name + ORCID)">
-              Authors (Name + ORCID)*
-            </div>
-            {renderAuthorsError()}
-            {newPublication.authors.map((a: Author, idx) => (
-              <div
-                key={`${a.name}-${a.orcId}`}
-                className="row"
-                style={{
-                  display: 'flex',
-                  gap: '0.75rem',
-                  marginTop: idx === 0 ? '0.5rem' : '0.75rem',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ flex: 1 }}
-                  value={a.name}
-                  placeholder="Author Name"
-                  onChange={e => updateAuthorField(idx, 'name', e.target.value)}
-                />
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ flex: 1 }}
-                  value={a.orcId}
-                  placeholder="ORCID (0000-0000-0000-0000)"
-                  onChange={e => updateAuthorField(idx, 'orcId', e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => removeAuthor(idx)}
-                  disabled={newPublication.authors.length === 1}
-                  title={
-                    newPublication.authors.length === 1
-                      ? 'At least one author required'
-                      : 'Remove author'
-                  }
+            <fieldset style={{ fontWeight: 600, marginTop: '1rem' }} aria-label="Authors (Name + ORCID)">
+              <legend style={{ fontSize: 16 }}>Authors (Name + ORCID)*</legend>
+              {renderAuthorsError()}
+              {newPublication.authors.map((a: Author, idx) => (
+                <div
+                  key={`${a.name}-${a.orcId}`}
+                  className="row"
+                  style={{
+                    display: 'flex',
+                    gap: '0.75rem',
+                    marginTop: idx === 0 ? '0.5rem' : '0.75rem',
+                    alignItems: 'flex-start',
+                  }}
                 >
-                  <span className="glyphicon glyphicon-minus" aria-hidden="true" />
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ marginTop: '0.75rem', width: '100%' }}
-              onClick={addAuthor}
-              disabled={disableAddAuthor}
-              title={
-                disableAddAuthor
-                  ? 'Fill all existing author name and valid ORCID first'
-                  : 'Add another author'
-              }
-            >
-              <span className="glyphicon glyphicon-plus" aria-hidden="true" /> Add Author
-            </button>
+                  <input
+                    type="text"
+                    className="form-control"
+                    style={{ flex: 1 }}
+                    value={a.name}
+                    placeholder="Author Name"
+                    onChange={e => updateAuthorField(idx, 'name', e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    className="form-control"
+                    style={{ flex: 1 }}
+                    value={a.orcId}
+                    placeholder="ORCID (0000-0000-0000-0000)"
+                    onChange={e => updateAuthorField(idx, 'orcId', e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => removeAuthor(idx)}
+                    disabled={newPublication.authors.length === 1}
+                    title={
+                      newPublication.authors.length === 1
+                        ? 'At least one author required'
+                        : 'Remove author'
+                    }
+                  >
+                    <span className="glyphicon glyphicon-minus" aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ marginTop: '0.75rem', width: '100%' }}
+                onClick={addAuthor}
+                disabled={disableAddAuthor}
+                title={
+                  disableAddAuthor
+                    ? 'Fill all existing author name and valid ORCID first'
+                    : 'Add another author'
+                }
+              >
+                <span className="glyphicon glyphicon-plus" aria-hidden="true" /> Add Author
+              </button>
+            </fieldset>
           </div>
 
           <FormField
