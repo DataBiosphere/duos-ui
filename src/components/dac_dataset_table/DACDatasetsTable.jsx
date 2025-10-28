@@ -83,6 +83,7 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
       setVisibleList: setVisibleDatasets,
       sort,
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType])
 
   // Helper function to update page

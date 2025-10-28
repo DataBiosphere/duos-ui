@@ -30,7 +30,6 @@ import homeIcon from 'src/images/icon_dataset_.png'
 import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import PropTypes from 'prop-types'
 import { useParams, useNavigate } from 'react-router-dom'
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
