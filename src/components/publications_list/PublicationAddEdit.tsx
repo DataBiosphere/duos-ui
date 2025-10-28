@@ -72,9 +72,9 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
       return
     }
     const filtered: Validation = {}
-    Object.entries(all).forEach(([k, v]) => {
+    for (const [k, v] of Object.entries(all)) {
       if (touched[k]) filtered[k as keyof Validation] = v
-    })
+    }
     setValidation(filtered)
   }
 
@@ -197,11 +197,13 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
           />
 
           <div style={{ marginBottom: '1rem', width: '100%' }}>
-            <label style={{ fontWeight: 600, marginTop: '1rem' }}>Authors (Name + ORCID)*</label>
+            <div style={{ fontWeight: 600, marginTop: '1rem' }} role="group" aria-label="Authors (Name + ORCID)">
+              Authors (Name + ORCID)*
+            </div>
             {renderAuthorsError()}
-            {newPublication.authors.map((a, idx) => (
+            {newPublication.authors.map((a: Author, idx) => (
               <div
-                key={idx}
+                key={`${a.name}-${a.orcId}`}
                 className="row"
                 style={{
                   display: 'flex',
