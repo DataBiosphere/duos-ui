@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { capitalize, isEmpty } from 'lodash'
 import { DatasetTerm } from 'src/types/model'
 import SimpleTable from 'src/components/SimpleTable'
@@ -80,8 +80,8 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
   const [tableSize, setTableSize] = useState(50)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [visibleRows, setVisibleRows] = useState<CellData[][]>([])
-  const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets)
-  const rows = tab.makeRows(filteredData, headers)
+  const headers = useMemo(() => tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets), [tab, filteredData, selected, onSelect, exportableDatasets])
+  const rows = useMemo(() => tab.makeRows(filteredData, headers), [tab, filteredData, headers])
   const [pageCount, setPageCount] = useState<number>(rows.length / tableSize)
 
   const handleSort = (newSort: Sort) => {
@@ -116,8 +116,7 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
       setVisibleList: setVisibleRows,
       sort: sort,
     })
-  },
-  [tableSize, pageCount, currentPage, setPageCount, setCurrentPage, rows, sort])
+  }, [tableSize, pageCount, currentPage, rows, sort])
 
   return (
     <>
