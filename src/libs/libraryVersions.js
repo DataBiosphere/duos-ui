@@ -156,7 +156,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Health Disparities Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-heart-and-vascular-diseases': {
       query: {
         match_phrase: {
@@ -166,7 +166,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Heart and Vascular Diseases Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-lung-diseases': {
       query: {
         match_phrase: {
@@ -176,7 +176,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Lung Diseases Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-obesity-nutrition-and-physical-activity': {
       query: {
         match_phrase: {
@@ -186,7 +186,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Obesity, Nutrition, and Physical Activity Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-population-and-epidemiology-studies': {
       query: {
         match_phrase: {
@@ -196,7 +196,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Population and Epidemiology Studies Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-precision-medicine-activities': {
       query: {
         match_phrase: {
@@ -206,7 +206,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Precision Medicine Activities Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-research-spectrum': {
       query: {
         match_phrase: {
@@ -216,7 +216,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Research Spectrum Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-sleep-science-and-sleep-disorders': {
       query: {
         match_phrase: {
@@ -226,7 +226,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Sleep Science and Sleep Disorders Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'nhlbi-womens-health': {
       query: {
         match_phrase: {
@@ -276,7 +276,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: terraIcon,
       title: 'Terra Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'cfde': {
       query: {
         match_phrase: {
@@ -297,7 +297,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: firecloudIcon,
       title: 'FireCloud Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'allofus': {
       query: {
         match_phrase: {
@@ -324,7 +324,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: duosIcon,
       title: 'DUOS Open Access Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'ifgc': {
       query: {
         match_phrase: {
@@ -356,7 +356,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     'stanleycenter': {
       query: {
         match_phrase: {
@@ -498,7 +498,7 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: ncpiIcon,
       title: 'NCPI DUO Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
     '/custom': {
       query: {
         bool: {
@@ -519,6 +519,6 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: homeIcon,
       title: customQuery + ' Data Library',
       featured: false,
-      order: 999,    },
+      order: 999 },
   }
 }

@@ -14,7 +14,7 @@ const Home = (props) => {
   const featuredLibraries = useMemo(() => {
     const allLibraries = getLibraryVersions(null, null, null)
     return Object.entries(allLibraries)
-      .filter(([key, library]) => library.featured)
+      .filter(([_key, library]) => library.featured)
       .map(([key, library]) => ({ key, ...library }))
       .sort((a, b) => {
         // Sort by order first, then alphabetically by key as fallback
@@ -267,8 +267,9 @@ const Home = (props) => {
                             textAlign: 'center',
                             fontWeight: '500',
                             maxWidth: '320px',
-                            wordWrap: 'break-word'
-                          }}>
+                            wordWrap: 'break-word',
+                          }}
+                          >
                             {label}
                           </div>
                         )}
