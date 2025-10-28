@@ -33,24 +33,24 @@ describe('Institution Details Tests', () => {
     cy.viewport(1000, 800)
   })
 
-  it('should show a loading spinner', () => {
+  const mountComponentInEditMode = (id: number) => {
     mount(
-      <MemoryRouter initialEntries={['admin_manage_institutions/institutions/123']}>
-        <InstitutionDetails formMode={FORM_MODES.editExisting} />
-      </MemoryRouter>,
-    )
-    cy.contains('Loading').should('be.visible')
-  })
-
-  it('should render institution details', () => {
-    cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
-    mount(
-      <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/123']}>
+      <MemoryRouter initialEntries={[`/admin_manage_institutions/institutions/${id}`]}>
         <Routes>
           <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
         </Routes>
       </MemoryRouter>,
     )
+  }
+
+  it('should show a loading spinner', () => {
+    mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.editExisting} /></BrowserRouter>)
+    cy.contains('Loading').should('be.visible')
+  })
+
+  it('should render institution details', () => {
+    cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
+    mountComponentInEditMode(123)
     cy.contains('Back to institutions').should('be.visible')
     cy.contains('Institution Name').should('be.visible')
     cy.get('input[value="Broad Institute"]').should('exist')
@@ -61,13 +61,7 @@ describe('Institution Details Tests', () => {
 
   it('should enter edit mode when Edit button is clicked', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
-    mount(
-      <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/123']}>
-        <Routes>
-          <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-        </Routes>
-      </MemoryRouter>,
-    )
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
 
     cy.get('input[value="Broad Institute"]').should('not.be.disabled')
@@ -78,13 +72,7 @@ describe('Institution Details Tests', () => {
 
   it('should cancel editing and revert changes', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
-    mount(
-      <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/123']}>
-        <Routes>
-          <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-        </Routes>
-      </MemoryRouter>,
-    )
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
     cy.get('input[value="Broad Institute"]').type(' of MIT & Harvard')
     cy.contains('button', 'Cancel').click()
@@ -97,13 +85,7 @@ describe('Institution Details Tests', () => {
   it('should save changes when Save button is clicked', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
     cy.stub(InstitutionAPI, 'patchInstitution').returns(Promise.resolve(mockInstitution))
-    mount(
-      <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/123']}>
-        <Routes>
-          <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-        </Routes>
-      </MemoryRouter>,
-    )
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
     cy.get('input[value="Broad Institute"]').type(' of MIT & Harvard')
     cy.contains('button', 'Save').click()
@@ -124,13 +106,7 @@ describe('Institution Details Tests', () => {
 
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
     cy.stub(InstitutionAPI, 'patchInstitution').rejects(conflictError)
-    mount(
-      <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/123']}>
-        <Routes>
-          <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-        </Routes>
-      </MemoryRouter>,
-    )
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
     cy.contains('button', 'Save').click()
 
@@ -233,13 +209,7 @@ describe('Institution Details Tests', () => {
 
     it('should allow editing current institution name (same name)', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(
-        <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/1']}>
-          <Routes>
-            <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-          </Routes>
-        </MemoryRouter>,
-      )
+      mountComponentInEditMode(1)
 
       cy.get('button').contains('Edit').click()
 
@@ -250,13 +220,7 @@ describe('Institution Details Tests', () => {
 
     it('should prevent editing to another existing institution name', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(
-        <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/1']}>
-          <Routes>
-            <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-          </Routes>
-        </MemoryRouter>,
-      )
+      mountComponentInEditMode(1)
 
       cy.get('button').contains('Edit').click()
       cy.get('input[value="Broad Institute"]').clear().type('MIT')
@@ -267,13 +231,7 @@ describe('Institution Details Tests', () => {
 
     it('should clear validation errors when canceling edit', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(
-        <MemoryRouter initialEntries={['/admin_manage_institutions/institutions/1']}>
-          <Routes>
-            <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-          </Routes>
-        </MemoryRouter>,
-      )
+      mountComponentInEditMode(1)
 
       cy.get('button').contains('Edit').click()
       cy.get('input[value="Broad Institute"]').clear().type('MIT')
