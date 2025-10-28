@@ -1,7 +1,7 @@
 import { React } from 'react'
 import { mount } from 'cypress/react'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { DAR } from 'src/libs/ajax/DAR'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Metrics } from 'src/libs/ajax/Metrics'
@@ -14,11 +14,6 @@ import { Collections } from 'src/libs/ajax/Collections'
 import darCollection from './darCollection.json'
 
 const props = {
-  match: {
-    params: {
-      collectionId: darCollection.darCollectionId,
-    },
-  },
   draftDar: true,
   isProgressReportApplication: false,
 }
@@ -116,8 +111,10 @@ describe('Data Access Request - Validation', () => {
       cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' })
       cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}))
       mount(
-        <MemoryRouter initialEntries={['/']}>
-          <DataAccessRequestApplication {...props} />
+        <MemoryRouter initialEntries={[`/dar_application/011467b7-5544-499f-9210-3c2035810639`]}>
+          <Routes>
+            <Route path="/dar_application/:dataRequestId" element={<DataAccessRequestApplication {...props} />} />
+          </Routes>
         </MemoryRouter>,
       )
     })

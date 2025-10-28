@@ -63,8 +63,7 @@ const fetchAllDatasets = async (dsIds) => {
 
 const DataAccessRequestApplication = (props) => {
   const params = useParams()
-  const collectionId = params.collectionId
-  const dataRequestId = params.dataRequestId
+  const { collectionId, dataRequestId } = params
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     datasetIds: [],
@@ -415,6 +414,10 @@ const DataAccessRequestApplication = (props) => {
     setShowNihValidationError(!nihValid)
 
     if (isInvalidForm) {
+      console.log('DAR form is invalid, cannot submit.', validation, nihValid, hasLibraryCard)
+      console.log('draftDar', draftDar)
+      console.log('selectedDatasets', selectedDatasets)
+      console.log('datasets', datasets)
       scrollToFormErrors(validation, nihValid, hasLibraryCard)
     }
     else {
