@@ -18,8 +18,6 @@ const RoleBAC = ({ rolesAllowed }: RoleBACProps) => {
     const user = Storage.getCurrentUser()
     const userRoles: Array<UserRole> = user.roles ? user.roles : []
     const currentUserRoleNames = new Set(userRoles.map(role => role.name as string))
-    console.log('Current user roles:', Array.from(currentUserRoleNames))
-    console.log('Allowed Roles:', allowedRoles)
     return allowedRoles.some(
       allowedRole => (currentUserRoleNames.has(allowedRole) || allowedRole === Utils.USER_ROLES.all),
     )
