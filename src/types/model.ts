@@ -370,19 +370,59 @@ export interface Workspace {
   tags?: string[]
 }
 
+export enum ClinicalTrialStatus {
+  ACTIVE_NOT_RECRUITING = 'ACTIVE_NOT_RECRUITING',
+  COMPLETED = 'COMPLETED',
+  ENROLLING_BY_INVITATION = 'ENROLLING_BY_INVITATION',
+  NOT_YET_RECRUITING = 'NOT_YET_RECRUITING',
+  RECRUITING = 'RECRUITING',
+  SUSPENDED = 'SUSPENDED',
+  TERMINATED = 'TERMINATED',
+  WITHDRAWN = 'WITHDRAWN',
+  AVAILABLE = 'AVAILABLE',
+  NO_LONGER_AVAILABLE = 'NO_LONGER_AVAILABLE',
+  TEMPORARILY_NOT_AVAILABLE = 'TEMPORARILY_NOT_AVAILABLE',
+  APPROVED_FOR_MARKETING = 'APPROVED_FOR_MARKETING',
+  WITHHELD = 'WITHHELD',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export enum ClinicalTrialInterventionType {
+  BEHAVIORAL = 'BEHAVIORAL',
+  BIOLOGICAL = 'BIOLOGICAL',
+  COMBINATION_PRODUCT = 'COMBINATION_PRODUCT',
+  DEVICE = 'DEVICE',
+  DIAGNOSTIC_TEST = 'DIAGNOSTIC_TEST',
+  DIETARY_SUPPLEMENT = 'DIETARY_SUPPLEMENT',
+  DRUG = 'DRUG',
+  GENETIC = 'GENETIC',
+  PROCEDURE = 'PROCEDURE',
+  RADIATION = 'RADIATION',
+  OTHER = 'OTHER',
+}
+
+export enum ClinicalTrialPhase {
+  NA = 'NA',
+  EARLY_PHASE1 = 'EARLY_PHASE1',
+  PHASE1 = 'PHASE1',
+  PHASE2 = 'PHASE2',
+  PHASE3 = 'PHASE3',
+  PHASE4 = 'PHASE4',
+}
+
 export interface ClinicalTrial {
   clinicalTrialId: string
   studyId: string
   title: string
   registry: string
   identifier: string
-  status: string
+  status: ClinicalTrialStatus
   sponsor: string
   startDate: string
-  endDate: string
-  interventionType: string
+  endDate?: string
+  interventionType: ClinicalTrialInterventionType
   description: string
-  phase: string
+  phase: ClinicalTrialPhase
   url: string
   tags?: string[]
 }
@@ -392,6 +432,7 @@ export interface FundingResource {
   studyId: string
   funderName: string
   funderProgram: string
+  grantNumber: string
   projectTitle: string
   startDate: string
   endDate: string
@@ -571,7 +612,6 @@ export interface DataAccessRequest {
   expiresAt: number
   userId: number
   createDate: number
-  sortDate: number
   submissionDate: number
   updateDate: number
   datasetIds: number[]
@@ -679,19 +719,17 @@ export interface Closeout {
 export interface Presentation {
   title: string
   date: string
-  // ToDO: Make existing Progress Report fields required in DT-2361
-  link?: string // ToDo: Remove in DT-2361 to be replaced by url
-  authors?: string
-  datasetCitation?: string
-  citation?: boolean
-  // ToDo: Make new study fields required in DT-2361 except for tags
-  presentationId?: string
-  studyId?: string
-  presenter?: Presenter
-  event?: string
-  location?: string
-  format?: string
-  access?: string
+  url: string
+  authors: string
+  datasetCitation: string
+  citation: boolean
+  presentationId: string
+  studyId: string
+  presenter: Presenter
+  event: string
+  location: string
+  format: string
+  access: string
   tags?: string[]
 }
 

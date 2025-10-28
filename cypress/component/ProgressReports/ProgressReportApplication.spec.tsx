@@ -185,7 +185,6 @@ describe('ProgressReportApplication - Component Tests', () => {
     collectionId: 1,
     elections: {},
     createDate: 1748736000,
-    sortDate: 1748736000,
     submissionDate: 1748736000,
     updateDate: 1748736000,
   }
