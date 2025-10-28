@@ -139,18 +139,22 @@ describe('Home Page - Tests', function () {
         </MemoryRouter>,
       )
 
+      // Helper function to map alt text to library keys
+      const mapAltToKey = (alt) => {
+        if (alt === 'DUOS') return 'duos'
+        if (alt === 'Broad') return 'broad'
+        if (alt === 'eLwazi') return 'elwazi'
+        if (alt === 'NHGRI') return 'nhgri'
+        if (alt === 'Single Cell Portal') return 'scp'
+        return alt?.toLowerCase()
+      }
+
       cy.get('.logo-card').then(($cards) => {
         // Get the image alt text to determine library order
         const libraries = $cards.map((_i, el) => {
           const img = Cypress.$(el).find('img')
           const alt = img.attr('alt')
-          // Map display names back to keys
-          if (alt === 'DUOS') return 'duos'
-          if (alt === 'Broad') return 'broad'
-          if (alt === 'eLwazi') return 'elwazi'
-          if (alt === 'NHGRI') return 'nhgri'
-          if (alt === 'Single Cell Portal') return 'scp'
-          return alt?.toLowerCase()
+          return mapAltToKey(alt)
         }).get().filter(Boolean)
 
         // Should be sorted by order parameter: duos (1), broad (2), elwazi (3), etc.
