@@ -49,7 +49,12 @@ const makeError = (message: string): ValidationError => ({ valid: true, failed: 
 const calcAiModelErrors = (model: AiModel): Validation => {
   const v: Validation = {}
   if (!model.name?.trim()) v.name = makeError('Required')
-  if (!model.url?.trim()) v.url = makeError('Required')
+  if (!model.url?.trim()) {
+    v.url = makeError('Required')
+  }
+  else if (!FormValidators.URL.isValid(model.url)) {
+    v.url = makeError('Invalid URL format')
+  }
   if (!model.format?.trim()) v.format = makeError('Required')
   if (!model.license?.trim()) v.license = makeError('Required')
   if (!model.maintainer?.name?.trim()) v.maintainerName = makeError('Required')
@@ -128,7 +133,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             title="Model URL"
             defaultValue={aiModel?.url}
             placeholder="URL"
-            validators={[FormValidators.REQUIRED]}
+            validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={validation.url}
           />
