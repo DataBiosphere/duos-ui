@@ -4,7 +4,7 @@ import App from 'src/App'
 import ReactGA from 'react-ga4'
 import StackdriverReporter from 'src/libs/stackdriverReporter'
 import { Config } from 'src/libs/config'
-import { MemoryRouter, Route, Router } from 'react-router-dom'
+import { MemoryRouter, Route, Router, useLocation } from 'react-router-dom'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
 import { createMemoryHistory } from 'history'
@@ -161,21 +161,21 @@ describe('Main App Functions', () => {
     cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
     cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
     const pageVisitStub = cy.stub()
+    const LocationSpy = ({ onLocationChange }) => {
+      const location = useLocation()
+      React.useEffect(() => {
+        onLocationChange(location.pathname)
+      }, [location, onLocationChange])
+      return null
+    }
     const history = createMemoryHistory()
     mount(
-      <Router history={history}>
-        <Route
-          path="*"
-          render={({ history }) => {
-            pageVisitStub(history.location.pathname)
-            return <div>Page</div>
-          }}
-        />
+      <MemoryRouter initialEntries={[initialLocation]}>
+        <LocationSpy onLocationChange={pageVisitStub} />
         <App />
-      </Router>,
+      </MemoryRouter>,
     )
     history.push(initialLocation)
-    console.log(history.location)
     cy.wrap(AuthenticateNIH.getECMProviderLinkInfo).should('have.been.calledWith', code, state)
     cy.wrap(AuthenticateNIH.getSyncedUser).should('have.been.calledOnce')
     // Endure that we've navigated to both the home page and the profile page
