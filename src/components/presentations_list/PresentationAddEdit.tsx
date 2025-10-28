@@ -7,10 +7,18 @@ import { Presentation } from 'src/types/model'
 const defaultPresentation: Presentation = {
   title: '',
   date: '',
+  url: '',
   authors: '',
   datasetCitation: '',
   citation: false,
-  link: '',
+  presentationId: '',
+  studyId: '',
+  presenter: { name: '', email: '' },
+  event: '',
+  location: '',
+  format: '',
+  access: '',
+  tags: [],
 }
 
 interface FormFieldChange {
@@ -29,27 +37,65 @@ interface PresentationAddEditProps {
 interface Validation {
   title?: ValidationError
   date?: ValidationError
+  url?: ValidationError
   authors?: ValidationError
-  bibliographicCitation?: ValidationError
-  link?: ValidationError
+  datasetCitation?: ValidationError
+  citation?: ValidationError
+  presenter: { name?: ValidationError, email?: ValidationError }
+  event?: ValidationError
+  location?: ValidationError
+  format?: ValidationError
+  access?: ValidationError
 }
+
 export default function PresentationAddEdit(props: PresentationAddEditProps): React.JSX.Element {
   const { id, presentation, presentations, closeAction, onPresentationChange } = props
 
   const [newPresentation, setNewPresentation] = useState<Presentation>(presentation || defaultPresentation)
-  const [validation, setValidation] = useState<Validation>({})
+  const [validation, setValidation] = useState<Validation>(() => ({
+    presenter: {},
+  }))
+
+  const applyValidation = (p: Presentation) => setValidation(calcPresentationErrors(p) as Validation)
 
   const onChange = ({ key, value }: FormFieldChange) => {
-    const presentationToSet: Presentation = { ...newPresentation, [key]: value }
-    setNewPresentation(presentationToSet)
-    setValidation(calcPresentationErrors(presentationToSet))
+    let next: Presentation
+    if (key === 'presenterName') {
+      next = { ...newPresentation, presenter: { ...newPresentation.presenter, name: value } }
+    }
+    else if (key === 'presenterEmail') {
+      next = { ...newPresentation, presenter: { ...newPresentation.presenter, email: value } }
+    }
+    else if (key === 'tags') {
+      next = { ...newPresentation, tags: value.split(',').map(t => t.trim()).filter(Boolean) }
+    }
+    else {
+      next = { ...newPresentation, [key]: value }
+    }
+    setNewPresentation(next)
+    applyValidation(next)
+  }
+
+  const save = () => {
+    const current = { ...newPresentation, presentationId: newPresentation.presentationId || crypto.randomUUID?.() || Date.now().toString() }
+    if (validationFailed(calcPresentationErrors(current))) return
+    if (id < 0) {
+      onPresentationChange([...presentations, current])
+    }
+    else {
+      const copy = [...presentations]
+      copy[id] = current
+      onPresentationChange(copy)
+    }
+    setNewPresentation(defaultPresentation)
+    closeAction()
   }
 
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{presentation === undefined ? `New Presentation Information` : `Edit ${presentation.title} Information`}</h2>
+          <h2>{presentation === undefined ? 'New Presentation' : `Edit ${presentation.title}`}</h2>
           <FormField
             id="title"
             title="Presentation Title"
@@ -63,14 +109,23 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             id="date"
             title="Presentation Date"
             defaultValue={presentation?.date}
-            placeholder="Date"
+            placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={validation.date}
           />
           <FormField
+            id="url"
+            title="Presentation URL"
+            defaultValue={presentation?.url}
+            placeholder="https://..."
+            validators={[FormValidators.REQUIRED, FormValidators.URL]}
+            onChange={onChange}
+            validation={validation.url}
+          />
+          <FormField
             id="authors"
-            title="Presentation Authors"
+            title="Authors"
             defaultValue={presentation?.authors}
             placeholder="Authors"
             validators={[FormValidators.REQUIRED]}
@@ -78,20 +133,13 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validation={validation.authors}
           />
           <FormField
-            id="link"
-            title="Presentation Link"
-            defaultValue={presentation?.link}
-            placeholder="Link"
-            validators={[FormValidators.REQUIRED]}
-            onChange={onChange}
-            validation={validation.link}
-          />
-          <FormField
             id="datasetCitation"
-            title="Dataset citation used in this presentation"
+            title="Dataset Citation"
             defaultValue={presentation?.datasetCitation}
             placeholder="Dataset Citation"
+            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
+            validation={validation.datasetCitation}
           />
           <FormField
             id="citation"
@@ -100,31 +148,86 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Did you cite the dataset(s) used in this presentation?"
             orientation="horizontal"
             onChange={onChange}
+            validation={validation.citation}
+          />
+          <FormField
+            id="presenterName"
+            title="Presenter Name"
+            defaultValue={presentation?.presenter?.name}
+            placeholder="Name"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.presenter?.name}
+          />
+          <FormField
+            id="presenterEmail"
+            title="Presenter Email"
+            defaultValue={presentation?.presenter?.email}
+            placeholder="email@example.org"
+            validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+            onChange={onChange}
+            validation={validation.presenter?.email}
+          />
+          <FormField
+            id="event"
+            title="Event"
+            defaultValue={presentation?.event}
+            placeholder="Event"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.event}
+          />
+          <FormField
+            id="location"
+            title="Location"
+            defaultValue={presentation?.location}
+            placeholder="Location"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.location}
+          />
+          <FormField
+            id="format"
+            title="Format"
+            defaultValue={presentation?.format}
+            placeholder="Format"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.format}
+          />
+          <FormField
+            id="access"
+            title="Access"
+            defaultValue={presentation?.access}
+            placeholder="Access"
+            validators={[FormValidators.REQUIRED]}
+            onChange={onChange}
+            validation={validation.access}
+          />
+          <FormField
+            id="tags"
+            title="Tags (comma separated)"
+            defaultValue={presentation?.tags?.join(', ')}
+            placeholder="tag1, tag2"
+            onChange={({ value }: { value: string }) => onChange({ key: 'tags', value })}
+          />
+          <FormField
+            id="hidden"
+            type={FormFieldTypes.TEXT}
+            style={{ display: 'none' }}
+            title=""
+            onChange={() => {}}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          {/* add/save button */}
           <button
             className="collaborator-form-add-save-button f-left btn"
             type="button"
-            onClick={() => {
-              if (id < 0 && newPresentation !== undefined) {
-                onPresentationChange([...presentations, newPresentation])
-                setNewPresentation(defaultPresentation)
-              }
-              else if (newPresentation !== undefined) {
-                const presentationsCopy = [...presentations]
-                presentationsCopy[id] = newPresentation
-                onPresentationChange(presentationsCopy)
-                setNewPresentation(defaultPresentation)
-              }
-              closeAction()
-            }}
+            onClick={save}
             disabled={validationFailed(calcPresentationErrors(newPresentation))}
           >
             {presentation === undefined ? 'Add' : 'Save'}
           </button>
-          {/* cancel button */}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"

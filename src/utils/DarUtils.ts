@@ -94,16 +94,24 @@ export function getPublicationList(formState: FormState): Publication[] {
 
 export function getPresentationList(formState: FormState): Presentation[] {
   const presentations: Presentation[] = formState.presentations ?? []
-  return presentations.map((presentation: Presentation) => {
-    const expectedPresentation: Presentation = {} as Presentation
-    expectedPresentation.title = presentation.title
-    expectedPresentation.date = presentation.date
-    expectedPresentation.authors = presentation.authors
-    expectedPresentation.datasetCitation = presentation.datasetCitation
-    expectedPresentation.citation = presentation.citation
-    expectedPresentation.link = presentation.link
-    return expectedPresentation
-  })
+  return presentations.map((p: Presentation): Presentation => ({
+    title: p.title,
+    date: p.date,
+    url: p.url,
+    authors: p.authors,
+    datasetCitation: p.datasetCitation,
+    citation: p.citation,
+    presentationId: p.presentationId,
+    studyId: p.studyId,
+    presenter: p.presenter
+      ? { name: p.presenter.name, email: p.presenter.email }
+      : { name: '', email: '' },
+    event: p.event,
+    location: p.location,
+    format: p.format,
+    access: p.access,
+    tags: p.tags ? [...p.tags] : [],
+  }))
 }
 
 export function getDataManagementIncidents(formState: FormState): DataManagementIncident {
