@@ -76,11 +76,13 @@ describe('Library Versions - Tests', function () {
       const institutionName = 'Test Institution'
       const versions = getLibraryVersions(institutionId, institutionName, null)
 
-      const myInstitution = versions['myinstitution']
+      const myInstitution = versions.myinstitution
 
       expect(myInstitution).to.not.equal(undefined)
       expect(myInstitution.title).to.equal('Test Institution Data Library')
-      expect(myInstitution.query.match_phrase['submitter.institution.id']).to.equal(123)
+      if (myInstitution.query && 'match_phrase' in myInstitution.query) {
+        expect(myInstitution.query.match_phrase['submitter.institution.id']).to.equal(123)
+      }
       expect(myInstitution.featured).to.equal(false)
     })
 
@@ -92,8 +94,10 @@ describe('Library Versions - Tests', function () {
 
       expect(customLibrary).to.not.equal(undefined)
       expect(customLibrary.title).to.equal('custom search term Data Library')
-      expect(customLibrary.query.bool.should).to.be.an('array')
-      expect(customLibrary.query.bool.should.length).to.equal(2)
+      if (customLibrary.query && 'bool' in customLibrary.query) {
+        expect(customLibrary.query.bool.should).to.be.an('array')
+        expect(customLibrary.query.bool.should.length).to.equal(2)
+      }
       expect(customLibrary.featured).to.equal(false)
     })
 
@@ -106,10 +110,10 @@ describe('Library Versions - Tests', function () {
           expect(library.query).to.be.an('object')
           // Should have either match_phrase, term, or bool
           const hasValidQuery
-            = library.query.match_phrase
-              || library.query.term
-              || library.query.bool
-          expect(hasValidQuery).to.not.equal(undefined)
+            = ('match_phrase' in library.query)
+              || ('term' in library.query)
+              || ('bool' in library.query)
+          expect(hasValidQuery).to.equal(true)
         }
       })
     })

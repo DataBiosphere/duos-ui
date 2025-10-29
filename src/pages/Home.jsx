@@ -262,10 +262,10 @@ const Home = (props) => {
                         </div>
                         {label && (
                           <div style={{
-                            fontSize: '14px',
+                            fontSize: '16px',
                             color: '#333',
                             textAlign: 'center',
-                            fontWeight: '500',
+                            fontWeight: '600',
                             maxWidth: '320px',
                             wordWrap: 'break-word',
                           }}

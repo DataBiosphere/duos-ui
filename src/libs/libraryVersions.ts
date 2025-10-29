@@ -22,14 +22,50 @@ import gedIcon from 'src/images/ged-logo.png'
 import ncpiIcon from 'src/images/ncpi-logo.png'
 import homeIcon from 'src/images/icon_dataset_.png'
 
+interface MatchPhraseQuery {
+  match_phrase: {
+    [key: string]: string | number
+  }
+}
+
+interface TermQuery {
+  term: {
+    [key: string]: string
+  }
+}
+
+interface BoolQuery {
+  bool: {
+    should: Array<MatchPhraseQuery | TermQuery>
+  }
+}
+
+type ElasticsearchQuery = MatchPhraseQuery | BoolQuery | null
+
+export interface LibraryVersion {
+  query: ElasticsearchQuery
+  icon: string | null
+  title: string
+  featured: boolean
+  order: number
+}
+
+export interface LibraryVersions {
+  [key: string]: LibraryVersion
+}
+
 /**
  * Get library versions configuration
- * @param {string} institutionId - The institution ID for the user
- * @param {string} institutionName - The institution name for the user
- * @param {string} customQuery - Custom query string for custom library version
- * @returns {Object} Library versions configuration object
+ * @param institutionId - The institution ID for the user
+ * @param institutionName - The institution name for the user
+ * @param customQuery - Custom query string for custom library version
+ * @returns Library versions configuration object
  */
-export const getLibraryVersions = (institutionId, institutionName, customQuery) => {
+export const getLibraryVersions = (
+  institutionId: number | null,
+  institutionName: string | null,
+  customQuery: string | null,
+): LibraryVersions => {
   return {
     '/datalibrary': {
       query: null,
@@ -95,11 +131,11 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
     'myinstitution': {
       query: {
         match_phrase: {
-          'submitter.institution.id': institutionId,
+          'submitter.institution.id': institutionId ?? 0,
         },
       },
       icon: null,
-      title: institutionName + ' Data Library',
+      title: (institutionName ?? '') + ' Data Library',
       featured: false,
       order: 999,
     },
@@ -156,7 +192,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Health Disparities Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-heart-and-vascular-diseases': {
       query: {
         match_phrase: {
@@ -166,7 +203,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Heart and Vascular Diseases Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-lung-diseases': {
       query: {
         match_phrase: {
@@ -176,7 +214,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Lung Diseases Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-obesity-nutrition-and-physical-activity': {
       query: {
         match_phrase: {
@@ -186,7 +225,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Obesity, Nutrition, and Physical Activity Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-population-and-epidemiology-studies': {
       query: {
         match_phrase: {
@@ -196,7 +236,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Population and Epidemiology Studies Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-precision-medicine-activities': {
       query: {
         match_phrase: {
@@ -206,7 +247,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Precision Medicine Activities Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-research-spectrum': {
       query: {
         match_phrase: {
@@ -216,7 +258,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Research Spectrum Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-sleep-science-and-sleep-disorders': {
       query: {
         match_phrase: {
@@ -226,7 +269,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: nhlbiIcon,
       title: 'NHLBI Sleep Science and Sleep Disorders Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'nhlbi-womens-health': {
       query: {
         match_phrase: {
@@ -276,7 +320,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: terraIcon,
       title: 'Terra Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'cfde': {
       query: {
         match_phrase: {
@@ -297,7 +342,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: firecloudIcon,
       title: 'FireCloud Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'allofus': {
       query: {
         match_phrase: {
@@ -324,7 +370,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: duosIcon,
       title: 'DUOS Open Access Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'ifgc': {
       query: {
         match_phrase: {
@@ -356,7 +403,8 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     'stanleycenter': {
       query: {
         match_phrase: {
@@ -498,27 +546,29 @@ export const getLibraryVersions = (institutionId, institutionName, customQuery) 
       icon: ncpiIcon,
       title: 'NCPI DUO Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
     '/custom': {
       query: {
         bool: {
           should: [
             {
               match_phrase: {
-                'study.description': customQuery,
+                'study.description': customQuery ?? '',
               },
             },
             {
               match_phrase: {
-                'submitter.institution.name': customQuery,
+                'submitter.institution.name': customQuery ?? '',
               },
             },
           ],
         },
       },
       icon: homeIcon,
-      title: customQuery + ' Data Library',
+      title: (customQuery ?? '') + ' Data Library',
       featured: false,
-      order: 999 },
+      order: 999,
+    },
   }
 }
