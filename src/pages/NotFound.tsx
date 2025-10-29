@@ -9,7 +9,7 @@ export default function NotFound() {
     const identifier = location.pathname.split('/').pop()
     // StudyDetails expects a database ID without the 'DUOS-S' prefix
     if (location.pathname.startsWith('/DUOS-S')) {
-      const studyId = identifier.replace('DUOS-S', '')
+      const studyId = identifier?.replace('DUOS-S', '')
       return <Navigate to={`/studies/${studyId}`} />
     }
     // DatasetStatistics can handle either a DUOS-Dxxx or a DUOS-000xxx identifier
