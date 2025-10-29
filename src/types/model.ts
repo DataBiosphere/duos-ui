@@ -365,7 +365,7 @@ export interface Workspace {
   platform: string
   url: string
   description: string
-  tools: string[]
+  tools?: string[]
   access: string
   tags?: string[]
 }
