@@ -214,8 +214,8 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('.accordion-step-container').should('exist')
   })
 
-  it('defaults intellectualPropertyYesNo to false when dar.intellectualPropertySummary is undefined', () => {
-    // Mount component with DAR that has undefined intellectualPropertySummary
+  it('defaults intellectualPropertyYesNo to false when dar.intellectualProperties is undefined or empty', () => {
+    // Test with undefined intellectualProperties
     const darWithoutIntellectualProperty = {}
 
     mountComponent(darWithoutIntellectualProperty, true)
@@ -225,10 +225,47 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
   })
 
-  it('sets intellectualPropertyYesNo to true when dar.intellectualPropertySummary has a value', () => {
-    // Mount component with DAR that has intellectualPropertySummary
+  it('defaults intellectualPropertyYesNo to false when dar.intellectualProperties is empty array', () => {
+    // Test with empty intellectualProperties array
+    const darWithEmptyIntellectualProperty = {
+      intellectualProperties: [],
+    }
+
+    mountComponent(darWithEmptyIntellectualProperty, true)
+
+    // Check that the intellectual property "No" radio button is checked (false state)
+    cy.get('#intellectualPropertyYesNo_no').should('be.checked')
+    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
+  })
+
+  it('sets intellectualPropertyYesNo to true when dar.intellectualProperties has items', () => {
+    // Test with intellectualProperties array containing items
     const darWithIntellectualProperty = {
-      intellectualPropertySummary: 'Some intellectual property description',
+      intellectualProperties: [{
+        ipId: 'ip-1',
+        studyId: 'study-1',
+        type: 'Patent',
+        title: 'IP 1',
+        assignee: 'Inventor A',
+        patentNumber: 'App123',
+        filingDate: '2023-01-01',
+        status: 'Filed',
+        url: 'https://example.com/ip',
+        contact: 'contact@example.com',
+        tags: [],
+      }, {
+        ipId: 'ip-2',
+        studyId: 'study-1',
+        type: 'Trademark',
+        title: 'IP 2',
+        assignee: 'Inventor B',
+        patentNumber: 'App456',
+        filingDate: '2023-02-01',
+        status: 'Granted',
+        url: 'https://example.com/ip2',
+        contact: 'contact2@example.com',
+        tags: [],
+      }],
     }
 
     mountComponent(darWithIntellectualProperty, true)
@@ -236,17 +273,10 @@ describe('ProgressReportApplication - Component Tests', () => {
     // Check that the intellectual property "Yes" radio button is checked (true state)
     cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
     cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
-  })
 
-  it('in non-read-only mode, has neither intellectualPropertyYesNo radio button checked when dar.intellectualPropertySummary is undefined', () => {
-    // Mount component with DAR that has undefined intellectualPropertySummary
-    const darWithoutIntellectualProperty = {}
-
-    mountComponent(darWithoutIntellectualProperty, false)
-
-    // Check that neither radio button is checked when the value is undefined
-    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
+    // Check that intellectual properties are actually displayed in the DOM
+    cy.contains('IP 1').should('be.visible')
+    cy.contains('IP 2').should('be.visible')
   })
 
   it('defaults publicationsYesNo to false when dar.publications is undefined or empty', () => {
@@ -469,21 +499,30 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('#closeoutYesNo_no').should('not.be.checked')
   })
 
-  it('displays intellectual property summary in read-only mode when it exists', () => {
-    // Test scenario where intellectual property summary exists
+  it('displays intellectual properties in read-only mode when they exist', () => {
     const darWithIntellectualProperty = {
-      intellectualPropertySummary: 'Test intellectual property description with important details',
+      intellectualProperties: [{
+        ipId: 'ip-1',
+        studyId: 'study-1',
+        type: 'Patent',
+        title: 'Test IP',
+        assignee: 'Inventor A',
+        patentNumber: 'App123',
+        filingDate: '2023-01-01',
+        status: 'Filed',
+        url: 'https://example.com/ip',
+        contact: 'contact@example.com',
+        tags: [],
+      }],
     }
 
     mountComponent(darWithIntellectualProperty, true)
 
-    // Check that the intellectual property "Yes" radio button is checked (true state)
     cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
     cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
 
-    // Check that the intellectual property summary is visible in the form
-    cy.get('#intellectualPropertySummary').should('be.visible')
-    cy.get('#intellectualPropertySummary').should('contain.value', 'Test intellectual property description with important details')
+    // Check that IP is visible
+    cy.contains('Test IP').should('be.visible')
   })
 
   it('shows only approved datasets in create-mode progress report', () => {

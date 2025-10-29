@@ -3,7 +3,7 @@ import {
   Closeout,
   CombinedDataAccessRequest, DarCollection, DataAccessRequest,
   DataManagementIncident,
-  Election,
+  Election, IntellectualProperty,
   Presentation,
   Publication, Vote,
 } from 'src/types/model'
@@ -42,8 +42,8 @@ export function getApprovedElectionDatasetIds(elections: Array<Election>): Array
 export function convertFormStateToDAR(formState: FormState): Partial<CombinedDataAccessRequest> {
   const expectedForm: Partial<CombinedDataAccessRequest> = {} as Partial<CombinedDataAccessRequest>
   expectedForm.progressReportSummary = formState.progressReportSummary
-  if (formState.intellectualPropertyYesNo) {
-    expectedForm.intellectualPropertySummary = formState.intellectualPropertySummary
+  if (formState.intellectualPropertiesYesNo) {
+    expectedForm.intellectualProperties = formState.intellectualProperties
   }
   expectedForm.datasetIds = formState.datasetIds ?? []
   if (formState.publicationsYesNo) {
@@ -70,6 +70,23 @@ export function convertFormStateToDAR(formState: FormState): Partial<CombinedDat
   expectedForm.collaborationLetterLocation = formState.collaborationLetterLocation
   expectedForm.collaborationLetterName = formState.collaborationLetterName
   return expectedForm
+}
+
+export function getIntellectualPropertyList(formState: FormState): IntellectualProperty[] {
+  const intellectualProperties: IntellectualProperty[] = formState.intellectualProperties ?? []
+  return intellectualProperties.map((ip: IntellectualProperty) => ({
+    ipId: ip.ipId,
+    studyId: ip.studyId,
+    type: ip.type,
+    title: ip.title,
+    assignee: ip.assignee,
+    patentNumber: ip.patentNumber,
+    filingDate: ip.filingDate,
+    status: ip.status,
+    url: ip.url,
+    contact: ip.contact,
+    tags: ip.tags ? [...ip.tags] : [],
+  }))
 }
 
 export function getPublicationList(formState: FormState): Publication[] {

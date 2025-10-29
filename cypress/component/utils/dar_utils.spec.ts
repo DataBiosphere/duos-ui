@@ -3,7 +3,7 @@ import {
   ElectionStatus, ElectionType,
   getApprovedElectionDatasetIds,
   getCloseoutInfo,
-  getDataManagementIncidents,
+  getDataManagementIncidents, getIntellectualPropertyList,
   getPresentationList,
   getPublicationList,
   userHasOpenDataAccessElection,
@@ -185,8 +185,20 @@ describe('DarUtils', () => {
     it('should convert FormState to DAR format', () => {
       const formState = {
         progressReportSummary: 'Test summary',
-        intellectualPropertyYesNo: true,
-        intellectualPropertySummary: 'IP summary',
+        intellectualPropertiesYesNo: true,
+        intellectualProperties: [{
+          ipId: 'ip-1',
+          studyId: 'study-1',
+          type: 'Patent',
+          title: 'IP 1',
+          assignee: 'Inventor A',
+          patentNumber: 'App123',
+          filingDate: '2023-01-01',
+          status: 'Filed',
+          url: 'https://example.com/ip',
+          contact: 'contact@example.com',
+          tags: [],
+        }],
         datasetIds: [1, 2],
         publicationsYesNo: true,
         publications: [{
@@ -248,7 +260,7 @@ describe('DarUtils', () => {
       } as unknown as FormState
       const result = convertFormStateToDAR(formState)
       expect(result.progressReportSummary).to.equal(formState.progressReportSummary)
-      expect(result.intellectualPropertySummary).to.equal(formState.intellectualPropertySummary)
+      expect(result.intellectualProperties).to.deep.equal(getIntellectualPropertyList(formState))
       expect(result.datasetIds).to.equal(formState.datasetIds)
       expect(result.publications).to.deep.equal(getPublicationList(formState))
       expect(result.presentations).to.deep.equal(getPresentationList(formState))

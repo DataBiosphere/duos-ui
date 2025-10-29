@@ -39,6 +39,7 @@ type ProgressReportApplicationProps = {
 export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
   const initialState: FormState = {
     ...dar,
+    intellectualProperties: (dar.intellectualProperties || []),
     publications: (dar.publications || []),
     presentations: (dar.presentations || []),
     dmiCombination: false,
@@ -59,14 +60,14 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     ...(readOnlyMode
       ? {
           // In read-only mode, check "No" when undefined
-          intellectualPropertyYesNo: !!dar.intellectualPropertySummary,
+          intellectualPropertiesYesNo: ((dar.intellectualProperties?.length ?? 0) > 0),
           publicationsYesNo: ((dar.publications?.length ?? 0) > 0),
           presentationsYesNo: ((dar.presentations?.length ?? 0) > 0),
         }
       : {
           // When not in read-only mode, don't check anything when undefined
-          ...(dar?.intellectualPropertySummary && {
-            intellectualPropertyYesNo: !!dar.intellectualPropertySummary,
+          ...(dar?.intellectualProperties && {
+            intellectualPropertiesYesNo: (dar.intellectualProperties.length > 0),
           }),
           ...(dar?.publications && {
             publicationsYesNo: (dar.publications.length > 0),

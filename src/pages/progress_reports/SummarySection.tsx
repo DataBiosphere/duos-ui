@@ -4,11 +4,12 @@ import { FormField, FormFieldTitle, FormFieldTypes } from 'src/components/forms/
 import PublicationList from 'src/components/publications_list/PublicationList'
 import { ValidFormState, FormState, FormStateKey } from 'src/pages/progress_reports/ProgressReportFormState'
 import ERACommons from 'src/components/era_commons/ERACommons'
-import { DuosUser, Presentation, Publication } from 'src/types/model'
+import { DuosUser, IntellectualProperty, Presentation, Publication } from 'src/types/model'
 import { Location } from 'history'
 import { DarErrors, ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { ERACommonsDisplay } from 'src/components/era_commons/ERACommonsDisplay'
 import PresentationList from 'src/components/presentations_list/PresentationList'
+import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
 
 interface SummarySectionProps {
   readonly readOnly: boolean
@@ -26,8 +27,14 @@ interface SummarySectionProps {
 export default function SummarySection(props: Readonly<SummarySectionProps>): React.JSX.Element {
   const { readOnly, formState, onFormChange, eRACommonsDestination, researcher, onValidationChange, validation, nihValid, onNihStatusUpdate } = props
 
+  const [intellectualProperties, setIntellectualProperties] = useState<IntellectualProperty[]>(formState.intellectualProperties || [])
   const [publications, setPublications] = useState<Publication[]>(formState.publications || [])
   const [presentations, setPresentations] = useState<Presentation[]>(formState.presentations || [])
+
+  const onIntellectualPropertyChange = (intellectualProperties: IntellectualProperty[]) => {
+    onFormChange({ [FormStateKey.INTELLECTUAL_PROPERTIES]: intellectualProperties } as Partial<FormState>)
+    setIntellectualProperties(intellectualProperties)
+  }
 
   const onPublicationChange = (publications: Publication[]) => {
     onFormChange({ [FormStateKey.PUBLICATIONS]: publications } as Partial<FormState>)
@@ -86,7 +93,7 @@ export default function SummarySection(props: Readonly<SummarySectionProps>): Re
         </div>
         <div className="progress-report-row">
           <FormField
-            id={FormStateKey.INTELLECTUAL_PROPERTY_YES_NO}
+            id={FormStateKey.INTELLECTUAL_PROPERTIES_YES_NO}
             type={FormFieldTypes.YESNORADIOGROUP}
             title="1.3 Intellectual Property"
             description={(
@@ -99,29 +106,20 @@ export default function SummarySection(props: Readonly<SummarySectionProps>): Re
               </span>
             )}
             orientation="horizontal"
-            defaultValue={formState.intellectualPropertyYesNo}
+            defaultValue={formState.intellectualPropertiesYesNo}
             onChange={({ key, value }: ValidFormState) => {
               onFormChange({ [key]: value } as Partial<FormState>)
             }}
             disabled={readOnly}
-            validation={validation?.intellectualPropertyYesNo}
+            validation={validation?.intellectualPropertiesYesNo}
             onValidationChange={onValidationChange}
           />
-          {formState.intellectualPropertyYesNo && (
-            <FormField
-              id={FormStateKey.INTELLECTUAL_PROPERTY_SUMMARY}
-              type={FormFieldTypes.TEXTAREA}
-              description="Please describe the intellectual property resulting from analysis of the requested dataset(s)."
-              placeholder="Please provide an update here."
-              rows={6}
-              maxLength={FORM_TEXT_AREA_MAX_LENGTH}
-              defaultValue={formState.intellectualPropertySummary}
-              onChange={({ key, value }: ValidFormState) => {
-                onFormChange({ [key]: value } as Partial<FormState>)
-              }}
+          {(formState.intellectualPropertiesYesNo || (readOnly && intellectualProperties.length > 0)) && (
+            <IntellectualPropertyList
+              intellectualProperties={intellectualProperties}
+              onIntellectualPropertyChange={onIntellectualPropertyChange}
               disabled={readOnly}
-              validation={validation?.intellectualPropertySummary}
-              onValidationChange={onValidationChange}
+              validation={validation}
             />
           )}
         </div>

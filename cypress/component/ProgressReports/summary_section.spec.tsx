@@ -151,14 +151,14 @@ describe('Summary Section - Component Tests', () => {
 
   it('handles intellectual property radio buttons', () => {
     cy.contains('label', 'Yes').find('input[type="radio"]').first().click({ force: true })
-    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertyYesNo: true })
+    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertiesYesNo: true })
 
     cy.contains('label', 'No').find('input[type="radio"]').first().click({ force: true })
-    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertyYesNo: false })
+    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertiesYesNo: false })
   })
 
   it('shows intellectual property details form when "Yes" is selected', () => {
-    mountComponent({ intellectualPropertyYesNo: true })
+    mountComponent({ intellectualPropertiesYesNo: true })
     cy.get('#intellectualPropertySummary').should('exist')
 
     const testDetails = 'Details about intellectual property.'

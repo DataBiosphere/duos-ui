@@ -211,11 +211,11 @@ const calcSummaryErrors = (nihValid, errors, formData) => {
   if (isEmpty(formData.progressReportSummary)) {
     errors.progressReportSummary = requiredError
   }
-  if (isNil(formData.intellectualPropertyYesNo)) {
-    errors.intellectualPropertyYesNo = requiredError
+  if (isNil(formData.intellectualPropertiesYesNo)) {
+    errors.intellectualPropertiesYesNo = requiredError
   }
-  if (formData.intellectualPropertyYesNo && isEmpty(formData.intellectualPropertySummary)) {
-    errors.intellectualPropertySummary = requiredError
+  if (formData.intellectualPropertiesYesNo && isEmpty(formData.intellectualProperties)) {
+    errors.intellectualProperties = requiredError
   }
   if (isNil(formData.publicationsYesNo)) {
     errors.publicationsYesNo = requiredError
