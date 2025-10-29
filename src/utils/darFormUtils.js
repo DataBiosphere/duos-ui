@@ -307,27 +307,60 @@ const validateDate = (date) => {
   return undefined
 }
 
+export const ORCID_REGEX = /^(\d{4}-){3}\d{3}[\dX]$/
+
 export const calcPublicationErrors = (newPublication) => {
   const validation = {}
+
   if (isEmpty(newPublication?.title)) {
     validation.title = requiredError
   }
-  validation.date = validateDate(newPublication?.date)
-  if (isEmpty(newPublication?.authors)) {
+  validation.publishedDate = validateDate(newPublication?.publishedDate)
+
+  const authorsArr = Array.isArray(newPublication?.authors) ? newPublication.authors : []
+  if (authorsArr.length === 0) {
     validation.authors = requiredError
   }
-  if (isEmpty(newPublication?.pubmedId)) {
-    validation.pubmedId = requiredError
-  }
-  if (isEmpty(newPublication?.bibliographicCitation)) {
-    validation.bibliographicCitation = requiredError
+  else {
+    const failedCodes = []
+    const perAuthor = authorsArr.map((a, idx) => {
+      const name = a?.name ?? ''
+      const orcId = a?.orcId ?? ''
+      const row = {}
+      if (isStringEmpty(name)) {
+        row.name = requiredError
+        failedCodes.push(`name@${idx}`)
+      }
+      if (!isStringEmpty(orcId) && !ORCID_REGEX.test(orcId)) { // only validate if not empty
+        row.orcId = validationError('orcIdFormat')
+        failedCodes.push(`orcIdFormat@${idx}`)
+      }
+      return row
+    })
+    if (failedCodes.length) {
+      validation.authors = { valid: false, failed: failedCodes, perAuthor }
+    }
   }
 
+  if (isStringEmpty(newPublication?.pubmedId)) validation.pubmedId = requiredError
+  if (isStringEmpty(newPublication?.bibliographicCitation)) validation.bibliographicCitation = requiredError
+  if (isStringEmpty(newPublication?.datasetCitation)) validation.datasetCitation = requiredError
+  if (isStringEmpty(newPublication?.journal)) validation.journal = requiredError
+  if (isStringEmpty(newPublication?.doi)) validation.doi = requiredError
+  if (isStringEmpty(newPublication?.url)) {
+    validation.url = requiredError
+  }
+  else if (!FormValidators.URL.isValid(newPublication.url)) {
+    validation.url = validationError('url')
+  }
+  if (isStringEmpty(newPublication?.access)) validation.access = requiredError
   return validation
 }
 
 export const calcPresentationErrors = (newPresentation) => {
-  const validation = {}
+  const validation = {
+    presenter: {},
+  }
   if (isEmpty(newPresentation?.title)) {
     validation.title = requiredError
   }
@@ -335,14 +368,34 @@ export const calcPresentationErrors = (newPresentation) => {
   if (isEmpty(newPresentation?.authors)) {
     validation.authors = requiredError
   }
-  if (isEmpty(newPresentation?.link)) {
-    validation.link = requiredError
+  if (isEmpty(newPresentation?.url)) {
+    validation.url = requiredError
+  }
+  if (isEmpty(newPresentation?.datasetCitation)) {
+    validation.datasetCitation = requiredError
+  }
+  if (newPresentation?.citation === undefined || newPresentation?.citation === null) {
+    validation.citation = requiredError
+  }
+  if (isEmpty(newPresentation?.presenter?.name)) {
+    validation.presenter.name = requiredError
+  }
+  if (isEmpty(newPresentation?.presenter?.email)) {
+    validation.presenter.email = requiredError
+  }
+  if (isEmpty(newPresentation?.event)) {
+    validation.event = requiredError
+  }
+  if (isEmpty(newPresentation?.location)) {
+    validation.location = requiredError
+  }
+  if (isEmpty(newPresentation?.format)) {
+    validation.format = requiredError
+  }
+  if (isEmpty(newPresentation?.access)) {
+    validation.access = requiredError
   }
   return validation
-}
-
-export const isPublication = (publicationText) => {
-  return publicationText === 'Publication'
 }
 
 const requiredRusFields = [

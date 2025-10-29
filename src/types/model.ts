@@ -304,6 +304,21 @@ export interface DatasetProperty {
   propertyValue: string
 }
 
+interface Person {
+  name: string
+}
+
+interface Contact extends Person {
+  email: string
+}
+
+export interface Author extends Person {
+  orcId?: string
+}
+
+export type Maintainer = Contact
+export type Presenter = Contact
+
 export interface Study {
   studyId: number
   name: string
@@ -319,6 +334,124 @@ export interface Study {
   createUserId: number
   updateDate?: string // Date?
   updateUserId?: number
+  assets?: {
+    models?: Array<AiModel>
+    workspaces?: Array<Workspace>
+    publications?: Array<Publication>
+    presentations?: Array<Presentation>
+    clinicalTrials?: Array<ClinicalTrial>
+    funding?: Array<FundingResource>
+    intellectualProperty?: Array<IntellectualProperty>
+  }
+}
+
+export interface AiModel {
+  modelId: string
+  studyId: string
+  name: string
+  description: string
+  url: string
+  format: string
+  license: string
+  trainedOnDatasets: string[]
+  maintainer: Maintainer
+  tags?: string[]
+}
+
+export interface Workspace {
+  workspaceId: string
+  studyId: string
+  name: string
+  platform: string
+  url: string
+  description: string
+  tools: string[]
+  access: string
+  tags?: string[]
+}
+
+export enum ClinicalTrialStatus {
+  ACTIVE_NOT_RECRUITING = 'ACTIVE_NOT_RECRUITING',
+  COMPLETED = 'COMPLETED',
+  ENROLLING_BY_INVITATION = 'ENROLLING_BY_INVITATION',
+  NOT_YET_RECRUITING = 'NOT_YET_RECRUITING',
+  RECRUITING = 'RECRUITING',
+  SUSPENDED = 'SUSPENDED',
+  TERMINATED = 'TERMINATED',
+  WITHDRAWN = 'WITHDRAWN',
+  AVAILABLE = 'AVAILABLE',
+  NO_LONGER_AVAILABLE = 'NO_LONGER_AVAILABLE',
+  TEMPORARILY_NOT_AVAILABLE = 'TEMPORARILY_NOT_AVAILABLE',
+  APPROVED_FOR_MARKETING = 'APPROVED_FOR_MARKETING',
+  WITHHELD = 'WITHHELD',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export enum ClinicalTrialInterventionType {
+  BEHAVIORAL = 'BEHAVIORAL',
+  BIOLOGICAL = 'BIOLOGICAL',
+  COMBINATION_PRODUCT = 'COMBINATION_PRODUCT',
+  DEVICE = 'DEVICE',
+  DIAGNOSTIC_TEST = 'DIAGNOSTIC_TEST',
+  DIETARY_SUPPLEMENT = 'DIETARY_SUPPLEMENT',
+  DRUG = 'DRUG',
+  GENETIC = 'GENETIC',
+  PROCEDURE = 'PROCEDURE',
+  RADIATION = 'RADIATION',
+  OTHER = 'OTHER',
+}
+
+export enum ClinicalTrialPhase {
+  NA = 'NA',
+  EARLY_PHASE1 = 'EARLY_PHASE1',
+  PHASE1 = 'PHASE1',
+  PHASE2 = 'PHASE2',
+  PHASE3 = 'PHASE3',
+  PHASE4 = 'PHASE4',
+}
+
+export interface ClinicalTrial {
+  clinicalTrialId: string
+  studyId: string
+  title: string
+  registry: string
+  identifier: string
+  status: ClinicalTrialStatus
+  sponsor: string
+  startDate: string
+  endDate?: string
+  interventionType: ClinicalTrialInterventionType
+  description: string
+  phase: ClinicalTrialPhase
+  url: string
+  tags?: string[]
+}
+
+export interface FundingResource {
+  fundingId: string
+  studyId: string
+  funderName: string
+  funderProgram: string
+  grantNumber: string
+  projectTitle: string
+  startDate: string
+  endDate: string
+  url: string
+  tags?: string[]
+}
+
+export interface IntellectualProperty {
+  ipId: string
+  studyId: string
+  type: string
+  title: string
+  assignee: string
+  patentNumber: string
+  filingDate: string
+  status: string
+  url: string
+  contact: string
+  tags?: string[]
 }
 
 export interface StudyProperty {
@@ -479,7 +612,6 @@ export interface DataAccessRequest {
   expiresAt: number
   userId: number
   createDate: number
-  sortDate: number
   submissionDate: number
   updateDate: number
   datasetIds: number[]
@@ -586,21 +718,36 @@ export interface Closeout {
 
 export interface Presentation {
   title: string
-  link: string
   date: string
+  url: string
   authors: string
   datasetCitation: string
   citation: boolean
+  presentationId: string
+  studyId: string
+  presenter: Presenter
+  event: string
+  location: string
+  format: string
+  access: string
+  tags?: string[]
 }
 
 export interface Publication {
   title: string
   pubmedId: string
-  date: string
-  authors: string
+  publishedDate: string
+  authors: Array<Author>
   bibliographicCitation: string
   datasetCitation: string
   citation: boolean
+  publicationId: string
+  studyId: string
+  journal: string
+  doi: string
+  url: string
+  access: string
+  tags?: string[]
 }
 
 export interface Collaborator {

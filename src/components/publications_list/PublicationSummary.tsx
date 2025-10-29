@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
-import { Publication } from 'src/types/model'
+import { Author, Publication } from 'src/types/model'
+import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface PublicationSummaryProps {
   publication: Publication
@@ -22,11 +23,35 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
 
   const buttonStyle = disabled ? disabledStyle : {}
 
+  const customRenderers = {
+    authors: (value: unknown) => {
+      if (Array.isArray(value)) {
+        return (value as Author[]).map((author, i) => (
+          <span key={author.orcId || i}>
+            {author.name}{i < (value as Author[]).length - 1 ? ', ' : ''}
+          </span>
+        ))
+      }
+      if (typeof value === 'string') return value
+      if (value == null) return null
+      return JSON.stringify(value)
+    },
+    url: (value: unknown) => {
+      const href = typeof value === 'string' ? value : ''
+      if (!href) return null
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {href}
+        </a>
+      )
+    },
+  }
+
   return (
     <div className="collaborator-summary-card">
       {/* data elements to show in the row summary */}
       {columnsToShow.map((column, index) => {
-        const columnContent = publication[column as keyof Publication]
+        const columnContent = renderColumnContent(column, publication[column as keyof Publication], customRenderers)
         return columnContent && (
           <div key={'publication_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>

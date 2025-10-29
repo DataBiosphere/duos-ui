@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { cloneDeep } from 'lodash/fp'
-import { set } from 'lodash'
+import { cloneDeep, set } from 'lodash/fp'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
@@ -22,8 +21,7 @@ export const DataSubmissionFormV2 = () => {
     if (isValid) {
       setFormData((val: Study) => {
         const newForm = cloneDeep(val)
-        set(newForm, key, value)
-        return newForm
+        return set(key, value, newForm)
       })
     }
   }, [])

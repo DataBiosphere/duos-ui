@@ -48,11 +48,11 @@ import { StudyUpdateForm } from 'src/pages/StudyUpdateForm'
 import { DAAUtils } from 'src/utils/DAAUtils'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
-import { InstitutionDetails } from 'src/components/institution_table/InstitutionDetails.js'
-import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode.js'
+import { InstitutionDetails } from 'src/components/institution_table/InstitutionDetails'
+import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode'
 import {
   DataSubmissionFormV2,
-} from 'src/pages/data_submission/v2/DataSubmissionFormV2.js'
+} from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 
 const Routes = props => (
   <Switch>
