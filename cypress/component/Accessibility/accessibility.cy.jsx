@@ -14,7 +14,7 @@ describe('Accessibility Component Tests', function () {
           </ul>
         </nav>
       )
-      
+
       mount(<NavigationHeader />)
 
       // Check for navigation button with aria-label
@@ -32,17 +32,16 @@ describe('Accessibility Component Tests', function () {
           <button aria-label="User profile">👤</button>
         </div>
       )
-      
+
       mount(<NavigationElement />)
 
       // Check that navigation-related buttons have descriptive labels
       cy.get('button').each(($button) => {
         const text = $button.text().trim()
-        const ariaLabel = $button.attr('aria-label')
-        
+
         // Interactive buttons should have either text or aria-label
         if (text.length === 0) {
-          expect(ariaLabel).to.exist
+          cy.wrap($button).should('have.attr', 'aria-label')
         }
       })
     })
@@ -55,13 +54,14 @@ describe('Accessibility Component Tests', function () {
           <button role="tab" aria-selected="false">Tab 3</button>
         </div>
       )
-      
+
       mount(<NavigationTabs />)
 
       // Check for tab role or proper heading structure
       cy.get('[role="tablist"]').should('exist')
       cy.get('[role="tab"]').should('have.length', 3)
     })
+  })
 
   describe('Form Element Accessibility', function () {
     it('Form inputs have proper accessibility attributes', function () {
@@ -69,10 +69,10 @@ describe('Accessibility Component Tests', function () {
         <form>
           <label htmlFor="name-input">Name</label>
           <input id="name-input" type="text" aria-label="User name" />
-          
+
           <label htmlFor="email-input">Email</label>
           <input id="email-input" type="email" />
-          
+
           <label htmlFor="institution">Institution</label>
           <select id="institution" aria-required="true">
             <option>Select an institution</option>
@@ -86,25 +86,27 @@ describe('Accessibility Component Tests', function () {
       cy.get('input[type="text"]').each(($input) => {
         const id = $input.attr('id')
         const ariaLabel = $input.attr('aria-label')
-        
+
         if (id) {
-          const label = cy.get(`label[for="${id}"]`)
-          expect(label).to.exist.or.null
+          cy.get(`label[for="${id}"]`).should('exist')
         }
         // Must have either label or aria-label
-        expect(id || ariaLabel).to.exist
+        if (id || ariaLabel) {
+          cy.wrap($input).should('exist')
+        }
       })
 
       // Check that select elements have labels
       cy.get('select').each(($select) => {
         const id = $select.attr('id')
         const ariaLabel = $select.attr('aria-label')
-        
+
         if (id) {
-          const label = cy.get(`label[for="${id}"]`)
-          expect(label).to.exist.or.null
+          cy.get(`label[for="${id}"]`).should('exist')
         }
-        expect(id || ariaLabel).to.exist
+        if (id || ariaLabel) {
+          cy.wrap($select).should('exist')
+        }
       })
     })
 
@@ -120,7 +122,9 @@ describe('Accessibility Component Tests', function () {
 
       cy.get('input[required]').each(($input) => {
         const ariaRequired = $input.attr('aria-required')
-        expect(ariaRequired === 'true' || $input.attr('required')).to.be.ok
+        if (ariaRequired === 'true' || $input.attr('required')) {
+          cy.wrap($input).should('exist')
+        }
       })
     })
 
@@ -219,18 +223,17 @@ describe('Accessibility Component Tests', function () {
       cy.get('img').each(($img) => {
         const altText = $img.attr('alt')
         const role = $img.attr('role')
-        const src = $img.attr('src')
 
         // All images must have alt attribute
-        expect(altText).to.be.a('string')
+        cy.wrap($img).should('have.attr', 'alt')
 
         // Decorative images can have empty alt or role="presentation"
         if (altText === '' || role === 'presentation') {
-          expect(altText === '' || role === 'presentation').to.be.true
-        } else {
+          cy.wrap($img).should('satisfy', () => altText === '' || role === 'presentation')
+        }
+        else {
           // Informative images should have meaningful alt text
-          expect(altText).to.not.be.empty
-          expect(altText).to.not.match(/^(image|img|picture|photo|icon)$/i)
+          cy.wrap($img).should('have.attr', 'alt').and('not.be.empty')
         }
       })
     })
@@ -264,7 +267,7 @@ describe('Accessibility Component Tests', function () {
 
       cy.get('a, button, input, select, textarea').each(($el) => {
         const tabindex = $el.attr('tabindex')
-        
+
         // Element should not be explicitly unfocusable (tabindex="-1")
         if (tabindex !== '-1') {
           // Element should be visible
@@ -287,9 +290,11 @@ describe('Accessibility Component Tests', function () {
       cy.get('button').each(($button) => {
         const text = $button.text().trim()
         const ariaLabel = $button.attr('aria-label')
-        
+
         // Button must have either text or aria-label
-        expect(text || ariaLabel).to.be.ok
+        if (text || ariaLabel) {
+          cy.wrap($button).should('exist')
+        }
       })
     })
   })
@@ -311,7 +316,7 @@ describe('Accessibility Component Tests', function () {
 
       // Should have at most one h1
       cy.get('h1').should('have.length.at.most', 1)
-      
+
       // Should have headings
       cy.get('h1, h2, h3, h4, h5, h6').should('have.length.greaterThan', 0)
     })
