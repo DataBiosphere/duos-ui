@@ -80,8 +80,19 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
   const [tableSize, setTableSize] = useState(50)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [visibleRows, setVisibleRows] = useState<CellData[][]>([])
-  const headers = useMemo(() => tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets), [tab, filteredData, selected, onSelect, exportableDatasets])
-  const rows = useMemo(() => tab.makeRows(filteredData, headers), [tab, filteredData, headers])
+
+  // Memoize headers to prevent recreation on every render
+  const headers = useMemo(
+    () => tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets),
+    [tab, filteredData, selected, onSelect, exportableDatasets],
+  )
+
+  // Memoize rows to prevent recreation on every render
+  const rows = useMemo(
+    () => tab.makeRows(filteredData, headers),
+    [tab, filteredData, headers],
+  )
+
   const [pageCount, setPageCount] = useState<number>(rows.length / tableSize)
 
   const handleSort = (newSort: Sort) => {
@@ -116,7 +127,8 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
       setVisibleList: setVisibleRows,
       sort: sort,
     })
-  }, [tableSize, pageCount, currentPage, rows, sort])
+  },
+  [tableSize, pageCount, currentPage, setPageCount, setCurrentPage, rows, sort])
 
   return (
     <>
