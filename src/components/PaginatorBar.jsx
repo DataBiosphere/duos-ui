@@ -64,7 +64,7 @@ export const PaginatorBar = (props) => {
               num => (
                 <PaginatorButton
                   key={num}
-                  props={{ className: `pagination-btn ${currentPage === num ? 'active' : ''}`, ariaCurrent: currentPage === num ? 'page' : undefined, ariaLabel: `Page ${num}${currentPage === num ? ', current page' : ''}`, ...getPageItemProps({ pageValue: num, onPageChange: props.onPageChange }) }}
+                  props={{ className: `pagination-btn ${currentPage === num ? 'active' : ''}`, ...getPageItemProps({ pageValue: num, onPageChange: props.onPageChange }) }}
                   label={num}
                 />
               ),
@@ -80,7 +80,7 @@ export const PaginatorBar = (props) => {
             />
           </div>
           <div className="select-wrapper">
-            <select className="select" value={limit} onChange={changeLimit} aria-label="Items per page">
+            <select className="select" value={limit} onChange={changeLimit}>
               {[5, 10, 20, 50, 100].map(optionValue => (
                 <option key={optionValue} value={optionValue}>{optionValue}</option>
               ))}
