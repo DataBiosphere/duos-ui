@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { hasSOAcceptedDAAs } from 'src/libs/acknowledgements'
+import { AcknowledgementService } from 'src/libs/acknowledgements'
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Outlet } from 'react-router-dom'
@@ -14,7 +14,7 @@ const SOAcknowledged = () => {
       try {
         setIsLoading(true)
         // Check if SO has accepted the required DAA acknowledgments
-        const accepted = await hasSOAcceptedDAAs()
+        const accepted = await AcknowledgementService.hasSOAcceptedDAAs()
         setHasAccepted(accepted)
         setIsLoading(false)
       }
