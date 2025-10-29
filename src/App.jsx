@@ -14,16 +14,18 @@ import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
 
+function GAListener() {
+  const location = useLocation()
+  ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search })
+  return null
+}
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [env, setEnv] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
-
-  const trackPageView = (location) => {
-    ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search })
-  }
 
   useEffect(() => {
     Modal.setAppElement(document.getElementById('modal-root'))
@@ -39,19 +41,14 @@ function App() {
   })
 
   useEffect(() => {
-    const initializeReactGA = async (location) => {
+    const initializeReactGA = async () => {
       const gaId = await Config.getGAId()
       ReactGA.initialize(gaId, {
         titleCase: false,
       })
-      // call trackPageView to register initial page load
-      trackPageView(location)
-      // pass trackPageView as callback function for url change listener
-      // TODO: Look into fixing this
-      // location.listen(trackPageView)
     }
-    initializeReactGA(location)
-  }, [location])
+    initializeReactGA()
+  }, [])
 
   useEffect(() => {
     const stackdriverStart = async () => {
@@ -116,6 +113,7 @@ function App() {
     <div className="body">
       <div className="wrap">
         <div className="main">
+          <GAListener />
           <DuosHeader />
           {isLoading && <div style={loadingSyle}><Spinner /></div>}
           {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
