@@ -17,6 +17,7 @@ import {
   MasterChangeHandler,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
+import { DataTypes } from 'src/components/forms/DataTypes'
 
 export interface GeneralStudyInformationProps {
   formData: Study
@@ -66,18 +67,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         isCreatable={true}
         isMulti={true}
         optionsAreString={true}
-        selectOptions={[
-          // The top properties were extracted from the prod database and deduplicated using the query:
-          // SELECT property_value, COUNT(*) FROM dataset_property WHERE property_key = 2 GROUP BY property_value ORDER BY COUNT(*) DESC;
-          'CITE-seq',
-          'Hybrid Capture',
-          'RNA-Seq',
-          'scRNA-Seq',
-          'Spatial Transcriptomics',
-          'snRNA-Seq',
-          'Whole Genome (WGS)',
-          'Whole Exome (WES)',
-        ]}
+        selectOptions={DataTypes.VALUES.map(entry => (`${entry.name}` + (entry.abbreviation ? ` (${entry.abbreviation})` : '')))}
         defaultValue={formData?.dataTypes}
         onChange={onChange}
       />
