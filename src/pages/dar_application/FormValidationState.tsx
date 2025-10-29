@@ -64,6 +64,7 @@ export interface DarErrors {
   aiModels?: ValidationError
   clinicalTrials?: ValidationError
   fundingResources?: ValidationError
+  workspaces?: ValidationError
 }
 
 export interface RusErrors {
