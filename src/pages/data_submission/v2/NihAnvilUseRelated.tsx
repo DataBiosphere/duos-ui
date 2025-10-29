@@ -6,8 +6,8 @@ import {
 } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import {
-  generateFormDateField,
-  generateFormTextField,
+  generateStudyPropertyFormDateField,
+  generateStudyPropertyFormTextField,
   getStudyPropertyValueByKey,
   MasterChangeHandler,
   setStudyPropertyByKey,
@@ -40,10 +40,10 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
       />
       {getStudyPropertyValueByKey(formData, 'nihAnvilUse') === NihAnvilUse.YES_NHGRI_YES_PHS_ID && (
         <>
-          {generateFormTextField(formData, onChange, new DbGaPPhsID(), [FormValidators.REQUIRED])}
-          {generateFormTextField(formData, onChange, new DbGaPStudyRegistrationName())}
-          {generateFormDateField(formData, onChange, new EmbargoReleaseDate(), [FormValidators.DATE])}
-          {generateFormTextField(formData, onChange, new SequencingCenter())}
+          {generateStudyPropertyFormTextField(formData, onChange, new DbGaPPhsID(), [FormValidators.REQUIRED])}
+          {generateStudyPropertyFormTextField(formData, onChange, new DbGaPStudyRegistrationName())}
+          {generateStudyPropertyFormDateField(formData, onChange, new EmbargoReleaseDate(), [FormValidators.DATE])}
+          {generateStudyPropertyFormTextField(formData, onChange, new SequencingCenter())}
         </>
       )}
     </div>

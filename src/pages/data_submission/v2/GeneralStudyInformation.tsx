@@ -2,7 +2,7 @@ import React from 'react'
 import { FormFieldTypes, FormField, FormValidators } from 'src/components/forms/forms'
 import {
   Study,
-  StudyType,
+  StudyTypeProperty,
   PhenotypeIndication,
   Species,
   DataCustodianEmail,
@@ -10,8 +10,9 @@ import {
   AlternativeDataSharingPlanTargetPublicReleaseDate,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
-  generateFormDateField,
-  generateFormTextField,
+  generateStudyInputFormTextField,
+  generateStudyPropertyFormDateField,
+  generateStudyPropertyFormTextField,
   getStudyPropertyValueByKey,
   MasterChangeHandler,
   setStudyPropertyByKey,
@@ -31,29 +32,19 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
   return (
     <div className="data-submitter-section">
       <h2>Study Information</h2>
+      {generateStudyInputFormTextField(onChange, 'studyName', formData?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
       <FormField
-        id="studyName"
-        title="Study Name"
-        validators={[FormValidators.REQUIRED]}
-        onChange={onChange}
-        defaultValue={formData?.name}
-      />
-      <FormField
-        id="studyType"
-        title="Study Type"
+        id={StudyTypeProperty.key}
+        title={StudyTypeProperty.fieldTitle}
+        placeholder={StudyTypeProperty.fieldPlaceholderText}
         type={FormFieldTypes.SELECT}
-        selectOptions={[
-          'Observational', 'Interventional', 'Descriptive',
-          'Analytical', 'Prospective', 'Retrospective',
-          'Case report', 'Case series', 'Cross-sectional',
-          'Cohort study',
-        ]}
+        selectOptions={StudyTypeProperty.STUDY_TYPE_OPTIONS}
         isCreatable={true}
         validators={[FormValidators.REQUIRED]}
         selectConfig={{}}
         defaultValue={getStudyPropertyValueByKey(formData, 'studyType')}
         onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new StudyType(input.value as string))
+          setStudyPropertyByKey(formData, onChange, input, new StudyTypeProperty(input.value as string))
         }}
       />
       <FormField
@@ -90,17 +81,11 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         defaultValue={formData?.dataTypes}
         onChange={onChange}
       />
-      {generateFormTextField(formData, onChange, new PhenotypeIndication())}
-      {generateFormTextField(formData, onChange, new Species())}
+      {generateStudyPropertyFormTextField(formData, onChange, new PhenotypeIndication())}
+      {generateStudyPropertyFormTextField(formData, onChange, new Species())}
+      {generateStudyInputFormTextField(onChange, 'piName', formData?.piName, 'Principal Investigator Name', 'Enter the Principal Investigator\'s name', [FormValidators.REQUIRED])}
       <FormField
-        id="piName"
-        title="Principal Investigator Name"
-        defaultValue={formData?.piName}
-        validators={[FormValidators.REQUIRED]}
-        onChange={onChange}
-      />
-      <FormField
-        id="dataCustodianEmail"
+        id={DataCustodianEmail.key}
         title="Data Custodian Email"
         description="Insert the email for any individual with the authority to add/remove users access to this study&apos;s datasets."
         type={FormFieldTypes.SELECT}
@@ -122,8 +107,8 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         }}
       />
       <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        {generateFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
-        {generateFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
+        {generateStudyPropertyFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
+        {generateStudyPropertyFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
       </div>
       <FormField
         id="publicVisibility"

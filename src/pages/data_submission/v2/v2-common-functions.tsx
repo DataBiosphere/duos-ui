@@ -3,13 +3,28 @@ import {
   Study,
   StudyProperty,
   StringStudyProperty,
-  DateStudyProperty,
+  DateStudyProperty, MultiCenterStudy, BooleanStudyProperty,
 } from 'src/pages/data_submission/v2/v2-models'
-import { FormField } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 
 export type MasterChangeHandler = ({ key, value, isValid }: { key: string, value: unknown, isValid: boolean }) => void
 
-export const generateFormTextField = (formData: Study, onChange: MasterChangeHandler, studyProperty: StringStudyProperty, validators: Array<unknown> = []) => {
+export const generateStudyPropertyYesNoField = (formData: Study, onChange: MasterChangeHandler, studyProperty: BooleanStudyProperty) => {
+  return (
+    <FormField
+      id={studyProperty.key}
+      title="Is this a multi-center study?"
+      type={FormFieldTypes.YESNORADIOGROUP}
+      defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
+      onChange={({ _key, value }: { _key: string, value: boolean }) => {
+        studyProperty.value = value
+        setStudyPropertyByKey(formData, onChange, { isValid: true }, studyProperty)
+      }}
+    />
+  )
+}
+
+export const generateStudyPropertyFormTextField = (formData: Study, onChange: MasterChangeHandler, studyProperty: StringStudyProperty, validators: Array<unknown> = []) => {
   return (
     <FormField
       id={studyProperty.key}
@@ -25,7 +40,22 @@ export const generateFormTextField = (formData: Study, onChange: MasterChangeHan
   )
 }
 
-export const generateFormDateField = (formData: Study, onChange: MasterChangeHandler, studyProperty: DateStudyProperty, validators: Array<unknown> = [], style: unknown = {}) => {
+export const generateStudyInputFormTextField = (onChange: MasterChangeHandler, id: string, initialValue: string | undefined, title: string, placeholder: string, validators: Array<unknown> = []) => {
+  return (
+    <FormField
+      id={id}
+      title={title}
+      placeholder={placeholder}
+      validators={validators}
+      defaultValue={initialValue}
+      onChange={(input: { key: string, value: string, isValid: boolean }) => {
+        onChange(input)
+      }}
+    />
+  )
+}
+
+export const generateStudyPropertyFormDateField = (formData: Study, onChange: MasterChangeHandler, studyProperty: DateStudyProperty, validators: Array<unknown> = [], style: unknown = {}) => {
   return (
     <FormField
       id={studyProperty.key}

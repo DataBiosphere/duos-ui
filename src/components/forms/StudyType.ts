@@ -23,4 +23,6 @@ export class StudyType {
     StudyType.CRS,
     StudyType.COS,
   ]
+
+  static readonly NAME_VALUES: string[] = StudyType.VALUES.map(val => val.name)
 }

@@ -14,7 +14,7 @@ import {
   Study,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
-  generateFormTextField,
+  generateStudyPropertyFormTextField, generateStudyPropertyYesNoField,
   getStudyPropertyValueByKey,
   MasterChangeHandler, setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
@@ -47,14 +47,14 @@ export const NIHAdministrativeInformation = (props: NIHAdministrativeInformation
         <InstitutionPicker
           initialInstitution={getStudyPropertyValueByKey(formData, PiInstitution.key) as number}
           fieldId={PiInstitution.key}
-          fieldTitle="Principal Investigator Institution"
+          fieldTitle={PiInstitution.fieldTitle}
           onChange={function ({ value, isValid }: { value: unknown, isValid: boolean }): void {
             const myVal = value as number
             setStudyPropertyByKey(formData, onChange, { isValid: isValid }, new PiInstitution(myVal))
           }}
           isRequired={true}
         />
-        {generateFormTextField(formData, onChange, new NihGrantContractNumber(), [FormValidators.REQUIRED])}
+        {generateStudyPropertyFormTextField(formData, onChange, new NihGrantContractNumber(), [FormValidators.REQUIRED])}
         <SelectOptionsInterfacePicker
           fieldId={NihICsSupportingStudy.key}
           initialValue={getStudyPropertyValueByKey(formData, NihICsSupportingStudy.key) as string[] ?? []}
@@ -75,11 +75,11 @@ export const NIHAdministrativeInformation = (props: NIHAdministrativeInformation
             }
           }}
           optionList={NIHInstitutesAndCenters.VALUES}
-          fieldTitle="NIH ICs Supporting the Study"
-          fieldPlaceholder="Institute/Center Name"
+          fieldTitle={NihICsSupportingStudy.fieldTitle}
+          fieldPlaceholder={NihICsSupportingStudy.fieldPlaceholderText}
           isMulti={true}
         />
-        {generateFormTextField(formData, onChange, new NihProgramOfficerName(), [FormValidators.REQUIRED])}
+        {generateStudyPropertyFormTextField(formData, onChange, new NihProgramOfficerName(), [FormValidators.REQUIRED])}
         <SelectOptionsInterfacePicker
           fieldId={NihInstitutionCenterSubmission.key}
           initialValue={getStudyPropertyValueByKey(formData, NihInstitutionCenterSubmission.key) as string ?? null}
@@ -88,19 +88,11 @@ export const NIHAdministrativeInformation = (props: NIHAdministrativeInformation
             setStudyPropertyByKey(formData, onChange, { isValid: isValid }, new NihInstitutionCenterSubmission(myVal.key))
           }}
           optionList={NIHInstitutesAndCenters.VALUES}
-          fieldTitle="NIH Institute/Center for Submission"
-          fieldPlaceholder="Institute/Center Name"
+          fieldTitle={NihInstitutionCenterSubmission.fieldTitle}
+          fieldPlaceholder={NihInstitutionCenterSubmission.fieldPlaceholderText}
         />
-        {generateFormTextField(formData, onChange, new NihGenomicProgramAdministratorName())}
-        <FormField
-          id={MultiCenterStudy.key}
-          title="Is this a multi-center study?"
-          type={FormFieldTypes.YESNORADIOGROUP}
-          defaultValue={getStudyPropertyValueByKey(formData, MultiCenterStudy.key)}
-          onChange={({ _key, value }: { _key: string, value: boolean }) => {
-            setStudyPropertyByKey(formData, onChange, { isValid: true }, new MultiCenterStudy(value))
-          }}
-        />
+        {generateStudyPropertyFormTextField(formData, onChange, new NihGenomicProgramAdministratorName())}
+        {generateStudyPropertyYesNoField(formData, onChange, new MultiCenterStudy())}
         {getStudyPropertyValueByKey(formData, MultiCenterStudy.key) === true && (
           <FormField
             id={CollaboratingSites.key}
@@ -121,21 +113,8 @@ export const NIHAdministrativeInformation = (props: NIHAdministrativeInformation
             onChange={(_key: string, value: string[], isValid: boolean) => setStudyPropertyByKey(formData, onChange, { isValid: isValid }, new CollaboratingSites(value))}
           />
         )}
-        <FormField
-          id={ControlledAccessRequiredForGenomicSummaryResultsGSR.key}
-          title="Is controlled access required for genomic summary results (GSR)?"
-          defaultValue={getStudyPropertyValueByKey(formData, ControlledAccessRequiredForGenomicSummaryResultsGSR.key)}
-          type={FormFieldTypes.YESNORADIOGROUP}
-          onChange={({ _key, value }: { _key: string, value: boolean }) => {
-            setStudyPropertyByKey(formData, onChange, { isValid: true }, new ControlledAccessRequiredForGenomicSummaryResultsGSR(value))
-            onChange({
-              key: ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
-              value: value ? getStudyPropertyValueByKey(formData, ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key) : undefined,
-              isValid: true,
-            })
-          }}
-        />
-        {getStudyPropertyValueByKey(formData, ControlledAccessRequiredForGenomicSummaryResultsGSR.key) === true && generateFormTextField(formData, onChange, new ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation())}
+        {generateStudyPropertyYesNoField(formData, onChange, new ControlledAccessRequiredForGenomicSummaryResultsGSR())}
+        {getStudyPropertyValueByKey(formData, ControlledAccessRequiredForGenomicSummaryResultsGSR.key) === true && generateStudyPropertyFormTextField(formData, onChange, new ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation())}
       </div>
     )}
     </>
