@@ -61,6 +61,7 @@ export interface DarErrors {
   closeoutProjectSuperseded?: ValidationError
   closeoutOther?: ValidationError
   closeoutOtherText?: ValidationError
+  aiModels?: ValidationError
   clinicalTrials?: ValidationError
   fundingResources?: ValidationError
 }
