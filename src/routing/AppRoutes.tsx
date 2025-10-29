@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router'
+import { Route, Routes } from 'react-router'
 import Home from 'src/pages/Home'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import Authenticated from 'src/routing/Authenticated'
@@ -51,6 +51,7 @@ import SigningOfficialLibraryCards from 'src/pages/signing_official_console/Sign
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
+import Translator from 'src/pages/Translator'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -90,6 +91,9 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/dar_application_review/:collectionId" element={<DataAccessRequestApplication existingDarsReadOnlyMode={true} draftDar={false} isProgressReportApplication={false} />} />
           <Route path="/progress_report_application/:collectionId" element={<DataAccessRequestApplication existingDarsReadOnlyMode={true} draftDar={false} isProgressReportApplication={true} />} />
           <Route path="/dar_application/:dataRequestId" element={<DataAccessRequestApplication draftDar={true} isProgressReportApplication={false} />} />
+          <Route element={<EnvRoute env={envGroups.NON_PROD} />}>
+            <Route path="/translate" element={<Translator />} />
+          </Route>
           {/*  NOTE: Previous support for this path is no longer allowed as users cannot select datasets from this form */}
           <Route path="/dar_application" element={<NotFound />} />
         </Route>
