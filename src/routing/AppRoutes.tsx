@@ -52,6 +52,7 @@ import SigningOfficialDarRequests from 'src/pages/signing_official_console/Signi
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
 import Translator from 'src/pages/Translator'
+import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -100,6 +101,9 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
           <Route path="/data_submission_form" element={<DataSubmissionForm />} />
+          <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
+            <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+          </Route>
           <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
@@ -128,10 +132,13 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/dac_datasets" element={<DACDatasets />} />
         <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
         <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
-        <Route path="/dataset_submissions" element={<DatasetSubmissions />}></Route>
-        <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />}></Route>
-        <Route path="/data_submission_form" element={<DataSubmissionForm />}></Route>
-        <Route path="/study_update/:studyId" element={<StudyUpdateForm />}></Route>
+        <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
+        <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
+        <Route path="/data_submission_form" element={<DataSubmissionForm />} />
+        <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
+          <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+        </Route>
+        <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         {/* NOTE: Previous support for Chairperson adding DACs should not have been allowed */}
         <Route path="/manage_dac" element={<ManageDac />} />
         <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
@@ -158,6 +165,9 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
         <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         <Route path="/data_submission_form" element={<DataSubmissionForm />} />
+        <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
+          <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+        </Route>
         <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
         <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
