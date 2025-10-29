@@ -214,18 +214,18 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('.accordion-step-container').should('exist')
   })
 
-  it('defaults intellectualPropertyYesNo to false when dar.intellectualProperties is undefined or empty', () => {
+  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is undefined or empty', () => {
     // Test with undefined intellectualProperties
     const darWithoutIntellectualProperty = {}
 
     mountComponent(darWithoutIntellectualProperty, true)
 
-    // Check that the intellectual property "No" radio button is checked (false state)
-    cy.get('#intellectualPropertyYesNo_no').should('be.checked')
-    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
+    // Check that the intellectualProperties "No" radio button is checked (false state)
+    cy.get('#intellectualPropertiesYesNo_no').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_yes').should('not.be.checked')
   })
 
-  it('defaults intellectualPropertyYesNo to false when dar.intellectualProperties is empty array', () => {
+  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is empty array', () => {
     // Test with empty intellectualProperties array
     const darWithEmptyIntellectualProperty = {
       intellectualProperties: [],
@@ -233,12 +233,12 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     mountComponent(darWithEmptyIntellectualProperty, true)
 
-    // Check that the intellectual property "No" radio button is checked (false state)
-    cy.get('#intellectualPropertyYesNo_no').should('be.checked')
-    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
+    // Check that the intellectualProperties "No" radio button is checked (false state)
+    cy.get('#intellectualPropertiesYesNo_no').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_yes').should('not.be.checked')
   })
 
-  it('sets intellectualPropertyYesNo to true when dar.intellectualProperties has items', () => {
+  it('sets intellectualPropertiesYesNo to true when dar.intellectualProperties has items', () => {
     // Test with intellectualProperties array containing items
     const darWithIntellectualProperty = {
       intellectualProperties: [{
@@ -270,9 +270,9 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     mountComponent(darWithIntellectualProperty, true)
 
-    // Check that the intellectual property "Yes" radio button is checked (true state)
-    cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
+    // Check that the intellectualProperties "Yes" radio button is checked (true state)
+    cy.get('#intellectualPropertiesYesNo_yes').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_no').should('not.be.checked')
 
     // Check that intellectual properties are actually displayed in the DOM
     cy.contains('IP 1').should('be.visible')
@@ -518,8 +518,8 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     mountComponent(darWithIntellectualProperty, true)
 
-    cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
+    cy.get('#intellectualPropertiesYesNo_yes').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_no').should('not.be.checked')
 
     // Check that IP is visible
     cy.contains('Test IP').should('be.visible')

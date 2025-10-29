@@ -157,15 +157,9 @@ describe('Summary Section - Component Tests', () => {
     cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertiesYesNo: false })
   })
 
-  it('shows intellectual property details form when "Yes" is selected', () => {
+  it('shows intellectualProperties list when "Yes" is selected', () => {
     mountComponent({ intellectualPropertiesYesNo: true })
-    cy.get('#intellectualPropertySummary').should('exist')
-
-    const testDetails = 'Details about intellectual property.'
-    cy.get('#intellectualPropertySummary').type(testDetails)
-    cy.get('#intellectualPropertySummary').should('have.value', testDetails)
-
-    cy.get('@formChangeStub').should('have.been.called')
+    cy.contains('Add Intellectual Property').should('exist')
   })
 
   it('handles publications radio buttons', () => {
