@@ -551,7 +551,7 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   darCode: string
   validRestriction: boolean
   progressReportSummary: string
-  intellectualPropertySummary: string
+  intellectualProperties?: Array<IntellectualProperty>
   publications?: Array<Publication>
   presentations?: Array<Presentation>
   dmi?: DataManagementIncident
