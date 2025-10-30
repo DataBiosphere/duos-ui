@@ -246,7 +246,8 @@ export const NavigationTabsComponent = (props) => {
                       key={`${tab.link}_${tabIndex}`}
                       label={tab.label}
                       style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
-                      to={{ pathname: tab.link, state: { selectedMenuTab: selectedMenuTab } }}
+                      to={{ pathname: tab.link }}
+                      state={{ selectedMenuTab: selectedMenuTab }}
                       component={Link}
                     />
                   )
