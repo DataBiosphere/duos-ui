@@ -1,5 +1,6 @@
 import { Dataset, FileStorageObject } from 'src/types/model'
 import { StudyType } from 'src/components/forms/StudyType'
+import React from 'react'
 
 export type StudyPropertyType = 'Boolean' | 'String' | 'Number' | 'Date' | 'Json'
 
@@ -188,10 +189,22 @@ export class MultiCenterStudy extends BooleanStudyProperty {
   }
 }
 
-export class AlternativeDataSharingPlan extends StudyProperty {
+export class AlternativeDataSharingPlan extends BooleanStudyProperty {
   static readonly key = 'alternativeDataSharingPlan'
-  constructor(value: boolean, studyId?: number, studyPropertyId?: number) {
-    super(AlternativeDataSharingPlan.key, 'Boolean' as StudyPropertyType, value, studyId, studyPropertyId)
+  static readonly fieldTitle = (
+    <span>
+      Are you requesting an Alternative Data Sharing Plan
+      {' '}
+      <a href="https://www.genome.gov/about-nhgri/Policies-Guidance/Data-Sharing-Policies-and-Expectations#genomic-data-sharing">
+        (info)
+      </a>
+      {' '}
+      for samples that cannot be shared through a public repository or database?
+    </span>
+  )
+
+  constructor(value?: boolean, studyId?: number, studyPropertyId?: number) {
+    super(AlternativeDataSharingPlan.key, AlternativeDataSharingPlan.key, value, studyId, studyPropertyId)
   }
 }
 

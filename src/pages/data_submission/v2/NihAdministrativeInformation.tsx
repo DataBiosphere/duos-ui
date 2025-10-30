@@ -26,12 +26,12 @@ import {
 import { InstitutionPicker } from 'src/components/forms/InstitutionPicker'
 import { NIHInstitutesAndCenters } from 'src/components/forms/NIHInstitutesAndCenters'
 
-export interface NIHAdministrativeInformationProps {
+export interface NihAdministrativeInformationProps {
   formData: Study
   onChange: MasterChangeHandler
 }
 
-export const NIHAdministrativeInformation = (props: NIHAdministrativeInformationProps) => {
+export const NihAdministrativeInformation = (props: NihAdministrativeInformationProps) => {
   const { onChange, formData } = props
   const [isRequired, setIsRequired] = useState(false)
 
