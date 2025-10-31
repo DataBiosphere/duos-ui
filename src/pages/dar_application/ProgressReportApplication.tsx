@@ -130,6 +130,19 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
   const eRACommonsDestination = 'progress_report_application/' + dar.collectionId
 
+  const isFormEmpty = () => {
+    // Run validation without showing errors
+    const validation = validatePRFormData(
+      nihValid,
+      formState,
+      formState.selectedDatasets,
+      dataUseTranslations,
+    )
+
+    // If there are validation errors, it means user hasn't filled required fields
+    return validationFailed(validation)
+  }
+
   const getValidation = (newState: FormState) => {
     if (!readOnlyMode && showValidation) {
       return validatePRFormData(
@@ -314,7 +327,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             onCancel={() => {
               Navigation.console(Storage.getCurrentUser(), navigate)
             }}
-            disabled={validationFailed(formValidation)}
+            disabled={isFormEmpty()}
             uploadedIrbDocument={uploadedIrbDocument}
             parentDar={dar}
           />
