@@ -2,16 +2,13 @@ import { DAR } from 'src/libs/ajax/DAR'
 import { Notifications } from 'src/libs/utils'
 import ReactMarkdown from 'react-markdown'
 import * as React from 'react'
+import { NavigateFunction } from 'react-router-dom'
 
-interface History {
-  push: (path: string) => void
-}
-
-export const applyForAccess = async (selected: number[], history: History) => {
+export const applyForAccess = async (selected: number[], navigate: NavigateFunction) => {
   try {
     const draftResponse = await DAR.postDarDraft({ datasetId: selected })
     if (draftResponse.referenceId) {
-      history.push(`/dar_application/${draftResponse.referenceId}`)
+      navigate(`/dar_application/${draftResponse.referenceId}`)
     }
     else if (draftResponse.code && draftResponse.message) {
       Notifications.showError(

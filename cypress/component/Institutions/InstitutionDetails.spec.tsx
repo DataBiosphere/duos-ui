@@ -4,7 +4,7 @@ import { mount } from 'cypress/react'
 import { InstitutionDetails } from 'src/components/institution_table/InstitutionDetails'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { Notifications } from 'src/libs/utils'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, BrowserRouter } from 'react-router-dom'
 import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode'
 
 describe('Institution Details Tests', () => {
@@ -33,16 +33,24 @@ describe('Institution Details Tests', () => {
     cy.viewport(1000, 800)
   })
 
+  const mountComponentInEditMode = (id: number) => {
+    mount(
+      <MemoryRouter initialEntries={[`/admin_manage_institutions/institutions/${id}`]}>
+        <Routes>
+          <Route path="admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+  }
+
   it('should show a loading spinner', () => {
-    mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 123 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
+    mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.editExisting} /></BrowserRouter>)
     cy.contains('Loading').should('be.visible')
   })
 
   it('should render institution details', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
-
-    mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 123 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
-
+    mountComponentInEditMode(123)
     cy.contains('Back to institutions').should('be.visible')
     cy.contains('Institution Name').should('be.visible')
     cy.get('input[value="Broad Institute"]').should('exist')
@@ -53,9 +61,7 @@ describe('Institution Details Tests', () => {
 
   it('should enter edit mode when Edit button is clicked', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
-
-    mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 123 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
-
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
 
     cy.get('input[value="Broad Institute"]').should('not.be.disabled')
@@ -66,9 +72,7 @@ describe('Institution Details Tests', () => {
 
   it('should cancel editing and revert changes', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
-
-    mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 123 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
-
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
     cy.get('input[value="Broad Institute"]').type(' of MIT & Harvard')
     cy.contains('button', 'Cancel').click()
@@ -81,14 +85,12 @@ describe('Institution Details Tests', () => {
   it('should save changes when Save button is clicked', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
     cy.stub(InstitutionAPI, 'patchInstitution').returns(Promise.resolve(mockInstitution))
-
-    mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 123 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
-
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
     cy.get('input[value="Broad Institute"]').type(' of MIT & Harvard')
     cy.contains('button', 'Save').click()
 
-    cy.wrap(InstitutionAPI.patchInstitution).should('have.been.calledWith', 123, {
+    cy.wrap(InstitutionAPI.patchInstitution).should('have.been.calledWith', '123', {
       name: 'Broad Institute of MIT & Harvard',
       domains: mockInstitution.domains,
     })
@@ -104,9 +106,7 @@ describe('Institution Details Tests', () => {
 
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([mockInstitution]))
     cy.stub(InstitutionAPI, 'patchInstitution').rejects(conflictError)
-
-    mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 123 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
-
+    mountComponentInEditMode(123)
     cy.get('button').contains('Edit').click()
     cy.contains('button', 'Save').click()
 
@@ -126,7 +126,7 @@ describe('Institution Details Tests', () => {
       return Promise.resolve(newInstitution)
     })
 
-    mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+    mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
     cy.contains('Institution Name').should('be.visible')
 
@@ -155,7 +155,7 @@ describe('Institution Details Tests', () => {
   })
 
   it('should disable the create/save button if the institution name is empty', () => {
-    mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+    mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
     // Create button should be disabled to start
     cy.contains('button', 'Create').should('be.disabled')
@@ -173,7 +173,7 @@ describe('Institution Details Tests', () => {
 
     it('should show error when institution name is empty', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       cy.get('input[placeholder="Institution Name"]').type('Test').clear()
       cy.contains('Institution name is required').should('be.visible')
@@ -182,7 +182,7 @@ describe('Institution Details Tests', () => {
 
     it('should show error when institution name already exists (case insensitive)', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       cy.get('input[placeholder="Institution Name"]').type('broad institute')
       cy.contains('An institution with this name already exists').should('be.visible')
@@ -191,7 +191,7 @@ describe('Institution Details Tests', () => {
 
     it('should show error when institution name already exists (exact match)', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       cy.get('input[placeholder="Institution Name"]').type('MIT')
       cy.contains('An institution with this name already exists').should('be.visible')
@@ -200,7 +200,7 @@ describe('Institution Details Tests', () => {
 
     it('should allow unique institution names', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       cy.get('input[placeholder="Institution Name"]').type('Stanford University')
       cy.contains('An institution with this name already exists').should('not.exist')
@@ -209,7 +209,7 @@ describe('Institution Details Tests', () => {
 
     it('should allow editing current institution name (same name)', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 1 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
+      mountComponentInEditMode(1)
 
       cy.get('button').contains('Edit').click()
 
@@ -220,7 +220,7 @@ describe('Institution Details Tests', () => {
 
     it('should prevent editing to another existing institution name', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 1 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
+      mountComponentInEditMode(1)
 
       cy.get('button').contains('Edit').click()
       cy.get('input[value="Broad Institute"]').clear().type('MIT')
@@ -231,7 +231,7 @@ describe('Institution Details Tests', () => {
 
     it('should clear validation errors when canceling edit', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails match={{ params: { institutionId: 1 } }} formMode={FORM_MODES.editExisting} /></BrowserRouter>)
+      mountComponentInEditMode(1)
 
       cy.get('button').contains('Edit').click()
       cy.get('input[value="Broad Institute"]').clear().type('MIT')
@@ -243,7 +243,7 @@ describe('Institution Details Tests', () => {
 
     it('should validate name on every character input', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       // Start typing "MIT"
       cy.get('input[placeholder="Institution Name"]').type('M')
@@ -258,7 +258,7 @@ describe('Institution Details Tests', () => {
 
     it('should reject institution names with straight double quotes', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       cy.get('input[placeholder="Institution Name"]').type('University "Research" Center')
       cy.contains('Institution name cannot contain double quotation marks (")').should('be.visible')
@@ -267,7 +267,7 @@ describe('Institution Details Tests', () => {
 
     it('should reject institution names with double quotes', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       cy.get('input[placeholder="Institution Name"]').type('University "Research" Center')
       cy.contains('Institution name cannot contain double quotation marks (")').should('be.visible')
@@ -276,7 +276,7 @@ describe('Institution Details Tests', () => {
 
     it('should allow single quotes in institution names', () => {
       cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+      mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
       cy.get('input[placeholder="Institution Name"]').type('St. Mary\'s College')
       cy.contains('Institution name cannot contain double quotation marks (")').should('not.exist')
@@ -286,7 +286,7 @@ describe('Institution Details Tests', () => {
     describe('Name Normalization', () => {
       it('should trim whitespace from institution names on blur', () => {
         cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
         // Type name with leading/trailing spaces
         cy.get('input[placeholder="Institution Name"]').type('   New University   ')
@@ -307,7 +307,7 @@ describe('Institution Details Tests', () => {
 
       it('should replace curly single quotes with straight quotes on blur', () => {
         cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
         // Type name with curly single quotes
         cy.get('input[placeholder="Institution Name"]').type('St. Mary’s College')
@@ -326,7 +326,7 @@ describe('Institution Details Tests', () => {
 
       it('should handle combined normalization (trim + single quote replacement) on blur', () => {
         cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
         // Type name with whitespace and curly single quotes (no double quotes since they're not allowed)
         cy.get('input[placeholder="Institution Name"]').type('   St. Mary’s College   ')
@@ -350,7 +350,7 @@ describe('Institution Details Tests', () => {
         ]
 
         cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(institutionsWithSpaces))
-        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
         // Type a name with extra spaces that will become a duplicate after trimming
         cy.get('input[placeholder="Institution Name"]').type('   Research University   ')
@@ -369,7 +369,7 @@ describe('Institution Details Tests', () => {
 
       it('should normalize empty/whitespace-only names correctly on blur', () => {
         cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(existingInstitutions))
-        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
         // Type only whitespace
         cy.get('input[placeholder="Institution Name"]').type('   ')
@@ -389,7 +389,7 @@ describe('Institution Details Tests', () => {
         ]
 
         cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(institutionsWithSimilarNames))
-        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
         // Start typing a name that will be a duplicate after normalization
         cy.get('input[placeholder="Institution Name"]').type('University Research')
@@ -408,7 +408,7 @@ describe('Institution Details Tests', () => {
       it('should notify user when institution name is normalized', () => {
         cy.stub(InstitutionAPI, 'list').returns(Promise.resolve([]))
         cy.stub(Notifications, 'showInformation').as('showNotification')
-        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} match={{ params: {} }} /></BrowserRouter>)
+        mount(<BrowserRouter><InstitutionDetails formMode={FORM_MODES.createNew} /></BrowserRouter>)
 
         // Test normalization with spaces that get trimmed
         cy.get('input[placeholder="Institution Name"]').type('  University of Test  ')

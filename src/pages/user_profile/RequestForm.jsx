@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { Support } from '../../libs/ajax/Support'
-import { Notifications } from '../../libs/utils'
-import { isNil } from 'lodash'
-import { FormField, FormFieldTypes } from '../../components/forms/forms'
+import { Support } from 'src/libs/ajax/Support'
+import { Notifications } from 'src/libs/utils'
+import { FormField, FormFieldTypes } from 'src/components/forms/forms'
+import { Link, useNavigate } from 'react-router-dom'
+import { Storage } from 'src/libs/storage'
 
-export default function RequestForm(props) {
-  const profile = props.location.state?.data || undefined
+export default function RequestForm() {
+  const navigate = useNavigate()
   const headerStyle = {
     fontWeight: 'bold',
     color: '#333F52',
@@ -41,11 +42,6 @@ export default function RequestForm(props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [supportRequests, setSupportRequests] = useState(supportRequestsCond)
 
-  const goToPrevPage = async (event) => {
-    event.preventDefault()
-    await props.history.push('/profile')
-  }
-
   const handleSupportRequestsChange = ({ key, value }) => {
     const newSupportRequests = Object.assign({}, supportRequests, { [key]: value })
     setSupportRequests(newSupportRequests)
@@ -53,11 +49,8 @@ export default function RequestForm(props) {
     setHasSupportRequests(hasAnyRequests)
   }
 
-  const submitForm = async (event) => {
-    event.preventDefault()
-    if (!isNil(profile)) {
-      await sendSupportRequests()
-    }
+  const submitForm = async () => {
+    await sendSupportRequests()
   }
 
   const processSupportRequests
@@ -79,7 +72,13 @@ export default function RequestForm(props) {
       if (!hasSupportRequests) {
         return
       }
-
+      const user = Storage.getCurrentUser()
+      const profile = {
+        profileName: user.displayName,
+        email: user.email,
+        emailPreference: user.emailPreference,
+        id: user.userId,
+      }
       const ticketInfo = {
         attachmentToken: [],
         type: 'task',
@@ -105,7 +104,7 @@ export default function RequestForm(props) {
           { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 },
         )
         setIsSubmitting(false)
-        await props.history.push('/profile')
+        navigate('/profile')
       }
       catch (error) {
         Notifications.showError({
@@ -170,16 +169,19 @@ export default function RequestForm(props) {
           onChange={handleSupportRequestsChange}
         />
       </div>
+      <Link to="/profile">
+        <button
+          type="button"
+          id="btn_save"
+          className="f-left btn-primary btn-back"
+          style={{ marginTop: '50px' }}
+          data-cy="backButton"
+        >
+          Back
+        </button>
+      </Link>
       <button
-        id="btn_save"
-        onClick={goToPrevPage}
-        className="f-left btn-primary btn-back"
-        style={{ marginTop: '50px' }}
-        data-cy="backButton"
-      >
-        Back
-      </button>
-      <button
+        type="button"
         id="btn_save"
         onClick={submitForm}
         className="f-right btn-primary common-background"

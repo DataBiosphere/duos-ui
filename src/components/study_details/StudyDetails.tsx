@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetTerm, StudyTerm } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { makeDatasetTableHeader, makeDatasetTableRows } from 'src/components/data_search/DatasetSearchTableConstants'
 import SimpleTable from 'src/components/SimpleTable'
 import { Styles } from 'src/libs/theme'
@@ -11,7 +11,6 @@ import { chain, Dictionary, intersection, isEmpty } from 'lodash'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { applyForAccess } from 'src/utils/accessUtils'
-import { History } from 'history'
 
 const styles = {
   row: {
@@ -48,18 +47,10 @@ const styles = {
   containerOverride: {},
 }
 
-export interface StudyDetailsProps {
-  history: History
-  match: {
-    params: {
-      studyId: number
-    }
-  }
-}
-
-export const StudyDetails = (props: StudyDetailsProps) => {
-  const { history } = props
-  const { studyId } = props.match.params
+export const StudyDetails = () => {
+  const params = useParams<{ studyId: string }>()
+  const studyId = params.studyId
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [datasets, setDatasets] = useState<DatasetTerm[]>([])
   const [exportableDatasets, setExportableDatasets] = useState<Dictionary<SnapshotSummaryModel[]>>({})
@@ -203,7 +194,7 @@ export const StudyDetails = (props: StudyDetailsProps) => {
               />
             </div>
           </div>
-          {!isEmpty(selectedDatasets) && <DatasetSearchFooter selectedDatasets={selectedDatasets} datasets={datasets} onClick={() => applyForAccess(selectedDatasets, history)} />}
+          {!isEmpty(selectedDatasets) && <DatasetSearchFooter selectedDatasets={selectedDatasets} datasets={datasets} onClick={() => applyForAccess(selectedDatasets, navigate)} />}
         </div>
       )
     : <div>Loading</div>

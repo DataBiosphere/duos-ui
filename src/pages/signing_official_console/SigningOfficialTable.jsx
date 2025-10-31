@@ -369,7 +369,7 @@ export default function SigningOfficialTable(props) {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div style={{ ...Styles.LEFT_HEADER_SECTION, maxWidth: '60%' }}>
           <div style={{ ...Styles.HEADER_CONTAINER }}>
             <div style={{ ...Styles.SUB_HEADER,

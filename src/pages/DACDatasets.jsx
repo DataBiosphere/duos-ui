@@ -11,9 +11,10 @@ import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from '.
 import { consoleTypes } from '../components/dac_dataset_table/DACDatasetTableCellData'
 import style from './DACDatasets.module.css'
 import { Button } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 
-export default function DACDatasets(props) {
-  const { history } = props
+export default function DACDatasets() {
+  const navigate = useNavigate()
   const [datasets, setDatasets] = useState([])
   const [filteredList, setFilteredList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -113,7 +114,7 @@ export default function DACDatasets(props) {
       <div>
         <Button
           className={style['add-button']}
-          onClick={() => history.push('data_submission_form')}
+          onClick={() => navigate('data_submission_form')}
           variant="outlined"
         >
           <div style={{ verticalAlign: 'center', color: '#0948B7' }}>
@@ -142,7 +143,6 @@ export default function DACDatasets(props) {
         ]}
         isLoading={isLoading}
         consoleType={consoleTypes.CHAIR}
-        history={history}
       />
     </div>
   )
