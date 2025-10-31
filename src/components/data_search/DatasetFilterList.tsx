@@ -64,37 +64,46 @@ interface FilterItemRangeProps {
   max?: number
   minCategory: string
   maxCategory: string
+  minInputProps?: React.InputHTMLAttributes<HTMLInputElement>
+  maxInputProps?: React.InputHTMLAttributes<HTMLInputElement>
   filterHandler: (category: string, filter: string | number) => void
 }
 
 export const FilterItemRange = (props: FilterItemRangeProps) => {
-  const { allowableMin, allowableMax, min, max, minCategory, maxCategory, filterHandler } = props
-  const inputProps = { max: allowableMax, min: allowableMin }
+  const { allowableMin, allowableMax, min, max, minCategory, maxCategory, minInputProps, maxInputProps, filterHandler } = props
+  const baseInputProps = { max: allowableMax, min: allowableMin }
+  const minInputPropsComplete = { ...baseInputProps, ...minInputProps }
+  const maxInputPropsComplete = { ...baseInputProps, ...maxInputProps }
+
+  // Use custom ID if provided in inputProps, otherwise use default pattern
+  const minId = minInputProps?.id || (minCategory + '-range-input')
+  const maxId = maxInputProps?.id || (maxCategory + '-range-input')
+
   return (
     <Box key={minCategory + '-' + maxCategory} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <TextField
         type="number"
         value={min}
-        id={minCategory + '-range-input'}
+        id={minId}
         size="small"
         margin="dense"
         variant="outlined"
         helperText="minimum"
         FormHelperTextProps={{ style: { transform: 'scale(1.5)' } }}
-        inputProps={inputProps}
+        inputProps={minInputPropsComplete}
         onChange={event => filterHandler(minCategory, Number(event.target.value))}
       />
       <Box padding="0rem 1rem 1rem"> - </Box>
       <TextField
         type="number"
         value={max}
-        id={maxCategory + '-range-input'}
+        id={maxId}
         size="small"
         margin="dense"
         variant="outlined"
         helperText="maximum"
         FormHelperTextProps={{ style: { transform: 'scale(1.5)' } }}
-        inputProps={inputProps}
+        inputProps={maxInputPropsComplete}
         onChange={event => filterHandler(maxCategory, Number(event.target.value))}
       />
     </Box>
@@ -185,6 +194,8 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
         max={filters.participantCountMax}
         minCategory="participantCountMin"
         maxCategory="participantCountMax"
+        minInputProps={{ 'aria-label': 'Minimum participants' }}
+        maxInputProps={{ 'aria-label': 'Maximum participants' }}
         filterHandler={filterHandler}
       />
     </Box>

@@ -146,6 +146,8 @@ export default function UserProfile() {
         <FormField
           type={FormFieldTypes.TEXT}
           id="profileName"
+          title="Full Name"
+          hideTitle={true}
           defaultValue={name}
           onChange={updateRef}
           style={{ width: '90%', marginTop: '10px',
@@ -165,6 +167,8 @@ export default function UserProfile() {
       <FormField
         type={FormFieldTypes.TEXT}
         id="profileEmail"
+        title="Email Address"
+        hideTitle={true}
         defaultValue={user.email}
         disabled={true}
       />
@@ -181,6 +185,8 @@ export default function UserProfile() {
       <FormField
         type={FormFieldTypes.YESNORADIOGROUP}
         id="profileEmailEnabled"
+        title="Send me email notifications"
+        hideTitle={true}
         defaultValue={user.emailPreference}
         onChange={field => updateEmailPreference(field.value)}
       />
