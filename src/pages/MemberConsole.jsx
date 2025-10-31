@@ -1,23 +1,23 @@
-import React from 'react'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import SearchBar from '../components/SearchBar'
 import { User } from '../libs/ajax/User'
 import { Collections } from '../libs/ajax/Collections'
-import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils'
+import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from '../libs/utils'
 import { Styles } from '../libs/theme'
 import lockIcon from '../images/lock-icon.png'
 import { DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable'
 import { consoleTypes } from '../utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
+import { useNavigate } from 'react-router-dom'
 
-export default function MemberConsole(props) {
+export default function MemberConsole() {
+  const navigate = useNavigate()
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])
   const [relevantDatasets, setRelevantDatasets] = useState()
   const [isLoading, setIsLoading] = useState(true)
   const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
-  const { history } = props
 
   // Get responsive columns for member console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.MEMBER)
@@ -49,7 +49,7 @@ export default function MemberConsole(props) {
     init()
   }, [])
 
-  const goToVote = useCallback(collectionId => history.push(`/dar_collection/${collectionId}`), [history])
+  const goToVote = useCallback(collectionId => navigate(`/dar_collection/${collectionId}`), [navigate])
 
   return (
     <div style={Styles.PAGE}>

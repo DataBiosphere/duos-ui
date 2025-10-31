@@ -14,7 +14,7 @@ import {
 import { extractError } from 'src/utils/ErrorUtils'
 import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
-import { History } from 'history'
+import { useParams, useNavigate } from 'react-router-dom'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
@@ -22,15 +22,6 @@ enum AccessManagement {
   OPEN = 'open',
   CONTROLLED = 'controlled',
   EXTERNAL = 'external',
-}
-
-interface DatasetStatisticsProps {
-  readonly history: History
-  readonly match: {
-    params: {
-      datasetIdentifier: string
-    }
-  }
 }
 
 const LabeledField = ({ label, children }: { label: string, children: React.ReactNode }) => {
@@ -46,8 +37,10 @@ const LabeledField = ({ label, children }: { label: string, children: React.Reac
   )
 }
 
-export default function DatasetStatistics(props: DatasetStatisticsProps) {
-  const { history, match: { params: { datasetIdentifier } } } = props
+export default function DatasetStatistics() {
+  const params = useParams<{ datasetIdentifier: string }>()
+  const navigate = useNavigate()
+  const datasetIdentifier = params.datasetIdentifier || ''
   const [datasetTerm, setDatasetTerm] = useState<DatasetTerm>()
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>()
   const [isLoading, setIsLoading] = useState(true)
@@ -68,7 +61,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     try {
       const draftResponse = await DAR.postDarDraft({ datasetId: [datasetTerm?.datasetId] })
       if (draftResponse.referenceId) {
-        history.push(`/dar_application/${draftResponse.referenceId}`)
+        navigate(`/dar_application/${draftResponse.referenceId}`)
       }
       else if (draftResponse.message) {
         showError(draftResponse.message + ' Please contact customer support for help.')

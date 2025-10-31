@@ -6,10 +6,11 @@ import lockIcon from '../images/lock-icon.png'
 import { Styles } from '../libs/theme'
 import DatasetUpdate from '../components/data_update/DatasetUpdate'
 import { DataSet } from '../libs/ajax/DataSet'
+import { useParams } from 'react-router-dom'
 
-export const DatasetUpdateForm = (props) => {
-  const { history } = props
-  const { datasetId } = props.match.params
+export const DatasetUpdateForm = () => {
+  const params = useParams()
+  const { datasetId } = params
 
   const [failedInit, setFailedInit] = useState(true)
   const [dataset, setDataset] = useState({})
@@ -46,7 +47,7 @@ export const DatasetUpdateForm = (props) => {
       </div>
 
       <form style={{ margin: 'auto', maxWidth: 800 }}>
-        <DatasetUpdate dataset={dataset} history={history} />
+        <DatasetUpdate dataset={dataset} />
       </form>
     </div>
   )

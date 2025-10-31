@@ -3,10 +3,11 @@ import { Auth } from 'src/libs/auth/auth'
 import { TosService } from 'src/libs/tosService'
 import SimpleButton from 'src/components/SimpleButton'
 import { Theme } from 'src/libs/theme'
+import { useNavigate } from 'react-router-dom'
 
-export default function TermsOfServiceAcceptance(props) {
+export default function TermsOfServiceAcceptance() {
+  const navigate = useNavigate()
   const [tosText, setTosText] = useState('')
-  const { history } = props
 
   useEffect(() => {
     const init = async () => {
@@ -24,8 +25,8 @@ export default function TermsOfServiceAcceptance(props) {
     const queryParams = new URLSearchParams(window.location.search)
     const redirect = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : '/datalibrary'
 
-    history.push(redirect)
-  }, [history])
+    navigate(redirect)
+  }, [navigate])
 
   const acceptButton = (
     <SimpleButton
@@ -45,7 +46,7 @@ export default function TermsOfServiceAcceptance(props) {
 
   const signOut = async () => {
     await Auth.signOut()
-    history.push('/')
+    navigate('/')
   }
 
   const rejectButton = (

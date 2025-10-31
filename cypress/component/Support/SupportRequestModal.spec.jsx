@@ -168,4 +168,64 @@ describe('Support Request Modal Tests', () => {
       cy.get('[data-cy="supportFormAttachmentContainer"]').should('contain', '2 files selected')
     })
   })
+
+  describe('When a user is logged in but current user values are undefined:', () => {
+    beforeEach(() => {
+      cy.stub(Storage, 'userIsLogged').returns(true)
+      cy.stub(Storage, 'getCurrentUser').returns({
+        displayName: undefined,
+        email: undefined,
+      })
+    })
+
+    it('Renders form correctly', () => {
+      mount(
+        <SupportRequestModal
+          onCloseRequest={handler}
+          onOKRequest={handler}
+          url="url"
+          showModal={true}
+        />,
+      )
+      // These fields should exist
+      cy.get('[data-cy="closeButton"]').should('exist')
+      cy.get('[data-cy="supportForm"]').should('exist')
+      cy.get('[data-cy="supportFormEmail"]').should('not.exist')
+      cy.get('[data-cy="supportFormName"]').should('not.exist')
+      cy.get('[data-cy="supportFormType"]').should('exist')
+      cy.get('[data-cy="supportFormSubject"]').should('exist')
+      cy.get('[data-cy="supportFormDescription"]').should('exist')
+      cy.get('[data-cy="supportFormAttachment"]').should('exist')
+      cy.get('[data-cy="supportFormSubmit"]').should('be.disabled')
+      cy.get('[data-cy="supportFormCancel"]').should('not.be.disabled')
+    })
+
+    it('Submits properly', () => {
+      mount(
+        <SupportRequestModal
+          onCloseRequest={handler}
+          onOKRequest={handler}
+          url="url"
+          showModal={true}
+        />,
+      )
+      // Ensure that all required fields are filled out before submit becomes available
+      cy.get('[data-cy="supportFormType"]').select('bug')
+      cy.get('[data-cy="supportFormSubmit"]').should('be.disabled')
+      cy.get('[data-cy="supportFormSubject"]').type('Subject')
+      cy.get('[data-cy="supportFormSubmit"]').should('be.disabled')
+      cy.get('[data-cy="supportFormDescription"]').type('Description')
+      // Form is complete:
+      cy.get('[data-cy="supportFormSubmit"]').should('not.be.disabled')
+      cy.get('[data-cy="supportFormCancel"]').should('not.be.disabled')
+      cy.intercept({ method: 'POST', url: '**/support/request' }, { statusCode: 201 }).as('request')
+      cy.intercept({ method: 'POST', url: '**/support/upload' }, { statusCode: 201, body: { token: 'token_string' } }).as('upload')
+      // {force: true} is necessary here due to the surrounding div that covers the input.
+      cy.get('[data-cy="supportFormAttachment"]').selectFile(['cypress/fixtures/example.json'], { force: true })
+      cy.get('[data-cy="supportFormSubmit"]').click()
+      cy.wait(['@request', '@upload']).then((interceptions) => {
+        assert(interceptions.length === 2)
+      })
+    })
+  })
 })

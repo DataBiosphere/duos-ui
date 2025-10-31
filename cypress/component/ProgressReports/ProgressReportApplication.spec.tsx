@@ -5,6 +5,7 @@ import { CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject } from 
 import { History, Location, Action } from 'history'
 import { Storage } from 'src/libs/storage'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
+import { BrowserRouter } from 'react-router-dom'
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History
@@ -16,6 +17,9 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.stub(window, 'fetch').resolves({
       ok: true,
       json: () => Promise.resolve([]),
+      headers: {
+        get: () => 'application/json',
+      },
     })
 
     // Mock Storage methods that might be used
@@ -181,7 +185,6 @@ describe('ProgressReportApplication - Component Tests', () => {
     collectionId: 1,
     elections: {},
     createDate: 1748736000,
-    sortDate: 1748736000,
     submissionDate: 1748736000,
     updateDate: 1748736000,
   }
@@ -199,7 +202,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    return mount(<ProgressReportApplication {...props} /> as ReactNode)
+    return mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
   }
 
   it('renders the component without errors', () => {
@@ -212,39 +215,69 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('.accordion-step-container').should('exist')
   })
 
-  it('defaults intellectualPropertyYesNo to false when dar.intellectualPropertySummary is undefined', () => {
-    // Mount component with DAR that has undefined intellectualPropertySummary
+  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is undefined or empty', () => {
+    // Test with undefined intellectualProperties
     const darWithoutIntellectualProperty = {}
 
     mountComponent(darWithoutIntellectualProperty, true)
 
-    // Check that the intellectual property "No" radio button is checked (false state)
-    cy.get('#intellectualPropertyYesNo_no').should('be.checked')
-    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
+    // Check that the intellectualProperties "No" radio button is checked (false state)
+    cy.get('#intellectualPropertiesYesNo_no').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_yes').should('not.be.checked')
   })
 
-  it('sets intellectualPropertyYesNo to true when dar.intellectualPropertySummary has a value', () => {
-    // Mount component with DAR that has intellectualPropertySummary
+  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is empty array', () => {
+    // Test with empty intellectualProperties array
+    const darWithEmptyIntellectualProperty = {
+      intellectualProperties: [],
+    }
+
+    mountComponent(darWithEmptyIntellectualProperty, true)
+
+    // Check that the intellectualProperties "No" radio button is checked (false state)
+    cy.get('#intellectualPropertiesYesNo_no').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_yes').should('not.be.checked')
+  })
+
+  it('sets intellectualPropertiesYesNo to true when dar.intellectualProperties has items', () => {
+    // Test with intellectualProperties array containing items
     const darWithIntellectualProperty = {
-      intellectualPropertySummary: 'Some intellectual property description',
+      intellectualProperties: [{
+        ipId: 'ip-1',
+        studyId: 'study-1',
+        type: 'Patent',
+        title: 'IP 1',
+        assignee: 'Inventor A',
+        patentNumber: 'App123',
+        filingDate: '2023-01-01',
+        status: 'Filed',
+        url: 'https://example.com/ip',
+        contact: 'contact@example.com',
+        tags: [],
+      }, {
+        ipId: 'ip-2',
+        studyId: 'study-1',
+        type: 'Trademark',
+        title: 'IP 2',
+        assignee: 'Inventor B',
+        patentNumber: 'App456',
+        filingDate: '2023-02-01',
+        status: 'Granted',
+        url: 'https://example.com/ip2',
+        contact: 'contact2@example.com',
+        tags: [],
+      }],
     }
 
     mountComponent(darWithIntellectualProperty, true)
 
-    // Check that the intellectual property "Yes" radio button is checked (true state)
-    cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
-  })
+    // Check that the intellectualProperties "Yes" radio button is checked (true state)
+    cy.get('#intellectualPropertiesYesNo_yes').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_no').should('not.be.checked')
 
-  it('in non-read-only mode, has neither intellectualPropertyYesNo radio button checked when dar.intellectualPropertySummary is undefined', () => {
-    // Mount component with DAR that has undefined intellectualPropertySummary
-    const darWithoutIntellectualProperty = {}
-
-    mountComponent(darWithoutIntellectualProperty, false)
-
-    // Check that neither radio button is checked when the value is undefined
-    cy.get('#intellectualPropertyYesNo_yes').should('not.be.checked')
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
+    // Check that intellectual properties are actually displayed in the DOM
+    cy.contains('IP 1').should('be.visible')
+    cy.contains('IP 2').should('be.visible')
   })
 
   it('defaults publicationsYesNo to false when dar.publications is undefined or empty', () => {
@@ -467,21 +500,30 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('#closeoutYesNo_no').should('not.be.checked')
   })
 
-  it('displays intellectual property summary in read-only mode when it exists', () => {
-    // Test scenario where intellectual property summary exists
+  it('displays intellectual properties in read-only mode when they exist', () => {
     const darWithIntellectualProperty = {
-      intellectualPropertySummary: 'Test intellectual property description with important details',
+      intellectualProperties: [{
+        ipId: 'ip-1',
+        studyId: 'study-1',
+        type: 'Patent',
+        title: 'Test IP',
+        assignee: 'Inventor A',
+        patentNumber: 'App123',
+        filingDate: '2023-01-01',
+        status: 'Filed',
+        url: 'https://example.com/ip',
+        contact: 'contact@example.com',
+        tags: [],
+      }],
     }
 
     mountComponent(darWithIntellectualProperty, true)
 
-    // Check that the intellectual property "Yes" radio button is checked (true state)
-    cy.get('#intellectualPropertyYesNo_yes').should('be.checked')
-    cy.get('#intellectualPropertyYesNo_no').should('not.be.checked')
+    cy.get('#intellectualPropertiesYesNo_yes').should('be.checked')
+    cy.get('#intellectualPropertiesYesNo_no').should('not.be.checked')
 
-    // Check that the intellectual property summary is visible in the form
-    cy.get('#intellectualPropertySummary').should('be.visible')
-    cy.get('#intellectualPropertySummary').should('contain.value', 'Test intellectual property description with important details')
+    // Check that IP is visible
+    cy.contains('Test IP').should('be.visible')
   })
 
   it('shows only approved datasets in create-mode progress report', () => {
@@ -616,7 +658,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     // Verify that only approved datasets are shown
     // The component should only show datasets that are:
@@ -717,7 +759,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     // Should show no datasets since none are approved through elections
     cy.get('[data-cy="remove-datasets"]').within(() => {
@@ -844,7 +886,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     // Only dataset 1 should be shown (meets all criteria)
     cy.get('[data-cy="remove-datasets"]').within(() => {
@@ -952,7 +994,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     cy.get('[data-cy="remove-datasets"]').should('exist')
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
-import { Presentation } from 'src/types/model'
+import { Presentation, Presenter } from 'src/types/model'
+import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface PresentationSummaryProps {
   presentation: Presentation
@@ -22,11 +23,33 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
 
   const buttonStyle = disabled ? disabledStyle : {}
 
+  const customRenderers = {
+    presenter: (value: unknown) => {
+      const presenter = value as Presenter
+      if (!presenter || typeof presenter !== 'object') return null
+      return (
+        <span>
+          {presenter.name}
+          {presenter.email ? ` (${presenter.email})` : ''}
+        </span>
+      )
+    },
+    url: (value: unknown) => {
+      const href = typeof value === 'string' ? value : ''
+      if (!href) return null
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {href}
+        </a>
+      )
+    },
+  }
+
   return (
     <div className="collaborator-summary-card">
       {/* data elements to show in the row summary */}
       {columnsToShow.map((column, index) => {
-        const columnContent = presentation[column as keyof Presentation]
+        const columnContent = renderColumnContent(column, presentation[column as keyof Presentation], customRenderers)
         return columnContent && (
           <div key={'presentation_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>

@@ -42,21 +42,41 @@ describe('Summary Section - Component Tests', () => {
   const initialPublications: Publication[] = [
     {
       title: 'Test Publication 1',
-      date: '2022-01-01',
-      bibliographicCitation: 'Citation 1',
-      citation: true,
       pubmedId: '12345',
-      authors: 'Author 1, Author 2',
+      publishedDate: '2022-01-01',
+      authors: [
+        { name: 'Author 1', orcId: '0000-0000-0000-0001' },
+        { name: 'Author 2', orcId: '0000-0000-0000-0002' },
+      ],
+      bibliographicCitation: 'Citation 1',
       datasetCitation: 'Dataset Citation 1',
+      citation: true,
+      publicationId: '',
+      studyId: '',
+      journal: 'Journal 1',
+      doi: '10.1000/xyz123',
+      url: 'https://example.org/pub1',
+      access: 'open',
+      tags: [],
     },
     {
       title: 'Test Publication 2',
-      date: '2022-02-01',
-      bibliographicCitation: 'Citation 2',
-      citation: true,
       pubmedId: '67890',
-      authors: 'Author 3, Author 4',
+      publishedDate: '2022-02-01',
+      authors: [
+        { name: 'Author 3', orcId: '0000-0000-0000-0003' },
+        { name: 'Author 4', orcId: '0000-0000-0000-0004' },
+      ],
+      bibliographicCitation: 'Citation 2',
       datasetCitation: 'Dataset Citation 2',
+      citation: true,
+      publicationId: '',
+      studyId: '',
+      journal: 'Journal 2',
+      doi: '10.1000/xyz456',
+      url: 'https://example.org/pub2',
+      access: 'open',
+      tags: [],
     },
   ]
 
@@ -131,21 +151,15 @@ describe('Summary Section - Component Tests', () => {
 
   it('handles intellectual property radio buttons', () => {
     cy.contains('label', 'Yes').find('input[type="radio"]').first().click({ force: true })
-    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertyYesNo: true })
+    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertiesYesNo: true })
 
     cy.contains('label', 'No').find('input[type="radio"]').first().click({ force: true })
-    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertyYesNo: false })
+    cy.get('@formChangeStub').should('have.been.calledWith', { intellectualPropertiesYesNo: false })
   })
 
-  it('shows intellectual property details form when "Yes" is selected', () => {
-    mountComponent({ intellectualPropertyYesNo: true })
-    cy.get('#intellectualPropertySummary').should('exist')
-
-    const testDetails = 'Details about intellectual property.'
-    cy.get('#intellectualPropertySummary').type(testDetails)
-    cy.get('#intellectualPropertySummary').should('have.value', testDetails)
-
-    cy.get('@formChangeStub').should('have.been.called')
+  it('shows intellectualProperties list when "Yes" is selected', () => {
+    mountComponent({ intellectualPropertiesYesNo: true })
+    cy.contains('Add Intellectual Property').should('exist')
   })
 
   it('handles publications radio buttons', () => {
@@ -179,17 +193,6 @@ describe('Summary Section - Component Tests', () => {
 
     cy.contains('Test Publication 1').should('be.visible')
     cy.contains('Test Publication 2').should('be.visible')
-    cy.contains('2022-01-01').should('be.visible')
-    cy.contains('2022-02-01').should('be.visible')
-  })
-
-  it('displays preloaded presentations', () => {
-    mountComponent({ presentationsYesNo: true, presentations: initialPublications })
-
-    cy.contains('Test Publication 1').should('be.visible')
-    cy.contains('Test Publication 2').should('be.visible')
-    cy.contains('2022-01-01').should('be.visible')
-    cy.contains('2022-02-01').should('be.visible')
   })
 
   it('shows era authenticated researcher commons id', () => {

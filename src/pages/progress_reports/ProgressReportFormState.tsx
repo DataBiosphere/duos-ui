@@ -1,4 +1,11 @@
-import { Collaborator, Dataset, Presentation, Publication, SimplifiedDuosUser } from 'src/types/model'
+import {
+  Collaborator,
+  Dataset,
+  IntellectualProperty,
+  Presentation,
+  Publication,
+  SimplifiedDuosUser,
+} from 'src/types/model'
 
 type FormStateKeys = keyof FormState
 
@@ -9,8 +16,8 @@ export type ValidFormState = {
 
 export interface FormState {
   progressReportSummary: string
-  intellectualPropertyYesNo: boolean
-  intellectualPropertySummary: string
+  intellectualPropertiesYesNo: boolean
+  intellectualProperties: IntellectualProperty[]
   datasetIds: number[]
   publicationsYesNo: boolean
   publications: Publication[]
@@ -52,8 +59,8 @@ export interface FormState {
 
 export enum FormStateKey {
   PROGRESS_REPORT_SUMMARY = 'progressReportSummary',
-  INTELLECTUAL_PROPERTY_YES_NO = 'intellectualPropertyYesNo',
-  INTELLECTUAL_PROPERTY_SUMMARY = 'intellectualPropertySummary',
+  INTELLECTUAL_PROPERTIES_YES_NO = 'intellectualPropertiesYesNo',
+  INTELLECTUAL_PROPERTIES = 'intellectualProperties',
   DATASET_IDS = 'datasetIds',
   PUBLICATIONS_YES_NO = 'publicationsYesNo',
   PUBLICATIONS = 'publications',

@@ -1,20 +1,23 @@
-import { map as lodashMap, concat, filter, matches as lodashMatches } from 'lodash'
-import { union, contains, map, isEmpty } from 'lodash/fp'
-import React, { useState, useEffect, useRef } from 'react'
-import { User } from '../libs/ajax/User'
-import { Notifications, USER_ROLES } from '../libs/utils'
-import { ResearcherReview } from '../components/ResearcherReview'
-import editUserIcon from '../images/icon_edit_user.png'
-import { PageHeading } from '../components/PageHeading'
+import { concat, filter, map as lodashMap, matches as lodashMatches } from 'lodash'
+import { contains, isEmpty, map, union } from 'lodash/fp'
+import React, { useEffect, useRef, useState } from 'react'
+import { User } from 'src/libs/ajax/User'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { ResearcherReview } from 'src/components/ResearcherReview'
+import editUserIcon from 'src/images/icon_edit_user.png'
+import { PageHeading } from 'src/components/PageHeading'
 import { extractError } from 'src/utils/ErrorUtils.js'
-import PropTypes from 'prop-types'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const adminRole = { roleId: 4, name: USER_ROLES.admin }
 const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
 const signingOfficialRole = { roleId: 7, name: USER_ROLES.signingOfficial }
 const serviceAccount = { roleId: 10, name: USER_ROLES.serviceAccount }
 
-export const AdminEditUser = (props) => {
+export const AdminEditUser = () => {
+  const params = useParams()
+  const navigate = useNavigate()
+  const userId = params.userId
   const [state, setState] = useState({
     user: {},
     displayName: '',
@@ -31,7 +34,7 @@ export const AdminEditUser = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await User.getById(props.match.params.userId)
+        const user = await User.getById(userId)
         const currentRoles = lodashMap(user.roles, (ur) => {
           return { roleId: ur.roleId, name: ur.name }
         })
@@ -52,7 +55,7 @@ export const AdminEditUser = (props) => {
       }
     }
     fetchData()
-  }, [props.match.params.userId])
+  }, [userId])
 
   useEffect(() => {
     if (fetchingComplete) {
@@ -79,7 +82,7 @@ export const AdminEditUser = (props) => {
     try {
       await User.update(user, userId)
       await updateRolesIfDifferent(userId, state.updatedRoles)
-      props.history.push('/admin_manage_users')
+      navigate('/admin_manage_users')
     }
     catch (error) {
       const errorText = extractError(error)
@@ -154,17 +157,6 @@ export const AdminEditUser = (props) => {
   }
 
   const { displayName, email, displayNameValid, institutionName } = state
-
-  AdminEditUser.propTypes = {
-    match: PropTypes.shape({
-      params: PropTypes.shape({
-        userId: PropTypes.string.isRequired,
-      }).isRequired,
-    }).isRequired,
-    history: PropTypes.shape({
-      push: PropTypes.func.isRequired,
-    }).isRequired,
-  }
 
   return (
     <div className="container container-wide">
@@ -321,7 +313,7 @@ export const AdminEditUser = (props) => {
                 <div style={{ marginLeft: '40px' }}>
                   <button
                     id="btn_save"
-                    onClick={() => props.history.push('/admin_manage_users')}
+                    onClick={() => navigate('/admin_manage_users')}
                     className="f-left btn-primary btn-back"
                   >
                     Back

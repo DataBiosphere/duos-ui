@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { isEmpty, capitalize, isUndefined } from 'lodash'
+import React, { useEffect, useMemo, useState } from 'react'
+import { capitalize, isEmpty } from 'lodash'
 import { DatasetTerm } from 'src/types/model'
 import SimpleTable from 'src/components/SimpleTable'
 import { Styles } from 'src/libs/theme'
@@ -9,6 +9,8 @@ import {
 } from 'src/components/data_search/DatasetSearchTableConstants'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
 import { Storage } from 'src/libs/storage'
+import PaginationBar from 'src/components/PaginationBar'
+import { recalculateVisibleTable } from 'src/libs/utils'
 
 const styles = {
   baseStyle: {
@@ -49,13 +51,6 @@ interface Sort {
 // Storage key for persisting sort preferences
 const storageDatasetSearchSort = 'storageDatasetSearchSort'
 
-// Helper function to check if a value should be treated as empty/undefined
-const isMissingValue = (value: CellData['value']): boolean => {
-  return isUndefined(value)
-    || isEmpty(value)
-    || value === '--'
-}
-
 // Get the sort configuration for the active tab
 const getSortForTab = (tabKey: string): Sort => {
   const storageKey = `${storageDatasetSearchSort}_${tabKey}`
@@ -68,7 +63,7 @@ const getSortForTab = (tabKey: string): Sort => {
     }
   }
 
-  return { colIndex: -1, dir: 1 }
+  return { dir: 1 } as Sort
 }
 
 interface DatasetSearchTableDisplayProps {
@@ -81,51 +76,24 @@ interface DatasetSearchTableDisplayProps {
 
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
   const { onSelect, exportableDatasets, filteredData, selected, tab } = props
-  const [sort, setSort] = React.useState<Sort>(getSortForTab(tab.key))
-  const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets)
+  const [sort, setSort] = useState<Sort>(getSortForTab(tab.key))
+  const [tableSize, setTableSize] = useState(50)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [visibleRows, setVisibleRows] = useState<CellData[][]>([])
 
-  const sortData = React.useCallback((data: CellData[][], sortState: Sort) => {
-    if (sortState.colIndex < 0) return data
+  // Memoize headers to prevent recreation on every render
+  const headers = useMemo(
+    () => tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets),
+    [tab, filteredData, selected, onSelect, exportableDatasets],
+  )
 
-    const colIndex = sortState.colIndex
-    const columnLabel = headers[colIndex]?.label
+  // Memoize rows to prevent recreation on every render
+  const rows = useMemo(
+    () => tab.makeRows(filteredData, headers),
+    [tab, filteredData, headers],
+  )
 
-    // Check if we're sorting a numeric column like Participants or Participant Count
-    const isNumericColumn = columnLabel === 'Participants' || columnLabel === 'Participant Count'
-
-    return [...data].sort((a, b) => {
-      const aValue = a[colIndex]?.value
-      const bValue = b[colIndex]?.value
-
-      // Always sort empty values to the bottom regardless of sort direction
-      const aIsEmpty = isMissingValue(aValue)
-      const bIsEmpty = isMissingValue(bValue)
-
-      if (aIsEmpty && bIsEmpty) return 0
-      if (aIsEmpty) return 1 // Move 'a' to the bottom when it's empty
-      if (bIsEmpty) return -1 // Move 'b' to the bottom when it's empty
-
-      if (isNumericColumn) {
-        const numA = Number(aValue)
-        const numB = Number(bValue)
-
-        // Handle NaN values similar to undefined
-        if (isNaN(numA) && isNaN(numB)) return 0
-        if (isNaN(numA)) return 1 // Treat NaN like undefined, to the bottom
-        if (isNaN(numB)) return -1 // Treat NaN like undefined, to the bottom
-
-        return (numA - numB) * sortState.dir
-      }
-      const strA = String(aValue).toLowerCase()
-      const strB = String(bValue).toLowerCase()
-      return strA.localeCompare(strB) * sortState.dir
-    })
-  }, [headers])
-
-  const rowData = React.useMemo(() => {
-    const baseData = tab.makeRows(filteredData, headers)
-    return sortData(baseData, sort)
-  }, [filteredData, headers, sort, sortData, tab])
+  const [pageCount, setPageCount] = useState<number>(rows.length / tableSize)
 
   const handleSort = (newSort: Sort) => {
     const storageKey = `${storageDatasetSearchSort}_${tab.key}`
@@ -136,6 +104,32 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     setSort(newSort)
   }
 
+  const goToPage = (page: number) => {
+    if (page > 0 && page < pageCount + 1) {
+      setCurrentPage(page)
+    }
+  }
+
+  const changeTableSize = (newSize: number) => {
+    if (!isEmpty(newSize) && newSize > 0) {
+      setTableSize(newSize)
+    }
+  }
+
+  useEffect(() => {
+    recalculateVisibleTable({
+      tableSize,
+      pageCount,
+      filteredList: rows,
+      currentPage,
+      setPageCount,
+      setCurrentPage,
+      setVisibleList: setVisibleRows,
+      sort: sort,
+    })
+  },
+  [tableSize, pageCount, currentPage, setPageCount, setCurrentPage, rows, sort])
+
   return (
     <>
       <div style={{
@@ -143,12 +137,12 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
         borderBottom: '1px solid black',
       }}
       >
-        {rowData.length}
+        {rows.length}
         {' '}
-        {capitalize(rowData.length !== 1 ? tab.plural : tab.singular)}
+        {capitalize(rows.length < 1 ? tab.plural : tab.singular)}
       </div>
       {
-        isEmpty(filteredData)
+        isEmpty(visibleRows)
           ? (
               <div style={{ fontWeight: 600, marginTop: '0.5rem' }}>
                 There are no
@@ -159,7 +153,7 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
             )
           : (
               <SimpleTable
-                rowData={rowData}
+                rowData={visibleRows}
                 columnHeaders={headers}
                 selected={selected}
                 styles={styles}
@@ -167,6 +161,15 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
                 summary={`faceted ${tab.singular} search table`}
                 onSort={handleSort}
                 sort={sort}
+                paginationBar={(
+                  <PaginationBar
+                    pageCount={pageCount}
+                    currentPage={currentPage}
+                    tableSize={tableSize}
+                    goToPage={goToPage}
+                    changeTableSize={changeTableSize}
+                  />
+                )}
               />
             )
       }

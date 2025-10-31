@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { Config } from '../config'
+import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export interface OAuthConfig {
   clientId: string
@@ -12,5 +12,6 @@ export const OAuth2 = {
 
 const getConfig = async (): Promise<OAuthConfig> => {
   const configUrl = `${await Config.getApiUrl()}/oauth2/configuration`
-  return (await axios.get(configUrl)).data
+  const res = await fetchGet(configUrl)
+  return res.data
 }

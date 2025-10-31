@@ -1,8 +1,9 @@
 import {
+  Author,
   Closeout,
   CombinedDataAccessRequest, DarCollection, DataAccessRequest,
   DataManagementIncident,
-  Election,
+  Election, IntellectualProperty,
   Presentation,
   Publication, Vote,
 } from 'src/types/model'
@@ -41,8 +42,8 @@ export function getApprovedElectionDatasetIds(elections: Array<Election>): Array
 export function convertFormStateToDAR(formState: FormState): Partial<CombinedDataAccessRequest> {
   const expectedForm: Partial<CombinedDataAccessRequest> = {} as Partial<CombinedDataAccessRequest>
   expectedForm.progressReportSummary = formState.progressReportSummary
-  if (formState.intellectualPropertyYesNo) {
-    expectedForm.intellectualPropertySummary = formState.intellectualPropertySummary
+  if (formState.intellectualPropertiesYesNo) {
+    expectedForm.intellectualProperties = formState.intellectualProperties
   }
   expectedForm.datasetIds = formState.datasetIds ?? []
   if (formState.publicationsYesNo) {
@@ -71,33 +72,63 @@ export function convertFormStateToDAR(formState: FormState): Partial<CombinedDat
   return expectedForm
 }
 
+export function getIntellectualPropertyList(formState: FormState): IntellectualProperty[] {
+  const intellectualProperties: IntellectualProperty[] = formState.intellectualProperties ?? []
+  return intellectualProperties.map((ip: IntellectualProperty) => ({
+    ipId: ip.ipId,
+    studyId: ip.studyId,
+    type: ip.type,
+    title: ip.title,
+    assignee: ip.assignee,
+    patentNumber: ip.patentNumber,
+    filingDate: ip.filingDate,
+    status: ip.status,
+    url: ip.url,
+    contact: ip.contact,
+    tags: ip.tags ? [...ip.tags] : [],
+  }))
+}
+
 export function getPublicationList(formState: FormState): Publication[] {
   const publications: Publication[] = formState.publications ?? []
-  return publications.map((pub: Publication) => {
-    const expectedPublication: Publication = {} as Publication
-    expectedPublication.title = pub.title
-    expectedPublication.pubmedId = pub.pubmedId
-    expectedPublication.date = pub.date
-    expectedPublication.authors = pub.authors
-    expectedPublication.bibliographicCitation = pub.bibliographicCitation
-    expectedPublication.datasetCitation = pub.datasetCitation
-    expectedPublication.citation = pub.citation
-    return expectedPublication
-  })
+  return publications.map((p: Publication) => ({
+    title: p.title,
+    pubmedId: p.pubmedId,
+    publishedDate: p.publishedDate,
+    authors: (p.authors ?? []).map((a: Author) => ({ name: a.name, orcId: a.orcId })),
+    bibliographicCitation: p.bibliographicCitation,
+    datasetCitation: p.datasetCitation,
+    citation: p.citation,
+    publicationId: p.publicationId,
+    studyId: p.studyId,
+    journal: p.journal,
+    doi: p.doi,
+    url: p.url,
+    access: p.access,
+    tags: p.tags ? [...p.tags] : [],
+  }))
 }
 
 export function getPresentationList(formState: FormState): Presentation[] {
   const presentations: Presentation[] = formState.presentations ?? []
-  return presentations.map((presentation: Presentation) => {
-    const expectedPresentation: Presentation = {} as Presentation
-    expectedPresentation.title = presentation.title
-    expectedPresentation.date = presentation.date
-    expectedPresentation.authors = presentation.authors
-    expectedPresentation.datasetCitation = presentation.datasetCitation
-    expectedPresentation.citation = presentation.citation
-    expectedPresentation.link = presentation.link
-    return expectedPresentation
-  })
+  return presentations.map((p: Presentation): Presentation => ({
+    title: p.title,
+    date: p.date,
+    url: p.url,
+    authors: p.authors,
+    datasetCitation: p.datasetCitation,
+    citation: p.citation,
+    presentationId: p.presentationId,
+    studyId: p.studyId,
+    presenter: p.presenter
+      ? { name: p.presenter.name, email: p.presenter.email }
+      : { name: '', email: '' },
+    event: p.event,
+    location: p.location,
+    format: p.format,
+    access: p.access,
+    tags: p.tags ? [...p.tags] : [],
+  }))
 }
 
 export function getDataManagementIncidents(formState: FormState): DataManagementIncident {

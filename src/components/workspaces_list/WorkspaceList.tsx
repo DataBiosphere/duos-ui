@@ -1,0 +1,90 @@
+import React, { useState } from 'react'
+import { Workspace } from 'src/types/model'
+import { WorkspaceAddEdit } from 'src/components/workspaces_list/WorkspaceAddEdit'
+import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
+import { DarErrors } from 'src/pages/dar_application/FormValidationState'
+
+interface WorkspaceListProps {
+  readonly workspaces: Workspace[]
+  readonly columnsToShow?: string[]
+  readonly onWorkspaceChange: (items: Workspace[]) => void
+  readonly disabled?: boolean
+  readonly validation?: DarErrors
+}
+
+export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Element {
+  const {
+    workspaces,
+    columnsToShow = ['name', 'platform', 'url', 'description', 'tools', 'access', 'tags'],
+    onWorkspaceChange,
+    disabled = false,
+    validation,
+  } = props
+
+  const [showAddEdit, setShowAddEdit] = useState(false)
+  const [editState, setEditState] = useState(workspaces.map(() => false))
+
+  const toggleEditState = (index: number) => {
+    const editStateCopy = [...editState]
+    editStateCopy[index] = !editStateCopy[index]
+    setEditState(editStateCopy)
+  }
+
+  const handleDeleteWorkspace = (index: number) => {
+    const updated = workspaces.filter((_, i) => i !== index)
+    onWorkspaceChange(updated)
+  }
+
+  const getValidationState = () => validation?.workspaces
+
+  return (
+    <div className="presentation-list-component">
+      <div className="row no-margin">
+        <button
+          id="add-workspace-btn"
+          type="button"
+          className="button button-white"
+          style={{
+            marginTop: 25,
+            marginBottom: 5,
+            border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
+            boxShadow: getValidationState() ? '0 0 5px red' : 'none',
+            ...(disabled ? { cursor: 'not-allowed' } : {}),
+          }}
+          onClick={() => !disabled && setShowAddEdit(true)}
+          disabled={disabled}
+        >
+          Add Workspace
+        </button>
+        {showAddEdit && (
+          <WorkspaceAddEdit
+            id={-1}
+            workspaces={workspaces}
+            closeAction={() => setShowAddEdit(false)}
+            onWorkspaceChange={onWorkspaceChange}
+          />
+        )}
+      </div>
+      <div className="form-group row no-margin">
+        {workspaces.map((w: Workspace, index: number) => (
+          <WorkspaceRow
+            key={w.workspaceId || index}
+            id={index}
+            editMode={editState[index]}
+            workspace={w}
+            workspaces={workspaces}
+            columnsToShow={columnsToShow}
+            editAction={() => toggleEditState(index)}
+            deleteAction={() => handleDeleteWorkspace(index)}
+            closeAction={() => {
+              toggleEditState(index)
+              setShowAddEdit(false)
+            }}
+            onWorkspaceChange={onWorkspaceChange}
+            disabled={disabled}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}

@@ -1,5 +1,4 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { PageHeading } from 'src/components/PageHeading'
 import { Notification } from 'src/components/Notification'
@@ -12,18 +11,12 @@ import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ga4ghLogo from 'src/images/ga4gh-logo.png'
 import userProfileIcon from 'src/images/user-profile.png'
+import { Link } from 'react-router-dom'
 
-export default function UserProfile(props) {
+export default function UserProfile() {
   const [user, setUser] = useState({})
   const [name, setName] = useState('')
   const [updatedName, setUpdatedName] = useState('')
-
-  const [profile, setProfile] = useState({
-    profileName: '',
-    email: undefined,
-    emailPreference: undefined,
-    id: undefined,
-  })
 
   const [notificationData, setNotificationData] = useState({})
 
@@ -68,12 +61,6 @@ export default function UserProfile(props) {
       try {
         const user = Storage.getCurrentUser()
         setUser(user)
-        setProfile({
-          profileName: user.displayName,
-          email: user.email,
-          emailPreference: user.emailPreference,
-          id: user.userId,
-        })
         setName(user.displayName)
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
       }
@@ -84,13 +71,6 @@ export default function UserProfile(props) {
 
     init()
   }, [])
-
-  const goToRequestRole = () => {
-    props.history.push({
-      pathname: '/request_role',
-      state: { data: profile },
-    })
-  }
 
   return (
     <div
@@ -189,7 +169,7 @@ export default function UserProfile(props) {
         id="profileEmail"
         title="Email Address"
         hideTitle={true}
-        defaultValue={profile.email}
+        defaultValue={user.email}
         disabled={true}
       />
       <div style={{ marginTop: '10px' }} />
@@ -207,28 +187,27 @@ export default function UserProfile(props) {
         id="profileEmailEnabled"
         title="Send me email notifications"
         hideTitle={true}
-        defaultValue={profile.emailPreference}
+        defaultValue={user.emailPreference}
         onChange={field => updateEmailPreference(field.value)}
       />
       <div style={{ marginTop: '45px' }} />
       <AffiliationAndRoles
         user={user}
       />
-      <button
-        className="f-left btn-primary common-background"
-        onClick={goToRequestRole}
-        style={{
-          marginTop: '10px',
-          marginBottom: '50px',
-        }}
-      >
-        Request a New Role
-      </button>
+      <Link to="/request_role">
+        <button
+          className="f-left btn-primary common-background"
+          style={{
+            marginTop: '10px',
+            marginBottom: '50px',
+          }}
+        >
+          Request a New Role
+        </button>
+      </Link>
       <div style={{ marginTop: '115px' }} />
       <ResearcherStatus
         user={user}
-        pageProps={props}
-        profile={profile}
       />
       <div style={{ marginTop: '60px' }} />
       <AcceptedAcknowledgements />

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { Institution } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { Button, TextField } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
-import { AxiosError } from 'axios'
 import { Notifications } from 'src/libs/utils'
 import { Spinner } from 'src/components/Spinner'
 import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
@@ -14,11 +13,6 @@ import { SigningOfficialsList } from 'src/components/institution_table/component
 import { FORM_MODES, InstitutionFormMode } from 'src/components/institution_table/InstitutionFormMode'
 
 interface InstitutionDetailsProps {
-  match: {
-    params: {
-      institutionId?: number
-    }
-  }
   formMode: InstitutionFormMode
 }
 
@@ -28,9 +22,10 @@ interface InstitutionDetailsUpdate {
 }
 
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
-  const { institutionId } = props.match.params
+  const params = useParams()
+  const { institutionId } = params
   const formMode = props.formMode
-  const history = useHistory()
+  const navigate = useNavigate()
   const [institutionList, setInstitutionList] = useState<Institution[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -58,7 +53,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       }
       catch (error) {
         Notifications.showError({
-          text: `Failed to load institution details: ${extractError(error)}'}`,
+          text: `Failed to load institution details: ${extractError(error)}`,
         })
       }
       finally {
@@ -73,7 +68,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     let normalized = name.trim()
 
     // Replace curly single quotes with straight single quotes
-    normalized = normalized.replace(/[‘’]/g, '\'')
+    normalized = normalized.replaceAll(/[‘’]/g, '\'')
 
     return normalized
   }
@@ -118,8 +113,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       Notifications.showSuccess({ text: 'Institution updated successfully' })
     }
     catch (error) {
-      const axiosError = error as AxiosError
-      const consentError = extractConsentError(axiosError)
+      const consentError = extractConsentError(error)
       if (consentError && consentError.code === 409) {
         Notifications.showError({
           text: 'One or more of the domains specified is already used by another institution. A domain can only be associated with one institution.',
@@ -127,7 +121,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       }
       else {
         Notifications.showError({
-          text: `An error occurred when trying to update the institution: ${consentError ? consentError.message : 'no additional error available'}`,
+          text: `An error occurred when trying to update the institution: ${consentError ? consentError.message : extractError(error)}`,
         })
       }
     }
@@ -143,11 +137,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       setInstitution(resp)
       Notifications.showSuccess({ text: 'Institution created successfully' })
       setIsEditing(false)
-      history.push(`/admin_manage_institutions/institutions/${resp.id}`)
+      navigate(`/admin_manage_institutions/institutions/${resp.id}`)
     }
     catch (error) {
-      const axiosError = error as AxiosError
-      const consentError = extractConsentError(axiosError)
+      const consentError = extractConsentError(error)
       if (consentError && consentError.code === 409) {
         Notifications.showError({
           text: 'One or more of the domains specified is already used by another institution. A domain can only be associated with one institution.',
@@ -155,8 +148,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       }
       else {
         Notifications.showError({
-          text: `An error occurred when trying to create the institution: ${consentError ? consentError.message : 'no additional error available'}`,
-        })
+          text: `An error occurred when trying to create the institution: ${consentError ? consentError.message : extractError(error)}` })
       }
     }
     finally {
@@ -245,8 +237,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     return 'Edit'
   }
 
-  return !loading
-    ? (
+  return loading
+    ? <div>Loading...</div>
+    : (
         <div style={{
           display: 'flex',
           alignItems: 'flex-start',
@@ -365,5 +358,4 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
           </div>
         </div>
       )
-    : <div>Loading...</div>
 }

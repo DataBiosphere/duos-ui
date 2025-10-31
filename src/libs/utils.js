@@ -161,16 +161,16 @@ export const Navigation = {
    * - The root path ("/") if no redirectTo or console tab is available
    *
    * @param user The user object to determine which console tabs are available
-   * @param history The history object to use for navigation (optional)
+   * @param navigate The navigate object to use for navigation (optional)
    * @returns {Promise<void>}
    */
-  console: async (user, history) => {
+  console: async (user, navigate) => {
     const queryParams = new URLSearchParams(window.location.search)
     const redirectTo = queryParams?.get('redirectTo')
     const firstConsole = headerTabsConfig.find(config => config.isRendered(user))
     const page = redirectTo || (firstConsole ? firstConsole.link : '/')
-    if (history) {
-      history.push(page)
+    if (navigate) {
+      navigate(page)
     }
     else {
       window.location = page
@@ -532,14 +532,13 @@ export const sortVisibleTable = ({ list, sort }) => {
       if (typeof aVal === 'number' || typeof aVal === 'boolean') {
         return (aVal > bVal ? -1 : 1) * sort.dir
       }
-      else {
-        if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
-          return (aVal > bVal ? -1 : 1) * sort.dir
-        }
-        else {
-          return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir)
-        }
+      else if (isNil(aVal) || isNil(bVal) || aVal.type === 'div' || bVal.type === 'div') {
+        return (aVal > bVal ? -1 : 1) * sort.dir
       }
+      else if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir)
+      }
+      return (aVal > bVal ? -1 : 1) * sort.dir
     })
   }
 }

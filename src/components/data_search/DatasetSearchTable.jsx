@@ -15,6 +15,7 @@ import DatasetFilterList from 'src/components/data_search/DatasetFilterList'
 import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
+import { useNavigate } from 'react-router-dom'
 
 const styles = {
   subTab: {
@@ -31,7 +32,8 @@ const styles = {
 }
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, history, icon, title } = props
+  const navigate = useNavigate()
+  const { datasets, icon, title } = props
   const [exportableDatasets, setExportableDatasets] = useState({})
   const [filters, setFilters] = useState(defaultFilters(datasets))
   const [filtered, setFiltered] = useState(datasets)
@@ -302,7 +304,7 @@ export const DatasetSearchTable = (props) => {
           </Box>
         </Box>
         <Box sx={{ padding: '1em' }} />
-        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, history)} />}
+        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, navigate)} />}
       </Box>
     </>
   )

@@ -11,15 +11,11 @@ import loadingIndicator from 'src/images/loading-indicator.svg'
 import ReactTooltip from 'react-tooltip'
 import eventList, { MetricsEventName } from 'src/libs/events'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
-import { History } from 'history'
 import { OidcUser } from 'src/libs/auth/oidcBroker'
 import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
-
-interface SignInButtonProps {
-  history: History
-}
+import { useNavigate } from 'react-router-dom'
 
 interface ErrorInfo {
   title?: string
@@ -35,9 +31,9 @@ interface HttpError extends Error {
   body?: ReadableStream<Uint8Array>
 }
 
-export const SignInButton = (props: SignInButtonProps) => {
+export const SignInButton = () => {
+  const navigate = useNavigate()
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({})
-  const { history } = props
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConsentDown, setIsConsentDown] = useState<boolean>(false)
   const [isSamDown, setIsSamDown] = useState<boolean>(false)
@@ -51,19 +47,19 @@ export const SignInButton = (props: SignInButtonProps) => {
     if (!isEmpty(userStatus) && !tosAccepted) {
       // User has authenticated, but has not accepted ToS
       if (isNil(redirectPath)) {
-        history.push(`/tos_acceptance`)
+        navigate(`/tos_acceptance`)
       }
       else {
-        history.push(`/tos_acceptance?redirectTo=${redirectPath}`)
+        navigate(`/tos_acceptance?redirectTo=${redirectPath}`)
       }
     }
     else {
       // User is authenticated, registered and has accepted ToS: redirect to destination.
       if (isNil(redirectPath)) {
-        await Navigation.console(Storage.getCurrentUser(), history)
+        await Navigation.console(Storage.getCurrentUser(), navigate)
       }
       else {
-        history.push(redirectPath)
+        navigate(redirectPath)
       }
     }
   }
@@ -111,7 +107,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     const registeredUser: DuosUser = await User.registerUser()
     setUserRoleStatuses(registeredUser, Storage)
     await syncSignInOrRegistrationEvent(eventList.userRegister)
-    history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`)
+    navigate(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`)
   }
 
   const syncSignInOrRegistrationEvent = async (event: MetricsEventName) => {

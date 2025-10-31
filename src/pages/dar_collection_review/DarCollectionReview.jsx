@@ -3,25 +3,21 @@ import { User } from '../../libs/ajax/User'
 import TabControl from '../../components/TabControl'
 import ReviewHeader from './ReviewHeader'
 import ApplicationInformation from './ApplicationInformation'
-import { isEmpty, flatMap, flow, filter, map, get, toLower, uniq, compact } from 'lodash/fp'
+import { compact, filter, flatMap, flow, get, isEmpty, map, toLower, uniq } from 'lodash/fp'
 import { updateFinalVote } from '../../utils/DarCollectionUtils'
 import { binCollectionToBuckets } from '../../utils/BucketUtils'
-import { Notifications, Navigation } from '../../libs/utils'
+import { Navigation, Notifications } from '../../libs/utils'
 import { Storage } from '../../libs/storage'
 import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from '../../libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
 import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
-import {
-  APPROVED_VOTETYPES,
-  ElectionStatus,
-  ElectionType,
-  userHasOpenDataAccessElection,
-} from 'src/utils/DarUtils'
+import { APPROVED_VOTETYPES, ElectionStatus, ElectionType, userHasOpenDataAccessElection } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import PropTypes from 'prop-types'
 import { Notification } from 'src/components/Notification.jsx'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const tabContainerColor = 'rgb(115,154,164)'
 
@@ -152,7 +148,9 @@ const userIsDacUser = (user) => {
 }
 
 export default function DarCollectionReview(props) {
-  const collectionId = props.match.params.collectionId
+  const params = useParams()
+  const collectionId = params.collectionId
+  const navigate = useNavigate()
   const [collection, setCollection] = useState({})
   const [collectionWithHistory, setCollectionWithHistory] = useState({})
   const [darInfo, setDarInfo] = useState({})
@@ -214,9 +212,9 @@ export default function DarCollectionReview(props) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       })
-      await Navigation.console(user, props.history)
+      await Navigation.console(user, navigate)
     }
-  }, [adminPage, props.history, collectionId])
+  }, [adminPage, navigate, collectionId])
 
   // Remember, votes are contained within buckets, so updating final votes will update the bucket
   // define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
@@ -230,7 +228,6 @@ export default function DarCollectionReview(props) {
         collectionId: PropTypes.string.isRequired,
       }).isRequired,
     }).isRequired,
-    history: PropTypes.object.isRequired,
     adminPage: PropTypes.bool,
     readOnly: PropTypes.bool,
   }

@@ -4,10 +4,11 @@ import { Auth } from '../libs/auth/auth'
 import { Storage } from '../libs/storage'
 import { TosService } from '../libs/tosService'
 import SimpleButton from '../components/SimpleButton'
+import { useNavigate } from 'react-router-dom'
 
-export default function TermsOfService(props) {
+export default function TermsOfService() {
+  const navigate = useNavigate()
   const [tosText, setTosText] = useState('')
-  const { history } = props
   const isLogged = Storage.userIsLogged()
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export default function TermsOfService(props) {
 
     // log user out and send them back home.
     await Auth.signOut()
-    history.push('/')
+    navigate('/')
   }
 
   return (

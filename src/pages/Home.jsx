@@ -1,15 +1,29 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import homeHeaderBackground from '../images/home_header_background.png'
 import duosLogoImg from '../images/duos_logo.svg'
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg'
 import broadLogo from '../images/broad_logo_allwhite.png'
-import anvilLogo from '../images/anvil-logo.svg'
-import hcaLogo from '../images/human-cell-atlas-logo.png'
 import { OverflowTooltip } from '../components/Tooltips'
 import { Link } from 'react-router-dom'
+import { getLibraryVersions } from '../libs/libraryVersions'
 
 const Home = (props) => {
   const { isLogged } = props
+
+  // Get all library versions and filter for featured ones
+  const featuredLibraries = useMemo(() => {
+    const allLibraries = getLibraryVersions(null, null, null)
+    return Object.entries(allLibraries)
+      .filter(([_key, library]) => library.featured)
+      .map(([key, library]) => ({ key, ...library }))
+      .sort((a, b) => {
+        // Sort by order first, then alphabetically by key as fallback
+        if (a.order !== b.order) {
+          return a.order - b.order
+        }
+        return a.key.localeCompare(b.key)
+      })
+  }, [])
 
   const homeTitle = {
     color: '#FFFFFF',
@@ -67,27 +81,29 @@ const Home = (props) => {
 
   const logoGrid = {
     display: 'flex',
-    gap: '3rem',
+    flexWrap: 'wrap',
+    gap: '2rem',
     justifyContent: 'center',
     alignItems: 'center',
-    flexWrap: 'nowrap',
     width: '100%',
+    maxWidth: '1400px',
+    margin: '0 auto',
   }
 
   const baseCard = {
-    width: 'clamp(240px, 26vw, 320px)',
-    aspectRatio: '2 / 1',
+    width: '320px',
+    height: '160px', // 2:1 aspect ratio
     borderRadius: '6px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    overflow: 'hidden', // Prevent images from overflowing
   }
 
   const logoImg = {
-    width: '100%',
-    height: '100%',
+    maxWidth: '100%',
+    maxHeight: '100%',
     objectFit: 'contain',
     display: 'block',
   }
@@ -117,8 +133,28 @@ const Home = (props) => {
     <>
       <style>
         {`
-        @media (max-width: 904px) {
-          .logo-grid { flex-direction: column; }
+        .logo-card {
+          width: 320px;
+          height: 160px;
+        }
+        @media (max-width: 768px) {
+          .logo-card {
+            width: 280px;
+            height: 140px;
+          }
+          .logo-grid {
+            gap: 1.5rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .logo-card {
+            width: 100%;
+            max-width: 320px;
+            height: 160px;
+          }
+          .logo-grid {
+            gap: 1rem !important;
+          }
         }
       `}
       </style>
@@ -164,8 +200,8 @@ const Home = (props) => {
               </div>
             </div>
             <div className="col-lg-4 col-md-4 ">
-              <p style={header}>Institutional Oversight</p>
-              <p style={description}>DUOS reduces repetitive work for Signing Officials and expedites data sharing through our innovative Library Card-style agreements.</p>
+              <p style={header}>Approving your researchers to submit or request data?</p>
+              <p style={description}>Signing Officials can login to request status to approve researchers or click below to learn more about our expedite data access agreements</p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
                 <a href="https://duos.blog/help/preauthorize_researchers_librarycards/" target="_blank" rel="noreferrer" id="blog-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
@@ -180,63 +216,67 @@ const Home = (props) => {
           </div>
 
           <section style={{ margin: '5rem auto', padding: '0 2rem' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
               <p style={header}>Search Data Libraries in DUOS</p>
               <p style={description}>
                 Explore curated Data Libraries for studies, programs, and institutions below. Contact us to request your own!
               </p>
 
               <div style={logoGrid} className="logo-grid">
-                <OverflowTooltip id="anvil" tooltipText={isLogged ? 'AnVIL' : 'Please login to access AnVIL Data Library'}>
-                  <div className="logo-card" style={baseCard}>
-                    <Link
-                      to={isLogged ? '/datalibrary/anvil' : '#'}
-                      onClick={(e) => {
-                        if (!isLogged) {
-                          e.preventDefault()
-                          handleSignIn('/datalibrary/anvil')
-                        }
-                      }}
-                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                    >
-                      <img src={anvilLogo} alt="AnVIL" style={logoImg} />
-                    </Link>
-                  </div>
-                </OverflowTooltip>
+                {featuredLibraries.map((library) => {
+                  const libraryPath = `/datalibrary/${library.key}`
+                  const libraryName = library.title.replace(' Data Library', '')
+                  const tooltipText = isLogged
+                    ? libraryName
+                    : `Please login to access ${libraryName} Data Library`
 
-                <OverflowTooltip id="broad" tooltipText={isLogged ? 'Broad Institute' : 'Please login to access Broad Institute Data Library'}>
-                  <div className="logo-card" style={{ ...baseCard, background: '#1F3B50', padding: '15px' }}>
-                    <Link
-                      to={isLogged ? '/datalibrary/broad' : '#'}
-                      onClick={(e) => {
-                        if (!isLogged) {
-                          e.preventDefault()
-                          handleSignIn('/datalibrary/broad')
-                        }
-                      }}
-                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                    >
-                      <img src={broadLogo} alt="Broad Institute" style={logoImg} />
-                    </Link>
-                  </div>
-                </OverflowTooltip>
+                  // Use the library name (title without "Data Library") as the label
+                  const label = libraryName
 
-                <OverflowTooltip id="hca" tooltipText={isLogged ? 'Human Cell Atlas' : 'Please login to access Human Cell Atlas Data Library'}>
-                  <div className="logo-card" style={baseCard}>
-                    <Link
-                      to={isLogged ? '/datalibrary/HCA' : '#'}
-                      onClick={(e) => {
-                        if (!isLogged) {
-                          e.preventDefault()
-                          handleSignIn('/datalibrary/HCA')
-                        }
-                      }}
-                      style={{ textDecoration: 'none', display: 'contents', cursor: isLogged ? 'pointer' : 'pointer' }}
-                    >
-                      <img src={hcaLogo} alt="Human Cell Atlas" style={logoImg} />
-                    </Link>
-                  </div>
-                </OverflowTooltip>
+                  // Special styling for Broad Institute (dark background)
+                  const cardStyle = library.key === 'broad'
+                    ? { ...baseCard, background: '#1F3B50', padding: '15px' }
+                    : baseCard
+
+                  // Special case for Broad logo to use the imported asset
+                  const logoSrc = library.key === 'broad'
+                    ? broadLogo
+                    : library.icon
+
+                  return (
+                    <OverflowTooltip key={library.key} id={library.key} tooltipText={tooltipText}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="logo-card" style={cardStyle}>
+                          <Link
+                            to={isLogged ? libraryPath : '#'}
+                            onClick={(e) => {
+                              if (!isLogged) {
+                                e.preventDefault()
+                                handleSignIn(libraryPath)
+                              }
+                            }}
+                            style={{ textDecoration: 'none', display: 'flex', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
+                          >
+                            <img src={logoSrc} alt={libraryName} style={logoImg} />
+                          </Link>
+                        </div>
+                        {label && (
+                          <div style={{
+                            fontSize: '16px',
+                            color: '#333',
+                            textAlign: 'center',
+                            fontWeight: '600',
+                            maxWidth: '320px',
+                            wordWrap: 'break-word',
+                          }}
+                          >
+                            {label}
+                          </div>
+                        )}
+                      </div>
+                    </OverflowTooltip>
+                  )
+                })}
               </div>
             </div>
           </section>

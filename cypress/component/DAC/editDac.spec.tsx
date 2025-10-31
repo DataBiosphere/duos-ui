@@ -4,17 +4,12 @@ import { DAA } from 'src/libs/ajax/DAA'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import EditDac from 'src/pages/manage_dac/EditDac'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import admin from './admin.json'
 import chair from './chair.json'
 import daas from './daas.json'
 import dac from './dac.json'
 import { setUserRoleStatuses } from 'src/libs/utils'
-
-// It's necessary to wrap components that contain `Link` components
-const WrappedEditDac = (props: object) => {
-  return <BrowserRouter><EditDac {...props} /></BrowserRouter>
-}
 
 describe('EditDAC Tests', () => {
   Cypress._.each([admin, chair], (user) => {
@@ -23,8 +18,13 @@ describe('EditDAC Tests', () => {
       cy.stub(Storage, 'getCurrentUser').returns(user)
       cy.stub(DAC, 'get').returns(dac)
       cy.stub(DAA, 'getDaas').returns([])
-      const props = { match: { params: { dacId: dac.dacId } } }
-      mount(WrappedEditDac(props))
+      mount(
+        <MemoryRouter initialEntries={[`/manage_edit_dac_daa/${dac.dacId}`]}>
+          <Routes>
+            <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />
+          </Routes>
+        </MemoryRouter>,
+      )
       cy.contains(dac.name).should('exist')
       cy.get('[data-cy="dac_name"]').should('not.be.disabled')
       cy.get('[data-cy="dac_description"]').should('not.be.disabled')
@@ -46,18 +46,7 @@ describe('EditDAC Tests', () => {
     cy.stub(DAC, 'removeDacChair').returns(Promise.resolve(200))
     cy.stub(DAC, 'addDacMember').returns(Promise.resolve(200))
     cy.stub(DAA, 'addDaaToDac').returns(Promise.resolve(200))
-    const props = {
-      match: {
-        params: {
-          dacId: undefined,
-        },
-      },
-      history: {
-        push() {
-        },
-      },
-    }
-    mount(WrappedEditDac(props))
+    mount(<BrowserRouter><EditDac /></BrowserRouter>)
     cy.get('[data-cy="dac_name"]').should('not.be.disabled')
     cy.get('[data-cy="dac_name"]').should('be.empty')
     cy.get('[data-cy="dac_description"]').should('not.be.disabled')
@@ -88,18 +77,7 @@ describe('EditDAC Tests', () => {
     cy.stub(DAC, 'removeDacChair').returns(Promise.resolve(200))
     cy.stub(DAC, 'addDacMember').returns(Promise.resolve(200))
     cy.stub(DAA, 'addDaaToDac').returns(Promise.resolve(200))
-    const props = {
-      match: {
-        params: {
-          dacId: undefined,
-        },
-      },
-      history: {
-        push() {
-        },
-      },
-    }
-    mount(WrappedEditDac(props))
+    mount(<BrowserRouter><EditDac /></BrowserRouter>)
 
     // Try to create a DAC
     const dacCreate = cy.stub(DAC, 'create')

@@ -2,24 +2,26 @@ import React from 'react'
 import { mount } from 'cypress/react'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
-import ManageRadar, { ManageRadarProps } from 'src/pages/manage_dac/ManageRadar'
-import { BrowserRouter } from 'react-router-dom'
+import ManageRadar from 'src/pages/manage_dac/ManageRadar'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { setUserRoleStatuses } from 'src/libs/utils'
 import admin from './admin.json'
 import chair from './chair.json'
 import dac from './dac.json'
 
 // Wrapper for components that contain `Link` components
-const WrappedManageRadar = (props: Partial<ManageRadarProps>) => {
-  return <BrowserRouter><ManageRadar {...props as ManageRadarProps} /></BrowserRouter>
+const WrappedManageRadar = (mockDacId: number | undefined) => {
+  return (
+    <MemoryRouter initialEntries={[`/manage_radar/${mockDacId}`]}>
+      <Routes>
+        <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
+      </Routes>
+    </MemoryRouter>
+  )
 }
 
 describe('ManageRadar Component Tests', () => {
   const mockDacId = 123
-  const mockProps = {
-    match: { params: { dacId: mockDacId.toString() } },
-    dacId: mockDacId,
-  }
 
   beforeEach(() => {
     cy.viewport(1200, 800)
@@ -31,7 +33,7 @@ describe('ManageRadar Component Tests', () => {
       // Stub DAC.get to return a promise that doesn't resolve immediately
       cy.stub(DAC, 'get').returns(new Promise(() => {}))
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       // Should show loading spinner initially
       cy.get('[data-cy="loading-spinner"]').should('exist')
@@ -42,7 +44,7 @@ describe('ManageRadar Component Tests', () => {
       setUserRoleStatuses(admin, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       // Wait for loading to complete
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
@@ -60,7 +62,7 @@ describe('ManageRadar Component Tests', () => {
       setUserRoleStatuses(admin, Storage)
       cy.stub(DAC, 'get').rejects(new Error('Failed to fetch DAC'))
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       // Should display error message
       cy.get('[data-cy="error-container"]').should('exist')
@@ -72,9 +74,8 @@ describe('ManageRadar Component Tests', () => {
 
     it('should handle missing DAC ID parameter', () => {
       setUserRoleStatuses(admin, Storage)
-      const propsWithoutDacId = { match: { params: { dacId: '' } }, dacId: 0 }
 
-      mount(WrappedManageRadar(propsWithoutDacId))
+      mount(WrappedManageRadar(undefined))
 
       // Should handle missing DAC ID gracefully
       cy.get('[data-cy="error-container"]').should('exist')
@@ -88,7 +89,7 @@ describe('ManageRadar Component Tests', () => {
       setUserRoleStatuses(admin, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
       cy.contains(dac.name).should('exist')
@@ -101,7 +102,7 @@ describe('ManageRadar Component Tests', () => {
       setUserRoleStatuses(chair, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
       cy.contains(dac.name).should('exist')
@@ -116,7 +117,7 @@ describe('ManageRadar Component Tests', () => {
       setUserRoleStatuses(admin, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
 
@@ -133,7 +134,7 @@ describe('ManageRadar Component Tests', () => {
       setUserRoleStatuses(admin, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
 
@@ -147,7 +148,7 @@ describe('ManageRadar Component Tests', () => {
       setUserRoleStatuses(admin, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
 
@@ -171,7 +172,7 @@ describe('ManageRadar Component Tests', () => {
 
       // Test mobile viewport
       cy.viewport(375, 667)
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
       cy.get('[data-cy="manage-radar-container"]').should('be.visible')
@@ -196,7 +197,7 @@ describe('ManageRadar Component Tests', () => {
       })
       cy.stub(DAC, 'get').returns(dacPromise)
 
-      mount(WrappedManageRadar(mockProps))
+      mount(WrappedManageRadar(mockDacId))
 
       // Initially loading
       cy.get('[data-cy="loading-spinner"]').should('exist')

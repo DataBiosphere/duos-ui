@@ -2,7 +2,6 @@ import MenuIcon from '@mui/icons-material/Menu'
 import { Box, IconButton } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
 import React, { useEffect, useState } from 'react'
-import { withRouter } from 'react-router-dom'
 import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent.jsx'
 import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
@@ -15,6 +14,7 @@ import { withStyles } from 'tss-react/mui'
 import { SupportRequestModal } from './modals/SupportRequestModal'
 import './DuosHeader.css'
 import { Notification } from './Notification'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const styles = {
   drawerPaper: {
@@ -116,7 +116,9 @@ const navbarDuosText = {
 
 // eslint-disable-next-line react-refresh/only-export-components
 const DuosHeader = (props) => {
-  const { location, classes, history } = props
+  const { classes } = props
+  const navigate = useNavigate()
+  const location = useLocation()
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -144,7 +146,7 @@ const DuosHeader = (props) => {
   }
 
   const signOut = () => {
-    props.history.push('/home')
+    navigate('/home')
     toggleDrawer(false)
     Auth.signOut()
   }
@@ -191,7 +193,7 @@ const DuosHeader = (props) => {
   }
 
   const goToLink = (link) => {
-    props.history.push(link)
+    navigate(link)
     toggleDrawer(false)
   }
 
@@ -234,7 +236,7 @@ const DuosHeader = (props) => {
       showModal={state.showSupportRequestModal}
       onOkRequest={okSupportRequestModal}
       onCloseRequest={closeSupportRequestModal}
-      url={props.location.pathname}
+      url={location.pathname}
     />
   )
 
@@ -285,8 +287,6 @@ const DuosHeader = (props) => {
         <div className="row no-margin" style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
-            history={history}
-            goToLink={goToLink}
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
             DuosLogo={DuosLogo}
@@ -327,8 +327,6 @@ const DuosHeader = (props) => {
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
-              history={history}
-              goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
               makeNotifications={() => {}}
               duosLogoImage={duosLogoImage}
@@ -358,4 +356,4 @@ const DuosHeader = (props) => {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export default withRouter(withStyles(DuosHeader, styles))
+export default withStyles(DuosHeader, styles)

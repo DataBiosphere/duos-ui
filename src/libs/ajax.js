@@ -1,36 +1,14 @@
-import { getOr, isNil } from 'lodash/fp'
 import { Auth } from './auth/auth'
 import { Config } from './config'
 import { spinnerService } from './spinner-service'
 import { StackdriverReporter } from './stackdriverReporter'
-import axios from 'axios'
 
-// define axios interceptor
 // to log out user and redirect to home when response has 401 status
 // return responses with statuses in the 200s and reject the rest
-const redirectOnLogout = () => {
+export const redirectOnLogout = () => {
   Auth.signOut()
   window.location.href = `/home?redirectTo=${window.location.pathname}`
 }
-
-axios.interceptors.response.use(function (response) {
-  return response
-}, function (error) {
-  // Default to a 502 when we can't get a real response object.
-  const status = getOr(502)('response.status')(error)
-  const reportUrl = getOr(null)('response.config.url')(error)
-  const method = getOr(null)('response.config.method')(error)
-  const isMeCheck = reportUrl?.endsWith('/api/user/me') && (method?.toLowerCase() === 'get')
-  if (status === 401 && !isMeCheck) {
-    redirectOnLogout()
-  }
-
-  if (!isNil(reportUrl) && status >= 500) {
-    reportError(reportUrl, status)
-  }
-
-  return Promise.reject(error)
-})
 
 export const getApiUrl = async () => {
   return await Config.getApiUrl()

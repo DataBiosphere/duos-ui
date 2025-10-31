@@ -8,7 +8,7 @@ import { Notifications } from 'src/libs/utils'
 import { DacMembersModal } from 'src/pages/manage_dac/DacMembersModal'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DAAUtils } from 'src/utils/DAAUtils'
 
@@ -55,11 +55,11 @@ export const ManageDac = function ManageDac() {
     init()
   }, [])
 
-  const history = useHistory()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (showDatasetsPage && selectedDatasets.length > 0) {
-      history.push({
+      navigate({
         pathname: '/manage_dac_datasets',
         state: { dac: selectedDac, datasets: selectedDatasets },
       })
@@ -67,7 +67,7 @@ export const ManageDac = function ManageDac() {
     else if (showDatasetsPage && selectedDatasets.length === 0) {
       Notifications.showError({ text: 'DAC has no datasets.' })
     }
-  }, [showDatasetsPage, selectedDac, selectedDatasets, history])
+  }, [showDatasetsPage, selectedDac, selectedDatasets, navigate])
 
   const handleDeleteDac = async () => {
     let status
