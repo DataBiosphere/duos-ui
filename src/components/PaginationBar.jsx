@@ -45,6 +45,7 @@ export default function PaginationBar(props) {
             ref={currentPage}
             defaultValue={props.currentPage}
             style={Styles.TABLE.PAGINATION_INPUT}
+            aria-label="Current page number"
           />
           <span>
             {' '}
@@ -71,6 +72,7 @@ export default function PaginationBar(props) {
           ref={tableSize}
           defaultValue={props.tableSize}
           style={Styles.TABLE.PAGINATION_INPUT}
+          aria-label="Rows per page"
         />
       </div>
     </div>
