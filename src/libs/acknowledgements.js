@@ -42,3 +42,7 @@ export const acceptAcknowledgments = async (...ackKeys) => {
 }
 
 export default Acknowledgments
+
+export const AcknowledgementService = {
+  hasSOAcceptedDAAs,
+}

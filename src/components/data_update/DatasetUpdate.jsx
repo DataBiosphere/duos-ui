@@ -6,10 +6,12 @@ import { DataSet } from '../../libs/ajax/DataSet'
 import { DAR } from '../../libs/ajax/DAR'
 import { DAC } from '../../libs/ajax/DAC'
 import { Notifications } from '../../libs/utils'
+import { useNavigate } from 'react-router-dom'
 
 // TODO: Deprecated - remove this component when all datasets have been converted to studies
 export const DatasetUpdate = (props) => {
-  const { dataset, history } = props
+  const navigate = useNavigate()
+  const { dataset } = props
 
   const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} })
 
@@ -101,7 +103,7 @@ export const DatasetUpdate = (props) => {
     multiPartFormData.append('consentGroups', consentGroups)
 
     DataSet.updateDatasetV3(dataset.datasetId, multiPartFormData).then(() => {
-      history.push('/datalibrary')
+      navigate('/datalibrary')
       Notifications.showSuccess({ text: 'Update submitted successfully!' })
     }, () => {
       Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' })

@@ -1,18 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { cloneDeep, set } from 'lodash/fp'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
 import { MasterChangeHandler } from 'src/pages/data_submission/v2/v2-common-functions'
-
-export interface DataSubmissionFormV2Params {
-  studyId?: string
-}
+import { useParams } from 'react-router-dom'
 
 export const DataSubmissionFormV2 = () => {
-  const { studyId } = useParams<DataSubmissionFormV2Params>()
+  const { studyId } = useParams()
   const [formData, setFormData] = useState({} as Study)
   const [loadingError, setLoadingError] = useState(false)
 

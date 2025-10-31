@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model'
-import { History } from 'history'
 import {
   CLOSEOUT_KEYS,
   DMI_INCIDENT_KEYS,
@@ -26,17 +25,17 @@ import {
 } from 'src/utils/darFormUtils'
 import { FormValidationState } from 'src/pages/dar_application/FormValidationState'
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
-
+import { useNavigate } from 'react-router-dom'
 type ProgressReportApplicationProps = {
   readonly dar: CombinedDataAccessRequest // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[]
   readonly readOnlyMode: boolean
-  readonly history: History
   readonly researcher: DuosUser
   readonly countriesOfOperation: string[]
 }
 
-export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, history, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
+export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, researcher, countriesOfOperation }: ProgressReportApplicationProps) => {
+  const navigate = useNavigate()
   const initialState: FormState = {
     ...dar,
     intellectualProperties: (dar.intellectualProperties || []),
@@ -297,7 +296,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           <CloseoutReview
             dar={dar}
             onReturn={() => {
-              Navigation.console(Storage.getCurrentUser(), history)
+              Navigation.console(Storage.getCurrentUser(), navigate)
             }}
           />
         </div>
@@ -310,10 +309,10 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             formState={formState}
             parentReferenceId={dar.referenceId}
             onSuccess={() => {
-              Navigation.console(Storage.getCurrentUser(), history)
+              Navigation.console(Storage.getCurrentUser(), navigate)
             }}
             onCancel={() => {
-              Navigation.console(Storage.getCurrentUser(), history)
+              Navigation.console(Storage.getCurrentUser(), navigate)
             }}
             disabled={validationFailed(formValidation)}
             uploadedIrbDocument={uploadedIrbDocument}

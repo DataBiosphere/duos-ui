@@ -1,9 +1,9 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import { StudyDetails, StudyDetailsProps } from 'src/components/study_details/StudyDetails'
+import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 const datasets = [
   {
@@ -38,24 +38,17 @@ const datasets = [
   },
 ]
 
-// It's necessary to wrap components that contain `Link` components
-const WrappedStudyDetailsComponent = (props: StudyDetailsProps) => {
-  return (
-    <BrowserRouter>
-      <StudyDetails {...props} />
-    </BrowserRouter>
-  )
-}
-
 describe('Study details test', () => {
   beforeEach(() => {
     cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve(datasets))
-    const props = {
-      history: {},
-      match: { params: { studyId: 1 } },
-    } as StudyDetailsProps
-    mount(<WrappedStudyDetailsComponent {...props} />)
+    mount(
+      <MemoryRouter initialEntries={[`/studies/1`]}>
+        <Routes>
+          <Route path="/studies/:studyId" element={<StudyDetails />} />
+        </Routes>
+      </MemoryRouter>,
+    )
   })
 
   it('shows the appropriate data for fields', () => {

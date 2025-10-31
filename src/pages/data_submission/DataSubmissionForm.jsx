@@ -1,5 +1,4 @@
-import React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { validateForm } from './RegistrationValidation'
 import { cloneDeep, isNil } from 'lodash/fp'
 import { set } from 'lodash'
@@ -16,11 +15,10 @@ import NIHDataManagement from 'src/pages/data_submission/NIHDataManagement'
 import NihAnvilUse from 'src/pages/data_submission/NihAnvilUse'
 import { uniqueValidator } from 'src/components/forms/formValidation'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton.js'
+import { useNavigate } from 'react-router-dom'
 
-export const DataSubmissionForm = (props) => {
-  const {
-    history,
-  } = props
+export const DataSubmissionForm = () => {
+  const navigate = useNavigate()
 
   const [registrationSchema, setRegistrationSchema] = useState({})
   const [institutions, setInstitutions] = useState([])
@@ -163,7 +161,7 @@ export const DataSubmissionForm = (props) => {
     const multiPartFormData = createMultiPartFormData(registration)
 
     await DataSet.registerDataset(multiPartFormData)
-    history.push('/datalibrary')
+    navigate('/datalibrary')
     Notifications.showSuccess({ text: 'Submitted successfully!' })
   }
 

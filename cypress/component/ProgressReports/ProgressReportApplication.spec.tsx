@@ -5,6 +5,7 @@ import { CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject } from 
 import { History, Location, Action } from 'history'
 import { Storage } from 'src/libs/storage'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
+import { BrowserRouter } from 'react-router-dom'
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History
@@ -201,7 +202,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    return mount(<ProgressReportApplication {...props} /> as ReactNode)
+    return mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
   }
 
   it('renders the component without errors', () => {
@@ -657,7 +658,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     // Verify that only approved datasets are shown
     // The component should only show datasets that are:
@@ -758,7 +759,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     // Should show no datasets since none are approved through elections
     cy.get('[data-cy="remove-datasets"]').within(() => {
@@ -885,7 +886,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     // Only dataset 1 should be shown (meets all criteria)
     cy.get('[data-cy="remove-datasets"]').within(() => {
@@ -993,7 +994,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       countriesOfOperation: [],
     }
 
-    mount(<ProgressReportApplication {...props} /> as ReactNode)
+    mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
     cy.get('[data-cy="remove-datasets"]').should('exist')
 

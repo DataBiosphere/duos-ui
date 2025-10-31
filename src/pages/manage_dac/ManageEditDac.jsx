@@ -1,18 +1,17 @@
-import { isEmpty, filter, difference, union, map } from 'lodash'
+import { difference, filter, isEmpty, map, union } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
-import { DAC } from '../../libs/ajax/DAC'
-import { Models } from '../../libs/models'
-import { PromiseSerial } from '../../libs/utils'
-import { Alert } from '../../components/Alert'
-import { Link } from 'react-router-dom'
+import { DAC } from 'src/libs/ajax/DAC'
+import { Models } from 'src/libs/models'
+import { Notifications, PromiseSerial } from 'src/libs/utils'
+import { Alert } from 'src/components/Alert'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
-import { Notifications } from '../../libs/utils'
-import editDACIcon from '../../images/dac_icon.svg'
-import backArrowIcon from '../../images/back_arrow.svg'
-import { Spinner } from '../../components/Spinner'
-import { Storage } from '../../libs/storage'
-import { Styles } from '../../libs/theme'
+import editDACIcon from 'src/images/dac_icon.svg'
+import backArrowIcon from 'src/images/back_arrow.svg'
+import { Spinner } from 'src/components/Spinner'
+import { Storage } from 'src/libs/storage'
+import { Styles } from 'src/libs/theme'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -20,7 +19,10 @@ export const MEMBER = 'member'
 // NOTE: This component is to be removed after the promotion of the Dynamic DAA feature
 // and is to be replaced by the EditDac component.
 
-export default function ManageEditDac(props) {
+export default function ManageEditDac() {
+  const params = useParams()
+  const dacId = params.dacId
+  const navigate = useNavigate()
   const [state, setState] = useState({
     error: Models.error,
     dirtyFlag: false,
@@ -35,7 +37,6 @@ export default function ManageEditDac(props) {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [fetchedDac, setFetchedDac] = useState(null)
-  const dacId = props.match.params.dacId
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
 
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function ManageEditDac(props) {
   }
 
   const closeHandler = () => {
-    props.history.push('/manage_dac')
+    navigate('/manage_dac')
   }
 
   const handleErrors = (message) => {

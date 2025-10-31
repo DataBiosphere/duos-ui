@@ -34,6 +34,7 @@ import PropTypes from 'prop-types'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview.js'
 import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils.js'
+import { useParams, useNavigate } from 'react-router-dom'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -61,6 +62,9 @@ const fetchAllDatasets = async (dsIds) => {
 }
 
 const DataAccessRequestApplication = (props) => {
+  const params = useParams()
+  const { collectionId, dataRequestId } = params
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     datasetIds: [],
     darCode: null,
@@ -120,7 +124,7 @@ const DataAccessRequestApplication = (props) => {
     collaborationLetterName: '',
   })
 
-  const { history, existingDarsReadOnlyMode, draftDar, match, isProgressReportApplication, collection } = props
+  const { existingDarsReadOnlyMode, draftDar, isProgressReportApplication, collection } = props
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} })
 
@@ -241,7 +245,6 @@ const DataAccessRequestApplication = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { collectionId } = match.params
         if (existingDarsReadOnlyMode) {
           const { createUser } = await getDarCollection(collectionId)
           setResearcher(createUser)
@@ -260,10 +263,9 @@ const DataAccessRequestApplication = (props) => {
     }
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match.params, existingDarsReadOnlyMode])
+  }, [existingDarsReadOnlyMode])
 
   const init = useCallback(async () => {
-    const { dataRequestId, collectionId } = match.params
     let formData = {}
 
     if (!isNil(collectionId)) {
@@ -308,7 +310,7 @@ const DataAccessRequestApplication = (props) => {
     batchFormFieldChange(formData)
     setIsLoading(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match.params, researcher, existingDarsReadOnlyMode])
+  }, [researcher, existingDarsReadOnlyMode])
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {
@@ -454,7 +456,7 @@ const DataAccessRequestApplication = (props) => {
       await DAR.postDar(updatedFormData)
       setShowDialogSubmit({
         showDialogSubmit: false,
-      }, Navigation.console(Storage.getCurrentUser(), history).response)
+      }, Navigation.console(Storage.getCurrentUser(), navigate).response)
     }
     catch (error) {
       setShowDialogSubmit(false)
@@ -511,14 +513,13 @@ const DataAccessRequestApplication = (props) => {
     formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
 
     // Make sure we navigate back to the current DAR after saving.
-    const { dataRequestId } = match.params
     try {
       let referenceId = formattedFormData.referenceId
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId)
       setDatasets(await DataSet.getDatasetsByIds(formData.datasetIds))
       referenceId = darPartialResponse.referenceId
       if (isNil(dataRequestId)) {
-        history.replace('/dar_application/' + referenceId)
+        navigate('/dar_application/' + referenceId, { replace: true })
       }
       // execute saveDARDocuments method only if documents are required for the DAR
       // value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
@@ -588,10 +589,9 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const back = () => {
-    history.goBack()
+    navigate.goBack()
   }
 
-  const { dataRequestId } = match.params
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId)
 
   if (isLoading) {
@@ -674,7 +674,6 @@ const DataAccessRequestApplication = (props) => {
                     readOnlyMode={false}
                     datasets={datasets}
                     dar={merge(reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
-                    history={history}
                     researcher={researcher}
                     countriesOfOperation={countriesOfOperation}
                   />
@@ -852,8 +851,6 @@ const DataAccessRequestApplication = (props) => {
 export default DataAccessRequestApplication
 
 DataAccessRequestApplication.propTypes = {
-  match: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
   draftDar: PropTypes.bool.isRequired,
   isProgressReportApplication: PropTypes.bool.isRequired,
   existingDarsReadOnlyMode: PropTypes.bool,

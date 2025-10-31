@@ -1,14 +1,13 @@
-import { filter, isEmpty, difference, union, map } from 'lodash'
+import { difference, filter, isEmpty, map, union } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
 import { DAC } from '../../libs/ajax/DAC'
 import { DAA } from '../../libs/ajax/DAA'
 import { Models } from '../../libs/models'
-import { PromiseSerial } from '../../libs/utils'
+import { Notifications, PromiseSerial } from '../../libs/utils'
 import { Alert } from '../../components/Alert'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
-import { Notifications } from '../../libs/utils'
 import editDACIcon from '../../images/dac_icon.svg'
 import backArrowIcon from '../../images/back_arrow.svg'
 import { Spinner } from '../../components/Spinner'
@@ -21,7 +20,11 @@ import { Storage } from '../../libs/storage'
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
 
-export default function EditDac(props) {
+export default function EditDac() {
+  const params = useParams()
+  const dacId = params.dacId
+  const navigate = useNavigate()
+  const location = useLocation()
   const [state, setState] = useState({
     error: Models.error,
     dirtyFlag: false,
@@ -42,7 +45,6 @@ export default function EditDac(props) {
   const [daaFileData, setDaaFileData] = useState(null)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [fetchedDac, setFetchedDac] = useState(null)
-  const dacId = props.match.params.dacId
   const [broadDaa, setBroadDaa] = useState(null)
   const [matchingDaas, setMatchingDaas] = useState([])
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
@@ -130,7 +132,7 @@ export default function EditDac(props) {
   }
 
   const closeHandler = () => {
-    props.history.push('/manage_dac')
+    navigate('/manage_dac')
   }
 
   const handleErrors = (message) => {
@@ -686,7 +688,7 @@ export default function EditDac(props) {
               <UploadDaaModal
                 showModal={showUploadModal}
                 setShowModal={setShowUploadModal}
-                userRole={props.location.state.userRole}
+                userRole={location?.state?.userRole}
                 onCloseRequest={() => setShowUploadModal(false)}
                 onAttachmentChange={handleAttachment}
               />

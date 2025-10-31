@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Institution } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { Button, TextField } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
@@ -13,11 +13,6 @@ import { SigningOfficialsList } from 'src/components/institution_table/component
 import { FORM_MODES, InstitutionFormMode } from 'src/components/institution_table/InstitutionFormMode'
 
 interface InstitutionDetailsProps {
-  match: {
-    params: {
-      institutionId?: number
-    }
-  }
   formMode: InstitutionFormMode
 }
 
@@ -27,9 +22,10 @@ interface InstitutionDetailsUpdate {
 }
 
 export const InstitutionDetails = (props: InstitutionDetailsProps) => {
-  const { institutionId } = props.match.params
+  const params = useParams()
+  const { institutionId } = params
   const formMode = props.formMode
-  const history = useHistory()
+  const navigate = useNavigate()
   const [institutionList, setInstitutionList] = useState<Institution[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -141,7 +137,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       setInstitution(resp)
       Notifications.showSuccess({ text: 'Institution created successfully' })
       setIsEditing(false)
-      history.push(`/admin_manage_institutions/institutions/${resp.id}`)
+      navigate(`/admin_manage_institutions/institutions/${resp.id}`)
     }
     catch (error) {
       const consentError = extractConsentError(error)

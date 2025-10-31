@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { capitalize, isEmpty } from 'lodash'
 import { DatasetTerm } from 'src/types/model'
 import SimpleTable from 'src/components/SimpleTable'

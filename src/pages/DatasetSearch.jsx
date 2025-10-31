@@ -8,7 +8,7 @@ import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import PropTypes from 'prop-types'
+import { useParams, useNavigate } from 'react-router-dom'
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -73,7 +73,9 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 }
 
 export const DatasetSearch = (props) => {
-  const { match: { params: { query } } } = props
+  const navigate = useNavigate()
+  const params = useParams()
+  const query = params.query
   const [datasets, setDatasets] = useState([])
   const [queryState, setQueryState] = useState(query)
   const [loading, setLoading] = useState(true)
@@ -124,7 +126,7 @@ export const DatasetSearch = (props) => {
       if (loading || hasChangedPage) {
         if (isInstitutionSet) {
           Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' })
-          props.history.push('/profile')
+          navigate('/profile')
           return
         }
         try {
@@ -141,16 +143,7 @@ export const DatasetSearch = (props) => {
     }
     init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, isInstitutionSet, fullQuery, props.history, hasChangedPage])
-
-  DatasetSearch.propTypes = {
-    match: PropTypes.shape({
-      params: PropTypes.shape({
-        query: PropTypes.string,
-      }),
-    }).isRequired,
-    history: PropTypes.object.isRequired,
-  }
+  }, [loading, isInstitutionSet, fullQuery, navigate, hasChangedPage])
 
   return (
     loading

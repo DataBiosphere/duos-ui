@@ -1,14 +1,16 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import SignInButton from '../../../src/components/SignInButton'
-import { User } from '../../../src/libs/ajax/User'
-import { Auth } from '../../../src/libs/auth/auth'
-import { Storage } from '../../../src/libs/storage'
-import { Metrics } from '../../../src/libs/ajax/Metrics'
-import { StackdriverReporter } from '../../../src/libs/stackdriverReporter'
-import { ToS } from '../../../src/libs/ajax/ToS'
-import { ServiceStatus } from '../../../src/libs/ajax/ServiceStatus'
+import SignInButton from 'src/components/SignInButton'
+import { User } from 'src/libs/ajax/User'
+import { Auth } from 'src/libs/auth/auth'
+import { Storage } from 'src/libs/storage'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import { StackdriverReporter } from 'src/libs/stackdriverReporter'
+import { ToS } from 'src/libs/ajax/ToS'
+import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import { mockOidcUser } from '../Auth/mockOidcUser'
+import { BrowserRouter } from 'react-router-dom'
+
 const signInText = 'Sign In'
 
 const duosUser = {
@@ -57,7 +59,7 @@ describe('Sign In: Component Loads', function () {
   })
 
   it('Sign In Button Loads', function () {
-    mount(<SignInButton history={undefined} />)
+    mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.contains(signInText).should('exist')
     cy.get('button').should('exist').and('not.be.disabled')
   })
@@ -70,7 +72,7 @@ describe('Sign In: Component Loads', function () {
     cy.stub(Metrics, 'syncProfile').as('syncProfile')
     cy.stub(Metrics, 'captureEvent').as('captureEvent')
     cy.stub(ToS, 'getStatus').returns(userStatus)
-    mount(<SignInButton history={[]} />)
+    mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
       expect(Storage.getCurrentUser()).to.deep.equal(duosUser)
@@ -88,7 +90,7 @@ describe('Sign In: Component Loads', function () {
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: bareUser }).as('getMe')
     cy.stub(StackdriverReporter, 'report').as('report')
     cy.stub(ToS, 'getStatus').returns(userStatus)
-    mount(<SignInButton history={[]} />)
+    mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
       cy.get('@report').should('be.called')
@@ -99,12 +101,10 @@ describe('Sign In: Component Loads', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: duosUser }).as('getMe')
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
-    const history = []
-    mount(<SignInButton history={history} />)
+    mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
-      assert.isNotEmpty(history, 'History should not be empty')
-      assert.isTrue(history[0].includes('tos_acceptance'), 'History should contain tos_acceptance')
+      cy.location('pathname').should('eq', '/tos_acceptance')
     })
   })
 
@@ -114,24 +114,22 @@ describe('Sign In: Component Loads', function () {
     cy.stub(User, 'getMe').throws()
     cy.intercept({ method: 'POST', url: '**/api/user' }, { statusCode: 200, body: duosUser }).as('registerUser')
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
-    const history = []
-    mount(<SignInButton history={history} />)
+    mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@registerUser').then(() => {
-      assert.isNotEmpty(history, 'History should not be empty')
-      assert.isTrue(history[0].includes('tos_acceptance'), 'History should contain tos_acceptance')
+      cy.location('pathname').should('eq', '/tos_acceptance')
     })
   })
 
   it('Sign In: Button is disabled when SAM is unhealthy', function () {
     cy.stub(ServiceStatus, 'isSamHealthy').resolves(false)
-    mount(<SignInButton history={[]} />)
+    mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').should('exist').and('be.disabled')
   })
 
   it('Sign In: Button is disabled when Consent is unhealthy', function () {
     cy.stub(ServiceStatus, 'isConsentHealthy').resolves(false)
-    mount(<SignInButton history={[]} />)
+    mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').should('exist').and('be.disabled')
   })
 })
