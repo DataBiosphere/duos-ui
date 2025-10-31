@@ -13,7 +13,7 @@ export const generateStudyPropertyYesNoField = (formData: Study, onChange: Maste
   return (
     <FormField
       id={studyProperty.key}
-      title="Is this a multi-center study?"
+      title={studyProperty.fieldTitle}
       type={FormFieldTypes.YESNORADIOGROUP}
       defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
       onChange={({ _key, value }: { _key: string, value: boolean }) => {
