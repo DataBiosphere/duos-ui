@@ -85,7 +85,7 @@ export function createDataUseDisplay({
         effect="solid"
         id={`dataset-data-use-${dataset.datasetId}`}
       >
-        <ul>
+        <ul role="list" aria-label="Data use code descriptions">
           {codesAndDescriptions.map((translation, index) => {
             return (
               <li

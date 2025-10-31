@@ -187,49 +187,42 @@ export default function MultiDatasetVoteSlab({
   return (
     <div style={styles.baseStyle} data-cy="dataset-vote-slab">
       <div style={{ display: 'inline' }}>
-        <table className="layout-table" style={{ width: '-webkit-fill-available' }}>
-          <thead><tr><th /></tr></thead>
-          <tbody>
-            <tr>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                <div style={styles.slabTitle} key={convertLabelToKey(get(bucket, 'key', 'slab-title'))}>
-                  <span style={styles.slatTitleText}>{title}</span>
-                </div>
-                <DataUseSummary bucket={bucket} />
-              </td>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                <div style={styles.question}>
-                  <p>Should data access be granted to this applicant?</p>
-                </div>
-                <VoteInfoSubsection
-                  currentUserVotes={currentUserVotes}
-                  bucket={bucket}
-                  isChair={isChair}
-                  isApprovalDisabled={isApprovalDisabled}
-                  isLoading={isLoading}
-                  readOnly={readOnly}
-                  adminPage={adminPage}
-                  updateFinalVote={updateFinalVote}
-                  reloadFn={reloadFn}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                <ChairVoteInfo
-                  dacVotes={dacVotes}
-                  isChair={isChair}
-                  adminPage={adminPage}
-                />
-              </td>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                {!isDMI && !isEmpty(algorithmResult) && (
-                  <CollectionAlgorithmDecision algorithmResult={algorithmResult} />
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', width: '100%' }}>
+          <div style={{ verticalAlign: 'text-top' }}>
+            <div style={styles.slabTitle} key={convertLabelToKey(get(bucket, 'key', 'slab-title'))}>
+              <span style={styles.slatTitleText}>{title}</span>
+            </div>
+            <DataUseSummary bucket={bucket} />
+          </div>
+          <div style={{ verticalAlign: 'text-top' }}>
+            <div style={styles.question}>
+              <p>Should data access be granted to this applicant?</p>
+            </div>
+            <VoteInfoSubsection
+              currentUserVotes={currentUserVotes}
+              bucket={bucket}
+              isChair={isChair}
+              isApprovalDisabled={isApprovalDisabled}
+              isLoading={isLoading}
+              readOnly={readOnly}
+              adminPage={adminPage}
+              updateFinalVote={updateFinalVote}
+              reloadFn={reloadFn}
+            />
+          </div>
+          <div style={{ verticalAlign: 'text-top' }}>
+            <ChairVoteInfo
+              dacVotes={dacVotes}
+              isChair={isChair}
+              adminPage={adminPage}
+            />
+          </div>
+          <div style={{ verticalAlign: 'text-top' }}>
+            {!isDMI && !isEmpty(algorithmResult) && (
+              <CollectionAlgorithmDecision algorithmResult={algorithmResult} />
+            )}
+          </div>
+        </div>
 
         <div style={{ paddingLeft: '20px' }}>
           <MemberVoteSummary

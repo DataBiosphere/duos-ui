@@ -28,23 +28,25 @@ const Status = () => {
 
   return (
     <div style={{ margin: '2rem' }}>
-      <ul style={{ marginTop: '2rem', listStyle: 'none', fontSize: 'x-large' }}>
-        <li>
-          <a href="#consent">Consent</a>
-          {' '}
-          {consentHealthy}
-        </li>
-        <li>
-          <a href="#ontology">Ontology</a>
-          {' '}
-          {ontologyHealthy}
-        </li>
-        <li>
-          <a href="#sam">Sam</a>
-          {' '}
-          {samHealthy}
-        </li>
-      </ul>
+      <nav aria-label="Service status navigation">
+        <ul style={{ marginTop: '2rem', listStyle: 'none', fontSize: 'x-large' }}>
+          <li>
+            <a href="#consent">Consent</a>
+            {' '}
+            {consentHealthy}
+          </li>
+          <li>
+            <a href="#ontology">Ontology</a>
+            {' '}
+            {ontologyHealthy}
+          </li>
+          <li>
+            <a href="#sam">Sam</a>
+            {' '}
+            {samHealthy}
+          </li>
+        </ul>
+      </nav>
       <hr />
       <h2><a id="consent">Consent Status</a></h2>
       <pre>{JSON.stringify(consentStatus, null, 4)}</pre>

@@ -74,15 +74,15 @@ const ColumnRow = ({ columnHeaders, baseStyle, columnStyle, sort, onSort }) => {
               }
               else if (header.data) {
                 return (
-                  <li className="dropdown" style={{ listStyleType: 'none' }}>
-                    <div role="button" data-toggle="dropdown">
+                  <div className="dropdown">
+                    <button type="button" data-toggle="dropdown" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                       <div id="dacUser">
                         {label}
                         <span className="caret caret-margin" style={{ color: '#337ab7' }}></span>
                       </div>
-                    </div>
+                    </button>
                     {data}
-                  </li>
+                  </div>
                 )
               }
               else {

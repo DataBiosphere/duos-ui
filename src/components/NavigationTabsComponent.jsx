@@ -72,7 +72,7 @@ export const NavigationTabsComponent = (props) => {
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
       {makeNotifications()}
-      <ul className="navbar-main">
+      <div className="navbar-main" role="navigation">
         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           {
             orientation === 'horizontal' && (
@@ -110,7 +110,7 @@ export const NavigationTabsComponent = (props) => {
           }
           {
             !isLogged && (
-              <ul className="navbar-public">
+              <ul className="navbar-public" role="list">
                 <li>
                   <a
                     id="link_about"
@@ -201,14 +201,21 @@ export const NavigationTabsComponent = (props) => {
               <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>
             </button>
             {supportrequestModal}
-            <li className="dropdown user-li" onClick={showProfileLinks} style={{ listStyleType: 'none' }}>
-              <a id="sel_user" role="button" className="dropdown-toggle" data-toggle="dropdown">
+            <div className="dropdown user-dropdown">
+              <button
+                id="sel_user"
+                onClick={showProfileLinks}
+                className="dropdown-toggle"
+                aria-expanded={profileState}
+                aria-haspopup="true"
+                style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}
+              >
                 <div id="dacUser">
                   {currentUser.displayName}
                   <span className="caret caret-margin"></span>
                 </div>
                 <small id="dacUserMail">{currentUser.email}</small>
-              </a>
+              </button>
               <ul
                 className="dropdown-menu navbar-dropdown"
                 role="menu"
@@ -224,10 +231,10 @@ export const NavigationTabsComponent = (props) => {
                   <a id="link_signOut" onClick={signOut}>Sign out</a>
                 </li>
               </ul>
-            </li>
+            </div>
           </div>
         )}
-      </ul>
+      </div>
 
       {/* Sub Tabs */}
       {tabs[selectedMenuTab]?.children && (

@@ -225,71 +225,52 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
       style={{ marginLeft: '3rem', paddingBottom: '2%', ...styles.baseStyle as React.CSSProperties }}
       data-cy="collection-vote-box"
     >
-      <table>
-        <thead>
-          <tr>
-            <th>
-              {question && <div style={styles.question}>{question}</div>}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <div>
-                <VoteSubsectionHeading
-                  vote={vote}
-                  adminPage={adminPage}
-                  isFinal={isFinal}
-                  isVotingDisabled={isVotingDisabled}
-                  isRadar={isRadar}
-                />
-                <div style={styles.voteButtons}>
-                  {!isVotingDisabled && (
-                    <CollectionVoteYesButton
-                      onClick={async () => await updateVote(true, !!updateFinalVote)}
-                      onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
-                      disabled={voteInProgress || isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
-                      isSelected={vote === true}
-                    />
-                  )}
-                  {!isVotingDisabled && (
-                    <CollectionVoteNoButton
-                      onClick={async () => await updateVote(false, !!updateFinalVote)}
-                      onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
-                      disabled={voteInProgress || isLoading || isVotingDisabled || isElectionClosed}
-                      isSelected={vote === false}
-                    />
-                  )}
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div style={styles.subsection}>
-                <span style={styles.rationaleTitle}>Rationale (optional):</span>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div style={styles.subsection}>
-                <textarea
-                  name="Rationale Input"
-                  value={rationale}
-                  placeholder="Optional: Enter your comments and describe your rationale prior to voting."
-                  onChange={e => setRationale(e.target.value)}
-                  onBlur={updateRationale}
-                  style={styles.rationaleTextArea}
-                  rows={4}
-                  disabled={isVotingDisabled || isLoading}
-                />
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div>
+        {question && <div style={styles.question}>{question}</div>}
+      </div>
+      <div>
+        <VoteSubsectionHeading
+          vote={vote}
+          adminPage={adminPage}
+          isFinal={isFinal}
+          isVotingDisabled={isVotingDisabled}
+          isRadar={isRadar}
+        />
+        <div style={styles.voteButtons}>
+          {!isVotingDisabled && (
+            <CollectionVoteYesButton
+              onClick={async () => await updateVote(true, !!updateFinalVote)}
+              onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
+              disabled={voteInProgress || isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
+              isSelected={vote === true}
+            />
+          )}
+          {!isVotingDisabled && (
+            <CollectionVoteNoButton
+              onClick={async () => await updateVote(false, !!updateFinalVote)}
+              onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
+              disabled={voteInProgress || isLoading || isVotingDisabled || isElectionClosed}
+              isSelected={vote === false}
+            />
+          )}
+        </div>
+      </div>
+      <div style={styles.subsection}>
+        <label htmlFor="vote-rationale" style={styles.rationaleTitle}>Rationale (optional):</label>
+      </div>
+      <div style={styles.subsection}>
+        <textarea
+          id="vote-rationale"
+          name="Rationale Input"
+          value={rationale}
+          placeholder="Optional: Enter your comments and describe your rationale prior to voting."
+          onChange={e => setRationale(e.target.value)}
+          onBlur={updateRationale}
+          style={styles.rationaleTextArea}
+          rows={4}
+          disabled={isVotingDisabled || isLoading}
+        />
+      </div>
     </div>
   )
 }

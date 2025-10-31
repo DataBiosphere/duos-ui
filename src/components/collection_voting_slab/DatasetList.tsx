@@ -52,12 +52,12 @@ export default function DatasetList(props: DatasetListProps) {
       )
     : (
         <div data-cy="dataset-list">
-          <table style={{ width: '-webkit-fill-available' }}>
+          <table style={{ width: '-webkit-fill-available' }} role="table" aria-label="Datasets requested">
             <thead>
               <tr>
-                <th>Dataset Identifier</th>
-                <th>Dataset Name</th>
-                <th>DAC</th>
+                <th scope="col">Dataset Identifier</th>
+                <th scope="col">Dataset Name</th>
+                <th scope="col">DAC</th>
               </tr>
             </thead>
             <tbody>
