@@ -47,8 +47,8 @@ export class StringStudyProperty extends StudyProperty {
 }
 
 export class BooleanStudyProperty extends StudyProperty {
-  fieldTitle: string
-  constructor(key: string, fieldTitle: string, value?: boolean | undefined, studyId?: number, studyPropertyId?: number) {
+  fieldTitle: string | React.JSX.Element
+  constructor(key: string, fieldTitle: string | React.JSX.Element, value?: boolean | undefined, studyId?: number, studyPropertyId?: number) {
     super(key, 'Boolean', value, studyId, studyPropertyId)
     this.fieldTitle = fieldTitle
   }
@@ -218,7 +218,7 @@ export class AlternativeDataSharingPlan extends BooleanStudyProperty {
   )
 
   constructor(value?: boolean, studyId?: number, studyPropertyId?: number) {
-    super(AlternativeDataSharingPlan.key, AlternativeDataSharingPlan.key, value, studyId, studyPropertyId)
+    super(AlternativeDataSharingPlan.key, AlternativeDataSharingPlan.fieldTitle, value, studyId, studyPropertyId)
   }
 }
 

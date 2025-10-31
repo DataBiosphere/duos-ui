@@ -23,22 +23,31 @@ export interface NihDataManagementProps {
 export const NihDataManagement = (props: NihDataManagementProps) => {
   const { onChange, onFileChange, formData } = props
   const [isRequired, setIsRequired] = useState(false)
-  const [showAlternativeDataSharingPlan, setShowAlternativeDataSharingPlan] = useState(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlan.key))
   useEffect(() => {
     const nihAnvilUse = getStudyPropertyValueByKey(formData, new NihAnvilUse().key) as string
     setIsRequired(NihAnvilUse.requiresNIHAdministrativeInformation(nihAnvilUse))
   }, [formData])
 
   const onAlternativeDataSharingPlanReasonsChange = ({ key }: { key: string }) => {
-    const setReasons: string[] = getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[]
+    let setReasons: string[] = getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []
     if (Object.keys(AlternativeDataSharingPlanReasons.VALUES).includes(key)) {
       const target = AlternativeDataSharingPlanReasons.VALUES[key as keyof typeof AlternativeDataSharingPlanReasons.VALUES]
       const index = setReasons.indexOf(target)
+      let removed = false
       if (index > -1) {
         setReasons.splice(index, 1)
+        removed = true
       }
       else {
         setReasons.push(target)
+      }
+      if ((target === AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate) && removed) {
+        if (setReasons.includes(AlternativeDataSharingPlanReasons.VALUES.legalRestrictions)) {
+          setReasons = [AlternativeDataSharingPlanReasons.VALUES.legalRestrictions]
+        }
+        else {
+          setReasons = []
+        }
       }
       setStudyPropertyByKey(formData, onChange, { isValid: true }, new AlternativeDataSharingPlanReasons(setReasons))
     }
@@ -50,11 +59,8 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
         isRequired && (
           <>
             <h2>NIH Data Management & Sharing Policy Details</h2>
-            {generateStudyPropertyYesNoField(formData, ({ key, value, isValid }) => {
-              setShowAlternativeDataSharingPlan(value)
-              onChange({ key, value, isValid })
-            }, new AlternativeDataSharingPlan())}
-            {showAlternativeDataSharingPlan && (
+            {generateStudyPropertyYesNoField(formData, onChange, new AlternativeDataSharingPlan())}
+            {(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlan.key) === true) && (
               <div>
                 <h3>Please mark the reasons for which you are requesting an Alternative Data Sharing plan (check all that apply)*</h3>
                 <FormField
