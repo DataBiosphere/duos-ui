@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { FundingResource } from 'src/types/model'
+import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
 interface FundingSourceAddEditProps {
   readonly id: number
@@ -11,13 +12,13 @@ interface FundingSourceAddEditProps {
 }
 
 interface Validation {
-  funderName?: unknown
-  funderProgram?: unknown
-  grantNumber?: unknown
-  projectTitle?: unknown
-  startDate?: unknown
-  endDate?: unknown
-  url?: unknown
+  funderName?: ValidationError
+  funderProgram?: ValidationError
+  grantNumber?: ValidationError
+  projectTitle?: ValidationError
+  startDate?: ValidationError
+  endDate?: ValidationError
+  url?: ValidationError
 }
 
 const defaultFunding: FundingResource = {
@@ -33,10 +34,12 @@ const defaultFunding: FundingResource = {
   tags: [],
 }
 
+const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+
 const calcErrors = (f: FundingResource): Validation => {
   const v: Validation = {}
-  if (!f.funderName?.trim()) v.funderName = { error: 'Required' }
-  if (!f.projectTitle?.trim()) v.projectTitle = { error: 'Required' }
+  if (!f.funderName?.trim()) v.funderName = makeError('Required')
+  if (!f.projectTitle?.trim()) v.projectTitle = makeError('Required')
   return v
 }
 

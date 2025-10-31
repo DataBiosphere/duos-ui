@@ -34,8 +34,8 @@ export interface DarErrors {
   pubAcknowledgement?: ValidationError
   dsAcknowledgement?: ValidationError
   progressReportSummary?: ValidationError
-  intellectualPropertyYesNo?: ValidationError
-  intellectualPropertySummary?: ValidationError
+  intellectualPropertiesYesNo?: ValidationError
+  intellectualProperties?: ValidationError
   publicationsYesNo?: ValidationError
   publications?: ValidationError
   presentationsYesNo?: ValidationError
@@ -64,6 +64,7 @@ export interface DarErrors {
   aiModels?: ValidationError
   clinicalTrials?: ValidationError
   fundingResources?: ValidationError
+  workspaces?: ValidationError
 }
 
 export interface RusErrors {

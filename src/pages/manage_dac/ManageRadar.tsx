@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from 'react'
-import backArrowIcon from '../../images/back_arrow.svg'
+import React, { useEffect, useState } from 'react'
+import backArrowIcon from 'src/images/back_arrow.svg'
 import { DACBotComponent } from 'src/components/dac_bot/DACBotComponent'
-import { DAC } from '../../libs/ajax/DAC'
-import { Link } from 'react-router-dom'
-import { Styles } from '../../libs/theme'
-import { Notifications } from '../../libs/utils'
-import radarIcon from '../../images/google-svg/radar.svg'
+import { DAC } from 'src/libs/ajax/DAC'
+import { Link, useParams } from 'react-router-dom'
+import { Styles } from 'src/libs/theme'
+import { Notifications } from 'src/libs/utils'
+import radarIcon from 'src/images/google-svg/radar.svg'
 import { Spinner } from 'src/components/Spinner'
 
-export type ManageRadarProps = {
-  match: { params: { dacId: string } }
-  dacId: number
-}
-
-const ManageRadar = (props: ManageRadarProps) => {
-  const dacIdParam = props.match.params.dacId
+const ManageRadar = () => {
+  const params = useParams<{ dacId: string }>()
+  const dacIdParam = params.dacId || ''
   const dacId = parseInt(dacIdParam, 10)
 
   const [fetchedDac, setFetchedDac] = useState<{ name: string } | null>(null)

@@ -4,6 +4,7 @@ import { Storage } from '../../../src/libs/storage'
 import { User } from '../../../src/libs/ajax/User'
 import { Institution } from '../../../src/libs/ajax/Institution'
 import UserProfile from '../../../src/pages/user_profile/UserProfile'
+import { BrowserRouter } from 'react-router-dom'
 
 const duosUser = {
   isSigningOfficial: false,
@@ -20,7 +21,7 @@ describe('User Profile', () => {
     cy.stub(User, 'getMe').returns(duosUser)
     cy.stub(User, 'getApprovedDatasets').returns([])
     cy.stub(User, 'getAcknowledgements').returns({})
-    mount(<UserProfile />)
+    mount(<BrowserRouter><UserProfile /></BrowserRouter>)
     cy.get('h2').should('contain', 'Your Profile')
   })
 
@@ -34,7 +35,7 @@ describe('User Profile', () => {
       { method: 'PUT', url: '**/user' },
       { statusCode: 200, body: duosUser },
     ).as('updateSelf')
-    mount(<UserProfile />)
+    mount(<BrowserRouter><UserProfile /></BrowserRouter>)
     cy.get('input[id="profileEmailEnabled_yes"]').check()
     cy.wait('@updateSelf').then(() => {
       cy.get('div').contains('Email preference updated successfully!')

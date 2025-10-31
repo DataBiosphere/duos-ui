@@ -13,7 +13,7 @@ export interface DataSubmissionFormV2Params {
 }
 
 export const DataSubmissionFormV2 = () => {
-  const { studyId } = useParams<DataSubmissionFormV2Params>()
+  const { studyId } = useParams()
   const [formData, setFormData] = useState({} as Study)
   const [loadingError, setLoadingError] = useState(false)
 

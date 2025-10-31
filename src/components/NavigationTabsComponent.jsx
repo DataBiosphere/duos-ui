@@ -52,7 +52,6 @@ const styles = {
 
 export const NavigationTabsComponent = (props) => {
   const {
-    history,
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
@@ -100,7 +99,8 @@ export const NavigationTabsComponent = (props) => {
                       key={`${tab.link}_${tabIndex}`}
                       label={tab.label}
                       style={selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab}
-                      to={{ pathname: tab.link, state: { selectedMenuTab: tabIndex } }}
+                      to={{ pathname: tab.link }}
+                      state={{ selectedMenuTab: tabIndex }}
                       component={Link}
                     />
                   ))}
@@ -152,10 +152,7 @@ export const NavigationTabsComponent = (props) => {
                 {/* Sign-in button location when window is narrow and menu is vertical */}
                 {!isLogged && orientation === 'vertical' && (
                   <li style={{ marginRight: 0 }}>
-                    <SignInButton
-                      props={props}
-                      history={history}
-                    />
+                    <SignInButton props={props} />
                   </li>
                 )}
               </ul>
@@ -174,10 +171,7 @@ export const NavigationTabsComponent = (props) => {
                 flexDirection: orientation === 'vertical' ? 'column' : 'row',
               }}
             >
-              <SignInButton
-                props={props}
-                history={history}
-              />
+              <SignInButton props={props} />
             </div>
           )}
         {isLogged && (
@@ -252,7 +246,8 @@ export const NavigationTabsComponent = (props) => {
                       key={`${tab.link}_${tabIndex}`}
                       label={tab.label}
                       style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
-                      to={{ pathname: tab.link, state: { selectedMenuTab: selectedMenuTab } }}
+                      to={{ pathname: tab.link }}
+                      state={{ selectedMenuTab: selectedMenuTab }}
                       component={Link}
                     />
                   )

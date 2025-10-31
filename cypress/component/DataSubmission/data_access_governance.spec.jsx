@@ -7,6 +7,7 @@ import { Study } from 'src/libs/ajax/Study'
 import { User } from 'src/libs/ajax/User'
 import DataSubmissionForm from 'src/pages/data_submission/DataSubmissionForm'
 import { mount } from 'cypress/react'
+import { BrowserRouter } from 'react-router-dom'
 
 const dacs = [
   {
@@ -35,7 +36,7 @@ beforeEach(() => {
 
 describe('Data Access Governance', function () {
   it('Adds multiple consent groups', function () {
-    mount(<DataSubmissionForm />)
+    mount(<BrowserRouter><DataSubmissionForm /></BrowserRouter>)
 
     cy.get('#0_consentGroupForm').should('exist')
     cy.get('#1_consentGroupForm').should('not.exist')
@@ -62,7 +63,7 @@ describe('Data Access Governance', function () {
   })
 
   it('Delete consent group works', function () {
-    mount(<DataSubmissionForm />)
+    mount(<BrowserRouter><DataSubmissionForm /></BrowserRouter>)
 
     cy.get('#btn_addConsentGroup').click()
     cy.get('#btn_addConsentGroup').click()

@@ -1,15 +1,16 @@
 import * as React from 'react'
 import { useCallback, useEffect, useState } from 'react'
-import { Notifications } from '../../libs/utils'
-import loadingIndicator from '../../images/loading-indicator.svg'
-import SortableTable from '../../components/sortable_table/SortableTable'
-import { concat, join, isNil } from 'lodash/fp'
+import { Notifications } from 'src/libs/utils'
+import loadingIndicator from 'src/images/loading-indicator.svg'
+import SortableTable from 'src/components/sortable_table/SortableTable'
+import { concat, isNil, join } from 'lodash/fp'
 import Button from '@mui/material/Button'
-import { Link } from 'react-router-dom'
-import { DataSet } from '../../libs/ajax/DataSet'
-import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog'
+import { Link, useNavigate } from 'react-router-dom'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 
 export default function DatasetSubmissionsTable(props) {
+  const navigate = useNavigate()
   const spinner = (
     <div style={{ textAlign: 'center', height: '44', width: '180' }}>
       <img src={loadingIndicator} alt="Loading" />
@@ -91,7 +92,7 @@ export default function DatasetSubmissionsTable(props) {
         Notifications.showSuccess({
           text: `Removed dataset '${termName}' successfully.`,
         })
-        props.history.push('/datalibrary')
+        navigate('/datalibrary')
       })
     }
     catch (_error) {

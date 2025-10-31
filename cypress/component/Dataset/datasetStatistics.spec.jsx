@@ -4,6 +4,7 @@ import DatasetStatistics from 'src/pages/DatasetStatistics'
 import datasetTerm from './datasetTerm.json'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { BrowserRouter } from 'react-router-dom'
 
 describe('Dataset Statistics Tests', () => {
   beforeEach(() => {
@@ -25,7 +26,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(datasetTerm.datasetIdentifier).should('exist')
   })
 
@@ -44,7 +45,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(datasetTerm.datasetIdentifier).should('exist')
   })
 
@@ -64,7 +65,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(controlled.datasetIdentifier).should('exist')
     cy.contains(controlled.datasetName).should('exist')
     cy.contains('Apply for Access').should('exist')
@@ -86,7 +87,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(external.datasetIdentifier).should('exist')
     cy.contains(external.datasetName).should('exist')
     cy.contains('This dataset is externally managed').should('exist')
@@ -109,7 +110,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(external.datasetIdentifier).should('exist')
     cy.contains(external.datasetName).should('exist')
     cy.contains('This dataset is externally managed').should('exist')
@@ -132,7 +133,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(open.datasetIdentifier).should('exist')
     cy.contains(open.datasetName).should('exist')
     cy.contains('This dataset is open access, does not require an access request').should('exist')
@@ -155,7 +156,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(open.datasetIdentifier).should('exist')
     cy.contains(open.datasetName).should('exist')
     cy.contains('This dataset is open access, does not require an access request').should('exist')
@@ -177,7 +178,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains(datasetTerm.datasetIdentifier).should('exist')
   })
 
@@ -205,7 +206,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains('Data Custodian').should('exist')
     dataCustodians.forEach((dataCustodian) => {
       cy.contains(dataCustodian).should('exist')
@@ -228,7 +229,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains('Data Use').should('not.exist')
   })
 
@@ -248,7 +249,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains('Data Use').should('exist')
     cy.contains(datasetTerm.dataUse.primary[0].code).should('exist')
   })
@@ -268,7 +269,7 @@ describe('Dataset Statistics Tests', () => {
         },
       },
     }
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains('Principal Investigator').should('exist')
     cy.contains(datasetTerm.study.piName).should('exist')
   })
@@ -289,7 +290,7 @@ describe('Dataset Statistics Tests', () => {
       history: { push() {} },
     }
 
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains('Data Access Requests for this dataset').should('exist')
     cy.contains('DAR-123').should('exist')
     cy.contains('Test Project').should('exist')
@@ -304,7 +305,7 @@ describe('Dataset Statistics Tests', () => {
       history: { push() {} },
     }
 
-    mount(<DatasetStatistics {...props} />)
+    mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains('No Data Access Requests have been created for this dataset').should('exist')
   })
 })

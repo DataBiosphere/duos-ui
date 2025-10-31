@@ -74,10 +74,8 @@ export default function AdminManageInstitutions() {
             <div>
               <Link
                 id="btn_addInstitution"
-                to={{
-                  pathname: '/admin_manage_institutions/create_new',
-                  state: { institutionList },
-                }}
+                to="/admin_manage_institutions/create_new"
+                state={{ institutionList }}
                 className="btn-primary btn-add common-background"
                 style={{ marginTop: '30%', display: 'block', lineHeight: 0.6 }}
               >
