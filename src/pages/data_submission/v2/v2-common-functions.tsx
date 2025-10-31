@@ -3,7 +3,7 @@ import {
   Study,
   StudyProperty,
   StringStudyProperty,
-  DateStudyProperty, MultiCenterStudy, BooleanStudyProperty,
+  DateStudyProperty, BooleanStudyProperty,
 } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 

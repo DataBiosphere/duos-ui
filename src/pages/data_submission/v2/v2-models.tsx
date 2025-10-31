@@ -128,15 +128,28 @@ export class PhenotypeIndication extends StringStudyProperty {
   }
 }
 
-export class AlternativeDataSharingPlanExplanation extends StudyProperty {
+export class AlternativeDataSharingPlanExplanation extends StringStudyProperty {
   static readonly key = 'alternativeDataSharingPlanExplanation'
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
-    super(AlternativeDataSharingPlanExplanation.key, 'String' as StudyPropertyType, value, studyId, studyPropertyId)
+  static readonly fieldTitle = 'Explanation for request'
+  static readonly fieldPlaceholderText = 'Enter the explanation for the request'
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super(AlternativeDataSharingPlanExplanation.key, AlternativeDataSharingPlanExplanation.fieldTitle, AlternativeDataSharingPlanExplanation.fieldPlaceholderText, value, studyId, studyPropertyId)
   }
 }
 
 export class AlternativeDataSharingPlanReasons extends StudyProperty {
   static readonly key = 'alternativeDataSharingPlanReasons'
+  static readonly VALUES = {
+    legalRestrictions: 'Legal Restrictions',
+    isInformedConsentProcessesInadequate: 'Informed consent processes are inadequate to support data for sharing for the following reasons:',
+    consentFormsUnavailable: 'The consent forms are unavailable or non-existent for samples collected after January 25, 2015',
+    consentProcessDidNotAddressFutureUseOrBroadSharing: 'The consent process did not specifically address future use or broad data sharing for samples collected after January 25, 2015',
+    consentProcessInadequatelyAddressesRisk: 'The consent process inadequately addresses risks related to future use or broad data sharing for samples collected after January 25, 2015',
+    consentProcessPrecludesFutureUseOrBroadSharing: 'The consent process specifically precludes future use or broad data sharing (including a statement that use of data will be limited to the original researchers)',
+    otherInformedConsentLimitationsOrConcerns: 'Other informed consent limitations or concerns',
+    otherReasonForRequest: 'Other',
+  }
+
   constructor(value: string[], studyId?: number, studyPropertyId?: number) {
     super('alternativeDataSharingPlanReasons', 'Json' as StudyPropertyType, value, studyId, studyPropertyId)
   }
@@ -160,7 +173,8 @@ export class NihICsSupportingStudy extends StudyProperty {
 
 export class AlternativeDataSharingPlanDataSubmitted extends StudyProperty {
   static readonly key = 'alternativeDataSharingPlanDataSubmitted'
-  constructor(value: string, studyId?: number, studyPropertyId?: number) {
+  static readonly fieldTitle = 'Data will be submitted:'
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
     super(AlternativeDataSharingPlanDataSubmitted.key, 'String' as StudyPropertyType, value, studyId, studyPropertyId)
   }
 }
@@ -240,10 +254,11 @@ export class SequencingCenter extends StringStudyProperty {
   }
 }
 
-export class AlternativeDataSharingPlanDataReleased extends StudyProperty {
+export class AlternativeDataSharingPlanDataReleased extends BooleanStudyProperty {
   static readonly key = 'alternativeDataSharingPlanDataReleased'
-  constructor(value: boolean, studyId?: number, studyPropertyId?: number) {
-    super(AlternativeDataSharingPlanDataReleased.key, 'Boolean' as StudyPropertyType, value, studyId, studyPropertyId)
+  static readonly fieldTitle = 'Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release'
+  constructor(value?: boolean, studyId?: number, studyPropertyId?: number) {
+    super(AlternativeDataSharingPlanDataReleased.key, AlternativeDataSharingPlanDataReleased.fieldTitle, value, studyId, studyPropertyId)
   }
 }
 
