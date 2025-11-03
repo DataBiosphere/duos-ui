@@ -6,10 +6,11 @@ import {
   DateStudyProperty, BooleanStudyProperty,
 } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
+import { cloneDeep, set } from 'lodash'
 
-export type MasterChangeHandler = ({ key, value, isValid }: { key: string, value: unknown, isValid: boolean }) => void
+export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
-export const generateStudyPropertyYesNoField = (formData: Study, onChange: MasterChangeHandler, studyProperty: BooleanStudyProperty) => {
+export const generateStudyPropertyYesNoField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: BooleanStudyProperty) => {
   return (
     <FormField
       id={studyProperty.key}
@@ -18,13 +19,13 @@ export const generateStudyPropertyYesNoField = (formData: Study, onChange: Maste
       defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
       onChange={({ _key, value }: { _key: string, value: boolean }) => {
         studyProperty.value = value
-        setStudyPropertyByKey(formData, onChange, { isValid: true }, studyProperty)
+        setStudyPropertyByKey(formData, setStudy, { isValid: true }, studyProperty)
       }}
     />
   )
 }
 
-export const generateStudyPropertyFormTextField = (formData: Study, onChange: MasterChangeHandler, studyProperty: StringStudyProperty, validators: Array<unknown> = []) => {
+export const generateStudyPropertyFormTextField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: StringStudyProperty, validators: Array<unknown> = []) => {
   return (
     <FormField
       id={studyProperty.key}
@@ -34,13 +35,13 @@ export const generateStudyPropertyFormTextField = (formData: Study, onChange: Ma
       defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as string
-        setStudyPropertyByKey(formData, onChange, input, studyProperty)
+        setStudyPropertyByKey(formData, setStudy, input, studyProperty)
       }}
     />
   )
 }
 
-export const generateStudyInputFormTextField = (onChange: MasterChangeHandler, id: string, initialValue: string | undefined, title: string, placeholder: string, validators: Array<unknown> = []) => {
+export const generateStudyInputFormTextField = (setStudy: React.Dispatch<React.SetStateAction<Study>>, id: string, initialValue: string | undefined, title: string, placeholder: string, validators: Array<unknown> = []) => {
   return (
     <FormField
       id={id}
@@ -49,13 +50,16 @@ export const generateStudyInputFormTextField = (onChange: MasterChangeHandler, i
       validators={validators}
       defaultValue={initialValue}
       onChange={(input: { key: string, value: string, isValid: boolean }) => {
-        onChange(input)
+        setStudy((val: Study) => {
+          const newForm = cloneDeep(val)
+          return set(newForm, input.key, input.value)
+        })
       }}
     />
   )
 }
 
-export const generateStudyPropertyFormDateField = (formData: Study, onChange: MasterChangeHandler, studyProperty: DateStudyProperty, validators: Array<unknown> = [], style: unknown = {}) => {
+export const generateStudyPropertyFormDateField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: DateStudyProperty, validators: Array<unknown> = [], style: unknown = {}) => {
   return (
     <FormField
       id={studyProperty.key}
@@ -66,28 +70,49 @@ export const generateStudyPropertyFormDateField = (formData: Study, onChange: Ma
       defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as Date
-        setStudyPropertyByKey(formData, onChange, input, studyProperty)
+        setStudyPropertyByKey(formData, setStudy, input, studyProperty)
       }}
     />
   )
 }
 
-export const setStudyPropertyByKey = (formData: Study, onChange: MasterChangeHandler, input: { isValid: boolean }, propertyInstance: StudyProperty) => {
+export const setStudyPropertyByKey = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, input: { isValid: boolean }, propertyInstance: StudyProperty) => {
   if (!input.isValid) {
     return
   }
-  formData.properties = formData.properties ?? []
-  const filteredProperty = formData.properties.find(prop => prop.key === propertyInstance.key)
+  const studyToUpdate = cloneDeep(formData)
+  studyToUpdate.properties = studyToUpdate.properties ?? []
+  const filteredProperty = studyToUpdate.properties.find(prop => prop.key === propertyInstance.key)
   if (filteredProperty) {
     filteredProperty.value = propertyInstance.value
   }
   else {
-    formData.properties.push(propertyInstance.toJSON() as StudyProperty)
+    studyToUpdate.properties.push(propertyInstance.toJSON() as StudyProperty)
   }
-  onChange({ key: 'properties', value: formData.properties, isValid: input.isValid })
+  setStudy(() => {
+    return studyToUpdate
+  })
 }
 
-export const getStudyPropertyValueByKey = (formData: Study, key: string) => {
+export const removeStudyPropertiesByKeys = (study: Study, keys: Set<string>) => {
+  if (!study?.properties || !Array.isArray(study.properties)) {
+    return study
+  }
+  else {
+    const arr: StudyProperty[] = study.properties
+    let i = 0
+    while (i < arr.length) {
+      if (keys.has(arr[i].key)) {
+        arr.splice(i, 1)
+      }
+      else {
+        ++i
+      }
+    }
+  }
+}
+
+export const getStudyPropertyValueByKey = (formData: Study, key: string): unknown => {
   if (!formData?.properties) {
     return undefined
   }

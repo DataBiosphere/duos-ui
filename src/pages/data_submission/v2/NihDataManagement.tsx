@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import {
   AlternativeDataSharingPlan,
   AlternativeDataSharingPlanDataReleased, AlternativeDataSharingPlanDataSubmitted,
@@ -10,26 +10,22 @@ import {
   generateStudyPropertyFormTextField,
   generateStudyPropertyYesNoField,
   getStudyPropertyValueByKey,
-  MasterChangeHandler, setStudyPropertyByKey,
+  MasterChangeHandler, removeStudyPropertiesByKeys, setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { cloneDeep, unset } from 'lodash'
 
 export interface NihDataManagementProps {
-  formData: Study
-  onChange: MasterChangeHandler
+  study: Study
+  setStudy: React.Dispatch<React.SetStateAction<Study>>
   formFiles: unknown
   onFileChange: MasterChangeHandler
 }
 export const NihDataManagement = (props: NihDataManagementProps) => {
-  const { onChange, onFileChange, formData } = props
-  const [isRequired, setIsRequired] = useState(false)
-  useEffect(() => {
-    const nihAnvilUse = getStudyPropertyValueByKey(formData, new NihAnvilUse().key) as string
-    setIsRequired(NihAnvilUse.requiresNIHAdministrativeInformation(nihAnvilUse))
-  }, [formData])
+  const { setStudy, onFileChange, study } = props
 
   const onAlternativeDataSharingPlanReasonsChange = ({ key }: { key: string }) => {
-    let setReasons: string[] = getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []
+    let setReasons: string[] = getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []
     if (Object.keys(AlternativeDataSharingPlanReasons.VALUES).includes(key)) {
       const target = AlternativeDataSharingPlanReasons.VALUES[key as keyof typeof AlternativeDataSharingPlanReasons.VALUES]
       const index = setReasons.indexOf(target)
@@ -49,81 +45,102 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
           setReasons = []
         }
       }
-      setStudyPropertyByKey(formData, onChange, { isValid: true }, new AlternativeDataSharingPlanReasons(setReasons))
+      setStudyPropertyByKey(study, setStudy, { isValid: true }, new AlternativeDataSharingPlanReasons(setReasons))
     }
   }
 
   return (
     <div className="data-submitter-section">
       {(
-        isRequired && (
+        NihAnvilUse.requiresNIHAdministrativeInformation(getStudyPropertyValueByKey(study, NihAnvilUse.key) as string | undefined) && (
           <>
             <h2>NIH Data Management & Sharing Policy Details</h2>
-            {generateStudyPropertyYesNoField(formData, onChange, new AlternativeDataSharingPlan())}
-            {(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlan.key) === true) && (
+            <FormField
+              id={AlternativeDataSharingPlan.key}
+              title={AlternativeDataSharingPlan.fieldTitle}
+              type={FormFieldTypes.YESNORADIOGROUP}
+              defaultValue={getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key)}
+              onChange={({ _key, value }: { _key: string, value: boolean }) => {
+                setStudyPropertyByKey(study, setStudy, { isValid: true }, new AlternativeDataSharingPlan(value))
+                if (!value) {
+                  setStudy((val) => {
+                    const newVal = cloneDeep(val)
+                    removeStudyPropertiesByKeys(newVal, new Set([AlternativeDataSharingPlanReasons.key,
+                      AlternativeDataSharingPlanExplanation.key,
+                      AlternativeDataSharingPlanDataSubmitted.key,
+                      AlternativeDataSharingPlanDataReleased.key]))
+                    unset(study, 'alternativeDataSharingPlanFile')
+                    return newVal
+                  })
+                }
+              }}
+            />
+            {generateStudyPropertyYesNoField(study, setStudy, new AlternativeDataSharingPlan())}
+
+            {(getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key) === true) && (
               <div>
                 <h3>Please mark the reasons for which you are requesting an Alternative Data Sharing plan (check all that apply)*</h3>
                 <FormField
                   id="legalRestrictions"
-                  defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.legalRestrictions)}
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.legalRestrictions)}
                   type={FormFieldTypes.CHECKBOX}
                   onChange={onAlternativeDataSharingPlanReasonsChange}
                   toggleText="Legal Restrictions"
                 />
                 <FormField
                   id="isInformedConsentProcessesInadequate"
-                  defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate)}
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate)}
                   type={FormFieldTypes.CHECKBOX}
                   onChange={onAlternativeDataSharingPlanReasonsChange}
                   toggleText="Informed consent processes are inadequate to support data for sharing for the following reasons:"
                 />
-                {(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate) && (
+                {(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate) && (
                   <div style={{ marginLeft: '2rem' }}>
                     <FormField
                       id="consentFormsUnavailable"
-                      defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentFormsUnavailable)}
+                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentFormsUnavailable)}
                       type={FormFieldTypes.CHECKBOX}
                       onChange={onAlternativeDataSharingPlanReasonsChange}
                       toggleText="The consent forms are unavailable or non-existant for samples collected after January 25, 2015"
                     />
                     <FormField
                       id="consentProcessDidNotAddressFutureUseOrBroadSharing"
-                      defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessDidNotAddressFutureUseOrBroadSharing)}
+                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessDidNotAddressFutureUseOrBroadSharing)}
                       type={FormFieldTypes.CHECKBOX}
                       onChange={onAlternativeDataSharingPlanReasonsChange}
                       toggleText="The consent process did not specifically address future use or broad data sharing for samples collected after January 25, 2015"
                     />
                     <FormField
                       id="consentProcessInadequatelyAddressesRisk"
-                      defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessInadequatelyAddressesRisk)}
+                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessInadequatelyAddressesRisk)}
                       type={FormFieldTypes.CHECKBOX}
                       onChange={onAlternativeDataSharingPlanReasonsChange}
                       toggleText="The consent processes inadequately addresses risks related to future use or broad data sharing for samples collected after January 25, 2015"
                     />
                     <FormField
                       id="consentProcessPrecludesFutureUseOrBroadSharing"
-                      defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessPrecludesFutureUseOrBroadSharing)}
+                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessPrecludesFutureUseOrBroadSharing)}
                       type={FormFieldTypes.CHECKBOX}
                       onChange={onAlternativeDataSharingPlanReasonsChange}
                       toggleText="The consent specifically precludes future use or broad sharing (including a statement that use of data will be limited to the original researchers)"
                     />
                     <FormField
                       id="otherInformedConsentLimitationsOrConcerns"
-                      defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherInformedConsentLimitationsOrConcerns)}
+                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherInformedConsentLimitationsOrConcerns)}
                       type={FormFieldTypes.CHECKBOX}
                       onChange={onAlternativeDataSharingPlanReasonsChange}
                       toggleText="Other informed consent limitations or concerns"
                     />
                     <FormField
                       id="otherReasonForRequest"
-                      defaultValue={(getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherReasonForRequest)}
+                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherReasonForRequest)}
                       type={FormFieldTypes.CHECKBOX}
                       onChange={onAlternativeDataSharingPlanReasonsChange}
                       toggleText="Other"
                     />
                   </div>
                 )}
-                {generateStudyPropertyFormTextField(formData, onChange, new AlternativeDataSharingPlanExplanation(), [FormValidators.REQUIRED])}
+                {generateStudyPropertyFormTextField(study, setStudy, new AlternativeDataSharingPlanExplanation(), [FormValidators.REQUIRED])}
                 <FormField
                   type={FormFieldTypes.FILE}
                   title="Upload your alternative sharing plan."
@@ -135,7 +152,7 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                   type={FormFieldTypes.RADIOGROUP}
                   title={AlternativeDataSharingPlanDataSubmitted.fieldTitle}
                   id={AlternativeDataSharingPlanDataSubmitted.key}
-                  defaultValue={getStudyPropertyValueByKey(formData, AlternativeDataSharingPlanDataSubmitted.key)}
+                  defaultValue={getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataSubmitted.key)}
                   options={[
                     {
                       text: 'Within 3 months of the last data generated or last clinical visit',
@@ -149,10 +166,10 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                     },
                   ]}
                   onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-                    setStudyPropertyByKey(formData, onChange, input, new AlternativeDataSharingPlanDataSubmitted(input.value as string))
+                    setStudyPropertyByKey(study, setStudy, input, new AlternativeDataSharingPlanDataSubmitted(input.value as string))
                   }}
                 />
-                {generateStudyPropertyYesNoField(formData, onChange, new AlternativeDataSharingPlanDataReleased())}
+                {generateStudyPropertyYesNoField(study, setStudy, new AlternativeDataSharingPlanDataReleased())}
               </div>
             )}
           </>

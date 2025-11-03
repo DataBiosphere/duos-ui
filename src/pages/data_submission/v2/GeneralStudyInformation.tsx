@@ -14,26 +14,25 @@ import {
   generateStudyPropertyFormDateField,
   generateStudyPropertyFormTextField,
   getStudyPropertyValueByKey,
-  MasterChangeHandler,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { DataTypes } from 'src/components/forms/DataTypes'
 
 export interface GeneralStudyInformationProps {
-  formData: Study
-  onChange: MasterChangeHandler
+  study: Study
+  setStudy: React.Dispatch<React.SetStateAction<Study>>
 }
 
 export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => {
   const {
-    onChange,
-    formData,
+    setStudy,
+    study,
   } = props
 
   return (
     <div className="data-submitter-section">
       <h2>Study Information</h2>
-      {generateStudyInputFormTextField(onChange, 'studyName', formData?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
+      {generateStudyInputFormTextField(setStudy, 'studyName', study?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
       <FormField
         id={StudyTypeProperty.key}
         title={StudyTypeProperty.fieldTitle}
@@ -43,9 +42,9 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         isCreatable={true}
         validators={[FormValidators.REQUIRED]}
         selectConfig={{}}
-        defaultValue={getStudyPropertyValueByKey(formData, 'studyType')}
+        defaultValue={getStudyPropertyValueByKey(study, 'studyType')}
         onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new StudyTypeProperty(input.value as string))
+          setStudyPropertyByKey(study, setStudy, input, new StudyTypeProperty(input.value as string))
         }}
       />
       <FormField
@@ -54,9 +53,9 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         id="studyDescription"
         title="Study Description"
         placeholder="Description"
-        defaultValue={formData?.description}
+        defaultValue={study?.description}
         validators={[FormValidators.REQUIRED]}
-        onChange={onChange}
+        onChange={setStudy}
       />
       <FormField
         id="dataTypes"
@@ -68,12 +67,12 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         isMulti={true}
         optionsAreString={true}
         selectOptions={DataTypes.VALUES.map(entry => (`${entry.name}` + (entry.abbreviation ? ` (${entry.abbreviation})` : '')))}
-        defaultValue={formData?.dataTypes}
-        onChange={onChange}
+        defaultValue={study?.dataTypes}
+        onChange={setStudy}
       />
-      {generateStudyPropertyFormTextField(formData, onChange, new PhenotypeIndication())}
-      {generateStudyPropertyFormTextField(formData, onChange, new Species())}
-      {generateStudyInputFormTextField(onChange, 'piName', formData?.piName, 'Principal Investigator Name', 'Enter the Principal Investigator\'s name', [FormValidators.REQUIRED])}
+      {generateStudyPropertyFormTextField(study, setStudy, new PhenotypeIndication())}
+      {generateStudyPropertyFormTextField(study, setStudy, new Species())}
+      {generateStudyInputFormTextField(setStudy, 'piName', study?.piName, 'Principal Investigator Name', 'Enter the Principal Investigator\'s name', [FormValidators.REQUIRED])}
       <FormField
         id={DataCustodianEmail.key}
         title="Data Custodian Email"
@@ -91,14 +90,14 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
           },
         }}
         placeholder="Add one or more emails"
-        defaultValue={getStudyPropertyValueByKey(formData, 'dataCustodianEmail')}
+        defaultValue={getStudyPropertyValueByKey(study, 'dataCustodianEmail')}
         onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new DataCustodianEmail(input.value as string[]))
+          setStudyPropertyByKey(study, setStudy, input, new DataCustodianEmail(input.value as string[]))
         }}
       />
       <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        {generateStudyPropertyFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
-        {generateStudyPropertyFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
+        {generateStudyPropertyFormDateField(study, setStudy, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
+        {generateStudyPropertyFormDateField(study, setStudy, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
       </div>
       <FormField
         id="publicVisibility"
@@ -111,8 +110,8 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
           { name: true, text: 'Yes, I want my dataset info to be visible and available for requests' },
           { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' },
         ]}
-        defaultValue={formData?.publicVisibility}
-        onChange={onChange}
+        defaultValue={study?.publicVisibility}
+        onChange={setStudy}
       />
     </div>
   )

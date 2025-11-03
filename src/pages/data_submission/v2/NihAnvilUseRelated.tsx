@@ -2,26 +2,31 @@ import React from 'react'
 import {
   Study,
   NihAnvilUse, DbGaPPhsID,
-  DbGaPStudyRegistrationName, EmbargoReleaseDate, SequencingCenter,
+  DbGaPStudyRegistrationName, EmbargoReleaseDate, SequencingCenter, PiInstitution, NihGrantContractNumber,
+  NihICsSupportingStudy, NihProgramOfficerName, NihInstitutionCenterSubmission, NihGenomicProgramAdministratorName,
+  MultiCenterStudy, CollaboratingSites, ControlledAccessRequiredForGenomicSummaryResultsGSR,
+  ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation, AlternativeDataSharingPlan,
+  AlternativeDataSharingPlanReasons, AlternativeDataSharingPlanExplanation, AlternativeDataSharingPlanDataSubmitted,
+  AlternativeDataSharingPlanDataReleased,
 } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import {
   generateStudyPropertyFormDateField,
   generateStudyPropertyFormTextField,
-  getStudyPropertyValueByKey,
-  MasterChangeHandler,
+  getStudyPropertyValueByKey, removeStudyPropertiesByKeys,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
+import { cloneDeep } from 'lodash'
 
 export interface NihAnvilUseRelatedProps {
-  formData: Study
-  onChange: MasterChangeHandler
+  study: Study
+  setStudy: React.Dispatch<React.SetStateAction<Study>>
 }
 
 export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   const {
-    onChange,
-    formData,
+    setStudy,
+    study,
   } = props
 
   return (
@@ -32,18 +37,44 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
         title="Will you or did you submit data to the NIH?"
         type={FormFieldTypes.RADIOGROUP}
         options={NihAnvilUse.NIH_ANVIL_USE_RADIOGROUP_OPTIONS}
-        defaultValue={getStudyPropertyValueByKey(formData, 'nihAnvilUse')}
+        defaultValue={getStudyPropertyValueByKey(study, 'nihAnvilUse')}
         validators={[FormValidators.REQUIRED]}
-        onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new NihAnvilUse(input.value as string))
+        onChange={(input: { key: string, value: string | undefined, isValid: boolean }) => {
+          setStudyPropertyByKey(study, setStudy, input, new NihAnvilUse(input.value as string))
+          if (NihAnvilUse.requiresNIHAdministrativeInformation(input.value)) {
+            setStudy((val) => {
+              const newVal = cloneDeep(val)
+              removeStudyPropertiesByKeys(newVal, new Set([DbGaPPhsID.key,
+                DbGaPStudyRegistrationName.key,
+                EmbargoReleaseDate.key,
+                SequencingCenter.key,
+                PiInstitution.key,
+                NihGrantContractNumber.key,
+                NihICsSupportingStudy.key,
+                NihProgramOfficerName.key,
+                NihInstitutionCenterSubmission.key,
+                NihGenomicProgramAdministratorName.key,
+                MultiCenterStudy.key,
+                CollaboratingSites.key,
+                ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
+                ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
+                AlternativeDataSharingPlan.key,
+                AlternativeDataSharingPlanReasons.key,
+                AlternativeDataSharingPlanExplanation.key,
+                AlternativeDataSharingPlanDataSubmitted.key,
+                AlternativeDataSharingPlanDataReleased.key,
+              ]))
+              return newVal
+            })
+          }
         }}
       />
-      {getStudyPropertyValueByKey(formData, 'nihAnvilUse') === NihAnvilUse.YES_NHGRI_YES_PHS_ID && (
+      {getStudyPropertyValueByKey(study, 'nihAnvilUse') === NihAnvilUse.YES_NHGRI_YES_PHS_ID && (
         <>
-          {generateStudyPropertyFormTextField(formData, onChange, new DbGaPPhsID(), [FormValidators.REQUIRED])}
-          {generateStudyPropertyFormTextField(formData, onChange, new DbGaPStudyRegistrationName())}
-          {generateStudyPropertyFormDateField(formData, onChange, new EmbargoReleaseDate(), [FormValidators.DATE])}
-          {generateStudyPropertyFormTextField(formData, onChange, new SequencingCenter())}
+          {generateStudyPropertyFormTextField(study, setStudy, new DbGaPPhsID(), [FormValidators.REQUIRED])}
+          {generateStudyPropertyFormTextField(study, setStudy, new DbGaPStudyRegistrationName())}
+          {generateStudyPropertyFormDateField(study, setStudy, new EmbargoReleaseDate(), [FormValidators.DATE])}
+          {generateStudyPropertyFormTextField(study, setStudy, new SequencingCenter())}
         </>
       )}
     </div>
