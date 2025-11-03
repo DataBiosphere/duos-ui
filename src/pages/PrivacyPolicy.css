@@ -24,6 +24,10 @@ div.markdown-body {
   list-style-type: lower-roman;
 }
 
-.markdown-body p, div {
+.markdown-body p {
+  margin-bottom: 1.5rem;
+}
+
+.markdown-body div {
   margin-bottom: 1.5rem;
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import './PrivacyPolicy.css'
 
 export default function CookiePolicy() {
   return (
