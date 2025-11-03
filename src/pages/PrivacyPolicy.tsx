@@ -27,7 +27,7 @@ We follow the laws of all the countries where we operate. We follow the laws of 
     3. User Account Information/Personally Identifiable Information
         * When you register with us through the Site and during your use of the Site, we will ask you for personally-identifiable information, which is information about you that can be used to contact or identify you ("Personal Information"), such as: your name, company or organization name, title, e-mail address, postal address, telephone number.
     4. Cookies Policy
-        * Please see our [Cookie Policy](https://duos.broadinstitute.org/cookie_policy) for information about how we use cookies and similar technologies to collect information through the Site.
+        * Please see our [Cookie Policy](/cookie_policy) for information about how we use cookies and similar technologies to collect information through the Site.
     5. User Software and Reference Data
         * You may also be permitted to upload your own software and data, including reference genomes, to the Site in the course of using the Site. You agree to and accept full responsibility for obtaining all permissions, consents, and rights necessary for uploading and using any such software and data to and with the Site. The software you upload must comply with the DUOS "Terms of Use Policy".
 2. How Your Information May be Used
