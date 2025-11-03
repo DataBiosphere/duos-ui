@@ -187,6 +187,26 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
     errors.ontologies = requiredError
   }
 
+  // Only validate visible fields based on previous selections
+  if (formData.diseases === false) {
+    if (isNil(formData.hmb)) {
+      errors.hmb = requiredError
+    }
+    else if (formData.hmb === false) {
+      if (isNil(formData.poa)) {
+        errors.poa = requiredError
+      }
+      else if (formData.poa === false) {
+        if (isNil(formData.methods)) {
+          errors.methods = requiredError
+        }
+        else if (formData.methods === false && isEmpty(formData.otherText)) {
+          errors.otherText = requiredError
+        }
+      }
+    }
+  }
+
   if (isStringEmpty(formData.nonTechRus)) {
     errors.nonTechRus = requiredError
   }

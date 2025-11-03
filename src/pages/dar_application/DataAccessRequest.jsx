@@ -167,11 +167,12 @@ export default function DataAccessRequest(props) {
         <FormField
           id="diseases"
           key="diseases"
-          title={<h4>Is the primary purpose of this research to investigate a specific disease(s)?</h4>}
+          title="Is the primary purpose of this research to investigate a specific disease(s)?"
           disabled={readOnlyMode}
           type={FormFieldTypes.YESNORADIOGROUP}
           orientation="horizontal"
           defaultValue={formData.diseases}
+          validators={[FormValidators.REQUIRED]}
           validation={validation.diseases}
           onValidationChange={onValidationChange}
           onChange={primaryChange}
@@ -207,9 +208,10 @@ export default function DataAccessRequest(props) {
               key="hmb"
               type={FormFieldTypes.YESNORADIOGROUP}
               disabled={readOnlyMode}
-              title={<h4>Is the primary purpose health/medical/biomedical research in nature?</h4>}
+              title="Is the primary purpose health/medical/biomedical research in nature?"
               orientation="horizontal"
               defaultValue={formData.hmb}
+              validators={[FormValidators.REQUIRED]}
               validation={validation.hmb}
               onValidationChange={onValidationChange}
               onChange={primaryChange}
@@ -222,9 +224,10 @@ export default function DataAccessRequest(props) {
               key="poa"
               type={FormFieldTypes.YESNORADIOGROUP}
               disabled={readOnlyMode}
-              title={<h4>Is the primary purpose of this research regarding population origins or ancestry?</h4>}
+              title="Is the primary purpose of this research regarding population origins or ancestry?"
               orientation="horizontal"
               defaultValue={formData.poa}
+              validators={[FormValidators.REQUIRED]}
               validation={validation.poa}
               onValidationChange={onValidationChange}
               onChange={primaryChange}
@@ -238,9 +241,10 @@ export default function DataAccessRequest(props) {
               key="methods"
               type={FormFieldTypes.YESNORADIOGROUP}
               disabled={readOnlyMode}
-              title={<h4>Is the primary purpose of this research to develop or validate new methods for analyzing/interpreting data?</h4>}
+              title="Is the primary purpose of this research to develop or validate new methods for analyzing/interpreting data?"
               orientation="horizontal"
               defaultValue={formData.methods}
+              validators={[FormValidators.REQUIRED]}
               validation={validation.methods}
               onValidationChange={onValidationChange}
               onChange={primaryChange}
@@ -253,9 +257,10 @@ export default function DataAccessRequest(props) {
               id="otherText"
               key="otherText"
               disabled={readOnlyMode}
-              title={<h4>If none of the above, please describe the primary purpose of your research:</h4>}
+              title="If none of the above, please describe the primary purpose of your research:"
               placeholder="Please specify..."
               defaultValue={formData.otherText}
+              validators={[FormValidators.REQUIRED]}
               validation={validation.otherText}
               onValidationChange={onValidationChange}
               onChange={onChange}
