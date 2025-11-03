@@ -15,7 +15,7 @@ export const Metrics = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details: Record<string, any> = {},
     signal: AbortSignal = defaultSignal,
-  ) => captureEventFn(event, details, signal).catch(() => {
+  ) => captureEventFn(event, signal, details).catch(() => {
   }),
   syncProfile: (signal: AbortSignal = defaultSignal) => syncProfile(signal),
   identify: (anonId: string, signal: AbortSignal = defaultSignal) => identify(anonId, signal),
@@ -25,12 +25,12 @@ export const Metrics = {
  * Captures an event with its details.
  *
  * @param {string} event - The event name.
- * @param {Object} [details={}] - The event details.
  * @param {AbortSignal} [signal] - The abort signal.
+ * @param {Object} [details={}] - The event details.
  * @returns {Promise} - A Promise that resolves when the event is captured.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const captureEventFn = async (event: MetricsEventName, details: object = {}, signal: AbortSignal): Promise<any> => {
+const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, details: object = {}): Promise<any> => {
   const isSignedIn = Storage.userIsLogged()
   const isRegistered = isSignedIn && Storage.getCurrentUser()
 
