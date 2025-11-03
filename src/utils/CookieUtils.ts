@@ -1,12 +1,11 @@
 export const getCookiePairs = () => {
   const cookies = document.cookie
   const cookiePairs: Record<string, string> = {}
-  cookies
-    .split(';')
-    .forEach((cookieStr) => {
-      const [name, ...rest] = cookieStr.split('=')
-      cookiePairs[name.trim()] = decodeURIComponent(rest.join('=').trim())
-    })
+  for (const cookieStr of cookies
+    .split(';')) {
+    const [name, ...rest] = cookieStr.split('=')
+    cookiePairs[name.trim()] = decodeURIComponent(rest.join('=').trim())
+  }
   return cookiePairs
 }
 
