@@ -5,7 +5,6 @@
 import { OidcBroker, OidcUser } from './oidcBroker'
 import { Storage } from './../storage'
 import { UserManager } from 'oidc-client-ts'
-import { MetricsEventName } from '../events'
 
 export const Auth = {
   signInError: () => {
