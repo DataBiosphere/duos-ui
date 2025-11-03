@@ -9,6 +9,7 @@ import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
 import { createMemoryHistory } from 'history'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
+import { CookeUtils } from 'src/utils/CookieUtils'
 
 const user = {
   userId: 2,
@@ -126,6 +127,7 @@ describe('Main App Functions', () => {
   })
 
   it('should initialize ReactGA and StackdriverReporter', () => {
+    cy.stub(CookeUtils, 'getAnalyticsControl').returns(true)
     mount(
       <MemoryRouter initialEntries={['/']}>
         <App />
@@ -133,6 +135,16 @@ describe('Main App Functions', () => {
     )
     cy.wrap(ReactGA.initialize).should('have.been.calledOnceWith', 'UA-12345678-1')
     cy.wrap(StackdriverReporter.start).should('have.been.calledOnce')
+  })
+
+  it('should NOT initialize ReactGA when analytics are not allowed', () => {
+    cy.stub(CookeUtils, 'getAnalyticsControl').returns(false)
+    mount(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+    cy.wrap(ReactGA.initialize).should('not.have.been.called')
   })
 
   it('should display an error when ECM fails', () => {
