@@ -53,6 +53,7 @@ import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResea
 import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
 import Translator from 'src/pages/Translator'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import CookiePolicy from 'src/pages/CookiePolicy'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -69,6 +70,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/nih_ic_webform" element={<NIHICWebform />} />
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/cookie_policy" element={<CookiePolicy />} />
       <Route path="/tos" element={<TermsOfService />} />
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/consent_text_generator" element={<ConsentTextGenerator />} />
