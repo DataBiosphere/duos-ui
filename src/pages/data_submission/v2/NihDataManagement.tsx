@@ -75,8 +75,6 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                 }
               }}
             />
-            {generateStudyPropertyYesNoField(study, setStudy, new AlternativeDataSharingPlan())}
-
             {(getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key) === true) && (
               <div>
                 <h3>Please mark the reasons for which you are requesting an Alternative Data Sharing plan (check all that apply)*</h3>
