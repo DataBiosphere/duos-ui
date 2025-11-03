@@ -88,7 +88,7 @@ export default function ManageCookies() {
               <AccordionDetails>
                 <Typography sx={{ fontSize: '1.5rem' }} component="span">
                   These cookies allow us to count visits and traffic sources, so we can measure and improve the
-                  performance of the UEFA Platforms. They help us know which pages are the most and least popular and
+                  performance of the DUOS site. They help us know which pages are the most and least popular and
                   see how visitors move around the site.
                 </Typography>
               </AccordionDetails>
