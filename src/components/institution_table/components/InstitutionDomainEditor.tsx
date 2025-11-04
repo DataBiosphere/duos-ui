@@ -23,7 +23,7 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
   const validateDomain = (domain: string): string | null => {
     try {
       // Check if it's a valid FQDN (Fully Qualified Domain Name)
-      const fqdnRegex = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.[A-Za-z]{2,}$/
+      const fqdnRegex = /^(?!-)[\p{L}\p{N}-]{1,63}(?<!-)(\.(?!-)[\p{L}\p{N}-]{1,63}(?<!-))*\.[\p{L}]{2,}$/u
       const isFQDN = (str: string) => fqdnRegex.test(str)
       if (!isFQDN(domain)) {
         return 'Please enter a valid domain name (e.g., example.com)'
