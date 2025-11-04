@@ -1,7 +1,6 @@
 import { Button, Chip, TextField } from '@mui/material'
 import React, { useState } from 'react'
 import { Institution } from 'src/types/model'
-import isFQDN from 'src/utils/isFQDN'
 
 interface DomainEditorProps {
   domains: string[]
@@ -24,13 +23,9 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
   const validateDomain = (domain: string): string | null => {
     try {
       // Check if it's a valid FQDN (Fully Qualified Domain Name)
-      if (!isFQDN(domain, {
-        require_tld: true,
-        allow_underscores: false,
-        allow_trailing_dot: false,
-        allow_numeric_tld: false,
-        allow_wildcard: false,
-      })) {
+      const fqdnRegex = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.[A-Za-z]{2,}$/
+      const isFQDN = (str: string) => fqdnRegex.test(str)
+      if (!isFQDN(domain)) {
         return 'Please enter a valid domain name (e.g., example.com)'
       }
 
