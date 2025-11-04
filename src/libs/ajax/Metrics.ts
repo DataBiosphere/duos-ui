@@ -15,8 +15,7 @@ export const Metrics = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details: Record<string, any> = {},
     signal: AbortSignal = defaultSignal,
-    refreshAppcues: boolean = true,
-  ) => captureEventFn(event, details, signal, refreshAppcues).catch(() => {
+  ) => captureEventFn(event, signal, details).catch(() => {
   }),
   syncProfile: (signal: AbortSignal = defaultSignal) => syncProfile(signal),
   identify: (anonId: string, signal: AbortSignal = defaultSignal) => identify(anonId, signal),
@@ -26,21 +25,14 @@ export const Metrics = {
  * Captures an event with its details.
  *
  * @param {string} event - The event name.
- * @param {Object} [details={}] - The event details.
  * @param {AbortSignal} [signal] - The abort signal.
- * @param refreshAppcues - The refresh Appcues flag.
+ * @param {Object} [details={}] - The event details.
  * @returns {Promise} - A Promise that resolves when the event is captured.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const captureEventFn = async (event: MetricsEventName, details: object = {}, signal: AbortSignal, refreshAppcues: boolean): Promise<any> => {
+const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, details: object = {}): Promise<any> => {
   const isSignedIn = Storage.userIsLogged()
   const isRegistered = isSignedIn && Storage.getCurrentUser()
-
-  // Send event to Appcues and refresh Appcues state
-  window.Appcues?.track(event)
-  if (refreshAppcues) {
-    window.Appcues?.page()
-  }
 
   if (!isRegistered && !Storage.getAnonymousId()) {
     Storage.setAnonymousId()
@@ -87,17 +79,6 @@ const syncProfile = async (signal: AbortSignal): Promise<any> => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
   const body = { anonId }
-
-  if (window.Appcues) {
-    const user = Storage.getCurrentUser()
-    const oidcSub = Storage.getOidcUser()?.profile?.sub || Storage.getAnonymousId()
-    const createDate = user.createDate ? user.createDate : new Date().getTime()
-    const appcuesProps = {
-      dateJoined: createDate,
-      app: 'DUOS',
-    }
-    window.Appcues.identify(oidcSub, appcuesProps)
-  }
 
   const url = `${await getBardApiUrl()}/api/identify`
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
