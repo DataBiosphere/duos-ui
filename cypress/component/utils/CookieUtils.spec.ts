@@ -46,9 +46,12 @@ describe('CookieUtils', () => {
     it('should clear analytics cookies when allowed is false', () => {
       // Set some analytics cookies
       document.cookie = '_ga=123; _gid=456;'
+      let pairs = CookieUtils.getCookiePairs()
+      cy.wrap(pairs._ga).should('not.be.undefined')
+      cy.wrap(pairs._gid).should('not.be.undefined')
+      // Clear analytics cookies
       CookieUtils.setAnalyticsControl(false)
-      // All analytics cookies should be cleared (set to empty string)
-      const pairs = CookieUtils.getCookiePairs()
+      pairs = CookieUtils.getCookiePairs()
       cy.wrap(pairs._ga).should('be.undefined')
       cy.wrap(pairs._gid).should('be.undefined')
     })
