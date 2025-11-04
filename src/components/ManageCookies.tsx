@@ -5,7 +5,7 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import Typography from '@mui/material/Typography'
 import Switch from '@mui/material/Switch'
-import { CookeUtils } from 'src/utils/CookieUtils'
+import { CookieUtils } from 'src/utils/CookieUtils'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Link } from 'react-router-dom'
 
@@ -13,13 +13,13 @@ export default function ManageCookies() {
   const [gaAllowed, setGaAllowed] = useState(false)
 
   useEffect(() => {
-    const allowed = CookeUtils.getAnalyticsControl()
+    const allowed = CookieUtils.getAnalyticsControl()
     setGaAllowed(allowed)
   })
 
   const setAnalyticsCookie = (val: boolean) => {
     setGaAllowed(val)
-    CookeUtils.setAnalyticsControl(val)
+    CookieUtils.setAnalyticsControl(val)
   }
 
   return (

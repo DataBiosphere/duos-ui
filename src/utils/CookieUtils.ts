@@ -43,7 +43,8 @@ export const setAnalyticsControl = (allowed: boolean) => {
   }
 }
 
-export const CookeUtils = {
+export const CookieUtils = {
+  getCookiePairs,
   getAnalyticsControl,
   setAnalyticsControl,
 }

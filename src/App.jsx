@@ -13,11 +13,11 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
-import { CookeUtils } from 'src/utils/CookieUtils'
+import { CookieUtils } from 'src/utils/CookieUtils'
 
 export function GAListener() {
   const location = useLocation()
-  if (CookeUtils.getAnalyticsControl()) {
+  if (CookieUtils.getAnalyticsControl()) {
     console.log('Logging pageview for ', location.pathname + location.search)
     ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search })
   }
@@ -47,7 +47,7 @@ function App() {
   useEffect(() => {
     const initializeReactGA = async () => {
       const gaId = await Config.getGAId()
-      if (CookeUtils.getAnalyticsControl()) {
+      if (CookieUtils.getAnalyticsControl()) {
         ReactGA.initialize(gaId, {
           titleCase: false,
         })

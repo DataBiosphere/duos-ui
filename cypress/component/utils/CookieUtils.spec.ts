@@ -1,4 +1,4 @@
-import * as CookieUtils from 'src/utils/CookieUtils'
+import { CookieUtils } from 'src/utils/CookieUtils'
 
 describe('CookieUtils', () => {
   beforeEach(() => {

@@ -9,7 +9,7 @@ import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
 import { createMemoryHistory } from 'history'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
-import { CookeUtils } from 'src/utils/CookieUtils'
+import { CookieUtils } from 'src/utils/CookieUtils'
 
 const user = {
   userId: 2,
@@ -127,7 +127,7 @@ describe('Main App Functions', () => {
   })
 
   it('should initialize ReactGA and StackdriverReporter', () => {
-    cy.stub(CookeUtils, 'getAnalyticsControl').returns(true)
+    cy.stub(CookieUtils, 'getAnalyticsControl').returns(true)
     mount(
       <MemoryRouter initialEntries={['/']}>
         <App />
@@ -138,7 +138,7 @@ describe('Main App Functions', () => {
   })
 
   it('should NOT initialize ReactGA when analytics are not allowed', () => {
-    cy.stub(CookeUtils, 'getAnalyticsControl').returns(false)
+    cy.stub(CookieUtils, 'getAnalyticsControl').returns(false)
     mount(
       <MemoryRouter initialEntries={['/']}>
         <App />
