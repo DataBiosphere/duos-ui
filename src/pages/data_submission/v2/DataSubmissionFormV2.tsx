@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { cloneDeep, set } from 'lodash'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
@@ -10,29 +9,18 @@ import { NihDataManagement } from 'src/pages/data_submission/v2/NihDataManagemen
 import { Styles } from 'src/libs/theme'
 import lockIcon from 'src/images/lock-icon.png'
 
-export interface DataSubmissionFormV2Params {
-  studyId?: string
-}
-
 export type FileProperty = {
   key: string
   value: File
 }
+
+export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
 
 export const DataSubmissionFormV2 = () => {
   const { studyId } = useParams()
   const [study, setStudy] = useState({} as Study)
   const [formFiles, setFormFiles] = useState({} as FileProperty)
   const [loadingError, setLoadingError] = useState(false)
-
-  const onFileChange = useCallback(({ key, value }: { key: string, value: unknown }) => {
-    console.log(key, value)
-    setFormFiles((val: FileProperty) => {
-      const newFiles = cloneDeep(val)
-      set(newFiles, key, value)
-      return newFiles
-    })
-  }, [setFormFiles])
 
   useEffect(() => {
     const onLoadFormData = (studyId: string | undefined) => {
@@ -74,9 +62,9 @@ export const DataSubmissionFormV2 = () => {
         </div>
 
         <GeneralStudyInformation study={study} setStudy={setStudy} />
-        <NihAnvilUseRelated study={study} setStudy={setStudy} />
+        <NihAnvilUseRelated study={study} setStudy={setStudy} setFiles={setFormFiles} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
-        <NihDataManagement study={study} setStudy={setStudy} formFiles={formFiles} onFileChange={onFileChange} />
+        <NihDataManagement study={study} setStudy={setStudy} files={formFiles} setFiles={setFormFiles} />
       </div>
     </>
   )

@@ -10,19 +10,20 @@ import {
   generateStudyPropertyFormTextField,
   generateStudyPropertyYesNoField,
   getStudyPropertyValueByKey,
-  MasterChangeHandler, removeStudyPropertiesByKeys, setStudyPropertyByKey,
+  removeStudyPropertiesByKeys, setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
-import { cloneDeep, unset } from 'lodash'
+import { cloneDeep, set, unset } from 'lodash'
+import { ALTERNATIVE_DATA_SHARING_PLAN_FILE, FileProperty } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 
 export interface NihDataManagementProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
-  formFiles: unknown
-  onFileChange: MasterChangeHandler
+  files: FileProperty
+  setFiles: React.Dispatch<React.SetStateAction<FileProperty>>
 }
 export const NihDataManagement = (props: NihDataManagementProps) => {
-  const { setStudy, onFileChange, study } = props
+  const { setStudy, setFiles, files, study } = props
 
   const onAlternativeDataSharingPlanReasonsChange = ({ key }: { key: string }) => {
     let setReasons: string[] = getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []
@@ -142,9 +143,16 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                 <FormField
                   type={FormFieldTypes.FILE}
                   title="Upload your alternative sharing plan."
-                  id="alternativeDataSharingPlanFile"
+                  id={ALTERNATIVE_DATA_SHARING_PLAN_FILE}
+                  defaultValue={files.value}
                   validators={[FormValidators.REQUIRED]}
-                  onChange={onFileChange}
+                  onChange={({ key, value }: { key: string, value: File }) => {
+                    setFiles((val: FileProperty) => {
+                      const newFiles = cloneDeep(val)
+                      set(newFiles, key, value)
+                      return newFiles
+                    })
+                  }}
                 />
                 <FormField
                   type={FormFieldTypes.RADIOGROUP}

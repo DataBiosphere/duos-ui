@@ -14,8 +14,7 @@ import {
   Study,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
-  generateStudyPropertyFormTextField, generateStudyPropertyYesNoField,
-  getStudyPropertyValueByKey,
+  generateStudyPropertyFormTextField, getStudyPropertyValueByKey,
   removeStudyPropertiesByKeys, setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
@@ -93,7 +92,22 @@ export const NihAdministrativeInformation = (props: NihAdministrativeInformation
           fieldPlaceholder={NihInstitutionCenterSubmission.fieldPlaceholderText}
         />
         {generateStudyPropertyFormTextField(study, setStudy, new NihGenomicProgramAdministratorName())}
-        {generateStudyPropertyYesNoField(study, setStudy, new MultiCenterStudy())}
+        <FormField
+          id={MultiCenterStudy.key}
+          title={MultiCenterStudy.fieldTitle}
+          type={FormFieldTypes.YESNORADIOGROUP}
+          defaultValue={getStudyPropertyValueByKey(study, MultiCenterStudy.key)}
+          onChange={({ _key, value }: { _key: string, value: boolean }) => {
+            setStudyPropertyByKey(study, setStudy, { isValid: true }, new MultiCenterStudy(value))
+            if (!value) {
+              setStudy((val) => {
+                const newVal = cloneDeep(val)
+                removeStudyPropertiesByKeys(newVal, new Set([CollaboratingSites.key]))
+                return newVal
+              })
+            }
+          }}
+        />
         {getStudyPropertyValueByKey(study, MultiCenterStudy.key) === true && (
           <FormField
             id={CollaboratingSites.key}

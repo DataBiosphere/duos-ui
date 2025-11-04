@@ -16,17 +16,20 @@ import {
   getStudyPropertyValueByKey, removeStudyPropertiesByKeys,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, unset } from 'lodash'
+import { ALTERNATIVE_DATA_SHARING_PLAN_FILE, FileProperty } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 
 export interface NihAnvilUseRelatedProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
+  setFiles: React.Dispatch<React.SetStateAction<FileProperty>>
 }
 
 export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   const {
     setStudy,
     study,
+    setFiles,
   } = props
 
   return (
@@ -64,6 +67,13 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
                 AlternativeDataSharingPlanDataSubmitted.key,
                 AlternativeDataSharingPlanDataReleased.key,
               ]))
+              return newVal
+            })
+            setFiles((val) => {
+              const newVal = cloneDeep(val)
+              if (val?.key === ALTERNATIVE_DATA_SHARING_PLAN_FILE) {
+                unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
+              }
               return newVal
             })
           }
