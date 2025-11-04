@@ -28,10 +28,11 @@ export const setAnalyticsControl = (allowed: boolean) => {
   // Additionally, if disabling, we may want to clear existing analytics cookies
   if (!allowed) {
     for (const [key, _] of Object.entries(getCookiePairs())) {
-      if (key.startsWith('GCP') || key.startsWith('_ga') || key.startsWith('_gid') || key.startsWith('_gat')) {
+      if (key.startsWith('_ga') || key.startsWith('_gid') || key.startsWith('_gat')) {
         const hostname = globalThis.location.hostname
         const parts = hostname.split('.')
         const topLevelDomain = parts.slice(-2).join('.')
+        // Clear all possible variants
         document.cookie = `${key}=; path=/; max-age=0`
         document.cookie = `${key}=; path=/; max-age=0; SameSite=Strict; Secure`
         document.cookie = `${key}=; path=/; max-age=0; domain=.${topLevelDomain}`
