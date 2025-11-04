@@ -16,6 +16,8 @@ import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { useNavigate } from 'react-router-dom'
+import AIAssistantButton from 'src/components/ai/AIAssistantButton'
+import AIAssistantModal from 'src/components/ai/AIAssistantModal'
 
 const styles = {
   subTab: {
@@ -40,6 +42,7 @@ export const DatasetSearchTable = (props) => {
   const [selected, setSelected] = useState([])
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study)
   const [searchTerm, setSearchTerm] = useState('')
+  const [aiModalOpen, setAiModalOpen] = useState(false)
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1
 
@@ -207,7 +210,11 @@ export const DatasetSearchTable = (props) => {
       return
     }
     getExportableDatasets(datasets)
+<<<<<<< Updated upstream
   }, [])
+=======
+  }, [datasets])
+>>>>>>> Stashed changes
 
   const searchAndFilter = useRef(
     debounce((fullQuery) => {
@@ -224,7 +231,8 @@ export const DatasetSearchTable = (props) => {
     }
     catch (_error) {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' })
-    }  }, [filters, searchTerm]); // eslint-disable-line
+    }
+  }, [filters, searchTerm])
 
   return (
     <>
@@ -305,6 +313,11 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ padding: '1em' }} />
         {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, navigate)} />}
       </Box>
+      <AIAssistantButton onClick={() => setAiModalOpen(true)} />
+      <AIAssistantModal
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+      />
     </>
   )
 }
