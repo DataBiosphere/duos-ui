@@ -17,8 +17,6 @@ export const Config = {
 
   getTerraUrl: async () => (await getConfig()).terraUrl,
 
-  getNihUrl: async () => (await getConfig()).nihUrl,
-
   getGAId: async () => (await getConfig()).gaId,
 
   getErrorApiKey: async () => (await getConfig()).errorApiKey,
