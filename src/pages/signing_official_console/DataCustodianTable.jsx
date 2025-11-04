@@ -290,11 +290,6 @@ export default function DataCustodianTable(props) {
     columnHeaderFormat.role,
   ]
 
-  const showModalOnClick = () => {
-    setSelectedResearcher({ institutionId: signingOfficial.institutionId })
-    setShowModal(true)
-  }
-
   const issueCustodian = async (selectedResearcher, researchers) => {
     let messageName
     const { userId, displayName } = selectedResearcher
@@ -408,25 +403,6 @@ export default function DataCustodianTable(props) {
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}
         />
-        <div
-          style={{
-            marginLeft: 20,
-            marginTop: 50,
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <SimpleButton
-            onClick={() => showModalOnClick()}
-            baseColor={Theme.palette.secondary}
-            label="Add New Data Submitter"
-            additionalStyle={{
-              width: '26rem',
-              padding: '4% 1%',
-              fontWeight: '600',
-            }}
-          />
-        </div>
       </div>
       <SimpleTable
         isLoading={isLoading}
