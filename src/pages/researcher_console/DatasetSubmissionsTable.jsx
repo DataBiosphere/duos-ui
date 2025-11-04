@@ -160,7 +160,6 @@ export default function DatasetSubmissionsTable(props) {
       }
     })
     setRows(rows)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [terms])
 
   useEffect(() => {
