@@ -1,7 +1,6 @@
 import { Button, Chip, TextField } from '@mui/material'
 import React, { useState } from 'react'
 import { InstitutionInterface } from 'src/types/model'
-import isFQDN from 'src/utils/isFQDN'
 
 interface DomainEditorProps {
   domains: string[]
