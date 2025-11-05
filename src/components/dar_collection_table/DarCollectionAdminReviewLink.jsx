@@ -11,8 +11,8 @@ export default function DarCollectionAdminReviewLink(props) {
         fontFamily: styles.baseStyle.fontFamily,
         fontWeight: 600,
       }}
-      to={`admin_review_collection/${darCollectionId}`}
-      id={`collection-review-${darCollectionId}`}
+      to={`/admin_review_collection/${darCollectionId}`}
+      id={`/collection-review-${darCollectionId}`}
     >
       {darCode}
     </NavLink>
