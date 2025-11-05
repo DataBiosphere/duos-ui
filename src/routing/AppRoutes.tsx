@@ -117,13 +117,9 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route element={<SOAcknowledged />}>
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
+            <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
             {DAAUtils.isEnabled()
-              && (
-                <>
-                  <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
-                  <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
-                </>
-              )}
+              && <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />}
           </Route>
         </Route>
       </Route>

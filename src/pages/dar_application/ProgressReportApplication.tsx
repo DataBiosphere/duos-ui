@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import {
   CLOSEOUT_KEYS,
@@ -119,7 +119,10 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     }),
   } as FormState
 
+  const isMounted = useRef(false)
+
   const [formState, setFormState] = useState<FormState>(initialState)
+  const [showValidation, setShowValidation] = useState<boolean>(false)
   const [formValidation, setFormValidation] = useState<FormValidationState>({ darErrors: {} })
   const [nihValid, setNihValid] = useState<boolean>(true)
   const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([])
@@ -127,8 +130,21 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
   const eRACommonsDestination = 'progress_report_application/' + dar.collectionId
 
+  const isFormEmpty = () => {
+    // Run validation without showing errors
+    const validation = validatePRFormData(
+      nihValid,
+      formState,
+      formState.selectedDatasets,
+      dataUseTranslations,
+    )
+
+    // If there are validation errors, it means user hasn't filled required fields
+    return validationFailed(validation)
+  }
+
   const getValidation = (newState: FormState) => {
-    if (!readOnlyMode) {
+    if (!readOnlyMode && showValidation) {
       return validatePRFormData(
         nihValid,
         newState,
@@ -139,12 +155,18 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     return { darErrors: {} }
   }
 
-  const onFormChange = (newState: Partial<FormState>) => {
+  const onFormChange = (newState: Partial<FormState>, isUserInteraction: boolean = true) => {
     const setState = { ...formState, ...newState }
     setFormState(prevState => ({
       ...prevState,
       ...newState,
     }))
+
+    // Only enable validation on user interaction, not on mount/initialization
+    if (isUserInteraction && isMounted.current && !showValidation) {
+      setShowValidation(true)
+    }
+
     setFormValidation(getValidation(setState))
   }
 
@@ -178,10 +200,9 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
   }
 
   function getDatasetsInApprovedElections(datasets: Dataset[], approvedElectionDatasetIds: number[]) {
-    const datasetsInApprovedElections = datasets.filter((dataset) => {
+    return datasets.filter((dataset) => {
       return approvedElectionDatasetIds.includes(dataset.datasetId)
     })
-    return datasetsInApprovedElections
   }
 
   // required because the datasets state changes during component mount
@@ -198,9 +219,9 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         .filter(ds => ds.dacApproval)
     }
 
-    onFormChange({ datasets: approvedDatasets })
+    onFormChange({ datasets: approvedDatasets }, false) // Mark as non-user interaction
     onSelectedDatasetChange(approvedDatasets)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    isMounted.current = true // Mark as mounted after initial setup
   }, [datasets])
 
   return (
@@ -212,7 +233,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           onFormChange={onFormChange}
           eRACommonsDestination={eRACommonsDestination}
           researcher={researcher}
-          validation={formValidation.darErrors}
+          validation={showValidation ? formValidation.darErrors : {}}
           nihValid={nihValid}
           onNihStatusUpdate={setNihValid}
         />
@@ -304,7 +325,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             onCancel={() => {
               Navigation.console(Storage.getCurrentUser(), navigate)
             }}
-            disabled={validationFailed(formValidation)}
+            disabled={isFormEmpty()}
             uploadedIrbDocument={uploadedIrbDocument}
             parentDar={dar}
           />

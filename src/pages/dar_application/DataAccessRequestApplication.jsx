@@ -262,7 +262,6 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingDarsReadOnlyMode])
 
   const init = useCallback(async () => {
@@ -309,7 +308,6 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData)
     setIsLoading(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [researcher, existingDarsReadOnlyMode])
 
   useEffect(() => {

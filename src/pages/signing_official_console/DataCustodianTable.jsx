@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Styles, Theme } from '../../libs/theme'
-import userIcon from '../../images/icon_manage_users.png'
+import { Styles, Theme } from 'src/libs/theme'
+import userIcon from 'src/images/icon_manage_users.png'
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
-import SimpleTable from '../../components/SimpleTable'
-import SimpleButton from '../../components/SimpleButton'
-import PaginationBar from '../../components/PaginationBar'
-import SearchBar from '../../components/SearchBar'
+import SimpleTable from 'src/components/SimpleTable'
+import SimpleButton from 'src/components/SimpleButton'
+import PaginationBar from 'src/components/PaginationBar'
+import SearchBar from 'src/components/SearchBar'
 import {
   Notifications,
   tableSearchHandler,
@@ -13,13 +13,13 @@ import {
   getSearchFilterFunctions,
   searchOnFilteredList,
   hasDataSubmitterRole,
-} from '../../libs/utils'
-import { User } from '../../libs/ajax/User'
-import ConfirmationModal from '../../components/modals/ConfirmationModal'
-import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal'
-import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer'
-import DpaMarkdown from '../../assets/DPA.md'
-import { confirmModalType } from '../../libs/libraryCardUtils'
+} from 'src/libs/utils'
+import { User } from 'src/libs/ajax/User'
+import ConfirmationModal from 'src/components/modals/ConfirmationModal'
+import DataCustodianFormModal from 'src/components/modals/DataCustodianFormModal'
+import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContainer'
+import DpaMarkdown from 'src/assets/DPA.md'
+import { confirmModalType } from 'src/libs/libraryCardUtils'
 
 // Styles specific to this table
 const styles = {
@@ -290,11 +290,6 @@ export default function DataCustodianTable(props) {
     columnHeaderFormat.role,
   ]
 
-  const showModalOnClick = () => {
-    setSelectedResearcher({ institutionId: signingOfficial.institutionId })
-    setShowModal(true)
-  }
-
   const issueCustodian = async (selectedResearcher, researchers) => {
     let messageName
     const { userId, displayName } = selectedResearcher
@@ -408,25 +403,6 @@ export default function DataCustodianTable(props) {
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}
         />
-        <div
-          style={{
-            marginLeft: 20,
-            marginTop: 50,
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <SimpleButton
-            onClick={() => showModalOnClick()}
-            baseColor={Theme.palette.secondary}
-            label="Add New Data Submitter"
-            additionalStyle={{
-              width: '26rem',
-              padding: '4% 1%',
-              fontWeight: '600',
-            }}
-          />
-        </div>
       </div>
       <SimpleTable
         isLoading={isLoading}

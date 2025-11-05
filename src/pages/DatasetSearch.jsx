@@ -142,7 +142,6 @@ export const DatasetSearch = (props) => {
       }
     }
     init()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, isInstitutionSet, fullQuery, navigate, hasChangedPage])
 
   return (

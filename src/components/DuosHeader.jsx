@@ -52,7 +52,7 @@ export const headerTabsConfig = [
     children: [
       { label: 'Library Cards', link: '/signing_official_console/library_cards' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => DAAUtils.isEnabled() },
+      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
       { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() },
     ],
@@ -316,7 +316,7 @@ const DuosHeader = (props) => {
             alt="DUOS Logo"
             onClick={() => goToLink('/home')}
           />
-          <IconButton id="collapsed-navigation-icon-button" size="small" onClick={() => toggleDrawer(true)}>
+          <IconButton id="collapsed-navigation-icon-button" size="small" onClick={() => toggleDrawer(true)} aria-label="Open navigation menu">
             <MenuIcon id="navbar-menu-icon" style={{ color: 'white', fontSize: '6rem', flex: 1 }} anchor="right" />
           </IconButton>
           <Drawer

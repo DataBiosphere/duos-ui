@@ -40,7 +40,6 @@ const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, vote
     })
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const headerStyle = {
     fontWeight: 600,
     fontSize: '1.1rem',

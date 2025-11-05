@@ -207,7 +207,6 @@ export const DatasetSearchTable = (props) => {
       return
     }
     getExportableDatasets(datasets)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const searchAndFilter = useRef(
@@ -237,6 +236,7 @@ export const DatasetSearchTable = (props) => {
               data-cy="search-bar"
               type="text"
               placeholder="Enter search terms"
+              aria-label="Search datasets"
               style={{
                 width: '100%',
                 border: '1px solid #cecece',
