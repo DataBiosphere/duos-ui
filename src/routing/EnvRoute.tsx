@@ -1,6 +1,7 @@
 import React from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { checkEnv } from 'src/utils/EnvironmentUtils'
+import NotFound from 'src/pages/NotFound'
 
 interface EnvRouteProps {
   readonly env: Array<string>
@@ -9,7 +10,7 @@ interface EnvRouteProps {
 const EnvRoute = ({ env }: EnvRouteProps) => {
   return checkEnv(env)
     ? <Outlet />
-    : <Navigate to="/" state={{ from: location }} replace />
+    : <NotFound />
 }
 
 export default EnvRoute
