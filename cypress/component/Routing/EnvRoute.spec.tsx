@@ -5,7 +5,6 @@ import EnvRoute from 'src/routing/EnvRoute'
 import { Storage } from 'src/libs/storage'
 
 const TestProtectedComponent = () => <div data-cy="protected-content">Protected Content</div>
-const HomeComponent = () => <div data-cy="home-content">Home Page</div>
 
 const allowedEnvs = ['dev', 'staging']
 const currentAllowedEnv = 'dev'
@@ -21,16 +20,15 @@ describe('EnvRoute', () => {
           <Route path="/protected" element={<EnvRoute env={allowedEnvs} />}>
             <Route index element={<TestProtectedComponent />} />
           </Route>
-          <Route path="/" element={<HomeComponent />} />
         </Routes>
       </MemoryRouter>,
     )
 
     cy.get('[data-cy="protected-content"]').should('be.visible')
-    cy.get('[data-cy="home-content"]').should('not.exist')
+    cy.get('[data-cy="not-found"]').should('not.exist')
   })
 
-  it('should redirect to the home page if the current environment is not in the allowed list', () => {
+  it('should redirect to the not found page if the current environment is not in the allowed list', () => {
     cy.stub(Storage, 'getEnv').returns(currentDisallowedEnv)
 
     mount(
@@ -39,16 +37,15 @@ describe('EnvRoute', () => {
           <Route path="/protected" element={<EnvRoute env={allowedEnvs} />}>
             <Route index element={<TestProtectedComponent />} />
           </Route>
-          <Route path="/" element={<HomeComponent />} />
         </Routes>
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="home-content"]').should('be.visible')
+    cy.get('[data-cy="not-found"]').should('be.visible')
     cy.get('[data-cy="protected-content"]').should('not.exist')
   })
 
-  it('should redirect to the home page if the environment is not set', () => {
+  it('should redirect to the not found page if the environment is not set', () => {
     cy.stub(Storage, 'getEnv').returns(null)
 
     mount(
@@ -57,12 +54,11 @@ describe('EnvRoute', () => {
           <Route path="/protected" element={<EnvRoute env={allowedEnvs} />}>
             <Route index element={<TestProtectedComponent />} />
           </Route>
-          <Route path="/" element={<HomeComponent />} />
         </Routes>
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="home-content"]').should('be.visible')
+    cy.get('[data-cy="not-found"]').should('be.visible')
     cy.get('[data-cy="protected-content"]').should('not.exist')
   })
 })

@@ -18,7 +18,7 @@ export default function NotFound() {
     }
     else {
       return (
-        <div className="container container-wide">
+        <div className="container container-wide" data-cy="not-found">
           <div className="row no-margin">
             <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
               <PageHeading
