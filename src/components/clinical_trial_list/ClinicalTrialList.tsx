@@ -9,22 +9,25 @@ import {
   parseLegacyInterventionType,
 } from 'src/utils/ClinicalTrialEnumUtils'
 
-export default function ClinicalTrialList(props: {
+interface ClinicalTrialListProps {
   readonly clinicalTrials: ClinicalTrial[]
   readonly columnsToShow?: string[]
   readonly onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
-}): React.JSX.Element {
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
+}
+
+export default function ClinicalTrialList(props: ClinicalTrialListProps): React.JSX.Element {
   const {
     clinicalTrials,
     columnsToShow = [],
     onClinicalTrialChange,
     disabled = false,
     validation,
+    studyAssetWrapper,
   } = props
 
-  // Normalize any legacy string values on render
   const normalized = clinicalTrials.map(ct => ({
     ...ct,
     status: parseLegacyStatus(ct.status as unknown as string),
@@ -48,54 +51,66 @@ export default function ClinicalTrialList(props: {
 
   const getValidationState = () => validation?.clinicalTrials
 
+  const button = (
+    <button
+      id="add-clinical-trial-btn"
+      type="button"
+      className="button button-white"
+      style={{
+        marginTop: 0,
+        marginBottom: 5,
+        border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
+        boxShadow: getValidationState() ? '0 0 5px red' : 'none',
+        ...(disabled ? { cursor: 'not-allowed' } : {}),
+      }}
+      onClick={() => !disabled && setShowAddEdit(true)}
+      disabled={disabled}
+    >
+      Add Clinical Trial
+    </button>
+  )
+
+  const content = (
+    <div className="form-group row no-margin">
+      {showAddEdit && (
+        <ClinicalTrialAddEdit
+          id={-1}
+          clinicalTrials={normalized}
+          closeAction={() => setShowAddEdit(false)}
+          onClinicalTrialChange={onClinicalTrialChange}
+        />
+      )}
+      {normalized.map((clinicalTrial: ClinicalTrial, index: number) => (
+        <ClinicalTrialRow
+          key={clinicalTrial.clinicalTrialId || index}
+          id={index}
+          editMode={editState[index]}
+          clinicalTrial={clinicalTrial}
+          clinicalTrials={normalized}
+          columnsToShow={columnsToShow}
+          editAction={() => toggleEditState(index)}
+          deleteAction={() => { handleDelete(index) }}
+          closeAction={() => {
+            toggleEditState(index)
+            setShowAddEdit(false)
+          }}
+          onClinicalTrialChange={onClinicalTrialChange}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  )
+
+  if (studyAssetWrapper) {
+    return <>{studyAssetWrapper(content, button)}</>
+  }
+
   return (
     <div className="presentation-list-component">
       <div className="row no-margin">
-        <button
-          id="add-clinical-trial-btn"
-          type="button"
-          className="button button-white"
-          style={{
-            marginTop: 25,
-            marginBottom: 5,
-            border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-            boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-            ...(disabled ? { cursor: 'not-allowed' } : {}),
-          }}
-          onClick={() => !disabled && setShowAddEdit(true)}
-          disabled={disabled}
-        >
-          Add Clinical Trial
-        </button>
-        {showAddEdit && (
-          <ClinicalTrialAddEdit
-            id={-1}
-            clinicalTrials={normalized}
-            closeAction={() => setShowAddEdit(false)}
-            onClinicalTrialChange={onClinicalTrialChange}
-          />
-        )}
+        {button}
       </div>
-      <div className="form-group row no-margin">
-        {normalized.map((clinicalTrial: ClinicalTrial, index: number) => (
-          <ClinicalTrialRow
-            key={clinicalTrial.clinicalTrialId || index}
-            id={index}
-            editMode={editState[index]}
-            clinicalTrial={clinicalTrial}
-            clinicalTrials={normalized}
-            columnsToShow={columnsToShow}
-            editAction={() => toggleEditState(index)}
-            deleteAction={() => { handleDelete(index) }}
-            closeAction={() => {
-              toggleEditState(index)
-              setShowAddEdit(false)
-            }}
-            onClinicalTrialChange={onClinicalTrialChange}
-            disabled={disabled}
-          />
-        ))}
-      </div>
+      {content}
     </div>
   )
 }

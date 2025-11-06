@@ -10,6 +10,7 @@ interface PresentationListProps {
   readonly onPresentationChange: (presentations: Presentation[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
 }
 
 export default function PresentationList(props: PresentationListProps): React.JSX.Element {
@@ -19,6 +20,7 @@ export default function PresentationList(props: PresentationListProps): React.JS
     onPresentationChange,
     disabled = false,
     validation,
+    studyAssetWrapper,
   } = props
 
   const [showAddEdit, setShowAddEdit] = useState(false)
@@ -37,56 +39,66 @@ export default function PresentationList(props: PresentationListProps): React.JS
 
   const getValidationState = () => validation?.presentations
 
+  const button = (
+    <button
+      id="add-presentation-btn"
+      type="button"
+      className="button button-white"
+      style={{
+        marginTop: 0,
+        marginBottom: 5,
+        border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
+        boxShadow: getValidationState() ? '0 0 5px red' : 'none',
+        ...(disabled ? { cursor: 'not-allowed' } : {}),
+      }}
+      onClick={() => !disabled && setShowAddEdit(true)}
+      disabled={disabled}
+    >
+      Add Presentation
+    </button>
+  )
+
+  const content = (
+    <div className="form-group row no-margin">
+      {showAddEdit && (
+        <PresentationAddEdit
+          id={-1}
+          presentations={presentations}
+          closeAction={() => setShowAddEdit(false)}
+          onPresentationChange={onPresentationChange}
+        />
+      )}
+      {presentations.map((presentation: Presentation, index: number) => (
+        <PresentationRow
+          key={index}
+          id={index}
+          editMode={editState[index]}
+          presentation={presentation}
+          presentations={presentations}
+          columnsToShow={columnsToShow}
+          editAction={() => toggleEditState(index)}
+          deleteAction={() => { handleDeletePresentation(index) }}
+          closeAction={() => {
+            toggleEditState(index)
+            setShowAddEdit(false)
+          }}
+          onPresentationChange={onPresentationChange}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  )
+
+  if (studyAssetWrapper) {
+    return <>{studyAssetWrapper(content, button)}</>
+  }
+
   return (
     <div className="presentation-list-component">
       <div className="row no-margin">
-        <button
-          id="add-presentation-btn"
-          type="button"
-          className="button button-white"
-          style={{
-            marginTop: 25,
-            marginBottom: 5,
-            border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-            boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-            ...(disabled ? { cursor: 'not-allowed' } : {}),
-          }}
-          onClick={() => !disabled && setShowAddEdit(true)}
-          disabled={disabled}
-        >
-          Add Presentation
-        </button>
-        {showAddEdit && (
-          <PresentationAddEdit
-            id={-1}
-            presentations={presentations}
-            closeAction={() => setShowAddEdit(false)}
-            onPresentationChange={onPresentationChange}
-          />
-        )}
+        {button}
       </div>
-      <div className="form-group row no-margin">
-        {presentations.map((presentation: Presentation, index: number) => {
-          return (
-            <PresentationRow
-              key={index}
-              id={index}
-              editMode={editState[index]}
-              presentation={presentation}
-              presentations={presentations}
-              columnsToShow={columnsToShow}
-              editAction={() => toggleEditState(index)}
-              deleteAction={() => { handleDeletePresentation(index) }}
-              closeAction={() => {
-                toggleEditState(index)
-                setShowAddEdit(false)
-              }}
-              onPresentationChange={onPresentationChange}
-              disabled={disabled}
-            />
-          )
-        })}
-      </div>
+      {content}
     </div>
   )
 }
