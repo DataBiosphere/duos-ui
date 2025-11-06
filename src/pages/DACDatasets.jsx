@@ -114,7 +114,7 @@ export default function DACDatasets() {
       <div>
         <Button
           className={style['add-button']}
-          onClick={() => navigate('data_submission_form')}
+          onClick={() => navigate('../data_submission_form')}
           variant="outlined"
         >
           <div style={{ verticalAlign: 'center', color: '#0948B7' }}>
