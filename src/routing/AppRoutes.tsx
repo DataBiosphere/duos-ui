@@ -101,8 +101,10 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
           <Route path="/data_submission_form" element={<DataSubmissionForm />} />
-          <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
-            <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+          <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
+            <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
+              <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+            </Route>
           </Route>
           <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         </Route>

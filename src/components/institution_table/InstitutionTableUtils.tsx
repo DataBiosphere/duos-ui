@@ -1,6 +1,6 @@
 import ReactTooltip from 'react-tooltip'
 import React from 'react'
-import { Institution, SimplifiedDuosUser } from 'src/types/model'
+import { InstitutionInterface, SimplifiedDuosUser } from 'src/types/model'
 import { Link } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
 import { isEmpty } from 'lodash'
@@ -44,9 +44,9 @@ interface ColumnConfig {
 interface ColumnConfigCell {
   label: string
   cellStyle: React.CSSProperties
-  cellDataFn: (row: Institution) => React.ReactNode
+  cellDataFn: (row: InstitutionInterface) => React.ReactNode
   sortable?: boolean
-  sortValueFn?: (row: Institution) => React.ReactNode
+  sortValueFn?: (row: InstitutionInterface) => React.ReactNode
 }
 
 /**
@@ -134,14 +134,14 @@ export const columnConfig: ColumnConfig = {
   id: {
     label: 'ID',
     cellStyle: { width: columnWidths.id },
-    cellDataFn: (row: Institution) => row.id,
+    cellDataFn: (row: InstitutionInterface) => row.id,
     sortable: true,
-    sortValueFn: (row: Institution) => row.id,
+    sortValueFn: (row: InstitutionInterface) => row.id,
   },
   name: {
     label: 'Institution',
     cellStyle: { width: columnWidths.name },
-    cellDataFn: (row: Institution) => {
+    cellDataFn: (row: InstitutionInterface) => {
       if (row) {
         return (
           <Link
@@ -161,12 +161,12 @@ export const columnConfig: ColumnConfig = {
       }
     },
     sortable: true,
-    sortValueFn: (row: Institution) => row.name,
+    sortValueFn: (row: InstitutionInterface) => row.name,
   },
   domains: {
     label: 'Domains',
     cellStyle: { width: columnWidths.domains },
-    cellDataFn: (row: Institution) => {
+    cellDataFn: (row: InstitutionInterface) => {
       if (row?.domains) {
         return row.domains.toSorted((a: string, b: string) => {
           return a.localeCompare(b)
@@ -177,7 +177,7 @@ export const columnConfig: ColumnConfig = {
       }
     },
     sortable: true,
-    sortValueFn: (row: Institution) => {
+    sortValueFn: (row: InstitutionInterface) => {
       if (row?.domains) {
         return row.domains.toSorted((a: string, b: string) => {
           return a.localeCompare(b)
@@ -191,7 +191,7 @@ export const columnConfig: ColumnConfig = {
   signingOfficials: {
     label: 'Signing Officials',
     cellStyle: { width: columnWidths.signingOfficials },
-    cellDataFn: (row: Institution) => {
+    cellDataFn: (row: InstitutionInterface) => {
       if (row.signingOfficials && row.signingOfficials.length > 0) {
         const fullNames = row.signingOfficials.map((user: SimplifiedDuosUser) => `${user.displayName} (${user.email})`).join(', ')
         if (fullNames.length > 40) {
@@ -237,12 +237,12 @@ export const columnConfig: ColumnConfig = {
   updateUser: {
     label: 'Updated By',
     cellStyle: { width: columnWidths.updateUser },
-    cellDataFn: (row: Institution) => {
+    cellDataFn: (row: InstitutionInterface) => {
       const user = isEmpty(row.updateUser) ? row.createUser : row.updateUser
       return user?.displayName ?? '- -'
     },
     sortable: true,
-    sortValueFn: (row: Institution) => {
+    sortValueFn: (row: InstitutionInterface) => {
       const user = isEmpty(row.updateUser) ? row.createUser : row.updateUser
       return user?.displayName ?? 'zz' // 'zz' ensures that institutions without a user appear at the end of the list
     },
@@ -250,7 +250,7 @@ export const columnConfig: ColumnConfig = {
   updateDate: {
     label: 'Updated On',
     cellStyle: { width: columnWidths.updateDate },
-    cellDataFn: (row: Institution) => {
+    cellDataFn: (row: InstitutionInterface) => {
       if (row?.updateDate) {
         return row.updateDate
       }
@@ -262,7 +262,7 @@ export const columnConfig: ColumnConfig = {
       }
     },
     sortable: true,
-    sortValueFn: (row: Institution) => {
+    sortValueFn: (row: InstitutionInterface) => {
       // Institution dates are in the form of 'Mon D, YYYY', e.g. 'Jan 1, 2023'
       const dateString = row.updateDate || row.createDate
       if (dateString) {
@@ -280,7 +280,7 @@ export const columnConfig: ColumnConfig = {
  * in the cell.
  * @param row Row of institution data to be processed.
  */
-export const processRowData = (row: Institution): CellData[] => {
+export const processRowData = (row: InstitutionInterface): CellData[] => {
   const rowData: CellData[] = []
   Object.keys(columnConfig).forEach((col) => {
     const { cellDataFn, cellStyle, label, sortValueFn } = columnConfig[col]
@@ -299,7 +299,7 @@ export const processRowData = (row: Institution): CellData[] => {
  * Utility functions for the Institution Table.
  */
 
-export const calcPageCount = (tableSize: number, filteredList: Institution[]) => {
+export const calcPageCount = (tableSize: number, filteredList: InstitutionInterface[]) => {
   if (isEmpty(filteredList)) {
     return 1
   }
@@ -312,7 +312,7 @@ export const columnHeaderData = (columns: string[]) => {
   return columns.map(col => columnConfig[col])
 }
 
-export const processRows = (institutions: Institution[]): CellData[][] => {
+export const processRows = (institutions: InstitutionInterface[]): CellData[][] => {
   return institutions.map((institution) => {
     return processRowData(institution)
   })

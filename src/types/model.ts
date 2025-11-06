@@ -123,7 +123,7 @@ export interface LibraryCard {
 
 export type OrganizationType = 'For-Profit' | 'Nonprofit'
 
-export interface Institution {
+export interface InstitutionInterface {
   id: number
   name: string
   itDirectorName?: string
