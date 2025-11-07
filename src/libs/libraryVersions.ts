@@ -23,7 +23,7 @@ import ncpiIcon from 'src/images/ncpi-logo.png'
 import homeIcon from 'src/images/icon_dataset_.png'
 import epi25Icon from 'src/images/Epi25_logo.png'
 import PGCIcon from 'src/images/PGC_logo.jpg'
-import PBNicon from 'src/images/PBN_logo.png'
+import PBNIcon from 'src/images/PBN_logo.jpg'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 
 interface MatchPhraseQuery {
