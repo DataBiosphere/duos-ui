@@ -1,21 +1,20 @@
 import { Button, Chip, TextField } from '@mui/material'
 import React, { useState } from 'react'
-import { Institution } from 'src/types/model'
-import isFQDN from 'src/utils/isFQDN'
+import { InstitutionInterface } from 'src/types/model'
 
 interface DomainEditorProps {
   domains: string[]
   isEditing: boolean
   onDomainsChange?: (domains: string[]) => void
-  institutionList: Institution[]
+  institutionList: InstitutionInterface[]
 }
 
 export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, institutionList }: DomainEditorProps) => {
   const [tempDomain, setTempDomain] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
-  const domainToInstitutionMap: Record<string, Institution> = {}
-  institutionList.forEach((inst: Institution) => {
+  const domainToInstitutionMap: Record<string, InstitutionInterface> = {}
+  institutionList.forEach((inst: InstitutionInterface) => {
     (inst.domains || []).forEach((domain) => {
       domainToInstitutionMap[domain] = inst
     })
@@ -24,13 +23,9 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
   const validateDomain = (domain: string): string | null => {
     try {
       // Check if it's a valid FQDN (Fully Qualified Domain Name)
-      if (!isFQDN(domain, {
-        require_tld: true,
-        allow_underscores: false,
-        allow_trailing_dot: false,
-        allow_numeric_tld: false,
-        allow_wildcard: false,
-      })) {
+      const fqdnRegex = /^(?!-)[\p{L}\p{N}-]{1,63}(?<!-)(\.(?!-)[\p{L}\p{N}-]{1,63}(?<!-))*\.[\p{L}]{2,}$/u
+      const isFQDN = (str: string) => fqdnRegex.test(str)
+      if (!isFQDN(domain)) {
         return 'Please enter a valid domain name (e.g., example.com)'
       }
 

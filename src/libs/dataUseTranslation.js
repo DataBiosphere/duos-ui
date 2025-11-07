@@ -409,6 +409,12 @@ export const DataUseTranslation = {
       dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(darInfo.otherText))
     }
 
+    // **FALLBACK CHECK**
+    // If no primary codes were added, add an "OTHER: Not provided" code
+    if (isEmpty(dataUseSummary.primary)) {
+      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(null))
+    }
+
     // Secondary Codes
     if (darInfo.methods) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods)

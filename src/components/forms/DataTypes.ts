@@ -1,49 +1,49 @@
 import { SelectOptionWithKeyNameAndAbbreviation } from './SelectOptionInterface'
 
 export class DataTypes {
-  static CITE: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly CITE: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'CITE',
     name: 'CITE-seq',
   }
 
-  static HYB: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly HYB: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'HYB',
     name: 'Hybrid Capture',
   }
 
-  static RNA: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly RNA: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'RNA',
     name: 'RNA-Seq',
   }
 
-  static SCRNA: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly SCRNA: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'scRNA',
     name: 'scRNA-Seq',
   }
 
-  static SPT: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly SPT: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'SPT',
     name: 'Spatial Transcriptomics',
   }
 
-  static SNRNA: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly SNRNA: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'snRNA',
     name: 'snRNA-Seq',
   }
 
-  static WGS: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly WGS: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'WGS',
     abbreviation: 'WGS',
     name: 'Whole Genome',
   }
 
-  static WES: SelectOptionWithKeyNameAndAbbreviation = {
+  static readonly WES: SelectOptionWithKeyNameAndAbbreviation = {
     key: 'WES',
     abbreviation: 'WES',
     name: 'Whole Exome',
   }
 
-  static VALUES: SelectOptionWithKeyNameAndAbbreviation[] = [DataTypes.CITE,
+  static readonly VALUES: SelectOptionWithKeyNameAndAbbreviation[] = [DataTypes.CITE,
     DataTypes.HYB,
     DataTypes.RNA,
     DataTypes.SCRNA,

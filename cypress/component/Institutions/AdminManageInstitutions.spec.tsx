@@ -3,7 +3,7 @@ import { mount } from 'cypress/react'
 import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
 import { BrowserRouter } from 'react-router-dom'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
-import { DuosUser, Institution } from 'src/types/model'
+import { DuosUser, InstitutionInterface } from 'src/types/model'
 
 const createUser: DuosUser = {
   createDate: new Date(),
@@ -58,7 +58,7 @@ const mockInstitutions = [
     createDate: 'Feb 1, 2023',
     createUser: createUser,
     createUserId: createUser.userId,
-  } as unknown as Institution,
+  } as unknown as InstitutionInterface,
   {
     id: 2,
     name: 'Test Institution 2',
@@ -70,7 +70,7 @@ const mockInstitutions = [
     updateDate: 'Jul 2, 2025',
     updateUser: updateUser,
     updateUserId: updateUser.userId,
-  } as unknown as Institution,
+  } as unknown as InstitutionInterface,
 ]
 
 describe('AdminManageInstitutions', () => {

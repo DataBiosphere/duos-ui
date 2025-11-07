@@ -2,7 +2,7 @@ import React from 'react'
 import { FormFieldTypes, FormField, FormValidators } from 'src/components/forms/forms'
 import {
   Study,
-  StudyType,
+  StudyTypeProperty,
   PhenotypeIndication,
   Species,
   DataCustodianEmail,
@@ -10,50 +10,41 @@ import {
   AlternativeDataSharingPlanTargetPublicReleaseDate,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
-  generateFormDateField,
-  generateFormTextField,
-  getStudyPropertyByKey,
-  MasterChangeHandler,
+  generateStudyInputFormTextField,
+  generateStudyPropertyFormDateField,
+  generateStudyPropertyFormTextField,
+  getStudyPropertyValueByKey,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
+import { DataTypes } from 'src/components/forms/DataTypes'
 
 export interface GeneralStudyInformationProps {
-  formData: Study
-  onChange: MasterChangeHandler
+  study: Study
+  setStudy: React.Dispatch<React.SetStateAction<Study>>
 }
 
 export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => {
   const {
-    onChange,
-    formData,
+    setStudy,
+    study,
   } = props
 
   return (
     <div className="data-submitter-section">
       <h2>Study Information</h2>
+      {generateStudyInputFormTextField(setStudy, 'studyName', study?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
       <FormField
-        id="studyName"
-        title="Study Name"
-        validators={[FormValidators.REQUIRED]}
-        onChange={onChange}
-        defaultValue={formData?.name}
-      />
-      <FormField
-        id="studyType"
-        title="Study Type"
+        id={StudyTypeProperty.key}
+        title={StudyTypeProperty.fieldTitle}
+        placeholder={StudyTypeProperty.fieldPlaceholderText}
         type={FormFieldTypes.SELECT}
-        selectOptions={[
-          'Observational', 'Interventional', 'Descriptive',
-          'Analytical', 'Prospective', 'Retrospective',
-          'Case report', 'Case series', 'Cross-sectional',
-          'Cohort study',
-        ]}
+        selectOptions={StudyTypeProperty.STUDY_TYPE_OPTIONS}
         isCreatable={true}
         validators={[FormValidators.REQUIRED]}
         selectConfig={{}}
-        defaultValue={getStudyPropertyByKey(formData, 'studyType')}
+        defaultValue={getStudyPropertyValueByKey(study, 'studyType')}
         onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new StudyType(input.value as string))
+          setStudyPropertyByKey(study, setStudy, input, new StudyTypeProperty(input.value as string))
         }}
       />
       <FormField
@@ -62,9 +53,9 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         id="studyDescription"
         title="Study Description"
         placeholder="Description"
-        defaultValue={formData?.description}
+        defaultValue={study?.description}
         validators={[FormValidators.REQUIRED]}
-        onChange={onChange}
+        onChange={setStudy}
       />
       <FormField
         id="dataTypes"
@@ -75,32 +66,15 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         isCreatable={true}
         isMulti={true}
         optionsAreString={true}
-        selectOptions={[
-          // The top properties were extracted from the prod database and deduplicated using the query:
-          // SELECT property_value, COUNT(*) FROM dataset_property WHERE property_key = 2 GROUP BY property_value ORDER BY COUNT(*) DESC;
-          'CITE-seq',
-          'Hybrid Capture',
-          'RNA-Seq',
-          'scRNA-Seq',
-          'Spatial Transcriptomics',
-          'snRNA-Seq',
-          'Whole Genome (WGS)',
-          'Whole Exome (WES)',
-        ]}
-        defaultValue={formData?.dataTypes}
-        onChange={onChange}
+        selectOptions={DataTypes.VALUES.map(entry => (`${entry.name}` + (entry.abbreviation ? ` (${entry.abbreviation})` : '')))}
+        defaultValue={study?.dataTypes}
+        onChange={setStudy}
       />
-      {generateFormTextField(formData, onChange, new PhenotypeIndication())}
-      {generateFormTextField(formData, onChange, new Species())}
+      {generateStudyPropertyFormTextField(study, setStudy, new PhenotypeIndication())}
+      {generateStudyPropertyFormTextField(study, setStudy, new Species())}
+      {generateStudyInputFormTextField(setStudy, 'piName', study?.piName, 'Principal Investigator Name', 'Enter the Principal Investigator\'s name', [FormValidators.REQUIRED])}
       <FormField
-        id="piName"
-        title="Principal Investigator Name"
-        defaultValue={formData?.piName}
-        validators={[FormValidators.REQUIRED]}
-        onChange={onChange}
-      />
-      <FormField
-        id="dataCustodianEmail"
+        id={DataCustodianEmail.key}
         title="Data Custodian Email"
         description="Insert the email for any individual with the authority to add/remove users access to this study&apos;s datasets."
         type={FormFieldTypes.SELECT}
@@ -116,14 +90,14 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
           },
         }}
         placeholder="Add one or more emails"
-        defaultValue={getStudyPropertyByKey(formData, 'dataCustodianEmail')}
+        defaultValue={getStudyPropertyValueByKey(study, 'dataCustodianEmail')}
         onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(formData, onChange, input, new DataCustodianEmail(input.value as string[]))
+          setStudyPropertyByKey(study, setStudy, input, new DataCustodianEmail(input.value as string[]))
         }}
       />
       <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        {generateFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
-        {generateFormDateField(formData, onChange, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
+        {generateStudyPropertyFormDateField(study, setStudy, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
+        {generateStudyPropertyFormDateField(study, setStudy, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
       </div>
       <FormField
         id="publicVisibility"
@@ -136,8 +110,8 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
           { name: true, text: 'Yes, I want my dataset info to be visible and available for requests' },
           { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' },
         ]}
-        defaultValue={formData?.publicVisibility}
-        onChange={onChange}
+        defaultValue={study?.publicVisibility}
+        onChange={setStudy}
       />
     </div>
   )

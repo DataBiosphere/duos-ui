@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import Home from 'src/pages/Home'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import Authenticated from 'src/routing/Authenticated'
@@ -103,37 +103,33 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
           <Route path="/data_submission_form" element={<DataSubmissionForm />} />
-          <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
-            <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+          <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
+            <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
+              <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+            </Route>
           </Route>
           <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         </Route>
-        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
-          <Route path="/member_console" element={<MemberConsole />} />
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member, USER_ROLES.signingOfficial, USER_ROLES.chairperson]} />}>
           <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
         </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
+          <Route path="/member_console" element={<MemberConsole />} />
+        </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
-          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
-          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
           <Route element={<SOAcknowledged />}>
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
+            <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
             {DAAUtils.isEnabled()
-              && (
-                <>
-                  <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
-                  <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
-                </>
-              )}
+              && <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />}
           </Route>
         </Route>
       </Route>
       <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
         <Route path="/chair_console" element={<ChairConsole />} />
         <Route path="/dac_datasets" element={<DACDatasets />} />
-        <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
-        <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
         <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
         <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         <Route path="/data_submission_form" element={<DataSubmissionForm />} />

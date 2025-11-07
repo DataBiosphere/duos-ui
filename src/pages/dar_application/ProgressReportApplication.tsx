@@ -222,8 +222,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     onFormChange({ datasets: approvedDatasets }, false) // Mark as non-user interaction
     onSelectedDatasetChange(approvedDatasets)
     isMounted.current = true // Mark as mounted after initial setup
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasets])
 
   return (

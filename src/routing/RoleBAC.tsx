@@ -2,7 +2,8 @@ import React from 'react'
 import { USER_ROLES } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import { UserRole } from 'src/types/model'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
+import NotFound from 'src/pages/NotFound'
 
 interface RoleBACProps {
   readonly rolesAllowed: string[]
@@ -20,7 +21,7 @@ const RoleBAC = ({ rolesAllowed }: RoleBACProps) => {
 
   return checkRoles(rolesAllowed)
     ? <Outlet />
-    : <Navigate to="/" />
+    : <NotFound />
 }
 
 export default RoleBAC

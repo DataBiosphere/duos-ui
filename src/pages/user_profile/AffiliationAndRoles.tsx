@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Institution as InstitutionAPI } from '../../libs/ajax/Institution'
 import { Notifications } from '../../libs/utils'
-import { DuosUser, Institution } from '../../types/model'
+import { DuosUser, InstitutionInterface } from '../../types/model'
 
 interface AffiliationAndRoleProps {
   readonly user: DuosUser
@@ -9,7 +9,7 @@ interface AffiliationAndRoleProps {
 
 export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
   const { user } = props
-  const [institution, setInstitution] = useState<Institution>()
+  const [institution, setInstitution] = useState<InstitutionInterface>()
   const [roles, setRoles] = useState<string>('')
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
         const allRoles = user?.roles?.map(role => role.name).join(', ')
         setRoles(allRoles)
         if (user?.institutionId) {
-          const institution: Institution = await InstitutionAPI.getById(user.institutionId)
+          const institution: InstitutionInterface = await InstitutionAPI.getById(user.institutionId)
           if (institution) {
             setInstitution(institution)
           }

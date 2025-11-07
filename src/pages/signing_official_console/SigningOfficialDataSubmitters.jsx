@@ -1,10 +1,9 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
-import { Notifications } from '../../libs/utils'
-import { Styles } from '../../libs/theme'
-import { User } from '../../libs/ajax/User'
-import { USER_ROLES } from '../../libs/utils'
+import React, { useEffect, useState } from 'react'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { Styles } from 'src/libs/theme'
+import { User } from 'src/libs/ajax/User'
 import DataCustodianTable from './DataCustodianTable'
+import { extractError } from 'src/utils/ErrorUtils.ts'
 
 export default function SigningOfficialConsole() {
   const [signingOfficial, setSigningOfficial] = useState({})
@@ -29,8 +28,9 @@ export default function SigningOfficialConsole() {
         setSigningOfficial(soUser)
         setIsLoading(false)
       }
-      catch (_error) {
-        Notifications.showError({ text: 'Error: Unable to retrieve current user from server' })
+      catch (error) {
+        const message = extractError(error)
+        Notifications.showError({ text: `Error: Unable to retrieve current user from server: ${message}` })
         setIsLoading(false)
       }
     }

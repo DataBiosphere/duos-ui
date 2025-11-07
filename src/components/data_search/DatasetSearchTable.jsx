@@ -207,7 +207,6 @@ export const DatasetSearchTable = (props) => {
       return
     }
     getExportableDatasets(datasets)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const searchAndFilter = useRef(
