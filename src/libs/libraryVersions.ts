@@ -22,7 +22,7 @@ import gedIcon from 'src/images/GED_logo.png'
 import ncpiIcon from 'src/images/ncpi-logo.png'
 import homeIcon from 'src/images/icon_dataset_.png'
 import epi25Icon from 'src/images/Epi25_logo.png'
-import PGCicon from 'src/images/PGC_logo.jpg'
+import PGCIcon from 'src/images/PGC_logo.jpg'
 import PBNicon from 'src/images/PBN_logo.png'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 
