@@ -108,14 +108,14 @@ const AppRoutes = (props: AppRoutesProps) => {
           </Route>
           <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         </Route>
-        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
-          <Route path="/member_console" element={<MemberConsole />} />
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member, USER_ROLES.signingOfficial, USER_ROLES.chairperson]} />}>
           <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
         </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
+          <Route path="/member_console" element={<MemberConsole />} />
+        </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
-          <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
-          <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
           <Route element={<SOAcknowledged />}>
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
@@ -128,8 +128,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
         <Route path="/chair_console" element={<ChairConsole />} />
         <Route path="/dac_datasets" element={<DACDatasets />} />
-        <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
-        <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
         <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
         <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         <Route path="/data_submission_form" element={<DataSubmissionForm />} />
