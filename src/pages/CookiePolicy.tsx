@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import './PrivacyPolicy.css'
+import MailOutlineIcon from '@mui/icons-material/MailOutline'
 
 export default function CookiePolicy() {
   return (
@@ -164,7 +165,9 @@ export default function CookiePolicy() {
         If you want to contact us in relation to this Cookie Policy, contact our DUOS Support Team.
       </div>
       <div>
-        <a href="mailto:duos@duos.org"><span className="glyphicon glyphicon-envelope" style={{ paddingRight: '1rem' }} />duos@duos.org</a>
+        <a href="mailto:duos@duos.org"><MailOutlineIcon fontSize="medium" sx={{ verticalAlign: 'middle' }} />
+          <span style={{ paddingLeft: '5px' }}>duos@duos.org</span>
+        </a>
       </div>
     </div>
   )
