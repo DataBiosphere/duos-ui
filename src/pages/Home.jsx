@@ -171,22 +171,7 @@ const Home = (props) => {
               </div>
             </div>
           </div>
-          <div className="row">
-            <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
-              <h1 style={header}>How does DUOS expedite compliant data sharing?</h1>
-              <h3 style={subHeader}>
-                Researchers use DUOS to share and request access to data, and data access committees
-                {' '}
-                <br />
-                {' '}
-                and institutional officials use DUOS to review and approve research uses of the data.
-              </h3>
-              <div>
-                <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
-              </div>
-            </div>
-          </div>
-          <div className="row" style={{ background: '#eff0f2', margin: '50px 0', padding: '48px 0 60px 0' }}>
+          <div className="row" style={{ background: '#eff0f2', padding: '48px 0 60px 0' }}>
             <div className="col-lg-4 col-md-4">
               <p style={header}>DUOS for DACs</p>
               <p style={description}>
@@ -280,6 +265,21 @@ const Home = (props) => {
               </div>
             </div>
           </section>
+          <div className="row">
+            <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
+              <h1 style={header}>How does DUOS expedite compliant data sharing?</h1>
+              <h3 style={subHeader}>
+                Researchers use DUOS to share and request access to data, and data access committees
+                {' '}
+                <br />
+                {' '}
+                and institutional officials use DUOS to review and approve research uses of the data.
+              </h3>
+              <div>
+                <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
