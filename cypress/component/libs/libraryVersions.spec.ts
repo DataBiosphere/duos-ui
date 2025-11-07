@@ -39,7 +39,7 @@ describe('Library Versions - Tests', function () {
       expect(featuredLibraries).to.include('scp')
 
       // Verify count
-      expect(featuredLibraries.length).to.equal(21)
+      expect(featuredLibraries.length).to.equal(20)
     })
 
     it('marks non-featured libraries correctly', function () {
@@ -139,7 +139,7 @@ describe('Library Versions - Tests', function () {
         .sort((a, b) => a.order - b.order || a.key.localeCompare(b.key))
 
       // Should have 21 featured libraries
-      expect(featuredLibraries.length).to.equal(21)
+      expect(featuredLibraries.length).to.equal(20)
 
       // Should be sorted by order parameter
       expect(featuredLibraries[0].key).to.equal('/datalibrary') // order: 1
