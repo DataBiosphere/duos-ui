@@ -3,6 +3,7 @@ import { IntellectualProperty } from 'src/types/model'
 import { IntellectualPropertyAddEdit } from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
 import IntellectualPropertyRow from 'src/components/intellectual_property_list/IntellectualPropertyRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
+import AddIcon from '@mui/icons-material/Add'
 
 interface IntellectualPropertyListProps {
   readonly intellectualProperties: IntellectualProperty[]
@@ -45,6 +46,8 @@ export default function IntellectualPropertyList(props: IntellectualPropertyList
       type="button"
       className="button button-white"
       style={{
+        display: 'flex',
+        alignItems: 'center',
         marginTop: 0,
         marginBottom: 5,
         border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
@@ -54,7 +57,8 @@ export default function IntellectualPropertyList(props: IntellectualPropertyList
       onClick={() => !disabled && setShowAddEdit(true)}
       disabled={disabled}
     >
-      Add Intellectual Property
+      <AddIcon fontSize="medium" />
+      Add IP
     </button>
   )
 

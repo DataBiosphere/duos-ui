@@ -3,6 +3,7 @@ import AiModelAddEdit from 'src/components/ai_models_list/AiModelAddEdit'
 import AiModelRow from 'src/components/ai_models_list/AiModelRow'
 import { AiModel } from 'src/types/model'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
+import AddIcon from '@mui/icons-material/Add'
 
 interface AiModelListProps {
   readonly aiModels: AiModel[]
@@ -53,6 +54,8 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
       type="button"
       className="button button-white"
       style={{
+        display: 'flex',
+        alignItems: 'center',
         marginTop: 0,
         marginBottom: 5,
         border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
@@ -62,7 +65,8 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
       onClick={() => !disabled && setShowAddEdit(true)}
       disabled={disabled}
     >
-      Add AI Model
+      <AddIcon fontSize="medium" />
+      Add Model
     </button>
   )
 

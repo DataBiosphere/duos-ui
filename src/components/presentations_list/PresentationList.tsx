@@ -3,6 +3,7 @@ import PresentationAddEdit from './PresentationAddEdit'
 import PresentationRow from './PresentationRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { Presentation } from 'src/types/model'
+import AddIcon from '@mui/icons-material/Add'
 
 interface PresentationListProps {
   readonly presentations: Presentation[]
@@ -45,6 +46,8 @@ export default function PresentationList(props: PresentationListProps): React.JS
       type="button"
       className="button button-white"
       style={{
+        display: 'flex',
+        alignItems: 'center',
         marginTop: 0,
         marginBottom: 5,
         border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
@@ -54,6 +57,7 @@ export default function PresentationList(props: PresentationListProps): React.JS
       onClick={() => !disabled && setShowAddEdit(true)}
       disabled={disabled}
     >
+      <AddIcon fontSize="medium" />
       Add Presentation
     </button>
   )

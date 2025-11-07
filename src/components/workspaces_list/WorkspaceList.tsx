@@ -3,6 +3,7 @@ import { Workspace } from 'src/types/model'
 import { WorkspaceAddEdit } from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
+import AddIcon from '@mui/icons-material/Add'
 
 interface WorkspaceListProps {
   readonly workspaces: Workspace[]
@@ -45,6 +46,8 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
       type="button"
       className="button button-white"
       style={{
+        display: 'flex',
+        alignItems: 'center',
         marginTop: 0,
         marginBottom: 5,
         border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
@@ -54,6 +57,7 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
       onClick={() => !disabled && setShowAddEdit(true)}
       disabled={disabled}
     >
+      <AddIcon fontSize="medium" />
       Add Workspace
     </button>
   )
