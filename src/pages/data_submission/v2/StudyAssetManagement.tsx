@@ -17,6 +17,13 @@ import AiModelList from 'src/components/ai_models_list/AiModelList'
 import WorkspaceList from 'src/components/workspaces_list/WorkspaceList'
 import ClinicalTrialList from 'src/components/clinical_trial_list/ClinicalTrialList'
 import FundingResourceList from 'src/components/funding_resource_list/FundingResourceList'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
+import DescriptionIcon from '@mui/icons-material/Description'
+import MonitorIcon from '@mui/icons-material/Monitor'
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
+import StorageIcon from '@mui/icons-material/Storage'
+import LaptopMacIcon from '@mui/icons-material/LaptopMac'
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 
 export interface StudyAssetManagementProps {
   study: Study
@@ -95,6 +102,10 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
       <h2>Study Assets</h2>
       <p>Add datasets, models, workspaces, and other resources associated with this study</p>
 
+      {/*
+        TODO: DT-2382: Add DatasetList component here
+        */}
+
       <AiModelList
         aiModels={models}
         onAiModelsChange={onModelChange}
@@ -102,7 +113,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
-              icon: 'glyphicon glyphicon-cog',
+              icon: <StorageIcon fontSize="large" />,
               title: 'Models',
               description: 'Add computational models or algorithms derived from this study',
               children: content,
@@ -119,7 +130,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
-              icon: 'glyphicon glyphicon-briefcase',
+              icon: <LaptopMacIcon fontSize="large" />,
               title: 'Featured Workspaces',
               description: 'Add computational workspaces for data analysis',
               children: content,
@@ -136,7 +147,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
-              icon: 'glyphicon glyphicon-file',
+              icon: <DescriptionIcon fontSize="large" />,
               title: 'Publications',
               description: 'Add published research papers related to this study',
               children: content,
@@ -153,7 +164,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
-              icon: 'glyphicon glyphicon-bullhorn',
+              icon: <MonitorIcon fontSize="large" />,
               title: 'Presentations',
               description: 'Add conference presentations or talks about this study',
               children: content,
@@ -170,7 +181,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
-              icon: 'glyphicon glyphicon-stats',
+              icon: <LocalHospitalIcon fontSize="large" />,
               title: 'Clinical Trials',
               description: 'Add clinical trials associated with this study',
               children: content,
@@ -187,7 +198,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
-              icon: 'glyphicon glyphicon-copyright-mark',
+              icon: <VerifiedUserIcon fontSize="large" />,
               title: 'Intellectual Property',
               description: 'Add patents or other IP related to this study',
               children: content,
@@ -204,7 +215,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
-              icon: 'glyphicon glyphicon-usd',
+              icon: <AttachMoneyIcon fontSize="large" />,
               title: 'Funding Resources',
               description: 'Add grants and funding sources for this study',
               children: content,

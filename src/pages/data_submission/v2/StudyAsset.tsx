@@ -1,7 +1,7 @@
 import React from 'react'
 
 export interface StudyAssetConfig {
-  icon: string
+  icon: string | React.ReactNode
   title: string
   description: string
   children?: React.ReactNode
@@ -26,12 +26,12 @@ export const StudyAsset: React.FC<StudyAssetProps> = ({ config }) => {
       >
         <div style={{
           display: 'flex',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           gap: '1rem',
           flex: 1,
         }}
         >
-          <span className={icon} style={{ fontSize: '32px', flexShrink: 0 }} aria-hidden="true" />
+          <div>{icon}</div>
           <div>
             <h3 style={{ margin: 0 }}>{title}</h3>
             <p style={{ margin: '0.25rem 0 0 0', color: '#666' }}>{description}</p>
