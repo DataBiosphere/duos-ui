@@ -22,7 +22,7 @@ export const StudyAsset: React.FC<StudyAssetProps> = ({ config }) => {
         width: '100%',
         background: '#eaf0fa',
         borderRadius: '12px',
-        padding: '1rem',
+        padding: '1rem 2rem',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}
     >
