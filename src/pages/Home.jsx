@@ -171,7 +171,7 @@ const Home = (props) => {
               </div>
             </div>
           </div>
-          <div className="row" style={{ background: '#eff0f2', margin: '50px 0', padding: '48px 0 60px 0' }}>
+          <div className="row" style={{ background: '#eff0f2', padding: '48px 0 60px 0' }}>
             <div className="col-lg-4 col-md-4">
               <p style={header}>DUOS for DACs</p>
               <p style={description}>
