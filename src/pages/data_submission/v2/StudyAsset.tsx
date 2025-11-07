@@ -16,20 +16,32 @@ export const StudyAsset: React.FC<StudyAssetProps> = ({ config }) => {
   const { icon, title, description, children, button } = config
 
   return (
-    <div style={{ marginTop: '2rem', width: '100%' }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '2rem',
-        marginBottom: '1rem',
+    <div
+      style={{
+        marginTop: '1rem',
+        width: '100%',
+        background: '#eaf0fa',
+        borderRadius: '12px',
+        padding: '1rem',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}
-      >
-        <div style={{
+    >
+      <div
+        style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          flex: 1,
+          alignItems: 'flex-start',
+          gap: '2rem',
+          marginTop: '1rem',
+          marginBottom: '1rem',
         }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            flex: 1,
+          }}
         >
           <div>{icon}</div>
           <div>
