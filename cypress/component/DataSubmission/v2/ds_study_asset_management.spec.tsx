@@ -33,9 +33,9 @@ describe('StudyAssetManagement component', () => {
     cy.contains('Study Assets').should('exist')
     cy.contains('Add datasets, models, workspaces, and other resources associated with this study').should('exist')
 
-    sections.forEach((s) => {
-      cy.contains('h3', s.title).should('exist')
-      cy.contains(s.desc).should('exist')
-    })
+    for (const { title, desc } of sections) {
+      cy.contains('h3', title).should('exist')
+      cy.contains(desc).should('exist')
+    }
   })
 })
