@@ -19,8 +19,8 @@ COPY tsconfig.json /usr/src/app/tsconfig.json
 COPY vite.config.ts /usr/src/app/vite.config.ts
 COPY config/base_config.json /usr/src/app/public/config.json
 RUN npm config set update-notifier false
-RUN npm install --silent
-RUN npm run build --silent
+RUN npm install --loglevel verbose
+RUN npm run build
 
 FROM us.gcr.io/broad-dsp-gcr-public/base/nginx:mainline-alpine
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html
