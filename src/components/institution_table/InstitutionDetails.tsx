@@ -11,6 +11,7 @@ import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 import { InstitutionDomainEditor } from 'src/components/institution_table/components/InstitutionDomainEditor'
 import { SigningOfficialsList } from 'src/components/institution_table/components/SigningOfficialsList'
 import { FORM_MODES, InstitutionFormMode } from 'src/components/institution_table/InstitutionFormMode'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 interface InstitutionDetailsProps {
   formMode: InstitutionFormMode
@@ -26,6 +27,10 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
   const { institutionId } = params
   const formMode = props.formMode
   const navigate = useNavigate()
+
+  // Set page title based on form mode
+  usePageTitle(formMode === FORM_MODES.createNew ? 'Add Institution' : 'Edit Institution')
+
   const [institutionList, setInstitutionList] = useState<InstitutionInterface[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)

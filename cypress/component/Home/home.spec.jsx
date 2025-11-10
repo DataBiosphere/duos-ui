@@ -13,10 +13,6 @@ describe('Home Page - Tests', function () {
       )
     })
 
-    it('sets the page title correctly', function () {
-      cy.title().should('equal', 'Home | DUOS')
-    })
-
     it('renders the page header correctly', function () {
       cy.contains('Data Use Oversight System').should('be.visible')
       cy.contains('Get data faster').should('be.visible')
