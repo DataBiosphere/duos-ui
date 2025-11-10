@@ -22,7 +22,7 @@ export default function RequestForm() {
     },
     {
       key: 'checkSOPermissions',
-      label: `I am a Signing Official and I want to issue permissions to my institution's users`,
+      label: `I am a Signing Official with authority to engage my instituion in contracts, and need to issue permissions to my institution's users`,
     },
     {
       key: 'checkJoinDac',
