@@ -9,8 +9,10 @@ import { DarCollectionTable } from '../components/dar_collection_table/DarCollec
 import { cancelCollectionFn, consoleTypes, openCollectionFn, updateCollectionFn } from '../utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
 import { useNavigate } from 'react-router-dom'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function ChairConsole() {
+  usePageTitle('DAR Requests')
   const navigate = useNavigate()
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])

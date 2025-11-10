@@ -6,9 +6,11 @@ import broadLogo from '../images/broad_logo_allwhite.png'
 import { OverflowTooltip } from '../components/Tooltips'
 import { Link } from 'react-router-dom'
 import { getLibraryVersions } from '../libs/libraryVersions'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 const Home = (props) => {
   const { isLogged } = props
+  usePageTitle('Home')
 
   // Get all library versions and filter for featured ones
   const featuredLibraries = useMemo(() => {

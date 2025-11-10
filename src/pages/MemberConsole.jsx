@@ -9,8 +9,10 @@ import { DarCollectionTable } from '../components/dar_collection_table/DarCollec
 import { consoleTypes } from '../utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
 import { useNavigate } from 'react-router-dom'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function MemberConsole() {
+  usePageTitle('DAR Requests')
   const navigate = useNavigate()
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])

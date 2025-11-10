@@ -9,6 +9,7 @@ import { ManageUsersTable } from '../components/manage_users_table/ManageUsersTa
 import { Styles } from '../libs/theme'
 import SearchBar from '../components/SearchBar'
 import { Notification } from '../components/Notification'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 const getUserList = async () => {
   const users = await User.list(USER_ROLES.admin)
@@ -28,6 +29,7 @@ const getUserList = async () => {
 }
 
 export const AdminManageUsers = function AdminManageUsers() {
+  usePageTitle('Manage Users')
   const [searchText, setSearchText] = useState('')
   const [userList, setUserList] = useState([])
   const [showAddUserModal, setShowAddUserModal] = useState(false)

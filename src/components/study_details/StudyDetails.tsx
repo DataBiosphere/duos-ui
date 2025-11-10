@@ -11,6 +11,7 @@ import { chain, Dictionary, intersection, isEmpty } from 'lodash'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { applyForAccess } from 'src/utils/accessUtils'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const styles = {
   row: {
@@ -48,6 +49,7 @@ const styles = {
 }
 
 export const StudyDetails = () => {
+  usePageTitle('Study Details')
   const params = useParams<{ studyId: string }>()
   const studyId = params.studyId
   const navigate = useNavigate()

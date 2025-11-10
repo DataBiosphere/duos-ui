@@ -4,8 +4,10 @@ import { Styles } from 'src/libs/theme'
 import { User } from 'src/libs/ajax/User'
 import DataCustodianTable from './DataCustodianTable'
 import { extractError } from 'src/utils/ErrorUtils.ts'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function SigningOfficialConsole() {
+  usePageTitle('Data Submitters')
   const [signingOfficial, setSigningOfficial] = useState({})
   const [researchers, setResearchers] = useState([])
   const [unregisteredResearchers, setUnregisteredResearchers] = useState()

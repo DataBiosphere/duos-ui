@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import SortableTable from 'src/components/sortable_table/SortableTable'
 import { User } from 'src/libs/ajax/User'
 import { formatDate, Notifications } from 'src/libs/utils'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const headCells = [
   {
@@ -58,6 +59,7 @@ function createRows(userRows) {
 }
 
 export default function ControlledAccessGrants() {
+  usePageTitle('My Datasets')
   const [rows, setRows] = useState([])
 
   useEffect(() => {

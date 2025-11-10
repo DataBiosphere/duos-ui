@@ -15,6 +15,7 @@ import { extractError } from 'src/utils/ErrorUtils'
 import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router-dom'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
@@ -38,6 +39,7 @@ const LabeledField = ({ label, children }: { label: string, children: React.Reac
 }
 
 export default function DatasetStatistics() {
+  usePageTitle('Dataset Details')
   const params = useParams<{ datasetIdentifier: string }>()
   const navigate = useNavigate()
   const datasetIdentifier = params.datasetIdentifier || ''

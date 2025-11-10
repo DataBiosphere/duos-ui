@@ -12,8 +12,10 @@ import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ga4ghLogo from 'src/images/ga4gh-logo.png'
 import userProfileIcon from 'src/images/user-profile.png'
 import { Link } from 'react-router-dom'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function UserProfile() {
+  usePageTitle('User Profile')
   const [user, setUser] = useState({})
   const [name, setName] = useState('')
   const [updatedName, setUpdatedName] = useState('')

@@ -13,8 +13,10 @@ import {
   updateCollectionFn,
 } from '../utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function AdminManageDarCollections() {
+  usePageTitle('DAR Requests')
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
