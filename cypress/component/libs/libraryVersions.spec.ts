@@ -30,7 +30,7 @@ describe('Library Versions - Tests', function () {
         .filter(([, library]) => library.featured)
         .map(([_key]) => _key)
 
-      // Currently featured: 20 libraries including /datalibrary, broad, elwazi, nhgri, scp, anvil, hca, etc.
+      // Currently featured: 21 libraries including /datalibrary, broad, elwazi, nhgri, scp, anvil, hca, etc.
       expect(featuredLibraries).to.include('/datalibrary')
       expect(featuredLibraries).to.include('broad')
       expect(featuredLibraries).to.include('elwazi')
@@ -39,7 +39,7 @@ describe('Library Versions - Tests', function () {
       expect(featuredLibraries).to.include('scp')
 
       // Verify count
-      expect(featuredLibraries.length).to.equal(20)
+      expect(featuredLibraries.length).to.equal(21)
     })
 
     it('marks non-featured libraries correctly', function () {
@@ -138,8 +138,8 @@ describe('Library Versions - Tests', function () {
         .map(([key, library]) => ({ key, ...library }))
         .sort((a, b) => a.order - b.order || a.key.localeCompare(b.key))
 
-      // Should have 20 featured libraries
-      expect(featuredLibraries.length).to.equal(20)
+      // Should have 21 featured libraries
+      expect(featuredLibraries.length).to.equal(21)
 
       // Should be sorted by order parameter
       expect(featuredLibraries[0].key).to.equal('/datalibrary') // order: 1

@@ -31,7 +31,7 @@ describe('Home Page - Tests', function () {
     })
 
     it('interacts with library card links when not logged in', function () {
-      cy.get('.logo-card').should('have.length', 20)
+      cy.get('.logo-card').should('have.length', 21)
       cy.get('.logo-card').each(($card) => {
         cy.wrap($card).find('a').should('exist')
       })
@@ -105,14 +105,14 @@ describe('Home Page - Tests', function () {
     it('displays logos horizontally on desktop', function () {
       cy.viewport(1200, 800)
       cy.get('.logo-grid').should('have.css', 'flex-direction', 'row')
-      cy.get('.logo-card').should('have.length', 20)
+      cy.get('.logo-card').should('have.length', 21)
     })
 
     it('displays logos responsively on mobile', function () {
       cy.viewport(600, 800)
       cy.get('.logo-grid').should('have.css', 'display', 'flex')
       cy.get('.logo-grid').should('have.css', 'flex-wrap', 'wrap')
-      cy.get('.logo-card').should('have.length', 20)
+      cy.get('.logo-card').should('have.length', 21)
     })
   })
 
@@ -124,8 +124,8 @@ describe('Home Page - Tests', function () {
         </MemoryRouter>,
       )
 
-      // Should show 20 featured libraries
-      cy.get('.logo-card').should('have.length', 20)
+      // Should show 21 featured libraries
+      cy.get('.logo-card').should('have.length', 21)
 
       // Should not display terra or mgb (featured: false)
       cy.get('[data-for="terra"]').should('not.exist')
@@ -139,7 +139,7 @@ describe('Home Page - Tests', function () {
         </MemoryRouter>,
       )
 
-      cy.get('.logo-card').should('have.length', 20)
+      cy.get('.logo-card').should('have.length', 21)
 
       // Verify first three libraries are in correct order
       cy.get('.logo-card').eq(0).find('img').should('have.attr', 'alt', 'DUOS')
@@ -174,11 +174,11 @@ describe('Home Page - Tests', function () {
 
       // Tablet
       cy.viewport(768, 1024)
-      cy.get('.logo-card').should('have.length', 20)
+      cy.get('.logo-card').should('have.length', 21)
 
       // Mobile
       cy.viewport(480, 800)
-      cy.get('.logo-card').should('have.length', 20)
+      cy.get('.logo-card').should('have.length', 21)
     })
   })
 })

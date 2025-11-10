@@ -18,9 +18,13 @@ import stanleyIcon from 'src/images/stanley-center-logo.png'
 import getzLabIcon from 'src/images/getz-lab-logo.svg'
 import gp2Icon from 'src/images/gp2-logo.svg'
 import asapIcon from 'src/images/asap-logo.svg'
-import gedIcon from 'src/images/ged-logo.png'
+import gedIcon from 'src/images/GED_logo.png'
 import ncpiIcon from 'src/images/ncpi-logo.png'
 import homeIcon from 'src/images/icon_dataset_.png'
+import epi25Icon from 'src/images/Epi25_logo.png'
+import PGCIcon from 'src/images/PGC_logo.jpg'
+import PBNIcon from 'src/images/PBN_logo.jpg'
+import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 
 interface MatchPhraseQuery {
   match_phrase: {
@@ -466,7 +470,7 @@ export const getLibraryVersions = (
           'study.description': 'PBN',
         },
       },
-      icon: broadIcon,
+      icon: PBNIcon,
       title: 'Psychiatric Biomarkers Network Data Library',
       featured: true,
       order: 14,
@@ -477,7 +481,7 @@ export const getLibraryVersions = (
           'study.description': 'PGC',
         },
       },
-      icon: broadIcon,
+      icon: PGCIcon,
       title: 'Psychiatric Genomics Consortium - PsychChip Data Library',
       featured: true,
       order: 15,
@@ -499,7 +503,7 @@ export const getLibraryVersions = (
           'study.description': 'ESP',
         },
       },
-      icon: broadIcon,
+      icon: epi25Icon,
       title: 'Broad Institute Epilepsy Data Library',
       featured: true,
       order: 17,
@@ -526,6 +530,17 @@ export const getLibraryVersions = (
       featured: true,
       order: 19,
     },
+    'helmsley': {
+      query: {
+        match_phrase: {
+          'study.description': 'Helmsley',
+        },
+      },
+      icon: HelmsleyIcon,
+      title: 'Data Library',
+      featured: true,
+      order: 20,
+    },
     'ged': {
       query: {
         match_phrase: {
@@ -535,7 +550,7 @@ export const getLibraryVersions = (
       icon: gedIcon,
       title: 'Genetics of Eating Disorders Data Library',
       featured: true,
-      order: 20,
+      order: 21,
     },
     'ncpi-duo': {
       query: {
