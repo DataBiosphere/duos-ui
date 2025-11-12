@@ -1,5 +1,5 @@
 import { Study } from 'src/pages/data_submission/v2/v2-models'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode } from 'react'
 import PublicationList from 'src/components/publications_list/PublicationList'
 import PresentationList from 'src/components/presentations_list/PresentationList'
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
@@ -33,69 +33,23 @@ export interface StudyAssetManagementProps {
 export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
   const { setStudy, study } = props
 
-  const [models, setModels] = useState<AiModel[]>(study.assets?.models || [])
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(study.assets?.workspaces || [])
-  const [publications, setPublications] = useState<Publication[]>(study.assets?.publications || [])
-  const [presentations, setPresentations] = useState<Presentation[]>(study.assets?.presentations || [])
-  const [clinicalTrials, setClinicalTrials] = useState<ClinicalTrial[]>(study.assets?.clinicalTrials || [])
-  const [intellectualProperties, setIntellectualProperties] = useState<IntellectualProperty[]>(study.assets?.intellectualProperty || [])
-  const [fundingResources, setFundingResources] = useState<FundingResource[]>(study.assets?.funding || [])
-
-  const onModelChange = (models: AiModel[]) => {
-    setModels(models)
+  const onAssetChange = <K extends keyof NonNullable<Study['assets']>>(
+    assetType: K,
+    value: NonNullable<Study['assets']>[K],
+  ) => {
     setStudy(prev => ({
       ...prev,
-      assets: { ...prev.assets, models },
+      assets: { ...prev.assets, [assetType]: value },
     }))
   }
 
-  const onWorkspaceChange = (workspaces: Workspace[]) => {
-    setWorkspaces(workspaces)
-    setStudy(prev => ({
-      ...prev,
-      assets: { ...prev.assets, workspaces },
-    }))
-  }
-
-  const onPublicationChange = (publications: Publication[]) => {
-    setPublications(publications)
-    setStudy(prev => ({
-      ...prev,
-      assets: { ...prev.assets, publications },
-    }))
-  }
-
-  const onPresentationChange = (presentations: Presentation[]) => {
-    setPresentations(presentations)
-    setStudy(prev => ({
-      ...prev,
-      assets: { ...prev.assets, presentations },
-    }))
-  }
-
-  const onClinicalTrialChange = (clinicalTrials: ClinicalTrial[]) => {
-    setClinicalTrials(clinicalTrials)
-    setStudy(prev => ({
-      ...prev,
-      assets: { ...prev.assets, clinicalTrials },
-    }))
-  }
-
-  const onIntellectualPropertyChange = (intellectualProperties: IntellectualProperty[]) => {
-    setIntellectualProperties(intellectualProperties)
-    setStudy(prev => ({
-      ...prev,
-      assets: { ...prev.assets, intellectualProperty: intellectualProperties },
-    }))
-  }
-
-  const onFundingResourceChange = (fundingResources: FundingResource[]) => {
-    setFundingResources(fundingResources)
-    setStudy(prev => ({
-      ...prev,
-      assets: { ...prev.assets, funding: fundingResources },
-    }))
-  }
+  const models = study.assets?.models || []
+  const workspaces = study.assets?.workspaces || []
+  const publications = study.assets?.publications || []
+  const presentations = study.assets?.presentations || []
+  const clinicalTrials = study.assets?.clinicalTrials || []
+  const intellectualProperties = study.assets?.intellectualProperty || []
+  const fundingResources = study.assets?.funding || []
 
   return (
     <div className="data-submitter-section">
@@ -108,7 +62,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <AiModelList
         aiModels={models}
-        onAiModelsChange={onModelChange}
+        onAiModelsChange={(models: AiModel[]) => onAssetChange('models', models)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
@@ -125,7 +79,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <WorkspaceList
         workspaces={workspaces}
-        onWorkspaceChange={onWorkspaceChange}
+        onWorkspaceChange={(workspaces: Workspace[]) => onAssetChange('workspaces', workspaces)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
@@ -142,7 +96,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <PublicationList
         publications={publications}
-        onPublicationChange={onPublicationChange}
+        onPublicationChange={(publications: Publication[]) => onAssetChange('publications', publications)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
@@ -159,7 +113,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <PresentationList
         presentations={presentations}
-        onPresentationChange={onPresentationChange}
+        onPresentationChange={(presentations: Presentation[]) => onAssetChange('presentations', presentations)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
@@ -176,7 +130,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <ClinicalTrialList
         clinicalTrials={clinicalTrials}
-        onClinicalTrialChange={onClinicalTrialChange}
+        onClinicalTrialChange={(clinicalTrials: ClinicalTrial[]) => onAssetChange('clinicalTrials', clinicalTrials)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
@@ -193,7 +147,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <IntellectualPropertyList
         intellectualProperties={intellectualProperties}
-        onIntellectualPropertyChange={onIntellectualPropertyChange}
+        onIntellectualPropertyChange={(intellectualProperties: IntellectualProperty[]) => onAssetChange('intellectualProperty', intellectualProperties)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
@@ -210,7 +164,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <FundingResourceList
         fundingResources={fundingResources}
-        onFundingResourceChange={onFundingResourceChange}
+        onFundingResourceChange={(fundingResources: FundingResource[]) => onAssetChange('funding', fundingResources)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
