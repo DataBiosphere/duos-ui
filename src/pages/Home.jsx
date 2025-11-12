@@ -276,7 +276,7 @@ const Home = (props) => {
                 and institutional officials use DUOS to review and approve research uses of the data.
               </h3>
               <div>
-                <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
+                <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25% 8.25% 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
               </div>
             </div>
           </div>
