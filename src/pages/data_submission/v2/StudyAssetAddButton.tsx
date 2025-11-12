@@ -2,11 +2,11 @@ import React from 'react'
 import AddIcon from '@mui/icons-material/Add'
 
 interface StudyAssetAddButtonProps {
-  id: string
-  label: string
-  onClick: () => void
-  disabled?: boolean
-  hasValidationError?: boolean
+  readonly id: string
+  readonly label: string
+  readonly onClick: () => void
+  readonly disabled?: boolean
+  readonly hasValidationError?: boolean
 }
 
 export default function StudyAssetAddButton(props: StudyAssetAddButtonProps): React.JSX.Element {
