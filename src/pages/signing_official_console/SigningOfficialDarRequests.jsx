@@ -7,7 +7,7 @@ import { USER_ROLES } from '../../libs/utils'
 import { DarCollectionTable } from '../../components/dar_collection_table/DarCollectionTable'
 import { consoleTypes } from '../../utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from '../../hooks/useResponsiveDarCollectionColumns'
-import { usePageTitle } from '../../hooks/usePageTitle'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function SigningOfficialDarRequests() {
   usePageTitle('DAR Requests')
