@@ -2,6 +2,7 @@ import React from 'react'
 import { mount } from 'cypress/react'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { Storage } from 'src/libs/storage'
+import { BrowserRouter } from 'react-router-dom'
 
 const mockUser = {
   displayName: 'Display Name',
@@ -25,12 +26,14 @@ describe('Support Request Modal Tests', () => {
 
     it('Renders form correctly', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // These fields should exist
       cy.get('[data-cy="closeButton"]').should('exist')
@@ -47,12 +50,14 @@ describe('Support Request Modal Tests', () => {
 
     it('Submits properly', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // Ensure that all required fields are filled out before submit becomes available
       cy.get('[data-cy="supportFormType"]').select('bug')
@@ -82,12 +87,14 @@ describe('Support Request Modal Tests', () => {
 
     it('Renders form correctly', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // These fields should exist
       cy.get('[data-cy="closeButton"]').should('exist')
@@ -104,12 +111,14 @@ describe('Support Request Modal Tests', () => {
 
     it('Submits properly', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // Ensure that all required fields are filled out before submit becomes available
       cy.get('[data-cy="supportFormName"]').type('Name')
@@ -142,12 +151,14 @@ describe('Support Request Modal Tests', () => {
     })
     it('Single attachment displayed', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // {force: true} is necessary here due to the surrounding div that covers the input.
       cy.get('[data-cy="supportFormAttachment"]').selectFile(['cypress/fixtures/example.json'], { force: true })
@@ -156,12 +167,14 @@ describe('Support Request Modal Tests', () => {
 
     it('Multiple attachments displayed', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // {force: true} is necessary here due to the surrounding div that covers the input.
       cy.get('[data-cy="supportFormAttachment"]').selectFile(['cypress/fixtures/example.json', 'cypress/fixtures/dataset-registration-schema_v1.json'], { force: true })
@@ -180,12 +193,14 @@ describe('Support Request Modal Tests', () => {
 
     it('Renders form correctly', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // These fields should exist
       cy.get('[data-cy="closeButton"]').should('exist')
@@ -202,12 +217,14 @@ describe('Support Request Modal Tests', () => {
 
     it('Submits properly', () => {
       mount(
-        <SupportRequestModal
-          onCloseRequest={handler}
-          onOKRequest={handler}
-          url="url"
-          showModal={true}
-        />,
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            onOKRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
       )
       // Ensure that all required fields are filled out before submit becomes available
       cy.get('[data-cy="supportFormType"]').select('bug')
@@ -225,6 +242,115 @@ describe('Support Request Modal Tests', () => {
       cy.get('[data-cy="supportFormSubmit"]').click()
       cy.wait(['@request', '@upload']).then((interceptions) => {
         assert(interceptions.length === 2)
+      })
+    })
+  })
+
+  describe('RedirectLink functionality', () => {
+    describe('When user is logged in:', () => {
+      beforeEach(() => {
+        cy.stub(Storage, 'userIsLogged').returns(true)
+        cy.stub(Storage, 'getCurrentUser').returns(mockUser)
+      })
+
+      it('Displays "Data Library" link text', () => {
+        mount(
+          <BrowserRouter>
+            <SupportRequestModal
+              onCloseRequest={handler}
+              onOKRequest={handler}
+              url="url"
+              showModal={true}
+            />
+          </BrowserRouter>,
+        )
+        cy.contains('Data Library').should('exist')
+        cy.get('a').filter(':contains("Data Library")').should('have.length', 2)
+      })
+
+      it('Links to /datalibrary when logged in', () => {
+        mount(
+          <BrowserRouter>
+            <SupportRequestModal
+              onCloseRequest={handler}
+              onOKRequest={handler}
+              url="url"
+              showModal={true}
+            />
+          </BrowserRouter>,
+        )
+        cy.get('a').contains('Data Library').first().should('have.attr', 'href', '/datalibrary')
+        cy.get('a').contains('Data Library').last().should('have.attr', 'href', '/datalibrary')
+      })
+
+      it('Has appropriate styling', () => {
+        mount(
+          <BrowserRouter>
+            <SupportRequestModal
+              onCloseRequest={handler}
+              onOKRequest={handler}
+              url="url"
+              showModal={true}
+            />
+          </BrowserRouter>,
+        )
+        cy.get('a').contains('Data Library').first()
+          .should('have.css', 'cursor', 'pointer')
+      })
+    })
+
+    describe('When user is NOT logged in:', () => {
+      beforeEach(() => {
+        cy.stub(Storage, 'userIsLogged').returns(false)
+        cy.stub(Storage, 'getCurrentUser').returns(undefined)
+      })
+
+      it('Displays "Data Library" link text', () => {
+        mount(
+          <BrowserRouter>
+            <SupportRequestModal
+              onCloseRequest={handler}
+              onOKRequest={handler}
+              url="url"
+              showModal={true}
+            />
+          </BrowserRouter>,
+        )
+        cy.contains('Data Library').should('exist')
+        cy.get('a').filter(':contains("Data Library")').should('have.length', 2)
+      })
+
+      it('Has appropriate styling', () => {
+        mount(
+          <BrowserRouter>
+            <SupportRequestModal
+              onCloseRequest={handler}
+              onOKRequest={handler}
+              url="url"
+              showModal={true}
+            />
+          </BrowserRouter>,
+        )
+        cy.get('a').contains('Data Library').first()
+          .should('have.css', 'cursor', 'pointer')
+      })
+
+      it('Closes modal when link is clicked', () => {
+        const onCloseStub = cy.stub().as('onCloseRequest')
+        mount(
+          <BrowserRouter>
+            <SupportRequestModal
+              onCloseRequest={onCloseStub}
+              onOKRequest={handler}
+              url="url"
+              showModal={true}
+            />
+          </BrowserRouter>,
+        )
+        // Click the first "Data Library" link
+        cy.get('a').contains('Data Library').first().click()
+        // Verify the modal close handler was called
+        cy.get('@onCloseRequest').should('be.calledWith', 'support')
       })
     })
   })
