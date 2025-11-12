@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { cloneDeep, set } from 'lodash'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
