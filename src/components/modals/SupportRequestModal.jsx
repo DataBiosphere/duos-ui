@@ -9,6 +9,8 @@ import Dropzone from 'react-dropzone'
 import Modal from 'react-modal'
 import { hasIn } from 'lodash/fp'
 import addHelpIcon from '../../images/icon_add_help.png'
+import { Link } from 'react-router-dom'
+import { handleSignIn } from 'src/libs/signInUtils'
 
 try {
   Modal.setAppElement('#root')
@@ -19,20 +21,20 @@ catch (_error) {
 }
 
 const getInitialState = () => {
+  const isLogged = Storage.userIsLogged()
+  const currentUser = Storage.getCurrentUser()
   return {
-    name: Storage.userIsLogged()
-      ? Storage.getCurrentUser().displayName
-      : '',
-    isLogged: Storage.userIsLogged(),
+    name: isLogged ? currentUser.displayName : '',
+    isLogged: isLogged,
     type: 'question',
     subject: '',
     description: '',
     attachment: '',
-    email: Storage.userIsLogged() ? Storage.getCurrentUser().email : '',
-    first_name: Storage.userIsLogged() ? Storage.getCurrentUser().displayName?.split(' ')[0] : '',
-    height: Storage.userIsLogged() ? (window.innerHeight < 550 ? window.innerHeight : '550px') : (window.innerHeight < 700 ? window.innerHeight : '700px'),
-    top: Storage.userIsLogged() ? '400px' : '1',
-    valid: Storage.userIsLogged(),
+    email: isLogged ? currentUser.email : '',
+    first_name: isLogged ? currentUser.displayName?.split(' ')[0] : '',
+    height: isLogged ? (window.innerHeight < 550 ? window.innerHeight : '550px') : (window.innerHeight < 700 ? window.innerHeight : '700px'),
+    top: isLogged ? '400px' : '1',
+    valid: isLogged,
     validAttachment: true,
   }
 }
@@ -56,6 +58,24 @@ export const SupportRequestModal = (props) => {
     })
 
     props.onCloseRequest('support')
+  }
+
+  const RedirectLink = () => {
+    return (
+      <Link
+        to={modalState.isLogged ? '/datalibrary' : '#'}
+        onClick={(e) => {
+          if (!modalState.isLogged) {
+            e.preventDefault()
+            handleSignIn('/datalibrary')
+            closeHandler()
+          }
+        }}
+        style={{ alignItems: 'center', cursor: 'pointer' }}
+      >
+        Data Library
+      </Link>
+    )
   }
 
   const OKHandler = async () => {
@@ -269,7 +289,7 @@ export const SupportRequestModal = (props) => {
               <div style={{ fontStyle: 'normal' }}>
                 Please contact the dataset&apos;s Data Custodian listed in the DUOS
                 {' '}
-                <a href="/datalibrary">Data Library</a>
+                <RedirectLink />
                 .
               </div>
             </div>
@@ -280,7 +300,7 @@ export const SupportRequestModal = (props) => {
               <div style={{ fontStyle: 'normal' }}>
                 Please contact the dataset&apos;s Data Access Committee (DAC) listed in the DUOS
                 {' '}
-                <a href="/datalibrary">Data Library</a>
+                <RedirectLink />
                 .
               </div>
             </div>
