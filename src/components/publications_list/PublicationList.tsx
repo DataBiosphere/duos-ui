@@ -3,7 +3,7 @@ import PublicationAddEdit from './PublicationAddEdit'
 import PublicationRow from './PublicationRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { Publication } from 'src/types/model'
-import AddIcon from '@mui/icons-material/Add'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
 
 interface PublicationListProps {
   readonly publications: Publication[]
@@ -41,25 +41,13 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
   const getValidationState = () => validation?.publications
 
   const button = (
-    <button
+    <StudyAssetAddButton
       id="add-publication-btn"
-      type="button"
-      className="button button-white"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        marginTop: 0,
-        marginBottom: 5,
-        border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-        boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-        ...(disabled ? { cursor: 'not-allowed' } : {}),
-      }}
-      onClick={() => !disabled && setShowAddEdit(true)}
+      label="Add Publication"
+      onClick={() => setShowAddEdit(true)}
       disabled={disabled}
-    >
-      <AddIcon fontSize="medium" />
-      Add Publication
-    </button>
+      hasValidationError={!!getValidationState()}
+    />
   )
 
   const content = (

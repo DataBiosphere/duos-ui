@@ -8,7 +8,7 @@ import {
   parseLegacyPhase,
   parseLegacyInterventionType,
 } from 'src/utils/ClinicalTrialEnumUtils'
-import AddIcon from '@mui/icons-material/Add'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
 
 interface ClinicalTrialListProps {
   readonly clinicalTrials: ClinicalTrial[]
@@ -53,25 +53,13 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
   const getValidationState = () => validation?.clinicalTrials
 
   const button = (
-    <button
+    <StudyAssetAddButton
       id="add-clinical-trial-btn"
-      type="button"
-      className="button button-white"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        marginTop: 0,
-        marginBottom: 5,
-        border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-        boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-        ...(disabled ? { cursor: 'not-allowed' } : {}),
-      }}
-      onClick={() => !disabled && setShowAddEdit(true)}
+      label="Add Clinical Trial"
+      onClick={() => setShowAddEdit(true)}
       disabled={disabled}
-    >
-      <AddIcon fontSize="medium" />
-      Add Clinical Trial
-    </button>
+      hasValidationError={!!getValidationState()}
+    />
   )
 
   const content = (

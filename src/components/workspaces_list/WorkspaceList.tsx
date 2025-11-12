@@ -3,7 +3,7 @@ import { Workspace } from 'src/types/model'
 import { WorkspaceAddEdit } from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import AddIcon from '@mui/icons-material/Add'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
 
 interface WorkspaceListProps {
   readonly workspaces: Workspace[]
@@ -41,25 +41,13 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
   const getValidationState = () => validation?.workspaces
 
   const button = (
-    <button
+    <StudyAssetAddButton
       id="add-workspace-btn"
-      type="button"
-      className="button button-white"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        marginTop: 0,
-        marginBottom: 5,
-        border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-        boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-        ...(disabled ? { cursor: 'not-allowed' } : {}),
-      }}
-      onClick={() => !disabled && setShowAddEdit(true)}
+      label="Add Workspace"
+      onClick={() => setShowAddEdit(true)}
       disabled={disabled}
-    >
-      <AddIcon fontSize="medium" />
-      Add Workspace
-    </button>
+      hasValidationError={!!getValidationState()}
+    />
   )
 
   const content = (

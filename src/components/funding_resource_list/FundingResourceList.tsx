@@ -3,7 +3,7 @@ import { FundingResource } from 'src/types/model'
 import { FundingResourceAddEdit } from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import FundingResourceRow from 'src/components/funding_resource_list/FundingResourceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import AddIcon from '@mui/icons-material/Add'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
 
 interface FundingResourceListProps {
   readonly fundingResources: FundingResource[]
@@ -41,25 +41,13 @@ export default function FundingResourceList(props: FundingResourceListProps): Re
   const getValidationState = () => validation?.fundingResources
 
   const button = (
-    <button
+    <StudyAssetAddButton
       id="add-funding-btn"
-      type="button"
-      className="button button-white"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        marginTop: 0,
-        marginBottom: 5,
-        border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-        boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-        ...(disabled ? { cursor: 'not-allowed' } : {}),
-      }}
-      onClick={() => !disabled && setShowAddEdit(true)}
+      label="Add Funding"
+      onClick={() => setShowAddEdit(true)}
       disabled={disabled}
-    >
-      <AddIcon fontSize="medium" />
-      Add Funding
-    </button>
+      hasValidationError={!!getValidationState()}
+    />
   )
 
   const content = (
