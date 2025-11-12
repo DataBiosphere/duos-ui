@@ -10,8 +10,10 @@ import { tableHeaderTemplate, tableRowLoadingTemplate } from 'src/components/ins
 import DarTableSkeletonLoader from 'src/components/TableSkeletonLoader'
 import { Link } from 'react-router-dom'
 import { extractError } from 'src/utils/ErrorUtils'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function AdminManageInstitutions() {
+  usePageTitle('Institutions')
   const [institutionList, setInstitutionList] = useState<InstitutionInterface[]>([])
   const [filteredList, setFilteredList] = useState<InstitutionInterface[]>([])
   const [tableSize, setTableSize] = useState<number>(10)

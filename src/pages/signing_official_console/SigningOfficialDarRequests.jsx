@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { Notifications } from '../../libs/utils'
-import { Styles } from '../../libs/theme'
-import lockIcon from '../../images/lock-icon.png'
-import { Collections } from '../../libs/ajax/Collections'
-import { USER_ROLES } from '../../libs/utils'
-import { DarCollectionTable } from '../../components/dar_collection_table/DarCollectionTable'
-import { consoleTypes } from '../../utils/DarCollectionUtils'
-import { useResponsiveDarCollectionColumns } from '../../hooks/useResponsiveDarCollectionColumns'
+import { Notifications } from 'src/libs/utils'
+import { Styles } from 'src/libs/theme'
+import lockIcon from 'src/images/lock-icon.png'
+import { Collections } from 'src/libs/ajax/Collections'
+import { USER_ROLES } from 'src/libs/utils'
+import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
+import { consoleTypes } from 'src/utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function SigningOfficialDarRequests() {
+  usePageTitle('DAR Requests')
   const [collectionList, setCollectionList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 

@@ -3,8 +3,10 @@ import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import SigningOfficialTable from './SigningOfficialTable'
 import { User } from 'src/libs/ajax/User'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function SigningOfficialLibraryCards() {
+  usePageTitle('Library Cards')
   const [signingOfficial, setSigningOfficial] = useState({})
   const [researchers, setResearchers] = useState([])
 

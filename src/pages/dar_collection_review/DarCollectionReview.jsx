@@ -18,6 +18,7 @@ import { extractError } from 'src/utils/ErrorUtils.js'
 import PropTypes from 'prop-types'
 import { Notification } from 'src/components/Notification.jsx'
 import { useNavigate, useParams } from 'react-router-dom'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const tabContainerColor = 'rgb(115,154,164)'
 
@@ -148,6 +149,7 @@ const userIsDacUser = (user) => {
 }
 
 export default function DarCollectionReview(props) {
+  usePageTitle('DAR Review')
   const params = useParams()
   const collectionId = params.collectionId
   const navigate = useNavigate()

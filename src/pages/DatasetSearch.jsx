@@ -9,6 +9,7 @@ import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import { useParams, useNavigate } from 'react-router-dom'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -73,6 +74,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 }
 
 export const DatasetSearch = (props) => {
+  usePageTitle('Data Library')
   const navigate = useNavigate()
   const params = useParams()
   const query = params.query

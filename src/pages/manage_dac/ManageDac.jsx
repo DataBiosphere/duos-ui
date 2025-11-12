@@ -11,11 +11,13 @@ import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
 import { Link, useNavigate } from 'react-router-dom'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DAAUtils } from 'src/utils/DAAUtils'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const CHAIR = 'Chairperson'
 const ADMIN = 'Admin'
 
 export const ManageDac = function ManageDac() {
+  usePageTitle('DACs')
   const [isLoading, setIsLoading] = useState(false)
   const [dacs, setDacs] = useState([])
   const [userRole, setUserRole] = useState()

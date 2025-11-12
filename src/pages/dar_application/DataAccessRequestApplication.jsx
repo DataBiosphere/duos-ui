@@ -29,6 +29,7 @@ import { ProgressReportApplication } from 'src/pages/dar_application/ProgressRep
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
 import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils.js'
 import { assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set } from 'lodash'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Countries } from 'src/libs/ajax/Countries.js'
 import PropTypes from 'prop-types'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
@@ -125,6 +126,12 @@ const DataAccessRequestApplication = (props) => {
   })
 
   const { existingDarsReadOnlyMode, draftDar, isProgressReportApplication, collection } = props
+
+  // Set page title based on mode
+  const pageTitle = isProgressReportApplication
+    ? 'Progress Report'
+    : (existingDarsReadOnlyMode ? 'DAR Application Review' : 'DAR Application')
+  usePageTitle(pageTitle)
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} })
 

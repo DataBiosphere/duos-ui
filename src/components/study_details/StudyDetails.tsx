@@ -11,6 +11,7 @@ import { chain, Dictionary, intersection, isEmpty } from 'lodash'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { applyForAccess } from 'src/utils/accessUtils'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const styles = {
   row: {
@@ -48,6 +49,7 @@ const styles = {
 }
 
 export const StudyDetails = () => {
+  usePageTitle('Study Details')
   const params = useParams<{ studyId: string }>()
   const studyId = params.studyId
   const navigate = useNavigate()
@@ -67,7 +69,7 @@ export const StudyDetails = () => {
     if (snapshots.filteredTotal > 0) {
       const datasetIdToSnapshot = chain(snapshots.items)
         // Ignore any snapshots that a user does not have export (steward or reader) to
-        .filter((snapshot: { id: string }) => intersection(snapshots.roleMap[snapshot.id] as string[], ['steward', 'reader']).length > 0)
+        .filter((snapshot: { id: string }) => intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
         .groupBy('duosId')
         .value()
       setExportableDatasets(datasetIdToSnapshot)
@@ -121,81 +123,83 @@ export const StudyDetails = () => {
     .map(dataset => dataset.participantCount)
     .reduce((partialSum, participants) => partialSum + participants, 0)
 
-  return !loading
-    ? (
-        <div style={styles.row}>
-          <div style={{ paddingLeft: 40 }}>
-            <Link
-              id="link_datalibrary"
-              to="/datalibrary"
-              className="navbar-brand"
-              style={{ height: 28, width: 28 }}
-            >
-              <img id="back-arrow-icon" src={backArrowIcon} alt="Back" style={{ height: 28, width: 28 }} />
-            </Link>
-          </div>
-          <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%' }}>
-            <div style={{ fontSize: 20, fontWeight: 600 }}>
-              Back to library
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
-              <Link to={`/DUOS-S${study?.studyId}`}>
-                DUOS-S{study?.studyId}
-              </Link>
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
-              {study?.studyName}
-            </div>
-            <Section>
-              {study?.description}
-            </Section>
-            {!isNaN(participantCount) && (
-              <Section>
-                <span style={{ fontWeight: 600 }}>Participants: </span>
-                <span>
-                  {
-                    participantCount
-                  }
-                </span>
-              </Section>
-            )}
-            {study?.phenotype && (
-              <Section>
-                <span style={{ fontWeight: 600 }}>Phenotype: </span>
-                <span>{study?.phenotype}</span>
-              </Section>
-            )}
-            {study?.species && (
-              <Section>
-                <span style={{ fontWeight: 600 }}>Species: </span>
-                <span>{study?.species}</span>
-              </Section>
-            )}
-            {study?.piName && (
-              <Section>
-                <span style={{ fontWeight: 600 }}>PI Name: </span>
-                <span>{study?.piName}</span>
-              </Section>
-            )}
-            {study?.dataCustodianEmail && study.dataCustodianEmail.length > 0 && (
-              <Section>
-                <span style={{ fontWeight: 600 }}>Data Custodian: </span>
-                <span>{study?.dataCustodianEmail.join(', ')}</span>
-              </Section>
-            )}
-            <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }}>
-              <SimpleTable
-                rowData={rowData}
-                columnHeaders={headers}
-                selected={selectedDatasets}
-                styles={styles}
-                tableSize={10}
-                summary="faceted dataset search table"
-              />
-            </div>
-          </div>
-          {!isEmpty(selectedDatasets) && <DatasetSearchFooter selectedDatasets={selectedDatasets} datasets={datasets} onClick={() => applyForAccess(selectedDatasets, navigate)} />}
+  if (loading) {
+    return <div>Loading</div>
+  }
+
+  return (
+    <div style={styles.row}>
+      <div style={{ paddingLeft: 40 }}>
+        <Link
+          id="link_datalibrary"
+          to="/datalibrary"
+          className="navbar-brand"
+          style={{ height: 28, width: 28 }}
+        >
+          <img id="back-arrow-icon" src={backArrowIcon} alt="Back" style={{ height: 28, width: 28 }} />
+        </Link>
+      </div>
+      <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <div style={{ fontSize: 20, fontWeight: 600 }}>
+          Back to library
         </div>
-      )
-    : <div>Loading</div>
+        <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
+          <Link to={`/DUOS-S${study?.studyId}`}>
+            DUOS-S{study?.studyId}
+          </Link>
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
+          {study?.studyName}
+        </div>
+        <Section>
+          {study?.description}
+        </Section>
+        {!Number.isNaN(participantCount) && (
+          <Section>
+            <span style={{ fontWeight: 600 }}>Participants: </span>
+            <span>
+              {
+                participantCount
+              }
+            </span>
+          </Section>
+        )}
+        {study?.phenotype && (
+          <Section>
+            <span style={{ fontWeight: 600 }}>Phenotype: </span>
+            <span>{study?.phenotype}</span>
+          </Section>
+        )}
+        {study?.species && (
+          <Section>
+            <span style={{ fontWeight: 600 }}>Species: </span>
+            <span>{study?.species}</span>
+          </Section>
+        )}
+        {study?.piName && (
+          <Section>
+            <span style={{ fontWeight: 600 }}>PI Name: </span>
+            <span>{study?.piName}</span>
+          </Section>
+        )}
+        {study?.dataCustodianEmail && study.dataCustodianEmail.length > 0 && (
+          <Section>
+            <span style={{ fontWeight: 600 }}>Data Custodian: </span>
+            <span>{study?.dataCustodianEmail.join(', ')}</span>
+          </Section>
+        )}
+        <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }}>
+          <SimpleTable
+            rowData={rowData}
+            columnHeaders={headers}
+            selected={selectedDatasets}
+            styles={styles}
+            tableSize={10}
+            summary="faceted dataset search table"
+          />
+        </div>
+      </div>
+      {!isEmpty(selectedDatasets) && <DatasetSearchFooter selectedDatasets={selectedDatasets} datasets={datasets} onClick={() => applyForAccess(selectedDatasets, navigate)} />}
+    </div>
+  )
 }

@@ -12,8 +12,10 @@ import { consoleTypes } from '../components/dac_dataset_table/DACDatasetTableCel
 import style from './DACDatasets.module.css'
 import { Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function DACDatasets() {
+  usePageTitle('My DAC\'s Datasets')
   const navigate = useNavigate()
   const [datasets, setDatasets] = useState([])
   const [filteredList, setFilteredList] = useState([])

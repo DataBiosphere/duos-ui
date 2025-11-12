@@ -4,8 +4,10 @@ import { Institution } from 'src/libs/ajax/Institution'
 import { LibraryCard } from 'src/libs/ajax/LibraryCard'
 import { Notifications } from 'src/libs/utils'
 import LibraryCardTable from 'src/components/library_card_table/LibraryCardTable'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function AdminManageLC() {
+  usePageTitle('Library Cards')
   const [libraryCards, setLibraryCards] = useState()
   const [institutions, setInstitutions] = useState()
 
