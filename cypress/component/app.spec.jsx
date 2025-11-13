@@ -1,7 +1,6 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import App from 'src/App'
-import ReactGA from 'react-ga4'
 import StackdriverReporter from 'src/libs/stackdriverReporter'
 import { Config } from 'src/libs/config'
 import { MemoryRouter, useLocation } from 'react-router-dom'
@@ -46,8 +45,6 @@ describe('Main App Functions', () => {
   beforeEach(() => {
     cy.viewport(800, 600)
     cy.initApplicationConfig()
-    cy.stub(ReactGA, 'send')
-    cy.stub(ReactGA, 'initialize')
     cy.stub(StackdriverReporter, 'start')
     cy.stub(Config, 'getGAId').returns('UA-12345678-1')
     cy.stub(Storage, 'setCurrentUser')
@@ -125,13 +122,12 @@ describe('Main App Functions', () => {
     cy.get('.body').contains('Data Use Oversight System').should('exist')
   })
 
-  it('should initialize ReactGA and StackdriverReporter', () => {
+  it('should initialize StackdriverReporter', () => {
     mount(
       <MemoryRouter initialEntries={['/']}>
         <App />
       </MemoryRouter>,
     )
-    cy.wrap(ReactGA.initialize).should('have.been.calledOnceWith', 'UA-12345678-1')
     cy.wrap(StackdriverReporter.start).should('have.been.calledOnce')
   })
 

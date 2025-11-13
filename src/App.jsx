@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import ReactGA from 'react-ga4'
 import Modal from 'react-modal'
 import 'src/App.css'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
@@ -13,12 +12,6 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
-
-function GAListener() {
-  const location = useLocation()
-  ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search })
-  return null
-}
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -39,16 +32,6 @@ function App() {
     }
     setEnvironment()
   })
-
-  useEffect(() => {
-    const initializeReactGA = async () => {
-      const gaId = await Config.getGAId()
-      ReactGA.initialize(gaId, {
-        titleCase: false,
-      })
-    }
-    initializeReactGA()
-  }, [])
 
   useEffect(() => {
     const stackdriverStart = async () => {
@@ -113,7 +96,6 @@ function App() {
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <GAListener />
           <DuosHeader />
           {isLoading && <div style={loadingSyle}><Spinner /></div>}
           {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
