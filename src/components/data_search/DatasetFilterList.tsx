@@ -10,6 +10,7 @@ import Divider from '@mui/material/Divider'
 import { flatten, uniq, compact, orderBy } from 'lodash'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { FiltersTypes, generateDefaultParticipantCountValues } from 'src/components/data_search/DatasetFilterConstants'
+import { muiCheckboxFix } from 'src/libs/muiThemeFix'
 
 interface FilterItemHeaderProps {
   title: React.ReactNode
@@ -43,7 +44,10 @@ export const FilterItemList = (props: FilterItemListProps) => {
             <ListItem disablePadding key={filterOption}>
               <ListItemButton sx={{ padding: '0' }} onClick={() => filterHandler(category, filterOption)}>
                 <ListItemIcon>
-                  <Checkbox checked={isFiltered(filterOption, category)} />
+                  <Checkbox
+                    checked={isFiltered(filterOption, category)}
+                    sx={muiCheckboxFix}
+                  />
                 </ListItemIcon>
                 <ListItemText sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }}>
                   {filterDisplayFn ? filterDisplayFn(filterOption) : filterName}

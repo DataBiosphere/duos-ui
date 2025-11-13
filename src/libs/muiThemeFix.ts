@@ -16,3 +16,10 @@ export const muiThemeFix = createTheme({
     fontFamily: 'Montserrat, Helvetica Neue, Helvetica, Arial, sans-serif',
   },
 })
+
+/**
+ * Style to set MUI Checkbox icon size correctly for the Data Library
+ */
+export const muiCheckboxFix = {
+  '& .MuiSvgIcon-root': { fontSize: '1.5rem' },
+}
