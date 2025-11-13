@@ -370,7 +370,7 @@ export default function DataCustodianTable(props) {
           padding: '0 2.5%',
         }}
       >
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+        <div className="left-header-section" style={{ ...Styles.LEFT_HEADER_SECTION, maxWidth: '75%' }}>
           <div style={{ ...Styles.ICON_CONTAINER }}>
             <img
               alt="user icon"
@@ -397,11 +397,16 @@ export default function DataCustodianTable(props) {
             >
               Issue or remove Data Submitter privileges.
             </div>
+            <div style={({ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', textAlign: 'justify' })}>
+              <p>By issuing Data Submitter permissions, you are authorizing researchers from your institution to register and share data in DUOS. Data registered in DUOS can be either <b>Open Access</b> or <b>Controlled Access</b>.</p>
+              <p>Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to. To register controlled access data with a DAC in DUOS, may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.</p>
+            </div>
           </div>
         </div>
         <SearchBar
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}
+          style={{ marginLeft: '25%' }}
         />
       </div>
       <SimpleTable
