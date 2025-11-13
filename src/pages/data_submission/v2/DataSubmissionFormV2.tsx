@@ -8,6 +8,7 @@ import { NihAdministrativeInformation } from 'src/pages/data_submission/v2/NihAd
 import { NihDataManagement } from 'src/pages/data_submission/v2/NihDataManagement'
 import { Styles } from 'src/libs/theme'
 import lockIcon from 'src/images/lock-icon.png'
+import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
 
 export type FileProperty = {
   key: string
@@ -65,6 +66,7 @@ export const DataSubmissionFormV2 = () => {
         <NihAnvilUseRelated study={study} setStudy={setStudy} setFiles={setFormFiles} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} files={formFiles} setFiles={setFormFiles} />
+        <StudyAssetManagement study={study} setStudy={setStudy} />
       </div>
     </>
   )

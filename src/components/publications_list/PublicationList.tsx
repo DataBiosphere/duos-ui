@@ -3,6 +3,7 @@ import PublicationAddEdit from './PublicationAddEdit'
 import PublicationRow from './PublicationRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { Publication } from 'src/types/model'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
 
 interface PublicationListProps {
   readonly publications: Publication[]
@@ -10,6 +11,7 @@ interface PublicationListProps {
   readonly onPublicationChange: (publications: Publication[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
 }
 
 export default function PublicationList(props: PublicationListProps): React.JSX.Element {
@@ -19,6 +21,7 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
     onPublicationChange,
     disabled = false,
     validation,
+    studyAssetWrapper,
   } = props
 
   const [showAddEdit, setShowAddEdit] = useState(false)
@@ -37,56 +40,57 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
 
   const getValidationState = () => validation?.publications
 
+  const button = (
+    <StudyAssetAddButton
+      id="add-publication-btn"
+      label="Add Publication"
+      onClick={() => setShowAddEdit(true)}
+      disabled={disabled}
+      hasValidationError={!!getValidationState()}
+    />
+  )
+
+  const content = (
+    <div className="form-group row no-margin">
+      {showAddEdit && (
+        <PublicationAddEdit
+          id={-1}
+          publications={publications}
+          closeAction={() => setShowAddEdit(false)}
+          onPublicationChange={onPublicationChange}
+        />
+      )}
+      {publications.map((publication: Publication, index: number) => (
+        <PublicationRow
+          key={index}
+          id={index}
+          editMode={editState[index]}
+          publication={publication}
+          publications={publications}
+          columnsToShow={columnsToShow}
+          editAction={() => toggleEditState(index)}
+          deleteAction={() => { handleDeletePublication(index) }}
+          closeAction={() => {
+            toggleEditState(index)
+            setShowAddEdit(false)
+          }}
+          onPublicationChange={onPublicationChange}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  )
+
+  if (studyAssetWrapper) {
+    return <>{studyAssetWrapper(content, button)}</>
+  }
+
   return (
     <div className="publication-list-component">
       <div className="row no-margin">
-        <button
-          id="add-publication-btn"
-          type="button"
-          className="button button-white"
-          style={{
-            marginTop: 25,
-            marginBottom: 5,
-            border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-            boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-            ...(disabled ? { cursor: 'not-allowed' } : {}),
-          }}
-          onClick={() => !disabled && setShowAddEdit(true)}
-          disabled={disabled}
-        >
-          Add Publication
-        </button>
-        {showAddEdit && (
-          <PublicationAddEdit
-            id={-1}
-            publications={publications}
-            closeAction={() => setShowAddEdit(false)}
-            onPublicationChange={onPublicationChange}
-          />
-        )}
+        {button}
       </div>
-      <div className="form-group row no-margin">
-        {publications.map((publication: Publication, index: number) => {
-          return (
-            <PublicationRow
-              key={index}
-              id={index}
-              editMode={editState[index]}
-              publication={publication}
-              publications={publications}
-              columnsToShow={columnsToShow}
-              editAction={() => toggleEditState(index)}
-              deleteAction={() => { handleDeletePublication(index) }}
-              closeAction={() => {
-                toggleEditState(index)
-                setShowAddEdit(false)
-              }}
-              onPublicationChange={onPublicationChange}
-              disabled={disabled}
-            />
-          )
-        })}
-      </div>
+      {content}
     </div>
   )
 }
