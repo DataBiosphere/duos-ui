@@ -44,7 +44,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
       <Button
         variant="contained"
         onClick={onClick}
-        sx={{ fontSize: 14, height: 35, marginRight: 5 }}
+        sx={{ fontWeight: 600, marginRight: 5 }}
       >
         Apply for Access
       </Button>
