@@ -121,22 +121,6 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
       })}
       <div style={{ marginTop: '20px' }} />
       <p style={subheadStyle}>Library Card issued to you</p>
-      {signingOfficialUsers.length === 0
-        ? (
-            <p>
-              No Signing Official found for your institution. Please refer to <a href="https://duos.blog/2025/08/06/how-to-get-a-library-card-from-your-signing-official/" target="_blank" rel="noreferrer">this help article</a> for instructions on how to get a Library Card.
-            </p>
-          )
-        : (
-            <>
-              <p>Signing Official(s):</p>
-              <ul>
-                {signingOfficialUsers.map(so => (
-                  <li key={so.userId}>{so.displayName} - {so.email}</li>
-                ))}
-              </ul>
-            </>
-          )}
       <p>
         A Library Card is a Signing Official’s pre-authorization of a researcher to submit Data Access Requests (DARs)
         in DUOS. A valid Library Card is required to initiate a DAR.
@@ -157,6 +141,22 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
                 you a Library Card.
               </p>
             </div>
+          )}
+      {signingOfficialUsers.length === 0
+        ? (
+            <p>
+              No Signing Official found for your institution. Please refer to <a href="https://duos.blog/2025/08/06/how-to-get-a-library-card-from-your-signing-official/" target="_blank" rel="noreferrer">this help article</a> for instructions on how to get a Library Card.
+            </p>
+          )
+        : (
+            <>
+              <p>Signing Official(s):</p>
+              <ul>
+                {signingOfficialUsers.map(so => (
+                  <li key={so.userId}>{so.displayName} - {so.email}</li>
+                ))}
+              </ul>
+            </>
           )}
     </div>
   )
