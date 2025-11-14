@@ -90,15 +90,15 @@ export interface DAAObject {
 }
 
 export interface DacObject {
-  dacId: number
-  name: string
-  description: string
-  email: string
-  associatedDaa: DAAObject
-  createDate: string
-  updateDate: string
-  chairpersons: DuosUser[]
-  members: DuosUser[]
+  dacId?: number
+  dacName?: string
+  description?: string
+  email?: string
+  associatedDaa?: DAAObject
+  createDate?: string
+  updateDate?: string
+  chairpersons?: DuosUser[]
+  members?: DuosUser[]
 }
 
 export interface DataAccessAgreement {
