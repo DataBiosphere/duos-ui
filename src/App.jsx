@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-modal'
+import { ThemeProvider } from '@mui/material/styles'
 import 'src/App.css'
+import { muiThemeFix } from 'src/libs/muiThemeFix'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
 import { Config } from 'src/libs/config'
 import DuosFooter from 'src/components/DuosFooter'
@@ -93,16 +95,18 @@ function App() {
     left: '45%',
   }
   return (
-    <div className="body">
-      <div className="wrap">
-        <div className="main">
-          <DuosHeader />
-          {isLoading && <div style={loadingSyle}><Spinner /></div>}
-          {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+    <ThemeProvider theme={muiThemeFix}>
+      <div className="body">
+        <div className="wrap">
+          <div className="main">
+            <DuosHeader />
+            {isLoading && <div style={loadingSyle}><Spinner /></div>}
+            {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+          </div>
         </div>
+        <DuosFooter />
       </div>
-      <DuosFooter />
-    </div>
+    </ThemeProvider>
   )
 }
 

@@ -10,13 +10,15 @@ import Divider from '@mui/material/Divider'
 import { flatten, uniq, compact, orderBy } from 'lodash'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { FiltersTypes, generateDefaultParticipantCountValues } from 'src/components/data_search/DatasetFilterConstants'
+import { muiSmallButtonFix, muiCheckboxFix, muiListItemTextFix, muiTextFieldFix, muiH5Fix, muiHeaderFix } from 'src/libs/muiThemeFix'
 
 interface FilterItemHeaderProps {
   title: React.ReactNode
   headerStyle?: React.CSSProperties
 }
+
 export const FilterItemHeader = (props: FilterItemHeaderProps) => {
-  const { title, headerStyle = { fontFamily: 'Montserrat', fontWeight: '600', marginTop: '1em' } } = props
+  const { title, headerStyle = muiHeaderFix } = props
   return (
     <Typography variant="h6" gutterBottom component="div" sx={headerStyle}>
       {title}
@@ -43,9 +45,15 @@ export const FilterItemList = (props: FilterItemListProps) => {
             <ListItem disablePadding key={filterOption}>
               <ListItemButton sx={{ padding: '0' }} onClick={() => filterHandler(category, filterOption)}>
                 <ListItemIcon>
-                  <Checkbox checked={isFiltered(filterOption, category)} />
+                  <Checkbox
+                    checked={isFiltered(filterOption, category)}
+                    sx={muiCheckboxFix}
+                  />
                 </ListItemIcon>
-                <ListItemText sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }}>
+                <ListItemText
+                  sx={{ marginLeft: '-1.5em' }}
+                  slotProps={muiListItemTextFix}
+                >
                   {filterDisplayFn ? filterDisplayFn(filterOption) : filterName}
                 </ListItemText>
               </ListItemButton>
@@ -89,9 +97,9 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         margin="dense"
         variant="outlined"
         helperText="minimum"
-        FormHelperTextProps={{ style: { transform: 'scale(1.5)' } }}
         inputProps={minInputPropsComplete}
         onChange={event => filterHandler(minCategory, Number(event.target.value))}
+        slotProps={muiTextFieldFix}
       />
       <Box padding="0rem 1rem 1rem"> - </Box>
       <TextField
@@ -102,9 +110,9 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         margin="dense"
         variant="outlined"
         helperText="maximum"
-        FormHelperTextProps={{ style: { transform: 'scale(1.5)' } }}
         inputProps={maxInputPropsComplete}
         onChange={event => filterHandler(maxCategory, Number(event.target.value))}
+        slotProps={muiTextFieldFix}
       />
     </Box>
   )
@@ -128,10 +136,10 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }}>
+        <Typography variant="h5" gutterBottom component="div" sx={muiH5Fix}>
           Filters
         </Typography>
-        <Button onClick={onClear}>
+        <Button onClick={onClear} sx={muiSmallButtonFix}>
           Clear Filters
         </Button>
       </Box>
@@ -147,7 +155,7 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
           const accessManagementSummary = getAccessManagementSummary(filter)
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <img src={accessManagementSummary.icon} alt={accessManagementSummary.name} style={{ width: '10px', marginRight: 6 }} />
+              <img src={accessManagementSummary.icon} alt={accessManagementSummary.name} style={{ width: '12px', marginRight: 6 }} />
               {accessManagementSummary.name}
             </div>
           )
@@ -164,12 +172,11 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
       <FilterItemHeader
         title={(
           <>
-            <span style={{ fontWeight: '600' }}>Data Access Committee</span>
+            <span>Data Access Committee</span>
             {' '}
-            <span>(DACs)</span>
+            <span style={{ fontWeight: 400 }}>(DACs)</span>
           </>
         )}
-        headerStyle={{ fontFamily: 'Montserrat', marginTop: '1em' }}
       />
       <FilterItemList
         category="dac"
