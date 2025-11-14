@@ -1,6 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { AlertColor, Alert, Snackbar, SnackbarOrigin } from '@mui/material'
+import { AlertColor, Alert, Snackbar, SnackbarOrigin, ThemeProvider } from '@mui/material'
+import { muiThemeFix } from 'src/libs/muiThemeFix'
 
 export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
 
@@ -71,30 +72,25 @@ export const ToastNotifications = {
       }
 
       return (
-        <Snackbar
-          anchorOrigin={snackbarLayout}
-          autoHideDuration={timeout}
-          open={open}
-          onClose={handleClose}
-          // these transforms are required because the rule `html { font-size: 10px }` exists in bootstrap_replacement.css
-          sx={{
-            transform: 'scale(1.5)',
-            transformOrigin: `${snackbarLayout.vertical} ${snackbarLayout.horizontal}`,
-            maxWidth: '30vw',
-            width: 'fit-content',
-          }}
-          {...props}
-        >
-          <Alert
-            data-cy="notification-alert"
+        <ThemeProvider theme={muiThemeFix}>
+          <Snackbar
+            anchorOrigin={snackbarLayout}
+            autoHideDuration={timeout}
+            open={open}
             onClose={handleClose}
-            severity={severity}
-            variant="filled"
-            sx={{ width: '100%' }}
+            {...props}
           >
-            {text}
-          </Alert>
-        </Snackbar>
+            <Alert
+              data-cy="notification-alert"
+              onClose={handleClose}
+              severity={severity}
+              variant="filled"
+              sx={{ width: '100%' }}
+            >
+              {text}
+            </Alert>
+          </Snackbar>
+        </ThemeProvider>
       )
     }
 
