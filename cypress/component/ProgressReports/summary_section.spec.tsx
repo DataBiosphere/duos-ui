@@ -159,7 +159,7 @@ describe('Summary Section - Component Tests', () => {
 
   it('shows intellectualProperties list when "Yes" is selected', () => {
     mountComponent({ intellectualPropertiesYesNo: true })
-    cy.contains('Add Intellectual Property').should('exist')
+    cy.contains('Add IP').should('exist')
   })
 
   it('handles publications radio buttons', () => {

@@ -1,14 +1,15 @@
 import React from 'react'
 import { useState, useRef, useEffect } from 'react'
-import { AddUserModal } from '../components/modals/AddUserModal'
-import { User } from '../libs/ajax/User'
-import manageUsersIcon from '../images/icon_manage_users.png'
-import { USER_ROLES } from '../libs/utils'
+import { AddUserModal } from 'src/components/modals/AddUserModal'
+import { User } from 'src/libs/ajax/User'
+import manageUsersIcon from 'src/images/icon_manage_users.png'
+import { USER_ROLES } from 'src/libs/utils'
 import { isNil } from 'lodash/fp'
-import { ManageUsersTable } from '../components/manage_users_table/ManageUsersTable'
-import { Styles } from '../libs/theme'
-import SearchBar from '../components/SearchBar'
-import { Notification } from '../components/Notification'
+import { ManageUsersTable } from 'src/components/manage_users_table/ManageUsersTable'
+import { Styles } from 'src/libs/theme'
+import SearchBar from 'src/components/SearchBar'
+import { Notification } from 'src/components/Notification'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const getUserList = async () => {
   const users = await User.list(USER_ROLES.admin)
@@ -28,6 +29,7 @@ const getUserList = async () => {
 }
 
 export const AdminManageUsers = function AdminManageUsers() {
+  usePageTitle('Manage Users')
   const [searchText, setSearchText] = useState('')
   const [userList, setUserList] = useState([])
   const [showAddUserModal, setShowAddUserModal] = useState(false)

@@ -7,6 +7,7 @@ import { SnapshotSummaryModel } from 'src/types/tdrModel'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import { dataUseCellData } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
 import 'src/components/data_search/DatasetSearch.css'
+import { muiCheckboxFix } from 'src/libs/muiThemeFix'
 
 export interface DatasetSearchTableTab<T> {
   key: string
@@ -81,6 +82,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
           checked={datasets.length === selected.length}
           indeterminate={selected.length > 0 && selected.length < selectableDatasetIds.length}
           onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}
+          sx={muiCheckboxFix}
         />
       ),
       sortable: false,
@@ -102,6 +104,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
                   indeterminate={indeterminate}
                   disabled={!isSelectableStudy}
                   onClick={() => onSelect(fullySelected ? without(selected, ...studyDatasetIds) : indeterminate ? xor(without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}
+                  sx={muiCheckboxFix}
                 />
               </span>
             </div>
@@ -267,6 +270,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
           checked={datasets.length === selected.length}
           indeterminate={selected.length > 0 && selected.length < datasets.length}
           onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}
+          sx={muiCheckboxFix}
         />
       ),
       sortable: false,
@@ -283,6 +287,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
                   checked={isSelected}
                   disabled={!isSelectable(dataset)}
                   onClick={() => onSelect(xor([dataset.datasetId], selected))}
+                  sx={muiCheckboxFix}
                 />
               </span>
             </div>

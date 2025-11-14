@@ -15,6 +15,7 @@ import { extractError } from 'src/utils/ErrorUtils'
 import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router-dom'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
@@ -38,6 +39,7 @@ const LabeledField = ({ label, children }: { label: string, children: React.Reac
 }
 
 export default function DatasetStatistics() {
+  usePageTitle('Dataset Details')
   const params = useParams<{ datasetIdentifier: string }>()
   const navigate = useNavigate()
   const datasetIdentifier = params.datasetIdentifier || ''
@@ -77,7 +79,7 @@ export default function DatasetStatistics() {
 
   const getMatchPhrase = (datasetIdentifier: string) => {
     if (datasetIdentifier.startsWith('DUOS-D')) {
-      const id = parseInt(datasetIdentifier.replace('DUOS-D', ''))
+      const id = Number.parseInt(datasetIdentifier.replace('DUOS-D', ''))
       return {
         datasetId: id,
       }
@@ -107,17 +109,17 @@ export default function DatasetStatistics() {
           },
         } })
 
-        if (datasetTerms.length != 1) {
+        if (datasetTerms.length === 1) {
+          setDatasetTerm(datasetTerms[0])
+          const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
+          setDars(metrics.dars)
+          setIsLoading(false)
+        }
+        else {
           showError(`Unable to retrieve dataset statistics from server: dataset ${datasetIdentifier} not found.`)
           setIsLoading(false)
           return
         }
-        else {
-          setDatasetTerm(datasetTerms[0])
-          const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
-          setDars(metrics.dars)
-        }
-        setIsLoading(false)
       }
       catch (error) {
         showError('Unable to retrieve dataset statistics from server: ' + extractError(error))
@@ -144,9 +146,8 @@ export default function DatasetStatistics() {
             {locationUrl
               && (
                 <span>
-                  , and can be accessed directly through this
-                  <a href={locationUrl}>link</a>
-                  .
+                  , and can be accessed directly through this{' '}
+                  <a href={locationUrl}>link</a>.
                 </span>
               )}
           </span>
@@ -158,13 +159,12 @@ export default function DatasetStatistics() {
             {locationUrl
               && (
                 <span>
-                  , but must be made directly through the
+                  , but must be made directly through the{' '}
                   <a
                     href={locationUrl}
                   >
                     dataset&apos;s host repository
-                  </a>
-                  .
+                  </a>.
                 </span>
               )}
           </span>

@@ -1,16 +1,18 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import SearchBar from '../components/SearchBar'
-import { User } from '../libs/ajax/User'
-import { Collections } from '../libs/ajax/Collections'
-import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from '../libs/utils'
-import { Styles } from '../libs/theme'
-import lockIcon from '../images/lock-icon.png'
-import { DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable'
-import { consoleTypes } from '../utils/DarCollectionUtils'
-import { useResponsiveDarCollectionColumns } from '../hooks/useResponsiveDarCollectionColumns'
+import SearchBar from 'src/components/SearchBar'
+import { User } from 'src/libs/ajax/User'
+import { Collections } from 'src/libs/ajax/Collections'
+import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
+import { Styles } from 'src/libs/theme'
+import lockIcon from 'src/images/lock-icon.png'
+import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
+import { consoleTypes } from 'src/utils/DarCollectionUtils'
+import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { useNavigate } from 'react-router-dom'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function MemberConsole() {
+  usePageTitle('DAR Requests')
   const navigate = useNavigate()
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])

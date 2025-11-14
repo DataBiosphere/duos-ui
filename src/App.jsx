@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import ReactGA from 'react-ga4'
 import Modal from 'react-modal'
+import { ThemeProvider } from '@mui/material/styles'
 import 'src/App.css'
+import { muiThemeFix } from 'src/libs/muiThemeFix'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
 import { Config } from 'src/libs/config'
 import DuosFooter from 'src/components/DuosFooter'
@@ -13,12 +14,6 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
-
-function GAListener() {
-  const location = useLocation()
-  ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search })
-  return null
-}
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -39,16 +34,6 @@ function App() {
     }
     setEnvironment()
   })
-
-  useEffect(() => {
-    const initializeReactGA = async () => {
-      const gaId = await Config.getGAId()
-      ReactGA.initialize(gaId, {
-        titleCase: false,
-      })
-    }
-    initializeReactGA()
-  }, [])
 
   useEffect(() => {
     const stackdriverStart = async () => {
@@ -110,17 +95,18 @@ function App() {
     left: '45%',
   }
   return (
-    <div className="body">
-      <div className="wrap">
-        <div className="main">
-          <GAListener />
-          <DuosHeader />
-          {isLoading && <div style={loadingSyle}><Spinner /></div>}
-          {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+    <ThemeProvider theme={muiThemeFix}>
+      <div className="body">
+        <div className="wrap">
+          <div className="main">
+            <DuosHeader />
+            {isLoading && <div style={loadingSyle}><Spinner /></div>}
+            {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+          </div>
         </div>
+        <DuosFooter />
       </div>
-      <DuosFooter />
-    </div>
+    </ThemeProvider>
   )
 }
 

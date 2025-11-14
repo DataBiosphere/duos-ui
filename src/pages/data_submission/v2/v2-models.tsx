@@ -1,4 +1,13 @@
-import { Dataset, FileStorageObject } from 'src/types/model'
+import {
+  AiModel,
+  ClinicalTrial,
+  Dataset,
+  FileStorageObject,
+  FundingResource, IntellectualProperty,
+  Presentation,
+  Publication,
+  Workspace,
+} from 'src/types/model'
 import { StudyType } from 'src/components/forms/StudyType'
 import React from 'react'
 
@@ -339,4 +348,13 @@ export interface Study {
   createUserId?: number
   updateDate?: string // Date?
   updateUserId?: number
+  assets?: {
+    models?: Array<AiModel>
+    workspaces?: Array<Workspace>
+    publications?: Array<Publication>
+    presentations?: Array<Presentation>
+    clinicalTrials?: Array<ClinicalTrial>
+    funding?: Array<FundingResource>
+    intellectualProperty?: Array<IntellectualProperty>
+  }
 }
