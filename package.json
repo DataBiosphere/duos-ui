@@ -76,7 +76,7 @@
     "not op_mini all"
   ],
   "engines": {
-    "node": ">=24.9.0 <25"
+    "node": ">=24.11.1 <25"
   },
   "type": "module"
 }
