@@ -34,7 +34,7 @@ describe('signInUtils', () => {
         cy.wrap(clickSpy).should('be.called')
 
         // Clean up
-        win.document.body.removeChild(button)
+        button.remove()
       })
     })
 
@@ -42,11 +42,11 @@ describe('signInUtils', () => {
       cy.window().then((win) => {
         // Ensure no Sign In button exists
         const buttons = win.document.querySelectorAll('button')
-        buttons.forEach((button) => {
+        for (const button of buttons) {
           if (button.textContent?.trim() === 'Sign In') {
             button.textContent = 'Other Button'
           }
-        })
+        }
 
         cy.spy(win, 'scrollTo').as('scrollTo')
         handleSignIn('/dashboard')
@@ -57,13 +57,13 @@ describe('signInUtils', () => {
     it('should handle different redirect paths', () => {
       const paths = ['/datalibrary', '/dashboard', '/profile', '/datasets']
 
-      paths.forEach((path) => {
+      for (const path of paths) {
         cy.window().then((win) => {
           win.history.replaceState({}, '', '/')
           handleSignIn(path)
           cy.location('search').should('include', `redirectTo=${encodeURIComponent(path)}`)
         })
-      })
+      }
     })
 
     it('should preserve existing query parameters when setting redirectTo', () => {
@@ -92,7 +92,7 @@ describe('signInUtils', () => {
         cy.wrap(clickSpy).should('be.called')
 
         // Clean up
-        win.document.body.removeChild(button)
+        button.remove()
       })
     })
   })

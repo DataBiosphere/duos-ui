@@ -34,6 +34,30 @@ interface SupportRequestModalProps {
   url?: string
 }
 
+interface RedirectLinkProps {
+  isLogged: boolean
+  closeHandler: () => void
+}
+
+const RedirectLink: React.FC<RedirectLinkProps> = (props) => {
+  const { isLogged, closeHandler } = props
+  return (
+    <Link
+      to={isLogged ? '/datalibrary' : '#'}
+      onClick={(e) => {
+        if (!isLogged) {
+          e.preventDefault()
+          handleSignIn('/datalibrary')
+        }
+        closeHandler()
+      }}
+      style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 500 }}
+    >
+      DUOS Data Library
+    </Link>
+  )
+}
+
 interface FormData {
   name: string
   type: string
@@ -66,24 +90,6 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
   const closeHandler = () => {
     setFormData(resetFormData())
     onCloseRequest('support')
-  }
-
-  const RedirectLink = () => {
-    return (
-      <Link
-        to={isLogged ? '/datalibrary' : '#'}
-        onClick={(e) => {
-          if (!isLogged) {
-            e.preventDefault()
-            handleSignIn('/datalibrary')
-          }
-          closeHandler()
-        }}
-        style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 500 }}
-      >
-        DUOS Data Library
-      </Link>
-    )
   }
 
   const uploadAttachments = async (files: File[]): Promise<string[]> => {
@@ -189,7 +195,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
               Having issues accessing data you were already approved to use?
             </Typography>
             <Typography variant="body2">
-              Please contact the dataset&apos;s Data Custodian listed in the <RedirectLink />.
+              Please contact the dataset&apos;s Data Custodian listed in the <RedirectLink isLogged={isLogged} closeHandler={closeHandler} />.
             </Typography>
           </Alert>
 
@@ -198,7 +204,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
               Want to ask the data access committee(s) about your requests&apos; expected turnaround time?
             </Typography>
             <Typography variant="body2">
-              Please contact the dataset&apos;s Data Access Committee (DAC) listed in the <RedirectLink />.
+              Please contact the dataset&apos;s Data Access Committee (DAC) listed in the <RedirectLink isLogged={isLogged} closeHandler={closeHandler} />.
             </Typography>
           </Alert>
         </Box>
