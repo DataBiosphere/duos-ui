@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { DataSet } from '../libs/ajax/DataSet'
 import { Storage } from '../libs/storage'
 import { Styles } from '../libs/theme'
-import lockIcon from '../images/lock-icon.png'
 import SearchBar from '../components/SearchBar'
 import { DACDatasetsTable } from '../components/dac_dataset_table/DACDatasetsTable'
 import { DACDatasetTableColumnOptions } from '../components/dac_dataset_table/DACDatasetConstants.js'
@@ -13,6 +12,7 @@ import style from './DACDatasets.module.css'
 import { Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
+import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
 
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
@@ -77,36 +77,10 @@ export default function DACDatasets() {
           padding: '0 2.5%',
         }}
       >
-        <div
-          className="left-header-section"
-          style={Styles.LEFT_HEADER_SECTION}
-        >
-          <div
-            style={Styles.ICON_CONTAINER}
-          >
-            <img
-              alt="Lock Icon"
-              id="lock-icon"
-              src={lockIcon}
-              style={Styles.HEADER_IMG}
-            />
-          </div>
-          <div
-            style={Styles.HEADER_CONTAINER}
-          >
-            <div
-              style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}
-            >
-              My DAC&apos;s Datasets
-            </div>
-            <div
-              style={{ fontFamily: 'Montserrat', fontSize: '1.6rem' }}
-            >
-              View the status of datasets submitted to your Data Access Committee
-            </div>
-          </div>
-        </div>
-
+        <TableHeaderSection
+          title="My DAC's Datasets"
+          description="View the status of datasets submitted to your Data Access Committee"
+        />
         <SearchBar
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}

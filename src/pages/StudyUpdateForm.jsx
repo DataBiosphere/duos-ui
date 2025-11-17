@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Notifications } from '../libs/utils'
-import lockIcon from '../images/lock-icon.png'
 import { Styles } from '../libs/theme'
 import { cloneDeep, isEmpty, isNil } from 'lodash/fp'
 
@@ -15,6 +14,7 @@ import { DataSet } from '../libs/ajax/DataSet'
 import { Storage } from '../libs/storage'
 import { set } from 'lodash'
 import { useNavigate, useParams } from 'react-router-dom'
+import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
 
 export const StudyUpdateForm = () => {
   const navigate = useNavigate()
@@ -224,19 +224,10 @@ export const StudyUpdateForm = () => {
   return !failedInit && (
     <div style={Styles.PAGE}>
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-          <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} />
-          </div>
-          <div style={Styles.HEADER_CONTAINER}>
-            <div style={Styles.TITLE}>
-              Study Update Form
-              <div style={Styles.MEDIUM_DESCRIPTION}>
-                This is an easy way to update a study in DUOS!
-              </div>
-            </div>
-          </div>
-        </div>
+        <TableHeaderSection
+          title="Study Update Form"
+          description="This is an easy way to update a study in DUOS!"
+        />
       </div>
 
       <form style={{ margin: 'auto', maxWidth: 800 }}>

@@ -6,7 +6,6 @@ import { Institution } from 'src/libs/ajax/Institution'
 import { Study } from 'src/libs/ajax/Study'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Notifications } from 'src/libs/utils'
-import lockIcon from 'src/images/lock-icon.png'
 import { Styles } from 'src/libs/theme'
 import DataAccessGovernance from 'src/pages/data_submission/DataAccessGovernance'
 import DataSubmissionStudyInformation from 'src/pages/data_submission/ds_study_information'
@@ -16,6 +15,7 @@ import NihAnvilUse from 'src/pages/data_submission/NihAnvilUse'
 import { uniqueValidator } from 'src/components/forms/formValidation'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton.js'
 import { useNavigate } from 'react-router-dom'
+import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
 
 export const DataSubmissionForm = () => {
   const navigate = useNavigate()
@@ -199,19 +199,10 @@ export const DataSubmissionForm = () => {
       {!failedInit && (
         <div style={Styles.PAGE}>
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
-            <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-              <div style={Styles.ICON_CONTAINER}>
-                <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} />
-              </div>
-              <div style={Styles.HEADER_CONTAINER}>
-                <div style={Styles.TITLE}>
-                  Study Registration Form
-                  <div style={Styles.MEDIUM_DESCRIPTION}>
-                    Submit new datasets to DUOS
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TableHeaderSection
+              title="Study Registration Form"
+              description="Submit new datasets to DUOS"
+            />
           </div>
 
           <form style={{ margin: 'auto', maxWidth: 800 }}>

@@ -7,7 +7,7 @@ import { Study } from 'src/pages/data_submission/v2/v2-models'
 import { NihAdministrativeInformation } from 'src/pages/data_submission/v2/NihAdministrativeInformation'
 import { NihDataManagement } from 'src/pages/data_submission/v2/NihDataManagement'
 import { Styles } from 'src/libs/theme'
-import lockIcon from 'src/images/lock-icon.png'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export type FileProperty = {
   key: string
@@ -39,26 +39,10 @@ export const DataSubmissionFormV2 = () => {
       {loadingError && <div>Error Loading Page</div>}
       <div style={Styles.PAGE}>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
-          <div
-            className="left-header-section"
-            style={{ display: 'flex',
-              flexDirection: 'row',
-              paddingTop: '3rem' }}
-          >
-            <div style={Styles.ICON_CONTAINER}>
-              <img id="lock-icon" alt="Lock icon" src={lockIcon} style={Styles.HEADER_IMG} />
-            </div>
-            <div style={{ display: 'flex',
-              flexDirection: 'column' }}
-            >
-              <div style={Styles.TITLE}>
-                Study Registration Form
-                <div style={Styles.MEDIUM_DESCRIPTION}>
-                  Submit new datasets to DUOS
-                </div>
-              </div>
-            </div>
-          </div>
+          <TableHeaderSection
+            title="Study Registration Form"
+            description="Submit new datasets to DUOS"
+          />
         </div>
 
         <GeneralStudyInformation study={study} setStudy={setStudy} />

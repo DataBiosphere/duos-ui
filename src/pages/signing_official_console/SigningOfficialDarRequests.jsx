@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
-import lockIcon from 'src/images/lock-icon.png'
 import { Collections } from 'src/libs/ajax/Collections'
 import { USER_ROLES } from 'src/libs/utils'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
 
 export default function SigningOfficialDarRequests() {
   usePageTitle('DAR Requests')
@@ -36,17 +36,10 @@ export default function SigningOfficialDarRequests() {
   return (
     <div style={Styles.PAGE}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-          <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} />
-          </div>
-          <div style={Styles.HEADER_CONTAINER}>
-            <div style={{ ...Styles.TITLE, marginTop: '0' }}>My Institution&apos;s Data Access Requests</div>
-            <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '18px' }}>
-              Your Institution&apos;s Data Access Requests: Records from all current and closed data access requests.
-            </div>
-          </div>
-        </div>
+        <TableHeaderSection
+          title="My Institution's Data Access Requests"
+          description="Your Institution's Data Access Requests: Records from all current and closed data access requests"
+        />
       </div>
       <div className="signing-official-tabs">
         {responsiveColumns.length > 0 && (

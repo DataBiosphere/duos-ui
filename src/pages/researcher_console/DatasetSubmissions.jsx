@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Styles, Theme } from '../../libs/theme'
-import lockIcon from '../../images/lock-icon.png'
 import { Link } from 'react-router-dom'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from '../../libs/utils'
@@ -9,6 +8,7 @@ import { DataSet } from '../../libs/ajax/DataSet'
 import DatasetSubmissionsTable from './DatasetSubmissionsTable'
 import { Storage } from '../../libs/storage'
 import styles from './DatasetTerms.module.css'
+import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
 
 export default function DatasetSubmissions() {
   const [terms, setTerms] = useState([])
@@ -119,32 +119,12 @@ export default function DatasetSubmissions() {
   return (
     <div style={Styles.PAGE}>
       <div className={styles['submitted-datasets-header']}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-          <div
-            style={Styles.ICON_CONTAINER}
-          >
-            <img
-              alt="Lock Icon"
-              id="lock-icon"
-              src={lockIcon}
-              style={Styles.HEADER_IMG}
-            />
-          </div>
-          <div
-            style={Styles.HEADER_CONTAINER}
-          >
-            <div
-              style={Styles.TITLE}
-            >
-              My Data Submissions
-            </div>
-            <div
-              style={{ fontFamily: 'Montserrat', fontSize: '1.6rem' }}
-            >
-              View the status of datasets registered in DUOS
-            </div>
-            <div>{addDatasetButton}</div>
-          </div>
+        <div>
+          <TableHeaderSection
+            title="My Data Submissions"
+            description="View the status of datasets registered in DUOS"
+          />
+          <div style={{ marginLeft: '2em' }}>{addDatasetButton}</div>
         </div>
         <div className={`right-header-section ${styles['search-box-container']}`}>
           <SearchBar
