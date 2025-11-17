@@ -6,6 +6,7 @@ import broadLogo from '../images/broad_logo_allwhite.png'
 import { OverflowTooltip } from '../components/Tooltips'
 import { Link } from 'react-router-dom'
 import { getLibraryVersions } from '../libs/libraryVersions'
+import { handleSignIn } from 'src/libs/signInUtils'
 
 const Home = (props) => {
   const { isLogged } = props
@@ -106,27 +107,6 @@ const Home = (props) => {
     maxHeight: '100%',
     objectFit: 'contain',
     display: 'block',
-  }
-
-  const handleSignIn = (redirectPath) => {
-    // Set the redirectTo parameter without forcing a page reload
-    const currentUrl = new URL(window.location.href)
-    currentUrl.searchParams.set('redirectTo', redirectPath)
-    window.history.replaceState({}, '', currentUrl)
-
-    // Find the existing sign-in button in the header and programmatically click it
-    // This will trigger the existing authentication flow with all proper session handling
-    const signInButtons = document.querySelectorAll('button')
-    const signInButton = Array.from(signInButtons).find(button =>
-      button.textContent && button.textContent.trim() === 'Sign In',
-    )
-    if (signInButton) {
-      signInButton.click()
-    }
-    else {
-      // Fallback - scroll to top where the sign-in button is located
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
   }
 
   return (

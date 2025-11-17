@@ -8,7 +8,6 @@
   "tdrApiUrl": "https://tdrApiUrl.org/",
   "ecmApiUrl": "https://ecmApiUrl.org",
   "errorApiKey": "example",
-  "gaId": "",
   "features": {
     "featureX" : true,
     "featureY" : false

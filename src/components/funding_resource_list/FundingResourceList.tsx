@@ -3,6 +3,7 @@ import { FundingResource } from 'src/types/model'
 import { FundingResourceAddEdit } from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import FundingResourceRow from 'src/components/funding_resource_list/FundingResourceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
 
 interface FundingResourceListProps {
   readonly fundingResources: FundingResource[]
@@ -10,6 +11,7 @@ interface FundingResourceListProps {
   readonly onFundingResourceChange: (items: FundingResource[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
 }
 
 export default function FundingResourceList(props: FundingResourceListProps): React.JSX.Element {
@@ -19,6 +21,7 @@ export default function FundingResourceList(props: FundingResourceListProps): Re
     onFundingResourceChange,
     disabled = false,
     validation,
+    studyAssetWrapper,
   } = props
 
   const [showAddEdit, setShowAddEdit] = useState(false)
@@ -37,54 +40,57 @@ export default function FundingResourceList(props: FundingResourceListProps): Re
 
   const getValidationState = () => validation?.fundingResources
 
+  const button = (
+    <StudyAssetAddButton
+      id="add-funding-btn"
+      label="Add Funding"
+      onClick={() => setShowAddEdit(true)}
+      disabled={disabled}
+      hasValidationError={!!getValidationState()}
+    />
+  )
+
+  const content = (
+    <div className="form-group row no-margin">
+      {showAddEdit && (
+        <FundingResourceAddEdit
+          id={-1}
+          fundingResources={fundingResources}
+          closeAction={() => setShowAddEdit(false)}
+          onFundingChange={onFundingResourceChange}
+        />
+      )}
+      {fundingResources.map((f: FundingResource, index: number) => (
+        <FundingResourceRow
+          key={f.fundingId || index}
+          id={index}
+          editMode={editState[index]}
+          funding={f}
+          fundingResources={fundingResources}
+          columnsToShow={columnsToShow}
+          editAction={() => toggleEditState(index)}
+          deleteAction={() => handleDeleteFunding(index)}
+          closeAction={() => {
+            toggleEditState(index)
+            setShowAddEdit(false)
+          }}
+          onFundingChange={onFundingResourceChange}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  )
+
+  if (studyAssetWrapper) {
+    return <>{studyAssetWrapper(content, button)}</>
+  }
+
   return (
     <div className="presentation-list-component">
       <div className="row no-margin">
-        <button
-          id="add-funding-btn"
-          type="button"
-          className="button button-white"
-          style={{
-            marginTop: 25,
-            marginBottom: 5,
-            border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-            boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-            ...(disabled ? { cursor: 'not-allowed' } : {}),
-          }}
-          onClick={() => !disabled && setShowAddEdit(true)}
-          disabled={disabled}
-        >
-          Add Funding Resource
-        </button>
-        {showAddEdit && (
-          <FundingResourceAddEdit
-            id={-1}
-            fundingResources={fundingResources}
-            closeAction={() => setShowAddEdit(false)}
-            onFundingChange={onFundingResourceChange}
-          />
-        )}
+        {button}
       </div>
-      <div className="form-group row no-margin">
-        {fundingResources.map((f: FundingResource, index: number) => (
-          <FundingResourceRow
-            key={f.fundingId || index}
-            id={index}
-            editMode={editState[index]}
-            funding={f}
-            fundingResources={fundingResources}
-            columnsToShow={columnsToShow}
-            editAction={() => toggleEditState(index)}
-            deleteAction={() => handleDeleteFunding(index)}
-            closeAction={() => {
-              toggleEditState(index)
-              setShowAddEdit(false)
-            }}
-            onFundingChange={onFundingResourceChange}
-            disabled={disabled}
-          />
-        ))}
-      </div>
+      {content}
     </div>
   )
 }

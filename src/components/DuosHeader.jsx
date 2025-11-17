@@ -167,13 +167,6 @@ const DuosHeader = (props) => {
     })
   }
 
-  const okSupportRequestModal = () => {
-    setState({
-      ...state,
-      showSupportRequestModal: false,
-    })
-  }
-
   const closeSupportRequestModal = () => {
     setState({
       ...state,
@@ -234,7 +227,6 @@ const DuosHeader = (props) => {
   const supportModal = (
     <SupportRequestModal
       showModal={state.showSupportRequestModal}
-      onOkRequest={okSupportRequestModal}
       onCloseRequest={closeSupportRequestModal}
       url={location.pathname}
     />
