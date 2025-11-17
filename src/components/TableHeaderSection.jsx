@@ -26,7 +26,7 @@ export const TableHeaderSection = (props) => {
         <div style={{ ...Styles.HEADER_CONTAINER, width: '120%' }}>
           <div
             style={{
-              fontFamily: 'Montserrat',
+              fontFamily: 'Inter',
               fontWeight: 600,
               fontSize: '2.8rem',
             }}
@@ -35,7 +35,7 @@ export const TableHeaderSection = (props) => {
           </div>
           <div
             style={{
-              fontFamily: 'Montserrat',
+              fontFamily: 'Inter',
               fontSize: '1.6rem',
               width: '150%',
             }}
