@@ -92,6 +92,7 @@ export interface DAAObject {
 export interface DacObject {
   dacId?: number
   dacName?: string
+  name?: string
   description?: string
   email?: string
   associatedDaa?: DAAObject

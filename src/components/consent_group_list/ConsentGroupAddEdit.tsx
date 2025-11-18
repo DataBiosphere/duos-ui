@@ -1,9 +1,9 @@
-import { cloneDeep, unset, set, isNil, isEmpty } from 'lodash'
+import { isNil, isEmpty } from 'lodash'
 import React, { useState } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { searchOntologies } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-import { ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { DacPicker } from '../forms/DacPicker'
 
 interface ConsentGroupAddEditProps {
@@ -15,11 +15,17 @@ interface ConsentGroupAddEditProps {
 }
 
 interface Validation {
-  name?: ValidationError
-  platform?: ValidationError
-  url?: ValidationError
-  description?: ValidationError
-  access?: ValidationError
+  consentGroupName?: ValidationError
+  accessManagement?: ValidationError
+  numberOfParticipants?: ValidationError
+  dataAccessCommitteeId?: ValidationError
+  dataLocation?: ValidationError
+  primaryConsent?: ValidationError
+  gs?: ValidationError
+  mor?: ValidationError
+  otherSecondary?: ValidationError
+  otherPrimary?: ValidationError
+  diseaseSpecificUse?: ValidationError
 }
 
 const defaultConsentGroup: ConsentGroup2 = {
@@ -30,13 +36,6 @@ const defaultConsentGroup: ConsentGroup2 = {
 }
 
 const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
-
-const calcErrors = (cg: ConsentGroup2): Validation => {
-  const v: Validation = {}
-  if (!cg.consentGroupName?.trim()) v.name = makeError('Required')
-  if (!cg.accessManagement?.trim()) v.platform = makeError('Required')
-  return v
-}
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
@@ -61,20 +60,35 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
   const [otherSecondaryText, setOtherSecondaryText] = useState(consentGroup?.otherSecondary)
 
   const [showGSText, setShowGSText] = useState(!isNil(consentGroup?.gs))
-  const [gsText, setGSText] = useState(consentGroup?.gs || '')
+  const [gsText, setGSText] = useState(consentGroup?.gs || undefined)
 
   const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup?.otherPrimary))
-  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup?.otherPrimary || '')
+  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup?.otherPrimary || undefined)
 
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup?.diseaseSpecificUse))
   const [selectedDiseases, setSelectedDiseases] = useState(consentGroup?.diseaseSpecificUse || [])
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup?.mor))
-  const [morText, setMORText] = useState<string>(consentGroup?.morDate || '')
+  const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
+
+  const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
+    const clearedFields = {} as ConsentGroup2
+    clearedFields.consentGroupName = current.consentGroupName
+    clearedFields.accessManagement = value as AccessManagementType
+    clearedFields.numberOfParticipants = current.numberOfParticipants
+    clearedFields.dataLocation = current.dataLocation
+    clearedFields.url = current.url
+    setCurrent(
+      clearedFields)
+    setShowOtherSecondaryText(false)
+    setShowGSText(false)
+    setShowOtherPrimaryText(false)
+    setValidation(calcErrors(current))
+  }
 
   const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] }) => {
     setCurrent({
-      ...consentGroup,
+      ...current,
       generalResearchUse: false,
       hmb: false,
       diseaseSpecificUse: undefined,
@@ -87,6 +101,43 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
 
     setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse')
     setShowOtherPrimaryText(key === 'otherPrimary')
+    if (!current.otherPrimary) {
+      setOtherPrimaryText(undefined)
+    }
+    if (!current.diseaseSpecificUse) {
+      setSelectedDiseases([])
+    }
+    setValidation(calcErrors(current))
+  }
+
+  const calcErrors = (cg: ConsentGroup2): Validation => {
+    const v: Validation = {}
+    if (!cg.consentGroupName?.trim()) v.consentGroupName = makeError('Required')
+    if (!cg.accessManagement?.trim()) v.accessManagement = makeError('Required')
+    if (!cg.numberOfParticipants || cg.numberOfParticipants <= 0) v.numberOfParticipants = makeError('Must be greater than zero')
+    if (cg.accessManagement === 'controlled' && !cg.dataAccessCommitteeId) {
+      v.dataAccessCommitteeId = makeError('Required')
+    }
+    if (cg.accessManagement !== 'open' && !selectedPrimaryGroup(cg as ConsentGroup)) {
+      v.primaryConsent = makeError('Required')
+    }
+    if (showDiseaseSpecificUseSearchbar && (isNil(cg.diseaseSpecificUse) || cg.diseaseSpecificUse.length === 0)) {
+      v.diseaseSpecificUse = makeError('Required')
+    }
+    if (showOtherPrimaryText && (!cg.otherPrimary || !cg.otherPrimary.trim())) {
+      v.otherPrimary = makeError('Required')
+    }
+    if (!cg.dataLocation?.trim()) v.dataLocation = makeError('Required')
+    if (showGSText && (!cg.gs || !cg.gs.trim())) {
+      v.gs = makeError('Required')
+    }
+    if (showMORText && (!cg.mor || !cg.mor.trim())) {
+      v.mor = makeError('Required')
+    }
+    if (showOtherSecondaryText && (!cg.otherSecondary || !cg.otherSecondary.trim())) {
+      v.otherSecondary = makeError('Required')
+    }
+    return v
   }
 
   const onChange = ({ key, value }: FormFieldChange) => {
@@ -123,24 +174,24 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
             title="Consent Group Name"
             placeholder="Enter a name for this consent group"
             validators={[FormValidators.REQUIRED]}
-            defaultValue={consentGroup?.consentGroupName}
+            defaultValue={current?.consentGroupName}
             onChange={onChange}
+            validation={validation.consentGroupName}
           />
 
           {/* controlled, open and external access */}
           <div>
             <FormField
-              title="Data Access Management"
+              title="Data Access Management*"
               description="Select a data access management strategy"
               id="accessManagement_controlled"
               name="accessManagement"
               value="controlled"
               type={FormFieldTypes.RADIOBUTTON}
               toggleText="Controlled Access (managed by a DAC in DUOS)"
-              defaultValue={consentGroup?.accessManagement}
-              onChange={({ key, value }: { key: string, value: boolean }) => {
-                onPrimaryChange({ key, value })
-              }}
+              defaultValue={current?.accessManagement}
+              onChange={onAccessTypeChange}
+              validation={validation.accessManagement}
             />
 
             <FormField
@@ -149,11 +200,9 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               value="open"
               type={FormFieldTypes.RADIOBUTTON}
               toggleText="Open Access (does not need DAC approval)"
-
-              defaultValue={consentGroup?.accessManagement}
-              onChange={({ key, value }: { key: string, value: boolean }) => {
-                onPrimaryChange({ key, value })
-              }}
+              defaultValue={current?.accessManagement}
+              onChange={onAccessTypeChange}
+              validation={validation.accessManagement}
             />
 
             <FormField
@@ -162,16 +211,15 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               value="external"
               type={FormFieldTypes.RADIOBUTTON}
               toggleText="External Access (managed by a DAC external to DUOS)"
-              defaultValue={consentGroup?.accessManagement}
-              onChange={({ key, value }: { key: string, value: boolean }) => {
-                onPrimaryChange({ key, value })
-              }}
+              defaultValue={current?.accessManagement}
+              onChange={onAccessTypeChange}
+              validation={validation.accessManagement}
             />
           </div>
 
           {/* primary */}
           {
-            consentGroup?.accessManagement !== 'open' && (
+            current?.accessManagement !== 'open' && (
               <div>
                 <FormField
                   title="Primary Data Use Terms*"
@@ -181,10 +229,11 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="primaryConsent"
                   value="generalResearchUse"
                   toggleText="General Research Use"
-                  defaultValue={selectedPrimaryGroup(consentGroup as ConsentGroup)}
+                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
                   onChange={({ value }: { value: string }) => {
                     onPrimaryChange({ key: value, value: true })
                   }}
+                  validation={validation.primaryConsent}
                 />
 
                 <FormField
@@ -193,11 +242,11 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="primaryConsent"
                   value="hmb"
                   toggleText="Health/Medical/Biomedical Research Use"
-                  defaultValue={selectedPrimaryGroup(consentGroup as ConsentGroup)}
+                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
                   onChange={({ value }: { value: string }) => {
                     onPrimaryChange({ key: value, value: true })
                   }}
-
+                  validation={validation.primaryConsent}
                 />
 
                 <FormField
@@ -206,13 +255,14 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="primaryConsent"
                   value="diseaseSpecificUse"
                   toggleText="Disease-Specific Research Use"
-                  defaultValue={selectedPrimaryGroup(consentGroup as ConsentGroup)}
+                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
                   onChange={({ value }: { value: string }) => {
                     onPrimaryChange({
                       key: value,
                       value: selectedDiseases,
                     })
                   }}
+                  validation={validation.primaryConsent}
                 />
                 {
                   showDiseaseSpecificUseSearchbar && (
@@ -234,12 +284,13 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         defaultValue={selectedDiseases}
                         onChange={({ key, value }: { key: string, value: [{ displayText: string, id: string }], isValid: boolean }) => {
                           const doids = value.map((v: { id: string }) => v.id)
-                          setSelectedDiseases(value.map(val => val.displayText))
+                          setSelectedDiseases(value)
                           onChange({
                             key: key,
                             value: doids,
                           })
                         }}
+                        validation={validation.diseaseSpecificUse}
                       />
                     </div>
                   )
@@ -250,7 +301,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="primaryConsent"
                   value="poa"
                   toggleText="Populations, Origins, Ancestry Use"
-                  defaultValue={selectedPrimaryGroup(consentGroup as ConsentGroup)}
+                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
                   onChange={({ value }: { value: string }) => {
                     onPrimaryChange({ key: value, value: true })
                   }}
@@ -262,9 +313,9 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="primaryConsent"
                   value="otherPrimary"
                   toggleText="Other"
-                  defaultValue={selectedPrimaryGroup(consentGroup as ConsentGroup)}
+                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
                   onChange={({ value }: { value: string }) => {
-                    onPrimaryChange({ key: value, value: otherPrimaryText })
+                    onPrimaryChange({ key: value, value: value })
                   }}
                 />
                 {
@@ -279,6 +330,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         setOtherPrimaryText(value)
                         onChange({ key: key, value: value })
                       }}
+                      validation={validation.otherPrimary}
                     />
                   )
                 }
@@ -288,7 +340,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
 
           {/* secondary */}
           {
-            consentGroup?.accessManagement !== 'open' && (
+            current?.accessManagement !== 'open' && (
               <div>
                 <FormField
                   title="Secondary Data Use Terms"
@@ -297,7 +349,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="nmds"
                   type={FormFieldTypes.CHECKBOX}
                   toggleText="No methods development or validation studies (NMDS)"
-                  defaultValue={consentGroup?.nmds}
+                  defaultValue={current?.nmds}
                   onChange={onChange}
                 />
 
@@ -306,7 +358,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="gso"
                   type={FormFieldTypes.CHECKBOX}
                   toggleText="Genetic studies only (GSO)"
-                  defaultValue={consentGroup?.gso}
+                  defaultValue={current?.gso}
                   onChange={onChange}
                 />
 
@@ -315,7 +367,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="pub"
                   type={FormFieldTypes.CHECKBOX}
                   toggleText="Publication Required (PUB)"
-                  defaultValue={consentGroup?.pub}
+                  defaultValue={current?.pub}
                   onChange={onChange}
                 />
 
@@ -324,7 +376,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="col"
                   type={FormFieldTypes.CHECKBOX}
                   toggleText="Collaboration Required (COL)"
-                  defaultValue={consentGroup?.col}
+                  defaultValue={current?.col}
                   onChange={onChange}
                 />
 
@@ -333,7 +385,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="irb"
                   type={FormFieldTypes.CHECKBOX}
                   toggleText="Ethics Approval Required (IRB)"
-                  defaultValue={consentGroup?.irb}
+                  defaultValue={current?.irb}
                   onChange={onChange}
                 />
 
@@ -345,12 +397,12 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   defaultValue={showGSText}
                   onChange={({ key, value }: { key: string, value: boolean }) => {
                     setShowGSText(value)
-
                     if (value) {
                       onChange({ key: key, value: gsText })
                     }
                     else {
                       onChange({ key: key, value: undefined })
+                      setGSText(undefined)
                     }
                   }}
                 />
@@ -361,12 +413,12 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                       name="gs"
                       validators={[FormValidators.REQUIRED]}
                       placeholder="Specify Geographic Restriction"
-                      defaultValue={gsText || ''}
+                      defaultValue={current?.gs}
                       onChange={({ key, value }: { key: string, value: string, isValid: boolean }) => {
                         setGSText(value)
                         onChange({ key: key, value: value })
                       }}
-
+                      validation={validation.gs}
                     />
                   )
                 }
@@ -379,6 +431,9 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   onChange={({ key, value }: { key: string, value: boolean }) => {
                     setShowMORText(value)
                     onChange({ key: key, value: (value ? morText : undefined) })
+                    if (!value) {
+                      setMORText(undefined)
+                    }
                   }}
                 />
                 {
@@ -393,6 +448,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         setMORText(value)
                         onChange({ key: key, value: value })
                       }}
+                      validation={validation.mor}
                     />
                   )
                 }
@@ -402,7 +458,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   name="npu"
                   type={FormFieldTypes.CHECKBOX}
                   toggleText="Non-profit Use Only (NPU)"
-                  defaultValue={consentGroup?.npu}
+                  defaultValue={current?.npu}
                   onChange={onChange}
                 />
 
@@ -414,12 +470,12 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   defaultValue={showOtherSecondaryText}
                   onChange={({ key, value }: { key: string, value: boolean }) => {
                     setShowOtherSecondaryText(value)
-
                     if (value) {
                       onChange({ key: key, value: otherSecondaryText })
                     }
                     else {
                       onChange({ key: key, value: undefined })
+                      setOtherSecondaryText(undefined)
                     }
                   }}
                 />
@@ -435,6 +491,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         setOtherSecondaryText(value)
                         onChange({ key: key, value: value })
                       }}
+                      validation={validation.otherSecondary}
                     />
                   )
                 }
@@ -444,11 +501,11 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
 
           {/* data access committee */}
           {
-            consentGroup?.accessManagement === 'controlled' && (
+            current?.accessManagement === 'controlled' && (
               <DacPicker
                 fieldId="dataAccessCommitteeId"
-                fieldTitle="DataAccessCommittee (DAC)"
-                initialDac={consentGroup?.dataAccessCommitteeId}
+                fieldTitle="Data Access Committee (DAC)"
+                initialDac={current?.dataAccessCommitteeId}
                 isRequired={true}
                 onChange={({ key, value }: { key: string, value: number, isValid: boolean }) => {
                   onChange({ key: key, value: value })
@@ -479,19 +536,12 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               'Not Determined',
             ]}
             placeholder="Data Location(s)"
-            defaultValue={consentGroup?.dataLocation}
-            onChange={({ key, value, isValid }: { key: string, value: string, isValid: boolean }) => {
-              if (isValid) {
-                setCurrent((val) => {
-                  if (val) {
-                    const newForm = cloneDeep(val)
-                    if (value === 'Not Determined') {
-                      unset(newForm, 'url')
-                    }
-                    return set(newForm, key, value)
-                  }
-                  return set({} as ConsentGroup2, key, value)
-                })
+            defaultValue={current?.dataLocation}
+            validation={validation.dataLocation}
+            onChange={({ key, value }: { key: string, value: string }) => {
+              onChange({ key, value })
+              if (current?.dataLocation === 'Not Determined') {
+                onChange({ key: 'url', value: undefined })
               }
             }}
           />
@@ -500,9 +550,9 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
             id="url"
             name="url"
             validators={[FormValidators.URL]}
-            disabled={consentGroup?.dataLocation === 'Not Determined'}
+            disabled={current?.dataLocation === 'Not Determined'}
             placeholder="Enter a URL for your data location here"
-            defaultValue={consentGroup?.dataLocation === 'Not Determined' ? '' : consentGroup?.url}
+            defaultValue={current?.dataLocation === 'Not Determined' ? undefined : consentGroup?.url}
             onChange={onChange}
           />
         </div>
@@ -525,7 +575,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               placeholder: 'Type',
             },
           ]}
-          defaultValue={consentGroup?.fileTypes}
+          defaultValue={current?.fileTypes}
           enableAddingRow={true}
           addRowLabel="Add New File Type"
           minLength={1}
@@ -539,8 +589,9 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
             placeholder="Number"
             type={FormFieldTypes.NUMBER}
             validators={[FormValidators.REQUIRED]}
-            defaultValue={consentGroup?.numberOfParticipants}
+            defaultValue={current?.numberOfParticipants}
             onChange={onChange}
+            validation={validation.numberOfParticipants}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>

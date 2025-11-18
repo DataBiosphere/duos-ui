@@ -482,12 +482,7 @@ export const searchOntologies = (query, callback) => {
   DAR.getAutoCompleteOT(query).then(
     (items) => {
       options = items.map(function (item) {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.label,
-          item: item,
-        }
+        return { displayText: item.label, id: item.id }
       })
       callback(options)
     })

@@ -27,8 +27,7 @@ export interface ConsentGroup2 {
   col?: boolean
   irb?: boolean
   gs?: string
-  mor?: boolean
-  morDate?: string
+  mor?: string
   npu?: boolean
   otherSecondary?: string
   dataLocation?: 'AnVIL Workspace' | 'Terra Workspace' | 'TDR Location' | 'Not Determined'
@@ -42,6 +41,7 @@ export interface FileType {
 }
 
 export const selectedPrimaryGroup = (consentGroup: ConsentGroup) => {
+  if (isNil(consentGroup)) return undefined
   if (!isNil(consentGroup.generalResearchUse) && consentGroup.generalResearchUse) {
     return 'generalResearchUse'
   }

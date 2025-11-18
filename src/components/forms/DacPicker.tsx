@@ -10,11 +10,12 @@ export interface DacPickerProps {
   fieldTitle: string
   fieldId: string
   isRequired: boolean
+  validation?: unknown
   onChange: ({ key, value, isValid }: { key: string, value: number, isValid: boolean }) => void
 }
 
 export const DacPicker = (props: DacPickerProps) => {
-  const { initialDac, fieldId, fieldTitle, isRequired, onChange } = props
+  const { initialDac, fieldId, fieldTitle, isRequired, validation, onChange } = props
   const [dacList, setDacList] = useState<DacObject[]>([])
 
   useEffect(() => {
@@ -40,12 +41,10 @@ export const DacPicker = (props: DacPickerProps) => {
     const dac = dacList.find(dac => dac.dacId === id)
 
     return {
-      displayText: dac?.dacName || 'Unknown',
+      displayText: dac?.name || 'Unknown',
       id: id,
     }
   }
-
-  const validation = isRequired ? [FormValidators.REQUIRED] : []
 
   return (
     <FormField
@@ -54,9 +53,10 @@ export const DacPicker = (props: DacPickerProps) => {
       isRendered={!isEmpty(dacList)}
       validation={validation}
       type={FormFieldTypes.SELECT}
-      selectOptions={dacList.map(dac => ({ displayText: dac.dacName, id: dac.dacId }))}
+      selectOptions={dacList.map(dac => ({ displayText: dac.name, id: dac.dacId }))}
       isCreatable={false}
       selectConfig={{}}
+      validators={isRequired ? [FormValidators.REQUIRED] : []}
       onChange={({ key, value, isValid }: { key: string, value: { displayText: string, id: number }, isValid: boolean }) => {
         onChange({ key, value: value?.id, isValid })
       }}

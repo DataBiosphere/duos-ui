@@ -3,8 +3,8 @@ import React from 'react'
 import { DacPicker } from 'src/components/forms/DacPicker'
 
 const dacs = [
-  { dacName: 'Awesome DAC', dacId: 1, dataCustodianEmail: ['Some Data Custodian Email 1'] },
-  { dacName: 'Extra DAC', dacId: 2, dataCustodianEmail: ['Some Data Custodian Email 2'] },
+  { name: 'Awesome DAC', dacId: 1, dataCustodianEmail: ['Some Data Custodian Email 1'] },
+  { name: 'Extra DAC', dacId: 2, dataCustodianEmail: ['Some Data Custodian Email 2'] },
 ]
 
 describe('Data Library Filters', () => {

@@ -3,6 +3,7 @@ import { ConsentGroupAddEdit } from 'src/components/consent_group_list/ConsentGr
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import ConsentGroupRow from 'src/components/consent_group_list/ConsentGroupRow'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
 
 interface ConsentGroupListProps {
   readonly consentGroups: ConsentGroup2[]
@@ -10,15 +11,17 @@ interface ConsentGroupListProps {
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
 }
 
 export default function ConsentGroupList(props: ConsentGroupListProps): React.JSX.Element {
   const {
     consentGroups,
-    columnsToShow = ['name', 'platform', 'url', 'description', 'tools', 'access', 'tags'],
+    columnsToShow = ['consentGroupName', 'accessManagement', 'dataLocation', 'numberOfParticipants'],
     onConsentGroupChange,
     disabled = false,
     validation,
+    studyAssetWrapper,
   } = props
 
   const [showAddEdit, setShowAddEdit] = useState(false)
@@ -35,36 +38,28 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
     onConsentGroupChange(updated)
   }
 
-  const getValidationState = () => validation?.workspaces
+  const getValidationState = () => validation?.consentGroups
 
-  return (
+  const button = (
+    <StudyAssetAddButton
+      id="add-consent-group-btn"
+      label="Add Dataset"
+      onClick={() => setShowAddEdit(true)}
+      disabled={disabled}
+      hasValidationError={!!getValidationState()}
+    />
+  )
+
+  const content = (
     <div className="presentation-list-component">
-      <div className="row no-margin">
-        <button
-          id="add-workspace-btn"
-          type="button"
-          className="button button-white"
-          style={{
-            marginTop: 25,
-            marginBottom: 5,
-            border: getValidationState() ? '1px solid red' : '1px solid #0948B7',
-            boxShadow: getValidationState() ? '0 0 5px red' : 'none',
-            ...(disabled ? { cursor: 'not-allowed' } : {}),
-          }}
-          onClick={() => !disabled && setShowAddEdit(true)}
-          disabled={disabled}
-        >
-          Add Workspace
-        </button>
-        {showAddEdit && (
-          <ConsentGroupAddEdit
-            id={-1}
-            consentGroups={consentGroups}
-            closeAction={() => setShowAddEdit(false)}
-            onConsentGroupChange={onConsentGroupChange}
-          />
-        )}
-      </div>
+      {showAddEdit && (
+        <ConsentGroupAddEdit
+          id={-1}
+          consentGroups={consentGroups}
+          closeAction={() => setShowAddEdit(false)}
+          onConsentGroupChange={onConsentGroupChange}
+        />
+      )}
       <div className="form-group row no-margin">
         {consentGroups.map((cg: ConsentGroup2, index: number) => (
           <ConsentGroupRow
@@ -85,6 +80,19 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
           />
         ))}
       </div>
+    </div>
+  )
+
+  if (studyAssetWrapper) {
+    return <>{studyAssetWrapper(content, button)}</>
+  }
+
+  return (
+    <div className="consent-group-list-component">
+      <div className="row no-margin">
+        {button}
+      </div>
+      {content}
     </div>
   )
 }
