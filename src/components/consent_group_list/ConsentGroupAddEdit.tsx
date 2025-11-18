@@ -124,17 +124,17 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     if (showDiseaseSpecificUseSearchbar && (isNil(cg.diseaseSpecificUse) || cg.diseaseSpecificUse.length === 0)) {
       v.diseaseSpecificUse = makeError('Required')
     }
-    if (showOtherPrimaryText && (!cg.otherPrimary || !cg.otherPrimary.trim())) {
+    if (showOtherPrimaryText && (!cg.otherPrimary?.trim())) {
       v.otherPrimary = makeError('Required')
     }
     if (!cg.dataLocation?.trim()) v.dataLocation = makeError('Required')
-    if (showGSText && (!cg.gs || !cg.gs.trim())) {
+    if (showGSText && (!cg.gs?.trim())) {
       v.gs = makeError('Required')
     }
-    if (showMORText && (!cg.mor || !cg.mor.trim())) {
+    if (showMORText && (!cg.mor?.trim())) {
       v.mor = makeError('Required')
     }
-    if (showOtherSecondaryText && (!cg.otherSecondary || !cg.otherSecondary.trim())) {
+    if (showOtherSecondaryText && (!cg.otherSecondary?.trim())) {
       v.otherSecondary = makeError('Required')
     }
     return v
