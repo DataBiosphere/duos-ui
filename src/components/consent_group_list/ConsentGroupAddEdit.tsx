@@ -69,7 +69,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
   const [selectedDiseases, setSelectedDiseases] = useState(consentGroup?.diseaseSpecificUse || [])
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup?.mor))
-  const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
+  const [morText, setMORText] = useState(consentGroup?.mor || undefined)
 
   const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
     const clearedFields = {} as ConsentGroup2

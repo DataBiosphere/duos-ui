@@ -12,7 +12,7 @@ describe('Consent Group', function () {
         closeAction={function (): void {
           throw new Error('Function not implemented.')
         }}
-        onConsentGroupChange={function (items: ConsentGroup2[]): void {
+        onConsentGroupChange={function (_items: ConsentGroup2[]): void {
           throw new Error('Function not implemented.')
         }}
       />,
@@ -29,7 +29,7 @@ describe('Consent Group', function () {
         closeAction={function (): void {
           throw new Error('Function not implemented.')
         }}
-        onConsentGroupChange={function (items: ConsentGroup2[]): void {
+        onConsentGroupChange={function (_items: ConsentGroup2[]): void {
           throw new Error('Function not implemented.')
         }}
       />,
