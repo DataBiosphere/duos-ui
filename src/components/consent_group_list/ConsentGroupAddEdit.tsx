@@ -66,7 +66,9 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
   const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup?.otherPrimary || undefined)
 
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup?.diseaseSpecificUse))
-  const [selectedDiseases, setSelectedDiseases] = useState(consentGroup?.diseaseSpecificUse || [])
+  const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>(
+    (consentGroup?.diseaseSpecificUse || []).map((d: string) => ({ id: d, displayText: d })),
+  )
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup?.mor))
   const [morText, setMORText] = useState(consentGroup?.mor || undefined)
@@ -284,6 +286,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         defaultValue={selectedDiseases}
                         onChange={({ key, value }: { key: string, value: [{ displayText: string, id: string }], isValid: boolean }) => {
                           const doids = value.map((v: { id: string }) => v.id)
+
                           setSelectedDiseases(value)
                           onChange({
                             key: key,
