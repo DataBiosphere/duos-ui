@@ -10,7 +10,7 @@ export default function SearchBar(props) {
   const button = props.button ? props.button : <div />
 
   const style = {
-    width: '100%',
+    width: '30ch', // 30 characters wide
     border: '1px solid #cecece',
     backgroundColor: '#f3f6f7',
     borderRadius: '5px',
