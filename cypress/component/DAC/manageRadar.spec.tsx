@@ -156,8 +156,8 @@ describe('ManageRadar Component Tests', () => {
       cy.get('[data-cy="manage-radar-container"]').should('exist')
 
       // Should have header section with DAC name
-      cy.get('[data-cy="page-header"]').should('exist')
-      cy.get('[data-cy="page-header"]').should('contain', dac.name)
+      cy.get('[data-cy="table-header-description"]').should('exist')
+      cy.get('[data-cy="table-header-description"]').should('contain', dac.name)
 
       // Should have back navigation
       cy.get('[data-cy="back-button"]').should('exist')
