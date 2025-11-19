@@ -107,7 +107,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     setValidation(calcErrors(current))
   }
 
-  const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] }) => {
+  const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] | { displayText: string, id: string }[] }) => {
     setCurrent({
       ...current,
       generalResearchUse: false,
