@@ -10,14 +10,14 @@ updates:
     commit-message:
       prefix: "[DT-400-actions]"
     groups:
-      action-dependencies:
+      action-major-updates:
         patterns:
           - "*"
         update-types:
           - "major"
-          - "minor"
-      action-patch-updates:
+      action-other-updates:
         update-types:
+          - "minor"
           - "patch"
   - package-ecosystem: npm
     directory: "/"
@@ -32,14 +32,14 @@ updates:
     commit-message:
       prefix: "[DT-400-npm]"
     groups:
-      npm-dependencies:
+      npm-major-updates:
         patterns:
           - "*"
         update-types:
           - "major"
-          - "minor"
-      npm-patch-updates:
+      npm-other-updates:
         update-types:
+          - "minor"
           - "patch"
   - package-ecosystem: docker
     directory: "/"
@@ -54,12 +54,12 @@ updates:
     commit-message:
       prefix: "[DT-400-docker]"
     groups:
-      docker-dependencies:
+      docker-major-updates:
         patterns:
           - "*"
         update-types:
           - "major"
-          - "minor"
-      docker-patch-updates:
+      docker-other-updates:
         update-types:
+          - "minor"
           - "patch"
