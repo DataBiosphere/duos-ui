@@ -9,7 +9,7 @@ import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function MemberConsole() {
   usePageTitle('DAR Requests')

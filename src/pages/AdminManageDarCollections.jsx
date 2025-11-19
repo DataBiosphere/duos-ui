@@ -13,7 +13,7 @@ import {
 } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function AdminManageDarCollections() {
   usePageTitle('DAR Requests')

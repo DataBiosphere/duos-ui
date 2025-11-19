@@ -12,7 +12,7 @@ import style from './DACDatasets.module.css'
 import { Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
@@ -68,41 +68,33 @@ export default function DACDatasets() {
 
   return (
     <div style={Styles.PAGE}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '112%',
-          marginLeft: '-6%',
-          padding: '0 2.5%',
-        }}
-      >
+      <div>
         <TableHeaderSection
           title="My DAC's Datasets"
           description="View the status of datasets submitted to your Data Access Committee"
         />
-        <SearchBar
-          handleSearchChange={handleSearchChange}
-          searchRef={searchRef}
-        />
-      </div>
-
-      <div>
-        <Button
-          className={style['add-button']}
-          onClick={() => navigate('/data_submission_form')}
-          variant="outlined"
-        >
-          <div style={{ verticalAlign: 'center', color: '#0948B7' }}>
-            <span
-              aria-hidden="true"
-              style={{ marginRight: '5px' }}
-              className="glyphicon glyphicon-plus-sign"
-            >
-            </span>
-            ADD DATASET
-          </div>
-        </Button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', marginLeft: '2em', marginTop: '1rem' }}>
+          <Button
+            className={style['add-button']}
+            onClick={() => navigate('/data_submission_form')}
+            variant="outlined"
+            sx={{ marginTop: '0 !important', marginLeft: '0 !important' }}
+          >
+            <div style={{ verticalAlign: 'center', color: '#0948B7' }}>
+              <span
+                aria-hidden="true"
+                style={{ marginRight: '5px' }}
+                className="glyphicon glyphicon-plus-sign"
+              >
+              </span>
+              ADD DATASET
+            </div>
+          </Button>
+          <SearchBar
+            handleSearchChange={handleSearchChange}
+            searchRef={searchRef}
+          />
+        </div>
       </div>
       <DACDatasetsTable
         datasets={filteredList}

@@ -6,7 +6,7 @@ import { Styles } from '../libs/theme'
 import DatasetUpdate from '../components/data_update/DatasetUpdate'
 import { DataSet } from '../libs/ajax/DataSet'
 import { useParams } from 'react-router-dom'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export const DatasetUpdateForm = () => {
   const params = useParams()

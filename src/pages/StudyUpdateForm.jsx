@@ -14,7 +14,7 @@ import { DataSet } from '../libs/ajax/DataSet'
 import { Storage } from '../libs/storage'
 import { set } from 'lodash'
 import { useNavigate, useParams } from 'react-router-dom'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export const StudyUpdateForm = () => {
   const navigate = useNavigate()

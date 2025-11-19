@@ -11,7 +11,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DAAUtils } from 'src/utils/DAAUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 const CHAIR = 'Chairperson'
 const ADMIN = 'Admin'

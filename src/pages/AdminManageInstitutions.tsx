@@ -61,7 +61,7 @@ export default function AdminManageInstitutions() {
     <div style={Styles.PAGE} data-cy="admin-manage-institutions">
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <TableHeaderSection
-          icon={manageInstitutionsIcon}
+          icon={{ src: manageInstitutionsIcon }}
           title="Manage Institutions"
           description="Select and manage Institutions"
         />

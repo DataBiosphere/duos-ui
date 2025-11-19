@@ -13,7 +13,7 @@ import SearchBar from 'src/components/SearchBar'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 const filterFn = getSearchFilterFunctions().darCollections
 
@@ -146,7 +146,7 @@ export default function ResearcherConsole() {
             title="My Data Access Requests"
             description="Select and manage Data Access Requests and Drafts below"
           />
-          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '18px', marginLeft: '1.5em' }}>
+          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify' }}>
             By submitting a DAR in DUOS you agree to the
             {' '}
             <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>

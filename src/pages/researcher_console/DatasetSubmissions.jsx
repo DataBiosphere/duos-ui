@@ -8,7 +8,7 @@ import { DataSet } from '../../libs/ajax/DataSet'
 import DatasetSubmissionsTable from './DatasetSubmissionsTable'
 import { Storage } from '../../libs/storage'
 import styles from './DatasetTerms.module.css'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function DatasetSubmissions() {
   const [terms, setTerms] = useState([])
@@ -120,22 +120,20 @@ export default function DatasetSubmissions() {
   return (
     <div style={Styles.PAGE}>
       <div>
-        <div>
-          <TableHeaderSection
-            title="My Data Submissions"
-            description="View the status of datasets registered in DUOS"
+        <TableHeaderSection
+          title="My Data Submissions"
+          description="View the status of datasets registered in DUOS"
+        />
+        <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
+          <p>DUOS accepts registration of either <b>Open Access</b> or <b>Controlled Access data</b>.</p>
+          <p>Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to [ex. dbGaP, EGA etc]. To register controlled access data with a DAC in DUOS, may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.</p>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', marginLeft: '2em', marginTop: '1rem' }}>
+          <div>{addDatasetButton}</div>
+          <SearchBar
+            handleSearchChange={handleSearchChange}
+            searchRef={searchRef}
           />
-          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
-            <p>DUOS accepts registration of either <b>Open Access</b> or <b>Controlled Access data</b>.</p>
-            <p>Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to [ex. dbGaP, EGA etc]. To register controlled access data with a DAC in DUOS, may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.</p>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', marginLeft: '2em', marginTop: '1rem' }}>
-            <div>{addDatasetButton}</div>
-            <SearchBar
-              handleSearchChange={handleSearchChange}
-              searchRef={searchRef}
-            />
-          </div>
         </div>
       </div>
       <div className={styles['term-table-container']}>

@@ -15,7 +15,7 @@ import NihAnvilUse from 'src/pages/data_submission/NihAnvilUse'
 import { uniqueValidator } from 'src/components/forms/formValidation'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton.js'
 import { useNavigate } from 'react-router-dom'
-import TableHeaderSection from 'src/components/TableHeaderSection.jsx'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export const DataSubmissionForm = () => {
   const navigate = useNavigate()
