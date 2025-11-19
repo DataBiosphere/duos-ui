@@ -4,7 +4,6 @@ import SearchBar from 'src/components/SearchBar'
 import { Collections } from 'src/libs/ajax/Collections'
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
-import lockIcon from 'src/images/lock-icon.png'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
 import {
   cancelCollectionFn,
@@ -14,6 +13,7 @@ import {
 } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function AdminManageDarCollections() {
   usePageTitle('DAR Requests')
@@ -55,19 +55,10 @@ export default function AdminManageDarCollections() {
   return (
     <div style={Styles.PAGE}>
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-          <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} />
-          </div>
-          <div style={Styles.HEADER_CONTAINER}>
-            <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>
-              All Data Access Requests
-            </div>
-            <div style={{ fontFamily: 'Montserrat', fontSize: '1.6rem' }}>
-              List of all Data Access Requests saved in DUOS
-            </div>
-          </div>
-        </div>
+        <TableHeaderSection
+          title="All Data Access Requests"
+          description="List of all Data Access Requests saved in DUOS"
+        />
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
       {responsiveColumns.length > 0 && (

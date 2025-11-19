@@ -2,11 +2,11 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 
 import { Notifications } from '../libs/utils'
-import lockIcon from '../images/lock-icon.png'
 import { Styles } from '../libs/theme'
 import DatasetUpdate from '../components/data_update/DatasetUpdate'
 import { DataSet } from '../libs/ajax/DataSet'
 import { useParams } from 'react-router-dom'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export const DatasetUpdateForm = () => {
   const params = useParams()
@@ -31,19 +31,10 @@ export const DatasetUpdateForm = () => {
   return !failedInit && (
     <div style={Styles.PAGE}>
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-          <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} />
-          </div>
-          <div style={Styles.HEADER_CONTAINER}>
-            <div style={Styles.TITLE}>
-              Dataset Update Form
-              <div style={Styles.MEDIUM_DESCRIPTION}>
-                This is an easy way to update a dataset in DUOS!
-              </div>
-            </div>
-          </div>
-        </div>
+        <TableHeaderSection
+          title="Dataset Update Form"
+          description="This is an easy way to update a dataset in DUOS!"
+        />
       </div>
 
       <form style={{ margin: 'auto', maxWidth: 800 }}>

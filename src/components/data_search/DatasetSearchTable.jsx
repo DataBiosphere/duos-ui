@@ -232,7 +232,7 @@ export const DatasetSearchTable = (props) => {
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
+        <TableHeaderSection icon={{ src: icon }} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
         <Box sx={{ paddingTop: '2em', paddingLeft: '2em' }}>
           <SearchBar
             handleSearchChange={handleSearchChange}

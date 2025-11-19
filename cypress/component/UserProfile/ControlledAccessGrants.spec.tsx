@@ -13,8 +13,11 @@ describe('ControlledAccessGrants', () => {
 
     mount(<ControlledAccessGrants />)
 
-    cy.contains('h1', 'Controlled Access Grants').should('be.visible')
-    cy.contains('p', 'Your current dataset approvals').should('be.visible')
+    cy.get('[data-cy="table-header-title"]').should('exist')
+    cy.get('[data-cy="table-header-title"]').should('contain', 'Controlled Access Grants')
+
+    cy.get('[data-cy="table-header-description"]').should('exist')
+    cy.get('[data-cy="table-header-description"]').should('contain', 'Your current dataset approvals')
 
     // Check if all the expected table headers are present
     cy.get('table').should('exist')

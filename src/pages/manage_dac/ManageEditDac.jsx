@@ -12,6 +12,7 @@ import backArrowIcon from 'src/images/back_arrow.svg'
 import { Spinner } from 'src/components/Spinner'
 import { Storage } from 'src/libs/storage'
 import { Styles } from 'src/libs/theme'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -257,35 +258,19 @@ export default function ManageEditDac() {
       : (
           <div className="container container-wide">
             <div className="row no-margin">
-              <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-                <Link
-                  id="link_manage_dac"
-                  to="/manage_dac"
-                  className="navbar-brand"
-                  style={{ paddingRight: '16px' }}
-                >
-                  <img id="back-arrow-icon" src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
-                </Link>
-                <div style={Styles.ICON_CONTAINER}>
-                  <img id="edit-dac-icon" src={editDACIcon} style={Styles.HEADER_IMG} alt="Edit" />
-                </div>
-                <div style={Styles.HEADER_CONTAINER}>
-                  <div
-                    className="common-color"
-                    style={{ fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration: 'underline' }}
-                  >
-                    {dacText}
-                  </div>
-                  <div style={{
-                    fontFamily: 'Montserrat',
-                    fontWeight: 600,
-                    fontSize: '2.8rem',
-                  }}
-                  >
-                    {dacId === undefined ? 'Create DAC' : fetchedDac?.name}
-                  </div>
-                </div>
-              </div>
+              <Link
+                id="link_manage_dac"
+                to="/manage_dac"
+                className="navbar-brand"
+                style={{ paddingRight: '16px', marginTop: '3rem' }}
+              >
+                <img id="back-arrow-icon" src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
+              </Link>
+              <TableHeaderSection
+                icon={editDACIcon}
+                title={dacText}
+                description={dacId === undefined ? 'Create DAC' : fetchedDac?.name}
+              />
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '2rem' }}>
                 <form
                   className="form-horizontal css-form"

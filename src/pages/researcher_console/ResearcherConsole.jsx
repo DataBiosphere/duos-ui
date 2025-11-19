@@ -6,7 +6,6 @@ import { Collections } from 'src/libs/ajax/Collections'
 import {
   DarCollectionTable,
 } from 'src/components/dar_collection_table/DarCollectionTable'
-import accessIcon from 'src/images/lock-icon.png'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
@@ -14,6 +13,7 @@ import SearchBar from 'src/components/SearchBar'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 const filterFn = getSearchFilterFunctions().darCollections
 
@@ -141,30 +141,25 @@ export default function ResearcherConsole() {
   return (
     <div style={Styles.PAGE}>
       <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0px -3%' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-          <div style={Styles.ICON_CONTAINER}>
-            <img id="access-icon" src={accessIcon} alt="Access Icon" style={Styles.HEADER_IMG} />
-          </div>
-          <div style={Styles.HEADER_CONTAINER}>
-            <div style={Styles.TITLE}>My Data Access Requests</div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, { fontSize: '18px' })}>
-              Select and manage Data Access Requests and Drafts below
-            </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, { fontSize: '18px' })}>
-              By submitting a DAR in DUOS you agree to the
-              {' '}
-              <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>
-                Broad
-              </a>
-              {' '}
-              and
-              {' '}
-              <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>
-                NIH
-              </a>
-              {' '}
-              Library Card Agreements.
-            </div>
+        <div>
+          <TableHeaderSection
+            title="My Data Access Requests"
+            description="Select and manage Data Access Requests and Drafts below"
+          />
+          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify' }}>
+            By submitting a DAR in DUOS you agree to the
+            {' '}
+            <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>
+              Broad
+            </a>
+            {' '}
+            and
+            {' '}
+            <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>
+              NIH
+            </a>
+            {' '}
+            Library Card Agreements.
           </div>
         </div>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
