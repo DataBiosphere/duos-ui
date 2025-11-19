@@ -1,7 +1,7 @@
 import { isNil, isEmpty } from 'lodash'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
-import { searchOntologies } from 'src/libs/utils'
+import { findOntologyTerms, searchOntologies } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { DacPicker } from '../forms/DacPicker'
@@ -66,9 +66,28 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
   const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup?.otherPrimary || undefined)
 
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup?.diseaseSpecificUse))
-  const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>(
-    (consentGroup?.diseaseSpecificUse || []).map((d: string) => ({ id: d, displayText: d })),
-  )
+  const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    const loadOntologyTerms = async () => {
+      if (!isEmpty(consentGroup?.diseaseSpecificUse)) {
+        try {
+          const terms = await findOntologyTerms(consentGroup!.diseaseSpecificUse)
+          if (mounted && Array.isArray(terms)) {
+            setSelectedDiseases(terms)
+          }
+        }
+        catch (_e) {
+          // ignore errors and leave selectedDiseases as empty array
+        }
+      }
+    }
+    loadOntologyTerms()
+    return () => {
+      mounted = false
+    }
+  }, [consentGroup?.diseaseSpecificUse])
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup?.mor))
   const [morText, setMORText] = useState(consentGroup?.mor || undefined)

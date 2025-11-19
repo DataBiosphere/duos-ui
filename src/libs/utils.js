@@ -484,8 +484,25 @@ export const searchOntologies = (query, callback) => {
       options = items.map(function (item) {
         return { displayText: item.label, id: item.id }
       })
+      if (isEmpty(options)) {
+        options = [{ displayText: query, id: query }]
+      }
       callback(options)
     })
+}
+
+export const findOntologyTerms = async (ids) => {
+  const urls = ids.filter(id => id.startsWith('http'))
+  const nonUrls = ids.filter(id => !id.startsWith('http'))
+  const items = await DAR.searchOntologyIdList(urls)
+  const foundEntries = items.map(function (item) {
+    return { displayText: item.label, id: item.id }
+  })
+
+  for (const entry of nonUrls) {
+    foundEntries.push({ displayText: entry, id: entry })
+  }
+  return foundEntries
 }
 
 export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
