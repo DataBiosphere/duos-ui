@@ -8,11 +8,11 @@ import { DACDatasetsTable } from '../components/dac_dataset_table/DACDatasetsTab
 import { DACDatasetTableColumnOptions } from '../components/dac_dataset_table/DACDatasetConstants.js'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from '../libs/utils'
 import { consoleTypes } from '../components/dac_dataset_table/DACDatasetTableCellData'
-import style from './DACDatasets.module.css'
-import { Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton.tsx'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
@@ -73,26 +73,17 @@ export default function DACDatasets() {
           title="My DAC's Datasets"
           description="View the status of datasets submitted to your Data Access Committee"
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', marginLeft: '2em', marginTop: '1rem' }}>
-          <Button
-            className={style['add-button']}
-            onClick={() => navigate('/data_submission_form')}
-            variant="outlined"
-            sx={{ marginTop: '0 !important', marginLeft: '0 !important' }}
-          >
-            <div style={{ verticalAlign: 'center', color: '#0948B7' }}>
-              <span
-                aria-hidden="true"
-                style={{ marginRight: '5px' }}
-                className="glyphicon glyphicon-plus-sign"
-              >
-              </span>
-              ADD DATASET
-            </div>
-          </Button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', margin: '1rem -5rem 0 2rem' }}>
           <SearchBar
             handleSearchChange={handleSearchChange}
             searchRef={searchRef}
+          />
+          <StudyAssetAddButton
+            id="add-dataset-btn"
+            label="ADD DATASET"
+            onClick={() => navigate('/data_submission_form')}
+            icon={<AddCircleOutlineIcon />}
+            className="button button-blue"
           />
         </div>
       </div>
