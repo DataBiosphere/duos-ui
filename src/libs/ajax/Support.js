@@ -29,7 +29,7 @@ export const Support = {
   uploadAttachment: async (file) => {
     const url = `${await getApiUrl()}/support/upload`
     try {
-      return await fetchPost(url, file, { headers: { 'Content-Type': 'application/binary' } })
+      return await fetchPost(url, file, { headers: { 'Content-Type': 'application/binary' }, isMultipart: true })
     }
     catch (error) {
       throw extractConsentError(error) || new Error(extractError(error))
