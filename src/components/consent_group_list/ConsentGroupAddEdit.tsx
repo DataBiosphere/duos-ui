@@ -1,7 +1,7 @@
 import { isNil, isEmpty } from 'lodash'
 import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
-import { findOntologyTerms, searchOntologies } from 'src/libs/utils'
+import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { DacPicker } from '../forms/DacPicker'
@@ -104,6 +104,13 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     setShowOtherSecondaryText(false)
     setShowGSText(false)
     setShowOtherPrimaryText(false)
+
+    if (value === 'open') {
+      setOtherPrimaryText(undefined)
+      setShowOtherPrimaryText(false)
+      setSelectedDiseases([])
+      setShowDiseaseSpecificUseSearchbar(false)
+    }
     setValidation(calcErrors(current))
   }
 
@@ -128,6 +135,9 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     if (!current.diseaseSpecificUse) {
       setSelectedDiseases([])
     }
+    setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse')
+    setShowOtherPrimaryText(key === 'otherPrimary')
+
     setValidation(calcErrors(current))
   }
 
@@ -297,7 +307,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         isMulti={true}
                         isCreatable={true}
                         isAsync={true}
-                        loadOptions={searchOntologies}
+                        loadOptions={searchOntologyTerm}
                         id="diseaseSpecificUseText"
                         name="diseaseSpecificUse"
                         validators={[FormValidators.REQUIRED]}

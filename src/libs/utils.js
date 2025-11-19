@@ -482,6 +482,25 @@ export const searchOntologies = (query, callback) => {
   DAR.getAutoCompleteOT(query).then(
     (items) => {
       options = items.map(function (item) {
+        return {
+          key: item.id,
+          value: item.id,
+          label: item.label,
+          item: item,
+        }
+      })
+      if (isEmpty(options)) {
+        options = [{ key: query, value: query, label: query, id: query }]
+      }
+      callback(options)
+    })
+}
+
+export const searchOntologyTerm = async (query, callback) => {
+  let options = []
+  DAR.getAutoCompleteOT([query]).then(
+    (items) => {
+      options = items.map(function (item) {
         return { displayText: item.label, id: item.id }
       })
       if (isEmpty(options)) {
@@ -500,7 +519,7 @@ export const findOntologyTerms = async (ids) => {
   })
 
   for (const entry of nonUrls) {
-    foundEntries.push({ displayText: entry, id: entry })
+    foundEntries.push({ key: entry, value: entry, label: entry, id: entry })
   }
   return foundEntries
 }
