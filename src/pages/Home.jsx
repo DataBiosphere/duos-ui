@@ -189,7 +189,7 @@ const Home = (props) => {
 
               <div style={logoGrid} className="logo-grid">
                 {featuredLibraries.map((library) => {
-                  const libraryPath = `/datalibrary/${library.key}`
+                  const libraryPath = library.key.startsWith('/') ? library.key : `/datalibrary/${library.key}`
                   const libraryName = library.title.replace(' Data Library', '')
                   const tooltipText = isLogged
                     ? libraryName
