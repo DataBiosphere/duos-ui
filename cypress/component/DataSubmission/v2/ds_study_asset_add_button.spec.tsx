@@ -119,4 +119,60 @@ describe('StudyAssetAddButton', () => {
     cy.get('#test-button').should('have.css', 'margin-top', '0px')
     cy.get('#test-button').should('have.css', 'margin-bottom', '5px')
   })
+
+  it('renders with custom icon', () => {
+    const CustomIcon = () => <span data-testid="custom-icon">★</span>
+
+    mount(
+      <StudyAssetAddButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+        icon={<CustomIcon />}
+      />,
+    )
+
+    cy.get('[data-testid="custom-icon"]').should('exist')
+    cy.get('[data-testid="custom-icon"]').should('contain.text', '★')
+  })
+
+  it('renders with default AddIcon when icon prop not provided', () => {
+    mount(
+      <StudyAssetAddButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+      />,
+    )
+
+    cy.get('#test-button').find('svg').should('exist')
+    cy.get('#test-button').find('[data-testid="AddIcon"]').should('exist')
+  })
+
+  it('applies custom className', () => {
+    mount(
+      <StudyAssetAddButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+        className="custom-class another-class"
+      />,
+    )
+
+    cy.get('#test-button').should('have.class', 'custom-class')
+    cy.get('#test-button').should('have.class', 'another-class')
+  })
+
+  it('applies default className when not provided', () => {
+    mount(
+      <StudyAssetAddButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+      />,
+    )
+
+    cy.get('#test-button').should('have.class', 'button')
+    cy.get('#test-button').should('have.class', 'button-white')
+  })
 })
