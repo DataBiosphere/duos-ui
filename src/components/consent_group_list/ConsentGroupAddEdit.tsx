@@ -1,5 +1,5 @@
 import { isNil, isEmpty } from 'lodash'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
