@@ -22,8 +22,11 @@ import DescriptionIcon from '@mui/icons-material/Description'
 import MonitorIcon from '@mui/icons-material/Monitor'
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import StorageIcon from '@mui/icons-material/Storage'
+import DatasetIcon from '@mui/icons-material/Dataset'
 import LaptopMacIcon from '@mui/icons-material/LaptopMac'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
+import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
+import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
 
 export interface StudyAssetManagementProps {
   study: Study
@@ -50,16 +53,29 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
   const clinicalTrials = study.assets?.clinicalTrials || []
   const intellectualProperties = study.assets?.intellectualProperty || []
   const fundingResources = study.assets?.funding || []
+  const consentGroups = study.assets?.consentGroups || []
 
   return (
     <div className="data-submitter-section">
       <h2>Study Assets</h2>
       <p>Add datasets, models, workspaces, and other resources associated with this study</p>
 
-      {/*
-        TODO: DT-2382: Add DatasetList component here
-        */}
-
+      <ConsentGroupList
+        consentGroups={consentGroups}
+        onConsentGroupChange={(consentGroups: ConsentGroup2[]) => onAssetChange('consentGroups', consentGroups)}
+        disabled={false}
+        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+          <StudyAsset
+            config={{
+              icon: <DatasetIcon fontSize="large" />,
+              title: 'Datasets',
+              description: 'Add datasets associated with this study',
+              children: content,
+              button: button,
+            }}
+          />
+        )}
+      />
       <AiModelList
         aiModels={models}
         onAiModelsChange={(models: AiModel[]) => onAssetChange('models', models)}
