@@ -3,7 +3,7 @@ import { FundingResource } from 'src/types/model'
 import { FundingResourceAddEdit } from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import FundingResourceRow from 'src/components/funding_resource_list/FundingResourceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface FundingResourceListProps {
   readonly fundingResources: FundingResource[]
@@ -41,7 +41,7 @@ export default function FundingResourceList(props: FundingResourceListProps): Re
   const getValidationState = () => validation?.fundingResources
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-funding-btn"
       label="Add Funding"
       onClick={() => setShowAddEdit(true)}

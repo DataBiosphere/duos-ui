@@ -11,7 +11,7 @@ import { consoleTypes } from '../components/dac_dataset_table/DACDatasetTableCel
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton.tsx'
+import AddObjectButton from 'src/components/AddObjectButton.tsx'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 export default function DACDatasets() {
@@ -78,7 +78,7 @@ export default function DACDatasets() {
             handleSearchChange={handleSearchChange}
             searchRef={searchRef}
           />
-          <StudyAssetAddButton
+          <AddObjectButton
             id="add-dataset-btn"
             label="ADD DATASET"
             onClick={() => navigate('/data_submission_form')}

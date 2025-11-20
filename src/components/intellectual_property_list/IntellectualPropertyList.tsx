@@ -3,7 +3,7 @@ import { IntellectualProperty } from 'src/types/model'
 import { IntellectualPropertyAddEdit } from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
 import IntellectualPropertyRow from 'src/components/intellectual_property_list/IntellectualPropertyRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface IntellectualPropertyListProps {
   readonly intellectualProperties: IntellectualProperty[]
@@ -41,7 +41,7 @@ export default function IntellectualPropertyList(props: IntellectualPropertyList
   const getValidationState = () => validation?.intellectualProperties
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-ip-btn"
       label="Add IP"
       onClick={() => setShowAddEdit(true)}

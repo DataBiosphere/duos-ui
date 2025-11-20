@@ -11,7 +11,7 @@ interface StudyAssetAddButtonProps {
   readonly className?: string
 }
 
-export default function StudyAssetAddButton(props: StudyAssetAddButtonProps): React.JSX.Element {
+export default function AddObjectButton(props: StudyAssetAddButtonProps): React.JSX.Element {
   const {
     id,
     label,

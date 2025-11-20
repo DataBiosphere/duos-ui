@@ -3,7 +3,7 @@ import PublicationAddEdit from './PublicationAddEdit'
 import PublicationRow from './PublicationRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { Publication } from 'src/types/model'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface PublicationListProps {
   readonly publications: Publication[]
@@ -41,7 +41,7 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
   const getValidationState = () => validation?.publications
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-publication-btn"
       label="Add Publication"
       onClick={() => setShowAddEdit(true)}

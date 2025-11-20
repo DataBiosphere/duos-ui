@@ -9,7 +9,7 @@ import DatasetSubmissionsTable from './DatasetSubmissionsTable'
 import { Storage } from 'src/libs/storage'
 import styles from './DatasetTerms.module.css'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton.tsx'
 
 export default function DatasetSubmissions() {
   const [terms, setTerms] = useState([])
@@ -103,7 +103,7 @@ export default function DatasetSubmissions() {
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}
         />
-        <StudyAssetAddButton
+        <AddObjectButton
           id="add-dataset-btn"
           label="ADD DATASET"
           onClick={() => navigate('/data_submission_form')}

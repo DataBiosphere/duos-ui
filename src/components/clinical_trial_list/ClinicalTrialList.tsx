@@ -8,7 +8,7 @@ import {
   parseLegacyPhase,
   parseLegacyInterventionType,
 } from 'src/utils/ClinicalTrialEnumUtils'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface ClinicalTrialListProps {
   readonly clinicalTrials: ClinicalTrial[]
@@ -53,7 +53,7 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
   const getValidationState = () => validation?.clinicalTrials
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-clinical-trial-btn"
       label="Add Clinical Trial"
       onClick={() => setShowAddEdit(true)}

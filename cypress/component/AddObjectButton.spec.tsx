@@ -1,13 +1,13 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
-describe('StudyAssetAddButton', () => {
+describe('AddObjectButton', () => {
   it('renders with required props', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={onClickSpy}
@@ -23,7 +23,7 @@ describe('StudyAssetAddButton', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={onClickSpy}
@@ -38,7 +38,7 @@ describe('StudyAssetAddButton', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={onClickSpy}
@@ -53,7 +53,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies correct styling when disabled', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -66,7 +66,7 @@ describe('StudyAssetAddButton', () => {
 
   it('shows validation error styling', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -80,7 +80,7 @@ describe('StudyAssetAddButton', () => {
 
   it('shows default styling without validation error', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -94,7 +94,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies button-white class', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -107,7 +107,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies correct layout styles', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -124,7 +124,7 @@ describe('StudyAssetAddButton', () => {
     const CustomIcon = () => <span data-testid="custom-icon">★</span>
 
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -138,7 +138,7 @@ describe('StudyAssetAddButton', () => {
 
   it('renders with default AddIcon when icon prop not provided', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -151,7 +151,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies custom className', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -165,7 +165,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies default className when not provided', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
