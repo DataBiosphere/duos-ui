@@ -15,10 +15,19 @@ div.markdown-body {
   font-size: 24px;
 }
 
+.markdown-body h3 {
+    color: #333F52;
+    font-size: 18px;
+}
+
 .markdown-body ol ol {
   list-style-type: lower-roman;
 }
 
 .markdown-body p {
   margin-bottom: 1.5rem;
+}
+
+.markdown-body div {
+    margin-bottom: 1.5rem;
 }
