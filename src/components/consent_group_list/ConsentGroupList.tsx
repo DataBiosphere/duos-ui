@@ -3,7 +3,7 @@ import { ConsentGroupAddEdit } from 'src/components/consent_group_list/ConsentGr
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import ConsentGroupRow from 'src/components/consent_group_list/ConsentGroupRow'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface ConsentGroupListProps {
   readonly consentGroups: ConsentGroup2[]
@@ -41,7 +41,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
   const getValidationState = () => validation?.consentGroups
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-consent-group-btn"
       label="Add Dataset"
       onClick={() => setShowAddEdit(true)}
