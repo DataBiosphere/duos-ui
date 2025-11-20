@@ -4,7 +4,8 @@ import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } 
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
-import { DacPicker } from '../forms/DacPicker'
+import { DacPicker } from 'src/components/forms/DacPicker'
+import { FileInput } from 'src/components/forms/FileInput'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
@@ -39,7 +40,7 @@ const makeError = (message: string): ValidationError => ({ valid: true, failed: 
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
-type ConsentGroupFieldValue = string | string[] | undefined | number
+type ConsentGroupFieldValue = string | string[] | undefined | number | File
 
 interface FormFieldChange {
   key: string
@@ -624,6 +625,20 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
             defaultValue={current?.numberOfParticipants}
             onChange={onChange}
             validation={validation.numberOfParticipants}
+          />
+        </div>
+        <div className="row" style={{ marginTop: 20 }}>
+          <FileInput
+            description="If an Institutional Certification for this consent group exists, please upload it here"
+            id="nihInstituionalCertificationFile"
+            defaultValue={current.nihInstitutionalCertificationFile}
+            onAddFile={function (file: File, id: string): void {
+              onChange({ key: id, value: file })
+            }}
+            onDeleteFile={function (id: string): void {
+              onChange({ key: id, value: undefined })
+            }}
+            title="NIH Institutional Certification"
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
