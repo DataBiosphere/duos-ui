@@ -43,6 +43,7 @@ export interface FileType {
 
 export const selectedPrimaryGroup = (consentGroup: ConsentGroup) => {
   if (isNil(consentGroup)) return undefined
+  if (isNil(consentGroup)) return undefined
   if (!isNil(consentGroup.generalResearchUse) && consentGroup.generalResearchUse) {
     return 'generalResearchUse'
   }

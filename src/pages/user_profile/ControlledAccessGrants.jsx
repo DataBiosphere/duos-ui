@@ -4,6 +4,8 @@ import SortableTable from 'src/components/sortable_table/SortableTable'
 import { User } from 'src/libs/ajax/User'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import TableHeaderSection from 'src/components/TableHeaderSection.tsx'
+import { Styles } from 'src/libs/theme.js'
 
 const headCells = [
   {
@@ -76,26 +78,13 @@ export default function ControlledAccessGrants() {
   }, [])
 
   return (
-    <div style={{ margin: '1rem 5rem' }}>
-      <h1
-        style={{
-          color: '#01549F',
-          fontSize: '20px',
-          fontWeight: '600',
-        }}
-      >
-        Controlled Access Grants
-      </h1>
-      <p
-        style={{
-          color: '#000',
-          fontSize: '16px',
-          fontWeight: '400',
-        }}
-      >
-        Your current dataset approvals
-      </p>
-      <div style={{ marginTop: '20px' }} />
+    <div style={Styles.PAGE}>
+      <div style={{ marginBottom: '2rem' }}>
+        <TableHeaderSection
+          title="Controlled Access Grants"
+          description="Your current dataset approvals"
+        />
+      </div>
       <SortableTable rows={rows} headCells={headCells} />
     </div>
   )

@@ -11,6 +11,7 @@ import DarTableSkeletonLoader from 'src/components/TableSkeletonLoader'
 import { Link } from 'react-router-dom'
 import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function AdminManageInstitutions() {
   usePageTitle('Institutions')
@@ -59,15 +60,11 @@ export default function AdminManageInstitutions() {
   return (
     <div style={Styles.PAGE} data-cy="admin-manage-institutions">
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION as React.CSSProperties}>
-          <div style={Styles.ICON_CONTAINER}>
-            <img alt="Admin Manage Institutions" id="lock-icon" src={manageInstitutionsIcon} style={Styles.HEADER_IMG} />
-          </div>
-          <div style={Styles.HEADER_CONTAINER as React.CSSProperties}>
-            <div style={Styles.TITLE}>Manage Institutions</div>
-            <div style={Styles.SMALL}>Select and manage Institutions</div>
-          </div>
-        </div>
+        <TableHeaderSection
+          icon={{ src: manageInstitutionsIcon }}
+          title="Manage Institutions"
+          description="Select and manage Institutions"
+        />
         <SearchBar
           handleSearchChange={handleSearchChange}
           currentPage={currentPage}

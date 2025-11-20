@@ -13,13 +13,13 @@ import { Styles } from 'src/libs/theme'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
 import SimpleTable from 'src/components/SimpleTable'
-import lockIcon from 'src/images/lock-icon.png'
 import { LibraryCard as LibraryCardAPI } from 'src/libs/ajax/LibraryCard'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { Delete } from '@mui/icons-material'
 import TableIconButton from 'src/components/TableIconButton'
 import { LibraryCard } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export interface LibraryCardTableProps {
   libraryCards?: LibraryCard[]
@@ -290,29 +290,10 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   return (
     <div data-cy="manage-library-card-table" style={Styles.PAGE}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div
-          className="left-header-section"
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            paddingTop: '3rem',
-          }}
-        >
-          <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} alt="Lock icon" />
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-          >
-            <div style={Styles.TITLE}>Manage Library Cards</div>
-            <div style={({ ...Styles.MEDIUM_DESCRIPTION, fontSize: '18px' })}>
-              Select and manage Library
-              Cards
-            </div>
-          </div>
-        </div>
+        <TableHeaderSection
+          title="Manage Library Cards"
+          description="Select and manage Library Cards"
+        />
         <SearchBar
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}

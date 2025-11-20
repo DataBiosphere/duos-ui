@@ -95,17 +95,16 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route element={<EnvRoute env={envGroups.NON_PROD} />}>
             <Route path="/translate" element={<Translator />} />
           </Route>
-          {/*  NOTE: Previous support for this path is no longer allowed as users cannot select datasets from this form */}
-          <Route path="/dar_application" element={<NotFound />} />
         </Route>
-        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter]} />}>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter, USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
           <Route path="/data_submission_form" element={<DataSubmissionForm />} />
           <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
-            <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
+            <Route path="/data_submission_form2" element={<DataSubmissionFormV2 />}>
               <Route path=":studyId" element={<DataSubmissionFormV2 />} />
             </Route>
           </Route>
+          <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
           <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member, USER_ROLES.signingOfficial, USER_ROLES.chairperson]} />}>
@@ -128,14 +127,8 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
         <Route path="/chair_console" element={<ChairConsole />} />
         <Route path="/dac_datasets" element={<DACDatasets />} />
-        <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
-        <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
-        <Route path="/data_submission_form" element={<DataSubmissionForm />} />
-        <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
-          <Route path=":studyId" element={<DataSubmissionFormV2 />} />
-        </Route>
-        <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
-        {/* NOTE: Previous support for Chairperson adding DACs should not have been allowed */}
+      </Route>
+      <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
         <Route path="/manage_dac" element={<ManageDac />} />
         <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
         <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
@@ -151,35 +144,9 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
         <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
         <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
-        <Route path="/manage_dac" element={<ManageDac />} />
-        <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
-        <Route path="/manage_edit_dac" element={<ManageEditDac />}>
-          <Route path=":dacId" element={<ManageEditDac />} />
-        </Route>
-        <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
         <Route path="/manage_add_dac" element={<ManageEditDac />} />
-        <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
-        <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
-        <Route path="/data_submission_form" element={<DataSubmissionForm />} />
-        <Route path="/data_submission_form2/" element={<DataSubmissionFormV2 />}>
-          <Route path=":studyId" element={<DataSubmissionFormV2 />} />
-        </Route>
-        <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
-        <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
-        <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
-        {DAAUtils.isEnabled()
-          && (
-            <>
-              <Route path="/manage_edit_dac_daa" element={<EditDac />}>
-                <Route path=":dacId" element={<EditDac />} />
-              </Route>
-              <Route path="/manage_add_dac_daa" element={<EditDac />} />
-              <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
-              <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
-            </>
-          )}
+        {DAAUtils.isEnabled() && <Route path="/manage_add_dac_daa" element={<EditDac />} />}
       </Route>
-      {/* NOTE: Previous support dataset study permalink routes is now handled in NotFound */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
