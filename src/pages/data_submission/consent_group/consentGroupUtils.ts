@@ -9,6 +9,7 @@ export interface ConsentGroup {
 }
 export type AccessManagementType = 'controlled' | 'open' | 'external'
 export interface ConsentGroup2 {
+  nihInstituionalCertificationFile?: File
   name: string
   consentGroupName: string
   consentGroupId: string | number
