@@ -49,7 +49,7 @@ export default function CookiePolicy() {
         website will not work without these strictly necessary cookies.
       </div>
 
-      <h2>Controlling all Cookies</h2>
+      <h2>Controlling all cookies</h2>
       <div>In addition to the Cookie choices presented within our websites, you can also use your web browser to
         manage your Cookies. For example, your web browser will enable you to:
       <ul>
