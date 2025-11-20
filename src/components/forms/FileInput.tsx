@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ConfirmationDialog } from '../../components/modals/ConfirmationDialog'
-import { FormFieldTitle } from '../../components/forms/forms'
+import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
+import { FormFieldTitle } from 'src/components/forms/forms'
 
 export type FileInputProps = {
   description: string

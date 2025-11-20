@@ -4,8 +4,8 @@ import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } 
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
-import { DacPicker } from '../forms/DacPicker'
-import { FileInput } from '../forms/FileInput'
+import { DacPicker } from 'src/components/forms/DacPicker'
+import { FileInput } from 'src/components/forms/FileInput'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
@@ -631,7 +631,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
           <FileInput
             description="If an Institutional Certification for this consent group exists, please upload it here"
             id="nihInstituionalCertificationFile"
-            defaultValue={current.nihInstituionalCertificationFile}
+            defaultValue={current.nihInstitutionalCertificationFile}
             onAddFile={function (file: File, id: string): void {
               onChange({ key: id, value: file })
             }}
