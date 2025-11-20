@@ -56,8 +56,8 @@ describe('Home Page - Tests', function () {
       cy.get('@replaceState').should('be.called')
       cy.get('@scrollTo').should('be.called')
 
-      // URL should contain the redirectTo parameter
-      cy.location('search').should('include', 'redirectTo=%2Fdatalibrary%2F%2Fdatalibrary')
+      // URL should contain the redirectTo parameter (encoded /datalibrary)
+      cy.location('search').should('include', 'redirectTo=%2Fdatalibrary')
     })
   })
 
@@ -89,7 +89,7 @@ describe('Home Page - Tests', function () {
 
     it('has direct navigation links when logged in', function () {
       // Check first few featured libraries
-      cy.get('a[href="/datalibrary//datalibrary"]').should('exist')
+      cy.get('a[href="/datalibrary"]').should('exist')
       cy.get('a[href="/datalibrary/broad"]').should('exist')
       cy.get('a[href="/datalibrary/elwazi"]').should('exist')
     })

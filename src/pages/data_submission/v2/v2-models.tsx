@@ -10,6 +10,7 @@ import {
 } from 'src/types/model'
 import { StudyType } from 'src/components/forms/StudyType'
 import React from 'react'
+import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
 
 export type StudyPropertyType = 'Boolean' | 'String' | 'Number' | 'Date' | 'Json'
 
@@ -349,6 +350,7 @@ export interface Study {
   updateDate?: string // Date?
   updateUserId?: number
   assets?: {
+    consentGroups?: Array<ConsentGroup2>
     models?: Array<AiModel>
     workspaces?: Array<Workspace>
     publications?: Array<Publication>
