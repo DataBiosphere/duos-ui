@@ -7,8 +7,8 @@ export default function CookiePolicy() {
   return (
     <div className="markdown-body">
       <h1>Cookie Policy</h1>
-      <div>Last Updated: 07, November, 2025</div>
-      <div>This Cookie Policy relates to your use of <Link to="/">duos.org</Link></div>
+      <div>Last Updated: 7 November, 2025</div>
+      <div>This Cookie Policy relates to your use of <Link to="/">duos.org</Link> (&quot;DUOS&quot;)</div>
       <div>
         When you choose to accept or reject cookies in DUOS, your choices are valid for DUOS only. If you follow a link
         to another website, whether operated by us or a third party, you will need to make separate choices in relation
@@ -20,9 +20,10 @@ export default function CookiePolicy() {
       <h2>What are cookies?</h2>
       <div>
         Like most organisations, DUOS uses cookies, and similar technologies such as tracking pixels (referred
-        to in this policy together as &quot;cookies&quot;), to capture information about our website users (referred
-        to as &quot;you&quot;). A cookie is a small file of letters and numbers that is downloaded onto your computer
-        or device by a website, stored and used to send information back to that website.
+        to in this policy together as &quot;cookies&quot;), to capture information about our website users (which may
+        be individuals using DUOS independently or in their capacity as employees of an organization, in either case,
+        referred to as &quot;you&quot;). A cookie is a small file of letters and numbers that is downloaded onto your
+        computer or device by a website, stored and used to send information back to that website.
       </div>
       <div>
         Cookies help to make websites work. They can also improve the performance of a site and some provide
@@ -37,16 +38,19 @@ export default function CookiePolicy() {
 
       <h3>Strictly necessary cookies</h3>
       <div>
-        These cookies are necessary for our website to function and therefore cannot be switched off. We use them for
+        These cookies are necessary for a website to function and therefore cannot be switched off.  We use them for
         things like remembering your privacy settings, or your authentication state (meaning whether you are logged in
-        as an authenticated user).
+        as an authenticated user). DUOS uses authentication because some of the datasets on our website have special
+        access controls. Authentication (through your login provider) allows DUOS to know that you&#39;re logged in as
+        an authenticated user and are permitted to access the appropriate information and datasets.
       </div>
 
       <h2>Cookies consent and changing preferences</h2>
       <div>
         We will ask for your consent to place cookies on your computer or device, except where they are essential to
         make our website work. By using our website, you agree to the strictly necessary cookies. Some parts of our
-        website will not work without these strictly necessary cookies.
+        website will not work without these strictly necessary cookies. If you do not want to use the strictly
+        necessary cookies, you are free to stop accessing DUOS at any time.
       </div>
 
       <h2>Controlling all cookies</h2>
