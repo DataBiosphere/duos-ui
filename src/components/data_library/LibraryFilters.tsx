@@ -54,7 +54,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
       || filters.participantCount.max !== undefined
 
   return (
-    <Box sx={{ width: '14%', padding: '0 1em' }}>
+    <Box sx={{ width: '100%' }}>
       <Box
         sx={{
           display: 'flex',
@@ -84,7 +84,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
               {/* Access Management Filter */}
               <Accordion defaultExpanded>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">Access Management</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Access Management</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <FormGroup>
@@ -116,7 +116,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
               {/* Data Use Filter */}
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">Data Use</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Data Use</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <FormGroup>
@@ -146,7 +146,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
               {/* Data Type Filter */}
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">Data Type</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Data Type</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <FormGroup>
@@ -176,7 +176,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
               {/* DAC Filter */}
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">DAC</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>DAC</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <FormGroup>
@@ -205,7 +205,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
               {/* Participant Count Filter */}
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">Participants</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Participants</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
