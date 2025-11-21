@@ -7,10 +7,10 @@ import InputBase from '@mui/material/InputBase'
 import IconButton from '@mui/material/IconButton'
 
 interface SearchBarProps {
-  handleSearchChange: (value: string) => void
-  placeholder?: string
-  style?: React.CSSProperties
-  searchRef?: React.RefObject<HTMLInputElement>
+  readonly handleSearchChange: (value: string) => void
+  readonly placeholder?: string
+  readonly style?: React.CSSProperties
+  readonly searchRef?: React.RefObject<HTMLInputElement>
 }
 
 const Search = styled('div')(({ theme }) => ({
