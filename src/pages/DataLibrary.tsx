@@ -78,7 +78,7 @@ export const DataLibrary: React.FC = () => {
   }
 
   // Fetch data based on current state
-  const { data, isLoading, error } = useLibraryData(
+  const { data, isLoading, isFetching, error } = useLibraryData(
     libraryConfig,
     urlState.tab,
     urlState.filters,
@@ -227,7 +227,7 @@ export const DataLibrary: React.FC = () => {
           <LibraryDataGrid
             assetType={urlState.tab}
             data={data?.items || []}
-            loading={isLoading}
+            loading={isFetching}
             total={data?.total || 0}
             paginationModel={{
               page: urlState.page,

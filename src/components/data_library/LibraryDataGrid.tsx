@@ -111,6 +111,23 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
     return true
   }
 
+  // Show loading state when data is empty and loading
+  if (isEmpty(data) && loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '50vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  // Show empty state only when not loading and no data
   if (isEmpty(data) && !loading) {
     return (
       <Box
