@@ -21,94 +21,88 @@ export default function PrivacyPolicy() {
       </div>
       <h2>Information DUOS May Collect From You</h2>
       <ol>
-        <li>
-          Our primary goals in collecting information are to provide genomic information management and
+        <li>Our primary goals in collecting information are to provide genomic information management and
           analysis services to you, to improve our Site, features, content, and to run our business.
-          <ol>
-            <li>
-              Genomic Information That You Voluntarily Provide
-              <ul>
-                <li>DUOS collects and stores the genomic sequence data (DNA, RNA, etc), derived from
-                  humans or other organisms, that you submit to the Site along with metadata and other
-                  information related to such sequence data. You agree to and accept full
-                  responsibility for obtaining all necessary permissions and informed consents from
-                  the donors of all samples from which your submitted sequence data is derived.
-                </li>
-              </ul>
-            </li>
-            <li>HIPAA, Protected Health Information, and the Clinical Compliance Features
-              <ul>
-                <li>DUOS is not a Covered Entity as that term is defined in the Health Insurance
-                  Portability and Accountability Act of 1996, as amended, and its related regulations
-                  (collectively, &quot;HIPAA&quot;). On occasion, DUOS may agree in writing with a
-                  user to perform services for the user in the storing PHI. We recommend that such
-                  users enter into a formal agreement with DUOS/Firecloud.
-                </li>
-                <li>DUOS does offer clinical compliance features as part of its service
-                  (&quot;Compliance Features&quot;) for users who wish to upload, store, or otherwise
-                  transfer PHI, as well as users who are using the Site in connection with their
-                  clinical operations. Users who desire to upload, store, or otherwise transfer PHI
-                  using the Site must implement all of the required Clinical Features and must enter a
-                  formal agreement with Firecloud stating that. The uploading, storing, or
-                  transferring of PHI using the Site by users that have not implemented the Clinical
-                  Features is strictly prohibited. You agree that, unless you have implemented the
-                  Clinical Features, you will not upload, store, or otherwise transfer PHI using the
-                  Site.
-                </li>
-                <li>You acknowledge that this may require you, in some instances, to anonymize sequence
-                  data prior to uploading it to the Site. You further agree to indemnify and hold
-                  harmless DUOS of and from any and all claims, demands, losses, causes of action,
-                  damage, lawsuits, judgments, including attorneys&#39; fees and costs, arising out of
-                  or relating to your uploading, storing, or transferring of PHI without having fully
-                  implemented the Clinical Features.
-                </li>
-              </ul>
-            </li>
-            <li>
-              User Account Information/Personally Identifiable Information
-              <ul>
-                <li>When you register with us through the Site and during your use of the Site, we will
-                  ask you for personally-identifiable information, which is information about you that
-                  can be used to contact or identify you (&quot;Personal Information&quot;), such as:
-                  your name, company or organization name, title, e-mail address, postal address,
-                  telephone number.
-                </li>
-              </ul>
-            </li>
-            <li>
-              Cookies
-              <ul>
-                <li>We use cookies, tracking pixels, and other similar technologies to track activity on
-                  our Site and to enhance the functionality of our Site. Cookies are small data files
-                  that our web servers send to your browser and which get saved on the hard drive of
-                  the computer that you are using to access the Site. If you do not want to allow
-                  cookies on your computer, most browsers have a feature that allows you either to
-                  automatically decline cookies or to decline or accept particular cookies from
-                  particular web sites. If you choose to reject cookies from our Site, you may be
-                  unable to use certain Site services, features, and functionality. If you choose to
-                  accept cookies from us and our service providers, you are agreeing to let us and our
-                  service providers install cookies on your computer. See our cookie policy for more
-                  information on the cookies we use. To learn more about cookies in general, please
-                  visit <Link to="https://allaboutcookies.org/">https://allaboutcookies.org/</Link>.
-                </li>
-              </ul>
-            </li>
-            <li>
-              User Software and Reference Data
-              <ul>
-                <li>You may also be permitted to upload your own software and data, including reference
-                  genomes, to the Site in the course of using the Site. You agree to and accept full
-                  responsibility for obtaining all permissions, consents, and rights necessary for
-                  uploading and using any such software and data to and with the Site. The software
-                  you upload must comply with the DUOS &quot;Terms of Use Policy&quot;.
-                </li>
-              </ul>
-            </li>
-          </ol>
+        <ol>
+          <li>Genomic Information That You Voluntarily Provide
+            <ul>
+              <li>DUOS collects and stores the genomic sequence data (DNA, RNA, etc), derived from
+                humans or other organisms, that you submit to the Site along with metadata and other
+                information related to such sequence data. You agree to and accept full
+                responsibility for obtaining all necessary permissions and informed consents from
+                the donors of all samples from which your submitted sequence data is derived.
+              </li>
+            </ul>
+          </li>
+          <li>HIPAA, Protected Health Information, and the Clinical Compliance Features
+            <ul>
+              <li>DUOS is not a Covered Entity as that term is defined in the Health Insurance
+                Portability and Accountability Act of 1996, as amended, and its related regulations
+                (collectively, &quot;HIPAA&quot;). On occasion, DUOS may agree in writing with a
+                user to perform services for the user in the storing PHI. We recommend that such
+                users enter into a formal agreement with DUOS/Firecloud.
+              </li>
+              <li>DUOS does offer clinical compliance features as part of its service
+                (&quot;Compliance Features&quot;) for users who wish to upload, store, or otherwise
+                transfer PHI, as well as users who are using the Site in connection with their
+                clinical operations. Users who desire to upload, store, or otherwise transfer PHI
+                using the Site must implement all of the required Clinical Features and must enter a
+                formal agreement with Firecloud stating that. The uploading, storing, or
+                transferring of PHI using the Site by users that have not implemented the Clinical
+                Features is strictly prohibited. You agree that, unless you have implemented the
+                Clinical Features, you will not upload, store, or otherwise transfer PHI using the
+                Site.
+              </li>
+              <li>You acknowledge that this may require you, in some instances, to anonymize sequence
+                data prior to uploading it to the Site. You further agree to indemnify and hold
+                harmless DUOS of and from any and all claims, demands, losses, causes of action,
+                damage, lawsuits, judgments, including attorneys&#39; fees and costs, arising out of
+                or relating to your uploading, storing, or transferring of PHI without having fully
+                implemented the Clinical Features.
+              </li>
+            </ul>
+          </li>
+          <li>User Account Information/Personally Identifiable Information
+            <ul>
+              <li>When you register with us through the Site and during your use of the Site, we will
+                ask you for personally-identifiable information, which is information about you that
+                can be used to contact or identify you (&quot;Personal Information&quot;), such as:
+                your name, company or organization name, title, e-mail address, postal address,
+                telephone number.
+              </li>
+            </ul>
+          </li>
+          <li>Cookies
+            <ul>
+              <li>We use cookies, tracking pixels, and other similar technologies to track activity on
+                our Site and to enhance the functionality of our Site. Cookies are small data files
+                that our web servers send to your browser and which get saved on the hard drive of
+                the computer that you are using to access the Site. If you do not want to allow
+                cookies on your computer, most browsers have a feature that allows you either to
+                automatically decline cookies or to decline or accept particular cookies from
+                particular web sites. If you choose to reject cookies from our Site, you may be
+                unable to use certain Site services, features, and functionality. If you choose to
+                accept cookies from us and our service providers, you are agreeing to let us and our
+                service providers install cookies on your computer. See our cookie policy for more
+                information on the cookies we use. To learn more about cookies in general, please
+                visit <Link to="https://allaboutcookies.org/">https://allaboutcookies.org/</Link>.
+              </li>
+            </ul>
+          </li>
+          <li>User Software and Reference Data
+            <ul>
+              <li>You may also be permitted to upload your own software and data, including reference
+                genomes, to the Site in the course of using the Site. You agree to and accept full
+                responsibility for obtaining all permissions, consents, and rights necessary for
+                uploading and using any such software and data to and with the Site. The software
+                you upload must comply with the DUOS &quot;Terms of Use Policy&quot;.
+              </li>
+            </ul>
+          </li>
+        </ol>
         </li>
 
-        <li>
-          How Your Information May be Used
+        <li>How Your Information May be Used
           <ol>
             <li>We may use your Personal Information to improve our products and services, to ensure contact
               information is up to date and accurate, to improve our customer service, to reduce risk and
@@ -125,8 +119,7 @@ export default function PrivacyPolicy() {
             </li>
           </ol>
         </li>
-        <li>
-          With Whom May DUOS Share Your Information?
+        <li>With Whom May DUOS Share Your Information?
           <ol>
             <li>Service Providers
               <ul>
