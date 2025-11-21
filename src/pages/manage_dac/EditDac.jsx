@@ -368,8 +368,8 @@ export default function EditDac() {
     isLoading
       ? <Spinner />
       : (
-          <div className="container container-wide">
-            <div className="row no-margin">
+          <div style={Styles.PAGE}>
+            <div>
               <Link
                 id="link_manage_dac"
                 to="/manage_dac"
@@ -383,290 +383,289 @@ export default function EditDac() {
                 title={dacText}
                 description={dacId === undefined ? 'Create DAC' : fetchedDac?.name}
               />
-              <hr />
-              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                <div style={{ flexBasis: '50%', flexGrow: 0, flexShrink: 0 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                    <form
-                      className="form-horizontal css-form"
-                      name="dacForm"
-                      noValidate
-                      encType="multipart/form-data"
-                      style={{ width: '83.33%', maxWidth: '1200px' }}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                        <label id="lbl_dacName" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
-                          DAC
-                          Name
-                        </label>
-                        <div style={{ flexBasis: '66.67%' }}>
-                          <input
-                            id="txt_dacName"
-                            type="text"
-                            defaultValue={state.dac.name}
-                            onChange={handleChange}
-                            name="name"
-                            className="form-control vote-input"
-                            required={true}
-                            data-cy="dac_name"
-                          />
-                        </div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '2rem' }}>
+              <div style={{ flexBasis: '50%', flexGrow: 0, flexShrink: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                  <form
+                    className="form-horizontal css-form"
+                    name="dacForm"
+                    noValidate
+                    encType="multipart/form-data"
+                    style={{ width: '83.33%', maxWidth: '1200px' }}
+                  >
+                    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
+                      <label id="lbl_dacName" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                        DAC
+                        Name
+                      </label>
+                      <div style={{ flexBasis: '66.67%' }}>
+                        <input
+                          id="txt_dacName"
+                          type="text"
+                          defaultValue={state.dac.name}
+                          onChange={handleChange}
+                          name="name"
+                          className="form-control vote-input"
+                          required={true}
+                          data-cy="dac_name"
+                        />
                       </div>
+                    </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                        <label
-                          id="lbl_dacDescription"
-                          style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}
-                        >
-                          DAC Description
-                        </label>
-                        <div style={{ flexBasis: '66.67%' }}>
-                          <textarea
-                            id="txt_dacDescription"
-                            defaultValue={state.dac.description}
-                            onChange={handleChange}
-                            name="description"
-                            className="form-control vote-input"
-                            required={true}
-                            data-cy="dac_description"
-                          />
-                        </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
+                      <label
+                        id="lbl_dacDescription"
+                        style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}
+                      >
+                        DAC Description
+                      </label>
+                      <div style={{ flexBasis: '66.67%' }}>
+                        <textarea
+                          id="txt_dacDescription"
+                          defaultValue={state.dac.description}
+                          onChange={handleChange}
+                          name="description"
+                          className="form-control vote-input"
+                          required={true}
+                          data-cy="dac_description"
+                        />
                       </div>
+                    </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                        <label id="lbl_dacEmail" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
-                          DAC
-                          Email
-                        </label>
-                        <div style={{ flexBasis: '66.67%' }}>
-                          <input
-                            id="txt_dacEmail"
-                            type="text"
-                            defaultValue={state.dac.email}
-                            onChange={handleChange}
-                            name="email"
-                            className="form-control vote-input"
-                            required={true}
-                            data-cy="dac_email"
-                          />
-                        </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
+                      <label id="lbl_dacEmail" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                        DAC
+                        Email
+                      </label>
+                      <div style={{ flexBasis: '66.67%' }}>
+                        <input
+                          id="txt_dacEmail"
+                          type="text"
+                          defaultValue={state.dac.email}
+                          onChange={handleChange}
+                          name="email"
+                          className="form-control vote-input"
+                          required={true}
+                          data-cy="dac_email"
+                        />
                       </div>
-                      {
-                        (state.dac.chairpersons.length > 0 || state.dac.members.length > 0)
-                        && (
-                          <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                            <label id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
-                              DAC
-                              Members
-                            </label>
-                            <div style={{ flexBasis: '66.67%' }}>
-                              <DacUsers
-                                dac={state.dac}
-                                removeButton={true}
-                                removeHandler={removeDacMember}
-                              />
-                            </div>
-                          </div>
-                        )
-                      }
-
-                      <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                        <label id="lbl_dacChair" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
-                          Add
-                          Chairperson(s)
-                        </label>
-                        <div style={{ flexBasis: '66.67%' }}>
-                          <AsyncSelect
-                            id="sel_dacChair"
-                            isDisabled={false}
-                            isMulti
-                            loadOptions={(query, callback) => chairSearch(query, callback)}
-                            onChange={option => onChairSearchChange(option)}
-                            onInputChange={() => onSearchInputChanged()}
-                            onMenuClose={() => onSearchMenuClosed()}
-                            noOptionsMessage={() => 'Select a DUOS User...'}
-                            value={state.chairsSelectedOptions}
-                            classNamePrefix="select"
-                            placeholder="Select a DUOS User..."
-                            className="select-autocomplete"
-                          />
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                        <label id="lbl_dacMember" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
-                          Add
-                          Member(s)
-                        </label>
-                        <div style={state.searchInputChanged
-                          ? {
-                              paddingBottom: '10rem',
-                              flexBasis: '66.67%',
-                            }
-                          : { flexBasis: '66.67%' }}
-                        >
-                          <AsyncSelect
-                            id="sel_dacMember"
-                            isDisabled={false}
-                            isMulti={true}
-                            loadOptions={(query, callback) => memberSearch(query, callback)}
-                            onChange={option => onMemberSearchChange(option)}
-                            onInputChange={() => onSearchInputChanged()}
-                            onMenuClose={() => onSearchMenuClosed()}
-                            noOptionsMessage={() => 'Select a DUOS User...'}
-                            value={state.membersSelectedOptions}
-                            classNamePrefix="select"
-                            placeholder="Select a DUOS User..."
-                            className="select-autocomplete"
-                          />
-                        </div>
-                      </div>
-                      <div className="inline-block" style={{ paddingBottom: '20px' }}>
-                        <button
-                          id="btn_save"
-                          onClick={okHandler}
-                          className="f-left btn-primary common-background"
-                          data-cy="btn_save"
-                        >
-                          Save
-                        </button>
-                        <div style={{ marginLeft: '40px' }}>
-                          <button
-                            id="btn_cancel"
-                            onClick={closeHandler}
-                            className="f-left btn-secondary"
-                            data-cy="btn_cancel"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </form>
+                    </div>
                     {
-                      state.error.show && (
-                        <div>
-                          <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+                      (state.dac.chairpersons.length > 0 || state.dac.members.length > 0)
+                      && (
+                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
+                          <label id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                            DAC
+                            Members
+                          </label>
+                          <div style={{ flexBasis: '66.67%' }}>
+                            <DacUsers
+                              dac={state.dac}
+                              removeButton={true}
+                              removeHandler={removeDacMember}
+                            />
+                          </div>
                         </div>
                       )
                     }
-                  </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
+                      <label id="lbl_dacChair" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                        Add
+                        Chairperson(s)
+                      </label>
+                      <div style={{ flexBasis: '66.67%' }}>
+                        <AsyncSelect
+                          id="sel_dacChair"
+                          isDisabled={false}
+                          isMulti
+                          loadOptions={(query, callback) => chairSearch(query, callback)}
+                          onChange={option => onChairSearchChange(option)}
+                          onInputChange={() => onSearchInputChanged()}
+                          onMenuClose={() => onSearchMenuClosed()}
+                          noOptionsMessage={() => 'Select a DUOS User...'}
+                          value={state.chairsSelectedOptions}
+                          classNamePrefix="select"
+                          placeholder="Select a DUOS User..."
+                          className="select-autocomplete"
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
+                      <label id="lbl_dacMember" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                        Add
+                        Member(s)
+                      </label>
+                      <div style={state.searchInputChanged
+                        ? {
+                            paddingBottom: '10rem',
+                            flexBasis: '66.67%',
+                          }
+                        : { flexBasis: '66.67%' }}
+                      >
+                        <AsyncSelect
+                          id="sel_dacMember"
+                          isDisabled={false}
+                          isMulti={true}
+                          loadOptions={(query, callback) => memberSearch(query, callback)}
+                          onChange={option => onMemberSearchChange(option)}
+                          onInputChange={() => onSearchInputChanged()}
+                          onMenuClose={() => onSearchMenuClosed()}
+                          noOptionsMessage={() => 'Select a DUOS User...'}
+                          value={state.membersSelectedOptions}
+                          classNamePrefix="select"
+                          placeholder="Select a DUOS User..."
+                          className="select-autocomplete"
+                        />
+                      </div>
+                    </div>
+                    <div className="inline-block" style={{ paddingBottom: '20px' }}>
+                      <button
+                        id="btn_save"
+                        onClick={okHandler}
+                        className="f-left btn-primary common-background"
+                        data-cy="btn_save"
+                      >
+                        Save
+                      </button>
+                      <div style={{ marginLeft: '40px' }}>
+                        <button
+                          id="btn_cancel"
+                          onClick={closeHandler}
+                          className="f-left btn-secondary"
+                          data-cy="btn_cancel"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  {
+                    state.error.show && (
+                      <div>
+                        <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+                      </div>
+                    )
+                  }
                 </div>
-                <div style={{ flexBasis: '50%', flexGrow: 0, flexShrink: 0 }}>
-                  <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }}>
-                    Select a Data Access
-                    Agreement (DAA) to govern access to your DAC&apos;s datasets
-                  </label>
-                  <ul role="menu" style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
-                    <form>
-                      <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                        <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                          <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
-                            Use default
-                            agreement
-                          </label>
-                          <br />
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <input
-                              type="radio"
-                              name="daa"
-                              checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId}
-                              onChange={() => handleDaaChange(broadDaa.daaId)}
-                              style={{ accentColor: '#00609f' }}
-                              data-cy="daa_radio"
-                            />
-                            <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                              <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                DUOS Uniform DAA
-                              </div>
-                              <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                <div style={{ marginLeft: '10px' }}>
-                                  <a
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    href={DUOSUniformDataAccessAgreement}
-                                    className="button button-white"
-                                    style={{ padding: '10px 12px' }}
-                                  >
-                                    <span className="glyphicon glyphicon-download-alt"></span>
-                                  </a>
-                                </div>
+              </div>
+              <div style={{ flexBasis: '50%', flexGrow: 0, flexShrink: 0 }}>
+                <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }}>
+                  Select a Data Access
+                  Agreement (DAA) to govern access to your DAC&apos;s datasets
+                </label>
+                <ul role="menu" style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
+                  <form>
+                    <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
+                      <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                        <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
+                          Use default
+                          agreement
+                        </label>
+                        <br />
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <input
+                            type="radio"
+                            name="daa"
+                            checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId}
+                            onChange={() => handleDaaChange(broadDaa.daaId)}
+                            style={{ accentColor: '#00609f' }}
+                            data-cy="daa_radio"
+                          />
+                          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+                            <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+                              DUOS Uniform DAA
+                            </div>
+                            <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+                              <div style={{ marginLeft: '10px' }}>
+                                <a
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  href={DUOSUniformDataAccessAgreement}
+                                  className="button button-white"
+                                  style={{ padding: '10px 12px' }}
+                                >
+                                  <span className="glyphicon glyphicon-download-alt"></span>
+                                </a>
                               </div>
                             </div>
                           </div>
+                        </div>
+                      </label>
+                    </li>
+                    <hr />
+                    <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
+                      <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                        <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
+                          Use your own
+                          agreement
                         </label>
-                      </li>
-                      <hr />
-                      <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                        <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                          <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
-                            Use your own
-                            agreement
-                          </label>
-                          <br />
-                          {
-                            matchingDaas.map((daa, index) => (
-                              <DaaItem key={index} specificDaa={daa} />
-                            ))
-                          }
-                          {uploadedDAAFile !== null
-                            && (
-                              <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px' }}>
-                                <input
-                                  type="radio"
-                                  name="daa"
-                                  checked={uploadedDAAFile || selectedDaa.daaId === createdDaa.daaId}
-                                  onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange(undefined)}
-                                  style={{ accentColor: '#00609f' }}
-                                />
-                                <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                                  <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                    <div className="row" style={{ paddingLeft: '15px' }}>
-                                      {daaFileData.name}
-                                    </div>
-                                    <div className="row" style={{ fontSize: '1rem', paddingLeft: '15px' }}>
-                                      Uploaded on
-                                      {' '}
-                                      {new Date().toLocaleDateString()}
-                                    </div>
+                        <br />
+                        {
+                          matchingDaas.map((daa, index) => (
+                            <DaaItem key={index} specificDaa={daa} />
+                          ))
+                        }
+                        {uploadedDAAFile !== null
+                          && (
+                            <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px' }}>
+                              <input
+                                type="radio"
+                                name="daa"
+                                checked={uploadedDAAFile || selectedDaa.daaId === createdDaa.daaId}
+                                onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange(undefined)}
+                                style={{ accentColor: '#00609f' }}
+                              />
+                              <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+                                <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+                                  <div className="row" style={{ paddingLeft: '15px' }}>
+                                    {daaFileData.name}
                                   </div>
-                                  <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                    <div style={{ marginLeft: '10px' }}>
-                                      <a
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        download={uploadedDAAFile[0].name}
-                                        href={URL.createObjectURL(uploadedDAAFile[0])}
-                                        className="button button-white"
-                                        style={{ padding: '10px 12px' }}
-                                      >
-                                        <span className="glyphicon glyphicon-download-alt"></span>
-                                      </a>
-                                    </div>
+                                  <div className="row" style={{ fontSize: '1rem', paddingLeft: '15px' }}>
+                                    Uploaded on
+                                    {' '}
+                                    {new Date().toLocaleDateString()}
+                                  </div>
+                                </div>
+                                <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+                                  <div style={{ marginLeft: '10px' }}>
+                                    <a
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      download={uploadedDAAFile[0].name}
+                                      href={URL.createObjectURL(uploadedDAAFile[0])}
+                                      className="button button-white"
+                                      style={{ padding: '10px 12px' }}
+                                    >
+                                      <span className="glyphicon glyphicon-download-alt"></span>
+                                    </a>
                                   </div>
                                 </div>
                               </div>
-                            )}
-                          <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
-                            <button
-                              className="button button-white"
-                              onClick={(event) => {
-                                event.preventDefault()
-                                setShowUploadModal(true)
-                              }}
-                              data-cy="daa_upload_button"
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <PublishIcon style={{ scale: '1.5' }} />
-                                <div style={{ marginLeft: '10px' }}>
-                                  Upload file
-                                </div>
+                            </div>
+                          )}
+                        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
+                          <button
+                            className="button button-white"
+                            onClick={(event) => {
+                              event.preventDefault()
+                              setShowUploadModal(true)
+                            }}
+                            data-cy="daa_upload_button"
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <PublishIcon style={{ scale: '1.5' }} />
+                              <div style={{ marginLeft: '10px' }}>
+                                Upload file
                               </div>
-                            </button>
-                          </div>
-                        </label>
-                      </li>
-                    </form>
-                  </ul>
-                </div>
+                            </div>
+                          </button>
+                        </div>
+                      </label>
+                    </li>
+                  </form>
+                </ul>
               </div>
             </div>
             {showUploadModal && (

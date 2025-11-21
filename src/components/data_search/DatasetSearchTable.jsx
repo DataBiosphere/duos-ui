@@ -15,7 +15,8 @@ import DatasetFilterList from 'src/components/data_search/DatasetFilterList'
 import { Notifications } from 'src/libs/utils'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { useNavigate } from 'react-router-dom'
-import SearchBar from 'src/components/SearchBar.jsx'
+import SearchBar from 'src/components/SearchBar'
+import { Styles } from 'src/libs/theme.js'
 
 const styles = {
   subTab: {
@@ -232,8 +233,16 @@ export const DatasetSearchTable = (props) => {
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <TableHeaderSection icon={{ src: icon }} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
-        <Box sx={{ paddingTop: '2em', paddingLeft: '2em' }}>
+        <TableHeaderSection
+          icon={{ src: icon }}
+          title={title}
+          description="Search, filter, and select datasets, then click 'Apply for Access' to request access"
+        />
+        <Box sx={{
+          ...Styles.SEARCH_ACTION_HEADER_SECTION,
+          ...(icon && { marginLeft: '6.5rem' }),
+        }}
+        >
           <SearchBar
             handleSearchChange={handleSearchChange}
             searchRef={searchRef}

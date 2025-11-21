@@ -98,7 +98,7 @@ export default function DatasetSubmissions() {
           <p>Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to [ex. dbGaP, EGA etc]. To register controlled access data with a DAC in DUOS, may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.</p>
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', margin: '1rem -2rem 0 2rem' }}>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}

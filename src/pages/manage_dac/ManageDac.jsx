@@ -7,11 +7,13 @@ import { Notifications } from 'src/libs/utils'
 import { DacMembersModal } from 'src/pages/manage_dac/DacMembersModal'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DAAUtils } from 'src/utils/DAAUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import AddObjectButton from 'src/components/AddObjectButton.tsx'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 const CHAIR = 'Chairperson'
 const ADMIN = 'Admin'
@@ -97,31 +99,27 @@ export const ManageDac = function ManageDac() {
 
   const addDac = () => {
     setShowAddPage(true)
+    navigate(DAAUtils.isEnabled() ? '/manage_add_dac_daa' : '/manage_add_dac', {
+      state: { userRole: userRole },
+    })
   }
 
   return (
     <div style={Styles.PAGE}>
-      <div
-        style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}
-      >
+      <div>
         <TableHeaderSection
           title="Manage Data Access Committee"
           description="Create and manage Data Access Committee"
         />
-        <div className="right-header-section">
-          <Link
-            id="btn_addDAC"
-            className="btn-primary btn-add common-background"
-            style={{ marginTop: '30%', display: 'flex' }}
-            onClick={addDac}
-            to={{
-              pathname: DAAUtils.isEnabled() ? `/manage_add_dac_daa` : `/manage_add_dac`,
-              state: { userRole: userRole },
-            }}
-          >
-            <span>Add DAC</span>
-          </Link>
-        </div>
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION, justifyContent: 'flex-end' }}>
+        <AddObjectButton
+          id="btn_addDAC"
+          label="ADD DAC"
+          onClick={addDac}
+          icon={<AddCircleOutlineIcon />}
+          className="button button-blue"
+        />
       </div>
       <ManageDacTable
         isLoading={isLoading}

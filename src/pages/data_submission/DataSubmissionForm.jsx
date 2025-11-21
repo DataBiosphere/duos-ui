@@ -198,7 +198,7 @@ export const DataSubmissionForm = () => {
     <div>
       {!failedInit && (
         <div style={Styles.PAGE}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+          <div style={{ marginLeft: '-1.5%' }}>
             <TableHeaderSection
               title="Study Registration Form"
               description="Submit new datasets to DUOS"

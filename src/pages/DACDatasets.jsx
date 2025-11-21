@@ -73,19 +73,19 @@ export default function DACDatasets() {
           title="My DAC's Datasets"
           description="View the status of datasets submitted to your Data Access Committee"
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', margin: '1rem -5rem 0 2rem' }}>
-          <SearchBar
-            handleSearchChange={handleSearchChange}
-            searchRef={searchRef}
-          />
-          <AddObjectButton
-            id="add-dataset-btn"
-            label="ADD DATASET"
-            onClick={() => navigate('/data_submission_form')}
-            icon={<AddCircleOutlineIcon />}
-            className="button button-blue"
-          />
-        </div>
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
+        <SearchBar
+          handleSearchChange={handleSearchChange}
+          searchRef={searchRef}
+        />
+        <AddObjectButton
+          id="add-dataset-btn"
+          label="ADD DATASET"
+          onClick={() => navigate('/data_submission_form')}
+          icon={<AddCircleOutlineIcon />}
+          className="button button-blue"
+        />
       </div>
       <DACDatasetsTable
         datasets={filteredList}

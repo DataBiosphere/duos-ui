@@ -8,10 +8,12 @@ import SearchBar from 'src/components/SearchBar'
 import InstitutionTable from 'src/components/institution_table/InstitutionTable'
 import { tableHeaderTemplate, tableRowLoadingTemplate } from 'src/components/institution_table/InstitutionTableUtils'
 import DarTableSkeletonLoader from 'src/components/TableSkeletonLoader'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import AddObjectButton from 'src/components/AddObjectButton'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 export default function AdminManageInstitutions() {
   usePageTitle('Institutions')
@@ -21,6 +23,8 @@ export default function AdminManageInstitutions() {
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     const init = async () => {
@@ -46,9 +50,9 @@ export default function AdminManageInstitutions() {
     setFilteredList(filter(institutionList, searchTerm))
   }, [searchTerm, institutionList])
 
-  const handleSearchChange = (query: { current: { value: string } }) => {
-    setSearchTerm(query.current.value)
-    setFilteredList(filter(institutionList, query.current.value))
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    setFilteredList(filter(institutionList, value))
   }
 
   const filter = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
@@ -57,31 +61,32 @@ export default function AdminManageInstitutions() {
     }
     return list
   }
+
+  const addInstitution = () => {
+    navigate('/admin_manage_institutions/create_new', {
+      state: { institutionList },
+    })
+  }
+
   return (
     <div style={Styles.PAGE} data-cy="admin-manage-institutions">
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div>
         <TableHeaderSection
           icon={{ src: manageInstitutionsIcon }}
           title="Manage Institutions"
           description="Select and manage Institutions"
         />
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchChange}
-          currentPage={currentPage}
-          style={{ width: '60%', margin: '0 3% 0 0' }}
-          button={(
-            <div>
-              <Link
-                id="btn_addInstitution"
-                to="/admin_manage_institutions/create_new"
-                state={{ institutionList }}
-                className="btn-primary btn-add common-background"
-                style={{ marginTop: '30%', display: 'block', lineHeight: 0.6 }}
-              >
-                <span>Add Institution</span>
-              </Link>
-            </div>
-          )}
+        />
+        <AddObjectButton
+          id="btn_addInstitution"
+          label="ADD INSTITUTION"
+          onClick={addInstitution}
+          icon={<AddCircleOutlineIcon />}
+          className="button button-blue"
         />
       </div>
       {!isLoading && (

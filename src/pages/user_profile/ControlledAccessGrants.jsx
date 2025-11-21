@@ -79,13 +79,15 @@ export default function ControlledAccessGrants() {
 
   return (
     <div style={Styles.PAGE}>
-      <div style={{ marginBottom: '2rem' }}>
+      <div>
         <TableHeaderSection
           title="Controlled Access Grants"
           description="Your current dataset approvals"
         />
       </div>
-      <SortableTable rows={rows} headCells={headCells} />
+      <div style={{ marginTop: '2rem' }}>
+        <SortableTable rows={rows} headCells={headCells} />
+      </div>
     </div>
   )
 }

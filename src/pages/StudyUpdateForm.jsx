@@ -223,7 +223,7 @@ export const StudyUpdateForm = () => {
 
   return !failedInit && (
     <div style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+      <div>
         <TableHeaderSection
           title="Study Update Form"
           description="This is an easy way to update a study in DUOS!"

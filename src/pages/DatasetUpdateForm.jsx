@@ -30,7 +30,7 @@ export const DatasetUpdateForm = () => {
 
   return !failedInit && (
     <div style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+      <div>
         <TableHeaderSection
           title="Dataset Update Form"
           description="This is an easy way to update a dataset in DUOS!"

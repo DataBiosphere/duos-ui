@@ -35,7 +35,7 @@ export default function SigningOfficialDarRequests() {
 
   return (
     <div style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div>
         <TableHeaderSection
           title="My Institution's Data Access Requests"
           description="Your Institution's Data Access Requests: Records from all current and closed data access requests"

@@ -11,6 +11,8 @@ import SearchBar from 'src/components/SearchBar'
 import { Notification } from 'src/components/Notification'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import AddObjectButton from 'src/components/AddObjectButton.tsx'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 const getUserList = async () => {
   const users = await User.list(USER_ROLES.admin)
@@ -78,28 +80,24 @@ export const AdminManageUsers = function AdminManageUsers() {
 
   return (
     <div style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+      <div>
         <TableHeaderSection
           icon={{ src: manageUsersIcon }}
           title="Manage Users"
           description="Select and manage users and their roles"
         />
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchUser}
           searchRef={searchRef}
-          style={{ width: '60%', margin: '0 3% 0 0' }}
-          button={(
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' }}>
-              <a
-                id="btn_addUser"
-                className="btn-primary btn-add common-background"
-                style={{ marginTop: '30%', display: 'flex' }}
-                onClick={addUser}
-              >
-                <span>Add User</span>
-              </a>
-            </div>
-          )}
+        />
+        <AddObjectButton
+          id="btn_addUser"
+          label="ADD USER"
+          onClick={addUser}
+          icon={<AddCircleOutlineIcon />}
+          className="button button-blue"
         />
       </div>
       <ManageUsersTable userList={userList} isLoading={isLoading} searchText={searchText} />

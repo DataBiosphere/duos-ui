@@ -45,7 +45,39 @@ const ManageRadar = () => {
 
   if (hasError) {
     return (
-      <div data-cy="error-container" style={{ padding: '0 2.5%' }}>
+      <div data-cy="error-container" style={Styles.PAGE}>
+        <div>
+          <Link
+            data-cy="back-button"
+            id="link_manage_dac"
+            to="/manage_dac"
+            className="navbar-brand"
+            style={{ paddingRight: '16px', marginTop: '3rem' }}
+          >
+            <img id="back-arrow-icon" src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
+          </Link>
+          <TableHeaderSection
+            icon={{ src: radarIcon }}
+            title="Manage Rule Automation for DARs (RADAR)"
+            description={(
+              <div
+                data-cy="error-message"
+                style={{
+                  color: '#d32f2f',
+                }}
+              >
+                {(!dacIdParam || isNaN(dacId)) ? 'Invalid DAC ID' : 'Error loading DAC information'}
+              </div>
+            )}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={Styles.PAGE}>
+      <div>
         <Link
           data-cy="back-button"
           id="link_manage_dac"
@@ -58,38 +90,10 @@ const ManageRadar = () => {
         <TableHeaderSection
           icon={{ src: radarIcon }}
           title="Manage Rule Automation for DARs (RADAR)"
-          description={(
-            <div
-              data-cy="error-message"
-              style={{
-                color: '#d32f2f',
-              }}
-            >
-              {(!dacIdParam || isNaN(dacId)) ? 'Invalid DAC ID' : 'Error loading DAC information'}
-            </div>
-          )}
+          description={fetchedDac ? fetchedDac.name : ''}
         />
       </div>
-    )
-  }
-
-  return (
-    <div data-cy="manage-radar-container" style={{ padding: '0 2.5%' }}>
-      <Link
-        data-cy="back-button"
-        id="link_manage_dac"
-        to="/manage_dac"
-        className="navbar-brand"
-        style={{ paddingRight: '16px', marginTop: '3rem' }}
-      >
-        <img id="back-arrow-icon" src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
-      </Link>
-      <TableHeaderSection
-        icon={{ src: radarIcon }}
-        title="Manage Rule Automation for DARs (RADAR)"
-        description={fetchedDac ? fetchedDac.name : ''}
-      />
-      <div style={{ maxWidth: '80%' }}>
+      <div>
         <DACBotComponent data-cy="dac-bot-component" dacId={dacId} />
       </div>
     </div>
