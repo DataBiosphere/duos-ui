@@ -36,6 +36,10 @@ async function fetchRequest({ url, method = 'GET', data, params, headers = {}, c
     credentials,
     body: getRequestBody(data, isMultipart),
   }
+  if (isMultipart) {
+    // Let the browser set the correct multipart boundary.
+    delete fetchOptions.headers['Content-Type']
+  }
   try {
     const res = await fetch(fullUrl, fetchOptions)
     return handleResponse(res, fullUrl, responseType, method)
