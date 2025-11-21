@@ -40,6 +40,12 @@ export const DataSet = {
     return res.data
   },
 
+  searchDatasetIndexV2: async (query) => {
+    const url = `${await getApiUrl()}/api/dataset/search/index/v2`
+    const res = await fetchPost(url, query, Config.authOpts())
+    return res
+  },
+
   getDataSetsByDatasetId: async (datasetId) => {
     const url = `${await Config.getApiUrl()}/api/dataset/v2/${datasetId}`
     const res = await fetchGet(url, Config.authOpts())

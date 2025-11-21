@@ -55,6 +55,7 @@ import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/Si
 import Translator from 'src/pages/Translator'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
+import DataLibrary from 'src/pages/DataLibrary'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -86,6 +87,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/datalibrary" element={<DatasetSearch {...props} />}>
           <Route path=":query" element={<DatasetSearch {...props} />} />
         </Route>
+        <Route path="/datalibrary2" element={<DataLibrary />} />
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
