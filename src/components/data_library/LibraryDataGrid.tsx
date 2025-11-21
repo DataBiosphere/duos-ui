@@ -96,6 +96,10 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
 
   // Check if a row is selectable
   const isRowSelectable = (params: { row: DatasetTerm | StudyAggregation }) => {
+    if (!params.row) {
+      return false
+    }
+
     if (assetType === AssetType.DATASETS) {
       const dataset = params.row as DatasetTerm
       return (
