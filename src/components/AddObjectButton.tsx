@@ -39,8 +39,10 @@ export default function AddObjectButton(props: StudyAssetAddButtonProps): React.
       onClick={() => !disabled && onClick()}
       disabled={disabled}
     >
-      {icon}
-      <span style={{ marginLeft: '0.5rem' }}>{label}</span>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+        {icon}
+        <span>{label}</span>
+      </span>
     </button>
   )
 }
