@@ -6,7 +6,7 @@ export default function PrivacyPolicy() {
   return (
     <div className="policy-body">
       <h1>DUOS Privacy Policy</h1>
-      <div>Last Updated: 21, November, 2025</div>
+      <div>Last Updated: November 7, 2025</div>
       <div>If there are any questions about privacy, please email&nbsp;
         <Link to="privacy@broadinstitute.org">privacy@broadinstitute.org</Link>
       </div>
@@ -16,21 +16,31 @@ export default function PrivacyPolicy() {
       <div>You are responsible for maintaining the privacy of data you enter into our system. We keep your data
         very private on our cloud providers.
       </div>
-      <div>We follow the laws of all the countries where we operate. We follow the laws of Europe, like GDPR. If
-        you need more information, see the sections below.
+      <div>It is the policy of The Broad Institute to comply with all applicable laws of the countries in which we
+        operate. We are aware of GDPR and other international privacy frameworks (“Privacy Law”) and are
+        supportive of
+        your rights and your compliance with any obligations you may have under Privacy Law.If you need more
+        information, see the sections below, or contact privacy@broadinstitute.org.
       </div>
       <h2>Information DUOS May Collect From You</h2>
       <ol>
-        <li>Our primary goals in collecting information are to provide genomic information management and
-          analysis services to you, to improve our Site, features, content, and to run our business.
+        <li>Our primary goals in collecting information are to provide data access request and data use
+          management
+          services to you, to improve our Site, features, content, and to perform necessary tasks to support
+          the
+          continued offering of DUOS.
         <ol>
-          <li>Genomic Information That You Voluntarily Provide
+          <li>Information That You Voluntarily Provide
             <ul>
               <li>DUOS collects and stores the genomic sequence data (DNA, RNA, etc), derived from
                 humans or other organisms, that you submit to the Site along with metadata and other
-                information related to such sequence data. You agree to and accept full
-                responsibility for obtaining all necessary permissions and informed consents from
-                the donors of all samples from which your submitted sequence data is derived.
+                information related to such data. You agree to and accept full responsibility for
+                obtaining all necessary permissions and informed consents from the donors or
+                providers of all samples from which your submitted sequence data is derived,
+                including any consents that may be needed to submit such data to the Site and to
+                enable any third parties with whom you share the data on the Site to use such data,
+                and any consents that may be needed to store the data in servers located within the
+                United States.
               </li>
             </ul>
           </li>
@@ -39,19 +49,12 @@ export default function PrivacyPolicy() {
               <li>DUOS is not a Covered Entity as that term is defined in the Health Insurance
                 Portability and Accountability Act of 1996, as amended, and its related regulations
                 (collectively, &quot;HIPAA&quot;). On occasion, DUOS may agree in writing with a
-                user to perform services for the user in the storing PHI. We recommend that such
-                users enter into a formal agreement with DUOS/Firecloud.
-              </li>
-              <li>DUOS does offer clinical compliance features as part of its service
-                (&quot;Compliance Features&quot;) for users who wish to upload, store, or otherwise
-                transfer PHI, as well as users who are using the Site in connection with their
-                clinical operations. Users who desire to upload, store, or otherwise transfer PHI
-                using the Site must implement all of the required Clinical Features and must enter a
-                formal agreement with Firecloud stating that. The uploading, storing, or
-                transferring of PHI using the Site by users that have not implemented the Clinical
-                Features is strictly prohibited. You agree that, unless you have implemented the
-                Clinical Features, you will not upload, store, or otherwise transfer PHI using the
-                Site.
+                user to perform services for the user in the storing PHI. Storing PHI in DUOS
+                requires a prior written agreement between the user and the Broad Institute.The
+                uploading, storing, or transferring of PHI using the Site by users without a written
+                agreement permitting uploading of PHI is strictly prohibited. You agree that, unless
+                you have entered into a written agreement with Broad to the contrary, you will not
+                upload, store, or otherwise transfer PHI using the Site.
               </li>
               <li>You acknowledge that this may require you, in some instances, to anonymize sequence
                 data prior to uploading it to the Site. You further agree to indemnify and hold
@@ -265,7 +268,8 @@ export default function PrivacyPolicy() {
               of our Privacy Policy. Any changes to our Privacy Policy will become effective upon our
               posting of the revised Privacy Policy on the Site. Use of the Site following such changes
               constitutes your acceptance of the revised Privacy Policy then in effect. You will be able
-              to determine when this Privacy Policy was last revised by checking the &quot;Last Updated&quot;
+              to determine when this Privacy Policy was last revised by checking the &quot;Last
+              Updated&quot;
               information that appears at the top of this page.
             </li>
           </ol>
