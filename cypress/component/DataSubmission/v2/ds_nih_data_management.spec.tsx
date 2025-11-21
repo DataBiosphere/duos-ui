@@ -54,7 +54,7 @@ describe('NihAdministrativeInformation - Tests', () => {
     cy.get('#legalRestrictions').should('be.visible')
     cy.get('#isInformedConsentProcessesInadequate').should('be.visible')
     cy.get('#alternativeDataSharingPlanExplanation').should('be.visible')
-    cy.get('#alternativeDataSharingPlanFile_fileName').should('be.visible')
+    cy.get('#lbl_alternativeDataSharingPlanFile').should('be.visible')
     cy.get('#alternativeDataSharingPlanDataSubmitted').should('be.visible')
     cy.get('#alternativeDataSharingPlanDataReleased').should('be.visible')
   })
