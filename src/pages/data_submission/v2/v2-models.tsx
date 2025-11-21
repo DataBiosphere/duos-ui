@@ -345,6 +345,7 @@ export interface Study {
   datasets?: Dataset[]
   properties?: StudyProperty[]
   alternativeDataSharingPlan?: FileStorageObject
+  alternativeDataSharingPlanFile?: File
   createDate?: string // Date?
   createUserId?: number
   updateDate?: string // Date?

@@ -16,20 +16,18 @@ import {
   getStudyPropertyValueByKey, removeStudyPropertiesByKeys,
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
-import { cloneDeep, unset } from 'lodash'
-import { ALTERNATIVE_DATA_SHARING_PLAN_FILE, FileProperty } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import { ALTERNATIVE_DATA_SHARING_PLAN_FILE } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import { unset } from 'lodash'
 
 export interface NihAnvilUseRelatedProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
-  setFiles: React.Dispatch<React.SetStateAction<FileProperty>>
 }
 
 export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   const {
     setStudy,
     study,
-    setFiles,
   } = props
 
   return (
@@ -46,34 +44,30 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
           setStudyPropertyByKey(study, setStudy, input, new NihAnvilUse(input.value as string))
           if (NihAnvilUse.requiresNIHAdministrativeInformation(input.value)) {
             setStudy((val) => {
-              const newVal = cloneDeep(val)
-              removeStudyPropertiesByKeys(newVal, new Set([DbGaPPhsID.key,
-                DbGaPStudyRegistrationName.key,
-                EmbargoReleaseDate.key,
-                SequencingCenter.key,
-                PiInstitution.key,
-                NihGrantContractNumber.key,
-                NihICsSupportingStudy.key,
-                NihProgramOfficerName.key,
-                NihInstitutionCenterSubmission.key,
-                NihGenomicProgramAdministratorName.key,
-                MultiCenterStudy.key,
-                CollaboratingSites.key,
-                ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
-                ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
-                AlternativeDataSharingPlan.key,
-                AlternativeDataSharingPlanReasons.key,
-                AlternativeDataSharingPlanExplanation.key,
-                AlternativeDataSharingPlanDataSubmitted.key,
-                AlternativeDataSharingPlanDataReleased.key,
-              ]))
-              return newVal
-            })
-            setFiles((val) => {
-              const newVal = cloneDeep(val)
-              if (val?.key === ALTERNATIVE_DATA_SHARING_PLAN_FILE) {
-                unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
-              }
+              const newVal = { ...val }
+              removeStudyPropertiesByKeys(newVal,
+                new Set(
+                  [DbGaPPhsID.key,
+                    DbGaPStudyRegistrationName.key,
+                    EmbargoReleaseDate.key,
+                    SequencingCenter.key,
+                    PiInstitution.key,
+                    NihGrantContractNumber.key,
+                    NihICsSupportingStudy.key,
+                    NihProgramOfficerName.key,
+                    NihInstitutionCenterSubmission.key,
+                    NihGenomicProgramAdministratorName.key,
+                    MultiCenterStudy.key,
+                    CollaboratingSites.key,
+                    ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
+                    ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
+                    AlternativeDataSharingPlan.key,
+                    AlternativeDataSharingPlanReasons.key,
+                    AlternativeDataSharingPlanExplanation.key,
+                    AlternativeDataSharingPlanDataSubmitted.key,
+                    AlternativeDataSharingPlanDataReleased.key,
+                  ]))
+              unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
               return newVal
             })
           }

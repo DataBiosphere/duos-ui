@@ -4,7 +4,7 @@ import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 import { FormFieldTitle } from 'src/components/forms/forms'
 
 export type FileInputProps = {
-  description: string
+  description?: string
   defaultValue?: File
   id: string
   onAddFile: (file: File, id: string) => void

@@ -20,7 +20,6 @@ export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFil
 export const DataSubmissionFormV2 = () => {
   const { studyId } = useParams()
   const [study, setStudy] = useState({} as Study)
-  const [formFiles, setFormFiles] = useState({} as FileProperty)
   const [loadingError, setLoadingError] = useState(false)
 
   useEffect(() => {
@@ -47,9 +46,9 @@ export const DataSubmissionFormV2 = () => {
         </div>
 
         <GeneralStudyInformation study={study} setStudy={setStudy} />
-        <NihAnvilUseRelated study={study} setStudy={setStudy} setFiles={setFormFiles} />
+        <NihAnvilUseRelated study={study} setStudy={setStudy} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
-        <NihDataManagement study={study} setStudy={setStudy} files={formFiles} setFiles={setFormFiles} />
+        <NihDataManagement study={study} setStudy={setStudy} />
         <StudyAssetManagement study={study} setStudy={setStudy} />
       </div>
     </>

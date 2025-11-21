@@ -6,7 +6,7 @@ import {
   DateStudyProperty, BooleanStudyProperty,
 } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { cloneDeep, set } from 'lodash'
+import { set } from 'lodash'
 
 export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
@@ -51,7 +51,7 @@ export const generateStudyInputFormTextField = (setStudy: React.Dispatch<React.S
       defaultValue={initialValue}
       onChange={(input: { key: string, value: string, isValid: boolean }) => {
         setStudy((val: Study) => {
-          const newForm = cloneDeep(val)
+          const newForm = { ...val }
           return set(newForm, input.key, input.value)
         })
       }}
@@ -80,7 +80,7 @@ export const setStudyPropertyByKey = (formData: Study, setStudy: React.Dispatch<
   if (!input.isValid) {
     return
   }
-  const studyToUpdate = cloneDeep(formData)
+  const studyToUpdate = { ...formData }
   studyToUpdate.properties = studyToUpdate.properties ?? []
   const filteredProperty = studyToUpdate.properties.find(prop => prop.key === propertyInstance.key)
   if (filteredProperty) {
