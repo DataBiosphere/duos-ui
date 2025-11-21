@@ -175,6 +175,13 @@ export const Styles = {
     flexDirection: 'row',
     paddingTop: '3rem',
   },
+  SEARCH_ACTION_HEADER_SECTION: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: '2rem',
+    margin: '1rem -2rem 0 0',
+  },
   TABLE: {
     CONTAINER: {
       marginTop: '2rem',
