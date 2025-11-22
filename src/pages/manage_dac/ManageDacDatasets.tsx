@@ -165,8 +165,7 @@ export const ManageDacDatasets: React.FC = () => {
     <div style={Styles.PAGE}>
       <div>
         <TableHeaderSection
-          title={`DAC Datasets associated with DAC: ${dac.name}`}
-          description={undefined}
+          title={`DAC Datasets associated with DAC: ${dac?.name || ''}`}
         />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>

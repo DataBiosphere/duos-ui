@@ -10,7 +10,7 @@ interface Icon {
 interface TableHeaderSectionProps {
   icon?: Icon
   title: string | React.ReactNode
-  description: string | React.ReactNode
+  description?: string | React.ReactNode
 }
 
 export const TableHeaderSection: React.FC<TableHeaderSectionProps> = ({
