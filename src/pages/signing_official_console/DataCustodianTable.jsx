@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Styles, Theme } from 'src/libs/theme'
-import userIcon from 'src/images/icon_manage_users.png'
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
 import SimpleTable from 'src/components/SimpleTable'
 import SimpleButton from 'src/components/SimpleButton'
@@ -365,7 +364,6 @@ export default function DataCustodianTable(props) {
       <div style={{ marginLeft: '-7.5%' }}>
         <div>
           <TableHeaderSection
-            icon={{ src: userIcon }}
             title="My Institution’s Data Submitters"
             description="Issue or remove Data Submitter privileges."
           />
