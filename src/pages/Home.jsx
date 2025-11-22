@@ -173,10 +173,7 @@ const Home = (props) => {
             </div>
             <div className="col-lg-4 col-md-4">
               <p style={header}>Looking for data?</p>
-              <p style={description}>Find and request access to 100s of datasets now!</p>
-              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a href="https://duos.org/datalibrary" id="data-library-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
-              </div>
+              <p style={description}>Find and request access to 100s of datasets through DUOS! Sign in to get started.</p>
             </div>
           </div>
 
