@@ -16,8 +16,8 @@ import scpIcon from 'src/images/scp_logo.png'
 import schareIcon from 'src/images/SCHARE_Logo_New.png'
 import stanleyIcon from 'src/images/stanley-center-logo.png'
 import getzLabIcon from 'src/images/getz-lab-logo.svg'
-import gp2Icon from 'src/images/gp2-logo.svg'
-import asapIcon from 'src/images/asap-logo.svg'
+import gp2Icon from 'src/images/gp2-logo.png'
+import asapIcon from 'src/images/asap-logo.png'
 import gedIcon from 'src/images/GED_logo.png'
 import ncpiIcon from 'src/images/ncpi-logo.png'
 import homeIcon from 'src/images/icon_dataset_.png'
@@ -537,7 +537,7 @@ export const getLibraryVersions = (
         },
       },
       icon: HelmsleyIcon,
-      title: 'Data Library',
+      title: 'Helmsey',
       featured: true,
       order: 20,
     },
