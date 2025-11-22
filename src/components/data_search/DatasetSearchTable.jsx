@@ -17,6 +17,7 @@ import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFoo
 import { useNavigate } from 'react-router-dom'
 import SearchBar from 'src/components/SearchBar'
 import { Styles } from 'src/libs/theme.js'
+import PropTypes from 'prop-types'
 
 const styles = {
   subTab: {
@@ -229,6 +230,11 @@ export const DatasetSearchTable = (props) => {
     catch (_error) {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' })
     }  }, [filters, searchTerm]); // eslint-disable-line
+
+  DatasetSearchTable.propTypes = {
+    datasets: PropTypes.array.isRequired,
+    title: PropTypes.string,
+  }
 
   return (
     <>
