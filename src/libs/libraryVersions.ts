@@ -537,7 +537,7 @@ export const getLibraryVersions = (
         },
       },
       icon: HelmsleyIcon,
-      title: 'Helmsey',
+      title: 'Helmsley Data Library',
       featured: true,
       order: 20,
     },
