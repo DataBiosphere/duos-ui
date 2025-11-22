@@ -47,7 +47,7 @@ describe('SigningOfficialTable', () => {
   it('should render the modal when Add Users button is clicked', () => {
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
 
-    cy.contains('Add Library Card').should('exist').click()
+    cy.contains('ADD LIBRARY CARD').should('exist').click()
     cy.get('[data-cy=library-card-form-modal]').should('be.visible')
     cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Cards')
   })
@@ -66,7 +66,7 @@ describe('SigningOfficialTable', () => {
       })
 
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
-    cy.contains('Add Library Card').click()
+    cy.contains('ADD LIBRARY CARD').click()
 
     // Select user
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName)
@@ -100,7 +100,7 @@ describe('SigningOfficialTable', () => {
 
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
 
-    cy.contains('Add Library Card').click()
+    cy.contains('ADD LIBRARY CARD').click()
 
     // Select user
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName)
@@ -142,7 +142,7 @@ describe('SigningOfficialTable', () => {
       })
 
     mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
-    cy.contains('Add Library Card').click()
+    cy.contains('ADD LIBRARY CARD').click()
 
     // Select users
     cy.get('input[id^=react-select-]').type(mockResearcher1.displayName)

@@ -76,7 +76,7 @@ const ManageRadar = () => {
   }
 
   return (
-    <div style={Styles.PAGE}>
+    <div style={Styles.PAGE} data-cy="manage-radar-container">
       <div>
         <Link
           data-cy="back-button"
