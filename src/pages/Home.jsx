@@ -181,7 +181,7 @@ const Home = (props) => {
             <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
               <p style={header}>Search Data Libraries in DUOS</p>
               <p style={description}>
-                Explore curated Data Libraries for studies, programs, and institutions below. Contact us to request your own!
+                Institutions, programs, and studies use curated Data Libraries to showcase their science! Check out the options below and contact us to request your own.
               </p>
 
               <div style={logoGrid} className="logo-grid">
