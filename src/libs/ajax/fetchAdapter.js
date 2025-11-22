@@ -36,10 +36,6 @@ async function fetchRequest({ url, method = 'GET', data, params, headers = {}, c
     credentials,
     body: getRequestBody(data, isMultipart),
   }
-  if (isMultipart) {
-    // Let the browser set the correct multipart boundary.
-    delete fetchOptions.headers['Content-Type']
-  }
   try {
     const res = await fetch(fullUrl, fetchOptions)
     return handleResponse(res, fullUrl, responseType, method)
@@ -47,6 +43,28 @@ async function fetchRequest({ url, method = 'GET', data, params, headers = {}, c
   catch {
     reportError(fullUrl, 502) // Default to a 502 when we can't get a real response object.
     throw new Error(`Request to ${fullUrl} failed with status 502`)
+  }
+}
+
+async function fetchMultipartRequest({ url, method = 'POST', data, params, headers = {}, credentials }) {
+  const fullUrl = params ? buildUrlWithParams(url, params) : url
+  const fetchOptions = {
+    method,
+    headers,
+    credentials,
+    body: getRequestBody(data, true),
+    isMultipart: true,
+  }
+  if (headers['Content-Type']) {
+    delete headers['Content-Type'] // Let the browser set the correct multipart boundary
+  }
+  try {
+    const res = await fetch(fullUrl, fetchOptions)
+    return handleResponse(res, url, undefined, method)
+  }
+  catch {
+    reportError(url, 502) // Default to a 502 when we can't get a real response object.
+    throw new Error(`Request to ${url} failed with status 502`)
   }
 }
 
@@ -66,4 +84,4 @@ export const fetchDelete = (url, config = {}) =>
   fetchRequest({ url, data: config.data, ...config, method: 'DELETE' })
 
 export const fetchMultipart = (url, formData, config = {}, method = 'POST') =>
-  fetchRequest({ url, data: formData, ...config, method, isMultipart: true })
+  fetchMultipartRequest({ url, data: formData, ...config, method })
