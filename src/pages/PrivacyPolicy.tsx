@@ -9,7 +9,13 @@ export default function PrivacyPolicy() {
       <div>Last Updated: November 7, 2025</div>
       <div>
         If there are any questions about privacy, please email&nbsp;
-        <a href="mailto:privacy@broadinstitute.org">privacy@broadinstitute.org</a>.
+        <Link
+          to="mailto:privacy@broadinstitute.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          privacy@broadinstitute.org
+        </Link>.
       </div>
       <div>We keep your name, email and company so you can use our system.</div>
       <div>We place cookies on your browser to make our site function and work faster.</div>
@@ -23,7 +29,13 @@ export default function PrivacyPolicy() {
         operate. We are aware of GDPR and other international privacy frameworks (“Privacy Law”) and are
         supportive of your rights and your compliance with any obligations you may have under Privacy Law.If you
         need more information, see the sections below, or contact&nbsp;
-        <a href="mailto:privacy@broadinstitute.org">privacy@broadinstitute.org</a>.
+        <Link
+          to="mailto:privacy@broadinstitute.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          privacy@broadinstitute.org
+        </Link>.
       </div>
       <h2>Information DUOS May Collect From You</h2>
       <ol>
@@ -247,7 +259,13 @@ export default function PrivacyPolicy() {
               Personal Data you provide only in accordance with your instructions as the Controller or Data Processor,
               and as stated in this Privacy Policy. Any questions regarding DUOS’ protection of Personal Data under
               GDPR or other Privacy Law may be directed to&nbsp;
-              <a href="mailto:privacy@broadinstitute.org">privacy@broadinstitute.org</a>.
+              <Link
+                to="mailto:privacy@broadinstitute.org"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                privacy@broadinstitute.org
+              </Link>.
             </li>
           </ol>
         </li>
