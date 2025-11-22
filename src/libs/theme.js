@@ -173,6 +173,7 @@ export const Styles = {
   LEFT_HEADER_SECTION: {
     display: 'flex',
     flexDirection: 'row',
+    paddingTop: '3rem',
   },
   SEARCH_ACTION_HEADER_SECTION: {
     display: 'flex',
