@@ -222,7 +222,17 @@ const Home = (props) => {
                             }}
                             style={{ textDecoration: 'none', display: 'flex', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
                           >
-                            <img src={logoSrc} alt={libraryName} style={logoImg} />
+                            <img
+                              src={logoSrc}
+                              alt={libraryName}
+                              style={{
+                                ...logoImg,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                objectPosition: 'center',
+                              }}
+                            />
                           </Link>
                         </div>
                         {label && (
