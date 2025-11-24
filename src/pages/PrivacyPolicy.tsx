@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
       <div>
         It is the policy of The Broad Institute to comply with all applicable laws of the countries in which we
         operate. We are aware of GDPR and other international privacy frameworks (“Privacy Law”) and are
-        supportive of your rights and your compliance with any obligations you may have under Privacy Law.If you
+        supportive of your rights and your compliance with any obligations you may have under Privacy Law. If you
         need more information, see the sections below, or contact&nbsp;
         <Link
           to="mailto:privacy@broadinstitute.org"
