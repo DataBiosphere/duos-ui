@@ -10,6 +10,7 @@ import BackgroundSignIn from 'src/pages/BackgroundSignIn'
 import NIHICWebform from 'src/pages/NIHicWebform'
 import NIHPilotInfo from 'src/pages/NIHPilotInfo'
 import PrivacyPolicy from 'src/pages/PrivacyPolicy'
+import CookiePolicy from 'src/pages/CookiePolicy'
 import TermsOfService from 'src/pages/TermsOfService'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
 import ConsentTextGenerator from 'src/pages/ConsentTextGenerator'
@@ -69,6 +70,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/nih_ic_webform" element={<NIHICWebform />} />
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/cookie_policy" element={<CookiePolicy />} />
       <Route path="/tos" element={<TermsOfService />} />
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/consent_text_generator" element={<ConsentTextGenerator />} />

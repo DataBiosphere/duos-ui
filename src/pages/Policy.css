@@ -15,6 +15,11 @@ div.policy-body {
   font-size: 24px;
 }
 
+.policy-body h3 {
+    color: #333F52;
+    font-size: 18px;
+}
+
 .policy-body ol ol {
   list-style-type: lower-roman;
 }
