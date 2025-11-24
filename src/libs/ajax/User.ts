@@ -32,7 +32,7 @@ export const User = {
   },
 
   create: async (request: CreateDuosUserRequest): Promise<DuosUser | false | undefined> => {
-    const url = `${await getApiUrl()}/api/dacuser`
+    const url = `${await getApiUrl()}/api/user/create`
     try {
       const res = await fetchPost(url, request, Config.authOpts())
       return res.data
