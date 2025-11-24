@@ -16,7 +16,6 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { set, unset } from 'lodash'
 import { ALTERNATIVE_DATA_SHARING_PLAN_FILE } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import { FileInput } from 'src/components/forms/FileInput'
-import { str } from 'ajv'
 
 export interface NihDataManagementProps {
   study: Study
