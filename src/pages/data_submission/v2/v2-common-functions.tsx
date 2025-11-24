@@ -51,7 +51,7 @@ export const generateStudyInputFormTextField = (setStudy: React.Dispatch<React.S
       defaultValue={initialValue}
       onChange={(input: { key: string, value: string, isValid: boolean }) => {
         setStudy((val: Study) => {
-          const newForm = { ...val }
+          const newForm = structuredClone(val)
           return set(newForm, input.key, input.value)
         })
       }}
@@ -80,7 +80,7 @@ export const setStudyPropertyByKey = (formData: Study, setStudy: React.Dispatch<
   if (!input.isValid) {
     return
   }
-  const studyToUpdate = { ...formData }
+  const studyToUpdate = structuredClone(formData)
   studyToUpdate.properties = studyToUpdate.properties ?? []
   const filteredProperty = studyToUpdate.properties.find(prop => prop.key === propertyInstance.key)
   if (filteredProperty) {

@@ -44,7 +44,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
           setStudyPropertyByKey(study, setStudy, input, new NihAnvilUse(input.value as string))
           if (NihAnvilUse.requiresNIHAdministrativeInformation(input.value)) {
             setStudy((val) => {
-              const newVal = { ...val }
+              const newVal = structuredClone(val)
               removeStudyPropertiesByKeys(newVal,
                 new Set(
                   [DbGaPPhsID.key,

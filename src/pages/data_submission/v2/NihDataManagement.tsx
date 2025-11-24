@@ -16,6 +16,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { set, unset } from 'lodash'
 import { ALTERNATIVE_DATA_SHARING_PLAN_FILE } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import { FileInput } from 'src/components/forms/FileInput'
+import { str } from 'ajv'
 
 export interface NihDataManagementProps {
   study: Study
@@ -64,7 +65,7 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                 setStudyPropertyByKey(study, setStudy, { isValid: true }, new AlternativeDataSharingPlan(value))
                 if (!value) {
                   setStudy((val) => {
-                    const newVal = { ...val }
+                    const newVal = structuredClone(val)
                     removeStudyPropertiesByKeys(newVal, new Set([AlternativeDataSharingPlanReasons.key,
                       AlternativeDataSharingPlanExplanation.key,
                       AlternativeDataSharingPlanDataSubmitted.key,
@@ -143,14 +144,14 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                   id={ALTERNATIVE_DATA_SHARING_PLAN_FILE}
                   onAddFile={function (file: File, id: string): void {
                     setStudy((val) => {
-                      const newVal = { ...val }
+                      const newVal = structuredClone(val)
                       set(newVal, id, file)
                       return newVal
                     })
                   }}
                   onDeleteFile={function (id: string): void {
                     setStudy((val) => {
-                      const newVal = { ...val }
+                      const newVal = structuredClone(val)
                       unset(newVal, id)
                       return newVal
                     })
