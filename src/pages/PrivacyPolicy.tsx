@@ -181,7 +181,7 @@ export default function PrivacyPolicy() {
                   <Link to="https://support.terra.bio/hc/en-us/articles/360039434212">
                     various third-party vendors and service providers
                   </Link>, such as Google Cloud, Umami, and
-                  MixPanel, that assist us in providing the Platform. For example, we may use
+                  Mixpanel, that assist us in providing the Platform. For example, we may use
                   third-party vendors to store and authenticate account credentials, store and analyze
                   system logs, send email communications, and for hosting and storing information
                   collected through our Platform. We may need to share your information with these
