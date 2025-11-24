@@ -96,18 +96,17 @@ export default function PrivacyPolicy() {
             <li>Cookies
               <ul>
                 <li>
-                  We use cookies, tracking pixels, and other similar technologies to track activity on
-                  our Site and to enhance the functionality of our Site. Cookies are small data files
-                  that our web servers send to your browser and which get saved on the hard drive of
-                  the computer that you are using to access the Site. If you do not want to allow
-                  cookies on your computer, most browsers have a feature that allows you either to
-                  automatically decline cookies or to decline or accept particular cookies from
-                  particular web sites. If you choose to reject cookies from our Site, you may be
-                  unable to use certain Site services, features, and functionality. If you choose to
-                  accept cookies from us and our service providers, you are agreeing to let us and our
-                  service providers install cookies on your computer. See our cookie policy for more
-                  information on the cookies we use. To learn more about cookies in general, please
-                  visit <Link to="https://allaboutcookies.org/">https://allaboutcookies.org/</Link>.
+                  We use cookies, tracking pixels, and other similar technologies to track activity on our Site and to
+                  enhance the functionality of our Site. Cookies are small data files that our web servers send to
+                  your browser and which get saved on the hard drive of the computer that you are using to access the
+                  Site. If you do not want to allow cookies on your computer, most browsers have a feature that allows
+                  you either to automatically decline cookies or to decline or accept particular cookies from
+                  particular web sites. If you choose to reject cookies from our Site, you may be unable to use
+                  certain Site services, features, and functionality. If you choose to accept cookies from us and our
+                  service providers, you are agreeing to let us and our service providers install cookies on your
+                  computer. See our <Link to="/cookie_policy">cookie policy</Link> for more information on the cookies
+                  we use. To learn more about cookies in general, please visit&nbsp;
+                  <Link to="https://allaboutcookies.org/">https://allaboutcookies.org/</Link>.
                 </li>
               </ul>
             </li>
