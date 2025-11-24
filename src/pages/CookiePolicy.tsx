@@ -1,11 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import './PrivacyPolicy.css'
+import './Policy.css'
 import MailOutlineIcon from '@mui/icons-material/MailOutline'
 
 export default function CookiePolicy() {
   return (
-    <div className="markdown-body">
+    <div className="policy-body">
       <h1>Cookie Policy</h1>
       <div>Last Updated: 7 November, 2025</div>
       <div>This Cookie Policy relates to your use of <Link to="/">duos.org</Link> (&quot;DUOS&quot;)</div>
