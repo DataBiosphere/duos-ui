@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
                   Portability and Accountability Act of 1996, as amended, and its related regulations
                   (collectively, &quot;HIPAA&quot;). On occasion, DUOS may agree in writing with a
                   user to perform services for the user in the storing PHI. Storing PHI in DUOS
-                  requires a prior written agreement between the user and the Broad Institute.The
+                  requires a prior written agreement between the user and the Broad Institute. The
                   uploading, storing, or transferring of PHI using the Site by users without a written
                   agreement permitting uploading of PHI is strictly prohibited. You agree that, unless
                   you have entered into a written agreement with Broad to the contrary, you will not
