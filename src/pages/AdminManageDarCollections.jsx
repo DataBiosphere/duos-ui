@@ -54,11 +54,13 @@ export default function AdminManageDarCollections() {
 
   return (
     <div style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+      <div>
         <TableHeaderSection
           title="All Data Access Requests"
           description="List of all Data Access Requests saved in DUOS"
         />
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
       {responsiveColumns.length > 0 && (

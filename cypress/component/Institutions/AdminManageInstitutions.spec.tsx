@@ -138,7 +138,7 @@ describe('AdminManageInstitutions', () => {
   it('link Add Institution page', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(mockInstitutions))
     mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
-    cy.get('[data-cy="admin-manage-institutions"]').should('contain', 'Add Institution')
+    cy.get('[id="btn_addInstitution"]').should('contain', 'ADD INSTITUTION')
     cy.get('[id="btn_addInstitution"]').should('exist')
   })
 

@@ -3,7 +3,7 @@ import { Workspace } from 'src/types/model'
 import { WorkspaceAddEdit } from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface WorkspaceListProps {
   readonly workspaces: Workspace[]
@@ -41,7 +41,7 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
   const getValidationState = () => validation?.workspaces
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-workspace-btn"
       label="Add Workspace"
       onClick={() => setShowAddEdit(true)}

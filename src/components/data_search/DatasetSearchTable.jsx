@@ -2,7 +2,7 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import * as React from 'react'
 import { Box, Button } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'lodash'
 import { applyForAccess } from 'src/utils/accessUtils.js'
 import { defaultFilters } from 'src/components/data_search/DatasetFilterConstants'
@@ -13,9 +13,11 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import DatasetFilterList from 'src/components/data_search/DatasetFilterList'
 import { Notifications } from 'src/libs/utils'
-import { Styles } from 'src/libs/theme'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { useNavigate } from 'react-router-dom'
+import SearchBar from 'src/components/SearchBar'
+import { Styles } from 'src/libs/theme.js'
+import PropTypes from 'prop-types'
 
 const styles = {
   subTab: {
@@ -33,13 +35,14 @@ const styles = {
 
 export const DatasetSearchTable = (props) => {
   const navigate = useNavigate()
-  const { datasets, icon, title } = props
+  const { datasets, title } = props
   const [exportableDatasets, setExportableDatasets] = useState({})
   const [filters, setFilters] = useState(defaultFilters(datasets))
   const [filtered, setFiltered] = useState(datasets)
   const [selected, setSelected] = useState([])
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study)
   const [searchTerm, setSearchTerm] = useState('')
+  const searchRef = useRef('')
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1
 
@@ -217,6 +220,8 @@ export const DatasetSearchTable = (props) => {
       })
     }, 150))
 
+  const handleSearchChange = useCallback(searchTerms => setSearchTerm(searchTerms))
+
   useEffect(() => {
     const fullQuery = assembleFullQuery()
     try {
@@ -226,39 +231,23 @@ export const DatasetSearchTable = (props) => {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' })
     }  }, [filters, searchTerm]); // eslint-disable-line
 
+  DatasetSearchTable.propTypes = {
+    datasets: PropTypes.array.isRequired,
+    title: PropTypes.string,
+  }
+
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <TableHeaderSection icon={{ src: icon }} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
-        <Box sx={{ paddingTop: '2em', paddingLeft: '2em' }}>
-          <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
-            <input
-              data-cy="search-bar"
-              type="text"
-              placeholder="Enter search terms"
-              aria-label="Search datasets"
-              style={{
-                width: '100%',
-                border: '1px solid #cecece',
-                backgroundColor: '#f3f6f7',
-                borderRadius: '5px',
-                height: '4rem',
-                paddingLeft: '2%',
-                fontFamily: 'Montserrat',
-                fontSize: '1.5rem',
-              }}
-              value={searchTerm}
-              onChange={(event) => {
-                setSearchTerm(event.target.value)
-              }}
-            />
-            <div />
-            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-              <Button variant="contained" onClick={() => setSearchTerm('')} sx={{ width: '10em', padding: '0' }}>
-                Clear Search
-              </Button>
-            </Box>
-          </div>
+        <TableHeaderSection
+          title={title}
+          description="Search, filter, and select datasets, then click 'Apply for Access' to request access"
+        />
+        <Box sx={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
+          <SearchBar
+            handleSearchChange={handleSearchChange}
+            searchRef={searchRef}
+          />
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'row', padding: '0 5rem', marginTop: '1rem', borderBottom: '1px solid black' }}>
           <Tabs

@@ -7,16 +7,26 @@ interface StudyAssetAddButtonProps {
   readonly onClick: () => void
   readonly disabled?: boolean
   readonly hasValidationError?: boolean
+  readonly icon?: React.ReactNode
+  readonly className?: string
 }
 
-export default function StudyAssetAddButton(props: StudyAssetAddButtonProps): React.JSX.Element {
-  const { id, label, onClick, disabled = false, hasValidationError = false } = props
+export default function AddObjectButton(props: StudyAssetAddButtonProps): React.JSX.Element {
+  const {
+    id,
+    label,
+    onClick,
+    disabled = false,
+    hasValidationError = false,
+    icon = <AddIcon fontSize="medium" />,
+    className = 'button button-white',
+  } = props
 
   return (
     <button
       id={id}
       type="button"
-      className="button button-white"
+      className={className}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -29,8 +39,10 @@ export default function StudyAssetAddButton(props: StudyAssetAddButtonProps): Re
       onClick={() => !disabled && onClick()}
       disabled={disabled}
     >
-      <AddIcon fontSize="medium" />
-      {label}
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+        {icon}
+        <span>{label}</span>
+      </span>
     </button>
   )
 }
