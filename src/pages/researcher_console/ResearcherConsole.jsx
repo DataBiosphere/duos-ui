@@ -60,7 +60,7 @@ export default function ResearcherConsole() {
   const cancelCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection
-      await Collections.cancelCollection(darCollectionId)
+      await Collections.cancelCollection(darCollectionId, USER_ROLES.researcher)
       const updatedCollection = await Collections.getCollectionSummaryByRoleNameAndId({
         roleName: USER_ROLES.researcher,
         id: darCollectionId,
