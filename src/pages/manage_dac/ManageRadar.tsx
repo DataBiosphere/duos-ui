@@ -83,12 +83,12 @@ const ManageRadar = () => {
           id="link_manage_dac"
           to="/manage_dac"
           className="navbar-brand"
-          style={{ paddingRight: '16px', marginTop: '3rem' }}
+          style={{ paddingRight: '16px' }}
         >
           <img id="back-arrow-icon" src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
         </Link>
         <TableHeaderSection
-          title="Manage Rule Automation for DARs (RADAR)"
+          title="DAC Configurations"
           description={fetchedDac ? fetchedDac.name : ''}
         />
       </div>
