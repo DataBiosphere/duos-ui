@@ -3,7 +3,6 @@ import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { InstitutionInterface } from 'src/types/model'
 import { Styles } from '../libs/theme'
 import { getSearchFilterFunctions, Notifications } from 'src/libs/utils'
-import manageInstitutionsIcon from 'src/images/icon_manage_dac.png'
 import SearchBar from 'src/components/SearchBar'
 import InstitutionTable from 'src/components/institution_table/InstitutionTable'
 import { tableHeaderTemplate, tableRowLoadingTemplate } from 'src/components/institution_table/InstitutionTableUtils'
@@ -72,7 +71,6 @@ export default function AdminManageInstitutions() {
     <div style={Styles.PAGE} data-cy="admin-manage-institutions">
       <div>
         <TableHeaderSection
-          icon={{ src: manageInstitutionsIcon }}
           title="Manage Institutions"
           description="Select and manage Institutions"
         />

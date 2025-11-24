@@ -2,7 +2,6 @@ import React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { AddUserModal } from 'src/components/modals/AddUserModal'
 import { User } from 'src/libs/ajax/User'
-import manageUsersIcon from 'src/images/icon_manage_users.png'
 import { USER_ROLES } from 'src/libs/utils'
 import { isNil } from 'lodash/fp'
 import { ManageUsersTable } from 'src/components/manage_users_table/ManageUsersTable'
@@ -82,7 +81,6 @@ export const AdminManageUsers = function AdminManageUsers() {
     <div style={Styles.PAGE}>
       <div>
         <TableHeaderSection
-          icon={{ src: manageUsersIcon }}
           title="Manage Users"
           description="Select and manage users and their roles"
         />

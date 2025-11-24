@@ -88,7 +88,6 @@ const ManageRadar = () => {
           <img id="back-arrow-icon" src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
         </Link>
         <TableHeaderSection
-          icon={{ src: radarIcon }}
           title="Manage Rule Automation for DARs (RADAR)"
           description={fetchedDac ? fetchedDac.name : ''}
         />

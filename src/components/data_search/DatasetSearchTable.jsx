@@ -17,6 +17,7 @@ import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFoo
 import { useNavigate } from 'react-router-dom'
 import SearchBar from 'src/components/SearchBar'
 import { Styles } from 'src/libs/theme.js'
+import PropTypes from 'prop-types'
 
 const styles = {
   subTab: {
@@ -34,7 +35,7 @@ const styles = {
 
 export const DatasetSearchTable = (props) => {
   const navigate = useNavigate()
-  const { datasets, icon, title } = props
+  const { datasets, title } = props
   const [exportableDatasets, setExportableDatasets] = useState({})
   const [filters, setFilters] = useState(defaultFilters(datasets))
   const [filtered, setFiltered] = useState(datasets)
@@ -230,19 +231,19 @@ export const DatasetSearchTable = (props) => {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' })
     }  }, [filters, searchTerm]); // eslint-disable-line
 
+  DatasetSearchTable.propTypes = {
+    datasets: PropTypes.array.isRequired,
+    title: PropTypes.string,
+  }
+
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <TableHeaderSection
-          icon={{ src: icon }}
           title={title}
           description="Search, filter, and select datasets, then click 'Apply for Access' to request access"
         />
-        <Box sx={{
-          ...Styles.SEARCH_ACTION_HEADER_SECTION,
-          ...(icon && { marginLeft: '6.5rem' }),
-        }}
-        >
+        <Box sx={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
           <SearchBar
             handleSearchChange={handleSearchChange}
             searchRef={searchRef}
