@@ -60,7 +60,7 @@ export default function ResearcherConsole() {
   const cancelCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection
-      await Collections.cancelCollection(darCollectionId)
+      await Collections.cancelCollection(darCollectionId, USER_ROLES.researcher)
       const updatedCollection = await Collections.getCollectionSummaryByRoleNameAndId({
         roleName: USER_ROLES.researcher,
         id: darCollectionId,
@@ -140,14 +140,13 @@ export default function ResearcherConsole() {
 
   return (
     <div style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0px -3%' }}>
-        <div>
-          <TableHeaderSection
-            title="My Data Access Requests"
-            description="Select and manage Data Access Requests and Drafts below"
-          />
-          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify' }}>
-            By submitting a DAR in DUOS you agree to the
+      <div>
+        <TableHeaderSection
+          title="My Data Access Requests"
+          description="Select and manage Data Access Requests and Drafts below"
+        />
+        <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify' }}>
+          <p>By submitting a DAR in DUOS you agree to the
             {' '}
             <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>
               Broad
@@ -160,8 +159,10 @@ export default function ResearcherConsole() {
             </a>
             {' '}
             Library Card Agreements.
-          </div>
+          </p>
         </div>
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
       </div>
       <div className="table-container">

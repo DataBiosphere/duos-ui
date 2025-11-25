@@ -1,24 +1,33 @@
 
-div.markdown-body {
+div.policy-body {
   margin: 5rem;
   max-width: 100rem;
   font-family: Montserrat, sans-serif;
 }
 
-.markdown-body h1 {
+.policy-body h1 {
   color: #333F52;
   font-size: 32px;
 }
 
-.markdown-body h2 {
+.policy-body h2 {
   color: #333F52;
   font-size: 24px;
 }
 
-.markdown-body ol ol {
+.policy-body h3 {
+    color: #333F52;
+    font-size: 18px;
+}
+
+.policy-body ol ol {
   list-style-type: lower-roman;
 }
 
-.markdown-body p {
+.policy-body p {
   margin-bottom: 1.5rem;
+}
+
+.policy-body div {
+    margin-bottom: 1.5rem;
 }

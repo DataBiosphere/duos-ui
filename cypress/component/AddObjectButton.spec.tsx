@@ -1,13 +1,13 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
-describe('StudyAssetAddButton', () => {
+describe('AddObjectButton', () => {
   it('renders with required props', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={onClickSpy}
@@ -23,7 +23,7 @@ describe('StudyAssetAddButton', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={onClickSpy}
@@ -38,7 +38,7 @@ describe('StudyAssetAddButton', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={onClickSpy}
@@ -53,7 +53,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies correct styling when disabled', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -66,7 +66,7 @@ describe('StudyAssetAddButton', () => {
 
   it('shows validation error styling', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -80,7 +80,7 @@ describe('StudyAssetAddButton', () => {
 
   it('shows default styling without validation error', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -94,7 +94,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies button-white class', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -107,7 +107,7 @@ describe('StudyAssetAddButton', () => {
 
   it('applies correct layout styles', () => {
     mount(
-      <StudyAssetAddButton
+      <AddObjectButton
         id="test-button"
         label="Add Test"
         onClick={() => {}}
@@ -118,5 +118,61 @@ describe('StudyAssetAddButton', () => {
     cy.get('#test-button').should('have.css', 'align-items', 'center')
     cy.get('#test-button').should('have.css', 'margin-top', '0px')
     cy.get('#test-button').should('have.css', 'margin-bottom', '5px')
+  })
+
+  it('renders with custom icon', () => {
+    const CustomIcon = () => <span data-testid="custom-icon">★</span>
+
+    mount(
+      <AddObjectButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+        icon={<CustomIcon />}
+      />,
+    )
+
+    cy.get('[data-testid="custom-icon"]').should('exist')
+    cy.get('[data-testid="custom-icon"]').should('contain.text', '★')
+  })
+
+  it('renders with default AddIcon when icon prop not provided', () => {
+    mount(
+      <AddObjectButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+      />,
+    )
+
+    cy.get('#test-button').find('svg').should('exist')
+    cy.get('#test-button').find('[data-testid="AddIcon"]').should('exist')
+  })
+
+  it('applies custom className', () => {
+    mount(
+      <AddObjectButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+        className="custom-class another-class"
+      />,
+    )
+
+    cy.get('#test-button').should('have.class', 'custom-class')
+    cy.get('#test-button').should('have.class', 'another-class')
+  })
+
+  it('applies default className when not provided', () => {
+    mount(
+      <AddObjectButton
+        id="test-button"
+        label="Add Test"
+        onClick={() => {}}
+      />,
+    )
+
+    cy.get('#test-button').should('have.class', 'button')
+    cy.get('#test-button').should('have.class', 'button-white')
   })
 })

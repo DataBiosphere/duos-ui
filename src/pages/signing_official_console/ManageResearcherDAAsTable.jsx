@@ -16,6 +16,7 @@ import { USER_ROLES } from '../../libs/utils'
 import DisplayNameCell from './DisplayNameCell'
 import ManageDaasDropdown from './ManageDaasDropdown'
 import DAACell from './DAACell'
+import TableHeaderSection from 'src/components/TableHeaderSection.tsx'
 
 // Styles specific to this table
 const styles = {
@@ -174,41 +175,35 @@ export default function ManageResearcherDAAsTable(props) {
   }
 
   return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' }}>
-        <div style={Styles.LEFT_HEADER_SECTION}>
-          <div style={{ ...Styles.HEADER_CONTAINER, marginRight: '-7%' }}>
-            <div style={{ ...Styles.SUB_HEADER,
-              marginTop: '0',
-              fontFamily: 'Montserrat',
-              fontWeight: 600,
-              fontSize: '2.8rem' }}
+    <div style={Styles.PAGE}>
+      <div>
+        <TableHeaderSection
+          title="My Institution's Researchers"
+        />
+        <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
+          <p>
+            The table below allows you to
+            {' '}
+            <a
+              href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS"
+              id="terra-support-pre-auth-link"
+              target="_blank"
+              rel="noreferrer"
             >
-              My Institution&apos;s Researchers
-            </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px',
-              maxWidth: '60%',
-            })}
-            >
-              The table below allows you to
-              {' '}
-              <a
-                href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS"
-                id="terra-support-pre-auth-link"
-                target="_blank"
-                rel="noreferrer"
-              >
-                pre-authorize
-              </a>
-              {' '}
-              your Institution&apos;s users to request access to datasets,
-              known as issuing them a Library Card. Issuing a checkmark in a cell for a researcher issues them a Library
-              Card for that DAA and denotes your approval of that researcher to request data from DACs operating under the respective DAA(s).
-            </div>
-          </div>
+              pre-authorize
+            </a>
+            {' '}
+            your Institution&apos;s users to request access to datasets,
+            known as issuing them a Library Card. Issuing a checkmark in a cell for a researcher issues them a Library
+            Card for that DAA and denotes your approval of that researcher to request data from DACs operating under the respective DAA(s).
+          </p>
         </div>
-        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
+        <SearchBar
+          handleSearchChange={handleSearchChange}
+          searchRef={searchRef}
+        />
       </div>
       <SimpleTable
         isLoading={isLoading}
@@ -218,6 +213,6 @@ export default function ManageResearcherDAAsTable(props) {
         tableSize={tableSize}
         paginationBar={paginationBar}
       />
-    </>
+    </div>
   )
 }

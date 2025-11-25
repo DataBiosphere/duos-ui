@@ -18,6 +18,8 @@ import { NIHDataUseCertificationAgreement } from 'src/components/external_docs/N
 import { processLibraryCards } from 'src/utils/LibraryCardUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import AddObjectButton from 'src/components/AddObjectButton.tsx'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 // Styles specific to this table
 const styles = {
@@ -369,56 +371,54 @@ export default function SigningOfficialTable(props) {
   }
 
   return (
-    <>
-      <div style={{ width: '105%', marginLeft: '-3%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <TableHeaderSection
-            title="Pre-authorize my Institution's Researchers with Library Cards"
-            description="Use the table below to add or remove Library Cards so DUOS-registered researchers can submit DARs."
-          />
-          <a
-            rel="noopener noreferrer"
-            href="https://duos.blog/preauthorize_researchers_librarycards"
-            target="_blank"
-            id="so-console-info-link"
-          >
-            <Info fontSize="medium" />
-          </a>
+    <div style={{ ...Styles.PAGE }}>
+      <div style={{ marginLeft: '-7.5%' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <TableHeaderSection
+              title="Pre-authorize my Institution's Researchers with Library Cards"
+              description="Use the table below to add or remove Library Cards so DUOS-registered researchers can submit DARs."
+            />
+            <a
+              rel="noopener noreferrer"
+              href="https://duos.blog/preauthorize_researchers_librarycards"
+              target="_blank"
+              id="so-console-info-link"
+            >
+              <Info fontSize="medium" />
+            </a>
+          </div>
+          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
+            <p>
+              Issuing Library Card privileges is done in accordance with the
+              {' '}
+              <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad Library Card Agreement</a>
+              ,
+              {' '}
+              <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH Library Card Agreement</a>
+              , and
+              {' '}
+              <NIHDataUseCertificationAgreement />
+              {' '}
+              and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does
+              {' '}
+              <span style={{ fontWeight: 600 }}>not</span>
+              {' '}
+              include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
+            </p>
+            <p>
+              Note: NIH DACs are not currently using DUOS to review Data Access Requests (DARs). Signing Officials agree to review Library Cards for their institutions annually, and add/remove Library Cards as necessary.
+            </p>
+          </div>
         </div>
-        <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
-          <p>
-            Issuing Library Card privileges is done in accordance with the
-            {' '}
-            <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad Library Card Agreement</a>
-            ,
-            {' '}
-            <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH Library Card Agreement</a>
-            , and
-            {' '}
-            <NIHDataUseCertificationAgreement />
-            {' '}
-            and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does
-            {' '}
-            <span style={{ fontWeight: 600 }}>not</span>
-            {' '}
-            include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
-          </p>
-          <p>
-            Note: NIH DACs are not currently using DUOS to review Data Access Requests (DARs). Signing Officials agree to review Library Cards for their institutions annually, and add/remove Library Cards as necessary.
-          </p>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '2rem', marginTop: '1rem' }}>
+        <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
           <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
-          <SimpleButton
-            onClick={() => showModalOnClick()}
-            baseColor={Theme.palette.secondary}
-            label="Add Library Card"
-            additionalStyle={{
-              width: '22rem',
-              height: '4rem',
-              padding: '0',
-              fontWeight: '600',
-            }}
+          <AddObjectButton
+            id="btn_addUser"
+            label="ADD LIBRARY CARD"
+            onClick={showModalOnClick}
+            icon={<AddCircleOutlineIcon />}
+            className="button button-blue"
           />
         </div>
       </div>
@@ -453,6 +453,6 @@ export default function SigningOfficialTable(props) {
             ? deactivateLibraryCard(selectedCard, researchers)
             : issueLibraryCards([selectedCard], researchers)}
       />
-    </>
+    </div>
   )
 }

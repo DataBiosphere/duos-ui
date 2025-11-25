@@ -256,8 +256,8 @@ export default function ManageEditDac() {
     isLoading
       ? <Spinner />
       : (
-          <div className="container container-wide">
-            <div className="row no-margin">
+          <div style={Styles.PAGE}>
+            <div>
               <Link
                 id="link_manage_dac"
                 to="/manage_dac"
@@ -271,185 +271,185 @@ export default function ManageEditDac() {
                 title={dacText}
                 description={dacId === undefined ? 'Create DAC' : fetchedDac?.name}
               />
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '2rem' }}>
-                <form
-                  className="form-horizontal css-form"
-                  name="dacForm"
-                  noValidate
-                  encType="multipart/form-data"
-                  style={{ width: '83.33%', maxWidth: '1200px' }}
-                >
-                  <div style={{ display: 'flex', marginBottom: '15px' }}>
-                    <label
-                      id="lbl_dacName"
-                      style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
-                      className="control-label common-color"
-                    >
-                      DAC Name
-                    </label>
-                    <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
-                      <input
-                        id="txt_dacName"
-                        type="text"
-                        defaultValue={state.dac.name}
-                        onChange={handleChange}
-                        name="name"
-                        className="form-control vote-input"
-                        required={true}
-                        style={{ width: '100%' }}
-                        data-cy="dac_name"
-                      />
-                    </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '2rem' }}>
+              <form
+                className="form-horizontal css-form"
+                name="dacForm"
+                noValidate
+                encType="multipart/form-data"
+                style={{ width: '83.33%', maxWidth: '1200px' }}
+              >
+                <div style={{ display: 'flex', marginBottom: '15px' }}>
+                  <label
+                    id="lbl_dacName"
+                    style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+                    className="control-label common-color"
+                  >
+                    DAC Name
+                  </label>
+                  <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+                    <input
+                      id="txt_dacName"
+                      type="text"
+                      defaultValue={state.dac.name}
+                      onChange={handleChange}
+                      name="name"
+                      className="form-control vote-input"
+                      required={true}
+                      style={{ width: '100%' }}
+                      data-cy="dac_name"
+                    />
                   </div>
+                </div>
 
-                  <div style={{ display: 'flex', marginBottom: '15px' }}>
-                    <label
-                      id="lbl_dacDescription"
-                      style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
-                      className="control-label common-color"
-                    >
-                      DAC Description
-                    </label>
-                    <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
-                      <textarea
-                        id="txt_dacDescription"
-                        defaultValue={state.dac.description}
-                        onChange={handleChange}
-                        name="description"
-                        className="form-control vote-input"
-                        required={true}
-                        data-cy="dac_description"
-                      />
-                    </div>
+                <div style={{ display: 'flex', marginBottom: '15px' }}>
+                  <label
+                    id="lbl_dacDescription"
+                    style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+                    className="control-label common-color"
+                  >
+                    DAC Description
+                  </label>
+                  <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+                    <textarea
+                      id="txt_dacDescription"
+                      defaultValue={state.dac.description}
+                      onChange={handleChange}
+                      name="description"
+                      className="form-control vote-input"
+                      required={true}
+                      data-cy="dac_description"
+                    />
                   </div>
+                </div>
 
-                  <div style={{ display: 'flex', marginBottom: '15px' }}>
-                    <label
-                      id="lbl_dacEmail"
-                      style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
-                      className="control-label common-color"
-                    >
-                      DAC Email
-                    </label>
-                    <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
-                      <input
-                        id="txt_dacEmail"
-                        type="text"
-                        defaultValue={state.dac.email}
-                        onChange={handleChange}
-                        name="email"
-                        className="form-control vote-input"
-                        required={true}
-                        data-cy="dac_email"
-                      />
-                    </div>
+                <div style={{ display: 'flex', marginBottom: '15px' }}>
+                  <label
+                    id="lbl_dacEmail"
+                    style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+                    className="control-label common-color"
+                  >
+                    DAC Email
+                  </label>
+                  <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+                    <input
+                      id="txt_dacEmail"
+                      type="text"
+                      defaultValue={state.dac.email}
+                      onChange={handleChange}
+                      name="email"
+                      className="form-control vote-input"
+                      required={true}
+                      data-cy="dac_email"
+                    />
                   </div>
-                  {
-                    (state.dac.chairpersons.length > 0 || state.dac.members.length > 0)
-                    && (
-                      <div style={{ display: 'flex', marginBottom: '15px' }}>
-                        <label
-                          id="lbl_dacMembers"
-                          style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
-                          className="control-label common-color"
-                        >
-                          DAC Members
-                        </label>
-                        <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
-                          <DacUsers
-                            dac={state.dac}
-                            removeButton={true}
-                            removeHandler={removeDacMember}
-                          />
-                        </div>
-                      </div>
-                    )
-                  }
-
-                  <div style={{ display: 'flex', marginBottom: '15px' }}>
-                    <label
-                      id="lbl_dacChair"
-                      style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
-                      className="control-label common-color"
-                    >
-                      Add Chairperson(s)
-                    </label>
-                    <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
-                      <AsyncSelect
-                        id="sel_dacChair"
-                        isDisabled={false}
-                        isMulti
-                        loadOptions={(query, callback) => chairSearch(query, callback)}
-                        onChange={option => onChairSearchChange(option)}
-                        onInputChange={() => onSearchInputChanged()}
-                        onMenuClose={() => onSearchMenuClosed()}
-                        noOptionsMessage={() => 'Select a DUOS User...'}
-                        value={state.chairsSelectedOptions}
-                        classNamePrefix="select"
-                        placeholder="Select a DUOS User..."
-                        className="select-autocomplete"
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', marginBottom: '15px' }}>
-                    <label
-                      id="lbl_dacMember"
-                      style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
-                      className="control-label common-color"
-                    >
-                      Add Member(s)
-                    </label>
-                    <div style={state.searchInputChanged
-                      ? {
-                          paddingBottom: '10rem',
-                          flexBasis: '66.67%',
-                          paddingLeft: '15px',
-                        }
-                      : { flexBasis: '66.67%', paddingLeft: '15px' }}
-                    >
-                      <AsyncSelect
-                        id="sel_dacMember"
-                        isDisabled={false}
-                        isMulti={true}
-                        loadOptions={(query, callback) => memberSearch(query, callback)}
-                        onChange={option => onMemberSearchChange(option)}
-                        onInputChange={() => onSearchInputChanged()}
-                        onMenuClose={() => onSearchMenuClosed()}
-                        noOptionsMessage={() => 'Select a DUOS User...'}
-                        value={state.membersSelectedOptions}
-                        classNamePrefix="select"
-                        placeholder="Select a DUOS User..."
-                        className="select-autocomplete"
-                      />
-                    </div>
-                  </div>
-                  <div style={{ paddingBottom: '20px', float: 'right' }}>
-                    <button
-                      id="btn_save"
-                      onClick={okHandler}
-                      className="f-left btn-primary common-background"
-                      data-cy="btn_save"
-                    >
-                      Save
-                    </button>
-                    <button
-                      id="btn_cancel"
-                      onClick={closeHandler}
-                      className="f-left btn-secondary"
-                      data-cy="btn_cancel"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+                </div>
                 {
-                  state.error.show && (
-                    <div>
-                      <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+                  (state.dac.chairpersons.length > 0 || state.dac.members.length > 0)
+                  && (
+                    <div style={{ display: 'flex', marginBottom: '15px' }}>
+                      <label
+                        id="lbl_dacMembers"
+                        style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+                        className="control-label common-color"
+                      >
+                        DAC Members
+                      </label>
+                      <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+                        <DacUsers
+                          dac={state.dac}
+                          removeButton={true}
+                          removeHandler={removeDacMember}
+                        />
+                      </div>
                     </div>
                   )
                 }
-              </div>
+
+                <div style={{ display: 'flex', marginBottom: '15px' }}>
+                  <label
+                    id="lbl_dacChair"
+                    style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+                    className="control-label common-color"
+                  >
+                    Add Chairperson(s)
+                  </label>
+                  <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+                    <AsyncSelect
+                      id="sel_dacChair"
+                      isDisabled={false}
+                      isMulti
+                      loadOptions={(query, callback) => chairSearch(query, callback)}
+                      onChange={option => onChairSearchChange(option)}
+                      onInputChange={() => onSearchInputChanged()}
+                      onMenuClose={() => onSearchMenuClosed()}
+                      noOptionsMessage={() => 'Select a DUOS User...'}
+                      value={state.chairsSelectedOptions}
+                      classNamePrefix="select"
+                      placeholder="Select a DUOS User..."
+                      className="select-autocomplete"
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', marginBottom: '15px' }}>
+                  <label
+                    id="lbl_dacMember"
+                    style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+                    className="control-label common-color"
+                  >
+                    Add Member(s)
+                  </label>
+                  <div style={state.searchInputChanged
+                    ? {
+                        paddingBottom: '10rem',
+                        flexBasis: '66.67%',
+                        paddingLeft: '15px',
+                      }
+                    : { flexBasis: '66.67%', paddingLeft: '15px' }}
+                  >
+                    <AsyncSelect
+                      id="sel_dacMember"
+                      isDisabled={false}
+                      isMulti={true}
+                      loadOptions={(query, callback) => memberSearch(query, callback)}
+                      onChange={option => onMemberSearchChange(option)}
+                      onInputChange={() => onSearchInputChanged()}
+                      onMenuClose={() => onSearchMenuClosed()}
+                      noOptionsMessage={() => 'Select a DUOS User...'}
+                      value={state.membersSelectedOptions}
+                      classNamePrefix="select"
+                      placeholder="Select a DUOS User..."
+                      className="select-autocomplete"
+                    />
+                  </div>
+                </div>
+                <div style={{ paddingBottom: '20px', float: 'right' }}>
+                  <button
+                    id="btn_save"
+                    onClick={okHandler}
+                    className="f-left btn-primary common-background"
+                    data-cy="btn_save"
+                  >
+                    Save
+                  </button>
+                  <button
+                    id="btn_cancel"
+                    onClick={closeHandler}
+                    className="f-left btn-secondary"
+                    data-cy="btn_cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+              {
+                state.error.show && (
+                  <div>
+                    <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+                  </div>
+                )
+              }
             </div>
           </div>
         )

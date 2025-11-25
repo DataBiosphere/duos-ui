@@ -3,7 +3,7 @@ import PresentationAddEdit from './PresentationAddEdit'
 import PresentationRow from './PresentationRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { Presentation } from 'src/types/model'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface PresentationListProps {
   readonly presentations: Presentation[]
@@ -41,7 +41,7 @@ export default function PresentationList(props: PresentationListProps): React.JS
   const getValidationState = () => validation?.presentations
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-presentation-btn"
       label="Add Presentation"
       onClick={() => setShowAddEdit(true)}

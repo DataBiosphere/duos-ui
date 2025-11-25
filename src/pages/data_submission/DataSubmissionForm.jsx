@@ -99,9 +99,11 @@ export const DataSubmissionForm = () => {
         if (Array.isArray(files)) {
           files.forEach((file, idx) => {
             const [[duosFileType, duosFileObj]] = Object.entries(file)
-            // Consent has code to look for the string as formatted below
-            const fieldKey = `${field}[${idx}].${duosFileType}`
-            multiPartFormData.append(fieldKey, duosFileObj, duosFileObj.fileName)
+            if (duosFileObj !== null) {
+              // Consent has code to look for the string as formatted below
+              const fieldKey = `${field}[${idx}].${duosFileType}`
+              multiPartFormData.append(fieldKey, duosFileObj, duosFileObj.fileName)
+            }
           })
         }
         else {
@@ -198,7 +200,7 @@ export const DataSubmissionForm = () => {
     <div>
       {!failedInit && (
         <div style={Styles.PAGE}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+          <div style={{ marginLeft: '-1.5%' }}>
             <TableHeaderSection
               title="Study Registration Form"
               description="Submit new datasets to DUOS"

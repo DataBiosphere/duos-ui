@@ -30,6 +30,7 @@ function DuosFooter() {
           <li className="footer-links__item">© Broad Institute</li>
           <li className="footer-links__item"><a href="/privacy">Privacy Policy</a></li>
           <li className="footer-links__item"><a href="/tos">Terms of Service</a></li>
+          <li className="footer-links__item"><a href="/cookie_policy">Cookie Policy</a></li>
           <li className="footer-links__item"><a href="/status">Status</a></li>
         </ul>
       </footer>

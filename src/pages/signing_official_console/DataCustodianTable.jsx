@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Styles, Theme } from 'src/libs/theme'
-import userIcon from 'src/images/icon_manage_users.png'
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
 import SimpleTable from 'src/components/SimpleTable'
 import SimpleButton from 'src/components/SimpleButton'
@@ -362,17 +361,18 @@ export default function DataCustodianTable(props) {
 
   return (
     <div style={Styles.PAGE}>
-      <div style={{ width: '112%', marginLeft: '-8%' }}>
-        <TableHeaderSection
-          icon={{ src: userIcon }}
-          title="My Institution’s Data Submitters"
-          description="Issue or remove Data Submitter privileges."
-        />
-        <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
-          <p>By issuing Data Submitter permissions, you are authorizing researchers from your institution to register and share data in DUOS. Data registered in DUOS can be either <b>Open Access</b> or <b>Controlled Access</b>.</p>
-          <p>Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to. To register controlled access data with a DAC in DUOS, may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.</p>
+      <div style={{ marginLeft: '-7.5%' }}>
+        <div>
+          <TableHeaderSection
+            title="My Institution’s Data Submitters"
+            description="Issue or remove Data Submitter privileges."
+          />
+          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
+            <p>By issuing Data Submitter permissions, you are authorizing researchers from your institution to register and share data in DUOS. Data registered in DUOS can be either <b>Open Access</b> or <b>Controlled Access</b>.</p>
+            <p>Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to. To register controlled access data with a DAC in DUOS, may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.</p>
+          </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', gap: '2rem', marginLeft: '2em', marginTop: '1rem', width: '100%' }}>
+        <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
           <SearchBar
             handleSearchChange={handleSearchChange}
             searchRef={searchRef}

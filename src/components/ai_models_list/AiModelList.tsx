@@ -3,7 +3,7 @@ import AiModelAddEdit from 'src/components/ai_models_list/AiModelAddEdit'
 import AiModelRow from 'src/components/ai_models_list/AiModelRow'
 import { AiModel } from 'src/types/model'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import StudyAssetAddButton from 'src/pages/data_submission/v2/StudyAssetAddButton'
+import AddObjectButton from 'src/components/AddObjectButton'
 
 interface AiModelListProps {
   readonly aiModels: AiModel[]
@@ -49,7 +49,7 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
   const getValidationState = () => validation?.aiModels
 
   const button = (
-    <StudyAssetAddButton
+    <AddObjectButton
       id="add-ai-model-btn"
       label="Add Model"
       onClick={() => setShowAddEdit(true)}

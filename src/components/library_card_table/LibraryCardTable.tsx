@@ -289,18 +289,16 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   // Template for render
   return (
     <div data-cy="manage-library-card-table" style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div>
         <TableHeaderSection
           title="Manage Library Cards"
           description="Select and manage Library Cards"
         />
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchChange}
           searchRef={searchRef}
-          style={{
-            width: '100%',
-            margin: '0 3% 0 0',
-          }}
         />
       </div>
       <SimpleTable

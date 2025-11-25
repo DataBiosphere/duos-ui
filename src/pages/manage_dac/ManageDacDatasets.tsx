@@ -8,6 +8,8 @@ import { Dataset, DatasetProperty } from 'src/types/model'
 import SimpleTable from 'src/components/SimpleTable'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
+import { Styles } from 'src/libs/theme'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 
 const PAGE_SIZE = 10
 
@@ -160,40 +162,44 @@ export const ManageDacDatasets: React.FC = () => {
   ])
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ margin: 0 }}>DAC Datasets associated with DAC: {dac.name}</h2>
+    <div style={Styles.PAGE}>
+      <div>
+        <TableHeaderSection
+          title={`DAC Datasets associated with DAC: ${dac?.name || ''}`}
+        />
+      </div>
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           placeholder="Search by Dataset ID or Name"
-          handleSearchChange={(searchValue: { current: { value: string } }) => {
-            const value = searchValue?.current?.value ?? ''
+          handleSearchChange={(value: string) => {
             setSearch(value)
             setCurrentPage(1)
           }}
-          searchRef={null}
         />
       </div>
-      <SimpleTable
-        rowData={rowData}
-        columnHeaders={columnHeaders}
-        styles={styles}
-        tableSize={rowData.length}
-        paginationBar={(
-          <PaginationBar
-            pageCount={pageCount}
-            currentPage={currentPage}
-            tableSize={PAGE_SIZE}
-            goToPage={(page: number) => {
-              const safePage = Math.max(1, Math.min(page, pageCount))
-              setCurrentPage(safePage)
-            }}
-            changeTableSize={() => {}}
-          />
-        )}
-        sort={sort}
-        onSort={setSort}
-        isLoading={false}
-      />
+      <div style={{ marginTop: '3rem' }}>
+        <SimpleTable
+          rowData={rowData}
+          columnHeaders={columnHeaders}
+          styles={styles}
+          tableSize={rowData.length}
+          paginationBar={(
+            <PaginationBar
+              pageCount={pageCount}
+              currentPage={currentPage}
+              tableSize={PAGE_SIZE}
+              goToPage={(page: number) => {
+                const safePage = Math.max(1, Math.min(page, pageCount))
+                setCurrentPage(safePage)
+              }}
+              changeTableSize={() => {}}
+            />
+          )}
+          sort={sort}
+          onSort={setSort}
+          isLoading={false}
+        />
+      </div>
     </div>
   )
 }
