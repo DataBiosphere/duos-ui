@@ -20,7 +20,7 @@ describe('Home Page - Tests', function () {
 
     it('renders the Data Libraries section with consistent message', function () {
       cy.contains('Data Libraries in DUOS').should('be.visible')
-      cy.contains('Explore curated Data Libraries for studies').should('be.visible')
+      cy.contains('Institutions, programs, and studies use curated Data Libraries to showcase their science').should('be.visible')
     })
 
     it('displays tooltips with login required message for data libraries', function () {
@@ -77,7 +77,7 @@ describe('Home Page - Tests', function () {
 
     it('renders the Data Libraries section with clickable message', function () {
       cy.contains('Data Libraries in DUOS').should('be.visible')
-      cy.contains('Explore curated Data Libraries for studies').should('be.visible')
+      cy.contains('Institutions, programs, and studies use curated Data Libraries to showcase their science').should('be.visible')
     })
 
     it('displays tooltips with correct text for data libraries', function () {

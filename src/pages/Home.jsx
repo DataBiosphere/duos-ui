@@ -173,10 +173,7 @@ const Home = (props) => {
             </div>
             <div className="col-lg-4 col-md-4">
               <p style={header}>Looking for data?</p>
-              <p style={description}>Find and request access to 100s of datasets now!</p>
-              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a href="https://duos.org/datalibrary" id="data-library-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
-              </div>
+              <p style={description}>Find and request access to 100s of datasets through DUOS! Sign in to get started.</p>
             </div>
           </div>
 
@@ -184,7 +181,7 @@ const Home = (props) => {
             <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
               <p style={header}>Search Data Libraries in DUOS</p>
               <p style={description}>
-                Explore curated Data Libraries for studies, programs, and institutions below. Contact us to request your own!
+                Institutions, programs, and studies use curated Data Libraries to showcase their science! Check out the options below and contact us to request your own.
               </p>
 
               <div style={logoGrid} className="logo-grid">
