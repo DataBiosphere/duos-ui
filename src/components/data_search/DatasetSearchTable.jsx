@@ -35,7 +35,7 @@ const styles = {
 
 export const DatasetSearchTable = (props) => {
   const navigate = useNavigate()
-  const { datasets, title } = props
+  const { datasets, icon, title } = props
   const [exportableDatasets, setExportableDatasets] = useState({})
   const [filters, setFilters] = useState(defaultFilters(datasets))
   const [filtered, setFiltered] = useState(datasets)
@@ -233,6 +233,7 @@ export const DatasetSearchTable = (props) => {
 
   DatasetSearchTable.propTypes = {
     datasets: PropTypes.array.isRequired,
+    icon: PropTypes.string,
     title: PropTypes.string,
   }
 
@@ -240,6 +241,7 @@ export const DatasetSearchTable = (props) => {
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <TableHeaderSection
+          icon={{ src: icon }}
           title={title}
           description="Search, filter, and select datasets, then click 'Apply for Access' to request access"
         />
