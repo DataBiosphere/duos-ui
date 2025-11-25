@@ -24,7 +24,6 @@ import {
 } from 'src/components/forms/SelectOptionsInterfacePicker'
 import { InstitutionPicker } from 'src/components/forms/InstitutionPicker'
 import { NIHInstitutesAndCenters } from 'src/components/forms/NIHInstitutesAndCenters'
-import { cloneDeep } from 'lodash'
 
 export interface NihAdministrativeInformationProps {
   study: Study
@@ -101,7 +100,7 @@ export const NihAdministrativeInformation = (props: NihAdministrativeInformation
             setStudyPropertyByKey(study, setStudy, { isValid: true }, new MultiCenterStudy(value))
             if (!value) {
               setStudy((val) => {
-                const newVal = cloneDeep(val)
+                const newVal = structuredClone(val)
                 removeStudyPropertiesByKeys(newVal, new Set([CollaboratingSites.key]))
                 return newVal
               })
@@ -138,7 +137,7 @@ export const NihAdministrativeInformation = (props: NihAdministrativeInformation
             setStudyPropertyByKey(study, setStudy, { isValid: true }, new ControlledAccessRequiredForGenomicSummaryResultsGSR(value))
             if (!value) {
               setStudy((val) => {
-                const newVal = cloneDeep(val)
+                const newVal = structuredClone(val)
                 removeStudyPropertiesByKeys(newVal, new Set([ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key]))
                 return newVal
               })

@@ -17,6 +17,7 @@ import {
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { DataTypes } from 'src/components/forms/DataTypes'
+import { set } from 'lodash'
 
 export interface GeneralStudyInformationProps {
   study: Study
@@ -28,6 +29,13 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
     setStudy,
     study,
   } = props
+
+  const onChange = ({ key, value }: { key: string, value: unknown, isValid: boolean }) => {
+    setStudy((val: Study) => {
+      const newForm = structuredClone(val)
+      return set(newForm, key, value)
+    })
+  }
 
   return (
     <div className="data-submitter-section">
@@ -55,7 +63,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         placeholder="Description"
         defaultValue={study?.description}
         validators={[FormValidators.REQUIRED]}
-        onChange={setStudy}
+        onChange={onChange}
       />
       <FormField
         id="dataTypes"
@@ -68,7 +76,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         optionsAreString={true}
         selectOptions={DataTypes.VALUES.map(entry => (`${entry.name}` + (entry.abbreviation ? ` (${entry.abbreviation})` : '')))}
         defaultValue={study?.dataTypes}
-        onChange={setStudy}
+        onChange={onChange}
       />
       {generateStudyPropertyFormTextField(study, setStudy, new PhenotypeIndication())}
       {generateStudyPropertyFormTextField(study, setStudy, new Species())}
@@ -111,7 +119,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
           { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' },
         ]}
         defaultValue={study?.publicVisibility}
-        onChange={setStudy}
+        onChange={onChange}
       />
     </div>
   )

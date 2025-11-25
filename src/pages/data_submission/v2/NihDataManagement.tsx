@@ -13,17 +13,16 @@ import {
   removeStudyPropertiesByKeys, setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
-import { cloneDeep, set, unset } from 'lodash'
-import { ALTERNATIVE_DATA_SHARING_PLAN_FILE, FileProperty } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import { set, unset } from 'lodash'
+import { ALTERNATIVE_DATA_SHARING_PLAN_FILE } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import { FileInput } from 'src/components/forms/FileInput'
 
 export interface NihDataManagementProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
-  files: FileProperty
-  setFiles: React.Dispatch<React.SetStateAction<FileProperty>>
 }
 export const NihDataManagement = (props: NihDataManagementProps) => {
-  const { setStudy, setFiles, files, study } = props
+  const { setStudy, study } = props
 
   const onAlternativeDataSharingPlanReasonsChange = ({ key }: { key: string }) => {
     let setReasons: string[] = getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []
@@ -65,12 +64,12 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                 setStudyPropertyByKey(study, setStudy, { isValid: true }, new AlternativeDataSharingPlan(value))
                 if (!value) {
                   setStudy((val) => {
-                    const newVal = cloneDeep(val)
+                    const newVal = structuredClone(val)
                     removeStudyPropertiesByKeys(newVal, new Set([AlternativeDataSharingPlanReasons.key,
                       AlternativeDataSharingPlanExplanation.key,
                       AlternativeDataSharingPlanDataSubmitted.key,
                       AlternativeDataSharingPlanDataReleased.key]))
-                    unset(study, 'alternativeDataSharingPlanFile')
+                    unset(study, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
                     return newVal
                   })
                 }
@@ -140,20 +139,26 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                   </div>
                 )}
                 {generateStudyPropertyFormTextField(study, setStudy, new AlternativeDataSharingPlanExplanation(), [FormValidators.REQUIRED])}
-                <FormField
-                  type={FormFieldTypes.FILE}
-                  title="Upload your alternative sharing plan."
+                <FileInput
                   id={ALTERNATIVE_DATA_SHARING_PLAN_FILE}
-                  defaultValue={files.value}
-                  validators={[FormValidators.REQUIRED]}
-                  onChange={({ key, value }: { key: string, value: File }) => {
-                    setFiles((val: FileProperty) => {
-                      const newFiles = cloneDeep(val)
-                      set(newFiles, key, value)
-                      return newFiles
+                  onAddFile={function (file: File, id: string): void {
+                    setStudy((val) => {
+                      const newVal = structuredClone(val)
+                      set(newVal, id, file)
+                      return newVal
                     })
                   }}
+                  onDeleteFile={function (id: string): void {
+                    setStudy((val) => {
+                      const newVal = structuredClone(val)
+                      unset(newVal, id)
+                      return newVal
+                    })
+                  }}
+                  defaultValue={study.alternativeDataSharingPlanFile}
+                  title="Upload your alternative sharing plan."
                 />
+
                 <FormField
                   type={FormFieldTypes.RADIOGROUP}
                   title={AlternativeDataSharingPlanDataSubmitted.fieldTitle}
