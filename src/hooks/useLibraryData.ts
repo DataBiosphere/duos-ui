@@ -26,11 +26,6 @@ export const buildElasticsearchQuery = (
 ): ElasticsearchQuery => {
   const queryChunks: QueryClause[] = [
     {
-      match: {
-        _type: 'dataset',
-      },
-    },
-    {
       exists: {
         field: 'study',
       },
@@ -74,7 +69,7 @@ export const buildElasticsearchQuery = (
       bool: {
         should: filters.accessManagement.map(term => ({
           term: {
-            accessManagement: term,
+            'accessManagement.keyword': term,
           },
         })),
       },
@@ -188,22 +183,22 @@ export const buildElasticsearchQuery = (
         // Add filter aggregations
         access_management: {
           terms: {
-            field: 'accessManagement',
+            field: 'accessManagement.keyword',
           },
         },
         data_use: {
           terms: {
-            field: 'dataUse.primary.code',
+            field: 'dataUse.primary.code.keyword',
           },
         },
         data_type: {
           terms: {
-            field: 'study.dataTypes',
+            field: 'study.dataTypes.keyword',
           },
         },
         dac: {
           terms: {
-            field: 'dac.dacName',
+            field: 'dac.dacName.keyword',
           },
         },
       },
@@ -233,22 +228,22 @@ export const buildElasticsearchQuery = (
     aggs: {
       access_management: {
         terms: {
-          field: 'accessManagement',
+          field: 'accessManagement.keyword',
         },
       },
       data_use: {
         terms: {
-          field: 'dataUse.primary.code',
+          field: 'dataUse.primary.code.keyword',
         },
       },
       data_type: {
         terms: {
-          field: 'study.dataTypes',
+          field: 'study.dataTypes.keyword',
         },
       },
       dac: {
         terms: {
-          field: 'dac.dacName',
+          field: 'dac.dacName.keyword',
         },
       },
     },
