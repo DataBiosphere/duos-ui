@@ -128,9 +128,11 @@ interface DatasetFilterListProps {
 export const DatasetFilterList = (props: DatasetFilterListProps) => {
   const { datasets, filterHandler, filters, isFiltered, onClear } = props
 
+  const hideDataTypeFilter = true // Temporarily hide Data Type filter until we have better data
+
   const accessManagementFilters = uniq(compact(datasets.map(dataset => dataset.accessManagement)))
   const dataUseFilters = uniq(compact(flatten(datasets.map(dataset => dataset.dataUse?.primary))).map(dataUse => dataUse.code))
-  const dataTypeFilters = uniq(flatten(datasets.map(dataset => dataset.study.dataTypes)))
+  const dataTypeFilters = hideDataTypeFilter ? [] : uniq(flatten(datasets.map(dataset => dataset.study.dataTypes)))
   const dacFilters = orderBy(uniq(compact(datasets.map(dataset => dataset.dac?.dacName))), dac => dac.toLowerCase(), 'asc')
   const defaultValues = generateDefaultParticipantCountValues(datasets)
   return (
@@ -185,14 +187,18 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
         isFiltered={isFiltered}
         filterNameFn={filter => filter}
       />
-      <FilterItemHeader title="Data Type" />
-      <FilterItemList
-        category="dataType"
-        filter={dataTypeFilters}
-        filterHandler={filterHandler}
-        isFiltered={isFiltered}
-        filterNameFn={filter => filter}
-      />
+      {!hideDataTypeFilter && (
+        <>
+          <FilterItemHeader title="Data Type" />
+          <FilterItemList
+            category="dataType"
+            filter={dataTypeFilters}
+            filterHandler={filterHandler}
+            isFiltered={isFiltered}
+            filterNameFn={filter => filter}
+          />
+        </>
+      )}
       <FilterItemHeader title="Participant Count" />
       <FilterItemRange
         allowableMin={defaultValues.min}
