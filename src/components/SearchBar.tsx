@@ -25,7 +25,8 @@ const Search = styled('div')(({ theme }) => ({
 }))
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
+  color: '#777777',
+  padding: theme.spacing(0, 1),
   height: '100%',
   position: 'absolute',
   top: 0,
@@ -54,7 +55,6 @@ const StyledInputBase = styled(InputBase, {
   'color': 'inherit',
   'width': '30ch',
   'border': '1px solid #cecece',
-  'backgroundColor': '#f3f6f7',
   'borderRadius': '5px',
   'height': '4rem',
   'fontFamily': 'Montserrat',
