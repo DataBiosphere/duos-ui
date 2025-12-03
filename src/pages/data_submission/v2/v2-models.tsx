@@ -8,9 +8,10 @@ import {
   Publication,
   Workspace,
 } from 'src/types/model'
-import { StudyType } from 'src/components/forms/StudyType'
+import { StudyType, StudyTypeNames } from 'src/components/forms/StudyType'
 import React from 'react'
 import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
+import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 
 export type StudyPropertyType = 'Boolean' | 'String' | 'Number' | 'Date' | 'Json'
 
@@ -165,6 +166,8 @@ export class AlternativeDataSharingPlanReasons extends StudyProperty {
   }
 }
 
+export type DataSharingPlanReasons = typeof AlternativeDataSharingPlanReasons.VALUES[keyof typeof AlternativeDataSharingPlanReasons.VALUES]
+
 export class Species extends StringStudyProperty {
   static readonly key = 'species'
   constructor(value?: string, studyId?: number, studyPropertyId?: number) {
@@ -182,12 +185,15 @@ export class NihICsSupportingStudy extends StudyProperty {
 }
 
 export class AlternativeDataSharingPlanDataSubmitted extends StudyProperty {
+  static readonly VALUES = ['Within 3 months of the last data generated or last clinical visit', 'By batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)']
   static readonly key = 'alternativeDataSharingPlanDataSubmitted'
   static readonly fieldTitle = 'Data will be submitted:'
   constructor(value?: string, studyId?: number, studyPropertyId?: number) {
     super(AlternativeDataSharingPlanDataSubmitted.key, 'String' as StudyPropertyType, value, studyId, studyPropertyId)
   }
 }
+
+export type AlternativeDataSharingPlanDataSubmittedValues = typeof AlternativeDataSharingPlanDataSubmitted.VALUES[number]
 
 export class AlternativeDataSharingPlanControlledOpenAccess extends StudyProperty {
   static readonly key = 'alternativeDataSharingPlanControlledOpenAccess'
@@ -312,6 +318,12 @@ export class NihAnvilUse extends StudyProperty {
   }
 }
 
+export type NiHAnvilUseValues
+  = | typeof NihAnvilUse.YES_NHGRI_YES_PHS_ID
+    | typeof NihAnvilUse.YES_NHGRI_NO_PHS_ID
+    | typeof NihAnvilUse.NO_NHGRI_YES_ANVIL
+    | typeof NihAnvilUse.NO_NHGRI_NO_ANVIL
+
 export class NihGenomicProgramAdministratorName extends StringStudyProperty {
   static readonly key = 'nihGenomicProgramAdministratorName'
   constructor(value?: string, studyId?: number, studyPropertyId?: number) {
@@ -339,7 +351,8 @@ export interface Study {
   name?: string
   description?: string
   dataTypes?: string[]
-  piName?: string
+  piName: string
+  piEmail: string
   publicVisibility?: boolean
   datasetIds?: number[]
   datasets?: Dataset[]
@@ -352,6 +365,117 @@ export interface Study {
   updateUserId?: number
   assets?: {
     consentGroups?: Array<ConsentGroup2>
+    models?: Array<AiModel>
+    workspaces?: Array<Workspace>
+    publications?: Array<Publication>
+    presentations?: Array<Presentation>
+    clinicalTrials?: Array<ClinicalTrial>
+    funding?: Array<FundingResource>
+    intellectualProperty?: Array<IntellectualProperty>
+  }
+}
+export interface DatasetRegistrationSchemaV1 {
+  /** @description The study name */
+  studyName: string
+  /**
+             * @description The study type
+             * @enum {string}
+             */
+  studyType?: StudyTypeNames
+  /** @description Description of the study */
+  studyDescription: string
+  /** @description All data types that study encompasses */
+  dataTypes: string[]
+  /** @description Phenotype/Indication Studied */
+  phenotypeIndication?: string
+  /** @description Species */
+  species?: string
+  /** @description Principal Investigator Name */
+  piName: string
+  /* dataSubmitterUserId: number  Removed because the backend will set this value */
+  /** @description Data Custodian Email */
+  dataCustodianEmail?: string[]
+  /** @description Public Visibility of this study */
+  publicVisibility: boolean
+  /** @enum {string} */
+  nihAnvilUse?: NiHAnvilUseValues
+  /** @description Are you planning to submit to AnVIL? */
+  submittingToAnvil?: boolean
+  /** @description dbGaP phs ID */
+  dbGaPPhsID?: string
+  /** @description dbGaP Study Registration Name */
+  dbGaPStudyRegistrationName?: string
+  /**
+             * Format: date
+             * @description Embargo Release Date
+             */
+  embargoReleaseDate?: string
+  /** @description Sequencing Center */
+  sequencingCenter?: string
+  /**
+             * Format: email
+             * @description Principal Investigator Email
+             */
+  piEmail?: string
+  /** @description Principal Investigator Institution */
+  piInstitution?: number
+  /** @description NIH Grant or Contract Number */
+  nihGrantContractNumber?: string
+  /** @description NIH ICs Supporting the Study */
+  nihICsSupportingStudy?: Array<NIHInstituteAndCenterAbbreviations>
+  /** @description NIH Program Officer Name */
+  nihProgramOfficerName?: string
+  /**
+             * @description NIH Institution/Center for Submission
+             * @enum {string}
+             */
+  nihInstitutionCenterSubmission?: NIHInstituteAndCenterAbbreviations
+  /** @description If an Institutional Certification for this consent group exists, please upload it here (file upload) */
+  nihInstitutionalCertificationFileName?: string
+  /** @description NIH Genomic Program Administrator Name */
+  nihGenomicProgramAdministratorName?: string
+  /** @description Is this a multi-center study? */
+  multiCenterStudy?: boolean
+  /** @description What are the collaborating sites? */
+  collaboratingSites?: string[]
+  /** @description Is controlled access required for genomic summary results (GSR)? */
+  controlledAccessRequiredForGenomicSummaryResultsGSR?: boolean
+  /** @description If no, explain why controlled access is required for GSR */
+  controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation?: string
+  /** @description Are you requesting an Alternative Data Sharing Plan for samples that cannot be shared through a public repository or database? */
+  alternativeDataSharingPlan?: boolean
+  /** @description Please mark the reasons for which you are requesting an Alternative Data Sharing Plan (check all that apply) */
+  alternativeDataSharingPlanReasons?: Array<DataSharingPlanReasons>
+  /** @description Explanation of Request */
+  alternativeDataSharingPlanExplanation?: string
+  /** @description Upload your alternative sharing plan (file upload) */
+  alternativeDataSharingPlanFileName?: string
+  /**
+             * @description Upload your alternative sharing plan (file upload)
+             * @enum {string}
+             */
+  alternativeDataSharingPlanDataSubmitted?: AlternativeDataSharingPlanDataSubmittedValues
+  /** @description Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release */
+  alternativeDataSharingPlanDataReleased?: boolean
+  /**
+             * Format: date
+             * @description Target Delivery Date
+             */
+  alternativeDataSharingPlanTargetDeliveryDate?: string
+  /**
+             * Format: date
+             * @description Target Public Release Date
+             */
+  alternativeDataSharingPlanTargetPublicReleaseDate?: string
+  /**
+             * @description Does the data need to be managed under Controlled, Open, or External Access // appears to be no longer used.
+             * @enum {string}
+             */
+  alternativeDataSharingPlanAccessManagement?: 'Controlled Access' | 'Open Access' | 'External Access'
+  /** @description Consent Groups */
+  consentGroups: Array<ConsentGroup2>
+  /** Study Assets excluding Consent Groups */
+  assets?: {
     models?: Array<AiModel>
     workspaces?: Array<Workspace>
     publications?: Array<Publication>

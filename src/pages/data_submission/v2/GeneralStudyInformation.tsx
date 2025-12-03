@@ -40,7 +40,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
   return (
     <div className="data-submitter-section">
       <h2>Study Information</h2>
-      {generateStudyInputFormTextField(setStudy, 'studyName', study?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
+      {generateStudyInputFormTextField(setStudy, 'name', study?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
       <FormField
         id={StudyTypeProperty.key}
         title={StudyTypeProperty.fieldTitle}
@@ -58,7 +58,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
       <FormField
         type={FormFieldTypes.TEXTAREA}
         rows={6}
-        id="studyDescription"
+        id="description"
         title="Study Description"
         placeholder="Description"
         defaultValue={study?.description}
@@ -81,6 +81,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
       {generateStudyPropertyFormTextField(study, setStudy, new PhenotypeIndication())}
       {generateStudyPropertyFormTextField(study, setStudy, new Species())}
       {generateStudyInputFormTextField(setStudy, 'piName', study?.piName, 'Principal Investigator Name', 'Enter the Principal Investigator\'s name', [FormValidators.REQUIRED])}
+      {generateStudyInputFormTextField(setStudy, 'piEmail', study?.piEmail, 'Principal Investigator Email Address', 'Enter the Principal Investigator\'s email address', [FormValidators.REQUIRED, FormValidators.EMAIL])}
       <FormField
         id={DataCustodianEmail.key}
         title="Data Custodian Email"

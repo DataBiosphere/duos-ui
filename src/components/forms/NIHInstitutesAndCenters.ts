@@ -186,4 +186,8 @@ export class NIHInstitutesAndCenters {
     NIHInstitutesAndCenters.FIC,
     NIHInstitutesAndCenters.NCATS,
     NIHInstitutesAndCenters.NCCIH]
+
+  static readonly ABBREVIATIONS: string[] = NIHInstitutesAndCenters.VALUES.map(val => val.abbreviation || '')
 }
+
+export type NIHInstituteAndCenterAbbreviations = typeof NIHInstitutesAndCenters.ABBREVIATIONS[number]

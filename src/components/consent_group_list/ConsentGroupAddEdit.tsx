@@ -6,6 +6,7 @@ import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { DacPicker } from 'src/components/forms/DacPicker'
 import { FileInput } from 'src/components/forms/FileInput'
+import { set } from 'lodash'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
@@ -40,7 +41,7 @@ const makeError = (message: string): ValidationError => ({ valid: true, failed: 
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
-type ConsentGroupFieldValue = string | string[] | undefined | number | File
+type ConsentGroupFieldValue = string | string[] | undefined | number | File | boolean
 
 interface FormFieldChange {
   key: string
@@ -105,28 +106,27 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     setShowOtherSecondaryText(false)
     setShowGSText(false)
     setShowOtherPrimaryText(false)
+    setShowMORText(false)
 
     if (value === 'open') {
       setOtherPrimaryText(undefined)
       setShowOtherPrimaryText(false)
       setSelectedDiseases([])
       setShowDiseaseSpecificUseSearchbar(false)
+      setShowMORText(false)
     }
     setValidation(calcErrors(current))
   }
 
   const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] | { displayText: string, id: string }[] }) => {
-    setCurrent({
-      ...current,
-      generalResearchUse: false,
-      hmb: false,
-      diseaseSpecificUse: undefined,
-      poa: false,
-      otherPrimary: undefined,
-
-      [key]: value,
-
-    } as ConsentGroup2)
+    const next = structuredClone(current) as ConsentGroup2
+    next.generalResearchUse = false
+    next.hmb = false
+    next.diseaseSpecificUse = undefined
+    next.poa = false
+    next.otherPrimary = undefined
+    set(next, key, value)
+    setCurrent(next)
 
     setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse')
     setShowOtherPrimaryText(key === 'otherPrimary')
@@ -163,7 +163,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     if (showGSText && (!cg.gs?.trim())) {
       v.gs = makeError('Required')
     }
-    if (showMORText && (!cg.mor?.trim())) {
+    if (showMORText && (!cg.morDate?.trim())) {
       v.mor = makeError('Required')
     }
     if (showOtherSecondaryText && (!cg.otherSecondary?.trim())) {
@@ -173,17 +173,16 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
   }
 
   const onChange = ({ key, value }: FormFieldChange) => {
-    const next = { ...current, [key]: value } as ConsentGroup2
+    const next = structuredClone(current) as ConsentGroup2
+    set(next, key, value)
     setCurrent(next)
     setValidation(calcErrors(next))
   }
 
   const save = () => {
     if (validationFailed(calcErrors(current))) return
-    const toSave: ConsentGroup2 = {
-      ...current,
-      consentGroupId: current.consentGroupId || crypto.randomUUID?.() || Date.now().toString(),
-    }
+    const toSave: ConsentGroup2 = structuredClone(current)
+    toSave.consentGroupId = current.consentGroupId || crypto.randomUUID?.() || Date.now().toString()
     if (id < 0) {
       onConsentGroupChange([...consentGroups, toSave])
     }
@@ -200,11 +199,11 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{consentGroup === undefined ? 'New Consent Group' : `Edit ${consentGroup.consentGroupName || 'Consent Group'}`}</h2>
+          <h2>{consentGroup === undefined ? 'New Dataset' : `Edit ${consentGroup.consentGroupName || ' Dataset'}`}</h2>
           <FormField
             id="consentGroupName"
-            title="Consent Group Name"
-            placeholder="Enter a name for this consent group"
+            title="Dataset Name"
+            placeholder="Enter a name for this dataset"
             validators={[FormValidators.REQUIRED]}
             defaultValue={current?.consentGroupName}
             onChange={onChange}
@@ -463,7 +462,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   defaultValue={showMORText}
                   onChange={({ key, value }: { key: string, value: boolean }) => {
                     setShowMORText(value)
-                    onChange({ key: key, value: (value ? morText : undefined) })
+                    onChange({ key: key, value: value })
                     if (!value) {
                       setMORText(undefined)
                     }
@@ -473,12 +472,11 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   showMORText && (
                     <FormField
                       id="morText"
-                      name="mor"
+                      name="morDate"
                       validators={[FormValidators.REQUIRED, FormValidators.DATE]}
                       placeholder="Please specify date (YYYY-MM-DD)"
                       defaultValue={morText}
                       onChange={({ key, value }: { key: string, value: string }) => {
-                        setMORText(value)
                         onChange({ key: key, value: value })
                       }}
                       validation={validation.mor}
@@ -630,7 +628,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
         <div className="row" style={{ marginTop: 20 }}>
           <FileInput
             description="If an Institutional Certification for this consent group exists, please upload it here"
-            id="nihInstituionalCertificationFile"
+            id="nihInstitutionalCertificationFile"
             defaultValue={current.nihInstitutionalCertificationFile}
             onAddFile={function (file: File, id: string): void {
               onChange({ key: id, value: file })

@@ -30,7 +30,7 @@ export const DataSet = {
 
   registerDataset: async (registration) => {
     const url = `${await getApiUrl()}/api/dataset/v3`
-    const res = await fetchMultipart(url, registration, Config.multiPartOpts(), 'POST')
+    const res = await fetchMultipart(url, registration, Config.multiPartOpts(), 'POST', true)
     return res.data
   },
 
