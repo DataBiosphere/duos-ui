@@ -37,7 +37,7 @@ import {
   DbGaPStudyRegistrationName,
 } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { get, set } from 'lodash'
+import { set } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 

@@ -1,4 +1,4 @@
-import { isNil, isEmpty } from 'lodash'
+import { isNil, isEmpty, set } from 'lodash'
 import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
@@ -6,7 +6,6 @@ import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { DacPicker } from 'src/components/forms/DacPicker'
 import { FileInput } from 'src/components/forms/FileInput'
-import { set } from 'lodash'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
