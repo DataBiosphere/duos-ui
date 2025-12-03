@@ -42,7 +42,7 @@ describe('Data Library Filters', () => {
     cy.get('div').should('contain', 'Access Type')
     cy.get('div').should('contain', 'Data Use')
     cy.get('div').should('contain', 'Data Access Committee')
-    cy.get('div').should('contain', 'Data Type')
+    // cy.get('div').should('contain', 'Data Type') // Temporarily hide Data Type filter until we have better data
     cy.get('div').should('contain', 'Participant Count')
   })
 
