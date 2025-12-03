@@ -1,6 +1,6 @@
 # builder image
 FROM node:24.11.1-trixie AS builder
-LABEL maintainer="grushton@broadinstitute.org"
+LABEL maintainer="dsp-data-team@broadinstitute.org"
 
 # set working directory
 RUN mkdir /usr/src/app
