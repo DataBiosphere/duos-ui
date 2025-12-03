@@ -13,7 +13,7 @@ const props = {
 }
 
 beforeEach(() => {
-  propCopy = cloneDeep(props)
+  propCopy = cloneDeep(props) as unknown as GeneralStudyInformationProps
 })
 
 describe('GeneralStudyInformation - Tests', () => {

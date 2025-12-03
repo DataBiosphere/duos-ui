@@ -21,7 +21,7 @@ const props = {
 }
 
 beforeEach(() => {
-  propCopy = cloneDeep(props)
+  propCopy = cloneDeep(props) as unknown as NihDataManagementProps
 })
 
 function verifySharingPlanTopLevelDisabled() {
