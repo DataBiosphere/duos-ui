@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-modal'
 import { ThemeProvider } from '@mui/material/styles'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import 'src/App.css'
 import { muiThemeFix } from 'src/libs/muiThemeFix'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH.js'
@@ -14,6 +15,17 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+})
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -95,18 +107,20 @@ function App() {
     left: '45%',
   }
   return (
-    <ThemeProvider theme={muiThemeFix}>
-      <div className="body">
-        <div className="wrap">
-          <div className="main">
-            <DuosHeader />
-            {isLoading && <div style={loadingSyle}><Spinner /></div>}
-            {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={muiThemeFix}>
+        <div className="body">
+          <div className="wrap">
+            <div className="main">
+              <DuosHeader />
+              {isLoading && <div style={loadingSyle}><Spinner /></div>}
+              {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+            </div>
           </div>
+          <DuosFooter />
         </div>
-        <DuosFooter />
-      </div>
-    </ThemeProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   )
 }
 
