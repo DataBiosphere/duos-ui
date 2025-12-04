@@ -11,6 +11,7 @@ import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetMan
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
 import { studyToDatasetSchemaSubmission } from 'src/pages/data_submission/v2/v2-common-functions'
+import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 
 export type FileProperty = {
   key: string
@@ -51,14 +52,13 @@ export const DataSubmissionFormV2 = () => {
         multiPartFormData.append(fieldKey, consentGroup.nihInstitutionalCertificationFile, consentGroup.nihInstitutionalCertificationFile.name)
       }
     })
-    try {
-      await DataSet.registerDataset(multiPartFormData)
-      Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
-      navigate('/datalibrary')
-    }
-    catch (error) {
-      Notifications.showError({ text: `Study creation failed: ${error}` })
-    }
+    await DataSet.registerDataset(multiPartFormData)
+    Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
+    navigate('/datalibrary')
+  }
+
+  const onError = (error: unknown) => {
+    Notifications.showError({ text: `Study creation failed: ${error}` })
   }
 
   return (
@@ -77,9 +77,16 @@ export const DataSubmissionFormV2 = () => {
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
         <StudyAssetManagement study={study} setStudy={setStudy} />
-        <button style={{ marginBottom: '12px' }} className="button-complex-outlined-secondary" onClick={onSubmitStudy}>
+        <AsyncSpinnerButton
+          onClick={onSubmitStudy}
+          onError={onError}
+          className="button button-white"
+          data-cy="data-submission-submit-button"
+          hideOnSuccess={true}
+          style={{ marginBottom: '12px' }}
+        >
           Create Study
-        </button>
+        </AsyncSpinnerButton>
       </div>
 
     </>
