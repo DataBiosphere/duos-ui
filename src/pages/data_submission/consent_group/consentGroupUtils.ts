@@ -28,7 +28,8 @@ export interface ConsentGroup2 {
   col?: boolean
   irb?: boolean
   gs?: string
-  mor?: string
+  mor?: boolean
+  morDate?: string
   npu?: boolean
   otherSecondary?: string
   dataLocation?: 'AnVIL Workspace' | 'Terra Workspace' | 'TDR Location' | 'Not Determined'

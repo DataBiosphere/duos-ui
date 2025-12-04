@@ -13,7 +13,7 @@ const baseStudy: Study = {
     intellectualProperty: [],
     funding: [],
   },
-} as Study
+} as unknown as Study
 
 describe('StudyAssetManagement component', () => {
   it('renders all asset sections with titles and descriptions', () => {

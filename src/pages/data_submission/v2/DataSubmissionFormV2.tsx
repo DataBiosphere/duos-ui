@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
@@ -9,6 +9,9 @@ import { NihDataManagement } from 'src/pages/data_submission/v2/NihDataManagemen
 import { Styles } from 'src/libs/theme'
 import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { Notifications } from 'src/libs/utils'
+import { studyToDatasetSchemaSubmission } from 'src/pages/data_submission/v2/v2-common-functions'
+import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 
 export type FileProperty = {
   key: string
@@ -22,6 +25,8 @@ export const DataSubmissionFormV2 = () => {
   const [study, setStudy] = useState({} as Study)
   const [loadingError, setLoadingError] = useState(false)
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     const onLoadFormData = (studyId: string | undefined) => {
       if (studyId) {
@@ -33,6 +38,28 @@ export const DataSubmissionFormV2 = () => {
     }
     onLoadFormData(studyId)
   }, [studyId, setStudy])
+
+  const onSubmitStudy = async () => {
+    const multiPartFormData = new FormData()
+    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(structuredClone(study))))
+    if (study.alternativeDataSharingPlanFile) {
+      multiPartFormData.append('alternativeDataSharingPlan', study.alternativeDataSharingPlanFile, study.alternativeDataSharingPlanFile.name)
+    }
+
+    study.assets?.consentGroups?.forEach((consentGroup, idx) => {
+      if (consentGroup?.nihInstitutionalCertificationFile) {
+        const fieldKey = `consentGroups[${idx}].nihInstitutionalCertificationFile`
+        multiPartFormData.append(fieldKey, consentGroup.nihInstitutionalCertificationFile, consentGroup.nihInstitutionalCertificationFile.name)
+      }
+    })
+    await DataSet.registerDataset(multiPartFormData)
+    Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
+    navigate('/datalibrary')
+  }
+
+  const onError = (error: unknown) => {
+    Notifications.showError({ text: `Study creation failed: ${error}` })
+  }
 
   return (
     <>
@@ -50,7 +77,18 @@ export const DataSubmissionFormV2 = () => {
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
         <StudyAssetManagement study={study} setStudy={setStudy} />
+        <AsyncSpinnerButton
+          onClick={onSubmitStudy}
+          onError={onError}
+          className="button button-white"
+          data-cy="data-submission-submit-button"
+          hideOnSuccess={true}
+          style={{ marginBottom: '12px' }}
+        >
+          Create Study
+        </AsyncSpinnerButton>
       </div>
+
     </>
   )
 }

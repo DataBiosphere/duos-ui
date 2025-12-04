@@ -26,3 +26,5 @@ export class StudyType {
 
   static readonly NAME_VALUES: string[] = StudyType.VALUES.map(val => val.name)
 }
+
+export type StudyTypeNames = typeof StudyType.NAME_VALUES[number]

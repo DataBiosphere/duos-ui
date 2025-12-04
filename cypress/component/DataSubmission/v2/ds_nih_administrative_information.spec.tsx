@@ -41,7 +41,7 @@ const mockInstitutions = [
 ]
 
 beforeEach(() => {
-  propCopy = cloneDeep(props)
+  propCopy = cloneDeep(props) as unknown as NihAdministrativeInformationProps
   cy.initApplicationConfig()
   cy.intercept('GET', '/api/institutions', (req) => {
     req.reply({

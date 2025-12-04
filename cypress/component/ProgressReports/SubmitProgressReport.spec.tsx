@@ -3,6 +3,7 @@ import { mount } from 'cypress/react'
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 import { CombinedDataAccessRequest } from 'src/types/model'
+import StackdriverErrorReporter from 'stackdriver-errors-js'
 
 describe('SubmitProgressReport tests', () => {
   beforeEach(() => {
@@ -95,6 +96,8 @@ describe('SubmitProgressReport tests', () => {
   })
 
   it('Submit failure message should be captured', () => {
+    cy.stub(StackdriverErrorReporter.prototype, 'setUser').callsFake(() => {
+    })
     mount(
       <SubmitProgressReport
         formState={{} as FormState}

@@ -46,7 +46,7 @@ async function fetchRequest({ url, method = 'GET', data, params, headers = {}, c
   }
 }
 
-async function fetchMultipartRequest({ url, method = 'POST', data, params, headers = {}, credentials }) {
+async function fetchMultipartRequest({ url, method = 'POST', data, params, headers = {}, credentials, returnError }) {
   const fullUrl = params ? buildUrlWithParams(url, params) : url
   const fetchOptions = {
     method,
@@ -60,11 +60,20 @@ async function fetchMultipartRequest({ url, method = 'POST', data, params, heade
   }
   try {
     const res = await fetch(fullUrl, fetchOptions)
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || `Request failed with status ${res.status}`)
+    }
     return handleResponse(res, url, undefined, method)
   }
-  catch {
-    reportError(url, 502) // Default to a 502 when we can't get a real response object.
-    throw new Error(`Request to ${url} failed with status 502`)
+  catch (error) {
+    if (returnError) {
+      throw error
+    }
+    else {
+      reportError(url, 502) // Default to a 502 when we can't get a real response object.
+      throw new Error(`Request to ${url} failed with status 502`)
+    }
   }
 }
 
@@ -83,5 +92,5 @@ export const fetchPatch = (url, data, config = {}) =>
 export const fetchDelete = (url, config = {}) =>
   fetchRequest({ url, data: config.data, ...config, method: 'DELETE' })
 
-export const fetchMultipart = (url, formData, config = {}, method = 'POST') =>
-  fetchMultipartRequest({ url, data: formData, ...config, method })
+export const fetchMultipart = (url, formData, config = {}, method = 'POST', returnError = false) =>
+  fetchMultipartRequest({ url, data: formData, ...config, method, returnError })
