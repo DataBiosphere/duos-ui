@@ -564,6 +564,7 @@ const DataAccessRequestApplication = (props) => {
     // Map each datasetId to its election and final voting info
     return (dar.datasetIds || []).map((datasetId) => {
       const election = elections.find(e => e.datasetId === datasetId)
+      const isElectionClosed = election?.status === ElectionStatus.CLOSED
 
       const votes = Array.isArray(election?.votes)
         ? election.votes
@@ -576,16 +577,23 @@ const DataAccessRequestApplication = (props) => {
       const dataset = datasets.find(d => d.datasetId === datasetId)
       const datasetName = dataset?.name ?? NO_ELECTION_STATUS
 
+      const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      }
+
       return {
         datasetId,
         datasetName,
         voteDate: finalVote?.updateDate
-          ? new Date(finalVote.updateDate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })
-          : NO_FINAL_VOTE_STATUS,
+          ? formatDate(finalVote.updateDate)
+          : isElectionClosed
+            ? formatDate(finalVote.createDate)
+            : NO_FINAL_VOTE_STATUS,
+        voteDateRaw: finalVote?.updateDate || finalVote?.createDate || null,
         requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
         linkedDarId: dar?.collectionId,
         voteResult: {
@@ -593,17 +601,44 @@ const DataAccessRequestApplication = (props) => {
             ? 'Approved'
             : finalVote?.vote === false
               ? 'Denied'
-              : PENDING_STATUS,
+              : isElectionClosed
+                ? election?.status
+                : PENDING_STATUS,
           rationale: hasFinalVoteRationale
             ? finalVote?.rationale
             : hasFinalVote
               ? 'No rationale provided.'
-              : NO_FINAL_VOTE_STATUS,
+              : isElectionClosed
+                ? 'Election Closed - No Final Vote'
+                : NO_FINAL_VOTE_STATUS,
         },
         status: election?.status ?? NO_ELECTION_STATUS,
       }
     })
-  }).flat()
+  }).flat().sort((a, b) => {
+    // Items without dates go to top
+    if (!a.voteDateRaw && !b.voteDateRaw) {
+      // Both null, continue to secondary sorts
+    }
+    else if (!a.voteDateRaw) return -1 // Changed: null dates go first
+    else if (!b.voteDateRaw) return 1
+    else {
+      const dateCompare = new Date(b.voteDateRaw) - new Date(a.voteDateRaw)
+      if (dateCompare !== 0) return dateCompare
+    }
+
+    // Secondary sort: status (Open comes first)
+    const statusOrder = { [ElectionStatus.OPEN]: 0, [ElectionStatus.CLOSED]: 1, [NO_ELECTION_STATUS]: 2 }
+    const statusCompare = (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3)
+    if (statusCompare !== 0) return statusCompare
+
+    // Tertiary sort: requestType (Initial DAR before Progress Report)
+    const typeCompare = a.requestType.localeCompare(b.requestType)
+    if (typeCompare !== 0) return typeCompare
+
+    // Quaternary sort: datasetName (alphabetical)
+    return a.datasetName.localeCompare(b.datasetName)
+  })
 
   const dar = {
     referenceId: formData?.darCode || '',

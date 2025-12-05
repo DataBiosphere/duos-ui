@@ -58,6 +58,10 @@ const mountDataAccessRequestApp = ({ initialEntries, props, collection }) => {
   )
 }
 
+const toggleRationale = (index) => {
+  cy.get('.rationale-btn').eq(index).should('exist').and('be.visible').click({ force: true })
+}
+
 describe('Voting History - Vote Status Display', () => {
   beforeEach(() => {
     cy.stub(Countries, 'getCountries').returns(Promise.resolve(['United States of America (the)']))
@@ -133,6 +137,7 @@ describe('Voting History - Vote Status Display', () => {
     })
     cy.get('#voting-history-info').should('exist').and('be.visible').click({ force: true })
     cy.contains('Approved').should('be.visible')
+    toggleRationale(0)
     cy.contains('Approved for research.').should('be.visible')
   })
 
@@ -174,6 +179,7 @@ describe('Voting History - Vote Status Display', () => {
     })
     cy.get('#voting-history-info').should('exist').and('be.visible').click({ force: true })
     cy.contains('Denied').should('be.visible')
+    toggleRationale(0)
     cy.contains('Not enough justification.').should('be.visible')
   })
 
@@ -256,6 +262,7 @@ describe('Voting History - Vote Status Display', () => {
     })
     cy.get('#voting-history-info').should('exist').and('be.visible').click({ force: true })
     cy.contains('Approved').should('be.visible')
+    toggleRationale(0)
     cy.contains('No rationale provided.').should('be.visible')
   })
 
@@ -297,6 +304,7 @@ describe('Voting History - Vote Status Display', () => {
     })
     cy.get('#voting-history-info').should('exist').and('be.visible').click({ force: true })
     cy.contains('Denied').should('be.visible')
+    toggleRationale(0)
     cy.contains('No rationale provided.').should('be.visible')
   })
 
@@ -351,8 +359,10 @@ describe('Voting History - Vote Status Display', () => {
     })
     cy.get('#voting-history-info').should('exist').and('be.visible').click({ force: true })
     cy.contains('Approved').should('be.visible')
+    toggleRationale(1) // Sorting by date, the approved vote is second
     cy.contains('Approved for dataset A.').should('be.visible')
     cy.contains('Denied').should('be.visible')
+    toggleRationale(0) // The denied vote is first
     cy.contains('No rationale provided.').should('be.visible')
   })
 
