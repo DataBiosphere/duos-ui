@@ -557,9 +557,14 @@ const DataAccessRequestApplication = (props) => {
   const PENDING_STATUS = 'Pending'
 
   const createVoteRecord = (dar, datasetId, election, datasets) => {
-    const votes = Array.isArray(election?.votes)
-      ? election.votes
-      : (election?.votes ? Object.values(election.votes) : [])
+    const getElectionVotes = (election) => {
+      if (Array.isArray(election?.votes)) {
+        return election.votes
+      }
+      return election?.votes ? Object.values(election.votes) : []
+    }
+
+    const votes = getElectionVotes(election)
 
     const finalVote = votes.find(v => v.type === VOTE_TYPES.FINAL)
     const hasFinalVote = finalVote?.vote !== undefined && finalVote?.vote !== null
@@ -578,27 +583,45 @@ const DataAccessRequestApplication = (props) => {
 
     const isElectionClosed = !hasFinalVote && (election?.status === ElectionStatus.CLOSED || election?.status === 'Canceled')
 
-    const voteDate = finalVote?.updateDate
-      ? formatDate(finalVote.updateDate)
-      : isElectionClosed
-        ? formatDate(finalVote.createDate)
-        : NO_FINAL_VOTE_STATUS
+    const getVoteDate = () => {
+      if (finalVote?.updateDate) {
+        return formatDate(finalVote.updateDate)
+      }
+      if (isElectionClosed) {
+        return formatDate(finalVote.createDate)
+      }
+      return NO_FINAL_VOTE_STATUS
+    }
 
-    const decision = finalVote?.vote === true
-      ? 'Approved'
-      : finalVote?.vote === false
-        ? 'Denied'
-        : isElectionClosed
-          ? election.status
-          : PENDING_STATUS
+    const getDecision = () => {
+      if (finalVote?.vote === true) {
+        return 'Approved'
+      }
+      if (finalVote?.vote === false) {
+        return 'Denied'
+      }
+      if (isElectionClosed) {
+        return election.status
+      }
+      return PENDING_STATUS
+    }
 
-    const rationale = hasFinalVoteRationale
-      ? finalVote.rationale
-      : hasFinalVote
-        ? 'No rationale provided.'
-        : isElectionClosed
-          ? 'Election Closed - No Final Vote'
-          : NO_FINAL_VOTE_STATUS
+    const getRationale = () => {
+      if (hasFinalVoteRationale) {
+        return finalVote.rationale
+      }
+      if (hasFinalVote) {
+        return 'No rationale provided.'
+      }
+      if (isElectionClosed) {
+        return 'Election Closed - No Final Vote'
+      }
+      return NO_FINAL_VOTE_STATUS
+    }
+
+    const voteDate = getVoteDate()
+    const decision = getDecision()
+    const rationale = getRationale()
 
     return {
       datasetId,
