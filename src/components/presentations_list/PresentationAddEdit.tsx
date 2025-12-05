@@ -23,7 +23,7 @@ const defaultPresentation: Presentation = {
 
 interface FormFieldChange {
   key: string
-  value: string
+  value: string | boolean
 }
 
 interface PresentationAddEditProps {
@@ -55,30 +55,65 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
   const [validation, setValidation] = useState<Validation>(() => ({
     presenter: {},
   }))
+  const [submitted, setSubmitted] = useState<boolean>(false)
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
 
-  const applyValidation = (p: Presentation) => setValidation(calcPresentationErrors(p) as Validation)
+  const applyValidation = (draft: Presentation, full: boolean) => {
+    const all = calcPresentationErrors(draft) as Validation
+    if (full) {
+      setValidation(all)
+      return
+    }
+    const filtered: Validation = { presenter: {} }
+    for (const [k, v] of Object.entries(all)) {
+      if (k === 'presenter') {
+        const presenterErrors = v as { name?: ValidationError, email?: ValidationError }
+        if (touched.presenterName && presenterErrors.name) {
+          filtered.presenter.name = presenterErrors.name
+        }
+        if (touched.presenterEmail && presenterErrors.email) {
+          filtered.presenter.email = presenterErrors.email
+        }
+      }
+      else if (touched[k]) {
+        filtered[k as keyof Validation] = v
+      }
+    }
+    setValidation(filtered)
+  }
+
+  const updatePresentation = (updated: Presentation) => {
+    setNewPresentation(updated)
+    if (submitted) applyValidation(updated, false)
+  }
+
+  const markTouched = (key: string) => {
+    setTouched(prev => (prev[key] ? prev : { ...prev, [key]: true }))
+  }
 
   const onChange = ({ key, value }: FormFieldChange) => {
+    markTouched(key)
     let next: Presentation
     if (key === 'presenterName') {
-      next = { ...newPresentation, presenter: { ...newPresentation.presenter, name: value } }
+      next = { ...newPresentation, presenter: { ...newPresentation.presenter, name: value as string } }
     }
     else if (key === 'presenterEmail') {
-      next = { ...newPresentation, presenter: { ...newPresentation.presenter, email: value } }
+      next = { ...newPresentation, presenter: { ...newPresentation.presenter, email: value as string } }
     }
     else if (key === 'tags') {
-      next = { ...newPresentation, tags: value.split(',').map(t => t.trim()).filter(Boolean) }
+      next = { ...newPresentation, tags: (value as string).split(',').map(t => t.trim()).filter(Boolean) }
     }
     else {
       next = { ...newPresentation, [key]: value }
     }
-    setNewPresentation(next)
-    applyValidation(next)
+    updatePresentation(next)
   }
 
   const save = () => {
+    setSubmitted(true)
+    applyValidation(newPresentation, true)
+    if (validationFailed(calcPresentationErrors(newPresentation))) return
     const current = { ...newPresentation, presentationId: newPresentation.presentationId || crypto.randomUUID?.() || Date.now().toString() }
-    if (validationFailed(calcPresentationErrors(current))) return
     if (id < 0) {
       onPresentationChange([...presentations, current])
     }
@@ -87,7 +122,6 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
       copy[id] = current
       onPresentationChange(copy)
     }
-    setNewPresentation(defaultPresentation)
     closeAction()
   }
 
@@ -103,7 +137,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Title"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.title}
+            validation={(submitted || touched.title) ? validation.title : undefined}
           />
           <FormField
             id="date"
@@ -112,7 +146,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
-            validation={validation.date}
+            validation={(submitted || touched.date) ? validation.date : undefined}
           />
           <FormField
             id="url"
@@ -121,7 +155,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="https://..."
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
-            validation={validation.url}
+            validation={(submitted || touched.url) ? validation.url : undefined}
           />
           <FormField
             id="authors"
@@ -130,7 +164,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Authors"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.authors}
+            validation={(submitted || touched.authors) ? validation.authors : undefined}
           />
           <FormField
             id="datasetCitation"
@@ -139,7 +173,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Dataset Citation"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.datasetCitation}
+            validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
           />
           <FormField
             id="citation"
@@ -148,7 +182,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Did you cite the dataset(s) used in this presentation?"
             orientation="horizontal"
             onChange={onChange}
-            validation={validation.citation}
+            validation={(submitted || touched.citation) ? validation.citation : undefined}
           />
           <FormField
             id="presenterName"
@@ -157,7 +191,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Name"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.presenter?.name}
+            validation={(submitted || touched.presenterName) ? validation.presenter?.name : undefined}
           />
           <FormField
             id="presenterEmail"
@@ -166,7 +200,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="email@example.org"
             validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
             onChange={onChange}
-            validation={validation.presenter?.email}
+            validation={(submitted || touched.presenterEmail) ? validation.presenter?.email : undefined}
           />
           <FormField
             id="event"
@@ -175,7 +209,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Event"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.event}
+            validation={(submitted || touched.event) ? validation.event : undefined}
           />
           <FormField
             id="location"
@@ -184,7 +218,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Location"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.location}
+            validation={(submitted || touched.location) ? validation.location : undefined}
           />
           <FormField
             id="format"
@@ -193,7 +227,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Format"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.format}
+            validation={(submitted || touched.format) ? validation.format : undefined}
           />
           <FormField
             id="access"
@@ -202,21 +236,14 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             placeholder="Access"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.access}
+            validation={(submitted || touched.access) ? validation.access : undefined}
           />
           <FormField
             id="tags"
             title="Tags (comma separated)"
             defaultValue={presentation?.tags?.join(', ')}
             placeholder="tag1, tag2"
-            onChange={({ value }: { value: string }) => onChange({ key: 'tags', value })}
-          />
-          <FormField
-            id="hidden"
-            type={FormFieldTypes.TEXT}
-            style={{ display: 'none' }}
-            title=""
-            onChange={() => {}}
+            onChange={onChange}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
@@ -224,7 +251,6 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             className="collaborator-form-add-save-button f-left btn"
             type="button"
             onClick={save}
-            disabled={validationFailed(calcPresentationErrors(newPresentation))}
           >
             {presentation === undefined ? 'Add' : 'Save'}
           </button>
