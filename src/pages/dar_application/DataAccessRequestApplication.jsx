@@ -645,32 +645,43 @@ const DataAccessRequestApplication = (props) => {
       return createVoteRecord(dar, datasetId, election, datasets)
     })
   }).sort((a, b) => {
+    // Compare by vote date (most recent first)
     if (a.voteDateRaw && b.voteDateRaw) {
       const dateCompare = new Date(b.voteDateRaw) - new Date(a.voteDateRaw)
       if (dateCompare !== 0) return dateCompare
     }
+    // Handle cases where one or both dates are missing
     else if (!a.voteDateRaw && b.voteDateRaw) return -1
     else if (a.voteDateRaw && !b.voteDateRaw) return 1
 
+    // Compare by election status (Open > Closed > Awaiting Election)
     const statusOrder = { [ElectionStatus.OPEN]: 0, [ElectionStatus.CLOSED]: 1, [NO_ELECTION_STATUS]: 2 }
     const statusCompare = (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3)
     if (statusCompare !== 0) return statusCompare
 
+    // Compare by request type (Initial DAR vs Progress Report)
     const typeCompare = a.requestType.localeCompare(b.requestType)
     if (typeCompare !== 0) return typeCompare
 
+    // Compare by dataset name as final tiebreaker
     return a.datasetName.localeCompare(b.datasetName)
   })
+
+  const getDarStatus = (votes) => {
+    if (votes.some(vote => vote.status === ElectionStatus.OPEN)) {
+      return ElectionStatus.OPEN
+    }
+    if (votes.every(vote => vote.status === NO_ELECTION_STATUS)) {
+      return NO_ELECTION_STATUS
+    }
+    return ElectionStatus.CLOSED
+  }
 
   const dar = {
     referenceId: formData?.darCode || '',
     piName: formData?.piName || '',
     institution: formData?.institution || '',
-    status: votes.some(vote => vote.status === ElectionStatus.OPEN)
-      ? ElectionStatus.OPEN
-      : votes.every(vote => vote.status === NO_ELECTION_STATUS)
-        ? NO_ELECTION_STATUS
-        : ElectionStatus.CLOSED,
+    status: getDarStatus(votes),
   }
 
   const back = () => {
