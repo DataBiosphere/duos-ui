@@ -133,7 +133,8 @@ export const DataAccessGovernance = (props) => {
           otherPrimary: dataUse.other,
 
           // secondary
-          nmds: dataUse.methodsResearch,
+          // when methodsResearch is false, it indicates NMDS
+          nmds: dataUse.methodsResearch === false,
           gso: dataUse.geneticStudiesOnly,
           pub: dataUse.publicationResults,
           col: dataUse.collaboratorRequired,

@@ -301,7 +301,7 @@ export const DatasetUpdate = (props) => {
           type={FormFieldTypes.CHECKBOX}
           id="methodsResearch"
           toggleText="No methods development or validation studies (NMDS)"
-          defaultValue={formData.dataUse.methodsResearch === true}
+          defaultValue={formData.dataUse.methodsResearch === false}
           disabled={true}
         />
         <FormField

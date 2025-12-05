@@ -277,7 +277,7 @@ export interface DataUse {
   hmbResearch?: boolean
   diseaseRestrictions?: string[]
   populationOriginsAncestry?: boolean
-  methodsResearch?: boolean
+  methodsResearch?: boolean // when this value is false, it indicates NMDS.
   nonProfitUse?: boolean
   other?: string
   secondaryOther?: string
