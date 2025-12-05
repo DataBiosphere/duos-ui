@@ -6,7 +6,7 @@ export default function PrivacyPolicy() {
   return (
     <div className="policy-body">
       <h1>DUOS Privacy Policy</h1>
-      <div>Last Updated: November 7, 2025</div>
+      <div>Last Updated: December 3, 2025</div>
       <div>
         If there are any questions about privacy, please email&nbsp;
         <Link
@@ -47,19 +47,16 @@ export default function PrivacyPolicy() {
             <li>Information That You Voluntarily Provide
               <ul>
                 <li>
-                  DUOS collects and stores the genomic sequence data (DNA, RNA, etc), derived from
-                  humans or other organisms, that you submit to the Site along with metadata and other
-                  information related to such data. You agree to and accept full responsibility for
-                  obtaining all necessary permissions and informed consents from the donors or
-                  providers of all samples from which your submitted sequence data is derived,
-                  including any consents that may be needed to submit such data to the Site and to
-                  enable any third parties with whom you share the data on the Site to use such data,
-                  and any consents that may be needed to store the data in servers located within the
-                  United States.
+                  DUOS collects and stores the metadata and other information related to datasets that you submit to
+                  the Site. You agree to and accept full responsibility for obtaining all necessary permissions and
+                  informed consents from the donors or providers of all samples from which your submitted sequence
+                  data is derived, including any consents that may be needed to submit such data to the Site and to
+                  enable any third parties with whom you share the data on the Site to use such data, and any consents
+                  that may be needed to store the data in servers located within the United States.
                 </li>
               </ul>
             </li>
-            <li>HIPAA, Protected Health Information, and the Clinical Compliance Features
+            <li>HIPAA and Protected Health Information
               <ul>
                 <li>
                   DUOS is not a Covered Entity as that term is defined in the Health Insurance
@@ -73,12 +70,12 @@ export default function PrivacyPolicy() {
                   upload, store, or otherwise transfer PHI using the Site.
                 </li>
                 <li>
-                  You acknowledge that this may require you, in some instances, to anonymize sequence
+                  You acknowledge that this may require you, in some instances, to deidentify sequence
                   data prior to uploading it to the Site. You further agree to indemnify and hold
                   harmless DUOS of and from any and all claims, demands, losses, causes of action,
                   damage, lawsuits, judgments, including attorneys&#39; fees and costs, arising out of
-                  or relating to your uploading, storing, or transferring of PHI without having fully
-                  implemented the Clinical Features.
+                  or relating to your uploading, storing, or transferring of PHI on DUOS against the
+                  terms of this Privacy Policy.
                 </li>
               </ul>
             </li>
@@ -115,8 +112,8 @@ export default function PrivacyPolicy() {
                 <li>
                   You may also be permitted to upload your own data to the Site in the course of using the Site. You
                   agree to and accept full responsibility for obtaining all permissions, consents, and rights
-                  necessary for uploading and using any such data to and with the Site. The software you upload must
-                  comply with the DUOS &quot;Terms of Use Policy&quot;.
+                  necessary for uploading and using any such data to and with the Site. The data you upload must
+                  comply with the DUOS &quot;<Link to="/tos">Terms of Use Policy</Link>&quot;.
                 </li>
               </ul>
             </li>
@@ -228,13 +225,14 @@ export default function PrivacyPolicy() {
         <li>Location
           <ol>
             <li>
-              Broad Institute is a United States based company and therefore we must abide the laws and
-              regulations of the United States as well as the other countries where we operate. By
-              providing Personal Information and other information to this Site, you understand and
-              consent to the collection, use, processing and transfer of such information to the United
-              States and other countries or territories, which may not offer the same level of data
-              protection as the country where you reside, in accordance with the terms of this Privacy
-              Policy.
+              Broad Institute is a non-profit research institution located in the United States and subject to the
+              laws and regulations of the United States, as well as any laws and regulations that may become
+              applicable to us by virtue of our operation in other countries. Users of DUOS with whom you may choose
+              to share your data may be located in other countries. By providing Personal Information and other
+              information to this Site, you understand and consent to the collection, use, processing and transfer of
+              such information to the United States and to other countries or territories, which may not offer the
+              same level of data protection as the country where you reside, in accordance with the terms of this
+              Privacy Policy.
             </li>
           </ol>
         </li>
