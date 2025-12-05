@@ -35,7 +35,7 @@ import PropTypes from 'prop-types'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview.js'
 import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils.js'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -552,45 +552,68 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
+  const NO_ELECTION_STATUS = 'Awaiting Election Opening'
+  const NO_FINAL_VOTE_STATUS = 'Awaiting Final Vote'
+  const PENDING_STATUS = 'Pending'
+
   const votes = reverseOrderedDARs.map((dar) => {
-    const election = dar.elections
-      ? Object.values(dar.elections).find(e => e.electionType === 'DataAccess')
-      : undefined
+    const elections = dar.elections
+      ? Object.values(dar.elections).filter(e => e.electionType === 'DataAccess')
+      : []
 
-    // Find the Final vote for decision and rationale
-    let finalVoteDecision = 'Pending'
-    let finalVoteRationale = 'No rationale provided.'
-    let finalVoteDate = election?.createDate
-    if (election?.votes) {
-      const votesArr = Array.isArray(election.votes)
+    // Map each datasetId to its election and final voting info
+    return (dar.datasetIds || []).map((datasetId) => {
+      const election = elections.find(e => e.datasetId === datasetId)
+
+      const votes = Array.isArray(election?.votes)
         ? election.votes
-        : Object.values(election.votes)
-      const finalVote = votesArr.find(v => v.type === VOTE_TYPES.FINAL)
-      if (finalVote) {
-        finalVoteDate = finalVote.createDate
-        finalVoteDecision = finalVote.vote === true ? 'Approved' : finalVote.vote === false ? 'Denied' : 'Pending'
-        finalVoteRationale = finalVote.rationale || 'No rationale provided.'
-      }
-    }
+        : (election?.votes ? Object.values(election.votes) : [])
 
-    return {
-      datasetName: datasets.find(d => d.datasetId === election?.datasetId)?.name || 'Unknown Dataset',
-      voteDate: new Date(finalVoteDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
-      linkedDarId: dar?.collectionId,
-      voteResult: {
-        decision: finalVoteDecision,
-        rationale: finalVoteRationale,
-      },
-      status: election?.status || 'Completed',
-    }
-  })
+      const finalVote = votes.find(v => v.type === VOTE_TYPES.FINAL)
+      const hasFinalVote = finalVote?.vote !== undefined && finalVote?.vote !== null
+      const hasFinalVoteRationale = hasFinalVote && typeof finalVote?.rationale === 'string' && finalVote.rationale.trim().length > 0
+
+      const dataset = datasets.find(d => d.datasetId === datasetId)
+      const datasetName = dataset?.name ?? NO_ELECTION_STATUS
+
+      return {
+        datasetId,
+        datasetName,
+        voteDate: finalVote?.updateDate
+          ? new Date(finalVote.updateDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : NO_FINAL_VOTE_STATUS,
+        requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
+        linkedDarId: dar?.collectionId,
+        voteResult: {
+          decision: finalVote?.vote === true
+            ? 'Approved'
+            : finalVote?.vote === false
+              ? 'Denied'
+              : PENDING_STATUS,
+          rationale: hasFinalVoteRationale
+            ? finalVote?.rationale
+            : hasFinalVote
+              ? 'No rationale provided.'
+              : NO_FINAL_VOTE_STATUS,
+        },
+        status: election?.status ?? NO_ELECTION_STATUS,
+      }
+    })
+  }).flat()
 
   const dar = {
     referenceId: formData?.darCode || '',
     piName: formData?.piName || '',
     institution: formData?.institution || '',
-    status: votes.some(vote => vote.status === ElectionStatus.OPEN) ? ElectionStatus.OPEN : ElectionStatus.CLOSED,
+    status: votes.some(vote => vote.status === ElectionStatus.OPEN)
+      ? ElectionStatus.OPEN
+      : votes.every(vote => vote.status === NO_ELECTION_STATUS)
+        ? NO_ELECTION_STATUS
+        : ElectionStatus.CLOSED,
   }
 
   const back = () => {
