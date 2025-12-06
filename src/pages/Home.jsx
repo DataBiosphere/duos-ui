@@ -222,6 +222,7 @@ const Home = (props) => {
                             <img
                               src={logoSrc}
                               alt={libraryName}
+                              loading="lazy"
                               style={{
                                 ...logoImg,
                                 width: '100%',
