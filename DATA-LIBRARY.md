@@ -1,25 +1,85 @@
-## Adding the "Example" Data Library
 
-Let's walk through adding a new featured data library for the "Example" organization.
+# Adding a New Data Library
 
-### Step 1: Prepare and Add Logo File
+This document describes the standardized process for adding a new featured data library to DUOS. It includes required steps for obtaining and standardizing partner logos, asset requirements, configuration updates, optional styling, and testing guidelines.
 
-First, obtain the logo file and optimize it:
-- Original file: `example-logo.svg`
-- Optimized to < 100KB
-- Verified logo looks good on white background
-- File placed in: `src/images/example-logo.svg`
+---
 
-### Step 2: Update libraryVersions.ts
+## Step 1: Obtain and Standardize the Logo File
 
-Open `src/libs/libraryVersions.ts` and make the following changes:
+Because partner institutions may provide assets in many different formats and quality levels, DUOS must standardize each logo before adding it.
 
-**Add import at the top (alphabetically with other imports):**
+### 1.1 Request assets from the partner
+
+Request the following, in order of preference:
+
+1. **SVG (preferred)**
+2. **High-resolution transparent PNG**
+
+If possible, also request:
+- Branding guidelines
+- Brand resource folders
+- Press/media kits
+
+### 1.2 If suitable assets are not provided
+
+Search for publicly available branding assets:
+
+- Partner’s official website (press kit, media page)
+- GitHub organization profile
+- Publications, slide decks, conference materials
+- Verified Google Images or social media sources
+
+### 1.3 Standardize the asset (fallback workflow)
+
+If no high-quality vector is available:
+
+1. Place the raster logo into a **256 × 256 transparent canvas**.
+2. Center it with consistent whitespace.
+3. Remove backgrounds if necessary.
+4. Export as PNG.
+5. Optimize the file for performance.
+
+### 1.4 Logo asset requirements
+
+| Requirement | Value |
+|------------|-------|
+| **Preferred format** | SVG |
+| **Fallback format** | Transparent PNG |
+| **Canvas or viewport size** | 256 × 256 |
+| **Max SVG file size** | ≤ 50 KB (hard limit 100 KB) |
+| **Max PNG file size** | ≤ 100 KB (hard limit 150 KB) |
+| **Optimization** | Required (SVGO, pngquant, Squoosh, ImageOptim, etc.) |
+
+Once the asset is finalized, save it to:
+
+```
+src/images/<partner>-logo.svg
+```
+
+Example:
+
+```
+src/images/example-logo.svg
+```
+
+---
+
+## Step 2: Update `libraryVersions.ts`
+
+Add a new configuration entry for the data library.
+
+### Add import (alphabetically):
+
 ```typescript
 import exampleIcon from 'src/images/example-logo.svg'
 ```
 
-**Add configuration entry (after line 532, before 'ncpi-duo'):**
+### Add the configuration entry
+
+> **Ordering rule:**  
+> Assign `order` to **one higher than the current highest order** in the file.
+
 ```typescript
 'example': {
   query: {
@@ -30,13 +90,13 @@ import exampleIcon from 'src/images/example-logo.svg'
   icon: exampleIcon,
   title: 'Example Data Library',
   featured: true,
-  order: 22,  // Next sequential number after current max (21)
+  order: <next_available_order>,
 },
 ```
 
-### Step 3: Verify the Configuration
+---
 
-The complete entry in context:
+## Step 3: Verify the Configuration
 
 ```typescript
 // ... existing imports ...
@@ -58,7 +118,7 @@ export const getLibraryVersions = (
       icon: exampleIcon,
       title: 'Example Data Library',
       featured: true,
-      order: 22,
+      order: <next_available_order>,
     },
     'ncpi-duo': {
       query: {
@@ -76,91 +136,56 @@ export const getLibraryVersions = (
 }
 ```
 
-### Step 4: How It Works on the Homepage
+---
 
-Once deployed, the library will automatically appear on the homepage:
+## Step 4: How It Works on the Homepage
 
-1. **Card Display**: 
-   - Logo displays in a 320px × 160px card
-   - Library name "Example" appears below (without "Data Library")
-   
-2. **User Interaction**:
-   - Authenticated users: Click to go to `/datalibrary/example`
-   - Unauthenticated users: See tooltip "Please login to access Example Data Library"
-   
-3. **Responsive Behavior**:
-   - Desktop: Full size with other libraries in grid
-   - Tablet: Resizes to 280px × 140px
-   - Mobile: Full width, max 320px × 160px
+Once your entry is added and deployed, DUOS automatically displays the new data library.
 
-### Step 5: Alternative Query Patterns
+### Card Display
 
-Depending on your needs, you can use different query patterns:
+- Logo scales **responsively** within the card container
+- Logo maintains its aspect ratio
+- Display name appears as **"Example"** (the key in lowercase)
+- Cards are automatically generated from `libraryVersions.ts`
 
-**Search by Institution Name:**
-```typescript
-'example': {
-  query: {
-    match_phrase: {
-      'submitter.institution.name': 'Example',
-    },
-  },
-  icon: exampleIcon,
-  title: 'Example Data Library',
-  featured: true,
-  order: 22,
-},
-```
+### User Interaction
 
-**Search by Multiple Criteria:**
-```typescript
-'example': {
-  query: {
-    bool: {
-      should: [
-        {
-          match_phrase: {
-            'study.description': 'Example',
-          },
-        },
-        {
-          match_phrase: {
-            'study.description': 'EX',
-          },
-        },
-        {
-          match_phrase: {
-            'submitter.institution.name': 'Example Organization',
-          },
-        },
-      ],
-    },
-  },
-  icon: exampleIcon,
-  title: 'Example Data Library',
-  featured: true,
-  order: 22,
-},
-```
+- **Authenticated users:** Clicking navigates to `/datalibrary/example`
+- **Unauthenticated users:** Tooltip appears:  
+  *"Please login to access Example Data Library"*
 
-### Step 6: Special Styling (If Needed)
+### Responsive Behavior
 
-If your logo needs a dark background like the Broad Institute:
+The UI does **not** use fixed pixel dimensions. Instead:
+- Card and logo sizes adjust based on available grid space
+- Layout adapts to desktop, tablet, and mobile views automatically
 
-1. Update `Home.jsx` around line 106:
+No developer action is required to support responsiveness.
+
+---
+
+## Step 5: Special Styling (If Needed)
+
+Some logos require a dark background (e.g., Broad Institute style). This is optional and should be used only when the branding requires it.
+
+### Add conditional dark card styling (in `Home.jsx`)
+
 ```javascript
-// Special styling for Broad Institute and Example (dark background)
+// Dark card background for Broad and Example
 const cardStyle = library.key === 'broad' || library.key === 'example'
   ? { ...baseCard, background: '#1F3B50', padding: '15px' }
   : baseCard
 ```
 
-2. Import a white version of the logo in `Home.jsx`:
+### Import a white logo variant (optional)
+
 ```javascript
 import exampleLogo from '../images/example-logo-white.svg'
 ```
 
-3. Update the logoSrc logic:
+### Update logo selection logic
+
 ```javascript
 const logoSrc = library.key === 'broad'
   ? broadLogo
@@ -169,26 +194,70 @@ const logoSrc = library.key === 'broad'
   : library.icon
 ```
 
-## Testing Checklist
+---
 
-After adding a library icon:
+## Appendix: Optional Alternative Query Patterns
 
-- [ ] Logo displays correctly in homepage grid
-- [ ] Logo maintains aspect ratio in card
-- [ ] Library name appears below logo without "Data Library"
-- [ ] Tooltip shows correct text on hover
-- [ ] Link works for authenticated users
-- [ ] Login redirect works for unauthenticated users
-- [ ] Logo displays properly on mobile devices
+These query patterns are not part of icon standardization but may be useful in special cases.
+
+### Search by Institution Name
+
+```typescript
+match_phrase: {
+  'submitter.institution.name': 'Example',
+}
+```
+
+### Search by Multiple Criteria
+
+```typescript
+bool: {
+  should: [
+    { match_phrase: { 'study.description': 'Example' }},
+    { match_phrase: { 'study.description': 'EX' }},
+    { match_phrase: { 'submitter.institution.name': 'Example Organization' }},
+  ],
+},
+```
+
+---
+
+# Testing Checklist
+
+### Implementation
+
+- [ ] Logo is SVG or high-resolution transparent PNG
+- [ ] Logo meets file size limits
+- [ ] Logo normalized to a 256 × 256 canvas if needed
+- [ ] Logo optimized using SVGO/pngquant/etc.
+- [ ] Logo placed in `src/images`
+- [ ] Alphabetical import added to `libraryVersions.ts`
+- [ ] Configuration entry added with correct query pattern
+- [ ] `order` assigned as highest existing + 1
+
+---
+
+### Homepage Testing
+
+- [ ] Logo displays correctly in the homepage grid
+- [ ] Logo maintains correct aspect ratio
+- [ ] Label shows correctly below the logo
+- [ ] Tooltip appears for unauthenticated users
+- [ ] Navigation works when authenticated
+- [ ] Logo renders properly on phones, tablets, and desktops
 - [ ] Logo appears in correct sort order
+- [ ] Logo does not significantly increase homepage load weight
+
+---
 
 ## Notes
 
-- No changes needed in `Home.jsx` when adding new library icons
-- The component automatically reads icons from `libraryVersions.ts`
-- Logo cards are automatically generated from the configuration
-- The grid layout is responsive and adjusts to screen size
+- No updates to UI components are required unless applying special dark-background styling
+- The grid layout reads automatically from `libraryVersions.ts`
+- Responsive behavior is handled entirely by the homepage grid styles
+
+---
 
 ## Contact
 
-For questions about adding data library icons, contact the DUOS development team.
+For questions about adding or standardizing data library icons, contact the DUOS development team.
