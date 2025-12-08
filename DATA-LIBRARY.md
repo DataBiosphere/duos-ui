@@ -96,76 +96,7 @@ import exampleIcon from 'src/images/example-logo.svg'
 
 ---
 
-## Step 3: Verify the Configuration
-
-```typescript
-// ... existing imports ...
-import exampleIcon from 'src/images/example-logo.svg'
-
-export const getLibraryVersions = (
-  institutionId: number | null,
-  institutionName: string | null,
-  customQuery: string | null,
-): LibraryVersions => {
-  return {
-    // ... existing libraries ...
-    'example': {
-      query: {
-        match_phrase: {
-          'study.description': 'Example',
-        },
-      },
-      icon: exampleIcon,
-      title: 'Example Data Library',
-      featured: true,
-      order: <next_available_order>,
-    },
-    'ncpi-duo': {
-      query: {
-        match_phrase: {
-          'study.description': 'NCPI DUO',
-        },
-      },
-      icon: ncpiIcon,
-      title: 'NCPI DUO Data Library',
-      featured: false,
-      order: 999,
-    },
-    // ... rest of configuration ...
-  }
-}
-```
-
----
-
-## Step 4: How It Works on the Homepage
-
-Once your entry is added and deployed, DUOS automatically displays the new data library.
-
-### Card Display
-
-- Logo scales **responsively** within the card container
-- Logo maintains its aspect ratio
-- Display name appears as **"Example"** (the key in lowercase)
-- Cards are automatically generated from `libraryVersions.ts`
-
-### User Interaction
-
-- **Authenticated users:** Clicking navigates to `/datalibrary/example`
-- **Unauthenticated users:** Tooltip appears:  
-  *"Please login to access Example Data Library"*
-
-### Responsive Behavior
-
-The UI does **not** use fixed pixel dimensions. Instead:
-- Card and logo sizes adjust based on available grid space
-- Layout adapts to desktop, tablet, and mobile views automatically
-
-No developer action is required to support responsiveness.
-
----
-
-## Step 5: Special Styling (If Needed)
+## Step 3: Special Styling (If Needed)
 
 Some logos require a dark background (e.g., Broad Institute style). This is optional and should be used only when the branding requires it.
 
@@ -192,32 +123,6 @@ const logoSrc = library.key === 'broad'
   : library.key === 'example'
   ? exampleLogo
   : library.icon
-```
-
----
-
-## Appendix: Optional Alternative Query Patterns
-
-These query patterns are not part of icon standardization but may be useful in special cases.
-
-### Search by Institution Name
-
-```typescript
-match_phrase: {
-  'submitter.institution.name': 'Example',
-}
-```
-
-### Search by Multiple Criteria
-
-```typescript
-bool: {
-  should: [
-    { match_phrase: { 'study.description': 'Example' }},
-    { match_phrase: { 'study.description': 'EX' }},
-    { match_phrase: { 'submitter.institution.name': 'Example Organization' }},
-  ],
-},
 ```
 
 ---
