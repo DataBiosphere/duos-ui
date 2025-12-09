@@ -91,7 +91,7 @@ const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, vote
           <strong>Rationale:</strong>{' '}
           {expandedRows.has(idx)
             ? vote.voteResult.rationale
-            : `${vote.voteResult.rationale.substring(0, 80)}... `}
+            : `${vote.voteResult.rationale.substring(0, 20)}... `}
           <button
             type="button"
             className="btn-link rationale-btn"

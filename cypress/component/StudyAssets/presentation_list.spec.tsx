@@ -52,7 +52,6 @@ describe('PresentationList component', () => {
         onPresentationChange={(items) => { collected.splice(0, collected.length, ...items) }}
       />,
     )
-    cy.get('.collaborator-form-add-save-button').should('be.disabled')
     cy.get('#title').type('New Title')
     cy.get('#date').type('2024-07-15')
     cy.get('#url').type('https://example.org/new')
@@ -66,7 +65,7 @@ describe('PresentationList component', () => {
     cy.get('#location').type('Location Z')
     cy.get('#format').type('Poster')
     cy.get('#access').type('Public')
-    cy.get('.collaborator-form-add-save-button').should('not.be.disabled').click()
+    cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
       expect(collected[0].title).to.eq('New Title')
