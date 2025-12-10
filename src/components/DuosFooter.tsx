@@ -1,27 +1,27 @@
-import React from 'react'
-import footerLogo from '../images/broad_logo_allwhite.png'
+import React, { CSSProperties } from 'react'
+import footerLogo from 'src/images/broad_logo_allwhite.png'
+
+const footerStyle: CSSProperties = {
+  position: 'relative',
+  clear: 'both',
+  backgroundColor: '#000000',
+  minHeight: '64px',
+}
+
+const mainFooterStyle: CSSProperties = {
+  display: 'block',
+  width: '100%',
+  padding: '0 20px',
+}
+
+const footerLogoStyle: CSSProperties = {
+  float: 'left',
+  height: '32px',
+  marginTop: '15px',
+  marginRight: '35px',
+}
 
 function DuosFooter() {
-  const footerStyle = {
-    position: 'relative',
-    clear: 'both',
-    backgroundColor: '#000000',
-    minHeight: '64px',
-  }
-
-  const mainFooterStyle = {
-    display: 'block',
-    width: '100%',
-    padding: '0 20px',
-  }
-
-  const footerLogoStyle = {
-    float: 'left',
-    height: '32px',
-    marginTop: '15px',
-    marginRight: '35px',
-  }
-
   return (
     <div style={footerStyle}>
       <footer style={mainFooterStyle}>
