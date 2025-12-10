@@ -8,11 +8,12 @@ interface PresentationSummaryProps {
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }
 
 export default function PresentationSummary(props: PresentationSummaryProps): React.JSX.Element {
-  const { presentation, columnsToShow, editAction, deleteAction, disabled } = props
+  const { presentation, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -58,10 +59,24 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
           </div>
         )
       })}
-      {/* edit button */}
       <div className="collaborator-summary-edit-delete-buttons">
+        {/* view button */}
         <a
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          style={{ marginLeft: 10, marginRight: 10 }}
+          onClick={() => viewAction?.()}
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View presentation"
+            data-for="tip_view"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </a>
+        {/* edit button */}
+        <a
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
         >
           <span
@@ -80,7 +95,7 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
         onClick={() => !disabled && setShowDeleteModal(true)}
       >
         <span
-          className="glyphicon glyphicon-trash presentation-delete-icon"
+          className="glyphicon glyphicon-trash collaborator-delete-icon"
           aria-hidden="true"
           data-tip="Delete dataset"
           data-for="tip_delete"

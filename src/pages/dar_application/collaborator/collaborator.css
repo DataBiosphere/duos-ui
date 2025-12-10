@@ -40,6 +40,15 @@
   font-size: 1.2em;
 }
 
+.collaborator-view-icon {
+  color: #ffffff !important;
+  background: #0948B7 !important;
+  border-radius: 10% !important;
+  vertical-align: middle !important;
+  text-align: center;
+  padding: 10% 10%;
+}
+
 /*///////////////////////////////////////////////////////Form*/
 
 .collaborator-form-card {

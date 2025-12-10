@@ -70,11 +70,28 @@ describe('PresentationList component', () => {
       expect(collected.length).to.eq(1)
       expect(collected[0].title).to.eq('New Title')
     })
+
+    it('opens presentation in view mode when view button is clicked', () => {
+      mount(<PresentationListHarness initial={[samplePresentation]} />)
+      cy.get('.glyphicon-eye-open').click({ force: true })
+      cy.contains('Sample Talk').should('exist')
+      cy.get('#title').should('be.disabled')
+      cy.get('#date').should('be.disabled')
+      cy.get('.collaborator-form-add-save-button').should('not.exist')
+      cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+    })
+
+    it('closes view mode when close button is clicked', () => {
+      mount(<PresentationListHarness initial={[samplePresentation]} />)
+      cy.get('.glyphicon-eye-open').click({ force: true })
+      cy.get('.collaborator-form-cancel-button').click()
+      cy.get('#title').should('not.exist')
+      cy.get('.glyphicon-eye-open').should('exist')
+    })
   })
 
   it('adds a presentation through list harness', () => {
-    const state: Presentation[] = []
-    mount(<PresentationListHarness initial={state} />)
+    mount(<PresentationListHarness initial={[]} />)
     cy.get('#add-presentation-btn').click()
     cy.contains('New Presentation').should('exist')
     cy.get('#title').type('Added Talk')
@@ -136,6 +153,22 @@ describe('PresentationSummary', () => {
     cy.contains('Dr. Presenter').should('exist')
     cy.get('a[href="https://example.org/presentation"]').should('exist')
   })
+
+  it('renders view button and triggers viewAction', () => {
+    mount(
+      <PresentationSummary
+        presentation={samplePresentation}
+        columnsToShow={['title']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').should('exist')
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
+  })
 })
 
 describe('PresentationRow', () => {
@@ -175,5 +208,48 @@ describe('PresentationRow', () => {
       />,
     )
     cy.get('#title').should('have.value', 'Sample Talk')
+  })
+
+  it('renders view form when viewMode true and is read-only', () => {
+    mount(
+      <PresentationRow
+        id={0}
+        editMode={false}
+        viewMode={true}
+        presentation={samplePresentation}
+        presentations={[samplePresentation]}
+        columnsToShow={['title']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub()}
+        onPresentationChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('#title').should('have.value', 'Sample Talk')
+    cy.get('#title').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
+  })
+
+  it('triggers viewAction when view button is clicked', () => {
+    mount(
+      <PresentationRow
+        id={0}
+        editMode={false}
+        viewMode={false}
+        presentation={samplePresentation}
+        presentations={[samplePresentation]}
+        columnsToShow={['title', 'event']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        onPresentationChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
   })
 })

@@ -32,6 +32,7 @@ interface PresentationAddEditProps {
   readonly presentations: Presentation[]
   readonly closeAction: () => void
   readonly onPresentationChange: (presentations: Presentation[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -49,7 +50,7 @@ interface Validation {
 }
 
 export default function PresentationAddEdit(props: PresentationAddEditProps): React.JSX.Element {
-  const { id, presentation, presentations, closeAction, onPresentationChange } = props
+  const { id, presentation, presentations, closeAction, onPresentationChange, readOnly = false } = props
 
   const [newPresentation, setNewPresentation] = useState<Presentation>(presentation || defaultPresentation)
   const [validation, setValidation] = useState<Validation>(() => ({
@@ -129,7 +130,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{presentation === undefined ? 'New Presentation' : `Edit ${presentation.title}`}</h2>
+          <h2>{readOnly ? presentation?.title : (presentation === undefined ? 'New Presentation' : `Edit ${presentation.title}`)}</h2>
           <FormField
             id="title"
             title="Presentation Title"
@@ -138,6 +139,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.title) ? validation.title : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="date"
@@ -147,6 +149,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={(submitted || touched.date) ? validation.date : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="url"
@@ -156,6 +159,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="authors"
@@ -165,6 +169,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.authors) ? validation.authors : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="datasetCitation"
@@ -174,6 +179,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="citation"
@@ -183,6 +189,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             orientation="horizontal"
             onChange={onChange}
             validation={(submitted || touched.citation) ? validation.citation : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="presenterName"
@@ -192,6 +199,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.presenterName) ? validation.presenter?.name : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="presenterEmail"
@@ -201,6 +209,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
             onChange={onChange}
             validation={(submitted || touched.presenterEmail) ? validation.presenter?.email : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="event"
@@ -210,6 +219,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.event) ? validation.event : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="location"
@@ -219,6 +229,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.location) ? validation.location : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="format"
@@ -228,6 +239,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.format) ? validation.format : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="access"
@@ -237,6 +249,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.access) ? validation.access : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="tags"
@@ -244,22 +257,25 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             defaultValue={presentation?.tags?.join(', ')}
             placeholder="tag1, tag2"
             onChange={onChange}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={save}
-          >
-            {presentation === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {presentation === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>
