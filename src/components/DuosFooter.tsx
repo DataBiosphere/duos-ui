@@ -1,5 +1,7 @@
 import React, { CSSProperties } from 'react'
 import footerLogo from 'src/images/broad_logo_allwhite.png'
+import { CookieBanner } from 'src/components/CookieBanner'
+import { CookieUtils } from 'src/utils/CookieUtils'
 
 const footerStyle: CSSProperties = {
   position: 'relative',
@@ -22,20 +24,22 @@ const footerLogoStyle: CSSProperties = {
 }
 
 function DuosFooter() {
-  return (
-    <div style={footerStyle}>
-      <footer style={mainFooterStyle}>
-        <img src={footerLogo} style={footerLogoStyle} alt="Broad Institute logo" />
-        <ul className="footer-links">
-          <li className="footer-links__item">© Broad Institute</li>
-          <li className="footer-links__item"><a href="/privacy">Privacy Policy</a></li>
-          <li className="footer-links__item"><a href="/tos">Terms of Service</a></li>
-          <li className="footer-links__item"><a href="/cookie_policy">Cookie Policy</a></li>
-          <li className="footer-links__item"><a href="/status">Status</a></li>
-        </ul>
-      </footer>
-    </div>
-  )
+  return CookieUtils.getAccepted()
+    ? (
+        <div style={footerStyle}>
+          <footer style={mainFooterStyle}>
+            <img src={footerLogo} style={footerLogoStyle} alt="Broad Institute logo" />
+            <ul className="footer-links">
+              <li className="footer-links__item">© Broad Institute</li>
+              <li className="footer-links__item"><a href="/privacy">Privacy Policy</a></li>
+              <li className="footer-links__item"><a href="/tos">Terms of Service</a></li>
+              <li className="footer-links__item"><a href="/cookie_policy">Cookie Policy</a></li>
+              <li className="footer-links__item"><a href="/status">Status</a></li>
+            </ul>
+          </footer>
+        </div>
+      )
+    : <CookieBanner visible={true} />
 }
 
 export default DuosFooter
