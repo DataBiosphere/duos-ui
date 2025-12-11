@@ -71,7 +71,7 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
           <span
             className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
             aria-hidden="true"
-            data-tip="View presentation"
+            data-tip="View publication"
             data-for="tip_view"
           >
           </span>
