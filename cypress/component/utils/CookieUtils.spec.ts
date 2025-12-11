@@ -17,30 +17,30 @@ describe('CookieUtils', () => {
     })
   })
 
-  describe('getAccepted', () => {
-    it('should return true if accepted', () => {
-      const control = { accepted: true }
+  describe('getAcknowledged', () => {
+    it('should return true if acknowledged', () => {
+      const control = { acknowledged: true }
       document.cookie = `cookie_control=${encodeURIComponent(JSON.stringify(control))}`
-      cy.wrap(CookieUtils.getAccepted()).should('be.true')
+      cy.wrap(CookieUtils.getAcknowledged()).should('be.true')
     })
 
-    it('should return false if not accepted', () => {
-      const control = { accepted: false }
+    it('should return false if not acknowledged', () => {
+      const control = { acknowledged: false }
       document.cookie = `cookie_control=${encodeURIComponent(JSON.stringify(control))}`
-      cy.wrap(CookieUtils.getAccepted()).should('be.false')
+      cy.wrap(CookieUtils.getAcknowledged()).should('be.false')
     })
 
     it('should return false if cookie_control is missing', () => {
       document.cookie = 'foo=bar'
-      cy.wrap(CookieUtils.getAccepted()).should('be.false')
+      cy.wrap(CookieUtils.getAcknowledged()).should('be.false')
     })
   })
 
   describe('setAccepted', () => {
-    it('should set cookie_control cookie when accepted', () => {
-      CookieUtils.setAccepted()
+    it('should set cookie_control cookie when acknowledged', () => {
+      CookieUtils.setAcknowledged()
       cy.wrap(document.cookie).should('contain', 'cookie_control')
-      cy.wrap(document.cookie).should('contain', '"accepted":true')
+      cy.wrap(document.cookie).should('contain', '"acknowledged":true')
     })
   })
 })

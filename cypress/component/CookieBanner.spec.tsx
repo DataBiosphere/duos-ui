@@ -13,7 +13,7 @@ describe('CookieBanner', () => {
   })
 
   it('hides banner and sets accepted when close button is clicked', () => {
-    cy.stub(CookieUtils, 'setAccepted').as('setAcceptedStub')
+    cy.stub(CookieUtils, 'setAcknowledged').as('setAcceptedStub')
     mount(<BrowserRouter><CookieBanner visible={true} /></BrowserRouter>)
     cy.get('#cookie_banner').should('be.visible')
     cy.get('button').click()

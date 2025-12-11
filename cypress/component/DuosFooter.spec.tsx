@@ -7,16 +7,16 @@ import { BrowserRouter } from 'react-router-dom'
 
 describe('DuosFooter', () => {
   it('renders the Broad Institute logo', () => {
-    cy.stub(CookieUtils, 'getAccepted').returns(true)
+    cy.stub(CookieUtils, 'getAcknowledged').returns(true)
     mount(<BrowserRouter><DuosFooter /></BrowserRouter>)
-    cy.get('#cookie_banner').should('not.exist')
+    cy.get('#cookie_banner').should('not.be.visible')
     cy.get('img[alt="Broad Institute logo"]').should('exist')
   })
 
   it('renders all footer links', () => {
-    cy.stub(CookieUtils, 'getAccepted').returns(true)
+    cy.stub(CookieUtils, 'getAcknowledged').returns(true)
     mount(<BrowserRouter><DuosFooter /></BrowserRouter>)
-    cy.get('#cookie_banner').should('not.exist')
+    cy.get('#cookie_banner').should('not.be.visible')
     cy.contains('© Broad Institute').should('exist')
     cy.contains('a', 'Privacy Policy').should('have.attr', 'href', '/privacy')
     cy.contains('a', 'Terms of Service').should('have.attr', 'href', '/tos')
@@ -25,7 +25,7 @@ describe('DuosFooter', () => {
   })
 
   it('shows Cookie Banner when cookies have not been acknowledged', () => {
-    cy.stub(CookieUtils, 'getAccepted').returns(false)
+    cy.stub(CookieUtils, 'getAcknowledged').returns(false)
     mount(<BrowserRouter><DuosFooter /></BrowserRouter>)
     cy.get('#cookie_banner').should('be.visible')
   })

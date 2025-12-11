@@ -1,7 +1,9 @@
 import React from 'react'
 import CloseIcon from '@mui/icons-material/Close'
+import { IconButton } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { CookieUtils } from 'src/utils/CookieUtils'
+import Tooltip from '@mui/material/Tooltip'
 
 export interface CookieBannerProps {
   visible?: boolean
@@ -14,24 +16,35 @@ export const CookieBanner = (props: CookieBannerProps) => {
       id="cookie_banner"
       className="cookie-banner"
       style={{
-        border: '1px solid',
+        position: 'fixed',
+        bottom: 0,
+        marginBottom: 10,
+        left: 15,
+        right: 15,
+        zIndex: 1000,
+        border: '1px solid gray',
         borderRadius: '5px',
-        padding: '10px',
+        padding: '15px',
         backgroundColor: '#f9f9f9',
         display: visible ? 'block' : 'none',
       }}
     >
 
-      <button
-        type="button"
-        style={{ float: 'right', fontWeight: 'bolder', fontSize: 24, cursor: 'pointer' }}
-        onClick={() => {
-          CookieUtils.setAccepted()
-          setVisible(false)
-        }}
-      >
-        <CloseIcon />
-      </button>
+      <Tooltip title="Acknowledge Cookies">
+        <IconButton
+          edge="end"
+          color="inherit"
+          aria-label="Acknowledge Cookies"
+          data-cy="closeButton"
+          onClick={() => {
+            CookieUtils.setAcknowledged()
+            setVisible(false)
+          }}
+          sx={{ float: 'right', marginRight: '5px' }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Tooltip>
 
       <p><strong>We care about your privacy</strong></p>
       <p>

@@ -9,19 +9,19 @@ export const getCookiePairs = () => {
   return cookiePairs
 }
 
-export const getAccepted = () => {
+export const getAcknowledged = () => {
   for (const [key, value] of Object.entries(getCookiePairs())) {
     if (key === 'cookie_control') {
       const control = JSON.parse(value)
-      return (control?.accepted === true)
+      return (control?.acknowledged === true)
     }
   }
   return false
 }
 
-export const setAccepted = () => {
+export const setAcknowledged = () => {
   // Base cookie control object
-  const control = { accepted: true, timestamp: Date.now() }
+  const control = { acknowledged: true, timestamp: Date.now() }
   // 400 - day cookie expiration (days * hours * minutes * seconds)
   const expiration = 400 * 24 * 60 * 60
   document.cookie = `cookie_control=${JSON.stringify(control)}; path=/; max-age=` + expiration
@@ -29,6 +29,6 @@ export const setAccepted = () => {
 
 export const CookieUtils = {
   getCookiePairs,
-  getAccepted,
-  setAccepted,
+  getAcknowledged,
+  setAcknowledged,
 }
