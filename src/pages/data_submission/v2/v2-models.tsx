@@ -575,16 +575,3 @@ export class NumberOfParticipants extends DatasetProperty {
     super(NumberOfParticipants.propertyName, NumberOfParticipants.schemaProperty, 'Number' as DatasetPropertyType, value, datasetId, propertyId)
   }
 }
-
-export interface BaseDataset {
-  datasetId?: number
-  uuid?: string
-  name?: string
-  description?: string
-  studyId?: number
-  properties?: DatasetProperty[]
-  createDate?: string // Date?
-  createUserId?: number
-  updateDate?: string // Date?
-  updateUserId?: number
-}
