@@ -128,7 +128,7 @@ describe('Summary Section - Component Tests', () => {
 
   it('displays the correct descriptions for each section', () => {
     cy.contains('Please summarize your research on this project since your initial request or most recent renewal').should('be.visible')
-    cy.contains('Have you generated any intellectual property since your last renewal').should('be.visible')
+    cy.contains('Have you generated any intellectual property (IP) since your last renewal').should('be.visible')
     cy.contains('Have you published in any publications since your last renewal').should('be.visible')
     cy.contains('Have you published in any presentations since your last renewal').should('be.visible')
   })
