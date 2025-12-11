@@ -17,7 +17,7 @@ interface AiModelListProps {
 export default function AiModelList(props: AiModelListProps): React.JSX.Element {
   const {
     aiModels,
-    columnsToShow = [],
+    columnsToShow = ['name', 'description', 'url', 'format', 'license', 'trainedOnDatasets', 'maintainer', 'tags'],
     onAiModelsChange,
     disabled = false,
     validation,
@@ -71,7 +71,7 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
       )}
       {aiModels.map((model: AiModel, index: number) => (
         <AiModelRow
-          key={model.modelId}
+          key={model.modelId || index}
           id={index}
           editMode={editState[index]}
           aiModel={model}
