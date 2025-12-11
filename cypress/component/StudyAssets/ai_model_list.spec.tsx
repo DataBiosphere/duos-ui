@@ -168,4 +168,28 @@ describe('AiModelList', () => {
       expect(state.length).to.eq(0)
     })
   })
+
+  it('shows all default columns when none are provided', () => {
+    const state: AiModel[] = [sampleModel]
+    mount(
+      <AiModelList
+        aiModels={state}
+        onAiModelsChange={(m) => { state.splice(0, state.length, ...m) }}
+        disabled={false}
+      />,
+    )
+    cy.contains(sampleModel.name).should('exist')
+    cy.contains(sampleModel.description).should('exist')
+    cy.contains(sampleModel.url).should('exist')
+    cy.contains(sampleModel.format).should('exist')
+    cy.contains(sampleModel.license).should('exist')
+    sampleModel.trainedOnDatasets?.forEach((t) => {
+      cy.contains(t).should('exist')
+    })
+    cy.contains(sampleModel.maintainer.name).should('exist')
+    cy.contains(sampleModel.maintainer.email).should('exist')
+    sampleModel.tags?.forEach((tag) => {
+      cy.contains(tag).should('exist')
+    })
+  })
 })
