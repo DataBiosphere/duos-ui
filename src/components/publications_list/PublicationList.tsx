@@ -17,7 +17,7 @@ interface PublicationListProps {
 export default function PublicationList(props: PublicationListProps): React.JSX.Element {
   const {
     publications,
-    columnsToShow = [],
+    columnsToShow = ['title', 'publishedDate', 'journal', 'url'],
     onPublicationChange,
     disabled = false,
     validation,

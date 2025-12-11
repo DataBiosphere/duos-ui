@@ -17,7 +17,7 @@ interface PresentationListProps {
 export default function PresentationList(props: PresentationListProps): React.JSX.Element {
   const {
     presentations,
-    columnsToShow = [],
+    columnsToShow = ['title', 'date', 'event', 'location', 'url'],
     onPresentationChange,
     disabled = false,
     validation,
