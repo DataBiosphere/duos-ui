@@ -149,7 +149,7 @@ export default function SummarySection(props: Readonly<SummarySectionProps>): Re
           {(formState.publicationsYesNo || (readOnly && publications.length > 0)) && (
             <PublicationList
               publications={publications}
-              columnsToShow={['title', 'date']}
+              columnsToShow={['title', 'publishedDate']}
               onPublicationChange={onPublicationChange}
               disabled={readOnly}
               validation={validation}

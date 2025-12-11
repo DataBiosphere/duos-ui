@@ -15,6 +15,7 @@ interface PublicationAddEditProps {
   readonly publications: Publication[]
   readonly closeAction: () => void
   readonly onPublicationChange: (publications: Publication[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -48,7 +49,7 @@ const defaultPublication: Publication = {
 }
 
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
-  const { id, publication, publications, closeAction, onPublicationChange } = props
+  const { id, publication, publications, closeAction, onPublicationChange, readOnly = false } = props
   const initialPublication = publication || defaultPublication
 
   // Ensure at least one author row is present and bound to state
@@ -170,12 +171,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>
-            {publication === undefined
-              ? 'New Publication Information'
-              : `Edit ${publication.title} Information`}
-          </h2>
-
+          <h2>{readOnly ? publication?.title : (publication === undefined ? 'New Publication' : `Edit ${publication.title}`)}</h2>
           <FormField
             id="title"
             title="Publication Title"
@@ -184,6 +180,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.title) ? validation.title : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -194,6 +191,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={(submitted || touched.publishedDate) ? validation.publishedDate : undefined}
+            disabled={readOnly}
           />
 
           <div style={{ marginBottom: '1rem', width: '100%' }}>
@@ -218,6 +216,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                     value={a.name}
                     placeholder="Author Name"
                     onChange={e => updateAuthorField(idx, 'name', e.target.value)}
+                    disabled={readOnly}
                   />
                   <input
                     type="text"
@@ -226,12 +225,13 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                     value={a.orcId}
                     placeholder="ORCID (0000-0000-0000-0000)"
                     onChange={e => updateAuthorField(idx, 'orcId', e.target.value)}
+                    disabled={readOnly}
                   />
                   <button
                     type="button"
                     className="btn btn-danger"
                     onClick={() => removeAuthor(idx)}
-                    disabled={newPublication.authors.length === 1}
+                    disabled={newPublication.authors.length === 1 || readOnly}
                     title={
                       newPublication.authors.length === 1
                         ? 'At least one author required'
@@ -247,7 +247,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
                 className="btn btn-primary"
                 style={{ marginTop: '0.75rem', width: '100%' }}
                 onClick={addAuthor}
-                disabled={disableAddAuthor}
+                disabled={disableAddAuthor || readOnly}
                 title={
                   disableAddAuthor
                     ? 'Fill all existing author name and valid ORCID first'
@@ -267,6 +267,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.pubmedId) ? validation.pubmedId : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -277,6 +278,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.bibliographicCitation) ? validation.bibliographicCitation : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -287,6 +289,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -297,6 +300,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.journal) ? validation.journal : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -307,6 +311,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.doi) ? validation.doi : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -317,6 +322,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -327,6 +333,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.access) ? validation.access : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -335,19 +342,25 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             defaultValue={tagsInput}
             placeholder="tag1, tag2"
             onChange={onChange}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button type="button" className="btn btn-primary" onClick={save}>
-            <span className="glyphicon glyphicon-floppy-disk" aria-hidden="true" /> Save
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {publication === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
+            className="collaborator-form-cancel-button f-left btn"
             type="button"
-            className="btn btn-default"
-            style={{ marginLeft: '1rem' }}
             onClick={closeAction}
           >
-            <span className="glyphicon glyphicon-remove" aria-hidden="true" /> Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>
