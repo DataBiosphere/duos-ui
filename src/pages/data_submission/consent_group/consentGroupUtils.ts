@@ -1,4 +1,5 @@
 import { isNil, isString } from 'lodash/fp'
+import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 
 export interface ConsentGroup {
   generalResearchUse?: boolean
@@ -14,9 +15,9 @@ export interface ConsentGroup2 {
   consentGroupName: string
   consentGroupId: string | number
   datasetId?: number
-  accessManagement?: AccessManagementType
+  accessManagement?: AccessManagementType | undefined
   numberOfParticipants: number
-  generalResearchUse?: boolean
+  generalResearchUse?: boolean | undefined
   hmb?: boolean
   diseaseSpecificUse?: string[]
   poa?: boolean
@@ -32,13 +33,14 @@ export interface ConsentGroup2 {
   morDate?: string
   npu?: boolean
   otherSecondary?: string
-  dataLocation?: 'AnVIL Workspace' | 'Terra Workspace' | 'TDR Location' | 'Not Determined'
+  dataLocation?: DataLocationType
   url?: string
-  fileTypes?: FileType[]
+  fileTypes?: Array<FileType>
 };
 
+export type FileTypeOptions = 'ARRAYS' | 'GENOME' | 'EXOME' | 'SURVEY' | 'PHENOTYPE'
 export interface FileType {
-  fileType: 'Arrays' | 'Genome' | 'Exome' | 'Survey' | 'Phenotype'
+  fileType: FileTypeOptions
   functionalEquivalence: string
 }
 
