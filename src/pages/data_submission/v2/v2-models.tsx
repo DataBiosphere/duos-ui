@@ -10,7 +10,7 @@ import {
 } from 'src/types/model'
 import { StudyType, StudyTypeNames } from 'src/components/forms/StudyType'
 import React from 'react'
-import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
+import { ConsentGroup2, FileType } from '../consent_group/consentGroupUtils'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 
 export type StudyPropertyType = 'Boolean' | 'String' | 'Number' | 'Date' | 'Json'
@@ -483,5 +483,95 @@ export interface DatasetRegistrationSchemaV1 {
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
     intellectualProperty?: Array<IntellectualProperty>
+  }
+}
+
+export type DatasetPropertyType = 'String' | 'Number' | 'Json'
+export class DatasetProperty {
+  propertyName: string
+  datasetId?: number
+  propertyId?: number
+  schemaProperty: string
+  type: DatasetPropertyType
+  value?: unknown
+
+  constructor(propertyName: string, schemaProperty: string, type: DatasetPropertyType, value?: unknown, datasetId?: number, propertyId?: number) {
+    this.datasetId = datasetId
+    this.propertyId = propertyId
+    this.propertyName = propertyName
+    this.schemaProperty = schemaProperty
+    this.type = type
+    this.value = value
+  }
+
+  toJSON() {
+    const obj = {
+      propertyName: this.propertyName,
+      propertyValue: this.value,
+      datasetId: this.datasetId,
+      propertyId: this.propertyId,
+      schemaProperty: this.schemaProperty,
+      propertyType: this.type,
+    }
+    if (!obj.datasetId) {
+      delete obj.datasetId
+    }
+    if (!obj.propertyId) {
+      delete obj.propertyId
+    }
+    return obj
+  }
+}
+
+export class StringDatasetProperty extends DatasetProperty {
+  fieldTitle: string
+  fieldPlaceholderText: string
+  constructor(fieldTitle: string, fieldPlaceholderText: string, propertyName: string, schemaProperty: string, value?: string, datasetId?: number, propertyId?: number) {
+    super(propertyName, schemaProperty, 'String', value, datasetId, propertyId)
+    this.fieldPlaceholderText = fieldPlaceholderText
+    this.fieldTitle = fieldTitle
+  }
+}
+export class AccessManagement extends StringDatasetProperty {
+  static readonly schemaProperty = 'accessManagement'
+  static readonly propertyName = 'Access Management'
+  static readonly VALUES = ['controlled', 'open', 'external']
+  constructor(value?: string, datasetId?: number, propertyId?: number) {
+    super('Access Management', '', AccessManagement.propertyName, AccessManagement.schemaProperty, value, datasetId, propertyId)
+  }
+}
+
+export class DataLocation extends StringDatasetProperty {
+  static readonly schemaProperty = 'dataLocation'
+  static readonly propertyName = 'Data Location'
+  static readonly VALUES = ['AnVIL Workspace', 'Terra Workspace', 'TDR Location', 'Not Determined']
+  constructor(value?: string, datasetId?: number, propertyId?: number) {
+    super('Data Location', '', DataLocation.propertyName, DataLocation.schemaProperty, value, datasetId, propertyId)
+  }
+}
+
+export type DataLocationType = 'AnVIL Workspace' | 'Terra Workspace' | 'TDR Location' | 'Not Determined'
+
+export class DataURL extends StringDatasetProperty {
+  static readonly schemaProperty = 'url'
+  static readonly propertyName = 'URL'
+  constructor(value?: string, datasetId?: number, propertyId?: number) {
+    super('URL', '', DataURL.propertyName, DataURL.schemaProperty, value, datasetId, propertyId)
+  }
+}
+
+export class FileTypes extends DatasetProperty {
+  static readonly schemaProperty = 'fileTypes'
+  static readonly propertyName = 'File Types'
+  constructor(value: Array<FileType>, datasetId?: number, propertyId?: number) {
+    super(FileTypes.propertyName, FileTypes.schemaProperty, 'Json' as DatasetPropertyType, value, datasetId, propertyId)
+  }
+}
+
+export class NumberOfParticipants extends DatasetProperty {
+  static readonly schemaProperty = 'numberOfParticipants'
+  static readonly propertyName = '# of participants'
+  constructor(value: number, datasetId?: number, propertyId?: number) {
+    super(NumberOfParticipants.propertyName, NumberOfParticipants.schemaProperty, 'Number' as DatasetPropertyType, value, datasetId, propertyId)
   }
 }

@@ -10,8 +10,9 @@ import { Styles } from 'src/libs/theme'
 import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
-import { studyToDatasetSchemaSubmission } from 'src/pages/data_submission/v2/v2-common-functions'
+import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy } from 'src/pages/data_submission/v2/v2-common-functions'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
+import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 
 export type FileProperty = {
   key: string
@@ -22,24 +23,32 @@ export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFil
 
 export const DataSubmissionFormV2 = () => {
   const { studyId } = useParams()
+  const [isEditing, setIsEditing] = useState(false)
   const [study, setStudy] = useState({} as Study)
   const [loadingError, setLoadingError] = useState(false)
 
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const onLoadFormData = (studyId: string | undefined) => {
-      if (studyId) {
-        DataSet.getStudyById(studyId).then(study => setStudy(study)).catch(() => {
-          setStudy({} as Study)
-          setLoadingError(true)
-        })
-      }
+  const onLoadFormData = (studyId: string | undefined) => {
+    if (studyId) {
+      DataSet.getStudyById(studyId).then((study) => {
+        const consentGroupAssets: ConsentGroup2[] = buildConsentGroupsFromStudy(study)
+        study.assets = { ...study.assets, consentGroups: consentGroupAssets }
+        setStudy(study)
+        setIsEditing(true)
+      }).catch(() => {
+        setStudy({} as Study)
+        setIsEditing(false)
+        setLoadingError(true)
+      })
     }
-    onLoadFormData(studyId)
-  }, [studyId, setStudy])
+  }
 
-  const onSubmitStudy = async () => {
+  useEffect(() => {
+    onLoadFormData(studyId)
+  }, [studyId, setStudy, setIsEditing])
+
+  const buildMultiPartFormData = (study: Study) => {
     const multiPartFormData = new FormData()
     multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(structuredClone(study))))
     if (study.alternativeDataSharingPlanFile) {
@@ -52,7 +61,21 @@ export const DataSubmissionFormV2 = () => {
         multiPartFormData.append(fieldKey, consentGroup.nihInstitutionalCertificationFile, consentGroup.nihInstitutionalCertificationFile.name)
       }
     })
-    await DataSet.registerDataset(multiPartFormData)
+    return multiPartFormData
+  }
+  const onUpdateStudy = async () => {
+    await DataSet.updateStudy(studyId as string, buildMultiPartFormData(study))
+    Notifications.showNotification({ text: 'Study updated successfully', type: 'success' })
+    navigate('/datalibrary')
+  }
+
+  const onUpdateStudyError = (error: unknown) => {
+    Notifications.showError({ text: `Study update failed: ${error}.  Reloading original study.` })
+    onLoadFormData(studyId)
+  }
+
+  const onSubmitStudy = async () => {
+    await DataSet.registerDataset(buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
     navigate('/datalibrary')
   }
@@ -77,16 +100,30 @@ export const DataSubmissionFormV2 = () => {
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
         <StudyAssetManagement study={study} setStudy={setStudy} />
-        <AsyncSpinnerButton
-          onClick={onSubmitStudy}
-          onError={onError}
-          className="button button-white"
-          data-cy="data-submission-submit-button"
-          hideOnSuccess={true}
-          style={{ marginBottom: '12px' }}
-        >
-          Create Study
-        </AsyncSpinnerButton>
+        {!isEditing && (
+          <AsyncSpinnerButton
+            onClick={onSubmitStudy}
+            onError={onError}
+            className="button button-white"
+            data-cy="data-submission-submit-button"
+            hideOnSuccess={true}
+            style={{ marginBottom: '12px' }}
+          >
+            Create Study
+          </AsyncSpinnerButton>
+        )}
+        { isEditing && (
+          <AsyncSpinnerButton
+            onClick={onUpdateStudy}
+            onError={onUpdateStudyError}
+            className="button button-white"
+            data-cy="data-submission-submit-button"
+            hideOnSuccess={true}
+            style={{ marginBottom: '12px' }}
+          >
+            Update Study
+          </AsyncSpinnerButton>
+        ) }
       </div>
 
     </>
