@@ -13,6 +13,7 @@ interface ConsentGroupAddEditProps {
   readonly consentGroups: ConsentGroup2[]
   readonly closeAction: () => void
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
+  readonly isEditingExistingStudy?: boolean
 }
 
 interface Validation {
@@ -53,6 +54,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
   consentGroups,
   closeAction,
   onConsentGroupChange,
+  isEditingExistingStudy,
 }) => {
   const [current, setCurrent] = useState<ConsentGroup2>(consentGroup || defaultConsentGroup)
   const [validation, setValidation] = useState<Validation>({})
@@ -92,6 +94,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
 
   const [showMORText, setShowMORText] = useState(consentGroup?.mor)
   const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
+  const disableAccessAdjustment = isEditingExistingStudy && current.accessManagement === 'controlled'
 
   const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
     const clearedFields = {} as ConsentGroup2
@@ -222,6 +225,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
+              disabled={disableAccessAdjustment}
             />
 
             <FormField
@@ -233,6 +237,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
+              disabled={disableAccessAdjustment}
             />
 
             <FormField
@@ -244,6 +249,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
+              disabled={disableAccessAdjustment}
             />
           </div>
 
@@ -540,6 +546,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                 onChange={({ key, value }: { key: string, value: number, isValid: boolean }) => {
                   onChange({ key: key, value: value })
                 }}
+                disabled={isEditingExistingStudy}
               />
             )
           }
