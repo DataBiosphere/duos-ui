@@ -81,7 +81,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
       {generateStudyPropertyFormTextField(study, setStudy, new PhenotypeIndication())}
       {generateStudyPropertyFormTextField(study, setStudy, new Species())}
       {generateStudyInputFormTextField(setStudy, 'piName', study?.piName, 'Principal Investigator Name', 'Enter the Principal Investigator\'s name', [FormValidators.REQUIRED])}
-      {generateStudyInputFormTextField(setStudy, 'piEmail', study?.piEmail, 'Principal Investigator Email Address', 'Enter the Principal Investigator\'s email address', [FormValidators.REQUIRED, FormValidators.EMAIL])}
+      {generateStudyInputFormTextField(setStudy, 'piEmail', study?.piEmail, 'Principal Investigator Email Address', 'Enter the Principal Investigator\'s email address', [FormValidators.EMAIL])}
       <FormField
         id={DataCustodianEmail.key}
         title="Data Custodian Email"

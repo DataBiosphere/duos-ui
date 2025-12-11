@@ -77,7 +77,7 @@ export const DataSet = {
 
   updateStudy: async (studyId, studyObject) => {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchMultipart(url, studyObject, Config.multiPartOpts(), 'PUT')
+    const res = await fetchMultipart(url, studyObject, Config.multiPartOpts(), 'PUT', true)
     return res.data
   },
 
