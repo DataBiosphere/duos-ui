@@ -26,11 +26,18 @@ export default function IntellectualPropertyList(props: IntellectualPropertyList
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState(intellectualProperties.map(() => false))
+  const [viewState, setViewState] = useState(intellectualProperties.map(() => false))
 
   const toggleEditState = (index: number) => {
     const editStateCopy = [...editState]
     editStateCopy[index] = !editStateCopy[index]
     setEditState(editStateCopy)
+  }
+
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
   }
 
   const handleDeleteIp = (index: number) => {
@@ -42,7 +49,7 @@ export default function IntellectualPropertyList(props: IntellectualPropertyList
 
   const button = (
     <AddObjectButton
-      id="add-ip-btn"
+      id="add-intellectual-property-btn"
       label="Add IP"
       onClick={() => setShowAddEdit(true)}
       disabled={disabled}
@@ -57,24 +64,31 @@ export default function IntellectualPropertyList(props: IntellectualPropertyList
           id={-1}
           intellectualProperties={intellectualProperties}
           closeAction={() => setShowAddEdit(false)}
-          onIpChange={onIntellectualPropertyChange}
+          onIntellectualPropertyChange={onIntellectualPropertyChange}
         />
       )}
-      {intellectualProperties.map((ip: IntellectualProperty, index: number) => (
+      {intellectualProperties.map((intellectualProperty: IntellectualProperty, index: number) => (
         <IntellectualPropertyRow
-          key={ip.ipId || index}
+          key={intellectualProperty.ipId || index}
           id={index}
           editMode={editState[index]}
-          ip={ip}
+          viewMode={viewState[index]}
+          intellectualProperty={intellectualProperty}
           intellectualProperties={intellectualProperties}
           columnsToShow={columnsToShow}
           editAction={() => toggleEditState(index)}
           deleteAction={() => handleDeleteIp(index)}
           closeAction={() => {
-            toggleEditState(index)
+            if (editState[index]) {
+              toggleEditState(index)
+            }
+            else if (viewState[index]) {
+              toggleViewState(index)
+            }
             setShowAddEdit(false)
           }}
-          onIpChange={onIntellectualPropertyChange}
+          viewAction={() => toggleViewState(index)}
+          onIntellectualPropertyChange={onIntellectualPropertyChange}
           disabled={disabled}
         />
       ))}

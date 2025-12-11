@@ -5,10 +5,11 @@ import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
 interface IntellectualPropertyAddEditProps {
   readonly id: number
-  readonly ip?: IntellectualProperty
+  readonly intellectualProperty?: IntellectualProperty
   readonly intellectualProperties: IntellectualProperty[]
   readonly closeAction: () => void
-  readonly onIpChange: (items: IntellectualProperty[]) => void
+  readonly onIntellectualPropertyChange: (items: IntellectualProperty[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -40,32 +41,32 @@ const makeError = (message: string): ValidationError => ({ valid: true, failed: 
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
-const calcErrors = (ip: IntellectualProperty): Validation => {
+const calcErrors = (intellectualProperty: IntellectualProperty): Validation => {
   const v: Validation = {}
-  if (!ip.type?.trim()) v.type = makeError('Required')
-  if (!ip.title?.trim()) v.title = makeError('Required')
-  if (!ip.assignee?.trim()) v.assignee = makeError('Required')
-  if (!ip.patentNumber?.trim()) v.patentNumber = makeError('Required')
+  if (!intellectualProperty.type?.trim()) v.type = makeError('Required')
+  if (!intellectualProperty.title?.trim()) v.title = makeError('Required')
+  if (!intellectualProperty.assignee?.trim()) v.assignee = makeError('Required')
+  if (!intellectualProperty.patentNumber?.trim()) v.patentNumber = makeError('Required')
 
   // Date validation
-  if (!ip.filingDate?.trim()) {
+  if (!intellectualProperty.filingDate?.trim()) {
     v.filingDate = makeError('Required')
   }
-  else if (!FormValidators.DATE.isValid(ip.filingDate)) {
+  else if (!FormValidators.DATE.isValid(intellectualProperty.filingDate)) {
     v.filingDate = makeError('Invalid date format (YYYY-MM-DD)')
   }
 
-  if (!ip.status?.trim()) v.status = makeError('Required')
+  if (!intellectualProperty.status?.trim()) v.status = makeError('Required')
 
   // URL validation
-  if (!ip.url?.trim()) {
+  if (!intellectualProperty.url?.trim()) {
     v.url = makeError('Required')
   }
-  else if (!FormValidators.URL.isValid(ip.url)) {
+  else if (!FormValidators.URL.isValid(intellectualProperty.url)) {
     v.url = makeError('Invalid URL format')
   }
 
-  if (!ip.contact?.trim()) v.contact = makeError('Required')
+  if (!intellectualProperty.contact?.trim()) v.contact = makeError('Required')
   return v
 }
 
@@ -78,12 +79,13 @@ interface FormFieldChange {
 
 export const IntellectualPropertyAddEdit: React.FC<IntellectualPropertyAddEditProps> = ({
   id,
-  ip,
+  intellectualProperty,
   intellectualProperties,
   closeAction,
-  onIpChange,
+  onIntellectualPropertyChange,
+  readOnly = false,
 }) => {
-  const [current, setCurrent] = useState<IntellectualProperty>(ip || defaultIp)
+  const [current, setCurrent] = useState<IntellectualProperty>(intellectualProperty || defaultIp)
   const [validation, setValidation] = useState<Validation>({})
 
   const onChange = ({ key, value }: FormFieldChange) => {
@@ -99,12 +101,12 @@ export const IntellectualPropertyAddEdit: React.FC<IntellectualPropertyAddEditPr
       ipId: current.ipId || crypto.randomUUID?.() || Date.now().toString(),
     }
     if (id < 0) {
-      onIpChange([...intellectualProperties, toSave])
+      onIntellectualPropertyChange([...intellectualProperties, toSave])
     }
     else {
       const copy = [...intellectualProperties]
       copy[id] = toSave
-      onIpChange(copy)
+      onIntellectualPropertyChange(copy)
     }
     setCurrent(defaultIp)
     closeAction()
@@ -114,83 +116,91 @@ export const IntellectualPropertyAddEdit: React.FC<IntellectualPropertyAddEditPr
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{ip === undefined ? 'New Intellectual Property' : `Edit ${ip.title || 'Intellectual Property'}`}</h2>
+          <h2>{readOnly ? intellectualProperty?.title : (intellectualProperty === undefined ? 'New Publication' : `Edit ${intellectualProperty.title}`)}</h2>
           <FormField
             id="type"
             title="Type"
-            defaultValue={ip?.type}
+            defaultValue={intellectualProperty?.type}
             placeholder="e.g., Patent, Trademark"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.type}
+            disabled={readOnly}
           />
           <FormField
             id="title"
             title="Title"
-            defaultValue={ip?.title}
+            defaultValue={intellectualProperty?.title}
             placeholder="IP Title"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.title}
+            disabled={readOnly}
           />
           <FormField
             id="assignee"
             title="Assignee"
-            defaultValue={ip?.assignee}
+            defaultValue={intellectualProperty?.assignee}
             placeholder="Assignee Name"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.assignee}
+            disabled={readOnly}
           />
           <FormField
             id="patentNumber"
             title="Patent Number"
-            defaultValue={ip?.patentNumber}
+            defaultValue={intellectualProperty?.patentNumber}
             placeholder="Patent Number"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.patentNumber}
+            disabled={readOnly}
           />
           <FormField
             id="filingDate"
             title="Filing Date"
-            defaultValue={ip?.filingDate}
+            defaultValue={intellectualProperty?.filingDate}
             placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={validation.filingDate}
+            disabled={readOnly}
           />
           <FormField
             id="status"
             title="Status"
-            defaultValue={ip?.status}
+            defaultValue={intellectualProperty?.status}
             placeholder="e.g., Pending, Granted"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.status}
+            disabled={readOnly}
           />
           <FormField
             id="url"
             title="URL"
-            defaultValue={ip?.url}
+            defaultValue={intellectualProperty?.url}
             placeholder="https://..."
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={validation.url}
+            disabled={readOnly}
           />
           <FormField
             id="contact"
             title="Contact"
-            defaultValue={ip?.contact}
+            defaultValue={intellectualProperty?.contact}
             placeholder="Contact Information"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.contact}
+            disabled={readOnly}
           />
           <FormField
             id="tags"
             title="Tags (comma separated)"
-            defaultValue={ip?.tags?.join(', ')}
+            defaultValue={intellectualProperty?.tags?.join(', ')}
             placeholder="tag1, tag2"
             onChange={({ value }: { value: string }) =>
               onChange({
@@ -200,6 +210,7 @@ export const IntellectualPropertyAddEdit: React.FC<IntellectualPropertyAddEditPr
                   .map(t => t.trim())
                   .filter(Boolean),
               })}
+            disabled={readOnly}
           />
           <FormField
             id="citation"
@@ -207,28 +218,28 @@ export const IntellectualPropertyAddEdit: React.FC<IntellectualPropertyAddEditPr
             style={{ display: 'none' }}
             title=""
             onChange={() => {}}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={save}
-            disabled={validationFailed(calcErrors(current))}
-          >
-            {ip === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {intellectualProperty === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>
     </div>
   )
 }
-
-export default IntellectualPropertyAddEdit
