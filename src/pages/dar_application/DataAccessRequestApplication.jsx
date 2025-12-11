@@ -566,7 +566,7 @@ const DataAccessRequestApplication = (props) => {
 
     const votes = getElectionVotes(election)
 
-    const finalVote = votes.find(v => v.type === VOTE_TYPES.FINAL)
+    const finalVote = votes.find(v => v.type === VOTE_TYPES.FINAL || v.type === VOTE_TYPES.RADAR_APPROVE)
     const hasFinalVote = finalVote?.vote !== undefined && finalVote?.vote !== null
     const hasFinalVoteRationale = hasFinalVote && typeof finalVote?.rationale === 'string' && finalVote.rationale.trim().length > 0
 
