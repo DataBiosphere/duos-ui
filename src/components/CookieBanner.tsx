@@ -1,5 +1,5 @@
 import React from 'react'
-import CloseIcon from '@mui/icons-material/Close'
+import CheckIcon from '@mui/icons-material/Check'
 import { IconButton } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { CookieUtils } from 'src/utils/CookieUtils'
@@ -42,7 +42,7 @@ export const CookieBanner = (props: CookieBannerProps) => {
           }}
           sx={{ float: 'right', marginRight: '5px' }}
         >
-          <CloseIcon />
+          <CheckIcon />
         </IconButton>
       </Tooltip>
 
