@@ -15,9 +15,9 @@ export interface ConsentGroup2 {
   consentGroupName: string
   consentGroupId: string | number
   datasetId?: number
-  accessManagement?: AccessManagementType | undefined
+  accessManagement?: AccessManagementType
   numberOfParticipants: number
-  generalResearchUse?: boolean | undefined
+  generalResearchUse?: boolean
   hmb?: boolean
   diseaseSpecificUse?: string[]
   poa?: boolean

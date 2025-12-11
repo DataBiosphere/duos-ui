@@ -40,14 +40,12 @@ import {
   DataLocationType,
   DataURL,
   FileTypes,
-  NumberOfParticipants,
-} from 'src/pages/data_submission/v2/v2-models'
-import { FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+  NumberOfParticipants } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { set, isEmpty } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
-import { AccessManagementType, ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { Dataset } from 'src/types/model'
 export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
@@ -211,10 +209,10 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
   datasetSchema.assets = assets
   return datasetSchema
 }
-const getDatasetPropertyValueByKey = (key: string, dataset: Dataset): unknown | undefined => {
+const getDatasetPropertyValueByKey = <T = unknown>(key: string, dataset: Dataset): T | undefined => {
   if (dataset.properties && Array.isArray(dataset.properties)) {
     const result = dataset.properties.find(entry => entry.propertyName === key)
-    return result ? result.propertyValue : undefined
+    return result ? (result.propertyValue as T) : undefined
   }
   return undefined
 }
@@ -227,7 +225,7 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     // see consent's ConsentGroupFromDataset.java -> build for an example of how to do this in Java.
     consentGroup.datasetId = dataset.datasetId
     consentGroup.consentGroupName = dataset.name || ''
-    consentGroup.accessManagement = getDatasetPropertyValueByKey(AccessManagement.propertyName, dataset) as AccessManagementType || undefined
+    consentGroup.accessManagement = getDatasetPropertyValueByKey(AccessManagement.propertyName, dataset) as AccessManagementType
     consentGroup.col = dataset.dataUse.collaboratorRequired
     consentGroup.generalResearchUse = dataset.dataUse.generalUse
     consentGroup.hmb = dataset.dataUse.hmbResearch
@@ -245,18 +243,18 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     consentGroup.npu = dataset.dataUse.nonProfitUse
     consentGroup.otherSecondary = dataset.dataUse.secondaryOther
     consentGroup.dataAccessCommitteeId = dataset.dacId
-    consentGroup.dataLocation = getDatasetPropertyValueByKey(DataLocation.propertyName, dataset) as DataLocationType | undefined
-    consentGroup.url = getDatasetPropertyValueByKey(DataURL.propertyName, dataset) as string | undefined
-    consentGroup.fileTypes = fileTypeAdjustment(getDatasetPropertyValueByKey(FileTypes.propertyName, dataset) as Array<FileType> | undefined)
+    consentGroup.dataLocation = getDatasetPropertyValueByKey(DataLocation.propertyName, dataset) as DataLocationType
+    consentGroup.url = getDatasetPropertyValueByKey(DataURL.propertyName, dataset) as string
+    consentGroup.fileTypes = fileTypeAdjustment(getDatasetPropertyValueByKey(FileTypes.propertyName, dataset) as Array<FileType>)
     consentGroup.numberOfParticipants = getDatasetPropertyValueByKey(NumberOfParticipants.propertyName, dataset) as number || 0
     consentGroups.push(consentGroup)
   })
   return consentGroups
 }
 
-const fileTypeAdjustment = (fileTypes: Array<FileType> | undefined) => {
+const fileTypeAdjustment = (fileTypes: Array<FileType>) => {
   if (!fileTypes) {
-    return []
+    return [] as FileType[]
   }
   const adjustedFileTypes: Array<FileType> = []
   fileTypes.forEach((fileType) => {
