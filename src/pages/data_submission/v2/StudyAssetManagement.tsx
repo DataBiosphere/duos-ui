@@ -51,7 +51,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
   const publications = study.assets?.publications || []
   const presentations = study.assets?.presentations || []
   const clinicalTrials = study.assets?.clinicalTrials || []
-  const intellectualProperties = study.assets?.intellectualProperty || []
+  const intellectualProperties = study.assets?.intellectualProperties || []
   const fundingResources = study.assets?.funding || []
   const consentGroups = study.assets?.consentGroups || []
 
@@ -163,7 +163,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
 
       <IntellectualPropertyList
         intellectualProperties={intellectualProperties}
-        onIntellectualPropertyChange={(intellectualProperties: IntellectualProperty[]) => onAssetChange('intellectualProperty', intellectualProperties)}
+        onIntellectualPropertyChange={(intellectualProperties: IntellectualProperty[]) => onAssetChange('intellectualProperties', intellectualProperties)}
         disabled={false}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset

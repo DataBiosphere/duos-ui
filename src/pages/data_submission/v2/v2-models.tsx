@@ -371,7 +371,7 @@ export interface Study {
     presentations?: Array<Presentation>
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
-    intellectualProperty?: Array<IntellectualProperty>
+    intellectualProperties?: Array<IntellectualProperty>
   }
 }
 export interface DatasetRegistrationSchemaV1 {
@@ -482,6 +482,6 @@ export interface DatasetRegistrationSchemaV1 {
     presentations?: Array<Presentation>
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
-    intellectualProperty?: Array<IntellectualProperty>
+    intellectualProperties?: Array<IntellectualProperty>
   }
 }

@@ -100,7 +100,7 @@ export default function SummarySection(props: Readonly<SummarySectionProps>): Re
               <span>
                 Have you generated any
                 {' '}
-                <strong>intellectual property</strong>
+                <strong>intellectual property (IP)</strong>
                 {' '}
                 since your last renewal as a result of using the data?
               </span>
@@ -117,6 +117,7 @@ export default function SummarySection(props: Readonly<SummarySectionProps>): Re
           {(formState.intellectualPropertiesYesNo || (readOnly && intellectualProperties.length > 0)) && (
             <IntellectualPropertyList
               intellectualProperties={intellectualProperties}
+              columnsToShow={['title', 'filingDate']}
               onIntellectualPropertyChange={onIntellectualPropertyChange}
               disabled={readOnly}
               validation={validation}
