@@ -77,24 +77,6 @@
   padding: 0;
 }
 
-.navbar-open-icon,
-.navbar-close-icon {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  width: 26px;
-  height: 26px;
-  transition: all 0.1s linear;
-}
-
-.navbar-open-icon {
-  background: url('../images/burger-icon.svg') no-repeat 0 0;
-}
-
-.navbar-close-icon {
-  background: url('../images/close-icon.svg') no-repeat 0 0;
-}
-
 .navbar-vertical .navbar-public {
   list-style: none;
   margin: 0;

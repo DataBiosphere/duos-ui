@@ -16,7 +16,7 @@ The Data Use Oversight system ensures that researchers using genomics data honor
 * A matching algorithm that checks if a data access request is compatible with the restrictions on the data
 * Interfaces for the data access committee (DAC) to evaluate data access requests requiring manual review
 
-![What is DUOS](https://github.com/DataBiosphere/duos-ui/blob/develop/public/images/what_is_duos.svg)
+![What is DUOS](https://raw.githubusercontent.com/DataBiosphere/duos-ui/refs/heads/develop/src/images/DUOS_Homepage_diagram.svg)
 
 ### Local Development
 See [DEVNOTES.md](DEVNOTES.md) for instructions on setting up an environment for local development.
