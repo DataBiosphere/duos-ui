@@ -54,6 +54,17 @@ function getHeaderTitle(readOnly: boolean, publication?: Publication) {
   return `Edit ${publication.title}`
 }
 
+function filterValidationByTouched(
+  all: Validation,
+  touched: Record<string, boolean>,
+): Validation {
+  const filtered: Validation = {}
+  for (const [k, v] of Object.entries(all)) {
+    if (touched[k]) filtered[k as keyof Validation] = v
+  }
+  return filtered
+}
+
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
   const { id, publication, publications, closeAction, onPublicationChange, readOnly = false } = props
   const initialPublication = publication || defaultPublication
@@ -77,11 +88,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
       setValidation(all)
       return
     }
-    const filtered: Validation = {}
-    for (const [k, v] of Object.entries(all)) {
-      if (touched[k]) filtered[k as keyof Validation] = v
-    }
-    setValidation(filtered)
+    setValidation(filterValidationByTouched(all, touched))
   }
 
   const updatePublication = (updated: Publication) => {
