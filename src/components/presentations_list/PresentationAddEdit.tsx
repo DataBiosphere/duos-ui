@@ -49,15 +49,21 @@ interface Validation {
   access?: ValidationError
 }
 
+function getHeaderTitle(readOnly: boolean, presentation?: Presentation) {
+  if (readOnly) return presentation?.title
+  if (!presentation) return 'New Presentation'
+  return `Edit ${presentation.title}`
+}
+
 export default function PresentationAddEdit(props: PresentationAddEditProps): React.JSX.Element {
   const { id, presentation, presentations, closeAction, onPresentationChange, readOnly = false } = props
 
-  const [newPresentation, setNewPresentation] = useState<Presentation>(presentation || defaultPresentation)
-  const [validation, setValidation] = useState<Validation>(() => ({
-    presenter: {},
-  }))
+  const initialPresentation = presentation || defaultPresentation
+  const [newPresentation, setNewPresentation] = useState<Presentation>(initialPresentation)
+  const [validation, setValidation] = useState<Validation>({ presenter: {} })
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [tagsInput, setTagsInput] = useState<string>((presentation?.tags ?? []).join(', '))
 
   const applyValidation = (draft: Presentation, full: boolean) => {
     const all = calcPresentationErrors(draft) as Validation
@@ -102,7 +108,9 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
       next = { ...newPresentation, presenter: { ...newPresentation.presenter, email: value as string } }
     }
     else if (key === 'tags') {
-      next = { ...newPresentation, tags: (value as string).split(',').map(t => t.trim()).filter(Boolean) }
+      const text = String(value)
+      setTagsInput(text)
+      next = { ...newPresentation, tags: text.split(',').map(t => t.trim()).filter(Boolean) }
     }
     else {
       next = { ...newPresentation, [key]: value }
@@ -126,16 +134,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
     closeAction()
   }
 
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = presentation?.title
-  }
-  else if (presentation === undefined) {
-    headerTitle = 'New Presentation'
-  }
-  else {
-    headerTitle = `Edit ${presentation.title}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, presentation)
 
   return (
     <div className="form-group row no-margin">
@@ -145,7 +144,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="title"
             title="Presentation Title"
-            defaultValue={presentation?.title}
+            defaultValue={newPresentation.title}
             placeholder="Title"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -155,7 +154,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="date"
             title="Presentation Date"
-            defaultValue={presentation?.date}
+            defaultValue={newPresentation.date}
             placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
@@ -165,7 +164,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="url"
             title="Presentation URL"
-            defaultValue={presentation?.url}
+            defaultValue={newPresentation.url}
             placeholder="https://..."
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
@@ -175,7 +174,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="authors"
             title="Authors"
-            defaultValue={presentation?.authors}
+            defaultValue={newPresentation.authors}
             placeholder="Authors"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -185,7 +184,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="datasetCitation"
             title="Dataset Citation"
-            defaultValue={presentation?.datasetCitation}
+            defaultValue={newPresentation.datasetCitation}
             placeholder="Dataset Citation"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -195,7 +194,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="citation"
             type={FormFieldTypes.YESNORADIOGROUP}
-            defaultValue={presentation?.citation}
+            defaultValue={newPresentation.citation}
             title="Did you cite the dataset(s) used in this presentation?"
             orientation="horizontal"
             onChange={onChange}
@@ -205,7 +204,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="presenterName"
             title="Presenter Name"
-            defaultValue={presentation?.presenter?.name}
+            defaultValue={newPresentation.presenter?.name}
             placeholder="Name"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -215,7 +214,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="presenterEmail"
             title="Presenter Email"
-            defaultValue={presentation?.presenter?.email}
+            defaultValue={newPresentation.presenter?.email}
             placeholder="email@example.org"
             validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
             onChange={onChange}
@@ -225,7 +224,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="event"
             title="Event"
-            defaultValue={presentation?.event}
+            defaultValue={newPresentation.event}
             placeholder="Event"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -235,7 +234,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="location"
             title="Location"
-            defaultValue={presentation?.location}
+            defaultValue={newPresentation.location}
             placeholder="Location"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -245,7 +244,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="format"
             title="Format"
-            defaultValue={presentation?.format}
+            defaultValue={newPresentation.format}
             placeholder="Format"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -255,7 +254,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="access"
             title="Access"
-            defaultValue={presentation?.access}
+            defaultValue={newPresentation.access}
             placeholder="Access"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -265,7 +264,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="tags"
             title="Tags (comma separated)"
-            defaultValue={presentation?.tags?.join(', ')}
+            defaultValue={tagsInput}
             placeholder="tag1, tag2"
             onChange={onChange}
             disabled={readOnly}

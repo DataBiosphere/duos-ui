@@ -48,17 +48,22 @@ const defaultPublication: Publication = {
   tags: [],
 }
 
+function getHeaderTitle(readOnly: boolean, publication?: Publication) {
+  if (readOnly) return publication?.title
+  if (!publication) return 'New Publication'
+  return `Edit ${publication.title}`
+}
+
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
   const { id, publication, publications, closeAction, onPublicationChange, readOnly = false } = props
   const initialPublication = publication || defaultPublication
 
-  // Ensure at least one author row is present and bound to state
   const [newPublication, setNewPublication] = useState<Publication>({
     ...initialPublication,
     authors:
-            Array.isArray(initialPublication.authors) && initialPublication.authors.length > 0
-              ? initialPublication.authors
-              : [{ name: '', orcId: '' }],
+        Array.isArray(initialPublication.authors) && initialPublication.authors.length > 0
+          ? initialPublication.authors
+          : [{ name: '', orcId: '' }],
   })
 
   const [validation, setValidation] = useState<Validation>({})
@@ -103,10 +108,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     }
   }
 
-  // Enable Add only when all current authors have a name
-  const disableAddAuthor = newPublication.authors.some(
-    a => a.name.trim() === '',
-  )
+  const disableAddAuthor = newPublication.authors.some(a => a.name.trim() === '')
 
   const addAuthor = () => {
     if (disableAddAuthor) return
@@ -147,36 +149,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     closeAction()
   }
 
-  const renderAuthorsError = () => {
-    if (!submitted && !touched.authors) return null
-    if (!validation.authors) return null
-    const failed = validation.authors.failed || []
-    if (failed.includes('required')) {
-      return (
-        <div className="error-message">
-          At least one author with name and valid ORCID is required.
-        </div>
-      )
-    }
-    return (
-      <div className="error-message">
-        {failed.map(f => (
-          <div key={f}>{f}</div>
-        ))}
-      </div>
-    )
-  }
-
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = publication?.title
-  }
-  else if (publication === undefined) {
-    headerTitle = 'New Publication'
-  }
-  else {
-    headerTitle = `Edit ${publication.title}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, publication)
 
   return (
     <div className="form-group row no-margin">
@@ -208,7 +181,15 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
           <div style={{ marginBottom: '1rem', width: '100%' }}>
             <fieldset style={{ fontWeight: 600, marginTop: '1rem' }} aria-label="Authors (Name + ORCID)">
               <legend style={{ fontSize: 16 }}>Authors (Name + ORCID)*</legend>
-              {renderAuthorsError()}
+              {(submitted || touched.authors) && validation.authors && (
+                <div className="error-message">
+                  {(validation.authors.failed || []).includes('required')
+                    ? 'At least one author with name and valid ORCID is required.'
+                    : (validation.authors.failed || []).map(f => (
+                        <div key={f}>{f}</div>
+                      ))}
+                </div>
+              )}
               {newPublication.authors.map((a: Author, idx) => (
                 <div
                   key={idx}
