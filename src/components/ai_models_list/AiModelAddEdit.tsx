@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-import { validationFailed } from 'src/utils/darFormUtils'
 import { AiModel, Maintainer } from 'src/types/model'
 
 const defaultMaintainer: Maintainer = {
@@ -33,6 +32,7 @@ interface AiModelAddEditProps {
   readonly aiModels: AiModel[]
   readonly closeAction: () => void
   readonly onAiModelsChange: (models: AiModel[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -63,7 +63,7 @@ const calcAiModelErrors = (model: AiModel): Validation => {
 }
 
 export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.Element {
-  const { id, aiModel, aiModels, closeAction, onAiModelsChange } = props
+  const { id, aiModel, aiModels, closeAction, onAiModelsChange, readOnly = false } = props
 
   const [newAiModel, setNewAiModel] = useState<AiModel>(aiModel || defaultAiModel)
   const [validation, setValidation] = useState<Validation>({})
@@ -92,7 +92,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
     setValidation(calcAiModelErrors(updated))
   }
 
-  const handleSave = () => {
+  const save = () => {
     if (id < 0) {
       onAiModelsChange([...aiModels, newAiModel])
     }
@@ -109,8 +109,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{aiModel === undefined ? 'New AI Model Information' : `Edit ${aiModel.name} Information`}</h2>
-
+          <h2>{readOnly ? aiModel?.name : (aiModel === undefined ? 'New AI Model' : `Edit ${aiModel.name}`)}</h2>
           <FormField
             id="name"
             title="Model Name"
@@ -119,6 +118,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.name}
+            disabled={readOnly}
           />
           <FormField
             id="description"
@@ -127,6 +127,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             placeholder="Description"
             onChange={onChange}
             type={FormFieldTypes.TEXTAREA}
+            disabled={readOnly}
           />
           <FormField
             id="url"
@@ -136,6 +137,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={validation.url}
+            disabled={readOnly}
           />
           <FormField
             id="format"
@@ -145,6 +147,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.format}
+            disabled={readOnly}
           />
           <FormField
             id="license"
@@ -154,6 +157,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.license}
+            disabled={readOnly}
           />
           <FormField
             id="trainedOnDatasets"
@@ -161,6 +165,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             defaultValue={aiModel?.trainedOnDatasets?.join(', ')}
             placeholder="Comma separated dataset identifiers"
             onChange={onChange}
+            disabled={readOnly}
           />
           <FormField
             id="maintainerName"
@@ -170,6 +175,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.maintainerName}
+            disabled={readOnly}
           />
           <FormField
             id="maintainerEmail"
@@ -179,6 +185,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
             onChange={onChange}
             validation={validation.maintainerEmail}
+            disabled={readOnly}
           />
           <FormField
             id="tags"
@@ -186,23 +193,25 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             defaultValue={aiModel?.tags?.join(', ')}
             placeholder="Comma separated tags"
             onChange={onChange}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={handleSave}
-            disabled={validationFailed(calcAiModelErrors(newAiModel))}
-          >
-            {aiModel === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {aiModel === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>

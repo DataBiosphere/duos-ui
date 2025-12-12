@@ -1,17 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { AiModel, Maintainer } from 'src/types/model'
 import { renderColumnContent } from 'src/utils/RenderUtils'
+import {
+  DeletePresentationOrPublication,
+} from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 
 interface AiModelSummaryProps {
   readonly aiModel: AiModel
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }
 
 export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.Element {
-  const { aiModel, columnsToShow, editAction, deleteAction, disabled } = props
+  const { aiModel, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const disabledStyle = {
     cursor: 'not-allowed',
@@ -53,9 +59,26 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
+        {/* view button */}
         <button
           type="button"
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          style={{ marginLeft: 10 }}
+          onClick={() => viewAction?.()}
+          aria-label="View AI model"
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View AI model"
+            data-for="tip_view"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+        {/* edit button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
           disabled={disabled}
           aria-label="Edit AI model"
@@ -68,27 +91,33 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
           />
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete AI model"
+        >
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete AI model"
+            data-for="tip_delete_ai_model"
+          />
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
       </div>
-      <button
-        type="button"
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => {
-          if (disabled) return
-          if (globalThis.confirm(`Delete AI model "${aiModel.name}"?`)) {
-            deleteAction()
-          }
+      <DeletePresentationOrPublication
+        name={aiModel.name}
+        objectName="AI model"
+        showDelete={showDeleteModal}
+        confirmAction={() => {
+          deleteAction()
+          setShowDeleteModal(false)
         }}
-        disabled={disabled}
-        aria-label={`Delete AI model ${aiModel.name}`}
-      >
-        <span
-          className="glyphicon glyphicon-trash presentation-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete AI model"
-          data-for="tip_delete_ai_model"
-        />
-        <span style={{ marginLeft: '1rem' }}></span>
-      </button>
+        closeAction={() => setShowDeleteModal(false)}
+      />
     </div>
   )
 }

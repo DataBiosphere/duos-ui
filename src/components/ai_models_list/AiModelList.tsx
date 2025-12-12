@@ -17,7 +17,7 @@ interface AiModelListProps {
 export default function AiModelList(props: AiModelListProps): React.JSX.Element {
   const {
     aiModels,
-    columnsToShow = ['name', 'description', 'url', 'format', 'license', 'trainedOnDatasets', 'maintainer', 'tags'],
+    columnsToShow = ['name', 'url', 'format', 'license', 'maintainer'],
     onAiModelsChange,
     disabled = false,
     validation,
@@ -26,6 +26,7 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState<boolean[]>(aiModels.map(() => false))
+  const [viewState, setViewState] = useState<boolean[]>(aiModels.map(() => false))
 
   useEffect(() => {
     if (editState.length !== aiModels.length) {
@@ -39,6 +40,12 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
       copy[index] = !copy[index]
       return copy
     })
+  }
+
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
   }
 
   const handleDeleteAiModel = (index: number) => {
@@ -74,15 +81,22 @@ export default function AiModelList(props: AiModelListProps): React.JSX.Element 
           key={model.modelId || index}
           id={index}
           editMode={editState[index]}
+          viewMode={viewState[index]}
           aiModel={model}
           aiModels={aiModels}
           columnsToShow={columnsToShow}
           editAction={() => toggleEditState(index)}
           deleteAction={() => { handleDeleteAiModel(index) }}
           closeAction={() => {
-            toggleEditState(index)
+            if (editState[index]) {
+              toggleEditState(index)
+            }
+            else if (viewState[index]) {
+              toggleViewState(index)
+            }
             setShowAddEdit(false)
           }}
+          viewAction={() => toggleViewState(index)}
           onAiModelsChange={onAiModelsChange}
           disabled={disabled}
         />
