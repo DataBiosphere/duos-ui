@@ -1,0 +1,3 @@
+# Enable all URLs to be retrieved
+User-agent: *
+Disallow:
