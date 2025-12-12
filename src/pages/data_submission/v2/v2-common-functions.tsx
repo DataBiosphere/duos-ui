@@ -47,6 +47,7 @@ import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { Dataset } from 'src/types/model'
+import dayjs from 'dayjs'
 export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
 export const generateStudyPropertyYesNoField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: BooleanStudyProperty) => {
@@ -107,7 +108,7 @@ export const generateStudyPropertyFormDateField = (formData: Study, setStudy: Re
       placeholder={studyProperty.fieldPlaceholderText}
       validators={validators}
       style={style}
-      defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
+      defaultValue={convertDateEpochToString(getStudyPropertyValueByKey(formData, studyProperty.key))}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as Date
         setStudyPropertyByKey(formData, setStudy, input, studyProperty)
@@ -165,6 +166,16 @@ export const getStudyPropertyValueByKey = (formData: Study, key: string): unknow
   }
 }
 
+const convertDateEpochToString = (dateEpoch: unknown): string | undefined => {
+  if (typeof dateEpoch === 'number') {
+    return dayjs(dateEpoch).format('YYYY-MM-DD')
+  }
+  if (typeof dateEpoch === 'string') {
+    return dateEpoch
+  }
+  return undefined
+}
+
 export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistrationSchemaV1 => {
   const datasetSchema: DatasetRegistrationSchemaV1 = {
     studyName: study.name || '',
@@ -181,7 +192,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     submittingToAnvil: getStudyPropertyValueByKey(study, SubmittingToAnvil.key) as boolean || undefined,
     dbGaPPhsID: getStudyPropertyValueByKey(study, DbGaPPhsID.key) as string || undefined,
     dbGaPStudyRegistrationName: getStudyPropertyValueByKey(study, DbGaPStudyRegistrationName.key) as string || undefined,
-    embargoReleaseDate: getStudyPropertyValueByKey(study, EmbargoReleaseDate.key) as string || undefined,
+    embargoReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, EmbargoReleaseDate.key) as string || undefined),
     sequencingCenter: getStudyPropertyValueByKey(study, SequencingCenter.key) as string || undefined,
     piInstitution: getStudyPropertyValueByKey(study, PiInstitution.key) as number || Storage.getCurrentUser().institutionId,
     nihGrantContractNumber: getStudyPropertyValueByKey(study, NihGrantContractNumber.key) as string || undefined,
@@ -198,8 +209,8 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     alternativeDataSharingPlanExplanation: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanExplanation.key) as string || undefined,
     alternativeDataSharingPlanDataSubmitted: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataSubmitted.key) as AlternativeDataSharingPlanDataSubmittedValues || undefined,
     alternativeDataSharingPlanDataReleased: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataReleased.key) as boolean || undefined,
-    alternativeDataSharingPlanTargetDeliveryDate: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined,
-    alternativeDataSharingPlanTargetPublicReleaseDate: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined,
+    alternativeDataSharingPlanTargetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined),
+    alternativeDataSharingPlanTargetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined),
     consentGroups: structuredClone(study.assets?.consentGroups) || [],
   }
   const assets = structuredClone(study.assets)

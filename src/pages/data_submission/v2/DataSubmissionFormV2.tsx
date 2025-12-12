@@ -10,7 +10,7 @@ import { Styles } from 'src/libs/theme'
 import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
-import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy } from 'src/pages/data_submission/v2/v2-common-functions'
+import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 
@@ -33,7 +33,8 @@ export const DataSubmissionFormV2 = () => {
     if (studyId) {
       DataSet.getStudyById(studyId).then((study) => {
         const consentGroupAssets: ConsentGroup2[] = buildConsentGroupsFromStudy(study)
-        study.assets = { ...study.assets, consentGroups: consentGroupAssets }
+        const studyAssets = getStudyPropertyValueByKey(study, 'assets') as object || {}
+        study.assets = { ...studyAssets, consentGroups: consentGroupAssets }
         setStudy(study)
         setIsEditing(true)
       }).catch(() => {

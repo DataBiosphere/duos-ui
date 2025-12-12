@@ -42,15 +42,12 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
         validators={[FormValidators.REQUIRED]}
         onChange={(input: { key: string, value: string | undefined, isValid: boolean }) => {
           setStudyPropertyByKey(study, setStudy, input, new NihAnvilUse(input.value as string))
-          if (NihAnvilUse.requiresNIHAdministrativeInformation(input.value)) {
+          if (!NihAnvilUse.requiresNIHAdministrativeInformation(input.value)) {
             setStudy((val) => {
               const newVal = structuredClone(val)
               removeStudyPropertiesByKeys(newVal,
                 new Set(
-                  [DbGaPPhsID.key,
-                    DbGaPStudyRegistrationName.key,
-                    EmbargoReleaseDate.key,
-                    SequencingCenter.key,
+                  [
                     PiInstitution.key,
                     NihGrantContractNumber.key,
                     NihICsSupportingStudy.key,
@@ -67,9 +64,20 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
                     AlternativeDataSharingPlanDataSubmitted.key,
                     AlternativeDataSharingPlanDataReleased.key,
                   ]))
+
               unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
               return newVal
             })
+            if (input.value !== NihAnvilUse.YES_NHGRI_YES_PHS_ID) {
+              setStudy((val) => {
+                const newVal = structuredClone(val)
+                removeStudyPropertiesByKeys(newVal, new Set([DbGaPPhsID.key,
+                  DbGaPStudyRegistrationName.key,
+                  EmbargoReleaseDate.key,
+                  SequencingCenter.key]))
+                return newVal
+              })
+            }
           }
         }}
       />
