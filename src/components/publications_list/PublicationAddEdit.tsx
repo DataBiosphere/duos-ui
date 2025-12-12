@@ -76,15 +76,15 @@ function AuthorsFieldset({
   disableAddAuthor,
   readOnly,
 }: {
-  authors: Author[]
-  submitted: boolean
-  touched: Record<string, boolean>
-  validation: Validation
-  updateAuthorField: (index: number, field: keyof Author, value: string) => void
-  removeAuthor: (index: number) => void
-  addAuthor: () => void
-  disableAddAuthor: boolean
-  readOnly: boolean
+  readonly authors: readonly Author[]
+  readonly submitted: boolean
+  readonly touched: Readonly<Record<string, boolean>>
+  readonly validation: Validation
+  readonly updateAuthorField: (index: number, field: keyof Author, value: string) => void
+  readonly removeAuthor: (index: number) => void
+  readonly addAuthor: () => void
+  readonly disableAddAuthor: boolean
+  readonly readOnly: boolean
 }) {
   return (
     <div style={{ marginBottom: '1rem', width: '100%' }}>
