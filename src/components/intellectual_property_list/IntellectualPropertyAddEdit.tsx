@@ -76,6 +76,11 @@ interface FormFieldChange {
   key: string
   value: IpFieldValue
 }
+const getHeaderTitle = (readOnly: boolean, intellectualProperty?: IntellectualProperty) => {
+  if (readOnly) return intellectualProperty?.title
+  if (!intellectualProperty) return 'New Intellectual Property'
+  return `Edit ${intellectualProperty.title}`
+}
 
 export default function IntellectualPropertyAddEdit(props: IntellectualPropertyAddEditProps): React.JSX.Element {
   const { id, intellectualProperty, intellectualProperties, closeAction, onIntellectualPropertyChange, readOnly = false } = props
@@ -107,16 +112,7 @@ export default function IntellectualPropertyAddEdit(props: IntellectualPropertyA
     closeAction()
   }
 
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = intellectualProperty?.title
-  }
-  else if (intellectualProperty === undefined) {
-    headerTitle = 'New Intellectual Property'
-  }
-  else {
-    headerTitle = `Edit ${intellectualProperty.title}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, intellectualProperty)
 
   return (
     <div className="form-group row no-margin">

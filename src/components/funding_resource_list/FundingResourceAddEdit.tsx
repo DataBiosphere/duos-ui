@@ -53,6 +53,12 @@ interface FormFieldChange {
   value: FundingFieldValue
 }
 
+const getHeaderTitle = (readOnly: boolean, funding?: FundingResource) => {
+  if (readOnly) return funding?.funderName
+  if (!funding) return 'New Funding Resource'
+  return `Edit ${funding.funderName}`
+}
+
 export default function FundingResourceAddEdit(props: FundingSourceAddEditProps): React.JSX.Element {
   const { id, funding, fundingResources, closeAction, onFundingChange, readOnly = false } = props
 
@@ -83,16 +89,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
     closeAction()
   }
 
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = funding?.funderName
-  }
-  else if (funding === undefined) {
-    headerTitle = 'New Funding Resource'
-  }
-  else {
-    headerTitle = `Edit ${funding.funderName}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, funding)
 
   return (
     <div className="form-group row no-margin">

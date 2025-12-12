@@ -62,6 +62,12 @@ const calcAiModelErrors = (model: AiModel): Validation => {
   return v
 }
 
+const getHeaderTitle = (readOnly: boolean, aiModel?: AiModel) => {
+  if (readOnly) return aiModel?.name
+  if (!aiModel) return 'New AI Model'
+  return `Edit ${aiModel.name}`
+}
+
 export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.Element {
   const { id, aiModel, aiModels, closeAction, onAiModelsChange, readOnly = false } = props
 
@@ -105,16 +111,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
     closeAction()
   }
 
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = aiModel?.name
-  }
-  else if (aiModel === undefined) {
-    headerTitle = 'New AI Model'
-  }
-  else {
-    headerTitle = `Edit ${aiModel.name}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, aiModel)
 
   return (
     <div className="form-group row no-margin">

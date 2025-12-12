@@ -58,6 +58,12 @@ interface FormFieldChange {
   value: WorkspaceFieldValue
 }
 
+const getHeaderTitle = (readOnly: boolean, workspace?: Workspace) => {
+  if (readOnly) return workspace?.name
+  if (!workspace) return 'New Workspace'
+  return `Edit ${workspace.name}`
+}
+
 export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JSX.Element {
   const { id, workspace, workspaces, closeAction, onWorkspaceChange, readOnly = false } = props
 
@@ -88,16 +94,7 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
     closeAction()
   }
 
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = workspace?.name
-  }
-  else if (workspace === undefined) {
-    headerTitle = 'New Workspace'
-  }
-  else {
-    headerTitle = `Edit ${workspace.name}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, workspace)
 
   return (
     <div className="form-group row no-margin">

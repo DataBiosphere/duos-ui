@@ -48,7 +48,7 @@ const defaultPublication: Publication = {
   tags: [],
 }
 
-function getHeaderTitle(readOnly: boolean, publication?: Publication) {
+const getHeaderTitle = (readOnly: boolean, publication?: Publication) => {
   if (readOnly) return publication?.title
   if (!publication) return 'New Publication'
   return `Edit ${publication.title}`

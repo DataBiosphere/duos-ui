@@ -85,6 +85,12 @@ const calcClinicalTrialErrors = (ct: ClinicalTrial): Validation => {
 const findSelectEntry = (options: SelectEntry[], key?: string) =>
   key ? options.find(o => o.key === key) || null : null
 
+const getHeaderTitle = (readOnly: boolean, clinicalTrial?: ClinicalTrial) => {
+  if (readOnly) return clinicalTrial?.title
+  if (!clinicalTrial) return 'New Clinical Trial'
+  return `Edit ${clinicalTrial.title}`
+}
+
 export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): React.JSX.Element {
   const { id, clinicalTrial, clinicalTrials, closeAction, onClinicalTrialChange, readOnly = false } = props
   const [newClinicalTrial, setNewClinicalTrial] = useState<ClinicalTrial>(clinicalTrial || defaultClinicalTrial)
@@ -130,16 +136,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
     closeAction()
   }
 
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = clinicalTrial?.title
-  }
-  else if (clinicalTrial === undefined) {
-    headerTitle = 'New Clinical Trial'
-  }
-  else {
-    headerTitle = `Edit ${clinicalTrial.title}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, clinicalTrial)
 
   return (
     <div className="form-group row no-margin">

@@ -49,7 +49,7 @@ interface Validation {
   access?: ValidationError
 }
 
-function getHeaderTitle(readOnly: boolean, presentation?: Presentation) {
+const getHeaderTitle = (readOnly: boolean, presentation?: Presentation) => {
   if (readOnly) return presentation?.title
   if (!presentation) return 'New Presentation'
   return `Edit ${presentation.title}`

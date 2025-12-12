@@ -49,6 +49,12 @@ interface FormFieldChange {
   value: ConsentGroupFieldValue
 }
 
+const getHeaderTitle = (readOnly: boolean, consentGroup?: ConsentGroup2) => {
+  if (readOnly) return consentGroup?.consentGroupName
+  if (!consentGroup) return 'New Dataset'
+  return `Edit ${consentGroup.consentGroupName}`
+}
+
 export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): React.JSX.Element {
   const { id, consentGroup, consentGroups, closeAction, onConsentGroupChange, readOnly = false, isEditingExistingStudy = false } = props
 
@@ -193,16 +199,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     closeAction()
   }
 
-  let headerTitle: string | undefined
-  if (readOnly) {
-    headerTitle = consentGroup?.consentGroupName
-  }
-  else if (consentGroup === undefined) {
-    headerTitle = 'New Dataset'
-  }
-  else {
-    headerTitle = `Edit ${consentGroup.consentGroupName}`
-  }
+  const headerTitle = getHeaderTitle(readOnly, consentGroup)
 
   return (
     <div className="form-group row no-margin">
