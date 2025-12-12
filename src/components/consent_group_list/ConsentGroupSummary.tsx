@@ -111,7 +111,6 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
           <span style={{ marginLeft: '1rem' }} />
         </button>
       </div>
-      </div>
       <button
         type="button"
         style={{ marginLeft: 10, ...buttonStyle }}
