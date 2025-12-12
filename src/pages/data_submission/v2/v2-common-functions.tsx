@@ -47,6 +47,7 @@ import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { Dataset } from 'src/types/model'
+import dayjs from 'dayjs'
 export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
 export const generateStudyPropertyYesNoField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: BooleanStudyProperty) => {
@@ -107,7 +108,7 @@ export const generateStudyPropertyFormDateField = (formData: Study, setStudy: Re
       placeholder={studyProperty.fieldPlaceholderText}
       validators={validators}
       style={style}
-      defaultValue={getStudyPropertyValueByKey(formData, studyProperty.key)}
+      defaultValue={typeof getStudyPropertyValueByKey(formData, studyProperty.key) === 'number' ? dayjs(getStudyPropertyValueByKey(formData, studyProperty.key) as number).format('YYYY-MM-DD') : getStudyPropertyValueByKey(formData, studyProperty.key) as string}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as Date
         setStudyPropertyByKey(formData, setStudy, input, studyProperty)
