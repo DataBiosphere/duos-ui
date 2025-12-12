@@ -61,9 +61,11 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
       })}
       <div className="collaborator-summary-edit-delete-buttons">
         {/* view button */}
-        <a
-          style={{ marginLeft: 10, marginRight: 10 }}
+        <button
+          type="button"
+          style={{ marginLeft: 10 }}
           onClick={() => viewAction?.()}
+          aria-label="View presentation"
         >
           <span
             className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
@@ -73,11 +75,14 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
           >
           </span>
           <span style={{ marginLeft: '1rem' }}></span>
-        </a>
+        </button>
         {/* edit button */}
-        <a
+        <button
+          type="button"
           style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
+          disabled={disabled}
+          aria-label="Edit presentation"
         >
           <span
             className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon"
@@ -87,22 +92,25 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
           >
           </span>
           <span style={{ marginLeft: '1rem' }}></span>
-        </a>
-      </div>
-      {/* delete button */}
-      <a
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-      >
-        <span
-          className="glyphicon glyphicon-trash collaborator-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete dataset"
-          data-for="tip_delete"
+        </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete presentation"
         >
-        </span>
-        <span style={{ marginLeft: '1rem' }}></span>
-      </a>
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete dataset"
+            data-for="tip_delete"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+      </div>
       {/* delete modal */}
       <DeletePresentationOrPublication
         name={presentation.title}
