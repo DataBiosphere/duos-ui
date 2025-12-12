@@ -17,7 +17,7 @@ import {
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { ALTERNATIVE_DATA_SHARING_PLAN_FILE } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
-import { set, unset } from 'lodash'
+import { unset } from 'lodash'
 
 export interface NihAnvilUseRelatedProps {
   study: Study
