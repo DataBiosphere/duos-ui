@@ -8,16 +8,13 @@ interface ConsentGroupSummaryProps {
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }
 
-export const ConsentGroupSummary: React.FC<ConsentGroupSummaryProps> = ({
-  consentGroup,
-  columnsToShow,
-  editAction,
-  deleteAction,
-  disabled,
-}) => {
+export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): React.JSX.Element {
+  const { consentGroup, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
+
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const disabledStyle = {
@@ -64,9 +61,26 @@ export const ConsentGroupSummary: React.FC<ConsentGroupSummaryProps> = ({
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
+        {/* view button */}
         <button
           type="button"
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          style={{ marginLeft: 10 }}
+          onClick={() => viewAction?.()}
+          aria-label="View dataset"
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View workspace"
+            data-for="tip_view_dataset"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+        {/* edit button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
           disabled={disabled}
           aria-label="Edit dataset"
@@ -79,22 +93,23 @@ export const ConsentGroupSummary: React.FC<ConsentGroupSummaryProps> = ({
           />
           <span style={{ marginLeft: '1rem' }} />
         </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete dataset"
+        >
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete dataset"
+            data-for="tip_delete_conset_group"
+          />
+          <span style={{ marginLeft: '1rem' }} />
+        </button>
       </div>
-      <button
-        type="button"
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-        disabled={disabled}
-        aria-label="Delete dataset"
-      >
-        <span
-          className="glyphicon glyphicon-trash presentation-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete dataset"
-          data-for="tip_delete_conset_group"
-        />
-        <span style={{ marginLeft: '1rem' }} />
-      </button>
       <DeletePresentationOrPublication
         name={consentGroup.consentGroupName}
         objectName="consentGroup"
@@ -108,5 +123,3 @@ export const ConsentGroupSummary: React.FC<ConsentGroupSummaryProps> = ({
     </div>
   )
 }
-
-export default ConsentGroupSummary
