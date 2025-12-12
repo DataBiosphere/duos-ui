@@ -7,7 +7,7 @@ import {
 
 interface AiModelSummaryProps {
   readonly aiModel: AiModel
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof AiModel)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -49,7 +49,7 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const raw = aiModel[column as keyof AiModel]
         const content = renderColumnContent(column, raw, customRenderers)
         return content && (

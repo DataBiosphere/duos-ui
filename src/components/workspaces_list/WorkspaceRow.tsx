@@ -9,7 +9,7 @@ interface WorkspaceRowProps {
   readonly viewMode?: boolean
   readonly workspace: Workspace
   readonly workspaces: Workspace[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Workspace)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

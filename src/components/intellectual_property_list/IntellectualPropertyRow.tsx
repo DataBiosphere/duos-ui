@@ -9,7 +9,7 @@ interface IntellectualPropertyRowProps {
   readonly viewMode?: boolean
   readonly intellectualProperty: IntellectualProperty
   readonly intellectualProperties: IntellectualProperty[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof IntellectualProperty)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

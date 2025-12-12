@@ -5,7 +5,7 @@ import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface WorkspaceSummaryProps {
   readonly workspace: Workspace
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Workspace)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -51,7 +51,7 @@ export default function WorkspaceSummary(props: WorkspaceSummaryProps): React.JS
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const rawValue = workspace[column as keyof Workspace]
         const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
         return columnContent && (

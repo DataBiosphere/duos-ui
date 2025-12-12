@@ -9,7 +9,7 @@ interface PublicationRowProps {
   readonly viewMode?: boolean
   publication: Publication
   readonly publications: Publication[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Publication)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

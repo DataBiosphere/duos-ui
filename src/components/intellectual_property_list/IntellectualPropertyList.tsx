@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface IntellectualPropertyListProps {
   readonly intellectualProperties: IntellectualProperty[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof IntellectualProperty)[]
   readonly onIntellectualPropertyChange: (items: IntellectualProperty[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

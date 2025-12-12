@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface PresentationListProps {
   readonly presentations: Presentation[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof Presentation)[]
   readonly onPresentationChange: (presentations: Presentation[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

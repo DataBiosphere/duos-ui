@@ -9,7 +9,7 @@ interface PresentationRowProps {
   readonly viewMode?: boolean
   presentation: Presentation
   readonly presentations: Presentation[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Presentation)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

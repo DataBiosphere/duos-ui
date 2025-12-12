@@ -12,7 +12,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface ClinicalTrialListProps {
   readonly clinicalTrials: ClinicalTrial[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
   readonly onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -22,7 +22,7 @@ interface ClinicalTrialListProps {
 export default function ClinicalTrialList(props: ClinicalTrialListProps): React.JSX.Element {
   const {
     clinicalTrials,
-    columnsToShow = ['title', 'status', 'registry', 'phase', 'startDate', 'completionDate', 'url'],
+    columnsToShow = ['title', 'status', 'registry', 'phase', 'startDate', 'endDate', 'url'],
     onClinicalTrialChange,
     disabled = false,
     validation,

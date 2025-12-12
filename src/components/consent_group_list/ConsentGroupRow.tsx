@@ -9,7 +9,7 @@ interface ConsentGroupRowProps {
   readonly viewMode?: boolean
   readonly consentGroup: ConsentGroup2
   readonly consentGroups: ConsentGroup2[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof ConsentGroup2)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

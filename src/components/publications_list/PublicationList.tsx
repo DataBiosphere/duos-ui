@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface PublicationListProps {
   readonly publications: Publication[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof Publication)[]
   readonly onPublicationChange: (publications: Publication[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

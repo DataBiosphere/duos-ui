@@ -5,7 +5,7 @@ import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface FundingResourceSummaryProps {
   readonly funding: FundingResource
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof FundingResource)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -45,7 +45,7 @@ export default function FundingResourceSummary(props: FundingResourceSummaryProp
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const rawValue = funding[column as keyof FundingResource]
         const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
         return columnContent && (

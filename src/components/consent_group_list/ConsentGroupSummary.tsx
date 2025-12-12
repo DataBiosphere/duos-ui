@@ -5,7 +5,7 @@ import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGr
 
 interface ConsentGroupSummaryProps {
   readonly consentGroup: ConsentGroup2
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof ConsentGroup2)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -52,7 +52,7 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const rawValue = consentGroup[column as keyof ConsentGroup2]
         const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
         return columnContent && (

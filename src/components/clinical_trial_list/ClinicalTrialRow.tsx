@@ -9,7 +9,7 @@ interface ClinicalTrialRowProps {
   readonly viewMode?: boolean
   readonly clinicalTrial: ClinicalTrial
   readonly clinicalTrials: ClinicalTrial[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

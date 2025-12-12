@@ -10,7 +10,7 @@ import {
 
 interface ClinicalTrialSummaryProps {
   readonly clinicalTrial: ClinicalTrial
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -37,7 +37,7 @@ export default function ClinicalTrialSummary(props: ClinicalTrialSummaryProps): 
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const contentSource = column === 'dateRange' ? 'dateRange' : column
         const rawValue = clinicalTrial[column as keyof ClinicalTrial]
         const columnContent = renderColumnContent(contentSource, rawValue, customRenderers)

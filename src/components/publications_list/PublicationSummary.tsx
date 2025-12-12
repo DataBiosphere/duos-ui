@@ -5,7 +5,7 @@ import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface PublicationSummaryProps {
   publication: Publication
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Publication)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -50,8 +50,7 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
 
   return (
     <div className="collaborator-summary-card">
-      {/* data elements to show in the row summary */}
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const columnContent = renderColumnContent(column, publication[column as keyof Publication], customRenderers)
         return columnContent && (
           <div key={'publication_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>

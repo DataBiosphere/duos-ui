@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface AiModelListProps {
   readonly aiModels: AiModel[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof AiModel)[]
   readonly onAiModelsChange: (models: AiModel[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

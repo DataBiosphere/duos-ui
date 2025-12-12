@@ -5,7 +5,7 @@ import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface IntellectualPropertySummaryProps {
   readonly intellectualProperty: IntellectualProperty
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof IntellectualProperty)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -45,7 +45,7 @@ export default function IntellectualPropertySummary(props: IntellectualPropertyS
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const rawValue = intellectualProperty[column as keyof IntellectualProperty]
         const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
         return columnContent && (

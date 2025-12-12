@@ -9,7 +9,7 @@ interface AiModelRowProps {
   readonly viewMode?: boolean
   readonly aiModel: AiModel
   readonly aiModels: AiModel[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof AiModel)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface ConsentGroupListProps {
   readonly consentGroups: ConsentGroup2[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof ConsentGroup2)[]
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

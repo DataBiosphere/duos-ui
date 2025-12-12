@@ -9,7 +9,7 @@ interface FundingResourceRowProps {
   readonly viewMode?: boolean
   readonly funding: FundingResource
   readonly fundingResources: FundingResource[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof FundingResource)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void

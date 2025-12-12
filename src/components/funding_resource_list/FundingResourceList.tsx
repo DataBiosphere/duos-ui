@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface FundingResourceListProps {
   readonly fundingResources: FundingResource[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof FundingResource)[]
   readonly onFundingResourceChange: (items: FundingResource[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

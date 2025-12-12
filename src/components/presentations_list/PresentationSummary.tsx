@@ -5,7 +5,7 @@ import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface PresentationSummaryProps {
   presentation: Presentation
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Presentation)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly viewAction?: () => void
@@ -48,8 +48,7 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
 
   return (
     <div className="collaborator-summary-card">
-      {/* data elements to show in the row summary */}
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const columnContent = renderColumnContent(column, presentation[column as keyof Presentation], customRenderers)
         return columnContent && (
           <div key={'presentation_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>

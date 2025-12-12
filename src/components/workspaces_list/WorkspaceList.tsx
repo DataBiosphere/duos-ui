@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface WorkspaceListProps {
   readonly workspaces: Workspace[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof Workspace)[]
   readonly onWorkspaceChange: (items: Workspace[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
