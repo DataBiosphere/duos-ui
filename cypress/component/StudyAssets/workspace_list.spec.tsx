@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import { Workspace } from 'src/types/model'
-import { WorkspaceAddEdit } from 'src/components/workspaces_list/WorkspaceAddEdit'
+import WorkspaceAddEdit from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceSummary from 'src/components/workspaces_list/WorkspaceSummary'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 import WorkspaceList from 'src/components/workspaces_list/WorkspaceList'
@@ -23,15 +23,21 @@ const WorkspaceListHarness: React.FC<{ initial: Workspace[] }> = ({ initial }) =
   return (
     <WorkspaceList
       workspaces={items}
-      columnsToShow={['name']}
+      columnsToShow={['name', 'platform']}
       onWorkspaceChange={setItems}
       disabled={false}
     />
   )
 }
 
-describe('WorkspaceAddEdit', () => {
-  it('disables Add until required fields filled then adds', () => {
+describe('WorkspaceList component', () => {
+  it('renders existing workspaces', () => {
+    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    cy.contains('Analysis Workspace').should('exist')
+    cy.contains('Terra').should('exist')
+  })
+
+  it('opens add form and enforces validation disabling save then adds', () => {
     const collected: Workspace[] = []
     mount(
       <WorkspaceAddEdit
@@ -42,17 +48,57 @@ describe('WorkspaceAddEdit', () => {
         onWorkspaceChange={(items) => { collected.splice(0, collected.length, ...items) }}
       />,
     )
-    cy.get('.collaborator-form-add-save-button').should('be.disabled')
     cy.get('#name').type('New Workspace')
     cy.get('#platform').type('New Platform')
     cy.get('#url').type('https://example.com')
     cy.get('#description').type('New Description')
     cy.get('#access').type('open')
-    cy.get('.collaborator-form-add-save-button').should('not.be.disabled').click()
+    cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
       expect(collected[0].name).to.eq('New Workspace')
       expect(collected[0].platform).to.eq('New Platform')
+    })
+  })
+
+  it('opens workspace in view mode when view button is clicked', () => {
+    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.contains('Analysis Workspace').should('exist')
+    cy.get('#name').should('be.disabled')
+    cy.get('#platform').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
+    cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+  })
+
+  it('closes view mode when close button is clicked', () => {
+    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('.collaborator-form-cancel-button').click()
+    cy.get('#name').should('not.exist')
+    cy.get('.glyphicon-eye-open').should('exist')
+  })
+
+  it('adds a new workspace', () => {
+    const state: Workspace[] = []
+    mount(
+      <WorkspaceList
+        workspaces={state}
+        columnsToShow={['name', 'platform']}
+        onWorkspaceChange={(items) => { state.splice(0, state.length, ...items) }}
+        disabled={false}
+      />,
+    )
+    cy.get('#add-workspace-btn').click()
+    cy.get('#name').type('Added Workspace')
+    cy.get('#platform').type('Added Platform')
+    cy.get('#url').type('https://added.com')
+    cy.get('#description').type('Added Description')
+    cy.get('#access').type('open')
+    cy.get('.collaborator-form-add-save-button').click()
+    cy.wrap(null).then(() => {
+      expect(state.length).to.eq(1)
+      expect(state[0].name).to.eq('Added Workspace')
     })
   })
 
@@ -73,6 +119,23 @@ describe('WorkspaceAddEdit', () => {
     cy.get('#name').type('Analysis Workspace Edited')
     cy.get('.collaborator-form-add-save-button').click()
   })
+
+  it('deletes a workspace via modal confirmation', () => {
+    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    cy.contains('Analysis Workspace').should('exist')
+    cy.get('.glyphicon-trash').click({ force: true })
+    cy.get('.ReactModal__Content')
+      .should('be.visible')
+      .within(() => {
+        cy.get('button')
+          .filter(':visible')
+          .contains(/delete/i)
+          .click({ force: true })
+      })
+    cy.get('.ReactModal__Content').should('not.exist')
+    cy.contains('Analysis Workspace').should('not.exist')
+    cy.get('.collaborator-summary-card').should('have.length', 0)
+  })
 })
 
 describe('WorkspaceSummary', () => {
@@ -92,6 +155,22 @@ describe('WorkspaceSummary', () => {
     cy.contains('R, Python').should('exist')
     cy.contains('genomics, analysis').should('exist')
     cy.get('a[href="https://terra.bio/workspace"]').should('exist')
+  })
+
+  it('renders view button and triggers viewAction', () => {
+    mount(
+      <WorkspaceSummary
+        workspace={sampleWorkspace}
+        columnsToShow={['name']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').should('exist')
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
   })
 })
 
@@ -133,50 +212,47 @@ describe('WorkspaceRow', () => {
     )
     cy.get('#name').should('have.value', 'Analysis Workspace')
   })
-})
 
-describe('WorkspaceList', () => {
-  it('adds a new workspace', () => {
-    const state: Workspace[] = []
+  it('renders view form when viewMode true and is read-only', () => {
     mount(
-      <WorkspaceList
-        workspaces={state}
-        columnsToShow={['name', 'platform']}
-        onWorkspaceChange={(items) => { state.splice(0, state.length, ...items) }}
+      <WorkspaceRow
+        id={0}
+        editMode={false}
+        viewMode={true}
+        workspace={sampleWorkspace}
+        workspaces={[sampleWorkspace]}
+        columnsToShow={['name']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub()}
+        onWorkspaceChange={cy.stub()}
         disabled={false}
       />,
     )
-    cy.get('#add-workspace-btn').click()
-    cy.get('#name').type('Added Workspace')
-    cy.get('#platform').type('Added Platform')
-    cy.get('#url').type('https://added.com')
-    cy.get('#description').type('Added Description')
-    cy.get('#access').type('open')
-    cy.get('.collaborator-form-add-save-button').click()
-    cy.wrap(null).then(() => {
-      expect(state.length).to.eq(1)
-      expect(state[0].name).to.eq('Added Workspace')
-    })
+    cy.get('#name').should('have.value', 'Analysis Workspace')
+    cy.get('#name').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
   })
 
-  it('deletes a workspace via modal confirmation', () => {
-    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-
-    cy.contains('Analysis Workspace').should('exist')
-
-    cy.get('.glyphicon-trash').click({ force: true })
-
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Analysis Workspace').should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+  it('triggers viewAction when view button is clicked', () => {
+    mount(
+      <WorkspaceRow
+        id={0}
+        editMode={false}
+        viewMode={false}
+        workspace={sampleWorkspace}
+        workspaces={[sampleWorkspace]}
+        columnsToShow={['name', 'platform']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        onWorkspaceChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
   })
 })

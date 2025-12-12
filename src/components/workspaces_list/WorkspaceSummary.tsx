@@ -8,16 +8,13 @@ interface WorkspaceSummaryProps {
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }
 
-export const WorkspaceSummary: React.FC<WorkspaceSummaryProps> = ({
-  workspace,
-  columnsToShow,
-  editAction,
-  deleteAction,
-  disabled,
-}) => {
+export default function WorkspaceSummary(props: WorkspaceSummaryProps): React.JSX.Element {
+  const { workspace, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
+
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const disabledStyle = {
@@ -64,9 +61,26 @@ export const WorkspaceSummary: React.FC<WorkspaceSummaryProps> = ({
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
+        {/* view button */}
         <button
           type="button"
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          style={{ marginLeft: 10 }}
+          onClick={() => viewAction?.()}
+          aria-label="View workspace"
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View workspace"
+            data-for="tip_view"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+        {/* edit button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
           disabled={disabled}
           aria-label="Edit workspace"
@@ -79,22 +93,23 @@ export const WorkspaceSummary: React.FC<WorkspaceSummaryProps> = ({
           />
           <span style={{ marginLeft: '1rem' }} />
         </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete workspace"
+        >
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete workspace"
+            data-for="tip_delete_workspace"
+          />
+          <span style={{ marginLeft: '1rem' }} />
+        </button>
       </div>
-      <button
-        type="button"
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-        disabled={disabled}
-        aria-label="Delete workspace"
-      >
-        <span
-          className="glyphicon glyphicon-trash presentation-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete workspace"
-          data-for="tip_delete_workspace"
-        />
-        <span style={{ marginLeft: '1rem' }} />
-      </button>
       <DeletePresentationOrPublication
         name={workspace.name}
         objectName="workspace"
@@ -108,5 +123,3 @@ export const WorkspaceSummary: React.FC<WorkspaceSummaryProps> = ({
     </div>
   )
 }
-
-export default WorkspaceSummary
