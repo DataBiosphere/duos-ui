@@ -126,11 +126,22 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
     closeAction()
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = presentation?.title
+  }
+  else if (!presentation) {
+    headerTitle = 'New Presentation'
+  }
+  else {
+    headerTitle = `Edit ${presentation.title}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? presentation?.title : (presentation === undefined ? 'New Presentation' : `Edit ${presentation.title}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="title"
             title="Presentation Title"

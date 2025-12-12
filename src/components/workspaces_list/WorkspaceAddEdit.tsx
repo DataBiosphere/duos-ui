@@ -88,11 +88,22 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
     closeAction()
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = workspace?.name
+  }
+  else if (!workspace) {
+    headerTitle = 'New Workspace'
+  }
+  else {
+    headerTitle = `Edit ${workspace.name}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? workspace?.name : (workspace === undefined ? 'New Workspace' : `Edit ${workspace.name}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="name"
             title="Workspace Name"

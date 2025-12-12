@@ -191,11 +191,22 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     closeAction()
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = consentGroup?.consentGroupName
+  }
+  else if (!consentGroup) {
+    headerTitle = 'New Dataset'
+  }
+  else {
+    headerTitle = `Edit ${consentGroup.consentGroupName}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? consentGroup?.consentGroupName : (consentGroup === undefined ? 'New Dataset' : `Edit ${consentGroup.consentGroupName}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="consentGroupName"
             title="Dataset Name"

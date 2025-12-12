@@ -167,11 +167,22 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     )
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = publication?.title
+  }
+  else if (!publication) {
+    headerTitle = 'New Publication'
+  }
+  else {
+    headerTitle = `Edit ${publication.title}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? publication?.title : (publication === undefined ? 'New Publication' : `Edit ${publication.title}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="title"
             title="Publication Title"

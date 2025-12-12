@@ -130,11 +130,22 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
     closeAction()
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = clinicalTrial?.title
+  }
+  else if (!clinicalTrial) {
+    headerTitle = 'New Clinical Trial'
+  }
+  else {
+    headerTitle = `Edit ${clinicalTrial.title}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? clinicalTrial?.title : (clinicalTrial === undefined ? 'New Clinical Trial' : `Edit ${clinicalTrial.title}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="title"
             title="Title"

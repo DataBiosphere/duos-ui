@@ -107,11 +107,22 @@ export default function IntellectualPropertyAddEdit(props: IntellectualPropertyA
     closeAction()
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = intellectualProperty?.title
+  }
+  else if (!intellectualProperty) {
+    headerTitle = 'New Intellectual Property'
+  }
+  else {
+    headerTitle = `Edit ${intellectualProperty.title}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? intellectualProperty?.title : (intellectualProperty === undefined ? 'New Publication' : `Edit ${intellectualProperty.title}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="type"
             title="Type"

@@ -105,11 +105,22 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
     closeAction()
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = aiModel?.name
+  }
+  else if (!aiModel) {
+    headerTitle = 'New AI Model'
+  }
+  else {
+    headerTitle = `Edit ${aiModel.name}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? aiModel?.name : (aiModel === undefined ? 'New AI Model' : `Edit ${aiModel.name}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="name"
             title="Model Name"

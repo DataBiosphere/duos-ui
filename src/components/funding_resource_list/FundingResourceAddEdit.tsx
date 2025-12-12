@@ -83,11 +83,22 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
     closeAction()
   }
 
+  let headerTitle: string | undefined
+  if (readOnly) {
+    headerTitle = funding?.funderName
+  }
+  else if (!funding) {
+    headerTitle = 'New Funding Resource'
+  }
+  else {
+    headerTitle = `Edit ${funding.funderName}`
+  }
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{readOnly ? funding?.funderName : (funding === undefined ? 'New Funding Resource' : `Edit ${funding.funderName}`)}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="funderName"
             title="Funder Name"
