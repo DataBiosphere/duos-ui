@@ -1,7 +1,7 @@
 import React from 'react'
 import { IntellectualProperty } from 'src/types/model'
-import { IntellectualPropertySummary } from 'src/components/intellectual_property_list/IntellectualPropertySummary'
-import { IntellectualPropertyAddEdit } from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
+import IntellectualPropertyAddEdit from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
+import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
 
 interface IntellectualPropertyRowProps {
   readonly id: number
@@ -18,20 +18,22 @@ interface IntellectualPropertyRowProps {
   readonly disabled: boolean
 }
 
-export const IntellectualPropertyRow: React.FC<IntellectualPropertyRowProps> = ({
-  id,
-  editMode,
-  viewMode,
-  intellectualProperty,
-  intellectualProperties,
-  columnsToShow,
-  editAction,
-  deleteAction,
-  closeAction,
-  viewAction,
-  onIntellectualPropertyChange,
-  disabled,
-}) => {
+export default function IntellectualPropertyRow(props: IntellectualPropertyRowProps): React.JSX.Element {
+  const {
+    id,
+    editMode,
+    viewMode,
+    intellectualProperty,
+    intellectualProperties,
+    columnsToShow,
+    editAction,
+    deleteAction,
+    closeAction,
+    viewAction,
+    onIntellectualPropertyChange,
+    disabled,
+  } = props
+
   return (
     <div>
       {(editMode || viewMode) && (
@@ -57,5 +59,3 @@ export const IntellectualPropertyRow: React.FC<IntellectualPropertyRowProps> = (
     </div>
   )
 }
-
-export default IntellectualPropertyRow

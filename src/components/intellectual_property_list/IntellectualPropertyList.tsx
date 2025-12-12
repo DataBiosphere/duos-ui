@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { IntellectualProperty } from 'src/types/model'
-import { IntellectualPropertyAddEdit } from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
+import IntellectualPropertyAddEdit from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
 import IntellectualPropertyRow from 'src/components/intellectual_property_list/IntellectualPropertyRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import AddObjectButton from 'src/components/AddObjectButton'

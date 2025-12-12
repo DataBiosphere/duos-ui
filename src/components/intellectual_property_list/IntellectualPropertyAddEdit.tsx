@@ -77,14 +77,9 @@ interface FormFieldChange {
   value: IpFieldValue
 }
 
-export const IntellectualPropertyAddEdit: React.FC<IntellectualPropertyAddEditProps> = ({
-  id,
-  intellectualProperty,
-  intellectualProperties,
-  closeAction,
-  onIntellectualPropertyChange,
-  readOnly = false,
-}) => {
+export default function IntellectualPropertyAddEdit(props: IntellectualPropertyAddEditProps): React.JSX.Element {
+  const { id, intellectualProperty, intellectualProperties, closeAction, onIntellectualPropertyChange, readOnly = false } = props
+
   const [current, setCurrent] = useState<IntellectualProperty>(intellectualProperty || defaultIp)
   const [validation, setValidation] = useState<Validation>({})
 

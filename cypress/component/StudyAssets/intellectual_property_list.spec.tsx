@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 import { IntellectualProperty } from 'src/types/model'
-import { IntellectualPropertyAddEdit } from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
+import IntellectualPropertyAddEdit from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
 import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
 import IntellectualPropertyRow from 'src/components/intellectual_property_list/IntellectualPropertyRow'
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
