@@ -8,16 +8,13 @@ interface FundingResourceSummaryProps {
   readonly columnsToShow: string[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }
 
-export const FundingResourceSummary: React.FC<FundingResourceSummaryProps> = ({
-  funding,
-  columnsToShow,
-  editAction,
-  deleteAction,
-  disabled,
-}) => {
+export default function FundingResourceSummary(props: FundingResourceSummaryProps): React.JSX.Element {
+  const { funding, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
+
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const disabledStyle = {
@@ -58,9 +55,26 @@ export const FundingResourceSummary: React.FC<FundingResourceSummaryProps> = ({
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
+        {/* view button */}
         <button
           type="button"
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          style={{ marginLeft: 10 }}
+          onClick={() => viewAction?.()}
+          aria-label="View funding resource"
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View funding resource"
+            data-for="tip_view"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+        {/* edit button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
           disabled={disabled}
           aria-label="Edit funding resource"
@@ -73,22 +87,23 @@ export const FundingResourceSummary: React.FC<FundingResourceSummaryProps> = ({
           />
           <span style={{ marginLeft: '1rem' }} />
         </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete funding resource"
+        >
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete funding resource"
+            data-for="tip_delete_funding"
+          />
+          <span style={{ marginLeft: '1rem' }} />
+        </button>
       </div>
-      <button
-        type="button"
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-        disabled={disabled}
-        aria-label="Delete funding resource"
-      >
-        <span
-          className="glyphicon glyphicon-trash presentation-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete funding resource"
-          data-for="tip_delete_funding"
-        />
-        <span style={{ marginLeft: '1rem' }} />
-      </button>
       <DeletePresentationOrPublication
         name={funding.funderName || funding.projectTitle}
         objectName="funding resource"
@@ -102,5 +117,3 @@ export const FundingResourceSummary: React.FC<FundingResourceSummaryProps> = ({
     </div>
   )
 }
-
-export default FundingResourceSummary
