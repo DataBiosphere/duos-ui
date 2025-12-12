@@ -46,8 +46,7 @@ export default function FundingResourceSummary(props: FundingResourceSummaryProp
   return (
     <div className="collaborator-summary-card">
       {columnsToShow?.map((column, index) => {
-        const rawValue = funding[column as keyof FundingResource]
-        const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
+        const columnContent = renderColumnContent(column, funding[column], customRenderers)
         return columnContent && (
           <div key={'funding_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>{columnContent}</span>

@@ -49,7 +49,7 @@ export default function PresentationSummary(props: PresentationSummaryProps): Re
   return (
     <div className="collaborator-summary-card">
       {columnsToShow?.map((column, index) => {
-        const columnContent = renderColumnContent(column, presentation[column as keyof Presentation], customRenderers)
+        const columnContent = renderColumnContent(column, presentation[column], customRenderers)
         return columnContent && (
           <div key={'presentation_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>

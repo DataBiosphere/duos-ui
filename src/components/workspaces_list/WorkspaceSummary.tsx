@@ -52,8 +52,7 @@ export default function WorkspaceSummary(props: WorkspaceSummaryProps): React.JS
   return (
     <div className="collaborator-summary-card">
       {columnsToShow?.map((column, index) => {
-        const rawValue = workspace[column as keyof Workspace]
-        const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
+        const columnContent = renderColumnContent(column, workspace[column], customRenderers)
         return columnContent && (
           <div key={'workspace_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>{columnContent}</span>

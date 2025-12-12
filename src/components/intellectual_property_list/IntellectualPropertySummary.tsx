@@ -46,8 +46,7 @@ export default function IntellectualPropertySummary(props: IntellectualPropertyS
   return (
     <div className="collaborator-summary-card">
       {columnsToShow?.map((column, index) => {
-        const rawValue = intellectualProperty[column as keyof IntellectualProperty]
-        const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
+        const columnContent = renderColumnContent(column, intellectualProperty[column], customRenderers)
         return columnContent && (
           <div key={'ip_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>{columnContent}</span>

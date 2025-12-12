@@ -41,8 +41,7 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
   return (
     <div className="collaborator-summary-card">
       {columnsToShow?.map((column, index) => {
-        const rawValue = consentGroup[column as keyof ConsentGroup2]
-        const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
+        const columnContent = renderColumnContent(column, consentGroup[column], customRenderers)
         return columnContent && (
           <div key={'consent_group_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>{columnContent}</span>

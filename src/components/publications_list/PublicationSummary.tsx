@@ -51,7 +51,7 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
   return (
     <div className="collaborator-summary-card">
       {columnsToShow?.map((column, index) => {
-        const columnContent = renderColumnContent(column, publication[column as keyof Publication], customRenderers)
+        const columnContent = renderColumnContent(column, publication[column], customRenderers)
         return columnContent && (
           <div key={'publication_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>

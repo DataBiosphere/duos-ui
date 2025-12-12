@@ -50,8 +50,7 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
   return (
     <div className="collaborator-summary-card">
       {columnsToShow?.map((column, index) => {
-        const raw = aiModel[column as keyof AiModel]
-        const content = renderColumnContent(column, raw, customRenderers)
+        const content = renderColumnContent(column, aiModel[column], customRenderers)
         return content && (
           <div key={'ai_model_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>{content}</span>
