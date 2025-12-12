@@ -1330,16 +1330,6 @@ a .editable:hover, a .enabled:hover {
 
 /*///////////////////////////////////////////////////////ADMIN*/
 
-.all-icons {
-  display: inline-block;
-  width: 35px;
-  height: 40px;
-  background: url('./images/admin_icons.png') no-repeat 0 0;
-  overflow: hidden;
-  text-indent: -15000px;
-  margin: 7px 3px 0 0;
-}
-
 .admin-manage-buttons .enabled, .admin-manage-buttons .disabled {
   text-align: center;
   margin: 4px auto 0 auto !important;
