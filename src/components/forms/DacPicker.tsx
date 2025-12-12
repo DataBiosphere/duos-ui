@@ -12,10 +12,11 @@ export interface DacPickerProps {
   isRequired: boolean
   validation?: unknown
   onChange: ({ key, value, isValid }: { key: string, value: number, isValid: boolean }) => void
+  disabled?: boolean
 }
 
 export const DacPicker = (props: DacPickerProps) => {
-  const { initialDac, fieldId, fieldTitle, isRequired, validation, onChange } = props
+  const { initialDac, fieldId, fieldTitle, isRequired, validation, onChange, disabled } = props
   const [dacList, setDacList] = useState<DacObject[]>([])
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export const DacPicker = (props: DacPickerProps) => {
         onChange({ key, value: value?.id, isValid })
       }}
       defaultValue={isNil(initialDac) ? null : findDacSelectOption(initialDac)}
+      disabled={disabled}
     />
   )
 }

@@ -10,10 +10,11 @@ interface ConsentGroupSummaryProps {
   readonly deleteAction: () => void
   readonly viewAction?: () => void
   readonly disabled?: boolean
+  readonly isEditingExistingStudy?: boolean
 }
 
 export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): React.JSX.Element {
-  const { consentGroup, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
+  const { consentGroup, columnsToShow, editAction, deleteAction, viewAction, disabled = false, isEditingExistingStudy = false } = props
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -97,8 +98,8 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
         <button
           type="button"
           style={{ marginLeft: 10, ...buttonStyle }}
-          onClick={() => !disabled && setShowDeleteModal(true)}
-          disabled={disabled}
+          onClick={() => !disabled && !isEditingExistingStudy && setShowDeleteModal(true)}
+          disabled={disabled || isEditingExistingStudy}
           aria-label="Delete dataset"
         >
           <span
@@ -110,6 +111,22 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
           <span style={{ marginLeft: '1rem' }} />
         </button>
       </div>
+      </div>
+      <button
+        type="button"
+        style={{ marginLeft: 10, ...buttonStyle }}
+        onClick={() => !disabled && !isEditingExistingStudy && setShowDeleteModal(true)}
+        disabled={disabled || isEditingExistingStudy}
+        aria-label="Delete dataset"
+      >
+        <span
+          className="glyphicon glyphicon-trash presentation-delete-icon"
+          aria-hidden="true"
+          data-tip="Delete dataset"
+          data-for="tip_delete_conset_group"
+        />
+        <span style={{ marginLeft: '1rem' }} />
+      </button>
       <DeletePresentationOrPublication
         name={consentGroup.consentGroupName}
         objectName="consentGroup"

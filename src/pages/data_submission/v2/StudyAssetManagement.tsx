@@ -31,10 +31,11 @@ import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
 export interface StudyAssetManagementProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
+  isEditingExistingStudy?: boolean
 }
 
 export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
-  const { setStudy, study } = props
+  const { setStudy, study, isEditingExistingStudy } = props
 
   const onAssetChange = <K extends keyof NonNullable<Study['assets']>>(
     assetType: K,
@@ -64,6 +65,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         consentGroups={consentGroups}
         onConsentGroupChange={(consentGroups: ConsentGroup2[]) => onAssetChange('consentGroups', consentGroups)}
         disabled={false}
+        isEditingExistingStudy={isEditingExistingStudy}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{

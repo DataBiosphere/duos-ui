@@ -12,6 +12,7 @@ interface ConsentGroupListProps {
   readonly disabled?: boolean
   readonly validation?: DarErrors
   readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
+  readonly isEditingExistingStudy?: boolean
 }
 
 export default function ConsentGroupList(props: ConsentGroupListProps): React.JSX.Element {
@@ -22,6 +23,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
     disabled = false,
     validation,
     studyAssetWrapper,
+    isEditingExistingStudy,
   } = props
 
   const [showAddEdit, setShowAddEdit] = useState(false)
@@ -65,6 +67,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
           consentGroups={consentGroups}
           closeAction={() => setShowAddEdit(false)}
           onConsentGroupChange={onConsentGroupChange}
+          isEditingExistingStudy={isEditingExistingStudy}
         />
       )}
       <div className="form-group row no-margin">
@@ -91,6 +94,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
             viewAction={() => toggleViewState(index)}
             onConsentGroupChange={onConsentGroupChange}
             disabled={disabled}
+            isEditingExistingStudy={isEditingExistingStudy}
           />
         ))}
       </div>

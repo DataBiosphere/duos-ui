@@ -27,6 +27,7 @@ import { Support } from 'src/libs/ajax/Support'
 import { Storage } from 'src/libs/storage'
 import { Notifications, isEmailAddress } from 'src/libs/utils'
 import { handleSignIn } from 'src/libs/signInUtils'
+import { AsyncSpinnerMuiButton } from 'src/components/AsyncSpinnerMuiButton'
 
 interface SupportRequestModalProps {
   showModal: boolean
@@ -361,14 +362,15 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
         >
           Cancel
         </Button>
-        <Button
+        <AsyncSpinnerMuiButton
           onClick={submitHandler}
           variant="contained"
           disabled={disableSubmitBtn}
           data-cy="supportFormSubmit"
+          sx={{ minWidth: 90 }}
         >
           Submit
-        </Button>
+        </AsyncSpinnerMuiButton>
       </DialogActions>
     </Dialog>
   )

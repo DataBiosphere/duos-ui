@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { Spinner } from 'src/components/Spinner'
+import { CircularProgress } from '@mui/material'
 
 export interface AsyncSpinnerButtonProps {
   /** The text to display on the button */
@@ -105,19 +105,7 @@ export const AsyncSpinnerButton: React.FC<AsyncSpinnerButtonProps> = ({
       {isLoading
         ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{
-                transform: 'scale(0.6)',
-                transformOrigin: 'center',
-                width: '1em',
-                height: '1em',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: '-0.5em',
-              }}
-              >
-                <Spinner />
-              </div>
+              <CircularProgress size={28} />
             </div>
           )
         : (

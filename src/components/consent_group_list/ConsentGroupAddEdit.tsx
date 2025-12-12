@@ -14,6 +14,7 @@ interface ConsentGroupAddEditProps {
   readonly closeAction: () => void
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly readOnly?: boolean
+  readonly isEditingExistingStudy?: boolean
 }
 
 interface Validation {
@@ -49,7 +50,7 @@ interface FormFieldChange {
 }
 
 export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): React.JSX.Element {
-  const { id, consentGroup, consentGroups, closeAction, onConsentGroupChange, readOnly = false } = props
+  const { id, consentGroup, consentGroups, closeAction, onConsentGroupChange, readOnly = false, isEditingExistingStudy = false } = props
 
   const [current, setCurrent] = useState<ConsentGroup2>(consentGroup || defaultConsentGroup)
   const [validation, setValidation] = useState<Validation>({})
@@ -89,6 +90,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
 
   const [showMORText, setShowMORText] = useState(consentGroup?.mor)
   const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
+  const disableAccessAdjustment = isEditingExistingStudy && current.accessManagement === 'controlled'
 
   const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
     const clearedFields = {} as ConsentGroup2
@@ -231,7 +233,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
-              disabled={readOnly}
+              disabled={readOnly || disableAccessAdjustment}
             />
 
             <FormField
@@ -243,7 +245,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
-              disabled={readOnly}
+              disabled={readOnly || disableAccessAdjustment}
             />
 
             <FormField
@@ -255,7 +257,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
-              disabled={readOnly}
+              disabled={readOnly || disableAccessAdjustment}
             />
           </div>
 
@@ -571,6 +573,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                 onChange={({ key, value }: { key: string, value: number, isValid: boolean }) => {
                   onChange({ key: key, value: value })
                 }}
+                disabled={readOnly || isEditingExistingStudy}
               />
             )
           }

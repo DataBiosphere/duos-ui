@@ -76,7 +76,7 @@ describe('AsyncSpinnerButton', () => {
     cy.get('[data-cy="async-action-button-loading-button"]')
       .should('be.disabled')
       .should('have.attr', 'aria-busy', 'true')
-      .find('img[alt="spinner"]')
+      .find('.MuiCircularProgress-root')
       .should('be.visible')
 
     // Text should not be visible during loading
@@ -318,7 +318,7 @@ describe('AsyncSpinnerButton', () => {
     cy.get('[data-cy="async-action-button-loading-stay-button"]')
       .should('be.disabled')
       .should('have.attr', 'aria-busy', 'true')
-      .find('img[alt="spinner"]')
+      .find('.MuiCircularProgress-root')
       .should('be.visible')
     cy.then(() => {
       resolvePromise()
