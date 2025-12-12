@@ -9,6 +9,7 @@ interface ConsentGroupSummaryProps {
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly disabled: boolean
+  readonly isEditingExistingStudy?: boolean
 }
 
 export const ConsentGroupSummary: React.FC<ConsentGroupSummaryProps> = ({
@@ -17,6 +18,7 @@ export const ConsentGroupSummary: React.FC<ConsentGroupSummaryProps> = ({
   editAction,
   deleteAction,
   disabled,
+  isEditingExistingStudy,
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -83,8 +85,8 @@ export const ConsentGroupSummary: React.FC<ConsentGroupSummaryProps> = ({
       <button
         type="button"
         style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-        disabled={disabled}
+        onClick={() => !disabled && !isEditingExistingStudy && setShowDeleteModal(true)}
+        disabled={disabled || isEditingExistingStudy}
         aria-label="Delete dataset"
       >
         <span

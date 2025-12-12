@@ -99,7 +99,7 @@ export const DataSubmissionFormV2 = () => {
         <NihAnvilUseRelated study={study} setStudy={setStudy} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
-        <StudyAssetManagement study={study} setStudy={setStudy} />
+        <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} />
         {!isEditing && (
           <AsyncSpinnerButton
             onClick={onSubmitStudy}

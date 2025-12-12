@@ -14,6 +14,7 @@ interface ConsentGroupRowProps {
   readonly closeAction: () => void
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly disabled: boolean
+  readonly isEditingExistingStudy?: boolean
 }
 
 export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.Element {
@@ -28,6 +29,7 @@ export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.
     closeAction,
     onConsentGroupChange,
     disabled,
+    isEditingExistingStudy,
   } = props
 
   return (
@@ -39,6 +41,7 @@ export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.
           consentGroups={consentGroups}
           closeAction={closeAction}
           onConsentGroupChange={onConsentGroupChange}
+          isEditingExistingStudy={isEditingExistingStudy}
         />
       )}
       {!editMode && (
@@ -48,6 +51,7 @@ export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.
           editAction={editAction}
           deleteAction={deleteAction}
           disabled={disabled}
+          isEditingExistingStudy={isEditingExistingStudy}
         />
       )}
     </div>
