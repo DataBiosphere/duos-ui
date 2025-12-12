@@ -108,7 +108,7 @@ export const generateStudyPropertyFormDateField = (formData: Study, setStudy: Re
       placeholder={studyProperty.fieldPlaceholderText}
       validators={validators}
       style={style}
-      defaultValue={typeof getStudyPropertyValueByKey(formData, studyProperty.key) === 'number' ? dayjs(getStudyPropertyValueByKey(formData, studyProperty.key) as number).format('YYYY-MM-DD') : getStudyPropertyValueByKey(formData, studyProperty.key) as string}
+      defaultValue={convertDateEpochToString(getStudyPropertyValueByKey(formData, studyProperty.key))}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
         studyProperty.value = input.value as Date
         setStudyPropertyByKey(formData, setStudy, input, studyProperty)
