@@ -38,8 +38,8 @@ const PresentationListHarness: React.FC<{ initial: Presentation[] }> = ({ initia
 describe('PresentationList component', () => {
   it('renders existing presentations', () => {
     mount(<PresentationListHarness initial={[samplePresentation]} />)
-    cy.contains('Sample Talk').should('exist')
-    cy.contains('Conference 2024').should('exist')
+    cy.contains(samplePresentation.title).should('exist')
+    cy.contains(samplePresentation.event).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
@@ -74,7 +74,7 @@ describe('PresentationList component', () => {
     it('opens presentation in view mode when view button is clicked', () => {
       mount(<PresentationListHarness initial={[samplePresentation]} />)
       cy.get('.glyphicon-eye-open').click({ force: true })
-      cy.contains('Sample Talk').should('exist')
+      cy.contains(samplePresentation.title).should('exist')
       cy.get('#title').should('be.disabled')
       cy.get('#date').should('be.disabled')
       cy.get('.collaborator-form-add-save-button').should('not.exist')
@@ -121,7 +121,7 @@ describe('PresentationList component', () => {
 
   it('deletes a presentation via modal confirmation', () => {
     mount(<PresentationListHarness initial={[samplePresentation]} />)
-    cy.contains('Sample Talk').should('exist')
+    cy.contains(samplePresentation.title).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -132,7 +132,7 @@ describe('PresentationList component', () => {
           .click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Sample Talk').should('not.exist')
+    cy.contains(samplePresentation.title).should('not.exist')
     cy.get('.collaborator-summary-card').should('have.length', 0)
   })
 })
@@ -148,10 +148,10 @@ describe('PresentationSummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Sample Talk').should('exist')
-    cy.contains('Conference 2024').should('exist')
-    cy.contains('Dr. Presenter').should('exist')
-    cy.get('a[href="https://example.org/presentation"]').should('exist')
+    cy.contains(samplePresentation.title).should('exist')
+    cy.contains(samplePresentation.event).should('exist')
+    cy.contains(samplePresentation.presenter.name).should('exist')
+    cy.get(`a[href="${samplePresentation.url}"]`).should('exist')
   })
 
   it('renders view button and triggers viewAction', () => {
@@ -187,7 +187,7 @@ describe('PresentationRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Sample Talk').should('exist')
+    cy.contains(samplePresentation.title).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -207,7 +207,7 @@ describe('PresentationRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Sample Talk')
+    cy.get('#title').should('have.value', samplePresentation.title)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
@@ -227,7 +227,7 @@ describe('PresentationRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Sample Talk')
+    cy.get('#title').should('have.value', samplePresentation.title)
     cy.get('#title').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })

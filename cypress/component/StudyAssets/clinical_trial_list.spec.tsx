@@ -43,8 +43,8 @@ const ClinicalTrialListHarness: React.FC<{ initial: ClinicalTrial[] }> = ({ init
 describe('ClinicalTrialList component', () => {
   it('renders existing trials', () => {
     mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    cy.contains('Baseline Trial').should('exist')
-    cy.contains('ClinicalTrials.gov').should('exist')
+    cy.contains(sampleTrial.title).should('exist')
+    cy.contains(sampleTrial.registry).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
@@ -82,7 +82,7 @@ describe('ClinicalTrialList component', () => {
   it('opens trial in view mode when view button is clicked', () => {
     mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains('Baseline Trial').should('exist')
+    cy.contains(sampleTrial.title).should('exist')
     cy.get('#title').should('be.disabled')
     cy.get('#registry').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
@@ -149,7 +149,7 @@ describe('ClinicalTrialList component', () => {
 
   it('deletes a clinical trial via modal confirmation', () => {
     mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    cy.contains('Baseline Trial').should('exist')
+    cy.contains(sampleTrial.title).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -160,7 +160,7 @@ describe('ClinicalTrialList component', () => {
           .click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Baseline Trial').should('not.exist')
+    cy.contains(sampleTrial.title).should('not.exist')
     cy.get('.collaborator-summary-card').should('have.length', 0)
   })
 })
@@ -187,15 +187,15 @@ describe('ClinicalTrialSummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Baseline Trial').should('exist')
-    cy.contains('ClinicalTrials.gov').should('exist')
-    cy.contains('NCT00000001').should('exist')
+    cy.contains(sampleTrial.title).should('exist')
+    cy.contains(sampleTrial.registry).should('exist')
+    cy.contains(sampleTrial.identifier).should('exist')
     cy.contains(/Completed/i).should('exist')
-    cy.contains('NIH').should('exist')
+    cy.contains(sampleTrial.sponsor).should('exist')
     cy.contains('2024-01-01 → 2025-12-31').should('exist')
     cy.contains(/Drug/i).should('exist')
     cy.contains(/Phase II|Phase 2/i).should('exist')
-    cy.contains('https://example.com/trial').should('exist')
+    cy.contains(sampleTrial.url).should('exist')
     cy.contains('oncology, phase2').should('exist')
   })
 
@@ -232,7 +232,7 @@ describe('ClinicalTrialRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Baseline Trial').should('exist')
+    cy.contains(sampleTrial.title).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -252,7 +252,7 @@ describe('ClinicalTrialRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Baseline Trial')
+    cy.get('#title').should('have.value', sampleTrial.title)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
@@ -272,7 +272,7 @@ describe('ClinicalTrialRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Baseline Trial')
+    cy.get('#title').should('have.value', sampleTrial.title)
     cy.get('#title').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })

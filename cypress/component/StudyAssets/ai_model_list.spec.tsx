@@ -34,8 +34,8 @@ const AiModelListHarness: React.FC<{ initial: AiModel[] }> = ({ initial }) => {
 describe('AiModelList component', () => {
   it('renders existing models', () => {
     mount(<AiModelListHarness initial={[sampleModel]} />)
-    cy.contains('Baseline Model').should('exist')
-    cy.contains('PyTorch').should('exist')
+    cy.contains(sampleModel.name).should('exist')
+    cy.contains(sampleModel.format).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
@@ -66,7 +66,7 @@ describe('AiModelList component', () => {
   it('opens model in view mode when view button is clicked', () => {
     mount(<AiModelListHarness initial={[sampleModel]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains('Baseline Model').should('exist')
+    cy.contains(sampleModel.name).should('exist')
     cy.get('#name').should('be.disabled')
     cy.get('#format').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
@@ -125,7 +125,7 @@ describe('AiModelList component', () => {
 
   it('deletes a model via modal confirmation', () => {
     mount(<AiModelListHarness initial={[sampleModel]} />)
-    cy.contains('Baseline Model').should('exist')
+    cy.contains(sampleModel.name).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -136,7 +136,7 @@ describe('AiModelList component', () => {
           .click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Baseline Model').should('not.exist')
+    cy.contains(sampleModel.name).should('not.exist')
     cy.get('.collaborator-summary-card').should('have.length', 0)
   })
 
@@ -169,11 +169,11 @@ describe('AiModelSummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Baseline Model').should('exist')
+    cy.contains(sampleModel.name).should('exist')
     cy.contains('Alice (alice@example.com)').should('exist')
     cy.contains('ds1, ds2').should('exist')
     cy.contains('vision, baseline').should('exist')
-    cy.contains('MIT').should('exist')
+    cy.contains(sampleModel.license).should('exist')
   })
 
   it('renders view button and triggers viewAction', () => {
@@ -209,7 +209,7 @@ describe('AiModelRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Baseline Model').should('exist')
+    cy.contains(sampleModel.name).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -229,7 +229,7 @@ describe('AiModelRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#name').should('have.value', 'Baseline Model')
+    cy.get('#name').should('have.value', sampleModel.name)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
@@ -249,7 +249,7 @@ describe('AiModelRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#name').should('have.value', 'Baseline Model')
+    cy.get('#name').should('have.value', sampleModel.name)
     cy.get('#name').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })

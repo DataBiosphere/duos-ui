@@ -33,8 +33,8 @@ const WorkspaceListHarness: React.FC<{ initial: Workspace[] }> = ({ initial }) =
 describe('WorkspaceList component', () => {
   it('renders existing workspaces', () => {
     mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-    cy.contains('Analysis Workspace').should('exist')
-    cy.contains('Terra').should('exist')
+    cy.contains(sampleWorkspace.name).should('exist')
+    cy.contains(sampleWorkspace.platform).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
@@ -64,7 +64,7 @@ describe('WorkspaceList component', () => {
   it('opens workspace in view mode when view button is clicked', () => {
     mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains('Analysis Workspace').should('exist')
+    cy.contains(sampleWorkspace.name).should('exist')
     cy.get('#name').should('be.disabled')
     cy.get('#platform').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
@@ -122,7 +122,7 @@ describe('WorkspaceList component', () => {
 
   it('deletes a workspace via modal confirmation', () => {
     mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-    cy.contains('Analysis Workspace').should('exist')
+    cy.contains(sampleWorkspace.name).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -133,7 +133,7 @@ describe('WorkspaceList component', () => {
           .click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Analysis Workspace').should('not.exist')
+    cy.contains(sampleWorkspace.name).should('not.exist')
     cy.get('.collaborator-summary-card').should('have.length', 0)
   })
 })
@@ -149,9 +149,9 @@ describe('WorkspaceSummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Analysis Workspace').should('exist')
-    cy.contains('Terra').should('exist')
-    cy.contains('Main analysis workspace').should('exist')
+    cy.contains(sampleWorkspace.name).should('exist')
+    cy.contains(sampleWorkspace.platform).should('exist')
+    cy.contains(sampleWorkspace.description).should('exist')
     cy.contains('R, Python').should('exist')
     cy.contains('genomics, analysis').should('exist')
     cy.get('a[href="https://terra.bio/workspace"]').should('exist')
@@ -190,7 +190,7 @@ describe('WorkspaceRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Analysis Workspace').should('exist')
+    cy.contains(sampleWorkspace.name).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -210,7 +210,7 @@ describe('WorkspaceRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#name').should('have.value', 'Analysis Workspace')
+    cy.get('#name').should('have.value', sampleWorkspace.name)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
@@ -230,7 +230,7 @@ describe('WorkspaceRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#name').should('have.value', 'Analysis Workspace')
+    cy.get('#name').should('have.value', sampleWorkspace.name)
     cy.get('#name').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })

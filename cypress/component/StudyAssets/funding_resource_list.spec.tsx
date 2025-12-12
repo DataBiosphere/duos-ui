@@ -24,7 +24,7 @@ const FundingResourceListHarness: React.FC<{ initial: FundingResource[] }> = ({ 
   return (
     <FundingResourceList
       fundingResources={items}
-      columnsToShow={['funderName', 'funderProgram']}
+      columnsToShow={['funderName', 'funderProgram', 'startDate']}
       onFundingResourceChange={setItems}
       disabled={false}
     />
@@ -34,8 +34,8 @@ const FundingResourceListHarness: React.FC<{ initial: FundingResource[] }> = ({ 
 describe('FundingResourceList component', () => {
   it('renders existing funding resources', () => {
     mount(<FundingResourceListHarness initial={[sampleFunding]} />)
-    cy.contains('Funder A').should('exist')
-    cy.contains('Program Z').should('exist')
+    cy.contains(sampleFunding.funderName).should('exist')
+    cy.contains(sampleFunding.funderProgram).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
@@ -63,7 +63,7 @@ describe('FundingResourceList component', () => {
   it('opens funding resource in view mode when view button is clicked', () => {
     mount(<FundingResourceListHarness initial={[sampleFunding]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains('Funder A').should('exist')
+    cy.contains(sampleFunding.funderName).should('exist')
     cy.get('#funderName').should('be.disabled')
     cy.get('#projectTitle').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
@@ -119,7 +119,7 @@ describe('FundingResourceList component', () => {
 
   it('deletes a funding resource via modal confirmation', () => {
     mount(<FundingResourceListHarness initial={[sampleFunding]} />)
-    cy.contains('Funder A').should('exist')
+    cy.contains(sampleFunding.funderName).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -130,7 +130,7 @@ describe('FundingResourceList component', () => {
           .click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Funder A').should('not.exist')
+    cy.contains(sampleFunding.funderName).should('not.exist')
     cy.get('.collaborator-summary-card').should('have.length', 0)
   })
 })
@@ -146,9 +146,9 @@ describe('FundingResourceSummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Funder A').should('exist')
-    cy.contains('Program Z').should('exist')
-    cy.contains('Project Alpha').should('exist')
+    cy.contains(sampleFunding.funderName).should('exist')
+    cy.contains(sampleFunding.funderProgram).should('exist')
+    cy.contains(sampleFunding.projectTitle).should('exist')
     cy.contains('tag1, tag2').should('exist')
     cy.get('a[href="https://example.org"]').should('exist')
   })
@@ -186,7 +186,7 @@ describe('FundingResourceRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Funder A').should('exist')
+    cy.contains(sampleFunding.funderName).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -206,7 +206,7 @@ describe('FundingResourceRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#funderName').should('have.value', 'Funder A')
+    cy.get('#funderName').should('have.value', sampleFunding.funderName)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
@@ -226,7 +226,7 @@ describe('FundingResourceRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#funderName').should('have.value', 'Funder A')
+    cy.get('#funderName').should('have.value', sampleFunding.funderName)
     cy.get('#funderName').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })

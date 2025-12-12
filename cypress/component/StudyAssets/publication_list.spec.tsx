@@ -1,4 +1,3 @@
-// Adjusted tests for author validation and ORCID format error
 import React from 'react'
 import { mount } from 'cypress/react'
 import PublicationList from 'src/components/publications_list/PublicationList'
@@ -44,8 +43,8 @@ const PublicationListHarness: React.FC<{ initial: Publication[] }> = ({ initial 
 describe('PublicationList component', () => {
   it('renders existing publications', () => {
     mount(<PublicationListHarness initial={[samplePublication]} />)
-    cy.contains('Sample Publication').should('exist')
-    cy.contains('Journal Name').should('exist')
+    cy.contains(samplePublication.title).should('exist')
+    cy.contains(samplePublication.journal).should('exist')
   })
 
   it('fills in and saves a new publication', () => {
@@ -86,7 +85,7 @@ describe('PublicationList component', () => {
   it('opens publication in view mode when view button is clicked', () => {
     mount(<PublicationListHarness initial={[samplePublication]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains('Sample Publication').should('exist')
+    cy.contains(samplePublication.title).should('exist')
     cy.get('#title').should('be.disabled')
     cy.get('#publishedDate').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
@@ -159,9 +158,9 @@ describe('PublicationSummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Sample Publication').should('exist')
-    cy.contains('Journal Name').should('exist')
-    cy.contains('Author One').should('exist')
+    cy.contains(samplePublication.title).should('exist')
+    cy.contains(samplePublication.journal).should('exist')
+    cy.contains(samplePublication.authors[0].name).should('exist')
     cy.get(`a[href="${samplePublication.url}"]`).should('exist')
   })
 
@@ -198,7 +197,7 @@ describe('PublicationRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Sample Publication').should('exist')
+    cy.contains(samplePublication.title).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -218,7 +217,7 @@ describe('PublicationRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Sample Publication')
+    cy.get('#title').should('have.value', samplePublication.title)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
@@ -238,7 +237,7 @@ describe('PublicationRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Sample Publication')
+    cy.get('#title').should('have.value', samplePublication.title)
     cy.get('#title').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })
@@ -269,7 +268,7 @@ describe('Publication delete flow', () => {
   it('deletes a publication via modal confirmation', () => {
     const list: Publication[] = [samplePublication]
     mount(<PublicationListHarness initial={list} />)
-    cy.contains('Sample Publication').should('exist')
+    cy.contains(samplePublication.title).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -277,6 +276,6 @@ describe('Publication delete flow', () => {
         cy.get('button').filter(':visible').contains(/delete/i).click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Sample Publication').should('not.exist')
+    cy.contains(samplePublication.title).should('not.exist')
   })
 })

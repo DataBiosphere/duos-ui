@@ -133,9 +133,9 @@ describe('IntellectualPropertySummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Test Patent').should('exist')
-    cy.contains('Patent').should('exist')
-    cy.contains('App123').should('exist')
+    cy.contains(sampleIp.title).should('exist')
+    cy.contains(sampleIp.type).should('exist')
+    cy.contains(sampleIp.patentNumber).should('exist')
     cy.contains('tag1, tag2').should('exist')
     cy.get('a[href="https://example.com/ip"]').should('exist')
   })
@@ -173,7 +173,7 @@ describe('IntellectualPropertyRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Test Patent').should('exist')
+    cy.contains(sampleIp.title).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -193,7 +193,7 @@ describe('IntellectualPropertyRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Test Patent')
+    cy.get('#title').should('have.value', sampleIp.title)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
@@ -213,7 +213,7 @@ describe('IntellectualPropertyRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Test Patent')
+    cy.get('#title').should('have.value', sampleIp.title)
     cy.get('#title').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })
@@ -270,7 +270,7 @@ describe('IntellectualPropertyList', () => {
   it('deletes an intellectual property via modal confirmation', () => {
     mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
 
-    cy.contains('Test Patent').should('exist')
+    cy.contains(sampleIp.title).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
 
     cy.get('.ReactModal__Content')
@@ -283,14 +283,14 @@ describe('IntellectualPropertyList', () => {
       })
 
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Test Patent').should('not.exist')
+    cy.contains(sampleIp.title).should('not.exist')
     cy.get('.collaborator-summary-card').should('have.length', 0)
   })
 
   it('opens intellectual property in view mode when view button is clicked', () => {
     mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains('Test Patent').should('exist')
+    cy.contains(sampleIp.title).should('exist')
     cy.get('#title').should('be.disabled')
     cy.get('#filingDate').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
