@@ -134,7 +134,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
   if (readOnly) {
     headerTitle = clinicalTrial?.title
   }
-  else if (!clinicalTrial) {
+  else if (clinicalTrial === undefined) {
     headerTitle = 'New Clinical Trial'
   }
   else {

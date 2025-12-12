@@ -92,7 +92,7 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
   if (readOnly) {
     headerTitle = workspace?.name
   }
-  else if (!workspace) {
+  else if (workspace === undefined) {
     headerTitle = 'New Workspace'
   }
   else {

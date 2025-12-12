@@ -130,7 +130,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
   if (readOnly) {
     headerTitle = presentation?.title
   }
-  else if (!presentation) {
+  else if (presentation === undefined) {
     headerTitle = 'New Presentation'
   }
   else {

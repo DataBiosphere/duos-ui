@@ -111,7 +111,7 @@ export default function IntellectualPropertyAddEdit(props: IntellectualPropertyA
   if (readOnly) {
     headerTitle = intellectualProperty?.title
   }
-  else if (!intellectualProperty) {
+  else if (intellectualProperty === undefined) {
     headerTitle = 'New Intellectual Property'
   }
   else {

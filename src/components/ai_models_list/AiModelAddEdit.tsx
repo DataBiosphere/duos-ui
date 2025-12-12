@@ -109,7 +109,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
   if (readOnly) {
     headerTitle = aiModel?.name
   }
-  else if (!aiModel) {
+  else if (aiModel === undefined) {
     headerTitle = 'New AI Model'
   }
   else {

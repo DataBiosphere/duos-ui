@@ -171,7 +171,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
   if (readOnly) {
     headerTitle = publication?.title
   }
-  else if (!publication) {
+  else if (publication === undefined) {
     headerTitle = 'New Publication'
   }
   else {

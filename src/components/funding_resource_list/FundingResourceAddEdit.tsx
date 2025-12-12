@@ -87,7 +87,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
   if (readOnly) {
     headerTitle = funding?.funderName
   }
-  else if (!funding) {
+  else if (funding === undefined) {
     headerTitle = 'New Funding Resource'
   }
   else {

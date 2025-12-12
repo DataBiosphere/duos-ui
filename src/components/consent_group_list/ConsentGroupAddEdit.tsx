@@ -195,7 +195,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   if (readOnly) {
     headerTitle = consentGroup?.consentGroupName
   }
-  else if (!consentGroup) {
+  else if (consentGroup === undefined) {
     headerTitle = 'New Dataset'
   }
   else {
