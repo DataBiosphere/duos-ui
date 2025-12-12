@@ -36,18 +36,6 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
       }
       return '—'
     },
-    tools: (value: unknown) => {
-      if (Array.isArray(value) && value.length > 0) {
-        return value.join(', ')
-      }
-      return '—'
-    },
-    tags: (value: unknown) => {
-      if (Array.isArray(value) && value.length > 0) {
-        return value.join(', ')
-      }
-      return '—'
-    },
   }
 
   return (
