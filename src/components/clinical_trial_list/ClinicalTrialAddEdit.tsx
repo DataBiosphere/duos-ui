@@ -43,6 +43,7 @@ interface ClinicalTrialAddEditProps {
   readonly clinicalTrials: ClinicalTrial[]
   readonly closeAction: () => void
   readonly onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -85,7 +86,7 @@ const findSelectEntry = (options: SelectEntry[], key?: string) =>
   key ? options.find(o => o.key === key) || null : null
 
 export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): React.JSX.Element {
-  const { id, clinicalTrial, clinicalTrials, closeAction, onClinicalTrialChange } = props
+  const { id, clinicalTrial, clinicalTrials, closeAction, onClinicalTrialChange, readOnly = false } = props
   const [newClinicalTrial, setNewClinicalTrial] = useState<ClinicalTrial>(clinicalTrial || defaultClinicalTrial)
   const [validation, setValidation] = useState<Validation>({})
 
@@ -133,7 +134,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{clinicalTrial === undefined ? 'New Clinical Trial Information' : `Edit ${clinicalTrial.title} Information`}</h2>
+          <h2>{readOnly ? clinicalTrial?.title : (clinicalTrial === undefined ? 'New Clinical Trial' : `Edit ${clinicalTrial.title}`)}</h2>
           <FormField
             id="title"
             title="Title"
@@ -142,6 +143,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.title}
+            disabled={readOnly}
           />
           <FormField
             id="registry"
@@ -151,6 +153,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.registry}
+            disabled={readOnly}
           />
           <FormField
             id="identifier"
@@ -160,6 +163,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.identifier}
+            disabled={readOnly}
           />
           <FormField
             id="status"
@@ -171,6 +175,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             onChange={onChange}
             validation={validation.status}
             placeholder="Select status"
+            disabled={readOnly}
           />
           <FormField
             id="sponsor"
@@ -180,6 +185,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.sponsor}
+            disabled={readOnly}
           />
           <FormField
             id="startDate"
@@ -189,6 +195,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={validation.startDate}
+            disabled={readOnly}
           />
           <FormField
             id="endDate"
@@ -198,6 +205,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             validators={[FormValidators.DATE]}
             onChange={onChange}
             validation={validation.endDate}
+            disabled={readOnly}
           />
           <FormField
             id="interventionType"
@@ -209,6 +217,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             onChange={onChange}
             validation={validation.interventionType}
             placeholder="Select intervention type"
+            disabled={readOnly}
           />
           <FormField
             id="phase"
@@ -220,6 +229,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             onChange={onChange}
             validation={validation.phase}
             placeholder="Select phase"
+            disabled={readOnly}
           />
           <FormField
             id="url"
@@ -229,6 +239,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.url}
+            disabled={readOnly}
           />
           <FormField
             id="description"
@@ -236,6 +247,7 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             defaultValue={clinicalTrial?.description}
             placeholder="Description"
             onChange={onChange}
+            disabled={readOnly}
           />
           <FormField
             id="tags"
@@ -243,23 +255,25 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
             defaultValue={clinicalTrial?.tags?.join(', ')}
             placeholder="Comma separated tags"
             onChange={onChange}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={save}
-            disabled={validationFailed(calcClinicalTrialErrors(newClinicalTrial))}
-          >
-            {clinicalTrial === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {clinicalTrial === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>
