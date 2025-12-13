@@ -33,6 +33,16 @@ export default function ClinicalTrialSummary(props: ClinicalTrialSummaryProps): 
     status: () => statusToDisplay(clinicalTrial.status),
     phase: () => phaseToDisplay(clinicalTrial.phase),
     interventionType: () => interventionTypeToDisplay(clinicalTrial.interventionType),
+    url: (value: unknown) => {
+      if (typeof value === 'string' && value) {
+        return (
+          <a href={value} target="_blank" rel="noreferrer">
+            {value}
+          </a>
+        )
+      }
+      return '—'
+    },
   }
 
   return (

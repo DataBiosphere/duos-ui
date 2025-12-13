@@ -45,6 +45,16 @@ export default function AiModelSummary(props: AiModelSummaryProps): React.JSX.El
       const arr = value as string[]
       return Array.isArray(arr) ? arr.join(', ') : ''
     },
+    url: (value: unknown) => {
+      if (typeof value === 'string' && value) {
+        return (
+          <a href={value} target="_blank" rel="noreferrer">
+            {value}
+          </a>
+        )
+      }
+      return '—'
+    },
   }
 
   return (
