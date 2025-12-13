@@ -630,16 +630,18 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               title: 'File Type',
               type: FormFieldTypes.SELECT,
               selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
+              disabled: readOnly,
             },
             {
               id: 'functionalEquivalence',
               name: 'functionalEquivalence',
               title: 'Functional Equivalence',
               placeholder: 'Type',
+              disabled: readOnly,
             },
           ]}
           defaultValue={current?.fileTypes}
-          enableAddingRow={true}
+          enableAddingRow={!readOnly}
           addRowLabel="Add New File Type"
           minLength={1}
           onChange={onChange}
@@ -671,6 +673,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               onChange({ key: id, value: undefined })
             }}
             title="NIH Institutional Certification"
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>

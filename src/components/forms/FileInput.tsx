@@ -11,10 +11,11 @@ export type FileInputProps = {
   onDeleteFile: (id: string) => void
   required?: boolean
   title: string
+  disabled?: boolean
 }
 
 export const FileInput = (props: FileInputProps) => {
-  const { id, title, description, onAddFile, onDeleteFile, defaultValue, required } = props
+  const { id, title, description, onAddFile, onDeleteFile, defaultValue, required, disabled = false } = props
   const [file, setFile] = useState<File | undefined>(defaultValue)
   const inputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState<boolean>(false)
@@ -84,6 +85,7 @@ export const FileInput = (props: FileInputProps) => {
           setFile(event.currentTarget.files?.[0])
           handleAddFile(event, id)
         }}
+        disabled={disabled}
       />
       <div style={{ display: 'inline', margin: 'auto' }}>
         <button
