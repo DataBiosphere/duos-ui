@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface PresentationListProps {
   readonly presentations: Presentation[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof Presentation)[]
   readonly onPresentationChange: (presentations: Presentation[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -17,7 +17,7 @@ interface PresentationListProps {
 export default function PresentationList(props: PresentationListProps): React.JSX.Element {
   const {
     presentations,
-    columnsToShow = [],
+    columnsToShow = ['title', 'date', 'event', 'location', 'url', 'format', 'access'],
     onPresentationChange,
     disabled = false,
     validation,
@@ -26,11 +26,18 @@ export default function PresentationList(props: PresentationListProps): React.JS
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState(presentations.map(() => false))
+  const [viewState, setViewState] = useState(presentations.map(() => false))
 
   const toggleEditState = (index: number) => {
     const editStateCopy = [...editState]
     editStateCopy[index] = !editStateCopy[index]
     setEditState(editStateCopy)
+  }
+
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
   }
 
   const handleDeletePresentation = (index: number) => {
@@ -65,15 +72,22 @@ export default function PresentationList(props: PresentationListProps): React.JS
           key={index}
           id={index}
           editMode={editState[index]}
+          viewMode={viewState[index]}
           presentation={presentation}
           presentations={presentations}
           columnsToShow={columnsToShow}
           editAction={() => toggleEditState(index)}
           deleteAction={() => { handleDeletePresentation(index) }}
           closeAction={() => {
-            toggleEditState(index)
+            if (editState[index]) {
+              toggleEditState(index)
+            }
+            else if (viewState[index]) {
+              toggleViewState(index)
+            }
             setShowAddEdit(false)
           }}
+          viewAction={() => toggleViewState(index)}
           onPresentationChange={onPresentationChange}
           disabled={disabled}
         />

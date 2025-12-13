@@ -8,14 +8,18 @@ import {
   interventionTypeToDisplay,
 } from 'src/utils/ClinicalTrialEnumUtils'
 
-export default function ClinicalTrialSummary(props: {
+interface ClinicalTrialSummaryProps {
   readonly clinicalTrial: ClinicalTrial
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
-}): React.JSX.Element {
-  const { clinicalTrial, columnsToShow, editAction, deleteAction, disabled } = props
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
+}
+
+export default function ClinicalTrialSummary(props: ClinicalTrialSummaryProps): React.JSX.Element {
+  const { clinicalTrial, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
+
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const disabledStyle = { cursor: 'not-allowed', opacity: 0.5 }
@@ -33,7 +37,7 @@ export default function ClinicalTrialSummary(props: {
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
+      {columnsToShow?.map((column, index) => {
         const contentSource = column === 'dateRange' ? 'dateRange' : column
         const rawValue = clinicalTrial[column as keyof ClinicalTrial]
         const columnContent = renderColumnContent(contentSource, rawValue, customRenderers)
@@ -44,9 +48,26 @@ export default function ClinicalTrialSummary(props: {
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
+        {/* view button */}
         <button
           type="button"
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          style={{ marginLeft: 10 }}
+          onClick={() => viewAction?.()}
+          aria-label="View clinical trial"
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View clinical trial"
+            data-for="tip_view"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+        {/* edit button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
           disabled={disabled}
           aria-label="Edit clinical trial"
@@ -54,17 +75,23 @@ export default function ClinicalTrialSummary(props: {
           <span className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon" aria-hidden="true" />
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete clinical trial"
+        >
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete clinical trial"
+            data-for="tip_delete_clinical_trial"
+          />
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
       </div>
-      <button
-        type="button"
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-        disabled={disabled}
-        aria-label="Delete clinical trial"
-      >
-        <span className="glyphicon glyphicon-trash presentation-delete-icon" aria-hidden="true" />
-        <span style={{ marginLeft: '1rem' }}></span>
-      </button>
       <DeletePresentationOrPublication
         name={clinicalTrial.title}
         objectName="clinical trial"

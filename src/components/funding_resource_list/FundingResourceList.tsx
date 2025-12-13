@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { FundingResource } from 'src/types/model'
-import { FundingResourceAddEdit } from 'src/components/funding_resource_list/FundingResourceAddEdit'
+import FundingResourceAddEdit from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import FundingResourceRow from 'src/components/funding_resource_list/FundingResourceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import AddObjectButton from 'src/components/AddObjectButton'
 
 interface FundingResourceListProps {
   readonly fundingResources: FundingResource[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof FundingResource)[]
   readonly onFundingResourceChange: (items: FundingResource[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -17,7 +17,7 @@ interface FundingResourceListProps {
 export default function FundingResourceList(props: FundingResourceListProps): React.JSX.Element {
   const {
     fundingResources,
-    columnsToShow = ['funderName', 'funderProgram', 'grantNumber', 'projectTitle', 'startDate', 'endDate', 'url', 'tags'],
+    columnsToShow = ['funderName', 'funderProgram', 'grantNumber', 'projectTitle', 'startDate', 'endDate', 'url'],
     onFundingResourceChange,
     disabled = false,
     validation,
@@ -26,11 +26,18 @@ export default function FundingResourceList(props: FundingResourceListProps): Re
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState(fundingResources.map(() => false))
+  const [viewState, setViewState] = useState(fundingResources.map(() => false))
 
   const toggleEditState = (index: number) => {
     const editStateCopy = [...editState]
     editStateCopy[index] = !editStateCopy[index]
     setEditState(editStateCopy)
+  }
+
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
   }
 
   const handleDeleteFunding = (index: number) => {
@@ -65,15 +72,22 @@ export default function FundingResourceList(props: FundingResourceListProps): Re
           key={f.fundingId || index}
           id={index}
           editMode={editState[index]}
+          viewMode={viewState[index]}
           funding={f}
           fundingResources={fundingResources}
           columnsToShow={columnsToShow}
           editAction={() => toggleEditState(index)}
           deleteAction={() => handleDeleteFunding(index)}
           closeAction={() => {
-            toggleEditState(index)
+            if (editState[index]) {
+              toggleEditState(index)
+            }
+            else if (viewState[index]) {
+              toggleViewState(index)
+            }
             setShowAddEdit(false)
           }}
+          viewAction={() => toggleViewState(index)}
           onFundingChange={onFundingResourceChange}
           disabled={disabled}
         />

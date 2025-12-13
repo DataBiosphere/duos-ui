@@ -5,14 +5,15 @@ import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface PublicationSummaryProps {
   publication: Publication
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Publication)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }
 
 export default function PublicationSummary(props: PublicationSummaryProps): React.JSX.Element {
-  const { publication, columnsToShow, editAction, deleteAction, disabled } = props
+  const { publication, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -49,9 +50,8 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
 
   return (
     <div className="collaborator-summary-card">
-      {/* data elements to show in the row summary */}
-      {columnsToShow.map((column, index) => {
-        const columnContent = renderColumnContent(column, publication[column as keyof Publication], customRenderers)
+      {columnsToShow?.map((column, index) => {
+        const columnContent = renderColumnContent(column, publication[column], customRenderers)
         return columnContent && (
           <div key={'publication_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>
@@ -60,11 +60,30 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
           </div>
         )
       })}
-      {/* edit button */}
       <div className="collaborator-summary-edit-delete-buttons">
-        <a
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+        {/* view button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10 }}
+          onClick={() => viewAction?.()}
+          aria-label="View publication"
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View publication"
+            data-for="tip_view"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+        {/* edit button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
+          disabled={disabled}
+          aria-label="Edit publication"
         >
           <span
             className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon"
@@ -74,22 +93,25 @@ export default function PublicationSummary(props: PublicationSummaryProps): Reac
           >
           </span>
           <span style={{ marginLeft: '1rem' }}></span>
-        </a>
-      </div>
-      {/* delete button */}
-      <a
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-      >
-        <span
-          className="glyphicon glyphicon-trash publication-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete dataset"
-          data-for="tip_delete"
+        </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete publication"
         >
-        </span>
-        <span style={{ marginLeft: '1rem' }}></span>
-      </a>
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete dataset"
+            data-for="tip_delete"
+          >
+          </span>
+          <span style={{ marginLeft: '1rem' }}></span>
+        </button>
+      </div>
       {/* delete modal */}
       <DeletePresentationOrPublication
         name={publication.title}

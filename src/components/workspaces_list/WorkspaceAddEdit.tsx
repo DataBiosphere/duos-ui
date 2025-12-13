@@ -9,6 +9,7 @@ interface WorkspaceAddEditProps {
   readonly workspaces: Workspace[]
   readonly closeAction: () => void
   readonly onWorkspaceChange: (items: Workspace[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -57,13 +58,15 @@ interface FormFieldChange {
   value: WorkspaceFieldValue
 }
 
-export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
-  id,
-  workspace,
-  workspaces,
-  closeAction,
-  onWorkspaceChange,
-}) => {
+const getHeaderTitle = (readOnly: boolean, workspace?: Workspace) => {
+  if (readOnly) return workspace?.name
+  if (!workspace) return 'New Workspace'
+  return `Edit ${workspace.name}`
+}
+
+export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JSX.Element {
+  const { id, workspace, workspaces, closeAction, onWorkspaceChange, readOnly = false } = props
+
   const [current, setCurrent] = useState<Workspace>(workspace || defaultWorkspace)
   const [validation, setValidation] = useState<Validation>({})
 
@@ -91,11 +94,13 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
     closeAction()
   }
 
+  const headerTitle = getHeaderTitle(readOnly, workspace)
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{workspace === undefined ? 'New Workspace' : `Edit ${workspace.name || 'Workspace'}`}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="name"
             title="Workspace Name"
@@ -104,6 +109,7 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.name}
+            disabled={readOnly}
           />
           <FormField
             id="platform"
@@ -113,6 +119,7 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.platform}
+            disabled={readOnly}
           />
           <FormField
             id="url"
@@ -122,6 +129,7 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={validation.url}
+            disabled={readOnly}
           />
           <FormField
             id="description"
@@ -131,6 +139,7 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.description}
+            disabled={readOnly}
           />
           <FormField
             id="tools"
@@ -145,6 +154,7 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
                   .map(t => t.trim())
                   .filter(Boolean),
               })}
+            disabled={readOnly}
           />
           <FormField
             id="access"
@@ -154,6 +164,7 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.access}
+            disabled={readOnly}
           />
           <FormField
             id="tags"
@@ -168,6 +179,7 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
                   .map(t => t.trim())
                   .filter(Boolean),
               })}
+            disabled={readOnly}
           />
           <FormField
             id="citation"
@@ -175,23 +187,25 @@ export const WorkspaceAddEdit: React.FC<WorkspaceAddEditProps> = ({
             style={{ display: 'none' }}
             title=""
             onChange={() => {}}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={save}
-            disabled={validationFailed(calcErrors(current))}
-          >
-            {workspace === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {workspace === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>

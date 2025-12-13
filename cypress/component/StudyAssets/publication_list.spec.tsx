@@ -1,4 +1,3 @@
-// Adjusted tests for author validation and ORCID format error
 import React from 'react'
 import { mount } from 'cypress/react'
 import PublicationList from 'src/components/publications_list/PublicationList'
@@ -44,8 +43,8 @@ const PublicationListHarness: React.FC<{ initial: Publication[] }> = ({ initial 
 describe('PublicationList component', () => {
   it('renders existing publications', () => {
     mount(<PublicationListHarness initial={[samplePublication]} />)
-    cy.contains('Sample Publication').should('exist')
-    cy.contains('Journal Name').should('exist')
+    cy.contains(samplePublication.title).should('exist')
+    cy.contains(samplePublication.journal).should('exist')
   })
 
   it('fills in and saves a new publication', () => {
@@ -61,7 +60,6 @@ describe('PublicationList component', () => {
       />,
     )
 
-    // Fill fields
     cy.get('#title').type('New Pub')
     cy.get('#publishedDate').type('2024-07-15')
     cy.get('#pubmedId').type('99999')
@@ -75,13 +73,31 @@ describe('PublicationList component', () => {
     cy.get('input[placeholder="ORCID (0000-0000-0000-0000)"]').type('0000-0000-0000-0003')
 
     cy.contains('Add Author').should('not.be.disabled')
-    cy.contains('Save').click()
+    cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
       expect(collected[0].title).to.eq('New Pub')
       expect(collected[0].authors).to.have.length(1)
       expect(collected[0].authors[0].name).to.eq('First Author')
     })
+  })
+
+  it('opens publication in view mode when view button is clicked', () => {
+    mount(<PublicationListHarness initial={[samplePublication]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.contains(samplePublication.title).should('exist')
+    cy.get('#title').should('be.disabled')
+    cy.get('#publishedDate').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
+    cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+  })
+
+  it('closes view mode when close button is clicked', () => {
+    mount(<PublicationListHarness initial={[samplePublication]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('.collaborator-form-cancel-button').click()
+    cy.get('#title').should('not.exist')
+    cy.get('.glyphicon-eye-open').should('exist')
   })
 
   it('shows validation errors on empty form', () => {
@@ -93,8 +109,8 @@ describe('PublicationList component', () => {
         onPublicationChange={cy.stub()}
       />,
     )
-    cy.contains('Save').click()
-    // Verify some error indicators appear
+    cy.get('.collaborator-form-add-save-button').click()
+    cy.get('.error-message').should('exist')
     cy.get('.error-message').should('have.length.greaterThan', 0)
   })
 
@@ -109,9 +125,7 @@ describe('PublicationList component', () => {
     )
     cy.contains('Add Author').should('be.disabled')
     cy.get('input[placeholder="Author Name"]').type('Temp Author')
-    // ORCID is optional, so Add Author should be enabled even without ORCID
     cy.contains('Add Author').should('not.be.disabled')
-    // Test that invalid ORCID format doesn't prevent adding (validation happens on save)
     cy.get('input[placeholder="ORCID (0000-0000-0000-0000)"]').type('BAD-ORCID')
     cy.contains('Add Author').should('not.be.disabled').click()
     cy.get('input[placeholder="Author Name"]').should('have.length', 2)
@@ -127,9 +141,8 @@ describe('PublicationList component', () => {
       />,
     )
     cy.get('input[placeholder="Author Name"]').type('Author Bad Orcid')
-    cy.get('input[placeholder="ORCID (0000-0000-0000-0000)"]').type('1111-2222-3333-444') // invalid
-    cy.contains('Save').click()
-    // Avoid .within() on multiple elements; directly locate the error token
+    cy.get('input[placeholder="ORCID (0000-0000-0000-0000)"]').type('1111-2222-3333-444')
+    cy.get('.collaborator-form-add-save-button').click()
     cy.get('.error-message').contains(/orcIdFormat@0/i).should('exist')
   })
 })
@@ -145,10 +158,26 @@ describe('PublicationSummary', () => {
         disabled={false}
       />,
     )
-    cy.contains('Sample Publication').should('exist')
-    cy.contains('Journal Name').should('exist')
-    cy.contains('Author One').should('exist')
+    cy.contains(samplePublication.title).should('exist')
+    cy.contains(samplePublication.journal).should('exist')
+    cy.contains(samplePublication.authors[0].name).should('exist')
     cy.get(`a[href="${samplePublication.url}"]`).should('exist')
+  })
+
+  it('renders view button and triggers viewAction', () => {
+    mount(
+      <PublicationSummary
+        publication={samplePublication}
+        columnsToShow={['title', 'publishedDate']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').should('exist')
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
   })
 })
 
@@ -168,7 +197,7 @@ describe('PublicationRow', () => {
         disabled={false}
       />,
     )
-    cy.contains('Sample Publication').should('exist')
+    cy.contains(samplePublication.title).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
@@ -188,7 +217,50 @@ describe('PublicationRow', () => {
         disabled={false}
       />,
     )
-    cy.get('#title').should('have.value', 'Sample Publication')
+    cy.get('#title').should('have.value', samplePublication.title)
+  })
+
+  it('renders view form when viewMode true and is read-only', () => {
+    mount(
+      <PublicationRow
+        id={0}
+        editMode={false}
+        viewMode={true}
+        publication={samplePublication}
+        publications={[samplePublication]}
+        columnsToShow={['title']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub()}
+        onPublicationChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('#title').should('have.value', samplePublication.title)
+    cy.get('#title').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
+  })
+
+  it('triggers viewAction when view button is clicked', () => {
+    mount(
+      <PublicationRow
+        id={0}
+        editMode={false}
+        viewMode={false}
+        publication={samplePublication}
+        publications={[samplePublication]}
+        columnsToShow={['title', 'journal']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        onPublicationChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
   })
 })
 
@@ -196,7 +268,7 @@ describe('Publication delete flow', () => {
   it('deletes a publication via modal confirmation', () => {
     const list: Publication[] = [samplePublication]
     mount(<PublicationListHarness initial={list} />)
-    cy.contains('Sample Publication').should('exist')
+    cy.contains(samplePublication.title).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -204,6 +276,6 @@ describe('Publication delete flow', () => {
         cy.get('button').filter(':visible').contains(/delete/i).click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Sample Publication').should('not.exist')
+    cy.contains(samplePublication.title).should('not.exist')
   })
 })

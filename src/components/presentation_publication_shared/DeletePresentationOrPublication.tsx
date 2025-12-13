@@ -55,13 +55,10 @@ export function DeletePresentationOrPublication(props: DeletePresentationOrPubli
       <div>
         <CloseIconComponent closeFn={closeAction} />
         <div className="delete-modal-header">
-          Delete
-          {objectName}
+          Delete {objectName}
         </div>
         <div className="delete-modal-title">
-          Are you sure you want to delete
-          <strong>{name}</strong>
-          ?
+          Are you sure you want to delete <strong>{name}</strong>?
         </div>
         <div className="delete-modal-message"><i>This action is permanent and cannot be undone.</i></div>
         <div className="delete-modal-actions">

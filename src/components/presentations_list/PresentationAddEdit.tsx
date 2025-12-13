@@ -32,6 +32,7 @@ interface PresentationAddEditProps {
   readonly presentations: Presentation[]
   readonly closeAction: () => void
   readonly onPresentationChange: (presentations: Presentation[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -48,15 +49,21 @@ interface Validation {
   access?: ValidationError
 }
 
-export default function PresentationAddEdit(props: PresentationAddEditProps): React.JSX.Element {
-  const { id, presentation, presentations, closeAction, onPresentationChange } = props
+const getHeaderTitle = (readOnly: boolean, presentation?: Presentation) => {
+  if (readOnly) return presentation?.title
+  if (!presentation) return 'New Presentation'
+  return `Edit ${presentation.title}`
+}
 
-  const [newPresentation, setNewPresentation] = useState<Presentation>(presentation || defaultPresentation)
-  const [validation, setValidation] = useState<Validation>(() => ({
-    presenter: {},
-  }))
+export default function PresentationAddEdit(props: PresentationAddEditProps): React.JSX.Element {
+  const { id, presentation, presentations, closeAction, onPresentationChange, readOnly = false } = props
+
+  const initialPresentation = presentation || defaultPresentation
+  const [newPresentation, setNewPresentation] = useState<Presentation>(initialPresentation)
+  const [validation, setValidation] = useState<Validation>({ presenter: {} })
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [tagsInput, setTagsInput] = useState<string>((presentation?.tags ?? []).join(', '))
 
   const applyValidation = (draft: Presentation, full: boolean) => {
     const all = calcPresentationErrors(draft) as Validation
@@ -101,7 +108,9 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
       next = { ...newPresentation, presenter: { ...newPresentation.presenter, email: value as string } }
     }
     else if (key === 'tags') {
-      next = { ...newPresentation, tags: (value as string).split(',').map(t => t.trim()).filter(Boolean) }
+      const text = String(value)
+      setTagsInput(text)
+      next = { ...newPresentation, tags: text.split(',').map(t => t.trim()).filter(Boolean) }
     }
     else {
       next = { ...newPresentation, [key]: value }
@@ -125,141 +134,158 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
     closeAction()
   }
 
+  const headerTitle = getHeaderTitle(readOnly, presentation)
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{presentation === undefined ? 'New Presentation' : `Edit ${presentation.title}`}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="title"
             title="Presentation Title"
-            defaultValue={presentation?.title}
+            defaultValue={newPresentation.title}
             placeholder="Title"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.title) ? validation.title : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="date"
             title="Presentation Date"
-            defaultValue={presentation?.date}
+            defaultValue={newPresentation.date}
             placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={(submitted || touched.date) ? validation.date : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="url"
             title="Presentation URL"
-            defaultValue={presentation?.url}
+            defaultValue={newPresentation.url}
             placeholder="https://..."
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="authors"
             title="Authors"
-            defaultValue={presentation?.authors}
+            defaultValue={newPresentation.authors}
             placeholder="Authors"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.authors) ? validation.authors : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="datasetCitation"
             title="Dataset Citation"
-            defaultValue={presentation?.datasetCitation}
+            defaultValue={newPresentation.datasetCitation}
             placeholder="Dataset Citation"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="citation"
             type={FormFieldTypes.YESNORADIOGROUP}
-            defaultValue={presentation?.citation}
+            defaultValue={newPresentation.citation}
             title="Did you cite the dataset(s) used in this presentation?"
             orientation="horizontal"
             onChange={onChange}
             validation={(submitted || touched.citation) ? validation.citation : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="presenterName"
             title="Presenter Name"
-            defaultValue={presentation?.presenter?.name}
+            defaultValue={newPresentation.presenter?.name}
             placeholder="Name"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.presenterName) ? validation.presenter?.name : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="presenterEmail"
             title="Presenter Email"
-            defaultValue={presentation?.presenter?.email}
+            defaultValue={newPresentation.presenter?.email}
             placeholder="email@example.org"
             validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
             onChange={onChange}
             validation={(submitted || touched.presenterEmail) ? validation.presenter?.email : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="event"
             title="Event"
-            defaultValue={presentation?.event}
+            defaultValue={newPresentation.event}
             placeholder="Event"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.event) ? validation.event : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="location"
             title="Location"
-            defaultValue={presentation?.location}
+            defaultValue={newPresentation.location}
             placeholder="Location"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.location) ? validation.location : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="format"
             title="Format"
-            defaultValue={presentation?.format}
+            defaultValue={newPresentation.format}
             placeholder="Format"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.format) ? validation.format : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="access"
             title="Access"
-            defaultValue={presentation?.access}
+            defaultValue={newPresentation.access}
             placeholder="Access"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.access) ? validation.access : undefined}
+            disabled={readOnly}
           />
           <FormField
             id="tags"
             title="Tags (comma separated)"
-            defaultValue={presentation?.tags?.join(', ')}
+            defaultValue={tagsInput}
             placeholder="tag1, tag2"
             onChange={onChange}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={save}
-          >
-            {presentation === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {presentation === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>

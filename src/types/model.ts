@@ -342,7 +342,7 @@ export interface Study {
     presentations?: Array<Presentation>
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
-    intellectualProperty?: Array<IntellectualProperty>
+    intellectualProperties?: Array<IntellectualProperty>
   }
 }
 

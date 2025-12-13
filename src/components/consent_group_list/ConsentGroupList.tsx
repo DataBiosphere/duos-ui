@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
-import { ConsentGroupAddEdit } from 'src/components/consent_group_list/ConsentGroupAddEdit'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import ConsentGroupAddEdit from 'src/components/consent_group_list/ConsentGroupAddEdit'
 import ConsentGroupRow from 'src/components/consent_group_list/ConsentGroupRow'
 import AddObjectButton from 'src/components/AddObjectButton'
 
 interface ConsentGroupListProps {
   readonly consentGroups: ConsentGroup2[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof ConsentGroup2)[]
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -18,7 +18,7 @@ interface ConsentGroupListProps {
 export default function ConsentGroupList(props: ConsentGroupListProps): React.JSX.Element {
   const {
     consentGroups,
-    columnsToShow = ['consentGroupName', 'accessManagement', 'dataLocation', 'numberOfParticipants'],
+    columnsToShow = ['consentGroupName', 'accessManagement', 'dataLocation', 'numberOfParticipants', 'url', 'generalResearchUse'],
     onConsentGroupChange,
     disabled = false,
     validation,
@@ -28,6 +28,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState(consentGroups.map(() => false))
+  const [viewState, setViewState] = useState(consentGroups.map(() => false))
 
   const toggleEditState = (index: number) => {
     const editStateCopy = [...editState]
@@ -35,7 +36,13 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
     setEditState(editStateCopy)
   }
 
-  const handleDeleteConsnetGroup = (index: number) => {
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
+  }
+
+  const handleDeleteConsentGroup = (index: number) => {
     const updated = consentGroups.filter((_, i) => i !== index)
     onConsentGroupChange(updated)
   }
@@ -69,15 +76,22 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
             key={cg.datasetId || index}
             id={index}
             editMode={editState[index]}
+            viewMode={viewState[index]}
             consentGroup={cg}
             consentGroups={consentGroups}
             columnsToShow={columnsToShow}
             editAction={() => toggleEditState(index)}
-            deleteAction={() => handleDeleteConsnetGroup(index)}
+            deleteAction={() => handleDeleteConsentGroup(index)}
             closeAction={() => {
-              toggleEditState(index)
+              if (editState[index]) {
+                toggleEditState(index)
+              }
+              else if (viewState[index]) {
+                toggleViewState(index)
+              }
               setShowAddEdit(false)
             }}
+            viewAction={() => toggleViewState(index)}
             onConsentGroupChange={onConsentGroupChange}
             disabled={disabled}
             isEditingExistingStudy={isEditingExistingStudy}

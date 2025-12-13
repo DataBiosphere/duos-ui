@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { Workspace } from 'src/types/model'
-import { WorkspaceAddEdit } from 'src/components/workspaces_list/WorkspaceAddEdit'
+import WorkspaceAddEdit from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import AddObjectButton from 'src/components/AddObjectButton'
 
 interface WorkspaceListProps {
   readonly workspaces: Workspace[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof Workspace)[]
   readonly onWorkspaceChange: (items: Workspace[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -17,7 +17,7 @@ interface WorkspaceListProps {
 export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Element {
   const {
     workspaces,
-    columnsToShow = ['name', 'platform', 'url', 'description', 'tools', 'access', 'tags'],
+    columnsToShow = ['name', 'platform', 'url', 'description', 'tools', 'access'],
     onWorkspaceChange,
     disabled = false,
     validation,
@@ -26,11 +26,18 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState(workspaces.map(() => false))
+  const [viewState, setViewState] = useState(workspaces.map(() => false))
 
   const toggleEditState = (index: number) => {
     const editStateCopy = [...editState]
     editStateCopy[index] = !editStateCopy[index]
     setEditState(editStateCopy)
+  }
+
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
   }
 
   const handleDeleteWorkspace = (index: number) => {
@@ -65,15 +72,22 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
           key={w.workspaceId || index}
           id={index}
           editMode={editState[index]}
+          viewMode={viewState[index]}
           workspace={w}
           workspaces={workspaces}
           columnsToShow={columnsToShow}
           editAction={() => toggleEditState(index)}
           deleteAction={() => handleDeleteWorkspace(index)}
           closeAction={() => {
-            toggleEditState(index)
+            if (editState[index]) {
+              toggleEditState(index)
+            }
+            else if (viewState[index]) {
+              toggleViewState(index)
+            }
             setShowAddEdit(false)
           }}
+          viewAction={() => toggleViewState(index)}
           onWorkspaceChange={onWorkspaceChange}
           disabled={disabled}
         />

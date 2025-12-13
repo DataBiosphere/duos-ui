@@ -1,7 +1,30 @@
 import React from 'react'
-import { ConsentGroupAddEdit } from 'src/components/consent_group_list/ConsentGroupAddEdit'
+import ConsentGroupAddEdit from 'src/components/consent_group_list/ConsentGroupAddEdit'
 import { mount } from 'cypress/react'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
+import ConsentGroupSummary from 'src/components/consent_group_list/ConsentGroupSummary'
+
+const sampleConsentGroup: ConsentGroup2 = {
+  consentGroupId: 'cg1',
+  consentGroupName: 'Test Consent Group',
+  name: 'Test Consent Group',
+  numberOfParticipants: 10,
+  generalResearchUse: true,
+  irb: false,
+}
+
+const ConsentGroupListHarness: React.FC<{ initial: ConsentGroup2[] }> = ({ initial }) => {
+  const [items, setItems] = React.useState<ConsentGroup2[]>(initial)
+  return (
+    <ConsentGroupList
+      consentGroups={items}
+      columnsToShow={['consentGroupName']}
+      onConsentGroupChange={setItems}
+      disabled={false}
+    />
+  )
+}
 
 describe('Consent Group', function () {
   it('Edits without saving', function () {
@@ -52,5 +75,36 @@ describe('Consent Group', function () {
     cy.get('#diseaseSpecificUseText').should('not.exist')
     cy.get('#primaryConsent_diseaseSpecificUse').check()
     cy.get('#diseaseSpecificUseText').should('exist')
+  })
+
+  it('opens consent group in view mode when view button is clicked', () => {
+    mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('#consentGroupName').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
+    cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+  })
+
+  it('closes view mode when close button is clicked', () => {
+    mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('.collaborator-form-cancel-button').click()
+    cy.get('#consentGroupName').should('not.exist')
+    cy.get('.glyphicon-eye-open').should('exist')
+  })
+
+  it('triggers viewAction when view button is clicked', () => {
+    mount(
+      <ConsentGroupSummary
+        consentGroup={sampleConsentGroup}
+        columnsToShow={['consentGroupName']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
   })
 })

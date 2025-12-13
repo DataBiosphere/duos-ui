@@ -12,7 +12,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface ClinicalTrialListProps {
   readonly clinicalTrials: ClinicalTrial[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
   readonly onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -22,7 +22,7 @@ interface ClinicalTrialListProps {
 export default function ClinicalTrialList(props: ClinicalTrialListProps): React.JSX.Element {
   const {
     clinicalTrials,
-    columnsToShow = [],
+    columnsToShow = ['title', 'status', 'registry', 'phase', 'startDate', 'endDate', 'url'],
     onClinicalTrialChange,
     disabled = false,
     validation,
@@ -38,11 +38,18 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState(normalized.map(() => false))
+  const [viewState, setViewState] = useState(normalized.map(() => false))
 
   const toggleEditState = (index: number) => {
     const copy = [...editState]
     copy[index] = !copy[index]
     setEditState(copy)
+  }
+
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
   }
 
   const handleDelete = (index: number) => {
@@ -77,15 +84,22 @@ export default function ClinicalTrialList(props: ClinicalTrialListProps): React.
           key={clinicalTrial.clinicalTrialId || index}
           id={index}
           editMode={editState[index]}
+          viewMode={viewState[index]}
           clinicalTrial={clinicalTrial}
           clinicalTrials={normalized}
           columnsToShow={columnsToShow}
           editAction={() => toggleEditState(index)}
           deleteAction={() => { handleDelete(index) }}
           closeAction={() => {
-            toggleEditState(index)
+            if (editState[index]) {
+              toggleEditState(index)
+            }
+            else if (viewState[index]) {
+              toggleViewState(index)
+            }
             setShowAddEdit(false)
           }}
+          viewAction={() => toggleViewState(index)}
           onClinicalTrialChange={onClinicalTrialChange}
           disabled={disabled}
         />

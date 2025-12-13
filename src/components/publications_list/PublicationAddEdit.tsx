@@ -15,6 +15,7 @@ interface PublicationAddEditProps {
   readonly publications: Publication[]
   readonly closeAction: () => void
   readonly onPublicationChange: (publications: Publication[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -47,17 +48,130 @@ const defaultPublication: Publication = {
   tags: [],
 }
 
+const getHeaderTitle = (readOnly: boolean, publication?: Publication) => {
+  if (readOnly) return publication?.title
+  if (!publication) return 'New Publication'
+  return `Edit ${publication.title}`
+}
+
+function filterValidationByTouched(
+  all: Validation,
+  touched: Record<string, boolean>,
+): Validation {
+  const filtered: Validation = {}
+  for (const [k, v] of Object.entries(all)) {
+    if (touched[k]) filtered[k as keyof Validation] = v
+  }
+  return filtered
+}
+
+function AuthorsFieldset({
+  authors,
+  submitted,
+  touched,
+  validation,
+  updateAuthorField,
+  removeAuthor,
+  addAuthor,
+  disableAddAuthor,
+  readOnly,
+}: {
+  readonly authors: readonly Author[]
+  readonly submitted: boolean
+  readonly touched: Readonly<Record<string, boolean>>
+  readonly validation: Validation
+  readonly updateAuthorField: (index: number, field: keyof Author, value: string) => void
+  readonly removeAuthor: (index: number) => void
+  readonly addAuthor: () => void
+  readonly disableAddAuthor: boolean
+  readonly readOnly: boolean
+}) {
+  return (
+    <div style={{ marginBottom: '1rem', width: '100%' }}>
+      <fieldset style={{ fontWeight: 600, marginTop: '1rem' }} aria-label="Authors (Name + ORCID)">
+        <legend style={{ fontSize: 16 }}>Authors (Name + ORCID)*</legend>
+        {(submitted || touched.authors) && validation.authors && (
+          <div className="error-message">
+            {(validation.authors.failed || []).includes('required')
+              ? 'At least one author with name and valid ORCID is required.'
+              : (validation.authors.failed || []).map(f => (
+                  <div key={f}>{f}</div>
+                ))}
+          </div>
+        )}
+        {authors.map((a: Author, idx) => (
+          <div
+            key={idx}
+            className="row"
+            style={{
+              display: 'flex',
+              gap: '0.75rem',
+              marginTop: idx === 0 ? '0.5rem' : '0.75rem',
+              alignItems: 'flex-start',
+            }}
+          >
+            <input
+              type="text"
+              className="form-control"
+              style={{ flex: 1 }}
+              value={a.name}
+              placeholder="Author Name"
+              onChange={e => updateAuthorField(idx, 'name', e.target.value)}
+              disabled={readOnly}
+            />
+            <input
+              type="text"
+              className="form-control"
+              style={{ flex: 1 }}
+              value={a.orcId}
+              placeholder="ORCID (0000-0000-0000-0000)"
+              onChange={e => updateAuthorField(idx, 'orcId', e.target.value)}
+              disabled={readOnly}
+            />
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => removeAuthor(idx)}
+              disabled={authors.length === 1 || readOnly}
+              title={
+                authors.length === 1
+                  ? 'At least one author required'
+                  : 'Remove author'
+              }
+            >
+              <span className="glyphicon glyphicon-minus" aria-hidden="true" />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="btn btn-primary"
+          style={{ marginTop: '0.75rem', width: '100%' }}
+          onClick={addAuthor}
+          disabled={disableAddAuthor || readOnly}
+          title={
+            disableAddAuthor
+              ? 'Fill all existing author name and valid ORCID first'
+              : 'Add another author'
+          }
+        >
+          <span className="glyphicon glyphicon-plus" aria-hidden="true" /> Add Author
+        </button>
+      </fieldset>
+    </div>
+  )
+}
+
 export default function PublicationAddEdit(props: PublicationAddEditProps): React.JSX.Element {
-  const { id, publication, publications, closeAction, onPublicationChange } = props
+  const { id, publication, publications, closeAction, onPublicationChange, readOnly = false } = props
   const initialPublication = publication || defaultPublication
 
-  // Ensure at least one author row is present and bound to state
   const [newPublication, setNewPublication] = useState<Publication>({
     ...initialPublication,
     authors:
-            Array.isArray(initialPublication.authors) && initialPublication.authors.length > 0
-              ? initialPublication.authors
-              : [{ name: '', orcId: '' }],
+        Array.isArray(initialPublication.authors) && initialPublication.authors.length > 0
+          ? initialPublication.authors
+          : [{ name: '', orcId: '' }],
   })
 
   const [validation, setValidation] = useState<Validation>({})
@@ -71,11 +185,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
       setValidation(all)
       return
     }
-    const filtered: Validation = {}
-    for (const [k, v] of Object.entries(all)) {
-      if (touched[k]) filtered[k as keyof Validation] = v
-    }
-    setValidation(filtered)
+    setValidation(filterValidationByTouched(all, touched))
   }
 
   const updatePublication = (updated: Publication) => {
@@ -102,10 +212,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     }
   }
 
-  // Enable Add only when all current authors have a name
-  const disableAddAuthor = newPublication.authors.some(
-    a => a.name.trim() === '',
-  )
+  const disableAddAuthor = newPublication.authors.some(a => a.name.trim() === '')
 
   const addAuthor = () => {
     if (disableAddAuthor) return
@@ -146,36 +253,13 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
     closeAction()
   }
 
-  const renderAuthorsError = () => {
-    if (!submitted && !touched.authors) return null
-    if (!validation.authors) return null
-    const failed = validation.authors.failed || []
-    if (failed.includes('required')) {
-      return (
-        <div className="error-message">
-          At least one author with name and valid ORCID is required.
-        </div>
-      )
-    }
-    return (
-      <div className="error-message">
-        {failed.map(f => (
-          <div key={f}>{f}</div>
-        ))}
-      </div>
-    )
-  }
+  const headerTitle = getHeaderTitle(readOnly, publication)
 
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>
-            {publication === undefined
-              ? 'New Publication Information'
-              : `Edit ${publication.title} Information`}
-          </h2>
-
+          <h2>{headerTitle}</h2>
           <FormField
             id="title"
             title="Publication Title"
@@ -184,6 +268,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.title) ? validation.title : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -194,70 +279,20 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={(submitted || touched.publishedDate) ? validation.publishedDate : undefined}
+            disabled={readOnly}
           />
 
-          <div style={{ marginBottom: '1rem', width: '100%' }}>
-            <fieldset style={{ fontWeight: 600, marginTop: '1rem' }} aria-label="Authors (Name + ORCID)">
-              <legend style={{ fontSize: 16 }}>Authors (Name + ORCID)*</legend>
-              {renderAuthorsError()}
-              {newPublication.authors.map((a: Author, idx) => (
-                <div
-                  key={idx}
-                  className="row"
-                  style={{
-                    display: 'flex',
-                    gap: '0.75rem',
-                    marginTop: idx === 0 ? '0.5rem' : '0.75rem',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <input
-                    type="text"
-                    className="form-control"
-                    style={{ flex: 1 }}
-                    value={a.name}
-                    placeholder="Author Name"
-                    onChange={e => updateAuthorField(idx, 'name', e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    className="form-control"
-                    style={{ flex: 1 }}
-                    value={a.orcId}
-                    placeholder="ORCID (0000-0000-0000-0000)"
-                    onChange={e => updateAuthorField(idx, 'orcId', e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    onClick={() => removeAuthor(idx)}
-                    disabled={newPublication.authors.length === 1}
-                    title={
-                      newPublication.authors.length === 1
-                        ? 'At least one author required'
-                        : 'Remove author'
-                    }
-                  >
-                    <span className="glyphicon glyphicon-minus" aria-hidden="true" />
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                className="btn btn-primary"
-                style={{ marginTop: '0.75rem', width: '100%' }}
-                onClick={addAuthor}
-                disabled={disableAddAuthor}
-                title={
-                  disableAddAuthor
-                    ? 'Fill all existing author name and valid ORCID first'
-                    : 'Add another author'
-                }
-              >
-                <span className="glyphicon glyphicon-plus" aria-hidden="true" /> Add Author
-              </button>
-            </fieldset>
-          </div>
+          <AuthorsFieldset
+            authors={newPublication.authors}
+            submitted={submitted}
+            touched={touched}
+            validation={validation}
+            updateAuthorField={updateAuthorField}
+            removeAuthor={removeAuthor}
+            addAuthor={addAuthor}
+            disableAddAuthor={disableAddAuthor}
+            readOnly={readOnly}
+          />
 
           <FormField
             id="pubmedId"
@@ -267,6 +302,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.pubmedId) ? validation.pubmedId : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -277,6 +313,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.bibliographicCitation) ? validation.bibliographicCitation : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -287,6 +324,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -297,6 +335,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.journal) ? validation.journal : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -307,6 +346,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.doi) ? validation.doi : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -317,6 +357,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -327,6 +368,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.access) ? validation.access : undefined}
+            disabled={readOnly}
           />
 
           <FormField
@@ -335,19 +377,25 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             defaultValue={tagsInput}
             placeholder="tag1, tag2"
             onChange={onChange}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button type="button" className="btn btn-primary" onClick={save}>
-            <span className="glyphicon glyphicon-floppy-disk" aria-hidden="true" /> Save
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {publication === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
+            className="collaborator-form-cancel-button f-left btn"
             type="button"
-            className="btn btn-default"
-            style={{ marginLeft: '1rem' }}
             onClick={closeAction}
           >
-            <span className="glyphicon glyphicon-remove" aria-hidden="true" /> Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>

@@ -1,52 +1,61 @@
 import React from 'react'
 import { IntellectualProperty } from 'src/types/model'
-import { IntellectualPropertySummary } from 'src/components/intellectual_property_list/IntellectualPropertySummary'
-import { IntellectualPropertyAddEdit } from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
+import IntellectualPropertyAddEdit from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
+import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
 
 interface IntellectualPropertyRowProps {
   readonly id: number
   readonly editMode: boolean
-  readonly ip: IntellectualProperty
+  readonly viewMode?: boolean
+  readonly intellectualProperty: IntellectualProperty
   readonly intellectualProperties: IntellectualProperty[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof IntellectualProperty)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void
-  readonly onIpChange: (items: IntellectualProperty[]) => void
+  readonly viewAction?: () => void
+  readonly onIntellectualPropertyChange: (items: IntellectualProperty[]) => void
   readonly disabled: boolean
 }
 
-export const IntellectualPropertyRow: React.FC<IntellectualPropertyRowProps> = ({
-  id,
-  editMode,
-  ip,
-  intellectualProperties,
-  columnsToShow,
-  editAction,
-  deleteAction,
-  closeAction,
-  onIpChange,
-  disabled,
-}) => {
-  return editMode
-    ? (
+export default function IntellectualPropertyRow(props: IntellectualPropertyRowProps): React.JSX.Element {
+  const {
+    id,
+    editMode,
+    viewMode,
+    intellectualProperty,
+    intellectualProperties,
+    columnsToShow,
+    editAction,
+    deleteAction,
+    closeAction,
+    viewAction,
+    onIntellectualPropertyChange,
+    disabled,
+  } = props
+
+  return (
+    <div>
+      {(editMode || viewMode) && (
         <IntellectualPropertyAddEdit
           id={id}
-          ip={ip}
+          intellectualProperty={intellectualProperty}
           intellectualProperties={intellectualProperties}
           closeAction={closeAction}
-          onIpChange={onIpChange}
+          onIntellectualPropertyChange={onIntellectualPropertyChange}
+          readOnly={viewMode}
         />
-      )
-    : (
+      )}
+      {!editMode && !viewMode && (
         <IntellectualPropertySummary
-          ip={ip}
+          intellectualProperty={intellectualProperty}
           columnsToShow={columnsToShow}
           editAction={editAction}
           deleteAction={deleteAction}
+          viewAction={viewAction}
           disabled={disabled}
         />
-      )
+      )}
+    </div>
+  )
 }
-
-export default IntellectualPropertyRow

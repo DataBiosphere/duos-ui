@@ -7,7 +7,7 @@ import AddObjectButton from 'src/components/AddObjectButton'
 
 interface PublicationListProps {
   readonly publications: Publication[]
-  readonly columnsToShow?: string[]
+  readonly columnsToShow?: (keyof Publication)[]
   readonly onPublicationChange: (publications: Publication[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -17,7 +17,7 @@ interface PublicationListProps {
 export default function PublicationList(props: PublicationListProps): React.JSX.Element {
   const {
     publications,
-    columnsToShow = [],
+    columnsToShow = ['title', 'publishedDate', 'journal', 'url', 'doi', 'access'],
     onPublicationChange,
     disabled = false,
     validation,
@@ -26,11 +26,18 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
 
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState(publications.map(() => false))
+  const [viewState, setViewState] = useState(publications.map(() => false))
 
   const toggleEditState = (index: number) => {
     const editStateCopy = [...editState]
     editStateCopy[index] = !editStateCopy[index]
     setEditState(editStateCopy)
+  }
+
+  const toggleViewState = (index: number) => {
+    const viewStateCopy = [...viewState]
+    viewStateCopy[index] = !viewStateCopy[index]
+    setViewState(viewStateCopy)
   }
 
   const handleDeletePublication = (index: number) => {
@@ -65,15 +72,22 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
           key={index}
           id={index}
           editMode={editState[index]}
+          viewMode={viewState[index]}
           publication={publication}
           publications={publications}
           columnsToShow={columnsToShow}
           editAction={() => toggleEditState(index)}
           deleteAction={() => { handleDeletePublication(index) }}
           closeAction={() => {
-            toggleEditState(index)
+            if (editState[index]) {
+              toggleEditState(index)
+            }
+            else if (viewState[index]) {
+              toggleViewState(index)
+            }
             setShowAddEdit(false)
           }}
+          viewAction={() => toggleViewState(index)}
           onPublicationChange={onPublicationChange}
           disabled={disabled}
         />

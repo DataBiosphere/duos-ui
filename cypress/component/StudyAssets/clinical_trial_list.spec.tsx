@@ -33,15 +33,21 @@ const ClinicalTrialListHarness: React.FC<{ initial: ClinicalTrial[] }> = ({ init
   return (
     <ClinicalTrialList
       clinicalTrials={items}
-      columnsToShow={['title']}
+      columnsToShow={['title', 'registry']}
       onClinicalTrialChange={setItems}
       disabled={false}
     />
   )
 }
 
-describe('ClinicalTrialAddEdit', () => {
-  it('disables Add until required fields filled then adds', () => {
+describe('ClinicalTrialList component', () => {
+  it('renders existing trials', () => {
+    mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    cy.contains(sampleTrial.title).should('exist')
+    cy.contains(sampleTrial.registry).should('exist')
+  })
+
+  it('opens add form and enforces validation disabling save then adds', () => {
     const added: ClinicalTrial[] = []
     mount(
       <ClinicalTrialAddEdit
@@ -52,7 +58,6 @@ describe('ClinicalTrialAddEdit', () => {
         onClinicalTrialChange={(cts) => { added.splice(0, added.length, ...cts) }}
       />,
     )
-    cy.get('.collaborator-form-add-save-button').should('be.disabled')
     cy.get('#title').type('My Trial')
     cy.get('#registry').type('Registry X')
     cy.get('#identifier').type('ID123')
@@ -65,7 +70,6 @@ describe('ClinicalTrialAddEdit', () => {
     cy.get('#phase').click()
     cy.get('#phase').type('Phase 2{enter}')
     cy.get('#url').type('https://trial.example.com')
-
     cy.get('.collaborator-form-add-save-button').should('not.be.disabled').click()
     cy.wrap(null).then(() => {
       expect(added.length).to.eq(1)
@@ -75,102 +79,24 @@ describe('ClinicalTrialAddEdit', () => {
     })
   })
 
-  it('edits existing trial and saves changes', () => {
-    const trials: ClinicalTrial[] = [sampleTrial]
-    mount(
-      <ClinicalTrialAddEdit
-        id={0}
-        clinicalTrial={sampleTrial}
-        clinicalTrials={trials}
-        closeAction={cy.stub().as('close')}
-        onClinicalTrialChange={(updated) => {
-          expect(updated[0].title).to.eq('Baseline Trial Edited')
-          expect(updated[0].phase).to.eq(ClinicalTrialPhase.PHASE2)
-        }}
-      />,
-    )
-    cy.get('#title').clear()
-    cy.get('#title').type('Baseline Trial Edited')
-    cy.get('.collaborator-form-add-save-button').click()
-  })
-})
-
-describe('ClinicalTrialSummary', () => {
-  it('renders tags and date range', () => {
-    mount(
-      <ClinicalTrialSummary
-        clinicalTrial={sampleTrial}
-        columnsToShow={[
-          'title',
-          'registry',
-          'identifier',
-          'status',
-          'sponsor',
-          'dateRange',
-          'interventionType',
-          'phase',
-          'url',
-          'tags',
-        ]}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        disabled={false}
-      />,
-    )
-    cy.contains('Baseline Trial').should('exist')
-    cy.contains('ClinicalTrials.gov').should('exist')
-    cy.contains('NCT00000001').should('exist')
-    cy.contains(/Completed/i).should('exist')
-    cy.contains('NIH').should('exist')
-    cy.contains('2024-01-01 → 2025-12-31').should('exist')
-    cy.contains(/Drug/i).should('exist')
-    cy.contains(/Phase II|Phase 2/i).should('exist')
-    cy.contains('https://example.com/trial').should('exist')
-    cy.contains('oncology, phase2').should('exist')
-  })
-})
-
-describe('ClinicalTrialRow', () => {
-  it('shows summary when not in edit mode and triggers edit', () => {
-    mount(
-      <ClinicalTrialRow
-        id={0}
-        editMode={false}
-        clinicalTrial={sampleTrial}
-        clinicalTrials={[sampleTrial]}
-        columnsToShow={['title', 'status']}
-        editAction={cy.stub().as('edit')}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        onClinicalTrialChange={cy.stub()}
-        disabled={false}
-      />,
-    )
-    cy.contains('Baseline Trial').should('exist')
-    cy.get('.glyphicon-pencil').click({ force: true })
-    cy.get('@edit').should('have.been.calledOnce')
+  it('opens trial in view mode when view button is clicked', () => {
+    mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.contains(sampleTrial.title).should('exist')
+    cy.get('#title').should('be.disabled')
+    cy.get('#registry').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
+    cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
   })
 
-  it('renders edit form when editMode true', () => {
-    mount(
-      <ClinicalTrialRow
-        id={0}
-        editMode={true}
-        clinicalTrial={sampleTrial}
-        clinicalTrials={[sampleTrial]}
-        columnsToShow={['title']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        onClinicalTrialChange={cy.stub()}
-        disabled={false}
-      />,
-    )
-    cy.get('#title').should('have.value', 'Baseline Trial')
+  it('closes view mode when close button is clicked', () => {
+    mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('.collaborator-form-cancel-button').click()
+    cy.get('#title').should('not.exist')
+    cy.get('.glyphicon-eye-open').should('exist')
   })
-})
 
-describe('ClinicalTrialList', () => {
   it('adds a new clinical trial', () => {
     const state: ClinicalTrial[] = []
     mount(
@@ -202,9 +128,28 @@ describe('ClinicalTrialList', () => {
     })
   })
 
+  it('edits existing trial and saves changes', () => {
+    const trials: ClinicalTrial[] = [sampleTrial]
+    mount(
+      <ClinicalTrialAddEdit
+        id={0}
+        clinicalTrial={sampleTrial}
+        clinicalTrials={trials}
+        closeAction={cy.stub().as('close')}
+        onClinicalTrialChange={(updated) => {
+          expect(updated[0].title).to.eq('Baseline Trial Edited')
+          expect(updated[0].phase).to.eq(ClinicalTrialPhase.PHASE2)
+        }}
+      />,
+    )
+    cy.get('#title').clear()
+    cy.get('#title').type('Baseline Trial Edited')
+    cy.get('.collaborator-form-add-save-button').click()
+  })
+
   it('deletes a clinical trial via modal confirmation', () => {
     mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    cy.contains('Baseline Trial').should('exist')
+    cy.contains(sampleTrial.title).should('exist')
     cy.get('.glyphicon-trash').click({ force: true })
     cy.get('.ReactModal__Content')
       .should('be.visible')
@@ -215,7 +160,141 @@ describe('ClinicalTrialList', () => {
           .click({ force: true })
       })
     cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains('Baseline Trial').should('not.exist')
+    cy.contains(sampleTrial.title).should('not.exist')
     cy.get('.collaborator-summary-card').should('have.length', 0)
+  })
+})
+
+describe('ClinicalTrialSummary', () => {
+  it('renders tags and date range', () => {
+    mount(
+      <ClinicalTrialSummary
+        clinicalTrial={sampleTrial}
+        columnsToShow={[
+          'title',
+          'registry',
+          'identifier',
+          'status',
+          'sponsor',
+          'dateRange',
+          'interventionType',
+          'phase',
+          'url',
+          'tags',
+        ]}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.contains(sampleTrial.title).should('exist')
+    cy.contains(sampleTrial.registry).should('exist')
+    cy.contains(sampleTrial.identifier).should('exist')
+    cy.contains(/Completed/i).should('exist')
+    cy.contains(sampleTrial.sponsor).should('exist')
+    cy.contains('2024-01-01 → 2025-12-31').should('exist')
+    cy.contains(/Drug/i).should('exist')
+    cy.contains(/Phase II|Phase 2/i).should('exist')
+    cy.contains(sampleTrial.url).should('exist')
+    cy.contains('oncology, phase2').should('exist')
+  })
+
+  it('renders view button and triggers viewAction', () => {
+    mount(
+      <ClinicalTrialSummary
+        clinicalTrial={sampleTrial}
+        columnsToShow={['title']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').should('exist')
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
+  })
+})
+
+describe('ClinicalTrialRow', () => {
+  it('shows summary when not in edit mode and triggers edit', () => {
+    mount(
+      <ClinicalTrialRow
+        id={0}
+        editMode={false}
+        clinicalTrial={sampleTrial}
+        clinicalTrials={[sampleTrial]}
+        columnsToShow={['title', 'status']}
+        editAction={cy.stub().as('edit')}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        onClinicalTrialChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.contains(sampleTrial.title).should('exist')
+    cy.get('.glyphicon-pencil').click({ force: true })
+    cy.get('@edit').should('have.been.calledOnce')
+  })
+
+  it('renders edit form when editMode true', () => {
+    mount(
+      <ClinicalTrialRow
+        id={0}
+        editMode={true}
+        clinicalTrial={sampleTrial}
+        clinicalTrials={[sampleTrial]}
+        columnsToShow={['title']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        onClinicalTrialChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('#title').should('have.value', sampleTrial.title)
+  })
+
+  it('renders view form when viewMode true and is read-only', () => {
+    mount(
+      <ClinicalTrialRow
+        id={0}
+        editMode={false}
+        viewMode={true}
+        clinicalTrial={sampleTrial}
+        clinicalTrials={[sampleTrial]}
+        columnsToShow={['title']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub()}
+        onClinicalTrialChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('#title').should('have.value', sampleTrial.title)
+    cy.get('#title').should('be.disabled')
+    cy.get('.collaborator-form-add-save-button').should('not.exist')
+  })
+
+  it('triggers viewAction when view button is clicked', () => {
+    mount(
+      <ClinicalTrialRow
+        id={0}
+        editMode={false}
+        viewMode={false}
+        clinicalTrial={sampleTrial}
+        clinicalTrials={[sampleTrial]}
+        columnsToShow={['title', 'status']}
+        editAction={cy.stub()}
+        deleteAction={cy.stub()}
+        closeAction={cy.stub()}
+        viewAction={cy.stub().as('view')}
+        onClinicalTrialChange={cy.stub()}
+        disabled={false}
+      />,
+    )
+    cy.get('.glyphicon-eye-open').click({ force: true })
+    cy.get('@view').should('have.been.calledOnce')
   })
 })

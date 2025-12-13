@@ -4,20 +4,17 @@ import { DeletePresentationOrPublication } from 'src/components/presentation_pub
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface IntellectualPropertySummaryProps {
-  readonly ip: IntellectualProperty
-  readonly columnsToShow: string[]
+  readonly intellectualProperty: IntellectualProperty
+  readonly columnsToShow?: (keyof IntellectualProperty)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
-  readonly disabled: boolean
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }
 
-export const IntellectualPropertySummary: React.FC<IntellectualPropertySummaryProps> = ({
-  ip,
-  columnsToShow,
-  editAction,
-  deleteAction,
-  disabled,
-}) => {
+export default function IntellectualPropertySummary(props: IntellectualPropertySummaryProps): React.JSX.Element {
+  const { intellectualProperty, columnsToShow, editAction, deleteAction, viewAction, disabled = false } = props
+
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const disabledStyle = {
@@ -48,9 +45,8 @@ export const IntellectualPropertySummary: React.FC<IntellectualPropertySummaryPr
 
   return (
     <div className="collaborator-summary-card">
-      {columnsToShow.map((column, index) => {
-        const rawValue = ip[column as keyof IntellectualProperty]
-        const columnContent = renderColumnContent(column, rawValue as unknown, customRenderers)
+      {columnsToShow?.map((column, index) => {
+        const columnContent = renderColumnContent(column, intellectualProperty[column], customRenderers)
         return columnContent && (
           <div key={'ip_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
             <span>{columnContent}</span>
@@ -58,9 +54,25 @@ export const IntellectualPropertySummary: React.FC<IntellectualPropertySummaryPr
         )
       })}
       <div className="collaborator-summary-edit-delete-buttons">
+        {/* view button */}
         <button
           type="button"
-          style={{ marginLeft: 10, marginRight: 10, ...buttonStyle }}
+          style={{ marginLeft: 10 }}
+          onClick={() => viewAction?.()}
+          aria-label="View intellectual property"
+        >
+          <span
+            className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon"
+            aria-hidden="true"
+            data-tip="View intellectual property"
+            data-for="tip_view"
+          />
+          <span style={{ marginLeft: '1rem' }} />
+        </button>
+        {/* edit button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
           onClick={() => !disabled && editAction()}
           disabled={disabled}
           aria-label="Edit intellectual property"
@@ -68,29 +80,30 @@ export const IntellectualPropertySummary: React.FC<IntellectualPropertySummaryPr
           <span
             className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon"
             aria-hidden="true"
-            data-tip="Edit intellectual property"
-            data-for="tip_edit_ip"
+            data-tip="Edit dataset"
+            data-for="tip_edit"
+          />
+          <span style={{ marginLeft: '1rem' }} />
+        </button>
+        {/* delete button */}
+        <button
+          type="button"
+          style={{ marginLeft: 10, ...buttonStyle }}
+          onClick={() => !disabled && setShowDeleteModal(true)}
+          disabled={disabled}
+          aria-label="Delete intellectual property"
+        >
+          <span
+            className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon"
+            aria-hidden="true"
+            data-tip="Delete dataset"
+            data-for="tip_delete"
           />
           <span style={{ marginLeft: '1rem' }} />
         </button>
       </div>
-      <button
-        type="button"
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && setShowDeleteModal(true)}
-        disabled={disabled}
-        aria-label="Delete intellectual property"
-      >
-        <span
-          className="glyphicon glyphicon-trash presentation-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete intellectual property"
-          data-for="tip_delete_ip"
-        />
-        <span style={{ marginLeft: '1rem' }} />
-      </button>
       <DeletePresentationOrPublication
-        name={ip.title || ip.type}
+        name={intellectualProperty.title || intellectualProperty.type}
         objectName="intellectual property"
         showDelete={showDeleteModal}
         confirmAction={() => {
@@ -102,5 +115,3 @@ export const IntellectualPropertySummary: React.FC<IntellectualPropertySummaryPr
     </div>
   )
 }
-
-export default IntellectualPropertySummary

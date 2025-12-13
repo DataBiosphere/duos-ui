@@ -9,6 +9,7 @@ interface FundingSourceAddEditProps {
   readonly fundingResources: FundingResource[]
   readonly closeAction: () => void
   readonly onFundingChange: (items: FundingResource[]) => void
+  readonly readOnly?: boolean
 }
 
 interface Validation {
@@ -52,13 +53,15 @@ interface FormFieldChange {
   value: FundingFieldValue
 }
 
-export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
-  id,
-  funding,
-  fundingResources,
-  closeAction,
-  onFundingChange,
-}) => {
+const getHeaderTitle = (readOnly: boolean, funding?: FundingResource) => {
+  if (readOnly) return funding?.funderName
+  if (!funding) return 'New Funding Resource'
+  return `Edit ${funding.funderName}`
+}
+
+export default function FundingResourceAddEdit(props: FundingSourceAddEditProps): React.JSX.Element {
+  const { id, funding, fundingResources, closeAction, onFundingChange, readOnly = false } = props
+
   const [current, setCurrent] = useState<FundingResource>(funding || defaultFunding)
   const [validation, setValidation] = useState<Validation>({})
 
@@ -86,11 +89,13 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
     closeAction()
   }
 
+  const headerTitle = getHeaderTitle(readOnly, funding)
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{funding === undefined ? 'New Funding Resource' : `Edit ${funding.funderName || 'Funding Resource'}`}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="funderName"
             title="Funder Name"
@@ -99,6 +104,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.funderName}
+            disabled={readOnly}
           />
           <FormField
             id="funderProgram"
@@ -108,6 +114,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.funderProgram}
+            disabled={readOnly}
           />
           <FormField
             id="grantNumber"
@@ -117,6 +124,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.grantNumber}
+            disabled={readOnly}
           />
           <FormField
             id="projectTitle"
@@ -126,6 +134,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.projectTitle}
+            disabled={readOnly}
           />
           <FormField
             id="startDate"
@@ -135,6 +144,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             validators={[FormValidators.DATE]}
             onChange={onChange}
             validation={validation.startDate}
+            disabled={readOnly}
           />
           <FormField
             id="endDate"
@@ -144,6 +154,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             validators={[FormValidators.DATE]}
             onChange={onChange}
             validation={validation.endDate}
+            disabled={readOnly}
           />
           <FormField
             id="url"
@@ -153,6 +164,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             validators={[FormValidators.URL]}
             onChange={onChange}
             validation={validation.url}
+            disabled={readOnly}
           />
           <FormField
             id="tags"
@@ -167,6 +179,7 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
                   .map(t => t.trim())
                   .filter(Boolean),
               })}
+            disabled={readOnly}
           />
           <FormField
             id="citation"
@@ -174,23 +187,25 @@ export const FundingResourceAddEdit: React.FC<FundingSourceAddEditProps> = ({
             style={{ display: 'none' }}
             title=""
             onChange={() => {}}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={save}
-            disabled={validationFailed(calcErrors(current))}
-          >
-            {funding === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {funding === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>

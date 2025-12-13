@@ -13,6 +13,7 @@ interface ConsentGroupAddEditProps {
   readonly consentGroups: ConsentGroup2[]
   readonly closeAction: () => void
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
+  readonly readOnly?: boolean
   readonly isEditingExistingStudy?: boolean
 }
 
@@ -48,14 +49,15 @@ interface FormFieldChange {
   value: ConsentGroupFieldValue
 }
 
-export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
-  id,
-  consentGroup,
-  consentGroups,
-  closeAction,
-  onConsentGroupChange,
-  isEditingExistingStudy,
-}) => {
+const getHeaderTitle = (readOnly: boolean, consentGroup?: ConsentGroup2) => {
+  if (readOnly) return consentGroup?.consentGroupName
+  if (!consentGroup) return 'New Dataset'
+  return `Edit ${consentGroup.consentGroupName}`
+}
+
+export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): React.JSX.Element {
+  const { id, consentGroup, consentGroups, closeAction, onConsentGroupChange, readOnly = false, isEditingExistingStudy = false } = props
+
   const [current, setCurrent] = useState<ConsentGroup2>(consentGroup || defaultConsentGroup)
   const [validation, setValidation] = useState<Validation>({})
 
@@ -197,11 +199,13 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
     closeAction()
   }
 
+  const headerTitle = getHeaderTitle(readOnly, consentGroup)
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
         <div className="row">
-          <h2>{consentGroup === undefined ? 'New Dataset' : `Edit ${consentGroup.consentGroupName || ' Dataset'}`}</h2>
+          <h2>{headerTitle}</h2>
           <FormField
             id="consentGroupName"
             title="Dataset Name"
@@ -210,6 +214,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
             defaultValue={current?.consentGroupName}
             onChange={onChange}
             validation={validation.consentGroupName}
+            disabled={readOnly}
           />
 
           {/* controlled, open and external access */}
@@ -225,7 +230,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
-              disabled={disableAccessAdjustment}
+              disabled={readOnly || disableAccessAdjustment}
             />
 
             <FormField
@@ -237,7 +242,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
-              disabled={disableAccessAdjustment}
+              disabled={readOnly || disableAccessAdjustment}
             />
 
             <FormField
@@ -249,7 +254,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
               defaultValue={current?.accessManagement}
               onChange={onAccessTypeChange}
               validation={validation.accessManagement}
-              disabled={disableAccessAdjustment}
+              disabled={readOnly || disableAccessAdjustment}
             />
           </div>
 
@@ -270,6 +275,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                     onPrimaryChange({ key: value, value: true })
                   }}
                   validation={validation.primaryConsent}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -283,6 +289,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                     onPrimaryChange({ key: value, value: true })
                   }}
                   validation={validation.primaryConsent}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -299,6 +306,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                     })
                   }}
                   validation={validation.primaryConsent}
+                  disabled={readOnly}
                 />
                 {
                   showDiseaseSpecificUseSearchbar && (
@@ -328,6 +336,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                           })
                         }}
                         validation={validation.diseaseSpecificUse}
+                        disabled={readOnly}
                       />
                     </div>
                   )
@@ -342,6 +351,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   onChange={({ value }: { value: string }) => {
                     onPrimaryChange({ key: value, value: true })
                   }}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -354,6 +364,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   onChange={({ value }: { value: string }) => {
                     onPrimaryChange({ key: value, value: value })
                   }}
+                  disabled={readOnly}
                 />
                 {
                   showOtherPrimaryText && (
@@ -368,6 +379,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         onChange({ key: key, value: value })
                       }}
                       validation={validation.otherPrimary}
+                      disabled={readOnly}
                     />
                   )
                 }
@@ -388,6 +400,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   toggleText="No methods development or validation studies (NMDS)"
                   defaultValue={current?.nmds}
                   onChange={onChange}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -397,6 +410,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   toggleText="Genetic studies only (GSO)"
                   defaultValue={current?.gso}
                   onChange={onChange}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -406,6 +420,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   toggleText="Publication Required (PUB)"
                   defaultValue={current?.pub}
                   onChange={onChange}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -415,6 +430,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   toggleText="Collaboration Required (COL)"
                   defaultValue={current?.col}
                   onChange={onChange}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -424,6 +440,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   toggleText="Ethics Approval Required (IRB)"
                   defaultValue={current?.irb}
                   onChange={onChange}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -442,6 +459,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                       setGSText(undefined)
                     }
                   }}
+                  disabled={readOnly}
                 />
                 {
                   showGSText && (
@@ -456,6 +474,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         onChange({ key: key, value: value })
                       }}
                       validation={validation.gs}
+                      disabled={readOnly}
                     />
                   )
                 }
@@ -472,6 +491,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                       setMORText(undefined)
                     }
                   }}
+                  disabled={readOnly}
                 />
                 {
                   showMORText && (
@@ -485,6 +505,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         onChange({ key: key, value: value })
                       }}
                       validation={validation.mor}
+                      disabled={readOnly}
                     />
                   )
                 }
@@ -496,6 +517,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                   toggleText="Non-profit Use Only (NPU)"
                   defaultValue={current?.npu}
                   onChange={onChange}
+                  disabled={readOnly}
                 />
 
                 <FormField
@@ -514,6 +536,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                       setOtherSecondaryText(undefined)
                     }
                   }}
+                  disabled={readOnly}
                 />
                 {
                   showOtherSecondaryText && (
@@ -528,6 +551,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                         onChange({ key: key, value: value })
                       }}
                       validation={validation.otherSecondary}
+                      disabled={readOnly}
                     />
                   )
                 }
@@ -546,7 +570,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                 onChange={({ key, value }: { key: string, value: number, isValid: boolean }) => {
                   onChange({ key: key, value: value })
                 }}
-                disabled={isEditingExistingStudy}
+                disabled={readOnly || isEditingExistingStudy}
               />
             )
           }
@@ -558,6 +582,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
             required={true}
             title="Data Location"
             description="Please provide the location of your data resource for this consent group"
+            disabled={readOnly}
           />
         </div>
         <div className="flex flex-row">
@@ -581,13 +606,14 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
                 onChange({ key: 'url', value: undefined })
               }
             }}
+            disabled={readOnly}
           />
           <FormField
             style={{ width: '50%', paddingLeft: '1.5%' }}
             id="url"
             name="url"
             validators={[FormValidators.URL]}
-            disabled={current?.dataLocation === 'Not Determined'}
+            disabled={current?.dataLocation === 'Not Determined' || readOnly}
             placeholder="Enter a URL for your data location here"
             defaultValue={current?.dataLocation === 'Not Determined' ? undefined : consentGroup?.url}
             onChange={onChange}
@@ -617,6 +643,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
           addRowLabel="Add New File Type"
           minLength={1}
           onChange={onChange}
+          disabled={readOnly}
         />
         <div style={{ width: '50%' }}>
           <FormField
@@ -629,6 +656,7 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
             defaultValue={current?.numberOfParticipants}
             onChange={onChange}
             validation={validation.numberOfParticipants}
+            disabled={readOnly}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
@@ -646,20 +674,21 @@ export const ConsentGroupAddEdit: React.FC<ConsentGroupAddEditProps> = ({
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
-          <button
-            className="collaborator-form-add-save-button f-left btn"
-            type="button"
-            onClick={save}
-            disabled={validationFailed(calcErrors(current))}
-          >
-            {consentGroup === undefined ? 'Add' : 'Save'}
-          </button>
+          {!readOnly && (
+            <button
+              className="collaborator-form-add-save-button f-left btn"
+              type="button"
+              onClick={save}
+            >
+              {consentGroup === undefined ? 'Add' : 'Save'}
+            </button>
+          )}
           <button
             className="collaborator-form-cancel-button f-left btn"
             type="button"
             onClick={closeAction}
           >
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </button>
         </div>
       </div>

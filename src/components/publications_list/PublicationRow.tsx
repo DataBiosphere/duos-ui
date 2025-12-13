@@ -6,36 +6,40 @@ import { Publication } from 'src/types/model'
 interface PublicationRowProps {
   readonly id: number
   readonly editMode: boolean
+  readonly viewMode?: boolean
   publication: Publication
   readonly publications: Publication[]
-  readonly columnsToShow: string[]
+  readonly columnsToShow?: (keyof Publication)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void
+  readonly viewAction?: () => void
   readonly onPublicationChange: (publications: Publication[]) => void
   readonly disabled: boolean
 }
 
 export default function PublicationRow(props: PublicationRowProps): React.JSX.Element {
-  const { id, editMode, publication, publications, columnsToShow, editAction, deleteAction, closeAction, onPublicationChange, disabled } = props
+  const { id, editMode, viewMode, publication, publications, columnsToShow, editAction, deleteAction, closeAction, viewAction, onPublicationChange, disabled } = props
 
   return (
     <div>
-      {editMode && (
+      {(editMode || viewMode) && (
         <PublicationAddEdit
           id={id}
           publication={publication}
           publications={publications}
           closeAction={closeAction}
           onPublicationChange={onPublicationChange}
+          readOnly={viewMode}
         />
       )}
-      {!editMode && (
+      {!editMode && !viewMode && (
         <PublicationSummary
           publication={publication}
           columnsToShow={columnsToShow}
           editAction={editAction}
           deleteAction={deleteAction}
+          viewAction={viewAction}
           disabled={disabled}
         />
       )}
