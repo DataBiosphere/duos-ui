@@ -98,21 +98,6 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
           <span style={{ marginLeft: '1rem' }} />
         </button>
       </div>
-      <button
-        type="button"
-        style={{ marginLeft: 10, ...buttonStyle }}
-        onClick={() => !disabled && !isEditingExistingStudy && setShowDeleteModal(true)}
-        disabled={disabled || isEditingExistingStudy}
-        aria-label="Delete dataset"
-      >
-        <span
-          className="glyphicon glyphicon-trash presentation-delete-icon"
-          aria-hidden="true"
-          data-tip="Delete dataset"
-          data-for="tip_delete_conset_group"
-        />
-        <span style={{ marginLeft: '1rem' }} />
-      </button>
       <DeletePresentationOrPublication
         name={consentGroup.consentGroupName}
         objectName="consentGroup"
