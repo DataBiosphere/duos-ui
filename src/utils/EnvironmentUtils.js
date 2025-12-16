@@ -9,9 +9,10 @@ import { includes } from 'lodash/fp'
  *      * alpha
  *      * dev
  *      * local
- * @type {{NON_STAGING: string[], NON_PROD: string[]}}
+ * @type {{PROD_STAGING: string[], NON_STAGING: string[], NON_PROD: string[]}}
  */
 export const envGroups = {
+  PROD_STAGING: ['prod', 'staging'],
   NON_PROD: ['local', 'dev', 'staging'],
   NON_STAGING: ['local', 'dev'],
   DEV: ['local', 'dev'],

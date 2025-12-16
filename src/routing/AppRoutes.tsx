@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import Home from 'src/pages/Home'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import Authenticated from 'src/routing/Authenticated'
-import { envGroups } from 'src/utils/EnvironmentUtils'
+import { checkEnv, envGroups } from 'src/utils/EnvironmentUtils'
 import HealthCheck from 'src/pages/HealthCheck'
 import Status from 'src/pages/Status'
 import BackgroundSignIn from 'src/pages/BackgroundSignIn'
@@ -100,14 +100,22 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter, USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
-          <Route path="/data_submission_form" element={<DataSubmissionForm />} />
-          <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
-            <Route path="/data_submission_form2" element={<DataSubmissionFormV2 />}>
-              <Route path=":studyId" element={<DataSubmissionFormV2 />} />
-            </Route>
-          </Route>
+          {checkEnv(envGroups.NON_STAGING) && (
+            <>
+              <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
+                <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+              </Route>
+              <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
+            </>
+          )}
+          {checkEnv(envGroups.PROD_STAGING) && (
+            <>
+              <Route path="/data_submission_form" element={<DataSubmissionForm />}>
+              </Route>
+              <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
+            </>
+          )}
           <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
-          <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member, USER_ROLES.signingOfficial, USER_ROLES.chairperson]} />}>
           <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
