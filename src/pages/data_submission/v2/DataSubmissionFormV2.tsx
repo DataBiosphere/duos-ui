@@ -19,9 +19,14 @@ export type FileProperty = {
   value: File
 }
 
+export type DataSubmissionFormV2Props = {
+  onSaveRoute?: string
+}
+
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
 
-export const DataSubmissionFormV2 = () => {
+export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
+  const { onSaveRoute } = props
   const { studyId } = useParams()
   const [isEditing, setIsEditing] = useState(false)
   const [study, setStudy] = useState({} as Study)
@@ -67,6 +72,10 @@ export const DataSubmissionFormV2 = () => {
   const onUpdateStudy = async () => {
     await DataSet.updateStudy(studyId as string, buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study updated successfully', type: 'success' })
+    if (onSaveRoute) {
+      navigate(onSaveRoute)
+      return
+    }
     navigate('/datalibrary')
   }
 
@@ -78,6 +87,10 @@ export const DataSubmissionFormV2 = () => {
   const onSubmitStudy = async () => {
     await DataSet.registerDataset(buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
+    if (onSaveRoute) {
+      navigate(onSaveRoute)
+      return
+    }
     navigate('/datalibrary')
   }
 
