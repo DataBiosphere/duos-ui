@@ -83,5 +83,5 @@ export function renderColumnContent(column: string, value: unknown, asset?: unkn
   if (value == null) return '—'
   if (Array.isArray(value)) return value.map(v => v && typeof v === 'object' ? JSON.stringify(v) : String(v)).join(', ')
   if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
+  return String(value as string | number | boolean)
 }
