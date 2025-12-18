@@ -5,6 +5,7 @@ import PublicationAddEdit from 'src/components/publications_list/PublicationAddE
 import PublicationRow from 'src/components/publications_list/PublicationRow'
 import PublicationSummary from 'src/components/publications_list/PublicationSummary'
 import { Publication, Author } from 'src/types/model'
+import { testDeleteViaModal } from './testUtils'
 
 const authorsSample: Author[] = [
   { name: 'Author One', orcId: '0000-0000-0000-0001' },
@@ -266,16 +267,9 @@ describe('PublicationRow', () => {
 
 describe('Publication delete flow', () => {
   it('deletes a publication via modal confirmation', () => {
-    const list: Publication[] = [samplePublication]
-    mount(<PublicationListHarness initial={list} />)
-    cy.contains(samplePublication.title).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button').filter(':visible').contains(/delete/i).click({ force: true })
-      })
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(samplePublication.title).should('not.exist')
+    testDeleteViaModal(
+      () => mount(<PublicationListHarness initial={[samplePublication]} />),
+      samplePublication.title,
+    )
   })
 })

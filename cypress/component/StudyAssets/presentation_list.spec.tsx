@@ -5,6 +5,7 @@ import PresentationAddEdit from 'src/components/presentations_list/PresentationA
 import PresentationRow from 'src/components/presentations_list/PresentationRow'
 import PresentationSummary from 'src/components/presentations_list/PresentationSummary'
 import { Presentation } from 'src/types/model'
+import { testDeleteViaModal } from './testUtils'
 
 const samplePresentation: Presentation = {
   presentationId: 'p1',
@@ -120,20 +121,10 @@ describe('PresentationList component', () => {
   })
 
   it('deletes a presentation via modal confirmation', () => {
-    mount(<PresentationListHarness initial={[samplePresentation]} />)
-    cy.contains(samplePresentation.title).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(samplePresentation.title).should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+    testDeleteViaModal(
+      () => mount(<PresentationListHarness initial={[samplePresentation]} />),
+      samplePresentation.title,
+    )
   })
 })
 

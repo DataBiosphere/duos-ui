@@ -10,6 +10,7 @@ import {
   ClinicalTrialInterventionType,
   ClinicalTrialPhase,
 } from 'src/types/model'
+import { testDeleteViaModal } from './testUtils'
 
 const sampleTrial: ClinicalTrial = {
   clinicalTrialId: 'ct1',
@@ -148,20 +149,10 @@ describe('ClinicalTrialList component', () => {
   })
 
   it('deletes a clinical trial via modal confirmation', () => {
-    mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    cy.contains(sampleTrial.title).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(sampleTrial.title).should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+    testDeleteViaModal(
+      () => mount(<ClinicalTrialListHarness initial={[sampleTrial]} />),
+      sampleTrial.title,
+    )
   })
 })
 

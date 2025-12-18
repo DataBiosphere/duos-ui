@@ -5,6 +5,7 @@ import IntellectualPropertyAddEdit from 'src/components/intellectual_property_li
 import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
 import IntellectualPropertyRow from 'src/components/intellectual_property_list/IntellectualPropertyRow'
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
+import { testDeleteViaModal } from './testUtils'
 
 const sampleIp: IntellectualProperty = {
   ipId: 'ip-1',
@@ -32,39 +33,55 @@ const IntellectualPropertyListHarness: React.FC<{ initial: IntellectualProperty[
   )
 }
 
+function fillValidForm() {
+  cy.get('#type').type('Patent')
+  cy.get('#title').type('New IP')
+  cy.get('#assignee').type('Assignee Name')
+  cy.get('#patentNumber').type('PAT123')
+  cy.get('#filingDate').type('2024-01-01')
+  cy.get('#status').type('Pending')
+  cy.get('#url').type('https://example.com')
+  cy.get('#contact').type('contact@example.com')
+}
+
+function testViewModeFlow(mountFn: () => void, titleText: string) {
+  mountFn()
+  cy.get('.glyphicon-eye-open').click({ force: true })
+  cy.contains(titleText).should('exist')
+  cy.get('#title').should('be.disabled')
+  cy.get('#filingDate').should('be.disabled')
+  cy.get('.collaborator-form-add-save-button').should('not.exist')
+  cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+}
+
+function testCloseViewMode(mountFn: () => void) {
+  mountFn()
+  cy.get('.glyphicon-eye-open').click({ force: true })
+  cy.get('.collaborator-form-cancel-button').click()
+  cy.get('#title').should('not.exist')
+  cy.get('.glyphicon-eye-open').should('exist')
+}
+
 describe('IntellectualPropertyAddEdit', () => {
   it('prevents save until required fields are valid, then saves', () => {
     const collected: IntellectualProperty[] = []
-    const onIntellectualPropertyChange = (items: IntellectualProperty[]) => {
-      collected.splice(0, collected.length, ...items)
-    }
     mount(
       <IntellectualPropertyAddEdit
         id={-1}
         intellectualProperty={undefined}
         intellectualProperties={[]}
         closeAction={cy.stub().as('close')}
-        onIntellectualPropertyChange={onIntellectualPropertyChange}
+        onIntellectualPropertyChange={(items) => { collected.splice(0, collected.length, ...items) }}
       />,
     )
 
-    // Try saving immediately; should not add because validation fails
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(0)
     })
 
-    // Fill required fields with valid values
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('New IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT123')
-    cy.get('#filingDate').type('2024-01-01')
-    cy.get('#status').type('Pending')
-    cy.get('#url').type('https://example.com')
-    cy.get('#contact').type('contact@example.com')
+    fillValidForm()
 
-    // Now save should succeed and add one item
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
@@ -84,14 +101,9 @@ describe('IntellectualPropertyAddEdit', () => {
         onIntellectualPropertyChange={onIntellectualPropertyChange}
       />,
     )
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('New IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT123')
+    fillValidForm()
+    cy.get('#filingDate').clear()
     cy.get('#filingDate').type('invalid-date')
-    cy.get('#status').type('Pending')
-    cy.get('#url').type('https://example.com')
-    cy.get('#contact').type('contact@example.com')
 
     cy.get('.collaborator-form-add-save-button').click()
     cy.get('@onIntellectualPropertyChange').should('not.have.been.called')
@@ -108,14 +120,9 @@ describe('IntellectualPropertyAddEdit', () => {
         onIntellectualPropertyChange={onIntellectualPropertyChange}
       />,
     )
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('New IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT123')
-    cy.get('#filingDate').type('2024-01-01')
-    cy.get('#status').type('Pending')
+    fillValidForm()
+    cy.get('#url').clear()
     cy.get('#url').type('invalid-url')
-    cy.get('#contact').type('contact@example.com')
 
     cy.get('.collaborator-form-add-save-button').click()
     cy.get('@onIntellectualPropertyChange').should('not.have.been.called')
@@ -252,56 +259,26 @@ describe('IntellectualPropertyList', () => {
       />,
     )
     cy.get('#add-intellectual-property-btn').click()
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('Added IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT456')
-    cy.get('#filingDate').type('2024-02-01')
-    cy.get('#status').type('Granted')
-    cy.get('#url').type('https://example.com/new')
-    cy.get('#contact').type('newcontact@example.com')
+    fillValidForm()
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(state.length).to.eq(1)
-      expect(state[0].title).to.eq('Added IP')
+      expect(state[0].title).to.eq('New IP')
     })
   })
 
   it('deletes an intellectual property via modal confirmation', () => {
-    mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-
-    cy.contains(sampleIp.title).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(sampleIp.title).should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+    testDeleteViaModal(
+      () => mount(<IntellectualPropertyListHarness initial={[sampleIp]} />),
+      sampleIp.title,
+    )
   })
 
   it('opens intellectual property in view mode when view button is clicked', () => {
-    mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains(sampleIp.title).should('exist')
-    cy.get('#title').should('be.disabled')
-    cy.get('#filingDate').should('be.disabled')
-    cy.get('.collaborator-form-add-save-button').should('not.exist')
-    cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+    testViewModeFlow(() => mount(<IntellectualPropertyListHarness initial={[sampleIp]} />), sampleIp.title)
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('.collaborator-form-cancel-button').click()
-    cy.get('#title').should('not.exist')
-    cy.get('.glyphicon-eye-open').should('exist')
+    testCloseViewMode(() => mount(<IntellectualPropertyListHarness initial={[sampleIp]} />))
   })
 })

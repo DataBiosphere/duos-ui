@@ -5,6 +5,7 @@ import WorkspaceAddEdit from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceSummary from 'src/components/workspaces_list/WorkspaceSummary'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 import WorkspaceList from 'src/components/workspaces_list/WorkspaceList'
+import { testDeleteViaModal } from './testUtils'
 
 const sampleWorkspace: Workspace = {
   workspaceId: 'w1',
@@ -121,20 +122,10 @@ describe('WorkspaceList component', () => {
   })
 
   it('deletes a workspace via modal confirmation', () => {
-    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-    cy.contains(sampleWorkspace.name).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(sampleWorkspace.name).should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+    testDeleteViaModal(
+      () => mount(<WorkspaceListHarness initial={[sampleWorkspace]} />),
+      sampleWorkspace.name,
+    )
   })
 })
 
