@@ -7,7 +7,7 @@ import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface PresentationListProps {
   readonly presentations: Presentation[]
-  readonly columnsToShow?: (keyof Presentation | string)[]
+  readonly columnsToShow?: (keyof Presentation)[]
   readonly onPresentationChange: (presentations: Presentation[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Presentation, Presenter } from 'src/types/model'
+import { Presentation } from 'src/types/model'
 import StudyAssetSummary from 'src/components/study_asset/StudyAssetSummary'
 
 interface PresentationSummaryProps {
@@ -12,33 +12,18 @@ interface PresentationSummaryProps {
 }
 
 export default function PresentationSummary(props: PresentationSummaryProps): React.JSX.Element {
-  const { presentation } = props
-
-  const customRenderers = {
-    presenter: (value: unknown) => {
-      const presenter = value as Presenter
-      if (!presenter || typeof presenter !== 'object') return '—'
-      return <span>{presenter.name}{presenter.email ? ` (${presenter.email})` : ''}</span>
-    },
-    url: (value: unknown) =>
-      typeof value === 'string' && value
-        ? <a href={value} target="_blank" rel="noreferrer">{value}</a>
-        : '—',
-    tags: (value: unknown) =>
-      Array.isArray(value) && value.length > 0 ? value.join(', ') : '—',
-  }
+  const { presentation, columnsToShow, editAction, deleteAction, viewAction, disabled } = props
 
   return (
     <StudyAssetSummary
       asset={presentation}
-      columnsToShow={props.columnsToShow}
-      customRenderers={customRenderers}
+      columnsToShow={columnsToShow}
       name={presentation.title}
       objectName="presentation"
-      editAction={props.editAction}
-      deleteAction={props.deleteAction}
-      viewAction={props.viewAction}
-      disabled={props.disabled}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      viewAction={viewAction}
+      disabled={disabled}
     />
   )
 }

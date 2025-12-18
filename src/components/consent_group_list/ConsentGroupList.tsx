@@ -7,7 +7,7 @@ import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface ConsentGroupListProps {
   readonly consentGroups: ConsentGroup2[]
-  readonly columnsToShow?: (keyof ConsentGroup2 | string)[]
+  readonly columnsToShow?: (keyof ConsentGroup2)[]
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

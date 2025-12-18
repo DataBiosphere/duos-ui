@@ -1,56 +1,27 @@
 import React from 'react'
 import { ClinicalTrial } from 'src/types/model'
-import {
-  statusToDisplay,
-  phaseToDisplay,
-  interventionTypeToDisplay,
-} from 'src/utils/ClinicalTrialEnumUtils'
 import StudyAssetSummary from 'src/components/study_asset/StudyAssetSummary'
 
 export default function ClinicalTrialSummary(props: {
-  clinicalTrial: ClinicalTrial
-  columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
-  editAction: () => void
-  deleteAction: () => void
-  viewAction?: () => void
-  disabled?: boolean
+  readonly clinicalTrial: ClinicalTrial
+  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
+  readonly editAction: () => void
+  readonly deleteAction: () => void
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
 }) {
-  const { clinicalTrial } = props
-
-  const customRenderers = {
-    tags: (value: unknown) =>
-      Array.isArray(value) && value.length > 0 ? value.join(', ') : '—',
-
-    // computed from the startDate and endDate fields
-    dateRange: () => {
-      const start = clinicalTrial.startDate
-      const end = clinicalTrial.endDate
-      return start || end ? `${start || 'N/A'} → ${end || 'N/A'}` : '—'
-    },
-
-    // use enum display functions
-    status: (value: unknown) => statusToDisplay(value as ClinicalTrial['status']),
-    phase: (value: unknown) => phaseToDisplay(value as ClinicalTrial['phase']),
-    interventionType: (value: unknown) =>
-      interventionTypeToDisplay(value as ClinicalTrial['interventionType']),
-
-    url: (value: unknown) =>
-      typeof value === 'string' && value
-        ? <a href={value} target="_blank" rel="noreferrer">{value}</a>
-        : '—',
-  }
+  const { clinicalTrial, columnsToShow, editAction, deleteAction, viewAction, disabled } = props
 
   return (
     <StudyAssetSummary
       asset={clinicalTrial}
-      columnsToShow={props.columnsToShow}
-      customRenderers={customRenderers}
+      columnsToShow={columnsToShow}
       name={clinicalTrial.title}
       objectName="clinical trial"
-      editAction={props.editAction}
-      deleteAction={props.deleteAction}
-      viewAction={props.viewAction}
-      disabled={props.disabled}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      viewAction={viewAction}
+      disabled={disabled}
     />
   )
 }

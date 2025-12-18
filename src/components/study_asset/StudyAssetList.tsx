@@ -8,19 +8,19 @@ interface StudyAssetListProps<
   AddEditProps extends object = object,
   RowProps extends object = object,
 > {
-  items: T[]
-  columnsToShow?: (keyof T | string)[]
-  onItemsChange: (items: T[]) => void
-  disabled?: boolean
-  validation?: V
-  AddEditComponent: React.ComponentType<AddEditProps>
-  RowComponent: React.ComponentType<RowProps>
-  addButtonId: string
-  addButtonLabel: string
-  getValidationState: (validation?: V) => ValidationError | undefined
-  studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
-  getAddEditProps: (items: T[], closeAction: () => void, onItemsChange: (items: T[]) => void) => AddEditProps
-  getRowProps: (baseProps: {
+  readonly items: T[]
+  readonly columnsToShow?: (keyof T | string)[]
+  readonly onItemsChange: (items: T[]) => void
+  readonly disabled?: boolean
+  readonly validation?: V
+  readonly AddEditComponent: React.ComponentType<AddEditProps>
+  readonly RowComponent: React.ComponentType<RowProps>
+  readonly addButtonId: string
+  readonly addButtonLabel: string
+  readonly getValidationState: (validation?: V) => ValidationError | undefined
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
+  readonly getAddEditProps: (items: T[], closeAction: () => void, onItemsChange: (items: T[]) => void) => AddEditProps
+  readonly getRowProps: (baseProps: {
     item: T
     items: T[]
     index: number
@@ -60,7 +60,7 @@ export default function StudyAssetList<
   const [editState, setEditState] = useState<boolean[]>(items.map(() => false))
   const [viewState, setViewState] = useState<boolean[]>(items.map(() => false))
 
-  const filteredColumnsToShow = columnsToShow.filter((c): c is keyof T => typeof c === 'string') as (keyof T)[]
+  const filteredColumnsToShow = columnsToShow.filter((c): c is keyof T => typeof c === 'string')
 
   useEffect(() => {
     if (editState.length !== items.length) {
@@ -109,7 +109,7 @@ export default function StudyAssetList<
     <div className="form-group row no-margin">
       {showAddEdit && (
         <AddEditComponent
-          {...(getAddEditProps(items, () => setShowAddEdit(false), onItemsChange) as AddEditProps)}
+          {...getAddEditProps(items, () => setShowAddEdit(false), onItemsChange)}
         />
       )}
       {items.map((item, index) => {
@@ -137,8 +137,8 @@ export default function StudyAssetList<
 
         return (
           <RowComponent
-            key={index}
-            {...(getRowProps(baseProps) as RowProps)}
+            key={`study-asset-item-${index}`}
+            {...getRowProps(baseProps)}
           />
         )
       })}

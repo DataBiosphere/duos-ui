@@ -7,7 +7,7 @@ import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface WorkspaceListProps {
   readonly workspaces: Workspace[]
-  readonly columnsToShow?: (keyof Workspace | string)[]
+  readonly columnsToShow?: (keyof Workspace)[]
   readonly onWorkspaceChange: (items: Workspace[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

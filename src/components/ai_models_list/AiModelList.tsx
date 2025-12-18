@@ -6,12 +6,12 @@ import React from 'react'
 import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 export default function AiModelList(props: {
-  aiModels: AiModel[]
-  columnsToShow?: (keyof AiModel | string)[]
-  onAiModelsChange: (models: AiModel[]) => void
-  disabled?: boolean
-  validation?: DarErrors
-  studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
+  readonly aiModels: AiModel[]
+  readonly columnsToShow?: (keyof AiModel)[]
+  readonly onAiModelsChange: (models: AiModel[]) => void
+  readonly disabled?: boolean
+  readonly validation?: DarErrors
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
 }) {
   return (
     <StudyAssetList<

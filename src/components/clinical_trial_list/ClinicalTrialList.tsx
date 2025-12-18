@@ -11,12 +11,12 @@ import React from 'react'
 import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 export default function ClinicalTrialList(props: {
-  clinicalTrials: ClinicalTrial[]
-  columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
-  onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
-  disabled?: boolean
-  validation?: DarErrors
-  studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
+  readonly clinicalTrials: ClinicalTrial[]
+  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
+  readonly onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
+  readonly disabled?: boolean
+  readonly validation?: DarErrors
+  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
 }) {
   const normalized = props.clinicalTrials.map(ct => ({
     ...ct,

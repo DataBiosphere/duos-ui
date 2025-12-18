@@ -7,7 +7,7 @@ import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface FundingResourceListProps {
   readonly fundingResources: FundingResource[]
-  readonly columnsToShow?: (keyof FundingResource | string)[]
+  readonly columnsToShow?: (keyof FundingResource)[]
   readonly onFundingResourceChange: (items: FundingResource[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

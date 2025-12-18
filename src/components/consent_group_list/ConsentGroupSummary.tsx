@@ -13,26 +13,18 @@ interface ConsentGroupSummaryProps {
 }
 
 export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): React.JSX.Element {
-  const { consentGroup, isEditingExistingStudy = false } = props
-
-  const customRenderers = {
-    url: (value: unknown) =>
-      typeof value === 'string' && value
-        ? <a href={value} target="_blank" rel="noreferrer">{value}</a>
-        : '—',
-  }
+  const { consentGroup, columnsToShow, editAction, deleteAction, viewAction, disabled, isEditingExistingStudy = false } = props
 
   return (
     <StudyAssetSummary
       asset={consentGroup}
-      columnsToShow={props.columnsToShow}
-      customRenderers={customRenderers}
+      columnsToShow={columnsToShow}
       name={consentGroup.consentGroupName}
       objectName="consentGroup"
-      editAction={props.editAction}
-      deleteAction={props.deleteAction}
-      viewAction={props.viewAction}
-      disabled={props.disabled}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      viewAction={viewAction}
+      disabled={disabled}
       disableDelete={isEditingExistingStudy}
     />
   )

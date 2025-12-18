@@ -3,22 +3,20 @@ import { DeletePresentationOrPublication } from 'src/components/presentation_pub
 import { renderColumnContent } from 'src/utils/RenderUtils'
 
 interface StudyAssetSummaryProps<T> {
-  asset: T
-  columnsToShow?: (keyof T | string)[]
-  customRenderers: Record<string, (value: unknown) => React.ReactNode>
-  name: string
-  objectName: string
-  editAction: () => void
-  deleteAction: () => void
-  viewAction?: () => void
-  disabled?: boolean
-  disableDelete?: boolean
+  readonly asset: T
+  readonly columnsToShow?: (keyof T | string)[]
+  readonly name: string
+  readonly objectName: string
+  readonly editAction: () => void
+  readonly deleteAction: () => void
+  readonly viewAction?: () => void
+  readonly disabled?: boolean
+  readonly disableDelete?: boolean
 }
 
 export default function StudyAssetSummary<T>({
   asset,
   columnsToShow,
-  customRenderers,
   name,
   objectName,
   editAction,
@@ -42,7 +40,7 @@ export default function StudyAssetSummary<T>({
       {cols.map((column, index) => {
         const key = String(column)
         const value = (asset as Record<string, unknown>)[key]
-        const content = renderColumnContent(key, value, customRenderers)
+        const content = renderColumnContent(key, value, asset)
 
         const shouldRender = content !== null && content !== undefined
 

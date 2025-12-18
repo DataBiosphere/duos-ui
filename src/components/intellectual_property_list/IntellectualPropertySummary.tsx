@@ -12,29 +12,18 @@ interface IntellectualPropertySummaryProps {
 }
 
 export default function IntellectualPropertySummary(props: IntellectualPropertySummaryProps): React.JSX.Element {
-  const { intellectualProperty } = props
-
-  const customRenderers = {
-    url: (value: unknown) =>
-      typeof value === 'string' && value
-        ? <a href={value} target="_blank" rel="noreferrer">{value}</a>
-        : '—',
-    tags: (value: unknown) =>
-      Array.isArray(value) && value.length > 0 ? value.join(', ') : '—',
-    filingDate: (value: unknown) => typeof value === 'string' && value ? value : '—',
-  }
+  const { intellectualProperty, columnsToShow, editAction, deleteAction, viewAction, disabled } = props
 
   return (
     <StudyAssetSummary
       asset={intellectualProperty}
-      columnsToShow={props.columnsToShow}
-      customRenderers={customRenderers}
+      columnsToShow={columnsToShow}
       name={intellectualProperty.title || intellectualProperty.type}
       objectName="intellectual property"
-      editAction={props.editAction}
-      deleteAction={props.deleteAction}
-      viewAction={props.viewAction}
-      disabled={props.disabled}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      viewAction={viewAction}
+      disabled={disabled}
     />
   )
 }

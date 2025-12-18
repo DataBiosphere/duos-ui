@@ -7,7 +7,7 @@ import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface PublicationListProps {
   readonly publications: Publication[]
-  readonly columnsToShow?: (keyof Publication | string)[]
+  readonly columnsToShow?: (keyof Publication)[]
   readonly onPublicationChange: (publications: Publication[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

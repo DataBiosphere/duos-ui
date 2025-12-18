@@ -1,22 +1,22 @@
 import React from 'react'
 
 export interface StudyAssetRowProps<T, AddEditProps, SummaryProps> {
-  id: number
-  editMode: boolean
-  viewMode?: boolean
-  asset: T
-  assets: T[]
-  columnsToShow?: (keyof T | string)[]
-  editAction: () => void
-  deleteAction: () => void
-  closeAction: () => void
-  viewAction?: () => void
-  onAssetsChange: (assets: T[]) => void
-  disabled: boolean
-  AddEditComponent: React.ComponentType<AddEditProps>
-  SummaryComponent: React.ComponentType<SummaryProps>
-  addEditProps: AddEditProps
-  summaryProps: SummaryProps
+  readonly id: number
+  readonly editMode: boolean
+  readonly viewMode?: boolean
+  readonly asset: T
+  readonly assets: T[]
+  readonly columnsToShow?: (keyof T | string)[]
+  readonly editAction: () => void
+  readonly deleteAction: () => void
+  readonly closeAction: () => void
+  readonly viewAction?: () => void
+  readonly onAssetsChange: (assets: T[]) => void
+  readonly disabled: boolean
+  readonly AddEditComponent: React.ComponentType<AddEditProps>
+  readonly SummaryComponent: React.ComponentType<SummaryProps>
+  readonly addEditProps: AddEditProps
+  readonly summaryProps: SummaryProps
 }
 
 export default function StudyAssetRow<

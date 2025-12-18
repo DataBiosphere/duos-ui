@@ -7,7 +7,7 @@ import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface IntellectualPropertyListProps {
   readonly intellectualProperties: IntellectualProperty[]
-  readonly columnsToShow?: (keyof IntellectualProperty | string)[]
+  readonly columnsToShow?: (keyof IntellectualProperty)[]
   readonly onIntellectualPropertyChange: (items: IntellectualProperty[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors

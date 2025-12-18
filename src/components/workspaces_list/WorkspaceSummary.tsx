@@ -12,30 +12,18 @@ interface WorkspaceSummaryProps {
 }
 
 export default function WorkspaceSummary(props: WorkspaceSummaryProps): React.JSX.Element {
-  const { workspace } = props
-
-  const customRenderers = {
-    url: (value: unknown) =>
-      typeof value === 'string' && value
-        ? <a href={value} target="_blank" rel="noreferrer">{value}</a>
-        : '—',
-    tools: (value: unknown) =>
-      Array.isArray(value) && value.length > 0 ? (value as string[]).join(', ') : '—',
-    tags: (value: unknown) =>
-      Array.isArray(value) && value.length > 0 ? (value as string[]).join(', ') : '—',
-  }
+  const { workspace, columnsToShow, editAction, deleteAction, viewAction, disabled } = props
 
   return (
     <StudyAssetSummary
       asset={workspace}
-      columnsToShow={props.columnsToShow}
-      customRenderers={customRenderers}
+      columnsToShow={columnsToShow}
       name={workspace.name}
       objectName="workspace"
-      editAction={props.editAction}
-      deleteAction={props.deleteAction}
-      viewAction={props.viewAction}
-      disabled={props.disabled}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      viewAction={viewAction}
+      disabled={disabled}
     />
   )
 }
