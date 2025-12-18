@@ -61,6 +61,19 @@ function mountRow(overrides: Partial<React.ComponentProps<typeof ConsentGroupRow
   )
 }
 
+function mountSummary(overrides: Partial<React.ComponentProps<typeof ConsentGroupSummary>> = {}) {
+  return mount(
+    <ConsentGroupSummary
+      consentGroup={sampleConsentGroup}
+      columnsToShow={['consentGroupName']}
+      editAction={cy.stub()}
+      deleteAction={cy.stub()}
+      disabled={false}
+      {...overrides}
+    />,
+  )
+}
+
 function fillConsentGroupForm(overrides: Partial<ConsentGroup2> = {}) {
   cy.get('#consentGroupName').type(overrides.consentGroupName ?? 'New Consent Group')
   cy.get('#accessManagement_open').check()
@@ -82,6 +95,22 @@ function mountAddEdit(overrides: Partial<React.ComponentProps<typeof ConsentGrou
   )
 }
 
+// Assertion helpers
+function verifyConsentGroupExists(name: string) {
+  cy.contains(name).should('exist')
+}
+
+function verifyConditionalField(checkboxId: string, textFieldId: string) {
+  cy.get(textFieldId).should('not.exist')
+  cy.get(checkboxId).check()
+  cy.get(textFieldId).should('exist')
+}
+
+function clickSaveButton() {
+  cy.get('.collaborator-form-add-save-button').should('not.be.disabled')
+  cy.get('.collaborator-form-add-save-button').click()
+}
+
 describe('ConsentGroupList component', () => {
   it('Edits without saving', () => {
     mountAddEdit()
@@ -91,29 +120,23 @@ describe('ConsentGroupList component', () => {
 
   it('Shows conditional fields only when checked', () => {
     mountAddEdit()
-
     cy.get('#primaryConsent_generalResearchUse').click()
 
-    cy.get('#gsText').should('not.exist')
-    cy.get('#gs').check()
-    cy.get('#gsText').should('exist')
+    const conditionalFields = [
+      { checkbox: '#gs', textField: '#gsText' },
+      { checkbox: '#otherSecondary', textField: '#otherSecondaryText' },
+      { checkbox: '#primaryConsent_otherPrimary', textField: '#otherPrimaryText' },
+      { checkbox: '#primaryConsent_diseaseSpecificUse', textField: '#diseaseSpecificUseText' },
+    ]
 
-    cy.get('#otherSecondaryText').should('not.exist')
-    cy.get('#otherSecondary').check()
-    cy.get('#otherSecondaryText').should('exist')
-
-    cy.get('#otherPrimaryText').should('not.exist')
-    cy.get('#primaryConsent_otherPrimary').check()
-    cy.get('#otherPrimaryText').should('exist')
-
-    cy.get('#diseaseSpecificUseText').should('not.exist')
-    cy.get('#primaryConsent_diseaseSpecificUse').check()
-    cy.get('#diseaseSpecificUseText').should('exist')
+    conditionalFields.forEach(({ checkbox, textField }) => {
+      verifyConditionalField(checkbox, textField)
+    })
   })
 
   it('renders existing consent groups', () => {
     mountListWithItem()
-    cy.contains(sampleConsentGroup.consentGroupName).should('exist')
+    verifyConsentGroupExists(sampleConsentGroup.consentGroupName)
   })
 
   it('opens consent group in view mode when view button is clicked', () => {
@@ -138,8 +161,7 @@ describe('ConsentGroupList component', () => {
     )
     cy.get('#add-consent-group-btn').click()
     fillConsentGroupForm()
-    cy.get('.collaborator-form-add-save-button').should('not.be.disabled')
-    cy.get('.collaborator-form-add-save-button').click()
+    clickSaveButton()
 
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
@@ -155,10 +177,9 @@ describe('ConsentGroupList component', () => {
     cy.get('#consentGroupName').type('Test Consent Group Edited')
     cy.get('#numberOfParticipants').clear()
     cy.get('#numberOfParticipants').type('15')
-    cy.get('.collaborator-form-add-save-button').should('not.be.disabled')
-    cy.get('.collaborator-form-add-save-button').click()
+    clickSaveButton()
     cy.get('#consentGroupName').should('not.exist')
-    cy.contains('Test Consent Group Edited').should('exist')
+    verifyConsentGroupExists('Test Consent Group Edited')
   })
 
   it('deletes a consent group via modal confirmation', () => {
@@ -168,31 +189,14 @@ describe('ConsentGroupList component', () => {
 
 describe('ConsentGroupSummary', () => {
   it('renders columns and consent group data', () => {
-    mount(
-      <ConsentGroupSummary
-        consentGroup={sampleConsentGroup}
-        columnsToShow={['consentGroupName', 'numberOfParticipants']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        disabled={false}
-      />,
-    )
-    cy.contains(sampleConsentGroup.consentGroupName).should('exist')
+    mountSummary({ columnsToShow: ['consentGroupName', 'numberOfParticipants'] })
+    verifyConsentGroupExists(sampleConsentGroup.consentGroupName)
     cy.contains(sampleConsentGroup.numberOfParticipants.toString()).should('exist')
   })
 
   it('renders view button and triggers viewAction', () => {
     testSummaryViewActionTrigger(() =>
-      mount(
-        <ConsentGroupSummary
-          consentGroup={sampleConsentGroup}
-          columnsToShow={['consentGroupName']}
-          editAction={cy.stub()}
-          deleteAction={cy.stub()}
-          viewAction={cy.stub().as('view')}
-          disabled={false}
-        />,
-      ),
+      mountSummary({ viewAction: cy.stub().as('view') }),
     )
   })
 })
@@ -200,7 +204,7 @@ describe('ConsentGroupSummary', () => {
 describe('ConsentGroupRow', () => {
   it('shows summary when not in edit mode and triggers editAction', () => {
     mountRow({ editAction: cy.stub().as('edit') })
-    cy.contains(sampleConsentGroup.consentGroupName).should('exist')
+    verifyConsentGroupExists(sampleConsentGroup.consentGroupName)
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
