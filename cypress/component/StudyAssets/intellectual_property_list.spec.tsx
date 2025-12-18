@@ -5,7 +5,15 @@ import IntellectualPropertyAddEdit from 'src/components/intellectual_property_li
 import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
 import IntellectualPropertyRow from 'src/components/intellectual_property_list/IntellectualPropertyRow'
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
-import { testDeleteViaModal } from './testUtils'
+import {
+  testDeleteViaModal,
+  testViewModeFlow,
+  testCloseViewMode,
+  testEditModeRender,
+  testViewModeRender,
+  testViewActionTrigger,
+  testSummaryViewActionTrigger,
+} from './testUtils'
 
 const sampleIp: IntellectualProperty = {
   ipId: 'ip-1',
@@ -69,24 +77,6 @@ function fillForm(overrides: Partial<IntellectualProperty> = {}) {
 
 function assertNotSaved() {
   cy.get('@onIntellectualPropertyChange').should('not.have.been.called')
-}
-
-function testViewModeFlow(mountFn: () => void, titleText: string) {
-  mountFn()
-  cy.get('.glyphicon-eye-open').click({ force: true })
-  cy.contains(titleText).should('exist')
-  cy.get('#title').should('be.disabled')
-  cy.get('#filingDate').should('be.disabled')
-  cy.get('.collaborator-form-add-save-button').should('not.exist')
-  cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
-}
-
-function testCloseViewMode(mountFn: () => void) {
-  mountFn()
-  cy.get('.glyphicon-eye-open').click({ force: true })
-  cy.get('.collaborator-form-cancel-button').click()
-  cy.get('#title').should('not.exist')
-  cy.get('.glyphicon-eye-open').should('exist')
 }
 
 describe('IntellectualPropertyAddEdit', () => {
@@ -163,19 +153,18 @@ describe('IntellectualPropertySummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
-      <IntellectualPropertySummary
-        intellectualProperty={sampleIp}
-        columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        viewAction={cy.stub().as('view')}
-        disabled={false}
-      />,
+    testSummaryViewActionTrigger(() =>
+      mount(
+        <IntellectualPropertySummary
+          intellectualProperty={sampleIp}
+          columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
+          editAction={cy.stub()}
+          deleteAction={cy.stub()}
+          viewAction={cy.stub().as('view')}
+          disabled={false}
+        />,
+      ),
     )
-    cy.get('.glyphicon-eye-open').should('exist')
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('@view').should('have.been.calledOnce')
   })
 })
 
@@ -188,21 +177,23 @@ describe('IntellectualPropertyRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mountRow({ editMode: true, columnsToShow: ['title'] })
-    cy.get('#title').should('have.value', sampleIp.title)
+    testEditModeRender<React.ComponentProps<typeof IntellectualPropertyRow>>(
+      mountRow,
+      '#title',
+      sampleIp.title,
+    )
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mountRow({ viewMode: true, columnsToShow: ['title'] })
-    cy.get('#title').should('have.value', sampleIp.title)
-    cy.get('#title').should('be.disabled')
-    cy.get('.collaborator-form-add-save-button').should('not.exist')
+    testViewModeRender<React.ComponentProps<typeof IntellectualPropertyRow>>(
+      mountRow,
+      '#title',
+      sampleIp.title,
+    )
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mountRow({ viewAction: cy.stub().as('view') })
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('@view').should('have.been.calledOnce')
+    testViewActionTrigger<React.ComponentProps<typeof IntellectualPropertyRow>>(mountRow)
   })
 })
 
@@ -231,10 +222,10 @@ describe('IntellectualPropertyList', () => {
   })
 
   it('opens intellectual property in view mode when view button is clicked', () => {
-    testViewModeFlow(mountListWithItem, sampleIp.title)
+    testViewModeFlow(mountListWithItem, sampleIp.title, { fieldId: '#title' })
   })
 
   it('closes view mode when close button is clicked', () => {
-    testCloseViewMode(mountListWithItem)
+    testCloseViewMode(mountListWithItem, { fieldId: '#title' })
   })
 })

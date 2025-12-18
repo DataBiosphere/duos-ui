@@ -5,7 +5,15 @@ import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGr
 import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
 import ConsentGroupSummary from 'src/components/consent_group_list/ConsentGroupSummary'
 import ConsentGroupRow from 'src/components/consent_group_list/ConsentGroupRow'
-import { testDeleteViaModal } from './testUtils'
+import {
+  testDeleteViaModal,
+  testViewModeFlow,
+  testCloseViewMode,
+  testEditModeRender,
+  testViewModeRender,
+  testViewActionTrigger,
+  testSummaryViewActionTrigger,
+} from './testUtils'
 
 const sampleConsentGroup: ConsentGroup2 = {
   consentGroupId: 'cg1',
@@ -60,23 +68,6 @@ function fillConsentGroupForm(overrides: Partial<ConsentGroup2> = {}) {
   cy.get('#numberOfParticipants').type((overrides.numberOfParticipants ?? 25).toString())
   cy.get('#dataLocation').click()
   cy.get('#dataLocation').type((overrides.dataLocation ?? 'Not Determined') + '{enter}')
-}
-
-function testViewModeFlow(mountFn: () => void, titleText: string) {
-  mountFn()
-  cy.get('.glyphicon-eye-open').click({ force: true })
-  cy.contains(titleText).should('exist')
-  cy.get('#consentGroupName').should('be.disabled')
-  cy.get('.collaborator-form-add-save-button').should('not.exist')
-  cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
-}
-
-function testCloseViewMode(mountFn: () => void) {
-  mountFn()
-  cy.get('.glyphicon-eye-open').click({ force: true })
-  cy.get('.collaborator-form-cancel-button').click()
-  cy.get('#consentGroupName').should('not.exist')
-  cy.get('.glyphicon-eye-open').should('exist')
 }
 
 describe('ConsentGroupList component', () => {
@@ -136,11 +127,13 @@ describe('ConsentGroupList component', () => {
   })
 
   it('opens consent group in view mode when view button is clicked', () => {
-    testViewModeFlow(mountListWithItem, sampleConsentGroup.consentGroupName)
+    testViewModeFlow(mountListWithItem, sampleConsentGroup.consentGroupName, {
+      fieldId: '#consentGroupName',
+    })
   })
 
   it('closes view mode when close button is clicked', () => {
-    testCloseViewMode(mountListWithItem)
+    testCloseViewMode(mountListWithItem, { fieldId: '#consentGroupName' })
   })
 
   it('adds a new consent group', () => {
@@ -199,19 +192,18 @@ describe('ConsentGroupSummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
-      <ConsentGroupSummary
-        consentGroup={sampleConsentGroup}
-        columnsToShow={['consentGroupName']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        viewAction={cy.stub().as('view')}
-        disabled={false}
-      />,
+    testSummaryViewActionTrigger(() =>
+      mount(
+        <ConsentGroupSummary
+          consentGroup={sampleConsentGroup}
+          columnsToShow={['consentGroupName']}
+          editAction={cy.stub()}
+          deleteAction={cy.stub()}
+          viewAction={cy.stub().as('view')}
+          disabled={false}
+        />,
+      ),
     )
-    cy.get('.glyphicon-eye-open').should('exist')
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('@view').should('have.been.calledOnce')
   })
 })
 
@@ -224,20 +216,22 @@ describe('ConsentGroupRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mountRow({ editMode: true })
-    cy.get('#consentGroupName').should('have.value', sampleConsentGroup.consentGroupName)
+    testEditModeRender<React.ComponentProps<typeof ConsentGroupRow>>(
+      mountRow,
+      '#consentGroupName',
+      sampleConsentGroup.consentGroupName,
+    )
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mountRow({ viewMode: true, viewAction: cy.stub() })
-    cy.get('#consentGroupName').should('have.value', sampleConsentGroup.consentGroupName)
-    cy.get('#consentGroupName').should('be.disabled')
-    cy.get('.collaborator-form-add-save-button').should('not.exist')
+    testViewModeRender<React.ComponentProps<typeof ConsentGroupRow>>(
+      mountRow,
+      '#consentGroupName',
+      sampleConsentGroup.consentGroupName,
+    )
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mountRow({ viewAction: cy.stub().as('view') })
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('@view').should('have.been.calledOnce')
+    testViewActionTrigger<React.ComponentProps<typeof ConsentGroupRow>>(mountRow)
   })
 })
