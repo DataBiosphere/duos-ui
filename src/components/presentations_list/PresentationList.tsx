@@ -53,6 +53,7 @@ export default function PresentationList(props: PresentationListProps): React.JS
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
       })}
+      getItemKey={item => item.presentationId}
     />
   )
 }

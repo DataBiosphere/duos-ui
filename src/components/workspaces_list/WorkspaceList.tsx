@@ -53,6 +53,7 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
       })}
+      getItemKey={item => item.workspaceId}
     />
   )
 }

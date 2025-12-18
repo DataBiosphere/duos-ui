@@ -56,6 +56,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
         disabled: baseProps.disabled,
         isEditingExistingStudy: props.isEditingExistingStudy,
       })}
+      getItemKey={item => item.consentGroupId}
     />
   )
 }

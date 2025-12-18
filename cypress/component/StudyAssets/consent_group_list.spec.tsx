@@ -70,37 +70,27 @@ function fillConsentGroupForm(overrides: Partial<ConsentGroup2> = {}) {
   cy.get('#dataLocation').type((overrides.dataLocation ?? 'Not Determined') + '{enter}')
 }
 
+function mountAddEdit(overrides: Partial<React.ComponentProps<typeof ConsentGroupAddEdit>> = {}) {
+  return mount(
+    <ConsentGroupAddEdit
+      id={0}
+      consentGroups={[]}
+      closeAction={cy.stub()}
+      onConsentGroupChange={cy.stub()}
+      {...overrides}
+    />,
+  )
+}
+
 describe('ConsentGroupList component', () => {
-  it('Edits without saving', function () {
-    mount(
-      <ConsentGroupAddEdit
-        id={0}
-        consentGroups={[]}
-        closeAction={function (): void {
-          throw new Error('Function not implemented.')
-        }}
-        onConsentGroupChange={function (_items: ConsentGroup2[]): void {
-          throw new Error('Function not implemented.')
-        }}
-      />,
-    )
+  it('Edits without saving', () => {
+    mountAddEdit()
     cy.get('#consentGroupName').type('Hello!')
     cy.get('#url').type('https://www.asdf.gov')
   })
 
-  it('Shows conditional fields only when checked', function () {
-    mount(
-      <ConsentGroupAddEdit
-        id={0}
-        consentGroups={[]}
-        closeAction={function (): void {
-          throw new Error('Function not implemented.')
-        }}
-        onConsentGroupChange={function (_items: ConsentGroup2[]): void {
-          throw new Error('Function not implemented.')
-        }}
-      />,
-    )
+  it('Shows conditional fields only when checked', () => {
+    mountAddEdit()
 
     cy.get('#primaryConsent_generalResearchUse').click()
 

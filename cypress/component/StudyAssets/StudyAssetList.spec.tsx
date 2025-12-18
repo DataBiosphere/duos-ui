@@ -95,6 +95,7 @@ function mountStudyAssetList(
       getValidationState={getValidationState}
       getAddEditProps={getDefaultAddEditProps}
       getRowProps={getDefaultRowProps}
+      getItemKey={item => item.id}
     />,
   )
 }

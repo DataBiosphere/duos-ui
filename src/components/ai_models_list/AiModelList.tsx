@@ -51,6 +51,7 @@ export default function AiModelList(props: {
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
       })}
+      getItemKey={item => item.modelId}
     />
   )
 }

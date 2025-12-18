@@ -53,6 +53,7 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
       })}
+      getItemKey={item => item.publicationId}
     />
   )
 }

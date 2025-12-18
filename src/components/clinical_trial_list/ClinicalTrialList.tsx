@@ -63,6 +63,7 @@ export default function ClinicalTrialList(props: {
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
       })}
+      getItemKey={item => item.clinicalTrialId}
     />
   )
 }

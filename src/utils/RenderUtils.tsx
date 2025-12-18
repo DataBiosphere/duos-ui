@@ -80,7 +80,8 @@ const renderersByColumn: Record<string, (value: unknown, asset?: unknown) => Rea
 
 export function renderColumnContent(column: string, value: unknown, asset?: unknown): React.ReactNode {
   if (renderersByColumn[column]) return renderersByColumn[column](value, asset)
-  if (value == null) return '—'
+  if (typeof value === 'object') return JSON.stringify(value)
   if (Array.isArray(value)) return value.map(v => v && typeof v === 'object' ? JSON.stringify(v) : String(v)).join(', ')
-  return typeof value === 'object' ? JSON.stringify(value) : String(value ?? '—')
+  if (value == null) return '—'
+  return String(value)
 }

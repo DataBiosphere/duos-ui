@@ -53,6 +53,7 @@ export default function FundingResourceList(props: FundingResourceListProps): Re
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
       })}
+      getItemKey={item => item.fundingId}
     />
   )
 }

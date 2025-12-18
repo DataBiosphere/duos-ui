@@ -34,6 +34,7 @@ interface StudyAssetListProps<
     columnsToShow: (keyof T)[]
     disabled: boolean
   }) => RowProps
+  readonly getItemKey: (item: T, index: number) => string | number
 }
 
 export default function StudyAssetList<
@@ -55,6 +56,7 @@ export default function StudyAssetList<
   studyAssetWrapper,
   getAddEditProps,
   getRowProps,
+  getItemKey,
 }: StudyAssetListProps<T, V, AddEditProps, RowProps>): React.JSX.Element {
   const [showAddEdit, setShowAddEdit] = useState(false)
   const [editState, setEditState] = useState<boolean[]>(items.map(() => false))
@@ -137,7 +139,7 @@ export default function StudyAssetList<
 
         return (
           <RowComponent
-            key={index}
+            key={getItemKey(item, index)}
             {...getRowProps(baseProps)}
           />
         )

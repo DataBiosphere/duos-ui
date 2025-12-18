@@ -53,6 +53,7 @@ export default function IntellectualPropertyList(props: IntellectualPropertyList
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
       })}
+      getItemKey={item => item.ipId}
     />
   )
 }
