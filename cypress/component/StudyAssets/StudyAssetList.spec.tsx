@@ -61,87 +61,90 @@ const sampleItems: TestAsset[] = [
   { id: 'item2', name: 'Second Item' },
 ]
 
-describe('StudyAssetList', () => {
-  const getValidationState = (validation?: ValidationError) => validation
+// Helper functions
+const getValidationState = (validation?: ValidationError) => validation
 
+function getDefaultAddEditProps(items: TestAsset[], closeAction: () => void, onChange: (items: TestAsset[]) => void): TestAddEditProps {
+  return {
+    items,
+    onSave: (item: TestAsset) => {
+      onChange([...items, item])
+      closeAction()
+    },
+    onCancel: closeAction,
+  }
+}
+
+function getDefaultRowProps(baseProps: Omit<TestRowProps, 'item' | 'items' | 'index'>): TestRowProps {
+  return baseProps as TestRowProps
+}
+
+function mountStudyAssetList(
+  items: TestAsset[] = [],
+  onItemsChange: (items: TestAsset[]) => void = cy.stub(),
+  options: {
+    disabled?: boolean
+    columnsToShow?: (keyof TestAsset)[]
+  } = {},
+) {
+  return mount(
+    <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
+      items={items}
+      onItemsChange={onItemsChange}
+      disabled={options.disabled}
+      columnsToShow={options.columnsToShow}
+      AddEditComponent={TestAddEditComponent}
+      RowComponent={TestRowComponent}
+      addButtonId="add-test-btn"
+      addButtonLabel="Add Test Item"
+      getValidationState={getValidationState}
+      getAddEditProps={getDefaultAddEditProps}
+      getRowProps={getDefaultRowProps}
+    />,
+  )
+}
+
+function createCollectedItems(initial: TestAsset[] = []) {
+  const collected: TestAsset[] = [...initial]
+  const onChange = (items: TestAsset[]) => collected.splice(0, collected.length, ...items)
+  return { collected, onChange }
+}
+
+function clickAddButton() {
+  cy.get('#add-test-btn').click()
+}
+
+function saveNewItem() {
+  cy.get('[data-testid="add-edit-form"]').within(() => {
+    cy.contains('Save').click()
+  })
+}
+
+function cancelAddEdit() {
+  cy.get('[data-testid="add-edit-form"]').within(() => {
+    cy.contains('Cancel').click()
+  })
+}
+
+describe('StudyAssetList', () => {
   it('renders add button', () => {
-    const onItemsChange = cy.stub()
-    mount(
-      <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
-        items={[]}
-        onItemsChange={onItemsChange}
-        AddEditComponent={TestAddEditComponent}
-        RowComponent={TestRowComponent}
-        addButtonId="add-test-btn"
-        addButtonLabel="Add Test Item"
-        getValidationState={getValidationState}
-        getAddEditProps={(items, closeAction, onChange) => ({
-          items,
-          onSave: (item: TestAsset) => {
-            onChange([...items, item])
-            closeAction()
-          },
-          onCancel: closeAction,
-        })}
-        getRowProps={baseProps => baseProps}
-      />,
-    )
+    mountStudyAssetList()
     cy.get('#add-test-btn').should('exist')
     cy.contains('Add Test Item').should('exist')
   })
 
   it('shows add/edit form when add button is clicked', () => {
-    const onItemsChange = cy.stub()
-    mount(
-      <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
-        items={[]}
-        onItemsChange={onItemsChange}
-        AddEditComponent={TestAddEditComponent}
-        RowComponent={TestRowComponent}
-        addButtonId="add-test-btn"
-        addButtonLabel="Add Test Item"
-        getValidationState={getValidationState}
-        getAddEditProps={(items, closeAction, onChange) => ({
-          items,
-          onSave: (item: TestAsset) => {
-            onChange([...items, item])
-            closeAction()
-          },
-          onCancel: closeAction,
-        })}
-        getRowProps={baseProps => baseProps}
-      />,
-    )
-    cy.get('#add-test-btn').click()
+    mountStudyAssetList()
+    clickAddButton()
     cy.get('[data-testid="add-edit-form"]').should('exist')
   })
 
   it('adds new item when save is clicked', () => {
-    const collected: TestAsset[] = []
-    mount(
-      <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
-        items={[]}
-        onItemsChange={items => collected.splice(0, collected.length, ...items)}
-        AddEditComponent={TestAddEditComponent}
-        RowComponent={TestRowComponent}
-        addButtonId="add-test-btn"
-        addButtonLabel="Add Test Item"
-        getValidationState={getValidationState}
-        getAddEditProps={(items, closeAction, onChange) => ({
-          items,
-          onSave: (item: TestAsset) => {
-            onChange([...items, item])
-            closeAction()
-          },
-          onCancel: closeAction,
-        })}
-        getRowProps={baseProps => baseProps}
-      />,
-    )
-    cy.get('#add-test-btn').click()
-    cy.get('[data-testid="add-edit-form"]').within(() => {
-      cy.contains('Save').click()
-    })
+    const { collected, onChange } = createCollectedItems()
+    mountStudyAssetList([], onChange)
+
+    clickAddButton()
+    saveNewItem()
 
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
@@ -150,83 +153,22 @@ describe('StudyAssetList', () => {
   })
 
   it('hides add/edit form when cancel is clicked', () => {
-    const onItemsChange = cy.stub()
-    mount(
-      <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
-        items={[]}
-        onItemsChange={onItemsChange}
-        AddEditComponent={TestAddEditComponent}
-        RowComponent={TestRowComponent}
-        addButtonId="add-test-btn"
-        addButtonLabel="Add Test Item"
-        getValidationState={getValidationState}
-        getAddEditProps={(items, closeAction, onChange) => ({
-          items,
-          onSave: (item: TestAsset) => {
-            onChange([...items, item])
-            closeAction()
-          },
-          onCancel: closeAction,
-        })}
-        getRowProps={baseProps => baseProps}
-      />,
-    )
-    cy.get('#add-test-btn').click()
-    cy.get('[data-testid="add-edit-form"]').within(() => {
-      cy.contains('Cancel').click()
-    })
+    mountStudyAssetList()
+    clickAddButton()
+    cancelAddEdit()
     cy.get('[data-testid="add-edit-form"]').should('not.exist')
   })
 
   it('renders existing items', () => {
-    const onItemsChange = cy.stub()
-    mount(
-      <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
-        items={sampleItems}
-        columnsToShow={['name']}
-        onItemsChange={onItemsChange}
-        AddEditComponent={TestAddEditComponent}
-        RowComponent={TestRowComponent}
-        addButtonId="add-test-btn"
-        addButtonLabel="Add Test Item"
-        getValidationState={getValidationState}
-        getAddEditProps={(items, closeAction, onChange) => ({
-          items,
-          onSave: (item: TestAsset) => {
-            onChange([...items, item])
-            closeAction()
-          },
-          onCancel: closeAction,
-        })}
-        getRowProps={baseProps => baseProps}
-      />,
-    )
+    mountStudyAssetList(sampleItems, cy.stub(), { columnsToShow: ['name'] })
     cy.contains('First Item').should('exist')
     cy.contains('Second Item').should('exist')
   })
 
   it('deletes item when delete button is clicked', () => {
-    const collected: TestAsset[] = [...sampleItems]
-    mount(
-      <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
-        items={collected}
-        onItemsChange={items => collected.splice(0, collected.length, ...items)}
-        AddEditComponent={TestAddEditComponent}
-        RowComponent={TestRowComponent}
-        addButtonId="add-test-btn"
-        addButtonLabel="Add Test Item"
-        getValidationState={getValidationState}
-        getAddEditProps={(items, closeAction, onChange) => ({
-          items,
-          onSave: (item: TestAsset) => {
-            onChange([...items, item])
-            closeAction()
-          },
-          onCancel: closeAction,
-        })}
-        getRowProps={baseProps => baseProps}
-      />,
-    )
+    const { collected, onChange } = createCollectedItems(sampleItems)
+    mountStudyAssetList(collected, onChange)
+
     cy.get('[data-testid="row-item1"]').within(() => {
       cy.get('.glyphicon-trash').click()
     })
@@ -238,28 +180,7 @@ describe('StudyAssetList', () => {
   })
 
   it('disables add button when disabled prop is true', () => {
-    const onItemsChange = cy.stub()
-    mount(
-      <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
-        items={[]}
-        onItemsChange={onItemsChange}
-        disabled={true}
-        AddEditComponent={TestAddEditComponent}
-        RowComponent={TestRowComponent}
-        addButtonId="add-test-btn"
-        addButtonLabel="Add Test Item"
-        getValidationState={getValidationState}
-        getAddEditProps={(items, closeAction, onChange) => ({
-          items,
-          onSave: (item: TestAsset) => {
-            onChange([...items, item])
-            closeAction()
-          },
-          onCancel: closeAction,
-        })}
-        getRowProps={baseProps => baseProps}
-      />,
-    )
+    mountStudyAssetList([], cy.stub(), { disabled: true })
     cy.get('#add-test-btn').should('be.disabled')
   })
 })

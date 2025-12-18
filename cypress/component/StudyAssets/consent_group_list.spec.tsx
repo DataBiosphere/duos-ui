@@ -30,6 +30,55 @@ const ConsentGroupListHarness: React.FC<{ initial: ConsentGroup2[] }> = ({ initi
   )
 }
 
+// Helper functions
+function mountListWithItem() {
+  return mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
+}
+
+function mountRow(overrides: Partial<React.ComponentProps<typeof ConsentGroupRow>> = {}) {
+  return mount(
+    <ConsentGroupRow
+      id={0}
+      editMode={false}
+      consentGroup={sampleConsentGroup}
+      consentGroups={[sampleConsentGroup]}
+      columnsToShow={['consentGroupName']}
+      editAction={cy.stub()}
+      deleteAction={cy.stub()}
+      closeAction={cy.stub()}
+      onConsentGroupChange={cy.stub()}
+      disabled={false}
+      {...overrides}
+    />,
+  )
+}
+
+function fillConsentGroupForm(overrides: Partial<ConsentGroup2> = {}) {
+  cy.get('#consentGroupName').type(overrides.consentGroupName ?? 'New Consent Group')
+  cy.get('#accessManagement_open').check()
+  cy.get('#numberOfParticipants').clear()
+  cy.get('#numberOfParticipants').type((overrides.numberOfParticipants ?? 25).toString())
+  cy.get('#dataLocation').click()
+  cy.get('#dataLocation').type((overrides.dataLocation ?? 'Not Determined') + '{enter}')
+}
+
+function testViewModeFlow(mountFn: () => void, titleText: string) {
+  mountFn()
+  cy.get('.glyphicon-eye-open').click({ force: true })
+  cy.contains(titleText).should('exist')
+  cy.get('#consentGroupName').should('be.disabled')
+  cy.get('.collaborator-form-add-save-button').should('not.exist')
+  cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+}
+
+function testCloseViewMode(mountFn: () => void) {
+  mountFn()
+  cy.get('.glyphicon-eye-open').click({ force: true })
+  cy.get('.collaborator-form-cancel-button').click()
+  cy.get('#consentGroupName').should('not.exist')
+  cy.get('.glyphicon-eye-open').should('exist')
+}
+
 describe('ConsentGroupList component', () => {
   it('Edits without saving', function () {
     mount(
@@ -82,25 +131,16 @@ describe('ConsentGroupList component', () => {
   })
 
   it('renders existing consent groups', () => {
-    mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
+    mountListWithItem()
     cy.contains(sampleConsentGroup.consentGroupName).should('exist')
   })
 
   it('opens consent group in view mode when view button is clicked', () => {
-    mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains(sampleConsentGroup.consentGroupName).should('exist')
-    cy.get('#consentGroupName').should('be.disabled')
-    cy.get('.collaborator-form-add-save-button').should('not.exist')
-    cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+    testViewModeFlow(mountListWithItem, sampleConsentGroup.consentGroupName)
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('.collaborator-form-cancel-button').click()
-    cy.get('#consentGroupName').should('not.exist')
-    cy.get('.glyphicon-eye-open').should('exist')
+    testCloseViewMode(mountListWithItem)
   })
 
   it('adds a new consent group', () => {
@@ -114,12 +154,7 @@ describe('ConsentGroupList component', () => {
       />,
     )
     cy.get('#add-consent-group-btn').click()
-    cy.get('#consentGroupName').type('New Consent Group')
-    cy.get('#accessManagement_open').check()
-    cy.get('#numberOfParticipants').clear()
-    cy.get('#numberOfParticipants').type('25')
-    cy.get('#dataLocation').click()
-    cy.get('#dataLocation').type('Not Determined{enter}')
+    fillConsentGroupForm()
     cy.get('.collaborator-form-add-save-button').should('not.be.disabled')
     cy.get('.collaborator-form-add-save-button').click()
 
@@ -130,7 +165,7 @@ describe('ConsentGroupList component', () => {
   })
 
   it('edits existing consent group and saves changes', () => {
-    mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
+    mountListWithItem()
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('#consentGroupName').should('exist')
     cy.get('#consentGroupName').clear()
@@ -144,10 +179,7 @@ describe('ConsentGroupList component', () => {
   })
 
   it('deletes a consent group via modal confirmation', () => {
-    testDeleteViaModal(
-      () => mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />),
-      sampleConsentGroup.consentGroupName,
-    )
+    testDeleteViaModal(mountListWithItem, sampleConsentGroup.consentGroupName)
   })
 })
 
@@ -185,82 +217,26 @@ describe('ConsentGroupSummary', () => {
 
 describe('ConsentGroupRow', () => {
   it('shows summary when not in edit mode and triggers editAction', () => {
-    mount(
-      <ConsentGroupRow
-        id={0}
-        editMode={false}
-        consentGroup={sampleConsentGroup}
-        consentGroups={[sampleConsentGroup]}
-        columnsToShow={['consentGroupName']}
-        editAction={cy.stub().as('edit')}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        onConsentGroupChange={cy.stub()}
-        disabled={false}
-      />,
-    )
+    mountRow({ editAction: cy.stub().as('edit') })
     cy.contains(sampleConsentGroup.consentGroupName).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
-      <ConsentGroupRow
-        id={0}
-        editMode={true}
-        consentGroup={sampleConsentGroup}
-        consentGroups={[sampleConsentGroup]}
-        columnsToShow={['consentGroupName']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        onConsentGroupChange={cy.stub()}
-        disabled={false}
-      />,
-    )
+    mountRow({ editMode: true })
     cy.get('#consentGroupName').should('have.value', sampleConsentGroup.consentGroupName)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
-      <ConsentGroupRow
-        id={0}
-        editMode={false}
-        viewMode={true}
-        consentGroup={sampleConsentGroup}
-        consentGroups={[sampleConsentGroup]}
-        columnsToShow={['consentGroupName']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        viewAction={cy.stub()}
-        onConsentGroupChange={cy.stub()}
-        disabled={false}
-      />,
-    )
+    mountRow({ viewMode: true, viewAction: cy.stub() })
     cy.get('#consentGroupName').should('have.value', sampleConsentGroup.consentGroupName)
     cy.get('#consentGroupName').should('be.disabled')
     cy.get('.collaborator-form-add-save-button').should('not.exist')
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
-      <ConsentGroupRow
-        id={0}
-        editMode={false}
-        viewMode={false}
-        consentGroup={sampleConsentGroup}
-        consentGroups={[sampleConsentGroup]}
-        columnsToShow={['consentGroupName']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        viewAction={cy.stub().as('view')}
-        onConsentGroupChange={cy.stub()}
-        disabled={false}
-      />,
-    )
+    mountRow({ viewAction: cy.stub().as('view') })
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.get('@view').should('have.been.calledOnce')
   })

@@ -25,7 +25,6 @@ describe('StudyAssetSummary', () => {
     mount(
       <StudyAssetSummary
         asset={sampleAsset}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={editAction}
@@ -48,7 +47,6 @@ describe('StudyAssetSummary', () => {
       <StudyAssetSummary
         asset={sampleAsset}
         columnsToShow={['name', 'value']}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={editAction}
@@ -68,7 +66,6 @@ describe('StudyAssetSummary', () => {
     mount(
       <StudyAssetSummary
         asset={sampleAsset}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={cy.stub()}
@@ -87,7 +84,6 @@ describe('StudyAssetSummary', () => {
     mount(
       <StudyAssetSummary
         asset={sampleAsset}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={editAction}
@@ -104,7 +100,6 @@ describe('StudyAssetSummary', () => {
     mount(
       <StudyAssetSummary
         asset={sampleAsset}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={cy.stub()}
@@ -123,7 +118,6 @@ describe('StudyAssetSummary', () => {
     mount(
       <StudyAssetSummary
         asset={sampleAsset}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={cy.stub()}
@@ -141,7 +135,6 @@ describe('StudyAssetSummary', () => {
     mount(
       <StudyAssetSummary
         asset={sampleAsset}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={cy.stub()}
@@ -158,7 +151,6 @@ describe('StudyAssetSummary', () => {
     mount(
       <StudyAssetSummary
         asset={sampleAsset}
-        customRenderers={{}}
         name="Test Asset"
         objectName="asset"
         editAction={cy.stub()}
@@ -169,26 +161,5 @@ describe('StudyAssetSummary', () => {
     )
 
     cy.get('.glyphicon-trash').parent().should('be.disabled')
-  })
-
-  it('applies custom renderer when provided', () => {
-    const customRenderers = {
-      value: (val: unknown) => <strong>Custom: {String(val)}</strong>,
-    }
-
-    mount(
-      <StudyAssetSummary
-        asset={sampleAsset}
-        columnsToShow={['value']}
-        customRenderers={customRenderers}
-        name="Test Asset"
-        objectName="asset"
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        viewAction={cy.stub()}
-      />,
-    )
-
-    cy.contains('Custom: 100').should('exist')
   })
 })
