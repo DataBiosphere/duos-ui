@@ -137,7 +137,7 @@ export default function StudyAssetList<
 
         return (
           <RowComponent
-            key={`study-asset-item-${index}`}
+            key={index}
             {...getRowProps(baseProps)}
           />
         )

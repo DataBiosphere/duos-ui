@@ -16,16 +16,11 @@ interface TestAddEditProps {
 
 interface TestRowProps {
   item: TestAsset
-  items: TestAsset[]
-  index: number
   editMode: boolean
   viewMode: boolean
   editAction: () => void
   deleteAction: () => void
   viewAction: () => void
-  closeAction: () => void
-  onItemsChange: (items: TestAsset[]) => void
-  columnsToShow: (keyof TestAsset)[]
   disabled: boolean
 }
 
