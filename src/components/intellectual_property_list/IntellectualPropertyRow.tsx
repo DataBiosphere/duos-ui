@@ -2,6 +2,7 @@ import React from 'react'
 import { IntellectualProperty } from 'src/types/model'
 import IntellectualPropertyAddEdit from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
 import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
+import StudyAssetRow from 'src/components/study_asset/StudyAssetRow'
 
 interface IntellectualPropertyRowProps {
   readonly id: number
@@ -35,27 +36,36 @@ export default function IntellectualPropertyRow(props: IntellectualPropertyRowPr
   } = props
 
   return (
-    <div>
-      {(editMode || viewMode) && (
-        <IntellectualPropertyAddEdit
-          id={id}
-          intellectualProperty={intellectualProperty}
-          intellectualProperties={intellectualProperties}
-          closeAction={closeAction}
-          onIntellectualPropertyChange={onIntellectualPropertyChange}
-          readOnly={viewMode}
-        />
-      )}
-      {!editMode && !viewMode && (
-        <IntellectualPropertySummary
-          intellectualProperty={intellectualProperty}
-          columnsToShow={columnsToShow}
-          editAction={editAction}
-          deleteAction={deleteAction}
-          viewAction={viewAction}
-          disabled={disabled}
-        />
-      )}
-    </div>
+    <StudyAssetRow
+      id={id}
+      editMode={editMode}
+      viewMode={viewMode}
+      asset={intellectualProperty}
+      assets={intellectualProperties}
+      columnsToShow={columnsToShow}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      closeAction={closeAction}
+      viewAction={viewAction}
+      onAssetsChange={onIntellectualPropertyChange}
+      disabled={disabled}
+      AddEditComponent={IntellectualPropertyAddEdit}
+      SummaryComponent={IntellectualPropertySummary}
+      addEditProps={{
+        id,
+        intellectualProperty,
+        intellectualProperties,
+        closeAction,
+        onIntellectualPropertyChange,
+      }}
+      summaryProps={{
+        intellectualProperty,
+        columnsToShow,
+        editAction,
+        deleteAction,
+        viewAction,
+        disabled,
+      }}
+    />
   )
 }

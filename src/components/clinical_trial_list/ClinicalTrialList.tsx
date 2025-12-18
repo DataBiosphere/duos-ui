@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
-import ClinicalTrialAddEdit from 'src/components/clinical_trial_list/ClinicalTrialAddEdit'
-import ClinicalTrialRow from 'src/components/clinical_trial_list/ClinicalTrialRow'
+import ClinicalTrialAddEdit from './ClinicalTrialAddEdit'
+import ClinicalTrialRow from './ClinicalTrialRow'
 import { ClinicalTrial } from 'src/types/model'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import {
@@ -8,115 +7,62 @@ import {
   parseLegacyPhase,
   parseLegacyInterventionType,
 } from 'src/utils/ClinicalTrialEnumUtils'
-import AddObjectButton from 'src/components/AddObjectButton'
+import React from 'react'
+import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
-interface ClinicalTrialListProps {
-  readonly clinicalTrials: ClinicalTrial[]
-  readonly columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
-  readonly onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
-  readonly disabled?: boolean
-  readonly validation?: DarErrors
-  readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
-}
-
-export default function ClinicalTrialList(props: ClinicalTrialListProps): React.JSX.Element {
-  const {
-    clinicalTrials,
-    columnsToShow = ['title', 'status', 'registry', 'phase', 'startDate', 'endDate', 'url'],
-    onClinicalTrialChange,
-    disabled = false,
-    validation,
-    studyAssetWrapper,
-  } = props
-
-  const normalized = clinicalTrials.map(ct => ({
+export default function ClinicalTrialList(props: {
+  clinicalTrials: ClinicalTrial[]
+  columnsToShow?: (keyof ClinicalTrial | 'dateRange')[]
+  onClinicalTrialChange: (clinicalTrials: ClinicalTrial[]) => void
+  disabled?: boolean
+  validation?: DarErrors
+  studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
+}) {
+  const normalized = props.clinicalTrials.map(ct => ({
     ...ct,
     status: parseLegacyStatus(ct.status as unknown as string),
     phase: parseLegacyPhase(ct.phase as unknown as string),
     interventionType: parseLegacyInterventionType(ct.interventionType as unknown as string),
   }))
 
-  const [showAddEdit, setShowAddEdit] = useState(false)
-  const [editState, setEditState] = useState(normalized.map(() => false))
-  const [viewState, setViewState] = useState(normalized.map(() => false))
-
-  const toggleEditState = (index: number) => {
-    const copy = [...editState]
-    copy[index] = !copy[index]
-    setEditState(copy)
-  }
-
-  const toggleViewState = (index: number) => {
-    const viewStateCopy = [...viewState]
-    viewStateCopy[index] = !viewStateCopy[index]
-    setViewState(viewStateCopy)
-  }
-
-  const handleDelete = (index: number) => {
-    const updated = normalized.filter((_, i) => i !== index)
-    onClinicalTrialChange(updated)
-  }
-
-  const getValidationState = () => validation?.clinicalTrials
-
-  const button = (
-    <AddObjectButton
-      id="add-clinical-trial-btn"
-      label="Add Clinical Trial"
-      onClick={() => setShowAddEdit(true)}
-      disabled={disabled}
-      hasValidationError={!!getValidationState()}
-    />
-  )
-
-  const content = (
-    <div className="form-group row no-margin">
-      {showAddEdit && (
-        <ClinicalTrialAddEdit
-          id={-1}
-          clinicalTrials={normalized}
-          closeAction={() => setShowAddEdit(false)}
-          onClinicalTrialChange={onClinicalTrialChange}
-        />
-      )}
-      {normalized.map((clinicalTrial: ClinicalTrial, index: number) => (
-        <ClinicalTrialRow
-          key={clinicalTrial.clinicalTrialId || index}
-          id={index}
-          editMode={editState[index]}
-          viewMode={viewState[index]}
-          clinicalTrial={clinicalTrial}
-          clinicalTrials={normalized}
-          columnsToShow={columnsToShow}
-          editAction={() => toggleEditState(index)}
-          deleteAction={() => { handleDelete(index) }}
-          closeAction={() => {
-            if (editState[index]) {
-              toggleEditState(index)
-            }
-            else if (viewState[index]) {
-              toggleViewState(index)
-            }
-            setShowAddEdit(false)
-          }}
-          viewAction={() => toggleViewState(index)}
-          onClinicalTrialChange={onClinicalTrialChange}
-          disabled={disabled}
-        />
-      ))}
-    </div>
-  )
-
-  if (studyAssetWrapper) {
-    return <>{studyAssetWrapper(content, button)}</>
-  }
-
   return (
-    <div className="presentation-list-component">
-      <div className="row no-margin">
-        {button}
-      </div>
-      {content}
-    </div>
+    <StudyAssetList<
+      ClinicalTrial,
+      DarErrors,
+      React.ComponentProps<typeof ClinicalTrialAddEdit>,
+      React.ComponentProps<typeof ClinicalTrialRow>
+    >
+      items={normalized}
+      columnsToShow={props.columnsToShow ?? ['title', 'status', 'registry', 'phase', 'startDate', 'endDate', 'url']}
+      onItemsChange={props.onClinicalTrialChange}
+      disabled={props.disabled}
+      validation={props.validation}
+      AddEditComponent={ClinicalTrialAddEdit}
+      RowComponent={ClinicalTrialRow}
+      addButtonId="add-clinical-trial-btn"
+      addButtonLabel="Add Clinical Trial"
+      getValidationState={v => v?.clinicalTrials}
+      studyAssetWrapper={props.studyAssetWrapper}
+      getAddEditProps={(items, closeAction, onItemsChange) => ({
+        id: -1,
+        clinicalTrials: items,
+        closeAction,
+        onClinicalTrialChange: onItemsChange,
+      })}
+      getRowProps={baseProps => ({
+        id: baseProps.index,
+        editMode: baseProps.editMode,
+        viewMode: baseProps.viewMode,
+        clinicalTrial: baseProps.item,
+        clinicalTrials: baseProps.items,
+        viewAction: baseProps.viewAction,
+        editAction: baseProps.editAction,
+        deleteAction: baseProps.deleteAction,
+        closeAction: baseProps.closeAction,
+        onClinicalTrialChange: baseProps.onItemsChange,
+        columnsToShow: baseProps.columnsToShow,
+        disabled: baseProps.disabled,
+      })}
+    />
   )
 }

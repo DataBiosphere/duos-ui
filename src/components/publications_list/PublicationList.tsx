@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PublicationAddEdit from './PublicationAddEdit'
 import PublicationRow from './PublicationRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { Publication } from 'src/types/model'
-import AddObjectButton from 'src/components/AddObjectButton'
+import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface PublicationListProps {
   readonly publications: Publication[]
-  readonly columnsToShow?: (keyof Publication)[]
+  readonly columnsToShow?: (keyof Publication | string)[]
   readonly onPublicationChange: (publications: Publication[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -15,96 +15,44 @@ interface PublicationListProps {
 }
 
 export default function PublicationList(props: PublicationListProps): React.JSX.Element {
-  const {
-    publications,
-    columnsToShow = ['title', 'publishedDate', 'journal', 'url', 'doi', 'access'],
-    onPublicationChange,
-    disabled = false,
-    validation,
-    studyAssetWrapper,
-  } = props
-
-  const [showAddEdit, setShowAddEdit] = useState(false)
-  const [editState, setEditState] = useState(publications.map(() => false))
-  const [viewState, setViewState] = useState(publications.map(() => false))
-
-  const toggleEditState = (index: number) => {
-    const editStateCopy = [...editState]
-    editStateCopy[index] = !editStateCopy[index]
-    setEditState(editStateCopy)
-  }
-
-  const toggleViewState = (index: number) => {
-    const viewStateCopy = [...viewState]
-    viewStateCopy[index] = !viewStateCopy[index]
-    setViewState(viewStateCopy)
-  }
-
-  const handleDeletePublication = (index: number) => {
-    const updatedPublications = publications.filter((_, i) => i !== index)
-    onPublicationChange(updatedPublications)
-  }
-
-  const getValidationState = () => validation?.publications
-
-  const button = (
-    <AddObjectButton
-      id="add-publication-btn"
-      label="Add Publication"
-      onClick={() => setShowAddEdit(true)}
-      disabled={disabled}
-      hasValidationError={!!getValidationState()}
-    />
-  )
-
-  const content = (
-    <div className="form-group row no-margin">
-      {showAddEdit && (
-        <PublicationAddEdit
-          id={-1}
-          publications={publications}
-          closeAction={() => setShowAddEdit(false)}
-          onPublicationChange={onPublicationChange}
-        />
-      )}
-      {publications.map((publication: Publication, index: number) => (
-        <PublicationRow
-          key={index}
-          id={index}
-          editMode={editState[index]}
-          viewMode={viewState[index]}
-          publication={publication}
-          publications={publications}
-          columnsToShow={columnsToShow}
-          editAction={() => toggleEditState(index)}
-          deleteAction={() => { handleDeletePublication(index) }}
-          closeAction={() => {
-            if (editState[index]) {
-              toggleEditState(index)
-            }
-            else if (viewState[index]) {
-              toggleViewState(index)
-            }
-            setShowAddEdit(false)
-          }}
-          viewAction={() => toggleViewState(index)}
-          onPublicationChange={onPublicationChange}
-          disabled={disabled}
-        />
-      ))}
-    </div>
-  )
-
-  if (studyAssetWrapper) {
-    return <>{studyAssetWrapper(content, button)}</>
-  }
-
   return (
-    <div className="publication-list-component">
-      <div className="row no-margin">
-        {button}
-      </div>
-      {content}
-    </div>
+    <StudyAssetList<
+      Publication,
+      DarErrors,
+      React.ComponentProps<typeof PublicationAddEdit>,
+      React.ComponentProps<typeof PublicationRow>
+    >
+      items={props.publications}
+      columnsToShow={props.columnsToShow ?? ['title', 'publishedDate', 'journal', 'url', 'doi', 'access']}
+      onItemsChange={props.onPublicationChange}
+      disabled={props.disabled}
+      validation={props.validation}
+      AddEditComponent={PublicationAddEdit}
+      RowComponent={PublicationRow}
+      addButtonId="add-publication-btn"
+      addButtonLabel="Add Publication"
+      getValidationState={v => v?.publications}
+      studyAssetWrapper={props.studyAssetWrapper}
+      getAddEditProps={(items, closeAction, onItemsChange) => ({
+        id: -1,
+        publications: items,
+        closeAction,
+        onPublicationChange: onItemsChange,
+      })}
+      getRowProps={baseProps => ({
+        id: baseProps.index,
+        editMode: baseProps.editMode,
+        viewMode: baseProps.viewMode,
+        publication: baseProps.item,
+        publications: baseProps.items,
+        viewAction: baseProps.viewAction,
+        editAction: baseProps.editAction,
+        deleteAction: baseProps.deleteAction,
+        closeAction: baseProps.closeAction,
+        onPublicationChange: baseProps.onItemsChange,
+        columnsToShow: baseProps.columnsToShow,
+        disabled: baseProps.disabled,
+      })}
+    />
   )
 }

@@ -5,10 +5,10 @@ import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
 interface FundingSourceAddEditProps {
   readonly id: number
-  readonly funding?: FundingResource
+  readonly fundingResource?: FundingResource
   readonly fundingResources: FundingResource[]
   readonly closeAction: () => void
-  readonly onFundingChange: (items: FundingResource[]) => void
+  readonly onFundingResourcesChange: (items: FundingResource[]) => void
   readonly readOnly?: boolean
 }
 
@@ -53,16 +53,16 @@ interface FormFieldChange {
   value: FundingFieldValue
 }
 
-const getHeaderTitle = (readOnly: boolean, funding?: FundingResource) => {
-  if (readOnly) return funding?.funderName
-  if (!funding) return 'New Funding Resource'
-  return `Edit ${funding.funderName}`
+const getHeaderTitle = (readOnly: boolean, fundingResource?: FundingResource) => {
+  if (readOnly) return fundingResource?.funderName
+  if (!fundingResource) return 'New Funding Resource'
+  return `Edit ${fundingResource.funderName}`
 }
 
 export default function FundingResourceAddEdit(props: FundingSourceAddEditProps): React.JSX.Element {
-  const { id, funding, fundingResources, closeAction, onFundingChange, readOnly = false } = props
+  const { id, fundingResource, fundingResources, closeAction, onFundingResourcesChange, readOnly = false } = props
 
-  const [current, setCurrent] = useState<FundingResource>(funding || defaultFunding)
+  const [current, setCurrent] = useState<FundingResource>(fundingResource || defaultFunding)
   const [validation, setValidation] = useState<Validation>({})
 
   const onChange = ({ key, value }: FormFieldChange) => {
@@ -78,18 +78,18 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
       fundingId: current.fundingId || crypto.randomUUID?.() || Date.now().toString(),
     }
     if (id < 0) {
-      onFundingChange([...fundingResources, toSave])
+      onFundingResourcesChange([...fundingResources, toSave])
     }
     else {
       const copy = [...fundingResources]
       copy[id] = toSave
-      onFundingChange(copy)
+      onFundingResourcesChange(copy)
     }
     setCurrent(defaultFunding)
     closeAction()
   }
 
-  const headerTitle = getHeaderTitle(readOnly, funding)
+  const headerTitle = getHeaderTitle(readOnly, fundingResource)
 
   return (
     <div className="form-group row no-margin">
@@ -99,7 +99,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="funderName"
             title="Funder Name"
-            defaultValue={funding?.funderName}
+            defaultValue={fundingResource?.funderName}
             placeholder="Funder"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -109,7 +109,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="funderProgram"
             title="Funder Program"
-            defaultValue={funding?.funderProgram}
+            defaultValue={fundingResource?.funderProgram}
             placeholder="Funder Program"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -119,7 +119,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="grantNumber"
             title="Grant Number"
-            defaultValue={funding?.grantNumber}
+            defaultValue={fundingResource?.grantNumber}
             placeholder="Grant Number"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -129,7 +129,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="projectTitle"
             title="Project Title"
-            defaultValue={funding?.projectTitle}
+            defaultValue={fundingResource?.projectTitle}
             placeholder="Project Title"
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
@@ -139,7 +139,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="startDate"
             title="Start Date"
-            defaultValue={funding?.startDate}
+            defaultValue={fundingResource?.startDate}
             placeholder="YYYY-MM-DD"
             validators={[FormValidators.DATE]}
             onChange={onChange}
@@ -149,7 +149,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="endDate"
             title="End Date"
-            defaultValue={funding?.endDate}
+            defaultValue={fundingResource?.endDate}
             placeholder="YYYY-MM-DD"
             validators={[FormValidators.DATE]}
             onChange={onChange}
@@ -159,7 +159,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="url"
             title="URL"
-            defaultValue={funding?.url}
+            defaultValue={fundingResource?.url}
             placeholder="https://..."
             validators={[FormValidators.URL]}
             onChange={onChange}
@@ -169,7 +169,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="tags"
             title="Tags (comma separated)"
-            defaultValue={funding?.tags?.join(', ')}
+            defaultValue={fundingResource?.tags?.join(', ')}
             placeholder="tag1, tag2"
             onChange={({ value }: { value: string }) =>
               onChange({
@@ -197,7 +197,7 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
               type="button"
               onClick={save}
             >
-              {funding === undefined ? 'Add' : 'Save'}
+              {fundingResource === undefined ? 'Add' : 'Save'}
             </button>
           )}
           <button

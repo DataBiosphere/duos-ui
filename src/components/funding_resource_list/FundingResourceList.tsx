@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { FundingResource } from 'src/types/model'
 import FundingResourceAddEdit from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import FundingResourceRow from 'src/components/funding_resource_list/FundingResourceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import AddObjectButton from 'src/components/AddObjectButton'
+import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface FundingResourceListProps {
   readonly fundingResources: FundingResource[]
-  readonly columnsToShow?: (keyof FundingResource)[]
+  readonly columnsToShow?: (keyof FundingResource | string)[]
   readonly onFundingResourceChange: (items: FundingResource[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -15,96 +15,44 @@ interface FundingResourceListProps {
 }
 
 export default function FundingResourceList(props: FundingResourceListProps): React.JSX.Element {
-  const {
-    fundingResources,
-    columnsToShow = ['funderName', 'funderProgram', 'grantNumber', 'projectTitle', 'startDate', 'endDate', 'url'],
-    onFundingResourceChange,
-    disabled = false,
-    validation,
-    studyAssetWrapper,
-  } = props
-
-  const [showAddEdit, setShowAddEdit] = useState(false)
-  const [editState, setEditState] = useState(fundingResources.map(() => false))
-  const [viewState, setViewState] = useState(fundingResources.map(() => false))
-
-  const toggleEditState = (index: number) => {
-    const editStateCopy = [...editState]
-    editStateCopy[index] = !editStateCopy[index]
-    setEditState(editStateCopy)
-  }
-
-  const toggleViewState = (index: number) => {
-    const viewStateCopy = [...viewState]
-    viewStateCopy[index] = !viewStateCopy[index]
-    setViewState(viewStateCopy)
-  }
-
-  const handleDeleteFunding = (index: number) => {
-    const updated = fundingResources.filter((_, i) => i !== index)
-    onFundingResourceChange(updated)
-  }
-
-  const getValidationState = () => validation?.fundingResources
-
-  const button = (
-    <AddObjectButton
-      id="add-funding-btn"
-      label="Add Funding"
-      onClick={() => setShowAddEdit(true)}
-      disabled={disabled}
-      hasValidationError={!!getValidationState()}
-    />
-  )
-
-  const content = (
-    <div className="form-group row no-margin">
-      {showAddEdit && (
-        <FundingResourceAddEdit
-          id={-1}
-          fundingResources={fundingResources}
-          closeAction={() => setShowAddEdit(false)}
-          onFundingChange={onFundingResourceChange}
-        />
-      )}
-      {fundingResources.map((f: FundingResource, index: number) => (
-        <FundingResourceRow
-          key={f.fundingId || index}
-          id={index}
-          editMode={editState[index]}
-          viewMode={viewState[index]}
-          funding={f}
-          fundingResources={fundingResources}
-          columnsToShow={columnsToShow}
-          editAction={() => toggleEditState(index)}
-          deleteAction={() => handleDeleteFunding(index)}
-          closeAction={() => {
-            if (editState[index]) {
-              toggleEditState(index)
-            }
-            else if (viewState[index]) {
-              toggleViewState(index)
-            }
-            setShowAddEdit(false)
-          }}
-          viewAction={() => toggleViewState(index)}
-          onFundingChange={onFundingResourceChange}
-          disabled={disabled}
-        />
-      ))}
-    </div>
-  )
-
-  if (studyAssetWrapper) {
-    return <>{studyAssetWrapper(content, button)}</>
-  }
-
   return (
-    <div className="presentation-list-component">
-      <div className="row no-margin">
-        {button}
-      </div>
-      {content}
-    </div>
+    <StudyAssetList<
+      FundingResource,
+      DarErrors,
+      React.ComponentProps<typeof FundingResourceAddEdit>,
+      React.ComponentProps<typeof FundingResourceRow>
+    >
+      items={props.fundingResources}
+      columnsToShow={props.columnsToShow ?? ['funderName', 'funderProgram', 'grantNumber', 'projectTitle', 'startDate', 'endDate', 'url']}
+      onItemsChange={props.onFundingResourceChange}
+      disabled={props.disabled}
+      validation={props.validation}
+      AddEditComponent={FundingResourceAddEdit}
+      RowComponent={FundingResourceRow}
+      addButtonId="add-funding-btn"
+      addButtonLabel="Add Funding"
+      getValidationState={v => v?.fundingResources}
+      studyAssetWrapper={props.studyAssetWrapper}
+      getAddEditProps={(items, closeAction, onItemsChange) => ({
+        id: -1,
+        fundingResources: items,
+        closeAction,
+        onFundingResourcesChange: onItemsChange,
+      })}
+      getRowProps={baseProps => ({
+        id: baseProps.index,
+        editMode: baseProps.editMode,
+        viewMode: baseProps.viewMode,
+        fundingResource: baseProps.item,
+        fundingResources: baseProps.items,
+        viewAction: baseProps.viewAction,
+        editAction: baseProps.editAction,
+        deleteAction: baseProps.deleteAction,
+        closeAction: baseProps.closeAction,
+        onFundingResourcesChange: baseProps.onItemsChange,
+        columnsToShow: baseProps.columnsToShow,
+        disabled: baseProps.disabled,
+      })}
+    />
   )
 }

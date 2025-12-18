@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import ConsentGroupAddEdit from 'src/components/consent_group_list/ConsentGroupAddEdit'
 import ConsentGroupRow from 'src/components/consent_group_list/ConsentGroupRow'
-import AddObjectButton from 'src/components/AddObjectButton'
+import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface ConsentGroupListProps {
   readonly consentGroups: ConsentGroup2[]
-  readonly columnsToShow?: (keyof ConsentGroup2)[]
+  readonly columnsToShow?: (keyof ConsentGroup2 | string)[]
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -16,101 +16,46 @@ interface ConsentGroupListProps {
 }
 
 export default function ConsentGroupList(props: ConsentGroupListProps): React.JSX.Element {
-  const {
-    consentGroups,
-    columnsToShow = ['consentGroupName', 'accessManagement', 'dataLocation', 'numberOfParticipants', 'url', 'generalResearchUse'],
-    onConsentGroupChange,
-    disabled = false,
-    validation,
-    studyAssetWrapper,
-    isEditingExistingStudy,
-  } = props
-
-  const [showAddEdit, setShowAddEdit] = useState(false)
-  const [editState, setEditState] = useState(consentGroups.map(() => false))
-  const [viewState, setViewState] = useState(consentGroups.map(() => false))
-
-  const toggleEditState = (index: number) => {
-    const editStateCopy = [...editState]
-    editStateCopy[index] = !editStateCopy[index]
-    setEditState(editStateCopy)
-  }
-
-  const toggleViewState = (index: number) => {
-    const viewStateCopy = [...viewState]
-    viewStateCopy[index] = !viewStateCopy[index]
-    setViewState(viewStateCopy)
-  }
-
-  const handleDeleteConsentGroup = (index: number) => {
-    const updated = consentGroups.filter((_, i) => i !== index)
-    onConsentGroupChange(updated)
-  }
-
-  const getValidationState = () => validation?.consentGroups
-
-  const button = (
-    <AddObjectButton
-      id="add-consent-group-btn"
-      label="Add Dataset"
-      onClick={() => setShowAddEdit(true)}
-      disabled={disabled}
-      hasValidationError={!!getValidationState()}
-    />
-  )
-
-  const content = (
-    <div className="presentation-list-component">
-      {showAddEdit && (
-        <ConsentGroupAddEdit
-          id={-1}
-          consentGroups={consentGroups}
-          closeAction={() => setShowAddEdit(false)}
-          onConsentGroupChange={onConsentGroupChange}
-          isEditingExistingStudy={isEditingExistingStudy}
-        />
-      )}
-      <div className="form-group row no-margin">
-        {consentGroups.map((cg: ConsentGroup2, index: number) => (
-          <ConsentGroupRow
-            key={cg.datasetId || index}
-            id={index}
-            editMode={editState[index]}
-            viewMode={viewState[index]}
-            consentGroup={cg}
-            consentGroups={consentGroups}
-            columnsToShow={columnsToShow}
-            editAction={() => toggleEditState(index)}
-            deleteAction={() => handleDeleteConsentGroup(index)}
-            closeAction={() => {
-              if (editState[index]) {
-                toggleEditState(index)
-              }
-              else if (viewState[index]) {
-                toggleViewState(index)
-              }
-              setShowAddEdit(false)
-            }}
-            viewAction={() => toggleViewState(index)}
-            onConsentGroupChange={onConsentGroupChange}
-            disabled={disabled}
-            isEditingExistingStudy={isEditingExistingStudy}
-          />
-        ))}
-      </div>
-    </div>
-  )
-
-  if (studyAssetWrapper) {
-    return <>{studyAssetWrapper(content, button)}</>
-  }
-
   return (
-    <div className="consent-group-list-component">
-      <div className="row no-margin">
-        {button}
-      </div>
-      {content}
-    </div>
+    <StudyAssetList<
+      ConsentGroup2,
+      DarErrors,
+      React.ComponentProps<typeof ConsentGroupAddEdit>,
+      React.ComponentProps<typeof ConsentGroupRow>
+    >
+      items={props.consentGroups}
+      columnsToShow={props.columnsToShow ?? ['consentGroupName', 'accessManagement', 'dataLocation', 'numberOfParticipants', 'url', 'generalResearchUse']}
+      onItemsChange={props.onConsentGroupChange}
+      disabled={props.disabled}
+      validation={props.validation}
+      AddEditComponent={ConsentGroupAddEdit}
+      RowComponent={ConsentGroupRow}
+      addButtonId="add-consent-group-btn"
+      addButtonLabel="Add Dataset"
+      getValidationState={v => v?.consentGroups}
+      studyAssetWrapper={props.studyAssetWrapper}
+      getAddEditProps={(items, closeAction, onItemsChange) => ({
+        id: -1,
+        consentGroups: items,
+        closeAction,
+        onConsentGroupChange: onItemsChange,
+        isEditingExistingStudy: props.isEditingExistingStudy,
+      })}
+      getRowProps={baseProps => ({
+        id: baseProps.index,
+        editMode: baseProps.editMode,
+        viewMode: baseProps.viewMode,
+        consentGroup: baseProps.item,
+        consentGroups: baseProps.items,
+        viewAction: baseProps.viewAction,
+        editAction: baseProps.editAction,
+        deleteAction: baseProps.deleteAction,
+        closeAction: baseProps.closeAction,
+        onConsentGroupChange: baseProps.onItemsChange,
+        columnsToShow: baseProps.columnsToShow,
+        disabled: baseProps.disabled,
+        isEditingExistingStudy: props.isEditingExistingStudy,
+      })}
+    />
   )
 }

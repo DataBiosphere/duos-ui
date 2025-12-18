@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PresentationAddEdit from './PresentationAddEdit'
 import PresentationRow from './PresentationRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 import { Presentation } from 'src/types/model'
-import AddObjectButton from 'src/components/AddObjectButton'
+import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface PresentationListProps {
   readonly presentations: Presentation[]
-  readonly columnsToShow?: (keyof Presentation)[]
+  readonly columnsToShow?: (keyof Presentation | string)[]
   readonly onPresentationChange: (presentations: Presentation[]) => void
   readonly disabled?: boolean
   readonly validation?: DarErrors
@@ -15,96 +15,44 @@ interface PresentationListProps {
 }
 
 export default function PresentationList(props: PresentationListProps): React.JSX.Element {
-  const {
-    presentations,
-    columnsToShow = ['title', 'date', 'event', 'location', 'url', 'format', 'access'],
-    onPresentationChange,
-    disabled = false,
-    validation,
-    studyAssetWrapper,
-  } = props
-
-  const [showAddEdit, setShowAddEdit] = useState(false)
-  const [editState, setEditState] = useState(presentations.map(() => false))
-  const [viewState, setViewState] = useState(presentations.map(() => false))
-
-  const toggleEditState = (index: number) => {
-    const editStateCopy = [...editState]
-    editStateCopy[index] = !editStateCopy[index]
-    setEditState(editStateCopy)
-  }
-
-  const toggleViewState = (index: number) => {
-    const viewStateCopy = [...viewState]
-    viewStateCopy[index] = !viewStateCopy[index]
-    setViewState(viewStateCopy)
-  }
-
-  const handleDeletePresentation = (index: number) => {
-    const updatedPresentations = presentations.filter((_, i) => i !== index)
-    onPresentationChange(updatedPresentations)
-  }
-
-  const getValidationState = () => validation?.presentations
-
-  const button = (
-    <AddObjectButton
-      id="add-presentation-btn"
-      label="Add Presentation"
-      onClick={() => setShowAddEdit(true)}
-      disabled={disabled}
-      hasValidationError={!!getValidationState()}
-    />
-  )
-
-  const content = (
-    <div className="form-group row no-margin">
-      {showAddEdit && (
-        <PresentationAddEdit
-          id={-1}
-          presentations={presentations}
-          closeAction={() => setShowAddEdit(false)}
-          onPresentationChange={onPresentationChange}
-        />
-      )}
-      {presentations.map((presentation: Presentation, index: number) => (
-        <PresentationRow
-          key={index}
-          id={index}
-          editMode={editState[index]}
-          viewMode={viewState[index]}
-          presentation={presentation}
-          presentations={presentations}
-          columnsToShow={columnsToShow}
-          editAction={() => toggleEditState(index)}
-          deleteAction={() => { handleDeletePresentation(index) }}
-          closeAction={() => {
-            if (editState[index]) {
-              toggleEditState(index)
-            }
-            else if (viewState[index]) {
-              toggleViewState(index)
-            }
-            setShowAddEdit(false)
-          }}
-          viewAction={() => toggleViewState(index)}
-          onPresentationChange={onPresentationChange}
-          disabled={disabled}
-        />
-      ))}
-    </div>
-  )
-
-  if (studyAssetWrapper) {
-    return <>{studyAssetWrapper(content, button)}</>
-  }
-
   return (
-    <div className="presentation-list-component">
-      <div className="row no-margin">
-        {button}
-      </div>
-      {content}
-    </div>
+    <StudyAssetList<
+      Presentation,
+      DarErrors,
+      React.ComponentProps<typeof PresentationAddEdit>,
+      React.ComponentProps<typeof PresentationRow>
+    >
+      items={props.presentations}
+      columnsToShow={props.columnsToShow ?? ['title', 'date', 'event', 'location', 'url', 'format', 'access']}
+      onItemsChange={props.onPresentationChange}
+      disabled={props.disabled}
+      validation={props.validation}
+      AddEditComponent={PresentationAddEdit}
+      RowComponent={PresentationRow}
+      addButtonId="add-presentation-btn"
+      addButtonLabel="Add Presentation"
+      getValidationState={v => v?.presentations}
+      studyAssetWrapper={props.studyAssetWrapper}
+      getAddEditProps={(items, closeAction, onItemsChange) => ({
+        id: -1,
+        presentations: items,
+        closeAction,
+        onPresentationChange: onItemsChange,
+      })}
+      getRowProps={baseProps => ({
+        id: baseProps.index,
+        editMode: baseProps.editMode,
+        viewMode: baseProps.viewMode,
+        presentation: baseProps.item,
+        presentations: baseProps.items,
+        viewAction: baseProps.viewAction,
+        editAction: baseProps.editAction,
+        deleteAction: baseProps.deleteAction,
+        closeAction: baseProps.closeAction,
+        onPresentationChange: baseProps.onItemsChange,
+        columnsToShow: baseProps.columnsToShow,
+        disabled: baseProps.disabled,
+      })}
+    />
   )
 }
