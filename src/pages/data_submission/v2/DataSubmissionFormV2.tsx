@@ -87,7 +87,6 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onSubmitStudy = async () => {
-    debugger
     await DataSet.registerDataset(buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
     if (onSaveRoute) {
