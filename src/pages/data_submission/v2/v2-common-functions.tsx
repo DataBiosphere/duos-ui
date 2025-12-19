@@ -268,11 +268,11 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
       consentGroup.morDate = dataset.dataUse.publicationMoratorium
     }
     consentGroup.npu = dataset.dataUse.nonProfitUse
-    if (consentGroup.otherSecondary && consentGroup.otherSecondary.length > 0) {
-      consentGroup.otherSecondary = dataset.dataUse.secondaryOther
+    if (isEmpty(consentGroup.otherSecondary)) {
+      consentGroup.otherSecondary = undefined
     }
     else {
-      consentGroup.otherSecondary = undefined
+      consentGroup.otherSecondary = dataset.dataUse.secondaryOther
     }
     consentGroup.dataAccessCommitteeId = dataset.dacId
     consentGroup.nihInstitutionalCertificationFile = dataset.nihInstitutionalCertificationFile
