@@ -1,5 +1,6 @@
 import { isNil, isString } from 'lodash/fp'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
+import { FileStorageObject } from 'src/types/model'
 
 export interface ConsentGroup {
   generalResearchUse?: boolean
@@ -10,7 +11,8 @@ export interface ConsentGroup {
 }
 export type AccessManagementType = 'controlled' | 'open' | 'external'
 export interface ConsentGroup2 {
-  nihInstitutionalCertificationFile?: File
+  nihInstitutionalCertificationFile?: FileStorageObject
+  addedNIHInstitutionalCertificationFile?: File
   name: string
   consentGroupName: string
   consentGroupId: string | number

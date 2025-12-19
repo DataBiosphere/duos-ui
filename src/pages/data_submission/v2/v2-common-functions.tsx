@@ -254,6 +254,7 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     consentGroup.npu = dataset.dataUse.nonProfitUse
     consentGroup.otherSecondary = dataset.dataUse.secondaryOther
     consentGroup.dataAccessCommitteeId = dataset.dacId
+    consentGroup.nihInstitutionalCertificationFile = dataset.nihInstitutionalCertificationFile
     consentGroup.dataLocation = getDatasetPropertyValueByKey(DataLocation.propertyName, dataset) as DataLocationType
     consentGroup.url = getDatasetPropertyValueByKey(DataURL.propertyName, dataset) as string
     consentGroup.fileTypes = fileTypeAdjustment(getDatasetPropertyValueByKey(FileTypes.propertyName, dataset) as Array<FileType>)

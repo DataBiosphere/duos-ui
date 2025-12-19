@@ -664,8 +664,9 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
         <div className="row" style={{ marginTop: 20 }}>
           <FileInput
             description="If an Institutional Certification for this consent group exists, please upload it here"
-            id="nihInstitutionalCertificationFile"
-            defaultValue={current.nihInstitutionalCertificationFile}
+            id="addedNIHInstitutionalCertificationFile"
+            defaultValue={current.addedNIHInstitutionalCertificationFile}
+            storedValue={current.nihInstitutionalCertificationFile}
             onAddFile={function (file: File, id: string): void {
               onChange({ key: id, value: file })
             }}

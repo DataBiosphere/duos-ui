@@ -2,10 +2,12 @@ import React, { ChangeEvent, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 import { FormFieldTitle } from 'src/components/forms/forms'
+import { FileStorageObject } from 'src/types/model'
 
 export type FileInputProps = {
   description?: string
   defaultValue?: File
+  storedValue?: FileStorageObject
   id: string
   onAddFile: (file: File, id: string) => void
   onDeleteFile: (id: string) => void
@@ -15,7 +17,7 @@ export type FileInputProps = {
 }
 
 export const FileInput = (props: FileInputProps) => {
-  const { id, title, description, onAddFile, onDeleteFile, defaultValue, required, disabled = false } = props
+  const { id, title, description, onAddFile, onDeleteFile, defaultValue, storedValue, required, disabled = false } = props
   const [file, setFile] = useState<File | undefined>(defaultValue)
   const inputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState<boolean>(false)
@@ -104,6 +106,11 @@ export const FileInput = (props: FileInputProps) => {
             {file.name}
             {' '}
             {deleteButton}
+          </span>
+        )}
+        {!file && storedValue && (
+          <span style={{ marginLeft: '15px' }}>
+            {storedValue.fileName}
           </span>
         )}
       </div>
