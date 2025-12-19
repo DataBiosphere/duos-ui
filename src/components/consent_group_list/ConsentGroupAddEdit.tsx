@@ -97,6 +97,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   const [showMORText, setShowMORText] = useState(consentGroup?.mor)
   const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
   const disableAccessAdjustment = isEditingExistingStudy && current.accessManagement === 'controlled'
+  const [editDataLocationUrl, setEditDataLocationUrl] = useState(consentGroup?.dataLocation === 'Not Determined')
 
   const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
     const clearedFields = {} as ConsentGroup2
@@ -604,6 +605,10 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               onChange({ key, value })
               if (current?.dataLocation === 'Not Determined') {
                 onChange({ key: 'url', value: undefined })
+                setEditDataLocationUrl(false)
+              }
+              else {
+                setEditDataLocationUrl(true)
               }
             }}
             disabled={readOnly}
@@ -613,7 +618,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             id="url"
             name="url"
             validators={[FormValidators.URL]}
-            disabled={current?.dataLocation === 'Not Determined' || readOnly}
+            disabled={editDataLocationUrl || readOnly}
             placeholder="Enter a URL for your data location here"
             defaultValue={current?.dataLocation === 'Not Determined' ? undefined : consentGroup?.url}
             onChange={onChange}
