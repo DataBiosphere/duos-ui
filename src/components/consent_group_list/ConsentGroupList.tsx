@@ -67,7 +67,6 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
           consentGroups={consentGroups}
           closeAction={() => setShowAddEdit(false)}
           onConsentGroupChange={onConsentGroupChange}
-          isEditingExistingStudy={isEditingExistingStudy}
         />
       )}
       <div className="form-group row no-margin">

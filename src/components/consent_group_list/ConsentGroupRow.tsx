@@ -46,7 +46,6 @@ export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.
           closeAction={closeAction}
           onConsentGroupChange={onConsentGroupChange}
           readOnly={viewMode}
-          isEditingExistingStudy={isEditingExistingStudy}
         />
       )}
       {!editMode && !viewMode && (
