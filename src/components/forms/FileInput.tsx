@@ -11,13 +11,14 @@ export type FileInputProps = {
   id: string
   onAddFile: (file: File, id: string) => void
   onDeleteFile: (id: string) => void
+  onClick?: () => void
   required?: boolean
   title: string
   disabled?: boolean
 }
 
 export const FileInput = (props: FileInputProps) => {
-  const { id, title, description, onAddFile, onDeleteFile, defaultValue, storedValue, required, disabled = false } = props
+  const { id, title, description, onAddFile, onClick, onDeleteFile, defaultValue, storedValue, required, disabled = false } = props
   const [file, setFile] = useState<File | undefined>(defaultValue)
   const inputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState<boolean>(false)
@@ -110,7 +111,12 @@ export const FileInput = (props: FileInputProps) => {
         )}
         {!file && storedValue && (
           <span style={{ marginLeft: '15px' }}>
-            {storedValue.fileName}
+            {onClick && (
+              <Link to="#" onClick={onClick}>
+                {storedValue.fileName}
+              </Link>
+            )}
+            {!onClick && (storedValue.fileName)}
           </span>
         )}
       </div>
