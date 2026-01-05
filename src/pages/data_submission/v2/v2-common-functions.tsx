@@ -242,18 +242,40 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     consentGroup.hmb = dataset.dataUse.hmbResearch
     consentGroup.diseaseSpecificUse = dataset.dataUse.diseaseRestrictions
     consentGroup.poa = dataset.dataUse.populationOriginsAncestry
-    consentGroup.otherPrimary = dataset.dataUse.other
+    if (isEmpty(dataset.dataUse.other)) {
+      consentGroup.otherPrimary = undefined
+    }
+    else {
+      consentGroup.otherPrimary = dataset.dataUse.other
+    }
     consentGroup.nmds = dataset.dataUse.methodsResearch === false
     consentGroup.gso = dataset.dataUse.geneticStudiesOnly
     consentGroup.pub = dataset.dataUse.publicationResults
     consentGroup.col = dataset.dataUse.collaboratorRequired
     consentGroup.irb = dataset.dataUse.ethicsApprovalRequired
-    consentGroup.gs = dataset.dataUse.geographicalRestrictions
+    if (isEmpty(dataset.dataUse.geographicalRestrictions)) {
+      consentGroup.gs = undefined
+    }
+    else {
+      consentGroup.gs = dataset.dataUse.geographicalRestrictions
+    }
+
     consentGroup.mor = !isEmpty(dataset.dataUse.publicationMoratorium)
-    consentGroup.morDate = dataset.dataUse.publicationMoratorium
+    if (isEmpty(dataset.dataUse.publicationMoratorium)) {
+      consentGroup.morDate = undefined
+    }
+    else {
+      consentGroup.morDate = dataset.dataUse.publicationMoratorium
+    }
     consentGroup.npu = dataset.dataUse.nonProfitUse
-    consentGroup.otherSecondary = dataset.dataUse.secondaryOther
+    if (isEmpty(consentGroup.otherSecondary)) {
+      consentGroup.otherSecondary = undefined
+    }
+    else {
+      consentGroup.otherSecondary = dataset.dataUse.secondaryOther
+    }
     consentGroup.dataAccessCommitteeId = dataset.dacId
+    consentGroup.nihInstitutionalCertificationFile = dataset.nihInstitutionalCertificationFile
     consentGroup.dataLocation = getDatasetPropertyValueByKey(DataLocation.propertyName, dataset) as DataLocationType
     consentGroup.url = getDatasetPropertyValueByKey(DataURL.propertyName, dataset) as string
     consentGroup.fileTypes = fileTypeAdjustment(getDatasetPropertyValueByKey(FileTypes.propertyName, dataset) as Array<FileType>)
@@ -264,7 +286,7 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
 }
 
 const fileTypeAdjustment = (fileTypes: Array<FileType>) => {
-  if (!fileTypes) {
+  if (isEmpty(fileTypes)) {
     return [] as FileType[]
   }
   const adjustedFileTypes: Array<FileType> = []

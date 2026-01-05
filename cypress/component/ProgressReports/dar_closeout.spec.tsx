@@ -32,7 +32,7 @@ describe('DAR Closeout - Component Tests', () => {
     objectId: '12345',
     dataUse: {} as DataUse,
     dacApproval: true,
-    nihCertificationFile: {} as FileStorageObject,
+    nihInstitutionalCertificationFile: {} as FileStorageObject,
   }
 
   const mountComponent = (customState = {}, customProps = {}) => {

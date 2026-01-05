@@ -156,6 +156,7 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                     })
                   }}
                   defaultValue={study.alternativeDataSharingPlanFile}
+                  storedValue={study.alternativeDataSharingPlan}
                   title="Upload your alternative sharing plan."
                 />
 

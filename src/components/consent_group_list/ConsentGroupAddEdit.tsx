@@ -6,6 +6,7 @@ import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { DacPicker } from 'src/components/forms/DacPicker'
 import { FileInput } from 'src/components/forms/FileInput'
+import { DataSet } from 'src/libs/ajax/DataSet'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
@@ -14,7 +15,6 @@ interface ConsentGroupAddEditProps {
   readonly closeAction: () => void
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly readOnly?: boolean
-  readonly isEditingExistingStudy?: boolean
 }
 
 interface Validation {
@@ -56,7 +56,7 @@ const getHeaderTitle = (readOnly: boolean, consentGroup?: ConsentGroup2) => {
 }
 
 export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): React.JSX.Element {
-  const { id, consentGroup, consentGroups, closeAction, onConsentGroupChange, readOnly = false, isEditingExistingStudy = false } = props
+  const { id, consentGroup, consentGroups, closeAction, onConsentGroupChange, readOnly = false } = props
 
   const [current, setCurrent] = useState<ConsentGroup2>(consentGroup || defaultConsentGroup)
   const [validation, setValidation] = useState<Validation>({})
@@ -96,7 +96,8 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
 
   const [showMORText, setShowMORText] = useState(consentGroup?.mor)
   const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
-  const disableAccessAdjustment = isEditingExistingStudy && current.accessManagement === 'controlled'
+  const disableAccessAdjustment = consentGroup?.datasetId !== undefined && current.accessManagement === 'controlled'
+  const [editDataLocationUrl, setEditDataLocationUrl] = useState(consentGroup?.dataLocation !== 'Not Determined')
 
   const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
     const clearedFields = {} as ConsentGroup2
@@ -177,7 +178,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   }
 
   const onChange = ({ key, value }: FormFieldChange) => {
-    const next = structuredClone(current) as ConsentGroup2
+    const next = structuredClone(current)
     set(next, key, value)
     setCurrent(next)
     setValidation(calcErrors(next))
@@ -570,7 +571,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                 onChange={({ key, value }: { key: string, value: number, isValid: boolean }) => {
                   onChange({ key: key, value: value })
                 }}
-                disabled={readOnly || isEditingExistingStudy}
+                disabled={readOnly || (current?.datasetId !== undefined)}
               />
             )
           }
@@ -602,8 +603,12 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             validation={validation.dataLocation}
             onChange={({ key, value }: { key: string, value: string }) => {
               onChange({ key, value })
-              if (current?.dataLocation === 'Not Determined') {
+              if (value === 'Not Determined') {
                 onChange({ key: 'url', value: undefined })
+                setEditDataLocationUrl(false)
+              }
+              else {
+                setEditDataLocationUrl(true)
               }
             }}
             disabled={readOnly}
@@ -613,7 +618,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             id="url"
             name="url"
             validators={[FormValidators.URL]}
-            disabled={current?.dataLocation === 'Not Determined' || readOnly}
+            disabled={!editDataLocationUrl || readOnly}
             placeholder="Enter a URL for your data location here"
             defaultValue={current?.dataLocation === 'Not Determined' ? undefined : consentGroup?.url}
             onChange={onChange}
@@ -664,8 +669,9 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
         <div className="row" style={{ marginTop: 20 }}>
           <FileInput
             description="If an Institutional Certification for this consent group exists, please upload it here"
-            id="nihInstitutionalCertificationFile"
-            defaultValue={current.nihInstitutionalCertificationFile}
+            id="addedNIHInstitutionalCertificationFile"
+            defaultValue={current.addedNIHInstitutionalCertificationFile}
+            storedValue={current.nihInstitutionalCertificationFile}
             onAddFile={function (file: File, id: string): void {
               onChange({ key: id, value: file })
             }}
@@ -674,6 +680,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             }}
             title="NIH Institutional Certification"
             disabled={readOnly}
+            onClick={current.nihInstitutionalCertificationFile ? () => { DataSet.getNIHInstitutionalCertification(current.datasetId) } : undefined}
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>
