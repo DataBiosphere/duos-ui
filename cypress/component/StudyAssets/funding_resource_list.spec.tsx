@@ -5,6 +5,7 @@ import FundingResourceAddEdit from 'src/components/funding_resource_list/Funding
 import FundingResourceSummary from 'src/components/funding_resource_list/FundingResourceSummary'
 import FundingResourceRow from 'src/components/funding_resource_list/FundingResourceRow'
 import FundingResourceList from 'src/components/funding_resource_list/FundingResourceList'
+import { testDeleteViaModal } from './testUtils'
 
 const sampleFunding: FundingResource = {
   fundingId: 'f1',
@@ -43,10 +44,10 @@ describe('FundingResourceList component', () => {
     mount(
       <FundingResourceAddEdit
         id={-1}
-        funding={undefined}
+        fundingResource={undefined}
         fundingResources={[]}
         closeAction={cy.stub().as('close')}
-        onFundingChange={(items) => { collected.splice(0, collected.length, ...items) }}
+        onFundingResourcesChange={(items: FundingResource[]) => { collected.splice(0, collected.length, ...items) }}
       />,
     )
     cy.get('#funderName').type('New Funder')
@@ -84,7 +85,7 @@ describe('FundingResourceList component', () => {
       <FundingResourceList
         fundingResources={state}
         columnsToShow={['funderName', 'projectTitle']}
-        onFundingResourceChange={(items) => { state.splice(0, state.length, ...items) }}
+        onFundingResourceChange={(items: FundingResource[]) => { state.splice(0, state.length, ...items) }}
         disabled={false}
       />,
     )
@@ -104,10 +105,10 @@ describe('FundingResourceList component', () => {
     mount(
       <FundingResourceAddEdit
         id={0}
-        funding={sampleFunding}
+        fundingResource={sampleFunding}
         fundingResources={resources}
         closeAction={cy.stub().as('close')}
-        onFundingChange={(updated) => {
+        onFundingResourcesChange={(updated: FundingResource[]) => {
           expect(updated[0].funderName).to.eq('Funder A Edited')
         }}
       />,
@@ -118,20 +119,10 @@ describe('FundingResourceList component', () => {
   })
 
   it('deletes a funding resource via modal confirmation', () => {
-    mount(<FundingResourceListHarness initial={[sampleFunding]} />)
-    cy.contains(sampleFunding.funderName).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(sampleFunding.funderName).should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+    testDeleteViaModal(
+      () => mount(<FundingResourceListHarness initial={[sampleFunding]} />),
+      sampleFunding.funderName,
+    )
   })
 })
 
@@ -139,7 +130,7 @@ describe('FundingResourceSummary', () => {
   it('renders columns including arrays and url', () => {
     mount(
       <FundingResourceSummary
-        funding={sampleFunding}
+        fundingResource={sampleFunding}
         columnsToShow={['funderName', 'funderProgram', 'projectTitle', 'url', 'tags']}
         editAction={cy.stub()}
         deleteAction={cy.stub()}
@@ -156,7 +147,7 @@ describe('FundingResourceSummary', () => {
   it('renders view button and triggers viewAction', () => {
     mount(
       <FundingResourceSummary
-        funding={sampleFunding}
+        fundingResource={sampleFunding}
         columnsToShow={['funderName']}
         editAction={cy.stub()}
         deleteAction={cy.stub()}
@@ -176,13 +167,13 @@ describe('FundingResourceRow', () => {
       <FundingResourceRow
         id={0}
         editMode={false}
-        funding={sampleFunding}
+        fundingResource={sampleFunding}
         fundingResources={[sampleFunding]}
         columnsToShow={['funderName', 'projectTitle']}
         editAction={cy.stub().as('edit')}
         deleteAction={cy.stub()}
         closeAction={cy.stub()}
-        onFundingChange={cy.stub()}
+        onFundingResourcesChange={cy.stub()}
         disabled={false}
       />,
     )
@@ -196,13 +187,13 @@ describe('FundingResourceRow', () => {
       <FundingResourceRow
         id={0}
         editMode={true}
-        funding={sampleFunding}
+        fundingResource={sampleFunding}
         fundingResources={[sampleFunding]}
         columnsToShow={['funderName']}
         editAction={cy.stub()}
         deleteAction={cy.stub()}
         closeAction={cy.stub()}
-        onFundingChange={cy.stub()}
+        onFundingResourcesChange={cy.stub()}
         disabled={false}
       />,
     )
@@ -215,14 +206,14 @@ describe('FundingResourceRow', () => {
         id={0}
         editMode={false}
         viewMode={true}
-        funding={sampleFunding}
+        fundingResource={sampleFunding}
         fundingResources={[sampleFunding]}
         columnsToShow={['funderName']}
         editAction={cy.stub()}
         deleteAction={cy.stub()}
         closeAction={cy.stub()}
         viewAction={cy.stub()}
-        onFundingChange={cy.stub()}
+        onFundingResourcesChange={cy.stub()}
         disabled={false}
       />,
     )
@@ -237,14 +228,14 @@ describe('FundingResourceRow', () => {
         id={0}
         editMode={false}
         viewMode={false}
-        funding={sampleFunding}
+        fundingResource={sampleFunding}
         fundingResources={[sampleFunding]}
         columnsToShow={['funderName', 'projectTitle']}
         editAction={cy.stub()}
         deleteAction={cy.stub()}
         closeAction={cy.stub()}
         viewAction={cy.stub().as('view')}
-        onFundingChange={cy.stub()}
+        onFundingResourcesChange={cy.stub()}
         disabled={false}
       />,
     )

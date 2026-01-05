@@ -54,7 +54,7 @@ export function DeletePresentationOrPublication(props: DeletePresentationOrPubli
     >
       <div>
         <CloseIconComponent closeFn={closeAction} />
-        <div className="delete-modal-header">
+        <div className="delete-modal-header" style={{ width: '100%' }}>
           Delete {objectName}
         </div>
         <div className="delete-modal-title">

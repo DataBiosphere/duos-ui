@@ -1,7 +1,8 @@
 import React from 'react'
-import AiModelAddEdit from 'src/components/ai_models_list/AiModelAddEdit'
-import AiModelSummary from 'src/components/ai_models_list/AiModelSummary'
+import AiModelAddEdit from './AiModelAddEdit'
+import AiModelSummary from './AiModelSummary'
 import { AiModel } from 'src/types/model'
+import StudyAssetRow from 'src/components/study_asset/StudyAssetRow'
 
 interface AiModelRowProps {
   readonly id: number
@@ -35,27 +36,36 @@ export default function AiModelRow(props: AiModelRowProps): React.JSX.Element {
   } = props
 
   return (
-    <div>
-      {(editMode || viewMode) && (
-        <AiModelAddEdit
-          id={id}
-          aiModel={aiModel}
-          aiModels={aiModels}
-          closeAction={closeAction}
-          onAiModelsChange={onAiModelsChange}
-          readOnly={viewMode}
-        />
-      )}
-      {!editMode && !viewMode && (
-        <AiModelSummary
-          aiModel={aiModel}
-          columnsToShow={columnsToShow}
-          editAction={editAction}
-          deleteAction={deleteAction}
-          viewAction={viewAction}
-          disabled={disabled}
-        />
-      )}
-    </div>
+    <StudyAssetRow
+      id={id}
+      editMode={editMode}
+      viewMode={viewMode}
+      asset={aiModel}
+      assets={aiModels}
+      columnsToShow={columnsToShow}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      closeAction={closeAction}
+      viewAction={viewAction}
+      onAssetsChange={onAiModelsChange}
+      disabled={disabled}
+      AddEditComponent={AiModelAddEdit}
+      SummaryComponent={AiModelSummary}
+      addEditProps={{
+        id,
+        aiModel,
+        aiModels,
+        closeAction,
+        onAiModelsChange,
+      }}
+      summaryProps={{
+        aiModel,
+        columnsToShow,
+        editAction,
+        deleteAction,
+        viewAction,
+        disabled,
+      }}
+    />
   )
 }

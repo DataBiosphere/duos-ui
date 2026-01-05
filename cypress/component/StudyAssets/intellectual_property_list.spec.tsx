@@ -5,6 +5,15 @@ import IntellectualPropertyAddEdit from 'src/components/intellectual_property_li
 import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
 import IntellectualPropertyRow from 'src/components/intellectual_property_list/IntellectualPropertyRow'
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
+import {
+  testDeleteViaModal,
+  testViewModeFlow,
+  testCloseViewMode,
+  testEditModeRender,
+  testViewModeRender,
+  testViewActionTrigger,
+  testSummaryViewActionTrigger,
+} from './testUtils'
 
 const sampleIp: IntellectualProperty = {
   ipId: 'ip-1',
@@ -32,39 +41,64 @@ const IntellectualPropertyListHarness: React.FC<{ initial: IntellectualProperty[
   )
 }
 
+// Helper functions
+function mountListWithItem() {
+  return mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
+}
+
+function mountRow(overrides: Partial<React.ComponentProps<typeof IntellectualPropertyRow>> = {}) {
+  return mount(
+    <IntellectualPropertyRow
+      id={0}
+      editMode={false}
+      intellectualProperty={sampleIp}
+      intellectualProperties={[sampleIp]}
+      columnsToShow={['title', 'type']}
+      editAction={cy.stub()}
+      deleteAction={cy.stub()}
+      closeAction={cy.stub()}
+      onIntellectualPropertyChange={cy.stub()}
+      disabled={false}
+      {...overrides}
+    />,
+  )
+}
+
+function fillForm(overrides: Partial<IntellectualProperty> = {}) {
+  cy.get('#type').type(overrides.type ?? 'Patent')
+  cy.get('#title').type(overrides.title ?? 'New IP')
+  cy.get('#assignee').type(overrides.assignee ?? 'Assignee Name')
+  cy.get('#patentNumber').type(overrides.patentNumber ?? 'PAT123')
+  cy.get('#filingDate').type(overrides.filingDate ?? '2024-01-01')
+  cy.get('#status').type(overrides.status ?? 'Pending')
+  cy.get('#url').type(overrides.url ?? 'https://example.com')
+  cy.get('#contact').type(overrides.contact ?? 'contact@example.com')
+}
+
+function assertNotSaved() {
+  cy.get('@onIntellectualPropertyChange').should('not.have.been.called')
+}
+
 describe('IntellectualPropertyAddEdit', () => {
   it('prevents save until required fields are valid, then saves', () => {
     const collected: IntellectualProperty[] = []
-    const onIntellectualPropertyChange = (items: IntellectualProperty[]) => {
-      collected.splice(0, collected.length, ...items)
-    }
     mount(
       <IntellectualPropertyAddEdit
         id={-1}
         intellectualProperty={undefined}
         intellectualProperties={[]}
         closeAction={cy.stub().as('close')}
-        onIntellectualPropertyChange={onIntellectualPropertyChange}
+        onIntellectualPropertyChange={(items) => { collected.splice(0, collected.length, ...items) }}
       />,
     )
 
-    // Try saving immediately; should not add because validation fails
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(0)
     })
 
-    // Fill required fields with valid values
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('New IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT123')
-    cy.get('#filingDate').type('2024-01-01')
-    cy.get('#status').type('Pending')
-    cy.get('#url').type('https://example.com')
-    cy.get('#contact').type('contact@example.com')
+    fillForm()
 
-    // Now save should succeed and add one item
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
@@ -73,52 +107,30 @@ describe('IntellectualPropertyAddEdit', () => {
     })
   })
 
-  it('does not save when date format is invalid', () => {
-    const onIntellectualPropertyChange = cy.stub().as('onIntellectualPropertyChange')
-    mount(
-      <IntellectualPropertyAddEdit
-        id={-1}
-        intellectualProperty={undefined}
-        intellectualProperties={[]}
-        closeAction={cy.stub().as('close')}
-        onIntellectualPropertyChange={onIntellectualPropertyChange}
-      />,
-    )
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('New IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT123')
-    cy.get('#filingDate').type('invalid-date')
-    cy.get('#status').type('Pending')
-    cy.get('#url').type('https://example.com')
-    cy.get('#contact').type('contact@example.com')
+  const invalidInputTests = [
+    { field: '#filingDate', value: 'invalid-date', label: 'date' },
+    { field: '#url', value: 'invalid-url', label: 'URL' },
+  ]
 
-    cy.get('.collaborator-form-add-save-button').click()
-    cy.get('@onIntellectualPropertyChange').should('not.have.been.called')
-  })
+  invalidInputTests.forEach(({ field, value, label }) => {
+    it(`does not save when ${label} format is invalid`, () => {
+      const onIntellectualPropertyChange = cy.stub().as('onIntellectualPropertyChange')
+      mount(
+        <IntellectualPropertyAddEdit
+          id={-1}
+          intellectualProperty={undefined}
+          intellectualProperties={[]}
+          closeAction={cy.stub().as('close')}
+          onIntellectualPropertyChange={onIntellectualPropertyChange}
+        />,
+      )
+      fillForm()
+      cy.get(field).clear()
+      cy.get(field).type(value)
 
-  it('does not save when URL format is invalid', () => {
-    const onIntellectualPropertyChange = cy.stub().as('onIntellectualPropertyChange')
-    mount(
-      <IntellectualPropertyAddEdit
-        id={-1}
-        intellectualProperty={undefined}
-        intellectualProperties={[]}
-        closeAction={cy.stub().as('close')}
-        onIntellectualPropertyChange={onIntellectualPropertyChange}
-      />,
-    )
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('New IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT123')
-    cy.get('#filingDate').type('2024-01-01')
-    cy.get('#status').type('Pending')
-    cy.get('#url').type('invalid-url')
-    cy.get('#contact').type('contact@example.com')
-
-    cy.get('.collaborator-form-add-save-button').click()
-    cy.get('@onIntellectualPropertyChange').should('not.have.been.called')
+      cy.get('.collaborator-form-add-save-button').click()
+      assertNotSaved()
+    })
   })
 })
 
@@ -141,102 +153,47 @@ describe('IntellectualPropertySummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
-      <IntellectualPropertySummary
-        intellectualProperty={sampleIp}
-        columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        viewAction={cy.stub().as('view')}
-        disabled={false}
-      />,
+    testSummaryViewActionTrigger(() =>
+      mount(
+        <IntellectualPropertySummary
+          intellectualProperty={sampleIp}
+          columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
+          editAction={cy.stub()}
+          deleteAction={cy.stub()}
+          viewAction={cy.stub().as('view')}
+          disabled={false}
+        />,
+      ),
     )
-    cy.get('.glyphicon-eye-open').should('exist')
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('@view').should('have.been.calledOnce')
   })
 })
 
 describe('IntellectualPropertyRow', () => {
   it('shows summary when not in edit mode and triggers editAction', () => {
-    mount(
-      <IntellectualPropertyRow
-        id={0}
-        editMode={false}
-        intellectualProperty={sampleIp}
-        intellectualProperties={[sampleIp]}
-        columnsToShow={['title', 'type']}
-        editAction={cy.stub().as('edit')}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        onIntellectualPropertyChange={cy.stub()}
-        disabled={false}
-      />,
-    )
+    mountRow({ editAction: cy.stub().as('edit') })
     cy.contains(sampleIp.title).should('exist')
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('@edit').should('have.been.calledOnce')
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
-      <IntellectualPropertyRow
-        id={0}
-        editMode={true}
-        intellectualProperty={sampleIp}
-        intellectualProperties={[sampleIp]}
-        columnsToShow={['title']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        onIntellectualPropertyChange={cy.stub()}
-        disabled={false}
-      />,
+    testEditModeRender<React.ComponentProps<typeof IntellectualPropertyRow>>(
+      mountRow,
+      '#title',
+      sampleIp.title,
     )
-    cy.get('#title').should('have.value', sampleIp.title)
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
-      <IntellectualPropertyRow
-        id={0}
-        editMode={false}
-        viewMode={true}
-        intellectualProperty={sampleIp}
-        intellectualProperties={[sampleIp]}
-        columnsToShow={['title']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        viewAction={cy.stub()}
-        onIntellectualPropertyChange={cy.stub()}
-        disabled={false}
-      />,
+    testViewModeRender<React.ComponentProps<typeof IntellectualPropertyRow>>(
+      mountRow,
+      '#title',
+      sampleIp.title,
     )
-    cy.get('#title').should('have.value', sampleIp.title)
-    cy.get('#title').should('be.disabled')
-    cy.get('.collaborator-form-add-save-button').should('not.exist')
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
-      <IntellectualPropertyRow
-        id={0}
-        editMode={false}
-        viewMode={false}
-        intellectualProperty={sampleIp}
-        intellectualProperties={[sampleIp]}
-        columnsToShow={['title', 'type']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        viewAction={cy.stub().as('view')}
-        onIntellectualPropertyChange={cy.stub()}
-        disabled={false}
-      />,
-    )
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('@view').should('have.been.calledOnce')
+    testViewActionTrigger<React.ComponentProps<typeof IntellectualPropertyRow>>(mountRow)
   })
 })
 
@@ -252,56 +209,23 @@ describe('IntellectualPropertyList', () => {
       />,
     )
     cy.get('#add-intellectual-property-btn').click()
-    cy.get('#type').type('Patent')
-    cy.get('#title').type('Added IP')
-    cy.get('#assignee').type('Assignee Name')
-    cy.get('#patentNumber').type('PAT456')
-    cy.get('#filingDate').type('2024-02-01')
-    cy.get('#status').type('Granted')
-    cy.get('#url').type('https://example.com/new')
-    cy.get('#contact').type('newcontact@example.com')
+    fillForm()
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(state.length).to.eq(1)
-      expect(state[0].title).to.eq('Added IP')
+      expect(state[0].title).to.eq('New IP')
     })
   })
 
   it('deletes an intellectual property via modal confirmation', () => {
-    mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-
-    cy.contains(sampleIp.title).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(sampleIp.title).should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+    testDeleteViaModal(mountListWithItem, sampleIp.title)
   })
 
   it('opens intellectual property in view mode when view button is clicked', () => {
-    mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.contains(sampleIp.title).should('exist')
-    cy.get('#title').should('be.disabled')
-    cy.get('#filingDate').should('be.disabled')
-    cy.get('.collaborator-form-add-save-button').should('not.exist')
-    cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
+    testViewModeFlow(mountListWithItem, sampleIp.title, { fieldId: '#title' })
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-    cy.get('.glyphicon-eye-open').click({ force: true })
-    cy.get('.collaborator-form-cancel-button').click()
-    cy.get('#title').should('not.exist')
-    cy.get('.glyphicon-eye-open').should('exist')
+    testCloseViewMode(mountListWithItem, { fieldId: '#title' })
   })
 })

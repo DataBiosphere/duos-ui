@@ -2,12 +2,13 @@ import React from 'react'
 import PublicationAddEdit from './PublicationAddEdit'
 import PublicationSummary from './PublicationSummary'
 import { Publication } from 'src/types/model'
+import StudyAssetRow from 'src/components/study_asset/StudyAssetRow'
 
 interface PublicationRowProps {
   readonly id: number
   readonly editMode: boolean
   readonly viewMode?: boolean
-  publication: Publication
+  readonly publication: Publication
   readonly publications: Publication[]
   readonly columnsToShow?: (keyof Publication)[]
   readonly editAction: () => void
@@ -19,30 +20,52 @@ interface PublicationRowProps {
 }
 
 export default function PublicationRow(props: PublicationRowProps): React.JSX.Element {
-  const { id, editMode, viewMode, publication, publications, columnsToShow, editAction, deleteAction, closeAction, viewAction, onPublicationChange, disabled } = props
+  const {
+    id,
+    editMode,
+    viewMode,
+    publication,
+    publications,
+    columnsToShow,
+    editAction,
+    deleteAction,
+    closeAction,
+    viewAction,
+    onPublicationChange,
+    disabled,
+  } = props
 
   return (
-    <div>
-      {(editMode || viewMode) && (
-        <PublicationAddEdit
-          id={id}
-          publication={publication}
-          publications={publications}
-          closeAction={closeAction}
-          onPublicationChange={onPublicationChange}
-          readOnly={viewMode}
-        />
-      )}
-      {!editMode && !viewMode && (
-        <PublicationSummary
-          publication={publication}
-          columnsToShow={columnsToShow}
-          editAction={editAction}
-          deleteAction={deleteAction}
-          viewAction={viewAction}
-          disabled={disabled}
-        />
-      )}
-    </div>
+    <StudyAssetRow
+      id={id}
+      editMode={editMode}
+      viewMode={viewMode}
+      asset={publication}
+      assets={publications}
+      columnsToShow={columnsToShow}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      closeAction={closeAction}
+      viewAction={viewAction}
+      onAssetsChange={onPublicationChange}
+      disabled={disabled}
+      AddEditComponent={PublicationAddEdit}
+      SummaryComponent={PublicationSummary}
+      addEditProps={{
+        id,
+        publication,
+        publications,
+        closeAction,
+        onPublicationChange,
+      }}
+      summaryProps={{
+        publication,
+        columnsToShow,
+        editAction,
+        deleteAction,
+        viewAction,
+        disabled,
+      }}
+    />
   )
 }
