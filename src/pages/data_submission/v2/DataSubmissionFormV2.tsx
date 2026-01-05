@@ -56,17 +56,19 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
 
   const buildMultiPartFormData = (study: Study) => {
     const multiPartFormData = new FormData()
-    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(structuredClone(study))))
     if (study.alternativeDataSharingPlanFile) {
       multiPartFormData.append('alternativeDataSharingPlan', study.alternativeDataSharingPlanFile, study.alternativeDataSharingPlanFile.name)
+      delete study.alternativeDataSharingPlanFile
     }
 
     study.assets?.consentGroups?.forEach((consentGroup, idx) => {
-      if (consentGroup?.nihInstitutionalCertificationFile) {
+      if (consentGroup?.addedNIHInstitutionalCertificationFile) {
         const fieldKey = `consentGroups[${idx}].nihInstitutionalCertificationFile`
-        multiPartFormData.append(fieldKey, consentGroup.nihInstitutionalCertificationFile, consentGroup.nihInstitutionalCertificationFile.name)
+        multiPartFormData.append(fieldKey, consentGroup.addedNIHInstitutionalCertificationFile, consentGroup.addedNIHInstitutionalCertificationFile.name)
+        delete consentGroup.addedNIHInstitutionalCertificationFile
       }
     })
+    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(structuredClone(study))))
     return multiPartFormData
   }
   const onUpdateStudy = async () => {

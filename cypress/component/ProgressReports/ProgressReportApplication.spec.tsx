@@ -153,7 +153,7 @@ describe('ProgressReportApplication - Component Tests', () => {
       alias: 2,
       datasetIdentifier: '',
       objectId: '',
-      nihCertificationFile: fso,
+      nihInstitutionalCertificationFile: fso,
       study: {
         description: 'Test Dataset Submission',
         studyId: 39,

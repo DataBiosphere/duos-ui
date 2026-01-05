@@ -163,7 +163,7 @@ export interface Dataset {
   objectId?: string
   dataUse: DataUse
   dacApproval?: boolean
-  nihCertificationFile?: FileStorageObject
+  nihInstitutionalCertificationFile?: FileStorageObject
   updateUserId?: number
   updateDate?: Date
   indexedDate?: Date
