@@ -80,7 +80,8 @@ function fillConsentGroupForm(overrides: Partial<ConsentGroup2> = {}) {
   cy.get('#numberOfParticipants').clear()
   cy.get('#numberOfParticipants').type((overrides.numberOfParticipants ?? 25).toString())
   cy.get('#dataLocation').click()
-  cy.get('#dataLocation').type((overrides.dataLocation ?? 'Not Determined') + '{enter}')
+  cy.get('#dataLocation').type((overrides.dataLocation ?? 'Terra Workspace') + '{enter}')
+  cy.get('#url').type(overrides.url ?? 'https://www.example.com')
 }
 
 function mountAddEdit(overrides: Partial<React.ComponentProps<typeof ConsentGroupAddEdit>> = {}) {
