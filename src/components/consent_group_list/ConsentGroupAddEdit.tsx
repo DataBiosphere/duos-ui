@@ -124,7 +124,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   }
 
   const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] | { displayText: string, id: string }[] }) => {
-    const next = structuredClone(current) as ConsentGroup2
+    const next = structuredClone(current)
     next.generalResearchUse = false
     next.hmb = false
     next.diseaseSpecificUse = undefined
