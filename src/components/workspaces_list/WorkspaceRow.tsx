@@ -2,6 +2,7 @@ import React from 'react'
 import { Workspace } from 'src/types/model'
 import WorkspaceAddEdit from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceSummary from 'src/components/workspaces_list/WorkspaceSummary'
+import StudyAssetRow from 'src/components/study_asset/StudyAssetRow'
 
 interface WorkspaceRowProps {
   readonly id: number
@@ -35,27 +36,36 @@ export default function WorkspaceRow(props: WorkspaceRowProps): React.JSX.Elemen
   } = props
 
   return (
-    <div>
-      {(editMode || viewMode) && (
-        <WorkspaceAddEdit
-          id={id}
-          workspace={workspace}
-          workspaces={workspaces}
-          closeAction={closeAction}
-          onWorkspaceChange={onWorkspaceChange}
-          readOnly={viewMode}
-        />
-      )}
-      {!editMode && !viewMode && (
-        <WorkspaceSummary
-          workspace={workspace}
-          columnsToShow={columnsToShow}
-          editAction={editAction}
-          deleteAction={deleteAction}
-          viewAction={viewAction}
-          disabled={disabled}
-        />
-      )}
-    </div>
+    <StudyAssetRow
+      id={id}
+      editMode={editMode}
+      viewMode={viewMode}
+      asset={workspace}
+      assets={workspaces}
+      columnsToShow={columnsToShow}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      closeAction={closeAction}
+      viewAction={viewAction}
+      onAssetsChange={onWorkspaceChange}
+      disabled={disabled}
+      AddEditComponent={WorkspaceAddEdit}
+      SummaryComponent={WorkspaceSummary}
+      addEditProps={{
+        id,
+        workspace,
+        workspaces,
+        closeAction,
+        onWorkspaceChange,
+      }}
+      summaryProps={{
+        workspace,
+        columnsToShow,
+        editAction,
+        deleteAction,
+        viewAction,
+        disabled,
+      }}
+    />
   )
 }

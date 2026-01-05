@@ -2,19 +2,20 @@ import React from 'react'
 import FundingResourceAddEdit from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import FundingResourceSummary from 'src/components/funding_resource_list/FundingResourceSummary'
 import { FundingResource } from 'src/types/model'
+import StudyAssetRow from 'src/components/study_asset/StudyAssetRow'
 
 interface FundingResourceRowProps {
   readonly id: number
   readonly editMode: boolean
   readonly viewMode?: boolean
-  readonly funding: FundingResource
+  readonly fundingResource: FundingResource
   readonly fundingResources: FundingResource[]
   readonly columnsToShow?: (keyof FundingResource)[]
   readonly editAction: () => void
   readonly deleteAction: () => void
   readonly closeAction: () => void
   readonly viewAction?: () => void
-  readonly onFundingChange: (items: FundingResource[]) => void
+  readonly onFundingResourcesChange: (resources: FundingResource[]) => void
   readonly disabled: boolean
 }
 
@@ -23,39 +24,48 @@ export default function FundingResourceRow(props: FundingResourceRowProps): Reac
     id,
     editMode,
     viewMode,
-    funding,
+    fundingResource,
     fundingResources,
     columnsToShow,
     editAction,
     deleteAction,
     closeAction,
     viewAction,
-    onFundingChange,
+    onFundingResourcesChange,
     disabled,
   } = props
 
   return (
-    <div>
-      {(editMode || viewMode) && (
-        <FundingResourceAddEdit
-          id={id}
-          funding={funding}
-          fundingResources={fundingResources}
-          closeAction={closeAction}
-          onFundingChange={onFundingChange}
-          readOnly={viewMode}
-        />
-      )}
-      {!editMode && !viewMode && (
-        <FundingResourceSummary
-          funding={funding}
-          columnsToShow={columnsToShow}
-          editAction={editAction}
-          deleteAction={deleteAction}
-          viewAction={viewAction}
-          disabled={disabled}
-        />
-      )}
-    </div>
+    <StudyAssetRow
+      id={id}
+      editMode={editMode}
+      viewMode={viewMode}
+      asset={fundingResource}
+      assets={fundingResources}
+      columnsToShow={columnsToShow}
+      editAction={editAction}
+      deleteAction={deleteAction}
+      closeAction={closeAction}
+      viewAction={viewAction}
+      onAssetsChange={onFundingResourcesChange}
+      disabled={disabled}
+      AddEditComponent={FundingResourceAddEdit}
+      SummaryComponent={FundingResourceSummary}
+      addEditProps={{
+        id,
+        fundingResource,
+        fundingResources,
+        closeAction,
+        onFundingResourcesChange,
+      }}
+      summaryProps={{
+        fundingResource,
+        columnsToShow,
+        editAction,
+        deleteAction,
+        viewAction,
+        disabled,
+      }}
+    />
   )
 }

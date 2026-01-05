@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Workspace } from 'src/types/model'
 import WorkspaceAddEdit from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import AddObjectButton from 'src/components/AddObjectButton'
+import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
 interface WorkspaceListProps {
   readonly workspaces: Workspace[]
@@ -15,96 +15,45 @@ interface WorkspaceListProps {
 }
 
 export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Element {
-  const {
-    workspaces,
-    columnsToShow = ['name', 'platform', 'url', 'description', 'tools', 'access'],
-    onWorkspaceChange,
-    disabled = false,
-    validation,
-    studyAssetWrapper,
-  } = props
-
-  const [showAddEdit, setShowAddEdit] = useState(false)
-  const [editState, setEditState] = useState(workspaces.map(() => false))
-  const [viewState, setViewState] = useState(workspaces.map(() => false))
-
-  const toggleEditState = (index: number) => {
-    const editStateCopy = [...editState]
-    editStateCopy[index] = !editStateCopy[index]
-    setEditState(editStateCopy)
-  }
-
-  const toggleViewState = (index: number) => {
-    const viewStateCopy = [...viewState]
-    viewStateCopy[index] = !viewStateCopy[index]
-    setViewState(viewStateCopy)
-  }
-
-  const handleDeleteWorkspace = (index: number) => {
-    const updated = workspaces.filter((_, i) => i !== index)
-    onWorkspaceChange(updated)
-  }
-
-  const getValidationState = () => validation?.workspaces
-
-  const button = (
-    <AddObjectButton
-      id="add-workspace-btn"
-      label="Add Workspace"
-      onClick={() => setShowAddEdit(true)}
-      disabled={disabled}
-      hasValidationError={!!getValidationState()}
-    />
-  )
-
-  const content = (
-    <div className="form-group row no-margin">
-      {showAddEdit && (
-        <WorkspaceAddEdit
-          id={-1}
-          workspaces={workspaces}
-          closeAction={() => setShowAddEdit(false)}
-          onWorkspaceChange={onWorkspaceChange}
-        />
-      )}
-      {workspaces.map((w: Workspace, index: number) => (
-        <WorkspaceRow
-          key={w.workspaceId || index}
-          id={index}
-          editMode={editState[index]}
-          viewMode={viewState[index]}
-          workspace={w}
-          workspaces={workspaces}
-          columnsToShow={columnsToShow}
-          editAction={() => toggleEditState(index)}
-          deleteAction={() => handleDeleteWorkspace(index)}
-          closeAction={() => {
-            if (editState[index]) {
-              toggleEditState(index)
-            }
-            else if (viewState[index]) {
-              toggleViewState(index)
-            }
-            setShowAddEdit(false)
-          }}
-          viewAction={() => toggleViewState(index)}
-          onWorkspaceChange={onWorkspaceChange}
-          disabled={disabled}
-        />
-      ))}
-    </div>
-  )
-
-  if (studyAssetWrapper) {
-    return <>{studyAssetWrapper(content, button)}</>
-  }
-
   return (
-    <div className="presentation-list-component">
-      <div className="row no-margin">
-        {button}
-      </div>
-      {content}
-    </div>
+    <StudyAssetList<
+      Workspace,
+      DarErrors,
+      React.ComponentProps<typeof WorkspaceAddEdit>,
+      React.ComponentProps<typeof WorkspaceRow>
+    >
+      items={props.workspaces}
+      columnsToShow={props.columnsToShow ?? ['name', 'platform', 'url', 'description', 'tools', 'access']}
+      onItemsChange={props.onWorkspaceChange}
+      disabled={props.disabled}
+      validation={props.validation}
+      AddEditComponent={WorkspaceAddEdit}
+      RowComponent={WorkspaceRow}
+      addButtonId="add-workspace-btn"
+      addButtonLabel="Add Workspace"
+      getValidationState={v => v?.workspaces}
+      studyAssetWrapper={props.studyAssetWrapper}
+      getAddEditProps={(items, closeAction, onItemsChange) => ({
+        id: -1,
+        workspaces: items,
+        closeAction,
+        onWorkspaceChange: onItemsChange,
+      })}
+      getRowProps={baseProps => ({
+        id: baseProps.index,
+        editMode: baseProps.editMode,
+        viewMode: baseProps.viewMode,
+        workspace: baseProps.item,
+        workspaces: baseProps.items,
+        viewAction: baseProps.viewAction,
+        editAction: baseProps.editAction,
+        deleteAction: baseProps.deleteAction,
+        closeAction: baseProps.closeAction,
+        onWorkspaceChange: baseProps.onItemsChange,
+        columnsToShow: baseProps.columnsToShow,
+        disabled: baseProps.disabled,
+      })}
+      getItemKey={item => item.workspaceId}
+    />
   )
 }

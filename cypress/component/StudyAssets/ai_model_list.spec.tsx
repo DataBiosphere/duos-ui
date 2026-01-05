@@ -5,6 +5,7 @@ import AiModelList from 'src/components/ai_models_list/AiModelList'
 import AiModelRow from 'src/components/ai_models_list/AiModelRow'
 import AiModelSummary from 'src/components/ai_models_list/AiModelSummary'
 import { AiModel } from 'src/types/model'
+import { testDeleteViaModal } from './testUtils'
 
 const sampleModel: AiModel = {
   modelId: 'm1',
@@ -124,20 +125,10 @@ describe('AiModelList component', () => {
   })
 
   it('deletes a model via modal confirmation', () => {
-    mount(<AiModelListHarness initial={[sampleModel]} />)
-    cy.contains(sampleModel.name).should('exist')
-    cy.get('.glyphicon-trash').click({ force: true })
-    cy.get('.ReactModal__Content')
-      .should('be.visible')
-      .within(() => {
-        cy.get('button')
-          .filter(':visible')
-          .contains(/delete/i)
-          .click({ force: true })
-      })
-    cy.get('.ReactModal__Content').should('not.exist')
-    cy.contains(sampleModel.name).should('not.exist')
-    cy.get('.collaborator-summary-card').should('have.length', 0)
+    testDeleteViaModal(
+      () => mount(<AiModelListHarness initial={[sampleModel]} />),
+      sampleModel.name,
+    )
   })
 
   it('shows all default columns when none are provided', () => {
