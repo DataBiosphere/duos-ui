@@ -46,7 +46,7 @@ export default function StudyAssetSummary<T>({
 
         return shouldRender
           ? (
-              <div key={'funding_summary_column_' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
+              <div key={'collaborator-summary-column-' + index} style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
                 <span>{content}</span>
               </div>
             )

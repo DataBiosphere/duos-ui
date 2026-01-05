@@ -20,7 +20,7 @@ export default function ConsentGroupSummary(props: ConsentGroupSummaryProps): Re
       asset={consentGroup}
       columnsToShow={columnsToShow}
       name={consentGroup.consentGroupName}
-      objectName="consentGroup"
+      objectName="consent group"
       editAction={editAction}
       deleteAction={deleteAction}
       viewAction={viewAction}
