@@ -1,4 +1,4 @@
-import { isNil, isEmpty, set } from 'lodash'
+import { isNil, isEmpty, set, unset } from 'lodash'
 import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
@@ -602,12 +602,16 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             defaultValue={current?.dataLocation}
             validation={validation.dataLocation}
             onChange={({ key, value }: { key: string, value: string }) => {
-              onChange({ key, value })
               if (value === 'Not Determined') {
-                onChange({ key: 'url', value: undefined })
+                const next = structuredClone(current)
+                set(next, key, 'Not Determined')
+                unset(next, 'url')
+                setCurrent(next)
+                setValidation(calcErrors(next))
                 setEditDataLocationUrl(false)
               }
               else {
+                onChange({ key, value })
                 setEditDataLocationUrl(true)
               }
             }}
