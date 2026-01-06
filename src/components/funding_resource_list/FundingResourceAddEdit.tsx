@@ -35,12 +35,14 @@ const defaultFunding: FundingResource = {
   tags: [],
 }
 
-const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
 const calcErrors = (f: FundingResource): Validation => {
   const v: Validation = {}
-  if (!f.funderName?.trim()) v.funderName = makeError('Required')
-  if (!f.projectTitle?.trim()) v.projectTitle = makeError('Required')
+  if (!f.funderName?.trim()) v.funderName = makeError('required')
+  if (!f.funderProgram?.trim()) v.funderProgram = makeError('required')
+  if (!f.grantNumber?.trim()) v.grantNumber = makeError('required')
+  if (!f.projectTitle?.trim()) v.projectTitle = makeError('required')
   return v
 }
 
@@ -72,7 +74,9 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
   }
 
   const save = () => {
-    if (validationFailed(calcErrors(current))) return
+    const validationErrors = calcErrors(current)
+    setValidation(validationErrors)
+    if (validationFailed(validationErrors)) return
     const toSave: FundingResource = {
       ...current,
       fundingId: current.fundingId || crypto.randomUUID?.() || Date.now().toString(),
