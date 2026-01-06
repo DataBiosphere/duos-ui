@@ -57,7 +57,7 @@ export function DeletePresentationOrPublication(props: DeletePresentationOrPubli
         <div className="delete-modal-header" style={{ width: '100%' }}>
           Delete {objectName}
         </div>
-        <div className="delete-modal-title">
+        <div className="delete-modal-title-text">
           Are you sure you want to delete <strong>{name}</strong>?
         </div>
         <div className="delete-modal-message"><i>This action is permanent and cannot be undone.</i></div>
