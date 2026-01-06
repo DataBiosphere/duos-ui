@@ -120,7 +120,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
       setShowDiseaseSpecificUseSearchbar(false)
       setShowMORText(false)
     }
-    setValidation(calcErrors(current))
+    setValidation(calcErrors(clearedFields))
   }
 
   const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] | { displayText: string, id: string }[] }) => {
@@ -144,7 +144,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse')
     setShowOtherPrimaryText(key === 'otherPrimary')
 
-    setValidation(calcErrors(current))
+    setValidation(calcErrors(next))
   }
 
   const calcErrors = (cg: ConsentGroup2): Validation => {
