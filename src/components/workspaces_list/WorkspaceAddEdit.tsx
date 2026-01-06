@@ -32,20 +32,20 @@ const defaultWorkspace: Workspace = {
   tags: [],
 }
 
-const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
 const calcErrors = (w: Workspace): Validation => {
   const v: Validation = {}
-  if (!w.name?.trim()) v.name = makeError('Required')
-  if (!w.platform?.trim()) v.platform = makeError('Required')
+  if (!w.name?.trim()) v.name = makeError('required')
+  if (!w.platform?.trim()) v.platform = makeError('required')
   if (!w.url?.trim()) {
-    v.url = makeError('Required')
+    v.url = makeError('required')
   }
   else if (!FormValidators.URL.isValid(w.url)) {
-    v.url = makeError('Invalid URL format')
+    v.url = makeError('uri')
   }
-  if (!w.description?.trim()) v.description = makeError('Required')
-  if (!w.access?.trim()) v.access = makeError('Required')
+  if (!w.description?.trim()) v.description = makeError('required')
+  if (!w.access?.trim()) v.access = makeError('required')
   return v
 }
 
@@ -77,7 +77,9 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
   }
 
   const save = () => {
-    if (validationFailed(calcErrors(current))) return
+    const validationErrors = calcErrors(current)
+    setValidation(validationErrors)
+    if (validationFailed(validationErrors)) return
     const toSave: Workspace = {
       ...current,
       workspaceId: current.workspaceId || crypto.randomUUID?.() || Date.now().toString(),
