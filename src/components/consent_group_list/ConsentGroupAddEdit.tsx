@@ -1,4 +1,4 @@
-import { isNil, isEmpty, set } from 'lodash'
+import { isNil, isEmpty, set, unset } from 'lodash'
 import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
@@ -38,7 +38,7 @@ const defaultConsentGroup: ConsentGroup2 = {
   consentGroupId: '',
 }
 
-const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
@@ -124,7 +124,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   }
 
   const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] | { displayText: string, id: string }[] }) => {
-    const next = structuredClone(current) as ConsentGroup2
+    const next = structuredClone(current)
     next.generalResearchUse = false
     next.hmb = false
     next.diseaseSpecificUse = undefined
@@ -149,30 +149,30 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
 
   const calcErrors = (cg: ConsentGroup2): Validation => {
     const v: Validation = {}
-    if (!cg.consentGroupName?.trim()) v.consentGroupName = makeError('Required')
-    if (!cg.accessManagement?.trim()) v.accessManagement = makeError('Required')
-    if (!cg.numberOfParticipants || cg.numberOfParticipants <= 0) v.numberOfParticipants = makeError('Must be greater than zero')
+    if (!cg.consentGroupName?.trim()) v.consentGroupName = makeError('required')
+    if (!cg.accessManagement?.trim()) v.accessManagement = makeError('required')
+    if (!cg.numberOfParticipants || cg.numberOfParticipants <= 0) v.numberOfParticipants = makeError('greaterThanZero')
     if (cg.accessManagement === 'controlled' && !cg.dataAccessCommitteeId) {
-      v.dataAccessCommitteeId = makeError('Required')
+      v.dataAccessCommitteeId = makeError('required')
     }
     if (cg.accessManagement !== 'open' && !selectedPrimaryGroup(cg as ConsentGroup)) {
-      v.primaryConsent = makeError('Required')
+      v.primaryConsent = makeError('required')
     }
     if (showDiseaseSpecificUseSearchbar && (isNil(cg.diseaseSpecificUse) || cg.diseaseSpecificUse.length === 0)) {
-      v.diseaseSpecificUse = makeError('Required')
+      v.diseaseSpecificUse = makeError('required')
     }
     if (showOtherPrimaryText && (!cg.otherPrimary?.trim())) {
-      v.otherPrimary = makeError('Required')
+      v.otherPrimary = makeError('required')
     }
-    if (!cg.dataLocation?.trim()) v.dataLocation = makeError('Required')
+    if (!cg.dataLocation?.trim()) v.dataLocation = makeError('required')
     if (showGSText && (!cg.gs?.trim())) {
-      v.gs = makeError('Required')
+      v.gs = makeError('required')
     }
     if (showMORText && (!cg.morDate?.trim())) {
-      v.mor = makeError('Required')
+      v.mor = makeError('required')
     }
     if (showOtherSecondaryText && (!cg.otherSecondary?.trim())) {
-      v.otherSecondary = makeError('Required')
+      v.otherSecondary = makeError('required')
     }
     return v
   }
@@ -185,7 +185,9 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   }
 
   const save = () => {
-    if (validationFailed(calcErrors(current))) return
+    const validationErrors = calcErrors(current)
+    setValidation(validationErrors)
+    if (validationFailed(validationErrors)) return
     const toSave: ConsentGroup2 = structuredClone(current)
     toSave.consentGroupId = current.consentGroupId || crypto.randomUUID?.() || Date.now().toString()
     if (id < 0) {
@@ -353,6 +355,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                     onPrimaryChange({ key: value, value: true })
                   }}
                   disabled={readOnly}
+                  validation={validation.primaryConsent}
                 />
 
                 <FormField
@@ -366,6 +369,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                     onPrimaryChange({ key: value, value: value })
                   }}
                   disabled={readOnly}
+                  validation={validation.primaryConsent}
                 />
                 {
                   showOtherPrimaryText && (
@@ -575,131 +579,135 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               />
             )
           }
-        </div>
 
-        {/* location */}
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <FormFieldTitle
-            required={true}
-            title="Data Location"
-            description="Please provide the location of your data resource for this consent group"
-            disabled={readOnly}
-          />
-        </div>
-        <div className="flex flex-row">
-          <FormField
-            style={{ width: '50%' }}
-            id="dataLocation"
-            name="dataLocation"
-            type={FormFieldTypes.SELECT}
-            selectOptions={[
-              'AnVIL Workspace',
-              'Terra Workspace',
-              'TDR Location',
-              'Not Determined',
+          {/* location */}
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+            <FormFieldTitle
+              required={true}
+              title="Data Location"
+              description="Please provide the location of your data resource for this consent group"
+              disabled={readOnly}
+            />
+          </div>
+          <div className="flex flex-row">
+            <FormField
+              style={{ width: '50%' }}
+              id="dataLocation"
+              name="dataLocation"
+              type={FormFieldTypes.SELECT}
+              selectOptions={[
+                'AnVIL Workspace',
+                'Terra Workspace',
+                'TDR Location',
+                'Not Determined',
+              ]}
+              placeholder="Data Location(s)"
+              defaultValue={current?.dataLocation}
+              validation={validation.dataLocation}
+              onChange={({ key, value }: { key: string, value: string }) => {
+                if (value === 'Not Determined') {
+                  const next = structuredClone(current)
+                  set(next, key, 'Not Determined')
+                  unset(next, 'url')
+                  setCurrent(next)
+                  setValidation(calcErrors(next))
+                  setEditDataLocationUrl(false)
+                }
+                else {
+                  onChange({ key, value })
+                  setEditDataLocationUrl(true)
+                }
+              }}
+              disabled={readOnly}
+            />
+            <FormField
+              style={{ width: '50%', paddingLeft: '1.5%' }}
+              id="url"
+              name="url"
+              validators={[FormValidators.URL]}
+              disabled={!editDataLocationUrl || readOnly}
+              placeholder="Enter a URL for your data location here"
+              defaultValue={current?.dataLocation === 'Not Determined' ? undefined : consentGroup?.url}
+              onChange={onChange}
+            />
+          </div>
+
+          <FormTable
+            id="fileTypes"
+            name="fileTypes"
+            formFields={[
+              {
+                id: 'fileType',
+                name: 'fileType',
+                title: 'File Type',
+                type: FormFieldTypes.SELECT,
+                selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
+                disabled: readOnly,
+              },
+              {
+                id: 'functionalEquivalence',
+                name: 'functionalEquivalence',
+                title: 'Functional Equivalence',
+                placeholder: 'Type',
+                disabled: readOnly,
+              },
             ]}
-            placeholder="Data Location(s)"
-            defaultValue={current?.dataLocation}
-            validation={validation.dataLocation}
-            onChange={({ key, value }: { key: string, value: string }) => {
-              onChange({ key, value })
-              if (value === 'Not Determined') {
-                onChange({ key: 'url', value: undefined })
-                setEditDataLocationUrl(false)
-              }
-              else {
-                setEditDataLocationUrl(true)
-              }
-            }}
-            disabled={readOnly}
-          />
-          <FormField
-            style={{ width: '50%', paddingLeft: '1.5%' }}
-            id="url"
-            name="url"
-            validators={[FormValidators.URL]}
-            disabled={!editDataLocationUrl || readOnly}
-            placeholder="Enter a URL for your data location here"
-            defaultValue={current?.dataLocation === 'Not Determined' ? undefined : consentGroup?.url}
+            defaultValue={current?.fileTypes}
+            enableAddingRow={!readOnly}
+            addRowLabel="Add New File Type"
+            minLength={1}
             onChange={onChange}
-          />
-        </div>
-
-        <FormTable
-          id="fileTypes"
-          name="fileTypes"
-          formFields={[
-            {
-              id: 'fileType',
-              name: 'fileType',
-              title: 'File Type',
-              type: FormFieldTypes.SELECT,
-              selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
-              disabled: readOnly,
-            },
-            {
-              id: 'functionalEquivalence',
-              name: 'functionalEquivalence',
-              title: 'Functional Equivalence',
-              placeholder: 'Type',
-              disabled: readOnly,
-            },
-          ]}
-          defaultValue={current?.fileTypes}
-          enableAddingRow={!readOnly}
-          addRowLabel="Add New File Type"
-          minLength={1}
-          onChange={onChange}
-          disabled={readOnly}
-        />
-        <div style={{ width: '50%' }}>
-          <FormField
-            id="numberOfParticipants"
-            name="numberOfParticipants"
-            title="# of Participants"
-            placeholder="Number"
-            type={FormFieldTypes.NUMBER}
-            validators={[FormValidators.REQUIRED]}
-            defaultValue={current?.numberOfParticipants}
-            onChange={onChange}
-            validation={validation.numberOfParticipants}
             disabled={readOnly}
           />
-        </div>
-        <div className="row" style={{ marginTop: 20 }}>
-          <FileInput
-            description="If an Institutional Certification for this consent group exists, please upload it here"
-            id="addedNIHInstitutionalCertificationFile"
-            defaultValue={current.addedNIHInstitutionalCertificationFile}
-            storedValue={current.nihInstitutionalCertificationFile}
-            onAddFile={function (file: File, id: string): void {
-              onChange({ key: id, value: file })
-            }}
-            onDeleteFile={function (id: string): void {
-              onChange({ key: id, value: undefined })
-            }}
-            title="NIH Institutional Certification"
-            disabled={readOnly}
-            onClick={current.nihInstitutionalCertificationFile ? () => { DataSet.getNIHInstitutionalCertification(current.datasetId) } : undefined}
-          />
-        </div>
-        <div className="row" style={{ marginTop: 20 }}>
-          {!readOnly && (
+          <div style={{ width: '50%' }}>
+            <FormField
+              id="numberOfParticipants"
+              name="numberOfParticipants"
+              title="# of Participants"
+              placeholder="Number"
+              type={FormFieldTypes.NUMBER}
+              validators={[FormValidators.REQUIRED]}
+              defaultValue={current?.numberOfParticipants}
+              onChange={onChange}
+              validation={validation.numberOfParticipants}
+              disabled={readOnly}
+            />
+          </div>
+          <div className="row" style={{ marginTop: 20 }}>
+            <FileInput
+              description="If an Institutional Certification for this consent group exists, please upload it here"
+              id="addedNIHInstitutionalCertificationFile"
+              defaultValue={current.addedNIHInstitutionalCertificationFile}
+              storedValue={current.nihInstitutionalCertificationFile}
+              onAddFile={function (file: File, id: string): void {
+                onChange({ key: id, value: file })
+              }}
+              onDeleteFile={function (id: string): void {
+                onChange({ key: id, value: undefined })
+              }}
+              title="NIH Institutional Certification"
+              disabled={readOnly}
+              onClick={current.nihInstitutionalCertificationFile ? () => { DataSet.getNIHInstitutionalCertification(current.datasetId) } : undefined}
+            />
+          </div>
+          <div className="row" style={{ marginTop: 20 }}>
+            {!readOnly && (
+              <button
+                className="collaborator-form-add-save-button f-left btn"
+                type="button"
+                onClick={save}
+              >
+                {consentGroup === undefined ? 'Add' : 'Save'}
+              </button>
+            )}
             <button
-              className="collaborator-form-add-save-button f-left btn"
+              className="collaborator-form-cancel-button f-left btn"
               type="button"
-              onClick={save}
+              onClick={closeAction}
             >
-              {consentGroup === undefined ? 'Add' : 'Save'}
+              {readOnly ? 'Close' : 'Cancel'}
             </button>
-          )}
-          <button
-            className="collaborator-form-cancel-button f-left btn"
-            type="button"
-            onClick={closeAction}
-          >
-            {readOnly ? 'Close' : 'Cancel'}
-          </button>
+          </div>
         </div>
       </div>
     </div>

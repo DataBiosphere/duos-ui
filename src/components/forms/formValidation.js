@@ -1,5 +1,5 @@
 import { isEmailAddress } from '../../libs/utils'
-import { isString, isEmpty, isNil, isArray } from 'lodash'
+import { isString, isEmpty, isNil, isArray, isNumber } from 'lodash'
 import dayjs from 'dayjs'
 
 export const requiredValidator = {
@@ -43,7 +43,13 @@ export const uniqueValidator = {
   msg: 'Please enter a unique value that doesn\'t exist in the system',
 }
 
-const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, dayJSValidator, uniqueValidator]
+export const greaterThanZeroValidator = {
+  id: 'greaterThanZero',
+  isValid: val => isNumber(val) && val > 0,
+  msg: 'Please enter a number greater than zero',
+}
+
+const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, dayJSValidator, uniqueValidator, greaterThanZeroValidator]
 
 /**
  * Validates the form value

@@ -34,6 +34,17 @@
   align-items: left;
 }
 
+.delete-modal-title-text {
+  height: 48px;
+  width: 365px;
+  color: #333F52;
+  font-family: Montserrat, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0;
+  line-height: 24px;
+  align-items: left;
+}
+
 .delete-modal-message {
   height: 48px;
   width: 365px;

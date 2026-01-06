@@ -37,36 +37,36 @@ const defaultIp: IntellectualProperty = {
   tags: [],
 }
 
-const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
 const calcErrors = (intellectualProperty: IntellectualProperty): Validation => {
   const v: Validation = {}
-  if (!intellectualProperty.type?.trim()) v.type = makeError('Required')
-  if (!intellectualProperty.title?.trim()) v.title = makeError('Required')
-  if (!intellectualProperty.assignee?.trim()) v.assignee = makeError('Required')
-  if (!intellectualProperty.patentNumber?.trim()) v.patentNumber = makeError('Required')
+  if (!intellectualProperty.type?.trim()) v.type = makeError('required')
+  if (!intellectualProperty.title?.trim()) v.title = makeError('required')
+  if (!intellectualProperty.assignee?.trim()) v.assignee = makeError('required')
+  if (!intellectualProperty.patentNumber?.trim()) v.patentNumber = makeError('required')
 
   // Date validation
   if (!intellectualProperty.filingDate?.trim()) {
-    v.filingDate = makeError('Required')
+    v.filingDate = makeError('required')
   }
   else if (!FormValidators.DATE.isValid(intellectualProperty.filingDate)) {
-    v.filingDate = makeError('Invalid date format (YYYY-MM-DD)')
+    v.filingDate = makeError('date')
   }
 
-  if (!intellectualProperty.status?.trim()) v.status = makeError('Required')
+  if (!intellectualProperty.status?.trim()) v.status = makeError('required')
 
   // URL validation
   if (!intellectualProperty.url?.trim()) {
-    v.url = makeError('Required')
+    v.url = makeError('required')
   }
   else if (!FormValidators.URL.isValid(intellectualProperty.url)) {
-    v.url = makeError('Invalid URL format')
+    v.url = makeError('uri')
   }
 
-  if (!intellectualProperty.contact?.trim()) v.contact = makeError('Required')
+  if (!intellectualProperty.contact?.trim()) v.contact = makeError('required')
   return v
 }
 
@@ -95,7 +95,9 @@ export default function IntellectualPropertyAddEdit(props: IntellectualPropertyA
   }
 
   const save = () => {
-    if (validationFailed(calcErrors(current))) return
+    const validationErrors = calcErrors(current)
+    setValidation(validationErrors)
+    if (validationFailed(validationErrors)) return
     const toSave: IntellectualProperty = {
       ...current,
       ipId: current.ipId || crypto.randomUUID?.() || Date.now().toString(),
