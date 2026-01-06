@@ -44,21 +44,23 @@ interface Validation {
   maintainerEmail?: ValidationError
 }
 
-const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
+
+const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
 const calcAiModelErrors = (model: AiModel): Validation => {
   const v: Validation = {}
-  if (!model.name?.trim()) v.name = makeError('Required')
+  if (!model.name?.trim()) v.name = makeError('required')
   if (!model.url?.trim()) {
-    v.url = makeError('Required')
+    v.url = makeError('required')
   }
   else if (!FormValidators.URL.isValid(model.url)) {
-    v.url = makeError('Invalid URL format')
+    v.url = makeError('uri')
   }
-  if (!model.format?.trim()) v.format = makeError('Required')
-  if (!model.license?.trim()) v.license = makeError('Required')
-  if (!model.maintainer?.name?.trim()) v.maintainerName = makeError('Required')
-  if (!model.maintainer?.email?.trim()) v.maintainerEmail = makeError('Required')
+  if (!model.format?.trim()) v.format = makeError('required')
+  if (!model.license?.trim()) v.license = makeError('required')
+  if (!model.maintainer?.name?.trim()) v.maintainerName = makeError('required')
+  if (!model.maintainer?.email?.trim()) v.maintainerEmail = makeError('required')
   return v
 }
 
@@ -99,6 +101,9 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
   }
 
   const save = () => {
+    const validationErrors = calcAiModelErrors(newAiModel)
+    setValidation(validationErrors)
+    if (validationFailed(validationErrors)) return
     if (id < 0) {
       onAiModelsChange([...aiModels, newAiModel])
     }
