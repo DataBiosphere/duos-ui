@@ -53,6 +53,7 @@ describe('FundingResourceList component', () => {
     cy.get('#funderName').type('New Funder')
     cy.get('#projectTitle').type('New Project')
     cy.get('#funderProgram').type('New Program')
+    cy.get('#grantNumber').type('New Grant number')
     cy.get('.collaborator-form-add-save-button').should('not.be.disabled').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
@@ -93,6 +94,7 @@ describe('FundingResourceList component', () => {
     cy.get('#funderName').type('Added Funder')
     cy.get('#projectTitle').type('Added Project')
     cy.get('#funderProgram').type('Added Program')
+    cy.get('#grantNumber').type('New Grant number')
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(state.length).to.eq(1)
