@@ -59,7 +59,7 @@ interface Validation {
   url?: ValidationError
 }
 
-const makeError = (message: string): ValidationError => ({ valid: true, failed: [message] })
+const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
 const isFallback = (v: string) =>
   v === ClinicalTrialStatus.UNKNOWN
@@ -68,17 +68,17 @@ const isFallback = (v: string) =>
 
 const calcClinicalTrialErrors = (ct: ClinicalTrial): Validation => {
   const v: Validation = {}
-  if (!ct.title?.trim()) v.title = makeError('Required')
-  if (!ct.registry?.trim()) v.registry = makeError('Required')
-  if (!ct.identifier?.trim()) v.identifier = makeError('Required')
-  if (isFallback(ct.status)) v.status = makeError('Select status')
-  if (!ct.sponsor?.trim()) v.sponsor = makeError('Required')
-  if (!ct.startDate?.trim()) v.startDate = makeError('Required')
-  else if (!FormValidators.DATE.isValid(ct.startDate)) v.startDate = makeError('Invalid date')
-  if (ct.endDate?.trim() && !FormValidators.DATE.isValid(ct.endDate)) v.endDate = makeError('Invalid date')
-  if (isFallback(ct.interventionType)) v.interventionType = makeError('Select type')
-  if (isFallback(ct.phase)) v.phase = makeError('Select phase')
-  if (!ct.url?.trim()) v.url = makeError('Required')
+  if (!ct.title?.trim()) v.title = makeError('required')
+  if (!ct.registry?.trim()) v.registry = makeError('required')
+  if (!ct.identifier?.trim()) v.identifier = makeError('required')
+  if (isFallback(ct.status)) v.status = makeError('required')
+  if (!ct.sponsor?.trim()) v.sponsor = makeError('required')
+  if (!ct.startDate?.trim()) v.startDate = makeError('required')
+  else if (!FormValidators.DATE.isValid(ct.startDate)) v.startDate = makeError('date')
+  if (ct.endDate?.trim() && !FormValidators.DATE.isValid(ct.endDate)) v.endDate = makeError('date')
+  if (isFallback(ct.interventionType)) v.interventionType = makeError('required')
+  if (isFallback(ct.phase)) v.phase = makeError('required')
+  if (!ct.url?.trim()) v.url = makeError('required')
   return v
 }
 
@@ -124,7 +124,9 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
   }
 
   const save = () => {
-    if (validationFailed(calcClinicalTrialErrors(newClinicalTrial))) return
+    const validationErrors = calcClinicalTrialErrors(newClinicalTrial)
+    setValidation(validationErrors)
+    if (validationFailed(validationErrors)) return
     if (id < 0) {
       onClinicalTrialChange([...clinicalTrials, newClinicalTrial])
     }
