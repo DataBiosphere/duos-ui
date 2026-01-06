@@ -37,10 +37,10 @@ describe('Form Validator tests', () => {
       expect(urlValidator.isValid('   ')).to.be.equal(false)
     })
     it('Whitespace leading URL should validate to true', () => {
-      expect(urlValidator.isValid('   http://www.broadinstitute.org')).to.be.equal(true)
+      expect(urlValidator.isValid('   https://www.broadinstitute.org')).to.be.equal(true)
     })
     it('Whitespace trailing URL should validate to true', () => {
-      expect(urlValidator.isValid('   http://www.broadinstitute.org    ')).to.be.equal(true)
+      expect(urlValidator.isValid('   https://www.broadinstitute.org    ')).to.be.equal(true)
     })
     it('undefined should validate to false', () => {
       expect(urlValidator.isValid(undefined)).to.be.equal(false)
