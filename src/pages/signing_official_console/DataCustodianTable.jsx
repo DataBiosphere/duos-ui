@@ -15,7 +15,6 @@ import {
 } from 'src/libs/utils'
 import { User } from 'src/libs/ajax/User'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
-import DataCustodianFormModal from 'src/components/modals/DataCustodianFormModal'
 import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContainer'
 import DpaMarkdown from 'src/assets/DPA.md'
 import { confirmModalType } from 'src/libs/libraryCardUtils'
@@ -178,13 +177,12 @@ export default function DataCustodianTable(props) {
   const [filteredResearchers, setFilteredResearchers] = useState([])
   const [visibleResearchers, setVisibleResearchers] = useState([])
   const [selectedResearcher, setSelectedResearcher] = useState({})
-  const [showModal, setShowModal] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const searchRef = useRef('')
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('')
   const [confirmationTitle, setConfirmationTitle] = useState('')
   const [confirmType, setConfirmType] = useState(confirmModalType.delete)
-  const { signingOfficial, unregisteredResearchers, isLoading } = props
+  const { signingOfficial, isLoading } = props
 
   const handleSearchChange = tableSearchHandler(
     researchers,
@@ -313,7 +311,6 @@ export default function DataCustodianTable(props) {
 
       setResearchers(listCopy)
       setShowConfirmation(false)
-      setShowModal(false)
       Notifications.showSuccess({
         text: `Issued ${messageName} as Data Submitter`,
       })
@@ -387,14 +384,6 @@ export default function DataCustodianTable(props) {
         styles={styles}
         tableSize={tableSize}
         paginationBar={paginationBar}
-      />
-      <DataCustodianFormModal
-        showModal={showModal}
-        createOnClick={researcher => issueCustodian(researcher, researchers)}
-        closeModal={() => setShowModal(false)}
-        researcher={selectedResearcher}
-        users={unregisteredResearchers}
-        dpaContent={dpaContent}
       />
       <ConfirmationModal
         showConfirmation={showConfirmation}
