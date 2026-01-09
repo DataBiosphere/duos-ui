@@ -54,7 +54,7 @@ const storageDatasetSearchSort = 'storageDatasetSearchSort'
 // Get the sort configuration for the active tab
 const getSortForTab = (tabKey: string): Sort => {
   const storageKey = `${storageDatasetSearchSort}_${tabKey}`
-  const savedSort = Storage.getCurrentUserSettings(storageKey)
+  const savedSort = Storage.getCurrentUserSettings(storageKey) as Sort | undefined
 
   if (savedSort) {
     return {
