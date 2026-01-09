@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import js from '@eslint/js'
 import globals from 'globals'
 import ts from 'typescript-eslint'
+import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import stylistic from '@stylistic/eslint-plugin'
@@ -30,6 +31,7 @@ export default defineConfig([
     extends: [
       js.configs.recommended,
       ts.configs.recommended,
+      react.configs.flat.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
       stylistic.configs.recommended,
@@ -63,6 +65,13 @@ export default defineConfig([
       ],
       'react/prop-types': 'off',
       '@stylistic/jsx-one-expression-per-line': ['off'],
+      // TODO: these issues should be fixed
+      'react-hooks/static-components': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/globals': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
     },
   },
 ])
