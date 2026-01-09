@@ -43,6 +43,7 @@ export const DatasetSearchTable = (props) => {
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study)
   const [searchTerm, setSearchTerm] = useState('')
   const searchRef = useRef('')
+  const hasRunInitialSearch = useRef(false)
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1
 
@@ -223,6 +224,12 @@ export const DatasetSearchTable = (props) => {
   const handleSearchChange = useCallback(searchTerms => setSearchTerm(searchTerms))
 
   useEffect(() => {
+    if (!hasRunInitialSearch.current) {
+      hasRunInitialSearch.current = true
+      setFiltered(datasets)
+      return
+    }
+
     const fullQuery = assembleFullQuery()
     try {
       searchAndFilter.current(fullQuery)

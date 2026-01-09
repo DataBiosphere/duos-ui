@@ -35,6 +35,28 @@ const props = {
 }
 
 describe('Dataset Search Table tests', () => {
+  describe('Initial search request optimization', () => {
+    it('Should not make redundant search request on initial mount', () => {
+      cy.initApplicationConfig()
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
+      cy.clock()
+
+      // Spy on search endpoint to verify it's not called initially
+      let searchCallCount = 0
+      cy.intercept('POST', '**/search/index', () => {
+        searchCallCount++
+      }).as('searchSpy')
+
+      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Wait for component to render
+      cy.get('button').contains('View By Studies').should('exist')
+
+      // Verify no initial search request was made
+      cy.wrap(searchCallCount).should('equal', 0)
+    })
+  })
+
   describe('Data library with one dataset footer tests', () => {
     beforeEach(() => {
       cy.initApplicationConfig()
