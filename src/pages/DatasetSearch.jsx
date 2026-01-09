@@ -153,7 +153,15 @@ export const DatasetSearch = (props) => {
             <CircularProgress />
           </Box>
         )
-      : <DatasetSearchTable {...props} datasets={datasets} icon={version.icon} title={version.title} />
+      : <DatasetSearchTable
+          {...props}
+          datasets={datasets}
+          icon={version.icon}
+          title={version.title}
+          assembleFullQuery={assembleFullQuery}
+          isSigningOfficial={isSigningOfficial}
+          isInstitutionQuery={isInstitutionQuery}
+        />
   )
 }
 
