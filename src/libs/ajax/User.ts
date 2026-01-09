@@ -88,12 +88,6 @@ export const User = {
     return res.data
   },
 
-  getUnassignedUsers: async (): Promise<DuosUser[]> => {
-    const url = `${await getApiUrl()}/api/user/institution/unassigned`
-    const res = await fetchGet(url, Config.authOpts())
-    return res.data
-  },
-
   addRoleToUser: async (userId: number, roleId: number): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
     const res = await fetchPut(url, null, Config.authOpts())
