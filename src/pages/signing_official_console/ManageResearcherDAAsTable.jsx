@@ -79,7 +79,7 @@ export default function ManageResearcherDAAsTable(props) {
 
   const headers = (dacs) => {
     const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0
-    columnHeaderFormat = {
+    const localColumnHeaderFormat = {
       ...columnHeaderFormat,
       ...dacs.reduce((acc, dac) => {
         const matchingDaas = daas.filter(daa => daa.dacs?.some(d => d.dacId === dac.dacId))
@@ -96,7 +96,7 @@ export default function ManageResearcherDAAsTable(props) {
       }, {}),
     }
     const dacColumns = dacs.map(dac => dac.name)
-    return [columnHeaderFormat.name, ...dacColumns.map(column => columnHeaderFormat[column])]
+    return [localColumnHeaderFormat.name, ...dacColumns.map(column => localColumnHeaderFormat[column])]
   }
 
   // Search function for SearchBar component, function defined in utils
