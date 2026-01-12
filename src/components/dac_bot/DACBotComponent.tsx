@@ -36,9 +36,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
   const { dacId, 'data-cy': dataCy } = props
   const [DACbotRules, setDACbotRules] = useState<Array<DACbotRule>>([])
   const [isLoading, setIsLoading] = useState(true)
-  const userIsChair = Storage.getCurrentUser().roles.filter((r: UserRole) => {
-    return r.dacId == dacId && r.name == 'Chairperson'
-  }).length > 0
+  const userIsChair = Storage.getCurrentUser().roles.some((r: UserRole) => r.dacId == dacId && r.name == 'Chairperson')
 
   const fetchData = useCallback(async () => {
     try {
