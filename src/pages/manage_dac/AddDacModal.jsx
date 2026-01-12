@@ -1,14 +1,13 @@
 import { filter, isEmpty, difference, union, map } from 'lodash'
 import React, { useState } from 'react'
 import AsyncSelect from 'react-select/async'
-import { DAC } from '../../libs/ajax/DAC'
-import { Models } from '../../libs/models'
-import { PromiseSerial } from '../../libs/utils'
-import { Alert } from '../../components/Alert'
-import { BaseModal } from '../../components/BaseModal'
+import { DAC } from 'src/libs/ajax/DAC'
+import { PromiseSerial } from 'src/libs/utils'
+import { Alert } from 'src/components/Alert'
+import { BaseModal } from 'src/components/BaseModal'
 import { DacUsers } from './DacUsers'
-import editDACIcon from '../../images/icon_edit_dac.png'
-import addDACIcon from '../../images/icon_add_dac.png'
+import editDACIcon from 'src/images/icon_edit_dac.png'
+import addDACIcon from 'src/images/icon_add_dac.png'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -18,9 +17,9 @@ const ADMIN = 'Admin'
 export const AddDacModal = (props) => {
   const [state, setState] = useState({
     isEditMode: props.isEditMode,
-    error: Models.error,
+    error: {},
     dirtyFlag: false,
-    dac: props.isEditMode ? props.dac : Models.dac,
+    dac: props.isEditMode ? props.dac : {},
     chairsSelectedOptions: [],
     chairIdsToAdd: [],
     chairIdsToRemove: [],
@@ -288,7 +287,7 @@ export const AddDacModal = (props) => {
           </div>
         </div>
         {
-          (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && (
+          (state.dac.chairpersons?.length > 0 || state.dac.members?.length > 0) && (
             <div className="form-group">
               <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
               <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
