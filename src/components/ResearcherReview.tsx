@@ -29,13 +29,13 @@ export const ResearcherReview = (props: ResearcherReviewProps) => {
       <div style={headerStyle}><h4>Researcher Information</h4></div>
       <div style={gridStyle}>
         <div style={labelStyle}>Full Name</div>
-        <div data-cy="display-name">{user.displayName || ''}</div>
+        <div data-cy="display-name">{user.displayName ?? ''}</div>
 
         <div style={labelStyle}>Institution Name</div>
-        <div data-cy="institution-name">{user.institution?.name || ''}</div>
+        <div data-cy="institution-name">{user.institution?.name ?? ''}</div>
 
         <div style={labelStyle}>NIH Linked Account ID</div>
-        <div data-cy="era-commons-id">{nihAuthState.eraCommonsId || ''}</div>
+        <div data-cy="era-commons-id">{nihAuthState.eraCommonsId ?? ''}</div>
 
         <div style={labelStyle}>NIH Authentication State</div>
         <div data-cy="nih-valid">{nihAuthState.nihValid ? 'Authorized' : 'Not Authorized'}</div>
