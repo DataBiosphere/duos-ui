@@ -87,7 +87,7 @@ function App() {
           if (linkInfo?.additionalState?.redirectTo) {
             // The redirectTo URL is expected to be a full URL, so we need to remove the origin part
             // to use navigate for the redirect.
-            navigate(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
+            navigate(linkInfo.additionalState.redirectTo.replace(globalThis.location.origin, ''))
           }
         }
         catch (error) {
