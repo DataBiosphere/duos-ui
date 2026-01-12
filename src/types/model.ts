@@ -57,6 +57,7 @@ export interface DuosUser {
   emailPreference: boolean
   eraCommonsId?: string
   institutionId?: number
+  institution?: InstitutionInterface
   isAdmin: boolean
   isAlumni: boolean
   isChairPerson: boolean
