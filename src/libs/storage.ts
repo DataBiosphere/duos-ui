@@ -1,4 +1,3 @@
-import get from 'lodash/fp/get'
 import { v4 as uuid } from 'uuid'
 import { DuosUser } from 'src/types/model'
 import { OidcUser as OidcUserType } from 'src/libs/auth/oidcBroker'
@@ -81,7 +80,7 @@ export const Storage = {
   getCurrentUserSettings: <T = never>(key: string): T | undefined => {
     const id = Storage.getCurrentUser().userId
     const userSettings = JSON.parse(localStorage.getItem(UserSettings) || '{}') as UserSettingsType
-    return get([id, key], userSettings) as T | undefined
+    return userSettings[id]?.[key] as T | undefined
   },
 
   getAnonymousId: (): string | null => {
