@@ -35,7 +35,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    Modal.setAppElement(document.getElementById('modal-root'))
+    const modalRoot = document.getElementById('modal-root')
+    if (modalRoot) {
+      Modal.setAppElement(modalRoot)
+    }
   })
 
   useEffect(() => {
@@ -89,7 +92,7 @@ function App() {
         }
         catch (error) {
           Notifications.showError({
-            message: 'Error during RAS authentication: ' + extractError(error),
+            text: 'Error during RAS authentication: ' + extractError(error),
             description: 'There was an error processing your RAS authentication. Please try again.',
           })
         }
@@ -105,7 +108,7 @@ function App() {
     position: 'fixed',
     top: '45%',
     left: '45%',
-  }
+  } as React.CSSProperties
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={muiThemeFix}>
