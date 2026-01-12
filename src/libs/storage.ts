@@ -11,7 +11,7 @@ const anonymousId = 'anonymousId'
 const ENV = 'env'
 
 interface UserSettingsType {
-  [userId: string]: {
+  [userId: number]: {
     [key: string]: unknown
   }
 }
@@ -78,10 +78,10 @@ export const Storage = {
     return user ? JSON.parse(user) : DEFAULT_DUOS_USER
   },
 
-  getCurrentUserSettings: (key: string): unknown => {
+  getCurrentUserSettings: <T = never>(key: string): T | undefined => {
     const id = Storage.getCurrentUser().userId
     const userSettings = JSON.parse(localStorage.getItem(UserSettings) || '{}') as UserSettingsType
-    return get([id, key], userSettings)
+    return get([id, key], userSettings) as T | undefined
   },
 
   getAnonymousId: (): string | null => {
@@ -92,7 +92,7 @@ export const Storage = {
     localStorage.setItem(anonymousId, id)
   },
 
-  setCurrentUserSettings: (key: string, value: unknown): void => {
+  setCurrentUserSettings: <T>(key: string, value: T): void => {
     const id = Storage.getCurrentUser().userId
     const userSettings = JSON.parse(localStorage.getItem(UserSettings) || '{}') as UserSettingsType
     if (!userSettings[id]) {

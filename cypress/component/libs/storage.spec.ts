@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Storage } from 'src/libs/storage'
 import { DuosUser } from 'src/types/model'
 import { OidcUser } from 'src/libs/auth/oidcBroker'
@@ -22,8 +21,8 @@ describe('Storage', () => {
         win.localStorage.setItem('test', 'value')
         Storage.clearStorage()
         expect(win.localStorage.length).to.be.greaterThan(0)
-        expect(Storage.getCurrentUser()).to.not.be.null
-        expect(Storage.getOidcUser()).to.not.be.null
+        expect(Storage.getCurrentUser()).to.not.equal(null)
+        expect(Storage.getOidcUser()).to.not.equal(null)
       })
     })
   })
@@ -53,7 +52,7 @@ describe('Storage', () => {
 
     it('should return default user when current user is not set', () => {
       const retrieved = Storage.getCurrentUser()
-      expect(retrieved).to.not.be.null
+      expect(retrieved).to.not.equal(null)
       expect(retrieved.userId).to.equal(0)
       expect(retrieved.roles).to.be.an('array')
     })
@@ -70,13 +69,13 @@ describe('Storage', () => {
     it('should generate uuid when no id provided', () => {
       Storage.setAnonymousId()
       const retrieved = Storage.getAnonymousId()
-      expect(retrieved).to.not.be.null
+      expect(retrieved).to.not.equal(null)
       expect(retrieved?.length).to.be.greaterThan(0)
     })
 
     it('should return null when anonymous id is not set', () => {
       const retrieved = Storage.getAnonymousId()
-      expect(retrieved).to.be.null
+      expect(retrieved).to.equal(null)
     })
   })
 
@@ -105,7 +104,7 @@ describe('Storage', () => {
 
     it('should return default oidc user when not set', () => {
       const retrieved = Storage.getOidcUser()
-      expect(retrieved).to.not.be.null
+      expect(retrieved).to.not.equal(null)
       expect(retrieved.access_token).to.equal('')
     })
   })
@@ -130,7 +129,7 @@ describe('Storage', () => {
         },
       }
       Storage.setOidcUser(user as OidcUser)
-      expect(Storage.userIsLogged()).to.be.true
+      expect(Storage.userIsLogged()).to.equal(true)
     })
 
     it('should return false when token is expired', () => {
@@ -152,11 +151,11 @@ describe('Storage', () => {
         },
       }
       Storage.setOidcUser(user as OidcUser)
-      expect(Storage.userIsLogged()).to.be.false
+      expect(Storage.userIsLogged()).to.equal(false)
     })
 
     it('should return false when oidc user is not set', () => {
-      expect(Storage.userIsLogged()).to.be.false
+      expect(Storage.userIsLogged()).to.equal(false)
     })
   })
 
@@ -179,7 +178,7 @@ describe('Storage', () => {
       }
       Storage.setCurrentUser(user)
       Storage.setCurrentUserSettings('theme', 'dark')
-      const retrieved = Storage.getCurrentUserSettings('theme')
+      const retrieved = Storage.getCurrentUserSettings<string>('theme')
       expect(retrieved).to.equal('dark')
     })
 
@@ -200,8 +199,8 @@ describe('Storage', () => {
         userId: 123,
       }
       Storage.setCurrentUser(user)
-      const retrieved = Storage.getCurrentUserSettings('nonexistent')
-      expect(retrieved).to.be.undefined
+      const retrieved = Storage.getCurrentUserSettings<string>('nonexistent')
+      expect(retrieved).to.equal(undefined)
     })
 
     it('should handle multiple settings for same user', () => {
@@ -223,8 +222,8 @@ describe('Storage', () => {
       Storage.setCurrentUser(user)
       Storage.setCurrentUserSettings('theme', 'dark')
       Storage.setCurrentUserSettings('language', 'en')
-      expect(Storage.getCurrentUserSettings('theme')).to.equal('dark')
-      expect(Storage.getCurrentUserSettings('language')).to.equal('en')
+      expect(Storage.getCurrentUserSettings<string>('theme')).to.equal('dark')
+      expect(Storage.getCurrentUserSettings<string>('language')).to.equal('en')
     })
   })
 
@@ -238,14 +237,14 @@ describe('Storage', () => {
 
     it('should return null for non-existent key', () => {
       const retrieved = Storage.getData('nonexistent')
-      expect(retrieved).to.be.null
+      expect(retrieved).to.equal(null)
     })
 
     it('should remove data', () => {
       Storage.setData('temp', 'value')
       Storage.removeData('temp')
       const retrieved = Storage.getData('temp')
-      expect(retrieved).to.be.null
+      expect(retrieved).to.equal(null)
     })
   })
 
@@ -256,7 +255,7 @@ describe('Storage', () => {
     })
 
     it('should return null when env is not set', () => {
-      expect(Storage.getEnv()).to.be.null
+      expect(Storage.getEnv()).to.equal(null)
     })
   })
 })

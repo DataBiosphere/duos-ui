@@ -21,7 +21,7 @@ export const storageInstitutionSort = 'storageInstitutionSort'
 
 // Sort functionality for the institution table.
 export const getInitialSort = (columns: string[] = []): SortType => {
-  const sort = Storage.getCurrentUserSettings(storageInstitutionSort) as StorageSort | undefined ?? {
+  const sort = Storage.getCurrentUserSettings<StorageSort>(storageInstitutionSort) ?? {
     field: 'name',
     dir: 1,
   }
