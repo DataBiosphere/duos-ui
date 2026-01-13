@@ -154,7 +154,7 @@ describe('Main App Functions', () => {
     cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
     cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
     const pageVisitStub = cy.stub()
-    const LocationSpy = ({ onLocationChange }) => {
+    const LocationSpy = ({ onLocationChange }: { onLocationChange: (pathname: string) => void }) => {
       const location = useLocation()
       React.useEffect(() => {
         onLocationChange(location.pathname)
