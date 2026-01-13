@@ -54,16 +54,7 @@ const storageDatasetSearchSort = 'storageDatasetSearchSort'
 // Get the sort configuration for the active tab
 const getSortForTab = (tabKey: string): Sort => {
   const storageKey = `${storageDatasetSearchSort}_${tabKey}`
-  const savedSort = Storage.getCurrentUserSettings(storageKey)
-
-  if (savedSort) {
-    return {
-      colIndex: savedSort.colIndex,
-      dir: savedSort.dir,
-    }
-  }
-
-  return { dir: 1 } as Sort
+  return Storage.getCurrentUserSettings<Sort>(storageKey) ?? { dir: 1 } as Sort
 }
 
 interface DatasetSearchTableDisplayProps {

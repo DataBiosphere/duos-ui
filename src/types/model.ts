@@ -34,6 +34,7 @@ export interface UserRole {
   name: UserRoleName
   userId: number
   userRoleId: number
+  dacId?: number
 }
 
 export interface UserStatusInfo {
