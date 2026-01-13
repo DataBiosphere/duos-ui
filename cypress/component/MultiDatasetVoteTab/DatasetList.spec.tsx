@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import DatasetList from 'src/components/collection_voting_slab/DatasetList'
 import { Storage } from 'src/libs/storage'
 import { BrowserRouter } from 'react-router-dom'
@@ -19,7 +18,7 @@ const user = {
 describe('DatasetList', () => {
   it('renders a table with datasets', () => {
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetList visibleDatasets={datasets} isLoading={false} dacs={dacs} />
       </BrowserRouter>,
@@ -35,7 +34,7 @@ describe('DatasetList', () => {
 
   it('renders placeholder when loading', () => {
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(
+    cy.mount(
       <DatasetList visibleDatasets={datasets} isLoading={true} dacs={dacs} />,
     )
     cy.get('.text-placeholder').should('exist')
@@ -44,7 +43,7 @@ describe('DatasetList', () => {
 
   it('renders filler for missing datasetIdentifier', () => {
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetList
           visibleDatasets={[{ datasetId: 3, name: 'Dataset 3', dacId: 1 } as Dataset]}
@@ -59,7 +58,7 @@ describe('DatasetList', () => {
 
   it('renders filler for missing name', () => {
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetList
           visibleDatasets={[{ datasetId: 4, datasetIdentifier: 'DUOS-4', dacId: 1 } as Dataset]}
@@ -74,7 +73,7 @@ describe('DatasetList', () => {
 
   it('renders DAC name as link for chair user', () => {
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetList visibleDatasets={datasets} isLoading={false} dacs={dacs} />
       </BrowserRouter>,
@@ -84,7 +83,7 @@ describe('DatasetList', () => {
 
   it('renders DAC name as plain text for non-chair user', () => {
     cy.stub(Storage, 'getCurrentUser').returns({ isChairPerson: false })
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetList visibleDatasets={datasets} isLoading={false} dacs={dacs} />
       </BrowserRouter>,

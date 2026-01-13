@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import VotesPieChart from 'src/components/common/VotesPieChart'
 
 const testVotes = [{ vote: true }, { vote: false }, {}]
@@ -10,7 +9,7 @@ const keyString = 'test'
 // Also harder to figure out sizing and colors due to vector dimensions
 describe('VotesPieChart - Tests', function () {
   it('renders the no data div if the votes array is empty', function () {
-    mount(<VotesPieChart keyString={keyString} />)
+    cy.mount(<VotesPieChart keyString={keyString} />)
     const chart = `.${keyString}-pie-chart-no-data`
     cy.get(chart).should('exist')
     cy.get(chart).contains(`No data for ${keyString}`)
@@ -18,7 +17,7 @@ describe('VotesPieChart - Tests', function () {
 
   it('renders the results so that each division is 1/3 of the whole', function () {
     const props = { votes: testVotes, keyString }
-    mount(<VotesPieChart {...props} />)
+    cy.mount(<VotesPieChart {...props} />)
     cy.get('svg').should('exist')
   })
 })

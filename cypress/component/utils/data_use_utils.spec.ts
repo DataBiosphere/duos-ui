@@ -1,6 +1,5 @@
 import { DatasetTerm } from 'src/types/model'
 import { processDataUseCodes, createDataUseDisplay } from 'src/utils/DataUseUtils'
-import { mount } from 'cypress/react'
 
 describe('DataUseUtils', () => {
   describe('processDataUseCodes', () => {
@@ -43,7 +42,7 @@ describe('DataUseUtils', () => {
         },
       }
 
-      mount(createDataUseDisplay({ dataset: dataset as DatasetTerm }))
+      cy.mount(createDataUseDisplay({ dataset: dataset as DatasetTerm }))
 
       cy.get('span').should('contain', 'GRU, HMB')
       cy.get('[data-for="dataset-data-use-8"]').should('exist')

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import SummarySection from 'src/pages/progress_reports/SummarySection'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
 import { Location } from 'history'
@@ -95,7 +94,7 @@ describe('Summary Section - Component Tests', () => {
       onNihStatusUpdate: cy.stub(),
     }
 
-    return mount(<SummarySection {...props} />)
+    return cy.mount(<SummarySection {...props} />)
   }
 
   beforeEach(() => {
@@ -122,7 +121,7 @@ describe('Summary Section - Component Tests', () => {
       researcher,
     }
 
-    mount(<SummarySection {...props} />)
+    cy.mount(<SummarySection {...props} />)
     cy.contains('Review a Progress Report').should('be.visible')
   })
 
@@ -203,7 +202,7 @@ describe('Summary Section - Component Tests', () => {
       location,
       researcher: {} as DuosUser,
     }
-    mount(<SummarySection {...props} />)
+    cy.mount(<SummarySection {...props} />)
     cy.get('[data-cy=researcher-identification]').should('exist')
     cy.get('[data-cy=era-commons-display-id-value]').should('have.text', 'scoobydoo')
   })

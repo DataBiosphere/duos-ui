@@ -1,6 +1,5 @@
 import React from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { mount } from 'cypress/react'
 import Authenticated from 'src/routing/Authenticated'
 import { Storage } from 'src/libs/storage'
 
@@ -15,7 +14,7 @@ describe('Authenticated', () => {
   it('should render the protected component if the user is logged in', () => {
     cy.stub(Storage, 'userIsLogged').returns(true)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route element={<Authenticated />}>
@@ -33,7 +32,7 @@ describe('Authenticated', () => {
   it('should redirect to the home page if the user is not logged in', () => {
     cy.stub(Storage, 'userIsLogged').returns(false)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route element={<Authenticated />}>
@@ -58,7 +57,7 @@ describe('Authenticated', () => {
       }, [location, onLocationChange])
       return null
     }
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <LocationSpy onLocationChange={pageVisitStub} />
         <Routes>

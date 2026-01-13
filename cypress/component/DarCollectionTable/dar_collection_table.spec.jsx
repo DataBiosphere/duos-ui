@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
 import { DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils.js'
 
@@ -16,7 +15,7 @@ describe('DarCollectionTable - Tests', function () {
     const columns = [
       DarCollectionTableColumnOptions.DAR_CODE,
     ]
-    mount(
+    cy.mount(
       <DarCollectionTable
         collections={collections}
         columns={columns}
@@ -35,7 +34,7 @@ describe('DarCollectionTable - Tests', function () {
       DarCollectionTableColumnOptions.DAR_CODE,
       DarCollectionTableColumnOptions.DATASET_COUNT,
     ]
-    mount(
+    cy.mount(
       <DarCollectionTable
         collections={collections}
         columns={columns}
@@ -50,7 +49,7 @@ describe('DarCollectionTable - Tests', function () {
   })
 
   it('should render skeleton table if isLoading is true', function () {
-    mount(
+    cy.mount(
       <DarCollectionTable
         isLoading={true}
       />,

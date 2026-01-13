@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import LibraryCardTable, { LibraryCardTableProps } from 'src/components/library_card_table/LibraryCardTable'
 import { LibraryCard as LibraryCardModel } from 'src/types/model'
 
@@ -39,7 +38,7 @@ describe('Library Card Table Tests', () => {
     const props: LibraryCardTableProps = {
       libraryCards: libraryCardList,
     }
-    mount(<LibraryCardTable {...props} />)
+    cy.mount(<LibraryCardTable {...props} />)
     cy.get('[data-cy=manage-library-card-table]').should('exist')
     // For each user in the list, test that the row is visible
     libraryCardList.forEach((card) => {
@@ -53,7 +52,7 @@ describe('Library Card Table Tests', () => {
       libraryCards: libraryCardList,
     }
 
-    mount(<LibraryCardTable {...props} />)
+    cy.mount(<LibraryCardTable {...props} />)
 
     cy.get('[data-cy=manage-library-card-table]').should('contain', libraryCardList[0].userName)
     cy.get(`[id=show-delete-modal-1]`).click()
@@ -74,7 +73,7 @@ describe('Library Card Table Tests', () => {
       libraryCards: libraryCardList,
     }
 
-    mount(<LibraryCardTable {...props} />)
+    cy.mount(<LibraryCardTable {...props} />)
 
     cy.get('[data-cy=search-bar]').type(libraryCardList[0].userEmail)
 
@@ -93,7 +92,7 @@ describe('Library Card Table Tests', () => {
       libraryCards: libraryCardList,
     }
 
-    mount(<LibraryCardTable {...props} />)
+    cy.mount(<LibraryCardTable {...props} />)
 
     cy.get('[data-cy=search-bar]').type(libraryCardList[0].userName)
 

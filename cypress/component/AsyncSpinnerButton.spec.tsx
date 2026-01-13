@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
@@ -6,7 +5,7 @@ describe('AsyncSpinnerButton', () => {
   it('renders the button with default styling', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick}>
         Test Button
       </AsyncSpinnerButton>,
@@ -23,7 +22,7 @@ describe('AsyncSpinnerButton', () => {
     const mockOnClick = cy.stub().resolves()
     const customStyle = { backgroundColor: 'red', color: 'white' }
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton
         onClick={mockOnClick}
         style={customStyle}
@@ -42,7 +41,7 @@ describe('AsyncSpinnerButton', () => {
   it('accepts custom data-cy and aria-label attributes', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton
         onClick={mockOnClick}
         data-cy="custom-test-id"
@@ -64,7 +63,7 @@ describe('AsyncSpinnerButton', () => {
     })
     const mockOnClick = cy.stub().returns(asyncAction)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick}>
         Loading Button
       </AsyncSpinnerButton>,
@@ -92,7 +91,7 @@ describe('AsyncSpinnerButton', () => {
   it('disappears after successful action completion', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick}>
         Success Button
       </AsyncSpinnerButton>,
@@ -117,7 +116,7 @@ describe('AsyncSpinnerButton', () => {
       return Promise.resolve()
     })
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick}>
         Error Button
       </AsyncSpinnerButton>,
@@ -148,7 +147,7 @@ describe('AsyncSpinnerButton', () => {
     const mockOnClick = cy.stub()
     cy.wrap(mockOnClick).as('mockOnClick')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} disabled={true}>
         Disabled Button
       </AsyncSpinnerButton>,
@@ -169,7 +168,7 @@ describe('AsyncSpinnerButton', () => {
     const mockOnClick = cy.stub().returns(asyncAction)
     cy.wrap(mockOnClick).as('mockOnClick')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick}>
         Multi Click Button
       </AsyncSpinnerButton>,
@@ -195,7 +194,7 @@ describe('AsyncSpinnerButton', () => {
   it('handles accessibility attributes correctly', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton
         onClick={mockOnClick}
         id="accessible-button"
@@ -217,7 +216,7 @@ describe('AsyncSpinnerButton', () => {
     const mockOnError = cy.stub()
     cy.wrap(mockOnError).as('mockOnError')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} onError={mockOnError}>
         Error Callback Button
       </AsyncSpinnerButton>,
@@ -233,7 +232,7 @@ describe('AsyncSpinnerButton', () => {
     const mockOnError = cy.stub()
     cy.wrap(mockOnError).as('mockOnError')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} onError={mockOnError}>
         Success Callback Button
       </AsyncSpinnerButton>,
@@ -247,7 +246,7 @@ describe('AsyncSpinnerButton', () => {
   it('hides button after successful action when hideOnSuccess is true', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} hideOnSuccess={true}>
         Hide True Button
       </AsyncSpinnerButton>,
@@ -264,7 +263,7 @@ describe('AsyncSpinnerButton', () => {
   it('keeps button visible after successful action when hideOnSuccess is false', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} hideOnSuccess={false}>
         Stay Visible Button
       </AsyncSpinnerButton>,
@@ -285,7 +284,7 @@ describe('AsyncSpinnerButton', () => {
     const mockOnClick = cy.stub().resolves()
     cy.wrap(mockOnClick).as('mockOnClick')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} hideOnSuccess={false}>
         Multi Use Button
       </AsyncSpinnerButton>,
@@ -308,7 +307,7 @@ describe('AsyncSpinnerButton', () => {
     })
     const mockOnClick = cy.stub().returns(asyncAction)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} hideOnSuccess={false}>
         Loading Stay Button
       </AsyncSpinnerButton>,
@@ -334,7 +333,7 @@ describe('AsyncSpinnerButton', () => {
     const error = new Error('Test error')
     const mockOnClick = cy.stub().rejects(error)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerButton onClick={mockOnClick} hideOnSuccess={true}>
         Error With Hide Button
       </AsyncSpinnerButton>,

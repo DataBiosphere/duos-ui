@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import DataUseAlertBox from '../../../src/components/collection_voting_slab/DataUseAlertBox'
 
 const dataUseManualReviewTrue = {
@@ -27,7 +26,7 @@ const dataUseNoManualReview = {
 
 describe('DataUseAlertBox - Tests', function () {
   it('Renders the alert box and exclamation point when translated data use a manually reviewed data use', function () {
-    mount(
+    cy.mount(
       <DataUseAlertBox
         translatedDataUse={{ primary: [dataUseManualReviewTrue] }}
       />,
@@ -36,7 +35,7 @@ describe('DataUseAlertBox - Tests', function () {
   })
 
   it('Does not render the alert box and exclamation point when translated data use a manually reviewed data use', function () {
-    mount(
+    cy.mount(
       <DataUseAlertBox
         translatedDataUse={{ primary: [dataUseManualReviewFalse] }}
       />,
@@ -45,7 +44,7 @@ describe('DataUseAlertBox - Tests', function () {
   })
 
   it('Does not render the description of a data use without a manuallyReviewed attribute', function () {
-    mount(
+    cy.mount(
       <DataUseAlertBox
         translatedDataUse={{ primary: [dataUseNoManualReview] }}
       />,
@@ -54,7 +53,7 @@ describe('DataUseAlertBox - Tests', function () {
   })
 
   it('Renders the description of a primary use manually reviewed data use', function () {
-    mount(
+    cy.mount(
       <DataUseAlertBox
         translatedDataUse={{ primary: [dataUseManualReviewTrue], secondary: [dataUseManualReviewFalse] }}
       />,
@@ -65,7 +64,7 @@ describe('DataUseAlertBox - Tests', function () {
   })
 
   it('Renders the description of a secondary use manually reviewed data use', function () {
-    mount(
+    cy.mount(
       <DataUseAlertBox
         translatedDataUse={{ primary: [dataUseManualReviewFalse], secondary: [dataUseManualReviewTrue] }}
       />,
@@ -76,7 +75,7 @@ describe('DataUseAlertBox - Tests', function () {
   })
 
   it('Renders the description multiple manually reviewed data uses in the same category', function () {
-    mount(
+    cy.mount(
       <DataUseAlertBox
         translatedDataUse={{ Primary: [dataUseManualReviewTrue, dataUseManualReviewTrue2] }}
       />,
@@ -87,7 +86,7 @@ describe('DataUseAlertBox - Tests', function () {
   })
 
   it('Renders the description multiple manually reviewed data uses in different categories', function () {
-    mount(
+    cy.mount(
       <DataUseAlertBox
         translatedDataUse={{ primary: [dataUseManualReviewTrue2], secondary: [dataUseManualReviewTrue] }}
       />,

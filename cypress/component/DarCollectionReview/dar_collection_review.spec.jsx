@@ -1,6 +1,5 @@
 /* eslint-disable cypress/no-assigning-return-values */
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview'
 import { Collections } from 'src/libs/ajax/Collections'
 import { Match } from 'src/libs/ajax/Match'
@@ -719,7 +718,7 @@ beforeEach(() => {
 describe('DAR Review', () => {
   it('renders the collections-review-page div with tabs for Chairs', () => {
     cy.stub(Storage, 'getCurrentUser').returns(chair)
-    mount(<BrowserRouter><DarCollectionReview {...props} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><DarCollectionReview {...props} /></BrowserRouter>)
     const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
@@ -743,7 +742,7 @@ describe('DAR Review', () => {
 
   it('renders the collections-review-page div with tabs for Members', () => {
     cy.stub(Storage, 'getCurrentUser').returns(member)
-    mount(<BrowserRouter><DarCollectionReview {...props} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><DarCollectionReview {...props} /></BrowserRouter>)
 
     cy.get('.tab-selection-Chair').should('not.exist')
 
@@ -765,7 +764,7 @@ describe('DAR Review', () => {
 
   it('renders the collections-review-page div with tabs for Researchers', () => {
     cy.stub(Storage, 'getCurrentUser').returns(researcher)
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/dar_collection/777']}>
         <Routes>
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview {...props} />} />
@@ -787,7 +786,7 @@ describe('DAR Review', () => {
   it('renders the collections-review-page div with tabs for Admins', () => {
     cy.stub(Storage, 'getCurrentUser').returns(admin)
     const propsCopy = Object.assign({}, props, { adminPage: true })
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/dar_collection/777']}>
         <Routes>
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview {...propsCopy} />} />

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
 
@@ -18,7 +17,7 @@ const baseStudy: Study = {
 describe('StudyAssetManagement component', () => {
   it('renders all asset sections with titles and descriptions', () => {
     const setStudySpy = cy.spy().as('setStudySpy')
-    mount(<StudyAssetManagement study={baseStudy} setStudy={setStudySpy} />)
+    cy.mount(<StudyAssetManagement study={baseStudy} setStudy={setStudySpy} />)
 
     const sections = [
       { title: 'Datasets', desc: 'Add datasets associated with this study' },

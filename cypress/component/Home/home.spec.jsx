@@ -1,12 +1,11 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { MemoryRouter } from 'react-router-dom'
 import Home from 'src/pages/Home'
 
 describe('Home Page - Tests', function () {
   describe('When user is not logged in', function () {
     beforeEach(() => {
-      mount(
+      cy.mount(
         <MemoryRouter>
           <Home isLogged={false} />
         </MemoryRouter>,
@@ -63,7 +62,7 @@ describe('Home Page - Tests', function () {
 
   describe('When user is logged in', function () {
     beforeEach(() => {
-      mount(
+      cy.mount(
         <MemoryRouter>
           <Home isLogged={true} />
         </MemoryRouter>,
@@ -118,7 +117,7 @@ describe('Home Page - Tests', function () {
 
   describe('Featured libraries functionality', function () {
     it('only displays libraries marked as featured', function () {
-      mount(
+      cy.mount(
         <MemoryRouter>
           <Home isLogged={true} />
         </MemoryRouter>,
@@ -133,7 +132,7 @@ describe('Home Page - Tests', function () {
     })
 
     it('displays featured libraries in order', function () {
-      mount(
+      cy.mount(
         <MemoryRouter>
           <Home isLogged={true} />
         </MemoryRouter>,
@@ -148,7 +147,7 @@ describe('Home Page - Tests', function () {
     })
 
     it('uses special styling for Broad Institute logo', function () {
-      mount(
+      cy.mount(
         <MemoryRouter>
           <Home isLogged={true} />
         </MemoryRouter>,
@@ -161,7 +160,7 @@ describe('Home Page - Tests', function () {
     })
 
     it('handles responsive layout correctly', function () {
-      mount(
+      cy.mount(
         <MemoryRouter>
           <Home isLogged={true} />
         </MemoryRouter>,

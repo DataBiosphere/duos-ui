@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ChairVoteHistoryTable from 'src/components/vote_history_table/ChairVoteHistoryTable'
 import { VoteHistoryRow } from 'src/types/model'
 
@@ -49,7 +48,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
   ]
 
   it('should render the table with specific headers', () => {
-    mount(<ChairVoteHistoryTable voteHistory={testData} />)
+    cy.mount(<ChairVoteHistoryTable voteHistory={testData} />)
     cy.get('.column-header').should('have.length', 8)
     cy.get(':nth-child(1) > .cell-sort').contains('Request Type')
     cy.get(':nth-child(2) > .cell-sort').contains('Dataset ID')
@@ -62,7 +61,7 @@ describe('ChairVoteHistoryTable Component - Tests', () => {
   })
 
   it('should render rows with correct default sort (by election date descending)', () => {
-    mount(<ChairVoteHistoryTable voteHistory={testData} />)
+    cy.mount(<ChairVoteHistoryTable voteHistory={testData} />)
     cy.get('.row-data-0 > :nth-child(1)').contains('Progress Report')
     cy.get('.row-data-0 > :nth-child(2)').contains('DUOS-00401')
     cy.get('.row-data-0 > :nth-child(3)').contains('2023-01-03')

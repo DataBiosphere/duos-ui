@@ -1,5 +1,4 @@
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { User } from 'src/libs/ajax/User.js'
 
@@ -83,33 +82,33 @@ beforeEach(() => {
 
 describe('Researcher Info', () => {
   it('renders the researcher info component', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     cy.get('[data-cy=researcher-info]').should('be.visible')
   })
 
   it('renders the missing library cards alert correctly', () => {
     const mergedProps = { ...props, ...{ formData: { ...props.formData } } }
-    mount(<WrappedResearcherInfo {...mergedProps} />)
+    cy.mount(<WrappedResearcherInfo {...mergedProps} />)
     cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist')
     cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible')
   })
 
   it('renders the profile submitted alert', () => {
     const mergedProps = { ...props, ...{ completed: true, researcher: researcherWithLibraryCard } }
-    mount(<WrappedResearcherInfo {...mergedProps} />)
+    cy.mount(<WrappedResearcherInfo {...mergedProps} />)
     cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible')
     cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist')
   })
 
   it('renders the profile unsubmitted alert', () => {
     const mergedProps = { ...props, ...{ completed: false, researcher: researcherWithLibraryCard } }
-    mount(<WrappedResearcherInfo {...mergedProps} />)
+    cy.mount(<WrappedResearcherInfo {...mergedProps} />)
     cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('be.visible')
     cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible')
   })
 
   it('renders the internal lab staff button and form', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     cy.get('[data-cy=internal-lab-staff]')
       .find('.collaborator-list-component')
       .find('.row')
@@ -121,7 +120,7 @@ describe('Researcher Info', () => {
   })
 
   it('renders the internal collaborator button and form', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     cy.get('[data-cy=internal-collaborators]')
       .find('.collaborator-list-component')
       .find('.row')
@@ -133,7 +132,7 @@ describe('Researcher Info', () => {
   })
 
   it('renders the external collaborator button and form', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     cy.get('[data-cy=external-collaborators]')
       .find('.collaborator-list-component')
       .find('.row')
@@ -145,7 +144,7 @@ describe('Researcher Info', () => {
   })
 
   it('saves new collaborators properly', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     addNewCollaborator('internal-lab-staff')
     cy.get('#0_collaboratorApproval_true').check()
     // save collaborator and switch to summary view
@@ -158,7 +157,7 @@ describe('Researcher Info', () => {
   })
 
   it('deletes saved collaborators properly', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     addNewCollaborator('internal-lab-staff')
     cy.get('#0_collaboratorApproval_true').check()
     // save collaborator and switch to summary view
@@ -169,7 +168,7 @@ describe('Researcher Info', () => {
   })
 
   it('cancels adding new collaborators properly', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     addNewCollaborator('internal-lab-staff')
     cy.get('#0_collaboratorApproval_true').check()
     // save collaborator and switch to summary view
@@ -178,7 +177,7 @@ describe('Researcher Info', () => {
   })
 
   it('updates collaborator properly', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     addNewCollaborator('internal-lab-staff')
     cy.get('#0_collaboratorApproval_true').check()
     // save collaborator and switch to summary view
@@ -208,7 +207,7 @@ describe('Researcher Info', () => {
   })
 
   it('renders researcher and pi as disabled with pi fields populated with the researcher data when not in read only mode', () => {
-    mount(<WrappedResearcherInfo {...props} />)
+    cy.mount(<WrappedResearcherInfo {...props} />)
     cy.get('#researcherName').should('have.value', props.researcher.displayName)
     cy.get('#piName').should('have.value', props.researcher.displayName)
     cy.get('#piEmail').should('have.value', props.researcher.email)
@@ -216,7 +215,7 @@ describe('Researcher Info', () => {
 
   it('renders researcher and pi as disabled with pi fields populated with saved pi info in read only mode', () => {
     const mergedProps = { ...props, ...{ readOnlyMode: true, eraCommonsId: 'scoobydoo' } }
-    mount(<WrappedResearcherInfo {...mergedProps} />)
+    cy.mount(<WrappedResearcherInfo {...mergedProps} />)
     cy.get('#researcherName').should('have.value', props.researcher.displayName)
     cy.get('#piName').should('have.value', props.formData.piName)
     cy.get('#piEmail').should('have.value', props.formData.piEmail)

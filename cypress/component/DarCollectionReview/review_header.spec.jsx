@@ -1,10 +1,9 @@
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import ReviewHeader from 'src/pages/dar_collection_review/ReviewHeader'
 
 describe('ReviewHeader - Tests', () => {
   it('Renders the header with no datasets approved', () => {
-    mount(
+    cy.mount(
       <ReviewHeader
         darCode="DAR-100"
         projectTitle="Title"
@@ -21,7 +20,7 @@ describe('ReviewHeader - Tests', () => {
   })
 
   it('Renders the header with datasets approved', () => {
-    mount(
+    cy.mount(
       <ReviewHeader
         darCode="DAR-100"
         projectTitle="Title"
@@ -35,7 +34,7 @@ describe('ReviewHeader - Tests', () => {
   })
 
   it('Renders read-only text in Review Header when readOnly prop is true', function () {
-    mount(
+    cy.mount(
       <ReviewHeader
         darCode="DAR-100"
         projectTitle="Title"
@@ -48,7 +47,7 @@ describe('ReviewHeader - Tests', () => {
   })
 
   it('Does not render read-only text in Review Header when readOnly prop is false', function () {
-    mount(
+    cy.mount(
       <ReviewHeader
         darCode="DAR-100"
         projectTitle="Title"

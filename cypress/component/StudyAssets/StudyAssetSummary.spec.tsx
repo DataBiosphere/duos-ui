@@ -1,6 +1,5 @@
 import React from 'react'
 import StudyAssetSummary from 'src/components/study_asset/StudyAssetSummary'
-import { mount } from 'cypress/react'
 
 interface TestAsset {
   id: string
@@ -22,7 +21,7 @@ describe('StudyAssetSummary', () => {
     const deleteAction = cy.stub()
     const viewAction = cy.stub()
 
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         name="Test Asset"
@@ -43,7 +42,7 @@ describe('StudyAssetSummary', () => {
     const deleteAction = cy.stub()
     const viewAction = cy.stub()
 
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         columnsToShow={['name', 'value']}
@@ -63,7 +62,7 @@ describe('StudyAssetSummary', () => {
   it('calls viewAction when view button is clicked', () => {
     const viewAction = cy.stub()
 
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         name="Test Asset"
@@ -81,7 +80,7 @@ describe('StudyAssetSummary', () => {
   it('calls editAction when edit button is clicked', () => {
     const editAction = cy.stub()
 
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         name="Test Asset"
@@ -97,7 +96,7 @@ describe('StudyAssetSummary', () => {
   })
 
   it('shows delete modal when delete button is clicked', () => {
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         name="Test Asset"
@@ -115,7 +114,7 @@ describe('StudyAssetSummary', () => {
   it('calls deleteAction when delete is confirmed', () => {
     const deleteAction = cy.stub()
 
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         name="Test Asset"
@@ -132,7 +131,7 @@ describe('StudyAssetSummary', () => {
   })
 
   it('disables edit button when disabled prop is true', () => {
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         name="Test Asset"
@@ -148,7 +147,7 @@ describe('StudyAssetSummary', () => {
   })
 
   it('disables delete button when disableDelete prop is true', () => {
-    mount(
+    cy.mount(
       <StudyAssetSummary
         asset={sampleAsset}
         name="Test Asset"
