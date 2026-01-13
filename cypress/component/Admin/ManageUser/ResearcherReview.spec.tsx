@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { ResearcherReview } from 'src/components/ResearcherReview'
 import { DuosUser } from 'src/types/model'
@@ -21,7 +20,7 @@ describe('ResearcherReview', () => {
 
   it('Renders user information correctly', () => {
     const user = createMockUser()
-    mount(<ResearcherReview user={user} />)
+    cy.mount(<ResearcherReview user={user} />)
 
     cy.get('[data-cy="display-name"]').should('contain', baseUser.displayName)
     cy.get('[data-cy="institution-name"]').should('contain', baseUser.institution?.name)
@@ -36,7 +35,7 @@ describe('ResearcherReview', () => {
         { propertyKey: 'eraAuthorized', propertyValue: 'false' },
       ],
     })
-    mount(<ResearcherReview user={user} />)
+    cy.mount(<ResearcherReview user={user} />)
 
     cy.get('[data-cy="nih-valid"]').should('contain', 'Not Authorized')
   })
@@ -47,7 +46,7 @@ describe('ResearcherReview', () => {
         { propertyKey: 'eraExpiration', propertyValue: Date.now() - 1000 },
       ],
     })
-    mount(<ResearcherReview user={user} />)
+    cy.mount(<ResearcherReview user={user} />)
 
     cy.get('[data-cy="nih-expiration"]').should('contain', 'Expired')
   })
@@ -59,7 +58,7 @@ describe('ResearcherReview', () => {
       eraCommonsId: null,
       properties: [],
     })
-    mount(<ResearcherReview user={user} />)
+    cy.mount(<ResearcherReview user={user} />)
 
     cy.get('[data-cy="display-name"]').should('be.empty')
     cy.get('[data-cy="institution-name"]').should('be.empty')
