@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ResearchProposalVoteSlab from 'src/components/collection_voting_slab/ResearchProposalVoteSlab'
 import { Votes } from 'src/libs/ajax/Votes'
 import { Storage } from 'src/libs/storage'
@@ -74,7 +73,7 @@ const votesForElection3 = {
 
 describe('ResearchProposalVoteSlab - Tests', function () {
   it('Does not render expanded view when collapsed', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />,
@@ -84,7 +83,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders primary data use pill', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />,
@@ -94,7 +93,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders secondary data use pill', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoSecondaryUseManualReviewTrue}
       />,
@@ -104,7 +103,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders primary and secondary data use pills', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimarySecondaryUse}
       />,
@@ -114,7 +113,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders link to expand when collapsed', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimarySecondaryUse}
       />,
@@ -123,7 +122,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders link to collapse when expanded', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimarySecondaryUse}
         bucket={{ key: 'test' }}
@@ -134,7 +133,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders data use pills when expanded', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimarySecondaryUse}
         bucket={{ key: 'test' }}
@@ -146,7 +145,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders research purpose when expanded', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
         bucket={{ key: 'test' }}
@@ -158,7 +157,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render research purpose when collapsed', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />,
@@ -168,7 +167,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders data use alert box when expanded with manually reviewed data uses', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoSecondaryUseManualReviewTrue}
         bucket={{ key: 'test' }}
@@ -180,7 +179,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render data use alert box when expanded with manually reviewed data uses', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
         bucket={{ key: 'test' }}
@@ -191,7 +190,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render data use alert box when collapsed', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoSecondaryUseManualReviewTrue}
       />,
@@ -200,7 +199,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render data use summary when loading', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimarySecondaryUse}
         isLoading={true}
@@ -211,7 +210,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render link to expand/collapse when loading', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoSecondaryUseManualReviewTrue}
         isLoading={true}
@@ -221,7 +220,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders skeleton when loading', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
         isLoading={true}
@@ -231,7 +230,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render skeleton when not loading', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
         isLoading={false}
@@ -241,7 +240,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders a selected vote button when all current user votes match (Member)', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection1, votesForElection2],
@@ -263,7 +262,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders a selected vote button when all current user votes match (Chair)', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection1, votesForElection2],
@@ -285,7 +284,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders vote button unselected when not all current user votes match (Member)', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection1, votesForElection2],
@@ -307,7 +306,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders vote button unselected when not all current user votes match (Chair)', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection2, votesForElection3],
@@ -329,7 +328,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders NOT SELECTED vote result text if no votes for current user in bucket', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection3],
@@ -349,7 +348,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Replaces vote buttons with vote result text when readOnly is true', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection1, votesForElection2],
@@ -370,7 +369,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render pie chart or vote summary table when current user is not chairperson', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection3],
@@ -386,7 +385,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render pie chart or table when current user is chairperson but no votes for dac in this bucket', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection3],
@@ -402,7 +401,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders a pie chart with votes for dac of user when current user is chairperson', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection3],
@@ -418,7 +417,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not render rows of vote summary table for votes outside of dac for current user', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection2, votesForElection3],
@@ -440,7 +439,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders collapsed row of vote summary table when the same user has same vote for multiple elections', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection2, votesForElection2],
@@ -459,7 +458,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders collapsed row with appended rationales when the same user has same vote but different rationales for multiple elections', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection1, votesForElection2],
@@ -478,7 +477,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Does not append rationale values when properties are undefined', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection2, votesForElection3],
@@ -497,7 +496,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders separate row with when the same user has different vote for multiple elections', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection1, votesForElection2],
@@ -517,7 +516,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Renders filler text when some fields of vote are empty', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection2],
@@ -537,7 +536,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('Allows sending reminder if no vote', function () {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection2],
@@ -557,7 +556,7 @@ describe('ResearchProposalVoteSlab - Tests', function () {
   })
 
   it('shows the RP vote decision on the admin review page', () => {
-    mount(
+    cy.mount(
       <ResearchProposalVoteSlab
         bucket={{
           votes: [votesForElection2],

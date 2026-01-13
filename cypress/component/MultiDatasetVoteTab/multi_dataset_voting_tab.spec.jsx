@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
 import { votingColors } from 'src/libs/VotingColors.ts'
@@ -123,7 +122,7 @@ beforeEach(() => {
 
 describe('MultiDatasetVoteTab - Tests', function () {
   it('Renders rp slab', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1]}
@@ -138,7 +137,7 @@ describe('MultiDatasetVoteTab - Tests', function () {
   })
 
   it('Renders dataset voting slab with vote button selected', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1]}
@@ -154,7 +153,7 @@ describe('MultiDatasetVoteTab - Tests', function () {
   })
 
   it('Renders multiple dataset voting slabs', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1, bucket2]}
@@ -169,7 +168,7 @@ describe('MultiDatasetVoteTab - Tests', function () {
   })
 
   it('Renders vote summary tables', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1]}
@@ -187,7 +186,7 @@ describe('MultiDatasetVoteTab - Tests', function () {
   })
 
   it('Does not render vote summary tables if isChair is false', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1, bucket2]}
@@ -201,7 +200,7 @@ describe('MultiDatasetVoteTab - Tests', function () {
   })
 
   it('Renders warning text that data access cannot be approved when the researcher is missing a library card', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1, bucket2]}
@@ -214,7 +213,7 @@ describe('MultiDatasetVoteTab - Tests', function () {
   })
 
   it('Does not render warning text that data access cannot be approved when the researcher has a library card', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1, bucket2]}

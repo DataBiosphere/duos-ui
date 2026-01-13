@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   component: {
-    specPattern: ['**/*.spec.js', '**/*.spec.jsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    specPattern: 'cypress/**/*.spec.{js,jsx,ts,tsx}',
     devServer: {
       framework: 'react',
       bundler: 'vite',

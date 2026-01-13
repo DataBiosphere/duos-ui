@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import RequestForm from 'src/pages/user_profile/RequestForm'
 import { BrowserRouter } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
@@ -14,7 +13,7 @@ describe('SupportRequestsPage Tests', () => {
       id: 1,
     })
     cy.initApplicationConfig()
-    mount(
+    cy.mount(
       <BrowserRouter><RequestForm /></BrowserRouter>,
     )
   })

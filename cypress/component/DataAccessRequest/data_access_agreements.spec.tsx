@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
 import { DAA } from 'src/libs/ajax/DAA'
 
@@ -18,7 +17,7 @@ describe('DataAccessAgreements Component Tests', () => {
       datasets: [],
       ...customProps,
     }
-    return mount(<DataAccessAgreements {...defaultProps} />)
+    return cy.mount(<DataAccessAgreements {...defaultProps} />)
   }
 
   beforeEach(() => {

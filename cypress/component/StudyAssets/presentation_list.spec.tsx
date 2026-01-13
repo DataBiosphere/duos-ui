@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import PresentationList from 'src/components/presentations_list/PresentationList'
 import PresentationAddEdit from 'src/components/presentations_list/PresentationAddEdit'
 import PresentationRow from 'src/components/presentations_list/PresentationRow'
@@ -38,14 +37,14 @@ const PresentationListHarness: React.FC<{ initial: Presentation[] }> = ({ initia
 
 describe('PresentationList component', () => {
   it('renders existing presentations', () => {
-    mount(<PresentationListHarness initial={[samplePresentation]} />)
+    cy.mount(<PresentationListHarness initial={[samplePresentation]} />)
     cy.contains(samplePresentation.title).should('exist')
     cy.contains(samplePresentation.event).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
     const collected: Presentation[] = []
-    mount(
+    cy.mount(
       <PresentationAddEdit
         id={-1}
         presentations={[]}
@@ -73,7 +72,7 @@ describe('PresentationList component', () => {
     })
 
     it('opens presentation in view mode when view button is clicked', () => {
-      mount(<PresentationListHarness initial={[samplePresentation]} />)
+      cy.mount(<PresentationListHarness initial={[samplePresentation]} />)
       cy.get('.glyphicon-eye-open').click({ force: true })
       cy.contains(samplePresentation.title).should('exist')
       cy.get('#title').should('be.disabled')
@@ -83,7 +82,7 @@ describe('PresentationList component', () => {
     })
 
     it('closes view mode when close button is clicked', () => {
-      mount(<PresentationListHarness initial={[samplePresentation]} />)
+      cy.mount(<PresentationListHarness initial={[samplePresentation]} />)
       cy.get('.glyphicon-eye-open').click({ force: true })
       cy.get('.collaborator-form-cancel-button').click()
       cy.get('#title').should('not.exist')
@@ -92,7 +91,7 @@ describe('PresentationList component', () => {
   })
 
   it('adds a presentation through list harness', () => {
-    mount(<PresentationListHarness initial={[]} />)
+    cy.mount(<PresentationListHarness initial={[]} />)
     cy.get('#add-presentation-btn').click()
     cy.contains('New Presentation').should('exist')
     cy.get('#title').type('Added Talk')
@@ -112,7 +111,7 @@ describe('PresentationList component', () => {
   })
 
   it('edits a presentation', () => {
-    mount(<PresentationListHarness initial={[samplePresentation]} />)
+    cy.mount(<PresentationListHarness initial={[samplePresentation]} />)
     cy.get('.glyphicon-pencil').click({ force: true })
     cy.get('#title').clear()
     cy.get('#title').type('Sample Talk Edited')
@@ -122,7 +121,7 @@ describe('PresentationList component', () => {
 
   it('deletes a presentation via modal confirmation', () => {
     testDeleteViaModal(
-      () => mount(<PresentationListHarness initial={[samplePresentation]} />),
+      () => cy.mount(<PresentationListHarness initial={[samplePresentation]} />),
       samplePresentation.title,
     )
   })
@@ -130,7 +129,7 @@ describe('PresentationList component', () => {
 
 describe('PresentationSummary', () => {
   it('renders columns including presenter composite', () => {
-    mount(
+    cy.mount(
       <PresentationSummary
         presentation={samplePresentation}
         columnsToShow={['title', 'event', 'presenter', 'url', 'tags']}
@@ -146,7 +145,7 @@ describe('PresentationSummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
+    cy.mount(
       <PresentationSummary
         presentation={samplePresentation}
         columnsToShow={['title']}
@@ -164,7 +163,7 @@ describe('PresentationSummary', () => {
 
 describe('PresentationRow', () => {
   it('shows summary when not in edit mode and triggers editAction', () => {
-    mount(
+    cy.mount(
       <PresentationRow
         id={0}
         editMode={false}
@@ -184,7 +183,7 @@ describe('PresentationRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
+    cy.mount(
       <PresentationRow
         id={0}
         editMode={true}
@@ -202,7 +201,7 @@ describe('PresentationRow', () => {
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
+    cy.mount(
       <PresentationRow
         id={0}
         editMode={false}
@@ -224,7 +223,7 @@ describe('PresentationRow', () => {
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
+    cy.mount(
       <PresentationRow
         id={0}
         editMode={false}

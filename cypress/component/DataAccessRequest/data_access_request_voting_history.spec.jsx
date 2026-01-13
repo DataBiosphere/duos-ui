@@ -1,5 +1,4 @@
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -46,7 +45,7 @@ const datasets = [
 const darId = '011467b7-5544-499f-9210-3c2035810639'
 
 const mountDataAccessRequestApp = ({ initialEntries, props, collection }) => {
-  mount(
+  cy.mount(
     <MemoryRouter initialEntries={initialEntries}>
       <Routes>
         <Route

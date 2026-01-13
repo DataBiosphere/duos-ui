@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import IrbDocumentUpload from 'src/pages/progress_reports/IrbDocumentUpload'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
@@ -36,7 +35,7 @@ describe('IrbDocumentUpload Component Tests', () => {
         body: 'mock file content',
       }).as('downloadDocument')
 
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={true}
           formState={mockFormState}
@@ -64,7 +63,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     it('Should display uploaded file name when a new file is uploaded', () => {
       const mockFile = new File(['test content'], 'new-irb-document.pdf', { type: 'application/pdf' })
 
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={false}
           formState={mockFormStateWithoutIrb}
@@ -82,7 +81,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     it('Should prioritize uploaded file name over form state file name', () => {
       const mockFile = new File(['test content'], 'newly-uploaded.pdf', { type: 'application/pdf' })
 
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={false}
           formState={mockFormState} // has existing file name
@@ -102,7 +101,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     it('Should show file upload form in editable mode', () => {
       const onIrbDocumentChangeSpy = cy.stub()
 
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={false}
           formState={mockFormStateWithoutIrb}
@@ -124,7 +123,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     it('Should call onIrbDocumentChange when file is uploaded', () => {
       const onIrbDocumentChangeSpy = cy.stub()
 
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={false}
           formState={mockFormStateWithoutIrb}
@@ -159,7 +158,7 @@ describe('IrbDocumentUpload Component Tests', () => {
 
   describe('Date Picker Functionality', () => {
     it('Should display correct default date in date picker', () => {
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={false}
           formState={mockFormState}
@@ -178,7 +177,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     it('Should call onIrbDocumentChange when date is changed', () => {
       const onIrbDocumentChangeSpy = cy.stub()
 
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={false}
           formState={mockFormStateWithoutIrb}
@@ -195,7 +194,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     })
 
     it('Should only show expiration date in read-only mode, not date picker', () => {
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={true}
           formState={mockFormState}
@@ -215,7 +214,7 @@ describe('IrbDocumentUpload Component Tests', () => {
 
   describe('Download Functionality', () => {
     it('Should not show download link when no document exists', () => {
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={true}
           formState={mockFormStateWithoutIrb}
@@ -230,7 +229,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     })
 
     it('Should show download link when document exists with valid reference', () => {
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={true}
           formState={mockFormState}
@@ -245,7 +244,7 @@ describe('IrbDocumentUpload Component Tests', () => {
     })
 
     it('Should not show download link when reference ID is missing', () => {
-      mount(
+      cy.mount(
         <IrbDocumentUpload
           readOnly={true}
           formState={mockFormState}

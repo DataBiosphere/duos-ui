@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import SigningOfficialTable from 'src/pages/signing_official_console/SigningOfficialTable'
 import * as LibraryCardApi from 'src/libs/ajax/LibraryCard'
 
@@ -45,7 +44,7 @@ describe('SigningOfficialTable', () => {
   })
 
   it('should render the modal when Add Users button is clicked', () => {
-    mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
+    cy.mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
 
     cy.contains('ADD LIBRARY CARD').should('exist').click()
     cy.get('[data-cy=library-card-form-modal]').should('be.visible')
@@ -65,7 +64,7 @@ describe('SigningOfficialTable', () => {
         })
       })
 
-    mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
+    cy.mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
     cy.contains('ADD LIBRARY CARD').click()
 
     // Select user
@@ -98,7 +97,7 @@ describe('SigningOfficialTable', () => {
         })
       })
 
-    mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
+    cy.mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
 
     cy.contains('ADD LIBRARY CARD').click()
 
@@ -141,7 +140,7 @@ describe('SigningOfficialTable', () => {
         })
       })
 
-    mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
+    cy.mount(<SigningOfficialTable researchers={mockResearcherList} signingOfficial={mockSigningOfficial} />)
     cy.contains('ADD LIBRARY CARD').click()
 
     // Select users

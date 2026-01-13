@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { FundingResource } from 'src/types/model'
 import FundingResourceAddEdit from 'src/components/funding_resource_list/FundingResourceAddEdit'
 import FundingResourceSummary from 'src/components/funding_resource_list/FundingResourceSummary'
@@ -34,14 +33,14 @@ const FundingResourceListHarness: React.FC<{ initial: FundingResource[] }> = ({ 
 
 describe('FundingResourceList component', () => {
   it('renders existing funding resources', () => {
-    mount(<FundingResourceListHarness initial={[sampleFunding]} />)
+    cy.mount(<FundingResourceListHarness initial={[sampleFunding]} />)
     cy.contains(sampleFunding.funderName).should('exist')
     cy.contains(sampleFunding.funderProgram).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
     const collected: FundingResource[] = []
-    mount(
+    cy.mount(
       <FundingResourceAddEdit
         id={-1}
         fundingResource={undefined}
@@ -63,7 +62,7 @@ describe('FundingResourceList component', () => {
   })
 
   it('opens funding resource in view mode when view button is clicked', () => {
-    mount(<FundingResourceListHarness initial={[sampleFunding]} />)
+    cy.mount(<FundingResourceListHarness initial={[sampleFunding]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.contains(sampleFunding.funderName).should('exist')
     cy.get('#funderName').should('be.disabled')
@@ -73,7 +72,7 @@ describe('FundingResourceList component', () => {
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<FundingResourceListHarness initial={[sampleFunding]} />)
+    cy.mount(<FundingResourceListHarness initial={[sampleFunding]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.get('.collaborator-form-cancel-button').click()
     cy.get('#funderName').should('not.exist')
@@ -82,7 +81,7 @@ describe('FundingResourceList component', () => {
 
   it('adds a new funding resource', () => {
     const state: FundingResource[] = []
-    mount(
+    cy.mount(
       <FundingResourceList
         fundingResources={state}
         columnsToShow={['funderName', 'projectTitle']}
@@ -104,7 +103,7 @@ describe('FundingResourceList component', () => {
 
   it('edits existing funding resource and saves changes', () => {
     const resources: FundingResource[] = [sampleFunding]
-    mount(
+    cy.mount(
       <FundingResourceAddEdit
         id={0}
         fundingResource={sampleFunding}
@@ -122,7 +121,7 @@ describe('FundingResourceList component', () => {
 
   it('deletes a funding resource via modal confirmation', () => {
     testDeleteViaModal(
-      () => mount(<FundingResourceListHarness initial={[sampleFunding]} />),
+      () => cy.mount(<FundingResourceListHarness initial={[sampleFunding]} />),
       sampleFunding.funderName,
     )
   })
@@ -130,7 +129,7 @@ describe('FundingResourceList component', () => {
 
 describe('FundingResourceSummary', () => {
   it('renders columns including arrays and url', () => {
-    mount(
+    cy.mount(
       <FundingResourceSummary
         fundingResource={sampleFunding}
         columnsToShow={['funderName', 'funderProgram', 'projectTitle', 'url', 'tags']}
@@ -147,7 +146,7 @@ describe('FundingResourceSummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
+    cy.mount(
       <FundingResourceSummary
         fundingResource={sampleFunding}
         columnsToShow={['funderName']}
@@ -165,7 +164,7 @@ describe('FundingResourceSummary', () => {
 
 describe('FundingResourceRow', () => {
   it('shows summary when not in edit mode and triggers editAction', () => {
-    mount(
+    cy.mount(
       <FundingResourceRow
         id={0}
         editMode={false}
@@ -185,7 +184,7 @@ describe('FundingResourceRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
+    cy.mount(
       <FundingResourceRow
         id={0}
         editMode={true}
@@ -203,7 +202,7 @@ describe('FundingResourceRow', () => {
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
+    cy.mount(
       <FundingResourceRow
         id={0}
         editMode={false}
@@ -225,7 +224,7 @@ describe('FundingResourceRow', () => {
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
+    cy.mount(
       <FundingResourceRow
         id={0}
         editMode={false}

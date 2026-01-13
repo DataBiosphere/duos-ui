@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import CollaboratorList from 'src/components/collaborator_list/CollaboratorList'
 import { Collaborator } from 'src/types/model'
 
@@ -35,7 +34,7 @@ describe('CollaboratorList - Component Tests', () => {
   }
 
   it('renders the component with a list of collaborators', () => {
-    mount(<CollaboratorList {...defaultProps} />)
+    cy.mount(<CollaboratorList {...defaultProps} />)
 
     cy.get('button').contains('Add Collaborator').should('be.visible')
 
@@ -51,7 +50,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('opens the add form when Add button is clicked', () => {
-    mount(<CollaboratorList {...defaultProps} />)
+    cy.mount(<CollaboratorList {...defaultProps} />)
 
     cy.contains('New Collaborator Information').should('not.exist')
 
@@ -61,7 +60,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('switches to edit mode when edit button is clicked for a collaborator', () => {
-    mount(<CollaboratorList {...defaultProps} />)
+    cy.mount(<CollaboratorList {...defaultProps} />)
 
     cy.contains(mockCollaborators[0].name).should('be.visible')
     cy.get('.collaborator-summary-card').first().within(() => {
@@ -78,7 +77,7 @@ describe('CollaboratorList - Component Tests', () => {
   it('deletes a collaborator when delete is confirmed', () => {
     const onCollaboratorChange = cy.stub().as('onCollaboratorChange')
 
-    mount(
+    cy.mount(
       <CollaboratorList
         {...defaultProps}
         onCollaboratorChange={onCollaboratorChange}
@@ -97,7 +96,7 @@ describe('CollaboratorList - Component Tests', () => {
   it('adds a new collaborator when adding through the form', () => {
     const onCollaboratorChange = cy.stub().as('onCollaboratorChange')
 
-    mount(
+    cy.mount(
       <CollaboratorList
         {...defaultProps}
         onCollaboratorChange={onCollaboratorChange}
@@ -123,7 +122,7 @@ describe('CollaboratorList - Component Tests', () => {
   it('updates a collaborator when editing through the form', () => {
     const onCollaboratorChange = cy.stub().as('onCollaboratorChange')
 
-    mount(
+    cy.mount(
       <CollaboratorList
         {...defaultProps}
         onCollaboratorChange={onCollaboratorChange}
@@ -142,7 +141,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('closes the add form when Cancel is clicked', () => {
-    mount(<CollaboratorList {...defaultProps} />)
+    cy.mount(<CollaboratorList {...defaultProps} />)
 
     cy.contains('Add Collaborator').click()
     cy.contains('New Collaborator Information').should('be.visible')
@@ -153,7 +152,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('disables the Add button when readOnly prop is true', () => {
-    mount(<CollaboratorList {...defaultProps} readOnly={true} />)
+    cy.mount(<CollaboratorList {...defaultProps} readOnly={true} />)
 
     // Button should be visible but disabled
     cy.contains('Add Collaborator').should('be.visible')
@@ -161,7 +160,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('renders correctly with empty collaborators list', () => {
-    mount(
+    cy.mount(
       <CollaboratorList
         {...defaultProps}
         collaborators={[]}
@@ -174,7 +173,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('renders correctly with custom columnsToShow', () => {
-    mount(
+    cy.mount(
       <CollaboratorList
         {...defaultProps}
         columnsToShow={['name']}
@@ -187,7 +186,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('clears edit state after a successful edit', () => {
-    mount(<CollaboratorList {...defaultProps} />)
+    cy.mount(<CollaboratorList {...defaultProps} />)
 
     cy.get('.glyphicon-pencil').first().parent('a').click({ force: true })
     cy.contains(`Edit ${mockCollaborators[0].name} Information`).should('be.visible')
@@ -199,7 +198,7 @@ describe('CollaboratorList - Component Tests', () => {
   })
 
   it('maintains proper edit state when editing multiple collaborators', () => {
-    mount(<CollaboratorList {...defaultProps} />)
+    cy.mount(<CollaboratorList {...defaultProps} />)
 
     cy.get('.glyphicon-pencil').first().parent('a').click({ force: true })
     cy.contains(`Edit ${mockCollaborators[0].name} Information`).should('be.visible')
@@ -223,7 +222,7 @@ describe('CollaboratorList - Component Tests', () => {
       readOnly: true,
     }
 
-    mount(<CollaboratorList {...readOnlyProps} />)
+    cy.mount(<CollaboratorList {...readOnlyProps} />)
 
     // Should show Add button but disabled in read-only mode
     cy.contains('Add Collaborator').should('be.visible')
@@ -246,7 +245,7 @@ describe('CollaboratorList - Component Tests', () => {
       readOnly: true,
     }
 
-    mount(<CollaboratorList {...readOnlyProps} />)
+    cy.mount(<CollaboratorList {...readOnlyProps} />)
 
     // Wait for component to fully render
     cy.get('.collaborator-summary-card').should('have.length', 2)

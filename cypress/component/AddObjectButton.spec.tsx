@@ -1,12 +1,11 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import AddObjectButton from 'src/components/AddObjectButton'
 
 describe('AddObjectButton', () => {
   it('renders with required props', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -22,7 +21,7 @@ describe('AddObjectButton', () => {
   it('calls onClick when clicked', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -37,7 +36,7 @@ describe('AddObjectButton', () => {
   it('does not call onClick when disabled', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -52,7 +51,7 @@ describe('AddObjectButton', () => {
   })
 
   it('applies correct styling when disabled', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -65,7 +64,7 @@ describe('AddObjectButton', () => {
   })
 
   it('shows validation error styling', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -79,7 +78,7 @@ describe('AddObjectButton', () => {
   })
 
   it('shows default styling without validation error', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -93,7 +92,7 @@ describe('AddObjectButton', () => {
   })
 
   it('applies button-white class', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -106,7 +105,7 @@ describe('AddObjectButton', () => {
   })
 
   it('applies correct layout styles', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -123,7 +122,7 @@ describe('AddObjectButton', () => {
   it('renders with custom icon', () => {
     const CustomIcon = () => <span data-testid="custom-icon">★</span>
 
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -137,7 +136,7 @@ describe('AddObjectButton', () => {
   })
 
   it('renders with default AddIcon when icon prop not provided', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -150,7 +149,7 @@ describe('AddObjectButton', () => {
   })
 
   it('applies custom className', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -164,7 +163,7 @@ describe('AddObjectButton', () => {
   })
 
   it('applies default className when not provided', () => {
-    mount(
+    cy.mount(
       <AddObjectButton
         id="test-button"
         label="Add Test"

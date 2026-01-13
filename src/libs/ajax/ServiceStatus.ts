@@ -72,13 +72,13 @@ export interface ConsentStatus extends BaseStatus {
 export const ServiceStatus = {
   getConsentStatus: async (): Promise<ConsentStatus> => {
     const url = `${await getApiUrl()}/status`
-    const result = await fetchGet(url)
+    const result = await fetchGet<ConsentStatus>(url)
     return result.data
   },
 
   getOntologyStatus: async (): Promise<OntologyStatus> => {
     const url = `${await getOntologyUrl()}/status`
-    const result = await fetchGet(url)
+    const result = await fetchGet<OntologyStatus>(url)
     return result.data
   },
 

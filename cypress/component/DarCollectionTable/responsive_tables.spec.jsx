@@ -1,7 +1,6 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 
 import React from 'react'
-import { mount } from 'cypress/react'
 import { BrowserRouter } from 'react-router-dom'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
 import { DarCollectionTableColumnOptions, consoleTypes } from 'src/utils/DarCollectionUtils'
@@ -41,7 +40,7 @@ const mockCollectionsForPagination = Array.from({ length: 25 }, (_, index) => ({
 
 // Helper function to mount components with router
 const mountWithRouter = (component) => {
-  return mount(
+  return cy.mount(
     <BrowserRouter>
       {component}
     </BrowserRouter>,
