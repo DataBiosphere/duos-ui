@@ -1,6 +1,5 @@
 import React from 'react'
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox'
-import { mount } from 'cypress/react'
 import { Votes } from 'src/libs/ajax/Votes'
 import { votingColors } from 'src/libs/VotingColors'
 import { Vote } from 'src/types/model'
@@ -23,7 +22,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders yes vote button as selected if all vote values are true and voting is not final', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMatch}
@@ -42,7 +41,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders unselected buttons if vote values are different and voting is not final', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -61,7 +60,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders unselected buttons if vote values are null and voting is not disabled', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={[{ voteId: 4 } as Vote]}
@@ -80,7 +79,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders unselected buttons if list of votes is empty and voting is not disabled', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={[]}
@@ -99,7 +98,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders unselected buttons if list of votes is null and voting is not disabled', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={[]}
@@ -118,7 +117,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders existing rationale if rationale is the same for all votes', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMatch}
@@ -135,7 +134,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('Does not render existing rationale in textarea if rationale different between votes', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -152,7 +151,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('can always edit rationale textarea when vote is not final', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMatch}
@@ -183,7 +182,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('can always edit vote value when vote is not final', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -209,7 +208,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('can edit rationale textarea multiple times before voting when vote is final', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -234,7 +233,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('can not edit rationale textarea after voting when vote is final', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -259,7 +258,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('replaces buttons with vote result text after voting when isFinal is true', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -284,7 +283,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders vote result text instead of buttons when vote values match and isFinal is true', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMatch}
@@ -303,7 +302,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('disables vote buttons and text area if page is loading', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -326,7 +325,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('replaces buttons with vote result text if isDisabled prop is true', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -348,7 +347,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('disables yes vote button if isApprovalDisabled is true', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -375,7 +374,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('does not disable no vote button if isApprovalDisabled is true', function () {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -399,7 +398,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders a different heading if user is viewing from the admin page (Dataset)', () => {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -420,7 +419,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('renders a different heading if user is viewing from the admin page (RP)', () => {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMixed}
@@ -441,7 +440,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('shows the final vote and renders the component read-only for admin page', () => {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={votesMatch}
@@ -463,7 +462,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
   })
 
   it('shows the radar vote icon when the vote type is radar', () => {
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={[{ vote: true, voteId: 1, type: VOTE_TYPES.RADAR_APPROVE, rationale: 'Radar Approve' } as Vote]}
@@ -482,7 +481,7 @@ describe('CollectionSubmitVoteBox - Tests', function () {
 
   it('shows disabled Yes/No buttons as member when election is closed', () => {
     const updateFunction = cy.spy().as('updateFunction')
-    mount(
+    cy.mount(
       <CollectionSubmitVoteBox
         question="question"
         votes={[{ type: VOTE_TYPES.FINAL, rationale: 'Approved', electionStatus: 'closed' } as Vote]}

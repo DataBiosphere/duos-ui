@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { Workspace } from 'src/types/model'
 import WorkspaceAddEdit from 'src/components/workspaces_list/WorkspaceAddEdit'
 import WorkspaceSummary from 'src/components/workspaces_list/WorkspaceSummary'
@@ -33,14 +32,14 @@ const WorkspaceListHarness: React.FC<{ initial: Workspace[] }> = ({ initial }) =
 
 describe('WorkspaceList component', () => {
   it('renders existing workspaces', () => {
-    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    cy.mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
     cy.contains(sampleWorkspace.name).should('exist')
     cy.contains(sampleWorkspace.platform).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
     const collected: Workspace[] = []
-    mount(
+    cy.mount(
       <WorkspaceAddEdit
         id={-1}
         workspace={undefined}
@@ -63,7 +62,7 @@ describe('WorkspaceList component', () => {
   })
 
   it('opens workspace in view mode when view button is clicked', () => {
-    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    cy.mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.contains(sampleWorkspace.name).should('exist')
     cy.get('#name').should('be.disabled')
@@ -73,7 +72,7 @@ describe('WorkspaceList component', () => {
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    cy.mount(<WorkspaceListHarness initial={[sampleWorkspace]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.get('.collaborator-form-cancel-button').click()
     cy.get('#name').should('not.exist')
@@ -82,7 +81,7 @@ describe('WorkspaceList component', () => {
 
   it('adds a new workspace', () => {
     const state: Workspace[] = []
-    mount(
+    cy.mount(
       <WorkspaceList
         workspaces={state}
         columnsToShow={['name', 'platform']}
@@ -105,7 +104,7 @@ describe('WorkspaceList component', () => {
 
   it('edits existing workspace and saves changes', () => {
     const workspaces: Workspace[] = [sampleWorkspace]
-    mount(
+    cy.mount(
       <WorkspaceAddEdit
         id={0}
         workspace={sampleWorkspace}
@@ -123,7 +122,7 @@ describe('WorkspaceList component', () => {
 
   it('deletes a workspace via modal confirmation', () => {
     testDeleteViaModal(
-      () => mount(<WorkspaceListHarness initial={[sampleWorkspace]} />),
+      () => cy.mount(<WorkspaceListHarness initial={[sampleWorkspace]} />),
       sampleWorkspace.name,
     )
   })
@@ -131,7 +130,7 @@ describe('WorkspaceList component', () => {
 
 describe('WorkspaceSummary', () => {
   it('renders columns including arrays and url', () => {
-    mount(
+    cy.mount(
       <WorkspaceSummary
         workspace={sampleWorkspace}
         columnsToShow={['name', 'platform', 'description', 'url', 'tools', 'tags']}
@@ -149,7 +148,7 @@ describe('WorkspaceSummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
+    cy.mount(
       <WorkspaceSummary
         workspace={sampleWorkspace}
         columnsToShow={['name']}
@@ -167,7 +166,7 @@ describe('WorkspaceSummary', () => {
 
 describe('WorkspaceRow', () => {
   it('shows summary when not in edit mode and triggers editAction', () => {
-    mount(
+    cy.mount(
       <WorkspaceRow
         id={0}
         editMode={false}
@@ -187,7 +186,7 @@ describe('WorkspaceRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
+    cy.mount(
       <WorkspaceRow
         id={0}
         editMode={true}
@@ -205,7 +204,7 @@ describe('WorkspaceRow', () => {
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
+    cy.mount(
       <WorkspaceRow
         id={0}
         editMode={false}
@@ -227,7 +226,7 @@ describe('WorkspaceRow', () => {
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
+    cy.mount(
       <WorkspaceRow
         id={0}
         editMode={false}

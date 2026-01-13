@@ -2,7 +2,6 @@ import ERACommons from 'src/components/era_commons/ERACommons'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
-import { mount } from 'cypress/react'
 import React from 'react'
 
 interface Researcher {
@@ -24,7 +23,7 @@ const researcher: Researcher = {
 describe('ERA Commons Component', function () {
   it('renders an empty ERA Commons component with header and required', function () {
     cy.stub(User, 'getMe').returns(researcher)
-    mount(
+    cy.mount(
       <ERACommons
         destination=""
         header={true}
@@ -50,7 +49,7 @@ describe('ERA Commons Component', function () {
       { propertyKey: 'eraExpiration', propertyValue: exp },
     ]
     cy.stub(User, 'getMe').returns(clonedResearcher)
-    mount(
+    cy.mount(
       <ERACommons
         destination=""
         header={true}
@@ -68,7 +67,7 @@ describe('ERA Commons Component', function () {
   })
 
   it('shows an error when auth token decoding fails', function () {
-    mount(
+    cy.mount(
       <ERACommons
         destination=""
         header={true}
@@ -92,7 +91,7 @@ describe('ERA Commons Component', function () {
       ],
     }
     cy.stub(User, 'getMe').returns(eraAuthedUser)
-    mount(
+    cy.mount(
       <ERACommons
         destination=""
         header={true}
@@ -110,7 +109,7 @@ describe('ERA Commons Component', function () {
   it('shows an error when ECM fails', function () {
     cy.stub(Storage, 'getEnv').returns('dev')
     cy.stub(Storage, 'getCurrentUser').returns(researcher)
-    mount(
+    cy.mount(
       <ERACommons
         destination=""
         header={true}

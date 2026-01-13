@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 
 describe('VotingHistoryOverview', () => {
@@ -36,7 +35,7 @@ describe('VotingHistoryOverview', () => {
   ]
 
   beforeEach(() => {
-    mount(
+    cy.mount(
       <VotingHistoryOverview dar={mockDar} votes={mockVotes} />,
     )
   })

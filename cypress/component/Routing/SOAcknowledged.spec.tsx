@@ -1,6 +1,5 @@
 import React from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { mount } from 'cypress/react'
 import SOAcknowledged from 'src/routing/SOAcknowledged'
 import { AcknowledgementService } from 'src/libs/acknowledgements'
 
@@ -22,7 +21,7 @@ describe('SOAcknowledged', () => {
   it('should render the protected component if SO has accepted DAAs', () => {
     cy.stub(AcknowledgementService, 'hasSOAcceptedDAAs').resolves(true)
     const pageVisitStub = cy.stub()
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <LocationSpy onLocationChange={pageVisitStub} />
         <Routes>
@@ -39,7 +38,7 @@ describe('SOAcknowledged', () => {
 
   it('should redirect to SigningOfficialDaaAgreementWrapper if SO has not accepted DAAs', () => {
     cy.stub(AcknowledgementService, 'hasSOAcceptedDAAs').resolves(false)
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route element={<SOAcknowledged />}>

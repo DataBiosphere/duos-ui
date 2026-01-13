@@ -1,11 +1,10 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { StudyAsset } from 'src/pages/data_submission/v2/StudyAsset'
 
 describe('StudyAsset component', () => {
   it('renders all configured elements (icon, title, description, children, button)', () => {
     const clickSpy = cy.spy().as('clickSpy')
-    mount(
+    cy.mount(
       <StudyAsset
         config={{
           icon: <span data-cy="icon">ICON</span>,
@@ -26,7 +25,7 @@ describe('StudyAsset component', () => {
   })
 
   it('renders without optional children and button', () => {
-    mount(
+    cy.mount(
       <StudyAsset
         config={{
           icon: <span data-cy="icon-min">I</span>,
@@ -41,7 +40,7 @@ describe('StudyAsset component', () => {
     cy.get('button').should('not.exist')
   })
   it('applies expected container styles', () => {
-    mount(
+    cy.mount(
       <StudyAsset
         config={{
           icon: <span>Icon</span>,

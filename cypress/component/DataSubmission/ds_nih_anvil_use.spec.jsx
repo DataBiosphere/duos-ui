@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { cloneDeep } from 'lodash/fp'
 import NihAnvilUse, { YES_NHGRI_YES_PHS_ID } from 'src/pages/data_submission/NihAnvilUse'
 
@@ -19,7 +18,7 @@ beforeEach(() => {
 
 describe('NihAnvilUse - Tests', () => {
   it('should mount with only the nihAnvilUse form field displayed', () => {
-    mount(<NihAnvilUse {...propCopy} />)
+    cy.mount(<NihAnvilUse {...propCopy} />)
     cy.get('.formField-container').should('exist')
 
     cy.get('#nihAnvilUse').should('exist')
@@ -31,7 +30,7 @@ describe('NihAnvilUse - Tests', () => {
 
   it('should show dbGaP form fields if NHGRI funded and has dbGaP ID', () => {
     propCopy.formData.nihAnvilUse = YES_NHGRI_YES_PHS_ID
-    mount(<NihAnvilUse {...propCopy} />)
+    cy.mount(<NihAnvilUse {...propCopy} />)
     cy.get('#nihAnvilUse_yes_nhgri_yes_phs_id').click()
     cy.get('#dbGaPPhsID').should('exist')
     cy.get('#dbGaPStudyRegistrationName').should('exist')
@@ -40,7 +39,7 @@ describe('NihAnvilUse - Tests', () => {
   })
 
   it('should hide dbGaP form fields if NHGRI funded and no dbGaP ID', () => {
-    mount(<NihAnvilUse {...propCopy} />)
+    cy.mount(<NihAnvilUse {...propCopy} />)
     cy.get('#nihAnvilUse_yes_nhgri_no_phs_id').click()
 
     cy.get('#dbGaPPhsID').should('not.exist')
@@ -50,7 +49,7 @@ describe('NihAnvilUse - Tests', () => {
   })
 
   it('should hide dbGaP form fields if not NHGRI funded and submitting to AnVIL ', () => {
-    mount(<NihAnvilUse {...propCopy} />)
+    cy.mount(<NihAnvilUse {...propCopy} />)
     cy.get('#nihAnvilUse_no_nhgri_yes_anvil').click()
 
     cy.get('#dbGaPPhsID').should('not.exist')
@@ -60,7 +59,7 @@ describe('NihAnvilUse - Tests', () => {
   })
 
   it('should hide dbGaP form fields if not NHGRI funded and not submitting to AnVIL', () => {
-    mount(<NihAnvilUse {...propCopy} />)
+    cy.mount(<NihAnvilUse {...propCopy} />)
     cy.get('#nihAnvilUse_no_nhgri_no_anvil').click()
 
     cy.get('#dbGaPPhsID').should('not.exist')

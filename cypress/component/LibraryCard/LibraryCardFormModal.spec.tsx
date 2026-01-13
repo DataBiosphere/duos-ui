@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import LibraryCardFormModal, { LibraryCardFormModalProps } from 'src/components/modals/LibraryCardFormModal'
 
 describe('Library Card Form Modal Tests', () => {
@@ -16,7 +15,7 @@ describe('Library Card Form Modal Tests', () => {
   })
 
   it('Should render the Library Card Form Modal', () => {
-    mount(<LibraryCardFormModal {...props} />)
+    cy.mount(<LibraryCardFormModal {...props} />)
     cy.get('[data-cy=library-card-form-modal]').should('exist')
     cy.get('[data-cy=library-card-form-modal]').should('contain', 'Add Library Cards')
     cy.get('[id=Add-button]').click()
@@ -35,7 +34,7 @@ describe('Library Card Form Modal Tests', () => {
       { userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: undefined },
     ]
     const mergedProps = { ...props, ...{ users: userOptions } }
-    mount(<LibraryCardFormModal {...mergedProps} />)
+    cy.mount(<LibraryCardFormModal {...mergedProps} />)
     cy.get('input').should('exist')
     cy.get('input').type(userOptions[0].displayName)
     cy.get('[data-cy=library-card-form-modal]').should('contain', userOptions[0].email)
@@ -53,7 +52,7 @@ describe('Library Card Form Modal Tests', () => {
     ]
 
     const mergedProps = { ...props, ...{ users: userOptions } }
-    mount(<LibraryCardFormModal {...mergedProps} />)
+    cy.mount(<LibraryCardFormModal {...mergedProps} />)
     cy.get('input').should('exist')
 
     // select the first option
@@ -82,7 +81,7 @@ describe('Library Card Form Modal Tests', () => {
       { userId: 1, displayName: 'Test User 1', email: 'user@test.com', libraryCard: undefined },
     ]
     const mergedProps = { ...props, ...{ users: userOptions } }
-    mount(<LibraryCardFormModal {...mergedProps} />)
+    cy.mount(<LibraryCardFormModal {...mergedProps} />)
     cy.get('input').should('exist')
     cy.get('input').type('Random Name')
     cy.get('[data-cy=library-card-form-modal]').should('not.contain', userOptions[0].email)

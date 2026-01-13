@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { Storage } from 'src/libs/storage'
 import DatasetSearch from 'src/pages/DatasetSearch'
@@ -15,7 +14,7 @@ describe('Data Library', () => {
 
   it('Renders the data library without a query', () => {
     cy.stub(Storage, 'getCurrentUser').returns(duosUser)
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/data-search']}>
         <Routes>
           <Route path="/data-search" element={<DatasetSearch />} />
@@ -26,7 +25,7 @@ describe('Data Library', () => {
 
   it('Renders the data library with a query', () => {
     cy.stub(Storage, 'getCurrentUser').returns(duosUser)
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/data-search/test']}>
         <Routes>
           <Route path="/data-search" element={<DatasetSearch />} />

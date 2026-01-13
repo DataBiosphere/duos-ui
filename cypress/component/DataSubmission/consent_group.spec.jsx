@@ -1,7 +1,6 @@
 import React from 'react'
 import ConsentGroupForm from 'src/pages/data_submission/consent_group/ConsentGroupForm'
 import { cloneDeep } from 'lodash/fp'
-import { mount } from 'cypress/react'
 
 const dacs = [
   {
@@ -45,7 +44,7 @@ describe('Consent Group', function () {
   it('Edits without saving', function () {
     cy.spy(propCopy, 'saveConsentGroup')
 
-    mount(<ConsentGroupForm {...propCopy} />)
+    cy.mount(<ConsentGroupForm {...propCopy} />)
 
     cy.get('#0_editConsentGroup').click()
     cy.get('#0_consentGroupName').type('Hello!')
@@ -59,7 +58,7 @@ describe('Consent Group', function () {
   it('Saves properly', function () {
     cy.spy(propCopy, 'saveConsentGroup');
 
-    mount(<ConsentGroupForm {...propCopy}/>);
+    cy.mount(<ConsentGroupForm {...propCopy}/>);
 
     cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
@@ -114,7 +113,7 @@ describe('Consent Group', function () {
   it('Deletes properly', function () {
     cy.spy(propCopy, 'deleteConsentGroup')
 
-    mount(<ConsentGroupForm {...propCopy} />)
+    cy.mount(<ConsentGroupForm {...propCopy} />)
 
     cy.get('#0_editConsentGroup').click()
     cy.get('#0_consentGroupName').type('Hello!')
@@ -126,7 +125,7 @@ describe('Consent Group', function () {
   })
 
   it('Shows conditional fields only when checked', function () {
-    mount(<ConsentGroupForm {...propCopy} />)
+    cy.mount(<ConsentGroupForm {...propCopy} />)
 
     cy.get('#0_editConsentGroup').click()
     cy.get('#0_primaryConsent_generalResearchUse').click()

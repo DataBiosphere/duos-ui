@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import DACDatasets from 'src/pages/DACDatasets'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Storage } from 'src/libs/storage'
@@ -81,7 +80,7 @@ describe('Dac Dataset Table Component', function () {
     cy.viewport(800, 500)
     cy.stub(Storage, 'getCurrentUser').returns(user)
     cy.stub(DataSet, 'searchDatasetIndex').returns([sampleDataset])
-    mount(WrappedDACDatasetsComponent({}))
+    cy.mount(WrappedDACDatasetsComponent({}))
     cy.contains('My DAC\'s Datasets').should('exist')
   })
   it('Dataset with data use is visible on page', function () {
@@ -101,7 +100,7 @@ describe('Dac Dataset Table Component', function () {
     const datasets = [datasetWithDataUseInfo]
     cy.stub(DataSet, 'searchDatasetIndex').returns(datasets)
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(WrappedDACDatasetsComponent({}))
+    cy.mount(WrappedDACDatasetsComponent({}))
     cy.contains('HMB').should('exist')
   })
 
@@ -114,7 +113,7 @@ describe('Dac Dataset Table Component', function () {
     const datasets = [rejectedDataset]
     cy.stub(DataSet, 'searchDatasetIndex').returns(datasets)
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(WrappedDACDatasetsComponent({}))
+    cy.mount(WrappedDACDatasetsComponent({}))
     cy.contains('REJECTED').should('exist')
   })
 
@@ -127,7 +126,7 @@ describe('Dac Dataset Table Component', function () {
     const datasets = [approvedDataset]
     cy.stub(DataSet, 'searchDatasetIndex').returns(datasets)
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(WrappedDACDatasetsComponent({}))
+    cy.mount(WrappedDACDatasetsComponent({}))
     cy.contains('ACCEPTED').should('exist')
   })
 
@@ -162,7 +161,7 @@ describe('Dac Dataset Table Component', function () {
     const datasets = [hmbDataset, gruDataset]
     cy.stub(DataSet, 'searchDatasetIndex').returns(datasets)
     cy.stub(Storage, 'getCurrentUser').returns(user)
-    mount(WrappedDACDatasetsComponent({}))
+    cy.mount(WrappedDACDatasetsComponent({}))
     cy.contains('HMB').should('exist')
     cy.contains('GRU').should('exist')
     cy.get('[data-cy="search-bar"]').clear()

@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { mount } from 'cypress/react'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
 import { BrowserRouter } from 'react-router-dom'
 
@@ -24,7 +23,7 @@ const WrappedScrollableTabs = ({ initialTabId }: { initialTabId?: string }) => {
 
 describe('ScrollableTabs - Basic Tests', () => {
   it('should render without crashing', () => {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={mockApplicationTabs} />
       </BrowserRouter>,
@@ -35,7 +34,7 @@ describe('ScrollableTabs - Basic Tests', () => {
   })
 
   it('should render the correct number of tabs', () => {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={mockApplicationTabs} />
       </BrowserRouter>,
@@ -47,7 +46,7 @@ describe('ScrollableTabs - Basic Tests', () => {
 
 describe('ScrollableTabs Component - Integration Tests', () => {
   beforeEach(() => {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <div style={{ display: 'inline-flex' }}>
           <WrappedScrollableTabs />
@@ -62,7 +61,7 @@ describe('ScrollableTabs Component - Integration Tests', () => {
   })
 
   it('Case 1 - change tabs based on formSelectedTabId', () => {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <WrappedScrollableTabs initialTabId="data-access-request" />
       </BrowserRouter>,
@@ -70,7 +69,7 @@ describe('ScrollableTabs Component - Integration Tests', () => {
     cy.get('.Mui-selected').contains('Data Access Request').should('exist')
     cy.get('.Mui-selected').contains('Researcher Information').should('not.exist')
 
-    mount(
+    cy.mount(
       <BrowserRouter>
         <WrappedScrollableTabs initialTabId="research-purpose-statement" />
       </BrowserRouter>,
@@ -106,7 +105,7 @@ describe('ScrollableTabs Component - Integration Tests', () => {
 
   it('should handle tabs without step numbers', () => {
     const tabsWithoutSteps = mockApplicationTabs.map(tab => ({ ...tab, showStep: false }))
-    mount(
+    cy.mount(
       <BrowserRouter>
         <ScrollableTabs applicationTabs={tabsWithoutSteps} />
       </BrowserRouter>,

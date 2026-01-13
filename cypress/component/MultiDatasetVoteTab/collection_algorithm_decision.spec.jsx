@@ -1,5 +1,4 @@
 import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision'
-import { mount } from 'cypress/react'
 import React from 'react'
 import { formatDate } from 'src/libs/utils'
 
@@ -9,7 +8,7 @@ describe('CollectionAlgorithmDecision component', () => {
     const props = {
       algorithmResult: { id },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-algorithm-id-${id}`).should('exist')
   })
@@ -22,7 +21,7 @@ describe('CollectionAlgorithmDecision component', () => {
         id,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-decision-label`).should('exist')
     cy.get(`#collection-${id}-decision-label`).contains('Decision:')
@@ -36,7 +35,7 @@ describe('CollectionAlgorithmDecision component', () => {
         id,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-date-label`).should('exist')
     cy.get(`#collection-${id}-date-label`).contains('Date:')
@@ -50,7 +49,7 @@ describe('CollectionAlgorithmDecision component', () => {
         id,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-subtitle`).should('exist')
     cy.get(`#collection-${id}-subtitle`).contains('DUOS Algorithm Decision')
@@ -64,7 +63,7 @@ describe('CollectionAlgorithmDecision component', () => {
         id,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-decision-value`).should('exist')
     cy.get(`#collection-${id}-decision-value`).contains('N/A')
@@ -78,7 +77,7 @@ describe('CollectionAlgorithmDecision component', () => {
         id,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-decision-value`).should('exist')
     cy.get(`#collection-${id}-decision-value`).contains('YES')
@@ -91,7 +90,7 @@ describe('CollectionAlgorithmDecision component', () => {
         id,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-decision-value`).should('exist')
     cy.get(`#collection-${id}-decision-value`).contains('NO')
@@ -108,7 +107,7 @@ describe('CollectionAlgorithmDecision component', () => {
         createDate,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-date-value`).should('exist')
     cy.get(`#collection-${id}-date-value`).contains(expectedDate)
@@ -122,7 +121,7 @@ describe('CollectionAlgorithmDecision component', () => {
         id,
       },
     }
-    mount(<CollectionAlgorithmDecision {...props} />)
+    cy.mount(<CollectionAlgorithmDecision {...props} />)
 
     cy.get(`#collection-${id}-date-value`).should('exist')
     cy.get(`#collection-${id}-date-value`).contains('N/A')

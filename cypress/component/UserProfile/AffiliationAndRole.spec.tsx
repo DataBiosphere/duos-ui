@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { Institution } from 'src/libs/ajax/Institution'
 import AffiliationAndRole from 'src/pages/user_profile/AffiliationAndRoles'
@@ -48,14 +47,14 @@ describe('Affiliation And Role', () => {
 
   it('Displays institution name when institution is present', () => {
     cy.stub(Institution, 'getById').returns(institution)
-    mount(<AffiliationAndRole user={user} />)
+    cy.mount(<AffiliationAndRole user={user} />)
     cy.get('[ data-cy="institutional-affiliation"]').contains(institution.name)
   })
 
   it('Displays contact us text when no institution present', () => {
     cy.stub(Institution, 'getById').returns(institution)
     const { institutionId, ...userWithoutInstitution } = user
-    mount(<AffiliationAndRole user={userWithoutInstitution} />)
+    cy.mount(<AffiliationAndRole user={userWithoutInstitution} />)
     cy.get('[ data-cy="institutional-affiliation"]').contains('Your institutional affiliation is automatically derived from your email domain.'
       + ' Please use your institutional email to be affiliated with your institution. If you are using your institutional email and have not been assigned an institution'
       + ' please use the Contact Us form and provide your email and institution.')
@@ -63,7 +62,7 @@ describe('Affiliation And Role', () => {
 
   it('Displays all role names for user', () => {
     cy.stub(Institution, 'getById').returns(institution)
-    mount(<AffiliationAndRole user={user} />)
+    cy.mount(<AffiliationAndRole user={user} />)
     user.roles.forEach((role) => {
       cy.get('[ data-cy="user-roles"]').contains(role.name)
     })
@@ -72,7 +71,7 @@ describe('Affiliation And Role', () => {
   it('Displays error when error is thrown loading user information', () => {
     const error = new Error('Error: Unable to retrieve user information')
     cy.stub(Institution, 'getById').throws(error)
-    mount(<AffiliationAndRole user={user} />)
+    cy.mount(<AffiliationAndRole user={user} />)
     cy.get('[ data-cy="notification-alert"]').contains(error.message)
   })
 
@@ -81,7 +80,7 @@ describe('Affiliation And Role', () => {
     [{}, undefined, null].forEach((value) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      mount(<AffiliationAndRole user={value} />)
+      cy.mount(<AffiliationAndRole user={value} />)
       cy.get('[ data-cy="notification-alert"]').should('not.exist')
     })
   })

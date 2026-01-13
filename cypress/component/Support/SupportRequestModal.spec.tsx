@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { Storage } from 'src/libs/storage'
 import { BrowserRouter } from 'react-router-dom'
@@ -30,7 +29,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Renders form correctly', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -53,7 +52,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Submits properly', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -90,7 +89,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Renders form correctly', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -113,7 +112,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Submits properly', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -154,7 +153,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Single attachment displayed', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -169,7 +168,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Multiple attachments displayed', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -195,7 +194,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Renders form correctly', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -221,7 +220,7 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Submit button remains disabled due to empty name and email', () => {
-      mount(
+      cy.mount(
         <BrowserRouter>
           <SupportRequestModal
             onCloseRequest={handler}
@@ -252,7 +251,7 @@ describe('Support Request Modal Tests', () => {
       })
 
       it('Displays "DUOS Data Library" link text', () => {
-        mount(
+        cy.mount(
           <BrowserRouter>
             <SupportRequestModal
               onCloseRequest={handler}
@@ -266,7 +265,7 @@ describe('Support Request Modal Tests', () => {
       })
 
       it('Links to /datalibrary when logged in', () => {
-        mount(
+        cy.mount(
           <BrowserRouter>
             <SupportRequestModal
               onCloseRequest={handler}
@@ -280,7 +279,7 @@ describe('Support Request Modal Tests', () => {
       })
 
       it('Has appropriate styling', () => {
-        mount(
+        cy.mount(
           <BrowserRouter>
             <SupportRequestModal
               onCloseRequest={handler}
@@ -301,7 +300,7 @@ describe('Support Request Modal Tests', () => {
       })
 
       it('Displays "DUOS Data Library" link text', () => {
-        mount(
+        cy.mount(
           <BrowserRouter>
             <SupportRequestModal
               onCloseRequest={handler}
@@ -315,7 +314,7 @@ describe('Support Request Modal Tests', () => {
       })
 
       it('Has appropriate styling', () => {
-        mount(
+        cy.mount(
           <BrowserRouter>
             <SupportRequestModal
               onCloseRequest={handler}
@@ -330,7 +329,7 @@ describe('Support Request Modal Tests', () => {
 
       it('Closes modal when link is clicked', () => {
         const onCloseStub = cy.stub().as('onCloseRequest')
-        mount(
+        cy.mount(
           <BrowserRouter>
             <SupportRequestModal
               onCloseRequest={onCloseStub}

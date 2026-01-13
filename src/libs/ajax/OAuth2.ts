@@ -12,6 +12,6 @@ export const OAuth2 = {
 
 const getConfig = async (): Promise<OAuthConfig> => {
   const configUrl = `${await Config.getApiUrl()}/oauth2/configuration`
-  const res = await fetchGet(configUrl)
+  const res = await fetchGet<OAuthConfig>(configUrl)
   return res.data
 }
