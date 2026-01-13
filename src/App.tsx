@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import Modal from 'react-modal'
 import { ThemeProvider } from '@mui/material/styles'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import 'src/App.css'
@@ -33,13 +32,6 @@ function App() {
   const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    const modalRoot = document.getElementById('modal-root')
-    if (modalRoot) {
-      Modal.setAppElement(modalRoot)
-    }
-  })
 
   useEffect(() => {
     const setEnvironment = async () => {
