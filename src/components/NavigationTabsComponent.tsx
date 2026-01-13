@@ -6,7 +6,48 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'
 
-const styles = {
+interface TabItem {
+  label: string
+  link: string
+  children?: SubTabItem[]
+}
+
+interface SubTabItem {
+  label: string
+  link: string
+  isRendered?: () => boolean
+  isRenderedForUser?: (user: CurrentUser) => boolean
+}
+
+interface CurrentUser {
+  displayName: string
+  email: string
+}
+
+type Orientation = 'horizontal' | 'vertical'
+
+interface NavigationTabsComponentProps {
+  orientation: Orientation
+  makeNotifications: () => React.ReactNode
+  navbarDuosIcon: React.CSSProperties
+  duosLogoImage: React.CSSProperties
+  DuosLogo: string
+  navbarDuosText: React.CSSProperties
+  currentUser: CurrentUser
+  signOut: () => void
+  isLogged: boolean
+  contactUsButton: React.ReactNode
+  showRequestModal: () => void
+  supportrequestModal: React.ReactNode
+  tabs: TabItem[]
+  initialTab: number
+  initialSubTab: number
+  onSubtabChange: (event: React.SyntheticEvent, newValue: number) => void
+  showProfileLinks: () => void
+  profileState: boolean
+}
+
+const styles: Record<string, React.CSSProperties> = {
   mainTab: {
     padding: '0 25px',
     fontSize: '16px',
@@ -50,7 +91,7 @@ const styles = {
   },
 }
 
-export const NavigationTabsComponent = (props) => {
+export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (props) => {
   const {
     orientation,
     makeNotifications,
@@ -60,10 +101,11 @@ export const NavigationTabsComponent = (props) => {
     tabs, initialTab, initialSubTab,
     onSubtabChange, showProfileLinks, profileState,
   } = props
-  const [selectedMenuTab, setSelectedMenuTab] = useState(false)
-  const [selectedSubTab, setSelectedSubTab] = useState(false)
+  const [selectedMenuTab, setSelectedMenuTab] = useState<number | false>(false)
+  const [selectedSubTab, setSelectedSubTab] = useState<number | false>(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedMenuTab(initialTab === -1 ? false : initialTab)
     setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab)
   }, [initialTab, initialSubTab])
@@ -92,7 +134,7 @@ export const NavigationTabsComponent = (props) => {
                   variant="scrollable"
                   scrollButtons="auto"
                   orientation={orientation}
-                  TabIndicatorProps={{ style: { background: '#2BBD9B' } }}
+                  sx={{ '& .MuiTabs-indicator': { background: '#2BBD9B' } }}
                 >
                   {tabs.map((tab, tabIndex) => (
                     <Tab
@@ -152,7 +194,7 @@ export const NavigationTabsComponent = (props) => {
                 {/* Sign-in button location when window is narrow and menu is vertical */}
                 {!isLogged && orientation === 'vertical' && (
                   <li style={{ marginRight: 0 }}>
-                    <SignInButton props={props} />
+                    <SignInButton />
                   </li>
                 )}
               </ul>
@@ -168,10 +210,10 @@ export const NavigationTabsComponent = (props) => {
                 minWidth: '185px',
                 display: 'flex',
                 alignItems: 'center',
-                flexDirection: orientation === 'vertical' ? 'column' : 'row',
+                flexDirection: orientation === 'horizontal' ? 'row' : 'column',
               }}
             >
-              <SignInButton props={props} />
+              <SignInButton />
             </div>
           )}
         {isLogged && (
@@ -212,7 +254,7 @@ export const NavigationTabsComponent = (props) => {
                 }}
               >
                 <li>
-                  <Link id="link_profile" to="/profile" onClick={onSubtabChange}>Your Profile</Link>
+                  <Link id="link_profile" to="/profile" onClick={e => onSubtabChange(e, 0)}>Your Profile</Link>
                 </li>
                 <li>
                   <a id="link_signOut" onClick={signOut}>Sign out</a>
@@ -224,17 +266,17 @@ export const NavigationTabsComponent = (props) => {
       </ul>
 
       {/* Sub Tabs */}
-      {tabs[selectedMenuTab]?.children && (
+      {tabs[selectedMenuTab as number]?.children && (
         <Box className="duos-navigation-box navbar-sub">
           <Tabs
             value={selectedSubTab}
             variant="scrollable"
             scrollButtons="auto"
             orientation={orientation}
-            TabIndicatorProps={{ style: { background: '#00609f' } }}
+            sx={{ '& .MuiTabs-indicator': { background: '#00609f' } }}
             onChange={onSubtabChange}
           >
-            {tabs[selectedMenuTab].children.map((tab, tabIndex) => {
+            {tabs[selectedMenuTab as number].children?.map((tab, tabIndex) => {
               // Default to displaying the sub tab if no render function exists for it
               const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered()
               const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser)))
