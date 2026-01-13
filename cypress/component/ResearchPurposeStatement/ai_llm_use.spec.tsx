@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement'
 import { RusErrors } from 'src/pages/dar_application/FormValidationState'
 
@@ -72,7 +71,7 @@ describe('ResearchPurposeStatement - AI/LLM Use Tests', () => {
   beforeEach(() => {
     formFieldChangeSpy = cy.stub()
     formValidationChangeSpy = cy.stub()
-    mount(<ResearchPurposeStatement {...getDefaultProps()} />)
+    cy.mount(<ResearchPurposeStatement {...getDefaultProps()} />)
   })
 
   it('should render AI/LLM use question', () => {
@@ -112,7 +111,7 @@ describe('ResearchPurposeStatement - AI/LLM Use Tests', () => {
 
   it('should be disabled in read-only mode', () => {
     const readOnlyProps = { ...getDefaultProps(), readOnlyMode: true }
-    mount(<ResearchPurposeStatement {...readOnlyProps} />)
+    cy.mount(<ResearchPurposeStatement {...readOnlyProps} />)
 
     cy.get('#aiLlmUse_yes').should('be.disabled')
     cy.get('#aiLlmUse_no').should('be.disabled')
@@ -130,7 +129,7 @@ describe('ResearchPurposeStatement - AI/LLM Use Tests', () => {
         },
       },
     }
-    mount(<ResearchPurposeStatement {...props} />)
+    cy.mount(<ResearchPurposeStatement {...props} />)
 
     cy.get('#aiLlmUse').should('have.class', 'errored')
   })
@@ -144,7 +143,7 @@ describe('ResearchPurposeStatement - AI/LLM Use Tests', () => {
         aiLlmUse: true,
       },
     }
-    mount(<ResearchPurposeStatement {...props} />)
+    cy.mount(<ResearchPurposeStatement {...props} />)
 
     cy.get('#aiLlmUse_yes').should('be.checked')
   })
@@ -158,7 +157,7 @@ describe('ResearchPurposeStatement - AI/LLM Use Tests', () => {
         aiLlmUse: false,
       },
     }
-    mount(<ResearchPurposeStatement {...props} />)
+    cy.mount(<ResearchPurposeStatement {...props} />)
 
     cy.get('#aiLlmUse_no').should('be.checked')
   })

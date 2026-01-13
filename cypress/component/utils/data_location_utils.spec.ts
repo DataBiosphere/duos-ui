@@ -1,5 +1,4 @@
 import { getDataLocationLink } from 'src/utils/DataLocationUtils'
-import { mount } from 'cypress/react'
 
 describe('DataLocationUtils', () => {
   describe('getDataLocationLink', () => {
@@ -7,7 +6,7 @@ describe('DataLocationUtils', () => {
       const dataLocation = 'TDR Location'
       const dataUrl = 'https://data.terra.bio/dataset/12345'
 
-      mount(getDataLocationLink(dataLocation, dataUrl))
+      cy.mount(getDataLocationLink(dataLocation, dataUrl))
 
       cy.get('a')
         .should('have.attr', 'href', dataUrl)
@@ -18,7 +17,7 @@ describe('DataLocationUtils', () => {
       const dataLocation = 'Terra Workspace'
       const dataUrl = 'https://app.terra.bio/workspace/12345'
 
-      mount(getDataLocationLink(dataLocation, dataUrl))
+      cy.mount(getDataLocationLink(dataLocation, dataUrl))
 
       cy.get('a')
         .should('have.attr', 'href', dataUrl)
@@ -29,7 +28,7 @@ describe('DataLocationUtils', () => {
       const dataLocation = 'Not Determined'
       const dataUrl = 'https://example.com/somewhere'
 
-      mount(getDataLocationLink(dataLocation, dataUrl))
+      cy.mount(getDataLocationLink(dataLocation, dataUrl))
 
       // Should render text without a link
       cy.get('a').should('not.exist')
@@ -40,7 +39,7 @@ describe('DataLocationUtils', () => {
       const dataLocation = 'Other Location'
       const dataUrl = 'https://example.com/other'
 
-      mount(getDataLocationLink(dataLocation, dataUrl))
+      cy.mount(getDataLocationLink(dataLocation, dataUrl))
 
       cy.get('a')
         .should('have.attr', 'href', dataUrl)
@@ -51,7 +50,7 @@ describe('DataLocationUtils', () => {
       const dataLocation = 'Terra Workspace'
       // No dataUrl provided
 
-      mount(getDataLocationLink(dataLocation))
+      cy.mount(getDataLocationLink(dataLocation))
 
       cy.get('a')
         .should('contain', 'Terra Workspace')

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 import { CombinedDataAccessRequest } from 'src/types/model'
@@ -13,7 +12,7 @@ describe('SubmitProgressReport tests', () => {
   )
 
   it('Should show a submit and cancel button', () => {
-    mount(
+    cy.mount(
       <SubmitProgressReport
         formState={{} as FormState}
         parentReferenceId="1"
@@ -32,7 +31,7 @@ describe('SubmitProgressReport tests', () => {
       statusCode: 200,
       body: {},
     }).as('submitProgressReport')
-    mount(
+    cy.mount(
       <SubmitProgressReport
         formState={{} as FormState}
         parentReferenceId="1"
@@ -60,7 +59,7 @@ describe('SubmitProgressReport tests', () => {
       body: {},
     })
 
-    mount(
+    cy.mount(
       <SubmitProgressReport
         formState={{} as FormState}
         parentReferenceId="1"
@@ -81,7 +80,7 @@ describe('SubmitProgressReport tests', () => {
       },
     }
     cy.spy(functionSpy, 'cancelHandler').as('cancelHandler')
-    mount(
+    cy.mount(
       <SubmitProgressReport
         formState={{} as FormState}
         parentReferenceId="1"
@@ -98,7 +97,7 @@ describe('SubmitProgressReport tests', () => {
   it('Submit failure message should be captured', () => {
     cy.stub(StackdriverErrorReporter.prototype, 'setUser').callsFake(() => {
     })
-    mount(
+    cy.mount(
       <SubmitProgressReport
         formState={{} as FormState}
         parentReferenceId="1"
@@ -137,7 +136,7 @@ describe('SubmitProgressReport tests', () => {
 
       const mockFile = new File(['test content'], 'new-irb.pdf', { type: 'application/pdf' })
 
-      mount(
+      cy.mount(
         <SubmitProgressReport
           formState={mockFormState}
           parentReferenceId="1"
@@ -177,7 +176,7 @@ describe('SubmitProgressReport tests', () => {
         body: {},
       }).as('submitProgressReport')
 
-      mount(
+      cy.mount(
         <SubmitProgressReport
           formState={mockFormState}
           parentReferenceId="1"
@@ -216,7 +215,7 @@ describe('SubmitProgressReport tests', () => {
         body: {},
       }).as('submitProgressReport')
 
-      mount(
+      cy.mount(
         <SubmitProgressReport
           formState={mockFormState}
           parentReferenceId="1"
@@ -250,7 +249,7 @@ describe('SubmitProgressReport tests', () => {
         body: {},
       }).as('submitProgressReport')
 
-      mount(
+      cy.mount(
         <SubmitProgressReport
           formState={mockFormState}
           parentReferenceId="1"
@@ -279,7 +278,7 @@ describe('SubmitProgressReport tests', () => {
         body: {},
       }).as('submitProgressReport')
 
-      mount(
+      cy.mount(
         <SubmitProgressReport
           formState={mockFormState}
           parentReferenceId="1"

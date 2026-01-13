@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
@@ -22,7 +21,7 @@ describe('ManageEditDAC Tests', () => {
       cy.viewport(600, 600)
       setUserRoleStatuses(user, Storage)
       cy.stub(DAC, 'get').returns(dac)
-      mount(
+      cy.mount(
         <MemoryRouter initialEntries={[`/manage_edit_dac/${dac.dacId}`]}>
           <Routes>
             <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
@@ -42,7 +41,7 @@ describe('ManageEditDAC Tests', () => {
     cy.viewport(600, 600)
     Storage.clearStorage()
     setUserRoleStatuses(admin, Storage)
-    mount(<BrowserRouter><ManageEditDac /></BrowserRouter>)
+    cy.mount(<BrowserRouter><ManageEditDac /></BrowserRouter>)
     cy.get('[data-cy="dac_name"]').should('not.be.disabled')
     cy.get('[data-cy="dac_name"]').should('be.empty')
     cy.get('[data-cy="dac_description"]').should('not.be.disabled')
@@ -67,7 +66,7 @@ describe('ManageEditDAC Tests', () => {
     Storage.clearStorage()
     setUserRoleStatuses(chair, Storage)
     const dacCreate = cy.stub(DAC, 'create')
-    mount(<BrowserRouter><ManageEditDac /></BrowserRouter>)
+    cy.mount(<BrowserRouter><ManageEditDac /></BrowserRouter>)
     cy.get('[data-cy="dac_name"]').type('New DAC Name')
     cy.get('[data-cy="dac_description"]').type('New DAC Description')
     cy.get('[data-cy="dac_email"]').type('New DAC Email')

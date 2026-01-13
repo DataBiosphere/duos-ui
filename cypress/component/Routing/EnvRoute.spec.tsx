@@ -1,6 +1,5 @@
 import React from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { mount } from 'cypress/react'
 import EnvRoute from 'src/routing/EnvRoute'
 import { Storage } from 'src/libs/storage'
 
@@ -14,7 +13,7 @@ describe('EnvRoute', () => {
   it('should render the protected component if the current environment is in the allowed list', () => {
     cy.stub(Storage, 'getEnv').returns(currentAllowedEnv)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<EnvRoute env={allowedEnvs} />}>
@@ -31,7 +30,7 @@ describe('EnvRoute', () => {
   it('should redirect to the not found page if the current environment is not in the allowed list', () => {
     cy.stub(Storage, 'getEnv').returns(currentDisallowedEnv)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<EnvRoute env={allowedEnvs} />}>
@@ -48,7 +47,7 @@ describe('EnvRoute', () => {
   it('should redirect to the not found page if the environment is not set', () => {
     cy.stub(Storage, 'getEnv').returns(null)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<EnvRoute env={allowedEnvs} />}>

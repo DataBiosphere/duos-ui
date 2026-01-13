@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { FormField, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import dayjs from 'dayjs'
 
@@ -20,7 +19,7 @@ describe('FormField - Tests', () => {
         defaultValue: dayjs(),
         validators: [FormValidators.REQUIRED, FormValidators.DATEJS],
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_releaseDate').contains('Release Date*')
     })
 
@@ -33,7 +32,7 @@ describe('FormField - Tests', () => {
         defaultValue: dayjs('2024-11-15'),
         validators: [FormValidators.DATEJS],
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_optionalDate').contains('Optional Date')
       cy.get('#lbl_optionalDate').should('not.contain', '*')
     })
@@ -47,7 +46,7 @@ describe('FormField - Tests', () => {
         defaultValue: dayjs(),
         validators: [FormValidators.DATEJS],
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_optionalDate').contains('Optional Date')
       cy.get('#lbl_optionalDate').should('not.contain', '*')
       cy.get('input').type('{end}{del}9999')
@@ -62,7 +61,7 @@ describe('FormField - Tests', () => {
         defaultValue: dayjs('Hello World!'),
         validators: [FormValidators.DATEJS],
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_optionalDate').contains('Optional Date')
       cy.get('#lbl_optionalDate').should('not.contain', '*')
       cy.get('.formField-optionalDate .error-message').contains(FormValidators.DATEJS.msg)
@@ -77,7 +76,7 @@ describe('FormField - Tests', () => {
         validators: [FormValidators.DATEJS],
       }
       cy.spy(props, 'onChange').as('onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_fixedDate').contains('Fixed Date')
       cy.get('#lbl_fixedDate').should('not.contain', '*')
       cy.get('.formField-fixedDate .error-message').contains(FormValidators.DATEJS.msg)
@@ -96,7 +95,7 @@ describe('FormField - Tests', () => {
         defaultValue: '1970-01-01',
         validators: [FormValidators.DATEJS],
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_fixedDate').contains('Fixed Date')
       cy.get('input.MuiInputBase-input').should('have.value', '1970-01-01')
     })
@@ -109,7 +108,7 @@ describe('FormField - Tests', () => {
         defaultValue: '1970-01-01',
         validators: [FormValidators.DATEJS],
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_fixedDate').contains('Fixed Date')
       cy.get('input.MuiInputBase-input').should('have.value', '1970-01-01')
       cy.get('button').click()
@@ -129,7 +128,7 @@ describe('FormField - Tests', () => {
         validators: [FormValidators.REQUIRED],
       }
 
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#lbl_studyName').contains('Study Name*')
     })
 
@@ -145,7 +144,7 @@ describe('FormField - Tests', () => {
 
       cy.spy(props.validators[0], 'isValid')
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a')
       cy.get('#dataCustodianEmail').should('have.value', 'a').then(() => {
         expect(props.validators[0].isValid).to.be.calledWith('a')
@@ -162,7 +161,7 @@ describe('FormField - Tests', () => {
           FormValidators.EMAIL,
         ],
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a')
       cy.get('#dataCustodianEmail').should('have.value', 'a').then(() => {
         cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg)
@@ -179,7 +178,7 @@ describe('FormField - Tests', () => {
         },
       }
       cy.spy(props, 'onValidationChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
 
       cy.get('#dataCustodianEmail').type('a')
       cy.get('#dataCustodianEmail').then(() => {
@@ -211,7 +210,7 @@ describe('FormField - Tests', () => {
           failed: ['required', 'email'],
         },
       }
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.REQUIRED.msg)
       cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg)
     })
@@ -228,7 +227,7 @@ describe('FormField - Tests', () => {
     })
 
     it('should render', () => {
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('.formField-studyName').should('have.length', 1)
       cy.get('#lbl_studyName').contains('Study Name')
       cy.get('#studyName').should('exist')
@@ -237,7 +236,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user inputs values into form control', () => {
       const textToType = 'Dangerous Study'
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyName').type(textToType)
       cy.get('#studyName').then(() => {
         cy.get('#studyName').should('have.value', textToType)
@@ -246,7 +245,7 @@ describe('FormField - Tests', () => {
     })
 
     it('should display error when text input is required, value is blank', () => {
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyName').type('hello')
       cy.get('#studyName').clear()
       cy.get('#studyName').then(() => {
@@ -257,7 +256,7 @@ describe('FormField - Tests', () => {
     })
 
     it('should display error when text input is required, but is dirty', () => {
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyName').click()
       cy.get('#studyName').blur()
       cy.get('#studyName').then(() => {
@@ -269,7 +268,7 @@ describe('FormField - Tests', () => {
 
     it('should be disabled with the config declares it', () => {
       props.disabled = true
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyName').should('be.disabled')
     })
   })
@@ -301,7 +300,7 @@ describe('FormField - Tests', () => {
     })
 
     it('should render', () => {
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#radioGroup_opt1').should('exist')
       cy.get('#radioGroup_opt2').should('exist')
       cy.get('#radioGroup_opt3').should('exist')
@@ -309,7 +308,7 @@ describe('FormField - Tests', () => {
 
     it('should able to check, only one at a time', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
 
       cy.get('#radioGroup_opt1').should('not.be.checked')
       cy.get('#radioGroup_opt2').should('not.be.checked')
@@ -371,7 +370,7 @@ describe('FormField - Tests', () => {
     })
 
     it('should render', () => {
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('.formField-dataCustodianEmail').should('have.length', 1)
       cy.get('#lbl_dataCustodianEmail').contains('Data Custodian Email')
       cy.get('#dataCustodianEmail').should('exist')
@@ -379,7 +378,7 @@ describe('FormField - Tests', () => {
 
     it('should add email address', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a@a.com')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('#dataCustodianEmail').then(() => {
@@ -390,7 +389,7 @@ describe('FormField - Tests', () => {
 
     it('should add multiple email addresses', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a@a.com')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('#dataCustodianEmail').type('b@b.com')
@@ -411,7 +410,7 @@ describe('FormField - Tests', () => {
 
     it('should not add duplicate emails', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a@a.com')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('#dataCustodianEmail').type('a@a.com')
@@ -425,7 +424,7 @@ describe('FormField - Tests', () => {
 
     it('should not add invalid emails', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('not an email haha')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('#dataCustodianEmail').then(() => {
@@ -437,7 +436,7 @@ describe('FormField - Tests', () => {
 
     it('should remove single on click', () => {
       cy.spy(props, 'onChange').as('onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a@a.com')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('.formField-dataCustodianEmail .pill').first().should('exist')
@@ -448,7 +447,7 @@ describe('FormField - Tests', () => {
 
     it('should remove [x, 1, 2] from array on click', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a@a.com')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('#dataCustodianEmail').type('b@b.com')
@@ -469,7 +468,7 @@ describe('FormField - Tests', () => {
 
     it('should remove [0, x, 2] from array on click', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a@a.com')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('#dataCustodianEmail').type('b@b.com')
@@ -490,7 +489,7 @@ describe('FormField - Tests', () => {
 
     it('should remove [0, 1, x] from array on click', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#dataCustodianEmail').type('a@a.com')
       cy.get('#dataCustodianEmail').type('{enter}')
       cy.get('#dataCustodianEmail').type('b@b.com')
@@ -525,13 +524,13 @@ describe('FormField - Tests', () => {
     })
 
     it('should render', () => {
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('.formField-publicVisibility').should('have.length', 1)
     })
 
     it('should run onChange event when user toggles the slider false', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       const selector = '#publicVisibility'
       cy.get(selector).should('not.be.checked')
       cy.get(selector).click()
@@ -543,7 +542,7 @@ describe('FormField - Tests', () => {
 
     it('should run onChange event when user toggles the slider true', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       const selector = '#publicVisibility'
       cy.get(selector).should('not.be.checked')
       cy.get(selector).click()
@@ -574,7 +573,7 @@ describe('FormField - Tests', () => {
     })
 
     it('should render', () => {
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('.formField-studyType').should('have.length', 1)
       cy.get('.formField-studyType label').contains('Study Type')
       cy.get('#studyType').should('exist')
@@ -582,7 +581,7 @@ describe('FormField - Tests', () => {
 
     it('should allow user to search options', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyType').type('Obs{enter}')
       cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({
@@ -595,7 +594,7 @@ describe('FormField - Tests', () => {
 
     it('should not allow user to select by entering a new option as freetext if creatable not set', () => {
       cy.spy(props, 'onChange')
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyType').type('asdf{enter}')
       cy.get('#studyType').then(() => {
         expect(props.onChange).to.have.callCount(0)
@@ -605,7 +604,7 @@ describe('FormField - Tests', () => {
     it('should allow user to select by entering a new option as freetext if creatable set', () => {
       cy.spy(props, 'onChange')
       props.isCreatable = true
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyType').type('asdf{enter}')
       cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({
@@ -620,7 +619,7 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange')
       props.selectOptions = ['Observational', 'Other']
       props.isCreatable = true
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyType').type('Obs{enter}')
       cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({ key: 'studyType', value: 'Observational', isValid: true })
@@ -635,7 +634,7 @@ describe('FormField - Tests', () => {
     it('allows multiple selection', () => {
       cy.spy(props, 'onChange')
       props.isMulti = true
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyType').type('Obs{enter}')
       cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({
@@ -662,7 +661,7 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange')
       props.isMulti = true
       props.isCreatable = true
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyType').type('Obs{enter}')
       cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({
@@ -702,7 +701,7 @@ describe('FormField - Tests', () => {
       props.selectOptions = ['Observational', 'Prospective', 'Other']
       props.isMulti = true
       props.isCreatable = true
-      mount(<FormField {...props} />)
+      cy.mount(<FormField {...props} />)
       cy.get('#studyType').type('Obs{enter}')
       cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({ key: 'studyType', value: ['Observational'], isValid: true })
@@ -757,7 +756,7 @@ describe('FormField - Tests', () => {
     })
 
     it('should render', () => {
-      mount(<FormTable {...props} />)
+      cy.mount(<FormTable {...props} />)
       cy.get('.formField-fileTypes').should('have.length', 1)
       cy.get('.formField-fileTypes .control-label').eq(0).contains('File Type')
       cy.get('.formField-fileTypes .control-label').eq(1).contains('Functional Equivalence')
@@ -766,7 +765,7 @@ describe('FormField - Tests', () => {
 
     it('should update a row field', () => {
       cy.spy(props, 'onChange')
-      mount(<FormTable {...props} />)
+      cy.mount(<FormTable {...props} />)
       cy.get('#fileTypes-0-functionalEquivalence').type('hello')
       cy.get('#fileTypes-0-functionalEquivalence').then(() => {
         cy.get('#fileTypes-0-functionalEquivalence').should('have.value', 'hello')
@@ -782,7 +781,7 @@ describe('FormField - Tests', () => {
 
     it('should add a new row', () => {
       cy.spy(props, 'onChange')
-      mount(<FormTable {...props} />)
+      cy.mount(<FormTable {...props} />)
       cy.get('.control-label').should('have.length', 3)
       cy.get('#add-new-table-row-fileTypes').click()
       cy.get('#add-new-table-row-fileTypes').then(() => {
@@ -794,7 +793,7 @@ describe('FormField - Tests', () => {
 
     it('should be able to update the follow up rows', () => {
       cy.spy(props, 'onChange')
-      mount(<FormTable {...props} />)
+      cy.mount(<FormTable {...props} />)
       cy.get('#add-new-table-row-fileTypes').click()
       cy.get('#fileTypes-1-functionalEquivalence').type('jello')
       cy.get('#fileTypes-1-functionalEquivalence').then(() => {
@@ -812,7 +811,7 @@ describe('FormField - Tests', () => {
 
     it('should be able to delete rows', () => {
       cy.spy(props, 'onChange')
-      mount(<FormTable {...props} />)
+      cy.mount(<FormTable {...props} />)
       cy.get('#delete-table-row-fileTypes-0').click()
       cy.get('.formTable-row').then(() => {
         expect(props.onChange).to.be.calledWith({ key: 'fileTypes', value: [], isValid: true }) // code value
@@ -824,7 +823,7 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange')
       props.minLength = 1
       props.defaultValue = [{}, {}]
-      mount(<FormTable {...props} />)
+      cy.mount(<FormTable {...props} />)
       cy.get('#delete-table-row-fileTypes-0').click()
       cy.get('#delete-table-row-fileTypes-0').then(() => {
         expect(props.onChange).to.be.calledWith({ key: 'fileTypes', value: [{}], isValid: true }) // code value
@@ -848,7 +847,7 @@ describe('FormField - Tests', () => {
           removeRowButtonIconClassName: 'button-icon button-icon-close',
         },
       }
-      mount(<FormTable {...customProps} />)
+      cy.mount(<FormTable {...customProps} />)
       cy.get('#fileTypes-0-functionalEquivalence').type('hello')
       cy.get('#add-new-table-row-fileTypes').should('have.class', 'button-complex-outlined-secondary')
       cy.get('#add-new-table-row-fileTypes').find('span').should('have.class', 'button-icon-circle-plus-outline')
@@ -876,7 +875,7 @@ describe('FormField - Tests', () => {
         return false
       })
 
-      mount(
+      cy.mount(
         <FormField {
           ...{ asdf: 'asdf', id: 'example', onChange: () => {} }
         }
@@ -895,7 +894,7 @@ describe('FormField - Tests', () => {
         return false
       })
 
-      mount(
+      cy.mount(
         <FormField {
           ...{ type: FormFieldTypes.TEXT, onChange: () => {} } // requires id
         }
@@ -914,7 +913,7 @@ describe('FormField - Tests', () => {
         return false
       })
 
-      mount(
+      cy.mount(
         <FormField {
           ...{
             type: {

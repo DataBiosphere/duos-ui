@@ -1,10 +1,9 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import CollapseExpandLink from 'src/components/collection_voting_slab/CollapsibleExpandLink'
 
 describe('CollapseExpandLink', () => {
   it('does not render if hiddenDatasetCount is 0', () => {
-    mount(
+    cy.mount(
       <CollapseExpandLink
         hiddenDatasetCount={0}
         expanded={false}
@@ -16,7 +15,7 @@ describe('CollapseExpandLink', () => {
   })
 
   it('renders expand link when not expanded', () => {
-    mount(
+    cy.mount(
       <CollapseExpandLink
         hiddenDatasetCount={2}
         expanded={false}
@@ -28,7 +27,7 @@ describe('CollapseExpandLink', () => {
   })
 
   it('renders collapse link when expanded', () => {
-    mount(
+    cy.mount(
       <CollapseExpandLink
         hiddenDatasetCount={3}
         expanded={true}
@@ -41,7 +40,7 @@ describe('CollapseExpandLink', () => {
 
   it('calls onExpand when expand link is clicked', () => {
     const onExpand = cy.stub().as('onExpand')
-    mount(
+    cy.mount(
       <CollapseExpandLink
         hiddenDatasetCount={1}
         expanded={false}
@@ -55,7 +54,7 @@ describe('CollapseExpandLink', () => {
 
   it('calls onCollapse when collapse link is clicked', () => {
     const onCollapse = cy.stub().as('onCollapse')
-    mount(
+    cy.mount(
       <CollapseExpandLink
         hiddenDatasetCount={1}
         expanded={true}

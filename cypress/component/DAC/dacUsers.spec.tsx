@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { DacUsers } from 'src/pages/manage_dac/DacUsers.jsx'
 import dac from './dac.json'
 
@@ -11,7 +10,7 @@ describe('Dac User Tests', () => {
       removeButton: true,
       removeHandler: () => { console.log('Remove Button Clicked') },
     }
-    mount(<DacUsers {...props} />)
+    cy.mount(<DacUsers {...props} />)
     dac.chairpersons.forEach((u) => {
       cy.contains(u.displayName)
       cy.get('[data-cy="remove_button_' + u.userId + '"]').click()

@@ -1,5 +1,4 @@
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import Actions from 'src/components/dar_collection_table/Actions'
 import { cloneDeep } from 'lodash/fp'
 import { Navigation } from 'src/libs/utils'
@@ -67,7 +66,7 @@ beforeEach(() => {
 
 describe('Actions - Container', () => {
   it('renders the actions container div', () => {
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get('.chair-actions').should('exist')
   })
 })
@@ -75,13 +74,13 @@ describe('Actions - Container', () => {
 describe('Actions - Open Button', () => {
   it('should render the open button if there is a an Open Action', () => {
     propCopy.actions = ['Open']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-open-${collectionId}`).should('exist')
   })
 
   it('should not render Open Button if there is no valid election for opening/re-opening', () => {
     propCopy.actions = []
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-open-${collectionId}`).should('not.exist')
   })
 })
@@ -89,13 +88,13 @@ describe('Actions - Open Button', () => {
 describe('Actions - Close Button', () => {
   it('should render if there is a valid election for canceling (all open elections)', () => {
     propCopy.actions = ['Cancel', 'Vote']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-cancel-${collectionId}`).should('exist')
   })
 
   it('should not render if there is no valid election for canceling (no open elections)', () => {
     propCopy.actions = []
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-cancel-${collectionId}`).should('not.exist')
   })
 })
@@ -103,12 +102,12 @@ describe('Actions - Close Button', () => {
 describe('Actions - Vote Button', () => {
   it('should not render if relevant elections are not votable', () => {
     propCopy.actions = []
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-vote-${collectionId}`).should('not.exist')
   })
   it('should render if all relevant elections are votable', () => {
     propCopy.actions = ['Vote']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-vote-${collectionId}`).should('exist')
   })
 })
@@ -116,12 +115,12 @@ describe('Actions - Vote Button', () => {
 describe('Actions - Update Button', () => {
   it('should not render if relevant elections are not votable', () => {
     propCopy.actions = []
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-update-${collectionId}`).should('not.exist')
   })
   it('should render if all relevant elections are votable', () => {
     propCopy.actions = ['Update']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-update-${collectionId}`).should('exist')
   })
 })
@@ -130,13 +129,13 @@ describe('Researcher Actions - Revise Button', () => {
   it('renders the revise button if the collection is revisable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Revise', 'Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-revise-${collectionId}`).should('exist')
   })
   it('does not render if the election is not revisable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-revise-${collectionId}`).should('not.exist')
   })
 })
@@ -145,13 +144,13 @@ describe('Researcher Actions - Review Button', () => {
   it('renders the review button if the collection is reviewable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Revise', 'Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-review-${collectionId}`).should('exist')
   })
   it('does not render if the election is not reviewable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Revise']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-review-${collectionId}`).should('not.exist')
   })
 })
@@ -160,13 +159,13 @@ describe('Researcher Actions - Resume Button', () => {
   it('renders the resume button if the collection is resumable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Resume', 'Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-resume-${collectionId}`).should('exist')
   })
   it('does not render if the election is not resumable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-resume-${collectionId}`).should('not.exist')
   })
 })
@@ -175,13 +174,13 @@ describe('Researcher Actions - Delete Button', () => {
   it('renders the delete button if the collection is deletable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Delete', 'Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-delete-${collectionId}`).should('exist')
   })
   it('does not render if the election is not deletable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-delete-${collectionId}`).should('not.exist')
   })
 })
@@ -191,7 +190,7 @@ describe('Researcher Actions - Draft', () => {
     propCopy.consoleType = 'researcher'
     propCopy.collection = draftDarColl
     propCopy.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-delete-${collectionId}`).should('not.exist')
     cy.get(`#researcher-resume-${refId1}`).should('exist')
     cy.get(`#researcher-review-${refId1}`).should('exist')
@@ -206,13 +205,13 @@ describe('Researcher Actions - Update Button', () => {
     cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Resume', 'Create_Progress_Report']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-create-progress-report-${collectionId}`).should('exist')
   })
   it('does not render if the collection is not updatable', () => {
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-create-progress-report-${collectionId}`).should('not.exist')
   })
 })
@@ -222,7 +221,7 @@ describe('Researcher Actions - Review Closeout Button', () => {
     cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review_Progress_Report']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-review-closeout-${collectionId}`).should('exist')
   })
 
@@ -230,7 +229,7 @@ describe('Researcher Actions - Review Closeout Button', () => {
     cy.stub(Storage, 'getEnv').returns('prod')
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review_Progress_Report']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-review-closeout-${collectionId}`).should('exist')
   })
 
@@ -238,7 +237,7 @@ describe('Researcher Actions - Review Closeout Button', () => {
     cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-review-closeout-${collectionId}`).should('not.exist')
   })
 
@@ -246,7 +245,7 @@ describe('Researcher Actions - Review Closeout Button', () => {
     cy.stub(Storage, 'getEnv').returns(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review_Progress_Report']
-    mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#researcher-review-closeout-${collectionId}`).should('contain.text', 'Review Closeout')
   })
 })

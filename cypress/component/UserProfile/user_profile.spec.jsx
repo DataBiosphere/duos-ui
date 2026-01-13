@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { Storage } from '../../../src/libs/storage'
 import { User } from '../../../src/libs/ajax/User'
@@ -21,7 +20,7 @@ describe('User Profile', () => {
     cy.stub(User, 'getMe').returns(duosUser)
     cy.stub(User, 'getApprovedDatasets').returns([])
     cy.stub(User, 'getAcknowledgements').returns({})
-    mount(<BrowserRouter><UserProfile /></BrowserRouter>)
+    cy.mount(<BrowserRouter><UserProfile /></BrowserRouter>)
     cy.get('h2').should('contain', 'Your Profile')
   })
 
@@ -35,7 +34,7 @@ describe('User Profile', () => {
       { method: 'PUT', url: '**/user' },
       { statusCode: 200, body: duosUser },
     ).as('updateSelf')
-    mount(<BrowserRouter><UserProfile /></BrowserRouter>)
+    cy.mount(<BrowserRouter><UserProfile /></BrowserRouter>)
     cy.get('input[id="profileEmailEnabled_yes"]').check()
     cy.wait('@updateSelf').then(() => {
       cy.get('div').contains('Email preference updated successfully!')

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -42,7 +41,7 @@ describe('Study details test', () => {
   beforeEach(() => {
     cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve(datasets))
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={[`/studies/1`]}>
         <Routes>
           <Route path="/studies/:studyId" element={<StudyDetails />} />

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { CloseoutReview } from 'src/pages/progress_reports/CloseoutReview'
 import { Acknowledgement, DataAccessRequest } from 'src/types/model'
 import { User } from 'src/libs/ajax/User'
@@ -17,7 +16,7 @@ describe('CloseoutReview - Component Tests', () => {
       ...props,
     }
 
-    return mount(<CloseoutReview {...defaultProps} />)
+    return cy.mount(<CloseoutReview {...defaultProps} />)
   }
 
   beforeEach(() => {

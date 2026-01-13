@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { mount } from 'cypress/react'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 
 type TestAsyncCacheFetchProps<T> = {
@@ -32,7 +31,7 @@ function TestAsyncCacheFetch<T>({ fetchFn }: Readonly<TestAsyncCacheFetchProps<T
 describe('useAsyncCacheFetch', () => {
   it('fetches and caches data', () => {
     const fetchFn = cy.stub().resolves('fetched-data')
-    mount(<TestAsyncCacheFetch fetchFn={fetchFn} />)
+    cy.mount(<TestAsyncCacheFetch fetchFn={fetchFn} />)
 
     cy.get('button').contains('Fetch').click()
     cy.get('[data-cy=\'result\']').should('have.text', 'fetched-data')
@@ -48,7 +47,7 @@ describe('useAsyncCacheFetch', () => {
 
   it('clears cache and refetches', () => {
     const fetchFn = cy.stub().resolves('fetched-data')
-    mount(<TestAsyncCacheFetch fetchFn={fetchFn} />)
+    cy.mount(<TestAsyncCacheFetch fetchFn={fetchFn} />)
 
     // first fetch
     cy.get('button').contains('Fetch').click()

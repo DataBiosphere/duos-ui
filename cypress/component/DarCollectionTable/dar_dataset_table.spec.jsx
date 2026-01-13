@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable'
 import darCollection from './darCollection'
 import { Match } from 'src/libs/ajax/Match'
@@ -34,7 +33,7 @@ describe('DarDatasetTable - Tests', function () {
       },
       dacId: 8,
     }])
-    mount(
+    cy.mount(
       <DarDatasetTable
         summary={darCollection}
         collection={darCollection}

@@ -1,6 +1,5 @@
 import React from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { mount } from 'cypress/react'
 import RoleBAC from 'src/routing/RoleBAC'
 import { Storage } from 'src/libs/storage'
 import { USER_ROLES } from 'src/libs/utils'
@@ -23,7 +22,7 @@ describe('RoleBAC', () => {
   it('should render the protected component if the user has the required role', () => {
     cy.stub(Storage, 'getCurrentUser').returns(researcherUser)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -40,7 +39,7 @@ describe('RoleBAC', () => {
   it('should redirect to the not found page if the user does not have the required role', () => {
     cy.stub(Storage, 'getCurrentUser').returns(adminUser)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -57,7 +56,7 @@ describe('RoleBAC', () => {
   it('should redirect to the not found page if the user has no roles', () => {
     cy.stub(Storage, 'getCurrentUser').returns(noRolesUser)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -74,7 +73,7 @@ describe('RoleBAC', () => {
   it('should render the protected component if "all" roles are allowed', () => {
     cy.stub(Storage, 'getCurrentUser').returns(noRolesUser)
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.all]} />}>
