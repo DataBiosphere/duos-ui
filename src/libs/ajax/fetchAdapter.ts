@@ -6,6 +6,8 @@ export type Credentials = 'omit' | 'same-origin' | 'include'
 export type ParamValue = string | number | boolean
 export type Params = Record<string, ParamValue>
 export type HeadersMap = Record<string, string>
+type FetchRequestConfig<TBody = unknown> = Omit<FetchRequestOptions<TBody>, 'url' | 'method' | 'data'>
+type FetchMultipartConfig = Omit<FetchMultipartOptions, 'url' | 'method' | 'data' | 'returnError'>
 
 interface MinimalRequestInit {
   method: Method
@@ -195,36 +197,36 @@ async function fetchMultipartRequest<T>(
 
 export const fetchGet = <T>(
   url: string,
-  config: Omit<FetchRequestOptions, 'url' | 'method'> = {},
+  config: FetchRequestConfig = {},
 ) => fetchRequest<T>({ url, ...config, method: 'GET' })
 
 export const fetchPost = <T, TBody = unknown>(
   url: string,
   data?: TBody,
-  config: Omit<FetchRequestOptions, 'url' | 'method' | 'data'> = {},
+  config: FetchRequestConfig<TBody> = {},
 ) => fetchRequest<T>({ url, data, ...config, method: 'POST' })
 
 export const fetchPut = <T, TBody = unknown>(
   url: string,
   data?: TBody,
-  config: Omit<FetchRequestOptions, 'url' | 'method' | 'data'> = {},
+  config: FetchRequestConfig<TBody> = {},
 ) => fetchRequest<T>({ url, data, ...config, method: 'PUT' })
 
 export const fetchPatch = <T, TBody = unknown>(
   url: string,
   data?: TBody,
-  config: Omit<FetchRequestOptions, 'url' | 'method' | 'data'> = {},
+  config: FetchRequestConfig<TBody> = {},
 ) => fetchRequest<T>({ url, data, ...config, method: 'PATCH' })
 
 export const fetchDelete = <T>(
   url: string,
-  config: Omit<FetchRequestOptions, 'url' | 'method'> = {},
+  config: FetchRequestConfig = {},
 ) => fetchRequest<T>({ url, data: (config as FetchRequestOptions).data, ...config, method: 'DELETE' })
 
 export const fetchMultipart = <T>(
   url: string,
   formData: FormData,
-  config: Omit<FetchMultipartOptions, 'url' | 'method' | 'data' | 'returnError'> = {},
+  config: FetchMultipartConfig = {},
   method: Exclude<Method, 'GET' | 'DELETE'> = 'POST',
   returnError: boolean = false,
 ) => fetchMultipartRequest<T>({ url, data: formData, ...config, method, returnError })
