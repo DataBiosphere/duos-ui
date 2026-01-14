@@ -190,14 +190,14 @@ const DataAccessRequestApplication = (props) => {
     })
   }, [])
 
-  const batchFormFieldChange = (updates) => {
+  const batchFormFieldChange = useCallback((updates) => {
     setFormData((formData) => {
       return {
         ...formData,
         ...updates,
       }
     })
-  }
+  }, [])
 
   const updateCollaborationLetter = (letter) => {
     batchFormFieldChange({
@@ -315,7 +315,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData)
     setIsLoading(false)
-  }, [researcher, existingDarsReadOnlyMode])
+  }, [researcher, existingDarsReadOnlyMode, collectionId, dataRequestId, getDarCollection, getPartialDarRequest, batchFormFieldChange])
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {

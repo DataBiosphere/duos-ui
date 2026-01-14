@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useRef, useState } from 'react'
+import React, { ChangeEvent, useCallback, useRef, useState } from 'react'
 import loadingIndicator from '../../images/loading-indicator.svg'
 import { Link } from 'react-router-dom'
 import { ConfirmationDialog } from '../../components/modals/ConfirmationDialog'
@@ -70,7 +70,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
     inputRef.current?.click()
   }
 
-  const toggleSpinnerRef = (visible: boolean) => {
+  const toggleSpinnerRef = useCallback((visible: boolean) => {
     if (spinnerRef?.current) {
       if (visible) {
         spinnerRef.current.style.display = 'inline'
@@ -79,7 +79,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
         spinnerRef.current.style.display = 'none'
       }
     }
-  }
+  }, [])
 
   return (
     <div>
