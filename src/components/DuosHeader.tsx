@@ -64,6 +64,10 @@ const isOnlySigningOfficial = (user: DuosUser): boolean => {
   return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter)
 }
 
+/**
+ * Tab objects in this array support an `isRendered` function per top level Tab as well as
+ * an optional `isRendered` (defaults to `true`) function for each sub-tab in `children`
+ */
 export const headerTabsConfig: Tab[] = [
   {
     label: 'Admin Console',
@@ -76,7 +80,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'Institutions', link: '/admin_manage_institutions' },
       { label: 'Library Cards', link: '/admin_manage_lc' },
     ],
-    isRendered: user => user.isAdmin ?? false,
+    isRendered: user => user.isAdmin,
   },
   {
     label: 'SO Console',
@@ -88,7 +92,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
       { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() },
     ],
-    isRendered: user => user.isSigningOfficial ?? false,
+    isRendered: user => user.isSigningOfficial,
   },
   {
     label: 'DAC Chair Console',
@@ -99,7 +103,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'Manage DACs', link: '/manage_dac' },
       { label: 'My DAC\'s Datasets', link: '/dac_datasets' },
     ],
-    isRendered: user => user.isChairPerson ?? false,
+    isRendered: user => user.isChairPerson,
   },
   {
     label: 'DAC Member Console',
@@ -109,7 +113,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'DAR Requests', link: '/member_console' },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
     ],
-    isRendered: user => user.isMember ?? false,
+    isRendered: user => user.isMember,
   },
   {
     label: 'Researcher Console',
@@ -119,9 +123,9 @@ export const headerTabsConfig: Tab[] = [
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
       { label: 'Datasets', link: '/datasets' },
-      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter ?? false },
+      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter },
     ],
-    isRendered: user => (user.isResearcher ?? false) && !isOnlySigningOfficial(user),
+    isRendered: user => user.isResearcher && !isOnlySigningOfficial(user),
   },
 ]
 
@@ -280,6 +284,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   const tabs = headerTabsConfig.filter(data => data.isRendered(currentUser))
 
+  // returns true if the current page the app is on is a part of this tab
   const isValidTab = (tab: Tab): boolean => {
     if (tab.link === location.pathname || location.pathname.includes(tab.search || '')) {
       return true
@@ -295,6 +300,10 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   let initialSubTab: number = -1
   let initialTab: number
 
+  // note: location.state.selectedMenuTab will be populated if the user navigated
+  // to the current page by clicking on a tab from the nav bar.
+
+  // populate initialTab based on state (if valid) or by manually searching through all tabs.
   if (location?.state?.selectedMenuTab && tabs.length > location.state.selectedMenuTab && isValidTab(tabs[location.state.selectedMenuTab])) {
     initialTab = location.state.selectedMenuTab
   }
@@ -302,14 +311,21 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     initialTab = tabs.findIndex(isValidTab)
   }
 
+  // populate initialSubTab
   if (initialTab !== -1) {
-    if (tabs[initialTab].link === location.pathname) {
-      initialSubTab = 0
+    // Only consider subtabs that should be rendered for the user
+    const renderedSubtabs = tabs[initialTab].children?.filter(
+      subtab => (subtab.isRenderedForUser ?? subtab.isRendered ?? (() => true))(currentUser),
+    ) || []
+    // Find index of matching subtab
+    const subtabIndex = renderedSubtabs.findIndex(
+      subtab => subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search)),
+    )
+    if (subtabIndex !== -1) {
+      initialSubTab = subtabIndex
     }
-    else if (tabs[initialTab].children) {
-      initialSubTab = tabs[initialTab].children!.filter(data => data.isRendered === undefined || data.isRendered(currentUser)).findIndex((subtab: SubTab) => {
-        return subtab.link === location.pathname || location.pathname.includes(subtab.search || '')
-      })
+    else {
+      initialSubTab = -1
     }
   }
 
@@ -317,6 +333,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     <nav className="navbar-duos" role="navigation">
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
         <div className="row no-margin" style={{ width: '100%' }}>
+          {/* Standard navbar for medium-sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
@@ -368,6 +385,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
+              // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
               makeNotifications={() => {}}
               duosLogoImage={duosLogoImage}
               DuosLogo={DuosLogo}
