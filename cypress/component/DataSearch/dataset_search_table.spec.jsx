@@ -125,21 +125,14 @@ describe('Dataset Search Table tests', () => {
     it('Should abort previous request when new search is triggered rapidly', () => {
       let requestCount = 0
 
-      cy.intercept('POST', '**/search/index', (req) => {
+      const interceptHandler = (req) => {
         requestCount++
-        const searchQuery = req.body.query?.bool?.must?.find(
-          clause => clause.multi_match
-        )?.multi_match?.query || 'none'
-
         // Simulate different response times
         const delay = requestCount === 1 ? 300 : 50
+        req.reply({ delay, body: datasets })
+      }
 
-        req.reply({ 
-          delay, 
-          body: datasets 
-        })
-      }).as('searchIndex')
-
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
       cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Trigger first search
@@ -166,11 +159,12 @@ describe('Dataset Search Table tests', () => {
     it('Should handle rapid filter changes gracefully', () => {
       let requestCount = 0
 
-      cy.intercept('POST', '**/search/index', (req) => {
+      const interceptHandler = (req) => {
         requestCount++
         req.reply({ delay: 50, body: datasets })
-      }).as('searchIndex')
+      }
 
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
       cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Rapidly change filters (each change should debounce and potentially abort previous)
@@ -195,16 +189,21 @@ describe('Dataset Search Table tests', () => {
     it('Should not throw errors when requests are aborted', () => {
       // Capture any console errors
       const consoleErrors = []
-      cy.on('window:before:load', (win) => {
-        cy.stub(win.console, 'error').callsFake((...args) => {
-          consoleErrors.push(args)
-        })
-      })
+      
+      const errorCapture = (...args) => {
+        consoleErrors.push(args)
+      }
 
-      cy.intercept('POST', '**/search/index', (req) => {
+      const windowLoadHandler = (win) => {
+        cy.stub(win.console, 'error').callsFake(errorCapture)
+      }
+
+      const interceptHandler = (req) => {
         req.reply({ delay: 200, body: datasets })
-      }).as('searchIndex')
+      }
 
+      cy.on('window:before:load', windowLoadHandler)
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
       cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Trigger multiple searches rapidly
