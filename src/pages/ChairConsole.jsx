@@ -50,9 +50,18 @@ export default function ChairConsole() {
     init()
   }, [])
 
-  const updateCollections = updateCollectionFn({ collections, filterFn, searchRef, setCollections, setFilteredList })
-  const cancelCollection = cancelCollectionFn({ updateCollections, role: USER_ROLES.chairperson })
-  const openCollection = openCollectionFn({ updateCollections, role: USER_ROLES.chairperson })
+  const updateCollections = useCallback(
+    updatedCollection => updateCollectionFn({ collections, filterFn, searchRef, setCollections, setFilteredList })(updatedCollection),
+    [collections, filterFn, setCollections, setFilteredList],
+  )
+  const cancelCollection = useCallback(
+    params => cancelCollectionFn({ updateCollections, role: USER_ROLES.chairperson })(params),
+    [updateCollections],
+  )
+  const openCollection = useCallback(
+    params => openCollectionFn({ updateCollections, role: USER_ROLES.chairperson })(params),
+    [updateCollections],
+  )
   const goToVote = useCallback(collectionId => navigate(`/dar_collection/${collectionId}`), [navigate])
 
   return (
