@@ -33,10 +33,15 @@ interface Tab {
   isRendered: (user: DuosUser) => boolean
 }
 
+interface NotificationData {
+  message: string
+  level: 'info' | 'warning' | 'danger' | 'success'
+}
+
 interface DuosHeaderState {
   showSupportRequestModal: boolean
   hover: boolean
-  notificationData: unknown[]
+  notificationData: NotificationData[]
   openDrawer: boolean
   showProfileLinks: boolean
 }
@@ -202,7 +207,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const makeNotifications = (): React.ReactNode[] => {
-    return state.notificationData.map((d, index) => <Notification notificationData={d} key={index} index={index} />)
+    return state.notificationData.map((d, index) => <Notification notificationData={d} key={d.message} index={index} />)
   }
 
   const toggleDrawer = (boolVal: boolean): void => {
@@ -336,12 +341,22 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
         {makeNotifications()}
         <div className="navbar-main" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <img
-            style={duosLogoImage}
-            src={DuosLogo}
-            alt="DUOS Logo"
+          <button
             onClick={() => goToLink('/home')}
-          />
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+            }}
+            aria-label="Go to home page"
+          >
+            <img
+              style={duosLogoImage}
+              src={DuosLogo}
+              alt="DUOS Logo"
+            />
+          </button>
           <IconButton id="collapsed-navigation-icon-button" size="small" onClick={() => toggleDrawer(true)} aria-label="Open navigation menu">
             <MenuIcon id="navbar-menu-icon" style={{ color: 'white', fontSize: '6rem', flex: 1 }} />
           </IconButton>
