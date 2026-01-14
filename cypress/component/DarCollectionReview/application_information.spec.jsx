@@ -1,45 +1,44 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ApplicationInformation from 'src/pages/dar_collection_review/ApplicationInformation'
 
 describe('Application Information', () => {
   it('renders the page', () => {
     const props = {}
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('.application-information-page').should('exist')
   })
 
   it('renders researcher information', () => {
     const props = { researcher: 'test person' }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get(`#researcher-label`).should('exist').contains('Researcher')
     cy.get(`#researcher-span`).should('exist').contains('test person')
   })
 
   it('renders email information', () => {
     const props = { email: 'test email' }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get(`#researcher-email-label`).should('exist').contains('Researcher Email')
     cy.get(`#researcher-email-span`).should('exist').contains('test email')
   })
 
   it('renders institution information', () => {
     const props = { institution: 'test' }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get(`#institution-label`).should('exist').contains('Institution')
     cy.get(`#institution-span`).should('exist').contains('test')
   })
 
   it('renders the Non Technical Summary', () => {
     const props = { nonTechSummary: 'test' }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('.non-technical-summary-subheader').should('exist')
     cy.get('.non-technical-summary-textbox').should('exist').contains('test')
   })
 
   it('renders the RUS', () => {
     const props = { rus: 'test' }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('.rus-subheader').should('exist')
     cy.get('.rus-textbox').should('exist').contains('test')
   })
@@ -48,27 +47,27 @@ describe('Application Information', () => {
     const props = {
       externalCollaborators: [{ name: 'Person A' }, { name: 'Person B' }],
     }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('.collaborator-details-container').should('exist')
     cy.get('.collaborator-details-subheader').should('exist').contains('Collaborators')
   })
 
   it('does not render collaborator details container and sub-header if none provided', () => {
     const props = {}
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('.collaborator-details-container').should('not.be.visible')
   })
 
   it('renders institution details container and sub-header', () => {
     const props = {}
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('.institution-details-container').should('exist')
     cy.get('.institution-details-subheader').should('exist').contains('Institution')
   })
 
   it('renders cloud use container and sub-header', () => {
     const props = {}
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('.cloud-use-details-container').should('exist')
     cy.get('.cloud-use-details-subheader').should('exist').contains('Cloud Use')
   })
@@ -80,7 +79,7 @@ describe('Application Information', () => {
       cloudComputing: true,
     }
 
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#cloud-computing-label').should('exist').contains('Requesting permission to use cloud computing')
     cy.get('#cloud-computing-span').should('exist').contains('Yes')
     cy.get('#cloud-provider-label').should('exist').contains('Cloud Provider (description below')
@@ -95,7 +94,7 @@ describe('Application Information', () => {
       cloudComputing: false,
     }
 
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#cloud-computing-label').should('exist').contains('Requesting permission to use cloud computing')
     cy.get('#cloud-computing-span').should('exist').contains('No')
     cy.get('#cloud-provider-label').should('not.exist')
@@ -107,7 +106,7 @@ describe('Application Information', () => {
     const props = {
       localComputing: false,
     }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#local-computing-label').should('exist').contains('Requesting permission to use local computing')
     cy.get('#local-computing-span').should('exist').contains('No')
   })
@@ -116,7 +115,7 @@ describe('Application Information', () => {
     const props = {
       externalCollaborators: [{ name: 'Person A' }, { name: 'Person B' }],
     }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#external-collaborators-label').should('exist').contains('External Collaborators')
     cy.get('#external-collaborators-span').should('exist').contains('Person A, Person B')
   })
@@ -125,7 +124,7 @@ describe('Application Information', () => {
     const props = {
       internalCollaborators: [{ name: 'Person C' }, { name: 'Person D' }],
     }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#internal-collaborators-label').should('exist').contains('Internal Collaborators')
     cy.get('#internal-collaborators-span').should('exist').contains('Person C, Person D')
   })
@@ -134,7 +133,7 @@ describe('Application Information', () => {
     const props = {
       internalLabStaff: [{ name: 'Person E' }, { name: 'Person F' }],
     }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#internal-lab-staff-label').should('exist').contains('Internal Lab Staff')
     cy.get('#internal-lab-staff-span').should('exist').contains('Person E, Person F')
   })
@@ -143,7 +142,7 @@ describe('Application Information', () => {
     const props = {
       signingOfficialEmail: 'test@test.com',
     }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#signing-official-label').should('exist').contains('Signing Official')
     cy.get('#signing-official-span').should('exist').contains('test@test.com')
   })
@@ -152,7 +151,7 @@ describe('Application Information', () => {
     const props = {
       itDirectorEmail: 'test@test.com',
     }
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#it-director-label').should('exist').contains('IT Director')
     cy.get('#it-director-span').should('exist').contains('test@test.com')
   })
@@ -162,7 +161,7 @@ describe('Application Information', () => {
       anvilStorage: true,
     }
 
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#anvil-storage-span').should('exist').contains('Yes')
     cy.get('#anvil-storage-label').should('exist').contains('Using AnVIL only for storage and analysis')
   })
@@ -174,7 +173,7 @@ describe('Application Information', () => {
       collaborationLetterName: 'collab-letter.txt',
     }
 
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#collab-letter').should('exist').contains('Download Collaboration Letter')
   })
 
@@ -185,7 +184,7 @@ describe('Application Information', () => {
       collaborationLetterName: 'collab-letter.txt',
     }
 
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#irb-doc').should('not.exist')
     cy.get('#collab-letter').should('exist').contains('Download Collaboration Letter')
   })
@@ -198,7 +197,7 @@ describe('Application Information', () => {
       collaborationLetterName: 'collab-letter.txt',
     }
 
-    mount(<ApplicationInformation {...props} />)
+    cy.mount(<ApplicationInformation {...props} />)
     cy.get('#irb-doc').should('not.exist')
     cy.get('#collab-letter').should('not.exist')
   })

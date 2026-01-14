@@ -10,7 +10,6 @@ export default function SigningOfficialConsole() {
   usePageTitle('Data Submitters')
   const [signingOfficial, setSigningOfficial] = useState({})
   const [researchers, setResearchers] = useState([])
-  const [unregisteredResearchers, setUnregisteredResearchers] = useState()
 
   // states to be added
   const [isLoading, setIsLoading] = useState(true)
@@ -21,12 +20,8 @@ export default function SigningOfficialConsole() {
         setIsLoading(true)
         // Need to assign to state variable on Component init for template reference
         const soUser = await User.getMe()
-        const soPromises = await Promise.all([
-          User.list(USER_ROLES.signingOfficial),
-          User.getUnassignedUsers(),
-        ])
-        setResearchers(soPromises[0])
-        setUnregisteredResearchers(soPromises[1])
+        const soUsers = await User.list(USER_ROLES.signingOfficial)
+        setResearchers(soUsers)
         setSigningOfficial(soUser)
         setIsLoading(false)
       }
@@ -42,7 +37,7 @@ export default function SigningOfficialConsole() {
   return (
     <div style={Styles.PAGE}>
       <div className="signing-official-tabs">
-        <DataCustodianTable researchers={researchers} signingOfficial={signingOfficial} unregisteredResearchers={unregisteredResearchers} isLoading={isLoading} />
+        <DataCustodianTable researchers={researchers} signingOfficial={signingOfficial} isLoading={isLoading} />
       </div>
     </div>
   )

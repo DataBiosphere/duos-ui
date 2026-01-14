@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import DataCustodianTable from 'src/pages/signing_official_console/DataCustodianTable'
 
 const dpaHeaderText = 'BROAD DATA USE OVERSIGHT SYSTEM (DUOS) - DATA PROVIDER AGREEMENT'
@@ -7,7 +6,7 @@ const dpaHeaderText = 'BROAD DATA USE OVERSIGHT SYSTEM (DUOS) - DATA PROVIDER AG
 describe('DataCustodianTable - Tests', function () {
   it('Issue modal displays the DPA Text', function () {
     cy.viewport(600, 300)
-    mount(
+    cy.mount(
       <DataCustodianTable
         isLoading={false}
         signingOfficial={{ institutionId: 1 }}

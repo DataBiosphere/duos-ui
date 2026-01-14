@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import InstitutionTable, { InstitutionTableProps } from 'src/components/institution_table/InstitutionTable'
 import { DuosUser, InstitutionInterface } from 'src/types/model'
 import { BrowserRouter } from 'react-router-dom'
@@ -87,7 +86,7 @@ describe('InstitutionTable', () => {
   })
 
   it('renders', () => {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <InstitutionTable
           filteredList={defaultProps.filteredList}
@@ -103,7 +102,7 @@ describe('InstitutionTable', () => {
 
   it('displays paginated institution rows', () => {
     // Set the page count to 1 so only the first institution is displayed
-    mount(
+    cy.mount(
       <BrowserRouter>
         <InstitutionTable
           filteredList={defaultProps.filteredList}
@@ -120,7 +119,7 @@ describe('InstitutionTable', () => {
   })
 
   it('links to the update institution page', () => {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <InstitutionTable
           filteredList={defaultProps.filteredList}

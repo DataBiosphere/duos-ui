@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import { React } from 'react'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 
@@ -43,19 +42,19 @@ const twoStudiesProps = {
 
 describe('Dataset Search Footer renders correct text and button', () => {
   it('Shows button and single dataset and study text', () => {
-    mount(<DatasetSearchFooter {...oneDatasetProps} />)
+    cy.mount(<DatasetSearchFooter {...oneDatasetProps} />)
     cy.contains('1 dataset selected from 1 study')
     cy.contains('Apply for Access')
   })
 
   it('Shows button and two datasets from one study text', () => {
-    mount(<DatasetSearchFooter {...oneStudyProps} />)
+    cy.mount(<DatasetSearchFooter {...oneStudyProps} />)
     cy.contains('2 datasets selected from 1 study')
     cy.contains('Apply for Access')
   })
 
   it('Shows button and three datasets from two studies text', () => {
-    mount(<DatasetSearchFooter {...twoStudiesProps} />)
+    cy.mount(<DatasetSearchFooter {...twoStudiesProps} />)
     cy.contains('3 datasets selected from 2 studies')
     cy.contains('Apply for Access')
   })

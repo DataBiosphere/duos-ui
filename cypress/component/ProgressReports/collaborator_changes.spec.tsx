@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import CollaboratorChanges from 'src/pages/progress_reports/CollaboratorChanges'
 import { Collaborator } from 'src/types/model'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
@@ -38,7 +37,7 @@ describe('Collaborator Changes - Component Tests', () => {
       countriesOfOperation: countriesOfOperation,
     }
 
-    return mount(<CollaboratorChanges {...props} />)
+    return cy.mount(<CollaboratorChanges {...props} />)
   }
 
   beforeEach(() => {
@@ -91,7 +90,7 @@ describe('Collaborator Changes - Component Tests', () => {
       countriesOfOperation: countriesOfOperation,
     }
 
-    mount(<CollaboratorChanges {...props} />)
+    cy.mount(<CollaboratorChanges {...props} />)
 
     cy.contains('Test User 1').should('be.visible')
     cy.contains('Test User 2').should('be.visible')

@@ -1,7 +1,6 @@
 import React from 'react'
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
 import { User } from 'src/libs/ajax/User'
-import { mount } from 'cypress/react'
 
 describe('ControlledAccessGrants', () => {
   beforeEach(() => {
@@ -11,7 +10,7 @@ describe('ControlledAccessGrants', () => {
   it('should render the component with correct header and description', () => {
     cy.stub(User, 'getApprovedDatasets').returns(Promise.resolve([]))
 
-    mount(<ControlledAccessGrants />)
+    cy.mount(<ControlledAccessGrants />)
 
     cy.get('[data-cy="table-header-title"]').should('exist')
     cy.get('[data-cy="table-header-title"]').should('contain', 'Controlled Access Grants')
@@ -48,7 +47,7 @@ describe('ControlledAccessGrants', () => {
 
     cy.stub(User, 'getApprovedDatasets').returns(Promise.resolve(mockDatasets))
 
-    mount(<ControlledAccessGrants />)
+    cy.mount(<ControlledAccessGrants />)
 
     cy.contains('DAR-001').should('be.visible')
     cy.contains('DS-123').should('be.visible')

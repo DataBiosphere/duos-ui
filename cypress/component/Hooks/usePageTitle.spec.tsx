@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 
 // Test component that uses the hook
@@ -18,17 +17,17 @@ describe('usePageTitle Hook', () => {
   })
 
   it('sets the document title with default DUOS suffix', () => {
-    mount(<TestComponent title="Test Page" />)
+    cy.mount(<TestComponent title="Test Page" />)
     cy.title().should('equal', 'Test Page | DUOS')
   })
 
   it('sets the document title with custom suffix', () => {
-    mount(<TestComponent title="Test Page" suffix="Custom" />)
+    cy.mount(<TestComponent title="Test Page" suffix="Custom" />)
     cy.title().should('equal', 'Test Page | Custom')
   })
 
   it('sets only suffix when pageTitle is empty', () => {
-    mount(<TestComponent title="" />)
+    cy.mount(<TestComponent title="" />)
     cy.title().should('equal', 'DUOS')
   })
 
@@ -44,7 +43,7 @@ describe('usePageTitle Hook', () => {
       )
     }
 
-    mount(<TestWrapper />)
+    cy.mount(<TestWrapper />)
     cy.title().should('equal', 'First Page | DUOS')
 
     cy.contains('Change Title').click()

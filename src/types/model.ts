@@ -34,6 +34,7 @@ export interface UserRole {
   name: UserRoleName
   userId: number
   userRoleId: number
+  dacId?: number
 }
 
 export interface UserStatusInfo {
@@ -57,6 +58,7 @@ export interface DuosUser {
   emailPreference: boolean
   eraCommonsId?: string
   institutionId?: number
+  institution?: InstitutionInterface
   isAdmin: boolean
   isAlumni: boolean
   isChairPerson: boolean

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import CollaboratorDelete from '../../../src/components/collaborator_list/CollaboratorDelete'
 
 describe('CollaboratorDelete - Component Tests', () => {
@@ -11,7 +10,7 @@ describe('CollaboratorDelete - Component Tests', () => {
   }
 
   it('renders the component correctly when showDelete is true', () => {
-    mount(<CollaboratorDelete {...defaultProps} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} />)
 
     cy.get('.delete-modal').should('exist')
     cy.get('.delete-modal-header').should('contain', 'Delete Collaborator')
@@ -21,14 +20,14 @@ describe('CollaboratorDelete - Component Tests', () => {
   })
 
   it('does not render when showDelete is false', () => {
-    mount(<CollaboratorDelete {...defaultProps} showDelete={false} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} showDelete={false} />)
 
     cy.get('.delete-modal').should('not.exist')
   })
 
   it('calls confirmAction when Delete button is clicked', () => {
     const confirmAction = cy.stub().as('confirmAction')
-    mount(<CollaboratorDelete {...defaultProps} confirmAction={confirmAction} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} confirmAction={confirmAction} />)
 
     cy.get('.delete-modal-primary-button').contains('Delete').click()
     cy.get('@confirmAction').should('have.been.calledOnce')
@@ -36,7 +35,7 @@ describe('CollaboratorDelete - Component Tests', () => {
 
   it('calls closeAction when Cancel button is clicked', () => {
     const closeAction = cy.stub().as('closeAction')
-    mount(<CollaboratorDelete {...defaultProps} closeAction={closeAction} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} closeAction={closeAction} />)
 
     cy.get('.delete-modal-secondary-button').contains('Cancel').click()
     cy.get('@closeAction').should('have.been.calledOnce')
@@ -44,7 +43,7 @@ describe('CollaboratorDelete - Component Tests', () => {
 
   it('calls closeAction when modal overlay is clicked', () => {
     const closeAction = cy.stub().as('closeAction')
-    mount(<CollaboratorDelete {...defaultProps} closeAction={closeAction} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} closeAction={closeAction} />)
 
     cy.get('.ReactModal__Overlay').click({ force: true })
 
@@ -53,7 +52,7 @@ describe('CollaboratorDelete - Component Tests', () => {
 
   it('calls closeAction when ESC key is pressed', () => {
     const closeAction = cy.stub().as('closeAction')
-    mount(<CollaboratorDelete {...defaultProps} closeAction={closeAction} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} closeAction={closeAction} />)
 
     // Press ESC key to close modal
     cy.get('body').type('{esc}')
@@ -63,13 +62,13 @@ describe('CollaboratorDelete - Component Tests', () => {
 
   it('displays different collaborator names correctly', () => {
     const testName = 'Jane Smith'
-    mount(<CollaboratorDelete {...defaultProps} collaboratorName={testName} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} collaboratorName={testName} />)
 
     cy.get('.delete-modal-title strong').should('contain', testName)
   })
 
   it('has the correct styling on buttons', () => {
-    mount(<CollaboratorDelete {...defaultProps} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} />)
 
     // Primary Delete button should be styled as contained
     cy.get('.delete-modal-primary-button')
@@ -84,7 +83,7 @@ describe('CollaboratorDelete - Component Tests', () => {
   })
 
   it('displays permanent action warning message', () => {
-    mount(<CollaboratorDelete {...defaultProps} />)
+    cy.mount(<CollaboratorDelete {...defaultProps} />)
 
     cy.get('.delete-modal-message')
       .should('contain', 'This action is permanent and cannot be undone')

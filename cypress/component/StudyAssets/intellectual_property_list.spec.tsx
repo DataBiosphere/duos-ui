@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { IntellectualProperty } from 'src/types/model'
 import IntellectualPropertyAddEdit from 'src/components/intellectual_property_list/IntellectualPropertyAddEdit'
 import IntellectualPropertySummary from 'src/components/intellectual_property_list/IntellectualPropertySummary'
@@ -43,11 +42,11 @@ const IntellectualPropertyListHarness: React.FC<{ initial: IntellectualProperty[
 
 // Helper functions
 function mountListWithItem() {
-  return mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
+  return cy.mount(<IntellectualPropertyListHarness initial={[sampleIp]} />)
 }
 
 function mountRow(overrides: Partial<React.ComponentProps<typeof IntellectualPropertyRow>> = {}) {
-  return mount(
+  return cy.mount(
     <IntellectualPropertyRow
       id={0}
       editMode={false}
@@ -82,7 +81,7 @@ function assertNotSaved() {
 describe('IntellectualPropertyAddEdit', () => {
   it('prevents save until required fields are valid, then saves', () => {
     const collected: IntellectualProperty[] = []
-    mount(
+    cy.mount(
       <IntellectualPropertyAddEdit
         id={-1}
         intellectualProperty={undefined}
@@ -115,7 +114,7 @@ describe('IntellectualPropertyAddEdit', () => {
   invalidInputTests.forEach(({ field, value, label }) => {
     it(`does not save when ${label} format is invalid`, () => {
       const onIntellectualPropertyChange = cy.stub().as('onIntellectualPropertyChange')
-      mount(
+      cy.mount(
         <IntellectualPropertyAddEdit
           id={-1}
           intellectualProperty={undefined}
@@ -136,7 +135,7 @@ describe('IntellectualPropertyAddEdit', () => {
 
 describe('IntellectualPropertySummary', () => {
   it('renders columns including arrays and url', () => {
-    mount(
+    cy.mount(
       <IntellectualPropertySummary
         intellectualProperty={sampleIp}
         columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
@@ -154,7 +153,7 @@ describe('IntellectualPropertySummary', () => {
 
   it('renders view button and triggers viewAction', () => {
     testSummaryViewActionTrigger(() =>
-      mount(
+      cy.mount(
         <IntellectualPropertySummary
           intellectualProperty={sampleIp}
           columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
@@ -200,7 +199,7 @@ describe('IntellectualPropertyRow', () => {
 describe('IntellectualPropertyList', () => {
   it('adds a new intellectual property', () => {
     const state: IntellectualProperty[] = []
-    mount(
+    cy.mount(
       <IntellectualPropertyList
         intellectualProperties={state}
         columnsToShow={['title', 'type']}

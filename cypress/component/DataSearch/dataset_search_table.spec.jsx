@@ -1,6 +1,5 @@
 import { makeDatasetTerm } from '../test-utils'
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import DatasetSearchTable from 'src/components/data_search/DatasetSearchTable'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { BrowserRouter } from 'react-router-dom'
@@ -62,7 +61,7 @@ describe('Dataset Search Table tests', () => {
       cy.initApplicationConfig()
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
       cy.clock()
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
     })
 
     it('When no datasets are selected the footer does not appear', () => {
@@ -96,7 +95,7 @@ describe('Dataset Search Table tests', () => {
         { method: 'POST', url: '**/search/index' }, (req) => {
           return handler(req, '{"range":{"participantCount":{"gte":30,"lte":50}}}')
         }).as('searchIndex')
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
       // first clear the default value (50), without clearing first, type('3') would result in input of 503
       cy.get('#participantCountMin-range-input').clear()
       cy.get('#participantCountMin-range-input').type('3')

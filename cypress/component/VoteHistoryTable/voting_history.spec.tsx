@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import VotingHistory from 'src/pages/dar_collection_review/VotingHistory'
 import { DarCollection } from 'src/types/model'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
@@ -448,13 +447,13 @@ const dacIds: number[] = [1]
 
 describe('VotingHistory Component', () => {
   it('Renders VotingHistory component with correct headers', () => {
-    mount(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+    cy.mount(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
     cy.get(':nth-child(1) > div').contains('Votes')
     cy.get(':nth-child(2) > div').contains('Chair Votes')
     cy.get(':nth-child(3) > div').contains('Member Votes')
   })
   it('Renders VotingHistory component with correct elections and votes', () => {
-    mount(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+    cy.mount(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
     // elections should be filtered by DAC IDs
     // election with datasetId 14 should not be present (created 2023-01-03)
     // election with datasetId 13 should be present (created 2022-11-21)

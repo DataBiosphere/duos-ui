@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import CollaboratorAddEdit from 'src/components/collaborator_list/CollaboratorAddEdit'
 import { Collaborator } from 'src/types/model'
 import { Countries } from 'src/libs/ajax/Countries'
@@ -37,7 +36,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
   }
 
   it('renders the component correctly for adding a new collaborator', () => {
-    mount(<CollaboratorAddEdit {...defaultProps} />)
+    cy.mount(<CollaboratorAddEdit {...defaultProps} />)
 
     cy.contains('New Collaborator Information').should('be.visible')
     cy.contains('Collaborator Name').should('be.visible')
@@ -48,7 +47,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
   })
 
   it('renders the component correctly for editing an existing collaborator', () => {
-    mount(
+    cy.mount(
       <CollaboratorAddEdit
         {...defaultProps}
         id={0}
@@ -65,7 +64,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
   it('calls closeAction when Cancel button is clicked', () => {
     const closeAction = cy.stub().as('closeAction')
-    mount(<CollaboratorAddEdit {...defaultProps} closeAction={closeAction} />)
+    cy.mount(<CollaboratorAddEdit {...defaultProps} closeAction={closeAction} />)
 
     cy.contains('Cancel').click()
     cy.get('@closeAction').should('have.been.calledOnce')
@@ -73,7 +72,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
   it('calls onCollaboratorChange when Save button is clicked for existing collaborator', () => {
     const onCollaboratorChange = cy.stub().as('onCollaboratorChange')
-    mount(
+    cy.mount(
       <CollaboratorAddEdit
         {...defaultProps}
         id={0}
@@ -100,7 +99,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
     const closeAction = cy.stub().as('closeAction')
     const onCollaboratorChange = cy.stub().as('onCollaboratorChange')
 
-    mount(
+    cy.mount(
       <CollaboratorAddEdit
         {...defaultProps}
         closeAction={closeAction}
@@ -120,7 +119,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
   })
 
   it('updates form fields when typing', () => {
-    mount(<CollaboratorAddEdit {...defaultProps} />)
+    cy.mount(<CollaboratorAddEdit {...defaultProps} />)
 
     const name = 'Test Name'
     cy.get('#name').type(name)
@@ -136,7 +135,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
   })
 
   it('shows validation error for empty required fields', () => {
-    mount(<CollaboratorAddEdit {...defaultProps} />)
+    cy.mount(<CollaboratorAddEdit {...defaultProps} />)
 
     cy.get('#name').focus()
     cy.get('#name').blur()
@@ -153,7 +152,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
   })
 
   it('shows validation error for invalid email format', () => {
-    mount(<CollaboratorAddEdit {...defaultProps} />)
+    cy.mount(<CollaboratorAddEdit {...defaultProps} />)
 
     cy.get('#email').type('invalid')
     cy.get('#email').blur()
@@ -163,7 +162,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
   it('shows the approver status radio button, emits true for yes', () => {
     approverProps.onCollaboratorChange = cy.spy().as('onChangeSpy')
-    mount(<CollaboratorAddEdit {...approverProps} />)
+    cy.mount(<CollaboratorAddEdit {...approverProps} />)
 
     cy.get('#-1_collaboratorApproval').should('be.visible')
 
@@ -194,7 +193,7 @@ describe('CollaboratorAddEdit - Component Tests', () => {
 
   it('shows the approver status radio button, emits false for no', () => {
     approverProps.onCollaboratorChange = cy.spy().as('onChangeSpy')
-    mount(<CollaboratorAddEdit {...approverProps} />)
+    cy.mount(<CollaboratorAddEdit {...approverProps} />)
 
     cy.get('#-1_collaboratorApproval').should('be.visible')
 

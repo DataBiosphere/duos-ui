@@ -2,7 +2,6 @@ import { difference, filter, isEmpty, map, union } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
 import { DAC } from 'src/libs/ajax/DAC'
-import { Models } from 'src/libs/models'
 import { Notifications, PromiseSerial } from 'src/libs/utils'
 import { Alert } from 'src/components/Alert'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -25,9 +24,9 @@ export default function ManageEditDac() {
   const dacId = params.dacId
   const navigate = useNavigate()
   const [state, setState] = useState({
-    error: Models.error,
+    error: {},
     dirtyFlag: false,
-    dac: Models.dac,
+    dac: {},
     chairsSelectedOptions: [],
     chairIdsToAdd: [],
     chairIdsToRemove: [],
@@ -346,7 +345,7 @@ export default function ManageEditDac() {
                   </div>
                 </div>
                 {
-                  (state.dac.chairpersons.length > 0 || state.dac.members.length > 0)
+                  (state.dac.chairpersons?.length > 0 || state.dac.members?.length > 0)
                   && (
                     <div style={{ display: 'flex', marginBottom: '15px' }}>
                       <label

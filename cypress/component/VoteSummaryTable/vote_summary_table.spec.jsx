@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable'
 
 const dacVotes = [
@@ -12,7 +11,7 @@ const dacVotes = [
 
 describe('VoteSummaryTable - Tests', function () {
   it('Renders four columns of data', function () {
-    mount(
+    cy.mount(
       <VoteSummaryTable
         dacVotes={dacVotes}
         isLoading={false}
@@ -22,7 +21,7 @@ describe('VoteSummaryTable - Tests', function () {
   })
 
   it('Renders member decision in the vote column', function () {
-    mount(
+    cy.mount(
       <VoteSummaryTable
         dacVotes={dacVotes}
         isLoading={false}
@@ -34,7 +33,7 @@ describe('VoteSummaryTable - Tests', function () {
   // this test works locally but fails on Github
   /*
   it('Formats date of vote to YYYY-MM-DD in date column', function() {
-    mount(
+    cy.mount(
       <VoteSummaryTable
         dacVotes={dacVotes}
         isLoading={false}
@@ -45,7 +44,7 @@ describe('VoteSummaryTable - Tests', function () {
   */
 
   it('Renders filler content for missing rationale', function () {
-    mount(
+    cy.mount(
       <VoteSummaryTable
         dacVotes={dacVotes}
         isLoading={false}
@@ -55,7 +54,7 @@ describe('VoteSummaryTable - Tests', function () {
   })
 
   it('Renders skeleton table if isLoading is true', function () {
-    mount(
+    cy.mount(
       <VoteSummaryTable
         isLoading={true}
       />,

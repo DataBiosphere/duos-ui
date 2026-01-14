@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { cloneDeep } from 'lodash/fp'
 import { User } from 'src/libs/ajax/User'
 import DataSubmissionStudyInformation from 'src/pages/data_submission/ds_study_information'
@@ -24,7 +23,7 @@ beforeEach(() => {
 
 describe('DataSubmissionStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
-    mount(<DataSubmissionStudyInformation {...propCopy} />)
+    cy.mount(<DataSubmissionStudyInformation {...propCopy} />)
     cy.get('.formField-container').should('have.length', 13)
 
     cy.get('.formField-studyName').should('have.length', 1)
@@ -43,7 +42,7 @@ describe('DataSubmissionStudyInformation - Tests', () => {
   })
 
   it('should load the user information, display it, but not let the user modify it', () => {
-    mount(<DataSubmissionStudyInformation {...propCopy} />)
+    cy.mount(<DataSubmissionStudyInformation {...propCopy} />)
     cy.get('#dataSubmitterName').should('be.disabled')
     cy.get('#dataSubmitterName').should('have.value', user.displayName)
     cy.get('#dataSubmitterEmail').should('be.disabled')

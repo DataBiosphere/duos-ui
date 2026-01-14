@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Styles, Theme } from 'src/libs/theme'
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
+import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
 import SimpleTable from 'src/components/SimpleTable'
 import SimpleButton from 'src/components/SimpleButton'
 import PaginationBar from 'src/components/PaginationBar'
@@ -15,11 +15,11 @@ import {
 } from 'src/libs/utils'
 import { User } from 'src/libs/ajax/User'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
-import DataCustodianFormModal from 'src/components/modals/DataCustodianFormModal'
 import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContainer'
 import DpaMarkdown from 'src/assets/DPA.md'
 import { confirmModalType } from 'src/libs/libraryCardUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import PropTypes from 'prop-types'
 
 // Styles specific to this table
 const styles = {
@@ -178,13 +178,12 @@ export default function DataCustodianTable(props) {
   const [filteredResearchers, setFilteredResearchers] = useState([])
   const [visibleResearchers, setVisibleResearchers] = useState([])
   const [selectedResearcher, setSelectedResearcher] = useState({})
-  const [showModal, setShowModal] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const searchRef = useRef('')
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('')
   const [confirmationTitle, setConfirmationTitle] = useState('')
   const [confirmType, setConfirmType] = useState(confirmModalType.delete)
-  const { signingOfficial, unregisteredResearchers, isLoading } = props
+  const { signingOfficial, isLoading } = props
 
   const handleSearchChange = tableSearchHandler(
     researchers,
@@ -300,9 +299,7 @@ export default function DataCustodianTable(props) {
         researcher => userId === researcher.userId,
       )(listCopy)
       if (targetIndex === -1) {
-        const targetResearcher = find(
-          researcher => userId === researcher.userId,
-        )(props.unregisteredResearchers) || selectedResearcher
+        const targetResearcher = selectedResearcher
         listCopy.unshift(targetResearcher)
         messageName = targetResearcher.email
       }
@@ -313,7 +310,6 @@ export default function DataCustodianTable(props) {
 
       setResearchers(listCopy)
       setShowConfirmation(false)
-      setShowModal(false)
       Notifications.showSuccess({
         text: `Issued ${messageName} as Data Submitter`,
       })
@@ -388,14 +384,6 @@ export default function DataCustodianTable(props) {
         tableSize={tableSize}
         paginationBar={paginationBar}
       />
-      <DataCustodianFormModal
-        showModal={showModal}
-        createOnClick={researcher => issueCustodian(researcher, researchers)}
-        closeModal={() => setShowModal(false)}
-        researcher={selectedResearcher}
-        users={unregisteredResearchers}
-        dpaContent={dpaContent}
-      />
       <ConfirmationModal
         showConfirmation={showConfirmation}
         closeConfirmation={() => setShowConfirmation(false)}
@@ -431,4 +419,33 @@ export default function DataCustodianTable(props) {
       />
     </div>
   )
+}
+
+DataCustodianTable.propTypes = {
+  signingOfficial: PropTypes.shape({
+    institutionId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }).isRequired,
+  isLoading: PropTypes.bool,
+  researchers: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      displayName: PropTypes.string,
+      email: PropTypes.string,
+      roles: PropTypes.arrayOf(
+        PropTypes.shape({
+          name: PropTypes.string,
+        }),
+      ),
+      institution: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+    }),
+  ),
+}
+
+// Default props
+DataCustodianTable.defaultProps = {
+  isLoading: false,
+  researchers: [],
 }

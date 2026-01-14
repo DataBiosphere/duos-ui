@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import MultiDatasetVoteSlab from 'src/components/collection_voting_slab/MultiDatasetVoteSlab'
 import { Storage } from 'src/libs/storage'
 import { Votes } from 'src/libs/ajax/Votes'
@@ -241,7 +240,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
       roles: [{ dacId: 4 }],
       isChairPerson: true,
     })
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -268,7 +267,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders a selected vote button when all current user votes match (Member)', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -292,7 +291,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Replaces vote buttons with vote result text when all current user votes match (Chair)', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -314,7 +313,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders vote button unselected when not all current user votes match (Member)', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -338,7 +337,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders vote button unselected when not all current user votes match (Chair)', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -364,7 +363,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders NOT SELECTED vote result text if no votes for current user in bucket', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -386,7 +385,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders vote button if any election is open', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -410,7 +409,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Replaces vote buttons with vote result text when readOnly is true', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -433,7 +432,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Does not render pie chart or vote summary table when current user is not chairperson', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -451,7 +450,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Does not render pie chart or table when current user is chairperson but no votes for dac in this bucket', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -469,7 +468,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders a pie chart with votes for dac of user when current user is chairperson', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -489,7 +488,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   it('Does not render rows of vote summary table for votes outside of dac for current user', function () {
     // workaround so that notifications don't overlap the clicked buttons and cause an error
     cy.viewport(1024, 768)
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -515,7 +514,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   it('Renders collapsed row of vote summary table when the same user has same vote for multiple elections', function () {
     // workaround so that notifications don't overlap the clicked buttons and cause an error
     cy.viewport(1024, 768)
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -537,7 +536,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
 
   it('Renders collapsed row with appended rationales when the same user has same vote but different rationales for multiple elections', function () {
     cy.viewport(1024, 768)
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -558,7 +557,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Does not append rationale values when properties are undefined', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -579,7 +578,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders separate row with when the same user has different vote for multiple elections', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -601,7 +600,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders filler text when some fields of vote are empty', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -623,7 +622,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
   })
 
   it('Renders send reminder button when user is chair and no vote', function () {
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -648,7 +647,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
     // The first dar in the list is the original parent DAR, which does not have a DMI.
     const newDar = Object.values(collection.dars).shift()
     const collectionWithoutDMI = { ...collection, dars: { [newDar.referenceId]: newDar } }
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{
@@ -672,7 +671,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
 
   it('Does not render the algorithm decision when the latest dar has a DMI', function () {
     // The first dar in the list is the original parent DAR, which does not have a DMI.
-    mount(
+    cy.mount(
       <MultiDatasetVoteSlab
         title="GROUP 1"
         bucket={{

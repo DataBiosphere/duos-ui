@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { BrowserRouter } from 'react-router-dom'
 import { actionsCellData } from 'src/components/manage_dac_table/ManageDacTableCellData'
 import { Storage } from 'src/libs/storage'
@@ -34,7 +33,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
 
       const cellData = actionsCellData(mockProps)
 
-      mount(
+      cy.mount(
         <WrappedActionCell>
           {cellData.data}
         </WrappedActionCell>,
@@ -57,7 +56,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
 
       const cellData = actionsCellData(mockProps)
 
-      mount(
+      cy.mount(
         <WrappedActionCell>
           {cellData.data}
         </WrappedActionCell>,
@@ -80,7 +79,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
 
       const cellData = actionsCellData(mockProps)
 
-      mount(
+      cy.mount(
         <WrappedActionCell>
           {cellData.data}
         </WrappedActionCell>,
@@ -103,7 +102,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
 
       const cellData = actionsCellData(mockProps)
 
-      mount(
+      cy.mount(
         <WrappedActionCell>
           {cellData.data}
         </WrappedActionCell>,
@@ -126,7 +125,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
 
       const cellData = actionsCellData(mockProps)
 
-      mount(
+      cy.mount(
         <WrappedActionCell>
           {cellData.data}
         </WrappedActionCell>,
@@ -150,7 +149,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
 
       const cellData = actionsCellData(mockProps)
 
-      mount(
+      cy.mount(
         <WrappedActionCell>
           {cellData.data}
         </WrappedActionCell>,
@@ -171,7 +170,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
 
     const cellData = actionsCellData(mockProps)
 
-    mount(
+    cy.mount(
       <WrappedActionCell>
         {cellData.data}
       </WrappedActionCell>,

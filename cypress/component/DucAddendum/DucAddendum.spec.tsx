@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
 import { makeDatasetTerm } from '../test-utils'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -56,7 +55,7 @@ describe('DucAddendum', () => {
       doSubmit: cy.stub(),
     }
 
-    mount(<DucAddendum {...props} />)
+    cy.mount(<DucAddendum {...props} />)
 
     // Check the informational header
     cy.contains('Addendum').should('be.visible')
@@ -101,7 +100,7 @@ describe('DucAddendum', () => {
       doSubmit: cy.stub(),
     }
 
-    mount(<DucAddendum {...props} />)
+    cy.mount(<DucAddendum {...props} />)
 
     cy.wrap(showErrorStub).should('have.been.calledWith', { text: 'Error loading Dataset Term information for datasets: DAC information could not be found' })
   })
@@ -121,7 +120,7 @@ describe('DucAddendum', () => {
       doSubmit: cy.stub(),
     }
 
-    mount(<DucAddendum {...props} />)
+    cy.mount(<DucAddendum {...props} />)
 
     cy.contains('DUOS-1001')
       .next().should('have.text', 'Test Dataset 1')

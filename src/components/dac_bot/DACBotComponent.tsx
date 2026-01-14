@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { DAC } from '../../libs/ajax/DAC'
-import { Notifications } from '../../libs/utils'
+import { DAC } from 'src/libs/ajax/DAC'
+import { Notifications } from 'src/libs/utils'
 import { DACBotCheckboxComponent } from './DACBotCheckboxComponent'
-import { Storage } from '../../libs/storage'
+import { Storage } from 'src/libs/storage'
+import { UserRole } from 'src/types/model'
 
 export type DACBotComponentProps = {
   'dacId': number
@@ -13,7 +14,7 @@ enum RuleState {
   AVAILABLE = 'AVAILABLE',
   DEPRECATED = 'DEPRECATED',
   UNAVAILABLE = 'UNAVAILABLE',
-};
+}
 
 export type DACbotRule = {
   id: number
@@ -35,9 +36,8 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
   const { dacId, 'data-cy': dataCy } = props
   const [DACbotRules, setDACbotRules] = useState<Array<DACbotRule>>([])
   const [isLoading, setIsLoading] = useState(true)
-  const userIsChair = Storage.getCurrentUser().roles.filter((r: { dacId: number, name: string }) => {
-    return r.dacId == dacId && r.name == 'Chairperson'
-  }).length > 0
+  const userIsChair = Storage.getCurrentUser().roles.some((r: UserRole) => r.dacId == dacId && r.name == 'Chairperson')
+
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true)

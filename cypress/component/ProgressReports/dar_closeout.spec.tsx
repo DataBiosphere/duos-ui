@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import DarCloseout from 'src/pages/progress_reports/DarCloseout'
 import { User } from 'src/libs/ajax/User'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
@@ -47,7 +46,7 @@ describe('DAR Closeout - Component Tests', () => {
       ...customProps,
     }
 
-    return mount(<DarCloseout {...props} />)
+    return cy.mount(<DarCloseout {...props} />)
   }
 
   beforeEach(() => {

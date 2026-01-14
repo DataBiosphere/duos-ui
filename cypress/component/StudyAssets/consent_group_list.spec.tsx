@@ -1,6 +1,5 @@
 import React from 'react'
 import ConsentGroupAddEdit from 'src/components/consent_group_list/ConsentGroupAddEdit'
-import { mount } from 'cypress/react'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
 import ConsentGroupSummary from 'src/components/consent_group_list/ConsentGroupSummary'
@@ -40,11 +39,11 @@ const ConsentGroupListHarness: React.FC<{ initial: ConsentGroup2[] }> = ({ initi
 
 // Helper functions
 function mountListWithItem() {
-  return mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
+  return cy.mount(<ConsentGroupListHarness initial={[sampleConsentGroup]} />)
 }
 
 function mountRow(overrides: Partial<React.ComponentProps<typeof ConsentGroupRow>> = {}) {
-  return mount(
+  return cy.mount(
     <ConsentGroupRow
       id={0}
       editMode={false}
@@ -62,7 +61,7 @@ function mountRow(overrides: Partial<React.ComponentProps<typeof ConsentGroupRow
 }
 
 function mountSummary(overrides: Partial<React.ComponentProps<typeof ConsentGroupSummary>> = {}) {
-  return mount(
+  return cy.mount(
     <ConsentGroupSummary
       consentGroup={sampleConsentGroup}
       columnsToShow={['consentGroupName']}
@@ -85,7 +84,7 @@ function fillConsentGroupForm(overrides: Partial<ConsentGroup2> = {}) {
 }
 
 function mountAddEdit(overrides: Partial<React.ComponentProps<typeof ConsentGroupAddEdit>> = {}) {
-  return mount(
+  return cy.mount(
     <ConsentGroupAddEdit
       id={0}
       consentGroups={[]}
@@ -152,7 +151,7 @@ describe('ConsentGroupList component', () => {
 
   it('adds a new consent group', () => {
     const collected: ConsentGroup2[] = []
-    mount(
+    cy.mount(
       <ConsentGroupList
         consentGroups={[]}
         columnsToShow={['consentGroupName']}

@@ -1,21 +1,20 @@
 import { difference, filter, isEmpty, map, union } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
-import { DAC } from '../../libs/ajax/DAC'
-import { DAA } from '../../libs/ajax/DAA'
-import { Models } from '../../libs/models'
-import { Notifications, PromiseSerial } from '../../libs/utils'
-import { Alert } from '../../components/Alert'
+import { DAC } from 'src/libs/ajax/DAC'
+import { DAA } from 'src/libs/ajax/DAA'
+import { Notifications, PromiseSerial } from 'src/libs/utils'
+import { Alert } from 'src/components/Alert'
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
-import editDACIcon from '../../images/dac_icon.svg'
-import backArrowIcon from '../../images/back_arrow.svg'
-import { Spinner } from '../../components/Spinner'
-import { Styles } from '../../libs/theme'
-import DUOSUniformDataAccessAgreement from '../../assets/DUOS_Uniform_Data_Access_Agreement.pdf'
+import editDACIcon from 'src/images/dac_icon.svg'
+import backArrowIcon from 'src/images/back_arrow.svg'
+import { Spinner } from 'src/components/Spinner'
+import { Styles } from 'src/libs/theme'
+import DUOSUniformDataAccessAgreement from 'src/assets/DUOS_Uniform_Data_Access_Agreement.pdf'
 import PublishIcon from '@mui/icons-material/Publish'
-import { UploadDaaModal } from '../../components/modals/UploadDaaModal'
-import { Storage } from '../../libs/storage'
+import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
+import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export const CHAIR = 'chair'
@@ -27,9 +26,9 @@ export default function EditDac() {
   const navigate = useNavigate()
   const location = useLocation()
   const [state, setState] = useState({
-    error: Models.error,
+    error: {},
     dirtyFlag: false,
-    dac: Models.dac,
+    dac: {},
     chairsSelectedOptions: [],
     chairIdsToAdd: [],
     chairIdsToRemove: [],
@@ -452,7 +451,7 @@ export default function EditDac() {
                       </div>
                     </div>
                     {
-                      (state.dac.chairpersons.length > 0 || state.dac.members.length > 0)
+                      (state.dac.chairpersons?.length > 0 || state.dac.members?.length > 0)
                       && (
                         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
                           <label id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>

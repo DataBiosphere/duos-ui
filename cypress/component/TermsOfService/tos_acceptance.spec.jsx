@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { Auth } from 'src/libs/auth/auth'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
 import { Navigation } from 'src/libs/utils'
@@ -27,7 +26,7 @@ describe('Terms of Service Acceptance Page', function () {
     cy.stub(Storage, 'getCurrentUser').returns({})
     cy.stub(Navigation, 'console').returns(true)
     cy.stub(Auth, 'signOut').as('signOut')
-    mount(<BrowserRouter><TermsOfServiceAcceptance /></BrowserRouter>)
+    cy.mount(<BrowserRouter><TermsOfServiceAcceptance /></BrowserRouter>)
     // Test that the reject button clicks and calls sign-out
     cy.contains('reject', { matchCase: false }).should('exist')
     cy.get('[id=tos-reject]').should('exist')

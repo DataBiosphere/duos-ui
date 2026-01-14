@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import CollaboratorSummary from 'src/components/collaborator_list/CollaboratorSummary'
 import { Collaborator } from 'src/types/model'
 
@@ -32,7 +31,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   }
 
   it('renders the component correctly with specified columns', () => {
-    mount(<CollaboratorSummary {...defaultProps} />)
+    cy.mount(<CollaboratorSummary {...defaultProps} />)
 
     cy.contains(mockCollaborator.name).should('be.visible')
     cy.contains(mockCollaborator.title).should('be.visible')
@@ -50,7 +49,7 @@ describe('CollaboratorSummary - Component Tests', () => {
       columnsToShow: ['name', 'email', 'eraCommonsId'],
     }
 
-    mount(<CollaboratorSummary {...customProps} />)
+    cy.mount(<CollaboratorSummary {...customProps} />)
 
     cy.contains(mockCollaborator.name).should('be.visible')
 
@@ -62,7 +61,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   it('calls editAction when edit button is clicked', () => {
     const editAction = cy.stub().as('editAction')
 
-    mount(
+    cy.mount(
       <CollaboratorSummary
         {...defaultProps}
         editAction={editAction}
@@ -74,7 +73,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   })
 
   it('shows delete modal when delete button is clicked', () => {
-    mount(<CollaboratorSummary {...defaultProps} />)
+    cy.mount(<CollaboratorSummary {...defaultProps} />)
 
     cy.get('.delete-modal').should('not.exist')
 
@@ -87,7 +86,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   it('calls deleteAction when confirming deletion', () => {
     const deleteAction = cy.stub().as('deleteAction')
 
-    mount(
+    cy.mount(
       <CollaboratorSummary
         {...defaultProps}
         deleteAction={deleteAction}
@@ -104,7 +103,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   })
 
   it('closes delete modal when cancel is clicked', () => {
-    mount(<CollaboratorSummary {...defaultProps} />)
+    cy.mount(<CollaboratorSummary {...defaultProps} />)
 
     cy.get('.glyphicon-trash').parent('a').click({ force: true })
     cy.get('.delete-modal').should('be.visible')
@@ -118,7 +117,7 @@ describe('CollaboratorSummary - Component Tests', () => {
     const editAction = cy.stub().as('editAction')
     const deleteAction = cy.stub().as('deleteAction')
 
-    mount(
+    cy.mount(
       <CollaboratorSummary
         {...defaultProps}
         editAction={editAction}
@@ -151,7 +150,7 @@ describe('CollaboratorSummary - Component Tests', () => {
       email: null,
     }
 
-    mount(
+    cy.mount(
       <CollaboratorSummary
         {...defaultProps}
         collaborator={incompleteCollaborator as Collaborator}

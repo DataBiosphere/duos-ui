@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { DataLocationList, DataLocationsProps } from 'src/components/forms/DataLocationList'
 import { DataLocationInfo } from 'src/components/forms/DataLocation'
@@ -12,12 +11,12 @@ const props = {
 
 describe('Data Locations List Component - Tests', () => {
   it('should render a Data Locations component with Add location button', () => {
-    mount(<DataLocationList {...props} />)
+    cy.mount(<DataLocationList {...props} />)
     cy.get('button').contains('Add location')
   })
   it('Add location click should fire expected event', () => {
     props.onChange = cy.spy().as('onChange')
-    mount(<DataLocationList locations={props.locations} onChange={props.onChange} />)
+    cy.mount(<DataLocationList locations={props.locations} onChange={props.onChange} />)
     cy.get('button').contains('Add location').click()
     cy.get('@onChange').should('be.calledWith', {
       key: 'locations',
@@ -32,7 +31,7 @@ describe('Data Locations List Component - Tests', () => {
       researchStage: null,
       dataLocation: null,
     }]
-    mount(<BrowserRouter><DataLocationList locations={locations} onChange={props.onChange} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><DataLocationList locations={locations} onChange={props.onChange} /></BrowserRouter>)
     cy.get('button').contains('Add another location')
   })
 })

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { cloneDeep } from 'lodash'
 import { Study, NihAnvilUse, StudyProperty } from 'src/pages/data_submission/v2/v2-models'
 import {
@@ -53,13 +52,13 @@ beforeEach(() => {
 
 describe('NihAdministrativeInformation - Tests', () => {
   it('should mount without any fields in the NihAdministrativeInformation', () => {
-    mount(<NihAdministrativeInformation {...propCopy} />)
+    cy.mount(<NihAdministrativeInformation {...propCopy} />)
     cy.get('.formField-container').should('not.exist')
   })
 
   it('fields should be visible if the user selected I am NHGRI funded and I have a dbGaP PHS ID already', () => {
     propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES_NHGRI_YES_PHS_ID))
-    mount(<NihAdministrativeInformation {...propCopy} />)
+    cy.mount(<NihAdministrativeInformation {...propCopy} />)
     cy.get('#piInstitution').should('be.visible')
     cy.get('#nihGrantContractNumber').should('be.visible')
     cy.get('#nihICsSupportingStudy').should('be.visible')
@@ -72,7 +71,7 @@ describe('NihAdministrativeInformation - Tests', () => {
 
   it('fields should be visible if the user selected I am NHGRI funded and I do not have a dbGaP PHS ID', () => {
     propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES_NHGRI_NO_PHS_ID))
-    mount(<NihAdministrativeInformation {...propCopy} />)
+    cy.mount(<NihAdministrativeInformation {...propCopy} />)
     cy.get('#piInstitution').should('be.visible')
     cy.get('#nihGrantContractNumber').should('be.visible')
     cy.get('#nihICsSupportingStudy').should('be.visible')
@@ -85,7 +84,7 @@ describe('NihAdministrativeInformation - Tests', () => {
 
   it('should hide dbGaP form fields if the user selected I am not NHGRI funded but I am seeking to submit data to AnVIL', () => {
     propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO_NHGRI_YES_ANVIL))
-    mount(<NihAdministrativeInformation {...propCopy} />)
+    cy.mount(<NihAdministrativeInformation {...propCopy} />)
     cy.get('#piInstitution').should('be.visible')
     cy.get('#nihGrantContractNumber').should('be.visible')
     cy.get('#nihICsSupportingStudy').should('be.visible')
@@ -98,7 +97,7 @@ describe('NihAdministrativeInformation - Tests', () => {
 
   it('should hide dbGaP form fields if the user selected I am not NHGRI funded and do not plan to store data in AnVIL', () => {
     propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO_NHGRI_NO_ANVIL))
-    mount(<NihAdministrativeInformation {...propCopy} />)
+    cy.mount(<NihAdministrativeInformation {...propCopy} />)
     cy.get('.formField-container').should('not.exist')
     cy.get('#piInstitution').should('not.exist')
     cy.get('#nihGrantContractNumber').should('not.exist')

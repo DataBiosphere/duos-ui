@@ -333,7 +333,9 @@ export const AdminEditUser = () => {
         </div>
         {
           !isEmpty(state.user) && (
-            <ResearcherReview user={state.user} />
+            <div style={{ margin: 50, padding: 80 }}>
+              <ResearcherReview user={state.user} />
+            </div>
           )
         }
       </div>

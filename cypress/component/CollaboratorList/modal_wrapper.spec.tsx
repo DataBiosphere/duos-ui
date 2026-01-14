@@ -1,10 +1,9 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ModalWrapper from '../../../src/components/collaborator_list/ModalWrapper'
 
 describe('ModalWrapper - Component Tests', () => {
   it('renders with default props', () => {
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}
@@ -19,7 +18,7 @@ describe('ModalWrapper - Component Tests', () => {
   })
 
   it('does not render when isOpen is false', () => {
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={false}
         ariaHideApp={false}
@@ -32,7 +31,7 @@ describe('ModalWrapper - Component Tests', () => {
   })
 
   it('applies custom className', () => {
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}
@@ -46,7 +45,7 @@ describe('ModalWrapper - Component Tests', () => {
   })
 
   it('applies overlayClassName', () => {
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}
@@ -62,7 +61,7 @@ describe('ModalWrapper - Component Tests', () => {
   it('handles onAfterOpen callback', () => {
     const onAfterOpen = cy.stub().as('afterOpenCallback')
 
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}
@@ -78,7 +77,7 @@ describe('ModalWrapper - Component Tests', () => {
   it('handles onRequestClose callback when clicking overlay', () => {
     const onRequestClose = cy.stub().as('requestCloseCallback')
 
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}
@@ -100,7 +99,7 @@ describe('ModalWrapper - Component Tests', () => {
       },
     }
 
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}
@@ -114,7 +113,7 @@ describe('ModalWrapper - Component Tests', () => {
   })
 
   it('renders with custom content label', () => {
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}
@@ -130,7 +129,7 @@ describe('ModalWrapper - Component Tests', () => {
   it('allows nested interactive elements to work', () => {
     const buttonClickStub = cy.stub().as('buttonClickHandler')
 
-    mount(
+    cy.mount(
       <ModalWrapper
         isOpen={true}
         ariaHideApp={false}

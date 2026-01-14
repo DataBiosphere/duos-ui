@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import App from 'src/App'
 import StackdriverReporter from 'src/libs/stackdriverReporter'
 import { MemoryRouter, useLocation } from 'react-router-dom'
@@ -109,7 +108,7 @@ describe('Main App Functions', () => {
   })
 
   it('should render main layout components on the home page', () => {
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/']}>
         <App />
       </MemoryRouter>,
@@ -121,7 +120,7 @@ describe('Main App Functions', () => {
   })
 
   it('should initialize StackdriverReporter', () => {
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/']}>
         <App />
       </MemoryRouter>,
@@ -131,7 +130,7 @@ describe('Main App Functions', () => {
 
   it('should display an error when ECM fails', () => {
     cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').throws(new Error('Authentication failed'))
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={[initialLocation]}>
         <App />
       </MemoryRouter>,
@@ -143,7 +142,7 @@ describe('Main App Functions', () => {
   it('should displays an error when account syncing fails', () => {
     cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
     cy.stub(AuthenticateNIH, 'getSyncedUser').throws(new Error('Authentication failed'))
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={[initialLocation]}>
         <App />
       </MemoryRouter>,
@@ -155,7 +154,7 @@ describe('Main App Functions', () => {
     cy.stub(AuthenticateNIH, 'getECMProviderLinkInfo').returns(linkInfo)
     cy.stub(AuthenticateNIH, 'getSyncedUser').returns(user)
     const pageVisitStub = cy.stub()
-    const LocationSpy = ({ onLocationChange }) => {
+    const LocationSpy = ({ onLocationChange }: { onLocationChange: (pathname: string) => void }) => {
       const location = useLocation()
       React.useEffect(() => {
         onLocationChange(location.pathname)
@@ -163,7 +162,7 @@ describe('Main App Functions', () => {
       return null
     }
     const history = createMemoryHistory()
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={[initialLocation]}>
         <LocationSpy onLocationChange={pageVisitStub} />
         <App />

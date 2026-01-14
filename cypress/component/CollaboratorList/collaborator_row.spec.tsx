@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import CollaboratorRow from 'src/components/collaborator_list/CollaboratorRow'
 import { Collaborator } from 'src/types/model'
 
@@ -35,7 +34,7 @@ describe('CollaboratorRow - Component Tests', () => {
   }
 
   it('renders CollaboratorSummary when not in edit mode', () => {
-    mount(<CollaboratorRow {...defaultProps} />)
+    cy.mount(<CollaboratorRow {...defaultProps} />)
 
     cy.contains(mockCollaborator.name).should('be.visible')
     cy.contains(mockCollaborator.title).should('be.visible')
@@ -49,7 +48,7 @@ describe('CollaboratorRow - Component Tests', () => {
   })
 
   it('renders CollaboratorAddEdit when in edit mode', () => {
-    mount(<CollaboratorRow {...defaultProps} editMode={true} />)
+    cy.mount(<CollaboratorRow {...defaultProps} editMode={true} />)
 
     cy.contains(`Edit ${mockCollaborator.name} Information`).should('be.visible')
     cy.get('#name').should('have.value', mockCollaborator.name)
@@ -68,7 +67,7 @@ describe('CollaboratorRow - Component Tests', () => {
   it('passes editAction to CollaboratorSummary and triggers it on edit button click', () => {
     const editAction = cy.stub().as('editAction')
 
-    mount(
+    cy.mount(
       <CollaboratorRow
         {...defaultProps}
         editAction={editAction}
@@ -83,7 +82,7 @@ describe('CollaboratorRow - Component Tests', () => {
   it('passes deleteAction to CollaboratorSummary and triggers it on delete confirmation', () => {
     const deleteAction = cy.stub().as('deleteAction')
 
-    mount(
+    cy.mount(
       <CollaboratorRow
         {...defaultProps}
         deleteAction={deleteAction}
@@ -100,7 +99,7 @@ describe('CollaboratorRow - Component Tests', () => {
   it('passes closeAction to CollaboratorAddEdit and triggers it on cancel', () => {
     const closeAction = cy.stub().as('closeAction')
 
-    mount(
+    cy.mount(
       <CollaboratorRow
         {...defaultProps}
         editMode={true}
@@ -116,7 +115,7 @@ describe('CollaboratorRow - Component Tests', () => {
   it('passes onCollaboratorChange to CollaboratorAddEdit and triggers it on save', () => {
     const onCollaboratorChange = cy.stub().as('onCollaboratorChange')
 
-    mount(
+    cy.mount(
       <CollaboratorRow
         {...defaultProps}
         editMode={true}
@@ -136,7 +135,7 @@ describe('CollaboratorRow - Component Tests', () => {
     const editAction = cy.stub().as('editAction')
     const deleteAction = cy.stub().as('deleteAction')
 
-    mount(
+    cy.mount(
       <CollaboratorRow
         {...defaultProps}
         editAction={editAction}
@@ -164,7 +163,7 @@ describe('CollaboratorRow - Component Tests', () => {
       editMode: true,
     }
 
-    mount(<CollaboratorRow {...newProps} />)
+    cy.mount(<CollaboratorRow {...newProps} />)
 
     cy.contains('New Collaborator Information').should('be.visible')
 

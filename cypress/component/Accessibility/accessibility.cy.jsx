@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 
 describe('Accessibility Component Tests', function () {
   describe('Navigation Accessibility', function () {
@@ -15,7 +14,7 @@ describe('Accessibility Component Tests', function () {
         </nav>
       )
 
-      mount(<NavigationHeader />)
+      cy.mount(<NavigationHeader />)
 
       // Check for navigation button with aria-label
       cy.get('button[aria-label*="navigation"], button[aria-label*="menu"]').should('exist')
@@ -33,7 +32,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<NavigationElement />)
+      cy.mount(<NavigationElement />)
 
       // Check that navigation-related buttons have descriptive labels
       cy.get('button').each(($button) => {
@@ -55,7 +54,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<NavigationTabs />)
+      cy.mount(<NavigationTabs />)
 
       // Check for tab role or proper heading structure
       cy.get('[role="tablist"]').should('exist')
@@ -80,7 +79,7 @@ describe('Accessibility Component Tests', function () {
         </form>
       )
 
-      mount(<FormComponent />)
+      cy.mount(<FormComponent />)
 
       // Check that form inputs have associated labels or aria-labels
       cy.get('input[type="text"]').each(($input) => {
@@ -118,7 +117,7 @@ describe('Accessibility Component Tests', function () {
         </form>
       )
 
-      mount(<FormComponent />)
+      cy.mount(<FormComponent />)
 
       cy.get('input[required]').each(($input) => {
         const ariaRequired = $input.attr('aria-required')
@@ -137,7 +136,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<FormComponent />)
+      cy.mount(<FormComponent />)
 
       cy.get('input[aria-describedby]').should('exist')
       cy.get('[role="alert"]').should('exist')
@@ -171,7 +170,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<TableComponent />)
+      cy.mount(<TableComponent />)
 
       cy.get('table').should('exist')
       cy.get('th').should('exist').and('have.length.greaterThan', 0)
@@ -198,7 +197,7 @@ describe('Accessibility Component Tests', function () {
         </table>
       )
 
-      mount(<TableComponent />)
+      cy.mount(<TableComponent />)
 
       cy.get('button[aria-label*="Delete dataset"]').each(($button) => {
         const ariaLabel = $button.attr('aria-label')
@@ -218,7 +217,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<ImageComponent />)
+      cy.mount(<ImageComponent />)
 
       cy.get('img').each(($img) => {
         const altText = $img.attr('alt')
@@ -243,7 +242,7 @@ describe('Accessibility Component Tests', function () {
         <img src="/ga4gh-logo.png" alt="GA4GH logo" />
       )
 
-      mount(<ImageComponent />)
+      cy.mount(<ImageComponent />)
 
       cy.get('img[src*="ga4gh"]').should('have.attr', 'alt').and('include', 'GA4GH')
     })
@@ -263,7 +262,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<InteractiveComponent />)
+      cy.mount(<InteractiveComponent />)
 
       cy.get('a, button, input, select, textarea').each(($el) => {
         const tabindex = $el.attr('tabindex')
@@ -285,7 +284,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<ButtonComponent />)
+      cy.mount(<ButtonComponent />)
 
       cy.get('button').each(($button) => {
         const text = $button.text().trim()
@@ -312,7 +311,7 @@ describe('Accessibility Component Tests', function () {
         </div>
       )
 
-      mount(<PageComponent />)
+      cy.mount(<PageComponent />)
 
       // Should have at most one h1
       cy.get('h1').should('have.length.at.most', 1)
