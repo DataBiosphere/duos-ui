@@ -160,7 +160,7 @@ export default function DatasetSubmissionsTable(props) {
       }
     })
     setRows(rows)
-  }, [terms])
+  }, [removeDataset, terms])
 
   useEffect(() => {
     const init = async () => {

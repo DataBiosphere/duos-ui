@@ -40,9 +40,10 @@ export const DataSet = {
     return await res.json()
   },
 
-  searchDatasetIndex: async (query) => {
+  searchDatasetIndex: async (query, options = {}) => {
     const url = `${await getApiUrl()}/api/dataset/search/index`
-    const res = await fetchPost(url, query, Config.authOpts())
+    const config = { ...Config.authOpts(), ...options }
+    const res = await fetchPost(url, query, config)
     return setNhgriExternalAccess(res.data)
   },
 
