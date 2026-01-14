@@ -101,13 +101,13 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
     tabs, initialTab, initialSubTab,
     onSubtabChange, showProfileLinks, profileState,
   } = props
-  const [selectedMenuTab, setSelectedMenuTab] = useState<number | false>(false)
-  const [selectedSubTab, setSelectedSubTab] = useState<number | false>(false)
+  const [selectedMenuTab, setSelectedMenuTab] = useState<number>(-1)
+  const [selectedSubTab, setSelectedSubTab] = useState<number>(-1)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedMenuTab(initialTab === -1 ? false : initialTab)
-    setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab)
+    setSelectedMenuTab(initialTab)
+    setSelectedSubTab(initialSubTab)
   }, [initialTab, initialSubTab])
 
   return (
