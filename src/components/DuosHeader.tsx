@@ -292,8 +292,8 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     return false
   }
 
-  let initialSubTab: number | boolean = false
-  let initialTab: number | boolean
+  let initialSubTab: number = -1
+  let initialTab: number
 
   if (location?.state?.selectedMenuTab && tabs.length > location.state.selectedMenuTab && isValidTab(tabs[location.state.selectedMenuTab])) {
     initialTab = location.state.selectedMenuTab
@@ -302,7 +302,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     initialTab = tabs.findIndex(isValidTab)
   }
 
-  if (initialTab !== -1 && typeof initialTab === 'number') {
+  if (initialTab !== -1) {
     if (tabs[initialTab].link === location.pathname) {
       initialSubTab = 0
     }

@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import DuosHeader from 'src/components/DuosHeader'
 import { DuosUser } from 'src/types/model'
@@ -35,7 +34,7 @@ const mountHeader = (path: string, user?: DuosUser) => {
     cy.stub(StorageModule.Storage, 'getCurrentUser').returns(null)
   }
 
-  mount(
+  cy.mount(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
