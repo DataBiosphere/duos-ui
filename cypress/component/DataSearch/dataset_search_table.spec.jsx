@@ -168,11 +168,14 @@ describe('Dataset Search Table tests', () => {
       cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Rapidly change filters (each change should debounce and potentially abort previous)
-      cy.get('#participantCountMin-range-input').clear().type('10')
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('10')
       cy.tick(50)
-      cy.get('#participantCountMin-range-input').clear().type('20')
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('20')
       cy.tick(50)
-      cy.get('#participantCountMin-range-input').clear().type('30')
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('30')
       cy.tick(150) // Complete debounce
 
       // Wait for request to complete
@@ -189,7 +192,6 @@ describe('Dataset Search Table tests', () => {
     it('Should not throw errors when requests are aborted', () => {
       // Capture any console errors
       const consoleErrors = []
-      
       const errorCapture = (...args) => {
         consoleErrors.push(args)
       }
@@ -221,8 +223,8 @@ describe('Dataset Search Table tests', () => {
 
       // No AbortError should be logged to console
       cy.wrap(null).then(() => {
-        const abortErrors = consoleErrors.filter(error => 
-          error.some(arg => typeof arg === 'string' && arg.includes('AbortError'))
+        const abortErrors = consoleErrors.filter(error =>
+          error.some(arg => typeof arg === 'string' && arg.includes('AbortError')),
         )
         expect(abortErrors).to.have.length(0)
       })
