@@ -223,8 +223,14 @@ const DataAccessRequestApplication = (props) => {
 
   const { fetchWithCache } = useAsyncCacheFetch(initialCache)
 
-  const getDarCollection = collectionId => fetchWithCache(collectionId, Collections.getCollectionById)
-  const getPartialDarRequest = darId => fetchWithCache(darId, DAR.getPartialDarRequest)
+  const getDarCollection = useCallback(
+    collectionId => fetchWithCache(collectionId, Collections.getCollectionById),
+    [fetchWithCache],
+  )
+  const getPartialDarRequest = useCallback(
+    darId => fetchWithCache(darId, DAR.getPartialDarRequest),
+    [fetchWithCache],
+  )
 
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])
@@ -269,7 +275,7 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
-  }, [existingDarsReadOnlyMode])
+  }, [existingDarsReadOnlyMode, collectionId, getDarCollection])
 
   const init = useCallback(async () => {
     let formData = {}
