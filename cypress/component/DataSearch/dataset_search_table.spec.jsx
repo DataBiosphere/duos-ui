@@ -46,7 +46,7 @@ describe('Dataset Search Table tests', () => {
         searchCallCount++
       }).as('searchSpy')
 
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Wait for component to render
       cy.get('button').contains('View By Studies').should('exist')
@@ -140,7 +140,7 @@ describe('Dataset Search Table tests', () => {
         })
       }).as('searchIndex')
 
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Trigger first search
       cy.get('[data-cy="search-bar"]').type('first')
@@ -171,7 +171,7 @@ describe('Dataset Search Table tests', () => {
         req.reply({ delay: 50, body: datasets })
       }).as('searchIndex')
 
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Rapidly change filters (each change should debounce and potentially abort previous)
       cy.get('#participantCountMin-range-input').clear().type('10')
@@ -205,7 +205,7 @@ describe('Dataset Search Table tests', () => {
         req.reply({ delay: 200, body: datasets })
       }).as('searchIndex')
 
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
 
       // Trigger multiple searches rapidly
       cy.get('[data-cy="search-bar"]').type('test1')

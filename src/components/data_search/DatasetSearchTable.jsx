@@ -66,7 +66,7 @@ export const DatasetSearchTable = (props) => {
     }
   }
 
-  const assembleFullQuery = () => {
+  const assembleFullQuery = useCallback(() => {
     const queryChunks = [
       {
         match: {
@@ -186,7 +186,7 @@ export const DatasetSearchTable = (props) => {
         },
       },
     }
-  }
+  }, [searchTerm, filters])
 
   const filterHandler = (category, filter) => {
     let newFilter
@@ -211,7 +211,7 @@ export const DatasetSearchTable = (props) => {
       return
     }
     getExportableDatasets(datasets)
-  }, [])
+  }, [datasets])
 
   const abortControllerRef = useRef(null)
 
@@ -245,7 +245,7 @@ export const DatasetSearchTable = (props) => {
       searchAndFilter(fullQuery)
     }, 150))
 
-  const handleSearchChange = useCallback(searchTerms => setSearchTerm(searchTerms))
+  const handleSearchChange = useCallback(searchTerms => setSearchTerm(searchTerms), [])
 
   useEffect(() => {
     if (!hasRunInitialSearch.current) {
@@ -269,12 +269,6 @@ export const DatasetSearchTable = (props) => {
       }
     }
   }, [filters, searchTerm, searchAndFilter]); // eslint-disable-line
-
-  DatasetSearchTable.propTypes = {
-    datasets: PropTypes.array.isRequired,
-    icon: PropTypes.string,
-    title: PropTypes.string,
-  }
 
   return (
     <>
@@ -337,6 +331,12 @@ export const DatasetSearchTable = (props) => {
       </Box>
     </>
   )
+}
+
+DatasetSearchTable.propTypes = {
+  datasets: PropTypes.array.isRequired,
+  icon: PropTypes.string,
+  title: PropTypes.string,
 }
 
 export default DatasetSearchTable
