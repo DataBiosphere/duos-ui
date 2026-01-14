@@ -28,19 +28,24 @@ function getRequestBody(data, isMultipart) {
   return isMultipart ? data : JSON.stringify(data)
 }
 
-async function fetchRequest({ url, method = 'GET', data, params, headers = {}, credentials, responseType, isMultipart }) {
+async function fetchRequest({ url, method = 'GET', data, params, headers = {}, credentials, responseType, isMultipart, signal }) {
   const fullUrl = params ? buildUrlWithParams(url, params) : url
   const fetchOptions = {
     method,
     headers: isMultipart ? headers : { 'Content-Type': 'application/json', ...headers },
     credentials,
     body: getRequestBody(data, isMultipart),
+    ...(signal && { signal }), // Add signal if provided
   }
   try {
     const res = await fetch(fullUrl, fetchOptions)
     return handleResponse(res, fullUrl, responseType, method)
   }
-  catch {
+  catch (error) {
+    // Re-throw AbortError without reporting
+    if (error.name === 'AbortError') {
+      throw error
+    }
     reportError(fullUrl, 502) // Default to a 502 when we can't get a real response object.
     throw new Error(`Request to ${fullUrl} failed with status 502`)
   }
