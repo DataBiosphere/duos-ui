@@ -15,6 +15,42 @@ import { SupportRequestModal } from './modals/SupportRequestModal'
 import './DuosHeader.css'
 import { Notification } from './Notification'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { DuosUser } from 'src/types/model'
+
+interface SubTab {
+  label: string
+  link: string
+  search?: string
+  isRendered?: (user: DuosUser) => boolean
+  isRenderedForUser?: (user: DuosUser) => boolean
+}
+
+interface Tab {
+  label: string
+  link: string
+  search?: string
+  children?: SubTab[]
+  isRendered: (user: DuosUser) => boolean
+}
+
+interface NotificationData {
+  message: string
+  level: 'info' | 'warning' | 'danger' | 'success'
+}
+
+interface DuosHeaderState {
+  showSupportRequestModal: boolean
+  hover: boolean
+  notificationData: NotificationData[]
+  openDrawer: boolean
+  showProfileLinks: boolean
+}
+
+interface DuosHeaderProps {
+  classes?: {
+    drawerPaper?: string
+  }
+}
 
 const styles = {
   drawerPaper: {
@@ -24,7 +60,7 @@ const styles = {
   },
 }
 
-const isOnlySigningOfficial = (user) => {
+const isOnlySigningOfficial = (user: DuosUser): boolean => {
   return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter)
 }
 
@@ -32,7 +68,7 @@ const isOnlySigningOfficial = (user) => {
  * Tab objects in this array support an `isRendered` function per top level Tab as well as
  * an optional `isRendered` (defaults to `true`) function for each sub-tab in `children`
  */
-export const headerTabsConfig = [
+export const headerTabsConfig: Tab[] = [
   {
     label: 'Admin Console',
     link: '/admin_manage_dar_collections',
@@ -93,14 +129,14 @@ export const headerTabsConfig = [
   },
 ]
 
-const duosLogoImage = {
+const duosLogoImage: React.CSSProperties = {
   height: '50px',
   padding: '0',
   marginRight: 30,
   cursor: 'pointer',
 }
 
-const navbarDuosIcon = {
+const navbarDuosIcon: React.CSSProperties = {
   display: 'inline-block',
   width: '16px',
   height: '16px',
@@ -109,17 +145,17 @@ const navbarDuosIcon = {
   verticalAlign: 'baseline',
 }
 
-const navbarDuosText = {
+const navbarDuosText: React.CSSProperties = {
   display: 'inline',
   verticalAlign: 'text-bottom',
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-const DuosHeader = (props) => {
+const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   const { classes } = props
   const navigate = useNavigate()
   const location = useLocation()
-  const [state, setState] = useState({
+  const [state, setState] = useState<DuosHeaderState>({
     showSupportRequestModal: false,
     hover: false,
     notificationData: [],
@@ -128,30 +164,30 @@ const DuosHeader = (props) => {
   })
 
   useEffect(() => {
-    async function fetchNotificationData() {
+    const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
       setState(prev => ({
         ...prev,
-        notificationData,
+        notificationData: Array.isArray(notificationData) ? notificationData : [],
       }))
     }
-    fetchNotificationData()
+    void fetchNotificationData()
   }, [])
 
-  const toggleHover = () => {
+  const toggleHover = (): void => {
     setState({
       ...state,
       hover: !state.hover,
     })
   }
 
-  const signOut = () => {
+  const signOut = (): void => {
     navigate('/home')
     toggleDrawer(false)
-    Auth.signOut()
+    void Auth.signOut()
   }
 
-  const supportRequestModal = () => {
+  const supportRequestModal = (): void => {
     setState({
       ...state,
       showSupportRequestModal: true,
@@ -159,7 +195,7 @@ const DuosHeader = (props) => {
     })
   }
 
-  const profileLinks = () => {
+  const profileLinks = (): void => {
     const profileState = state.showProfileLinks
     setState({
       ...state,
@@ -167,31 +203,45 @@ const DuosHeader = (props) => {
     })
   }
 
-  const closeSupportRequestModal = () => {
+  const closeSupportRequestModal = (): void => {
     setState({
       ...state,
       showSupportRequestModal: false,
     })
   }
 
-  const makeNotifications = () => {
-    return state.notificationData.map((d, index) => <Notification notificationData={d} key={index} index={index} />)
+  const makeNotifications = (): React.ReactNode[] => {
+    return state.notificationData.map((d, index) => <Notification notificationData={d} key={d.message} index={index} />)
   }
 
-  const toggleDrawer = (boolVal) => {
+  const toggleDrawer = (boolVal: boolean): void => {
     setState({
       ...state,
       openDrawer: boolVal,
     })
   }
 
-  const goToLink = (link) => {
+  const goToLink = (link: string): void => {
     navigate(link)
     toggleDrawer(false)
   }
 
   const isLogged = Storage.userIsLogged()
-  let currentUser = {}
+  let currentUser: DuosUser = {
+    createDate: new Date(),
+    displayName: '',
+    email: '',
+    emailPreference: false,
+    isAdmin: false,
+    isAlumni: false,
+    isChairPerson: false,
+    isDataSubmitter: false,
+    isMember: false,
+    isResearcher: false,
+    isSigningOfficial: false,
+    roles: [],
+    userId: 0,
+  }
 
   if (isLogged) {
     currentUser = Storage.getCurrentUser()
@@ -235,20 +285,20 @@ const DuosHeader = (props) => {
   const tabs = headerTabsConfig.filter(data => data.isRendered(currentUser))
 
   // returns true if the current page the app is on is a part of this tab
-  const isValidTab = (tab) => {
-    if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
+  const isValidTab = (tab: Tab): boolean => {
+    if (tab.link === location.pathname || location.pathname.includes(tab.search || '')) {
       return true
     }
     if (tab.children) {
-      return tab.children.some((subtab) => {
-        return subtab.link === location.pathname || location.pathname.includes(subtab.search)
+      return tab.children.some((subtab: SubTab) => {
+        return subtab.link === location.pathname || location.pathname.includes(subtab.search || '')
       })
     }
-    return tab.children ? tab.children.indexOf(subtab => subtab.link === location.pathname) !== -1 : false
+    return false
   }
 
-  let initialSubTab = false
-  let initialTab = false
+  let initialSubTab: number = -1
+  let initialTab: number
 
   // note: location.state.selectedMenuTab will be populated if the user navigated
   // to the current page by clicking on a tab from the nav bar.
@@ -263,13 +313,19 @@ const DuosHeader = (props) => {
 
   // populate initialSubTab
   if (initialTab !== -1) {
-    if (tabs[initialTab].link === location.pathname) {
-      initialSubTab = 0
+    // Only consider subtabs that should be rendered for the user
+    const renderedSubtabs = tabs[initialTab].children?.filter(
+      subtab => (subtab.isRenderedForUser ?? subtab.isRendered ?? (() => true))(currentUser),
+    ) || []
+    // Find index of matching subtab
+    const subtabIndex = renderedSubtabs.findIndex(
+      subtab => subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search)),
+    )
+    if (subtabIndex === -1) {
+      initialSubTab = -1
     }
-    else if (tabs[initialTab].children) {
-      initialSubTab = tabs[initialTab].children.filter(data => data.isRendered === undefined || data.isRendered(currentUser)).findIndex((subtab) => {
-        return subtab.link === location.pathname || location.pathname.includes(subtab.search)
-      })
+    else {
+      initialSubTab = subtabIndex
     }
   }
 
@@ -277,7 +333,7 @@ const DuosHeader = (props) => {
     <nav className="navbar-duos" role="navigation">
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
         <div className="row no-margin" style={{ width: '100%' }}>
-          {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
+          {/* Standard navbar for medium-sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
@@ -302,19 +358,29 @@ const DuosHeader = (props) => {
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
         {makeNotifications()}
         <div className="navbar-main" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <img
-            style={duosLogoImage}
-            src={DuosLogo}
-            alt="DUOS Logo"
+          <button
             onClick={() => goToLink('/home')}
-          />
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+            }}
+            aria-label="Go to home page"
+          >
+            <img
+              style={duosLogoImage}
+              src={DuosLogo}
+              alt="DUOS Logo"
+            />
+          </button>
           <IconButton id="collapsed-navigation-icon-button" size="small" onClick={() => toggleDrawer(true)} aria-label="Open navigation menu">
-            <MenuIcon id="navbar-menu-icon" style={{ color: 'white', fontSize: '6rem', flex: 1 }} anchor="right" />
+            <MenuIcon id="navbar-menu-icon" style={{ color: 'white', fontSize: '6rem', flex: 1 }} />
           </IconButton>
           <Drawer
             anchor="right"
             open={state.openDrawer}
-            PaperProps={{ className: classes.drawerPaper }}
+            slotProps={{ paper: { className: classes?.drawerPaper } }}
             className="navbar-duos"
             onClose={() => toggleDrawer(false)}
           >
