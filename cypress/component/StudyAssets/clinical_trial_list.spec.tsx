@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ClinicalTrialAddEdit from 'src/components/clinical_trial_list/ClinicalTrialAddEdit'
 import ClinicalTrialList from 'src/components/clinical_trial_list/ClinicalTrialList'
 import ClinicalTrialRow from 'src/components/clinical_trial_list/ClinicalTrialRow'
@@ -43,14 +42,14 @@ const ClinicalTrialListHarness: React.FC<{ initial: ClinicalTrial[] }> = ({ init
 
 describe('ClinicalTrialList component', () => {
   it('renders existing trials', () => {
-    mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    cy.mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
     cy.contains(sampleTrial.title).should('exist')
     cy.contains(sampleTrial.registry).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
     const added: ClinicalTrial[] = []
-    mount(
+    cy.mount(
       <ClinicalTrialAddEdit
         id={-1}
         clinicalTrial={undefined}
@@ -81,7 +80,7 @@ describe('ClinicalTrialList component', () => {
   })
 
   it('opens trial in view mode when view button is clicked', () => {
-    mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    cy.mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.contains(sampleTrial.title).should('exist')
     cy.get('#title').should('be.disabled')
@@ -91,7 +90,7 @@ describe('ClinicalTrialList component', () => {
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    cy.mount(<ClinicalTrialListHarness initial={[sampleTrial]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.get('.collaborator-form-cancel-button').click()
     cy.get('#title').should('not.exist')
@@ -100,7 +99,7 @@ describe('ClinicalTrialList component', () => {
 
   it('adds a new clinical trial', () => {
     const state: ClinicalTrial[] = []
-    mount(
+    cy.mount(
       <ClinicalTrialList
         clinicalTrials={state}
         columnsToShow={['title', 'status']}
@@ -131,7 +130,7 @@ describe('ClinicalTrialList component', () => {
 
   it('edits existing trial and saves changes', () => {
     const trials: ClinicalTrial[] = [sampleTrial]
-    mount(
+    cy.mount(
       <ClinicalTrialAddEdit
         id={0}
         clinicalTrial={sampleTrial}
@@ -150,7 +149,7 @@ describe('ClinicalTrialList component', () => {
 
   it('deletes a clinical trial via modal confirmation', () => {
     testDeleteViaModal(
-      () => mount(<ClinicalTrialListHarness initial={[sampleTrial]} />),
+      () => cy.mount(<ClinicalTrialListHarness initial={[sampleTrial]} />),
       sampleTrial.title,
     )
   })
@@ -158,7 +157,7 @@ describe('ClinicalTrialList component', () => {
 
 describe('ClinicalTrialSummary', () => {
   it('renders tags and date range', () => {
-    mount(
+    cy.mount(
       <ClinicalTrialSummary
         clinicalTrial={sampleTrial}
         columnsToShow={[
@@ -191,7 +190,7 @@ describe('ClinicalTrialSummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
+    cy.mount(
       <ClinicalTrialSummary
         clinicalTrial={sampleTrial}
         columnsToShow={['title']}
@@ -209,7 +208,7 @@ describe('ClinicalTrialSummary', () => {
 
 describe('ClinicalTrialRow', () => {
   it('shows summary when not in edit mode and triggers edit', () => {
-    mount(
+    cy.mount(
       <ClinicalTrialRow
         id={0}
         editMode={false}
@@ -229,7 +228,7 @@ describe('ClinicalTrialRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
+    cy.mount(
       <ClinicalTrialRow
         id={0}
         editMode={true}
@@ -247,7 +246,7 @@ describe('ClinicalTrialRow', () => {
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
+    cy.mount(
       <ClinicalTrialRow
         id={0}
         editMode={false}
@@ -269,7 +268,7 @@ describe('ClinicalTrialRow', () => {
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
+    cy.mount(
       <ClinicalTrialRow
         id={0}
         editMode={false}

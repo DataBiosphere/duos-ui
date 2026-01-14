@@ -1,6 +1,5 @@
 import { makeDatasetTerm } from '../test-utils'
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import DatasetSearchTable from 'src/components/data_search/DatasetSearchTable'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { BrowserRouter } from 'react-router-dom'
@@ -113,7 +112,11 @@ describe('Dataset Search Table tests', () => {
         searchCallCount++
       }).as('searchSpy')
 
+<<<<<<< HEAD
       mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+=======
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+>>>>>>> b51a5b97737c0aa7d78c6431bb3525ce1512ba75
 
       // Wait for component to render
       cy.get('button').contains('View By Studies').should('exist')
@@ -128,7 +131,7 @@ describe('Dataset Search Table tests', () => {
       cy.initApplicationConfig()
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
       cy.clock()
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
     })
 
     it('When no datasets are selected the footer does not appear', () => {
@@ -162,7 +165,7 @@ describe('Dataset Search Table tests', () => {
         { method: 'POST', url: '**/search/index' }, (req) => {
           return handler(req, '{"range":{"participantCount":{"gte":30,"lte":50}}}')
         }).as('searchIndex')
-      mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
       // first clear the default value (50), without clearing first, type('3') would result in input of 503
       cy.get('#participantCountMin-range-input').clear()
       cy.get('#participantCountMin-range-input').type('3')
@@ -182,13 +185,18 @@ describe('Dataset Search Table tests', () => {
     })
   })
 
+<<<<<<< HEAD
   describe('Visibility modifier security tests', () => {
+=======
+  describe('Request abort handling tests', () => {
+>>>>>>> b51a5b97737c0aa7d78c6431bb3525ce1512ba75
     beforeEach(() => {
       cy.initApplicationConfig()
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
       cy.clock()
     })
 
+<<<<<<< HEAD
     it('Should include visibility modifiers in search requests', () => {
       let capturedRequest = null
       cy.intercept('POST', '**/search/index', (req) => {
@@ -270,6 +278,113 @@ describe('Dataset Search Table tests', () => {
 
         // But basic query structure should still be there
         cy.wrap(queryString).should('include', '"_type":"dataset"')
+=======
+    it('Should abort previous request when new search is triggered rapidly', () => {
+      let requestCount = 0
+
+      const interceptHandler = (req) => {
+        requestCount++
+        // Simulate different response times
+        const delay = requestCount === 1 ? 300 : 50
+        req.reply({ delay, body: datasets })
+      }
+
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Trigger first search
+      cy.get('[data-cy="search-bar"]').type('first')
+      cy.tick(150) // Debounce delay
+
+      // Quickly trigger second search before first completes
+      cy.get('[data-cy="search-bar"]').clear()
+      cy.get('[data-cy="search-bar"]').type('second')
+      cy.tick(150)
+
+      // Wait for the last request
+      cy.wait('@searchIndex')
+
+      // Advance time to ensure all requests complete
+      cy.tick(500)
+
+      // Verify multiple requests were made (abort controller creates new requests)
+      cy.wrap(null).then(() => {
+        expect(requestCount).to.be.at.least(2)
+      })
+    })
+
+    it('Should handle rapid filter changes gracefully', () => {
+      let requestCount = 0
+
+      const interceptHandler = (req) => {
+        requestCount++
+        req.reply({ delay: 50, body: datasets })
+      }
+
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Rapidly change filters (each change should debounce and potentially abort previous)
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('10')
+      cy.tick(50)
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('20')
+      cy.tick(50)
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('30')
+      cy.tick(150) // Complete debounce
+
+      // Wait for request to complete
+      cy.wait('@searchIndex')
+      cy.tick(100)
+
+      // The debounce should limit the number of actual requests
+      cy.wrap(null).then(() => {
+        // With 150ms debounce and rapid changes, should only fire one request
+        expect(requestCount).to.equal(1)
+      })
+    })
+
+    it('Should not throw errors when requests are aborted', () => {
+      // Capture any console errors
+      const consoleErrors = []
+      const errorCapture = (...args) => {
+        consoleErrors.push(args)
+      }
+
+      const windowLoadHandler = (win) => {
+        cy.stub(win.console, 'error').callsFake(errorCapture)
+      }
+
+      const interceptHandler = (req) => {
+        req.reply({ delay: 200, body: datasets })
+      }
+
+      cy.on('window:before:load', windowLoadHandler)
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Trigger multiple searches rapidly
+      cy.get('[data-cy="search-bar"]').type('test1')
+      cy.tick(50)
+      cy.get('[data-cy="search-bar"]').clear()
+      cy.get('[data-cy="search-bar"]').type('test2')
+      cy.tick(50)
+      cy.get('[data-cy="search-bar"]').clear()
+      cy.get('[data-cy="search-bar"]').type('test3')
+      cy.tick(150)
+
+      // Wait for final request
+      cy.wait('@searchIndex')
+
+      // No AbortError should be logged to console
+      cy.wrap(null).then(() => {
+        const abortErrors = consoleErrors.filter(error =>
+          error.some(arg => typeof arg === 'string' && arg.includes('AbortError')),
+        )
+        expect(abortErrors).to.have.length(0)
+>>>>>>> b51a5b97737c0aa7d78c6431bb3525ce1512ba75
       })
     })
   })

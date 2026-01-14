@@ -1,5 +1,4 @@
 import { React } from 'react'
-import { mount } from 'cypress/react'
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets.jsx'
 
 const datasets = [
@@ -40,7 +39,7 @@ const propsDisabled = {
 describe('Selectable Datasets - Not Read Only', () => {
   describe('With 4 Datasets', () => {
     beforeEach(() => {
-      mount(<SelectableDatasets {...props} />)
+      cy.mount(<SelectableDatasets {...props} />)
     })
 
     it('Marks 2 datasets for removal', () => {
@@ -93,7 +92,7 @@ describe('Selectable Datasets - Not Read Only', () => {
 
   describe('Selectable Datasets - Read Only', () => {
     beforeEach(() => {
-      mount(<SelectableDatasets {...propsDisabled} />)
+      cy.mount(<SelectableDatasets {...propsDisabled} />)
     })
 
     it('Can not click on any dataset', () => {

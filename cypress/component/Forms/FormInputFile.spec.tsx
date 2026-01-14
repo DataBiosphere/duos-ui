@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import '../../../src/components/forms/formComponents.css'
 
@@ -39,7 +38,7 @@ const TestFormInputFile = ({
 
 describe('FormInputFile Component', () => {
   it('should render upload button when not disabled', () => {
-    mount(<TestFormInputFile id="test-file-input" />)
+    cy.mount(<TestFormInputFile id="test-file-input" />)
 
     cy.get('.form-file-upload').should('exist')
     cy.get('.form-file-upload').should('not.have.class', 'disabled')
@@ -49,7 +48,7 @@ describe('FormInputFile Component', () => {
   })
 
   it('should disable upload button when disabled prop is true', () => {
-    mount(<TestFormInputFile id="test-file-input" disabled={true} />)
+    cy.mount(<TestFormInputFile id="test-file-input" disabled={true} />)
 
     cy.get('.form-file-upload').should('exist')
     cy.get('.form-file-upload').should('have.class', 'disabled')
@@ -59,13 +58,13 @@ describe('FormInputFile Component', () => {
   })
 
   it('should show custom upload text', () => {
-    mount(<TestFormInputFile id="test-file-input" uploadText="Choose your file" />)
+    cy.mount(<TestFormInputFile id="test-file-input" uploadText="Choose your file" />)
 
     cy.get('label.form-file-label').should('contain.text', 'Choose your file')
   })
 
   it('should appear disabled in read-only DAR and not trigger file selection', () => {
-    mount(<TestFormInputFile id="test-file-input" disabled={true} />)
+    cy.mount(<TestFormInputFile id="test-file-input" disabled={true} />)
 
     // Verify visual disabled state
     cy.get('.form-file-upload').should('have.class', 'disabled')
@@ -90,7 +89,7 @@ describe('FormInputFile Component', () => {
   })
 
   it('should have proper cursor styling when disabled', () => {
-    mount(<TestFormInputFile id="test-file-input" disabled={true} />)
+    cy.mount(<TestFormInputFile id="test-file-input" disabled={true} />)
 
     // Verify disabled cursor styling is applied via CSS
     // Note: cursor styles might not be testable in headless mode, so let's verify the CSS class exists
@@ -99,7 +98,7 @@ describe('FormInputFile Component', () => {
   })
 
   it('should enable file selection when clicking enabled upload button', () => {
-    mount(<TestFormInputFile id="test-file-input" disabled={false} />)
+    cy.mount(<TestFormInputFile id="test-file-input" disabled={false} />)
 
     // Verify enabled state
     cy.get('.form-file-upload').should('not.have.class', 'disabled')

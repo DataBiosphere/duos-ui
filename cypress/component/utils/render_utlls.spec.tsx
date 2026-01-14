@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import {
   renderColumnContent,
   renderMaintainer,
@@ -16,12 +15,12 @@ import { Maintainer, Presenter, Author, ClinicalTrial } from 'src/types/model'
 
 // Helper functions
 function mountAndAssertText(element: React.ReactNode, expectedText: string) {
-  mount(<div>{element}</div>)
+  cy.mount(<div>{element}</div>)
   cy.contains(expectedText).should('exist')
 }
 
 function mountAndAssertLink(element: React.ReactNode, href: string, text: string) {
-  mount(<div>{element}</div>)
+  cy.mount(<div>{element}</div>)
   cy.get(`a[href="${href}"]`).should('contain', text)
 }
 
@@ -99,7 +98,7 @@ describe('renderAuthors', () => {
       { name: 'Author One', orcId: '0000-0001-1234-5678' },
       { name: 'Author Two', orcId: '0000-0002-1234-5678' },
     ]
-    mount(<div>{renderAuthors(authors)}</div>)
+    cy.mount(<div>{renderAuthors(authors)}</div>)
     cy.contains('Author One, Author Two').should('exist')
   })
 
@@ -138,7 +137,7 @@ describe('renderInterventionType', () => {
 describe('renderColumnContent', () => {
   it('renders maintainer column', () => {
     const maintainer: Maintainer = { name: 'Test User', email: 'test@example.com' }
-    mount(<div>{renderColumnContent('maintainer', maintainer)}</div>)
+    cy.mount(<div>{renderColumnContent('maintainer', maintainer)}</div>)
     cy.contains('Test User (test@example.com)').should('exist')
   })
 
@@ -168,13 +167,13 @@ describe('renderColumnContent', () => {
 
   it('renders presenter column', () => {
     const presenter: Presenter = { name: 'Presenter Name', email: 'presenter@example.com' }
-    mount(<div>{renderColumnContent('presenter', presenter)}</div>)
+    cy.mount(<div>{renderColumnContent('presenter', presenter)}</div>)
     cy.contains('Presenter Name (presenter@example.com)').should('exist')
   })
 
   it('renders authors column', () => {
     const authors: Author[] = [{ name: 'Author One' }, { name: 'Author Two' }]
-    mount(<div>{renderColumnContent('authors', authors)}</div>)
+    cy.mount(<div>{renderColumnContent('authors', authors)}</div>)
     cy.contains('Author One, Author Two').should('exist')
   })
 

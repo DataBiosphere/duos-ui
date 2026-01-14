@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
@@ -82,7 +81,7 @@ function mountStudyAssetList(
     columnsToShow?: (keyof TestAsset)[]
   } = {},
 ) {
-  return mount(
+  return cy.mount(
     <StudyAssetList<TestAsset, never, TestAddEditProps, TestRowProps>
       items={items}
       onItemsChange={onItemsChange}

@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { DacPicker } from 'src/components/forms/DacPicker'
 
@@ -23,7 +22,7 @@ describe('Data Library Filters', () => {
     const id = 'DacPicker'
     const title = 'Data Access Committee'
     props.onChange = cy.spy().as('onChange')
-    mount(
+    cy.mount(
       <DacPicker
         fieldTitle={title}
         fieldId={id}

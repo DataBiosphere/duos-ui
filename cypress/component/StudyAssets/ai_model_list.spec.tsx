@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import AiModelAddEdit from 'src/components/ai_models_list/AiModelAddEdit'
 import AiModelList from 'src/components/ai_models_list/AiModelList'
 import AiModelRow from 'src/components/ai_models_list/AiModelRow'
@@ -34,14 +33,14 @@ const AiModelListHarness: React.FC<{ initial: AiModel[] }> = ({ initial }) => {
 
 describe('AiModelList component', () => {
   it('renders existing models', () => {
-    mount(<AiModelListHarness initial={[sampleModel]} />)
+    cy.mount(<AiModelListHarness initial={[sampleModel]} />)
     cy.contains(sampleModel.name).should('exist')
     cy.contains(sampleModel.format).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
     const onChangeSpy: AiModel[] = []
-    mount(
+    cy.mount(
       <AiModelAddEdit
         id={-1}
         aiModel={undefined}
@@ -65,7 +64,7 @@ describe('AiModelList component', () => {
   })
 
   it('opens model in view mode when view button is clicked', () => {
-    mount(<AiModelListHarness initial={[sampleModel]} />)
+    cy.mount(<AiModelListHarness initial={[sampleModel]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.contains(sampleModel.name).should('exist')
     cy.get('#name').should('be.disabled')
@@ -75,7 +74,7 @@ describe('AiModelList component', () => {
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<AiModelListHarness initial={[sampleModel]} />)
+    cy.mount(<AiModelListHarness initial={[sampleModel]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.get('.collaborator-form-cancel-button').click()
     cy.get('#name').should('not.exist')
@@ -84,7 +83,7 @@ describe('AiModelList component', () => {
 
   it('adds a new model', () => {
     const state: AiModel[] = []
-    mount(
+    cy.mount(
       <AiModelList
         aiModels={state}
         columnsToShow={['name', 'license']}
@@ -108,7 +107,7 @@ describe('AiModelList component', () => {
 
   it('edits existing model and saves changes', () => {
     const models: AiModel[] = [sampleModel]
-    mount(
+    cy.mount(
       <AiModelAddEdit
         id={0}
         aiModel={sampleModel}
@@ -126,14 +125,14 @@ describe('AiModelList component', () => {
 
   it('deletes a model via modal confirmation', () => {
     testDeleteViaModal(
-      () => mount(<AiModelListHarness initial={[sampleModel]} />),
+      () => cy.mount(<AiModelListHarness initial={[sampleModel]} />),
       sampleModel.name,
     )
   })
 
   it('shows all default columns when none are provided', () => {
     const state: AiModel[] = [sampleModel]
-    mount(
+    cy.mount(
       <AiModelList
         aiModels={state}
         onAiModelsChange={(m) => { state.splice(0, state.length, ...m) }}
@@ -151,7 +150,7 @@ describe('AiModelList component', () => {
 
 describe('AiModelSummary', () => {
   it('renders arrays and maintainer formatting', () => {
-    mount(
+    cy.mount(
       <AiModelSummary
         aiModel={sampleModel}
         columnsToShow={['name', 'maintainer', 'trainedOnDatasets', 'tags', 'license']}
@@ -168,7 +167,7 @@ describe('AiModelSummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
+    cy.mount(
       <AiModelSummary
         aiModel={sampleModel}
         columnsToShow={['name']}
@@ -186,7 +185,7 @@ describe('AiModelSummary', () => {
 
 describe('AiModelRow', () => {
   it('shows summary when not in edit mode', () => {
-    mount(
+    cy.mount(
       <AiModelRow
         id={0}
         editMode={false}
@@ -206,7 +205,7 @@ describe('AiModelRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
+    cy.mount(
       <AiModelRow
         id={0}
         editMode={true}
@@ -224,7 +223,7 @@ describe('AiModelRow', () => {
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
+    cy.mount(
       <AiModelRow
         id={0}
         editMode={false}
@@ -246,7 +245,7 @@ describe('AiModelRow', () => {
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
+    cy.mount(
       <AiModelRow
         id={0}
         editMode={false}

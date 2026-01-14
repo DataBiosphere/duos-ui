@@ -1,6 +1,5 @@
 import React from 'react'
 import StudyAssetRow, { StudyAssetRowProps } from 'src/components/study_asset/StudyAssetRow'
-import { mount } from 'cypress/react'
 
 interface TestAsset {
   id: string
@@ -67,7 +66,7 @@ describe('StudyAssetRow', () => {
 
   it('renders summary component when not in edit or view mode', () => {
     const props = createDefaultProps()
-    mount(<StudyAssetRow {...props} />)
+    cy.mount(<StudyAssetRow {...props} />)
     cy.get('[data-testid="summary-component"]').should('exist')
     cy.contains('Test Asset').should('exist')
     cy.get('[data-testid="add-edit-component"]').should('not.exist')
@@ -75,7 +74,7 @@ describe('StudyAssetRow', () => {
 
   it('renders add/edit component when in edit mode', () => {
     const props = createDefaultProps()
-    mount(<StudyAssetRow {...props} editMode={true} />)
+    cy.mount(<StudyAssetRow {...props} editMode={true} />)
     cy.get('[data-testid="add-edit-component"]').should('exist')
     cy.get('#assetName').should('have.value', 'Test Asset')
     cy.get('[data-testid="summary-component"]').should('not.exist')
@@ -83,7 +82,7 @@ describe('StudyAssetRow', () => {
 
   it('renders add/edit component in read-only mode when in view mode', () => {
     const props = createDefaultProps()
-    mount(<StudyAssetRow {...props} viewMode={true} />)
+    cy.mount(<StudyAssetRow {...props} viewMode={true} />)
     cy.get('[data-testid="add-edit-component"]').should('exist')
     cy.get('#assetName').should('be.disabled')
     cy.contains('Save').should('be.disabled')
@@ -92,7 +91,7 @@ describe('StudyAssetRow', () => {
 
   it('does not render add/edit component as read-only when in edit mode', () => {
     const props = createDefaultProps()
-    mount(<StudyAssetRow {...props} editMode={true} />)
+    cy.mount(<StudyAssetRow {...props} editMode={true} />)
     cy.get('#assetName').should('not.be.disabled')
     cy.contains('Save').should('not.be.disabled')
   })

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import Modal from 'react-modal'
 import { ThemeProvider } from '@mui/material/styles'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import 'src/App.css'
@@ -33,10 +32,6 @@ function App() {
   const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    Modal.setAppElement(document.getElementById('modal-root'))
-  })
 
   useEffect(() => {
     const setEnvironment = async () => {
@@ -84,12 +79,12 @@ function App() {
           if (linkInfo?.additionalState?.redirectTo) {
             // The redirectTo URL is expected to be a full URL, so we need to remove the origin part
             // to use navigate for the redirect.
-            navigate(linkInfo.additionalState.redirectTo.replace(window.location.origin, ''))
+            navigate(linkInfo.additionalState.redirectTo.replace(globalThis.location.origin, ''))
           }
         }
         catch (error) {
           Notifications.showError({
-            message: 'Error during RAS authentication: ' + extractError(error),
+            text: 'Error during RAS authentication: ' + extractError(error),
             description: 'There was an error processing your RAS authentication. Please try again.',
           })
         }
@@ -105,7 +100,7 @@ function App() {
     position: 'fixed',
     top: '45%',
     left: '45%',
-  }
+  } as React.CSSProperties
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={muiThemeFix}>

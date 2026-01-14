@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionWithMemberVotesTable'
 import { ElectionWithMemberVotes } from 'src/types/model'
 
@@ -142,7 +141,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
   const electionHistory: ElectionWithMemberVotes[] = [electionWithMemberVotes1, electionWithMemberVotes2, electionWithMemberVotes3]
 
   it('should render the table with specific headers', () => {
-    mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
+    cy.mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
 
     cy.get('.column-header').should('have.length', 6)
     cy.get(':nth-child(1) > .cell-sort').contains('Request Type')
@@ -154,7 +153,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
   })
 
   it('should display election rows with correct data in correct default order', () => {
-    mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
+    cy.mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
 
     cy.get('.row-data-0 > :nth-child(1)').contains('Progress Report')
     cy.get('.row-data-0 > :nth-child(2)').contains('DUOS-00404')
@@ -179,7 +178,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
   })
 
   it('should expand and collapse election rows', () => {
-    mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
+    cy.mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
     cy.get('.row-data-0 > :nth-child(1) > div > [data-testid="ExpandMoreIcon"]').click()
     cy.get('[style="width: 80%; margin: auto;"] > :nth-child(1) > .table-data').should('exist')
 
@@ -188,7 +187,7 @@ describe('ElectionWithMemberVotesTable Component Tests', () => {
   })
 
   it('should show member vote dropdown when election is expanded', () => {
-    mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
+    cy.mount(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
 
     cy.get('.row-data-0 > :nth-child(1) > div > [data-testid="ExpandMoreIcon"]').click()
     cy.get('[style="width: 80%; margin: auto;"] > :nth-child(1)').contains('Name')

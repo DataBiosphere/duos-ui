@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel'
 import { Storage } from 'src/libs/storage'
 import { BrowserRouter } from 'react-router-dom'
@@ -46,7 +45,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.stub(Storage, 'getCurrentUser').returns(user)
   })
   it('Renders no dataset information if bucketDatasets is empty', function () {
-    mount(
+    cy.mount(
       <DatasetsRequestedPanel
         bucketDatasets={[]}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
@@ -58,7 +57,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders no dataset information if bucketDatasets is null', function () {
-    mount(
+    cy.mount(
       <DatasetsRequestedPanel
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
         dacs={dacs}
@@ -69,7 +68,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders no dataset information if dacDatasetIds is empty', function () {
-    mount(
+    cy.mount(
       <DatasetsRequestedPanel
         bucketDatasets={bucketDatasets}
         dacDatasetIds={[]}
@@ -81,7 +80,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders no dataset information if dacDatasetIds is null', function () {
-    mount(
+    cy.mount(
       <DatasetsRequestedPanel
         bucketDatasets={bucketDatasets}
         dacs={dacs}
@@ -92,7 +91,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders no dataset information if there are no matches between bucket datasets and DAC dataset ids', function () {
-    mount(
+    cy.mount(
       <DatasetsRequestedPanel
         bucketDatasets={bucketDatasets}
         dacDatasetIds={[8, 9, 10]}
@@ -104,7 +103,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders less than five datasets without an expansion link', function () {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
@@ -125,7 +124,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders five datasets without an expansion link', function () {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
@@ -152,7 +151,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders more than five datasets with an expansion link', function () {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
@@ -184,7 +183,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Shows more or less datasets when link is clicked', function () {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
@@ -218,7 +217,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders filler dataset identifier if attribute is null', function () {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={[
@@ -238,7 +237,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders filler dataset name if attribute is null', function () {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={[
@@ -258,7 +257,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('Renders skeleton text when loading', function () {
-    mount(
+    cy.mount(
       <DatasetsRequestedPanel
         bucketDatasets={bucketDatasets}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
@@ -272,7 +271,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('shows all datasets if the viewing on the admin page', () => {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}
@@ -288,7 +287,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
   })
 
   it('shows all DACs in bucket', function () {
-    mount(
+    cy.mount(
       <BrowserRouter>
         <DatasetsRequestedPanel
           bucketDatasets={bucketDatasets}

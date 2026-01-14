@@ -1,6 +1,5 @@
 import React from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { mount } from 'cypress/react'
 import NotFound from 'src/pages/NotFound'
 
 const StudyDetailsComponent = () => <div data-cy="study-details-page">Study Details Page</div>
@@ -21,7 +20,7 @@ const LocationSpy = ({ onLocationChange }: LocationSpyProps) => {
 
 describe('NotFound', () => {
   it('should display the 404 page for a generic unknown path', () => {
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/some-unknown-path']}>
         <Routes>
           <Route path="*" element={<NotFound />} />
@@ -35,7 +34,7 @@ describe('NotFound', () => {
 
   it('should redirect from a DUOS-S path to the corresponding study details page', () => {
     const pageVisitStub = cy.stub()
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/DUOS-S12345']}>
         <LocationSpy onLocationChange={pageVisitStub} />
         <Routes>
@@ -51,7 +50,7 @@ describe('NotFound', () => {
 
   it('should redirect from a DUOS- path to the corresponding dataset statistics page', () => {
     const pageVisitStub = cy.stub()
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/DUOS-000123']}>
         <LocationSpy onLocationChange={pageVisitStub} />
         <Routes>
@@ -67,7 +66,7 @@ describe('NotFound', () => {
 
   it('should navigate to the home page when the "Back to Home" link is clicked', () => {
     const pageVisitStub = cy.stub()
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={['/some-unknown-path']}>
         <LocationSpy onLocationChange={pageVisitStub} />
         <Routes>

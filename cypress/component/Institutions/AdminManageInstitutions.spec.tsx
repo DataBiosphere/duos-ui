@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
 import { BrowserRouter } from 'react-router-dom'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
@@ -81,14 +80,14 @@ describe('AdminManageInstitutions', () => {
 
   it('renders', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(mockInstitutions))
-    mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
+    cy.mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
     cy.get('[data-cy="admin-manage-institutions"]').should('exist')
     cy.get('[data-cy="search-bar"]').should('exist')
   })
 
   it('displays all institutions in list', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(mockInstitutions))
-    mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
+    cy.mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
     mockInstitutions.forEach((institution) => {
       cy.contains(institution.name).should('exist')
       cy.contains(institution.id).should('exist')
@@ -114,7 +113,7 @@ describe('AdminManageInstitutions', () => {
 
   it('filters institutions on search', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(mockInstitutions))
-    mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
+    cy.mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
     const institution1 = mockInstitutions[0]
     const institution2 = mockInstitutions[1]
     cy.get('[data-cy="search-bar"]').clear()
@@ -137,7 +136,7 @@ describe('AdminManageInstitutions', () => {
 
   it('link Add Institution page', () => {
     cy.stub(InstitutionAPI, 'list').returns(Promise.resolve(mockInstitutions))
-    mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
+    cy.mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
     cy.get('[id="btn_addInstitution"]').should('contain', 'ADD INSTITUTION')
     cy.get('[id="btn_addInstitution"]').should('exist')
   })
@@ -149,7 +148,7 @@ describe('AdminManageInstitutions', () => {
         body: mockInstitutions,
       })
     })
-    mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
+    cy.mount(<BrowserRouter><AdminManageInstitutions /></BrowserRouter>)
     cy.get('[data-cy="table-skeleton-loader"]').should('exist')
     // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(1500) // Wait for the loading state to finish

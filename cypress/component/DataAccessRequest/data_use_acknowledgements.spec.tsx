@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
@@ -20,7 +19,7 @@ describe('DataUseAcknowledgements Component', () => {
       validation: {},
       ...customProps,
     }
-    return mount(<DataUseAcknowledgements {...defaultProps} />)
+    return cy.mount(<DataUseAcknowledgements {...defaultProps} />)
   }
 
   beforeEach(() => {

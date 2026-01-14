@@ -1,6 +1,5 @@
 /* eslint-disable cypress/unsafe-to-chain-command */
 import React from 'react'
-import { mount } from 'cypress/react'
 import { InstitutionDomainEditor } from 'src/components/institution_table/components/InstitutionDomainEditor'
 import { InstitutionInterface } from 'src/types/model'
 
@@ -12,7 +11,7 @@ describe('Institution Domain Editor Tests', () => {
   })
 
   it('should render domains in view mode', () => {
-    mount(<InstitutionDomainEditor domains={testDomains} isEditing={false} institutionList={[]} />)
+    cy.mount(<InstitutionDomainEditor domains={testDomains} isEditing={false} institutionList={[]} />)
 
     testDomains.forEach((domain) => {
       cy.contains(domain).should('exist')
@@ -22,13 +21,13 @@ describe('Institution Domain Editor Tests', () => {
   })
 
   it('should show message when no domains in view mode', () => {
-    mount(<InstitutionDomainEditor domains={[]} isEditing={false} institutionList={[]} />)
+    cy.mount(<InstitutionDomainEditor domains={[]} isEditing={false} institutionList={[]} />)
 
     cy.contains('This institution is not associated with any domains').should('be.visible')
   })
 
   it('should render domains and input field in edit mode', () => {
-    mount(<InstitutionDomainEditor domains={testDomains} isEditing={true} institutionList={[]} />)
+    cy.mount(<InstitutionDomainEditor domains={testDomains} isEditing={true} institutionList={[]} />)
 
     testDomains.forEach((domain) => {
       cy.contains(domain).should('exist')
@@ -42,7 +41,7 @@ describe('Institution Domain Editor Tests', () => {
     const newDomain = 'newdomain.com'
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
-    mount(
+    cy.mount(
       <InstitutionDomainEditor
         domains={testDomains}
         isEditing={true}
@@ -60,7 +59,7 @@ describe('Institution Domain Editor Tests', () => {
   it('should not add empty domains', () => {
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
-    mount(
+    cy.mount(
       <InstitutionDomainEditor
         domains={testDomains}
         isEditing={true}
@@ -77,7 +76,7 @@ describe('Institution Domain Editor Tests', () => {
     const newDomain = 'trimmed.com'
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
-    mount(
+    cy.mount(
       <InstitutionDomainEditor
         domains={testDomains}
         isEditing={true}
@@ -97,7 +96,7 @@ describe('Institution Domain Editor Tests', () => {
     const expectedLowercaseDomain = 'uppercase.com'
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
-    mount(
+    cy.mount(
       <InstitutionDomainEditor
         domains={testDomains}
         isEditing={true}
@@ -117,7 +116,7 @@ describe('Institution Domain Editor Tests', () => {
     const existingDomain = testDomains[0]
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
-    mount(
+    cy.mount(
       <InstitutionDomainEditor
         domains={testDomains}
         isEditing={true}
@@ -138,7 +137,7 @@ describe('Institution Domain Editor Tests', () => {
     const expectedDomains = testDomains.filter(domain => domain !== domainToDelete)
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
-    mount(
+    cy.mount(
       <InstitutionDomainEditor
         domains={testDomains}
         isEditing={true}
@@ -156,7 +155,7 @@ describe('Institution Domain Editor Tests', () => {
   })
 
   it('should not show delete buttons in view mode', () => {
-    mount(<InstitutionDomainEditor domains={testDomains} isEditing={false} institutionList={[]} />)
+    cy.mount(<InstitutionDomainEditor domains={testDomains} isEditing={false} institutionList={[]} />)
 
     cy.contains(testDomains[0])
       .parent()
@@ -174,7 +173,7 @@ describe('Institution Domain Editor Tests', () => {
     ] as InstitutionInterface[]
     const onDomainsChange = cy.stub().as('domainsChangeHandler')
 
-    mount(
+    cy.mount(
       <InstitutionDomainEditor
         domains={['d.com']}
         isEditing={true}
@@ -198,7 +197,7 @@ describe('Institution Domain Editor Tests', () => {
     })
 
     it('should reject invalid domain formats', () => {
-      mount(
+      cy.mount(
         <InstitutionDomainEditor
           domains={[]}
           isEditing={true}
@@ -237,7 +236,7 @@ describe('Institution Domain Editor Tests', () => {
     })
 
     it('should accept valid domain formats', () => {
-      mount(
+      cy.mount(
         <InstitutionDomainEditor
           domains={[]}
           isEditing={true}
@@ -281,7 +280,7 @@ describe('Institution Domain Editor Tests', () => {
     })
 
     it('should handle international domain names (IDN)', () => {
-      mount(
+      cy.mount(
         <InstitutionDomainEditor
           domains={[]}
           isEditing={true}
@@ -305,7 +304,7 @@ describe('Institution Domain Editor Tests', () => {
     })
 
     it('should validate domain on Enter key press', () => {
-      mount(
+      cy.mount(
         <InstitutionDomainEditor
           domains={[]}
           isEditing={true}
@@ -319,7 +318,7 @@ describe('Institution Domain Editor Tests', () => {
     })
 
     it('should not add domain on Enter if validation fails', () => {
-      mount(
+      cy.mount(
         <InstitutionDomainEditor
           domains={[]}
           isEditing={true}
@@ -334,7 +333,7 @@ describe('Institution Domain Editor Tests', () => {
     })
 
     it('should clear error message when typing new domain after error', () => {
-      mount(
+      cy.mount(
         <InstitutionDomainEditor
           domains={[]}
           isEditing={true}
@@ -354,7 +353,7 @@ describe('Institution Domain Editor Tests', () => {
     })
 
     it('should show specific error messages for different validation failures', () => {
-      mount(
+      cy.mount(
         <InstitutionDomainEditor
           domains={['existing.com']}
           isEditing={true}

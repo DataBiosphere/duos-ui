@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import { AsyncSpinnerMuiButton } from 'src/components/AsyncSpinnerMuiButton'
 
@@ -6,7 +5,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('renders the button with children', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton onClick={mockOnClick}>
         Test Button
       </AsyncSpinnerMuiButton>,
@@ -20,7 +19,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('applies MUI Button props correctly', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         variant="contained"
@@ -40,7 +39,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('accepts custom className and sx props', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         className="custom-button-class"
@@ -63,7 +62,7 @@ describe('AsyncSpinnerMuiButton', () => {
     })
     const mockOnClick = cy.stub().returns(asyncAction)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton onClick={mockOnClick} data-cy="loading-button">
         Loading Button
       </AsyncSpinnerMuiButton>,
@@ -94,7 +93,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('disappears after successful action when hideOnSuccess is true', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         hideOnSuccess={true}
@@ -116,7 +115,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('remains visible after successful action when hideOnSuccess is false', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         hideOnSuccess={false}
@@ -147,7 +146,7 @@ describe('AsyncSpinnerMuiButton', () => {
       return Promise.resolve()
     })
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton onClick={mockOnClick} data-cy="error-button">
         Error Button
       </AsyncSpinnerMuiButton>,
@@ -177,7 +176,7 @@ describe('AsyncSpinnerMuiButton', () => {
     const mockOnClick = cy.stub()
     cy.wrap(mockOnClick).as('mockOnClick')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         disabled={true}
@@ -202,7 +201,7 @@ describe('AsyncSpinnerMuiButton', () => {
     const mockOnClick = cy.stub().returns(asyncAction)
     cy.wrap(mockOnClick).as('mockOnClick')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         data-cy="multi-click-button"
@@ -235,7 +234,7 @@ describe('AsyncSpinnerMuiButton', () => {
     const mockOnError = cy.stub()
     cy.wrap(mockOnError).as('mockOnError')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         onError={mockOnError}
@@ -255,7 +254,7 @@ describe('AsyncSpinnerMuiButton', () => {
     const mockOnError = cy.stub()
     cy.wrap(mockOnError).as('mockOnError')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         onError={mockOnError}
@@ -274,7 +273,7 @@ describe('AsyncSpinnerMuiButton', () => {
     const mockOnClick = cy.stub().resolves()
     cy.wrap(mockOnClick).as('mockOnClick')
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         hideOnSuccess={false}
@@ -301,7 +300,7 @@ describe('AsyncSpinnerMuiButton', () => {
     })
     const mockOnClick = cy.stub().returns(asyncAction)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         hideOnSuccess={false}
@@ -332,7 +331,7 @@ describe('AsyncSpinnerMuiButton', () => {
     const error = new Error('Test error')
     const mockOnClick = cy.stub().rejects(error)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         hideOnSuccess={true}
@@ -353,7 +352,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('applies MUI variant and color props', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <div>
         <AsyncSpinnerMuiButton
           onClick={mockOnClick}
@@ -386,7 +385,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('supports MUI size prop', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <div>
         <AsyncSpinnerMuiButton
           onClick={mockOnClick}
@@ -415,7 +414,7 @@ describe('AsyncSpinnerMuiButton', () => {
   it('supports MUI fullWidth prop', () => {
     const mockOnClick = cy.stub().resolves()
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         fullWidth
@@ -436,7 +435,7 @@ describe('AsyncSpinnerMuiButton', () => {
     })
     const mockOnClick = cy.stub().returns(asyncAction)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         data-cy="spinner-size-button"
@@ -464,7 +463,7 @@ describe('AsyncSpinnerMuiButton', () => {
     })
     const mockOnClick = cy.stub().returns(asyncAction)
 
-    mount(
+    cy.mount(
       <AsyncSpinnerMuiButton
         onClick={mockOnClick}
         disabled={false}

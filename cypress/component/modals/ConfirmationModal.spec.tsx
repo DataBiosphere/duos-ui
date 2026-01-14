@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import ConfirmationModal from '../../../src/components/modals/ConfirmationModal'
 
 describe('ConfirmationModal z-index Tests', () => {
@@ -13,7 +12,7 @@ describe('ConfirmationModal z-index Tests', () => {
       onConfirm: () => {},
     }
 
-    mount(<ConfirmationModal {...mockProps} />)
+    cy.mount(<ConfirmationModal {...mockProps} />)
 
     // Check that modal content has the correct z-index
     cy.get('.confirmation-modal')
@@ -36,7 +35,7 @@ describe('ConfirmationModal z-index Tests', () => {
       onConfirm: cy.stub(),
     }
 
-    mount(<ConfirmationModal {...mockProps} />)
+    cy.mount(<ConfirmationModal {...mockProps} />)
 
     cy.get('.confirmation-modal-header').should('contain', 'DAR-123 - Test Project')
     cy.get('.confirmation-modal-title').should('contain', 'Delete DAR')

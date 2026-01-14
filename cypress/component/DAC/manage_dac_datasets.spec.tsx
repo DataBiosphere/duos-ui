@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
@@ -32,7 +31,7 @@ const locationState = { dac: { name: 'Test DAC' }, datasets }
 
 describe('ManageDacDatasets Component', () => {
   beforeEach(() => {
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={[{ pathname: '/manage_dac_datasets', state: locationState }]}>
         <Routes>
           <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
@@ -59,7 +58,7 @@ describe('ManageDacDatasets Component', () => {
       ],
     }
 
-    mount(
+    cy.mount(
       <MemoryRouter initialEntries={[{ pathname: '/manage_dac_datasets', state: locationState }]}>
         <Routes>
           <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />

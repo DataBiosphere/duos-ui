@@ -1,4 +1,3 @@
-import { mount } from 'cypress/react'
 import React from 'react'
 import ResearcherStatus from 'src/pages/user_profile/ResearcherStatus'
 import { DAAObject, DuosUser, FileStorageObject, SimplifiedDuosUser } from 'src/types/model'
@@ -79,7 +78,7 @@ describe('ResearcherStatus', () => {
       },
     }
 
-    mount(<ResearcherStatus user={userWithCard} />)
+    cy.mount(<ResearcherStatus user={userWithCard} />)
     cy.contains('Researcher Status')
     cy.contains('RAS Account')
     cy.contains('Library Card issued to you')
@@ -90,7 +89,7 @@ describe('ResearcherStatus', () => {
   it('Renders the Researcher Status Without Library Card Info', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser])
 
-    mount(<ResearcherStatus user={user} />)
+    cy.mount(<ResearcherStatus user={user} />)
     cy.contains('No Library Card Found')
   })
 
@@ -109,7 +108,7 @@ describe('ResearcherStatus', () => {
         },
       },
     }
-    mount(<ResearcherStatus user={userWithCard} />)
+    cy.mount(<ResearcherStatus user={userWithCard} />)
     cy.contains('No Signing Official found for your institution')
     cy.contains('help article')
   })
@@ -129,7 +128,7 @@ describe('ResearcherStatus', () => {
         },
       },
     }
-    mount(<ResearcherStatus user={userWithCard} />)
+    cy.mount(<ResearcherStatus user={userWithCard} />)
     cy.contains('Signing Official(s):')
     cy.contains('Signing Official - so@test.com')
   })

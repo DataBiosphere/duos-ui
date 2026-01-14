@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import PublicationList from 'src/components/publications_list/PublicationList'
 import PublicationAddEdit from 'src/components/publications_list/PublicationAddEdit'
 import PublicationRow from 'src/components/publications_list/PublicationRow'
@@ -43,14 +42,14 @@ const PublicationListHarness: React.FC<{ initial: Publication[] }> = ({ initial 
 
 describe('PublicationList component', () => {
   it('renders existing publications', () => {
-    mount(<PublicationListHarness initial={[samplePublication]} />)
+    cy.mount(<PublicationListHarness initial={[samplePublication]} />)
     cy.contains(samplePublication.title).should('exist')
     cy.contains(samplePublication.journal).should('exist')
   })
 
   it('fills in and saves a new publication', () => {
     const collected: Publication[] = []
-    mount(
+    cy.mount(
       <PublicationAddEdit
         id={-1}
         publications={[]}
@@ -84,7 +83,7 @@ describe('PublicationList component', () => {
   })
 
   it('opens publication in view mode when view button is clicked', () => {
-    mount(<PublicationListHarness initial={[samplePublication]} />)
+    cy.mount(<PublicationListHarness initial={[samplePublication]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.contains(samplePublication.title).should('exist')
     cy.get('#title').should('be.disabled')
@@ -94,7 +93,7 @@ describe('PublicationList component', () => {
   })
 
   it('closes view mode when close button is clicked', () => {
-    mount(<PublicationListHarness initial={[samplePublication]} />)
+    cy.mount(<PublicationListHarness initial={[samplePublication]} />)
     cy.get('.glyphicon-eye-open').click({ force: true })
     cy.get('.collaborator-form-cancel-button').click()
     cy.get('#title').should('not.exist')
@@ -102,7 +101,7 @@ describe('PublicationList component', () => {
   })
 
   it('shows validation errors on empty form', () => {
-    mount(
+    cy.mount(
       <PublicationAddEdit
         id={-1}
         publications={[]}
@@ -116,7 +115,7 @@ describe('PublicationList component', () => {
   })
 
   it('disables Add Author until first row has name filled', () => {
-    mount(
+    cy.mount(
       <PublicationAddEdit
         id={-1}
         publications={[]}
@@ -133,7 +132,7 @@ describe('PublicationList component', () => {
   })
 
   it('shows per-author ORCID format error', () => {
-    mount(
+    cy.mount(
       <PublicationAddEdit
         id={-1}
         publications={[]}
@@ -150,7 +149,7 @@ describe('PublicationList component', () => {
 
 describe('PublicationSummary', () => {
   it('renders columns including authors list', () => {
-    mount(
+    cy.mount(
       <PublicationSummary
         publication={samplePublication}
         columnsToShow={['title', 'journal', 'authors', 'url', 'tags']}
@@ -166,7 +165,7 @@ describe('PublicationSummary', () => {
   })
 
   it('renders view button and triggers viewAction', () => {
-    mount(
+    cy.mount(
       <PublicationSummary
         publication={samplePublication}
         columnsToShow={['title', 'publishedDate']}
@@ -184,7 +183,7 @@ describe('PublicationSummary', () => {
 
 describe('PublicationRow', () => {
   it('shows summary when not in edit mode and triggers editAction', () => {
-    mount(
+    cy.mount(
       <PublicationRow
         id={0}
         editMode={false}
@@ -204,7 +203,7 @@ describe('PublicationRow', () => {
   })
 
   it('renders edit form when editMode true', () => {
-    mount(
+    cy.mount(
       <PublicationRow
         id={0}
         editMode={true}
@@ -222,7 +221,7 @@ describe('PublicationRow', () => {
   })
 
   it('renders view form when viewMode true and is read-only', () => {
-    mount(
+    cy.mount(
       <PublicationRow
         id={0}
         editMode={false}
@@ -244,7 +243,7 @@ describe('PublicationRow', () => {
   })
 
   it('triggers viewAction when view button is clicked', () => {
-    mount(
+    cy.mount(
       <PublicationRow
         id={0}
         editMode={false}
@@ -268,7 +267,7 @@ describe('PublicationRow', () => {
 describe('Publication delete flow', () => {
   it('deletes a publication via modal confirmation', () => {
     testDeleteViaModal(
-      () => mount(<PublicationListHarness initial={[samplePublication]} />),
+      () => cy.mount(<PublicationListHarness initial={[samplePublication]} />),
       samplePublication.title,
     )
   })

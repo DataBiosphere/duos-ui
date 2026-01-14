@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { SearchSelect } from 'src/components/SearchSelect'
 
 const options = [
@@ -10,7 +9,7 @@ const options = [
 
 describe('<SearchSelect />', () => {
   it('renders with empty value', () => {
-    mount(
+    cy.mount(
       <SearchSelect
         onSelection={cy.stub().as('onSelection')}
         placeholder="Select an option"
@@ -23,7 +22,7 @@ describe('<SearchSelect />', () => {
   })
 
   it('preselects option when value matches', () => {
-    mount(
+    cy.mount(
       <SearchSelect
         onSelection={cy.stub().as('onSelection')}
         placeholder="Select an option"
@@ -36,7 +35,7 @@ describe('<SearchSelect />', () => {
   })
 
   it('calls onSelection when user selects an option', () => {
-    mount(
+    cy.mount(
       <SearchSelect
         onSelection={cy.stub().as('onSelection')}
         placeholder="Select an option"
@@ -51,7 +50,7 @@ describe('<SearchSelect />', () => {
   })
 
   it('does not allow interaction when disabled', () => {
-    mount(
+    cy.mount(
       <SearchSelect
         onSelection={cy.stub().as('onSelection')}
         placeholder="Disabled select"

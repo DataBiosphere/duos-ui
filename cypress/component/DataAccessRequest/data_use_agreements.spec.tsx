@@ -1,6 +1,5 @@
 import React from 'react'
 import { DataUseAgreements, DataUseAgreementsProps } from 'src/pages/dar_application/DataUseAgreements'
-import { mount } from 'cypress/react'
 
 describe('DataUseAgreements Component Tests', () => {
   let saveSpy: () => void
@@ -16,7 +15,7 @@ describe('DataUseAgreements Component Tests', () => {
       cancelAttest: cancelAttestSpy,
       ...customProps,
     } as DataUseAgreementsProps
-    return mount(<DataUseAgreements {...defaultProps} />)
+    return cy.mount(<DataUseAgreements {...defaultProps} />)
   }
 
   beforeEach(() => {

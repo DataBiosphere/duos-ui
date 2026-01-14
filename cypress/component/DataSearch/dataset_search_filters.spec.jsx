@@ -1,5 +1,4 @@
 import { makeDatasetTerm, makeStudyTerm } from '../test-utils'
-import { mount } from 'cypress/react'
 import React from 'react'
 import { defaultFilters } from 'src/components/data_search/DatasetFilterConstants'
 import DatasetFilterList from 'src/components/data_search/DatasetFilterList'
@@ -37,7 +36,7 @@ describe('Data Library Filters', () => {
 
   it('Renders the data library filters', () => {
     const props = { datasets, filters: defaultFilters(datasets), filterHandler: () => {}, isFiltered: () => {} }
-    mount(<DatasetFilterList {...props} />)
+    cy.mount(<DatasetFilterList {...props} />)
     cy.get('div').should('contain', 'Filters')
     cy.get('div').should('contain', 'Access Type')
     cy.get('div').should('contain', 'Data Use')
@@ -48,7 +47,7 @@ describe('Data Library Filters', () => {
 
   it('initially defaults to minimum and maximum participant counts in datasets', () => {
     const props = { datasets, filters: defaultFilters(datasets), filterHandler: () => {}, isFiltered: () => {} }
-    mount(<DatasetFilterList {...props} />)
+    cy.mount(<DatasetFilterList {...props} />)
     cy.get('#participantCountMax-range-input').should('have.value',
       datasets[0].participantCount)
     cy.get('#participantCountMin-range-input').should('have.value',
@@ -58,7 +57,7 @@ describe('Data Library Filters', () => {
   it('calls the filter handler on range changes', () => {
     const filterHandlerStub = cy.stub()
     const props = { datasets, filters: { ...defaultFilters(datasets), participantCountMin: 2, participantCountMax: 5 }, filterHandler: filterHandlerStub, isFiltered: () => {} }
-    mount(<DatasetFilterList {...props} />)
+    cy.mount(<DatasetFilterList {...props} />)
     cy.get('#participantCountMax-range-input').type('3')
     filterHandlerStub.calledWith('participantCountMax', 53)
     cy.get('#participantCountMin-range-input').type('3')

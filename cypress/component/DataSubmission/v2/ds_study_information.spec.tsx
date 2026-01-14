@@ -1,5 +1,4 @@
 import React from 'react'
-import { mount } from 'cypress/react'
 import { cloneDeep } from 'lodash'
 import {
   GeneralStudyInformation, GeneralStudyInformationProps,
@@ -18,7 +17,7 @@ beforeEach(() => {
 
 describe('GeneralStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
-    mount(<GeneralStudyInformation {...propCopy} />)
+    cy.mount(<GeneralStudyInformation {...propCopy} />)
     cy.get('.formField-container').should('have.length', 12)
 
     cy.get('.formField-name').should('have.length', 1)
@@ -37,7 +36,7 @@ describe('GeneralStudyInformation - Tests', () => {
 
   it('should allow edit in all fields', () => {
     cy.spy(propCopy, 'setStudy').as('setStudySpy')
-    mount(<GeneralStudyInformation {...propCopy} />)
+    cy.mount(<GeneralStudyInformation {...propCopy} />)
     cy.get('.formField-name').type('A Study Name')
     cy.get('@setStudySpy').its('callCount').should('eq', 12)
     cy.get('.formField-studyType').type('Observational{enter}')
