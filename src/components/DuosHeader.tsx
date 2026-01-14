@@ -321,11 +321,11 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     const subtabIndex = renderedSubtabs.findIndex(
       subtab => subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search)),
     )
-    if (subtabIndex !== -1) {
-      initialSubTab = subtabIndex
+    if (subtabIndex === -1) {
+      initialSubTab = -1
     }
     else {
-      initialSubTab = -1
+      initialSubTab = subtabIndex
     }
   }
 
