@@ -132,7 +132,11 @@ async function fetchRequest<T>(
     const res = await fetchFn(fullUrl, fetchOptions)
     return handleResponse<T>(res, fullUrl, responseType, method)
   }
-  catch {
+  catch (error) {
+    // Re-throw AbortError without reporting
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error
+    }
     reportError(fullUrl, 502)
     throw new Error(`Request to ${fullUrl} failed with status 502`)
   }
