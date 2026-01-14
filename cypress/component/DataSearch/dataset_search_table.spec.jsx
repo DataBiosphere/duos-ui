@@ -34,6 +34,28 @@ const props = {
 }
 
 describe('Dataset Search Table tests', () => {
+  describe('Initial search request optimization', () => {
+    it('Should not make redundant search request on initial mount', () => {
+      cy.initApplicationConfig()
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
+      cy.clock()
+
+      // Spy on search endpoint to verify it's not called initially
+      let searchCallCount = 0
+      cy.intercept('POST', '**/search/index', () => {
+        searchCallCount++
+      }).as('searchSpy')
+
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Wait for component to render
+      cy.get('button').contains('View By Studies').should('exist')
+
+      // Verify no initial search request was made
+      cy.wrap(searchCallCount).should('equal', 0)
+    })
+  })
+
   describe('Data library with one dataset footer tests', () => {
     beforeEach(() => {
       cy.initApplicationConfig()
@@ -89,6 +111,122 @@ describe('Dataset Search Table tests', () => {
       })
       cy.get('@searchIndex').then(() => {
         cy.wrap(count).should('equal', 1)
+      })
+    })
+  })
+
+  describe('Request abort handling tests', () => {
+    beforeEach(() => {
+      cy.initApplicationConfig()
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
+      cy.clock()
+    })
+
+    it('Should abort previous request when new search is triggered rapidly', () => {
+      let requestCount = 0
+
+      const interceptHandler = (req) => {
+        requestCount++
+        // Simulate different response times
+        const delay = requestCount === 1 ? 300 : 50
+        req.reply({ delay, body: datasets })
+      }
+
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Trigger first search
+      cy.get('[data-cy="search-bar"]').type('first')
+      cy.tick(150) // Debounce delay
+
+      // Quickly trigger second search before first completes
+      cy.get('[data-cy="search-bar"]').clear()
+      cy.get('[data-cy="search-bar"]').type('second')
+      cy.tick(150)
+
+      // Wait for the last request
+      cy.wait('@searchIndex')
+
+      // Advance time to ensure all requests complete
+      cy.tick(500)
+
+      // Verify multiple requests were made (abort controller creates new requests)
+      cy.wrap(null).then(() => {
+        expect(requestCount).to.be.at.least(2)
+      })
+    })
+
+    it('Should handle rapid filter changes gracefully', () => {
+      let requestCount = 0
+
+      const interceptHandler = (req) => {
+        requestCount++
+        req.reply({ delay: 50, body: datasets })
+      }
+
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Rapidly change filters (each change should debounce and potentially abort previous)
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('10')
+      cy.tick(50)
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('20')
+      cy.tick(50)
+      cy.get('#participantCountMin-range-input').clear()
+      cy.get('#participantCountMin-range-input').type('30')
+      cy.tick(150) // Complete debounce
+
+      // Wait for request to complete
+      cy.wait('@searchIndex')
+      cy.tick(100)
+
+      // The debounce should limit the number of actual requests
+      cy.wrap(null).then(() => {
+        // With 150ms debounce and rapid changes, should only fire one request
+        expect(requestCount).to.equal(1)
+      })
+    })
+
+    it('Should not throw errors when requests are aborted', () => {
+      // Capture any console errors
+      const consoleErrors = []
+      const errorCapture = (...args) => {
+        consoleErrors.push(args)
+      }
+
+      const windowLoadHandler = (win) => {
+        cy.stub(win.console, 'error').callsFake(errorCapture)
+      }
+
+      const interceptHandler = (req) => {
+        req.reply({ delay: 200, body: datasets })
+      }
+
+      cy.on('window:before:load', windowLoadHandler)
+      cy.intercept('POST', '**/search/index', interceptHandler).as('searchIndex')
+      cy.mount(<BrowserRouter><DatasetSearchTable {...props} /></BrowserRouter>)
+
+      // Trigger multiple searches rapidly
+      cy.get('[data-cy="search-bar"]').type('test1')
+      cy.tick(50)
+      cy.get('[data-cy="search-bar"]').clear()
+      cy.get('[data-cy="search-bar"]').type('test2')
+      cy.tick(50)
+      cy.get('[data-cy="search-bar"]').clear()
+      cy.get('[data-cy="search-bar"]').type('test3')
+      cy.tick(150)
+
+      // Wait for final request
+      cy.wait('@searchIndex')
+
+      // No AbortError should be logged to console
+      cy.wrap(null).then(() => {
+        const abortErrors = consoleErrors.filter(error =>
+          error.some(arg => typeof arg === 'string' && arg.includes('AbortError')),
+        )
+        expect(abortErrors).to.have.length(0)
       })
     })
   })

@@ -43,6 +43,7 @@ export const DatasetSearchTable = (props) => {
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study)
   const [searchTerm, setSearchTerm] = useState('')
   const searchRef = useRef('')
+  const hasRunInitialSearch = useRef(false)
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1
 
@@ -65,7 +66,7 @@ export const DatasetSearchTable = (props) => {
     }
   }
 
-  const assembleFullQuery = () => {
+  const assembleFullQuery = useCallback(() => {
     const queryChunks = [
       {
         match: {
@@ -185,7 +186,7 @@ export const DatasetSearchTable = (props) => {
         },
       },
     }
-  }
+  }, [searchTerm, filters])
 
   const filterHandler = (category, filter) => {
     let newFilter
@@ -210,32 +211,64 @@ export const DatasetSearchTable = (props) => {
       return
     }
     getExportableDatasets(datasets)
-  }, [])
+  }, [datasets])
 
-  const searchAndFilter = useRef(
-    debounce((fullQuery) => {
-      DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-        const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)))
-        setFiltered(newFiltered)
+  const abortControllerRef = useRef(null)
+
+  const searchAndFilter = useCallback((fullQuery) => {
+    // Cancel any pending debounced calls
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController()
+    const signal = abortControllerRef.current.signal
+
+    DataSet.searchDatasetIndex(fullQuery, { signal })
+      .then((filteredDatasets) => {
+        if (!signal.aborted) {
+          const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)))
+          setFiltered(newFiltered)
+        }
       })
+      .catch((error) => {
+        // Don't show error for aborted requests
+        if (error.name !== 'AbortError' && !signal.aborted) {
+          Notifications.showError({ text: 'Failed to load Elasticsearch index' })
+        }
+      })
+  }, [datasets])
+
+  const debouncedSearchAndFilter = useRef(
+    debounce((fullQuery) => {
+      searchAndFilter(fullQuery)
     }, 150))
 
-  const handleSearchChange = useCallback(searchTerms => setSearchTerm(searchTerms))
+  const handleSearchChange = useCallback(searchTerms => setSearchTerm(searchTerms), [])
 
   useEffect(() => {
+    if (!hasRunInitialSearch.current) {
+      hasRunInitialSearch.current = true
+      setFiltered(datasets)
+      return
+    }
+
     const fullQuery = assembleFullQuery()
     try {
-      searchAndFilter.current(fullQuery)
+      debouncedSearchAndFilter.current(fullQuery)
     }
     catch (_error) {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' })
-    }  }, [filters, searchTerm]); // eslint-disable-line
+    }
 
-  DatasetSearchTable.propTypes = {
-    datasets: PropTypes.array.isRequired,
-    icon: PropTypes.string,
-    title: PropTypes.string,
-  }
+    // Cleanup: abort request if component unmounts or dependencies change
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [filters, searchTerm, searchAndFilter]); // eslint-disable-line
 
   return (
     <>
@@ -298,6 +331,12 @@ export const DatasetSearchTable = (props) => {
       </Box>
     </>
   )
+}
+
+DatasetSearchTable.propTypes = {
+  datasets: PropTypes.array.isRequired,
+  icon: PropTypes.string,
+  title: PropTypes.string,
 }
 
 export default DatasetSearchTable
