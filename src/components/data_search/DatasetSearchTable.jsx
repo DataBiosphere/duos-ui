@@ -240,13 +240,22 @@ export const DatasetSearchTable = (props) => {
       })
   }, [datasets])
 
-  const debouncedSearchAndFilter = useRef(
-    debounce((fullQuery) => {
-      searchAndFilter(fullQuery)
-    }, 150))
-
   const handleSearchChange = useCallback(searchTerms => setSearchTerm(searchTerms), [])
 
+  // Create a ref for the debounced function
+  const debouncedSearchAndFilter = useRef()
+
+  // Update the debounced function when searchAndFilter changes
+  useEffect(() => {
+    debouncedSearchAndFilter.current = debounce((fullQuery) => {
+      searchAndFilter(fullQuery)
+    }, 150)
+    return () => {
+      debouncedSearchAndFilter.current.cancel()
+    }
+  }, [searchAndFilter])
+
+  // Use debounced function in effect
   useEffect(() => {
     if (!hasRunInitialSearch.current) {
       hasRunInitialSearch.current = true
@@ -264,11 +273,10 @@ export const DatasetSearchTable = (props) => {
 
     // Cleanup: abort request if component unmounts or dependencies change
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
+      if (debouncedSearchAndFilter.current) debouncedSearchAndFilter.current.cancel()
+      if (abortControllerRef.current) abortControllerRef.current.abort()
     }
-  }, [filters, searchTerm, searchAndFilter]); // eslint-disable-line
+  }, [filters, searchTerm, searchAndFilter, assembleFullQuery, datasets])
 
   return (
     <>
