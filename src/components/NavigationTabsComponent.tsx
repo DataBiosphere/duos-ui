@@ -2,7 +2,7 @@ import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { isFunction, isNil } from 'lodash/fp.js'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'
 
@@ -101,14 +101,6 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
     tabs, initialTab, initialSubTab,
     onSubtabChange, showProfileLinks, profileState,
   } = props
-  const [selectedMenuTab, setSelectedMenuTab] = useState<number>(-1)
-  const [selectedSubTab, setSelectedSubTab] = useState<number>(-1)
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedMenuTab(initialTab)
-    setSelectedSubTab(initialSubTab)
-  }, [initialTab, initialSubTab])
 
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
@@ -130,7 +122,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
             isLogged && (
               <Box className="duos-navigation-box">
                 <Tabs
-                  value={selectedMenuTab}
+                  value={initialTab}
                   variant="scrollable"
                   scrollButtons="auto"
                   orientation={orientation}
@@ -140,9 +132,9 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                     <Tab
                       key={`${tab.link}_${tabIndex}`}
                       label={tab.label}
-                      style={selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab}
+                      style={initialTab === tabIndex ? styles.mainTabActive : styles.mainTab}
                       to={{ pathname: tab.link }}
-                      state={{ selectedMenuTab: tabIndex }}
+                      state={{ initialTab: tabIndex }}
                       component={Link}
                     />
                   ))}
@@ -266,17 +258,17 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
       </ul>
 
       {/* Sub Tabs */}
-      {tabs[selectedMenuTab as number]?.children && (
+      {tabs[initialTab as number]?.children && (
         <Box className="duos-navigation-box navbar-sub">
           <Tabs
-            value={selectedSubTab}
+            value={initialSubTab}
             variant="scrollable"
             scrollButtons="auto"
             orientation={orientation}
             sx={{ '& .MuiTabs-indicator': { background: '#00609f' } }}
             onChange={onSubtabChange}
           >
-            {tabs[selectedMenuTab as number].children?.map((tab, tabIndex) => {
+            {tabs[initialTab as number].children?.map((tab, tabIndex) => {
               // Default to displaying the sub tab if no render function exists for it
               const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered()
               const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser)))
@@ -287,9 +279,9 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                     <Tab
                       key={`${tab.link}_${tabIndex}`}
                       label={tab.label}
-                      style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
+                      style={initialSubTab === tabIndex ? styles.subTabActive : styles.subTab}
                       to={{ pathname: tab.link }}
-                      state={{ selectedMenuTab: selectedMenuTab }}
+                      state={{ initialTab: initialTab }}
                       component={Link}
                     />
                   )
