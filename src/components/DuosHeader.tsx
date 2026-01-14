@@ -25,7 +25,7 @@ interface SubTab {
   isRenderedForUser?: (user: DuosUser) => boolean
 }
 
-interface Tab {
+export interface Tab {
   label: string
   link: string
   search?: string
@@ -329,6 +329,13 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     }
   }
 
+  if (initialTab === -1) {
+    initialTab = 0
+  }
+  if (initialSubTab === -1) {
+    initialSubTab = 0
+  }
+
   return (
     <nav className="navbar-duos" role="navigation">
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -352,6 +359,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
             orientation="horizontal"
             showProfileLinks={profileLinks}
             profileState={state.showProfileLinks}
+            onSubtabChange={() => {}}
           />
         </div>
       </Box>
@@ -386,7 +394,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
           >
             <NavigationTabsComponent
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
-              makeNotifications={() => {}}
+              makeNotifications={() => null}
               duosLogoImage={duosLogoImage}
               DuosLogo={DuosLogo}
               navbarDuosIcon={navbarDuosIcon}

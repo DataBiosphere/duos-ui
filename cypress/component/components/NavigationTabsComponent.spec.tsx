@@ -1,6 +1,23 @@
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent'
+import { DuosUser } from 'src/types/model'
+
+const mockUser: DuosUser = {
+  createDate: new Date(),
+  displayName: 'Test User',
+  email: 'test@example.com',
+  emailPreference: false,
+  isAdmin: false,
+  isAlumni: false,
+  isChairPerson: false,
+  isDataSubmitter: false,
+  isMember: false,
+  isResearcher: false,
+  isSigningOfficial: false,
+  roles: [],
+  userId: 1,
+}
 
 const createMockProps = () => {
   const stubs = {
@@ -18,7 +35,7 @@ const createMockProps = () => {
     duosLogoImage: {},
     DuosLogo: 'logo.png',
     navbarDuosText: {},
-    currentUser: { displayName: 'Test User', email: 'test@example.com' },
+    currentUser: mockUser,
     signOut: stubs.signOut,
     isLogged: true,
     contactUsButton: <button>Contact</button>,
@@ -28,14 +45,16 @@ const createMockProps = () => {
       {
         label: 'Tab 1',
         link: '/tab1',
+        isRendered: () => true,
         children: [
-          { label: 'SubTab 1', link: '/tab1/sub1' },
-          { label: 'SubTab 2', link: '/tab1/sub2' },
+          { label: 'SubTab 1', link: '/tab1/sub1', isRendered: () => true },
+          { label: 'SubTab 2', link: '/tab1/sub2', isRendered: () => true },
         ],
       },
       {
         label: 'Tab 2',
         link: '/tab2',
+        isRendered: () => true,
       },
     ],
     initialTab: 0,
@@ -147,6 +166,7 @@ describe('NavigationTabsComponent', () => {
       {
         label: 'Tab 1',
         link: '/tab1',
+        isRendered: () => true,
         children: [
           { label: 'Visible SubTab', link: '/tab1/sub1', isRendered: () => true },
           { label: 'Hidden SubTab', link: '/tab1/sub2', isRendered: () => false },
