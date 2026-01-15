@@ -97,8 +97,8 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
     profileState,
   } = props
 
-  const [selectedMenuTab, setSelectedMenuTab] = useState(-1)
-  const [selectedSubTab, setSelectedSubTab] = useState(-1)
+  const [selectedMenuTab, setSelectedMenuTab] = useState(0)
+  const [selectedSubTab, setSelectedSubTab] = useState(0)
 
   useEffect(() => {
     setSelectedMenuTab(initialTab)
