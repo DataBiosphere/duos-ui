@@ -123,7 +123,8 @@ export const computeCollaboratorErrors = ({
     errors.email = { valid: false, failed: ['email'] }
   }
   if (needsApproverStatus) {
-    if (isNil(collaborator?.approverStatus)) {
+    const approverStatus = collaborator?.approverStatus
+    if (!approverStatus) {
       errors.approverStatus = requiredError
     }
   }
