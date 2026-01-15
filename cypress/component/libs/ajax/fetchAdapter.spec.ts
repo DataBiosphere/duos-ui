@@ -451,64 +451,68 @@ describe('fetchAdapter - Fetch methods', () => {
   })
 
   describe('Error handling with axios-like structure', () => {
-    it('fetchPost - should throw error with response.data structure on 400', () => {
-      cy.window().then((win) => {
-        const errorMessage = 'Validation failed: Email is required'
-        const errorBody = {
-          code: 400,
-          message: errorMessage,
-        }
+    // Helper to verify common error structure
+    const verifyErrorStructure = (error: Error & { response?: { status: number, data: unknown } }, expectedStatus: number, expectedMessage: string, expectedData?: unknown) => {
+      expect(error).to.have.property('message', expectedMessage)
+      expect(error).to.have.property('response')
+      expect(error.response).to.have.property('status', expectedStatus)
+      expect(error.response).to.have.property('data')
+      if (expectedData !== undefined) {
+        expect(error.response.data).to.deep.equal(expectedData)
+      }
+    }
 
+    it('fetchPost - should throw error with response.data structure on 400', () => {
+      const errorMessage = 'Validation failed: Email is required'
+      const errorBody = {
+        code: 400,
+        message: errorMessage,
+      }
+
+      cy.window().then((win) => {
         fetchStub.resolves(
           new win.Response(JSON.stringify(errorBody), {
             status: 400,
             headers: { 'content-type': 'application/json' },
           }),
         )
-
-        fetchPost('/api/dar/v2', { data: 'test' }).then(
-          () => {
-            throw new Error('Should have thrown')
-          },
-          (error) => {
-            // Verify error structure matches what handleResponse creates
-            expect(error).to.have.property('message', errorMessage)
-            expect(error).to.have.property('response')
-            expect(error.response).to.have.property('status', 400)
-            expect(error.response).to.have.property('data')
-            expect(error.response.data).to.deep.equal(errorBody)
-          },
-        )
       })
+
+      fetchPost('/api/dar/v2', { data: 'test' }).then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          verifyErrorStructure(error, 400, errorMessage, errorBody)
+        },
+      )
     })
 
     it('fetchPost - should throw error with response.data structure on 500', () => {
-      cy.window().then((win) => {
-        const errorMessage = 'Internal server error'
-        const errorBody = {
-          message: errorMessage,
-          code: 500,
-        }
+      const errorMessage = 'Internal server error'
+      const errorBody = {
+        message: errorMessage,
+        code: 500,
+      }
 
+      cy.window().then((win) => {
         fetchStub.resolves(
           new win.Response(JSON.stringify(errorBody), {
             status: 500,
             headers: { 'content-type': 'application/json' },
           }),
         )
-
-        fetchGet('/api/data').then(
-          () => {
-            throw new Error('Should have thrown')
-          },
-          (error) => {
-            expect(error).to.have.property('message', errorMessage)
-            expect(error).to.have.property('response')
-            expect(error.response).to.have.property('status', 500)
-            expect(error.response.data).to.have.property('message', errorMessage)
-          },
-        )
       })
+
+      fetchGet('/api/data').then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          verifyErrorStructure(error, 500, errorMessage)
+          expect(error.response.data).to.have.property('message', errorMessage)
+        },
+      )
     })
 
     it('should handle 400 error with non-JSON response', () => {
@@ -519,49 +523,45 @@ describe('fetchAdapter - Fetch methods', () => {
             headers: { 'content-type': 'text/html' },
           }),
         )
-
-        fetchPost('/api/test', { data: 'test' }).then(
-          () => {
-            throw new Error('Should have thrown')
-          },
-          (error) => {
-            expect(error).to.have.property('message', 'Request failed with status 400')
-            expect(error).to.have.property('response')
-            expect(error.response).to.have.property('status', 400)
-            expect(error.response).to.have.property('data')
-            expect(error.response.data).to.deep.equal({})
-          },
-        )
       })
+
+      fetchPost('/api/test', { data: 'test' }).then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          verifyErrorStructure(error, 400, 'Request failed with status 400', {})
+        },
+      )
     })
 
     it('should preserve error message from backend', () => {
-      cy.window().then((win) => {
-        const backendMessage = 'All listed personnel must share the same institutional affiliation'
-        const errorBody = {
-          code: 400,
-          message: backendMessage,
-        }
+      const backendMessage = 'All listed personnel must share the same institutional affiliation'
+      const errorBody = {
+        code: 400,
+        message: backendMessage,
+      }
 
+      cy.window().then((win) => {
         fetchStub.resolves(
           new win.Response(JSON.stringify(errorBody), {
             status: 400,
             headers: { 'content-type': 'application/json' },
           }),
         )
-
-        fetchPost('/api/dar/v2', {}).then(
-          () => {
-            throw new Error('Should have thrown')
-          },
-          (error) => {
-            // The error message should be the backend message
-            expect(error.message).to.equal(backendMessage)
-            // And it should also be in response.data.message for error handlers
-            expect(error.response.data.message).to.equal(backendMessage)
-          },
-        )
       })
+
+      fetchPost('/api/dar/v2', {}).then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          // The error message should be the backend message
+          expect(error.message).to.equal(backendMessage)
+          // And it should also be in response.data.message for error handlers
+          expect(error.response.data.message).to.equal(backendMessage)
+        },
+      )
     })
   })
 })
