@@ -12,7 +12,6 @@ import {
   Collaborator,
   DuosUser,
   Author,
-  Presenter,
 } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
@@ -87,15 +86,6 @@ export const newIrbDocumentExpirationDate = (): string => {
 
 // ********************** DAR FORM VALIDATION ********************** //
 
-export const validationFailed = (validation: unknown): boolean => {
-  const obj = validation as Record<string, unknown>
-  return Object.keys(obj).some(key => !isEmpty(obj[key]))
-}
-
-const validationError = (failed: string[]): ValidationError => {
-  return { valid: false, failed }
-}
-
 const requiredError: ValidationError = {
   valid: false,
   failed: ['required'],
@@ -113,9 +103,7 @@ export const computeCollaboratorErrors = ({
   needsApproverStatus?: boolean
 }): CollaboratorErrors => {
   const errors: CollaboratorErrors = {}
-  if (!collaborator) {
-    return errors
-  }
+  // if collaborator is undefined or a required field is empty, include an error
   if (isStringEmpty(collaborator?.name)) {
     errors.name = requiredError
   }
@@ -131,15 +119,37 @@ export const computeCollaboratorErrors = ({
   if (isStringEmpty(collaborator?.email)) {
     errors.email = requiredError
   }
-  if (!isStringEmpty(collaborator?.email) && !FormValidators.EMAIL.isValid(collaborator.email as string)) {
-    errors.email = validationError(['email'])
+  else if (!FormValidators.EMAIL.isValid(collaborator.email as string)) {
+    errors.email = { valid: false, failed: ['email'] }
   }
   if (needsApproverStatus) {
-    if (isNil(collaborator?.approverStatus)) {
+    if (isEmpty(collaborator?.approverStatus)) {
       errors.approverStatus = requiredError
     }
   }
   return errors
+}
+
+// Clean up error objects: only keep keys with actual errors
+function cleanErrors<T extends Record<string, unknown>>(errors: T): T {
+  Object.keys(errors).forEach((key) => {
+    const val = errors[key]
+    if (
+      val === undefined
+      || val === null
+      || (typeof val === 'object' && Object.keys(val).length === 0)
+      || (typeof val === 'object' && (val as { valid?: boolean }).valid)
+    ) {
+      delete errors[key]
+    }
+  })
+  return errors
+}
+
+export const validationFailed = (validation: unknown): boolean => {
+  // Match the original JS: only check if any top-level error object is non-empty using lodash isEmpty
+  if (!validation || typeof validation !== 'object') return false
+  return Object.values(validation).some(val => !isEmpty(val))
 }
 
 const calcResearcherInfoErrors = (
@@ -193,7 +203,7 @@ const calcResearcherInfoErrors = (
       errors.cloudProviderDescription = requiredError
     }
   }
-  return errors
+  return cleanErrors(errors)
 }
 
 const calcDarErrors = (
@@ -216,32 +226,40 @@ const calcDarErrors = (
   if (isNil(formData.diseases)) {
     errors.diseases = requiredError
   }
-  if (formData.diseases === true && isEmpty(formData.ontologies)) {
-    errors.ontologies = requiredError
+  if (formData.diseases === true) {
+    if (isEmpty(formData.ontologies)) {
+      errors.ontologies = requiredError
+    }
   }
-  if (formData.diseases === false && isNil(formData.hmb)) {
-    errors.hmb = requiredError
-  }
-  if (formData.hmb === false && isNil(formData.poa)) {
-    errors.poa = requiredError
-  }
-  if (formData.poa === false && isNil(formData.methods)) {
-    errors.methods = requiredError
-  }
-  if (formData.methods === false && isEmpty(formData.otherText)) {
-    errors.otherText = requiredError
+  else if (formData.diseases === false) {
+    if (isNil(formData.hmb)) {
+      errors.hmb = requiredError
+    }
+    else if (formData.hmb === false) {
+      if (isNil(formData.poa)) {
+        errors.poa = requiredError
+      }
+      else if (formData.poa === false) {
+        if (isNil(formData.methods)) {
+          errors.methods = requiredError
+        }
+        else if (formData.methods === false && isEmpty(formData.otherText)) {
+          errors.otherText = requiredError
+        }
+      }
+    }
   }
   if (isStringEmpty(formData.nonTechRus)) {
     errors.nonTechRus = requiredError
   }
-  if (needsCollaborationLetter(datasets) && isNil(collaborationLetter) && isEmpty(formData['collaborationLetterLocation'])) {
+  if (needsCollaborationLetter(datasets) && (isNil(collaborationLetter) && isEmpty(formData['collaborationLetterLocation']))) {
     errors.collaborationLetter = requiredError
   }
-  if (needsIrbApprovalDocument(datasets) && isNil(irbDocument) && isEmpty(formData['irbDocumentLocation'])) {
+  if (needsIrbApprovalDocument(datasets) && (isNil(irbDocument) && isEmpty(formData['irbDocumentLocation']))) {
     errors.irbDocument = requiredError
   }
   calcDUAErrors(formData, datasets, dataUseTranslations, errors)
-  return errors
+  return cleanErrors(errors)
 }
 
 const calcSummaryErrors = (nihValid: boolean, errors: FormValidationErrors, formData: FormDataBase): void => {
@@ -341,15 +359,15 @@ const calcDUAErrors = (formData: FormDataBase, datasets: Dataset[], dataUseTrans
   }
 }
 
-const validateDate = (date: unknown): ValidationError => {
+const validateDate = (date: unknown): ValidationError | undefined => {
   if (isEmpty(date)) {
     return requiredError
   }
   const dateValue = date as string
   if (!FormValidators.DATE.isValid(dateValue)) {
-    return validationError(['date'])
+    return { valid: false, failed: ['date'] }
   }
-  return { valid: true }
+  return undefined // Only return error if invalid, otherwise undefined
 }
 
 export const ORCID_REGEX = /^(\d{4}-){3}\d{3}[\dX]$/
@@ -359,15 +377,12 @@ export const calcPublicationErrors = (newPublication: Partial<Publication>): Pub
   if (isEmpty(newPublication?.title)) {
     validation.title = requiredError
   }
-  const publishedDate = newPublication?.publishedDate
-  if (!isEmpty(publishedDate)) {
-    validation.publishedDate = validateDate(publishedDate)
-  }
+  validation.publishedDate = <ValidationError>validateDate(newPublication?.publishedDate)
   const authorsArr = Array.isArray(newPublication?.authors) ? newPublication.authors : []
   if (authorsArr.length === 0) {
     validation.authors = requiredError
   }
-  if (authorsArr.length > 0) {
+  else {
     const failedCodes: string[] = []
     const perAuthor = authorsArr.map((author: Author, idx) => {
       const name = author?.name ?? ''
@@ -378,7 +393,7 @@ export const calcPublicationErrors = (newPublication: Partial<Publication>): Pub
         failedCodes.push(`name@${idx}`)
       }
       if (!isStringEmpty(orcId) && !ORCID_REGEX.test(orcId)) {
-        row.orcId = validationError(['orcIdFormat'])
+        row.orcId = { valid: false, failed: ['orcIdFormat'] }
         failedCodes.push(`orcIdFormat@${idx}`)
       }
       return row
@@ -395,8 +410,8 @@ export const calcPublicationErrors = (newPublication: Partial<Publication>): Pub
   if (isStringEmpty(newPublication?.url)) {
     validation.url = requiredError
   }
-  if (!isStringEmpty(newPublication?.url) && !FormValidators.URL.isValid(newPublication.url as string)) {
-    validation.url = validationError(['url'])
+  else if (!FormValidators.URL.isValid(newPublication.url as string)) {
+    validation.url = { valid: false, failed: ['url'] }
   }
   if (isStringEmpty(newPublication?.access)) validation.access = requiredError
   return validation
@@ -409,10 +424,7 @@ export const calcPresentationErrors = (newPresentation: Partial<Presentation>): 
   if (isEmpty(newPresentation?.title)) {
     validation.title = requiredError
   }
-  const dateVal = newPresentation?.date
-  if (!isEmpty(dateVal)) {
-    validation.date = validateDate(dateVal)
-  }
+  validation.date = <ValidationError>validateDate(newPresentation?.date)
   if (isEmpty(newPresentation?.authors)) {
     validation.authors = requiredError
   }
@@ -425,12 +437,10 @@ export const calcPresentationErrors = (newPresentation: Partial<Presentation>): 
   if (newPresentation?.citation === undefined || newPresentation?.citation === null) {
     validation.citation = requiredError
   }
-  // Validate presenter (type: Presenter which extends Contact with name and email)
-  const presenter: Partial<Presenter> = newPresentation?.presenter ?? {}
-  if (isEmpty(presenter?.name)) {
+  if (isEmpty(newPresentation?.presenter?.name)) {
     validation.presenter.name = requiredError
   }
-  if (isEmpty(presenter?.email)) {
+  if (isEmpty(newPresentation?.presenter?.email)) {
     validation.presenter.email = requiredError
   }
   if (isEmpty(newPresentation?.event)) {
@@ -476,7 +486,7 @@ const calcRusErrors = (formData: FormDataBase): FormValidationErrors => {
       errors[field] = requiredError
     }
   })
-  return errors
+  return cleanErrors(errors)
 }
 
 export const validateDARFormData = ({
