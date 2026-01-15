@@ -279,7 +279,7 @@ const calcDmiErrors = (formData: FormDataBase, errors: FormValidationErrors): vo
   }
   const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,
     formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
-  if (formData.dmiYesNo && !dmiFields.some(field => field)) {
+  if (formData.dmiYesNo && !dmiFields.some(Boolean)) {
     errors.dmiAcknowledgement = requiredError
     errors.dmiCombination = requiredError
     errors.dmiFalsification = requiredError
@@ -307,7 +307,7 @@ const calcCloseoutErrors = (formData: FormDataBase, errors: FormValidationErrors
     if (signingOfficial?.userId === undefined) {
       errors.closeoutSigningOfficial = requiredError
     }
-    if (!closeoutFields.some(field => field)) {
+    if (!closeoutFields.some(Boolean)) {
       errors.closeoutProjectCompleted = requiredError
       errors.closeoutRequestorMovedInstitution = requiredError
       errors.closeoutProjectTransferred = requiredError
@@ -505,7 +505,7 @@ export const validatePRFormData = (
   nihValid: boolean,
   formData: unknown,
   datasets: Dataset[] = [],
-  dataUseTranslations: unknown[],
+  dataUseTranslations: unknown[] = [],
 ): PRFormValidationResult => {
   return {
     darErrors: calcPRErrors(nihValid, formData as FormDataBase, datasets, dataUseTranslations),
