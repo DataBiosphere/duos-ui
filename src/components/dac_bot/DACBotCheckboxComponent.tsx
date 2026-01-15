@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import { DACbotRule } from './DACBotComponent'
-import { FormField, FormFieldTypes } from '../forms/forms'
-import { DAC } from '../../libs/ajax/DAC'
+import { DACbotRule, ParsedDACbotRule } from 'src/components/dac_bot/DACBotComponent'
+import { FormField, FormFieldTypes } from 'src/components/forms/forms'
+import { DAC } from 'src/libs/ajax/DAC'
 import { Link } from '@mui/material'
-import { Notifications } from '../../libs/utils'
+import { Notifications } from 'src/libs/utils'
 import ReactMarkdown from 'react-markdown'
 
 export type DACBotCheckboxComponentProps = {
   dacId: number
-  rule: DACbotRule
+  rule: DACbotRule | ParsedDACbotRule
   disableEdit: boolean
+  onRuleChange?: (rule: ParsedDACbotRule, isEnabled: boolean) => Promise<void>
 }
 
 export type DACBotToggleResult = {
@@ -21,7 +22,7 @@ export type DACBotToggleResult = {
 }
 
 export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => {
-  const { dacId, rule, disableEdit } = props
+  const { dacId, rule, disableEdit, onRuleChange } = props
   const [isReadOnly, setIsReadOnly] = useState(disableEdit)
   const [isRuleEnabled, setIsRuleEnabled] = useState(!!rule.enabledByUserId)
   const [enabledTime, setEnabledTime] = useState(rule.activationDate)
@@ -31,7 +32,21 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
   const onCheckboxChange = async () => {
     setIsReadOnly(true)
     try {
-      const toggleResult: DACBotToggleResult = await DAC.toggleDACbotRule(dacId, rule.id)
+      const newEnabledState = !isRuleEnabled
+
+      // If a custom onRuleChange callback is provided, use it
+      if (onRuleChange) {
+        await onRuleChange(rule as ParsedDACbotRule, newEnabledState)
+      }
+      else {
+        // Fallback to direct toggle
+        const toggleResult: DACBotToggleResult = await DAC.toggleDACbotRule(dacId, rule.id)
+        setIsRuleEnabled(toggleResult.isRuleEnabled)
+        setEnabledTime(toggleResult.enabledTime)
+        setDisplayName(toggleResult.displayName)
+        setEmailAddress(toggleResult.email)
+      }
+
       Notifications.showSuccess(
         {
           severity: 'success',
@@ -41,14 +56,12 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
             vertical: 'bottom',
             horizontal: 'right',
           },
-        })
+        },
+      )
       setIsReadOnly(false)
-      setIsRuleEnabled(toggleResult.isRuleEnabled)
-      setEnabledTime(toggleResult.enabledTime)
-      setDisplayName(toggleResult.displayName)
-      setEmailAddress(toggleResult.email)
     }
     catch (_) {
+      setIsReadOnly(false)
       Notifications.showError(
         {
           severity: 'error',
@@ -58,7 +71,8 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
             vertical: 'bottom',
             horizontal: 'right',
           },
-        })
+        },
+      )
     }
   }
 
@@ -70,7 +84,7 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
         <>
           <span style={{ display: 'table' }}>
             <ReactMarkdown components={{
-              // Map `p` to use `span`s to align with the checkbox.
+              // Map `p` to use `span` to align with the checkbox.
               p: 'span',
             }}
             >
@@ -93,7 +107,7 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
             : ``}
         </>
       )}
-      defaultValue={rule.enabledByUserId != null}
+      defaultValue={!!rule.enabledByUserId}
       onChange={onCheckboxChange}
       disabled={isReadOnly}
     />
