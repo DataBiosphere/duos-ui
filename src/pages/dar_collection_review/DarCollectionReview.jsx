@@ -224,16 +224,6 @@ export default function DarCollectionReview(props) {
     return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })
   }, [dataUseBuckets])
 
-  DarCollectionReview.propTypes = {
-    match: PropTypes.shape({
-      params: PropTypes.shape({
-        collectionId: PropTypes.string.isRequired,
-      }).isRequired,
-    }).isRequired,
-    adminPage: PropTypes.bool,
-    readOnly: PropTypes.bool,
-  }
-
   useEffect(() => {
     try {
       setIsLoading(true)
@@ -362,4 +352,14 @@ export default function DarCollectionReview(props) {
       </div>
     </div>
   )
+}
+
+DarCollectionReview.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      collectionId: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  adminPage: PropTypes.bool,
+  readOnly: PropTypes.bool,
 }
