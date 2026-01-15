@@ -10,8 +10,9 @@ export type DataLocationsProps = {
 export const DataLocationList = (props: DataLocationsProps) => {
   const { locations, onChange } = props
   const onChangeLocation = useCallback(({ idx, location }: { idx: number, location: DataLocationInfo }) => {
-    locations[idx] = location
-    onChange({ key: 'locations', value: cloneDeep(locations) })
+    const newLocations = cloneDeep(locations)
+    newLocations[idx] = location
+    onChange({ key: 'locations', value: newLocations })
   }, [locations, onChange])
 
   const onAddLocation = useCallback(() => {
@@ -25,8 +26,9 @@ export const DataLocationList = (props: DataLocationsProps) => {
   }, [locations.length, onChangeLocation])
 
   const onDeleteLocation = useCallback((idx: number) => {
-    locations.splice(idx, 1)
-    onChange({ key: 'locations', value: cloneDeep(locations) })
+    const newLocations = cloneDeep(locations)
+    newLocations.splice(idx, 1)
+    onChange({ key: 'locations', value: newLocations })
   }, [locations, onChange])
 
   return (
