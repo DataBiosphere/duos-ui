@@ -123,33 +123,16 @@ export const computeCollaboratorErrors = ({
     errors.email = { valid: false, failed: ['email'] }
   }
   if (needsApproverStatus) {
-    if (isEmpty(collaborator?.approverStatus)) {
+    if (isNil(collaborator?.approverStatus)) {
       errors.approverStatus = requiredError
     }
   }
   return errors
 }
 
-// Clean up error objects: only keep keys with actual errors
-function cleanErrors<T extends Record<string, unknown>>(errors: T): T {
-  Object.keys(errors).forEach((key) => {
-    const val = errors[key]
-    if (
-      val === undefined
-      || val === null
-      || (typeof val === 'object' && Object.keys(val).length === 0)
-      || (typeof val === 'object' && (val as { valid?: boolean }).valid)
-    ) {
-      delete errors[key]
-    }
-  })
-  return errors
-}
-
 export const validationFailed = (validation: unknown): boolean => {
-  // Match the original JS: only check if any top-level error object is non-empty using lodash isEmpty
   if (!validation || typeof validation !== 'object') return false
-  return Object.values(validation).some(val => !isEmpty(val))
+  return Object.keys(validation).some(key => !isEmpty((validation as Record<string, unknown>)[key]))
 }
 
 const calcResearcherInfoErrors = (
@@ -203,7 +186,7 @@ const calcResearcherInfoErrors = (
       errors.cloudProviderDescription = requiredError
     }
   }
-  return cleanErrors(errors)
+  return errors
 }
 
 const calcDarErrors = (
@@ -259,7 +242,7 @@ const calcDarErrors = (
     errors.irbDocument = requiredError
   }
   calcDUAErrors(formData, datasets, dataUseTranslations, errors)
-  return cleanErrors(errors)
+  return errors
 }
 
 const calcSummaryErrors = (nihValid: boolean, errors: FormValidationErrors, formData: FormDataBase): void => {
@@ -486,7 +469,7 @@ const calcRusErrors = (formData: FormDataBase): FormValidationErrors => {
       errors[field] = requiredError
     }
   })
-  return cleanErrors(errors)
+  return errors
 }
 
 export const validateDARFormData = ({
