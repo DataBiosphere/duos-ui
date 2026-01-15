@@ -455,6 +455,9 @@ describe('fetchAdapter - Fetch methods', () => {
     const verifyErrorStructure = (error: Error & { response?: { status: number, data: unknown } }, expectedStatus: number, expectedMessage: string, expectedData?: unknown) => {
       expect(error).to.have.property('message', expectedMessage)
       expect(error).to.have.property('response')
+      if (!error.response) {
+        throw new Error('Expected error.response to be defined')
+      }
       expect(error.response).to.have.property('status', expectedStatus)
       expect(error.response).to.have.property('data')
       if (expectedData !== undefined) {
@@ -510,6 +513,9 @@ describe('fetchAdapter - Fetch methods', () => {
         },
         (error) => {
           verifyErrorStructure(error, 500, errorMessage)
+          if (!error.response) {
+            throw new Error('Expected error.response to be defined')
+          }
           expect(error.response.data).to.have.property('message', errorMessage)
         },
       )
@@ -559,6 +565,9 @@ describe('fetchAdapter - Fetch methods', () => {
           // The error message should be the backend message
           expect(error.message).to.equal(backendMessage)
           // And it should also be in response.data.message for error handlers
+          if (!error.response) {
+            throw new Error('Expected error.response to be defined')
+          }
           expect(error.response.data.message).to.equal(backendMessage)
         },
       )
