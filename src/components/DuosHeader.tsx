@@ -318,22 +318,13 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
       subtab => (subtab.isRenderedForUser ?? subtab.isRendered ?? (() => true))(currentUser),
     ) || []
     // Find index of matching subtab
-    const subtabIndex = renderedSubtabs.findIndex(
+    initialSubTab = renderedSubtabs.findIndex(
       subtab => subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search)),
     )
-    if (subtabIndex === -1) {
-      initialSubTab = -1
-    }
-    else {
-      initialSubTab = subtabIndex
-    }
   }
 
   if (initialTab === -1) {
     initialTab = 0
-  }
-  if (initialSubTab === -1) {
-    initialSubTab = 0
   }
 
   return (

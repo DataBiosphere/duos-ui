@@ -125,7 +125,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
             isLogged && (
               <Box className="duos-navigation-box" sx={{ minWidth: 0, flex: 1 }}>
                 <Tabs
-                  value={selectedMenuTab}
+                  value={selectedMenuTab >= 0 ? selectedMenuTab : false}
                   variant="scrollable"
                   scrollButtons="auto"
                   allowScrollButtonsMobile
@@ -264,11 +264,11 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
         )}
       </ul>
 
-      {/* Sub Tabs */}
-      {tabs[selectedMenuTab as number]?.children && (
+      {/* Sub Tabs - only show if a valid subtab is selected */}
+      {tabs[selectedMenuTab as number]?.children && selectedSubTab >= 0 && (
         <Box className="duos-navigation-box navbar-sub">
           <Tabs
-            value={selectedSubTab}
+            value={selectedSubTab >= 0 ? selectedSubTab : false}
             variant="scrollable"
             scrollButtons="auto"
             orientation={orientation}
