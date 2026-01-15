@@ -86,7 +86,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       // If enabling this rule, disable its exclusive counterpart
       if (isEnabled && rule.exclusiveRuleType) {
         const exclusiveRule = DACbotRules.find(r => r.ruleType === rule.exclusiveRuleType)
-        if (exclusiveRule && exclusiveRule.enabledByUserId) {
+        if (exclusiveRule?.enabledByUserId) {
           await DAC.toggleDACbotRule(dacId, exclusiveRule.id)
         }
       }
@@ -94,7 +94,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       // Refresh rules to get updated state
       await fetchData()
     }
-    catch (_e) {
+    catch (_error) {
       Notifications.showError(
         {
           severity: 'error',
@@ -106,11 +106,14 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
           },
         },
       )
+      console.error('Failed to fetch DAC bot rules:', _error)
     }
   }, [dacId, DACbotRules, fetchData])
 
   useEffect(() => {
-    void fetchData()
+    (async () => {
+      await fetchData()
+    })()
   }, [dacId, fetchData])
 
   return (
