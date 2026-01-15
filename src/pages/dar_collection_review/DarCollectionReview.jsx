@@ -355,11 +355,6 @@ export default function DarCollectionReview(props) {
 }
 
 DarCollectionReview.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      collectionId: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
   adminPage: PropTypes.bool,
   readOnly: PropTypes.bool,
 }
