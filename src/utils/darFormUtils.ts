@@ -123,8 +123,8 @@ export const computeCollaboratorErrors = ({
     errors.email = { valid: false, failed: ['email'] }
   }
   if (needsApproverStatus) {
-    const approverStatus = collaborator?.approverStatus
-    if (!approverStatus) {
+    const approverStatus = collaborator?.approverStatus as string | boolean | null | undefined
+    if (isNil(approverStatus) || approverStatus === '') {
       errors.approverStatus = requiredError
     }
   }
@@ -146,7 +146,7 @@ const calcResearcherInfoErrors = (
   if (isStringEmpty(formData.researcher)) {
     errors.researcher = requiredError
   }
-  if (!formData.nihValid) {
+  if (formData.nihValid === false) {
     errors.nihEraId = requiredError
   }
   if (isStringEmpty(formData.piCountryOfOperation)) {
