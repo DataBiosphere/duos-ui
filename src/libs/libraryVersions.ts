@@ -561,8 +561,8 @@ export const getLibraryVersions = (
       },
       icon: ccxdpIcon,
       title: 'CCXDP Data Library',
-      featured: false,
-      order: 999,
+      featured: true,
+      order: 22,
     },
     'ncpi-duo': {
       query: {
