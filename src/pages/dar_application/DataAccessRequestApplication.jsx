@@ -190,14 +190,14 @@ const DataAccessRequestApplication = (props) => {
     })
   }, [])
 
-  const batchFormFieldChange = (updates) => {
+  const batchFormFieldChange = useCallback((updates) => {
     setFormData((formData) => {
       return {
         ...formData,
         ...updates,
       }
     })
-  }
+  }, [])
 
   const updateCollaborationLetter = (letter) => {
     batchFormFieldChange({
@@ -223,8 +223,14 @@ const DataAccessRequestApplication = (props) => {
 
   const { fetchWithCache } = useAsyncCacheFetch(initialCache)
 
-  const getDarCollection = collectionId => fetchWithCache(collectionId, Collections.getCollectionById)
-  const getPartialDarRequest = darId => fetchWithCache(darId, DAR.getPartialDarRequest)
+  const getDarCollection = useCallback(
+    collectionId => fetchWithCache(collectionId, Collections.getCollectionById),
+    [fetchWithCache],
+  )
+  const getPartialDarRequest = useCallback(
+    darId => fetchWithCache(darId, DAR.getPartialDarRequest),
+    [fetchWithCache],
+  )
 
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])
@@ -269,7 +275,7 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
-  }, [existingDarsReadOnlyMode])
+  }, [existingDarsReadOnlyMode, collectionId, getDarCollection])
 
   const init = useCallback(async () => {
     let formData = {}
@@ -315,7 +321,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData)
     setIsLoading(false)
-  }, [researcher, existingDarsReadOnlyMode])
+  }, [researcher, existingDarsReadOnlyMode, collectionId, dataRequestId, getDarCollection, getPartialDarRequest, batchFormFieldChange])
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {
