@@ -191,6 +191,12 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     }
   }, [])
 
+  const showConfirmationModal = useCallback((collectionSummary, action = '') => {
+    setConsoleAction(action)
+    setSelectedCollection(collectionSummary)
+    setShowConfirmation(true)
+  }, [])
+
   useEffect(() => {
     recalculateVisibleTable({
       tableSize,
@@ -212,13 +218,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort,
     })
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById])
-
-  const showConfirmationModal = (collectionSummary, action = '') => {
-    setConsoleAction(action)
-    setSelectedCollection(collectionSummary)
-    setShowConfirmation(true)
-  }
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById, showConfirmationModal])
 
   // Helper function to update page
   const goToPage = useCallback(
