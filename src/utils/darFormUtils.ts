@@ -236,10 +236,10 @@ const calcDarErrors = (
   if (isStringEmpty(formData.nonTechRus)) {
     errors.nonTechRus = requiredError
   }
-  if (needsCollaborationLetter(datasets) && (isNil(collaborationLetter) && isEmpty(formData['collaborationLetterLocation']))) {
+  if (needsCollaborationLetter(datasets) && isNil(collaborationLetter) && isEmpty(formData['collaborationLetterLocation'])) {
     errors.collaborationLetter = requiredError
   }
-  if (needsIrbApprovalDocument(datasets) && (isNil(irbDocument) && isEmpty(formData['irbDocumentLocation']))) {
+  if (needsIrbApprovalDocument(datasets) && isNil(irbDocument) && isEmpty(formData['irbDocumentLocation'])) {
     errors.irbDocument = requiredError
   }
   calcDUAErrors(formData, datasets, dataUseTranslations, errors)
@@ -347,11 +347,10 @@ const validateDate = (date: unknown): ValidationError | undefined => {
   if (isEmpty(date)) {
     return requiredError
   }
-  const dateValue = date as string
-  if (!FormValidators.DATE.isValid(dateValue)) {
+  else if (!FormValidators.DATE.isValid(date as string)) {
     return { valid: false, failed: ['date'] }
   }
-  return undefined // Only return error if invalid, otherwise undefined
+  return undefined
 }
 
 export const ORCID_REGEX = /^(\d{4}-){3}\d{3}[\dX]$/
@@ -460,8 +459,7 @@ const requiredRusFields = [
 const calcRusErrors = (formData: FormDataBase): FormValidationErrors => {
   const errors: FormValidationErrors = {}
   if (formData.oneGender === true) {
-    const genderValue = formData.gender as string
-    if (!['M', 'F'].includes(genderValue)) {
+    if (!['M', 'F'].includes(formData.gender as string)) {
       errors.gender = requiredError
     }
   }
