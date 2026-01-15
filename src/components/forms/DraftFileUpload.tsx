@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useRef, useState } from 'react'
+import React, { ChangeEvent, useCallback, useRef, useState } from 'react'
 import loadingIndicator from '../../images/loading-indicator.svg'
 import { Link } from 'react-router-dom'
 import { ConfirmationDialog } from '../../components/modals/ConfirmationDialog'
@@ -36,6 +36,17 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
     await onDeleteFile(draftId, defaultValue!.fileStorageObjectId, id)
   }
 
+  const toggleSpinnerRef = useCallback((visible: boolean) => {
+    if (spinnerRef?.current) {
+      if (visible) {
+        spinnerRef.current.style.display = 'inline'
+      }
+      else {
+        spinnerRef.current.style.display = 'none'
+      }
+    }
+  }, [])
+
   const deleteButton = (defaultValue)
     ? (
         <>
@@ -68,17 +79,6 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
 
   const handleUploadButtonClick = () => {
     inputRef.current?.click()
-  }
-
-  const toggleSpinnerRef = (visible: boolean) => {
-    if (spinnerRef?.current) {
-      if (visible) {
-        spinnerRef.current.style.display = 'inline'
-      }
-      else {
-        spinnerRef.current.style.display = 'none'
-      }
-    }
   }
 
   return (

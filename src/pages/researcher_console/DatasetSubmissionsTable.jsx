@@ -74,16 +74,16 @@ export default function DatasetSubmissionsTable(props) {
   const [rows, setRows] = useState([])
   const [open, setOpen] = useState(false)
 
-  const handleClick = (term) => {
+  const handleClick = useCallback((term) => {
     setOpen(true)
     setSelectedTerm(term)
-  }
+  }, [])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false)
-  }
+  }, [])
 
-  const removeDataset = async (termToDelete) => {
+  const removeDataset = useCallback(async (termToDelete) => {
     const termName = termToDelete.datasetName
     const termId = termToDelete.datasetId
     setOpen(false)
@@ -100,7 +100,7 @@ export default function DatasetSubmissionsTable(props) {
         text: `Error removing ${termName} as a dataset`,
       })
     }
-  }
+  }, [navigate])
 
   // Datasets can be filtered from the parent component and redrawn frequently.
   const redrawRows = useCallback((open, selectedTerm) => {
@@ -160,7 +160,7 @@ export default function DatasetSubmissionsTable(props) {
       }
     })
     setRows(rows)
-  }, [terms])
+  }, [removeDataset, terms, handleClose, handleClick])
 
   useEffect(() => {
     const init = async () => {

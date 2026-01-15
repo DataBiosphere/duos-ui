@@ -48,9 +48,18 @@ export default function AdminManageDarCollections() {
     init()
   }, [])
 
-  const updateCollections = updateCollectionFn({ collections, filterFn, searchRef, setCollections, setFilteredList })
-  const cancelCollection = cancelCollectionFn({ updateCollections, role: USER_ROLES.admin })
-  const openCollection = openCollectionFn({ updateCollections, role: USER_ROLES.admin })
+  const updateCollections = useCallback(
+    updatedCollection => updateCollectionFn({ collections, filterFn, searchRef, setCollections, setFilteredList })(updatedCollection),
+    [collections, filterFn, setCollections, setFilteredList],
+  )
+  const cancelCollection = useCallback(
+    params => cancelCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
+    [updateCollections],
+  )
+  const openCollection = useCallback(
+    params => openCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
+    [updateCollections],
+  )
 
   return (
     <div style={Styles.PAGE}>
