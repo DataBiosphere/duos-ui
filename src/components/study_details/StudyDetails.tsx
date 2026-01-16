@@ -13,6 +13,13 @@ import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFoo
 import { applyForAccess } from 'src/utils/accessUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 
+interface SectionProps {
+  style?: React.CSSProperties
+}
+
+const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
+  <div style={{ paddingTop: 20, ...style }}>{children}</div>
+
 const styles = {
   row: {
     display: 'flex',
@@ -111,13 +118,6 @@ export const StudyDetails = () => {
   useEffect(() => {
     getExportableDatasets(datasets)
   }, [datasets])
-
-  interface SectionProps {
-    style?: React.CSSProperties
-  }
-
-  const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
-    <div style={{ paddingTop: 20, ...style }}>{children}</div>
 
   const participantCount = datasets
     .map(dataset => dataset.participantCount)
