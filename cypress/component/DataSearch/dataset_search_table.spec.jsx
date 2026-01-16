@@ -37,8 +37,6 @@ describe('DatasetSearchTable (component) - basic tests', () => {
     cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
     cy.clock()
   })
- 
- 
 
   it('does not trigger an initial search on mount', () => {
     let searchCalls = 0
@@ -52,7 +50,7 @@ describe('DatasetSearchTable (component) - basic tests', () => {
       </BrowserRouter>,
     )
 
-    cy.get('button').contains('View By Studies').should('exist')
+    cy.contains('button', 'View By Studies').should('exist')
     cy.wrap(searchCalls).should('equal', 0)
   })
 
@@ -103,7 +101,7 @@ describe('DatasetSearchTable (component) - basic tests', () => {
   it('aborts previous requests when new searches are fired rapidly', () => {
     // Stub the DataSet client and assert it was called multiple times
     const dsStub = cy.stub(DataSet, 'searchDatasetIndex').callsFake((_) => {
-      return new Promise((resolve) => setTimeout(() => resolve(datasets), 100))
+      return new Promise(resolve => setTimeout(() => resolve(datasets), 100))
     })
 
     cy.mount(
@@ -115,7 +113,8 @@ describe('DatasetSearchTable (component) - basic tests', () => {
     // Trigger first search and quickly trigger a second one
     cy.get('[data-cy="search-bar"]').type('first')
     cy.tick(50)
-    cy.get('[data-cy="search-bar"]').clear().type('second')
+    cy.get('[data-cy="search-bar"]').clear()
+    cy.get('[data-cy="search-bar"]').type('second')
 
     // Advance time enough for debounced calls and the fake responses
     cy.tick(300)
@@ -125,5 +124,4 @@ describe('DatasetSearchTable (component) - basic tests', () => {
       expect(dsStub.callCount).to.be.at.least(1)
     })
   })
-
-  })
+})
