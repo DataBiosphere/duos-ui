@@ -2,7 +2,7 @@ import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { isFunction, isNil } from 'lodash/fp.js'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'
 import { Tab as TabItem } from 'src/components/DuosHeader'
@@ -97,13 +97,8 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
     profileState,
   } = props
 
-  const [selectedMenuTab, setSelectedMenuTab] = useState(-1)
-  const [selectedSubTab, setSelectedSubTab] = useState(-1)
-
-  useEffect(() => {
-    setSelectedMenuTab(initialTab)
-    setSelectedSubTab(initialSubTab)
-  }, [initialTab, initialSubTab])
+  const selectedMenuTab = initialTab
+  const selectedSubTab = initialSubTab
 
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
