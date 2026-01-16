@@ -85,7 +85,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
   const [sortedElections, setSortedElections] = useState<RowData[][]>([])
   const [sort, setSort] = useState({ colIndex: 2, dir: -1 }) // Default sort by election date descending
 
-  const toggleElectionExpansion = (electionId: number) => {
+  const toggleElectionExpansion = useCallback((electionId: number) => {
     const newExpanded = new Set(expandedElections)
     if (newExpanded.has(electionId)) {
       newExpanded.delete(electionId)
@@ -94,7 +94,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
       newExpanded.add(electionId)
     }
     setExpandedElections(newExpanded)
-  }
+  }, [expandedElections])
 
   const electionIsExpanded = useCallback((electionId: number) => {
     return expandedElections.has(electionId)
@@ -114,7 +114,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     return [requestType, datasetIdentifier, electionDate, electionStatus, votes, voteSummary]
   }
 
-  const processElectionRowData = (electionsWithMemberVotes: ElectionWithMemberVotes[]) => {
+  const processElectionRowData = useCallback((electionsWithMemberVotes: ElectionWithMemberVotes[]) => {
     if (!electionsWithMemberVotes) return []
 
     return electionsWithMemberVotes.map((election: ElectionWithMemberVotes, i) => {
@@ -144,7 +144,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
         { data: processVoteSummary(election.memberVotes), cellStyle: { width: '40%' }, label: 'Vote Summary', id: i },
       ]
     })
-  }
+  }, [electionIsExpanded, toggleElectionExpansion])
 
   const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode, rowData: TableData[] }) => {
     const electionId = rowData[0].electionId ?? -1
@@ -170,7 +170,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
       list: processElectionRowData(electionsWithMemberVotes),
       sort,
     }))
-  }, [sort, expandedElections, electionsWithMemberVotes])
+  }, [sort, electionsWithMemberVotes, processElectionRowData])
 
   return (
     <SimpleTable
