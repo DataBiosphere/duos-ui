@@ -4,6 +4,23 @@ import { DownloadLink } from '../../components/DownloadLink'
 import { DAA } from '../../libs/ajax/DAA'
 import { Notifications } from '../../libs/utils'
 
+const ConditionalDownloadLink = ({ id, fileName }) => {
+  if (id === 0 && fileName === '') {
+    return (
+      <DownloadLink
+        label="Download agreement"
+        onDownload={() => { DAA.getDaaFileById(17, 'DUOS Uniform Data Access Agreement') }}
+      />
+    )
+  }
+  return (
+    <DownloadLink
+      label="Download agreement"
+      onDownload={() => { DAA.getDaaFileById(id, fileName) }}
+    />
+  )
+}
+
 export default function ManageDaasDropdown(props) {
   const [applyAll, setApplyAll] = useState(null)
   const { actionsTitle, download, moreData, researchers, refreshResearchers, setResearchers } = props
@@ -46,23 +63,6 @@ export default function ManageDaasDropdown(props) {
     else {
       removeUsersFromDaa(userList)
     }
-  }
-
-  const ConditionalDownloadLink = ({ id, fileName }) => {
-    if (id === 0 && fileName === '') {
-      return (
-        <DownloadLink
-          label="Download agreement"
-          onDownload={() => { DAA.getDaaFileById(17, 'DUOS Uniform Data Access Agreement') }}
-        />
-      )
-    }
-    return (
-      <DownloadLink
-        label="Download agreement"
-        onDownload={() => { DAA.getDaaFileById(id, fileName) }}
-      />
-    )
   }
 
   return (

@@ -13,35 +13,35 @@ interface CollaboratorDeleteProps {
   readonly closeAction: () => void
 }
 
+const duosBlue = '#0948B7'
+const duosBlueHover = 'rgb(9,72,183)'
+
+const SecondaryButton = styled(Button)(() => ({
+  'fontFamily': 'Montserrat, sans-serif',
+  'color': duosBlue,
+  'backgroundColor': 'white',
+  'borderRadius': '4px',
+  'fontSize': '1.45rem',
+  'borderColor': duosBlue,
+  '&:hover': {
+    borderColor: duosBlueHover,
+    color: duosBlueHover,
+  },
+}))
+
+const PrimaryButton = styled(Button)(({ theme }) => ({
+  'fontFamily': 'Montserrat, sans-serif',
+  'color': theme.palette.getContrastText(duosBlue),
+  'backgroundColor': duosBlue,
+  'borderRadius': '4px',
+  'fontSize': '1.45rem',
+  '&:hover': {
+    backgroundColor: duosBlueHover,
+  },
+}))
+
 export default function CollaboratorDelete(props: CollaboratorDeleteProps): React.JSX.Element {
   const { collaboratorName, showDelete, confirmAction, closeAction } = props
-
-  const duosBlue = '#0948B7'
-  const duosBlueHover = 'rgb(9,72,183)'
-
-  const SecondaryButton = styled(Button)(() => ({
-    'fontFamily': 'Montserrat, sans-serif',
-    'color': duosBlue,
-    'backgroundColor': 'white',
-    'borderRadius': '4px',
-    'fontSize': '1.45rem',
-    'borderColor': duosBlue,
-    '&:hover': {
-      borderColor: duosBlueHover,
-      color: duosBlueHover,
-    },
-  }))
-
-  const PrimaryButton = styled(Button)(({ theme }) => ({
-    'fontFamily': 'Montserrat, sans-serif',
-    'color': theme.palette.getContrastText(duosBlue),
-    'backgroundColor': duosBlue,
-    'borderRadius': '4px',
-    'fontSize': '1.45rem',
-    '&:hover': {
-      backgroundColor: duosBlueHover,
-    },
-  }))
 
   return (
     <ModalWrapper
