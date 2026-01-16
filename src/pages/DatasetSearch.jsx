@@ -144,7 +144,7 @@ export const DatasetSearch = (props) => {
       }
     }
     init()
-  }, [loading, isInstitutionSet, fullQuery, navigate, hasChangedPage])
+  }, [loading, isInstitutionSet, fullQuery, navigate, hasChangedPage, query])
 
   return (
     loading
