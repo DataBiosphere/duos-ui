@@ -83,7 +83,7 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
       setVisibleList: setVisibleDatasets,
       sort,
     })
-  }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType])
+  }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType, navigate])
 
   // Helper function to update page
   const goToPage = useCallback(
