@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { isEmpty, isNil } from 'lodash/fp'
 import CollectionVoteYesButton from './CollectionVoteYesButton'
 import CollectionVoteNoButton from './CollectionVoteNoButton'
@@ -129,9 +129,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   const [vote, setVote] = useState<boolean | undefined>()
   const [rationale, setRationale] = useState<string>('')
   const [submitted, setSubmitted] = useState<boolean>(false)
-  const [isVotingDisabled, setIsVotingDisabled] = useState<boolean>(false)
   const [isRadar, setIsRadar] = useState<boolean>(false)
-  const [isElectionClosed, setIsElectionClosed] = useState<boolean>(false)
   const [voteInProgress, setVoteInProgress] = useState<boolean>(false)
   const {
     question,
@@ -145,12 +143,12 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     reloadFn = () => {},
   } = props
 
-  useEffect(() => {
-    setIsElectionClosed(votes.filter(v => v.electionStatus?.toLowerCase() === 'open').length === 0)
+  const isElectionClosed = useMemo(() => {
+    return votes.filter(v => v.electionStatus?.toLowerCase() === 'open').length === 0
   }, [votes])
 
-  useEffect(() => {
-    setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || adminPage)
+  const isVotingDisabled = useMemo(() => {
+    return props.isDisabled || (isFinal && submitted) || adminPage
   }, [props.isDisabled, isFinal, submitted, adminPage])
 
   useEffect(() => {
