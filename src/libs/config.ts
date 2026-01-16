@@ -56,7 +56,7 @@ export const Config = {
     },
   }),
 
-  jsonBody: body => ({
+  jsonBody: (body: unknown) => ({
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' },
   }),
