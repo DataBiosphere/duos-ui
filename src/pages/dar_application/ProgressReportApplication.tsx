@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import {
   CLOSEOUT_KEYS,
@@ -143,40 +143,37 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     return validationFailed(validation)
   }
 
-  const getValidation = (newState: FormState) => {
+  const getValidation = useCallback((newState: FormState) => {
     if (!readOnlyMode && showValidation) {
       return validatePRFormData(
         nihValid,
         newState,
-        formState.selectedDatasets,
+        newState.selectedDatasets,
         dataUseTranslations,
       )
     }
     return { darErrors: {} }
-  }
+  }, [readOnlyMode, showValidation, nihValid, dataUseTranslations])
 
-  const onFormChange = (newState: Partial<FormState>, isUserInteraction: boolean = true) => {
-    const setState = { ...formState, ...newState }
-    setFormState(prevState => ({
-      ...prevState,
-      ...newState,
-    }))
+  const onFormChange = useCallback((newState: Partial<FormState>, isUserInteraction: boolean = true) => {
+    setFormState((prevState) => {
+      const setState = { ...prevState, ...newState }
+      // Only enable validation on user interaction, not on mount/initialization
+      if (isUserInteraction && isMounted.current && !showValidation) {
+        setShowValidation(true)
+      }
+      setFormValidation(getValidation(setState))
+      return setState
+    })
+  }, [showValidation, getValidation])
 
-    // Only enable validation on user interaction, not on mount/initialization
-    if (isUserInteraction && isMounted.current && !showValidation) {
-      setShowValidation(true)
-    }
-
-    setFormValidation(getValidation(setState))
-  }
-
-  const onSelectedDatasetChange = (newDatasets: Dataset[]) => {
+  const onSelectedDatasetChange = useCallback((newDatasets: Dataset[]) => {
     const newDatasetIds = newDatasets.map(ds => ds.datasetId)
     translateDataUseRestrictionsFromDataUseArray(newDatasets.map(ds => ds.dataUse)).then((translations) => {
       setDataUseTranslations(translations)
     })
     onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds })
-  }
+  }, [onFormChange])
 
   const onIrbDocumentChange = (document: File | null, expiration: string) => {
     setUploadedIrbDocument(document)
@@ -222,7 +219,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     onFormChange({ datasets: approvedDatasets }, false) // Mark as non-user interaction
     onSelectedDatasetChange(approvedDatasets)
     isMounted.current = true // Mark as mounted after initial setup
-  }, [datasets])
+  }, [datasets, readOnlyMode, dar.datasetIds, dar.elections, onFormChange, onSelectedDatasetChange])
 
   return (
     <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
