@@ -1,66 +1,204 @@
-import { memoize } from 'lodash'
-import { Storage } from './storage'
+import { Storage } from 'src/libs/storage'
 
-export const Config = {
+interface ConfigType {
+  env: string
+  apiUrl: string
+  bardApiUrl: string
+  ecmApiUrl: string
+  errorApiKey: string
+  gaId: string
+  hash: string
+  nihUrl: string
+  ontologyApiUrl: string
+  profileUrl: string
+  samApiUrl: string
+  tag: string
+  tdrApiUrl: string
+  terraUrl: string
+}
 
-  getEnv: async () => (await getConfig()).env,
+let configPromise: Promise<ConfigType> | null = null
 
-  getApiUrl: async () => (await getConfig()).apiUrl,
+const loadConfig = async (): Promise<ConfigType> => {
+  if (!configPromise) {
+    configPromise = fetch('/config.json').then(res => res.json())
+  }
+  return configPromise
+}
 
-  getBardApiUrl: async () => (await getConfig()).bardApiUrl, // Mixpanel
+class ConfigClass {
+  async getConfig(): Promise<ConfigType> {
+    return loadConfig()
+  }
 
-  getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
+  async getEnv(): Promise<string> {
+    return getEnv()
+  }
 
-  getECMUrl: async () => (await getConfig()).ecmApiUrl,
+  async getApiUrl(): Promise<string> {
+    return getApiUrl()
+  }
 
-  getTdrApiUrl: async () => (await getConfig()).tdrApiUrl,
+  async getBardApiUrl(): Promise<string> {
+    return getBardApiUrl()
+  }
 
-  getTerraUrl: async () => (await getConfig()).terraUrl,
+  async getEcmApiUrl(): Promise<string> {
+    return getEcmApiUrl()
+  }
 
-  getErrorApiKey: async () => (await getConfig()).errorApiKey,
+  async getECMUrl(): Promise<string> {
+    return getECMUrl()
+  }
 
-  getHash: async () => (await getConfig()).hash,
+  async getErrorApiKey(): Promise<string> {
+    return getErrorApiKey()
+  }
 
-  getTag: async () => (await getConfig()).tag,
+  async getGaId(): Promise<string> {
+    return getGaId()
+  }
 
-  getProject: async () => {
-    const env = await Config.getEnv()
-    switch (env) {
-      case 'prod':
-        return 'broad-duos-prod'
-      default:
-        return 'broad-duos-dev'
-    }
-  },
+  async getHash(): Promise<string> {
+    return getHash()
+  }
 
-  authOpts: (token = Token.getToken()) => ({
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
-      'X-App-ID': 'DUOS',
-    },
-  }),
+  async getNihUrl(): Promise<string> {
+    return getNihUrl()
+  }
 
-  multiPartOpts: (token = Token.getToken()) => ({
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'multipart/form-data',
-      'X-App-ID': 'DUOS',
-    },
-  }),
+  async getOntologyApiUrl(): Promise<string> {
+    return getOntologyApiUrl()
+  }
 
-  textPlain: () => ({
-    headers: {
-      'Accept': 'text/plain',
-      'X-App-ID': 'DUOS',
-    },
-  }),
+  async getOntologyUrl(): Promise<string> {
+    return getOntologyUrl()
+  }
 
-  jsonBody: (body: unknown) => ({
-    body: JSON.stringify(body),
-    headers: { 'Content-Type': 'application/json' },
-  }),
+  async getProfileUrl(): Promise<string> {
+    return getProfileUrl()
+  }
 
+  async getProject(): Promise<string> {
+    return getProject()
+  }
+
+  async getSamApiUrl(): Promise<string> {
+    return getSamApiUrl()
+  }
+
+  async getTag(): Promise<string> {
+    return getTag()
+  }
+
+  async getTdrApiUrl(): Promise<string> {
+    return getTdrApiUrl()
+  }
+
+  async getTerraUrl(): Promise<string> {
+    return getTerraUrl()
+  }
+
+  authOpts(token: string | undefined = Token.getToken()) {
+    return authOpts(token)
+  }
+
+  jsonBody(body: unknown) {
+    return jsonBody(body)
+  }
+
+  multiPartOpts(token: string | undefined = Token.getToken()) {
+    return multiPartOpts(token)
+  }
+
+  textPlain() {
+    return textPlain()
+  }
+}
+
+export const Config = new ConfigClass()
+
+export const getEnv = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.env
+}
+
+export const getApiUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.apiUrl
+}
+
+export const getBardApiUrl = async (): Promise<string> => { // Mixpanel
+  const config = await loadConfig()
+  return config.bardApiUrl
+}
+
+export const getEcmApiUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.ecmApiUrl
+}
+
+export const getECMUrl = async (): Promise<string> => {
+  return await getEcmApiUrl()
+}
+
+export const getErrorApiKey = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.errorApiKey
+}
+
+export const getGaId = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.gaId
+}
+
+export const getHash = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.hash
+}
+
+export const getNihUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.nihUrl
+}
+
+export const getOntologyApiUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.ontologyApiUrl
+}
+
+export const getOntologyUrl = async (): Promise<string> => {
+  return await getOntologyApiUrl()
+}
+
+export const getProfileUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.profileUrl
+}
+
+export const getProject = async (): Promise<string> => {
+  const env = await getEnv()
+  return `broad-duos-${env}`
+}
+
+export const getSamApiUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.samApiUrl
+}
+
+export const getTag = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.tag
+}
+
+export const getTdrApiUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.tdrApiUrl
+}
+
+export const getTerraUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.terraUrl
 }
 
 export const Token = {
@@ -69,11 +207,30 @@ export const Token = {
   },
 }
 
-const loadConfig = memoize(async () => {
-  const res = await fetch('/config.json')
-  return res.json()
+export const authOpts = (token: string | undefined = Token.getToken()) => ({
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/json',
+    'X-App-ID': 'DUOS',
+  },
 })
 
-const getConfig = async () => {
-  return await loadConfig()
-}
+export const jsonBody = (body: unknown) => ({
+  body: JSON.stringify(body),
+  headers: { 'Content-Type': 'application/json' },
+})
+
+export const multiPartOpts = (token: string | undefined = Token.getToken()) => ({
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'multipart/form-data',
+    'X-App-ID': 'DUOS',
+  },
+})
+
+export const textPlain = () => ({
+  headers: {
+    'Accept': 'text/plain',
+    'X-App-ID': 'DUOS',
+  },
+})
