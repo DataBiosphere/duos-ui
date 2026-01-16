@@ -67,18 +67,7 @@ export const DatasetSearchTable = (props) => {
   }
 
   const assembleFullQuery = useCallback(() => {
-    const queryChunks = [
-      {
-        match: {
-          _type: 'dataset',
-        },
-      },
-      {
-        exists: {
-          field: 'study',
-        },
-      },
-    ]
+    let searchModifier = null
 
     // do not apply search modifier if there is no search term
     if (searchTerm.length > 0) {
@@ -189,7 +178,7 @@ export const DatasetSearchTable = (props) => {
         },
       }
     }
-  }, [searchTerm, filters])
+  }, [searchTerm, filters, assembleBaseQuery, isSigningOfficial, isInstitutionQuery])
 
   const filterHandler = (category, filter) => {
     let newFilter
@@ -213,6 +202,9 @@ export const DatasetSearchTable = (props) => {
     if (isEmpty(datasets)) {
       return
     }
+    // Calling setState inside this effect is intentional: it updates
+    // derived state from `datasets` when they arrive.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     getExportableDatasets(datasets)
   }, [datasets])
 
@@ -262,6 +254,8 @@ export const DatasetSearchTable = (props) => {
   useEffect(() => {
     if (!hasRunInitialSearch.current) {
       hasRunInitialSearch.current = true
+      // Intentionally setting initial filtered state from datasets.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFiltered(datasets)
       return
     }
