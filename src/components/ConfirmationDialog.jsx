@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import Modal from 'react-modal'
 import { Alert } from './Alert'
 import CloseIconComponent from '../components/CloseIconComponent'
@@ -30,13 +30,9 @@ const customStyles = {
 Modal.setAppElement('#root')
 
 export const ConfirmationDialog = (props) => {
-  const [alertMessage, setLocalAlertMessage] = useState(undefined)
-  const [alertTitle, setLocalAlertTitle] = useState(undefined)
-
-  useEffect(() => {
-    setLocalAlertMessage(props.alertMessage)
-    setLocalAlertTitle(props.alertTitle)
-  }, [props.alertMessage, props.alertTitle])
+  // Use props directly for alert content to avoid redundant local state
+  const alertMessage = props.alertMessage
+  const alertTitle = props.alertTitle
   const { disableOkBtn = false, disableNoBtn = false } = props
 
   return (
