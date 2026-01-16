@@ -28,6 +28,29 @@ type VotingHistoryOverviewProps = {
   votes: Vote[]
 }
 
+const headerStyle = {
+  fontWeight: 600,
+  fontSize: '1.1rem',
+  background: '#f5f7fa',
+  color: '#2a3b4d',
+  padding: '8px 0',
+  whiteSpace: 'normal',
+  wordBreak: 'break-word',
+  overflowWrap: 'anywhere',
+}
+
+const cellWrapStyle = {
+  whiteSpace: 'normal',
+  wordBreak: 'break-word',
+  overflowWrap: 'anywhere',
+}
+
+const styles = {
+  baseStyle: { display: 'flex', alignItems: 'center', minHeight: 40, ...cellWrapStyle },
+  columnStyle: { display: 'flex', background: '#f5f7fa', ...cellWrapStyle },
+  containerOverride: { width: '100%', overflowX: 'visible' },
+}
+
 const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, votes }) => {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
 
@@ -40,29 +63,6 @@ const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, vote
     })
   }
 
-  const headerStyle = {
-    fontWeight: 600,
-    fontSize: '1.1rem',
-    background: '#f5f7fa',
-    color: '#2a3b4d',
-    padding: '8px 0',
-    whiteSpace: 'normal',
-    wordBreak: 'break-word',
-    overflowWrap: 'anywhere',
-  }
-
-  const cellWrapStyle = {
-    whiteSpace: 'normal',
-    wordBreak: 'break-word',
-    overflowWrap: 'anywhere',
-  }
-
-  const styles = {
-    baseStyle: { display: 'flex', alignItems: 'center', minHeight: 40, ...cellWrapStyle },
-    columnStyle: { display: 'flex', background: '#f5f7fa', ...cellWrapStyle },
-    containerOverride: { width: '100%', overflowX: 'visible' },
-  }
-
   const columnHeaders = useMemo(() => [
     { label: 'Dataset Name', cellStyle: { ...headerStyle, width: 200 } },
     { label: 'Vote Date', cellStyle: { ...headerStyle, width: 180 } },
@@ -70,7 +70,7 @@ const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, vote
     { label: 'Linked DAR ID', cellStyle: { ...headerStyle, width: 140 } },
     { label: 'Vote Result', cellStyle: { ...headerStyle, width: 400 } },
     { label: 'Status', cellStyle: { ...headerStyle, width: 180 } },
-  ], [headerStyle])
+  ], [])
 
   const rowData = votes.map((vote, idx) => [
     { data: vote.datasetName },
