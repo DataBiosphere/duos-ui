@@ -3,29 +3,29 @@ import { votingColors } from 'src/libs/VotingColors.ts'
 import CollectionVoteButton from './CollectionVoteButton'
 import { CheckCircleOutlined } from '@mui/icons-material'
 
+const styles = {
+  label: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    fontSize: '28px',
+    margin: '2.5%',
+  },
+}
+
+const Label = () => {
+  return (
+    <span style={styles.label}>
+      <CheckCircleOutlined style={styles.icon} />
+      Yes
+    </span>
+  )
+}
+
 export default function CollectionVoteYesButton(props) {
   const { onClick, disabled, isSelected, onError } = props
-
-  const styles = {
-    label: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    icon: {
-      fontSize: '28px',
-      margin: '2.5%',
-    },
-  }
-
-  const Label = () => {
-    return (
-      <span style={styles.label}>
-        <CheckCircleOutlined style={styles.icon} />
-        Yes
-      </span>
-    )
-  }
 
   return (
     <CollectionVoteButton

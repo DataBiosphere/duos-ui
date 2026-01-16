@@ -6,6 +6,25 @@ import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiD
 import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab'
 import { User } from '../../libs/ajax/User'
 
+const DatasetVoteSlabs = ({ dataBuckets, collection, dacDatasetIds, isChair, isApprovalDisabled, readOnly, adminPage, updateFinalVote, isLoading, reloadFn }) => {
+  return dataBuckets.map(bucket => (
+    <MultiDatasetVoteSlab
+      title={bucket.label}
+      bucket={bucket}
+      collection={collection}
+      dacDatasetIds={dacDatasetIds}
+      isChair={isChair}
+      isApprovalDisabled={isApprovalDisabled}
+      readOnly={readOnly}
+      key={bucket.key}
+      adminPage={adminPage}
+      updateFinalVote={updateFinalVote}
+      isLoading={isLoading}
+      reloadFn={reloadFn}
+    />
+  ))
+}
+
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
@@ -52,26 +71,6 @@ export default function MultiDatasetVotingTab(props) {
     init()
   }, [adminPage])
 
-  const DatasetVoteSlabs = () => {
-    const isApprovalDisabled = dataAccessApprovalDisabled()
-    return dataBuckets.map(bucket => (
-      <MultiDatasetVoteSlab
-        title={bucket.label}
-        bucket={bucket}
-        collection={collection}
-        dacDatasetIds={dacDatasetIds}
-        isChair={isChair}
-        isApprovalDisabled={isApprovalDisabled}
-        readOnly={readOnly}
-        key={bucket.key}
-        adminPage={adminPage}
-        updateFinalVote={updateFinalVote}
-        isLoading={isLoading}
-        reloadFn={reloadFn}
-      />
-    ))
-  }
-
   const dataAccessApprovalDisabled = () => {
     const researcherLibraryCard = flow(
       get('createUser'),
@@ -104,7 +103,18 @@ export default function MultiDatasetVotingTab(props) {
       />
       <div style={styles.title}>Datasets Requested by Data Use</div>
       <div style={styles.slabs}>
-        <DatasetVoteSlabs />
+        <DatasetVoteSlabs
+          dataBuckets={dataBuckets}
+          collection={collection}
+          dacDatasetIds={dacDatasetIds}
+          isChair={isChair}
+          isApprovalDisabled={dataAccessApprovalDisabled()}
+          readOnly={readOnly}
+          adminPage={adminPage}
+          updateFinalVote={updateFinalVote}
+          isLoading={isLoading}
+          reloadFn={reloadFn}
+        />
       </div>
     </div>
   )

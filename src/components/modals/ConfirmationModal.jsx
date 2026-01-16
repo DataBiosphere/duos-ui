@@ -7,25 +7,25 @@ import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
 import { AsyncSpinnerButton } from '../AsyncSpinnerButton.js'
 
+const duosBlue = 'rgb(0, 96, 159)'
+const duosBlueHover = 'rgb(9,72,183)'
+
+const SecondaryButton = styled(Button)(() => ({
+  'fontFamily': 'Montserrat, sans-serif',
+  'color': duosBlue,
+  'backgroundColor': 'white',
+  'borderRadius': '4px',
+  'fontSize': '1.45rem',
+  'borderColor': duosBlue,
+  '&:hover': {
+    borderColor: duosBlueHover,
+    color: duosBlueHover,
+  },
+}))
+
 const ConfirmationModal = (props) => {
   const { showConfirmation, closeConfirmation, title, message, header, onConfirm, styleOverride = {} } = props
   const closeFn = () => closeConfirmation()
-
-  const duosBlue = 'rgb(0, 96, 159)'
-  const duosBlueHover = 'rgb(9,72,183)'
-
-  const SecondaryButton = styled(Button)(() => ({
-    'fontFamily': 'Montserrat, sans-serif',
-    'color': duosBlue,
-    'backgroundColor': 'white',
-    'borderRadius': '4px',
-    'fontSize': '1.45rem',
-    'borderColor': duosBlue,
-    '&:hover': {
-      borderColor: duosBlueHover,
-      color: duosBlueHover,
-    },
-  }))
 
   const setHoverState = (e, backgroundColor) => {
     if (!e.currentTarget.disabled) {
