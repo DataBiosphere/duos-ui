@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model'
-import React, { useState, useEffect, useRef } from 'react'
 import { CombinedDataAccessRequest, Dataset, DataUse, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import {
   CLOSEOUT_KEYS,
