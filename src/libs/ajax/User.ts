@@ -1,6 +1,5 @@
 import { cloneDeep, flow, unset } from 'lodash/fp'
 import { Config } from 'src/libs/config'
-import { getApiUrl } from 'src/libs/ajax'
 import { fetchGet, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes'
 import {
@@ -14,25 +13,25 @@ import {
 
 export const User = {
   getMe: async (): Promise<DuosUser> => {
-    const url = `${await getApiUrl()}/api/user/me`
+    const url = `${await Config.getApiUrl()}/api/user/me`
     const res = await fetchGet<DuosUser>(url, Config.authOpts())
     return res.data
   },
 
   getById: async (id: number): Promise<DuosUser> => {
-    const url = `${await getApiUrl()}/api/user/${id}`
+    const url = `${await Config.getApiUrl()}/api/user/${id}`
     const res = await fetchGet<DuosUser>(url, Config.authOpts())
     return res.data
   },
 
   list: async (roleName: 'Admin' | 'SigningOfficial'): Promise<DuosUser[]> => {
-    const url = `${await getApiUrl()}/api/user/role/${roleName}`
+    const url = `${await Config.getApiUrl()}/api/user/role/${roleName}`
     const res = await fetchGet<DuosUser[]>(url, Config.authOpts())
     return res.data
   },
 
   create: async (request: CreateDuosUserRequest): Promise<DuosUser | false | undefined> => {
-    const url = `${await getApiUrl()}/api/user/create`
+    const url = `${await Config.getApiUrl()}/api/user/create`
     try {
       const res = await fetchPost<DuosUser, CreateDuosUserRequest>(url, request, Config.authOpts())
       return res.data
@@ -43,7 +42,7 @@ export const User = {
   },
 
   updateSelf: async (payload: UpdateDuosUserRequestV1): Promise<DuosUser | false | undefined> => {
-    const url = `${await getApiUrl()}/api/user`
+    const url = `${await Config.getApiUrl()}/api/user`
     // We should not be updating the user's create date, associated institution, or library cards
     try {
       const res = await fetchPut<DuosUser, UpdateDuosUserRequestV1>(url, payload, Config.authOpts())
@@ -55,7 +54,7 @@ export const User = {
   },
 
   update: async (user: UpdateDuosUserRequestV2, userId: number)/* : Promise<UpdateDuosUserResponse> */ => {
-    const url = `${await getApiUrl()}/api/user/${userId}`
+    const url = `${await Config.getApiUrl()}/api/user/${userId}`
     // We should not be updating the user's create date, associated institution, or library card
     // This below code does not seem to work at all and
     // does not seem appropriate for this request anyway.
@@ -77,43 +76,43 @@ export const User = {
   },
 
   registerUser: async (): Promise<DuosUser> => {
-    const url = `${await getApiUrl()}/api/user`
+    const url = `${await Config.getApiUrl()}/api/user`
     const res = await fetchPost<DuosUser>(url, undefined, Config.authOpts())
     return res.data
   },
 
   getSOsForCurrentUser: async (): Promise<SimplifiedDuosUser[]> => {
-    const url = `${await getApiUrl()}/api/user/signing-officials`
+    const url = `${await Config.getApiUrl()}/api/user/signing-officials`
     const res = await fetchGet<SimplifiedDuosUser[]>(url, Config.authOpts())
     return res.data
   },
 
   addRoleToUser: async (userId: number, roleId: number): Promise<DuosUser> => {
-    const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
+    const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`
     const res = await fetchPut<DuosUser>(url, null, Config.authOpts())
     return res.data
   },
 
   deleteRoleFromUser: async (userId: number, roleId: number): Promise<DuosUser> => {
-    const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`
+    const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`
     const res = await fetchDelete<DuosUser>(url, Config.authOpts())
     return res.data
   },
 
   getUserRelevantDatasets: async (): Promise<Dataset[]> => {
-    const url = `${await getApiUrl()}/api/user/me/dac/datasets/v2`
+    const url = `${await Config.getApiUrl()}/api/user/me/dac/datasets/v2`
     const res = await fetchGet<Dataset[]>(url, Config.authOpts())
     return res.data
   },
 
   getAcknowledgements: async (): Promise<AcknowledgementMap> => {
-    const url = `${await getApiUrl()}/api/user/acknowledgements`
+    const url = `${await Config.getApiUrl()}/api/user/acknowledgements`
     const res = await fetchGet<AcknowledgementMap>(url, Config.authOpts())
     return res.data
   },
 
   getAcknowledgement: async (key: string): Promise<Acknowledgement> => {
-    const url = `${await getApiUrl()}/api/user/acknowledgements/${key}`
+    const url = `${await Config.getApiUrl()}/api/user/acknowledgements/${key}`
     const res = await fetchGet<Acknowledgement>(url, Config.authOpts())
     return res.data
   },
@@ -122,13 +121,13 @@ export const User = {
     if (keys.length === 0) {
       return {}
     }
-    const url = `${await getApiUrl()}/api/user/acknowledgements`
+    const url = `${await Config.getApiUrl()}/api/user/acknowledgements`
     const res = await fetchPost<AcknowledgementMap, string[]>(url, keys, Config.authOpts())
     return res.data
   },
 
   getApprovedDatasets: async (): Promise<ApprovedDataset[]> => {
-    const url = `${await getApiUrl()}/api/user/me/researcher/datasets`
+    const url = `${await Config.getApiUrl()}/api/user/me/researcher/datasets`
     const res = await fetchGet<ApprovedDataset[]>(url, Config.authOpts())
     return res.data
   },

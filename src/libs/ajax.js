@@ -1,5 +1,4 @@
 import { Auth } from './auth/auth'
-import { Config } from './config'
 import { spinnerService } from './spinner-service'
 import { StackdriverReporter } from './stackdriverReporter'
 
@@ -8,22 +7,6 @@ import { StackdriverReporter } from './stackdriverReporter'
 export const redirectOnLogout = () => {
   Auth.signOut()
   window.location.href = `/home?redirectTo=${window.location.pathname}`
-}
-
-export const getApiUrl = async () => {
-  return await Config.getApiUrl()
-}
-
-export const getBardApiUrl = async () => {
-  return await Config.getBardApiUrl()
-}
-
-export const getOntologyUrl = async () => {
-  return await Config.getOntologyApiUrl()
-}
-
-export const getECMUrl = async () => {
-  return await Config.getECMUrl()
 }
 
 export const fetchOk = async (...args) => {

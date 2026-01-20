@@ -1,10 +1,9 @@
 import { Config } from '../config'
-import { getApiUrl } from '../ajax'
 import { fetchGet, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 export const ToS = {
   getDUOSText: async () => {
-    const url = `${await getApiUrl()}/tos/text/duos`
+    const url = `${await Config.getApiUrl()}/tos/text/duos`
     const res = await fetchGet(url, Config.textPlain())
     return res.data
   },
@@ -22,17 +21,17 @@ export const ToS = {
    * @returns {Promise<any>}
    */
   getStatus: async () => {
-    const url = `${await getApiUrl()}/api/sam/register/self/diagnostics`
+    const url = `${await Config.getApiUrl()}/api/sam/register/self/diagnostics`
     const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
   acceptToS: async () => {
-    const url = `${await getApiUrl()}/api/sam/register/self/tos`
+    const url = `${await Config.getApiUrl()}/api/sam/register/self/tos`
     const res = await fetchPost(url, {}, Config.authOpts())
     return res.data
   },
   rejectToS: async () => {
-    const url = `${await getApiUrl()}/api/sam/register/self/tos`
+    const url = `${await Config.getApiUrl()}/api/sam/register/self/tos`
     const res = await fetchDelete(url, Config.authOpts())
     return res.data
   },
