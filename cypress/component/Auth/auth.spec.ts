@@ -1,5 +1,5 @@
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, redirectOnLogout } from 'src/libs/auth/auth'
 import { OAuth2 } from 'src/libs/ajax/OAuth2'
 import { Storage } from 'src/libs/storage'
 import { v4 as uuid } from 'uuid'
@@ -50,5 +50,30 @@ describe('Auth Success', function () {
       cy.wrap(Storage.getData('key')).should('be.null')
       cy.wrap(Storage.getEnv()).should('be.null')
     })
+  })
+
+  it('redirectOnLogout clears storage and calls signOut', function () {
+    Storage.setAnonymousId(uuid())
+    Storage.setData('key', 'val')
+    Storage.setEnv('test')
+    cy.wrap(Storage.getAnonymousId()).should('not.be.empty')
+    cy.wrap(Storage.getData('key')).should('not.be.empty')
+    cy.wrap(Storage.getEnv()).should('not.be.empty')
+
+    cy.spy(Auth, 'signOut').as('signOutSpy')
+
+    // Verify that the storage is cleared when redirectOnLogout completes
+    try {
+      redirectOnLogout()
+    }
+    catch (_e) {
+      // Ignore errors from attempting to redirect in test environment
+    }
+
+    cy.wrap(Storage.userIsLogged()).should('be.false')
+    cy.wrap(Storage.getAnonymousId()).should('be.null')
+    cy.wrap(Storage.getData('key')).should('be.null')
+    cy.wrap(Storage.getEnv()).should('be.null')
+    cy.get('@signOutSpy').should('have.been.called')
   })
 })
