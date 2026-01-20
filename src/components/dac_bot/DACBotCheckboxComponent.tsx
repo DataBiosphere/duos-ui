@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DACbotRule, ParsedDACbotRule } from 'src/components/dac_bot/DACBotComponent'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { DAC } from 'src/libs/ajax/DAC'
@@ -28,53 +28,60 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
   const [enabledTime, setEnabledTime] = useState(rule.activationDate)
   const [displayName, setDisplayName] = useState(rule.displayName)
   const [emailAddress, setEmailAddress] = useState(rule.userEmail)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Sync local state when rule prop changes
+  useEffect(() => {
+    setIsRuleEnabled(!!rule.enabledByUserId)
+    setEnabledTime(rule.activationDate)
+    setDisplayName(rule.displayName)
+    setEmailAddress(rule.userEmail)
+  }, [rule])
 
   const onCheckboxChange = async () => {
     setIsReadOnly(true)
+    setIsLoading(true)
     try {
       const newEnabledState = !isRuleEnabled
 
-      // If a custom onRuleChange callback is provided, use it
       if (onRuleChange) {
         await onRuleChange(rule as ParsedDACbotRule, newEnabledState)
       }
       else {
-        // Fallback to direct toggle
         const toggleResult: DACBotToggleResult = await DAC.toggleDACbotRule(dacId, rule.id)
         setIsRuleEnabled(toggleResult.isRuleEnabled)
         setEnabledTime(toggleResult.enabledTime)
         setDisplayName(toggleResult.displayName)
         setEmailAddress(toggleResult.email)
       }
-
-      Notifications.showSuccess(
-        {
-          severity: 'success',
-          text: 'Automation rule successfully saved.',
-          timeout: 3500,
-          layout: {
-            vertical: 'bottom',
-            horizontal: 'right',
-          },
+      Notifications.showSuccess({
+        severity: 'success',
+        text: 'Automation rule successfully saved.',
+        timeout: 3500,
+        layout: {
+          vertical: 'bottom',
+          horizontal: 'right',
         },
-      )
+      })
       setIsReadOnly(false)
+      setIsLoading(false)
     }
     catch (_) {
       setIsReadOnly(false)
-      Notifications.showError(
-        {
-          severity: 'error',
-          text: 'Error: Unable to change automation rule.  Please try this operation again.',
-          timeout: 3500,
-          layout: {
-            vertical: 'bottom',
-            horizontal: 'right',
-          },
+      setIsLoading(false)
+      Notifications.showError({
+        severity: 'error',
+        text: 'Error: Unable to change automation rule. Please try this operation again.',
+        timeout: 3500,
+        layout: {
+          vertical: 'bottom',
+          horizontal: 'right',
         },
-      )
+      })
     }
   }
+
+  const isDisabledByExclusive = 'isDisabled' in rule ? rule.isDisabled : false
 
   return (
     <FormField
@@ -84,7 +91,6 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
         <>
           <span style={{ display: 'table' }}>
             <ReactMarkdown components={{
-              // Map `p` to use `span` to align with the checkbox.
               p: 'span',
             }}
             >
@@ -99,8 +105,7 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
                   {' '}
                   <Link href={`mailto:${emailAddress}`}>{displayName}</Link>
                   {' '}
-                  (
-                  { new Date(enabledTime).toDateString()}
+                  ({ new Date(enabledTime).toDateString()}
                   )
                 </span>
               )
@@ -109,7 +114,7 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
       )}
       defaultValue={!!rule.enabledByUserId}
       onChange={onCheckboxChange}
-      disabled={isReadOnly}
+      disabled={isReadOnly || isLoading || isDisabledByExclusive}
     />
   )
 }
