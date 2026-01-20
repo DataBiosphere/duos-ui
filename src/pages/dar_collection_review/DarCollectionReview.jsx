@@ -226,6 +226,8 @@ export default function DarCollectionReview(props) {
 
   useEffect(() => {
     try {
+      // Intentionally setting loading state at effect start.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true)
       setSubcomponentLoading(true)
       init()
@@ -239,6 +241,8 @@ export default function DarCollectionReview(props) {
   useEffect(() => {
     try {
       if (toLower(selectedTab) === 'chair vote') {
+        // Intentionally setting loading state when switching tabs.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSubcomponentLoading(true)
         init()
       }
