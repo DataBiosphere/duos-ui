@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { filter, includes } from 'lodash/fp'
 import { DacTerm, Dataset } from 'src/types/model'
 import SectionHeading from 'src/components/collection_voting_slab/SectionHeading'
@@ -21,6 +21,16 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
   const collapsedDatasetCapacity = 5
   const { bucketDatasets, dacs, dacDatasetIds, isLoading, adminPage } = props
 
+  const collapseView = useCallback((datasets: Dataset[]) => {
+    const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity
+
+    const collapsedViewDatasets = datasetsHiddenWhenCollapsed
+      ? datasets.slice(0, collapsedDatasetCapacity)
+      : datasets
+
+    setVisibleDatasets(collapsedViewDatasets)
+  }, [collapsedDatasetCapacity])
+
   useEffect(() => {
     const datasets = adminPage
       ? bucketDatasets
@@ -32,17 +42,7 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
     setFilteredDatasets(datasets)
     setDatasetCount(datasets.length)
     collapseView(datasets)
-  }, [adminPage, bucketDatasets, dacDatasetIds])
-
-  const collapseView = (datasets: Dataset[]) => {
-    const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity
-
-    const collapsedViewDatasets = datasetsHiddenWhenCollapsed
-      ? datasets.slice(0, collapsedDatasetCapacity)
-      : datasets
-
-    setVisibleDatasets(collapsedViewDatasets)
-  }
+  }, [adminPage, bucketDatasets, dacDatasetIds, collapseView])
 
   const expandDatasetList = () => {
     setExpanded(true)

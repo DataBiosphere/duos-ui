@@ -224,18 +224,10 @@ export default function DarCollectionReview(props) {
     return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })
   }, [dataUseBuckets])
 
-  DarCollectionReview.propTypes = {
-    match: PropTypes.shape({
-      params: PropTypes.shape({
-        collectionId: PropTypes.string.isRequired,
-      }).isRequired,
-    }).isRequired,
-    adminPage: PropTypes.bool,
-    readOnly: PropTypes.bool,
-  }
-
   useEffect(() => {
     try {
+      // Intentionally setting loading state at effect start.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true)
       setSubcomponentLoading(true)
       init()
@@ -249,6 +241,8 @@ export default function DarCollectionReview(props) {
   useEffect(() => {
     try {
       if (toLower(selectedTab) === 'chair vote') {
+        // Intentionally setting loading state when switching tabs.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSubcomponentLoading(true)
         init()
       }
@@ -362,4 +356,9 @@ export default function DarCollectionReview(props) {
       </div>
     </div>
   )
+}
+
+DarCollectionReview.propTypes = {
+  adminPage: PropTypes.bool,
+  readOnly: PropTypes.bool,
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import {
   CollaboratingSites,
   ControlledAccessRequiredForGenomicSummaryResultsGSR,
@@ -32,12 +32,8 @@ export interface NihAdministrativeInformationProps {
 
 export const NihAdministrativeInformation = (props: NihAdministrativeInformationProps) => {
   const { setStudy, study } = props
-  const [isRequired, setIsRequired] = useState(false)
-
-  useEffect(() => {
-    const nihAnvilUse = getStudyPropertyValueByKey(study, new NihAnvilUse().key) as string
-    setIsRequired(NihAnvilUse.requiresNIHAdministrativeInformation(nihAnvilUse))
-  }, [study])
+  const nihAnvilUse = getStudyPropertyValueByKey(study, new NihAnvilUse().key) as string
+  const isRequired = NihAnvilUse.requiresNIHAdministrativeInformation(nihAnvilUse)
 
   return (
     <>{isRequired && (

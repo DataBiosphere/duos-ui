@@ -62,7 +62,8 @@ export default function ERACommons({
     const origin = window.location.origin
     const redirectTo = `${origin}/${destination}`
     try {
-      window.location.href = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo)
+      const authUrl = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo)
+      window.location.assign(authUrl)
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error

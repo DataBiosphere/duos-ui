@@ -66,8 +66,6 @@ export default defineConfig([
       'react/prop-types': 'off',
       '@stylistic/jsx-one-expression-per-line': ['off'],
       // TODO: these issues should be fixed
-      'react-hooks/static-components': 'warn',
-      'react-hooks/immutability': 'warn',
       'react-hooks/set-state-in-effect': 'warn',
     },
   },

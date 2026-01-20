@@ -35,7 +35,7 @@ const styles = {
 
 export const DatasetSearchTable = (props) => {
   const navigate = useNavigate()
-  const { datasets, icon, title } = props
+  const { datasets, icon, title, assembleFullQuery: assembleBaseQuery, isSigningOfficial, isInstitutionQuery } = props
   const [exportableDatasets, setExportableDatasets] = useState({})
   const [filters, setFilters] = useState(defaultFilters(datasets))
   const [filtered, setFiltered] = useState(datasets)
@@ -67,46 +67,36 @@ export const DatasetSearchTable = (props) => {
   }
 
   const assembleFullQuery = useCallback(() => {
-    const queryChunks = [
-      {
-        match: {
-          _type: 'dataset',
-        },
-      },
-      {
-        exists: {
-          field: 'study',
-        },
-      },
-    ]
+    let searchModifier = null
 
     // do not apply search modifier if there is no search term
     if (searchTerm.length > 0) {
-      const searchModifier = [
-        {
-          multi_match: {
-            query: searchTerm,
-            type: 'phrase_prefix',
-            fields: [
-              'datasetName',
-              'dataLocation',
-              'study.description',
-              'study.studyName',
-              'study.species',
-              'study.piName',
-              'study.dataCustodianEmail',
-              'study.dataTypes',
-              'dataUse.primary.code',
-              'dataUse.secondary.code',
-              'dac.dacName',
-              'datasetIdentifier',
-            ],
-          },
+      searchModifier = {
+        multi_match: {
+          query: searchTerm,
+          type: 'phrase_prefix',
+          fields: [
+            'datasetName',
+            'dataLocation',
+            'study.description',
+            'study.studyName',
+            'study.species',
+            'study.piName',
+            'study.dataCustodianEmail',
+            'study.dataTypes',
+            'dataUse.primary.code',
+            'dataUse.secondary.code',
+            'dac.dacName',
+            'datasetIdentifier',
+          ],
         },
-      ]
-      queryChunks.push(...searchModifier)
+      }
     }
 
+    // Get base query with visibility modifiers from parent
+    const baseQuery = assembleBaseQuery(isSigningOfficial, isInstitutionQuery, searchModifier)
+
+    // Add filter layer if any filters are selected
     let filterQuery = {}
     if (anyFiltersSelected(filters)) {
       const filterTerms = []
@@ -175,18 +165,20 @@ export const DatasetSearchTable = (props) => {
       }
     }
 
-    return {
-      from: 0,
-      size: 10000,
-      query: {
-        bool: {
-          must: queryChunks,
-          // Only add filter subquery when filters are applied.
-          ...(Object.keys(filterQuery).length > 0 && { filter: filterQuery }),
+    // Add filter layer to base query if filters are present
+    if (Object.keys(filterQuery).length > 0) {
+      return {
+        ...baseQuery,
+        query: {
+          ...baseQuery.query,
+          bool: {
+            ...baseQuery.query.bool,
+            filter: filterQuery,
+          },
         },
-      },
+      }
     }
-  }, [searchTerm, filters])
+  }, [searchTerm, filters, assembleBaseQuery, isSigningOfficial, isInstitutionQuery])
 
   const filterHandler = (category, filter) => {
     let newFilter
@@ -210,6 +202,9 @@ export const DatasetSearchTable = (props) => {
     if (isEmpty(datasets)) {
       return
     }
+    // Calling setState inside this effect is intentional: it updates
+    // derived state from `datasets` when they arrive.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     getExportableDatasets(datasets)
   }, [datasets])
 
@@ -259,6 +254,8 @@ export const DatasetSearchTable = (props) => {
   useEffect(() => {
     if (!hasRunInitialSearch.current) {
       hasRunInitialSearch.current = true
+      // Intentionally setting initial filtered state from datasets.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFiltered(datasets)
       return
     }

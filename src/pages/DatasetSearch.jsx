@@ -144,7 +144,7 @@ export const DatasetSearch = (props) => {
       }
     }
     init()
-  }, [loading, isInstitutionSet, fullQuery, navigate, hasChangedPage])
+  }, [loading, isInstitutionSet, fullQuery, navigate, hasChangedPage, query])
 
   return (
     loading
@@ -153,7 +153,17 @@ export const DatasetSearch = (props) => {
             <CircularProgress />
           </Box>
         )
-      : <DatasetSearchTable {...props} datasets={datasets} icon={version.icon} title={version.title} />
+      : (
+          <DatasetSearchTable
+            {...props}
+            datasets={datasets}
+            icon={version.icon}
+            title={version.title}
+            assembleFullQuery={assembleFullQuery}
+            isSigningOfficial={isSigningOfficial}
+            isInstitutionQuery={isInstitutionQuery}
+          />
+        )
   )
 }
 

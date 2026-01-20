@@ -37,7 +37,7 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
       }
     }
     init()
-  }, [])
+  }, [formState.closeoutSigningOfficial?.userId])
 
   return (
     <div data-cy="dar-closeout">
