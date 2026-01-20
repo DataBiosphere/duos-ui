@@ -47,17 +47,13 @@ const styles = {
 }
 
 export default function MultiDatasetVotingTab(props) {
-  const [rpBucket, setRpBucket] = useState({})
-  const [dataBuckets, setDataBuckets] = useState([])
   const [dacDatasetIds, setDacDatasetIds] = useState([])
   const { darInfo, buckets, collection, isChair, isLoading, readOnly, adminPage, updateFinalVote, reloadFn } = props
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n'
     + (!adminPage ? 'You can still deny this request and/or vote on the Structured Research Purpose.' : '')
 
-  useEffect(() => {
-    setRpBucket(find(bucket => get('isRP')(bucket))(buckets))
-    setDataBuckets(filter(bucket => get('isRP')(bucket) !== true)(buckets))
-  }, [buckets, collection])
+  const rpBucket = find(bucket => get('isRP')(bucket))(buckets) || {}
+  const dataBuckets = filter(bucket => get('isRP')(bucket) !== true)(buckets)
 
   useEffect(() => {
     const init = async () => {

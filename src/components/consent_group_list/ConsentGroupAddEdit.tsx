@@ -73,12 +73,14 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup?.diseaseSpecificUse))
   const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
 
+  const diseaseSpecificUse = consentGroup?.diseaseSpecificUse
+
   useEffect(() => {
     let mounted = true
     const loadOntologyTerms = async () => {
-      if (!isEmpty(consentGroup?.diseaseSpecificUse)) {
+      if (!isEmpty(diseaseSpecificUse)) {
         try {
-          const terms = await findOntologyTerms(consentGroup!.diseaseSpecificUse)
+          const terms = await findOntologyTerms(diseaseSpecificUse!)
           if (mounted && Array.isArray(terms)) {
             setSelectedDiseases(terms)
           }
@@ -92,7 +94,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     return () => {
       mounted = false
     }
-  }, [consentGroup?.diseaseSpecificUse])
+  }, [diseaseSpecificUse])
 
   const [showMORText, setShowMORText] = useState(consentGroup?.mor)
   const [morText, setMORText] = useState(consentGroup?.morDate || undefined)

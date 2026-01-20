@@ -30,10 +30,7 @@ const customStyles = {
 Modal.setAppElement('#root')
 
 export const ConfirmationDialog = (props) => {
-  // Use props directly for alert content to avoid redundant local state
-  const alertMessage = props.alertMessage
-  const alertTitle = props.alertTitle
-  const { disableOkBtn = false, disableNoBtn = false } = props
+  const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props
 
   return (
     <Modal

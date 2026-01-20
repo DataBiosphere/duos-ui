@@ -67,11 +67,6 @@ export default function CollaboratorList(props) {
     return formFieldChange({ key: collaboratorKey, value: collaborators })
   }, [formFieldChange, collaboratorKey, collaborators])
 
-  useEffect(() => {
-    setCollaborators(props.collaborators)
-    setDeleteBoolArray((new Array(props.collaborators.length).fill(false)))
-  }, [props.collaborators, props.deleteBoolArray])
-
   const ListItems = (
     <div className="form-group row no-margin">
       {collaborators.map((collaborator, index) => (

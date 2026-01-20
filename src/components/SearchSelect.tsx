@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useMemo } from 'react'
 import './SearchSelect.css'
 import { FormField, FormFieldTypes } from './forms/forms'
 
@@ -18,11 +18,9 @@ type SearchSelectProps = {
 
 export const SearchSelect: React.FC<SearchSelectProps> = (props: SearchSelectProps) => {
   const { onSelection, placeholder, options, value, isClearable, disabled = false } = props
-  const [selectedOption, setSelectedOption] = useState<Option | undefined>()
 
-  useEffect(() => {
-    const selected = options.find(option => option.key === value)
-    setSelectedOption(selected)
+  const selectedOption = useMemo(() => {
+    return options.find(option => option.key === value)
   }, [value, options])
 
   return (

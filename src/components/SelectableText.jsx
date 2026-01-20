@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 
 const defaultUnselectedStyle = {
   fontSize: '1.8rem',
@@ -22,29 +22,30 @@ const defaultHoverStyle = { fontWeight: 600, cursor: 'pointer' }
 
 export default function SelectableText({ label, setSelected, selectedType, styleOverride = {}, isDisabled = false }) {
   const { baseStyle, tabSelected, tabUnselected, tabHover } = styleOverride
+  const [isHovered, setIsHovered] = useState(false)
 
   const utilizedUnselectedStyle = useMemo(() => {
     return Object.assign({}, tabUnselected || defaultUnselectedStyle, baseStyle)
   }, [tabUnselected, baseStyle])
-  const [style, setStyle] = useState(utilizedUnselectedStyle)
-  const utilizedHoverStyle = useMemo(() => {
-    return Object.assign({}, style, tabHover || defaultHoverStyle, baseStyle)
-  }, [tabHover, baseStyle, style])
   const utilizedSelectedStyle = useMemo(() => {
     return Object.assign({}, tabSelected || defaultSelectedStyle, baseStyle)
   }, [tabSelected, baseStyle])
+  const utilizedHoverStyle = useMemo(() => {
+    return Object.assign({}, tabHover || defaultHoverStyle, baseStyle)
+  }, [tabHover, baseStyle])
 
-  useEffect(() => {
-    setStyle(
-      selectedType === label ? utilizedSelectedStyle : utilizedUnselectedStyle,
-    )
-  }, [label, selectedType, utilizedSelectedStyle, utilizedUnselectedStyle])
+  const style = useMemo(() => {
+    if (isHovered) {
+      return utilizedHoverStyle
+    }
+    return selectedType === label ? utilizedSelectedStyle : utilizedUnselectedStyle
+  }, [isHovered, selectedType, label, utilizedSelectedStyle, utilizedUnselectedStyle, utilizedHoverStyle])
 
   const addHoverEffect = () => {
-    setStyle(utilizedHoverStyle)
+    setIsHovered(true)
   }
   const removeHoverEffect = () => {
-    setStyle(selectedType === label ? utilizedSelectedStyle : utilizedUnselectedStyle)
+    setIsHovered(false)
   }
 
   return (
