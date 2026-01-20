@@ -1,4 +1,4 @@
-import { mergeAll, isEmpty } from 'lodash/fp'
+import { isEmpty } from 'lodash/fp'
 import { fetchGet, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 import { Config } from '../config'
 

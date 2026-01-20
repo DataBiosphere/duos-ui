@@ -1,5 +1,5 @@
 import { fileDownload } from '../../utils/FileDownload'
-import { mergeAll, omit } from 'lodash/fp'
+import { omit } from 'lodash/fp'
 import { Config } from '../config'
 import { isFileEmpty } from '../utils'
 import { DAAUtils } from '../../utils/DAAUtils'
@@ -70,7 +70,7 @@ export const DAR = {
       const res = await fetchGet(url, Config.authOpts())
       return res.data
     }
-    catch (error) {
+    catch (_error) {
       // Return empty array on error (original behavior)
       return []
     }
