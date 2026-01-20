@@ -1,13 +1,6 @@
-import { Auth } from './auth/auth'
+import { redirectOnLogout } from './auth/auth'
 import { spinnerService } from './spinner-service'
 import { reportError } from './ajax/fetchAdapter'
-
-// to log out user and redirect to home when response has 401 status
-// return responses with statuses in the 200s and reject the rest
-export const redirectOnLogout = () => {
-  Auth.signOut()
-  window.location.href = `/home?redirectTo=${window.location.pathname}`
-}
 
 export const fetchOk = async (...args) => {
   // TODO: Remove spinnerService calls

@@ -1,4 +1,4 @@
-import { redirectOnLogout } from 'src/libs/ajax'
+import { redirectOnLogout } from 'src/libs/auth/auth'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 
 export type ResponseType = 'blob' | 'json' | 'text'
