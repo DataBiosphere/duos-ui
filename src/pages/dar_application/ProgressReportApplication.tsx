@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+import { CombinedDataAccessRequest, Dataset, DataUse, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import {
   CLOSEOUT_KEYS,
   DMI_INCIDENT_KEYS,
@@ -125,7 +125,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
   const [showValidation, setShowValidation] = useState<boolean>(false)
   const [formValidation, setFormValidation] = useState<FormValidationState>({ darErrors: {} })
   const [nihValid, setNihValid] = useState<boolean>(true)
-  const [dataUseTranslations, setDataUseTranslations] = useState<string[]>([])
+  const [dataUseTranslations, setDataUseTranslations] = useState<DataUse[]>([])
   const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null)
 
   const eRACommonsDestination = 'progress_report_application/' + dar.collectionId

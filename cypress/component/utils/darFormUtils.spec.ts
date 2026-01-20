@@ -108,22 +108,22 @@ describe('darFormUtils - DUL Logic', () => {
   describe('needsDsAcknowledgement', () => {
     it('should return true when data use translations differ', () => {
       const translations = [
-        { someKey: 'value1' },
-        { someKey: 'value2' },
+        { generalUse: true },
+        { hmbResearch: false },
       ]
       expect(needsDsAcknowledgement(translations)).to.equal(true)
     })
 
     it('should return false when data use translations are the same', () => {
       const translations = [
-        { someKey: 'value1' },
-        { someKey: 'value1' },
+        { generalUse: true },
+        { generalUse: true },
       ]
       expect(needsDsAcknowledgement(translations)).to.equal(false)
     })
 
     it('should return false when there is only one translation', () => {
-      const translations = [{ someKey: 'value1' }]
+      const translations = [{ generalUse: true }]
       expect(needsDsAcknowledgement(translations)).to.equal(false)
     })
   })

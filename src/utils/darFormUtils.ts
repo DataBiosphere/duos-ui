@@ -75,7 +75,7 @@ export const needsPubAcknowledgement = (datasets: Dataset[]): boolean => {
   return datasetsContainDataUseFlag(datasets, 'publicationResults')
 }
 
-export const needsDsAcknowledgement = (dataUseTranslations: unknown[]): boolean => {
+export const needsDsAcknowledgement = (dataUseTranslations: DataUse[]): boolean => {
   return dataUseTranslations.length > 1 && !dataUseTranslations.every(translation => isEqual(dataUseTranslations[0], translation))
 }
 
@@ -193,7 +193,7 @@ const calcResearcherInfoErrors = (
 const calcDarErrors = (
   formData: FormDataBase,
   datasets: Dataset[],
-  dataUseTranslations: unknown[],
+  dataUseTranslations: DataUse[],
   irbDocument: FileStorageObject,
   collaborationLetter: FileStorageObject,
 ): FormValidationErrors => {
@@ -321,7 +321,7 @@ const calcPRErrors = (
   nihValid: boolean,
   formData: FormDataBase,
   datasets: Dataset[],
-  dataUseTranslations: unknown[],
+  dataUseTranslations: DataUse[],
 ): FormValidationErrors => {
   const errors: FormValidationErrors = {}
   calcSummaryErrors(nihValid, errors, formData)
@@ -331,7 +331,7 @@ const calcPRErrors = (
   return errors
 }
 
-const calcDUAErrors = (formData: FormDataBase, datasets: Dataset[], dataUseTranslations: unknown[], errors: FormValidationErrors): void => {
+const calcDUAErrors = (formData: FormDataBase, datasets: Dataset[], dataUseTranslations: DataUse[], errors: FormValidationErrors): void => {
   if (needsGsoAcknowledgement(datasets) && !formData.gsoAcknowledgement) {
     errors.gsoAcknowledgement = requiredError
   }
@@ -484,7 +484,7 @@ export const validateDARFormData = ({
 }: {
   formData: unknown
   datasets: Dataset[]
-  dataUseTranslations: unknown[]
+  dataUseTranslations: DataUse[]
   irbDocument: FileStorageObject
   collaborationLetter: FileStorageObject
   researcher: DuosUser
@@ -505,7 +505,7 @@ export const validatePRFormData = (
   nihValid: boolean,
   formData: unknown,
   datasets: Dataset[] = [],
-  dataUseTranslations: unknown[] = [],
+  dataUseTranslations: DataUse[] = [],
 ): PRFormValidationResult => {
   return {
     darErrors: calcPRErrors(nihValid, formData as FormDataBase, datasets, dataUseTranslations),
