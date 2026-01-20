@@ -492,18 +492,18 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
 export const makeDatasetTableRows = (datasets: DatasetTerm[], headers: HeaderData<DatasetTerm>[]): CellData[][] => datasets.map(dataset => headers.map(header => header.cellDataFn(dataset)))
 
 export const datasetSearchTableTabs: DatasetSearchTableTabs = {
-  study: {
-    key: 'study-table-tab',
-    singular: 'study',
-    plural: 'studies',
-    makeHeaders: makeStudyTableHeaders,
-    makeRows: makeStudyTableRowData,
-  },
   dataset: {
     key: 'datasets-table-tab',
     singular: 'dataset',
     plural: 'datasets',
     makeHeaders: makeDatasetTableHeader,
     makeRows: makeDatasetTableRows,
+  },
+  study: {
+    key: 'study-table-tab',
+    singular: 'study',
+    plural: 'studies',
+    makeHeaders: makeStudyTableHeaders,
+    makeRows: makeStudyTableRowData,
   },
 }

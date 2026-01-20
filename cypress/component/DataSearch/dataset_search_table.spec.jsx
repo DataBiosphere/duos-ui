@@ -50,7 +50,7 @@ describe('DatasetSearchTable (component) - basic tests', () => {
       </BrowserRouter>,
     )
 
-    cy.contains('button', 'View By Studies').should('exist')
+    cy.contains('button', 'View By Datasets').should('exist')
     cy.wrap(searchCalls).should('equal', 0)
   })
 
