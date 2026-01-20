@@ -1,18 +1,17 @@
 import { Config } from '../config'
-import { fetchOk } from '../ajax'
-import { fetchPost, fetchPut, fetchPatch, fetchDelete } from 'src/libs/ajax/fetchAdapter'
+import { fetchGet, fetchPost, fetchPut, fetchPatch, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 export const Institution = {
   list: async () => {
     const url = `${await Config.getApiUrl()}/api/institutions`
-    const res = await fetchOk(url, Config.authOpts())
-    return res.json()
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   getById: async (id) => {
     const url = `${await Config.getApiUrl()}/api/institutions/${id}`
-    const res = await fetchOk(url, Config.authOpts())
-    return res.json()
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   postInstitution: async (institution) => {

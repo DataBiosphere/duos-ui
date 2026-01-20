@@ -1,8 +1,6 @@
-import { mergeAll } from 'lodash/fp'
 import { Config } from 'src/libs/config'
-import { fetchOk } from 'src/libs/ajax'
 import { fileDownload } from 'src/utils/FileDownload.js'
-import { fetchGet, fetchMultipart, fetchPost } from 'src/libs/ajax/fetchAdapter'
+import { fetchGet, fetchMultipart, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 // FIXME: temporary read-only mode for NHGRI datasets
 const setNhgriExternalAccess = (datasets) => {
@@ -19,13 +17,13 @@ export const DataSet = {
   getDatasetNames: async () => {
     const url = `${await Config.getApiUrl()}/api/dataset/datasetNames`
     const res = await fetchGet(url, Config.authOpts())
-    return await res.data
+    return res.data
   },
 
   getRegistrationSchema: async () => {
     const url = `${await Config.getApiUrl()}/schemas/dataset-registration/v1`
     const res = await fetchGet(url, Config.authOpts())
-    return await res.data
+    return res.data
   },
 
   registerDataset: async (registration) => {
@@ -36,8 +34,8 @@ export const DataSet = {
 
   getDatasetsByIds: async (ids) => {
     const url = `${await Config.getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   searchDatasetIndex: async (query, options = {}) => {
@@ -55,13 +53,14 @@ export const DataSet = {
 
   getDataSetsByDatasetId: async (datasetId) => {
     const url = `${await Config.getApiUrl()}/api/dataset/v2/${datasetId}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   deleteDataset: async (datasetObjectId) => {
     const url = `${await Config.getApiUrl()}/api/dataset/${datasetObjectId}`
-    return await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]))
+    await fetchDelete(url, Config.authOpts())
+    return { status: 200 }
   },
 
   updateDatasetV3: async (datasetId, datasetAndFiles) => {
@@ -72,8 +71,8 @@ export const DataSet = {
 
   getStudyById: async (studyId) => {
     const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   updateStudy: async (studyId, studyObject) => {

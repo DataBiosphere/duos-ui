@@ -1,12 +1,11 @@
 import { fileDownload } from '../../utils/FileDownload'
-import { isNil, mergeAll, omit } from 'lodash/fp'
+import { mergeAll, omit } from 'lodash/fp'
 import { Config } from '../config'
 import { isFileEmpty } from '../utils'
-import { fetchAny, fetchOk } from '../ajax'
 import { DAAUtils } from '../../utils/DAAUtils'
 import { Metrics } from './Metrics'
 import eventList from '../events'
-import { fetchGet, fetchMultipart, fetchPost, fetchPut } from 'src/libs/ajax/fetchAdapter'
+import { fetchGet, fetchMultipart, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 export const DAR = {
   // v2 get for DARs
@@ -40,8 +39,8 @@ export const DAR = {
   // v2 delete dar
   deleteDar: async (darId) => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/${darId}`
-    // fetchAdapter.js has fetchDelete, but fetchOk is used for custom handling; keeping as is
-    return await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]))
+    await fetchDelete(url, Config.authOpts())
+    return { status: 200 }
   },
 
   // v2, v3 DAR Creation
@@ -63,15 +62,18 @@ export const DAR = {
   },
 
   searchOntologyIdList: async (ids) => {
-    if (isNil(ids) || ids.length === 0) {
+    if (!ids || ids.length === 0) {
       return []
     }
     const url = `${await Config.getOntologyUrl()}/search?id=${ids}`
-    const res = await fetchAny(url, Config.authOpts())
-    if (res.status >= 400) {
+    try {
+      const res = await fetchGet(url, Config.authOpts())
+      return res.data
+    }
+    catch (error) {
+      // Return empty array on error (original behavior)
       return []
     }
-    return await res.json()
   },
 
   downloadDARDocument: async (referenceId, fileType, fileName) => {
