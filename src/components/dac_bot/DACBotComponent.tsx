@@ -97,14 +97,14 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       // Fetch all rules
       const allRules = await DAC.fetchDACbotRules(dacId)
 
+      const createUpdatedRulesMap = (allRules: DACbotRule[], updatedRuleIds: number[]) => {
+        const rulesMap = new Map(allRules.map(r => [r.id, r]))
+        return (r: DACbotRule) => updatedRuleIds.includes(r.id) ? rulesMap.get(r.id) || r : r
+      }
+
       // Update state with only the rules that changed
       setDACbotRules(prevRules =>
-        prevRules.map((r) => {
-          if (updatedRuleIds.includes(r.id)) {
-            return allRules.find((ar: DACbotRule) => ar.id === r.id) || r
-          }
-          return r
-        }),
+        prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)),
       )
     }
     catch (_error) {
