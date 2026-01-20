@@ -1,6 +1,6 @@
 import { Auth } from './auth/auth'
 import { spinnerService } from './spinner-service'
-import { StackdriverReporter } from './stackdriverReporter'
+import { reportError } from './ajax/fetchAdapter'
 
 // to log out user and redirect to home when response has 401 status
 // return responses with statuses in the 200s and reject the rest
@@ -46,12 +46,4 @@ export const fetchAny = async (...args) => {
   }
   spinnerService.hideAll()
   return res
-}
-
-export const reportError = async (url, status) => {
-  const msg = 'Error fetching response: '
-    .concat(JSON.stringify(url))
-    .concat('Status: ')
-    .concat(status)
-  await StackdriverReporter.report(msg)
 }

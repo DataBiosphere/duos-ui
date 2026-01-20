@@ -1,4 +1,5 @@
-import { redirectOnLogout, reportError } from 'src/libs/ajax'
+import { redirectOnLogout } from 'src/libs/ajax'
+import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -40,6 +41,14 @@ interface FetchMultipartOptions extends Omit<FetchOptionsBase, 'method'> {
 
 export interface FetchData<T> {
   data: T
+}
+
+export const reportError = async (url: string, status: number): Promise<void> => {
+  const msg = 'Error fetching response: '
+    .concat(JSON.stringify(url))
+    .concat('Status: ')
+    .concat(String(status))
+  await StackdriverReporter.report(msg)
 }
 
 function buildUrlWithParams(url: string, params?: Params): string {
