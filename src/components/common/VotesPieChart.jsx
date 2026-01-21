@@ -1,6 +1,6 @@
 import React from 'react'
 import { Chart } from 'react-google-charts'
-import { isNil, isEmpty } from 'lodash/fp'
+import { isNil, isEmpty } from 'lodash'
 import { map } from 'lodash'
 import { useMemo } from 'react'
 

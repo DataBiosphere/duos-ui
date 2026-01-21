@@ -1,7 +1,7 @@
 import { Storage } from './storage'
 import StackdriverErrorReporter from 'stackdriver-errors-js'
 import { Config } from './config'
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash'
 
 const errorHandler = new StackdriverErrorReporter()
 

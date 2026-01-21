@@ -1,6 +1,6 @@
 import React from 'react'
 import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms'
-import { isNil, toLower } from 'lodash/fp'
+import { isNil, toLower } from 'lodash'
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already'
 export const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID'

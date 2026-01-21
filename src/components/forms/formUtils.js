@@ -1,5 +1,5 @@
 import { FormFieldTypes } from './forms'
-import { isNil, isFunction, isArray, isString } from 'lodash/fp'
+import { isNil, isFunction, isArray, isString } from 'lodash'
 
 const commonRequiredProps = [
   'id',

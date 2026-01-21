@@ -1,4 +1,4 @@
-import { uniq } from 'lodash/fp'
+import { uniq } from 'lodash'
 import { Config } from '../config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { validateForm } from './RegistrationValidation'
-import { cloneDeep, isNil } from 'lodash/fp'
+import { cloneDeep, isNil } from 'lodash'
 import { set } from 'lodash'
 import { Institution } from 'src/libs/ajax/Institution'
 import { Study } from 'src/libs/ajax/Study'

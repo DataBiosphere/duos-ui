@@ -1,5 +1,5 @@
 import React from 'react'
-import { isNil, isString, isArray } from 'lodash/fp'
+import { isNil, isString, isArray } from 'lodash'
 
 const primaryConsentText = {
   generalResearchUse: 'General Research Use',

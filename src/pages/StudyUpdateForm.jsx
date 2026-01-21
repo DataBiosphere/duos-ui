@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Notifications } from '../libs/utils'
 import { Styles } from '../libs/theme'
-import { cloneDeep, isEmpty, isNil } from 'lodash/fp'
+import { cloneDeep, isEmpty, isNil } from 'lodash'
 
 import DataSubmissionStudyInformation from './data_submission/ds_study_information'
 import NihAnvilUse from './data_submission/NihAnvilUse'
