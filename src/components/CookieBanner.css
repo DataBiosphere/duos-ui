@@ -1,0 +1,25 @@
+
+.banner {
+    position: fixed;
+    bottom: 0;
+    margin-bottom: 10px;
+    left: 15px;
+    right: 15px;
+    z-index: 1000;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #0948b7;
+    color: white;
+}
+
+.banner-link {
+    color: white;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.banner-link:hover {
+    text-decoration: underline;
+    color: #1a73e8
+}
