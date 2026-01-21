@@ -9,6 +9,7 @@ import chair from './chair.json'
 import daas from './daas.json'
 import dac from './dac.json'
 import { setUserRoleStatuses } from 'src/libs/utils'
+import { DuosUser } from 'src/types/model'
 
 describe('EditDAC Tests', () => {
   Cypress._.each([admin, chair], (user) => {
@@ -38,7 +39,7 @@ describe('EditDAC Tests', () => {
   it('Admins can create a DAC', () => {
     cy.viewport(600, 600)
     Storage.clearStorage()
-    setUserRoleStatuses(admin, Storage)
+    setUserRoleStatuses(admin as DuosUser, Storage)
     cy.stub(DAA, 'getDaas').returns(daas)
     cy.stub(DAC, 'removeDacMember').returns(Promise.resolve(200))
     cy.stub(DAC, 'addDacChair').returns(Promise.resolve(200))
@@ -69,7 +70,7 @@ describe('EditDAC Tests', () => {
   it('Chairs cannot create a DAC', () => {
     cy.viewport(600, 600)
     Storage.clearStorage()
-    setUserRoleStatuses(chair, Storage)
+    setUserRoleStatuses(chair as DuosUser, Storage)
     cy.stub(DAA, 'getDaas').returns(daas)
     cy.stub(DAC, 'removeDacMember').returns(Promise.resolve(200))
     cy.stub(DAC, 'addDacChair').returns(Promise.resolve(200))

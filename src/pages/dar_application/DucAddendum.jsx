@@ -4,8 +4,8 @@ import SimpleTable from 'src/components/SimpleTable'
 import './dar_application.css'
 import { binCollectionToBuckets } from 'src/utils/BucketUtils'
 import { flatten, isEmpty } from 'lodash/fp'
-import { Notifications } from 'src/libs/utils.js'
-import { extractError } from 'src/utils/ErrorUtils.js'
+import { Notifications } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
 import PropTypes from 'prop-types'
 
 const commonStyles = {

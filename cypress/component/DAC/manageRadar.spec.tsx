@@ -7,6 +7,7 @@ import { setUserRoleStatuses } from 'src/libs/utils'
 import admin from './admin.json'
 import chair from './chair.json'
 import dac from './dac.json'
+import { DuosUser } from 'src/types/model'
 
 // Wrapper for components that contain `Link` components
 const WrappedManageRadar = (mockDacId: number | undefined) => {
@@ -28,7 +29,7 @@ describe('ManageRadar Component Tests', () => {
 
   describe('Basic Rendering', () => {
     it('should render the ManageRadar component with loading state', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       // Stub DAC.get to return a promise that doesn't resolve immediately
       cy.stub(DAC, 'get').returns(new Promise(() => {}))
 
@@ -40,7 +41,7 @@ describe('ManageRadar Component Tests', () => {
     })
 
     it('should render with DAC data after loading completes', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
       cy.mount(WrappedManageRadar(mockDacId))
@@ -58,7 +59,7 @@ describe('ManageRadar Component Tests', () => {
 
   describe('Error Handling', () => {
     it('should handle DAC fetch errors gracefully', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       cy.stub(DAC, 'get').rejects(new Error('Failed to fetch DAC'))
 
       cy.mount(WrappedManageRadar(mockDacId))
@@ -72,7 +73,7 @@ describe('ManageRadar Component Tests', () => {
     })
 
     it('should handle missing DAC ID parameter', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
 
       cy.mount(WrappedManageRadar(undefined))
 
@@ -85,7 +86,7 @@ describe('ManageRadar Component Tests', () => {
 
   describe('User Role Integration', () => {
     it('should render correctly for admin users', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
       cy.mount(WrappedManageRadar(mockDacId))
@@ -98,7 +99,7 @@ describe('ManageRadar Component Tests', () => {
     })
 
     it('should render correctly for chair users', () => {
-      setUserRoleStatuses(chair, Storage)
+      setUserRoleStatuses(chair as DuosUser, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
       cy.mount(WrappedManageRadar(mockDacId))
@@ -113,7 +114,7 @@ describe('ManageRadar Component Tests', () => {
 
   describe('Navigation', () => {
     it('should have working back button', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
       cy.mount(WrappedManageRadar(mockDacId))
@@ -130,7 +131,7 @@ describe('ManageRadar Component Tests', () => {
     })
 
     it('should show "Back to DAC Console" text', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
       cy.mount(WrappedManageRadar(mockDacId))
@@ -144,7 +145,7 @@ describe('ManageRadar Component Tests', () => {
 
   describe('Page Layout and Structure', () => {
     it('should have proper page structure', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
       cy.mount(WrappedManageRadar(mockDacId))
@@ -166,7 +167,7 @@ describe('ManageRadar Component Tests', () => {
     })
 
     it('should be responsive on different screen sizes', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
       cy.stub(DAC, 'get').resolves(dac)
 
       // Test mobile viewport
@@ -188,7 +189,7 @@ describe('ManageRadar Component Tests', () => {
 
   describe('Data Consistency', () => {
     it('should maintain consistent state during DAC loading', () => {
-      setUserRoleStatuses(admin, Storage)
+      setUserRoleStatuses(admin as DuosUser, Storage)
 
       let resolvePromise: (value: unknown) => void
       const dacPromise = new Promise((resolve) => {

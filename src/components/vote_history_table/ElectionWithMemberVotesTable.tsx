@@ -169,7 +169,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     setSortedElections(sortVisibleTable({
       list: processElectionRowData(electionsWithMemberVotes),
       sort,
-    }))
+    }) as RowData[][])
   }, [sort, electionsWithMemberVotes, processElectionRowData])
 
   return (

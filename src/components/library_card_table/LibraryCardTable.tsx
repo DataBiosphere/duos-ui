@@ -218,7 +218,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
       const searchTerms = searchRef.current.value
       let filteredList = libraryCards
       if (!isEmpty(searchTerms)) {
-        filteredList = lcFilterFunction(searchRef, libraryCards)
+        filteredList = lcFilterFunction(searchRef as unknown as string, libraryCards)
       }
       setFilteredCards(filteredList)
     }
