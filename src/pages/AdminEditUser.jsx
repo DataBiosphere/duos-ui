@@ -1,5 +1,4 @@
-import { concat, filter, map as lodashMap, matches as lodashMatches } from 'lodash'
-import { contains, isEmpty, map, union } from 'lodash/fp'
+import { concat, filter, includes, isEmpty, map, union, matches as lodashMatches } from 'lodash'
 import React, { useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
@@ -35,7 +34,7 @@ export const AdminEditUser = () => {
     const fetchData = async () => {
       try {
         const user = await User.getById(userId)
-        const currentRoles = lodashMap(user.roles, (ur) => {
+        const currentRoles = map(user.roles, (ur) => {
           return { roleId: ur.roleId, name: ur.name }
         })
         const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles
@@ -92,18 +91,18 @@ export const AdminEditUser = () => {
 
   const updateRolesIfDifferent = async (userId, updatedRoles) => {
     const user = await User.getById(userId)
-    const currentRoleIds = map('roleId')(user.roles)
+    const currentRoleIds = map(user.roles, 'roleId')
     // Always make sure researcher is a role we already have or need to add.
-    const updatedRoleIds = union([researcherRole.roleId])(map('roleId')(updatedRoles))
+    const updatedRoleIds = union([researcherRole.roleId], map(updatedRoles, 'roleId'))
 
-    await Promise.all(lodashMap(updatedRoleIds, async (roleId) => {
-      if (!contains(roleId)(currentRoleIds)) {
+    await Promise.all(map(updatedRoleIds, async (roleId) => {
+      if (!includes(currentRoleIds, roleId)) {
         await User.addRoleToUser(userId, roleId)
       }
     }))
 
-    await Promise.all(lodashMap(currentRoleIds, async (roleId) => {
-      if (!contains(roleId)(updatedRoleIds)) {
+    await Promise.all(map(currentRoleIds, async (roleId) => {
+      if (!includes(updatedRoleIds, roleId)) {
         // Safety check ... never delete the researcher role!!!
         if (roleId !== researcherRole.roleId) {
           await User.deleteRoleFromUser(userId, roleId)

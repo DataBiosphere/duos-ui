@@ -89,7 +89,7 @@ const generateLinkContents = (key, id, type, text, fileName, location) => {
 
 // function to generate application details content
 const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, cloudComputing) => {
-  // lodash/fp filter (non-empty string, non-empty object, non-empty array, booleans)
+  // lodash filter (non-empty string, non-empty object, non-empty array, booleans)
   // also filter out the cloud-provider element if cloudComputing is false
   const labels = filter(appDetailLabels, (label) => {
     return (

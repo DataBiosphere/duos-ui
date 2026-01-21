@@ -1,5 +1,5 @@
 import React from 'react'
-import { merge } from 'lodash/fp'
+import { merge } from 'lodash'
 
 export const RadioButton = (props) => {
   const basicWrapperStyle = {

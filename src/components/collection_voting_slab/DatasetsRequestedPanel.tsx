@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { filter, includes } from 'lodash/fp'
+import { filter, includes } from 'lodash'
 import { DacTerm, Dataset } from 'src/types/model'
 import SectionHeading from 'src/components/collection_voting_slab/SectionHeading'
 import DatasetList from 'src/components/collection_voting_slab/DatasetList'
@@ -34,10 +34,10 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
   useEffect(() => {
     const datasets = adminPage
       ? bucketDatasets
-      : filter((dataset: Dataset) => {
+      : filter(bucketDatasets, (dataset: Dataset) => {
           const { datasetId } = dataset
-          return includes(datasetId)(dacDatasetIds)
-        })(bucketDatasets)
+          return includes(dacDatasetIds, datasetId)
+        })
 
     setFilteredDatasets(datasets)
     setDatasetCount(datasets.length)
