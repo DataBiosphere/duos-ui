@@ -1,4 +1,4 @@
-import { Config } from '../config'
+import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 interface SystemHealth {

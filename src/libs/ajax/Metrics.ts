@@ -1,7 +1,7 @@
 import { getDefaultProperties } from '@databiosphere/bard-client'
 
-import { Storage } from '../storage'
-import { Config, Token } from '../config'
+import { Storage } from 'src/libs/storage'
+import { Config, Token } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
 import { fetchPost } from 'src/libs/ajax/fetchAdapter'
 
