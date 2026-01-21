@@ -47,7 +47,10 @@ export const UserProperties = {
 /// ////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
 export const isCollectionCanceled = (collection: DarCollection): boolean => {
   const { dars } = collection
-  const darValues = Object.values(dars) as DataAccessRequest[]
+  if (!dars) {
+    return false
+  }
+  const darValues = Object.values(dars)
   return every((dar: DataAccessRequest) => toLower(dar.data.status) === 'canceled')(darValues)
 }
 
@@ -178,13 +181,13 @@ export const convertLabelToKey = (label = ''): string => {
  */
 export const setUserRoleStatuses = (user: Partial<DuosUser> & { institution?: Partial<InstitutionInterface> }, Storage: { setCurrentUser: (user: DuosUser) => void }): DuosUser => {
   const currentUserRoles = (user.roles) ? user.roles.map(roles => roles.name) : []
-  user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1
-  user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1
-  user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1
-  user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1
-  user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1
-  user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1
-  user.isDataSubmitter = currentUserRoles.indexOf(USER_ROLES.dataSubmitter) > -1
+  user.isChairPerson = currentUserRoles.includes(USER_ROLES.chairperson)
+  user.isMember = currentUserRoles.includes(USER_ROLES.member)
+  user.isAdmin = currentUserRoles.includes(USER_ROLES.admin)
+  user.isResearcher = currentUserRoles.includes(USER_ROLES.researcher)
+  user.isAlumni = currentUserRoles.includes(USER_ROLES.alumni)
+  user.isSigningOfficial = currentUserRoles.includes(USER_ROLES.signingOfficial)
+  user.isDataSubmitter = currentUserRoles.includes(USER_ROLES.dataSubmitter)
   Storage.setCurrentUser(user as DuosUser)
   return user as DuosUser
 }
@@ -200,8 +203,8 @@ export const Navigation = {
    * @param navigate The navigate object to use for navigation (optional)
    * @returns {Promise<void>}
    */
-  console: async (user: DuosUser, navigate?: (path: string) => void) => {
-    const queryParams = new URLSearchParams(window.location.search)
+  console: async (user: DuosUser, navigate?: (path: string) => void): Promise<void> => {
+    const queryParams = new URLSearchParams(globalThis.location.search)
     const redirectTo = queryParams?.get('redirectTo')
     const firstConsole = headerTabsConfig.find(config => config.isRendered(user))
     const page = redirectTo || (firstConsole ? firstConsole.link : '/')
@@ -209,7 +212,7 @@ export const Navigation = {
       navigate(page)
     }
     else {
-      window.location.href = page
+      globalThis.location.href = page
     }
   },
 }
@@ -218,7 +221,7 @@ export const download = (fileName: string, text: string): void => {
   const break_line = '\r\n \r\n'
   const fullText = break_line + text
   const blob = new Blob([fullText], { type: 'text/plain' })
-  const url = window.URL.createObjectURL(blob)
+  const url = globalThis.URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = fileName + '-restriction'
@@ -278,13 +281,13 @@ export const processElectionStatus = (
   const electionStatus = !isNil(get('status')(election))
     ? toLower(election!.status)
     : null
-  const votesArray = Array.isArray(votes) ? votes : votes ? Object.values(votes) : []
+  const votesArray = Array.isArray(votes) ? votes : Object.values(votes ?? {})
 
   if (isNil(electionStatus)) {
     output = 'Unreviewed'
   }
   else if (electionStatus === 'open') {
-    // Null check since react doesn't necessarily perform prop updates immediately
+    // Null check since React doesn't necessarily perform prop updates immediately
     if (!isEmpty(votesArray) && !isNil(election)) {
       const dacVotes = filter(
         (vote: Vote) => toLower(vote.type) === 'dac' && vote.electionId === election.electionId,
@@ -353,24 +356,24 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
     dar: (term, targetList) => filter((electionData: ElectionData) => {
       const { election, dac, votes, dar } = electionData
       const darData = dar?.data
-      const targetDarAttrs = !isNil(darData)
-        ? JSON.stringify([
+      const targetDarAttrs = isNil(darData)
+        ? []
+        : JSON.stringify([
             toLower(darData.projectTitle || ''),
             toLower(darData.darCode || ''),
             toLower(getNameOfDatasetForThisDAR(darData.datasets?.map(ds => ({
-              datasetId: parseInt(ds.key),
+              datasetId: Number.parseInt(ds.key),
               name: ds.label,
               datasetName: ds.label,
             } as Dataset)) || [], dar.datasetIds)),
           ])
-        : []
-      const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name || dac.dacName || '')]) : []
-      const targetElectionAttrs = !isNil(election)
-        ? JSON.stringify([
+      const targetDacAttrs = isNil(dac) ? [] : JSON.stringify([toLower(dac.name || dac.dacName || '')])
+      const targetElectionAttrs = isNil(election)
+        ? []
+        : JSON.stringify([
             toLower(processElectionStatus(election, votes, false)),
             getElectionDate(election),
           ])
-        : []
       return (
         includes(term, targetDarAttrs as string)
         || includes(term, targetDacAttrs as string)
@@ -464,11 +467,11 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
         const identifier = dataset.datasetIdentifier
         const allPropValues = dataset.properties?.map(p => p.propertyValue).join('')
         // Approval status
-        const status = !isNil(dataset.dacApproval)
-          ? dataset.dacApproval
+        const status = isNil(dataset.dacApproval)
+          ? 'yes no'
+          : dataset.dacApproval
             ? 'accepted'
             : 'rejected'
-          : 'yes no'
         const studyName = dataset.study?.name
         const phsId = dataset.study?.description
         const dataUseStr = dataset.dataUse ? JSON.stringify(dataset.dataUse) : ''
@@ -491,11 +494,11 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
          */
         const loweredTerm = toLower(term)
         // Approval status
-        const status = !isNil(datasetTerm.dacApproval)
-          ? datasetTerm.dacApproval
+        const status = isNil(datasetTerm.dacApproval)
+          ? 'pending'
+          : datasetTerm.dacApproval
             ? 'accepted'
             : 'rejected'
-          : 'pending'
         const primaryCodes = datasetTerm.dataUse?.primary?.map(du => du.code) || []
         const secondaryCodes = datasetTerm.dataUse?.secondary?.map(du => du.code) || []
         const codes = join(', ')(concat(primaryCodes)(secondaryCodes))
@@ -688,12 +691,7 @@ export const setStyle = (
   targetColorAttribute: string,
 ): Record<string, unknown> => {
   const appliedStyle = disabled ? { [targetColorAttribute]: Theme.palette.disabled } : {}
-  try {
-    return Object.assign(baseStyle, appliedStyle)
-  }
-  catch (_e) {
-    return baseStyle
-  }
+  return Object.assign(baseStyle, appliedStyle)
 }
 
 interface DivAttributes {
@@ -716,11 +714,11 @@ export const setDivAttributes = (
   id?: string,
 ): DivAttributes => {
   let attributes: DivAttributes
-  if (!disabled) {
-    attributes = { onClick, onMouseEnter, onMouseLeave, style, 'data-tip': dataTip, id }
+  if (disabled) {
+    attributes = { style, disabled, 'data-tip': dataTip }
   }
   else {
-    attributes = { style, disabled, 'data-tip': dataTip }
+    attributes = { onClick, onMouseEnter, onMouseLeave, style, 'data-tip': dataTip, id }
   }
   if (!isEmpty(dataTip)) {
     attributes['data-tip'] = dataTip
@@ -752,7 +750,7 @@ export const sortVisibleTable = <T extends TableCell = TableCell>({
   list: T[][] | undefined
   sort: SortConfig | undefined
 }): T[][] => {
-  if (!list || !sort || sort.colIndex === undefined) {
+  if (!list?.length || !sort?.colIndex) {
     return list ?? []
   }
   // Sort: { dir, colIndex }
@@ -820,8 +818,9 @@ export const recalculateVisibleTable = async <T = unknown>({
     const visibleList = calcVisibleWindow(currentPage, tableSize, sortedList)
     setVisibleList(visibleList)
   }
-  catch (_error) {
+  catch (error) {
     Notifications.showError({ text: 'Error updating table' })
+    console.error('Error updating table:', error)
   }
 }
 
@@ -831,7 +830,7 @@ export const searchOnFilteredList = <T = unknown>(
   filterFn: (term: string, list: T[]) => T[],
   setFilteredList: (list: T[]) => void,
 ): void => {
-  let searchList = (!isNil(originalList) ? [...originalList] : [])
+  let searchList = (isNil(originalList) ? [] : [...originalList])
   if (!isEmpty(searchTerms)) {
     const terms = searchTerms.split(' ')
     lodashFPForEach((term: string) => {
