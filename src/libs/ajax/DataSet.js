@@ -1,8 +1,6 @@
-import { mergeAll } from 'lodash/fp'
 import { Config } from 'src/libs/config'
-import { fetchOk, getApiUrl } from 'src/libs/ajax'
 import { fileDownload } from 'src/utils/FileDownload.js'
-import { fetchGet, fetchMultipart, fetchPost } from 'src/libs/ajax/fetchAdapter'
+import { fetchGet, fetchMultipart, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 
 // FIXME: temporary read-only mode for NHGRI datasets
 const setNhgriExternalAccess = (datasets) => {
@@ -17,67 +15,68 @@ const setNhgriExternalAccess = (datasets) => {
 
 export const DataSet = {
   getDatasetNames: async () => {
-    const url = `${await getApiUrl()}/api/dataset/datasetNames`
+    const url = `${await Config.getApiUrl()}/api/dataset/datasetNames`
     const res = await fetchGet(url, Config.authOpts())
-    return await res.data
+    return res.data
   },
 
   getRegistrationSchema: async () => {
-    const url = `${await getApiUrl()}/schemas/dataset-registration/v1`
+    const url = `${await Config.getApiUrl()}/schemas/dataset-registration/v1`
     const res = await fetchGet(url, Config.authOpts())
-    return await res.data
+    return res.data
   },
 
   registerDataset: async (registration) => {
-    const url = `${await getApiUrl()}/api/dataset/v3`
+    const url = `${await Config.getApiUrl()}/api/dataset/v3`
     const res = await fetchMultipart(url, registration, Config.multiPartOpts(), 'POST', true)
     return res.data
   },
 
   getDatasetsByIds: async (ids) => {
-    const url = `${await getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
+    const url = `${await Config.getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   searchDatasetIndex: async (query, options = {}) => {
-    const url = `${await getApiUrl()}/api/dataset/search/index`
+    const url = `${await Config.getApiUrl()}/api/dataset/search/index`
     const config = { ...Config.authOpts(), ...options }
     const res = await fetchPost(url, query, config)
     return setNhgriExternalAccess(res.data)
   },
 
   searchDatasetIndexV2: async (query) => {
-    const url = `${await getApiUrl()}/api/dataset/search/index/v2`
+    const url = `${await Config.getApiUrl()}/api/dataset/search/index/v2`
     const res = await fetchPost(url, query, Config.authOpts())
     return res
   },
 
   getDataSetsByDatasetId: async (datasetId) => {
-    const url = `${await getApiUrl()}/api/dataset/v2/${datasetId}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
+    const url = `${await Config.getApiUrl()}/api/dataset/v2/${datasetId}`
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   deleteDataset: async (datasetObjectId) => {
-    const url = `${await getApiUrl()}/api/dataset/${datasetObjectId}`
-    return await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]))
+    const url = `${await Config.getApiUrl()}/api/dataset/${datasetObjectId}`
+    await fetchDelete(url, Config.authOpts())
+    return { status: 200 }
   },
 
   updateDatasetV3: async (datasetId, datasetAndFiles) => {
-    const url = `${await getApiUrl()}/api/dataset/v3/${datasetId}`
+    const url = `${await Config.getApiUrl()}/api/dataset/v3/${datasetId}`
     const res = await fetchMultipart(url, datasetAndFiles, Config.multiPartOpts(), 'PUT')
     return res.data
   },
 
   getStudyById: async (studyId) => {
-    const url = `${await getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
+    const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 
   updateStudy: async (studyId, studyObject) => {
-    const url = `${await getApiUrl()}/api/dataset/study/${studyId}`
+    const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
     const res = await fetchMultipart(url, studyObject, Config.multiPartOpts(), 'PUT', true)
     return res.data
   },
@@ -94,7 +93,7 @@ export const DataSet = {
         'Accept': 'application/octet-stream',
       },
     }
-    const url = `${await getApiUrl()}/api/dataset/${datasetId}/nihInstitutionalCertification`
+    const url = `${await Config.getApiUrl()}/api/dataset/${datasetId}/nihInstitutionalCertification`
     const res = await fetchGet(url, authOpts)
     fileDownload(res.data, fileName)
   },

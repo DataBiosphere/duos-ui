@@ -1,5 +1,4 @@
 import { fileDownload } from 'src/utils/FileDownload'
-import { getApiUrl } from 'src/libs/ajax'
 import { Config } from 'src/libs/config'
 import { isFileEmpty } from 'src/libs/utils'
 import {
@@ -12,49 +11,49 @@ import {
 
 export const DAA = {
   getDaas: async () => {
-    const url = `${await getApiUrl()}/api/daa`
+    const url = `${await Config.getApiUrl()}/api/daa`
     const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
   getDaaById: async (daaId) => {
-    const url = `${await getApiUrl()}/api/daa/${daaId}`
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}`
     const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
 
   createDaaLcLink: async (daaId, userId) => {
-    const url = `${await getApiUrl()}/api/daa/${daaId}/${userId}`
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}/${userId}`
     const res = await fetchPut(url, {}, Config.authOpts())
     return res.data
   },
 
   deleteDaaLcLink: async (daaId, userId) => {
-    const url = `${await getApiUrl()}/api/daa/${daaId}/${userId}`
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}/${userId}`
     const res = await fetchDelete(url, Config.authOpts())
     return res.data
   },
 
   bulkAddUsersToDaa: async (daaId, userList) => {
-    const url = `${await getApiUrl()}/api/daa/bulk/${daaId}`
+    const url = `${await Config.getApiUrl()}/api/daa/bulk/${daaId}`
     const res = await fetchPost(url, userList, Config.authOpts())
     return res.data
   },
 
   bulkRemoveUsersFromDaa: async (daaId, userList) => {
-    const url = `${await getApiUrl()}/api/daa/bulk/${daaId}`
+    const url = `${await Config.getApiUrl()}/api/daa/bulk/${daaId}`
     const res = await fetchDelete(url, { ...Config.authOpts(), data: userList })
     return res.data
   },
 
   bulkAddDaasToUser: async (userId, daaList) => {
-    const url = `${await getApiUrl()}/api/daa/bulk/user/${userId}`
+    const url = `${await Config.getApiUrl()}/api/daa/bulk/user/${userId}`
     const res = await fetchPost(url, daaList, Config.authOpts())
     return res.data
   },
 
   bulkRemoveDaasFromUser: async (userId, daaList) => {
-    const url = `${await getApiUrl()}/api/daa/bulk/user/${userId}`
+    const url = `${await Config.getApiUrl()}/api/daa/bulk/user/${userId}`
     const res = await fetchDelete(url, { ...Config.authOpts(), data: daaList })
     return res.data
   },
@@ -69,7 +68,7 @@ export const DAA = {
         'Accept': 'application/octet-stream',
       },
     }
-    const url = `${await getApiUrl()}/api/daa/${daaId}/file`
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}/file`
     const res = await fetchGet(url, authOpts)
     fileDownload(res.data, daaFileName)
   },
@@ -83,31 +82,31 @@ export const DAA = {
       // Do not set Content-Type for FormData; browser will set it
       const formData = new FormData()
       formData.append('file', file)
-      const url = `${await getApiUrl()}/api/daa/dac/${dacId}`
+      const url = `${await Config.getApiUrl()}/api/daa/dac/${dacId}`
       return fetchMultipart(url, formData, authOpts)
     }
   },
 
   addDaaToDac: async (daaId, dacId) => {
-    const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}/dac/${dacId}`
     const res = await fetchPut(url, {}, Config.authOpts())
     return res.status
   },
 
   deleteDaa: async (daaId) => {
-    const url = `${await getApiUrl()}/api/daa/${daaId}`
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}`
     return fetchDelete(url, Config.authOpts())
   },
 
   deleteDacDaaRelationship: async (daaId, dacId) => {
-    const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}/dac/${dacId}`
     return fetchDelete(url, Config.authOpts())
   },
 
   // NOTE: In the future, this functionality should be handled in the backend and should not be
   // dependent on the UI.
   sendDaaUpdateEmails: async (dacId, oldDaaId, newDaaName) => {
-    const url = `${await getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/${newDaaName}`
+    const url = `${await Config.getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/${newDaaName}`
     const res = await fetchPost(url, {}, Config.authOpts())
     return res.status
   },

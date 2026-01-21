@@ -1,5 +1,4 @@
 import { Config } from 'src/libs/config'
-import { getECMUrl, getApiUrl } from 'src/libs/ajax'
 import { fetchGet, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 import { merge } from 'lodash'
 
@@ -14,12 +13,12 @@ const provider = 'ras'
 export const AuthenticateNIH = {
 
   deleteAccountLinkage: async () => {
-    const url = `${await getApiUrl()}/api/nih`
+    const url = `${await Config.getApiUrl()}/api/nih`
     return await fetchDelete(url, Config.authOpts())
   },
 
   getECMProviderAuthUrl: async (redirectUri, redirectTo) => {
-    const url = `${await getECMUrl()}/api/oauth/v1/${provider}/authorization-url?redirectUri=${redirectUri}`
+    const url = `${await Config.getECMUrl()}/api/oauth/v1/${provider}/authorization-url?redirectUri=${redirectUri}`
     // ECM returns a `text/plain` response and expects an `Accept: */*` request header
     const authOpts = merge({}, Config.authOpts(), { headers: { Accept: '*/*' } })
     const res = await fetchPost(url, { redirectTo: redirectTo }, authOpts)
@@ -30,7 +29,7 @@ export const AuthenticateNIH = {
   },
 
   getECMProviderLinkInfo: async (code, state) => {
-    const url = `${await getECMUrl()}/api/oauth/v1/${provider}/oauthcode?state=${state}&oauthcode=${code}`
+    const url = `${await Config.getECMUrl()}/api/oauth/v1/${provider}/oauthcode?state=${state}&oauthcode=${code}`
     const res = await fetchPost(url, null, Config.authOpts())
     if (res?.data) {
       return res.data
@@ -39,7 +38,7 @@ export const AuthenticateNIH = {
   },
 
   getSyncedUser: async () => {
-    const url = `${await getApiUrl()}/api/nih/sync`
+    const url = `${await Config.getApiUrl()}/api/nih/sync`
     const res = await fetchGet(url, Config.authOpts())
     return res.data
   },

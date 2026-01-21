@@ -39,3 +39,8 @@ export const Auth = {
     await OidcBroker.signOut()
   },
 }
+
+export const redirectOnLogout = () => {
+  Auth.signOut()
+  window.location.href = `/home?redirectTo=${window.location.pathname}`
+}

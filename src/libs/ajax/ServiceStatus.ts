@@ -1,4 +1,4 @@
-import { getApiUrl, getOntologyUrl } from '../ajax'
+import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 interface SystemHealth {
@@ -71,13 +71,13 @@ export interface ConsentStatus extends BaseStatus {
 
 export const ServiceStatus = {
   getConsentStatus: async (): Promise<ConsentStatus> => {
-    const url = `${await getApiUrl()}/status`
+    const url = `${await Config.getApiUrl()}/status`
     const result = await fetchGet<ConsentStatus>(url)
     return result.data
   },
 
   getOntologyStatus: async (): Promise<OntologyStatus> => {
-    const url = `${await getOntologyUrl()}/status`
+    const url = `${await Config.getOntologyUrl()}/status`
     const result = await fetchGet<OntologyStatus>(url)
     return result.data
   },
