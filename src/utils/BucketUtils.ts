@@ -1,4 +1,4 @@
-import { filter, flatMap, flow, includes, isEmpty, map, uniq, values } from 'lodash/fp'
+import { chain, filter, includes, isEmpty, map, values } from 'lodash'
 import { isNil } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet.js'
@@ -189,9 +189,7 @@ const findElectionsForDatasets = (dar: DataAccessRequest, datasetIds: number[]):
 const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] => {
   return isEmpty(dacIds)
     ? datasets
-    : filter(
-        (dataset: Dataset) => includes(dataset.dacId)(dacIds),
-      )(datasets)
+    : filter(datasets, (dataset: Dataset) => includes(dacIds, dataset.dacId))
 }
 
 /**
@@ -213,10 +211,10 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
   // If they are not all the same, we have to punt this decision solely to the DAC.
   // Check algorithm version: V3 does not need to be checked for 'unmatchable'
   const matchVals: boolean[] = (algorithmVersionV3 || !unmatchable)
-    ? flow(
-        map((m: MatchResult) => m.match),
-        uniq,
-      )(bucket.matchResults)
+    ? chain(bucket.matchResults)
+        .map((m: MatchResult) => m.match)
+        .uniq()
+        .value()
     : []
 
   const abstain = processV3Abstain(bucket.matchResults)
@@ -226,10 +224,10 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
     return { result: 'N/A', createDate: undefined, rationales: undefined, id: bucket.key }
   }
   else if ((matchVals.length === 1)) {
-    const rationales: string[] = flow(
-      flatMap((match: MatchResult) => match.rationales),
-      uniq,
-    )(bucket.matchResults)
+    const rationales: string[] = chain(bucket.matchResults)
+      .flatMap((match: MatchResult) => match.rationales)
+      .uniq()
+      .value()
     const { createDate, failed, id, match } = bucket.matchResults[0]
     const matchResult = { createDate, rationales, failed, id, match }
     if (abstain) {
@@ -265,8 +263,8 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
  * an ABSTAIN case, we can return true if the number of abstentions > 0
  */
 const processV3Abstain = (matchResults: MatchResult[]): boolean => {
-  const abstainList = map((m: MatchResult) => m.abstain)(matchResults)
-  const abstainValList = filter((a: boolean | undefined) => a === true)(abstainList)
+  const abstainList = map(matchResults, (m: MatchResult) => m.abstain)
+  const abstainValList = filter(abstainList, (a: boolean | undefined) => a === true)
   return abstainValList.length > 0
 }
 
@@ -299,13 +297,13 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
   // List of rp vote groups broken out by election into chair, member, and final votes.
   const rpVotes: Array<{ rp: VoteGroup }> = []
 
-  const rpElectionVoteArrays: Vote[][] = flow(
-    flatMap((b: Bucket) => b.elections),
-    filter((e: Election) => e.electionType.toLowerCase() === 'rp'),
-    map((e: Election) => e.votes),
+  const rpElectionVoteArrays: Vote[][] = chain(buckets)
+    .flatMap((b: Bucket) => b.elections)
+    .filter((e: Election) => e.electionType.toLowerCase() === 'rp')
+    .map((e: Election) => e.votes)
     // election.votes is a hash of vote id => vote object
-    map((hash: Record<string, Vote>) => values(hash)),
-  )(buckets)
+    .map((hash: Record<string, Vote>) => values(hash))
+    .value()
 
   for (const vArray of rpElectionVoteArrays) {
     const rpVoteGroup: VoteGroup = {

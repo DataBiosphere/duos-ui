@@ -1,5 +1,5 @@
 import React from 'react'
-import { isEmpty, map } from 'lodash/fp'
+import { isEmpty, map } from 'lodash'
 
 const styles = {
   box: {
@@ -28,14 +28,14 @@ const styles = {
 const dataUseDescriptions = (translatedDataUse) => {
   return Object.keys(translatedDataUse).flatMap((key) => {
     const dataUses = translatedDataUse[key]
-    return map.convert({ cap: false })((dataUse, index) => {
+    return map(manuallyReviewedDataUses(dataUses), (dataUse, index) => {
       const uniqKey = key + '-' + dataUse.code + '-' + index
       return (
         <div key={uniqKey}>
           {dataUse.description}
         </div>
       )
-    })(manuallyReviewedDataUses(dataUses))
+    })
   })
 }
 
