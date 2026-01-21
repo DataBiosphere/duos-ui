@@ -1,5 +1,4 @@
-import { chain, filter, includes, isEmpty, map, values } from 'lodash'
-import { isNil } from 'lodash'
+import { chain, filter, includes, isEmpty, isNil, map, values } from 'lodash'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet.js'
 import { processVotesForBucket } from './DarCollectionUtils'
