@@ -8,6 +8,7 @@ import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DarCollectionSummary } from 'src/types/model'
 
 interface CollectionSummary {
   darCollectionId: string
@@ -26,7 +27,8 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
     const init = async (): Promise<void> => {
       try {
         setIsLoading(true)
-        const collectionList = await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial)
+        const collectionList = (await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial))
+          .filter((collection: DarCollectionSummary) => collection.requiresSOApproval === true)
         setCollectionList(collectionList)
         setIsLoading(false)
       }

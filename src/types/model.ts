@@ -603,6 +603,26 @@ export interface DarCollection {
   datasets: Dataset[]
 }
 
+export interface DarCollectionSummary {
+  actions: string[]
+  dacNames: string[]
+  dacCode: string
+  darCollectionId: number
+  datasetCount: number
+  datasetIds: number[]
+  expired: boolean
+  expiresAt: number
+  institutionName: string
+  latestReferenceId: string
+  name: string
+  progressReport: boolean
+  referenceIds: string[]
+  requiresSOApproval: boolean
+  researcherName: string
+  status: string
+  submissionDate: number
+}
+
 export interface DataAccessRequest {
   id: number
   referenceId: string
