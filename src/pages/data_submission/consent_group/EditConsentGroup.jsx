@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
-import { isNil, isEmpty } from 'lodash'
+import { cloneDeep, isNil, isEmpty } from 'lodash'
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../../components/forms/forms'
 import { selectedPrimaryGroup } from './consentGroupUtils'
 import { DAR } from '../../../libs/ajax/DAR'
-import { cloneDeep } from 'lodash'
 
 const searchOntologies = (query, callback) => {
   let options = []

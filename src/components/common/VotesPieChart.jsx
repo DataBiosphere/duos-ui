@@ -1,7 +1,6 @@
 import React from 'react'
 import { Chart } from 'react-google-charts'
-import { isNil, isEmpty } from 'lodash'
-import { map } from 'lodash'
+import { isNil, isEmpty, map } from 'lodash'
 import { useMemo } from 'react'
 
 const pieSliceColors = {
