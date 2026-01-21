@@ -278,9 +278,9 @@ export const processElectionStatus = (
   showVotes: boolean,
 ): string => {
   let output: string
-  const electionStatus = !isNil(get('status')(election))
-    ? toLower(election!.status)
-    : null
+  const electionStatus = isNil(get('status')(election))
+    ? null
+    : toLower(election!.status)
   const votesArray = Array.isArray(votes) ? votes : Object.values(votes ?? {})
 
   if (isNil(electionStatus)) {
@@ -352,6 +352,13 @@ interface SearchFilterFunctions {
 }
 
 export const getSearchFilterFunctions = (): SearchFilterFunctions => {
+  const getApprovalStatus = (
+    dacApproval: boolean | null | undefined,
+    defaultStatus: string): string => {
+    if (isNil(dacApproval)) return defaultStatus
+    return dacApproval ? 'accepted' : 'rejected'
+  }
+
   return {
     dar: (term, targetList) => filter((electionData: ElectionData) => {
       const { election, dac, votes, dar } = electionData
@@ -467,11 +474,7 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
         const identifier = dataset.datasetIdentifier
         const allPropValues = dataset.properties?.map(p => p.propertyValue).join('')
         // Approval status
-        const status = isNil(dataset.dacApproval)
-          ? 'yes no'
-          : dataset.dacApproval
-            ? 'accepted'
-            : 'rejected'
+        const status = getApprovalStatus(dataset.dacApproval, 'yes no')
         const studyName = dataset.study?.name
         const phsId = dataset.study?.description
         const dataUseStr = dataset.dataUse ? JSON.stringify(dataset.dataUse) : ''
@@ -494,11 +497,7 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
          */
         const loweredTerm = toLower(term)
         // Approval status
-        const status = isNil(datasetTerm.dacApproval)
-          ? 'pending'
-          : datasetTerm.dacApproval
-            ? 'accepted'
-            : 'rejected'
+        const status = getApprovalStatus(datasetTerm.dacApproval, 'pending')
         const primaryCodes = datasetTerm.dataUse?.primary?.map(du => du.code) || []
         const secondaryCodes = datasetTerm.dataUse?.secondary?.map(du => du.code) || []
         const codes = join(', ')(concat(primaryCodes)(secondaryCodes))
