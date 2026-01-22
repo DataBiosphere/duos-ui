@@ -1,6 +1,5 @@
 import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
-import { toLower } from 'lodash/fp'
-import { forEach } from 'lodash'
+import { toLower, forEach } from 'lodash'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 import { Election, LibraryCard, Vote, DarCollection, Study } from 'src/types/model'
 import { DuosUser } from 'src/types/model'
@@ -235,9 +234,9 @@ describe('LC Search Filter', () => {
     filteredList = cardSearchFn(term, sampleLCList)
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
-    forEach(originalCard, (value, key) => {
+    forEach((value, key) => {
       expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    })
+    }, originalCard)
   })
 
   it('filters cards on user name', () => {
@@ -250,9 +249,9 @@ describe('LC Search Filter', () => {
     filteredList = cardSearchFn(term, sampleLCList)
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
-    forEach(originalCard, (value, key) => {
+    forEach((value, key) => {
       expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    })
+    }, originalCard)
   })
 
   it('filters on user email', () => {
@@ -265,9 +264,9 @@ describe('LC Search Filter', () => {
     filteredList = cardSearchFn(term, sampleLCList)
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
-    forEach(originalCard, (value, key) => {
+    forEach((value, key) => {
       expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    })
+    }, originalCard)
   })
 })
 

@@ -1,4 +1,3 @@
-import { forEach as lodashForEach } from 'lodash'
 import { DAR } from './ajax/DAR'
 import { Theme } from './theme'
 import { RefObject } from 'react'
@@ -10,7 +9,7 @@ import {
   filter,
   find,
   first,
-  forEach as lodashFPForEach,
+  forEach,
   get,
   includes,
   isEmpty,
@@ -18,7 +17,7 @@ import {
   join,
   map,
   toLower,
-} from 'lodash/fp'
+} from 'lodash'
 import { headerTabsConfig } from '../components/DuosHeader'
 import { ToastNotifications } from './ToastNotifications'
 import {
@@ -51,7 +50,7 @@ export const isCollectionCanceled = (collection: DarCollection): boolean => {
     return false
   }
   const darValues = Object.values(dars)
-  return every((dar: DataAccessRequest) => toLower(dar.data.status) === 'canceled')(darValues)
+  return every(darValues, (dar: DataAccessRequest) => toLower(dar.data.status) === 'canceled')
 }
 
 /// ////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +72,7 @@ export const findPropertyValue = (
   const props = researcher.properties
   const prop = isNil(props)
     ? null
-    : find((p: UserProperty) => p.propertyKey === propName)(props)
+    : find(props, (p: UserProperty) => p.propertyKey === propName)
   return isNil(prop) ? '' : prop.propertyValue
 }
 
@@ -98,7 +97,7 @@ export const applyHoverEffects = (
   e: React.MouseEvent<HTMLElement>,
   style: Record<string, string>,
 ): void => {
-  lodashForEach(style, (value, key) => {
+  forEach(style, (value, key) => {
     (e.target as HTMLElement).style[key as never] = value
   })
 }
@@ -110,7 +109,7 @@ export const getNameOfDatasetForThisDAR = (
   datasetId: number[] | undefined,
 ): string => {
   const data = !isNil(datasetId) && !isEmpty(datasetId)
-    ? find((ds: Dataset) => ds.datasetId === first(datasetId)!)(datasets)
+    ? find(datasets, (ds: Dataset) => ds.datasetId === first(datasetId)!)
     : null
   return isNil(data) ? '- -' : getDatasetNames([data])
 }
@@ -278,7 +277,7 @@ export const processElectionStatus = (
   showVotes: boolean,
 ): string => {
   let output: string
-  const electionStatus = isNil(get('status')(election))
+  const electionStatus = isNil(get(election, 'status'))
     ? null
     : toLower(election!.status)
   const votesArray = Array.isArray(votes) ? votes : Object.values(votes ?? {})
@@ -287,12 +286,9 @@ export const processElectionStatus = (
     output = 'Unreviewed'
   }
   else if (electionStatus === 'open') {
-    // Null check since React doesn't necessarily perform prop updates immediately
     if (!isEmpty(votesArray) && !isNil(election)) {
-      const dacVotes = filter(
-        (vote: Vote) => toLower(vote.type) === 'dac' && vote.electionId === election.electionId,
-      )(votesArray)
-      const completedVotes = filter(wasVoteSubmitted)(dacVotes).length
+      const dacVotes = filter(votesArray, (vote: Vote) => toLower(vote.type) === 'dac' && vote.electionId === election.electionId)
+      const completedVotes = filter(dacVotes, wasVoteSubmitted).length
       const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`
       output = `Open${showVotes ? outputSuffix : ''}`
     }
@@ -301,10 +297,7 @@ export const processElectionStatus = (
     }
   }
   else if (electionStatus === 'final' || electionStatus === 'closed') {
-    // some elections have electionStatus === Final, others have electionStatus === Closed
-    // both are, in this step of the process, technically referring to a closed election
-    // therefore both values must be checked for
-    const finalVote = find(wasFinalVoteTrue)(votesArray)
+    const finalVote = find(votesArray, wasFinalVoteTrue)
     output = finalVote ? 'Approved' : 'Denied'
   }
   else {
@@ -360,7 +353,7 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
   }
 
   return {
-    dar: (term, targetList) => filter((electionData: ElectionData) => {
+    dar: (term, targetList) => filter(targetList, (electionData: ElectionData) => {
       const { election, dac, votes, dar } = electionData
       const darData = dar?.data
       const targetDarAttrs = isNil(darData)
@@ -368,11 +361,15 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
         : JSON.stringify([
             toLower(darData.projectTitle || ''),
             toLower(darData.darCode || ''),
-            toLower(getNameOfDatasetForThisDAR(darData.datasets?.map(ds => ({
-              datasetId: Number.parseInt(ds.key),
-              name: ds.label,
-              datasetName: ds.label,
-            } as Dataset)) || [], dar.datasetIds)),
+            toLower(getNameOfDatasetForThisDAR(
+              (darData.datasets
+                ? darData.datasets.map(ds => ({
+                    datasetId: Number.parseInt(ds.key),
+                    name: ds.label,
+                    datasetName: ds.label,
+                  } as Dataset))
+                : []),
+              dar.datasetIds)),
           ])
       const targetDacAttrs = isNil(dac) ? [] : JSON.stringify([toLower(dac.name || dac.dacName || '')])
       const targetElectionAttrs = isNil(election)
@@ -382,43 +379,38 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
             getElectionDate(election),
           ])
       return (
-        includes(term, targetDarAttrs as string)
-        || includes(term, targetDacAttrs as string)
-        || includes(term, targetElectionAttrs as string)
+        includes(targetDarAttrs as string, term)
+        || includes(targetDacAttrs as string, term)
+        || includes(targetElectionAttrs as string, term)
       )
-    }, targetList),
-
+    }),
     libraryCard: (term, targetList) =>
-      filter((libraryCard: LibraryCard) => {
+      filter(targetList, (libraryCard: LibraryCard) => {
         const { userName, createDate, userEmail } = libraryCard
         return (
-          includes(term, toLower(userName))
-          || includes(term, formatDate(createDate as unknown as number))
-          || includes(term, toLower(userEmail))
+          includes(toLower(userName), term)
+          || includes(formatDate(createDate as unknown as number), term)
+          || includes(toLower(userEmail), term)
         )
-      }, targetList),
-
+      }),
     signingOfficialResearchers: (term, targetList) =>
-      filter((researcher: Researcher) => {
+      filter(targetList, (researcher: Researcher) => {
         const { displayName, eraCommonsId, email } = researcher
         const roles = researcher.roles || []
         const baseAttributes = [displayName, eraCommonsId || '', email]
         const includesRoles = roles.reduce((memo, current) => {
           const roleName = current.name
-          return memo || includes(term, toLower(roleName))
+          return memo || includes(toLower(roleName), term)
         }, false)
-
         const includesBaseAttributes = baseAttributes.reduce((memo, current) => {
-          return memo || includes(term, toLower(current))
+          return memo || includes(toLower(current), term)
         }, false)
-
         return includesRoles || includesBaseAttributes
-      }, targetList),
-
+      }),
     darCollections: (term, targetList) =>
       isEmpty(term)
         ? targetList
-        : filter((collection: DarCollection) => {
+        : filter(targetList, (collection: DarCollection) => {
             const { darCode, createDate, updateDate } = collection
             const datasetCount = collection.datasets?.length || 0
             const formattedCreateDate = formatDate(createDate)
@@ -431,129 +423,112 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
             ]
             const termArr = term.split(' ')
             return searchableValues.some(value =>
-              termArr.some(t => includes(toLower(t), toLower(String(value)))),
+              termArr.some(t => includes(toLower(String(value)), toLower(t))),
             )
-          }, targetList),
-
+          }),
     users: (term, targetList) => {
       const lowerCaseTerm = toLower(term)
-      const isMatch = (userField: string) => includes(lowerCaseTerm, toLower(userField))
-
-      return filter((user: DuosUser) => {
+      const isMatch = (userField: string) => includes(toLower(userField), lowerCaseTerm)
+      return filter(targetList, (user: DuosUser) => {
         const { displayName, email, roles, institution, libraryCard } = user
-
         const matchable: string[] = [displayName, email]
         if (!isNil(roles)) {
-          matchable.push(...map((r: UserRole) => r.name)(roles))
+          matchable.push(...map(roles, (r: UserRole) => r.name))
         }
         if (!isNil(institution)) {
           matchable.push(institution.name)
         }
-
         if (!isNil(libraryCard)) {
           const hasLibraryCard = !isNil(libraryCard)
           if (hasLibraryCard) {
             matchable.push('LibraryCard')
           }
         }
-
-        const match = find(isMatch)(matchable)
+        const match = find(matchable, isMatch)
         return !isNil(match)
-      }, targetList)
+      })
     },
-
     datasets: (term, targetList) =>
-      filter((dataset: Dataset) => {
-        /**
-         * This filter function assumes that the dataset has been
-         * pre-populated with data use codes and translations
-         */
+      filter(targetList, (dataset: Dataset) => {
         const loweredTerm = toLower(term)
         const name = dataset.name || dataset.datasetName
         const alias = dataset.alias
         const identifier = dataset.datasetIdentifier
         const allPropValues = dataset.properties?.map(p => p.propertyValue).join('')
-        // Approval status
         const status = getApprovalStatus(dataset.dacApproval, 'yes no')
         const studyName = dataset.study?.name
         const phsId = dataset.study?.description
         const dataUseStr = dataset.dataUse ? JSON.stringify(dataset.dataUse) : ''
         return (
-          includes(loweredTerm, toLower(alias?.toString() || ''))
-          || includes(loweredTerm, toLower(name || ''))
-          || includes(loweredTerm, toLower(identifier))
-          || includes(loweredTerm, toLower(allPropValues || ''))
-          || includes(loweredTerm, toLower(status))
-          || includes(loweredTerm, toLower(studyName || ''))
-          || includes(loweredTerm, toLower(phsId || ''))
-          || includes(loweredTerm, toLower(dataUseStr))
+          includes(toLower(alias?.toString() || ''), loweredTerm)
+          || includes(toLower(name || ''), loweredTerm)
+          || includes(toLower(identifier), loweredTerm)
+          || includes(toLower(allPropValues || ''), loweredTerm)
+          || includes(toLower(status), loweredTerm)
+          || includes(toLower(studyName || ''), loweredTerm)
+          || includes(toLower(phsId || ''), loweredTerm)
+          || includes(toLower(dataUseStr), loweredTerm)
         )
-      }, targetList),
-
+      }),
     datasetTerms: (term, targetList) =>
-      filter((datasetTerm: DatasetTerm) => {
-        /**
-         * This filter function is intended for Dataset Index Terms
-         */
+      filter(targetList, (datasetTerm: DatasetTerm) => {
         const loweredTerm = toLower(term)
-        // Approval status
         const status = getApprovalStatus(datasetTerm.dacApproval, 'pending')
         const primaryCodes = datasetTerm.dataUse?.primary?.map(du => du.code) || []
         const secondaryCodes = datasetTerm.dataUse?.secondary?.map(du => du.code) || []
-        const codes = join(', ')(concat(primaryCodes)(secondaryCodes))
-        const dataTypes = join(', ')(datasetTerm.study?.dataTypes || [])
-        const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail || [])
+        const codes = join(concat(primaryCodes, secondaryCodes), ', ')
+        const dataTypes = join(datasetTerm.study?.dataTypes || [], ', ')
+        const custodians = join(datasetTerm.study?.dataCustodianEmail || [], ', ')
         const dataSubmitterEmail = datasetTerm.study?.dataSubmitterEmail || ''
         return (
-          includes(loweredTerm, toLower(datasetTerm.datasetName))
-          || includes(loweredTerm, toLower(datasetTerm.datasetIdentifier))
-          || includes(loweredTerm, toLower(datasetTerm.dac?.dacName || ''))
-          || includes(loweredTerm, toLower(datasetTerm.dac?.dacEmail || ''))
-          || includes(loweredTerm, toLower(datasetTerm.dataLocation))
-          || includes(loweredTerm, toLower(codes as string))
-          || includes(loweredTerm, toLower(datasetTerm.createUserDisplayName))
-          || includes(loweredTerm, toLower(datasetTerm.url))
-          || includes(loweredTerm, toLower(datasetTerm.study?.description || ''))
-          || includes(loweredTerm, toLower(dataSubmitterEmail))
-          || includes(loweredTerm, toLower(dataTypes as string))
-          || includes(loweredTerm, toLower(custodians as string))
-          || includes(loweredTerm, toLower(datasetTerm.study?.species || ''))
-          || includes(loweredTerm, toLower(datasetTerm.study?.piName || ''))
-          || includes(loweredTerm, toLower(datasetTerm.study?.studyName || ''))
-          || includes(loweredTerm, toLower(status))
+          includes(toLower(datasetTerm.datasetName), loweredTerm)
+          || includes(toLower(datasetTerm.datasetIdentifier), loweredTerm)
+          || includes(toLower(datasetTerm.dac?.dacName || ''), loweredTerm)
+          || includes(toLower(datasetTerm.dac?.dacEmail || ''), loweredTerm)
+          || includes(toLower(datasetTerm.dataLocation), loweredTerm)
+          || includes(toLower(codes as string), loweredTerm)
+          || includes(toLower(datasetTerm.createUserDisplayName), loweredTerm)
+          || includes(toLower(datasetTerm.url), loweredTerm)
+          || includes(toLower(datasetTerm.study?.description || ''), loweredTerm)
+          || includes(toLower(dataSubmitterEmail), loweredTerm)
+          || includes(toLower(dataTypes as string), loweredTerm)
+          || includes(toLower(custodians as string), loweredTerm)
+          || includes(toLower(datasetTerm.study?.species || ''), loweredTerm)
+          || includes(toLower(datasetTerm.study?.piName || ''), loweredTerm)
+          || includes(toLower(datasetTerm.study?.studyName || ''), loweredTerm)
+          || includes(toLower(status), loweredTerm)
         )
-      }, targetList),
-
+      }),
     institutions: (term, targetList) =>
-      filter((institution: InstitutionInterface) => {
+      filter(targetList, (institution: InstitutionInterface) => {
         const loweredTerm = toLower(term)
         const soStrings = institution.signingOfficials
           ?.map((so) => {
             return so.displayName + ' ' + so.email
           })
           .join(' ')
-        const domains = institution.domains?.join(' ') || ''
+        const domains = (institution.domains || []).join(' ')
         return (
-          includes(loweredTerm, toLower(institution.name))
-          || includes(loweredTerm, toLower(institution.id?.toString() || ''))
-          || includes(loweredTerm, toLower(institution.itDirectorName || ''))
-          || includes(loweredTerm, toLower(institution.itDirectorEmail || ''))
-          || includes(loweredTerm, toLower(institution.institutionUrl || ''))
-          || includes(loweredTerm, toLower(institution.dunsNumber?.toString() || ''))
-          || includes(loweredTerm, toLower(institution.orgChartUrl || ''))
-          || includes(loweredTerm, toLower(institution.verificationUrl || ''))
-          || includes(loweredTerm, toLower(institution.verificationFilename || ''))
-          || includes(loweredTerm, toLower(institution.organizationType || ''))
-          || includes(loweredTerm, toLower(institution.createUser?.displayName || ''))
-          || includes(loweredTerm, toLower(institution.createUser?.email || ''))
-          || includes(loweredTerm, toLower(institution.updateUser?.displayName || ''))
-          || includes(loweredTerm, toLower(institution.updateUser?.email || ''))
-          || includes(loweredTerm, toLower(institution.updateDate?.toString() || ''))
-          || includes(loweredTerm, toLower(institution.createDate))
-          || includes(loweredTerm, toLower(domains))
-          || includes(loweredTerm, toLower(soStrings || ''))
+          includes(toLower(institution.name), loweredTerm)
+          || includes(toLower(institution.id?.toString() || ''), loweredTerm)
+          || includes(toLower(institution.itDirectorName || ''), loweredTerm)
+          || includes(toLower(institution.itDirectorEmail || ''), loweredTerm)
+          || includes(toLower(institution.institutionUrl || ''), loweredTerm)
+          || includes(toLower(institution.dunsNumber?.toString() || ''), loweredTerm)
+          || includes(toLower(institution.orgChartUrl || ''), loweredTerm)
+          || includes(toLower(institution.verificationUrl || ''), loweredTerm)
+          || includes(toLower(institution.verificationFilename || ''), loweredTerm)
+          || includes(toLower(institution.organizationType || ''), loweredTerm)
+          || includes(toLower(institution.createUser?.displayName || ''), loweredTerm)
+          || includes(toLower(institution.createUser?.email || ''), loweredTerm)
+          || includes(toLower(institution.updateUser?.displayName || ''), loweredTerm)
+          || includes(toLower(institution.updateUser?.email || ''), loweredTerm)
+          || includes(toLower(institution.updateDate?.toString() || ''), loweredTerm)
+          || includes(toLower(institution.createDate), loweredTerm)
+          || includes(toLower(domains), loweredTerm)
+          || includes(toLower(soStrings || ''), loweredTerm)
         )
-      }, targetList),
+      }),
   }
 }
 
@@ -586,19 +561,19 @@ export const tableSearchHandler = <T extends keyof SearchFilterFunctions>(
     else {
       rawSearchTerms = ''
     }
-    const searchTermValues = toLower(rawSearchTerms as string).split(/\s|,/)
+    const searchTermValues = toLower(rawSearchTerms as string).split(/\s|,/) // remains unchanged
     if (isEmpty(searchTermValues)) {
       setFilteredList(list)
     }
     else {
       let newFilteredList: ListTypeForModel<T> = cloneDeep(list)
-      lodashFPForEach((splitTerm: string) => {
+      forEach(searchTermValues, (splitTerm: string) => {
         const term = splitTerm.trim()
         if (!isEmpty(term)) {
           const filterFn = filterFnMap[modelName] as unknown as (term: string, list: ListTypeForModel<T>) => ListTypeForModel<T>
           newFilteredList = filterFn(term, newFilteredList)
         }
-      })(searchTermValues)
+      })
       setFilteredList(newFilteredList)
     }
     setCurrentPage(1)
@@ -832,16 +807,16 @@ export const searchOnFilteredList = <T = unknown>(
   let searchList = (isNil(originalList) ? [] : [...originalList])
   if (!isEmpty(searchTerms)) {
     const terms = searchTerms.split(' ')
-    lodashFPForEach((term: string) => {
+    forEach(terms, (term: string) => {
       searchList = filterFn(term, searchList)
-    })(terms)
+    })
   }
   setFilteredList(searchList)
 }
 
 export const hasDataSubmitterRole = (user: DuosUser): boolean => {
-  const roles = get('roles')(user)
-  const dsRole = find({ roleId: 8 })(roles)
+  const roles = get(user, 'roles')
+  const dsRole = find(roles, { roleId: 8 })
   return !isNil(dsRole)
 }
 
