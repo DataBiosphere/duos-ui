@@ -1,8 +1,7 @@
 import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
 import { toLower, forEach } from 'lodash'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
-import { Election, LibraryCard, Vote, DarCollection, Study } from 'src/types/model'
-import { DuosUser } from 'src/types/model'
+import { DuosUser, Election, LibraryCard, Vote, DarCollection, Study } from 'src/types/model'
 
 const sampleLCList: LibraryCard[] = [
   {
@@ -188,6 +187,12 @@ let collectionSearchFn: (term: string, list: DarCollection[]) => DarCollection[]
 let cardSearchFn: (term: string, list: LibraryCard[]) => LibraryCard[]
 let researcherSearchFn: (term: string, list: DuosUser[]) => DuosUser[]
 let summaryList: DarCollection[]
+const expectResearcherMatch = (actual: DuosUser, expected: DuosUser) => {
+  expect(actual.displayName).to.equal(expected.displayName)
+  expect(actual.email).to.equal(expected.email)
+  expect(actual.eraCommonsId).to.equal(expected.eraCommonsId)
+  expect(actual.roles[0].name).to.equal(expected.roles[0].name)
+}
 
 beforeEach(() => {
   const searchFunctionsMap = getSearchFilterFunctions()
@@ -271,12 +276,6 @@ describe('LC Search Filter', () => {
 })
 
 describe('Researcher Search Filter (SO Console)', () => {
-  function expectResearcherMatch(actual: DuosUser, expected: DuosUser) {
-    expect(actual.displayName).to.equal(expected.displayName)
-    expect(actual.email).to.equal(expected.email)
-    expect(actual.eraCommonsId).to.equal(expected.eraCommonsId)
-    expect(actual.roles[0].name).to.equal(expected.roles[0].name)
-  }
   it('filters on researcher name', () => {
     let filteredList
     filteredList = researcherSearchFn('', sampleResearcherList)
