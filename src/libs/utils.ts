@@ -738,6 +738,30 @@ interface SortConfig {
   dir: number
 }
 
+const compareTableCellValues = (aVal: unknown, bVal: unknown, dir: number): number => {
+  const hasType = (val: unknown): val is { type: string } =>
+    typeof val === 'object' && val !== null && 'type' in val
+
+  if (typeof aVal === 'number' && typeof bVal === 'number') {
+    return (aVal > bVal ? -1 : 1) * dir
+  }
+  if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
+    return (aVal > bVal ? -1 : 1) * dir
+  }
+  if (
+    isNil(aVal)
+    || isNil(bVal)
+    || (hasType(aVal) && aVal.type === 'div')
+    || (hasType(bVal) && bVal.type === 'div')
+  ) {
+    return (Number(aVal) > Number(bVal) ? -1 : 1) * dir
+  }
+  if (typeof aVal === 'string' && typeof bVal === 'string') {
+    return aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * dir
+  }
+  return (Number(aVal) > Number(bVal) ? -1 : 1) * dir
+}
+
 // each item in the list is an array of metadata representing a single table row
 // the metadata for each cell needs a data (exactly what is displayed in the table)
 // or value (string or number alternative) property which determines sorting
@@ -751,27 +775,10 @@ export const sortVisibleTable = <T extends TableCell = TableCell>({
   if (!list?.length || !sort?.colIndex) {
     return list ?? []
   }
-  // Sort: { dir, colIndex }
-  // Mutate the original array in place and return it
   list.sort((a, b) => {
     const aVal = a[sort.colIndex].value ?? a[sort.colIndex].data
     const bVal = b[sort.colIndex].value ?? b[sort.colIndex].data
-
-    if (typeof aVal === 'number' && typeof bVal === 'number') {
-      return (aVal > bVal ? -1 : 1) * sort.dir
-    }
-    if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
-      return (aVal > bVal ? -1 : 1) * sort.dir
-    }
-    const hasType = (val: unknown): val is { type: string } =>
-      typeof val === 'object' && val !== null && 'type' in val
-    if (isNil(aVal) || isNil(bVal) || (hasType(aVal) && aVal.type === 'div') || (hasType(bVal) && bVal.type === 'div')) {
-      return (Number(aVal) > Number(bVal) ? -1 : 1) * sort.dir
-    }
-    if (typeof aVal === 'string' && typeof bVal === 'string') {
-      return aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir
-    }
-    return (Number(aVal) > Number(bVal) ? -1 : 1) * sort.dir
+    return compareTableCellValues(aVal, bVal, sort.dir)
   })
   return list
 }
