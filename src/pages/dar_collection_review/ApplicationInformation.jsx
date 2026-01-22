@@ -1,5 +1,5 @@
 import React from 'react'
-import { chunk, filter, isEmpty } from 'lodash/fp'
+import { chunk, filter, isEmpty } from 'lodash'
 import { DAR } from '../../libs/ajax/DAR'
 import { DownloadLink } from '../../components/DownloadLink'
 
@@ -91,13 +91,13 @@ const generateLinkContents = (key, id, type, text, fileName, location) => {
 const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, cloudComputing) => {
   // lodash/fp filter (non-empty string, non-empty object, non-empty array, booleans)
   // also filter out the cloud-provider element if cloudComputing is false
-  const labels = filter((label) => {
+  const labels = filter(appDetailLabels, (label) => {
     return (
       (typeof label.value === 'boolean')
       || (!isEmpty(label.value) && label.key !== 'cloud-provider')
       || (label.key === 'cloud-provider' && cloudComputing === true)
     )
-  }) (appDetailLabels)
+  })
 
   const labelArray = labels.map((label) => {
     if (typeof label.value === 'boolean') {
@@ -109,7 +109,7 @@ const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, clou
     }
   })
   // use the chunk method to organize them in arrays of two
-  const chunkedArr = chunk(rowElementMaxCount)(labelArray)
+  const chunkedArr = chunk(labelArray, rowElementMaxCount)
 
   // use a map function to generate a new array that wraps each chunk in the row style
   // template that you can then plug into the component's return statement

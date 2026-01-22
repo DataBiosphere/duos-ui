@@ -1,4 +1,4 @@
-import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash/fp'
+import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash'
 import { OntologyService } from './ontologyService'
 import { Notifications } from './utils'
 
@@ -34,7 +34,7 @@ export const srpTranslations = {
     }
     if (!isEmpty(diseases)) {
       const diseaseArray = diseases.sort().map(disease => disease.label)
-      const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0]
+      const diseaseString = diseaseArray.length > 1 ? join(diseaseArray, '; ') : diseaseArray[0]
       outputStruct.description = outputStruct.description + ` (${diseaseString})`
     }
     return outputStruct
@@ -339,7 +339,7 @@ const translateDataUseRestrictions = async (dataUse) => {
   const targetKeys = Object.keys(consentTranslations)
   restrictionStatements = targetKeys.map(async key =>
     await processRestrictionStatements(key, dataUse))
-  restrictionStatements = filter(statement => !isNil(statement))(restrictionStatements)
+  restrictionStatements = filter(restrictionStatements, statement => !isNil(statement))
   restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements)
   return (await Promise.all(restrictionStatements)).filter(value => !isEmpty(value))
 }
@@ -354,8 +354,9 @@ export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => 
       return Promise.all(restrictionStatementPromises)
     })
     return filter(
+      await Promise.all(translationPromises),
       restriction => !isEmpty(restriction),
-    ) (await Promise.all(translationPromises))
+    )
   }
   catch (_error) {
     throw new Error('Failed to translate Data Use Restrictions from list')
@@ -398,71 +399,71 @@ export const DataUseTranslation = {
 
     // NOTE: additional check on hmb, diseases, and other are needed for older DARs where populationMigration - poa link was not established
     if ((darInfo.poa || darInfo.populationMigration) && (!darInfo.hmb && !darInfo.diseases && !darInfo.other)) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa)
+      dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.poa)
     }
 
     if (darInfo.diseases) {
       const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies))
-      dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation))
+      dataUseSummary.primary = uniq(concat(dataUseSummary.primary, diseaseTranslation))
     }
     if (darInfo.other) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(darInfo.otherText))
+      dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.other(darInfo.otherText))
     }
 
     // **FALLBACK CHECK**
     // If no primary codes were added, add an "OTHER: Not provided" code
     if (isEmpty(dataUseSummary.primary)) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(null))
+      dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.other(null))
     }
 
     // Secondary Codes
     if (darInfo.methods) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.methods)
     }
     if (darInfo.aiLlmUse) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.aiLlmUse)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.aiLlmUse)
     }
     if (darInfo.controls) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.controls)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.controls)
     }
     if (darInfo.forProfit) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.forProfit)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.forProfit)
     }
     else {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notForProfit)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.notForProfit)
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.genderFemale)
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.genderFemale)
     }
     if (darInfo.pediatric) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.pediatric)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.pediatric)
     }
     if (darInfo.illegalBehavior) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.illegalBehavior)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.illegalBehavior)
     }
     if (darInfo.addiction) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.addiction)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.addiction)
     }
     if (darInfo.sexualDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.sexualDiseases)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.sexualDiseases)
     }
     if (darInfo.stigmatizedDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.stigmatizedDiseases)
     }
     if (darInfo.vulnerablePopulation) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.vulnerablePopulation)
     }
     if (darInfo.population) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.population)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.population)
     }
     if (darInfo.psychiatricTraits) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.psychiatricTraits)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.psychiatricTraits)
     }
     if (darInfo.notHealth) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notHealth)
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.notHealth)
     }
 
     return dataUseSummary

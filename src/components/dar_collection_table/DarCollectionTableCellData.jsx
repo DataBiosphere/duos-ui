@@ -1,5 +1,5 @@
 import React from 'react'
-import { includes, isEmpty, isNil, toLower, uniq } from 'lodash/fp'
+import { includes, isEmpty, isNil, toLower, uniq } from 'lodash'
 import { formatDate } from '../../libs/utils'
 import { ExpandMore, ExpandLess } from '@mui/icons-material'
 import Actions from './Actions'
@@ -68,7 +68,7 @@ export function darCodeCellData({ darCode = '- -', darCollectionId, collectionIs
 }
 
 const dacLinkToCollection = (darCode, status = '', darCollectionId) => {
-  const hasOpenElections = includes('open')(toLower(status))
+  const hasOpenElections = includes(toLower(status), 'open')
   const path = hasOpenElections
     ? `/dar_collection/${darCollectionId}`
     : `/dar_vote_review/${darCollectionId}`

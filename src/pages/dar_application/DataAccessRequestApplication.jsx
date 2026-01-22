@@ -15,7 +15,6 @@ import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'
 import { NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
-import { get, map } from 'lodash/fp'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
 import { DAAUtils } from 'src/utils/DAAUtils'
@@ -28,7 +27,7 @@ import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
 import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils'
-import { assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set } from 'lodash'
+import { assign, cloneDeep, get, isArray, isEmpty, isNil, isString, map, merge, set } from 'lodash'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Countries } from 'src/libs/ajax/Countries'
 import PropTypes from 'prop-types'
@@ -300,7 +299,7 @@ const DataAccessRequestApplication = (props) => {
       formData = darId ? await getPartialDarRequest(darId) : {}
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
-      formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
+      formData.datasetIds = map(datasets, ds => get(ds, 'datasetId'))
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
@@ -824,7 +823,7 @@ const DataAccessRequestApplication = (props) => {
                   defaultExpanded={reverseOrderedDARs.length === 1}
                 >
                   <ResearcherInfo
-                    completed={!isNil(get('institutionId', researcher))}
+                    completed={!isNil(get(researcher, 'institutionId'))}
                     readOnlyMode={existingDarsReadOnlyMode || isAttested}
                     includeInstructions={!existingDarsReadOnlyMode}
                     darCode={formData.darCode}

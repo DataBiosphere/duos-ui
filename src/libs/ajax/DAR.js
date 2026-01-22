@@ -1,5 +1,5 @@
 import { fileDownload } from '../../utils/FileDownload'
-import { omit } from 'lodash/fp'
+import { omit } from 'lodash'
 import { Config } from '../config'
 import { isFileEmpty } from '../utils'
 import { DAAUtils } from '../../utils/DAAUtils'
@@ -47,7 +47,7 @@ export const DAR = {
   postDar: async (dar) => {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, { action: 'submit' })
-    const filteredDar = omit(['createDate', 'data_access_request_id'])(dar)
+    const filteredDar = omit(dar, ['createDate', 'data_access_request_id'])
     const url = DAAUtils.isEnabled()
       ? `${await Config.getApiUrl()}/api/dar/v3`
       : `${await Config.getApiUrl()}/api/dar/v2`

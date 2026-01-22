@@ -8,7 +8,7 @@ import {
   Notifications,
   searchOnFilteredList,
 } from 'src/libs/utils'
-import { cloneDeep, findIndex, isEmpty, isNaN, isNil } from 'lodash/fp'
+import { cloneDeep, findIndex, isEmpty, isNaN, isNil } from 'lodash'
 import { Styles } from 'src/libs/theme'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
@@ -137,7 +137,7 @@ const deleteOnClick = (
     if (id) {
       LibraryCardAPI.deleteLibraryCard(id)
       const libraryCardsCopy = cloneDeep(libraryCards)
-      const targetIndex = findIndex((card: LibraryCard) => card.id === id)(libraryCardsCopy)
+      const targetIndex = findIndex(libraryCardsCopy, (card: LibraryCard) => card.id === id)
       libraryCardsCopy.splice(targetIndex, 1)
       setLibraryCards(libraryCardsCopy)
       setShowConfirmation(false)

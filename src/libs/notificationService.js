@@ -1,5 +1,4 @@
-import { find, isEmpty } from 'lodash/fp'
-import { filter } from 'lodash'
+import { filter, find, isEmpty } from 'lodash'
 import { Config } from './config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
@@ -46,7 +45,7 @@ export const NotificationService = {
     try {
       const banners = await NotificationService.getBanners()
       if (!isEmpty(banners)) {
-        return find({ active: true, id: id })(banners)
+        return find(banners, { active: true, id: id })
       }
     }
     catch (_error) {
