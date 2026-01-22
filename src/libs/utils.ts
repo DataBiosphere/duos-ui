@@ -738,35 +738,28 @@ interface SortConfig {
   dir: number
 }
 
-const compareTableCellValues = (aVal: unknown, bVal: unknown, dir: number): number => {
-  const hasType = (val: unknown): val is { type: string } =>
-    typeof val === 'object' && val !== null && 'type' in val
+const isString = (val: unknown): val is string => typeof val === 'string'
+const isNumber = (val: unknown): val is number => typeof val === 'number'
+const isBoolean = (val: unknown): val is boolean => typeof val === 'boolean'
+const hasDivType = (val: unknown): boolean =>
+  typeof val === 'object' && val !== null && 'type' in val && (val as { type: string }).type === 'div'
 
-  // Handle string comparison
-  if (typeof aVal === 'string' && typeof bVal === 'string') {
+const compareTableCellValues = (aVal: unknown, bVal: unknown, dir: number): number => {
+  if (isString(aVal) && isString(bVal)) {
     return aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * dir
   }
-
-  // Handle number comparison
-  if (typeof aVal === 'number' && typeof bVal === 'number') {
+  if (isNumber(aVal) && isNumber(bVal)) {
     return (aVal > bVal ? -1 : 1) * dir
   }
-
-  // Handle boolean comparison
-  if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
+  if (isBoolean(aVal) && isBoolean(bVal)) {
     return (aVal > bVal ? -1 : 1) * dir
   }
-
-  // Handle nil or 'div' type
   if (
     isNil(aVal) || isNil(bVal)
-    || (hasType(aVal) && aVal.type === 'div')
-    || (hasType(bVal) && bVal.type === 'div')
+    || hasDivType(aVal) || hasDivType(bVal)
   ) {
     return (Number(aVal) > Number(bVal) ? -1 : 1) * dir
   }
-
-  // Fallback to number comparison
   return (Number(aVal) > Number(bVal) ? -1 : 1) * dir
 }
 
