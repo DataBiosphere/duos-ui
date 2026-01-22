@@ -63,7 +63,6 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
   const [validation, setValidation] = useState<Validation>({ presenter: {} })
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [tagsInput, setTagsInput] = useState<string>((presentation?.tags ?? []).join(', '))
 
   const applyValidation = (draft: Presentation, full: boolean) => {
     const all = calcPresentationErrors(draft) as Validation
