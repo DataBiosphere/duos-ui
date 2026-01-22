@@ -215,10 +215,10 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   // Hook to execute on initialization and card creation/deletion, applies filter on updated collection list
   useEffect(() => {
     if (searchRef.current) {
-      const searchTerms = searchRef.current.value
+      const searchTerms = searchRef.current.value ?? ''
       let filteredList = libraryCards
       if (!isEmpty(searchTerms)) {
-        filteredList = lcFilterFunction(searchRef as unknown as string, libraryCards)
+        filteredList = lcFilterFunction(searchTerms, libraryCards)
       }
       setFilteredCards(filteredList)
     }

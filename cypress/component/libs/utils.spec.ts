@@ -332,8 +332,8 @@ describe('Researcher Search Filter (SO Console)', () => {
 
 describe('processElectionStatus utils - tests', () => {
   it('Returns Unreviewed when election has a null status', () => {
-    const election = {}
-    const status = processElectionStatus(election as Election, null, false)
+    const election = {} as Election
+    const status = processElectionStatus(election, null, false)
     expect(toLower(status)).equals('unreviewed')
   })
 
