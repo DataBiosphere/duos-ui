@@ -234,9 +234,9 @@ describe('LC Search Filter', () => {
     filteredList = cardSearchFn(term, sampleLCList)
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
-    forEach((value, key) => {
+    forEach(originalCard, (value, key) => {
       expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    }, originalCard)
+    })
   })
 
   it('filters cards on user name', () => {
@@ -249,9 +249,9 @@ describe('LC Search Filter', () => {
     filteredList = cardSearchFn(term, sampleLCList)
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
-    forEach((value, key) => {
+    forEach(originalCard, (value, key) => {
       expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    }, originalCard)
+    })
   })
 
   it('filters on user email', () => {
@@ -264,9 +264,9 @@ describe('LC Search Filter', () => {
     filteredList = cardSearchFn(term, sampleLCList)
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
-    forEach((value, key) => {
+    forEach(originalCard, (value, key) => {
       expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    }, originalCard)
+    })
   })
 })
 
