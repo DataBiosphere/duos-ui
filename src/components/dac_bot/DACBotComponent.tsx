@@ -100,9 +100,6 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
         }
       }
     }
-    catch (_) {
-      await Promise.reject()
-    }
     finally {
       // Fetch updated rules to refresh state
       const allRules = await DAC.fetchDACbotRules(dacId)
@@ -150,7 +147,6 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       {!isLoading && parsedRules.map((rule) => {
         return (
           <DACBotCheckboxComponent
-            dacId={dacId}
             rule={rule}
             key={rule.id}
             disableEdit={!userIsChair || rule.isDisabled}

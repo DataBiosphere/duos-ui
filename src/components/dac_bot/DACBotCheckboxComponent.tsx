@@ -6,7 +6,6 @@ import { Notifications } from 'src/libs/utils'
 import ReactMarkdown from 'react-markdown'
 
 export type DACBotCheckboxComponentProps = {
-  dacId: number
   rule: ParsedDACbotRule
   disableEdit: boolean
   onRuleChange: (rule: ParsedDACbotRule, isEnabled: boolean) => Promise<void>

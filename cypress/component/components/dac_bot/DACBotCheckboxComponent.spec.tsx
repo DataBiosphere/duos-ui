@@ -39,7 +39,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockRule}
         disableEdit={false}
         onRuleChange={onRuleChange}
@@ -52,7 +51,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockRule}
         disableEdit={true}
         onRuleChange={onRuleChange}
@@ -65,7 +63,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockRule}
         disableEdit={false}
         onRuleChange={onRuleChange}
@@ -78,7 +75,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockEnabledRule}
         disableEdit={false}
         onRuleChange={onRuleChange}
@@ -93,7 +89,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockRule}
         disableEdit={false}
         onRuleChange={onRuleChange}
@@ -106,7 +101,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockRule}
         disableEdit={false}
         onRuleChange={onRuleChange}
@@ -120,7 +114,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub().resolves()
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockRule}
         disableEdit={false}
         onRuleChange={onRuleChange}
@@ -134,7 +127,6 @@ describe('DACBotCheckboxComponent', () => {
     const onRuleChange = cy.stub().rejects(new Error('Failed to update'))
     cy.mount(
       <DACBotCheckboxComponent
-        dacId={1}
         rule={mockRule}
         disableEdit={false}
         onRuleChange={onRuleChange}
