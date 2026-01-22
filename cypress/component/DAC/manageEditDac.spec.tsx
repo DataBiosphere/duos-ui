@@ -3,11 +3,14 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import admin from './admin.json'
-import chair from './chair.json'
+import adminJson from './admin.json'
+import chairJson from './chair.json'
 import dac from './dac.json'
 import { setUserRoleStatuses } from 'src/libs/utils'
 import { DuosUser } from 'src/types/model'
+
+const admin = adminJson as DuosUser
+const chair = chairJson as DuosUser
 
 /**
  * This manage page is the pre-Data Access Agreement way to edit a DAC and will be removed when DAA work is complete.
@@ -20,7 +23,7 @@ describe('ManageEditDAC Tests', () => {
   Cypress._.each([admin, chair], (user) => {
     it('Manage Edit DAC page should load for ' + user.displayName, () => {
       cy.viewport(600, 600)
-      setUserRoleStatuses(user as DuosUser, Storage)
+      setUserRoleStatuses(user, Storage)
       cy.stub(DAC, 'get').returns(dac)
       cy.mount(
         <MemoryRouter initialEntries={[`/manage_edit_dac/${dac.dacId}`]}>
@@ -41,7 +44,7 @@ describe('ManageEditDAC Tests', () => {
   it('Admins can create a DAC', () => {
     cy.viewport(600, 600)
     Storage.clearStorage()
-    setUserRoleStatuses(admin as DuosUser, Storage)
+    setUserRoleStatuses(admin, Storage)
     cy.mount(<BrowserRouter><ManageEditDac /></BrowserRouter>)
     cy.get('[data-cy="dac_name"]').should('not.be.disabled')
     cy.get('[data-cy="dac_name"]').should('be.empty')
@@ -65,7 +68,7 @@ describe('ManageEditDAC Tests', () => {
   it('Chairs cannot create a DAC', () => {
     cy.viewport(600, 600)
     Storage.clearStorage()
-    setUserRoleStatuses(chair as DuosUser, Storage)
+    setUserRoleStatuses(chair, Storage)
     const dacCreate = cy.stub(DAC, 'create')
     cy.mount(<BrowserRouter><ManageEditDac /></BrowserRouter>)
     cy.get('[data-cy="dac_name"]').type('New DAC Name')

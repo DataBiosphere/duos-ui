@@ -725,7 +725,7 @@ export const setDivAttributes = (
   return attributes
 }
 
-interface TableCell {
+export interface TableCell {
   data: unknown
   value?: string | number | boolean
   cellStyle?: Record<string, unknown>

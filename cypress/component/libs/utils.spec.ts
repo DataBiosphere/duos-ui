@@ -1,23 +1,9 @@
-import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable } from 'src/libs/utils'
+import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
 import { toLower } from 'lodash/fp'
 import { forEach } from 'lodash'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
-import { Election, LibraryCard, Vote, DarCollection } from 'src/types/model'
-
-interface SampleResearcher {
-  displayName: string
-  eraCommonsId: string
-  email: string
-  roles: Array<{ name: string }>
-}
-
-interface TableCellData {
-  data: unknown
-  cellStyle?: Record<string, string>
-  label?: string
-  id: number
-  value?: string | number | boolean
-}
+import { Election, LibraryCard, Vote, DarCollection, Study } from 'src/types/model'
+import { DuosUser } from 'src/types/model'
 
 const sampleLCList: LibraryCard[] = [
   {
@@ -38,22 +24,48 @@ const sampleLCList: LibraryCard[] = [
   },
 ]
 
-const sampleResearcherList: SampleResearcher[] = [
+const sampleResearcherList: DuosUser[] = [
   {
+    createDate: new Date(),
     displayName: 'Test Person',
-    eraCommonsId: 'era',
     email: 'devemail',
-    roles: [{
-      name: 'admin',
-    }],
+    emailPreference: true,
+    eraCommonsId: 'era',
+    institutionId: 1,
+    institution: undefined,
+    isAdmin: true,
+    isAlumni: false,
+    isChairPerson: false,
+    isDataSubmitter: false,
+    isMember: false,
+    isResearcher: true,
+    isSigningOfficial: false,
+    libraryCard: undefined,
+    properties: [],
+    roles: [{ roleId: 1, name: 'Admin', userId: 1, userRoleId: 1 }],
+    userId: 1,
+    userStatusInfo: undefined,
   },
   {
+    createDate: new Date(),
     displayName: 'Another person',
-    eraCommonsId: 'commons',
     email: 'prodemail',
-    roles: [{
-      name: 'researcher',
-    }],
+    emailPreference: true,
+    eraCommonsId: 'commons',
+    institutionId: 2,
+    institution: undefined,
+    isAdmin: false,
+    isAlumni: false,
+    isChairPerson: false,
+    isDataSubmitter: false,
+    isMember: false,
+    isResearcher: true,
+    isSigningOfficial: false,
+    libraryCard: undefined,
+    properties: [],
+    roles: [{ roleId: 2, name: 'Researcher', userId: 2, userRoleId: 2 }],
+    userId: 2,
+    userStatusInfo: undefined,
   },
 ]
 
@@ -67,13 +79,13 @@ const darCollectionSummaryOne: DarCollection = {
     name: 'Dataset 1',
     datasetId: 1,
     createUserId: 1,
-    createUser: {} as unknown,
+    createUser: {} as DuosUser,
     createDate: new Date(),
     dacId: 1,
     translatedDataUse: 'test',
     deletable: true,
     properties: [],
-    study: {} as unknown,
+    study: {} as Study,
     alias: 1,
     datasetIdentifier: 'TEST-001',
     dataUse: {},
@@ -81,13 +93,13 @@ const darCollectionSummaryOne: DarCollection = {
     name: 'Dataset 2',
     datasetId: 2,
     createUserId: 1,
-    createUser: {} as unknown,
+    createUser: {} as DuosUser,
     createDate: new Date(),
     dacId: 1,
     translatedDataUse: 'test',
     deletable: true,
     properties: [],
-    study: {} as unknown,
+    study: {} as Study,
     alias: 2,
     datasetIdentifier: 'TEST-002',
     dataUse: {},
@@ -95,13 +107,13 @@ const darCollectionSummaryOne: DarCollection = {
     name: 'Dataset 3',
     datasetId: 3,
     createUserId: 1,
-    createUser: {} as unknown,
+    createUser: {} as DuosUser,
     createDate: new Date(),
     dacId: 1,
     translatedDataUse: 'test',
     deletable: true,
     properties: [],
-    study: {} as unknown,
+    study: {} as Study,
     alias: 3,
     datasetIdentifier: 'TEST-003',
     dataUse: {},
@@ -109,13 +121,13 @@ const darCollectionSummaryOne: DarCollection = {
     name: 'Dataset 4',
     datasetId: 4,
     createUserId: 1,
-    createUser: {} as unknown,
+    createUser: {} as DuosUser,
     createDate: new Date(),
     dacId: 1,
     translatedDataUse: 'test',
     deletable: true,
     properties: [],
-    study: {} as unknown,
+    study: {} as Study,
     alias: 4,
     datasetIdentifier: 'TEST-004',
     dataUse: {},
@@ -132,13 +144,13 @@ const darCollectionSummaryTwo: DarCollection = {
     name: 'Dataset 5',
     datasetId: 5,
     createUserId: 1,
-    createUser: {} as unknown,
+    createUser: {} as DuosUser,
     createDate: new Date(),
     dacId: 1,
     translatedDataUse: 'test',
     deletable: true,
     properties: [],
-    study: {} as unknown,
+    study: {} as Study,
     alias: 5,
     datasetIdentifier: 'TEST-005',
     dataUse: {},
@@ -146,13 +158,13 @@ const darCollectionSummaryTwo: DarCollection = {
     name: 'Dataset 6',
     datasetId: 6,
     createUserId: 1,
-    createUser: {} as unknown,
+    createUser: {} as DuosUser,
     createDate: new Date(),
     dacId: 1,
     translatedDataUse: 'test',
     deletable: true,
     properties: [],
-    study: {} as unknown,
+    study: {} as Study,
     alias: 6,
     datasetIdentifier: 'TEST-006',
     dataUse: {},
@@ -160,13 +172,13 @@ const darCollectionSummaryTwo: DarCollection = {
     name: 'Dataset 7',
     datasetId: 7,
     createUserId: 1,
-    createUser: {} as unknown,
+    createUser: {} as DuosUser,
     createDate: new Date(),
     dacId: 1,
     translatedDataUse: 'test',
     deletable: true,
     properties: [],
-    study: {} as unknown,
+    study: {} as Study,
     alias: 7,
     datasetIdentifier: 'TEST-007',
     dataUse: {},
@@ -175,14 +187,14 @@ const darCollectionSummaryTwo: DarCollection = {
 
 let collectionSearchFn: (term: string, list: DarCollection[]) => DarCollection[]
 let cardSearchFn: (term: string, list: LibraryCard[]) => LibraryCard[]
-let researcherSearchFn: (term: string, list: SampleResearcher[]) => SampleResearcher[]
+let researcherSearchFn: (term: string, list: DuosUser[]) => DuosUser[]
 let summaryList: DarCollection[]
 
 beforeEach(() => {
   const searchFunctionsMap = getSearchFilterFunctions()
   collectionSearchFn = searchFunctionsMap.darCollections as (term: string, list: DarCollection[]) => DarCollection[]
   cardSearchFn = searchFunctionsMap.libraryCard as (term: string, list: LibraryCard[]) => LibraryCard[]
-  researcherSearchFn = searchFunctionsMap.signingOfficialResearchers as unknown as (term: string, list: SampleResearcher[]) => SampleResearcher[]
+  researcherSearchFn = searchFunctionsMap.signingOfficialResearchers
   summaryList = [darCollectionSummaryOne, darCollectionSummaryTwo]
 })
 
@@ -219,12 +231,12 @@ describe('LC Search Filter', () => {
     filteredList = cardSearchFn('', sampleLCList)
     expect(filteredList.length).equals(sampleLCList.length)
 
-    const term = formatDate(originalCard.createDate as unknown as number)
+    const term = formatDate(originalCard.createDate.getTime())
     filteredList = cardSearchFn(term, sampleLCList)
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
     forEach(originalCard, (value, key) => {
-      expect((filteredCard as unknown as Record<string, unknown>)[key]).equals(value)
+      expect(filteredCard[key as keyof LibraryCard]).equals(value)
     })
   })
 
@@ -239,7 +251,7 @@ describe('LC Search Filter', () => {
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
     forEach(originalCard, (value, key) => {
-      expect((filteredCard as unknown as Record<string, unknown>)[key]).equals(value)
+      expect(filteredCard[key as keyof LibraryCard]).equals(value)
     })
   })
 
@@ -254,12 +266,18 @@ describe('LC Search Filter', () => {
     expect(filteredList.length).equals(1)
     const filteredCard = filteredList[0]
     forEach(originalCard, (value, key) => {
-      expect((filteredCard as unknown as Record<string, unknown>)[key]).equals(value)
+      expect(filteredCard[key as keyof LibraryCard]).equals(value)
     })
   })
 })
 
 describe('Researcher Search Filter (SO Console)', () => {
+  function expectResearcherMatch(actual: DuosUser, expected: DuosUser) {
+    expect(actual.displayName).to.equal(expected.displayName)
+    expect(actual.email).to.equal(expected.email)
+    expect(actual.eraCommonsId).to.equal(expected.eraCommonsId)
+    expect(actual.roles[0].name).to.equal(expected.roles[0].name)
+  }
   it('filters on researcher name', () => {
     let filteredList
     filteredList = researcherSearchFn('', sampleResearcherList)
@@ -271,11 +289,8 @@ describe('Researcher Search Filter (SO Console)', () => {
     expect(filteredList.length).equals(1)
 
     const filteredResearcher = filteredList[0]
-    forEach(originalResearcher, (value, key) => {
-      expect((filteredResearcher as unknown as Record<string, unknown>)[key]).equals(value)
-    })
+    expectResearcherMatch(filteredResearcher, originalResearcher)
   })
-
   it('filters on eraCommonsId', () => {
     let filteredList
     filteredList = researcherSearchFn('', sampleResearcherList)
@@ -287,11 +302,8 @@ describe('Researcher Search Filter (SO Console)', () => {
     expect(filteredList.length).equals(1)
 
     const filteredResearcher = filteredList[0]
-    forEach(originalResearcher, (value, key) => {
-      expect((filteredResearcher as unknown as Record<string, unknown>)[key]).equals(value)
-    })
+    expectResearcherMatch(filteredResearcher, originalResearcher)
   })
-
   it('filters on email', () => {
     let filteredList
     filteredList = researcherSearchFn('', sampleResearcherList)
@@ -303,11 +315,8 @@ describe('Researcher Search Filter (SO Console)', () => {
     expect(filteredList.length).equals(1)
 
     const filteredResearcher = filteredList[0]
-    forEach(originalResearcher, (value, key) => {
-      expect((filteredResearcher as unknown as Record<string, unknown>)[key]).equals(value)
-    })
+    expectResearcherMatch(filteredResearcher, originalResearcher)
   })
-
   it('filters on role name', () => {
     let filteredList
     filteredList = researcherSearchFn('', sampleResearcherList)
@@ -319,16 +328,14 @@ describe('Researcher Search Filter (SO Console)', () => {
     expect(filteredList.length).equals(1)
 
     const filteredResearcher = filteredList[0]
-    forEach(originalResearcher, (value, key) => {
-      expect((filteredResearcher as unknown as Record<string, unknown>)[key]).equals(value)
-    })
+    expectResearcherMatch(filteredResearcher, originalResearcher)
   })
 })
 
 describe('processElectionStatus utils - tests', () => {
   it('Returns Unreviewed when election has a null status', () => {
-    const election = { status: null }
-    const status = processElectionStatus(election as unknown as Election, null, false)
+    const election = {}
+    const status = processElectionStatus(election as Election, null, false)
     expect(toLower(status)).equals('unreviewed')
   })
 
@@ -456,128 +463,44 @@ describe('processElectionStatus utils - tests', () => {
   })
 
   it('sortVisibleTables returns the correct order', () => {
-    const rowData: TableCellData[][] = [
+    const rowData: TableCell[][] = [
       [
-        {
-          data: 'Progress Report',
-          cellStyle: {
-            width: '10%',
-          },
-          label: 'Request Type',
-          id: 0,
-        },
-        {
-          data: 'DAR Title 1',
-          cellStyle: {
-            width: '20%',
-          },
-          label: 'DAR Title',
-          id: 0,
-        },
-        {
-          data: '2023-01-03',
-          cellStyle: {
-            width: '10%',
-          },
-          label: 'Election Date',
-          id: 0,
-        },
-        {
-          data: false,
-          cellStyle: {
-            width: '20%',
-          },
-          label: 'Boolean Value',
-          id: 0,
-        },
+        { data: 'Progress Report', cellStyle: { width: '10%' }, label: 'Request Type', id: 0 },
+        { data: 'DAR Title 1', cellStyle: { width: '20%' }, label: 'DAR Title', id: 0 },
+        { data: '2023-01-03', cellStyle: { width: '10%' }, label: 'Election Date', id: 0 },
+        { data: false, cellStyle: { width: '20%' }, label: 'Boolean Value', id: 0 },
       ],
       [
-        {
-          data: 'Progress Report',
-          cellStyle: {
-            width: '10%',
-          },
-          label: 'Request Type',
-          id: 2,
-        },
-        {
-          data: 'DAR Title 3',
-          cellStyle: {
-            width: '20%',
-          },
-          label: 'DAR Title',
-          id: 2,
-        },
-        {
-          data: '2023-01-02',
-          cellStyle: {
-            width: '10%',
-          },
-          label: 'Election Date',
-          id: 2,
-        },
-        {
-          data: true,
-          cellStyle: {
-            width: '20%',
-          },
-          label: 'Boolean Value',
-          id: 0,
-        },
+        { data: 'Progress Report', cellStyle: { width: '10%' }, label: 'Request Type', id: 2 },
+        { data: 'DAR Title 3', cellStyle: { width: '20%' }, label: 'DAR Title', id: 2 },
+        { data: '2023-01-02', cellStyle: { width: '10%' }, label: 'Election Date', id: 2 },
+        { data: true, cellStyle: { width: '20%' }, label: 'Boolean Value', id: 0 },
       ],
       [
-        {
-          data: 'Initial Dar',
-          cellStyle: {
-            width: '10%',
-          },
-          label: 'Request Type',
-          id: 1,
-        },
-        {
-          data: 'DAR Title 2',
-          cellStyle: {
-            width: '20%',
-          },
-          label: 'DAR Title',
-          id: 1,
-        },
-        {
-          data: '2023-01-01',
-          cellStyle: {
-            width: '10%',
-          },
-          label: 'Election Date',
-          id: 1,
-        },
-        {
-          data: false,
-          cellStyle: {
-            width: '20%',
-          },
-          label: 'Boolean Value',
-          id: 0,
-        },
+        { data: 'Initial Dar', cellStyle: { width: '10%' }, label: 'Request Type', id: 1 },
+        { data: 'DAR Title 2', cellStyle: { width: '20%' }, label: 'DAR Title', id: 1 },
+        { data: '2023-01-01', cellStyle: { width: '10%' }, label: 'Election Date', id: 1 },
+        { data: false, cellStyle: { width: '20%' }, label: 'Boolean Value', id: 0 },
       ],
     ]
 
-    sortVisibleTable({ list: rowData as unknown as never, sort: { colIndex: 1, dir: -1 } })
+    sortVisibleTable({ list: rowData, sort: { colIndex: 1, dir: -1 } })
 
     expect(rowData[0][1].data).to.equal('DAR Title 3')
     expect(rowData[1][1].data).to.equal('DAR Title 2')
     expect(rowData[2][1].data).to.equal('DAR Title 1')
 
-    sortVisibleTable({ list: rowData as unknown as never, sort: { colIndex: 2, dir: 1 } })
+    sortVisibleTable({ list: rowData, sort: { colIndex: 2, dir: 1 } })
     expect(rowData[0][2].data).to.equal('2023-01-01')
     expect(rowData[1][2].data).to.equal('2023-01-02')
     expect(rowData[2][2].data).to.equal('2023-01-03')
 
-    sortVisibleTable({ list: rowData as unknown as never, sort: { colIndex: 3, dir: 1 } })
+    sortVisibleTable({ list: rowData, sort: { colIndex: 3, dir: 1 } })
     expect(rowData[0][3].data).to.equal(true)
     expect(rowData[1][3].data).to.equal(false)
     expect(rowData[2][3].data).to.equal(false)
 
-    sortVisibleTable({ list: rowData as unknown as never, sort: { colIndex: 3, dir: -1 } })
+    sortVisibleTable({ list: rowData, sort: { colIndex: 3, dir: -1 } })
     expect(rowData[0][3].data).to.equal(false)
     expect(rowData[1][3].data).to.equal(false)
     expect(rowData[2][3].data).to.equal(true)
