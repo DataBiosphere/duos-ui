@@ -1,43 +1,26 @@
-import React, { CSSProperties } from 'react'
+import React from 'react'
 import footerLogo from 'src/images/broad_logo_allwhite.png'
 import { CookieBanner } from 'src/components/CookieBanner'
 import { CookieUtils } from 'src/utils/CookieUtils'
-
-const footerStyle: CSSProperties = {
-  position: 'relative',
-  clear: 'both',
-  backgroundColor: '#000000',
-  minHeight: '64px',
-}
-
-const mainFooterStyle: CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '0 20px',
-}
-
-const footerLogoStyle: CSSProperties = {
-  float: 'left',
-  height: '32px',
-  marginTop: '15px',
-  marginRight: '35px',
-}
+import './DuosFooter.css'
 
 function DuosFooter() {
   return (
-    <div style={footerStyle}>
+    <>
+      <div className="footer-container" style={{ minHeight: CookieUtils.getAcknowledged() ? 64 : 225 }}>
+        <footer className="footer-content">
+          <img src={footerLogo} className="footer-logo" alt="Broad Institute logo" />
+          <ul className="footer-links">
+            <li className="footer-links-item">© Broad Institute</li>
+            <li className="footer-links-item"><a href="/privacy">Privacy Policy</a></li>
+            <li className="footer-links-item"><a href="/tos">Terms of Service</a></li>
+            <li className="footer-links-item"><a href="/cookie_policy">Cookie Policy</a></li>
+            <li className="footer-links-item"><a href="/status">Status</a></li>
+          </ul>
+        </footer>
+      </div>
       <CookieBanner visible={!CookieUtils.getAcknowledged()} />
-      <footer style={mainFooterStyle}>
-        <img src={footerLogo} style={footerLogoStyle} alt="Broad Institute logo" />
-        <ul className="footer-links">
-          <li className="footer-links__item">© Broad Institute</li>
-          <li className="footer-links__item"><a href="/privacy">Privacy Policy</a></li>
-          <li className="footer-links__item"><a href="/tos">Terms of Service</a></li>
-          <li className="footer-links__item"><a href="/cookie_policy">Cookie Policy</a></li>
-          <li className="footer-links__item"><a href="/status">Status</a></li>
-        </ul>
-      </footer>
-    </div>
+    </>
   )
 }
 
