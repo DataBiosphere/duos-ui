@@ -1,59 +1,31 @@
-import React, { useEffect, useState } from 'react'
-import { DACbotRule, ParsedDACbotRule } from 'src/components/dac_bot/DACBotComponent'
+import React, { useState } from 'react'
+import { ParsedDACbotRule } from 'src/components/dac_bot/DACBotComponent'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { DAC } from 'src/libs/ajax/DAC'
 import { Link } from '@mui/material'
 import { Notifications } from 'src/libs/utils'
 import ReactMarkdown from 'react-markdown'
 
 export type DACBotCheckboxComponentProps = {
   dacId: number
-  rule: DACbotRule | ParsedDACbotRule
+  rule: ParsedDACbotRule
   disableEdit: boolean
-  onRuleChange?: (rule: ParsedDACbotRule, isEnabled: boolean) => Promise<void>
-}
-
-export type DACBotToggleResult = {
-  ruleId: number
-  isRuleEnabled: boolean
-  enabledTime: number
-  displayName: string | null
-  email: string | null
+  onRuleChange: (rule: ParsedDACbotRule, isEnabled: boolean) => Promise<void>
 }
 
 export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => {
-  const { dacId, rule, disableEdit, onRuleChange } = props
-  const [isReadOnly, setIsReadOnly] = useState(disableEdit)
-  const [isRuleEnabled, setIsRuleEnabled] = useState(!!rule.enabledByUserId)
-  const [enabledTime, setEnabledTime] = useState(rule.activationDate)
-  const [displayName, setDisplayName] = useState(rule.displayName)
-  const [emailAddress, setEmailAddress] = useState(rule.userEmail)
+  const { rule, disableEdit, onRuleChange } = props
+  const [isReadOnly, setIsReadOnly] = useState(disableEdit || false)
   const [isLoading, setIsLoading] = useState(false)
-
-  // Sync local state when rule prop changes
-  useEffect(() => {
-    setIsRuleEnabled(!!rule.enabledByUserId)
-    setEnabledTime(rule.activationDate)
-    setDisplayName(rule.displayName)
-    setEmailAddress(rule.userEmail)
-  }, [rule])
+  const [checked, setChecked] = useState(!!rule.enabledByUserId)
 
   const onCheckboxChange = async () => {
+    const newChecked = !checked
+    setChecked(newChecked)
     setIsReadOnly(true)
     setIsLoading(true)
     try {
-      const newEnabledState = !isRuleEnabled
-
-      if (onRuleChange) {
-        await onRuleChange(rule as ParsedDACbotRule, newEnabledState)
-      }
-      else {
-        const toggleResult: DACBotToggleResult = await DAC.toggleDACbotRule(dacId, rule.id)
-        setIsRuleEnabled(toggleResult.isRuleEnabled)
-        setEnabledTime(toggleResult.enabledTime)
-        setDisplayName(toggleResult.displayName)
-        setEmailAddress(toggleResult.email)
-      }
+      const newEnabledState = !rule.enabledByUserId
+      await onRuleChange(rule, newEnabledState)
       Notifications.showSuccess({
         severity: 'success',
         text: 'Automation rule successfully saved.',
@@ -63,12 +35,9 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
           horizontal: 'right',
         },
       })
-      setIsReadOnly(false)
-      setIsLoading(false)
     }
     catch (_) {
-      setIsReadOnly(false)
-      setIsLoading(false)
+      setChecked(!newChecked) // Revert on failure
       Notifications.showError({
         severity: 'error',
         text: 'Error: Unable to change automation rule. Please try this operation again.',
@@ -79,9 +48,11 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
         },
       })
     }
+    finally {
+      setIsReadOnly(false)
+      setIsLoading(false)
+    }
   }
-
-  const isDisabledByExclusive = 'isDisabled' in rule ? rule.isDisabled : false
 
   return (
     <FormField
@@ -90,31 +61,27 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
       toggleText={(
         <>
           <span style={{ display: 'table' }}>
-            <ReactMarkdown components={{
-              p: 'span',
-            }}
-            >
+            <ReactMarkdown components={{ p: 'span' }}>
               {rule.description}
             </ReactMarkdown>
           </span>
           {' '}
-          {isRuleEnabled
+          {!!rule.enabledByUserId && rule.displayName && rule.userEmail && rule.activationDate
             ? (
                 <span>
                   Enabled by:
                   {' '}
-                  <Link href={`mailto:${emailAddress}`}>{displayName}</Link>
+                  <Link href={`mailto:${rule.userEmail}`}>{rule.displayName}</Link>
                   {' '}
-                  ({ new Date(enabledTime).toDateString()}
-                  )
+                  ({ new Date(rule.activationDate).toDateString() })
                 </span>
               )
             : ``}
         </>
       )}
-      defaultValue={!!rule.enabledByUserId}
+      defaultValue={checked}
       onChange={onCheckboxChange}
-      disabled={isReadOnly || isLoading || isDisabledByExclusive}
+      disabled={isReadOnly || isLoading || rule.isDisabled}
     />
   )
 }

@@ -36,44 +36,52 @@ describe('DACBotCheckboxComponent', () => {
   })
 
   it('should render checkbox with rule description', () => {
+    const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
         dacId={1}
         rule={mockRule}
         disableEdit={false}
+        onRuleChange={onRuleChange}
       />,
     )
     cy.contains('Require Signing Official approval').should('be.visible')
   })
 
   it('should be disabled when disableEdit is true', () => {
+    const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
         dacId={1}
         rule={mockRule}
         disableEdit={true}
+        onRuleChange={onRuleChange}
       />,
     )
     cy.get('[id="1_checkbox"]').should('be.disabled')
   })
 
   it('should be enabled when disableEdit is false', () => {
+    const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
         dacId={1}
         rule={mockRule}
         disableEdit={false}
+        onRuleChange={onRuleChange}
       />,
     )
     cy.get('[id="1_checkbox"]').should('not.be.disabled')
   })
 
   it('should display enabled user info when rule is enabled', () => {
+    const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
         dacId={1}
         rule={mockEnabledRule}
         disableEdit={false}
+        onRuleChange={onRuleChange}
       />,
     )
     cy.contains('Enabled by:').should('be.visible')
@@ -82,11 +90,13 @@ describe('DACBotCheckboxComponent', () => {
   })
 
   it('should not display enabled user info when rule is disabled', () => {
+    const onRuleChange = cy.stub()
     cy.mount(
       <DACBotCheckboxComponent
         dacId={1}
         rule={mockRule}
         disableEdit={false}
+        onRuleChange={onRuleChange}
       />,
     )
     cy.contains('Enabled by:').should('not.exist')
@@ -107,14 +117,33 @@ describe('DACBotCheckboxComponent', () => {
   })
 
   it('should show success notification on successful toggle', () => {
+    const onRuleChange = cy.stub().resolves()
     cy.mount(
       <DACBotCheckboxComponent
         dacId={1}
         rule={mockRule}
         disableEdit={false}
+        onRuleChange={onRuleChange}
       />,
     )
     cy.get('[id="1_checkbox"]').click()
     cy.contains('Automation rule successfully saved.').should('be.visible')
+  })
+
+  it('should revert checkbox if onRuleChange fails', () => {
+    const onRuleChange = cy.stub().rejects(new Error('Failed to update'))
+    cy.mount(
+      <DACBotCheckboxComponent
+        dacId={1}
+        rule={mockRule}
+        disableEdit={false}
+        onRuleChange={onRuleChange}
+      />,
+    )
+    cy.get('[id="1_checkbox"]').click()
+    // Wait for the error notification
+    cy.contains('Error: Unable to change automation rule. Please try this operation again.').should('be.visible')
+    // Checkbox should be unchecked after failure
+    cy.get('[id="1_checkbox"]').should('not.be.checked')
   })
 })

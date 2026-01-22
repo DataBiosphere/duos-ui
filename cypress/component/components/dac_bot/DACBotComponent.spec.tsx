@@ -10,10 +10,10 @@ describe('DACBotComponent', () => {
       ruleType: 'REQUIRE_SO_DAR_APPROVAL',
       description: 'Require SO approval for data access',
       ruleState: 'AVAILABLE',
-      activationDate: 0,
+      activationDate: Date.now(),
       enabledByUserId: 1,
       displayName: 'Test User',
-      userEmail: null,
+      userEmail: 'testuser@example.com',
     },
     {
       id: 2,
@@ -40,7 +40,15 @@ describe('DACBotComponent', () => {
       displayName: 'Test User',
       email: 'test@example.com',
     })
-    cy.mount(<DACBotComponent dacId={1} data-cy="dac-bot-component" />)
+    cy.mount(
+      <DACBotComponent
+        dacId={1}
+        mutuallyExclusiveRules={{
+          REQUIRE_SO_DAR_APPROVAL: 'AUTO_OPEN_DAR_FOR_ALL_MEMBERS',
+          AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'REQUIRE_SO_DAR_APPROVAL',
+        }}
+      />,
+    )
   })
 
   it('should render component with heading and description', () => {

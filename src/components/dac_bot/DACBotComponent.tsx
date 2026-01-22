@@ -8,6 +8,7 @@ import { UserRole } from 'src/types/model'
 export type DACBotComponentProps = {
   'dacId': number
   'data-cy'?: string
+  'mutuallyExclusiveRules'?: { [key: string]: string }
 }
 
 enum RuleState {
@@ -41,17 +42,17 @@ export type ParsedDACbotRule = DACbotRule & {
  *    AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'REQUIRE_SO_DAR_APPROVAL'
  *  }
  */
-const MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {}
+const DEFAULT_MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {}
 
 export const DACBotComponent = (props: DACBotComponentProps) => {
-  const { dacId, 'data-cy': dataCy } = props
+  const { dacId, 'data-cy': dataCy, mutuallyExclusiveRules = DEFAULT_MUTUALLY_EXCLUSIVE_RULES } = props
   const [DACbotRules, setDACbotRules] = useState<Array<DACbotRule>>([])
   const [isLoading, setIsLoading] = useState(true)
   const userIsChair = Storage.getCurrentUser().roles.some((r: UserRole) => r.dacId == dacId && r.name == 'Chairperson')
 
   const parsedRules = useMemo(() => {
     return DACbotRules.map((rule: DACbotRule) => {
-      const exclusiveRuleType = MUTUALLY_EXCLUSIVE_RULES[rule.ruleType]
+      const exclusiveRuleType = mutuallyExclusiveRules[rule.ruleType]
       const isExclusiveRuleEnabled = exclusiveRuleType && DACbotRules.some((r: DACbotRule) => r.ruleType === exclusiveRuleType && r.enabledByUserId)
 
       return {
@@ -60,7 +61,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
         isDisabled: !!isExclusiveRuleEnabled,
       }
     })
-  }, [DACbotRules])
+  }, [DACbotRules, mutuallyExclusiveRules])
 
   const fetchData = useCallback(async () => {
     try {
@@ -84,12 +85,11 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
     }
   }, [dacId])
 
-  const handleRuleChange = useCallback(async (rule: ParsedDACbotRule, isEnabled: boolean) => {
+  const handleRuleChange = useCallback(async (rule: ParsedDACbotRule, isEnabled: boolean): Promise<void> => {
+    const updatedRuleIds = [rule.id]
     try {
       // Toggle the current rule
       await DAC.toggleDACbotRule(dacId, rule.id)
-
-      const updatedRuleIds = [rule.id]
 
       // If enabling this rule, disable its exclusive counterpart
       if (isEnabled && rule.exclusiveRuleType) {
@@ -99,33 +99,20 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
           updatedRuleIds.push(exclusiveRule.id)
         }
       }
-
-      // Fetch all rules
+    }
+    catch (_) {
+      await Promise.reject()
+    }
+    finally {
+      // Fetch updated rules to refresh state
       const allRules = await DAC.fetchDACbotRules(dacId)
-
       const createUpdatedRulesMap = (allRules: DACbotRule[], updatedRuleIds: number[]) => {
         const rulesMap = new Map(allRules.map(r => [r.id, r]))
         return (r: DACbotRule) => updatedRuleIds.includes(r.id) ? rulesMap.get(r.id) || r : r
       }
-
-      // Update state with only the rules that changed
       setDACbotRules(prevRules =>
         prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)),
       )
-    }
-    catch (_error) {
-      Notifications.showError(
-        {
-          severity: 'error',
-          text: 'Error: Unable to update automation rule. Please try again.',
-          timeout: 3500,
-          layout: {
-            vertical: 'bottom',
-            horizontal: 'right',
-          },
-        },
-      )
-      console.error('Failed to fetch DAC bot rules:', _error)
     }
   }, [dacId, DACbotRules])
 
@@ -161,7 +148,15 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       </p>
       <h5>Rules</h5>
       {!isLoading && parsedRules.map((rule) => {
-        return <DACBotCheckboxComponent dacId={dacId} rule={rule} key={rule.id} disableEdit={!userIsChair || rule.isDisabled} onRuleChange={handleRuleChange} />
+        return (
+          <DACBotCheckboxComponent
+            dacId={dacId}
+            rule={rule}
+            key={rule.id}
+            disableEdit={!userIsChair || rule.isDisabled}
+            onRuleChange={handleRuleChange}
+          />
+        )
       })}
     </div>
   )
