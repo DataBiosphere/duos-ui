@@ -107,11 +107,6 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
     else if (key === 'presenterEmail') {
       next = { ...newPresentation, presenter: { ...newPresentation.presenter, email: value as string } }
     }
-    else if (key === 'tags') {
-      const text = String(value)
-      setTagsInput(text)
-      next = { ...newPresentation, tags: text.split(',').map(t => t.trim()).filter(Boolean) }
-    }
     else {
       next = { ...newPresentation, [key]: value }
     }
@@ -263,9 +258,14 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           />
           <FormField
             id="tags"
-            title="Tags (comma separated)"
-            defaultValue={tagsInput}
-            placeholder="tag1, tag2"
+            title="Tags"
+            placeholder="Select or enter tags"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={newPresentation?.tags}
             onChange={onChange}
             disabled={readOnly}
           />

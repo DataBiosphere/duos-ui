@@ -170,17 +170,15 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
           />
           <FormField
             id="tags"
-            title="Tags (comma separated)"
-            defaultValue={workspace?.tags?.join(', ')}
-            placeholder="tag1, tag2"
-            onChange={({ value }: { value: string }) =>
-              onChange({
-                key: 'tags',
-                value: value
-                  .split(',')
-                  .map(t => t.trim())
-                  .filter(Boolean),
-              })}
+            title="Tags"
+            placeholder="Select or enter tags"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={workspace?.tags}
+            onChange={onChange}
             disabled={readOnly}
           />
           <FormField
