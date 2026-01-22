@@ -40,7 +40,7 @@ export const DatasetSearchTable = (props) => {
   const [filters, setFilters] = useState(defaultFilters(datasets))
   const [filtered, setFiltered] = useState(datasets)
   const [selected, setSelected] = useState([])
-  const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study)
+  const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.dataset)
   const [searchTerm, setSearchTerm] = useState('')
   const searchRef = useRef('')
   const hasRunInitialSearch = useRef(false)
