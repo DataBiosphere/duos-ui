@@ -1,5 +1,5 @@
 import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
-import { toLower, forEach } from 'lodash'
+import { toLower } from 'lodash'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 import { DuosUser, Election, LibraryCard, Vote, DarCollection, Study } from 'src/types/model'
 
@@ -228,105 +228,65 @@ describe('Dar Collection Search Filter', () => {
   })
 })
 
+// Helper to test filtering for a given term and expected result
+function testFilter<T>(
+  filterFn: (term: string, list: T[]) => T[],
+  list: T[],
+  term: string,
+  expected: T,
+  matchFn: (actual: T, expected: T) => void,
+) {
+  const filteredList = filterFn(term, list)
+  expect(filteredList.length).equals(1)
+  matchFn(filteredList[0], expected)
+}
+
+// Helper for LibraryCard field match
+const expectLibraryCardMatch = (actual: LibraryCard, expected: LibraryCard) => {
+  Object.keys(expected).forEach((key) => {
+    expect(actual[key as keyof LibraryCard]).equals(expected[key as keyof LibraryCard])
+  })
+}
+
 describe('LC Search Filter', () => {
   it('filters cards on create date', () => {
-    let filteredList
     const originalCard = sampleLCList[0]
-    filteredList = cardSearchFn('', sampleLCList)
-    expect(filteredList.length).equals(sampleLCList.length)
-
-    const term = formatDate(originalCard.createDate.getTime())
-    filteredList = cardSearchFn(term, sampleLCList)
-    expect(filteredList.length).equals(1)
-    const filteredCard = filteredList[0]
-    forEach(originalCard, (value, key) => {
-      expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    })
+    testFilter(
+      cardSearchFn,
+      sampleLCList,
+      formatDate(originalCard.createDate.getTime()),
+      originalCard,
+      expectLibraryCardMatch,
+    )
   })
 
   it('filters cards on user name', () => {
-    let filteredList
     const originalCard = sampleLCList[0]
-    filteredList = cardSearchFn('', sampleLCList)
-    expect(filteredList.length).equals(sampleLCList.length)
-
-    const term = 'test'
-    filteredList = cardSearchFn(term, sampleLCList)
-    expect(filteredList.length).equals(1)
-    const filteredCard = filteredList[0]
-    forEach(originalCard, (value, key) => {
-      expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    })
+    testFilter(cardSearchFn, sampleLCList, 'test', originalCard, expectLibraryCardMatch)
   })
 
   it('filters on user email', () => {
-    let filteredList
     const originalCard = sampleLCList[0]
-    filteredList = cardSearchFn('', sampleLCList)
-    expect(filteredList.length).equals(sampleLCList.length)
-
-    const term = 'devemail'
-    filteredList = cardSearchFn(term, sampleLCList)
-    expect(filteredList.length).equals(1)
-    const filteredCard = filteredList[0]
-    forEach(originalCard, (value, key) => {
-      expect(filteredCard[key as keyof LibraryCard]).equals(value)
-    })
+    testFilter(cardSearchFn, sampleLCList, 'devemail', originalCard, expectLibraryCardMatch)
   })
 })
 
 describe('Researcher Search Filter (SO Console)', () => {
   it('filters on researcher name', () => {
-    let filteredList
-    filteredList = researcherSearchFn('', sampleResearcherList)
-    expect(filteredList.length).equals(sampleResearcherList.length)
-
     const originalResearcher = sampleResearcherList[0]
-    const term = 'test'
-    filteredList = researcherSearchFn(term, sampleResearcherList)
-    expect(filteredList.length).equals(1)
-
-    const filteredResearcher = filteredList[0]
-    expectResearcherMatch(filteredResearcher, originalResearcher)
+    testFilter(researcherSearchFn, sampleResearcherList, 'test', originalResearcher, expectResearcherMatch)
   })
   it('filters on eraCommonsId', () => {
-    let filteredList
-    filteredList = researcherSearchFn('', sampleResearcherList)
-    expect(filteredList.length).equals(sampleResearcherList.length)
-
     const originalResearcher = sampleResearcherList[0]
-    const term = 'era'
-    filteredList = researcherSearchFn(term, sampleResearcherList)
-    expect(filteredList.length).equals(1)
-
-    const filteredResearcher = filteredList[0]
-    expectResearcherMatch(filteredResearcher, originalResearcher)
+    testFilter(researcherSearchFn, sampleResearcherList, 'era', originalResearcher, expectResearcherMatch)
   })
   it('filters on email', () => {
-    let filteredList
-    filteredList = researcherSearchFn('', sampleResearcherList)
-    expect(filteredList.length).equals(sampleResearcherList.length)
-
     const originalResearcher = sampleResearcherList[0]
-    const term = 'devemail'
-    filteredList = researcherSearchFn(term, sampleResearcherList)
-    expect(filteredList.length).equals(1)
-
-    const filteredResearcher = filteredList[0]
-    expectResearcherMatch(filteredResearcher, originalResearcher)
+    testFilter(researcherSearchFn, sampleResearcherList, 'devemail', originalResearcher, expectResearcherMatch)
   })
   it('filters on role name', () => {
-    let filteredList
-    filteredList = researcherSearchFn('', sampleResearcherList)
-    expect(filteredList.length).equals(sampleResearcherList.length)
-
     const originalResearcher = sampleResearcherList[0]
-    const term = 'admin'
-    filteredList = researcherSearchFn(term, sampleResearcherList)
-    expect(filteredList.length).equals(1)
-
-    const filteredResearcher = filteredList[0]
-    expectResearcherMatch(filteredResearcher, originalResearcher)
+    testFilter(researcherSearchFn, sampleResearcherList, 'admin', originalResearcher, expectResearcherMatch)
   })
 })
 
@@ -340,35 +300,35 @@ describe('processElectionStatus utils - tests', () => {
   it('Returns Approved when election is closed and has an approving final vote', () => {
     const election = {
       status: 'Closed',
-    }
+    } as Election
     const votes = [
       {
         type: VOTE_TYPES.FINAL,
         vote: true,
       },
-    ]
-    const status = processElectionStatus(election as Election, votes as Array<Vote>, false)
+    ] as Array<Vote>
+    const status = processElectionStatus(election, votes, false)
     expect(toLower(status)).equals('approved')
   })
 
   it('Returns Approved when election is final and has an approving final vote', () => {
     const election = {
       status: 'Final',
-    }
+    } as Election
     const votes = [
       {
         type: VOTE_TYPES.FINAL,
         vote: true,
       },
-    ]
-    const status = processElectionStatus(election as Election, votes as Array<Vote>, false)
+    ] as Array<Vote>
+    const status = processElectionStatus(election, votes, false)
     expect(toLower(status)).equals('approved')
   })
 
   it('Returns Denied when election is closed and there are no approving final votes', () => {
     const election = {
       status: 'Closed',
-    }
+    } as Election
     const votes = [
       {
         type: 'DAC',
@@ -378,8 +338,8 @@ describe('processElectionStatus utils - tests', () => {
         type: VOTE_TYPES.FINAL,
         vote: false,
       },
-    ]
-    const status = processElectionStatus(election as Election, votes as Array<Vote>, false)
+    ] as Array<Vote>
+    const status = processElectionStatus(election, votes, false)
     expect(toLower(status)).equals('denied')
   })
 
