@@ -742,23 +742,31 @@ const compareTableCellValues = (aVal: unknown, bVal: unknown, dir: number): numb
   const hasType = (val: unknown): val is { type: string } =>
     typeof val === 'object' && val !== null && 'type' in val
 
+  // Handle string comparison
+  if (typeof aVal === 'string' && typeof bVal === 'string') {
+    return aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * dir
+  }
+
+  // Handle number comparison
   if (typeof aVal === 'number' && typeof bVal === 'number') {
     return (aVal > bVal ? -1 : 1) * dir
   }
+
+  // Handle boolean comparison
   if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
     return (aVal > bVal ? -1 : 1) * dir
   }
+
+  // Handle nil or 'div' type
   if (
-    isNil(aVal)
-    || isNil(bVal)
+    isNil(aVal) || isNil(bVal)
     || (hasType(aVal) && aVal.type === 'div')
     || (hasType(bVal) && bVal.type === 'div')
   ) {
     return (Number(aVal) > Number(bVal) ? -1 : 1) * dir
   }
-  if (typeof aVal === 'string' && typeof bVal === 'string') {
-    return aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * dir
-  }
+
+  // Fallback to number comparison
   return (Number(aVal) > Number(bVal) ? -1 : 1) * dir
 }
 
