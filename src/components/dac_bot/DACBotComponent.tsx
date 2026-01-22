@@ -32,10 +32,16 @@ export type ParsedDACbotRule = DACbotRule & {
   isDisabled: boolean
 }
 
-const MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {
-  REQUIRE_SO_DAR_APPROVAL: 'AUTO_OPEN_DAR_FOR_ALL_MEMBERS',
-  AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'REQUIRE_SO_DAR_APPROVAL',
-}
+/**
+ * Mapping of mutually exclusive rules. If one rule is enabled, the other must be disabled.
+ *
+ * E.g., if REQUIRE_SO_DAR_APPROVAL is enabled, AUTO_OPEN_DAR_FOR_ALL_MEMBERS must be disabled, and vice versa.
+ *  {
+ *    REQUIRE_SO_DAR_APPROVAL: 'AUTO_OPEN_DAR_FOR_ALL_MEMBERS',
+ *    AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'REQUIRE_SO_DAR_APPROVAL'
+ *  }
+ */
+const MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {}
 
 export const DACBotComponent = (props: DACBotComponentProps) => {
   const { dacId, 'data-cy': dataCy } = props
