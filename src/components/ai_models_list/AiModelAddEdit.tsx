@@ -82,9 +82,6 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
     if (key === 'trainedOnDatasets') {
       updated.trainedOnDatasets = value.split(',').map((s: string) => s.trim()).filter(Boolean)
     }
-    else if (key === 'tags') {
-      updated.tags = value.split(',').map((s: string) => s.trim()).filter(Boolean)
-    }
     else if (key === 'maintainerName') {
       updated.maintainer = { ...updated.maintainer, name: value }
     }
@@ -203,8 +200,13 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
           <FormField
             id="tags"
             title="Tags"
-            defaultValue={aiModel?.tags?.join(', ')}
-            placeholder="Comma separated tags"
+            placeholder="Select or enter tags"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={aiModel?.tags}
             onChange={onChange}
             disabled={readOnly}
           />

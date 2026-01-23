@@ -774,7 +774,7 @@ const DataAccessRequestApplication = (props) => {
                   <ProgressReportApplication
                     readOnlyMode={false}
                     datasets={datasets}
-                    dar={merge(reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
+                    dar={merge({}, reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
                     researcher={researcher}
                     countriesOfOperation={countriesOfOperation}
                   />
@@ -797,7 +797,7 @@ const DataAccessRequestApplication = (props) => {
                           <ProgressReportApplication
                             readOnlyMode={true}
                             datasets={datasets}
-                            dar={merge(dar?.data, dar)}
+                            dar={merge({}, dar?.data, dar)}
                             researcher={researcher}
                             countriesOfOperation={countriesOfOperation}
                           />
