@@ -23,7 +23,7 @@ export default function WorkspaceList(props: WorkspaceListProps): React.JSX.Elem
       React.ComponentProps<typeof WorkspaceRow>
     >
       items={props.workspaces}
-      columnsToShow={props.columnsToShow ?? ['name', 'platform', 'url', 'description', 'tools', 'access']}
+      columnsToShow={props.columnsToShow ?? ['name', 'platform', 'url', 'description']}
       onItemsChange={props.onWorkspaceChange}
       disabled={props.disabled}
       validation={props.validation}
