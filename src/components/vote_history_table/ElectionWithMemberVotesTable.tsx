@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { formatDate, sortVisibleTable } from '../../libs/utils'
@@ -82,7 +82,6 @@ interface TableData {
 
 const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> = ({ electionsWithMemberVotes }) => {
   const [expandedElections, setExpandedElections] = useState<Set<number>>(new Set())
-  const [sortedElections, setSortedElections] = useState<RowData[][]>([])
   const [sort, setSort] = useState({ colIndex: 2, dir: -1 }) // Default sort by election date descending
 
   const toggleElectionExpansion = useCallback((electionId: number) => {
@@ -165,11 +164,11 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     return renderedRow
   }, [electionIsExpanded])
 
-  useEffect(() => {
-    setSortedElections(sortVisibleTable({
+  const sortedElections = useMemo(() => {
+    return sortVisibleTable({
       list: processElectionRowData(electionsWithMemberVotes),
       sort,
-    }) as RowData[][])
+    }) as RowData[][]
   }, [sort, electionsWithMemberVotes, processElectionRowData])
 
   return (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { DataUseTranslation } from '../../libs/dataUseTranslation'
 import { isEmpty, isNil, flatMap, keys, get } from 'lodash'
 import { DataUsePills } from './DataUsePill'
@@ -163,14 +163,15 @@ export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false)
-  const [currentUserVotes, setCurrentUserVotes] = useState([])
-  const [dacVotes, setDacVotes] = useState([])
   const { darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote } = props
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {}
-  useEffect(() => {
+
+  const { dacVotes, currentUserVotes } = useMemo(() => {
     const user = Storage.getCurrentUser()
-    setDacVotes(extractDacRPVotesFromBucket(bucket, user, adminPage))
-    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage))
+    return {
+      dacVotes: extractDacRPVotesFromBucket(bucket, user, adminPage),
+      currentUserVotes: extractUserRPVotesFromBucket(bucket, user, isChair, adminPage),
+    }
   }, [bucket, isChair, adminPage])
 
   return (

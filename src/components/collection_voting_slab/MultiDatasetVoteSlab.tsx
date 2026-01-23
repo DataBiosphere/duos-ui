@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { get, isEmpty, isNil } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
@@ -156,9 +156,6 @@ export default function MultiDatasetVoteSlab({
   updateFinalVote,
   reloadFn,
 }: MultiDatasetVoteSlabProps) {
-  const [currentUserVotes, setCurrentUserVotes] = useState<Vote[]>([])
-  const [dacVotes, setDacVotes] = useState<Vote[]>([])
-  const [isDMI, setIsDMI] = useState(false)
   const { algorithmResult } = bucket
   const getMemberVoteSectionTitle = () => {
     if (adminPage) return 'DAC Member Votes'
@@ -166,23 +163,23 @@ export default function MultiDatasetVoteSlab({
     return 'Other DAC Member\'s Votes'
   }
 
-  useEffect(() => {
+  const isDMI = React.useMemo(() => {
     const sorted = Object.values(collection.dars).sort(
       (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime(),
     )
     const mostRecentDar = sorted.at(0)
     const darData = mostRecentDar?.data
 
-    if (darData && Object.keys(darData).includes('dmi')) {
-      setIsDMI(true)
-    }
+    return darData && Object.keys(darData).includes('dmi')
+  }, [collection.dars])
 
+  const { dacVotes, currentUserVotes } = React.useMemo(() => {
     const user = Storage.getCurrentUser()
-    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage))
-    setCurrentUserVotes(
-      extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage),
-    )
-  }, [bucket, isChair, adminPage, collection.dars])
+    return {
+      dacVotes: extractDacDataAccessVotesFromBucket(bucket, user, adminPage),
+      currentUserVotes: extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage),
+    }
+  }, [bucket, isChair, adminPage])
 
   return (
     <div style={styles.baseStyle} data-cy="dataset-vote-slab">

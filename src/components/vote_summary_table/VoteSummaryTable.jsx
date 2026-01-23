@@ -1,8 +1,7 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { isNil, isEmpty } from 'lodash'
-import { useEffect, useState } from 'react'
 import { formatDate, Notifications, sortVisibleTable } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
 
@@ -143,7 +142,6 @@ function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }) {
 
 export default function VoteSummaryTable(props) {
   const [sort, setSort] = useState({ colIndex: 0, dir: -1 })
-  const [visibleVotes, setVisibleVotes] = useState([])
   const [tableSize, setTableSize] = useState(5)
   const { dacVotes, isLoading, isChair = false } = props
 
@@ -166,31 +164,36 @@ export default function VoteSummaryTable(props) {
     })
   }
 
+  const visibleVotes = React.useMemo(() => {
+    return sortVisibleTable({
+      list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder: (voteId) => {
+        const sendReminder = (voteId) => {
+          updateReminderState(voteId, ReminderStates.SENDING)
+
+          Email.sendReminderEmail(voteId)
+            .then(() => {
+              Notifications.showSuccess({ text: 'Successfully sent reminder.' })
+              updateReminderState(voteId, ReminderStates.SENT)
+            })
+            .catch(() => {
+              Notifications.showError({ text: 'There was an issue sending the reminder. Please try again later.' })
+              updateReminderState(voteId, undefined)
+            })
+        }
+        sendReminder(voteId)
+      } }),
+      sort,
+    })
+  }, [dacVotes, isChair, getReminderSentState, sort])
+
   useEffect(() => {
-    const sendReminder = (voteId) => {
-      updateReminderState(voteId, ReminderStates.SENDING)
-
-      Email.sendReminderEmail(voteId)
-        .then(() => {
-          Notifications.showSuccess({ text: 'Successfully sent reminder.' })
-          updateReminderState(voteId, ReminderStates.SENT)
-        })
-        .catch(() => {
-          Notifications.showError({ text: 'There was an issue sending the reminder. Please try again later.' })
-          updateReminderState(voteId, undefined)
-        })
+    const init = async () => {
+      if (!isEmpty(dacVotes)) {
+        setTableSize(dacVotes.length)
+      }
     }
-
-    setVisibleVotes(
-      sortVisibleTable({
-        list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }),
-        sort,
-      }),
-    )
-    if (!isEmpty(dacVotes)) {
-      setTableSize(dacVotes.length)
-    }
-  }, [sort, dacVotes, isChair, getReminderSentState])
+    init()
+  }, [dacVotes])
 
   return (
     <SimpleTable

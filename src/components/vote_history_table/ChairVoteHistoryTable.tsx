@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { VoteHistoryRow } from 'src/types/model'
 import { Styles } from 'src/libs/theme'
@@ -47,7 +47,6 @@ const styles = {
 }
 
 const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHistory }) => {
-  const [sortedVotes, setSortedVotes] = useState<RowData[][]>([])
   const [sort, setSort] = useState({ colIndex: 5, dir: -1 }) // Default sort by voteDate descending
 
   const columnHeaderFormat = {
@@ -88,11 +87,11 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     return rowData
   }, [])
 
-  useEffect(() => {
-    setSortedVotes(sortVisibleTable({
+  const sortedVotes = useMemo(() => {
+    return sortVisibleTable({
       list: processVoteHistoryRowData(voteHistory),
       sort,
-    }) as RowData[][])
+    }) as RowData[][]
   }, [sort, voteHistory, processVoteHistoryRowData])
 
   return (
