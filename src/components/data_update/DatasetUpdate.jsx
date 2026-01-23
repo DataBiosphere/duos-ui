@@ -1,7 +1,6 @@
 import React from 'react'
 import { useCallback, useState, useEffect } from 'react'
-import { find, isNil } from 'lodash/fp'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, find, isNil } from 'lodash'
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms'
 import { DataSet } from '../../libs/ajax/DataSet'
 import { DAR } from '../../libs/ajax/DAR'
@@ -48,7 +47,7 @@ export const DatasetUpdate = (props) => {
   }
 
   const extract = useCallback((propertyName) => {
-    const property = find({ propertyName })(dataset.properties)
+    const property = find(dataset.properties, { propertyName })
     return property?.propertyValue
   }, [dataset])
 

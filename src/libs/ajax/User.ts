@@ -1,4 +1,4 @@
-import { cloneDeep, flow, unset } from 'lodash/fp'
+import { cloneDeep, unset } from 'lodash'
 import { Config } from 'src/libs/config'
 import { fetchGet, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes'
@@ -60,12 +60,11 @@ export const User = {
     // does not seem appropriate for this request anyway.
     // The UpdateDuosUserRequestV2 is not the same shape as a DuosUser
     // like this flow suggests.
-    const filteredUser = flow(
-      cloneDeep,
-      unset('updatedUser.createDate'),
-      unset('updatedUser.institution'),
-      unset('updatedUser.libraryCard'),
-    )(user)
+    const filteredUser = cloneDeep(user)
+    unset(filteredUser, 'updatedUser.createDate')
+    unset(filteredUser, 'updatedUser.institution')
+    unset(filteredUser, 'updatedUser.libraryCard')
+
     try {
       const res = await fetchPut<DuosUser, UpdateDuosUserRequestV2>(url, filteredUser, Config.authOpts())
       return res.data

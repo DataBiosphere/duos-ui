@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { cloneDeep, groupBy, isNil } from 'lodash/fp'
+import { cloneDeep, groupBy, isNil } from 'lodash'
 import { Translate } from '../libs/ajax/Translate'
 import homeHeaderBackground from '../images/home_header_background.png'
 import { Spinner } from '../components/Spinner'
@@ -54,7 +54,7 @@ export default function Translator() {
         normalizedRaw.urlDomain = splitArr[2]
         return normalizedRaw
       })
-    setResults(groupBy('category', normalizedObjects))
+    setResults(groupBy(normalizedObjects, 'category'))
     setIsLoading(false)
   }
 

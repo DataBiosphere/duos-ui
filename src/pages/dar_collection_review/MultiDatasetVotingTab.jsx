@@ -1,4 +1,4 @@
-import { filter, find, flow, get, isNil, map } from 'lodash/fp'
+import { chain, filter, find, get, isNil } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { Alert } from '../../components/Alert'
 import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
@@ -52,26 +52,23 @@ export default function MultiDatasetVotingTab(props) {
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n'
     + (!adminPage ? 'You can still deny this request and/or vote on the Structured Research Purpose.' : '')
 
-  const rpBucket = find(bucket => get('isRP')(bucket))(buckets) || {}
-  const dataBuckets = filter(bucket => get('isRP')(bucket) !== true)(buckets)
+  const rpBucket = find(buckets, bucket => get(bucket, 'isRP')) || {}
+  const dataBuckets = filter(buckets, bucket => get(bucket, 'isRP') !== true)
 
   useEffect(() => {
     const init = async () => {
       const dacDatasets = adminPage ? [] : await User.getUserRelevantDatasets()
-      const datasetIds = flow(
-        map(dataset => get('datasetId')(dataset)),
-        filter(datasetId => !isNil(datasetId)),
-      )(dacDatasets)
+      const datasetIds = chain(dacDatasets)
+        .map(dataset => get(dataset, 'datasetId'))
+        .filter(datasetId => !isNil(datasetId))
+        .value()
       setDacDatasetIds(datasetIds)
     }
     init()
   }, [adminPage])
 
   const dataAccessApprovalDisabled = () => {
-    const researcherLibraryCard = flow(
-      get('createUser'),
-      get('libraryCard'),
-    )(collection)
+    const researcherLibraryCard = get(collection, 'createUser.libraryCard')
     const researcherMissingLibraryCards = isNil(researcherLibraryCard)
     return isChair && researcherMissingLibraryCards
   }

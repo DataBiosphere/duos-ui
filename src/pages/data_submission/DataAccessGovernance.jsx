@@ -1,6 +1,6 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm'
 import React, { useEffect, useState, useCallback } from 'react'
-import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp'
+import { isNil, every, cloneDeep, isEmpty, find } from 'lodash'
 import { DAR } from '../../libs/ajax/DAR'
 import { DAC } from '../../libs/ajax/DAC'
 
@@ -54,7 +54,7 @@ export const DataAccessGovernance = (props) => {
   }, [])
 
   const extractFileTypes = useCallback((propertyName, dataset) => {
-    const property = find({ propertyName })(dataset.properties)
+    const property = find(dataset.properties, { propertyName })
     let fileTypes = []
 
     property?.propertyValue.forEach((propValue) => {
@@ -69,7 +69,7 @@ export const DataAccessGovernance = (props) => {
   }, [])
 
   const extract = useCallback((propertyName, dataset) => {
-    const property = find({ propertyName })(dataset.properties)
+    const property = find(dataset.properties, { propertyName })
     return property?.propertyValue
   }, [])
 

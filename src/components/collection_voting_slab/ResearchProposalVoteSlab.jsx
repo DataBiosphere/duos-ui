@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { DataUseTranslation } from '../../libs/dataUseTranslation'
-import { isEmpty, isNil, flatMap, keys, get } from 'lodash/fp'
+import { isEmpty, isNil, flatMap, keys, get } from 'lodash'
 import { DataUsePills } from './DataUsePill'
 import DataUseAlertBox from './DataUseAlertBox'
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox'
@@ -93,10 +93,10 @@ const highlightedWords = [
 ]
 
 const DataUseSummary = ({ translatedDataUse }) => {
-  return flatMap((key) => {
+  return flatMap(keys(translatedDataUse), (key) => {
     const dataUses = translatedDataUse[key]
     return <div key={key}>{DataUsePills(dataUses)}</div>
-  })(keys(translatedDataUse))
+  })
 }
 
 const SkeletonLoader = () => {
@@ -175,7 +175,7 @@ export default function ResearchProposalVoteSlab(props) {
 
   return (
     <div data-cy="rp-slab" style={styles.baseStyle}>
-      <div style={styles.slabTitle} id={convertLabelToKey(get('key')(bucket))}>
+      <div style={styles.slabTitle} id={convertLabelToKey(get(bucket, 'key'))}>
         RUS (GA4GH DUO)
       </div>
       {isLoading && (

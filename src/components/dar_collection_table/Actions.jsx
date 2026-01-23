@@ -4,7 +4,7 @@ import { Styles, Theme } from 'src/libs/theme'
 import { Block, Delete } from '@mui/icons-material'
 import SimpleButton from 'src/components/SimpleButton'
 import { useNavigate } from 'react-router-dom'
-import { includes, toLower } from 'lodash/fp'
+import { includes, toLower } from 'lodash'
 import './dar_collection_table.css'
 
 const duosBlue = '#0948B7'
@@ -31,7 +31,7 @@ export default function Actions(props) {
 
   const openButtonAttributes = {
     keyProp: `${consoleType}-open-${uniqueId}`,
-    label: includes(toLower(status), ['complete', 'canceled']) ? 'Re-Open' : 'Open',
+    label: includes(['complete', 'canceled'], toLower(status)) ? 'Re-Open' : 'Open',
     onClick: () => showConfirmationModal(collection, 'open'),
     baseColor: duosBlue,
     hoverStyle: {

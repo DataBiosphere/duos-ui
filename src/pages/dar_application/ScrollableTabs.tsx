@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import { findIndex } from 'lodash/fp'
+import { findIndex } from 'lodash'
 
 type ApplicationTab = {
   id: string
@@ -19,7 +19,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
   // Use positive check for clarity (suggested improvement)
   const selectedStepNumber
     = typeof formSelectedTabId === 'string'
-      ? findIndex(tab => tab.id === formSelectedTabId, applicationTabs) + 1
+      ? findIndex(applicationTabs, tab => tab.id === formSelectedTabId) + 1
       : 1
 
   const goToStep = useCallback((tabId: string) => {
