@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { cloneDeep, findIndex } from 'lodash/fp'
+import { cloneDeep, findIndex } from 'lodash'
 import { Styles } from 'src/libs/theme'
 import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'
@@ -109,9 +109,9 @@ export default function ResearcherConsole() {
   const deleteDraftById = async ({ referenceId }) => {
     const collectionsClone = cloneDeep(researcherCollections)
     await DAR.deleteDar(referenceId)
-    const targetIndex = findIndex((draft) => {
+    const targetIndex = findIndex(collectionsClone, (draft) => {
       return draft.referenceIds[0] === referenceId
-    })(collectionsClone)
+    })
 
     // if deleted index, remove it from the collections array
     collectionsClone.splice(targetIndex, 1)

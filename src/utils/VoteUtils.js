@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash/fp'
+import { isEmpty } from 'lodash'
 // helper method -> process match data and converts it to a Yes/No algorithm vote result
 export const processMatchData = (matchData) => {
   if (isEmpty(matchData)) {

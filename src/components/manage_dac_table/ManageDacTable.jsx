@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import ReactTooltip from 'react-tooltip'
 import { DAC } from 'src/libs/ajax/DAC'
-import { filter, isNil } from 'lodash/fp'
+import { filter, isNil } from 'lodash'
 import { recalculateVisibleTable, goToPage as updatePage } from 'src/libs/utils'
 import cellData from 'src/components/manage_dac_table/ManageDacTableCellData'
 import { styles } from 'src/components/manage_dac_table/manageDacTableUtils'
@@ -121,7 +121,7 @@ export const ManageDacTable = function ManageDacTable(props) {
 
   const viewDatasets = useCallback(async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId)
-    const approvedDatasets = filter({ dacApproval: true })(datasets)
+    const approvedDatasets = filter(datasets, { dacApproval: true })
     setShowDatasetsPage(true)
     setSelectedDac(selectedDac)
     setSelectedDatasets(approvedDatasets)

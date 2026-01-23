@@ -13,7 +13,7 @@ import {
 } from '../../../src/utils/DarCollectionUtils'
 import { Collections } from '../../../src/libs/ajax/Collections'
 import { formatDate, Notifications, USER_ROLES } from '../../../src/libs/utils'
-import { forEach, includes, concat } from 'lodash/fp'
+import { forEach, includes, concat } from 'lodash'
 
 describe('updateCollectionFn', () => {
   it('generates an update callback function for consoles to use', () => {
@@ -595,11 +595,11 @@ describe('updateFinalVote()', () => {
     const setDataUseBuckets = newBucketArray => dataUseBuckets = newBucketArray
     const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })
 
-    forEach((bucket) => {
+    forEach(updatedBuckets, (bucket) => {
       const voteObj = bucket.votes[0].dataAccess
       const votes = concat(voteObj.finalVotes, voteObj.chairpersonVotes)
-      forEach((vote) => {
-        if (includes(vote.voteId)(voteIds)) {
+      forEach(votes, (vote) => {
+        if (includes(voteIds, vote.voteId)) {
           cy.wrap(vote.vote).should('equal', votePayload.vote)
           cy.wrap(vote.rationale).should('equal', votePayload.rationale)
         }
@@ -607,8 +607,8 @@ describe('updateFinalVote()', () => {
           cy.wrap(vote.vote).should('equal', undefined)
           cy.wrap(vote.rationale).should('equal', undefined)
         }
-      })(votes)
-    })(updatedBuckets)
+      })
+    })
 
     cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets)
   })
@@ -624,11 +624,11 @@ describe('updateFinalVote()', () => {
     const setDataUseBuckets = newBucketArray => dataUseBuckets = newBucketArray
     const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })
 
-    forEach((bucket) => {
+    forEach(updatedBuckets, (bucket) => {
       const voteObj = bucket.votes[0].rp
       const votes = concat(voteObj.finalVotes, voteObj.chairpersonVotes)
-      forEach((vote) => {
-        if (includes(vote.voteId)(voteIds)) {
+      forEach(votes, (vote) => {
+        if (includes(voteIds, vote.voteId)) {
           cy.wrap(vote.vote).should('equal', votePayload.vote)
           cy.wrap(vote.rationale).should('equal', votePayload.rationale)
         }
@@ -636,8 +636,8 @@ describe('updateFinalVote()', () => {
           cy.wrap(vote.vote).should('equal', undefined)
           cy.wrap(vote.rationale).should('equal', undefined)
         }
-      })(votes)
-    })(updatedBuckets)
+      })
+    })
 
     cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets)
   })

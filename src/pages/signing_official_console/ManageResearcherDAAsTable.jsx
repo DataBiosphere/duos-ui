@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Styles } from '../../libs/theme'
-import { isNaN } from 'lodash/fp'
+import { isNaN } from 'lodash'
 import SimpleTable from '../../components/SimpleTable'
 import PaginationBar from '../../components/PaginationBar'
 import SearchBar from '../../components/SearchBar'

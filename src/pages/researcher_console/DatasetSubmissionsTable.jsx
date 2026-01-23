@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Notifications } from 'src/libs/utils'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import SortableTable from 'src/components/sortable_table/SortableTable'
-import { concat, isNil, join } from 'lodash/fp'
+import { concat, isNil, join } from 'lodash'
 import Button from '@mui/material/Button'
 import { Link, useNavigate } from 'react-router-dom'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -147,14 +147,14 @@ export default function DatasetSubmissionsTable(props) {
             </div>
           )
         : <div />
-      const custodians = join(', ')(term.study?.dataCustodianEmail)
+      const custodians = join(term.study?.dataCustodianEmail, ', ')
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,
         dataSubmitter: term.createUserDisplayName,
         datasetCustodians: custodians,
         dac: term.dac?.dacName,
-        dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
+        dataUse: join(concat(primaryCodes, secondaryCodes), ', '),
         status: status,
         actions: editButton, deleteButton,
       }

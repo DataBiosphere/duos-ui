@@ -3,7 +3,7 @@ import { User } from '../../libs/ajax/User'
 import TabControl from '../../components/TabControl'
 import ReviewHeader from './ReviewHeader'
 import ApplicationInformation from './ApplicationInformation'
-import { compact, filter, flatMap, flow, get, isEmpty, map, toLower, uniq } from 'lodash/fp'
+import { chain, compact, filter, get, isEmpty, map, toLower, uniq } from 'lodash'
 import { updateFinalVote } from '../../utils/DarCollectionUtils'
 import { binCollectionToBuckets } from '../../utils/BucketUtils'
 import { Navigation, Notifications } from '../../libs/utils'
@@ -60,21 +60,19 @@ const tabsForUser = (user, buckets, adminPage = false) => {
       votingHistory: 'Voting History',
     }
   }
-  const dataAccessBuckets = filter(
-    bucket => get('isRP')(bucket) !== true,
-  )(buckets)
-  const myMemberVotes = flow(
-    flatMap(b => b.votes),
-    flatMap(v => v.dataAccess),
-    flatMap(da => da.memberVotes),
-    filter(v => v.userId === user.userId),
-  )(dataAccessBuckets)
-  const myChairVotes = flow(
-    flatMap(b => b.votes),
-    flatMap(v => v.dataAccess),
-    flatMap(da => da.chairpersonVotes),
-    filter(v => v.userId === user.userId),
-  )(dataAccessBuckets)
+  const dataAccessBuckets = filter(buckets, bucket => get(bucket, 'isRP') !== true)
+  const myMemberVotes = chain(dataAccessBuckets)
+    .flatMap(b => b.votes)
+    .flatMap(v => v.dataAccess)
+    .flatMap(da => da.memberVotes)
+    .filter(v => v.userId === user.userId)
+    .value()
+  const myChairVotes = chain(dataAccessBuckets)
+    .flatMap(b => b.votes)
+    .flatMap(v => v.dataAccess)
+    .flatMap(da => da.chairpersonVotes)
+    .filter(v => v.userId === user.userId)
+    .value()
   const updatedTabs = { applicationInformation: 'Application Information', fullDAR: 'Full DAR' }
   if (!isEmpty(myMemberVotes)) {
     updatedTabs.memberVote = 'Member Vote'
@@ -188,7 +186,7 @@ export default function DarCollectionReview(props) {
       }
 
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
-      const dacIds = adminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
+      const dacIds = adminPage ? [] : uniq(compact(map(user.roles, r => r.dacId)))
 
       // Parallelize async calls
       const [researcherProfile, processedBuckets] = await Promise.all([
@@ -261,7 +259,7 @@ export default function DarCollectionReview(props) {
           darCode={collection.darCode || '- -'}
           projectTitle={darInfo.projectTitle || '- -'}
           userName={researcherProfile.displayName || '- -'}
-          institutionName={get('institution.name')(researcherProfile) || '- -'}
+          institutionName={get(researcherProfile, 'institution.name') || '- -'}
           approvedDatasets={approvedDatasets}
           isLoading={isLoading}
           readOnly={readOnly || adminPage}
@@ -287,7 +285,7 @@ export default function DarCollectionReview(props) {
         />
         {selectedTab === tabs.applicationInformation && (
           <ApplicationInformation
-            institution={get('institution.name')(researcherProfile)}
+            institution={get(researcherProfile, 'institution.name')}
             researcher={researcherProfile.displayName}
             email={researcherProfile.email}
             nonTechSummary={darInfo.nonTechRus}

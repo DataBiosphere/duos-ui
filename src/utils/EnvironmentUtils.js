@@ -1,5 +1,5 @@
 import { Storage } from 'src/libs/storage'
-import { includes } from 'lodash/fp'
+import { includes } from 'lodash'
 
 /**
  * Predefined groups of environments for which certain features might be valid for.
@@ -33,7 +33,7 @@ export const envGroups = {
  */
 export const checkEnv = (envGroup) => {
   const env = Storage.getEnv()
-  return env ? includes(env)(envGroup) : false
+  return env ? includes(envGroup, env) : false
 }
 
 /**

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, useEffect, useCallback } from 'react'
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash'
 import PaginationBar from '../PaginationBar'
 import { recalculateVisibleTable, goToPage as updatePage, getSearchFilterFunctions, searchOnFilteredList } from '../../libs/utils'
 import SimpleTable from '../SimpleTable'

@@ -1,7 +1,7 @@
 import React from 'react'
 import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms'
 import { nihInstitutions } from './nih_institutions'
-import { isEmpty, isNil } from 'lodash/fp'
+import { isEmpty, isNil } from 'lodash'
 import { useState } from 'react'
 import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL } from './NihAnvilUse'
 

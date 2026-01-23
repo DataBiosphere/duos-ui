@@ -1,5 +1,5 @@
 import { processDefinedLimitations, consentTranslations } from 'src/libs/dataUseTranslation'
-import { isEmpty, cloneDeep } from 'lodash/fp'
+import { isEmpty, cloneDeep } from 'lodash'
 
 const mockDataUse = {
   diseaseRestrictions: [],

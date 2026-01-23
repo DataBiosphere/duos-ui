@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Styles, Theme } from 'src/libs/theme'
-import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp'
+import { chain, cloneDeep, findIndex, isNil } from 'lodash'
 import SimpleTable from 'src/components/SimpleTable'
 import SimpleButton from 'src/components/SimpleButton'
 import PaginationBar from 'src/components/PaginationBar'
@@ -137,12 +137,12 @@ const SubmitterCell = ({
 }
 
 const roleCell = (roles, id) => {
-  const roleString = flow(
-    map(role => role.name),
-    sortBy(name => name),
-    sortedUniq,
-    join(', '),
-  )(roles)
+  const roleString = chain(roles)
+    .map(role => role.name)
+    .sortBy(name => name)
+    .sortedUniq()
+    .join(', ')
+    .value()
 
   return {
     data: roleString || '- -',
@@ -295,9 +295,9 @@ export default function DataCustodianTable(props) {
     try {
       const updatedResearcher = await User.addRoleToUser(userId, 8)
       const listCopy = cloneDeep(researchers)
-      const targetIndex = findIndex(
+      const targetIndex = findIndex(listCopy,
         researcher => userId === researcher.userId,
-      )(listCopy)
+      )
       if (targetIndex === -1) {
         const targetResearcher = selectedResearcher
         listCopy.unshift(targetResearcher)
@@ -328,9 +328,9 @@ export default function DataCustodianTable(props) {
     const listCopy = cloneDeep(researchers)
     const messageName = displayName || email
     try {
-      const targetIndex = findIndex((researcher) => {
+      const targetIndex = findIndex(listCopy, (researcher) => {
         return !isNil(researcher) && selectedResearcher[searchableKey] === researcher[searchableKey]
-      })(listCopy)
+      })
       if (
         isNil(userId)
         || researchers[targetIndex].institutionId !== signingOfficial.institutionId
