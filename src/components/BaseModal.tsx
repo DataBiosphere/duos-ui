@@ -1,29 +1,29 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import Modal from 'react-modal'
-import './BaseModal.css'
-import { PageSubHeading } from './PageSubHeading'
-import CloseIconComponent from './CloseIconComponent'
+import 'src/components/BaseModal.css'
+import { PageSubHeading } from 'src/components/PageSubHeading'
+import CloseIconComponent from 'src/components/CloseIconComponent'
 
 const customStyles = {
   overlay: {
-    position: 'fixed',
+    position: 'fixed' as const,
     top: '0',
     left: '0',
     right: '0',
     bottom: '0',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    overflowY: 'auto',
+    overflowY: 'auto' as const,
   },
 
   content: {
-    position: 'relative',
+    position: 'relative' as const,
     top: '20%',
     maxHeight: '60%',
     margin: '0 auto',
     maxWidth: '60%',
     border: '1px solid rgb(204, 204, 204)',
     background: 'rgb(255, 255, 255)',
-    overflow: 'auto',
+    overflow: 'auto' as const,
     borderRadius: '4px',
     outline: 'none',
     padding: '10px 20px 20px 20px',
@@ -32,7 +32,26 @@ const customStyles = {
 
 Modal.setAppElement('#root')
 
-export const BaseModal = (props) => {
+export interface BaseModalProps {
+  showModal: boolean
+  onRequestClose: () => void
+  afterOpen?: () => void
+  id?: string
+  imgSrc?: string
+  color?: string
+  iconSize?: 'none' | 'medium' | 'large'
+  title: string
+  description?: string
+  children?: ReactNode
+  action: {
+    label: string
+    handler: () => void
+  }
+  type?: 'informative' | 'default'
+  disableOkBtn?: boolean
+}
+
+export const BaseModal: React.FC<BaseModalProps> = (props) => {
   const { disableOkBtn = false } = props
   return (
     <div>
