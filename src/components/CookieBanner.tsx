@@ -31,7 +31,7 @@ export const CookieBanner = (props: CookieBannerProps) => {
             setVisible(false)
             props.onDismiss()
           }}
-          sx={{ float: 'right', marginRight: '5px' }}
+          sx={{ float: 'right', marginRight: 0, padding: '5px 0 0 0' }}
         >
           <CheckIcon />
         </IconButton>

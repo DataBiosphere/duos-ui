@@ -1,4 +1,5 @@
 .banner {
+    text-align: justify;
     box-shadow: 0 0 5px;
     position: fixed;
     bottom: 0;
@@ -7,7 +8,7 @@
     right: 0;
     z-index: 1000;
     border: 1px solid gray;
-    padding: 15px 25px 15px 25px;
+    padding: 15px 30px 15px 30px;
     background-color: white;
     color: #00243c;
 }
@@ -29,5 +30,6 @@
         bottom: 20px;
         width: 80%;
         margin: 15px auto;
+        padding: 10px 20px 10px 20px;
     }
 }
