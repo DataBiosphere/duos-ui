@@ -4,9 +4,13 @@ import { Storage } from 'src/libs/storage'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { setUserRoleStatuses } from 'src/libs/utils'
-import admin from './admin.json'
-import chair from './chair.json'
+import adminJson from './admin.json'
+import chairJson from './chair.json'
 import dac from './dac.json'
+import { DuosUser } from 'src/types/model'
+
+const admin = adminJson as DuosUser
+const chair = chairJson as DuosUser
 
 // Wrapper for components that contain `Link` components
 const WrappedManageRadar = (mockDacId: number | undefined) => {

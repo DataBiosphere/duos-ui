@@ -531,7 +531,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
     cy.get('.table-data').should('not.exist')
     cy.get('#show-member-vote-dropdown').click()
     cy.get('.table-data').should('exist')
-    cy.get('.row-data-0').should('contain.text', 'Sarah').should('contain.text', 'test1')
+    cy.get('.table-data').should('contain.text', 'Sarah').should('contain.text', 'test1')
   })
 
   it('Renders collapsed row with appended rationales when the same user has same vote but different rationales for multiple elections', function () {
@@ -553,7 +553,7 @@ describe('MultiDatasetVoteSlab - Tests', function () {
     cy.get('.table-data').should('not.exist')
     cy.get('#show-member-vote-dropdown').click()
     cy.get('.table-data').should('exist')
-    cy.get('.row-data-3').should('contain.text', 'Joe').should('contain.text', 'test1\ntest2')
+    cy.get('.table-data').should('contain.text', 'Joe').should('contain.text', 'test1\ntest2')
   })
 
   it('Does not append rationale values when properties are undefined', function () {
@@ -595,8 +595,8 @@ describe('MultiDatasetVoteSlab - Tests', function () {
     cy.get('.table-data').should('not.exist')
     cy.get('#show-member-vote-dropdown').click()
     cy.get('.table-data').should('exist')
-    cy.get('.row-data-0').should('contain.text', 'Matt').should('contain.text', 'Yes')
-    cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', 'No')
+    cy.get('.table-data').should('contain.text', 'Matt').should('contain.text', 'Yes')
+    cy.get('.table-data').should('contain.text', 'Matt').should('contain.text', 'No')
   })
 
   it('Renders filler text when some fields of vote are empty', function () {
@@ -617,8 +617,8 @@ describe('MultiDatasetVoteSlab - Tests', function () {
     cy.get('.table-data').should('not.exist')
     cy.get('#show-member-vote-dropdown').click()
     cy.get('.table-data').should('exist')
-    cy.get('.row-data-2').should('contain.text', 'Joe').should('contain.text', '- -')
-    cy.get('.row-data-1').should('contain.text', 'Matt').should('contain.text', '- -')
+    cy.get('.table-data').should('contain.text', 'Joe').should('contain.text', '- -')
+    cy.get('.table-data').should('contain.text', 'Matt').should('contain.text', '- -')
   })
 
   it('Renders send reminder button when user is chair and no vote', function () {
@@ -639,8 +639,8 @@ describe('MultiDatasetVoteSlab - Tests', function () {
     cy.get('.table-data').should('not.exist')
     cy.get('#show-member-vote-dropdown').click()
     cy.get('.table-data').should('exist')
-    cy.get('.row-data-2').should('contain.text', 'Joe').should('contain.text', 'Send Reminder')
-    cy.get('.row-data-1').should('contain.text', 'Matt').should('contain.text', '- -')
+    cy.get('.table-data').should('contain.text', 'Joe').should('contain.text', 'Send Reminder')
+    cy.get('.table-data').should('contain.text', 'Matt').should('contain.text', '- -')
   })
 
   it('Renders the algorithm decision when the latest dar does not have a DMI', function () {

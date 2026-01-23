@@ -92,7 +92,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     setSortedVotes(sortVisibleTable({
       list: processVoteHistoryRowData(voteHistory),
       sort,
-    }))
+    }) as RowData[][])
   }, [sort, voteHistory, processVoteHistoryRowData])
 
   return (
