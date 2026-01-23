@@ -252,14 +252,14 @@ export const FormField = (config) => {
 
   const typeDefaultValue = isFunction(type.defaultValue) ? type.defaultValue(config) : type.defaultValue
   const [formValue, setFormValue] = useState(typeDefaultValue || '')
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue)
 
   const required = (validators || []).includes(FormValidators.REQUIRED)
 
-  useEffect(() => {
-    if (defaultValue !== undefined) {
-      setFormValue(defaultValue)
-    }
-  }, [defaultValue, type])
+  if (defaultValue !== undefined && defaultValue !== prevDefaultValue) {
+    setPrevDefaultValue(defaultValue)
+    setFormValue(defaultValue)
+  }
 
   useEffect(() => {
     validateFormProps(config)

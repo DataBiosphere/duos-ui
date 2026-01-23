@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { isEmpty, isNil } from 'lodash'
 import CollectionVoteYesButton from './CollectionVoteYesButton'
 import CollectionVoteNoButton from './CollectionVoteNoButton'
@@ -143,6 +143,8 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     reloadFn = () => {},
   } = props
 
+  const [prevVotes, setPrevVotes] = useState<Vote[] | undefined>(undefined)
+
   const isElectionClosed = useMemo(() => {
     return votes.filter(v => v.electionStatus?.toLowerCase() === 'open').length === 0
   }, [votes])
@@ -151,7 +153,8 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     return props.isDisabled || (isFinal && submitted) || adminPage
   }, [props.isDisabled, isFinal, submitted, adminPage])
 
-  useEffect(() => {
+  if (votes !== prevVotes) {
+    setPrevVotes(votes)
     if (!isEmpty(votes)) {
       const prevVote = votes[0]
 
@@ -169,7 +172,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
       const radar = votes.some(vote => vote.type === VOTE_TYPES.RADAR_APPROVE)
       setIsRadar(radar)
     }
-  }, [votes])
+  }
 
   const updateVote = async (newVote: boolean, isChair: boolean) => {
     setVoteInProgress(true)
