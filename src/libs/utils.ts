@@ -1,5 +1,5 @@
-import { DAR } from './ajax/DAR'
-import { Theme } from './theme'
+import { DAR } from 'src/libs/ajax/DAR'
+import { Theme } from 'src/libs/theme'
 import React, { RefObject } from 'react'
 import {
   capitalize,
@@ -18,8 +18,8 @@ import {
   map,
   toLower,
 } from 'lodash'
-import { headerTabsConfig } from '../components/DuosHeader'
-import { ToastNotifications } from './ToastNotifications'
+import { headerTabsConfig } from 'src/components/DuosHeader'
+import { ToastNotifications } from 'src/libs/ToastNotifications'
 import {
   DuosUser,
   DarCollection,
@@ -34,7 +34,7 @@ import {
   DacObject,
   UserRole,
   UserProperty,
-} from '../types/model'
+} from 'src/types/model'
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
