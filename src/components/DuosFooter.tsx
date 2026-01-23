@@ -7,7 +7,7 @@ import './DuosFooter.css'
 function DuosFooter() {
   const baseHeight = 64 // min height of the footer without the banner
   const [bannerHeight, setBannerHeight] = useState(0)
-  const acknowledged = CookieUtils.getAcknowledged()
+  const [acknowledged, setAcknowledged] = useState(CookieUtils.getAcknowledged())
 
   const bannerRef = useCallback((node: HTMLDivElement) => {
     if (node !== null) {
@@ -23,8 +23,8 @@ function DuosFooter() {
 
   return (
     <>
-      <div className="footer-container" style={{ minHeight: footerHeight() }}>
-        <footer className="footer-content">
+      <div className="footer-container">
+        <footer className="footer-content" style={{ minHeight: footerHeight() }}>
           <img src={footerLogo} className="footer-logo" alt="Broad Institute logo" />
           <ul className="footer-links">
             <li className="footer-links-item">© Broad Institute</li>
@@ -36,7 +36,10 @@ function DuosFooter() {
         </footer>
       </div>
       <div ref={bannerRef}>
-        <CookieBanner visible={!acknowledged} />
+        <CookieBanner
+          visible={!acknowledged}
+          onDismiss={() => setAcknowledged(true)}
+        />
       </div>
     </>
   )

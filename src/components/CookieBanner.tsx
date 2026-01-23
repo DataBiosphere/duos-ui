@@ -7,6 +7,7 @@ import Tooltip from '@mui/material/Tooltip'
 import './CookieBanner.css'
 
 export interface CookieBannerProps {
+  onDismiss: () => void
   visible?: boolean
 }
 
@@ -28,6 +29,7 @@ export const CookieBanner = (props: CookieBannerProps) => {
           onClick={() => {
             CookieUtils.setAcknowledged()
             setVisible(false)
+            props.onDismiss()
           }}
           sx={{ float: 'right', marginRight: '5px' }}
         >
