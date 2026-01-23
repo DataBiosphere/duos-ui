@@ -142,6 +142,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const {
     collections, columns, isLoading, cancelCollection, reviseCollection,
     openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
+    approveCollection,
   } = props
   const isUnfilteredView = consoleType === consoleTypes.ADMIN || consoleType === consoleTypes.RESEARCHER
 
@@ -304,6 +305,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         openCollection={openCollection}
         deleteDraft={deleteDraft}
         consoleAction={consoleAction}
+        approveCollection={approveCollection}
       />
     </Fragment>
   )

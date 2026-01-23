@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { Collections } from 'src/libs/ajax/Collections'
 import { USER_ROLES } from 'src/libs/utils'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
-import { consoleTypes } from 'src/utils/DarCollectionUtils'
+import { consoleTypes, approveCollectionFn } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -20,7 +20,6 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
   const [collectionList, setCollectionList] = useState<CollectionSummary[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  // Get responsive columns for signing official console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.SIGNING_OFFICIAL)
 
   useEffect(() => {
@@ -40,6 +39,24 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
     init()
   }, [])
 
+  const updateCollections = useCallback((updatedCollection: CollectionSummary) => {
+    setCollectionList((prevList) => {
+      const index = prevList.findIndex(c => c.darCollectionId === updatedCollection.darCollectionId)
+      if (index === -1) return prevList
+      if (updatedCollection.requiresSOApproval === false) {
+        return prevList.filter((_, i) => i !== index)
+      }
+      const newList = [...prevList]
+      newList[index] = updatedCollection
+      return newList
+    })
+  }, [])
+
+  const approveCollection = approveCollectionFn({
+    updateCollections,
+    role: USER_ROLES.signingOfficial,
+  })
+
   return (
     <div style={Styles.PAGE}>
       <div>
@@ -57,6 +74,7 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
             isLoading={isLoading}
             cancelCollection={null}
             reviseCollection={null}
+            approveCollection={approveCollection}
             consoleType={consoleTypes.SIGNING_OFFICIAL}
           />
         )}

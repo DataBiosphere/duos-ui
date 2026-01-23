@@ -38,4 +38,9 @@ export const Collections = {
     const res = await fetchPost(url, {}, Config.authOpts())
     return res.data
   },
+  approveElectionsById: async (id) => {
+    const url = `${await Config.getApiUrl()}/api/collections/${id}/approve`
+    const res = await fetchPost(url, {}, Config.authOpts())
+    return res.data
+  },
 }
