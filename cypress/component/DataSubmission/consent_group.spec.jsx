@@ -1,6 +1,6 @@
 import React from 'react'
 import ConsentGroupForm from 'src/pages/data_submission/consent_group/ConsentGroupForm'
-import { cloneDeep } from 'lodash/fp'
+import { cloneDeep } from 'lodash'
 
 const dacs = [
   {

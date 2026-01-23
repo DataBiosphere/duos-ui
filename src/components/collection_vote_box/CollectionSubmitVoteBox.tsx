@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { isEmpty, isNil } from 'lodash/fp'
+import { isEmpty, isNil } from 'lodash'
 import CollectionVoteYesButton from './CollectionVoteYesButton'
 import CollectionVoteNoButton from './CollectionVoteNoButton'
 import { Notifications } from 'src/libs/utils'

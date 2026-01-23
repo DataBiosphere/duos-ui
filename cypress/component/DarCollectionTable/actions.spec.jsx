@@ -1,6 +1,6 @@
 import { React } from 'react'
 import Actions from 'src/components/dar_collection_table/Actions'
-import { cloneDeep } from 'lodash/fp'
+import { cloneDeep } from 'lodash'
 import { Navigation } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import EnvironmentUtils from 'src/utils/EnvironmentUtils.js'

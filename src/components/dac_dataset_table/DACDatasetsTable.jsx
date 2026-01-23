@@ -4,7 +4,7 @@ import PaginationBar from '../PaginationBar'
 import SimpleTable from '../SimpleTable'
 import cellData from './DACDatasetTableCellData'
 import { styles, DACDatasetTableColumnOptions } from './DACDatasetConstants'
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash'
 import { goToPage as updatePage, recalculateVisibleTable } from 'src/libs/utils'
 import { useNavigate } from 'react-router-dom'
 

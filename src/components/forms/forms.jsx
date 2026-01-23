@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, useEffect, useCallback } from 'react'
-import { cloneDeep, isFunction, isNil, isArray } from 'lodash/fp'
+import { cloneDeep, isFunction, isNil, isArray } from 'lodash'
 import {
   getKey,
   validateFormProps,

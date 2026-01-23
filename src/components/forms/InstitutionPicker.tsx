@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { MasterChangeHandler } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
-import { isEmpty, isNil } from 'lodash/fp'
+import { isEmpty, isNil } from 'lodash'
 import { Institution } from 'src/libs/ajax/Institution'
 import { InstitutionInterface } from 'src/types/model'
 import { Notifications } from 'src/libs/utils'

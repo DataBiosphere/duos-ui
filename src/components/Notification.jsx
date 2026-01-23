@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash/fp'
+import { isEmpty } from 'lodash'
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import WarningIcon from '@mui/icons-material/Warning'

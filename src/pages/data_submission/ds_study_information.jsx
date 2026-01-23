@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { isEmpty } from 'lodash/fp'
+import { isEmpty } from 'lodash'
 
 import { Notifications } from '../../libs/utils'
 import { User } from '../../libs/ajax/User'
