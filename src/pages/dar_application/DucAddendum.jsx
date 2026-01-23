@@ -112,7 +112,10 @@ export default function DucAddendum(props) {
   }, [datasets])
 
   useEffect(() => {
-    getBuckets()
+    const init = async () => {
+      await getBuckets()
+    }
+    init()
   }, [getBuckets])
 
   const buildDucAddendumTable = useCallback(async () => {
@@ -199,7 +202,10 @@ export default function DucAddendum(props) {
   }, [buckets, isLoading, dacs])
 
   useEffect(() => {
-    buildDucAddendumTable()
+    const init = async () => {
+      await buildDucAddendumTable()
+    }
+    init()
   }, [buildDucAddendumTable])
 
   return (

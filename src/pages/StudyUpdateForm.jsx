@@ -142,9 +142,12 @@ export const StudyUpdateForm = () => {
   }, [extractAllProperties])
 
   useEffect(() => {
-    if (isNil(formData.studyName) && !isEmpty(study)) {
-      prefillFormData(study)
+    const init = async () => {
+      if (isNil(formData.studyName) && !isEmpty(study)) {
+        await prefillFormData(study)
+      }
     }
+    init()
   }, [prefillFormData, study, formData])
 
   const datasets = formData.datasets
