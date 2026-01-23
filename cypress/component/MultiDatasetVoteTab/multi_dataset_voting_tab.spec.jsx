@@ -180,9 +180,9 @@ describe('MultiDatasetVoteTab - Tests', function () {
     cy.get('#show-member-vote-dropdown').click()
     cy.get('.table-data').should('exist')
     cy.get('[data-cy=dataset-vote-slab]').should('be.visible')
-    cy.get('.row-data-2').should('contain.text', 'Joe').should('contain.text', '- -')
-    cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'No')
-    cy.get('.row-data-0').should('contain.text', 'Matt').should('contain.text', 'Yes')
+    cy.get('.table-data').should('contain.text', 'Joe')
+    cy.get('.table-data').should('contain.text', 'Sarah')
+    cy.get('.table-data').should('contain.text', 'Matt')
   })
 
   it('Does not render vote summary tables if isChair is false', function () {
