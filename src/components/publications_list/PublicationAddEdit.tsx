@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FormField, FormValidators } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { validationFailed, calcPublicationErrors } from 'src/utils/darFormUtils'
 import { Author, Publication } from 'src/types/model'
@@ -177,7 +177,6 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
   const [validation, setValidation] = useState<Validation>({})
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [tagsInput, setTagsInput] = useState<string>((publication?.tags ?? []).join(', '))
 
   const applyValidation = (draft: Publication, full: boolean) => {
     const all = calcPublicationErrors(draft)
@@ -199,17 +198,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
 
   const onChange = ({ key, value }: FormFieldChange) => {
     markTouched(key)
-    if (key === 'tags') {
-      const text = String(value)
-      setTagsInput(text)
-      updatePublication({
-        ...newPublication,
-        tags: text.split(',').map(t => t.trim()).filter(Boolean),
-      })
-    }
-    else {
-      updatePublication({ ...newPublication, [key]: value })
-    }
+    updatePublication({ ...newPublication, [key]: value })
   }
 
   const disableAddAuthor = newPublication.authors.some(a => a.name.trim() === '')
@@ -373,9 +362,14 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
 
           <FormField
             id="tags"
-            title="Tags (comma separated)"
-            defaultValue={tagsInput}
-            placeholder="tag1, tag2"
+            title="Tags"
+            placeholder="Select or enter tags"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={newPublication?.tags}
             onChange={onChange}
             disabled={readOnly}
           />
