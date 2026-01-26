@@ -289,26 +289,6 @@ describe('darFormUtils - Publication & Presentation Validation', () => {
       expect(errors.title).to.be.an('object')
     })
 
-    it('should return error for missing presenter name', () => {
-      const presentation: Partial<Presentation> = {
-        title: 'Test Presentation',
-        presenter: { name: '', email: 'test@example.com' } as { name: string, email: string },
-      }
-      const errors = calcPresentationErrors(presentation)
-      const presenterErrors = errors.presenter as Record<string, unknown>
-      expect(presenterErrors?.name).to.be.an('object')
-    })
-
-    it('should return error for missing presenter email', () => {
-      const presentation: Partial<Presentation> = {
-        title: 'Test Presentation',
-        presenter: { name: 'John Doe', email: '' } as { name: string, email: string },
-      }
-      const errors = calcPresentationErrors(presentation)
-      const presenterErrors = errors.presenter as Record<string, unknown>
-      expect(presenterErrors?.email).to.be.an('object')
-    })
-
     it('should return errors for multiple missing fields', () => {
       const presentation: Partial<Presentation> = {}
       const errors = calcPresentationErrors(presentation)

@@ -23,7 +23,7 @@ export default function PublicationList(props: PublicationListProps): React.JSX.
       React.ComponentProps<typeof PublicationRow>
     >
       items={props.publications}
-      columnsToShow={props.columnsToShow ?? ['title', 'publishedDate', 'journal', 'url', 'doi', 'access']}
+      columnsToShow={props.columnsToShow ?? ['title', 'publishedDate', 'journal', 'doi']}
       onItemsChange={props.onPublicationChange}
       disabled={props.disabled}
       validation={props.validation}

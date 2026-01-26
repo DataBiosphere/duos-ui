@@ -385,18 +385,10 @@ export const calcPublicationErrors = (newPublication: Partial<Publication>): Pub
       validation.authors = { valid: false, failed: failedCodes, perAuthor } as unknown as ValidationError
     }
   }
-  if (isStringEmpty(newPublication?.pubmedId)) validation.pubmedId = requiredError
-  if (isStringEmpty(newPublication?.bibliographicCitation)) validation.bibliographicCitation = requiredError
   if (isStringEmpty(newPublication?.datasetCitation)) validation.datasetCitation = requiredError
   if (isStringEmpty(newPublication?.journal)) validation.journal = requiredError
   if (isStringEmpty(newPublication?.doi)) validation.doi = requiredError
-  if (isStringEmpty(newPublication?.url)) {
-    validation.url = requiredError
-  }
-  else if (!FormValidators.URL.isValid(newPublication.url as string)) {
-    validation.url = { valid: false, failed: ['url'] }
-  }
-  if (isStringEmpty(newPublication?.access)) validation.access = requiredError
+
   return validation
 }
 
@@ -408,35 +400,8 @@ export const calcPresentationErrors = (newPresentation: Partial<Presentation>): 
     validation.title = requiredError
   }
   validation.date = <ValidationError>validateDate(newPresentation?.date)
-  if (isEmpty(newPresentation?.authors)) {
-    validation.authors = requiredError
-  }
-  if (isEmpty(newPresentation?.url)) {
-    validation.url = requiredError
-  }
-  if (isEmpty(newPresentation?.datasetCitation)) {
-    validation.datasetCitation = requiredError
-  }
   if (newPresentation?.citation === undefined || newPresentation?.citation === null) {
     validation.citation = requiredError
-  }
-  if (isEmpty(newPresentation?.presenter?.name)) {
-    validation.presenter.name = requiredError
-  }
-  if (isEmpty(newPresentation?.presenter?.email)) {
-    validation.presenter.email = requiredError
-  }
-  if (isEmpty(newPresentation?.event)) {
-    validation.event = requiredError
-  }
-  if (isEmpty(newPresentation?.location)) {
-    validation.location = requiredError
-  }
-  if (isEmpty(newPresentation?.format)) {
-    validation.format = requiredError
-  }
-  if (isEmpty(newPresentation?.access)) {
-    validation.access = requiredError
   }
   return validation
 }

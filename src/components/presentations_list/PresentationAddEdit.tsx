@@ -160,7 +160,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Presentation URL"
             defaultValue={newPresentation.url}
             placeholder="https://..."
-            validators={[FormValidators.REQUIRED, FormValidators.URL]}
+            validators={[FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
             disabled={readOnly}
@@ -170,9 +170,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Authors"
             defaultValue={newPresentation.authors}
             placeholder="Authors"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.authors) ? validation.authors : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -180,9 +178,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Dataset Citation"
             defaultValue={newPresentation.datasetCitation}
             placeholder="Dataset Citation"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -200,9 +196,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Presenter Name"
             defaultValue={newPresentation.presenter?.name}
             placeholder="Name"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.presenterName) ? validation.presenter?.name : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -210,7 +204,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Presenter Email"
             defaultValue={newPresentation.presenter?.email}
             placeholder="email@example.org"
-            validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+            validators={[FormValidators.EMAIL]}
             onChange={onChange}
             validation={(submitted || touched.presenterEmail) ? validation.presenter?.email : undefined}
             disabled={readOnly}
@@ -220,9 +214,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Event"
             defaultValue={newPresentation.event}
             placeholder="Event"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.event) ? validation.event : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -230,9 +222,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Location"
             defaultValue={newPresentation.location}
             placeholder="Location"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.location) ? validation.location : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -240,9 +230,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Format"
             defaultValue={newPresentation.format}
             placeholder="Format"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.format) ? validation.format : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -250,9 +238,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Access"
             defaultValue={newPresentation.access}
             placeholder="Access"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.access) ? validation.access : undefined}
             disabled={readOnly}
           />
           <FormField

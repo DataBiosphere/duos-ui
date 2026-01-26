@@ -17,7 +17,6 @@ interface Validation {
   platform?: ValidationError
   url?: ValidationError
   description?: ValidationError
-  access?: ValidationError
 }
 
 const defaultWorkspace: Workspace = {
@@ -45,7 +44,6 @@ const calcErrors = (w: Workspace): Validation => {
     v.url = makeError('uri')
   }
   if (!w.description?.trim()) v.description = makeError('required')
-  if (!w.access?.trim()) v.access = makeError('required')
   return v
 }
 
@@ -145,17 +143,15 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
           />
           <FormField
             id="tools"
-            title="Tools (comma separated)"
-            defaultValue={workspace?.tools?.join(', ')}
-            placeholder="tool1, tool2"
-            onChange={({ value }: { value: string }) =>
-              onChange({
-                key: 'tools',
-                value: value
-                  .split(',')
-                  .map(t => t.trim())
-                  .filter(Boolean),
-              })}
+            title="Tools"
+            placeholder="Select or enter tools"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={workspace?.tools}
+            onChange={onChange}
             disabled={readOnly}
           />
           <FormField
@@ -163,9 +159,7 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
             title="Access"
             defaultValue={workspace?.access}
             placeholder="Access Type"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={validation.access}
             disabled={readOnly}
           />
           <FormField
