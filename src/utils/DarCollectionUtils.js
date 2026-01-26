@@ -285,7 +285,7 @@ export const approveCollectionFn
   = ({ updateCollections, role }) =>
     async ({ darCode, darCollectionId }) => {
       try {
-        await Collections.approveElectionsById(darCollectionId)
+        await Collections.approveCollectionById(darCollectionId)
         const summary = await Collections.getCollectionSummaryByRoleNameAndId({
           id: darCollectionId,
           roleName: role,
