@@ -281,6 +281,23 @@ export const openCollectionFn
       }
     }
 
+export const approveCollectionFn
+  = ({ updateCollections, role }) =>
+    async ({ darCode, darCollectionId }) => {
+      try {
+        await Collections.approveCollectionById(darCollectionId)
+        const summary = await Collections.getCollectionSummaryByRoleNameAndId({
+          id: darCollectionId,
+          roleName: role,
+        })
+        updateCollections(summary)
+        Notifications.showSuccess({ text: `Successfully approved ${darCode}` })
+      }
+      catch (_error) {
+        Notifications.showError({ text: `Error approving ${darCode}` })
+      }
+    }
+
 // helper function used in DarCollectionReview to update final vote on source of truth
 // done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
 export const updateFinalVote = ({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets }) => {

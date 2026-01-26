@@ -4,7 +4,7 @@ import ConfirmationModal from '../modals/ConfirmationModal'
 import { isCollectionCanceled } from '../../libs/utils'
 
 export default function CollectionConfirmationModal(props) {
-  const { collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction, deleteDraft } = props
+  const { collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction, deleteDraft, approveCollection } = props
 
   const getModalHeader = (collection) => {
     if (!isNil(collection)) {
@@ -25,6 +25,11 @@ export default function CollectionConfirmationModal(props) {
 
   const openOnClick = async () => {
     await openCollection(collection)
+    setShowConfirmation(false)
+  }
+
+  const approveOnClick = async () => {
+    await approveCollection(collection)
     setShowConfirmation(false)
   }
 
@@ -67,6 +72,17 @@ export default function CollectionConfirmationModal(props) {
     />
   )
 
+  const approveModal = (
+    <ConfirmationModal
+      showConfirmation={showConfirmation}
+      closeConfirmation={() => setShowConfirmation(false)}
+      title="Approve Data Access Request"
+      message={`Are you sure you want to approve ${collection.darCode}?`}
+      header={getModalHeader(collection)}
+      onConfirm={approveOnClick}
+    />
+  )
+
   const deleteModal = (
     <ConfirmationModal
       showConfirmation={showConfirmation}
@@ -86,6 +102,8 @@ export default function CollectionConfirmationModal(props) {
       return cancelModal
     case 'open':
       return openModal
+    case 'approve':
+      return approveModal
     case 'delete':
       return deleteModal
     // conditional used in older references, will remove when implementation is updated

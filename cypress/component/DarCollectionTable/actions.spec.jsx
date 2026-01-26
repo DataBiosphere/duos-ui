@@ -85,6 +85,20 @@ describe('Actions - Open Button', () => {
   })
 })
 
+describe('Actions - Approve Button', () => {
+  it('should render the approve button if there is an Approve Action', () => {
+    propCopy.actions = ['Approve']
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.get(`#chair-approve-${collectionId}`).should('exist')
+  })
+
+  it('should not render Approve Button if there is no Approve Action', () => {
+    propCopy.actions = []
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.get(`#chair-approve-${collectionId}`).should('not.exist')
+  })
+})
+
 describe('Actions - Close Button', () => {
   it('should render if there is a valid election for canceling (all open elections)', () => {
     propCopy.actions = ['Cancel', 'Vote']
