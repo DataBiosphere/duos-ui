@@ -39,7 +39,6 @@ describe('PresentationList component', () => {
   it('renders existing presentations', () => {
     cy.mount(<PresentationListHarness initial={[samplePresentation]} />)
     cy.contains(samplePresentation.title).should('exist')
-    cy.contains(samplePresentation.event).should('exist')
   })
 
   it('opens add form and enforces validation disabling save then adds', () => {
@@ -139,8 +138,6 @@ describe('PresentationSummary', () => {
       />,
     )
     cy.contains(samplePresentation.title).should('exist')
-    cy.contains(samplePresentation.event).should('exist')
-    cy.contains(samplePresentation.presenter.name).should('exist')
     cy.get(`a[href="${samplePresentation.url}"]`).should('exist')
   })
 

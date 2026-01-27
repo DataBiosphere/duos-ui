@@ -320,7 +320,6 @@ export interface Author extends Person {
 }
 
 export type Maintainer = Contact
-export type Presenter = Contact
 
 export interface Study {
   studyId: number
@@ -369,7 +368,7 @@ export interface Workspace {
   url: string
   description: string
   tools?: string[]
-  access: string
+  access?: string
   tags?: string[]
 }
 
@@ -603,6 +602,26 @@ export interface DarCollection {
   datasets: Dataset[]
 }
 
+export interface DarCollectionSummary {
+  actions: string[]
+  dacNames: string[]
+  dacCode: string
+  darCollectionId: number
+  datasetCount: number
+  datasetIds: number[]
+  expired: boolean
+  expiresAt: number
+  institutionName: string
+  latestReferenceId: string
+  name: string
+  progressReport: boolean
+  referenceIds: string[]
+  requiresSOApproval: boolean
+  researcherName: string
+  status: string
+  submissionDate: number
+}
+
 export interface DataAccessRequest {
   id: number
   referenceId: string
@@ -719,37 +738,42 @@ export interface Closeout {
   signingOfficialId: number
 }
 
+export interface Presenter {
+  name?: string
+  email?: string
+}
+
 export interface Presentation {
   title: string
   date: string
-  url: string
-  authors: string
-  datasetCitation: string
+  url?: string
+  authors?: string
+  datasetCitation?: string
   citation: boolean
   presentationId: string
   studyId: string
-  presenter: Presenter
-  event: string
-  location: string
-  format: string
-  access: string
+  presenter?: Presenter
+  event?: string
+  location?: string
+  format?: string
+  access?: string
   tags?: string[]
 }
 
 export interface Publication {
   title: string
-  pubmedId: string
+  pubmedId?: string
   publishedDate: string
   authors: Array<Author>
-  bibliographicCitation: string
+  bibliographicCitation?: string
   datasetCitation: string
   citation: boolean
   publicationId: string
   studyId: string
   journal: string
   doi: string
-  url: string
-  access: string
+  url?: string
+  access?: string
   tags?: string[]
 }
 

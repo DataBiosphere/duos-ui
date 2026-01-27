@@ -172,6 +172,24 @@ export default function Actions(props) {
     onClick: () => showConfirmationModal(collection, 'revise'),
   }
 
+  const approveButtonAttributes = {
+    keyProp: `${consoleType}-approve-${uniqueId}`,
+    label: 'Approve',
+    onClick: () => showConfirmationModal(collection, 'approve'),
+    baseColor: duosBlue,
+    hoverStyle: {
+      backgroundColor: duosBlue,
+      color: 'white',
+    },
+    additionalStyle: {
+      padding: '3% 7%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      color: 'white',
+      marginRight: 5,
+    },
+  }
+
   const createProgressReportButtonAttributes = {
     keyProp: `${consoleType}-create-progress-report-${uniqueId}`,
     onClick: () => { navigate(`/progress_report_application/${uniqueId}`) },
@@ -204,6 +222,7 @@ export default function Actions(props) {
       }}
     >
       {actions.includes('Open') && <SimpleButton {...openButtonAttributes} />}
+      {actions.includes('Approve') && <SimpleButton {...approveButtonAttributes} />}
       {actions.includes('Vote') && <SimpleButton {...voteButtonAttributes} />}
       {actions.includes('Update') && <SimpleButton {...updateButtonAttributes} />}
       {actions.includes('Revise') && <SimpleButton {...reviseButtonAttributes} />}

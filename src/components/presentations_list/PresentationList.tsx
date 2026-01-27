@@ -23,7 +23,7 @@ export default function PresentationList(props: PresentationListProps): React.JS
       React.ComponentProps<typeof PresentationRow>
     >
       items={props.presentations}
-      columnsToShow={props.columnsToShow ?? ['title', 'date', 'event', 'location', 'url', 'format', 'access']}
+      columnsToShow={props.columnsToShow ?? ['title', 'date']}
       onItemsChange={props.onPresentationChange}
       disabled={props.disabled}
       validation={props.validation}

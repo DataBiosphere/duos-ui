@@ -88,6 +88,7 @@ export const headerTabsConfig: Tab[] = [
     children: [
       { label: 'Library Cards', link: '/signing_official_console/library_cards' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
+      { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
       { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() },

@@ -48,7 +48,6 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         type={FormFieldTypes.SELECT}
         selectOptions={StudyTypeProperty.STUDY_TYPE_OPTIONS}
         isCreatable={true}
-        validators={[FormValidators.REQUIRED]}
         selectConfig={{}}
         defaultValue={getStudyPropertyValueByKey(study, 'studyType')}
         onChange={(input: { key: string, value: unknown, isValid: boolean }) => {

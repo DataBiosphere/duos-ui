@@ -20,15 +20,12 @@ interface PublicationAddEditProps {
 
 interface Validation {
   title?: ValidationError
-  pubmedId?: ValidationError
   publishedDate?: ValidationError
   authors?: ValidationError
-  bibliographicCitation?: ValidationError
   datasetCitation?: ValidationError
   journal?: ValidationError
   doi?: ValidationError
   url?: ValidationError
-  access?: ValidationError
 }
 
 const defaultPublication: Publication = {
@@ -288,9 +285,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="PubMed ID"
             defaultValue={newPublication.pubmedId}
             placeholder="PubMed ID"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.pubmedId) ? validation.pubmedId : undefined}
             disabled={readOnly}
           />
 
@@ -299,9 +294,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="Bibliographic Citation"
             defaultValue={newPublication.bibliographicCitation}
             placeholder="Citation"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.bibliographicCitation) ? validation.bibliographicCitation : undefined}
             disabled={readOnly}
           />
 
@@ -343,7 +336,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="URL"
             defaultValue={newPublication.url}
             placeholder="https://example.org"
-            validators={[FormValidators.REQUIRED, FormValidators.URL]}
+            validators={[FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
             disabled={readOnly}
@@ -354,9 +347,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="Access"
             defaultValue={newPublication.access}
             placeholder="Access"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.access) ? validation.access : undefined}
             disabled={readOnly}
           />
 
