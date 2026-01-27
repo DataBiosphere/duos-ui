@@ -431,6 +431,9 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
         else if (dataset.dataLocation === 'Not Determined') {
           dataLocation = 'Not Determined'
         }
+        else if (dataset.dataLocation === 'Other') {
+          dataLocation = dataset.url ? new URL(dataset.url).hostname : ''
+        }
         else {
           dataLocation = dataset.url
             ? <Link href={dataset.url}>External to DUOS</Link>
