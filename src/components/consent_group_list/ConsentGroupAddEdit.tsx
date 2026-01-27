@@ -616,10 +616,6 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                   setValidation(calcErrors(next))
                   setEditDataLocationUrl(false)
                 }
-                else if (value === 'Other') {
-                  onChange({ key, value })
-                  setEditDataLocationUrl(true)
-                }
                 else {
                   onChange({ key, value })
                   setEditDataLocationUrl(true)
