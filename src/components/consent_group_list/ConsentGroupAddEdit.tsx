@@ -602,6 +602,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                 'Terra Workspace',
                 'TDR Location',
                 'Not Determined',
+                'Other',
               ]}
               placeholder="Data Location(s)"
               defaultValue={current?.dataLocation}
@@ -614,6 +615,10 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                   setCurrent(next)
                   setValidation(calcErrors(next))
                   setEditDataLocationUrl(false)
+                }
+                else if (value === 'Other') {
+                  onChange({ key, value })
+                  setEditDataLocationUrl(true)
                 }
                 else {
                   onChange({ key, value })
