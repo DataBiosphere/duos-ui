@@ -166,7 +166,6 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     if (showOtherPrimaryText && (!cg.otherPrimary?.trim())) {
       v.otherPrimary = makeError('required')
     }
-    if (!cg.dataLocation?.trim()) v.dataLocation = makeError('required')
     if (showGSText && (!cg.gs?.trim())) {
       v.gs = makeError('required')
     }
@@ -606,7 +605,6 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               ]}
               placeholder="Data Location(s)"
               defaultValue={current?.dataLocation}
-              validation={validation.dataLocation}
               onChange={({ key, value }: { key: string, value: string }) => {
                 if (value === 'Not Determined') {
                   const next = structuredClone(current)
