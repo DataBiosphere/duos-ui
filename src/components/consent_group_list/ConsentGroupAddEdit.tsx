@@ -22,7 +22,6 @@ interface Validation {
   accessManagement?: ValidationError
   numberOfParticipants?: ValidationError
   dataAccessCommitteeId?: ValidationError
-  dataLocation?: ValidationError
   primaryConsent?: ValidationError
   gs?: ValidationError
   mor?: ValidationError
@@ -584,7 +583,6 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
           {/* location */}
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
             <FormFieldTitle
-              required={true}
               title="Data Location"
               description="Please provide the location of your data resource for this consent group"
               disabled={readOnly}
