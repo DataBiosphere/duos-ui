@@ -12,7 +12,6 @@ function DuosFooter() {
   const bannerRef = useCallback((node: HTMLDivElement) => {
     if (node !== null) {
       const banner = node.children[0] as HTMLElement
-      console.log(banner?.offsetHeight)
       setBannerHeight(banner?.offsetHeight ?? 0)
     }
   }, [])
