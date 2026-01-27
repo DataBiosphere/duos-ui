@@ -116,7 +116,10 @@ export const StudyDetails = () => {
   }, [studyId, setDatasets])
 
   useEffect(() => {
-    getExportableDatasets(datasets)
+    const init = async () => {
+      await getExportableDatasets(datasets)
+    }
+    init()
   }, [datasets])
 
   const participantCount = datasets

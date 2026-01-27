@@ -124,12 +124,15 @@ export const DarDatasetTable = (props) => {
   }, [collection, isUnfilteredView, user])
 
   useEffect(() => {
-    try {
-      init()
+    const callInit = async () => {
+      try {
+        await init()
+      }
+      catch (_error) {
+        Notifications.showError({ text: 'Failed to initialize collection' })
+      }
     }
-    catch (_error) {
-      Notifications.showError({ text: 'Failed to initialize collection' })
-    }
+    callInit()
   }, [init])
 
   const changeTableSize = useCallback((value) => {
