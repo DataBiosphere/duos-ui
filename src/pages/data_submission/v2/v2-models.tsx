@@ -544,13 +544,13 @@ export class AccessManagement extends StringDatasetProperty {
 export class DataLocation extends StringDatasetProperty {
   static readonly schemaProperty = 'dataLocation'
   static readonly propertyName = 'Data Location'
-  static readonly VALUES = ['AnVIL Workspace', 'Terra Workspace', 'TDR Location', 'Not Determined']
+  static readonly VALUES = ['AnVIL Workspace', 'Terra Workspace', 'TDR Location', 'Not Determined', 'Other']
   constructor(value?: string, datasetId?: number, propertyId?: number) {
     super('Data Location', '', DataLocation.propertyName, DataLocation.schemaProperty, value, datasetId, propertyId)
   }
 }
 
-export type DataLocationType = 'AnVIL Workspace' | 'Terra Workspace' | 'TDR Location' | 'Not Determined'
+export type DataLocationType = 'AnVIL Workspace' | 'Terra Workspace' | 'TDR Location' | 'Not Determined' | 'Other'
 
 export class DataURL extends StringDatasetProperty {
   static readonly schemaProperty = 'url'
