@@ -7,6 +7,7 @@ import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup
 import { DacPicker } from 'src/components/forms/DacPicker'
 import { FileInput } from 'src/components/forms/FileInput'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
@@ -595,11 +596,11 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               name="dataLocation"
               type={FormFieldTypes.SELECT}
               selectOptions={[
-                'AnVIL Workspace',
-                'Terra Workspace',
-                'TDR Location',
-                'Not Determined',
-                'Other',
+                DataLocationType.AnVILWorkspace,
+                DataLocationType.TerraWorkspace,
+                DataLocationType.TDRLocation,
+                DataLocationType.NotDetermined,
+                DataLocationType.Other,
               ]}
               placeholder="Data Location(s)"
               defaultValue={current?.dataLocation}

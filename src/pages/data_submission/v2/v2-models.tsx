@@ -541,16 +541,29 @@ export class AccessManagement extends StringDatasetProperty {
   }
 }
 
+export enum DataLocationType {
+  AnVILWorkspace = 'AnVIL Workspace',
+  TerraWorkspace = 'Terra Workspace',
+  TDRLocation = 'TDR Location',
+  NotDetermined = 'Not Determined',
+  Other = 'Other',
+}
+
 export class DataLocation extends StringDatasetProperty {
   static readonly schemaProperty = 'dataLocation'
   static readonly propertyName = 'Data Location'
-  static readonly VALUES = ['AnVIL Workspace', 'Terra Workspace', 'TDR Location', 'Not Determined', 'Other']
+  static readonly VALUES = [
+    DataLocationType.AnVILWorkspace,
+    DataLocationType.TerraWorkspace,
+    DataLocationType.TDRLocation,
+    DataLocationType.NotDetermined,
+    DataLocationType.Other,
+  ]
+
   constructor(value?: string, datasetId?: number, propertyId?: number) {
     super('Data Location', '', DataLocation.propertyName, DataLocation.schemaProperty, value, datasetId, propertyId)
   }
 }
-
-export type DataLocationType = 'AnVIL Workspace' | 'Terra Workspace' | 'TDR Location' | 'Not Determined' | 'Other'
 
 export class DataURL extends StringDatasetProperty {
   static readonly schemaProperty = 'url'
