@@ -493,10 +493,10 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
-  const onSaveConfirmation = selectedOk => () => {
+  const onSaveConfirmation = selectedOk => async () => {
     setDisableOkBtn(true)
     if (selectedOk === true) {
-      saveDarDraft()
+      await saveDarDraft()
       setDisableOkBtn(false)
     }
     else {
@@ -505,10 +505,10 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
-  const onSubmitConfirmation = selectedOk => () => {
+  const onSubmitConfirmation = selectedOk => async () => {
     setDisableOkBtn(true)
     if (selectedOk === true) {
-      submitDARFormData()
+      await submitDARFormData()
       setDisableOkBtn(false)
     }
     else {
