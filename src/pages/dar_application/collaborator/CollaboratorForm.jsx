@@ -38,19 +38,22 @@ export default function CollaboratorForm(props) {
   }
 
   useEffect(() => {
-    if (!isEmpty(collaborator)) {
-      setName(collaborator.name)
-      setEmail(collaborator.email)
-      setEraCommonsId(collaborator.eraCommonsId)
-      setTitle(collaborator.title)
-      setApproverStatus(collaborator.approverStatus)
-      setUuid(collaborator.uuid)
-      setCountryOfOperation(collaborator.countryOfOperation)
+    const init = async () => {
+      if (!isEmpty(collaborator)) {
+        setName(collaborator.name)
+        setEmail(collaborator.email)
+        setEraCommonsId(collaborator.eraCommonsId)
+        setTitle(collaborator.title)
+        setApproverStatus(collaborator.approverStatus)
+        setUuid(collaborator.uuid)
+        setCountryOfOperation(collaborator.countryOfOperation)
+      }
+      else {
+        setUuid(uuidV4())
+        setCountryOfOperation(Countries.DEFAULT_COUNTRY)
+      }
     }
-    else {
-      setUuid(uuidV4())
-      setCountryOfOperation(Countries.DEFAULT_COUNTRY)
-    }
+    init()
   }, [collaborator])
 
   const saveUpdate = () => {

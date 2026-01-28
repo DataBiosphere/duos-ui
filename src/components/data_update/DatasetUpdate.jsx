@@ -140,9 +140,12 @@ export const DatasetUpdate = (props) => {
   }, [extract, normalizeDataUse])
 
   useEffect(() => {
-    if (isNil(formData.datasetName)) {
-      prefillFormData(dataset)
+    const init = async () => {
+      if (isNil(formData.datasetName)) {
+        await prefillFormData(dataset)
+      }
     }
+    init()
   }, [prefillFormData, dataset, formData])
 
   return (
