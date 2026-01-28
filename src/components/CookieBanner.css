@@ -1,6 +1,6 @@
 .banner {
     text-align: justify;
-    box-shadow: 0 0 5px;
+    box-shadow: 0 0 2px;
     position: fixed;
     bottom: 0;
     margin-bottom: 0;
@@ -10,18 +10,55 @@
     border: 1px solid gray;
     padding: 15px 30px 15px 30px;
     background-color: white;
-    color: #00243c;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.banner-title-bar {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.banner-title {
+    padding-top: 7px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f3b50;
 }
 
 .banner-link {
-    color: #00243c;
     text-decoration: underline;
-    font-weight: bold;
 }
 
 .banner-link:hover {
     text-decoration: underline;
-    color: #1a73e8
+}
+
+.banner-acknowledge {
+    border: 1px solid #0060A0;
+    border-radius: 4px;
+    background-color: #0060A0;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 120px;
+    text-transform: uppercase;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+    color: white;
+    font-weight: 600;
+    float: right;
+    clear: both;
+}
+
+.banner-acknowledge:hover {
+    background-color: #0948B7FF
 }
 
 @media screen and (max-width: 800px) {
