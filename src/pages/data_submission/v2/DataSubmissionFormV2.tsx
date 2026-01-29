@@ -13,6 +13,7 @@ import { Notifications } from 'src/libs/utils'
 import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import { formatSectionedError } from 'src/utils/ErrorUtils'
 
 export type FileProperty = {
   key: string
@@ -97,38 +98,8 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
-    // Split error into lines
-    const lines = String(error).split('\n').map(line => line.trim()).filter(Boolean)
-
-    // Group lines by section headers
-    const sections: { header: string, items: string[] }[] = []
-    let currentSection: { header: string, items: string[] } | null = null
-
-    lines.forEach((line) => {
-      if (/^(Study:|Dataset:)/.test(line)) {
-        if (currentSection) sections.push(currentSection)
-        currentSection = { header: line, items: [] }
-      }
-      else if (currentSection) {
-        currentSection.items.push(line)
-      }
-    })
-    if (currentSection) sections.push(currentSection)
-
-    const formattedError = (
-      <>
-        {lines[0] && <div style={{ fontWeight: 600 }}>{lines[0]}</div>}
-        {sections.map((section, idx) => (
-          <div key={idx} style={{ marginTop: 8 }}>
-            <div style={{ fontWeight: 500 }}>{section.header}</div>
-            {section.items.map((item, i) => (
-              <div key={i} style={{ marginLeft: 16 }}>{item}</div>
-            ))}
-          </div>
-        ))}
-      </>
-    )
-
+    const regex = /^(Study|Datasets|Models|Workspaces|Publications|Presentations|ClinicalTrials|Funding|Intellectual Property):/
+    const formattedError = formatSectionedError(error, regex)
     Notifications.showError({ text: <>Study creation failed:<br />{formattedError}</> })
   }
 
