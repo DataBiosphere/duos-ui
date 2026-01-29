@@ -47,11 +47,11 @@ export function formatSectionedError(
   return (
     <div>
       {preamble.map((line, idx) => (
-        <div key={idx} style={{ fontWeight: idx === 0 ? 600 : 400, marginBottom: 4 }}>{line}</div>
+        <div key={line} style={{ fontWeight: idx === 0 ? 600 : 400, marginBottom: 4 }}>{line}</div>
       ))}
-      {sections.map((section, idx) => (
+      {sections.map(section => (
         <div
-          key={idx}
+          key={section.header}
           style={{
             marginTop: 12,
             borderRadius: 4,
