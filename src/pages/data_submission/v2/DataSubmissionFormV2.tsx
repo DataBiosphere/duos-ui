@@ -97,7 +97,39 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
-    Notifications.showError({ text: `Study creation failed: ${error}` })
+    // Split error into lines
+    const lines = String(error).split('\n').map(line => line.trim()).filter(Boolean)
+
+    // Group lines by section headers
+    const sections: { header: string, items: string[] }[] = []
+    let currentSection: { header: string, items: string[] } | null = null
+
+    lines.forEach((line) => {
+      if (/^(Study:|Dataset:)/.test(line)) {
+        if (currentSection) sections.push(currentSection)
+        currentSection = { header: line, items: [] }
+      }
+      else if (currentSection) {
+        currentSection.items.push(line)
+      }
+    })
+    if (currentSection) sections.push(currentSection)
+
+    const formattedError = (
+      <>
+        {lines[0] && <div style={{ fontWeight: 600 }}>{lines[0]}</div>}
+        {sections.map((section, idx) => (
+          <div key={idx} style={{ marginTop: 8 }}>
+            <div style={{ fontWeight: 500 }}>{section.header}</div>
+            {section.items.map((item, i) => (
+              <div key={i} style={{ marginLeft: 16 }}>{item}</div>
+            ))}
+          </div>
+        ))}
+      </>
+    )
+
+    Notifications.showError({ text: <>Study creation failed:<br />{formattedError}</> })
   }
 
   return (
