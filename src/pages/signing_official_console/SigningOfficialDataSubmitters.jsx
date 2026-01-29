@@ -3,7 +3,7 @@ import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { User } from 'src/libs/ajax/User'
 import DataCustodianTable from './DataCustodianTable'
-import { extractError } from 'src/utils/ErrorUtils.ts'
+import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 
 export default function SigningOfficialConsole() {

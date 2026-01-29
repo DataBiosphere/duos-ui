@@ -7,7 +7,7 @@ import DataSubmitterAgreementLink from 'src/assets/Data_Registrant_Agreement_7.2
 import Acknowledgments, { acceptAcknowledgments } from 'src/libs/acknowledgements'
 import { Styles } from 'src/libs/theme'
 import { NIHDataUseCertificationAgreement } from 'src/components/external_docs/NIHDataUseCertificationAgreement'
-import { extractError } from 'src/utils/ErrorUtils.ts'
+import { extractError } from 'src/utils/ErrorUtils'
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
