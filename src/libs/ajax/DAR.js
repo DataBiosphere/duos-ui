@@ -65,7 +65,7 @@ export const DAR = {
     if (!ids || ids.length === 0) {
       return []
     }
-    const url = `${await Config.getOntologyUrl()}/search?id=${ids}`
+    const url = `${await Config.getApiUrl()}/ontology/search?ids=${ids}`
     try {
       const res = await fetchGet(url, Config.authOpts())
       return res.data
