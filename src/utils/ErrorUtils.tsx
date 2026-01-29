@@ -60,8 +60,8 @@ export function formatSectionedError(
         >
           <div style={{ fontWeight: 500, marginBottom: 4 }}>{section.header}</div>
           <ul style={{ margin: 0, paddingLeft: 20 }}>
-            {section.items.map((item, i) => (
-              <li key={i} style={{ marginBottom: 2 }}>{item}</li>
+            {section.items.map(item => (
+              <li key={item} style={{ marginBottom: 2 }}>{item}</li>
             ))}
           </ul>
         </div>
