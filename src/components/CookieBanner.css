@@ -15,7 +15,7 @@
 }
 
 .banner-title-bar {
-    margin-bottom: 10px;
+    margin: 3px 0 18px 0;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
