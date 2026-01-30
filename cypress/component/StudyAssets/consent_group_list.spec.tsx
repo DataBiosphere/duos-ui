@@ -5,14 +5,15 @@ import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList
 import ConsentGroupSummary from 'src/components/consent_group_list/ConsentGroupSummary'
 import ConsentGroupRow from 'src/components/consent_group_list/ConsentGroupRow'
 import {
-  testDeleteViaModal,
-  testViewModeFlow,
   testCloseViewMode,
+  testDeleteViaModal,
   testEditModeRender,
-  testViewModeRender,
-  testViewActionTrigger,
   testSummaryViewActionTrigger,
+  testViewActionTrigger,
+  testViewModeFlow,
+  testViewModeRender,
 } from './testUtils'
+import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 
 const sampleConsentGroup: ConsentGroup2 = {
   consentGroupId: 'cg1',
@@ -22,7 +23,7 @@ const sampleConsentGroup: ConsentGroup2 = {
   generalResearchUse: true,
   irb: false,
   accessManagement: 'open',
-  dataLocation: 'Not Determined',
+  dataLocation: DataLocationType.NotDetermined,
 }
 
 const ConsentGroupListHarness: React.FC<{ initial: ConsentGroup2[] }> = ({ initial }) => {
