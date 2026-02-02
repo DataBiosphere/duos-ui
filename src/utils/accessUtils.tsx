@@ -24,11 +24,11 @@ export const applyForAccess = async (selected: number[], navigate: NavigateFunct
   }
   catch (error) {
     const errorMessage = extractError(error)
-    if (errorMessage !== 'Unknown error') {
-      Notifications.showError({ text: <ReactMarkdown>{errorMessage}</ReactMarkdown>, timeout: 6000 })
+    if (errorMessage === 'Unknown error') {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' })
     }
     else {
-      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' })
+      Notifications.showError({ text: <ReactMarkdown>{errorMessage}</ReactMarkdown>, timeout: 6000 })
     }
   }
 }

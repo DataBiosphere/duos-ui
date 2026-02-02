@@ -45,7 +45,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
         {studyText}
       </div>
       <Tooltip
-        title={!hasLibraryCard ? 'A Library Card is required to apply for data access' : ''}
+        title={hasLibraryCard ? '' : 'A Library Card is required to apply for data access'}
         slotProps={{
           tooltip: {
             sx: {

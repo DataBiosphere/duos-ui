@@ -96,7 +96,7 @@ describe('accessUtils', () => {
     it('shows generic error when postDarDraft throws an error without extractable message', () => {
       const selectedDatasets = [123456]
 
-      postDarDraftStub.rejects(new Error())
+      postDarDraftStub.rejects(new Error(''))
 
       cy.wrap(applyForAccess(selectedDatasets, navigateMock as unknown as NavigateFunction)).then(() => {
         verifyStubCalledWith(postDarDraftStub, { datasetId: selectedDatasets })
