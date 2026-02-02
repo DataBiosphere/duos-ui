@@ -10,13 +10,13 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { getFlagNhgriDacId } from 'src/libs/ajax/FeatureFlag.ts'
+import { getFlagEsIndexKeyName, getFlagNhgriDacId } from 'src/libs/ajax/FeatureFlag'
 
-const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery, nhgriDacId) => {
+const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery, nhgriDacId, esIndexKeyName) => {
   const queryChunks = [
     {
       match: {
-        _type: 'dataset',
+        [esIndexKeyName]: 'dataset',
       },
     },
     {
@@ -93,6 +93,7 @@ export const DatasetSearch = (props) => {
   const [queryState, setQueryState] = useState(query)
   const [loading, setLoading] = useState(true)
   const [nhgriDacId, setNhgriDacId] = useState(null)
+  const [esIndexKeyName, setEsIndexKeyName] = useState(null)
   const user = Storage.getCurrentUser()
 
   const isSigningOfficial = user.isSigningOfficial
@@ -112,13 +113,24 @@ export const DatasetSearch = (props) => {
 
   // Memoize fullQuery to prevent recreation on every render
   const fullQuery = useMemo(
-    () => assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query, nhgriDacId),
-    [isSigningOfficial, isInstitutionQuery, version.query, nhgriDacId],
+    () => {
+      if (!esIndexKeyName) return null
+      return assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query, nhgriDacId, esIndexKeyName)
+    },
+    [isSigningOfficial, isInstitutionQuery, version.query, nhgriDacId, esIndexKeyName],
   )
 
   const isInstitutionSet = institutionId === undefined && isInstitutionQuery
 
   const hasChangedPage = query !== queryState
+
+  useEffect(() => {
+    const init = async () => {
+      const keyName = await getFlagEsIndexKeyName()
+      setEsIndexKeyName(keyName)
+    }
+    init()
+  }, [])
 
   useEffect(() => {
     const init = async () => {
@@ -137,7 +149,7 @@ export const DatasetSearch = (props) => {
 
   useEffect(() => {
     const init = async () => {
-      if (loading || hasChangedPage) {
+      if ((loading || hasChangedPage) && fullQuery) {
         if (isInstitutionSet) {
           Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' })
           navigate('/profile')

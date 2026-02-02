@@ -10,6 +10,7 @@ import { Storage } from 'src/libs/storage'
 import styles from './DatasetTerms.module.css'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton.tsx'
+import { getFlagEsIndexKeyName } from 'src/libs/ajax/FeatureFlag'
 
 export default function DatasetSubmissions() {
   const [terms, setTerms] = useState([])
@@ -23,6 +24,7 @@ export default function DatasetSubmissions() {
     const init = async () => {
       const user = Storage.getCurrentUser()
       setCurrentUser(user)
+      const esIndexKeyName = await getFlagEsIndexKeyName()
       const query = {
         from: 0,
         size: 10000,
@@ -31,7 +33,7 @@ export default function DatasetSubmissions() {
             must: [
               {
                 match: {
-                  _type: 'dataset',
+                  [esIndexKeyName]: 'dataset',
                 },
               },
               {

@@ -20,6 +20,7 @@ import {
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { ControlledAccessType } from 'src/libs/dataUseTranslation'
+import { getFlagEsIndexKeyName } from 'src/libs/ajax/FeatureFlag'
 
 export interface Bucket {
   key: string
@@ -334,6 +335,7 @@ const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGr
  * data use information so the UI doesn't have to reprocess it.
  */
 const getDatasetTerms = async (datasets: Dataset[]): Promise<DatasetTerm[]> => {
+  const esIndexKeyName = await getFlagEsIndexKeyName()
   const datasetQuery = DataSet.searchDatasetIndex({
     from: 0,
     size: 10000,
@@ -342,7 +344,7 @@ const getDatasetTerms = async (datasets: Dataset[]): Promise<DatasetTerm[]> => {
         must: [
           {
             match: {
-              _type: 'dataset',
+              [esIndexKeyName]: 'dataset',
             },
           },
           {

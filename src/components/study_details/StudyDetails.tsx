@@ -12,6 +12,7 @@ import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import { getFlagEsIndexKeyName } from 'src/libs/ajax/FeatureFlag'
 
 interface SectionProps {
   style?: React.CSSProperties
@@ -84,35 +85,39 @@ export const StudyDetails = () => {
   }
 
   useEffect(() => {
-    const query = {
-      from: 0,
-      size: 10000,
-      query: {
-        bool: {
-          must: [
-            {
-              match: {
-                _type: 'dataset',
+    const init = async () => {
+      const esIndexKeyName = await getFlagEsIndexKeyName()
+      const query = {
+        from: 0,
+        size: 10000,
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  [esIndexKeyName]: 'dataset',
+                },
               },
-            },
-            {
-              match: {
-                'study.studyId': studyId,
+              {
+                match: {
+                  'study.studyId': studyId,
+                },
               },
-            },
-            {
-              exists: {
-                field: 'study',
+              {
+                exists: {
+                  field: 'study',
+                },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
+      }
+      DataSet.searchDatasetIndex(query).then((datasets) => {
+        setDatasets(datasets)
+        setLoading(false)
+      })
     }
-    DataSet.searchDatasetIndex(query).then((datasets) => {
-      setDatasets(datasets)
-      setLoading(false)
-    })
+    init()
   }, [studyId, setDatasets])
 
   useEffect(() => {

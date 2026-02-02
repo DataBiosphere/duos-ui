@@ -23,7 +23,7 @@ const datasets = [
 ]
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
-  const base = [{ match: { _type: 'dataset' } }, { exists: { field: 'study' } }]
+  const base = []
   if (!isSigningOfficial || !isInstitutionQuery) base.push({ term: { 'study.publicVisibility': true } })
   if (subQuery) base.push(subQuery)
   return { from: 0, size: 10000, query: { bool: { must: base } } }

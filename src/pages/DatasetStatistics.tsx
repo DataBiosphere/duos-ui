@@ -16,6 +16,7 @@ import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import { getFlagEsIndexKeyName } from 'src/libs/ajax/FeatureFlag'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
@@ -94,12 +95,13 @@ export default function DatasetStatistics() {
   useEffect(() => {
     const init = async () => {
       try {
+        const esIndexKeyName = await getFlagEsIndexKeyName()
         const datasetTerms: DatasetTerm[] = await DataSet.searchDatasetIndex({ query: {
           bool: {
             must: [
               {
                 match: {
-                  _type: 'dataset',
+                  [esIndexKeyName]: 'dataset',
                 },
               },
               {
