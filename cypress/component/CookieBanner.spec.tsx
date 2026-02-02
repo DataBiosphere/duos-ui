@@ -6,14 +6,14 @@ import { CookieUtils } from 'src/utils/CookieUtils'
 
 describe('CookieBanner', () => {
   it('renders the banner text and close button', () => {
-    cy.mount(<BrowserRouter><CookieBanner visible={true} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><CookieBanner visible={true} onDismiss={() => {}} /></BrowserRouter>)
     cy.contains('We care about your privacy').should('exist')
     cy.get('button').should('exist')
   })
 
   it('hides banner and sets accepted when close button is clicked', () => {
     cy.stub(CookieUtils, 'setAcknowledged').as('setAcceptedStub')
-    cy.mount(<BrowserRouter><CookieBanner visible={true} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><CookieBanner visible={true} onDismiss={() => {}} /></BrowserRouter>)
     cy.get('#cookie_banner').should('be.visible')
     cy.get('button').click()
     cy.get('#cookie_banner').should('not.be.visible')
@@ -21,7 +21,7 @@ describe('CookieBanner', () => {
   })
 
   it('does not render the banner text when visible is set false', () => {
-    cy.mount(<BrowserRouter><CookieBanner visible={false} /></BrowserRouter>)
+    cy.mount(<BrowserRouter><CookieBanner visible={false} onDismiss={() => {}} /></BrowserRouter>)
     cy.get('#cookie_banner').should('not.be.visible')
   })
 })

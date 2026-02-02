@@ -1478,41 +1478,6 @@ input:-webkit-autofill {
   margin: 10px auto 20px auto !important;
 }
 
-/***************************************************Footer*/
-
-.footer-links li {
-  cursor: default;
-  padding: 8px 0 0 0;
-}
-
-.footer-links, .footer-links a {
-  color: #D8D8D8 !important;
-  display: inline-block;
-  font-family: "Montserrat", sans-serif;
-  font-size: 12px;
-  font-weight: 500 !important;
-  height: 100%;
-  list-style: none;
-  margin: 0;
-  padding: 10px 0;
-  transition: color 0.3s ease;
-}
-
-.footer-links a:hover {
-  color: #2FA4E7 !important;
-}
-
-.footer-links__item {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.footer-links__item~*:before {
-  padding: 0 0.8em 0 0.8em;
-  content: "|";
-  font-size: 1em;
-}
-
 /*///////////////////////////////////////////////////////LOGIN*/
 
 .landing-box {
