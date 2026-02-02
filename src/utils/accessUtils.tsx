@@ -3,6 +3,7 @@ import { Notifications } from 'src/libs/utils'
 import ReactMarkdown from 'react-markdown'
 import * as React from 'react'
 import { NavigateFunction } from 'react-router-dom'
+import { extractError } from 'src/utils/ErrorUtils'
 
 export const applyForAccess = async (selected: number[], navigate: NavigateFunction) => {
   try {
@@ -21,7 +22,13 @@ export const applyForAccess = async (selected: number[], navigate: NavigateFunct
       Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' })
     }
   }
-  catch (_error) {
-    Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' })
+  catch (error) {
+    const errorMessage = extractError(error)
+    if (errorMessage !== 'Unknown error') {
+      Notifications.showError({ text: <ReactMarkdown>{errorMessage}</ReactMarkdown>, timeout: 6000 })
+    }
+    else {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' })
+    }
   }
 }
