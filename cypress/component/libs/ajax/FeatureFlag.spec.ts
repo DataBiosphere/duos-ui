@@ -121,4 +121,4 @@ const createFlagTestSuite = <T>(
 }
 
 createFlagTestSuite('ES_TYPE_TO_INDEX_ENABLED', getFlagEsIndexKeyName, resetEsIndexKeyNamePromise, 'true', '_index', '_type')
-createFlagTestSuite('NHGRI_RESTRICTED_DAC', getFlagNhgriDacId, resetNhgriDacIdPromise, 'dac-id', 'dac-id', undefined)
+createFlagTestSuite('NHGRI_RESTRICTED_DAC', getFlagNhgriDacId, resetNhgriDacIdPromise, 'dac-id', 'dac-id')
