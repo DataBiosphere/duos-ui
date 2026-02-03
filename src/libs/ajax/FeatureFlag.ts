@@ -43,7 +43,8 @@ export const resetEsIndexKeyNamePromise = () => {
 let nhgriDacIdPromise: Promise<string | undefined> | undefined = undefined
 
 export const getFlagNhgriDacId = (): Promise<string | undefined> => {
-  return nhgriDacIdPromise ??= getFeatureFlag('NHGRI_RESTRICTED_DAC').catch(() => undefined)
+  nhgriDacIdPromise ??= getFeatureFlag('NHGRI_RESTRICTED_DAC').catch(() => undefined)
+  return nhgriDacIdPromise
 }
 
 // Function to reset the cached NHGRI DAC ID for testing
