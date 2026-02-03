@@ -1,17 +1,6 @@
 import { Config } from 'src/libs/config'
 import { fileDownload } from 'src/utils/FileDownload.js'
-import { fetchGet, fetchMultipart, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
-
-// FIXME: temporary read-only mode for NHGRI datasets
-const setNhgriExternalAccess = (datasets) => {
-  return datasets.map((d) => {
-    // nhgri dac id in prod is 2, verified in db
-    if (d.dacId === 2 && d.accessManagement === 'controlled') {
-      d.accessManagement = 'external'
-    }
-    return d
-  })
-}
+import { fetchDelete, fetchGet, fetchMultipart, fetchPost } from 'src/libs/ajax/fetchAdapter'
 
 export const DataSet = {
   getDatasetNames: async () => {
@@ -42,13 +31,13 @@ export const DataSet = {
     const url = `${await Config.getApiUrl()}/api/dataset/search/index`
     const config = { ...Config.authOpts(), ...options }
     const res = await fetchPost(url, query, config)
-    return setNhgriExternalAccess(res.data)
+    return res.data
   },
 
   searchDatasetIndexV2: async (query) => {
     const url = `${await Config.getApiUrl()}/api/dataset/search/index/v2`
     const res = await fetchPost(url, query, Config.authOpts())
-    return res
+    return res.data
   },
 
   getDataSetsByDatasetId: async (datasetId) => {

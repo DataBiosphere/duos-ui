@@ -107,17 +107,7 @@ export const DatasetSearchTable = (props) => {
             term: {
               accessManagement: term,
             },
-          })), // if 'controlled' IS selected, exclude NHGRI datasets
-          must_not: filters.accessManagement.includes('controlled')
-            ? {
-                bool: {
-                  must: [
-                    { term: { dacId: '2' } },
-                    { term: { accessManagement: 'controlled' } },
-                  ],
-                },
-              }
-            : [],
+          })),
         },
       })
 
