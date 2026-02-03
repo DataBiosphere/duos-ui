@@ -1,5 +1,11 @@
 import { Config } from 'src/libs/config'
-import { getAllFeatureFlags, getFeatureFlag, getFlagEsIndexKeyName, resetEsIndexKeyNamePromise } from 'src/libs/ajax/FeatureFlag'
+import {
+  getAllFeatureFlags,
+  getFeatureFlag,
+  getFlagEsIndexKeyName,
+  getFlagNhgriDacId,
+  resetEsIndexKeyNamePromise, resetNhgriDacIdPromise,
+} from 'src/libs/ajax/FeatureFlag'
 
 describe('FeatureFlag ajax', () => {
   let fetchStub: ReturnType<typeof cy.stub>
@@ -90,6 +96,60 @@ describe('FeatureFlag tests for ES_TYPE_TO_INDEX_ENABLED flag', () => {
         }),
       )
       cy.wrap(getFlagEsIndexKeyName()).should('equal', '_type')
+    })
+  })
+})
+
+describe('FeatureFlag tests for NHGRI_RESTRICTED_DAC flag', () => {
+  let fetchStub: ReturnType<typeof cy.stub>
+
+  beforeEach(() => {
+    resetNhgriDacIdPromise()
+    cy.initApplicationConfig()
+    cy.stub(Config, 'getApiUrl').resolves('')
+    cy.window().then((win) => {
+      fetchStub = cy.stub(win, 'fetch')
+    })
+  })
+
+  afterEach(() => {
+    cy.window().then(() => {
+      fetchStub.restore()
+    })
+  })
+
+  it('getFlagNhgriDacId returns the DAC ID when available', () => {
+    cy.window().then((win) => {
+      fetchStub.resolves(
+        new win.Response(JSON.stringify('dac-123'), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+      cy.wrap(getFlagNhgriDacId()).should('equal', 'dac-123')
+    })
+  })
+
+  it('getFlagNhgriDacId returns undefined when the flag fetch errors', () => {
+    cy.window().then(() => {
+      fetchStub.rejects(new Error('Not found'))
+      cy.wrap(getFlagNhgriDacId()).should('be.undefined')
+    })
+  })
+
+  it('getFlagNhgriDacId caches the promise and does not refetch on subsequent calls', () => {
+    cy.window().then((win) => {
+      fetchStub.resolves(
+        new win.Response(JSON.stringify('dac-456'), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+      cy.wrap(getFlagNhgriDacId()).should('equal', 'dac-456')
+      cy.wrap(getFlagNhgriDacId()).should('equal', 'dac-456')
+      cy.wrap(null).then(() => {
+        expect(fetchStub.callCount).to.equal(1)
+      })
     })
   })
 })
