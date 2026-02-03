@@ -103,11 +103,12 @@ export const DatasetSearchTable = (props) => {
 
       filterTerms.push({
         bool: {
-          should: filters.accessManagement.map(term => ({
-            term: {
-              accessManagement: term,
-            },
-          })),
+          should:
+              filters.accessManagement.map(term => ({
+                term: {
+                  accessManagement: term,
+                },
+              })),
         },
       })
 
