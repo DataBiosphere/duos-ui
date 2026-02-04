@@ -11,6 +11,9 @@ export default function RequiredDAAs(props) {
       return <div key={dataset.dataSetId + '-' + index}></div>
     }
     const daa = daas.find(daa => daa.dacs?.some(d => d.dacId === datasetDacId))
+    if (!daa) {
+      return <div key={dataset.dataSetId + '-' + index}></div>
+    }
     const id = daa.daaId
     const fileName = daa.file.fileName.split('.')[0]
     if (fileNames.has(fileName)) {

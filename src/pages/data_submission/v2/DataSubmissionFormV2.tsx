@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
@@ -97,7 +97,15 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
-    Notifications.showError({ text: `Study creation failed: ${error}` })
+    Notifications.showError({
+      text: (
+        <>
+          Study creation failed:<br />{String(error).split('\n').map(line => (
+            <Fragment key={line}>{line}<br /></Fragment>
+          ))}
+        </>
+      ),
+    })
   }
 
   return (
