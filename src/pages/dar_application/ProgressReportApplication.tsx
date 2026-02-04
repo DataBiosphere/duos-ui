@@ -169,8 +169,9 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
   const onSelectedDatasetChange = useCallback((newDatasets: Dataset[]) => {
     const newDatasetIds = newDatasets.map(ds => ds.datasetId)
-    translateDataUseRestrictionsFromDataUseArray(newDatasets.map(ds => ds.dataUse)).then((translations) => {
-      setDataUseTranslations(translations)
+    const dataUses = newDatasets.map(ds => ds.dataUse)
+    translateDataUseRestrictionsFromDataUseArray(dataUses).then(() => {
+      setDataUseTranslations(dataUses)
     })
     onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds })
   }, [onFormChange])
