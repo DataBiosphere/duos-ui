@@ -1,18 +1,23 @@
 import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
-type FeatureFlagValue = string
+export interface FeatureFlag {
+  id: string
+  value: string
+  createDate: number
+  updateDate: number
+}
 
-export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlagValue> | FeatureFlagValue[]> {
+export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlag> | FeatureFlag[]> {
   const url = `${await Config.getApiUrl()}/feature`
-  const res = await fetchGet<Record<string, FeatureFlagValue> | FeatureFlagValue[]>(url, Config.authOpts())
+  const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url, Config.authOpts())
   return res.data
 }
 
-export async function getFeatureFlag(key: string): Promise<FeatureFlagValue | undefined> {
+export async function getFeatureFlag(key: string): Promise<FeatureFlag | undefined> {
   const url = `${await Config.getApiUrl()}/feature/${encodeURIComponent(key)}`
   try {
-    const res = await fetchGet<FeatureFlagValue>(url, Config.authOpts())
+    const res = await fetchGet<FeatureFlag>(url, Config.authOpts())
     return res.data
   }
   catch {
@@ -25,8 +30,8 @@ let esIndexKeyNamePromise: Promise<string> | undefined = undefined
 
 export const getFlagEsIndexKeyName = (): Promise<string> => {
   if (esIndexKeyNamePromise === undefined) {
-    esIndexKeyNamePromise = getFeatureFlag('ES_TYPE_TO_INDEX_ENABLED').then((flag) => {
-      return flag === 'true' ? '_index' : '_type'
+    esIndexKeyNamePromise = getFeatureFlag('ES_TYPE_TO_INDEX_ENABLED').then((flag: FeatureFlag | undefined) => {
+      return flag?.value === 'true' ? '_index' : '_type'
     }).catch(() => {
       return '_type'
     })
@@ -43,7 +48,9 @@ export const resetEsIndexKeyNamePromise = () => {
 let nhgriDacIdPromise: Promise<string | undefined> | undefined = undefined
 
 export const getFlagNhgriDacId = (): Promise<string | undefined> => {
-  nhgriDacIdPromise ??= getFeatureFlag('NHGRI_RESTRICTED_DAC').catch(() => undefined)
+  nhgriDacIdPromise ??= getFeatureFlag('NHGRI_RESTRICTED_DAC')
+    .then(flag => flag?.value)
+    .catch(() => undefined)
   return nhgriDacIdPromise
 }
 

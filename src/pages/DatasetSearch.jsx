@@ -145,8 +145,8 @@ export const DatasetSearch = (props) => {
         }
 
         // Fetch NHGRI DAC ID flag
-        getFlagNhgriDacId().then((flag) => {
-          setNhgriDacId(flag?.value ?? null)
+        getFlagNhgriDacId().then((value) => {
+          setNhgriDacId(value ?? null)
         })
 
         try {
