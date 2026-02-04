@@ -38,3 +38,16 @@ export const getFlagEsIndexKeyName = (): Promise<string> => {
 export const resetEsIndexKeyNamePromise = () => {
   esIndexKeyNamePromise = undefined
 }
+
+// Cache the NHGRI DAC ID to avoid repeated feature flag lookups
+let nhgriDacIdPromise: Promise<string | undefined> | undefined = undefined
+
+export const getFlagNhgriDacId = (): Promise<string | undefined> => {
+  nhgriDacIdPromise ??= getFeatureFlag('NHGRI_RESTRICTED_DAC').catch(() => undefined)
+  return nhgriDacIdPromise
+}
+
+// Function to reset the cached NHGRI DAC ID for testing
+export const resetNhgriDacIdPromise = () => {
+  nhgriDacIdPromise = undefined
+}
