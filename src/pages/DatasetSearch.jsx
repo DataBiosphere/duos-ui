@@ -10,9 +10,8 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { getFlagNhgriDacId } from 'src/libs/ajax/FeatureFlag.ts'
 
-const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery, nhgriDacId) => {
+const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
     {
       match: {
@@ -69,16 +68,6 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery, nhgr
     query: {
       bool: {
         must: queryChunks,
-        must_not: nhgriDacId
-          ? {
-              bool: {
-                must: [
-                  { term: { dacId: nhgriDacId } },
-                  { term: { accessManagement: 'controlled' } },
-                ],
-              },
-            }
-          : [],
       },
     },
   }
@@ -92,7 +81,6 @@ export const DatasetSearch = (props) => {
   const [datasets, setDatasets] = useState([])
   const [queryState, setQueryState] = useState(query)
   const [loading, setLoading] = useState(true)
-  const [nhgriDacId, setNhgriDacId] = useState(null)
   const user = Storage.getCurrentUser()
 
   const isSigningOfficial = user.isSigningOfficial
@@ -112,8 +100,8 @@ export const DatasetSearch = (props) => {
 
   // Memoize fullQuery to prevent recreation on every render
   const fullQuery = useMemo(
-    () => assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query, nhgriDacId),
-    [isSigningOfficial, isInstitutionQuery, version.query, nhgriDacId],
+    () => assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query),
+    [isSigningOfficial, isInstitutionQuery, version.query],
   )
 
   const isInstitutionSet = institutionId === undefined && isInstitutionQuery
@@ -143,12 +131,6 @@ export const DatasetSearch = (props) => {
           navigate('/profile')
           return
         }
-
-        // Fetch NHGRI DAC ID flag
-        getFlagNhgriDacId().then((value) => {
-          setNhgriDacId(value ?? null)
-        })
-
         try {
           await DataSet.searchDatasetIndex(fullQuery).then((datasets) => {
             setDatasets(datasets)
