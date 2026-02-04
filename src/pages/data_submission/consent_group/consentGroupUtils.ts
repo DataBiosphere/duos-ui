@@ -1,4 +1,4 @@
-import { isNil, isString } from 'lodash/fp'
+import { isNil, isString } from 'lodash'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 import { FileStorageObject } from 'src/types/model'
 

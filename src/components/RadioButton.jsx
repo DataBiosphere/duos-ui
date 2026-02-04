@@ -1,5 +1,5 @@
 import React from 'react'
-import { merge } from 'lodash/fp'
+import { merge } from 'lodash'
 
 export const RadioButton = (props) => {
   const basicWrapperStyle = {
@@ -10,7 +10,7 @@ export const RadioButton = (props) => {
     position: 'relative',
   }
 
-  const wrapperStyle = props.style ? merge(basicWrapperStyle, props.style) : basicWrapperStyle
+  const wrapperStyle = props.style ? merge({}, basicWrapperStyle, props.style) : basicWrapperStyle
 
   const basicUnchecked = {
     fontSize: 15,
@@ -28,9 +28,9 @@ export const RadioButton = (props) => {
     border: '1px solid #999999',
   }
 
-  const uncheckedStyle = props.style ? merge(basicUnchecked, props.style) : basicUnchecked
+  const uncheckedStyle = props.style ? merge({}, basicUnchecked, props.style) : basicUnchecked
 
-  const checkedStyle = merge(uncheckedStyle, {
+  const checkedStyle = merge({}, uncheckedStyle, {
     boxShadow: 'rgb(0, 0, 0) 0 0 0 1px',
     backgroundColor: '#2196F3',
     border: '2px solid white',
@@ -43,7 +43,7 @@ export const RadioButton = (props) => {
     fontWeight: '500',
 
   }
-  const labelStyle = props.style ? merge(basicLabelStyle, props.style) : basicLabelStyle
+  const labelStyle = props.style ? merge({}, basicLabelStyle, props.style) : basicLabelStyle
 
   const descriptionStyle = {
     marginLeft: '.25rem',

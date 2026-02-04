@@ -8,6 +8,7 @@ import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import { dataUseCellData } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
 import 'src/components/data_search/DatasetSearch.css'
 import { muiCheckboxFix } from 'src/libs/muiThemeFix'
+import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 
 export interface DatasetSearchTableTab<T> {
   key: string
@@ -420,16 +421,20 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellStyle: makeHeaderStyle(cellWidths.dataLocation),
       cellDataFn: (dataset: DatasetTerm) => {
         let dataLocation
-        if (dataset.dataLocation === 'TDR Location') {
-          dataLocation = 'Terra Data Repo'
+        const TERRA_DATA_REPO = 'Terra Data Repo'
+        if (dataset.dataLocation === DataLocationType.TDRLocation) {
+          dataLocation = TERRA_DATA_REPO
         }
-        else if (dataset.dataLocation === 'Terra Workspace') {
+        else if (dataset.dataLocation === DataLocationType.TerraWorkspace) {
           dataLocation = dataset.url
-            ? <Link href={dataset.url}>Terra Workspace</Link>
-            : 'Terra Data Repo'
+            ? <Link href={dataset.url}>{DataLocationType.TerraWorkspace}</Link>
+            : TERRA_DATA_REPO
         }
-        else if (dataset.dataLocation === 'Not Determined') {
-          dataLocation = 'Not Determined'
+        else if (dataset.dataLocation === DataLocationType.NotDetermined) {
+          dataLocation = DataLocationType.NotDetermined
+        }
+        else if (dataset.dataLocation === DataLocationType.Other) {
+          dataLocation = dataset.url ? new URL(dataset.url).hostname : ''
         }
         else {
           dataLocation = dataset.url
@@ -492,18 +497,18 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
 export const makeDatasetTableRows = (datasets: DatasetTerm[], headers: HeaderData<DatasetTerm>[]): CellData[][] => datasets.map(dataset => headers.map(header => header.cellDataFn(dataset)))
 
 export const datasetSearchTableTabs: DatasetSearchTableTabs = {
-  study: {
-    key: 'study-table-tab',
-    singular: 'study',
-    plural: 'studies',
-    makeHeaders: makeStudyTableHeaders,
-    makeRows: makeStudyTableRowData,
-  },
   dataset: {
     key: 'datasets-table-tab',
     singular: 'dataset',
     plural: 'datasets',
     makeHeaders: makeDatasetTableHeader,
     makeRows: makeDatasetTableRows,
+  },
+  study: {
+    key: 'study-table-tab',
+    singular: 'study',
+    plural: 'studies',
+    makeHeaders: makeStudyTableHeaders,
+    makeRows: makeStudyTableRowData,
   },
 }

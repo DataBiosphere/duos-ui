@@ -1,12 +1,37 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { isFunction, isNil } from 'lodash/fp.js'
-import React, { useEffect, useState } from 'react'
+import { isFunction, isNil } from 'lodash'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'
+import { Tab as TabItem } from 'src/components/DuosHeader'
+import { DuosUser } from 'src/types/model'
 
-const styles = {
+type Orientation = 'horizontal' | 'vertical'
+
+interface NavigationTabsComponentProps {
+  orientation: Orientation
+  makeNotifications: () => React.ReactNode
+  navbarDuosIcon: React.CSSProperties
+  duosLogoImage: React.CSSProperties
+  DuosLogo: string
+  navbarDuosText: React.CSSProperties
+  currentUser: DuosUser
+  signOut: () => void
+  isLogged: boolean
+  contactUsButton: React.ReactNode
+  showRequestModal: () => void
+  supportrequestModal: React.ReactNode
+  tabs: TabItem[]
+  initialTab: number
+  initialSubTab: number
+  onSubtabChange: (event: React.SyntheticEvent, newValue: number) => void
+  showProfileLinks: () => void
+  profileState: boolean
+}
+
+const styles: Record<string, React.CSSProperties> = {
   mainTab: {
     padding: '0 25px',
     fontSize: '16px',
@@ -50,23 +75,30 @@ const styles = {
   },
 }
 
-export const NavigationTabsComponent = (props) => {
+export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (props) => {
   const {
     orientation,
     makeNotifications,
-    navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
-    currentUser, signOut, isLogged,
-    contactUsButton, showRequestModal, supportrequestModal,
-    tabs, initialTab, initialSubTab,
-    onSubtabChange, showProfileLinks, profileState,
+    navbarDuosIcon,
+    duosLogoImage,
+    DuosLogo,
+    navbarDuosText,
+    currentUser,
+    signOut,
+    isLogged,
+    contactUsButton,
+    showRequestModal,
+    supportrequestModal,
+    tabs,
+    initialTab,
+    initialSubTab,
+    onSubtabChange,
+    showProfileLinks,
+    profileState,
   } = props
-  const [selectedMenuTab, setSelectedMenuTab] = useState(false)
-  const [selectedSubTab, setSelectedSubTab] = useState(false)
 
-  useEffect(() => {
-    setSelectedMenuTab(initialTab === -1 ? false : initialTab)
-    setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab)
-  }, [initialTab, initialSubTab])
+  const selectedMenuTab = initialTab
+  const selectedSubTab = initialSubTab
 
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
@@ -86,13 +118,17 @@ export const NavigationTabsComponent = (props) => {
           }
           {
             isLogged && (
-              <Box className="duos-navigation-box">
+              <Box className="duos-navigation-box" sx={{ minWidth: 0, flex: 1 }}>
                 <Tabs
-                  value={selectedMenuTab}
+                  value={selectedMenuTab >= 0 ? selectedMenuTab : false}
                   variant="scrollable"
                   scrollButtons="auto"
+                  allowScrollButtonsMobile
                   orientation={orientation}
-                  TabIndicatorProps={{ style: { background: '#2BBD9B' } }}
+                  sx={{
+                    '& .MuiTabs-indicator': { background: '#2BBD9B' },
+                    'minWidth': 0,
+                  }}
                 >
                   {tabs.map((tab, tabIndex) => (
                     <Tab
@@ -152,7 +188,7 @@ export const NavigationTabsComponent = (props) => {
                 {/* Sign-in button location when window is narrow and menu is vertical */}
                 {!isLogged && orientation === 'vertical' && (
                   <li style={{ marginRight: 0 }}>
-                    <SignInButton props={props} />
+                    <SignInButton />
                   </li>
                 )}
               </ul>
@@ -168,10 +204,10 @@ export const NavigationTabsComponent = (props) => {
                 minWidth: '185px',
                 display: 'flex',
                 alignItems: 'center',
-                flexDirection: orientation === 'vertical' ? 'column' : 'row',
+                flexDirection: orientation === 'horizontal' ? 'row' : 'column',
               }}
             >
-              <SignInButton props={props} />
+              <SignInButton />
             </div>
           )}
         {isLogged && (
@@ -212,7 +248,7 @@ export const NavigationTabsComponent = (props) => {
                 }}
               >
                 <li>
-                  <Link id="link_profile" to="/profile" onClick={onSubtabChange}>Your Profile</Link>
+                  <Link id="link_profile" to="/profile" onClick={e => onSubtabChange(e, 0)}>Your Profile</Link>
                 </li>
                 <li>
                   <a id="link_signOut" onClick={signOut}>Sign out</a>
@@ -223,20 +259,20 @@ export const NavigationTabsComponent = (props) => {
         )}
       </ul>
 
-      {/* Sub Tabs */}
-      {tabs[selectedMenuTab]?.children && (
+      {/* Sub Tabs - only show if a valid subtab is selected */}
+      {tabs[selectedMenuTab as number]?.children && selectedSubTab >= 0 && (
         <Box className="duos-navigation-box navbar-sub">
           <Tabs
-            value={selectedSubTab}
+            value={selectedSubTab >= 0 ? selectedSubTab : false}
             variant="scrollable"
             scrollButtons="auto"
             orientation={orientation}
-            TabIndicatorProps={{ style: { background: '#00609f' } }}
+            sx={{ '& .MuiTabs-indicator': { background: '#00609f' } }}
             onChange={onSubtabChange}
           >
-            {tabs[selectedMenuTab].children.map((tab, tabIndex) => {
+            {tabs[selectedMenuTab as number].children?.map((tab, tabIndex) => {
               // Default to displaying the sub tab if no render function exists for it
-              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered()
+              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered(currentUser))) ? true : tab.isRendered(currentUser)
               const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser)))
                 ? true
                 : tab.isRenderedForUser(currentUser)

@@ -44,19 +44,7 @@ export default function CollectionVoteButton({
 }: CollectionVoteButtonProps) {
   const [additionalStyle, setAdditionalStyle] = useState<React.CSSProperties>({})
 
-  const defaultButtonStyle = useCallback(() => {
-    updateStyle(votingColors.default, styles.defaultLabelColor, false, disabled)
-  }, [disabled])
-
-  const selectedButtonStyle = useCallback(() => {
-    updateStyle(baseColor, votingColors.default, true, disabled)
-  }, [baseColor, disabled])
-
-  useEffect(() =>
-    isSelected ? selectedButtonStyle() : defaultButtonStyle(),
-  [defaultButtonStyle, isSelected, selectedButtonStyle])
-
-  const updateStyle = (
+  const updateStyle = useCallback((
     backgroundColor: string,
     labelColor: string,
     showSelectedStyle: boolean,
@@ -68,7 +56,19 @@ export default function CollectionVoteButton({
       border: showSelectedStyle ? '0px' : '1px solid',
       cursor: (showSelectedStyle && !disabled) ? 'pointer' : 'default',
     })
-  }
+  }, [])
+
+  const defaultButtonStyle = useCallback(() => {
+    updateStyle(votingColors.default, styles.defaultLabelColor, false, disabled)
+  }, [disabled, updateStyle])
+
+  const selectedButtonStyle = useCallback(() => {
+    updateStyle(baseColor, votingColors.default, true, disabled)
+  }, [baseColor, disabled, updateStyle])
+
+  useEffect(() =>
+    isSelected ? selectedButtonStyle() : defaultButtonStyle(),
+  [defaultButtonStyle, isSelected, selectedButtonStyle])
 
   const handleAsyncClick = useCallback(async () => {
     if (!disabled && onClick) {

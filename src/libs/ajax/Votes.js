@@ -1,5 +1,4 @@
 import { Config } from '../config'
-import { getApiUrl } from '../ajax'
 import { fetchPut } from 'src/libs/ajax/fetchAdapter'
 
 export const Votes = {
@@ -9,7 +8,7 @@ export const Votes = {
       rationale: vote.rationale,
       voteIds: voteIds,
     }
-    const url = `${await getApiUrl()}/api/votes`
+    const url = `${await Config.getApiUrl()}/api/votes`
     const res = await fetchPut(url, voteUpdate, Config.authOpts())
     return res.data
   },
@@ -19,7 +18,7 @@ export const Votes = {
       rationale: rationale,
       voteIds: voteIds,
     }
-    const url = `${await getApiUrl()}/api/votes/rationale`
+    const url = `${await Config.getApiUrl()}/api/votes/rationale`
     const res = await fetchPut(url, rationaleUpdate, Config.authOpts())
     return res.data
   },

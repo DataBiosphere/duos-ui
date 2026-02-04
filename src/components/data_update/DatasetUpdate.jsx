@@ -1,6 +1,6 @@
 import React from 'react'
 import { useCallback, useState, useEffect } from 'react'
-import { find, isNil } from 'lodash/fp'
+import { cloneDeep, find, isNil } from 'lodash'
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms'
 import { DataSet } from '../../libs/ajax/DataSet'
 import { DAR } from '../../libs/ajax/DAR'
@@ -47,7 +47,7 @@ export const DatasetUpdate = (props) => {
   }
 
   const extract = useCallback((propertyName) => {
-    const property = find({ propertyName })(dataset.properties)
+    const property = find(dataset.properties, { propertyName })
     return property?.propertyValue
   }, [dataset])
 
@@ -71,6 +71,14 @@ export const DatasetUpdate = (props) => {
       du.hasSecondaryOther = true
     }
     return du
+  }, [])
+
+  const updateProperty = useCallback((propertyName, value) => {
+    setFormData((prev) => {
+      const newFormData = cloneDeep(prev)
+      newFormData.properties[propertyName] = value
+      return newFormData
+    })
   }, [])
 
   const submitForm = (event) => {
@@ -132,9 +140,12 @@ export const DatasetUpdate = (props) => {
   }, [extract, normalizeDataUse])
 
   useEffect(() => {
-    if (isNil(formData.datasetName)) {
-      prefillFormData(dataset)
+    const init = async () => {
+      if (isNil(formData.datasetName)) {
+        await prefillFormData(dataset)
+      }
     }
+    init()
   }, [prefillFormData, dataset, formData])
 
   return (
@@ -145,72 +156,56 @@ export const DatasetUpdate = (props) => {
         title="Dataset Name"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.datasetName}
-        onChange={({ value }) => {
-          formData.properties.datasetName = value
-        }}
+        onChange={({ value }) => updateProperty('datasetName', value)}
       />
       <FormField
         id="description"
         title="Dataset Description"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.description}
-        onChange={({ value }) => {
-          formData.properties.description = value
-        }}
+        onChange={({ value }) => updateProperty('description', value)}
       />
       <FormField
         id="dataDepositor"
         title="Data Custodian"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.dataDepositor}
-        onChange={({ value }) => {
-          formData.properties.dataDepositor = value
-        }}
+        onChange={({ value }) => updateProperty('dataDepositor', value)}
       />
       <FormField
         id="principalInvestigator"
         title="Principal Investigator (PI)"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.principalInvestigator}
-        onChange={({ value }) => {
-          formData.properties.principalInvestigator = value
-        }}
+        onChange={({ value }) => updateProperty('principalInvestigator', value)}
       />
       <FormField
         id="url"
         title="Dataset Repository URL"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.url}
-        onChange={({ value }) => {
-          formData.properties.url = value
-        }}
+        onChange={({ value }) => updateProperty('url', value)}
       />
       <FormField
         id="dataType"
         title="Data Type"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.dataType}
-        onChange={({ value }) => {
-          formData.properties.dataType = value
-        }}
+        onChange={({ value }) => updateProperty('dataType', value)}
       />
       <FormField
         id="species"
         title="Species"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.species}
-        onChange={({ value }) => {
-          formData.properties.species = value
-        }}
+        onChange={({ value }) => updateProperty('species', value)}
       />
       <FormField
         id="phenotype"
         title="Phenotype/Indication"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.phenotype}
-        onChange={({ value }) => {
-          formData.properties.phenotype = value
-        }}
+        onChange={({ value }) => updateProperty('phenotype', value)}
       />
       <FormField
         id="nrParticipants"
@@ -218,9 +213,7 @@ export const DatasetUpdate = (props) => {
         type={FormFieldTypes.NUMBER}
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.nrParticipants}
-        onChange={({ value }) => {
-          formData.properties.nrParticipants = value
-        }}
+        onChange={({ value }) => updateProperty('nrParticipants', value)}
       />
       <FormField
         id="dac"

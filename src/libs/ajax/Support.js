@@ -1,4 +1,4 @@
-import { getApiUrl } from '../ajax'
+import { Config } from '../config'
 import { fetchPost } from 'src/libs/ajax/fetchAdapter'
 import { extractConsentError, extractError } from 'src/utils/ErrorUtils.js'
 
@@ -17,7 +17,7 @@ export const Support = {
   },
 
   createSupportRequest: async (ticket) => {
-    const url = `${await getApiUrl()}/support/request`
+    const url = `${await Config.getApiUrl()}/support/request`
     try {
       return await fetchPost(url, ticket)
     }
@@ -27,7 +27,7 @@ export const Support = {
   },
 
   uploadAttachment: async (file) => {
-    const url = `${await getApiUrl()}/support/upload`
+    const url = `${await Config.getApiUrl()}/support/upload`
     try {
       return await fetchPost(url, file, { headers: { 'Content-Type': 'application/binary' }, isMultipart: true })
     }

@@ -1,8 +1,7 @@
 import { getDefaultProperties } from '@databiosphere/bard-client'
 
-import { Storage } from '../storage'
-import { getBardApiUrl } from '../ajax'
-import { Token } from '../config'
+import { Storage } from 'src/libs/storage'
+import { Config, Token } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
 import { fetchPost } from 'src/libs/ajax/fetchAdapter'
 
@@ -50,7 +49,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
     },
   }
 
-  const url = `${await getBardApiUrl()}/api/event`
+  const url = `${await Config.getBardApiUrl()}/api/event`
   const headers = isRegistered ? { Authorization: `Bearer ${Token.getToken()}` } : undefined
 
   return fetchPost(url, body, { headers, signal })
@@ -64,7 +63,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const syncProfile = async (signal: AbortSignal): Promise<any> => {
-  const url = `${await getBardApiUrl()}/api/syncProfile`
+  const url = `${await Config.getBardApiUrl()}/api/syncProfile`
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
   return fetchPost(url, undefined, { headers, signal }).catch(() => {})
 }
@@ -80,7 +79,7 @@ const syncProfile = async (signal: AbortSignal): Promise<any> => {
 const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
   const body = { anonId }
 
-  const url = `${await getBardApiUrl()}/api/identify`
+  const url = `${await Config.getBardApiUrl()}/api/identify`
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
 
   return fetchPost(url, body, { headers, signal }).catch(() => {})

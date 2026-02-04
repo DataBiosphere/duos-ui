@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Notifications } from 'src/libs/utils'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import SortableTable from 'src/components/sortable_table/SortableTable'
-import { concat, isNil, join } from 'lodash/fp'
+import { concat, isNil, join } from 'lodash'
 import Button from '@mui/material/Button'
 import { Link, useNavigate } from 'react-router-dom'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -74,16 +74,16 @@ export default function DatasetSubmissionsTable(props) {
   const [rows, setRows] = useState([])
   const [open, setOpen] = useState(false)
 
-  const handleClick = (term) => {
+  const handleClick = useCallback((term) => {
     setOpen(true)
     setSelectedTerm(term)
-  }
+  }, [])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false)
-  }
+  }, [])
 
-  const removeDataset = async (termToDelete) => {
+  const removeDataset = useCallback(async (termToDelete) => {
     const termName = termToDelete.datasetName
     const termId = termToDelete.datasetId
     setOpen(false)
@@ -100,7 +100,7 @@ export default function DatasetSubmissionsTable(props) {
         text: `Error removing ${termName} as a dataset`,
       })
     }
-  }
+  }, [navigate])
 
   // Datasets can be filtered from the parent component and redrawn frequently.
   const redrawRows = useCallback((open, selectedTerm) => {
@@ -147,20 +147,20 @@ export default function DatasetSubmissionsTable(props) {
             </div>
           )
         : <div />
-      const custodians = join(', ')(term.study?.dataCustodianEmail)
+      const custodians = join(term.study?.dataCustodianEmail, ', ')
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,
         dataSubmitter: term.createUserDisplayName,
         datasetCustodians: custodians,
         dac: term.dac?.dacName,
-        dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
+        dataUse: join(concat(primaryCodes, secondaryCodes), ', '),
         status: status,
         actions: editButton, deleteButton,
       }
     })
     setRows(rows)
-  }, [removeDataset, terms])
+  }, [removeDataset, terms, handleClose, handleClick])
 
   useEffect(() => {
     const init = async () => {

@@ -54,6 +54,7 @@ import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResea
 import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
 import Translator from 'src/pages/Translator'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -128,6 +129,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route element={<SOAcknowledged />}>
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
+            <Route path="/signing_official_console/dar_approvals" element={<SigningOfficialDarApprovals />} />
             <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
             {DAAUtils.isEnabled()
               && <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />}

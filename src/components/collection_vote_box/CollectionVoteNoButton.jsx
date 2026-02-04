@@ -3,29 +3,29 @@ import { votingColors } from 'src/libs/VotingColors.ts'
 import CollectionVoteButton from './CollectionVoteButton'
 import { CancelOutlined } from '@mui/icons-material'
 
+const styles = {
+  label: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    fontSize: '28px',
+    margin: '2.5%',
+  },
+}
+
+const Label = () => {
+  return (
+    <span style={styles.label}>
+      <CancelOutlined style={styles.icon} />
+      No
+    </span>
+  )
+}
+
 export default function CollectionVoteNoButton(props) {
   const { onClick, disabled, isSelected, onError } = props
-
-  const styles = {
-    label: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    icon: {
-      fontSize: '28px',
-      margin: '2.5%',
-    },
-  }
-
-  const Label = () => {
-    return (
-      <span style={styles.label}>
-        <CancelOutlined style={styles.icon} />
-        No
-      </span>
-    )
-  }
 
   return (
     <CollectionVoteButton

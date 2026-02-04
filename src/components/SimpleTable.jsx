@@ -1,5 +1,5 @@
 import React from 'react'
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash'
 import { Styles } from '../libs/theme'
 import ReactTooltip from 'react-tooltip'
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material'

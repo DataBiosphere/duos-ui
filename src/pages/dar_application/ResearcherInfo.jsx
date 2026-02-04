@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useMemo } from 'react'
 import { Alert } from 'src/components/Alert'
 import { Link } from 'react-router-dom'
 import ERACommons from 'src/components/era_commons/ERACommons'
 import CollaboratorList from './collaborator/CollaboratorList'
-import { isEmpty, isNil } from 'lodash/fp'
+import { isEmpty, isNil } from 'lodash'
 import { FormField, FormValidators, FormFieldTypes } from 'src/components/forms/forms'
 import './dar_application.css'
 import { nihAccountLabel, nihAccountInstructions } from 'src/components/era_commons/ERACommonsUtils'
@@ -73,10 +73,8 @@ export default function ResearcherInfo(props) {
 
   const onValidationChange = formValidationChange
 
-  const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false)
-
-  useEffect(() => {
-    setLibraryCardReqSatisfied(!isNil(researcher.libraryCard))
+  const libraryCardReqSatisfied = useMemo(() => {
+    return !isNil(researcher.libraryCard)
   }, [researcher])
 
   return (

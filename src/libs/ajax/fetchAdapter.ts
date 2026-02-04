@@ -1,4 +1,5 @@
-import { redirectOnLogout, reportError } from 'src/libs/ajax'
+import { redirectOnLogout } from 'src/libs/auth/auth'
+import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -42,6 +43,14 @@ export interface FetchData<T> {
   data: T
 }
 
+export const reportError = async (url: string, status: number): Promise<void> => {
+  const msg = 'Error fetching response: '
+    .concat(JSON.stringify(url))
+    .concat('Status: ')
+    .concat(String(status))
+  await StackdriverReporter.report(msg)
+}
+
 function buildUrlWithParams(url: string, params?: Params): string {
   if (!params || Object.keys(params).length === 0) return url
   const query = new URLSearchParams(
@@ -65,6 +74,30 @@ async function handleResponse<T>(
       redirectOnLogout()
     }
     await reportError(url, res.status)
+
+    // Parse error response and throw with axios-like structure for compatibility
+    interface ErrorData {
+      message?: string
+      code?: number
+    }
+    let errorData: ErrorData = {}
+    const contentType = res.headers.get('content-type') ?? ''
+    if (contentType.includes('application/json')) {
+      try {
+        errorData = await res.json()
+      }
+      catch {
+        // If JSON parsing fails, use empty object
+      }
+    }
+    const error = new Error(errorData.message || `Request failed with status ${res.status}`) as Error & {
+      response: { status: number, data: ErrorData }
+    }
+    error.response = {
+      status: res.status,
+      data: errorData,
+    }
+    throw error
   }
 
   if (responseType === 'blob') {

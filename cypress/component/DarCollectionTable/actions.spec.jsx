@@ -1,6 +1,6 @@
 import { React } from 'react'
 import Actions from 'src/components/dar_collection_table/Actions'
-import { cloneDeep } from 'lodash/fp'
+import { cloneDeep } from 'lodash'
 import { Navigation } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import EnvironmentUtils from 'src/utils/EnvironmentUtils.js'
@@ -82,6 +82,20 @@ describe('Actions - Open Button', () => {
     propCopy.actions = []
     cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     cy.get(`#chair-open-${collectionId}`).should('not.exist')
+  })
+})
+
+describe('Actions - Approve Button', () => {
+  it('should render the approve button if there is an Approve Action', () => {
+    propCopy.actions = ['Approve']
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.get(`#chair-approve-${collectionId}`).should('exist')
+  })
+
+  it('should not render Approve Button if there is no Approve Action', () => {
+    propCopy.actions = []
+    cy.mount(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
+    cy.get(`#chair-approve-${collectionId}`).should('not.exist')
   })
 })
 

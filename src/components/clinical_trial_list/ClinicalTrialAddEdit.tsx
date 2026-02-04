@@ -113,11 +113,6 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
         ? (value as SelectEntry).key as ClinicalTrialInterventionType
         : value
     }
-    else if (key === 'tags') {
-      castValue = typeof value === 'string'
-        ? value.split(',').map(t => t.trim()).filter(Boolean)
-        : value
-    }
     const ctToSet: ClinicalTrial = { ...newClinicalTrial, [key]: castValue as never }
     setNewClinicalTrial(ctToSet)
     setValidation(calcClinicalTrialErrors(ctToSet))
@@ -262,8 +257,13 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
           <FormField
             id="tags"
             title="Tags"
-            defaultValue={clinicalTrial?.tags?.join(', ')}
-            placeholder="Comma separated tags"
+            placeholder="Select or enter tags"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={clinicalTrial?.tags}
             onChange={onChange}
             disabled={readOnly}
           />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FormField, FormValidators } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { validationFailed, calcPublicationErrors } from 'src/utils/darFormUtils'
 import { Author, Publication } from 'src/types/model'
@@ -20,15 +20,12 @@ interface PublicationAddEditProps {
 
 interface Validation {
   title?: ValidationError
-  pubmedId?: ValidationError
   publishedDate?: ValidationError
   authors?: ValidationError
-  bibliographicCitation?: ValidationError
   datasetCitation?: ValidationError
   journal?: ValidationError
   doi?: ValidationError
   url?: ValidationError
-  access?: ValidationError
 }
 
 const defaultPublication: Publication = {
@@ -177,7 +174,6 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
   const [validation, setValidation] = useState<Validation>({})
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [tagsInput, setTagsInput] = useState<string>((publication?.tags ?? []).join(', '))
 
   const applyValidation = (draft: Publication, full: boolean) => {
     const all = calcPublicationErrors(draft)
@@ -199,17 +195,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
 
   const onChange = ({ key, value }: FormFieldChange) => {
     markTouched(key)
-    if (key === 'tags') {
-      const text = String(value)
-      setTagsInput(text)
-      updatePublication({
-        ...newPublication,
-        tags: text.split(',').map(t => t.trim()).filter(Boolean),
-      })
-    }
-    else {
-      updatePublication({ ...newPublication, [key]: value })
-    }
+    updatePublication({ ...newPublication, [key]: value })
   }
 
   const disableAddAuthor = newPublication.authors.some(a => a.name.trim() === '')
@@ -299,9 +285,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="PubMed ID"
             defaultValue={newPublication.pubmedId}
             placeholder="PubMed ID"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.pubmedId) ? validation.pubmedId : undefined}
             disabled={readOnly}
           />
 
@@ -310,9 +294,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="Bibliographic Citation"
             defaultValue={newPublication.bibliographicCitation}
             placeholder="Citation"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.bibliographicCitation) ? validation.bibliographicCitation : undefined}
             disabled={readOnly}
           />
 
@@ -354,7 +336,7 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="URL"
             defaultValue={newPublication.url}
             placeholder="https://example.org"
-            validators={[FormValidators.REQUIRED, FormValidators.URL]}
+            validators={[FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
             disabled={readOnly}
@@ -365,17 +347,20 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             title="Access"
             defaultValue={newPublication.access}
             placeholder="Access"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.access) ? validation.access : undefined}
             disabled={readOnly}
           />
 
           <FormField
             id="tags"
-            title="Tags (comma separated)"
-            defaultValue={tagsInput}
-            placeholder="tag1, tag2"
+            title="Tags"
+            placeholder="Select or enter tags"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={newPublication?.tags}
             onChange={onChange}
             disabled={readOnly}
           />

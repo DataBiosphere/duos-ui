@@ -4,11 +4,15 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import admin from './admin.json'
-import chair from './chair.json'
+import adminJson from './admin.json'
+import chairJson from './chair.json'
 import daas from './daas.json'
 import dac from './dac.json'
 import { setUserRoleStatuses } from 'src/libs/utils'
+import { DuosUser } from 'src/types/model'
+
+const admin = adminJson as DuosUser
+const chair = chairJson as DuosUser
 
 describe('EditDAC Tests', () => {
   Cypress._.each([admin, chair], (user) => {

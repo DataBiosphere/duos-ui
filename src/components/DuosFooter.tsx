@@ -1,43 +1,46 @@
-import React, { CSSProperties } from 'react'
+import React, { useCallback, useState } from 'react'
 import footerLogo from 'src/images/broad_logo_allwhite.png'
 import { CookieBanner } from 'src/components/CookieBanner'
 import { CookieUtils } from 'src/utils/CookieUtils'
-
-const footerStyle: CSSProperties = {
-  position: 'relative',
-  clear: 'both',
-  backgroundColor: '#000000',
-  minHeight: '64px',
-}
-
-const mainFooterStyle: CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '0 20px',
-}
-
-const footerLogoStyle: CSSProperties = {
-  float: 'left',
-  height: '32px',
-  marginTop: '15px',
-  marginRight: '35px',
-}
+import './DuosFooter.css'
 
 function DuosFooter() {
+  const baseHeight = 64 // min height of the footer without the banner
+  const [bannerHeight, setBannerHeight] = useState(0)
+  const [acknowledged, setAcknowledged] = useState(CookieUtils.getAcknowledged())
+
+  const bannerRef = useCallback((node: HTMLDivElement) => {
+    if (node !== null) {
+      const banner = node.children[0] as HTMLElement
+      setBannerHeight(banner?.offsetHeight ?? 0)
+    }
+  }, [])
+
+  const footerHeight = () => {
+    return acknowledged ? baseHeight : baseHeight + bannerHeight + 20
+  }
+
   return (
-    <div style={footerStyle}>
-      <CookieBanner visible={!CookieUtils.getAcknowledged()} />
-      <footer style={mainFooterStyle}>
-        <img src={footerLogo} style={footerLogoStyle} alt="Broad Institute logo" />
-        <ul className="footer-links">
-          <li className="footer-links__item">© Broad Institute</li>
-          <li className="footer-links__item"><a href="/privacy">Privacy Policy</a></li>
-          <li className="footer-links__item"><a href="/tos">Terms of Service</a></li>
-          <li className="footer-links__item"><a href="/cookie_policy">Cookie Policy</a></li>
-          <li className="footer-links__item"><a href="/status">Status</a></li>
-        </ul>
-      </footer>
-    </div>
+    <>
+      <div className="footer-container">
+        <footer className="footer-content" style={{ minHeight: footerHeight() }}>
+          <img src={footerLogo} className="footer-logo" alt="Broad Institute logo" />
+          <ul className="footer-links">
+            <li className="footer-links-item">© Broad Institute</li>
+            <li className="footer-links-item"><a href="/privacy">Privacy Policy</a></li>
+            <li className="footer-links-item"><a href="/tos">Terms of Service</a></li>
+            <li className="footer-links-item"><a href="/cookie_policy">Cookie Policy</a></li>
+            <li className="footer-links-item"><a href="/status">Status</a></li>
+          </ul>
+        </footer>
+      </div>
+      <div ref={bannerRef}>
+        <CookieBanner
+          visible={!acknowledged}
+          onDismiss={() => setAcknowledged(true)}
+        />
+      </div>
+    </>
   )
 }
 

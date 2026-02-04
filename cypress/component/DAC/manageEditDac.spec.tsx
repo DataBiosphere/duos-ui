@@ -3,10 +3,14 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import admin from './admin.json'
-import chair from './chair.json'
+import adminJson from './admin.json'
+import chairJson from './chair.json'
 import dac from './dac.json'
 import { setUserRoleStatuses } from 'src/libs/utils'
+import { DuosUser } from 'src/types/model'
+
+const admin = adminJson as DuosUser
+const chair = chairJson as DuosUser
 
 /**
  * This manage page is the pre-Data Access Agreement way to edit a DAC and will be removed when DAA work is complete.

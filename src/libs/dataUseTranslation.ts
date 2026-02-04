@@ -1,4 +1,4 @@
-import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash/fp'
+import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash'
 import { OntologyService } from './ontologyService'
 import { Notifications } from './utils'
 import { DataUse, DataUseSummary, DataUseTerm } from '../types/model'
@@ -73,7 +73,7 @@ export const srpTranslations = {
     }
     if (!isEmpty(diseases)) {
       const diseaseArray = diseases.sort().map(disease => disease.label)
-      const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0]
+      const diseaseString = diseaseArray.length > 1 ? join(diseaseArray, '; ') : diseaseArray[0]
       outputStruct.description = outputStruct.description + ` (${diseaseString})`
     }
     return outputStruct
@@ -410,7 +410,7 @@ const translateDataUseRestrictions = async (dataUse: ExtendedDataUse | null): Pr
   const targetKeys = Object.keys(consentTranslations)
   restrictionStatements = targetKeys.map(async key =>
     await processRestrictionStatements(key, dataUse))
-  restrictionStatements = filter((statement: Promise<TranslationEntry | undefined>) => !isNil(statement))(restrictionStatements)
+  restrictionStatements = filter(restrictionStatements, statement => !isNil(statement))
   restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements)
   const results = await Promise.all(restrictionStatements)
   return results.filter((value): value is TranslationEntry => !isEmpty(value))
@@ -427,10 +427,10 @@ export const translateDataUseRestrictionsFromDataUseArray = async (
       processOtherInDataUse(dataUse, restrictionStatementPromises)
       return Promise.all(restrictionStatementPromises)
     })
-    const results = await Promise.all(translationPromises)
     return filter(
-      (restriction: (TranslationEntry | undefined)[]) => !isEmpty(restriction),
-    )(results)
+      await Promise.all(translationPromises),
+      restriction => !isEmpty(restriction),
+    )
   }
   catch (_error) {
     throw new Error('Failed to translate Data Use Restrictions from list')
@@ -456,8 +456,8 @@ export const DataUseTranslation = {
 
     // Primary Codes
     if (darInfo.hmb) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(
-        srpTranslations.hmb) as DataUseTerm[]
+      dataUseSummary.primary = concat(dataUseSummary.primary,
+        [srpTranslations.hmb]) as DataUseTerm[]
     }
     /**
      * TODO: Resolve confusion on consent/ontology/orsp sides
@@ -473,71 +473,71 @@ export const DataUseTranslation = {
 
     // NOTE: additional check on hmb, diseases, and other are needed for older DARs where populationMigration - poa link was not established
     if ((darInfo.poa || darInfo.populationMigration) && (!darInfo.hmb && !darInfo.diseases && !darInfo.other)) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa) as DataUseTerm[]
+      dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.poa)
     }
 
     if (darInfo.diseases) {
-      const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies) ?? [])
-      dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation)) as DataUseTerm[]
+      const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies || []))
+      dataUseSummary.primary = uniq(concat(dataUseSummary.primary, [diseaseTranslation]))
     }
     if (darInfo.other) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(darInfo.otherText ?? null)) as DataUseTerm[]
+      dataUseSummary.primary = concat(dataUseSummary.primary, [srpTranslations.other(darInfo.otherText || null)])
     }
 
     // **FALLBACK CHECK**
     // If no primary codes were added, add an "OTHER: Not provided" code
     if (isEmpty(dataUseSummary.primary)) {
-      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(null)) as DataUseTerm[]
+      dataUseSummary.primary = concat(dataUseSummary.primary, [srpTranslations.other(null)])
     }
 
     // Secondary Codes
     if (darInfo.methods) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.methods]) as DataUseTerm[]
     }
     if (darInfo.aiLlmUse) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.aiLlmUse) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.aiLlmUse]) as DataUseTerm[]
     }
     if (darInfo.controls) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.controls) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.controls]) as DataUseTerm[]
     }
     if (darInfo.forProfit) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.forProfit) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.forProfit]) as DataUseTerm[]
     }
     else {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notForProfit) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.notForProfit]) as DataUseTerm[]
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.genderFemale]) as DataUseTerm[]
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.genderMale]) as DataUseTerm[]
     }
     if (darInfo.pediatric) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.pediatric) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.pediatric]) as DataUseTerm[]
     }
     if (darInfo.illegalBehavior) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.illegalBehavior) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.illegalBehavior]) as DataUseTerm[]
     }
     if (darInfo.addiction) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.addiction) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.addiction]) as DataUseTerm[]
     }
     if (darInfo.sexualDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.sexualDiseases) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.sexualDiseases]) as DataUseTerm[]
     }
     if (darInfo.stigmatizedDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.stigmatizedDiseases]) as DataUseTerm[]
     }
     if (darInfo.vulnerablePopulation) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.vulnerablePopulation]) as DataUseTerm[]
     }
     if (darInfo.population) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.population) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.population]) as DataUseTerm[]
     }
     if (darInfo.psychiatricTraits) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.psychiatricTraits) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.psychiatricTraits]) as DataUseTerm[]
     }
     if (darInfo.notHealth) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notHealth) as DataUseTerm[]
+      dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.notHealth]) as DataUseTerm[]
     }
 
     return dataUseSummary

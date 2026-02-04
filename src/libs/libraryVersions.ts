@@ -25,6 +25,7 @@ import epi25Icon from 'src/images/Epi25_logo.png'
 import PGCIcon from 'src/images/PGC_logo.jpg'
 import PBNIcon from 'src/images/PBN_logo.jpg'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
+import ccxdpIcon from 'src/images/ccxdp-logo.png'
 
 interface MatchPhraseQuery {
   match_phrase: {
@@ -551,6 +552,17 @@ export const getLibraryVersions = (
       title: 'Genetics of Eating Disorders Data Library',
       featured: true,
       order: 21,
+    },
+    'ccxdp': {
+      query: {
+        match_phrase: {
+          'study.description': 'CCXDP',
+        },
+      },
+      icon: ccxdpIcon,
+      title: 'CCXDP Data Library',
+      featured: true,
+      order: 22,
     },
     'ncpi-duo': {
       query: {

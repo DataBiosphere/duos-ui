@@ -1,10 +1,10 @@
 import { Config } from '../config'
-import { getApiUrl, fetchOk } from '../ajax'
+import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export const DatasetMetrics = {
   getDatasetStats: async (datasetId) => {
-    const url = `${await getApiUrl()}/metrics/dataset/${datasetId}`
-    const res = await fetchOk(url, Config.authOpts())
-    return await res.json()
+    const url = `${await Config.getApiUrl()}/metrics/dataset/${datasetId}`
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
   },
 }

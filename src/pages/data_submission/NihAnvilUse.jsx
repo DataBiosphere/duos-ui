@@ -1,6 +1,6 @@
 import React from 'react'
 import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms'
-import { isNil, toLower } from 'lodash/fp'
+import { isNil, toLower } from 'lodash'
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already'
 export const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID'
@@ -60,6 +60,10 @@ export default function NihAnvilUse(props) {
           const value = nihAnvilUseLabels[config.value]
           onChange({ key: config.key, value: value, isValid: config.isValid })
           if (studyEditMode) {
+            // TODO: Remove this prop mutation. Currently needed because other components expect formData.nihAnvilUse
+            // to be a key ('yes_nhgri_yes_phs_id') in edit mode but a label in create mode. Should standardize on one
+            // format across all components.
+            // eslint-disable-next-line react-hooks/immutability
             formData.nihAnvilUse = config.value
           }
         }}

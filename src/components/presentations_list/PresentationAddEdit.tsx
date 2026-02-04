@@ -63,7 +63,6 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
   const [validation, setValidation] = useState<Validation>({ presenter: {} })
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [tagsInput, setTagsInput] = useState<string>((presentation?.tags ?? []).join(', '))
 
   const applyValidation = (draft: Presentation, full: boolean) => {
     const all = calcPresentationErrors(draft) as Validation
@@ -106,11 +105,6 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
     }
     else if (key === 'presenterEmail') {
       next = { ...newPresentation, presenter: { ...newPresentation.presenter, email: value as string } }
-    }
-    else if (key === 'tags') {
-      const text = String(value)
-      setTagsInput(text)
-      next = { ...newPresentation, tags: text.split(',').map(t => t.trim()).filter(Boolean) }
     }
     else {
       next = { ...newPresentation, [key]: value }
@@ -166,7 +160,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Presentation URL"
             defaultValue={newPresentation.url}
             placeholder="https://..."
-            validators={[FormValidators.REQUIRED, FormValidators.URL]}
+            validators={[FormValidators.URL]}
             onChange={onChange}
             validation={(submitted || touched.url) ? validation.url : undefined}
             disabled={readOnly}
@@ -176,9 +170,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Authors"
             defaultValue={newPresentation.authors}
             placeholder="Authors"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.authors) ? validation.authors : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -186,9 +178,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Dataset Citation"
             defaultValue={newPresentation.datasetCitation}
             placeholder="Dataset Citation"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -206,9 +196,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Presenter Name"
             defaultValue={newPresentation.presenter?.name}
             placeholder="Name"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.presenterName) ? validation.presenter?.name : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -216,7 +204,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Presenter Email"
             defaultValue={newPresentation.presenter?.email}
             placeholder="email@example.org"
-            validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+            validators={[FormValidators.EMAIL]}
             onChange={onChange}
             validation={(submitted || touched.presenterEmail) ? validation.presenter?.email : undefined}
             disabled={readOnly}
@@ -226,9 +214,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Event"
             defaultValue={newPresentation.event}
             placeholder="Event"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.event) ? validation.event : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -236,9 +222,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Location"
             defaultValue={newPresentation.location}
             placeholder="Location"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.location) ? validation.location : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -246,9 +230,7 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Format"
             defaultValue={newPresentation.format}
             placeholder="Format"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.format) ? validation.format : undefined}
             disabled={readOnly}
           />
           <FormField
@@ -256,16 +238,19 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
             title="Access"
             defaultValue={newPresentation.access}
             placeholder="Access"
-            validators={[FormValidators.REQUIRED]}
             onChange={onChange}
-            validation={(submitted || touched.access) ? validation.access : undefined}
             disabled={readOnly}
           />
           <FormField
             id="tags"
-            title="Tags (comma separated)"
-            defaultValue={tagsInput}
-            placeholder="tag1, tag2"
+            title="Tags"
+            placeholder="Select or enter tags"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={newPresentation?.tags}
             onChange={onChange}
             disabled={readOnly}
           />

@@ -3,9 +3,9 @@ import { Styles } from 'src/libs/theme'
 import SimpleTable from 'src/components/SimpleTable'
 import './dar_application.css'
 import { binCollectionToBuckets } from 'src/utils/BucketUtils'
-import { flatten, isEmpty } from 'lodash/fp'
-import { Notifications } from 'src/libs/utils.js'
-import { extractError } from 'src/utils/ErrorUtils.js'
+import { flatten, isEmpty } from 'lodash'
+import { Notifications } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
 import PropTypes from 'prop-types'
 
 const commonStyles = {
@@ -112,7 +112,10 @@ export default function DucAddendum(props) {
   }, [datasets])
 
   useEffect(() => {
-    getBuckets()
+    const init = async () => {
+      await getBuckets()
+    }
+    init()
   }, [getBuckets])
 
   const buildDucAddendumTable = useCallback(async () => {
@@ -199,7 +202,10 @@ export default function DucAddendum(props) {
   }, [buckets, isLoading, dacs])
 
   useEffect(() => {
-    buildDucAddendumTable()
+    const init = async () => {
+      await buildDucAddendumTable()
+    }
+    init()
   }, [buildDucAddendumTable])
 
   return (

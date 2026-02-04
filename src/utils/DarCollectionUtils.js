@@ -1,4 +1,4 @@
-import { cloneDeep, concat, filter, find, findIndex, flatMap, flatten, flow, forEach, groupBy, includes, isEmpty, isNil, map, toLower } from 'lodash/fp'
+import { chain, cloneDeep, concat, filter, find, findIndex, flatMap, flatten, groupBy, includes, isEmpty, isNil, map, toLower } from 'lodash'
 import { Styles } from 'src/libs/theme.js'
 import { formatDate, Notifications } from '../libs/utils'
 import { Collections } from '../libs/ajax/Collections'
@@ -73,11 +73,11 @@ export const processVotesForBucket = (darElections = []) => {
 export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => {
   const votes = bucket?.votes ?? []
 
-  let memberVotesArrays = flow(
-    map(voteData => voteData.dataAccess),
-    filter(dataAccessData => !isEmpty(dataAccessData)),
-    map(filteredData => filteredData.memberVotes),
-  )(votes)
+  let memberVotesArrays = chain(votes)
+    .map(voteData => voteData.dataAccess)
+    .filter(dataAccessData => !isEmpty(dataAccessData))
+    .map(filteredData => filteredData.memberVotes)
+    .value()
 
   if (!adminPage) {
     memberVotesArrays = filterVoteArraysForUsersDac(memberVotesArrays, user)
@@ -89,11 +89,11 @@ export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => 
 // Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : []
-  let rpVoteArrays = flow(
-    map(voteData => voteData.rp),
-    filter(rpData => !isEmpty(rpData)),
-    map(filteredData => filteredData.memberVotes),
-  )(votes)
+  let rpVoteArrays = chain(votes)
+    .map(voteData => voteData.rp)
+    .filter(rpData => !isEmpty(rpData))
+    .map(filteredData => filteredData.memberVotes)
+    .value()
 
   if (!adminPage) {
     rpVoteArrays = filterVoteArraysForUsersDac(rpVoteArrays, user)
@@ -105,12 +105,10 @@ export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
 // only keeps arrays where at least one vote has the userId of the provided user
 const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   const userIdsOfVotes = (votes) => {
-    return map(vote => vote.userId)(votes)
+    return map(votes, vote => vote.userId)
   }
 
-  return filter(
-    voteArray => includes(user.userId, userIdsOfVotes(voteArray)),
-  )(voteArrays)
+  return filter(voteArrays, voteArray => includes(userIdsOfVotes(voteArray), user.userId))
 }
 
 // Gets this user's data access votes from this bucket; radar, final and chairperson votes if isChair is true, member votes if false
@@ -162,12 +160,12 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, admi
 
 // collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
 export const collapseVotesByUser = (votes) => {
-  const votesGroupedByUser = groupBy(vote => vote.userId)(cloneDeep(votes))
-  return flatMap((userIdKey) => {
+  const votesGroupedByUser = groupBy(cloneDeep(votes), vote => vote.userId)
+  return flatMap(Object.keys(votesGroupedByUser), (userIdKey) => {
     const votesByUser = votesGroupedByUser[userIdKey]
     const collapsedVotes = collapseVotes({ votes: votesByUser })
     return convertToVoteObjects({ collapsedVotes })
-  })(Object.keys(votesGroupedByUser))
+  })
 }
 
 // helper method to collapse votes by converting them to an object with differing rationales and dates in arrays
@@ -196,10 +194,10 @@ const collapseVotes = ({ votes }) => {
 
 // helper method to follow collapseVotes in flow
 const convertToVoteObjects = ({ collapsedVotes }) => {
-  return map((key) => {
+  return map(Object.keys(collapsedVotes), (key) => {
     const collapsedVote = collapsedVotes[key]
     const collapsedRationale = appendAll(collapsedVote.rationales)
-    const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.lastUpdates))
+    const collapsedDate = appendAll(map(collapsedVote.lastUpdates, date => formatDate(date)))
 
     return {
       userId: collapsedVote.userId,
@@ -209,7 +207,7 @@ const convertToVoteObjects = ({ collapsedVotes }) => {
       rationale: collapsedRationale,
       lastUpdated: collapsedDate,
     }
-  })(Object.keys(collapsedVotes))
+  })
 }
 
 const appendAll = (values) => {
@@ -221,17 +219,17 @@ const appendAll = (values) => {
 }
 
 const addIfUnique = (newValue, existingValues) => {
-  if (!isNil(newValue) && !includes(newValue, existingValues)) {
+  if (!isNil(newValue) && !includes(existingValues, newValue)) {
     existingValues.push(newValue)
   }
 }
 
 export const updateCollectionFn = ({ collections, filterFn, searchRef, setCollections, setFilteredList }) =>
   (updatedCollection) => {
-    const targetIndex = findIndex(
+    const targetIndex = findIndex(collections,
       collection =>
         collection.darCollectionId === updatedCollection.darCollectionId,
-    )(collections)
+    )
     if (targetIndex < 0) {
       Notifications.showError({
         text: `Error: Could not find ${updatedCollection.darCode} collection`,
@@ -283,6 +281,23 @@ export const openCollectionFn
       }
     }
 
+export const approveCollectionFn
+  = ({ updateCollections, role }) =>
+    async ({ darCode, darCollectionId }) => {
+      try {
+        await Collections.approveCollectionById(darCollectionId)
+        const summary = await Collections.getCollectionSummaryByRoleNameAndId({
+          id: darCollectionId,
+          roleName: role,
+        })
+        updateCollections(summary)
+        Notifications.showSuccess({ text: `Successfully approved ${darCode}` })
+      }
+      catch (_error) {
+        Notifications.showError({ text: `Error approving ${darCode}` })
+      }
+    }
+
 // helper function used in DarCollectionReview to update final vote on source of truth
 // done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
 export const updateFinalVote = ({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets }) => {
@@ -290,28 +305,28 @@ export const updateFinalVote = ({ key, votePayload, voteIds, dataUseBuckets, set
     // clone entire bucket to trigger page re-render on bucket update (setDataUseBuckets)
     const clonedBuckets = cloneDeep(dataUseBuckets)
     const isRPBucket = toLower(key) === toLower(rpVoteKey)
-    const targetBucket = find(bucket => toLower(bucket.key) === toLower(key))(clonedBuckets)
+    const targetBucket = find(clonedBuckets, bucket => toLower(bucket.key) === toLower(key))
     // source of votes will differ depending on the bucket (rp vs non-rp), so determine the callback function for flow here
-    const voteObjectCallback = isRPBucket ? map(voteObj => voteObj.rp) : map(voteObj => voteObj.dataAccess)
+    const voteObjectCallback = isRPBucket ? voteObj => voteObj.rp : voteObj => voteObj.dataAccess
     // to keep local source of truth updated without a fetch, we will need to update both the final and the chairperson votes
     // to make searching on the votes easier, concatenate and then flatten the finalVotes and chairpersonVotes into one array
     // NOTE: For the RP bucket the chairperson votes and the final votes are the same (RP has no final vote)
     // This was a conscious choice in order to keep processing the same between RP and non-RP buckets
-    const votes = flow([
-      voteObjectCallback,
-      flatMap(voteObj => concat(voteObj.finalVotes, voteObj.chairpersonVotes)),
-    ])(targetBucket.votes)
+    const votes = chain(targetBucket.votes)
+      .map(voteObjectCallback)
+      .flatMap(voteObj => concat(voteObj.finalVotes, voteObj.chairpersonVotes))
+      .value()
 
     // perform in place update of vote and vote rationale based on voteIds arguments
     // updates to the vote here will be reflected in clonedBuckets since the vote references are the same
-    flow([
-      filter(vote => includes(vote.voteId, voteIds)),
-      forEach((currentVote) => {
+    chain(votes)
+      .filter(vote => includes(voteIds, vote.voteId))
+      .forEach((currentVote) => {
         const { rationale, vote } = votePayload
         currentVote.rationale = rationale
         currentVote.vote = vote
-      }),
-    ])(votes)
+      })
+      .value()
     // set new bucket to trigger re-render, return clonedBuckets for debugging/testing efforts
     setDataUseBuckets(clonedBuckets)
     return clonedBuckets

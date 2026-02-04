@@ -15,26 +15,25 @@ import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'
 import { NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
-import { get, map } from 'lodash/fp'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
 import { DAAUtils } from 'src/utils/DAAUtils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import ReactMarkdown from 'react-markdown'
-import { SpinnerComponent } from 'src/components/SpinnerComponent.jsx'
+import { SpinnerComponent } from 'src/components/SpinnerComponent'
 import loadingImage from 'src/images/loading-indicator.svg'
-import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion.js'
+import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
-import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils.js'
-import { assign, cloneDeep, isArray, isEmpty, isNil, isString, merge, set } from 'lodash'
+import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils'
+import { assign, cloneDeep, get, isArray, isEmpty, isNil, isString, map, merge, set } from 'lodash'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { Countries } from 'src/libs/ajax/Countries.js'
+import { Countries } from 'src/libs/ajax/Countries'
 import PropTypes from 'prop-types'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
-import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview.js'
-import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils.js'
+import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
+import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils'
 import { useNavigate, useParams } from 'react-router-dom'
 
 // Constants
@@ -190,14 +189,14 @@ const DataAccessRequestApplication = (props) => {
     })
   }, [])
 
-  const batchFormFieldChange = (updates) => {
+  const batchFormFieldChange = useCallback((updates) => {
     setFormData((formData) => {
       return {
         ...formData,
         ...updates,
       }
     })
-  }
+  }, [])
 
   const updateCollaborationLetter = (letter) => {
     batchFormFieldChange({
@@ -223,8 +222,14 @@ const DataAccessRequestApplication = (props) => {
 
   const { fetchWithCache } = useAsyncCacheFetch(initialCache)
 
-  const getDarCollection = collectionId => fetchWithCache(collectionId, Collections.getCollectionById)
-  const getPartialDarRequest = darId => fetchWithCache(darId, DAR.getPartialDarRequest)
+  const getDarCollection = useCallback(
+    collectionId => fetchWithCache(collectionId, Collections.getCollectionById),
+    [fetchWithCache],
+  )
+  const getPartialDarRequest = useCallback(
+    darId => fetchWithCache(darId, DAR.getPartialDarRequest),
+    [fetchWithCache],
+  )
 
   const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
   const [datasets, setDatasets] = useState([])
@@ -269,7 +274,7 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     fetchData()
-  }, [existingDarsReadOnlyMode])
+  }, [existingDarsReadOnlyMode, collectionId, getDarCollection])
 
   const init = useCallback(async () => {
     let formData = {}
@@ -294,7 +299,7 @@ const DataAccessRequestApplication = (props) => {
       formData = darId ? await getPartialDarRequest(darId) : {}
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
-      formData.datasetIds = map(ds => get('datasetId')(ds))(datasets)
+      formData.datasetIds = map(datasets, ds => get(ds, 'datasetId'))
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
@@ -315,7 +320,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData)
     setIsLoading(false)
-  }, [researcher, existingDarsReadOnlyMode])
+  }, [researcher, existingDarsReadOnlyMode, collectionId, dataRequestId, getDarCollection, getPartialDarRequest, batchFormFieldChange])
 
   useEffect(() => {
     if (existingDarsReadOnlyMode) {
@@ -488,10 +493,10 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
-  const onSaveConfirmation = selectedOk => () => {
+  const onSaveConfirmation = selectedOk => async () => {
     setDisableOkBtn(true)
     if (selectedOk === true) {
-      saveDarDraft()
+      await saveDarDraft()
       setDisableOkBtn(false)
     }
     else {
@@ -500,10 +505,10 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
-  const onSubmitConfirmation = selectedOk => () => {
+  const onSubmitConfirmation = selectedOk => async () => {
     setDisableOkBtn(true)
     if (selectedOk === true) {
-      submitDARFormData()
+      await submitDARFormData()
       setDisableOkBtn(false)
     }
     else {
@@ -769,7 +774,7 @@ const DataAccessRequestApplication = (props) => {
                   <ProgressReportApplication
                     readOnlyMode={false}
                     datasets={datasets}
-                    dar={merge(reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
+                    dar={merge({}, reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
                     researcher={researcher}
                     countriesOfOperation={countriesOfOperation}
                   />
@@ -792,7 +797,7 @@ const DataAccessRequestApplication = (props) => {
                           <ProgressReportApplication
                             readOnlyMode={true}
                             datasets={datasets}
-                            dar={merge(dar?.data, dar)}
+                            dar={merge({}, dar?.data, dar)}
                             researcher={researcher}
                             countriesOfOperation={countriesOfOperation}
                           />
@@ -818,7 +823,7 @@ const DataAccessRequestApplication = (props) => {
                   defaultExpanded={reverseOrderedDARs.length === 1}
                 >
                   <ResearcherInfo
-                    completed={!isNil(get('institutionId', researcher))}
+                    completed={!isNil(get(researcher, 'institutionId'))}
                     readOnlyMode={existingDarsReadOnlyMode || isAttested}
                     includeInstructions={!existingDarsReadOnlyMode}
                     darCode={formData.darCode}

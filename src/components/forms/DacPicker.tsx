@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
-import { isEmpty, isNil } from 'lodash/fp'
+import { isEmpty, isNil } from 'lodash'
 import { Notifications } from 'src/libs/utils'
 import { DAC } from 'src/libs/ajax/DAC'
 import { DacObject } from 'src/types/model'

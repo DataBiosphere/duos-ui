@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Info } from '@mui/icons-material'
 import { Styles, Theme } from 'src/libs/theme'
-import { cloneDeep, findIndex, flow, isNil, join, map, sortBy, sortedUniq } from 'lodash/fp'
+import { chain, cloneDeep, findIndex, isNil } from 'lodash'
 import SimpleTable from 'src/components/SimpleTable'
 import SimpleButton from 'src/components/SimpleButton'
 import PaginationBar from 'src/components/PaginationBar'
@@ -144,12 +144,12 @@ const LibraryCardCell = ({
 }
 
 const roleCell = (roles, id) => {
-  const roleString = flow(
-    map(role => role.name),
-    sortBy(name => name),
-    sortedUniq,
-    join(', '),
-  )(roles)
+  const roleString = chain(roles)
+    .map(role => role.name)
+    .sortBy(name => name)
+    .sortedUniq()
+    .join(', ')
+    .value()
 
   return {
     data: roleString || '- -',
@@ -310,7 +310,7 @@ export default function SigningOfficialTable(props) {
       const listCopy = cloneDeep(researchers)
       successfulCards.forEach((newCard) => {
         const { userEmail, userName, userId } = newCard
-        const targetIndex = findIndex(researcher => userId === researcher.userId)(listCopy)
+        const targetIndex = findIndex(listCopy, researcher => userId === researcher.userId)
         if (targetIndex === -1) { // if card is not found, push new user to top of list
           listCopy.unshift({
             email: userEmail,
@@ -350,10 +350,10 @@ export default function SigningOfficialTable(props) {
     const messageName = userName || userEmail
     try {
       await LibraryCard.deleteLibraryCard(id)
-      const targetIndex = findIndex((researcher) => {
+      const targetIndex = findIndex(researchers, (researcher) => {
         const card = researcher.libraryCard
         return !isNil(card) && id === card.id
-      })(researchers)
+      })
       if (isNil(userId) || researchers[targetIndex].institutionId !== signingOfficial.institutionId) {
         listCopy.splice(targetIndex, 1)
       }

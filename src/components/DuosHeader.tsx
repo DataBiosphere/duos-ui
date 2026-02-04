@@ -2,7 +2,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import { Box, IconButton } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
 import React, { useEffect, useState } from 'react'
-import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent.jsx'
+import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent'
 import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
@@ -25,7 +25,7 @@ interface SubTab {
   isRenderedForUser?: (user: DuosUser) => boolean
 }
 
-interface Tab {
+export interface Tab {
   label: string
   link: string
   search?: string
@@ -88,6 +88,7 @@ export const headerTabsConfig: Tab[] = [
     children: [
       { label: 'Library Cards', link: '/signing_official_console/library_cards' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
+      { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
       { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() },
@@ -318,15 +319,13 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
       subtab => (subtab.isRenderedForUser ?? subtab.isRendered ?? (() => true))(currentUser),
     ) || []
     // Find index of matching subtab
-    const subtabIndex = renderedSubtabs.findIndex(
+    initialSubTab = renderedSubtabs.findIndex(
       subtab => subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search)),
     )
-    if (subtabIndex === -1) {
-      initialSubTab = -1
-    }
-    else {
-      initialSubTab = subtabIndex
-    }
+  }
+
+  if (initialTab === -1) {
+    initialTab = 0
   }
 
   return (
@@ -352,6 +351,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
             orientation="horizontal"
             showProfileLinks={profileLinks}
             profileState={state.showProfileLinks}
+            onSubtabChange={() => {}}
           />
         </div>
       </Box>
@@ -386,7 +386,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
           >
             <NavigationTabsComponent
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
-              makeNotifications={() => {}}
+              makeNotifications={() => null}
               duosLogoImage={duosLogoImage}
               DuosLogo={DuosLogo}
               navbarDuosIcon={navbarDuosIcon}

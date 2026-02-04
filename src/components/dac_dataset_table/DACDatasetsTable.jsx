@@ -4,7 +4,7 @@ import PaginationBar from '../PaginationBar'
 import SimpleTable from '../SimpleTable'
 import cellData from './DACDatasetTableCellData'
 import { styles, DACDatasetTableColumnOptions } from './DACDatasetConstants'
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash'
 import { goToPage as updatePage, recalculateVisibleTable } from 'src/libs/utils'
 import { useNavigate } from 'react-router-dom'
 
@@ -83,7 +83,7 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
       setVisibleList: setVisibleDatasets,
       sort,
     })
-  }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType])
+  }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType, navigate])
 
   // Helper function to update page
   const goToPage = useCallback(

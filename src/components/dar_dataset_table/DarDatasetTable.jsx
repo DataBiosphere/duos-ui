@@ -4,11 +4,10 @@ import PaginationBar from '../PaginationBar'
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils'
 import SimpleTable from '../SimpleTable'
 import cellData from './DarDatasetTableCellData'
-import { compact, isNil, map, uniq } from 'lodash/fp'
+import { compact, isEmpty, isNil, map, uniq } from 'lodash'
 import { binCollectionToBuckets } from '../../utils/BucketUtils'
 import { styles } from '../../utils/darDatasetUtils'
 import { Notifications } from '../../libs/utils'
-import { isEmpty } from 'lodash'
 
 const storageDarDatasetSort = 'storageDarDatasetSort'
 
@@ -108,7 +107,7 @@ export const DarDatasetTable = (props) => {
         return
       }
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
-      const dacIds = isUnfilteredView ? [] : uniq(compact(map(r => r.dacId)(user.roles)))
+      const dacIds = isUnfilteredView ? [] : uniq(compact(map(user.roles, r => r.dacId)))
       const buckets = await binCollectionToBuckets(collection, dacIds)
       const dataAccessBuckets = buckets.filter(
         b => b.isRP !== true,
@@ -125,12 +124,15 @@ export const DarDatasetTable = (props) => {
   }, [collection, isUnfilteredView, user])
 
   useEffect(() => {
-    try {
-      init()
+    const callInit = async () => {
+      try {
+        await init()
+      }
+      catch (_error) {
+        Notifications.showError({ text: 'Failed to initialize collection' })
+      }
     }
-    catch (_error) {
-      Notifications.showError({ text: 'Failed to initialize collection' })
-    }
+    callInit()
   }, [init])
 
   const changeTableSize = useCallback((value) => {

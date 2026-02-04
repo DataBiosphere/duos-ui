@@ -7,6 +7,7 @@ import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup
 import { DacPicker } from 'src/components/forms/DacPicker'
 import { FileInput } from 'src/components/forms/FileInput'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
@@ -22,7 +23,6 @@ interface Validation {
   accessManagement?: ValidationError
   numberOfParticipants?: ValidationError
   dataAccessCommitteeId?: ValidationError
-  dataLocation?: ValidationError
   primaryConsent?: ValidationError
   gs?: ValidationError
   mor?: ValidationError
@@ -73,12 +73,14 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup?.diseaseSpecificUse))
   const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
 
+  const diseaseSpecificUse = consentGroup?.diseaseSpecificUse
+
   useEffect(() => {
     let mounted = true
     const loadOntologyTerms = async () => {
-      if (!isEmpty(consentGroup?.diseaseSpecificUse)) {
+      if (!isEmpty(diseaseSpecificUse)) {
         try {
-          const terms = await findOntologyTerms(consentGroup!.diseaseSpecificUse)
+          const terms = await findOntologyTerms(diseaseSpecificUse!)
           if (mounted && Array.isArray(terms)) {
             setSelectedDiseases(terms)
           }
@@ -92,7 +94,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     return () => {
       mounted = false
     }
-  }, [consentGroup?.diseaseSpecificUse])
+  }, [diseaseSpecificUse])
 
   const [showMORText, setShowMORText] = useState(consentGroup?.mor)
   const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
@@ -164,7 +166,6 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     if (showOtherPrimaryText && (!cg.otherPrimary?.trim())) {
       v.otherPrimary = makeError('required')
     }
-    if (!cg.dataLocation?.trim()) v.dataLocation = makeError('required')
     if (showGSText && (!cg.gs?.trim())) {
       v.gs = makeError('required')
     }
@@ -583,7 +584,6 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
           {/* location */}
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
             <FormFieldTitle
-              required={true}
               title="Data Location"
               description="Please provide the location of your data resource for this consent group"
               disabled={readOnly}
@@ -596,14 +596,14 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               name="dataLocation"
               type={FormFieldTypes.SELECT}
               selectOptions={[
-                'AnVIL Workspace',
-                'Terra Workspace',
-                'TDR Location',
-                'Not Determined',
+                DataLocationType.AnVILWorkspace,
+                DataLocationType.TerraWorkspace,
+                DataLocationType.TDRLocation,
+                DataLocationType.NotDetermined,
+                DataLocationType.Other,
               ]}
               placeholder="Data Location(s)"
               defaultValue={current?.dataLocation}
-              validation={validation.dataLocation}
               onChange={({ key, value }: { key: string, value: string }) => {
                 if (value === 'Not Determined') {
                   const next = structuredClone(current)

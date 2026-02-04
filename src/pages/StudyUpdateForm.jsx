@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Notifications } from '../libs/utils'
 import { Styles } from '../libs/theme'
-import { cloneDeep, isEmpty, isNil } from 'lodash/fp'
+import { cloneDeep, isEmpty, isNil, set } from 'lodash'
 
 import DataSubmissionStudyInformation from './data_submission/ds_study_information'
 import NihAnvilUse from './data_submission/NihAnvilUse'
@@ -12,7 +12,6 @@ import { Institution } from '../libs/ajax/Institution'
 import { User } from '../libs/ajax/User'
 import { DataSet } from '../libs/ajax/DataSet'
 import { Storage } from '../libs/storage'
-import { set } from 'lodash'
 import { useNavigate, useParams } from 'react-router-dom'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 
@@ -143,9 +142,12 @@ export const StudyUpdateForm = () => {
   }, [extractAllProperties])
 
   useEffect(() => {
-    if (isNil(formData.studyName) && !isEmpty(study)) {
-      prefillFormData(study)
+    const init = async () => {
+      if (isNil(formData.studyName) && !isEmpty(study)) {
+        await prefillFormData(study)
+      }
     }
+    init()
   }, [prefillFormData, study, formData])
 
   const datasets = formData.datasets

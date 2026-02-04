@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useCallback } from 'react'
-import { isNil } from 'lodash/fp'
+import { cloneDeep, isNil } from 'lodash'
 import { DarCollectionTableColumnOptions, styles, consoleTypes } from '../../utils/DarCollectionUtils'
 import { Storage } from '../../libs/storage'
 import PaginationBar from '../PaginationBar'
@@ -7,7 +7,6 @@ import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/util
 import SimpleTable from '../SimpleTable'
 import cellData from './DarCollectionTableCellData'
 import CollectionConfirmationModal from './CollectionConfirmationModal'
-import { cloneDeep } from 'lodash'
 import './dar_collection_table.css'
 import { DarDatasetTable } from '../dar_dataset_table/DarDatasetTable'
 import { Collections } from '../../libs/ajax/Collections'
@@ -143,6 +142,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const {
     collections, columns, isLoading, cancelCollection, reviseCollection,
     openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
+    approveCollection,
   } = props
   const isUnfilteredView = consoleType === consoleTypes.ADMIN || consoleType === consoleTypes.RESEARCHER
 
@@ -191,6 +191,12 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     }
   }, [])
 
+  const showConfirmationModal = useCallback((collectionSummary, action = '') => {
+    setConsoleAction(action)
+    setSelectedCollection(collectionSummary)
+    setShowConfirmation(true)
+  }, [])
+
   useEffect(() => {
     recalculateVisibleTable({
       tableSize,
@@ -212,13 +218,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort,
     })
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById])
-
-  const showConfirmationModal = (collectionSummary, action = '') => {
-    setConsoleAction(action)
-    setSelectedCollection(collectionSummary)
-    setShowConfirmation(true)
-  }
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById, showConfirmationModal])
 
   // Helper function to update page
   const goToPage = useCallback(
@@ -305,6 +305,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         openCollection={openCollection}
         deleteDraft={deleteDraft}
         consoleAction={consoleAction}
+        approveCollection={approveCollection}
       />
     </Fragment>
   )
