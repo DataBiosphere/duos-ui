@@ -1,5 +1,6 @@
 import { isEmailAddress } from '../../libs/utils'
 import { isString, isEmpty, isNil, isArray, isNumber } from 'lodash'
+import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
 
 export const requiredValidator = {
@@ -23,6 +24,16 @@ export const emailValidator = {
   id: 'email',
   isValid: isEmailAddress,
   msg: 'Please enter a valid email address (e.g., person@example.com)',
+}
+
+export const emailDomainValidator = {
+  id: 'emailDomain',
+  isValid: (newUserEmail) => {
+    const newUserDomain = newUserEmail.split('@')[1]
+    const authenticatedUserDomain = Storage.getCurrentUser().email.split('@')[1]
+    return newUserDomain === authenticatedUserDomain
+  },
+  msg: 'Please enter an email domain that matches your organization domain',
 }
 
 export const dateValidator = {
@@ -49,7 +60,7 @@ export const greaterThanZeroValidator = {
   msg: 'Please enter a number greater than zero',
 }
 
-const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, dayJSValidator, uniqueValidator, greaterThanZeroValidator]
+const validators = [requiredValidator, urlValidator, emailValidator, emailDomainValidator, dateValidator, dayJSValidator, uniqueValidator, greaterThanZeroValidator]
 
 /**
  * Validates the form value
