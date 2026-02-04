@@ -345,12 +345,12 @@ export const processRestrictionStatements = async (
 
   const diseaseValue = value as (string | { label: string })[]
   const firstElement = head(diseaseValue)
-  
+
   // Check if ontology labels are contained within the dataUse object
   if (!isNil(firstElement) && !isNil((firstElement as { label: string }).label)) {
     return processDiseaseRestrictionsWithLabels(diseaseValue as { label: string }[])
   }
-  
+
   // Process datasets without ontology labels saved on the dataUse object
   return processDiseaseRestrictionsWithUrls(diseaseValue as string[])
 }
@@ -453,7 +453,7 @@ const addPrimaryCodes = (darInfo: DarInfo, dataUseSummary: DataUseSummary): void
   if (darInfo.hmb) {
     dataUseSummary.primary = concat(dataUseSummary.primary, [srpTranslations.hmb]) as DataUseTerm[]
   }
-  
+
   /**
    * population refers to question 2.3.2: The outcome of this study is expected to provide
    * new knowledge about the origins of a certain population or its ancestry.
@@ -472,7 +472,7 @@ const addPrimaryCodes = (darInfo: DarInfo, dataUseSummary: DataUseSummary): void
     const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies || []))
     dataUseSummary.primary = uniq(concat(dataUseSummary.primary, [diseaseTranslation]))
   }
-  
+
   if (darInfo.other) {
     dataUseSummary.primary = concat(dataUseSummary.primary, [srpTranslations.other(darInfo.otherText || null)])
   }
