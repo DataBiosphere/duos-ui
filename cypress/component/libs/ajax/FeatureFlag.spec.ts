@@ -1,5 +1,6 @@
 import { Config } from 'src/libs/config'
 import {
+  FeatureFlag,
   getAllFeatureFlags,
   getFeatureFlag,
   getFlagEsIndexKeyName,
@@ -39,13 +40,14 @@ describe('FeatureFlag ajax', () => {
 
   it('getFeatureFlag returns the per-key value when available', () => {
     cy.window().then((win) => {
+      const mockFlag = { id: 'someFlag', value: 'enabled', createDate: 123, updateDate: 456 }
       fetchStub.resolves(
-        new win.Response(JSON.stringify('enabled'), {
+        new win.Response(JSON.stringify(mockFlag), {
           status: 200,
           headers: { 'content-type': 'application/json' },
         }),
       )
-      cy.wrap(getFeatureFlag('someFlag')).should('equal', 'enabled')
+      cy.wrap(getFeatureFlag('someFlag')).should('deep.equal', mockFlag)
     })
   })
 
@@ -61,7 +63,7 @@ const createFlagTestSuite = <T>(
   flagName: string,
   getFlagFn: () => Promise<T>,
   resetFn: () => void,
-  mockResponseValue: string,
+  mockResponseValue: FeatureFlag,
   expectedValue: T,
   expectedErrorValue: T | undefined = undefined,
 ) => {
@@ -120,5 +122,5 @@ const createFlagTestSuite = <T>(
   })
 }
 
-createFlagTestSuite('ES_TYPE_TO_INDEX_ENABLED', getFlagEsIndexKeyName, resetEsIndexKeyNamePromise, 'true', '_index', '_type')
-createFlagTestSuite('NHGRI_RESTRICTED_DAC', getFlagNhgriDacId, resetNhgriDacIdPromise, 'dac-id', 'dac-id')
+createFlagTestSuite('ES_TYPE_TO_INDEX_ENABLED', getFlagEsIndexKeyName, resetEsIndexKeyNamePromise, { id: 'ES_TYPE_TO_INDEX_ENABLED', value: 'true', createDate: 123, updateDate: 456 }, '_index', '_type')
+createFlagTestSuite('NHGRI_RESTRICTED_DAC', getFlagNhgriDacId, resetNhgriDacIdPromise, { id: 'NHGRI_RESTRICTED_DAC', value: 'dac-id', createDate: 123, updateDate: 456 }, 'dac-id')
