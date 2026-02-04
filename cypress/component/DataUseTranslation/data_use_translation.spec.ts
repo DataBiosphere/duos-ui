@@ -1,11 +1,6 @@
-<<<<<<< HEAD:cypress/component/DataUseTranslation/data_use_translation.spec.ts
 import { processDefinedLimitations, consentTranslations, TranslationEntry } from 'src/libs/dataUseTranslation'
-import { isEmpty, cloneDeep } from 'lodash/fp'
-import { DataUse } from 'src/types/model'
-=======
-import { processDefinedLimitations, consentTranslations } from 'src/libs/dataUseTranslation'
 import { isEmpty, cloneDeep } from 'lodash'
->>>>>>> 7958d3fb320298e8bef2f18d4a1b67e19ebd4b99:cypress/component/DataUseTranslation/data_use_translation.spec.js
+import { DataUse } from 'src/types/model'
 
 interface MockDataUse extends DataUse {
   [key: string]: boolean | string | string[] | undefined
