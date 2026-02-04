@@ -9,6 +9,7 @@ import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgr
 import { MultiValue } from 'react-select'
 import { LibraryCard } from 'src/types/model'
 import { Spinner } from 'src/components/Spinner'
+import { FormField, FormValidators } from 'src/components/forms/forms'
 
 // This represents the fields describing users in a selection dropdown menu
 interface UserOption {
@@ -31,8 +32,20 @@ export interface LibraryCardFormModalProps {
   users: UserOption[]
 }
 
+interface NewUserInput {
+  name: string
+  email: string
+}
+
+interface FormFieldChange {
+  key: string
+  value: string
+}
+
 const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
   const { selectedUsers, dropdownOptions, updateUsers } = props
+  const [isNewUser, setIsNewUser] = useState<boolean>(false)
+  const [newUser, setNewUser] = useState<NewUserInput>({ name: '', email: '' })
 
   // Represents users that do not already have library cards
   const cardlessUserOptions = dropdownOptions.filter(option => isNil(option.libraryCard))
@@ -51,25 +64,67 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     }, 0)
   }
 
+  // const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
+
+  const onChangeNewUserInput = ({ key, value }: FormFieldChange) => {
+    let updated: NewUserInput = { ...newUser }
+
+    updated = { ...updated, [key]: value }
+
+    setNewUser(updated)
+  }
+
   return (
     <div style={{ display: 'flex' }}>
       <div style={{ marginBottom: '2%', width: '100%' }}>
-        <p><strong>Users</strong></p>
-        <AsyncSelect
-          classNamePrefix="select"
-          className="select-autocomplete"
-          key="select-user"
-          isClearable={true}
-          isMulti={true}
-          onChange={updateUsers}
-          value={selectedUsers}
-          defaultOptions={cardlessUserOptions}
-          loadOptions={loadOptions}
-          placeholder="Select a DUOS User..."
-          isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-          /* eslint-disable-next-line no-constant-binary-expression */
-          getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
-        />
+        {!isNewUser
+          ? (
+              <>
+                <p><strong>Select from Existing Users OR <a onClick={() => { setIsNewUser(true) }}>Add New User</a></strong></p>
+                <AsyncSelect
+                  classNamePrefix="select"
+                  className="select-autocomplete"
+                  key="select-user"
+                  isClearable={true}
+                  isMulti={true}
+                  onChange={updateUsers}
+                  value={selectedUsers}
+                  defaultOptions={cardlessUserOptions}
+                  loadOptions={loadOptions}
+                  placeholder="Select a DUOS User..."
+                  isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+                  /* eslint-disable-next-line no-constant-binary-expression */
+                  getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
+                />
+              </>
+            )
+          : (
+              <>
+                <p><strong>Add New User OR <a onClick={() => { setIsNewUser(false) }}>Select from Existing Users</a></strong></p>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <FormField
+                    id="name"
+                    title="User Name"
+                    hideTitle={true}
+                    defaultValue={newUser?.name}
+                    placeholder="User Name"
+                    validators={[FormValidators.REQUIRED]}
+                    onChange={onChangeNewUserInput}
+                    style={{ flex: 1, padding: '0.5rem' }}
+                  />
+                  <FormField
+                    id="email"
+                    title="User Email"
+                    hideTitle={true}
+                    defaultValue={newUser?.email}
+                    placeholder="User Email"
+                    validators={[FormValidators.REQUIRED, FormValidators.EMAIL, FormValidators.EMAILDOMAIN]}
+                    onChange={onChangeNewUserInput}
+                    style={{ flex: 1, padding: '0.5rem' }}
+                  />
+                </div>
+              </>
+            )}
       </div>
     </div>
   )
