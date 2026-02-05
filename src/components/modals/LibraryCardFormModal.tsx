@@ -7,7 +7,7 @@ import AsyncSelect from 'react-select/async'
 import SimpleButton from 'src/components/SimpleButton'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
 import { MultiValue } from 'react-select'
-import { LibraryCard } from 'src/types/model'
+import { LibraryCard, UserRole } from 'src/types/model'
 import { Spinner } from 'src/components/Spinner'
 import { FormField, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
@@ -189,14 +189,14 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   const [validation, setValidation] = useState<Validation>({})
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const validationFailed = (v: Validation) => Object.keys(v).length > 0 && Object.values(v).some(e => !!e)
+  const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
   // Handle confirm button disabled state
   const noSelectedUsers = (): boolean => !isNewUser && selectedUsers.length === 0
-  const incompleteValidation = (): boolean => isNewUser && validationFailed(validation)
+  const hasNewUserData = (): boolean => newUser.name?.trim() !== '' && newUser.email?.trim() !== ''
+  const incompleteValidation = (): boolean => isNewUser && (!hasNewUserData() || validationFailed(validation))
   const isConfirmDisabled = (): boolean => isLoading || noSelectedUsers() || incompleteValidation()
 
-  console.log('validation:', validation)
   // Create a library card for each selected user
   const createLibraryCards = async () => {
     if (incompleteValidation()) return
@@ -209,12 +209,12 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
       if (isNewUser) {
         try {
           // Create new user
-          const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
+          const researcherRole = { roleId: 5, name: USER_ROLES.researcher } as UserRole
           const createdUser = await User.create({
             displayName: newUser.name,
             email: newUser.email,
-            roles: [researcherRole],
             emailPreference: false,
+            roles: [researcherRole],
           } as CreateDuosUserRequest)
 
           // Add the new user to the selected users list
