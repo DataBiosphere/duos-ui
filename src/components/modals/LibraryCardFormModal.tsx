@@ -41,6 +41,7 @@ interface FormFieldRowProps {
   setNewUser: (value: NewUserInput) => void
   validation: Validation
   setValidation: (v: Validation) => void
+  setHasValidated: (v: boolean) => void
 }
 
 export interface LibraryCardFormModalProps {
@@ -71,6 +72,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     setNewUser,
     validation,
     setValidation,
+    setHasValidated,
   } = props
 
   // Represents users that do not already have library cards
@@ -112,7 +114,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
 
   const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
-  const calcErrors = (u: NewUserInput): Validation => {
+  const calcErrors = async (u: NewUserInput): Promise<Validation> => {
     const v: Validation = {}
     if (!u.name?.trim()) v.name = makeError('required')
 
@@ -122,16 +124,17 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     else if (!FormValidators.EMAIL.isValid(u.email)) {
       v.email = makeError('email')
     }
-    else if (!FormValidators.EMAILDOMAIN.isValid(u.email)) {
+    else if (!(await FormValidators.EMAILDOMAIN.isValid(u.email))) {
       v.email = makeError('emailDomain')
     }
     return v
   }
 
-  const handleNewUserChange = (change: FormFieldChange) => {
+  const handleNewUserChange = async (change: FormFieldChange) => {
     const updated = { ...newUser, [change.key]: change.value }
     setNewUser(updated)
-    setValidation(calcErrors(updated))
+    setValidation(await calcErrors(updated))
+    setHasValidated(true)
   }
 
   return (
@@ -198,6 +201,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   const [isNewUser, setIsNewUser] = useState<boolean>(false)
   const [newUser, setNewUser] = useState<NewUserInput>({ name: '', email: '' })
   const [validation, setValidation] = useState<Validation>({})
+  const [hasValidated, setHasValidated] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
@@ -205,7 +209,11 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   // Handle confirm button disabled state
   const noSelectedUsers = (): boolean => !isNewUser && selectedUsers.length === 0
   const hasNewUserData = (): boolean => newUser.name?.trim() !== '' && newUser.email?.trim() !== ''
-  const incompleteValidation = (): boolean => isNewUser && (!hasNewUserData() || validationFailed(validation))
+  const incompleteValidation = (): boolean => {
+    if (!isNewUser) return false
+    if (!hasValidated && !hasNewUserData()) return true // Initial empty state
+    return hasValidated && validationFailed(validation) // Has errors after validation
+  }
   const isConfirmDisabled = (): boolean => isLoading || noSelectedUsers() || incompleteValidation()
 
   // Create a library card for each selected user
@@ -254,9 +262,11 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
       })
 
       await createOnClick(cards, createdUser)
+      setSelectedUsers([])
       setIsNewUser(false)
       setNewUser({ name: '', email: '' })
-      setSelectedUsers([])
+      setHasValidated(false)
+      setValidation({})
     }
     finally {
       setIsLoading(false)
@@ -298,6 +308,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
           setNewUser={setNewUser}
           validation={validation}
           setValidation={setValidation}
+          setHasValidated={setHasValidated}
           dropdownOptions={users}
         />
         <div style={{ display: 'inline-block', marginBottom: '1rem' }}>
