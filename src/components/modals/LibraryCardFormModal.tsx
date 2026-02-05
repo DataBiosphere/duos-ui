@@ -11,6 +11,11 @@ import { LibraryCard } from 'src/types/model'
 import { Spinner } from 'src/components/Spinner'
 import { FormField, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { User } from 'src/libs/ajax/User'
+import { CreateDuosUserRequest } from 'src/types/requestTypes'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
+import ReactMarkdown from 'react-markdown'
 
 interface Validation {
   name?: ValidationError
@@ -184,13 +189,14 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   const [validation, setValidation] = useState<Validation>({})
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
+  const validationFailed = (v: Validation) => Object.keys(v).length > 0 && Object.values(v).some(e => !!e)
 
   // Handle confirm button disabled state
   const noSelectedUsers = (): boolean => !isNewUser && selectedUsers.length === 0
   const incompleteValidation = (): boolean => isNewUser && validationFailed(validation)
   const isConfirmDisabled = (): boolean => isLoading || noSelectedUsers() || incompleteValidation()
 
+  console.log('validation:', validation)
   // Create a library card for each selected user
   const createLibraryCards = async () => {
     if (incompleteValidation()) return
@@ -201,14 +207,29 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
       setIsLoading(true)
 
       if (isNewUser) {
-        // Create new user
+        try {
+          // Create new user
+          const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
+          const createdUser = await User.create({
+            displayName: newUser.name,
+            email: newUser.email,
+            roles: [researcherRole],
+            emailPreference: false,
+          } as CreateDuosUserRequest)
 
-        // Add the new user to the selected users list
-        selectedUsers.push({
-          userId: -1,
-          displayName: newUser.name,
-          email: newUser.email,
-        })
+          // Add the new user to the selected users list
+          if (createdUser) {
+            selectedUsers.push({
+              userId: createdUser.userId,
+              displayName: createdUser.displayName,
+              email: createdUser.email,
+            })
+          }
+        }
+        catch (error) {
+          Notifications.showError({ text: <ReactMarkdown>{extractError(error)}</ReactMarkdown> })
+          return
+        }
       }
 
       // Map selected users to library cards
