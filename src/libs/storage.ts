@@ -1,7 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { DuosUser } from 'src/types/model'
 import { OidcUser as OidcUserType } from 'src/libs/auth/oidcBroker'
-import { Institution } from 'src/libs/ajax/Institution'
 
 // Storage Variables
 const CurrentUser = 'CurrentUser'
@@ -70,8 +69,6 @@ export const Storage = {
   },
 
   setCurrentUser: async (data: DuosUser): Promise<void> => {
-    // Fetch institution data
-    data.institution = await Institution.getById(data.institutionId)
     localStorage.setItem(CurrentUser, JSON.stringify(data))
   },
 
