@@ -45,7 +45,8 @@ export const emailDomainValidator = {
   },
   get msg() {
     const domains = cachedInstitution?.domains?.join(', ') || ''
-    return `Please enter an email that matches your organization domains${domains ? `: ${domains}` : ''}`
+    const baseMessage = 'Please enter an email that matches your organization domains'
+    return domains ? `${baseMessage}: ${domains}` : baseMessage
   },
 }
 
