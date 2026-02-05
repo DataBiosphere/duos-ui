@@ -2,7 +2,6 @@ import { isEmailAddress } from '../../libs/utils'
 import { isString, isEmpty, isNil, isArray, isNumber } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
-import { Institution } from 'src/libs/ajax/Institution.js'
 
 export const requiredValidator = {
   id: 'required',
@@ -30,10 +29,7 @@ export const emailValidator = {
 export const emailDomainValidator = {
   id: 'emailDomain',
   isValid: async (newUserEmail) => {
-    const institutionId = Storage.getCurrentUser().institutionId
-    const institution = await Institution.getById(institutionId)
-    const institutionDomains = institution?.domains || []
-
+    const institutionDomains = Storage.getCurrentUser().institution?.domains || []
     const newUserDomain = newUserEmail.split('@')[1]
 
     return institutionDomains.includes(newUserDomain)
