@@ -308,7 +308,6 @@ export default function SigningOfficialTable(props) {
     // Update researchers list with successful cards
     if (successfulCards.length > 0) {
       const listCopy = cloneDeep(researchers)
-
       successfulCards.forEach((newCard) => {
         const { userEmail, userName, userId } = newCard
         const targetIndex = findIndex(listCopy, researcher => userId === researcher.userId)
