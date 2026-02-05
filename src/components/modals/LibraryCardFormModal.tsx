@@ -90,7 +90,17 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     }, 0)
   }
 
-  const toggleAlternateFormLink = () => {
+  const toggleLink = (label: string, onClick: () => void) => (
+    <Link
+      component="button"
+      variant="body2"
+      onClick={onClick}
+    >
+      {label}
+    </Link>
+  )
+
+  const toggleOnClick = () => {
     if (isNewUser) {
       setNewUser({ name: '', email: '' })
     }
@@ -124,23 +134,13 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     setValidation(calcErrors(updated))
   }
 
-  const toggleLink = (label: string, onClick: () => void) => (
-    <Link
-      component="button"
-      variant="body2"
-      onClick={onClick}
-    >
-      {label}
-    </Link>
-  )
-
   return (
     <div style={{ display: 'flex' }}>
       <div style={{ marginBottom: '2%', width: '100%' }}>
         {isNewUser
           ? (
               <>
-                <p><strong>Add User OR {toggleLink('Select Existing Users', toggleAlternateFormLink)}</strong></p>
+                <p><strong>Add User OR {toggleLink('Select Existing Users', toggleOnClick)}</strong></p>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <FormField
                     id="name"
@@ -169,7 +169,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
             )
           : (
               <>
-                <p><strong>Select Existing Users OR {toggleLink('Add User', toggleAlternateFormLink)}</strong></p>
+                <p><strong>Select Existing Users OR {toggleLink('Add User', toggleOnClick)}</strong></p>
                 <AsyncSelect
                   classNamePrefix="select"
                   className="select-autocomplete"
