@@ -7,7 +7,7 @@ import AsyncSelect from 'react-select/async'
 import SimpleButton from 'src/components/SimpleButton'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
 import { MultiValue } from 'react-select'
-import { LibraryCard, UserRole } from 'src/types/model'
+import { DuosUser, LibraryCard, UserRole } from 'src/types/model'
 import { Spinner } from 'src/components/Spinner'
 import { FormField, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
@@ -44,7 +44,7 @@ interface FormFieldRowProps {
 
 export interface LibraryCardFormModalProps {
   showModal: boolean
-  createOnClick: (cards: LibraryCard[]) => Promise<void>
+  createOnClick: (cards: LibraryCard[], newUser: DuosUser | false | undefined) => Promise<void>
   closeModal: () => void
   users: UserOption[]
 }
@@ -205,12 +205,13 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
 
     try {
       setIsLoading(true)
+      let createdUser: DuosUser | false | undefined = undefined
 
       if (isNewUser) {
         try {
           // Create new user
           const researcherRole = { roleId: 5, name: USER_ROLES.researcher } as UserRole
-          const createdUser = await User.create({
+          createdUser = await User.create({
             displayName: newUser.name,
             email: newUser.email,
             emailPreference: false,
@@ -241,7 +242,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
         } as LibraryCard
       })
 
-      await createOnClick(cards)
+      await createOnClick(cards, createdUser)
       setIsNewUser(false)
       setNewUser({ name: '', email: '' })
       setSelectedUsers([])
