@@ -146,7 +146,7 @@ const Home = (props) => {
               <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
               <h1 style={homeTitle}>Data Use Oversight System</h1>
               <div className="hidden-xs" style={homeBannerDescription}>
-                Get data faster.
+                Access data faster.
                 {' '}
               </div>
             </div>
