@@ -16,6 +16,7 @@ import { CreateDuosUserRequest } from 'src/types/requestTypes'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import ReactMarkdown from 'react-markdown'
+import { Link } from '@mui/material'
 
 interface Validation {
   name?: ValidationError
@@ -123,33 +124,23 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     setValidation(calcErrors(updated))
   }
 
+  const toggleLink = (label: string, onClick: () => void) => (
+    <Link
+      component="button"
+      variant="body2"
+      onClick={onClick}
+    >
+      {label}
+    </Link>
+  )
+
   return (
     <div style={{ display: 'flex' }}>
       <div style={{ marginBottom: '2%', width: '100%' }}>
-        {!isNewUser
+        {isNewUser
           ? (
               <>
-                <p><strong>Select from Existing Users OR <a onClick={toggleAlternateFormLink}>Add New User</a></strong></p>
-                <AsyncSelect
-                  classNamePrefix="select"
-                  className="select-autocomplete"
-                  key="select-user"
-                  isClearable={true}
-                  isMulti={true}
-                  onChange={updateUsers}
-                  value={selectedUsers}
-                  defaultOptions={cardlessUserOptions}
-                  loadOptions={loadOptions}
-                  placeholder="Select a DUOS User..."
-                  isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-                  /* eslint-disable-next-line no-constant-binary-expression */
-                  getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
-                />
-              </>
-            )
-          : (
-              <>
-                <p><strong>Add New User OR <a onClick={toggleAlternateFormLink}>Select from Existing Users</a></strong></p>
+                <p><strong>Add User OR {toggleLink('Select Existing Users', toggleAlternateFormLink)}</strong></p>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <FormField
                     id="name"
@@ -174,6 +165,26 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
                     style={{ flex: 1, padding: '0.5rem' }}
                   />
                 </div>
+              </>
+            )
+          : (
+              <>
+                <p><strong>Select Existing Users OR {toggleLink('Add User', toggleAlternateFormLink)}</strong></p>
+                <AsyncSelect
+                  classNamePrefix="select"
+                  className="select-autocomplete"
+                  key="select-user"
+                  isClearable={true}
+                  isMulti={true}
+                  onChange={updateUsers}
+                  value={selectedUsers}
+                  defaultOptions={cardlessUserOptions}
+                  loadOptions={loadOptions}
+                  placeholder="Select a DUOS User..."
+                  isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+                  /* eslint-disable-next-line no-constant-binary-expression */
+                  getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
+                />
               </>
             )}
       </div>
