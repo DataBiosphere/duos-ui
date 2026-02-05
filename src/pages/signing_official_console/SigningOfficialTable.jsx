@@ -311,8 +311,7 @@ export default function SigningOfficialTable(props) {
       successfulCards.forEach((newCard) => {
         const { userEmail, userName, userId } = newCard
         const targetIndex = findIndex(listCopy, researcher => userId === researcher.userId)
-        // if card is not found and new user, push new user to top of list
-        if (targetIndex === -1) {
+        if (targetIndex === -1) { // if card is not found, push new user to top of list
           listCopy.unshift({
             email: newUser?.email || userEmail,
             displayName: newUser?.displayName || userName,
