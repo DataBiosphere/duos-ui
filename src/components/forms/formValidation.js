@@ -2,6 +2,9 @@ import { isEmailAddress } from '../../libs/utils'
 import { isString, isEmpty, isNil, isArray, isNumber } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
+import { Institution } from 'src/libs/ajax/Institution.js'
+
+let cachedInstitution = null
 
 export const requiredValidator = {
   id: 'required',
@@ -29,12 +32,21 @@ export const emailValidator = {
 export const emailDomainValidator = {
   id: 'emailDomain',
   isValid: async (newUserEmail) => {
-    const institutionDomains = Storage.getCurrentUser().institution?.domains || []
+    const institutionId = Storage.getCurrentUser().institutionId
+
+    if (!cachedInstitution) {
+      cachedInstitution = await Institution.getById(institutionId)
+    }
+
+    const institutionDomains = cachedInstitution?.domains || []
     const newUserDomain = newUserEmail.split('@')[1]
 
     return institutionDomains.includes(newUserDomain)
   },
-  msg: 'Please enter an email that matches your organization domains',
+  get msg() {
+    const domains = cachedInstitution?.domains?.join(', ') || ''
+    return `Please enter an email that matches your organization domains${domains ? `: ${domains}` : ''}`
+  },
 }
 
 export const dateValidator = {
