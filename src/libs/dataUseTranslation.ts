@@ -22,6 +22,29 @@ export interface DiseaseOntology {
   label: string
 }
 
+/**
+ * Represents Data Access Request information used for translation.
+ *
+ * Note: Many of these fields are required in the DAR form
+ * (see `requiredRusFields` in `darFormUtils.ts`). They are typed as
+ * optional here to handle:
+ * 1. Legacy DARs that predate when fields became required
+ * 2. Newer fields (like aiLlmUse) that don't exist in older DARs
+ * 3. Incomplete/draft DARs during form submission
+ *
+ * Making fields optional lets translation functions handle both new,
+ * complete DARs and older, incomplete ones gracefully.
+ *
+ * Fields required by current DAR form (kept optional for backward
+ * compatibility):
+ * - aiLlmUse, controls, forProfit, pediatric, illegalBehavior,
+ *   sexualDiseases
+ * - stigmatizedDiseases, vulnerablePopulation, population,
+ *   psychiatricTraits, notHealth
+ *
+ * Primary purpose fields (form requires at least one of these):
+ * - hmb, diseases, poa / populationMigration, methods, or other
+ */
 export interface DarInfo {
   hmb?: boolean
   poa?: boolean
