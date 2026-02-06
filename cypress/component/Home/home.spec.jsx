@@ -14,7 +14,7 @@ describe('Home Page - Tests', function () {
 
     it('renders the page header correctly', function () {
       cy.contains('Data Use Oversight System').should('be.visible')
-      cy.contains('Get data faster').should('be.visible')
+      cy.contains('Access data faster').should('be.visible')
     })
 
     it('renders the Data Libraries section with consistent message', function () {
@@ -71,7 +71,7 @@ describe('Home Page - Tests', function () {
 
     it('renders the page header correctly', function () {
       cy.contains('Data Use Oversight System').should('be.visible')
-      cy.contains('Get data faster').should('be.visible')
+      cy.contains('Access data faster').should('be.visible')
     })
 
     it('renders the Data Libraries section with clickable message', function () {
