@@ -26,46 +26,37 @@ export interface DiseaseOntology {
  * Represents Data Access Request information used for translation.
  *
  * Note: Many of these fields are required in the DAR form
- * (see `requiredRusFields` in `darFormUtils.ts`). They are typed as
- * optional here to handle:
- * 1. Legacy DARs that predate when fields became required
- * 2. Newer fields (like aiLlmUse) that don't exist in older DARs
+ * (see `requiredRusFields` in `darFormUtils.ts`).
  *
- * Making fields optional lets translation functions handle both new,
- * complete DARs and older, incomplete ones gracefully.
- *
- * Fields required by current DAR form (kept optional for backward
- * compatibility):
- * - aiLlmUse, controls, forProfit, pediatric, illegalBehavior,
- *   sexualDiseases
- * - stigmatizedDiseases, vulnerablePopulation, population,
- *   psychiatricTraits, notHealth
+ * Fields marked as required are present in all DAR records (including
+ * legacy DARs). Optional fields are those that don't exist in older
+ * DARs (e.g., poa, populationMigration, methods, addiction, aiLlmUse).
  *
  * Primary purpose fields (form requires at least one of these):
  * - hmb, diseases, poa / populationMigration, methods, or other
  */
 export interface DarInfo {
-  hmb?: boolean
+  hmb: boolean
   poa?: boolean
   populationMigration?: boolean
-  diseases?: boolean
-  other?: boolean
-  otherText?: string
-  ontologies?: DiseaseOntology[]
+  diseases: boolean
+  other: boolean
+  otherText: string
+  ontologies: DiseaseOntology[]
   methods?: boolean
   aiLlmUse?: boolean
-  controls?: boolean
-  forProfit?: boolean
-  gender?: string
-  pediatric?: boolean
-  illegalBehavior?: boolean
+  controls: boolean
+  forProfit: boolean
+  gender: string
+  pediatric: boolean
+  illegalBehavior: boolean
   addiction?: boolean
-  sexualDiseases?: boolean
-  stigmatizedDiseases?: boolean
-  vulnerablePopulation?: boolean
-  population?: boolean
-  psychiatricTraits?: boolean
-  notHealth?: boolean
+  sexualDiseases: boolean
+  stigmatizedDiseases: boolean
+  vulnerablePopulation: boolean
+  population: boolean
+  psychiatricTraits: boolean
+  notHealth: boolean
 }
 
 /**
