@@ -465,8 +465,7 @@ export const translateDataUseRestrictionsFromDataUseArray = async (
       restriction => !isEmpty(restriction),
     )
   }
-  catch (error) {
-    console.error('Failed to translate Data Use Restrictions from list:', error)
+  catch (_error) {
     throw new Error('Failed to translate Data Use Restrictions from list')
   }
 }
