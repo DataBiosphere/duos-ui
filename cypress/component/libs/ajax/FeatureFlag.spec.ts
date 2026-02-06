@@ -3,9 +3,8 @@ import {
   FeatureFlag,
   getAllFeatureFlags,
   getFeatureFlag,
-  getFlagEsIndexKeyName,
   getFlagNhgriDacId,
-  resetEsIndexKeyNamePromise, resetNhgriDacIdPromise,
+  resetNhgriDacIdPromise,
 } from 'src/libs/ajax/FeatureFlag'
 
 describe('FeatureFlag ajax', () => {
@@ -122,5 +121,4 @@ const createFlagTestSuite = <T>(
   })
 }
 
-createFlagTestSuite('ES_TYPE_TO_INDEX_ENABLED', getFlagEsIndexKeyName, resetEsIndexKeyNamePromise, { id: 'ES_TYPE_TO_INDEX_ENABLED', value: 'true', createDate: 123, updateDate: 456 }, '_index', '_type')
 createFlagTestSuite('NHGRI_RESTRICTED_DAC', getFlagNhgriDacId, resetNhgriDacIdPromise, { id: 'NHGRI_RESTRICTED_DAC', value: 'dac-id', createDate: 123, updateDate: 456 }, 'dac-id')
