@@ -30,7 +30,6 @@ export interface DiseaseOntology {
  * optional here to handle:
  * 1. Legacy DARs that predate when fields became required
  * 2. Newer fields (like aiLlmUse) that don't exist in older DARs
- * 3. Incomplete/draft DARs during form submission
  *
  * Making fields optional lets translation functions handle both new,
  * complete DARs and older, incomplete ones gracefully.
