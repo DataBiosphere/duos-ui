@@ -1,6 +1,6 @@
-import { Notifications } from './utils'
-import { Config } from './config'
-import { Storage as storage } from '../libs/storage'
+import { Notifications } from 'src/libs/utils'
+import { Config } from 'src/libs/config'
+import { Storage as storage } from 'src/libs/storage'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export const OntologyService = {
