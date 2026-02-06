@@ -31,7 +31,7 @@ export default function DatasetSubmissions() {
             must: [
               {
                 match: {
-                  _type: 'dataset',
+                  _index: 'dataset',
                 },
               },
               {

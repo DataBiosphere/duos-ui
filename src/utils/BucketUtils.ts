@@ -342,7 +342,7 @@ const getDatasetTerms = async (datasets: Dataset[]): Promise<DatasetTerm[]> => {
         must: [
           {
             match: {
-              _type: 'dataset',
+              _index: 'dataset',
             },
           },
           {
