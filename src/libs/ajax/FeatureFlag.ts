@@ -25,25 +25,6 @@ export async function getFeatureFlag(key: string): Promise<FeatureFlag | undefin
   }
 }
 
-// Cache the ES index key name to avoid repeated feature flag lookups
-let esIndexKeyNamePromise: Promise<string> | undefined = undefined
-
-export const getFlagEsIndexKeyName = (): Promise<string> => {
-  if (esIndexKeyNamePromise === undefined) {
-    esIndexKeyNamePromise = getFeatureFlag('ES_TYPE_TO_INDEX_ENABLED').then((flag: FeatureFlag | undefined) => {
-      return flag?.value === 'true' ? '_index' : '_type'
-    }).catch(() => {
-      return '_type'
-    })
-  }
-  return esIndexKeyNamePromise
-}
-
-// Function to reset the cached ES index key name for testing
-export const resetEsIndexKeyNamePromise = () => {
-  esIndexKeyNamePromise = undefined
-}
-
 // Cache the NHGRI DAC ID to avoid repeated feature flag lookups
 let nhgriDacIdPromise: Promise<string | undefined> | undefined = undefined
 

@@ -99,7 +99,7 @@ export default function DatasetStatistics() {
             must: [
               {
                 match: {
-                  _type: 'dataset',
+                  _index: 'dataset',
                 },
               },
               {

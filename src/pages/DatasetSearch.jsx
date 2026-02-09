@@ -16,7 +16,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery, nhgr
   const queryChunks = [
     {
       match: {
-        _type: 'dataset',
+        _index: 'dataset',
       },
     },
     {
