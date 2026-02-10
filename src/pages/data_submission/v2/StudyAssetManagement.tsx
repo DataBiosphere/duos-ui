@@ -5,7 +5,6 @@ import PresentationList from 'src/components/presentations_list/PresentationList
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
 import {
   AiModel,
-  Biospecimen,
   ClinicalTrial,
   FundingResource,
   IntellectualProperty,
@@ -201,22 +200,25 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         )}
       />
 
-      <BiospecimenList
-        biospecimens={biospecimens}
-        onBiospecimenChange={(biospecimens: Biospecimen[]) => onAssetChange('biospecimens', biospecimens)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <Biotech fontSize="large" />,
-              title: 'Biospecimens',
-              description: 'View total biospecimens for this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
+      {/* Only show biospecimen section if there are biospecimens to display */}
+      {biospecimens.length > 0 && (
+        <BiospecimenList
+          biospecimens={biospecimens}
+          onBiospecimenChange={() => {}} // Biospecimens are not editable through the UI, so we pass an empty change handler
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <Biotech fontSize="large" />,
+                title: 'Biospecimens',
+                description: 'View total biospecimens for this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+      )}
     </div>
   )
 }
