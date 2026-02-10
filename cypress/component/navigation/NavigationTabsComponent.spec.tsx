@@ -21,7 +21,6 @@ const mockUser: DuosUser = {
 
 const createMockProps = () => {
   const stubs = {
-    showProfileLinks: cy.stub(),
     signOut: cy.stub(),
     onSubtabChange: cy.stub(),
     showRequestModal: cy.stub(),
@@ -60,8 +59,6 @@ const createMockProps = () => {
     initialTab: 0,
     initialSubTab: 0,
     onSubtabChange: stubs.onSubtabChange,
-    showProfileLinks: stubs.showProfileLinks,
-    profileState: false,
     stubs,
   }
 }
@@ -115,24 +112,6 @@ describe('NavigationTabsComponent', () => {
   it('hides main tabs when not logged in', () => {
     mountComponent({ isLogged: false })
     cy.get('.duos-navigation-box:not(.navbar-sub)').should('not.exist')
-  })
-
-  it('calls showProfileLinks when user dropdown clicked', () => {
-    const mockProps = mountComponent({ profileState: true })
-    cy.contains('Test User').parent().click()
-    cy.wrap(mockProps.stubs.showProfileLinks).should('have.been.called')
-  })
-
-  it('displays profile dropdown menu when profileState is true', () => {
-    mountComponent({ profileState: true })
-    cy.contains('Your Profile').should('be.visible')
-    cy.contains('Sign out').should('be.visible')
-  })
-
-  it('calls signOut when sign out link clicked', () => {
-    const mockProps = mountComponent({ profileState: true })
-    cy.contains('Sign out').click()
-    cy.wrap(mockProps.stubs.signOut).should('have.been.called')
   })
 
   it('handles vertical orientation', () => {
