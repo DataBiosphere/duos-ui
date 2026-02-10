@@ -324,7 +324,7 @@ export const useLibraryData = (
       }
 
       // For datasets, the response might be an array or an object with hits
-      const items = Array.isArray(actualData) ? actualData : (actualData.hits?.hits?.map((h: any) => h._source) || [])
+      const items = Array.isArray(actualData) ? actualData : (actualData.hits?.hits?.map((h: unknown) => h._source) || [])
       return {
         items,
         total: Array.isArray(actualData) ? actualData.length : (actualData.hits?.total?.value || 0),
