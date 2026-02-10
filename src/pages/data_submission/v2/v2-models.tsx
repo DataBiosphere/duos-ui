@@ -1,5 +1,6 @@
 import {
   AiModel,
+  Biospecimen,
   ClinicalTrial,
   Dataset,
   FileStorageObject,
@@ -372,6 +373,7 @@ export interface Study {
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
     intellectualProperties?: Array<IntellectualProperty>
+    biospecimens?: Array<Biospecimen>
   }
 }
 export interface DatasetRegistrationSchemaV1 {

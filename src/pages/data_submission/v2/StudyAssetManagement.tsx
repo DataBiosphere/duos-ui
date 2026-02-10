@@ -5,6 +5,7 @@ import PresentationList from 'src/components/presentations_list/PresentationList
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
 import {
   AiModel,
+  Biospecimen,
   ClinicalTrial,
   FundingResource,
   IntellectualProperty,
@@ -27,6 +28,8 @@ import LaptopMacIcon from '@mui/icons-material/LaptopMac'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
 import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
+import BiospecimenList from 'src/components/biospecimen_list/BiospecimenList'
+import { Biotech } from '@mui/icons-material'
 
 export interface StudyAssetManagementProps {
   study: Study
@@ -55,6 +58,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
   const intellectualProperties = study.assets?.intellectualProperties || []
   const fundingResources = study.assets?.funding || []
   const consentGroups = study.assets?.consentGroups || []
+  const biospecimens = study.assets?.biospecimens || []
 
   return (
     <div className="data-submitter-section">
@@ -190,6 +194,23 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
               icon: <AttachMoneyIcon fontSize="large" />,
               title: 'Funding Resources',
               description: 'Add grants and funding sources for this study',
+              children: content,
+              button: button,
+            }}
+          />
+        )}
+      />
+
+      <BiospecimenList
+        biospecimens={biospecimens}
+        onBiospecimenChange={(biospecimens: Biospecimen[]) => onAssetChange('biospecimens', biospecimens)}
+        disabled={false}
+        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+          <StudyAsset
+            config={{
+              icon: <Biotech fontSize="large" />,
+              title: 'Biospecimens',
+              description: 'View total biospecimens for this study',
               children: content,
               button: button,
             }}
