@@ -34,6 +34,7 @@ export const ProfileLinks: React.FC<ProfileLinksProps> = (props) => {
     <Box sx={{
       p: '5px',
       flexGrow: 0,
+      minWidth: menuWidth,
     }}
     >
       <Typography
@@ -52,8 +53,8 @@ export const ProfileLinks: React.FC<ProfileLinksProps> = (props) => {
           },
         ]}
       >
-        <div>{currentUser.displayName}<span className="caret caret-margin" /></div>
-        <div style={{ fontSize: 12 }}>{currentUser.email}</div>
+        <span>{currentUser.displayName}<span className="caret caret-margin" /></span>
+        <span style={{ fontSize: 12 }}>{currentUser.email}</span>
       </Typography>
       <Menu
         sx={{

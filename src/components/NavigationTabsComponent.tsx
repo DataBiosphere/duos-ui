@@ -233,7 +233,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
               signOut={signOut}
               onSubtabChange={onSubtabChange}
               orientation={orientation}
-              menuWidth={180}
+              menuWidth={190}
             />
           </div>
         )}
