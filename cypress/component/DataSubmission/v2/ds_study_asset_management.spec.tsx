@@ -28,6 +28,7 @@ describe('StudyAssetManagement component', () => {
       { title: 'Clinical Trials', desc: 'Add clinical trials associated with this study' },
       { title: 'Intellectual Property', desc: 'Add patents or other IP related to this study' },
       { title: 'Funding Resources', desc: 'Add grants and funding sources for this study' },
+      { title: 'Biospecimens', desc: 'View total biospecimens for this study' },
     ]
 
     cy.contains('Study Assets').should('exist')
