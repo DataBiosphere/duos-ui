@@ -4,7 +4,7 @@ import { Box, Menu, MenuItem, PopoverOrigin, Typography } from '@mui/material'
 import { DuosUser } from 'src/types/model'
 import { Link } from 'react-router-dom'
 
-interface ProfileBoxProps {
+interface ProfileLinksProps {
   currentUser: DuosUser
   onSubtabChange: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, newValue: number) => void
   signOut: () => void
@@ -12,7 +12,7 @@ interface ProfileBoxProps {
   menuWidth?: number | string
 }
 
-export const ProfileBox: React.FC<ProfileBoxProps> = (props) => {
+export const ProfileLinks: React.FC<ProfileLinksProps> = (props) => {
   const { currentUser, onSubtabChange, signOut, orientation, menuWidth } = props
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {

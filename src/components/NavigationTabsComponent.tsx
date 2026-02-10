@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'
 import { Tab as TabItem } from 'src/components/DuosHeader'
 import { DuosUser } from 'src/types/model'
-import { ProfileBox } from 'src/components/navigation/ProfileBox'
+import { ProfileLinks } from 'src/components/navigation/ProfileLinks'
 
 type Orientation = 'horizontal' | 'vertical'
 
@@ -228,7 +228,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
               <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>
             </button>
             {supportrequestModal}
-            <ProfileBox
+            <ProfileLinks
               currentUser={currentUser}
               signOut={signOut}
               onSubtabChange={onSubtabChange}
