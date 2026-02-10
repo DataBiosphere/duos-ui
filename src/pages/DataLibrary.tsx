@@ -35,7 +35,6 @@ export const DataLibrary: React.FC = () => {
   // Local selection state (dataset IDs)
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
 
-  // Library configuration (could be made dynamic based on urlState.library)
   const libraryConfig: LibraryVersion = {
     key: 'duos',
     query: null,
@@ -46,13 +45,11 @@ export const DataLibrary: React.FC = () => {
     order: 0,
   }
 
-  // Tab configuration
   const tabs: TabConfig[] = [
     { key: AssetType.STUDIES, label: 'Studies' },
     { key: AssetType.DATASETS, label: 'Datasets' },
   ]
 
-  // Available filters (in a real app, these might come from an API)
   const availableFilters: AvailableFilters = {
     accessManagement: [
       { value: 'controlled', label: 'Controlled' },
@@ -70,7 +67,7 @@ export const DataLibrary: React.FC = () => {
       { value: 'Genomic', label: 'Genomic' },
       { value: 'Transcriptomic', label: 'Transcriptomic' },
     ],
-    dac: [], // Would be populated from API
+    dac: [],
     participantCountRange: {
       min: 0,
       max: 100000,
@@ -89,34 +86,29 @@ export const DataLibrary: React.FC = () => {
       : undefined,
   )
 
-  // Handle tab change
   const handleTabChange = (newAssetType: AssetType) => {
     updateUrlState({ tab: newAssetType })
-    setSelectedDatasetIds([]) // Clear selection when switching tabs
+    setSelectedDatasetIds([])
   }
 
-  // Handle search change
   const handleSearchChange = (searchTerm: string) => {
     updateUrlState({
       search: searchTerm,
-      page: 0, // Reset to first page
+      page: 0,
     })
   }
 
-  // Handle clear search
   const handleClearSearch = () => {
     updateUrlState({ search: '' })
   }
 
-  // Handle filter changes
   const handleFiltersChange = (newFilters: typeof urlState.filters) => {
     updateUrlState({
       filters: newFilters,
-      page: 0, // Reset to first page
+      page: 0,
     })
   }
 
-  // Handle clear filters
   const handleClearFilters = () => {
     updateUrlState({
       filters: {
@@ -130,7 +122,6 @@ export const DataLibrary: React.FC = () => {
     })
   }
 
-  // Convert sort model for DataGrid
   const sortModel = useMemo(() => {
     if (urlState.sortField && urlState.sortOrder) {
       return [{ field: urlState.sortField, sort: urlState.sortOrder }]
@@ -138,7 +129,6 @@ export const DataLibrary: React.FC = () => {
     return []
   }, [urlState.sortField, urlState.sortOrder])
 
-  // Handle sort changes
   const handleSortChange = (model: Array<{ field: string, sort: 'asc' | 'desc' | null }>) => {
     if (model.length > 0 && model[0].sort) {
       updateUrlState({
@@ -154,19 +144,16 @@ export const DataLibrary: React.FC = () => {
     }
   }
 
-  // Handle selection changes
   const handleSelectionChange = (datasetIds: number[]) => {
     setSelectedDatasetIds(datasetIds)
   }
 
-  // Handle Apply for Access
   const handleApplyForAccess = () => {
     // Navigate to DAR Application with selected dataset IDs
     const datasetIdsParam = selectedDatasetIds.join(',')
     navigate(`/dar_application?datasetIds=${datasetIdsParam}`)
   }
 
-  // Show error state
   if (error) {
     return (
       <Box sx={{ px: 3, py: 4 }}>
@@ -183,7 +170,7 @@ export const DataLibrary: React.FC = () => {
       {/* Header */}
       <Box sx={{ px: 3, pt: 3 }}>
         <LibraryHeader
-          icon={null} // Using MUI icon instead
+          icon={null}
           title="Data Library"
           description="Search and browse available datasets and studies"
           searchTerm={urlState.search}

@@ -6,9 +6,8 @@ import {
 } from '@mui/x-data-grid'
 import { Box, Typography, CircularProgress } from '@mui/material'
 import { isEmpty } from 'lodash'
-import { LibraryDataGridProps, AssetType } from 'src/types/library'
+import { LibraryDataGridProps, AssetType, StudyAggregation } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
-import { StudyAggregation } from 'src/types/library'
 import { makeDatasetColumns } from './columns/datasetColumns'
 import { makeStudyColumns } from './columns/studyColumns'
 

@@ -12,10 +12,10 @@ const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
     dac: searchParams.get('dac')?.split(',').filter(Boolean) || [],
     participantCount: {
       min: searchParams.get('minParticipants')
-        ? parseInt(searchParams.get('minParticipants')!)
+        ? Number.parseInt(searchParams.get('minParticipants')!)
         : undefined,
       max: searchParams.get('maxParticipants')
-        ? parseInt(searchParams.get('maxParticipants')!)
+        ? Number.parseInt(searchParams.get('maxParticipants')!)
         : undefined,
     },
   }
@@ -57,18 +57,18 @@ const serializeFiltersToUrl = (
     searchParams.delete('dac')
   }
 
-  if (filters.participantCount.min !== undefined) {
-    searchParams.set('minParticipants', filters.participantCount.min.toString())
-  }
-  else {
+  if (filters.participantCount.min === undefined) {
     searchParams.delete('minParticipants')
   }
+  else {
+    searchParams.set('minParticipants', filters.participantCount.min.toString())
+  }
 
-  if (filters.participantCount.max !== undefined) {
-    searchParams.set('maxParticipants', filters.participantCount.max.toString())
+  if (filters.participantCount.max === undefined) {
+    searchParams.delete('maxParticipants')
   }
   else {
-    searchParams.delete('maxParticipants')
+    searchParams.set('maxParticipants', filters.participantCount.max.toString())
   }
 }
 
@@ -84,8 +84,8 @@ export const useLibraryUrlState = () => {
     tab: (searchParams.get('tab') as AssetType) || AssetType.STUDIES,
     search: searchParams.get('search') || '',
     filters: parseFiltersFromUrl(searchParams),
-    page: parseInt(searchParams.get('page') || '0'),
-    pageSize: parseInt(searchParams.get('pageSize') || '25'),
+    page: Number.parseInt(searchParams.get('page') || '0'),
+    pageSize: Number.parseInt(searchParams.get('pageSize') || '25'),
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as 'asc' | 'desc') || undefined,
   }
@@ -131,11 +131,11 @@ export const useLibraryUrlState = () => {
     }
 
     if (updates.pageSize !== undefined) {
-      if (updates.pageSize !== 25) {
-        newParams.set('pageSize', updates.pageSize.toString())
+      if (updates.pageSize === 25) {
+        newParams.delete('pageSize')
       }
       else {
-        newParams.delete('pageSize')
+        newParams.set('pageSize', updates.pageSize.toString())
       }
     }
 

@@ -331,8 +331,8 @@ export const useLibraryData = (
         aggregations: {},
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1, // Only retry once on failure
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
     // Provide default data structure on error to prevent crashes
     placeholderData: {
       items: [],

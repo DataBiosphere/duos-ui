@@ -8,7 +8,7 @@ import { DatasetTerm } from './model'
 export enum AssetType {
   STUDIES = 'studies',
   DATASETS = 'datasets',
-  AI_MODELS = 'ai-models', // Future
+  MODELS = 'models',
 }
 
 // Library configuration
@@ -335,7 +335,7 @@ export interface LibraryFiltersProps {
 
 export interface LibraryDataGridProps {
   assetType: AssetType
-  data: any[]
+  data: unknown[]
   loading: boolean
   total: number
   paginationModel: {

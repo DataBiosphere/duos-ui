@@ -35,7 +35,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
   }
 
   const handleParticipantChange = (type: 'min' | 'max', value: string) => {
-    const numValue = value === '' ? undefined : parseInt(value)
+    const numValue = value === '' ? undefined : Number.parseInt(value)
     onChange({
       ...filters,
       participantCount: {
