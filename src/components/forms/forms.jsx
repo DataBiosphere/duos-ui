@@ -25,6 +25,7 @@ import './forms.css'
 import {
   dateValidator,
   dayJSValidator,
+  emailDomainValidator,
   emailValidator,
   isValid,
   requiredValidator,
@@ -197,6 +198,7 @@ export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
   EMAIL: emailValidator,
+  EMAILDOMAIN: emailDomainValidator,
   DATE: dateValidator,
   DATEJS: dayJSValidator,
 }

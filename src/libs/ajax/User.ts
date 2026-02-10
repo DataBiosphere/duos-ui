@@ -32,13 +32,8 @@ export const User = {
 
   create: async (request: CreateDuosUserRequest): Promise<DuosUser | false | undefined> => {
     const url = `${await Config.getApiUrl()}/api/user/create`
-    try {
-      const res = await fetchPost<DuosUser, CreateDuosUserRequest>(url, request, Config.authOpts())
-      return res.data
-    }
-    catch {
-      return false
-    }
+    const res = await fetchPost<DuosUser, CreateDuosUserRequest>(url, request, Config.authOpts())
+    return res.data
   },
 
   updateSelf: async (payload: UpdateDuosUserRequestV1): Promise<DuosUser | false | undefined> => {

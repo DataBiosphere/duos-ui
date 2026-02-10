@@ -7,8 +7,21 @@ import AsyncSelect from 'react-select/async'
 import SimpleButton from 'src/components/SimpleButton'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
 import { MultiValue } from 'react-select'
-import { LibraryCard } from 'src/types/model'
+import { DuosUser, LibraryCard, UserRole } from 'src/types/model'
 import { Spinner } from 'src/components/Spinner'
+import { FormField, FormValidators } from 'src/components/forms/forms'
+import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { User } from 'src/libs/ajax/User'
+import { CreateDuosUserRequest } from 'src/types/requestTypes'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
+import ReactMarkdown from 'react-markdown'
+import { Link } from '@mui/material'
+
+interface Validation {
+  name?: ValidationError
+  email?: ValidationError
+}
 
 // This represents the fields describing users in a selection dropdown menu
 interface UserOption {
@@ -22,17 +35,45 @@ interface FormFieldRowProps {
   selectedUsers: UserOption[]
   dropdownOptions: UserOption[]
   updateUsers: (values: MultiValue<UserOption>) => void
+  isNewUser: boolean
+  setIsNewUser: (isNew: boolean) => void
+  newUser: NewUserInput
+  setNewUser: (value: NewUserInput) => void
+  validation: Validation
+  setValidation: (v: Validation) => void
+  setHasValidated: (v: boolean) => void
 }
 
 export interface LibraryCardFormModalProps {
   showModal: boolean
-  createOnClick: (cards: LibraryCard[]) => Promise<void>
+  createOnClick: (cards: LibraryCard[], newUser: DuosUser | false | undefined) => Promise<void>
   closeModal: () => void
   users: UserOption[]
 }
 
+interface NewUserInput {
+  name: string
+  email: string
+}
+
+interface FormFieldChange {
+  key: string
+  value: string
+}
+
 const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
-  const { selectedUsers, dropdownOptions, updateUsers } = props
+  const {
+    selectedUsers,
+    dropdownOptions,
+    updateUsers,
+    isNewUser,
+    setIsNewUser,
+    newUser,
+    setNewUser,
+    validation,
+    setValidation,
+    setHasValidated,
+  } = props
 
   // Represents users that do not already have library cards
   const cardlessUserOptions = dropdownOptions.filter(option => isNil(option.libraryCard))
@@ -51,25 +92,104 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     }, 0)
   }
 
+  const toggleLink = (label: string, onClick: () => void) => (
+    <Link
+      component="button"
+      variant="body2"
+      onClick={onClick}
+    >
+      {label}
+    </Link>
+  )
+
+  const toggleOnClick = () => {
+    if (isNewUser) {
+      setNewUser({ name: '', email: '' })
+    }
+    else {
+      updateUsers([])
+    }
+    setIsNewUser(!isNewUser)
+  }
+
+  const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
+
+  const calcErrors = async (u: NewUserInput): Promise<Validation> => {
+    const v: Validation = {}
+    if (!u.name?.trim()) v.name = makeError('required')
+
+    if (!u.email?.trim()) {
+      v.email = makeError('required')
+    }
+    else if (!FormValidators.EMAIL.isValid(u.email)) {
+      v.email = makeError('email')
+    }
+    else if (!(await FormValidators.EMAILDOMAIN.isValid(u.email))) {
+      v.email = makeError('emailDomain')
+    }
+    return v
+  }
+
+  const handleNewUserChange = async (change: FormFieldChange) => {
+    const updated = { ...newUser, [change.key]: change.value }
+    setNewUser(updated)
+    setValidation(await calcErrors(updated))
+    setHasValidated(true)
+  }
+
   return (
     <div style={{ display: 'flex' }}>
       <div style={{ marginBottom: '2%', width: '100%' }}>
-        <p><strong>Users</strong></p>
-        <AsyncSelect
-          classNamePrefix="select"
-          className="select-autocomplete"
-          key="select-user"
-          isClearable={true}
-          isMulti={true}
-          onChange={updateUsers}
-          value={selectedUsers}
-          defaultOptions={cardlessUserOptions}
-          loadOptions={loadOptions}
-          placeholder="Select a DUOS User..."
-          isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-          /* eslint-disable-next-line no-constant-binary-expression */
-          getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
-        />
+        {isNewUser
+          ? (
+              <>
+                <p><strong>Add User OR {toggleLink('Select Existing Users', toggleOnClick)}</strong></p>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <FormField
+                    id="name"
+                    title="User Name"
+                    hideTitle={true}
+                    defaultValue={newUser?.name}
+                    placeholder="User Name"
+                    validators={[FormValidators.REQUIRED]}
+                    onChange={handleNewUserChange}
+                    validation={validation.name}
+                    style={{ flex: 1, padding: '0.5rem' }}
+                  />
+                  <FormField
+                    id="email"
+                    title="User Email"
+                    hideTitle={true}
+                    defaultValue={newUser?.email}
+                    placeholder="User Email"
+                    validators={[FormValidators.REQUIRED, FormValidators.EMAIL, FormValidators.EMAILDOMAIN]}
+                    onChange={handleNewUserChange}
+                    validation={validation.email}
+                    style={{ flex: 1, padding: '0.5rem' }}
+                  />
+                </div>
+              </>
+            )
+          : (
+              <>
+                <p><strong>Select Existing Users OR {toggleLink('Add User', toggleOnClick)}</strong></p>
+                <AsyncSelect
+                  classNamePrefix="select"
+                  className="select-autocomplete"
+                  key="select-user"
+                  isClearable={true}
+                  isMulti={true}
+                  onChange={updateUsers}
+                  value={selectedUsers}
+                  defaultOptions={cardlessUserOptions}
+                  loadOptions={loadOptions}
+                  placeholder="Select a DUOS User..."
+                  isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+                  /* eslint-disable-next-line no-constant-binary-expression */
+                  getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
+                />
+              </>
+            )}
       </div>
     </div>
   )
@@ -78,14 +198,59 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
 const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   const { showModal, createOnClick, closeModal, users } = props
   const [selectedUsers, setSelectedUsers] = useState<UserOption[]>([])
+  const [isNewUser, setIsNewUser] = useState<boolean>(false)
+  const [newUser, setNewUser] = useState<NewUserInput>({ name: '', email: '' })
+  const [validation, setValidation] = useState<Validation>({})
+  const [hasValidated, setHasValidated] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
+
+  // Handle confirm button disabled state
+  const noSelectedUsers = (): boolean => !isNewUser && selectedUsers.length === 0
+  const hasNewUserData = (): boolean => newUser.name?.trim() !== '' && newUser.email?.trim() !== ''
+  const incompleteValidation = (): boolean => {
+    if (!isNewUser) return false
+    if (!hasValidated && !hasNewUserData()) return true // Initial empty state
+    return hasValidated && validationFailed(validation) // Has errors after validation
+  }
+  const isConfirmDisabled = (): boolean => isLoading || noSelectedUsers() || incompleteValidation()
 
   // Create a library card for each selected user
   const createLibraryCards = async () => {
-    if (selectedUsers.length === 0) return
+    if (incompleteValidation()) return
+
+    if (noSelectedUsers()) return
 
     try {
       setIsLoading(true)
+      let createdUser: DuosUser | false | undefined = undefined
+
+      if (isNewUser) {
+        try {
+          // Create new user
+          const researcherRole = { roleId: 5, name: USER_ROLES.researcher } as UserRole
+          createdUser = await User.create({
+            displayName: newUser.name,
+            email: newUser.email,
+            emailPreference: false,
+            roles: [researcherRole],
+          } as CreateDuosUserRequest)
+
+          // Add the new user to the selected users list
+          if (createdUser) {
+            selectedUsers.push({
+              userId: createdUser.userId,
+              displayName: createdUser.displayName,
+              email: createdUser.email,
+            })
+          }
+        }
+        catch (error) {
+          Notifications.showError({ text: <ReactMarkdown>{extractError(error)}</ReactMarkdown> })
+          return
+        }
+      }
 
       // Map selected users to library cards
       const cards = selectedUsers.map((user) => {
@@ -96,8 +261,12 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
         } as LibraryCard
       })
 
-      await createOnClick(cards)
+      await createOnClick(cards, createdUser)
       setSelectedUsers([])
+      setIsNewUser(false)
+      setNewUser({ name: '', email: '' })
+      setHasValidated(false)
+      setValidation({})
     }
     finally {
       setIsLoading(false)
@@ -107,11 +276,6 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
   // Handle multi-selection changes
   const updateUsers = (newValues: MultiValue<UserOption>) => {
     setSelectedUsers(newValues as UserOption[])
-  }
-
-  // Check if we have any selected users
-  const isConfirmDisabled = (): boolean => {
-    return selectedUsers.length === 0 || isLoading
   }
 
   return (
@@ -138,6 +302,13 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
         <FormFieldRow
           selectedUsers={selectedUsers}
           updateUsers={updateUsers}
+          isNewUser={isNewUser}
+          setIsNewUser={setIsNewUser}
+          newUser={newUser}
+          setNewUser={setNewUser}
+          validation={validation}
+          setValidation={setValidation}
+          setHasValidated={setHasValidated}
           dropdownOptions={users}
         />
         <div style={{ display: 'inline-block', marginBottom: '1rem' }}>
