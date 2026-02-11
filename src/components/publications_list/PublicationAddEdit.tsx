@@ -241,6 +241,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
 
   const headerTitle = getHeaderTitle(readOnly, publication)
 
+  const throughBioLink = (<a href="https://through.bio" target="_blank" rel="noopener noreferrer">Through.Bio</a>)
+
   return (
     <div className="form-group row no-margin">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card">
@@ -283,6 +285,15 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
           <FormField
             id="pubmedId"
             title="PubMed ID"
+            helpText={(
+              <>Tip: Adding a PubMed ID (PMID) helps DUOS link your publication to your
+                {' '}
+                {throughBioLink}
+                {' '}
+                page and promote your research. Learn more at{' '}
+                {throughBioLink}.
+              </>
+            )}
             defaultValue={newPublication.pubmedId}
             placeholder="PubMed ID"
             onChange={onChange}
