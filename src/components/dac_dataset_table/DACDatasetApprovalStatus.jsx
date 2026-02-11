@@ -51,7 +51,7 @@ export default function DACDatasetApprovalStatus(props) {
             style={{ marginLeft: '15px' }}
             id={`${dataset.datasetId}_edit`}
             className="glyphicon glyphicon-pencil"
-            to={`study_update/${dataset.study.studyId}`}
+            to={`/study_update/${dataset.study.studyId}`}
           />
         )}
       {dataset.deletable
