@@ -276,7 +276,6 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     else {
       consentGroup.otherSecondary = dataset.dataUse.secondaryOther
     }
-    debugger
     consentGroup.dataAccessCommitteeId = dataset.dacId
     consentGroup.nihInstitutionalCertificationFile = dataset.nihInstitutionalCertificationFile
     consentGroup.dataLocation = getDatasetPropertyValueByKey(DataLocation.propertyName, dataset) as DataLocationType
