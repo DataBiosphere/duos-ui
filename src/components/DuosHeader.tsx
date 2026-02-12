@@ -196,14 +196,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     })
   }
 
-  const profileLinks = (): void => {
-    const profileState = state.showProfileLinks
-    setState({
-      ...state,
-      showProfileLinks: !profileState,
-    })
-  }
-
   const closeSupportRequestModal = (): void => {
     setState({
       ...state,
@@ -349,8 +341,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
             initialTab={initialTab}
             initialSubTab={initialSubTab}
             orientation="horizontal"
-            showProfileLinks={profileLinks}
-            profileState={state.showProfileLinks}
             onSubtabChange={() => {}}
           />
         </div>
@@ -402,8 +392,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
               initialSubTab={initialSubTab}
               orientation="vertical"
               onSubtabChange={() => toggleDrawer(false)}
-              showProfileLinks={profileLinks}
-              profileState={state.showProfileLinks}
             />
           </Drawer>
         </div>
