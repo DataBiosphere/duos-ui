@@ -79,6 +79,7 @@ function mountStudyAssetList(
   options: {
     disabled?: boolean
     columnsToShow?: (keyof TestAsset)[]
+    addButtonIcon?: React.ReactNode
   } = {},
 ) {
   return cy.mount(
@@ -91,6 +92,7 @@ function mountStudyAssetList(
       RowComponent={TestRowComponent}
       addButtonId="add-test-btn"
       addButtonLabel="Add Test Item"
+      addButtonIcon={options.addButtonIcon}
       getValidationState={getValidationState}
       getAddEditProps={getDefaultAddEditProps}
       getRowProps={getDefaultRowProps}
@@ -177,5 +179,21 @@ describe('StudyAssetList', () => {
   it('disables add button when disabled prop is true', () => {
     mountStudyAssetList([], cy.stub(), { disabled: true })
     cy.get('#add-test-btn').should('be.disabled')
+  })
+
+  it('renders button with custom icon', () => {
+    const customIcon = <span data-testid="custom-icon">★</span>
+    mountStudyAssetList([], cy.stub(), { addButtonIcon: customIcon })
+
+    cy.get('[data-testid="custom-icon"]').should('exist')
+    cy.get('[data-testid="custom-icon"]').should('contain', '★')
+  })
+
+  it('removes default icon when empty string is passed', () => {
+    mountStudyAssetList([], cy.stub(), { addButtonIcon: '' })
+
+    cy.get('#add-test-btn').within(() => {
+      cy.get('.glyphicon-plus').should('not.exist')
+    })
   })
 })

@@ -17,6 +17,7 @@ interface StudyAssetListProps<
   readonly RowComponent: React.ComponentType<RowProps>
   readonly addButtonId: string
   readonly addButtonLabel: string
+  readonly addButtonIcon?: React.ReactNode
   readonly getValidationState: (validation?: V) => ValidationError | undefined
   readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
   readonly getAddEditProps: (items: T[], closeAction: () => void, onItemsChange: (items: T[]) => void) => AddEditProps
@@ -52,6 +53,7 @@ export default function StudyAssetList<
   RowComponent,
   addButtonId,
   addButtonLabel,
+  addButtonIcon,
   getValidationState,
   studyAssetWrapper,
   getAddEditProps,
@@ -104,6 +106,7 @@ export default function StudyAssetList<
       onClick={() => setShowAddEdit(true)}
       disabled={disabled}
       hasValidationError={!!getValidationState(validation)}
+      icon={addButtonIcon}
     />
   )
 
