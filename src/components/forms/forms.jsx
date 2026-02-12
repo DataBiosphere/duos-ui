@@ -150,7 +150,7 @@ export const FormFieldTypes = {
       //   ^^^ can pass other fields in as extra info, e.g.:
       //  {displayText: 'Dac 1', dacId: 213}
       // ]
-      // can also be array of stirngs: ['Option 1', 'Option 2']
+      // can also be array of strings: ['Option 1', 'Option 2']
     ],
     requiredAsyncSelectProps: [
       'loadOptions',

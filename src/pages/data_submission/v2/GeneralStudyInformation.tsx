@@ -8,6 +8,7 @@ import {
   DataCustodianEmail,
   AlternativeDataSharingPlanTargetDeliveryDate,
   AlternativeDataSharingPlanTargetPublicReleaseDate,
+  StudyData,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
   generateStudyInputFormTextField,
@@ -63,6 +64,27 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         defaultValue={study?.description}
         validators={[FormValidators.REQUIRED]}
         onChange={onChange}
+      />
+      <FormField
+        id="tags"
+        title="Tags"
+        placeholder="Add tags to help others find your study (e.g. disease area, assay type, etc.)"
+        type={FormFieldTypes.SELECT}
+        isCreatable={true}
+        isMulti={true}
+        optionsAreString={true}
+        defaultValue={(getStudyPropertyValueByKey(study, 'data') as Record<string, unknown> | undefined)?.tags || []}
+        selectOptions={study.data?.tags || []}
+        onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
+          const tags = input.value as string[]
+          setStudyPropertyByKey(study, setStudy, input, new StudyData({ ...getStudyPropertyValueByKey(study, 'data') as Record<string, unknown>, tags } as Record<string, unknown>))
+        }}
+        selectConfig={{
+          components: {
+            DropdownIndicator: null,
+            Menu: () => null,
+          },
+        }}
       />
       <FormField
         id="dataTypes"

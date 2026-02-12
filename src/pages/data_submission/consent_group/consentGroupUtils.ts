@@ -11,6 +11,7 @@ export interface ConsentGroup {
 }
 export type AccessManagementType = 'controlled' | 'open' | 'external'
 export interface ConsentGroup2 {
+  data?: Record<string, unknown>
   nihInstitutionalCertificationFile?: FileStorageObject
   addedNIHInstitutionalCertificationFile?: File
   name: string

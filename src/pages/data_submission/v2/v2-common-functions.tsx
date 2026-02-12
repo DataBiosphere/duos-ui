@@ -40,7 +40,8 @@ import {
   DataLocationType,
   DataURL,
   FileTypes,
-  NumberOfParticipants } from 'src/pages/data_submission/v2/v2-models'
+  NumberOfParticipants, StudyData,
+  DatasetData } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { set, isEmpty } from 'lodash'
 import { Storage } from 'src/libs/storage'
@@ -212,6 +213,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     alternativeDataSharingPlanTargetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined),
     alternativeDataSharingPlanTargetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined),
     consentGroups: structuredClone(study.assets?.consentGroups) || [],
+    data: getStudyPropertyValueByKey(study, StudyData.key) as Record<string, unknown> || {},
   }
   const assets = structuredClone(study.assets)
   if (assets) {
@@ -274,12 +276,14 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     else {
       consentGroup.otherSecondary = dataset.dataUse.secondaryOther
     }
+    debugger
     consentGroup.dataAccessCommitteeId = dataset.dacId
     consentGroup.nihInstitutionalCertificationFile = dataset.nihInstitutionalCertificationFile
     consentGroup.dataLocation = getDatasetPropertyValueByKey(DataLocation.propertyName, dataset) as DataLocationType
     consentGroup.url = getDatasetPropertyValueByKey(DataURL.propertyName, dataset) as string
     consentGroup.fileTypes = fileTypeAdjustment(getDatasetPropertyValueByKey(FileTypes.propertyName, dataset) as Array<FileType>)
     consentGroup.numberOfParticipants = getDatasetPropertyValueByKey(NumberOfParticipants.propertyName, dataset) as number || 0
+    consentGroup.data = getDatasetPropertyValueByKey(DatasetData.propertyName, dataset) as Record<string, unknown> || {}
     consentGroups.push(consentGroup)
   })
   return consentGroups

@@ -185,6 +185,13 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     setValidation(calcErrors(next))
   }
 
+  const onTagsChange = ({ key, value }: { key: string, value: unknown }) => {
+    const next = structuredClone(current)
+    next.data ??= {}
+    set(next.data, key, value)
+    setCurrent(next)
+  }
+
   const save = () => {
     const validationErrors = calcErrors(current)
     setValidation(validationErrors)
@@ -219,6 +226,26 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             onChange={onChange}
             validation={validation.consentGroupName}
             disabled={readOnly}
+          />
+          <FormField
+            id="tags"
+            name="tags"
+            title="Tags"
+            placeholder="Add tags to help others find your dataset (e.g. disease area, assay type, etc.)"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            onChange={onTagsChange}
+            disabled={readOnly}
+            defaultValue={current?.data?.tags || []}
+            selectOptions={(current?.data?.tags as string[]) || []}
+            selectConfig={{
+              components: {
+                DropdownIndicator: null,
+                Menu: () => null,
+              },
+            }}
           />
 
           {/* controlled, open and external access */}

@@ -82,6 +82,7 @@ function fillConsentGroupForm(overrides: Partial<ConsentGroup2> = {}) {
   cy.get('#dataLocation').click()
   cy.get('#dataLocation').type((overrides.dataLocation ?? 'Terra Workspace') + '{enter}')
   cy.get('#url').type(overrides.url ?? 'https://www.example.com')
+  cy.get('#tags').type('tag1{enter}tag2{enter}')
 }
 
 function mountAddEdit(overrides: Partial<React.ComponentProps<typeof ConsentGroupAddEdit>> = {}) {
@@ -117,6 +118,7 @@ describe('ConsentGroupList component', () => {
     mountAddEdit()
     cy.get('#consentGroupName').type('Hello!')
     cy.get('#url').type('https://www.asdf.gov')
+    cy.get('#tags').type('tag4{enter}tag5{enter}')
   })
 
   it('Shows conditional fields only when checked', () => {
@@ -178,6 +180,7 @@ describe('ConsentGroupList component', () => {
     cy.get('#consentGroupName').type('Test Consent Group Edited')
     cy.get('#numberOfParticipants').clear()
     cy.get('#numberOfParticipants').type('15')
+    cy.get('#tags').type('editedTag1{enter}editedTag2{enter}')
     clickSaveButton()
     cy.get('#consentGroupName').should('not.exist')
     verifyConsentGroupExists('Test Consent Group Edited')
