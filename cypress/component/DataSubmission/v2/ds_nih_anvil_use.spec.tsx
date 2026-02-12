@@ -8,7 +8,6 @@ let propCopy = { study: { properties: [] as StudyProperty[] } as Study } as NihA
 const props = {
   setStudy: () => {},
   study: { properties: [] },
-  setFiles: () => {},
 }
 
 beforeEach(() => {
@@ -27,8 +26,8 @@ describe('NihAnvilUseRelated - Tests', () => {
     cy.get('#sequencingCenter').should('not.exist')
   })
 
-  it('should show dbGaP form fields if NHGRI funded and has dbGaP ID', () => {
-    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES_NHGRI_YES_PHS_ID))
+  it('should show dbGaP form fields if "YES" is selected', () => {
+    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES))
     cy.mount(<NihAnvilUseRelated {...propCopy} />)
     cy.get(':nth-child(1) > [style="font-family: Montserrat; font-size: 14px;"] > label > [style="float: left;"] > span').click()
     cy.get('#dbGaPPhsID').should('exist')
@@ -37,32 +36,10 @@ describe('NihAnvilUseRelated - Tests', () => {
     cy.get('#sequencingCenter').should('exist')
   })
 
-  it('should hide dbGaP form fields if NHGRI funded and no dbGaP ID', () => {
-    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES_NHGRI_NO_PHS_ID))
+  it('should hide dbGaP form fields if "NO" is selected ', () => {
+    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO))
     cy.mount(<NihAnvilUseRelated {...propCopy} />)
     cy.get(':nth-child(2) > [style="font-family: Montserrat; font-size: 14px;"] > label > [style="float: left;"] > span').click()
-
-    cy.get('#dbGaPPhsID').should('not.exist')
-    cy.get('#dbGaPStudyRegistrationName').should('not.exist')
-    cy.get('#embargoReleaseDate').should('not.exist')
-    cy.get('#sequencingCenter').should('not.exist')
-  })
-
-  it('should hide dbGaP form fields if not NHGRI funded and submitting to AnVIL ', () => {
-    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO_NHGRI_YES_ANVIL))
-    cy.mount(<NihAnvilUseRelated {...propCopy} />)
-    cy.get(':nth-child(3) > [style="font-family: Montserrat; font-size: 14px;"] > label > [style="float: left;"] > span').click()
-
-    cy.get('#dbGaPPhsID').should('not.exist')
-    cy.get('#dbGaPStudyRegistrationName').should('not.exist')
-    cy.get('#embargoReleaseDate').should('not.exist')
-    cy.get('#sequencingCenter').should('not.exist')
-  })
-
-  it('should hide dbGaP form fields if not NHGRI funded and not submitting to AnVIL', () => {
-    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO_NHGRI_NO_ANVIL))
-    cy.mount(<NihAnvilUseRelated {...propCopy} />)
-    cy.get(':nth-child(4) > [style="font-family: Montserrat; font-size: 14px;"] > label > [style="float: left;"] > span').click()
 
     cy.get('#dbGaPPhsID').should('not.exist')
     cy.get('#dbGaPStudyRegistrationName').should('not.exist')
