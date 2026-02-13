@@ -56,7 +56,7 @@ export const DAR = {
   },
 
   getAutoCompleteOT: async (partial) => {
-    const url = `${await Config.getOntologyUrl()}/autocomplete?q=${partial}`
+    const url = `${await Config.getApiUrl()}/ontology/autocomplete?q=${partial}`
     const res = await fetchGet(url, Config.authOpts())
     return res.data
   },
