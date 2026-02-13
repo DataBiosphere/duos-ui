@@ -281,7 +281,7 @@ export const DatasetSearchTable = (props) => {
         <TableHeaderSection
           icon={{ src: icon }}
           title={title}
-          description="Search, filter, and select datasets, then click 'Apply for Access' to request access"
+          description="Search and filter datasets. For controlled access, select the dataset(s) you desire then click ‘Apply for Access.' Open access data does not require access requests. External data requires an access request in the host repository (which is linked on the dataset page)."
         />
         <Box sx={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
           <SearchBar
