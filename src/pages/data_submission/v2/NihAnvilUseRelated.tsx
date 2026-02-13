@@ -68,10 +68,20 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
               unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
               return newVal
             })
+            if (input.value !== NihAnvilUse.YES_NHGRI_YES_PHS_ID) {
+              setStudy((val) => {
+                const newVal = structuredClone(val)
+                removeStudyPropertiesByKeys(newVal, new Set([DbGaPPhsID.key,
+                  DbGaPStudyRegistrationName.key,
+                  EmbargoReleaseDate.key,
+                  SequencingCenter.key]))
+                return newVal
+              })
+            }
           }
         }}
       />
-      {getStudyPropertyValueByKey(study, 'nihAnvilUse') === NihAnvilUse.YES && (
+      {getStudyPropertyValueByKey(study, 'nihAnvilUse') === NihAnvilUse.YES_NHGRI_YES_PHS_ID && (
         <>
           {generateStudyPropertyFormTextField(study, setStudy, new DbGaPPhsID(), [FormValidators.REQUIRED])}
           {generateStudyPropertyFormTextField(study, setStudy, new DbGaPStudyRegistrationName())}
