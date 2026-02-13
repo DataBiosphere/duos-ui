@@ -1,4 +1,4 @@
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getErrorApiKey, getGaId, getHash, getNihUrl, getProject, getSamApiUrl, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getErrorApiKey, getGaId, getHash, getProject, getSamApiUrl, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 describe('Config', () => {
@@ -86,12 +86,6 @@ describe('Config', () => {
       })
     })
 
-    it('should get nihUrl', () => {
-      cy.wrap(Config.getNihUrl()).then((result) => {
-        expect(result).to.equal('https://test.nih.gov')
-      })
-    })
-
     it('should get project', () => {
       cy.wrap(Config.getProject()).then((result) => {
         expect(result).to.equal('broad-duos-test')
@@ -169,12 +163,6 @@ describe('Config', () => {
     it('getHash should return hash', () => {
       cy.wrap(getHash()).then((result) => {
         expect(result).to.equal('test-hash-123')
-      })
-    })
-
-    it('getNihUrl should return NIH URL', () => {
-      cy.wrap(getNihUrl()).then((result) => {
-        expect(result).to.equal('https://test.nih.gov')
       })
     })
 
