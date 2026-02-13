@@ -12,6 +12,7 @@ let propCopy = { study: { properties: [] as StudyProperty[] } as Study } as NihA
 const props = {
   setStudy: () => {},
   study: { properties: [] },
+  setFiles: () => {},
 }
 
 const mockInstitutions = [
@@ -55,8 +56,8 @@ describe('NihAdministrativeInformation - Tests', () => {
     cy.get('.formField-container').should('not.exist')
   })
 
-  it('fields should be visible if the user selected "YES', () => {
-    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES))
+  it('fields should be visible if the user selected I am NHGRI funded and I have a dbGaP PHS ID already', () => {
+    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES_NHGRI_YES_PHS_ID))
     cy.mount(<NihAdministrativeInformation {...propCopy} />)
     cy.get('#piInstitution').should('be.visible')
     cy.get('#nihGrantContractNumber').should('be.visible')
@@ -68,8 +69,34 @@ describe('NihAdministrativeInformation - Tests', () => {
     cy.get('#controlledAccessRequiredForGenomicSummaryResultsGSR').should('be.visible')
   })
 
-  it('should hide dbGaP form fields if the user selected "NO', () => {
-    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO))
+  it('fields should be visible if the user selected I am NHGRI funded and I do not have a dbGaP PHS ID', () => {
+    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.YES_NHGRI_NO_PHS_ID))
+    cy.mount(<NihAdministrativeInformation {...propCopy} />)
+    cy.get('#piInstitution').should('be.visible')
+    cy.get('#nihGrantContractNumber').should('be.visible')
+    cy.get('#nihICsSupportingStudy').should('be.visible')
+    cy.get('#nihProgramOfficerName').should('be.visible')
+    cy.get('#nihInstitutionCenterSubmission').should('be.visible')
+    cy.get('#nihGenomicProgramAdministratorName').should('be.visible')
+    cy.get('#multiCenterStudy').should('be.visible')
+    cy.get('#controlledAccessRequiredForGenomicSummaryResultsGSR').should('be.visible')
+  })
+
+  it('should hide dbGaP form fields if the user selected I am not NHGRI funded but I am seeking to submit data to AnVIL', () => {
+    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO_NHGRI_YES_ANVIL))
+    cy.mount(<NihAdministrativeInformation {...propCopy} />)
+    cy.get('#piInstitution').should('be.visible')
+    cy.get('#nihGrantContractNumber').should('be.visible')
+    cy.get('#nihICsSupportingStudy').should('be.visible')
+    cy.get('#nihProgramOfficerName').should('be.visible')
+    cy.get('#nihInstitutionCenterSubmission').should('be.visible')
+    cy.get('#nihGenomicProgramAdministratorName').should('be.visible')
+    cy.get('#multiCenterStudy').should('be.visible')
+    cy.get('#controlledAccessRequiredForGenomicSummaryResultsGSR').should('be.visible')
+  })
+
+  it('should hide dbGaP form fields if the user selected I am not NHGRI funded and do not plan to store data in AnVIL', () => {
+    propCopy?.study?.properties?.push(new NihAnvilUse(NihAnvilUse.NO_NHGRI_NO_ANVIL))
     cy.mount(<NihAdministrativeInformation {...propCopy} />)
     cy.get('.formField-container').should('not.exist')
     cy.get('#piInstitution').should('not.exist')
