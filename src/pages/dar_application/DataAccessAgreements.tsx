@@ -113,7 +113,7 @@ export const DataAccessAgreements = ({
               className="button button-white"
               disabled={isAttested}
             >
-              Save
+              Save Draft
             </button>
           )}
         </div>
