@@ -1,5 +1,5 @@
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import AddObjectButton from 'src/components/AddObjectButton'
 
 interface StudyAssetListProps<
@@ -66,13 +66,13 @@ export default function StudyAssetList<
 
   const filteredColumnsToShow = columnsToShow.filter((c): c is keyof T => typeof c === 'string')
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (editState.length !== items.length) {
       setEditState(items.map(() => false))
     }
   }, [items, editState.length])
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (viewState.length !== items.length) {
       setViewState(items.map(() => false))
     }
@@ -142,7 +142,7 @@ export default function StudyAssetList<
 
         return (
           <RowComponent
-            key={getItemKey(item, index)}
+            key={getItemKey(item, index) || index}
             {...getRowProps(baseProps)}
           />
         )

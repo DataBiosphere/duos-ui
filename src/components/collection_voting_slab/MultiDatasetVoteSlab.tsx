@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { get, isEmpty, isNil } from 'lodash'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
@@ -166,7 +166,7 @@ export default function MultiDatasetVoteSlab({
     return 'Other DAC Member\'s Votes'
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     const sorted = Object.values(collection.dars).sort(
       (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime(),
     )
