@@ -3,7 +3,6 @@
   "tag": "dev",
   "hash": "dev",
   "apiUrl": "http://localhost:8180/api",
-  "ontologyApiUrl": "https://ontologyURL.org/",
   "terraUrl": "https://terraURL.org/",
   "tdrApiUrl": "https://tdrApiUrl.org/",
   "ecmApiUrl": "https://ecmApiUrl.org",
