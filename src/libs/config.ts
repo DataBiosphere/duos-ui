@@ -67,10 +67,6 @@ class ConfigClass {
     return getNihUrl()
   }
 
-  async getProfileUrl(): Promise<string> {
-    return getProfileUrl()
-  }
-
   async getProject(): Promise<string> {
     return getProject()
   }
@@ -152,11 +148,6 @@ export const getHash = async (): Promise<string> => {
 export const getNihUrl = async (): Promise<string> => {
   const config = await loadConfig()
   return config.nihUrl
-}
-
-export const getProfileUrl = async (): Promise<string> => {
-  const config = await loadConfig()
-  return config.profileUrl
 }
 
 export const getProject = async (): Promise<string> => {
