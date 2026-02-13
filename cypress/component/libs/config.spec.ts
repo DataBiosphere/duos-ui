@@ -10,8 +10,6 @@ describe('Config', () => {
     errorApiKey: 'test-error-key',
     gaId: 'GA-TEST-123',
     hash: 'test-hash-123',
-    nihUrl: 'https://test.nih.gov',
-    profileUrl: 'https://test.profile.com',
     samApiUrl: 'https://test.sam.com',
     tag: 'v1.0.0-test',
     tdrApiUrl: 'https://test.tdr.com',
