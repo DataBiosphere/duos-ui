@@ -10,7 +10,7 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function SigningOfficialDarRequests() {
-  usePageTitle('DAR Requests')
+  usePageTitle('Data Access Requests')
   const [collectionList, setCollectionList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
