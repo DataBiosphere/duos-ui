@@ -346,6 +346,13 @@ export class ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanat
   }
 }
 
+export class StudyData extends StudyProperty {
+  static readonly key = 'data'
+  constructor(value: Record<string, unknown>, studyId?: number, studyPropertyId?: number) {
+    super(StudyData.key, 'Json' as StudyPropertyType, value, studyId, studyPropertyId)
+  }
+}
+
 export interface Study {
   studyId?: number
   uuid?: string
@@ -375,6 +382,7 @@ export interface Study {
     intellectualProperties?: Array<IntellectualProperty>
     biospecimens?: Array<Biospecimen>
   }
+  data: Record<string, unknown>
 }
 export interface DatasetRegistrationSchemaV1 {
   /** @description The study name */
@@ -486,6 +494,7 @@ export interface DatasetRegistrationSchemaV1 {
     funding?: Array<FundingResource>
     intellectualProperties?: Array<IntellectualProperty>
   }
+  data: Record<string, unknown>
 }
 
 export type DatasetPropertyType = 'String' | 'Number' | 'Json'
@@ -588,5 +597,12 @@ export class NumberOfParticipants extends DatasetProperty {
   static readonly propertyName = '# of participants'
   constructor(value: number, datasetId?: number, propertyId?: number) {
     super(NumberOfParticipants.propertyName, NumberOfParticipants.schemaProperty, 'Number' as DatasetPropertyType, value, datasetId, propertyId)
+  }
+}
+export class DatasetData extends DatasetProperty {
+  static readonly schemaProperty = 'data'
+  static readonly propertyName = 'data'
+  constructor(value: Record<string, unknown>, datasetId?: number, propertyId?: number) {
+    super(DatasetData.propertyName, DatasetData.schemaProperty, 'Json' as DatasetPropertyType, value, datasetId, propertyId)
   }
 }

@@ -18,11 +18,12 @@ beforeEach(() => {
 describe('GeneralStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
     cy.mount(<GeneralStudyInformation {...propCopy} />)
-    cy.get('.formField-container').should('have.length', 12)
+    cy.get('.formField-container').should('have.length', 13)
 
     cy.get('.formField-name').should('have.length', 1)
     cy.get('.formField-studyType').should('have.length', 1)
     cy.get('.formField-description').should('have.length', 1)
+    cy.get('.formField-tags').should('have.length', 1)
     cy.get('.formField-dataTypes').should('have.length', 1)
     cy.get('.formField-phenotypeIndication').should('have.length', 1)
     cy.get('.formField-species').should('have.length', 1)
@@ -63,5 +64,7 @@ describe('GeneralStudyInformation - Tests', () => {
     cy.get('@setStudySpy').its('callCount').should('eq', 46)
     cy.get('.formField-piEmail').type('name@anywhere.biz')
     cy.get('@setStudySpy').its('callCount').should('eq', 63)
+    cy.get('.formField-tags').type('tag1{enter}tag2{enter}')
+    cy.get('@setStudySpy').its('callCount').should('eq', 65)
   })
 })
