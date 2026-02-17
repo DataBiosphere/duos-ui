@@ -28,6 +28,7 @@ import {
   emailDomainValidator,
   emailValidator,
   isValid,
+  NotUrlValidator,
   requiredValidator,
   urlValidator,
 } from './formValidation'
@@ -197,6 +198,7 @@ export const FormFieldTypes = {
 export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
+  NOTURL: NotUrlValidator,
   EMAIL: emailValidator,
   EMAILDOMAIN: emailDomainValidator,
   DATE: dateValidator,
