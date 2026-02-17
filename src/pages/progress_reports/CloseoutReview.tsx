@@ -153,7 +153,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
                 e.currentTarget.style.backgroundColor = 'white'
               }}
             >
-              Go to DAR Requests
+              Go to Data Access Requests
             </button>
           </div>
         </div>

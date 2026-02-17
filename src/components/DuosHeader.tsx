@@ -73,7 +73,7 @@ export const headerTabsConfig: Tab[] = [
     label: 'Admin Console',
     link: '/admin_manage_dar_collections',
     children: [
-      { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
+      { label: 'Data Access Requests', link: '/admin_manage_dar_collections' },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DACs', link: '/manage_dac' },
       { label: 'Users', link: '/admin_manage_users' },
@@ -87,7 +87,7 @@ export const headerTabsConfig: Tab[] = [
     link: '/signing_official_console/library_cards',
     children: [
       { label: 'Library Cards', link: '/signing_official_console/library_cards' },
-      { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
+      { label: 'Data Access Requests', link: '/signing_official_console/dar_requests' },
       { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
@@ -100,7 +100,7 @@ export const headerTabsConfig: Tab[] = [
     link: '/chair_console',
     search: 'chair_console',
     children: [
-      { label: 'DAR Requests', link: '/chair_console' },
+      { label: 'Data Access Requests', link: '/chair_console' },
       { label: 'Manage DACs', link: '/manage_dac' },
       { label: 'My DAC\'s Datasets', link: '/dac_datasets' },
     ],
@@ -111,7 +111,7 @@ export const headerTabsConfig: Tab[] = [
     link: '/member_console',
     search: 'member_console',
     children: [
-      { label: 'DAR Requests', link: '/member_console' },
+      { label: 'Data Access Requests', link: '/member_console' },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
     ],
     isRendered: user => user.isMember,
@@ -122,7 +122,7 @@ export const headerTabsConfig: Tab[] = [
     search: 'datalibrary',
     children: [
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
-      { label: 'DAR Requests', link: '/researcher_console' },
+      { label: 'Data Access Requests', link: '/researcher_console' },
       { label: 'Datasets', link: '/datasets' },
       { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter },
     ],
