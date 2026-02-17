@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { filter, includes } from 'lodash'
 import { DacTerm, Dataset } from 'src/types/model'
 import SectionHeading from 'src/components/collection_voting_slab/SectionHeading'
@@ -31,7 +31,7 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
     setVisibleDatasets(collapsedViewDatasets)
   }, [collapsedDatasetCapacity])
 
-  useEffect(() => {
+  React.useEffect(() => {
     const datasets = adminPage
       ? bucketDatasets
       : filter(bucketDatasets, (dataset: Dataset) => {

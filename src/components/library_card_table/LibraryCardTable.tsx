@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import ReactTooltip from 'react-tooltip'
 import {
   calcTablePageCount,
@@ -187,7 +187,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
     columnHeaderFormat.actions,
   ]
 
-  useEffect(() => {
+  React.useEffect(() => {
     const init = async () => {
       try {
         setPageCount(calcTablePageCount(tableSize, filteredCards))
@@ -213,7 +213,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   }, [filteredCards, tableSize, currentPage, pageCount])
 
   // Hook to execute on initialization and card creation/deletion, applies filter on updated collection list
-  useEffect(() => {
+  React.useEffect(() => {
     if (searchRef.current) {
       const searchTerms = searchRef.current.value ?? ''
       let filteredList = libraryCards
@@ -225,7 +225,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   }, [props.libraryCards, libraryCards])
 
   // Hook that executes on prop load (initialization hook)
-  useEffect(() => {
+  React.useEffect(() => {
     setLibraryCards(props.libraryCards ?? [])
     if (!isNil(props.libraryCards)) {
       setIsLoading(false)

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DataUseTranslation } from '../../libs/dataUseTranslation'
 import { isEmpty, isNil, flatMap, keys, get } from 'lodash'
 import { DataUsePills } from './DataUsePill'
@@ -167,7 +167,7 @@ export default function ResearchProposalVoteSlab(props) {
   const [dacVotes, setDacVotes] = useState([])
   const { darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote } = props
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {}
-  useEffect(() => {
+  React.useEffect(() => {
     const user = Storage.getCurrentUser()
     setDacVotes(extractDacRPVotesFromBucket(bucket, user, adminPage))
     setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage))

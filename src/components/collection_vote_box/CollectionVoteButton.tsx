@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { votingColors } from 'src/libs/VotingColors'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
@@ -66,7 +66,7 @@ export default function CollectionVoteButton({
     updateStyle(baseColor, votingColors.default, true, disabled)
   }, [baseColor, disabled, updateStyle])
 
-  useEffect(() =>
+  React.useEffect(() =>
     isSelected ? selectedButtonStyle() : defaultButtonStyle(),
   [defaultButtonStyle, isSelected, selectedButtonStyle])
 

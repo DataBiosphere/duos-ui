@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { cloneDeep, isFunction, isNil, isArray } from 'lodash'
 import {
   getKey,
@@ -257,13 +257,13 @@ export const FormField = (config) => {
 
   const required = (validators || []).includes(FormValidators.REQUIRED)
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (defaultValue !== undefined) {
       setFormValue(defaultValue)
     }
   }, [defaultValue, type])
 
-  useEffect(() => {
+  React.useEffect(() => {
     validateFormProps(config)
   }, [config])
 
