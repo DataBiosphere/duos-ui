@@ -371,6 +371,7 @@ export interface Study {
   piName: string
   piEmail: string
   publicVisibility?: boolean
+  throughBioId?: string
   datasetIds?: number[]
   datasets?: Dataset[]
   properties?: StudyProperty[]
@@ -416,6 +417,8 @@ export interface DatasetRegistrationSchemaV1 {
   dataCustodianEmail?: string[]
   /** @description Public Visibility of this study */
   publicVisibility: boolean
+  /** @description Through.bio ID associated with this study if available */
+  throughBioId?: string
   /** @enum {string} */
   nihAnvilUse?: NiHAnvilUseValues
   /** @description Are you planning to submit to AnVIL? */

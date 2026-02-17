@@ -143,6 +143,17 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         defaultValue={study?.publicVisibility}
         onChange={onChange}
       />
+      <FormField
+        id="throughBioId"
+        title="Through.Bio ID"
+        helpText="Through.bio/"
+        name="throughBioId"
+        type={FormFieldTypes.TEXT}
+        placeholder="Enter the Through.Bio ID for this study, if available"
+        defaultValue={study?.throughBioId}
+        validators={[FormValidators.NOTURL]}
+        onChange={onChange}
+      />
     </div>
   )
 }

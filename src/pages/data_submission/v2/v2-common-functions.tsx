@@ -189,6 +189,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     piEmail: study.piEmail,
     dataCustodianEmail: getStudyPropertyValueByKey(study, DataCustodianEmail.key) as string[] || undefined,
     publicVisibility: study.publicVisibility || false,
+    throughBioId: study.throughBioId || undefined,
     nihAnvilUse: getStudyPropertyValueByKey(study, NihAnvilUse.key) as NiHAnvilUseValues || undefined,
     submittingToAnvil: getStudyPropertyValueByKey(study, SubmittingToAnvil.key) as boolean || undefined,
     dbGaPPhsID: getStudyPropertyValueByKey(study, DbGaPPhsID.key) as string || undefined,
