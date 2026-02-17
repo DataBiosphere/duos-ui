@@ -18,7 +18,7 @@ beforeEach(() => {
 describe('GeneralStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
     cy.mount(<GeneralStudyInformation {...propCopy} />)
-    cy.get('.formField-container').should('have.length', 13)
+    cy.get('.formField-container').should('have.length', 14)
 
     cy.get('.formField-name').should('have.length', 1)
     cy.get('.formField-studyType').should('have.length', 1)
@@ -33,6 +33,7 @@ describe('GeneralStudyInformation - Tests', () => {
     cy.get('#alternativeDataSharingPlanTargetDeliveryDate').should('exist')
     cy.get('#alternativeDataSharingPlanTargetPublicReleaseDate').should('exist')
     cy.get('.formField-publicVisibility').should('have.length', 1)
+    cy.get('.formField-throughBioId').should('have.length', 1)
   })
 
   it('should allow edit in all fields', () => {
@@ -66,5 +67,7 @@ describe('GeneralStudyInformation - Tests', () => {
     cy.get('@setStudySpy').its('callCount').should('eq', 63)
     cy.get('.formField-tags').type('tag1{enter}tag2{enter}')
     cy.get('@setStudySpy').its('callCount').should('eq', 65)
+    cy.get('.formField-throughBioId').type('test-bio-id')
+    cy.get('@setStudySpy').its('callCount').should('eq', 76)
   })
 })
