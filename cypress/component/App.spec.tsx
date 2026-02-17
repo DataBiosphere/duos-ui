@@ -88,23 +88,6 @@ describe('Main App Functions', () => {
           },
         },
       }))
-
-    cy.stub(ServiceStatus, 'getOntologyStatus').returns(Promise.resolve({
-      ok: true,
-      degraded: false,
-      systems: {
-        'elastic-search': {
-          healthy: true,
-          message: 'ClusterHealth is GREEN',
-          error: null,
-          details: null,
-          time: 1756131890182,
-          duration: 4,
-          timestamp: '2025-08-25T14:24:50.182Z',
-        },
-      },
-    },
-    ))
   })
 
   it('should render main layout components on the home page', () => {

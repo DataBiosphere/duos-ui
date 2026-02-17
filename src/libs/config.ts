@@ -63,22 +63,6 @@ class ConfigClass {
     return getHash()
   }
 
-  async getNihUrl(): Promise<string> {
-    return getNihUrl()
-  }
-
-  async getOntologyApiUrl(): Promise<string> {
-    return getOntologyApiUrl()
-  }
-
-  async getOntologyUrl(): Promise<string> {
-    return getOntologyUrl()
-  }
-
-  async getProfileUrl(): Promise<string> {
-    return getProfileUrl()
-  }
-
   async getProject(): Promise<string> {
     return getProject()
   }
@@ -155,25 +139,6 @@ export const getGaId = async (): Promise<string> => {
 export const getHash = async (): Promise<string> => {
   const config = await loadConfig()
   return config.hash
-}
-
-export const getNihUrl = async (): Promise<string> => {
-  const config = await loadConfig()
-  return config.nihUrl
-}
-
-export const getOntologyApiUrl = async (): Promise<string> => {
-  const config = await loadConfig()
-  return config.ontologyApiUrl
-}
-
-export const getOntologyUrl = async (): Promise<string> => {
-  return await getOntologyApiUrl()
-}
-
-export const getProfileUrl = async (): Promise<string> => {
-  const config = await loadConfig()
-  return config.profileUrl
 }
 
 export const getProject = async (): Promise<string> => {
