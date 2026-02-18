@@ -294,6 +294,15 @@ export class NihProgramOfficerName extends StringStudyProperty {
   }
 }
 
+export class ThroughBioId extends StringStudyProperty {
+  static readonly key = 'throughBioId'
+  static readonly fieldTitle = 'Through Bio ID'
+  static readonly fieldPlaceholderText = 'Enter the Through.Bio ID for this study, if available'
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super(ThroughBioId.key, ThroughBioId.fieldTitle, ThroughBioId.fieldPlaceholderText, value, studyId, studyPropertyId)
+  }
+}
+
 export class NihAnvilUse extends StudyProperty {
   static readonly key = 'nihAnvilUse'
   static readonly YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already'
@@ -371,7 +380,6 @@ export interface Study {
   piName: string
   piEmail: string
   publicVisibility?: boolean
-  throughBioId?: string
   datasetIds?: number[]
   datasets?: Dataset[]
   properties?: StudyProperty[]
@@ -417,7 +425,7 @@ export interface DatasetRegistrationSchemaV1 {
   dataCustodianEmail?: string[]
   /** @description Public Visibility of this study */
   publicVisibility: boolean
-  /** @description Through.bio ID associated with this study if available */
+  /** @description Through.Bio ID for this study, if available */
   throughBioId?: string
   /** @enum {string} */
   nihAnvilUse?: NiHAnvilUseValues
