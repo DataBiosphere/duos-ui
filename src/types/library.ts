@@ -10,8 +10,8 @@ export enum AssetType {
 
 export interface LibraryVersionNew {
   key: string
-  query: unknown | null
-  icon: string | null
+  query?: unknown
+  icon?: string
   title: string
   description?: string
   featured: boolean

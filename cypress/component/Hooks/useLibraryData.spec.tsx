@@ -32,8 +32,6 @@ const TestComponent = ({
 describe('useLibraryData', () => {
   const libraryConfig: LibraryVersionNew = {
     key: 'duos',
-    query: null,
-    icon: null,
     title: 'DUOS Data Library',
     featured: true,
     order: 0,

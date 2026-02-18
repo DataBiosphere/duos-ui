@@ -31,8 +31,6 @@ export const DataLibrary: React.FC = () => {
 
   const libraryConfig: LibraryVersionNew = {
     key: 'duos',
-    query: null,
-    icon: null,
     title: 'DUOS Data Library',
     description: 'Search, filter, and select datasets, then click \'Apply for Access\' to request access',
     featured: true,
