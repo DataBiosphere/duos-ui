@@ -16,7 +16,7 @@ export const useLibraryData = (
       assetType,
       filters,
     ],
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
     placeholderData: {
       items: [],
