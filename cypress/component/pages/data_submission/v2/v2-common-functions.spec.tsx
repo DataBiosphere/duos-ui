@@ -9,7 +9,7 @@ describe('extractThroughBioId', () => {
 
   it('returns empty string for non-through.bio URLs', () => {
     expect(extractThroughBioId('https://example.com/abc123')).to.equal('')
-    expect(extractThroughBioId('http://throughbio.com/abc')).to.equal('')
+    expect(extractThroughBioId('https://throughbio.com/abc')).to.equal('')
   })
 
   it('returns trimmed input for non-URL strings', () => {
