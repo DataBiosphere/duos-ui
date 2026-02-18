@@ -58,6 +58,10 @@ export interface LibraryUrlState {
   library: string
   tab: AssetType
   filters: FilterState
+  page: number
+  pageSize: number
+  sortField?: string
+  sortOrder?: 'asc' | 'desc'
 }
 
 export interface TabConfig {
@@ -70,4 +74,44 @@ export interface LibraryTabsProps {
   value: AssetType
   onChange: (assetType: AssetType) => void
   tabs: TabConfig[]
+}
+
+export interface LibraryDataGridProps {
+  assetType: AssetType
+  data: unknown[]
+  loading: boolean
+  total: number
+  paginationModel: {
+    page: number
+    pageSize: number
+  }
+  onPaginationChange: (model: { page: number, pageSize: number }) => void
+  sortModel: Array<{ field: string, sort: 'asc' | 'desc' | null }>
+  onSortChange: (model: Array<{ field: string, sort: 'asc' | 'desc' | null }>) => void
+  selectedDatasetIds: number[]
+  onSelectionChange: (selectedIds: number[]) => void
+}
+
+export interface StudyAggregation {
+  studyId: number
+  studyName: string
+  studyDescription?: string
+  piName: string
+  species: string
+  phenotype: string
+  dataCustodianEmail: string[]
+  datasetCount: number
+  totalParticipants: number
+  datasetIds: number[]
+  accessTypes?: string[]
+}
+
+export interface PaginationState {
+  page: number
+  pageSize: number
+}
+
+export interface SortState {
+  field: string
+  order: 'asc' | 'desc'
 }

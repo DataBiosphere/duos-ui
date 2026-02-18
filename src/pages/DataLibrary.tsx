@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { Box } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
@@ -7,6 +7,7 @@ import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType, AvailableFilters, LibraryVersionNew, TabConfig } from 'src/types/library'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData } from 'src/hooks/useLibraryData'
+import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 
 /**
  * DataLibrary Page Component
@@ -26,6 +27,8 @@ import { useLibraryData } from 'src/hooks/useLibraryData'
  */
 export const DataLibrary: React.FC = () => {
   const [urlState, updateUrlState] = useLibraryUrlState()
+
+  const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
 
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -66,14 +69,26 @@ export const DataLibrary: React.FC = () => {
     },
   }
 
-  const { isLoading } = useLibraryData(
+  const { data, isLoading, isFetching, error } = useLibraryData(
     libraryConfig,
     urlState.tab,
     urlState.filters,
+    { page: urlState.page, pageSize: urlState.pageSize },
+    urlState.sortField && urlState.sortOrder
+      ? { field: urlState.sortField, order: urlState.sortOrder }
+      : undefined,
   )
+
+  const sortModel = useMemo(() => {
+    if (urlState.sortField && urlState.sortOrder) {
+      return [{ field: urlState.sortField, sort: urlState.sortOrder }]
+    }
+    return []
+  }, [urlState.sortField, urlState.sortOrder])
 
   const handleTabChange = (newAssetType: AssetType) => {
     updateUrlState({ tab: newAssetType })
+    setSelectedDatasetIds([])
   }
 
   const handleFiltersChange = (newFilters: typeof urlState.filters) => {
@@ -92,6 +107,37 @@ export const DataLibrary: React.FC = () => {
         participantCount: {},
       },
     })
+  }
+
+  const handleSortChange = (model: Array<{ field: string, sort: 'asc' | 'desc' | null }>) => {
+    if (model.length > 0 && model[0].sort) {
+      updateUrlState({
+        sortField: model[0].field,
+        sortOrder: model[0].sort,
+      })
+    }
+    else {
+      updateUrlState({
+        sortField: undefined,
+        sortOrder: undefined,
+      })
+    }
+  }
+
+  const handleSelectionChange = (datasetIds: number[]) => {
+    setSelectedDatasetIds(datasetIds)
+  }
+
+  if (error) {
+    console.log(error)
+    return (
+      <Box sx={{ px: 3, py: 4 }}>
+        <Box sx={{ textAlign: 'center', color: 'error.main' }}>
+          <h2>Error Loading Data</h2>
+          <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
+        </Box>
+      </Box>
+    )
   }
 
   return (
@@ -138,6 +184,30 @@ export const DataLibrary: React.FC = () => {
             onClear={handleClearFilters}
             availableFilters={availableFilters}
             loading={isLoading}
+          />
+        </Box>
+
+        {/* Data Grid */}
+        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+          <LibraryDataGrid
+            assetType={urlState.tab}
+            data={data?.items || []}
+            loading={isFetching}
+            total={data?.total || 0}
+            paginationModel={{
+              page: urlState.page,
+              pageSize: urlState.pageSize,
+            }}
+            onPaginationChange={(model) => {
+              updateUrlState({
+                page: model.page,
+                pageSize: model.pageSize,
+              })
+            }}
+            sortModel={sortModel}
+            onSortChange={handleSortChange}
+            selectedDatasetIds={selectedDatasetIds}
+            onSelectionChange={handleSelectionChange}
           />
         </Box>
       </Box>

@@ -83,6 +83,10 @@ export const useLibraryUrlState = () => {
     library: searchParams.get('library') || 'duos',
     tab: (searchParams.get('tab') as AssetType) || AssetType.STUDIES,
     filters: parseFiltersFromUrl(searchParams),
+    page: Number.parseInt(searchParams.get('page') || '0'),
+    pageSize: Number.parseInt(searchParams.get('pageSize') || '25'),
+    sortField: searchParams.get('sort') || undefined,
+    sortOrder: (searchParams.get('order') as 'asc' | 'desc') || undefined,
   }
 
   const updateState = (updates: Partial<LibraryUrlState>) => {
@@ -103,6 +107,42 @@ export const useLibraryUrlState = () => {
       }
       else {
         newParams.delete('tab')
+      }
+    }
+
+    if (updates.page !== undefined) {
+      if (updates.page > 0) {
+        newParams.set('page', updates.page.toString())
+      }
+      else {
+        newParams.delete('page')
+      }
+    }
+
+    if (updates.pageSize !== undefined) {
+      if (updates.pageSize === 25) {
+        newParams.delete('pageSize')
+      }
+      else {
+        newParams.set('pageSize', updates.pageSize.toString())
+      }
+    }
+
+    if (updates.sortField !== undefined) {
+      if (updates.sortField) {
+        newParams.set('sort', updates.sortField)
+      }
+      else {
+        newParams.delete('sort')
+      }
+    }
+
+    if (updates.sortOrder !== undefined) {
+      if (updates.sortOrder) {
+        newParams.set('order', updates.sortOrder)
+      }
+      else {
+        newParams.delete('order')
       }
     }
 
