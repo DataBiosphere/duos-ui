@@ -1,24 +1,44 @@
 import { extractThroughBioId } from 'src/pages/data_submission/v2/v2-common-functions'
 
 describe('extractThroughBioId', () => {
-  it('extracts ID from a valid through.bio URL', () => {
-    expect(extractThroughBioId('https://through.bio/abc123')).to.equal('abc123')
-    expect(extractThroughBioId('https://through.bio/xyz')).to.equal('xyz')
-    expect(extractThroughBioId('https://through.bio/abc/def')).to.equal('abc/def')
+  const validUrls = [
+    ['https://through.bio/abc123', 'abc123'],
+    ['https://through.bio/xyz', 'xyz'],
+    ['https://through.bio/abc/def', 'abc/def'],
+  ]
+  validUrls.forEach(([input, expected]) => {
+    it(`extracts ID "${expected}" from "${input}"`, () => {
+      expect(extractThroughBioId(input)).to.equal(expected)
+    })
   })
 
-  it('returns empty string for non-through.bio URLs', () => {
-    expect(extractThroughBioId('https://example.com/abc123')).to.equal('')
-    expect(extractThroughBioId('https://throughbio.com/abc')).to.equal('')
+  const invalidUrls = [
+    'https://example.com/abc123',
+    'https://throughbio.com/abc',
+  ]
+  invalidUrls.forEach((input) => {
+    it(`returns empty string for invalid URL "${input}"`, () => {
+      expect(extractThroughBioId(input)).to.equal('')
+    })
   })
 
-  it('returns trimmed input for non-URL strings', () => {
-    expect(extractThroughBioId('  myid  ')).to.equal('myid')
-    expect(extractThroughBioId('anotherId')).to.equal('anotherId')
+  const nonUrlStrings = [
+    ['  myid  ', 'myid'],
+    ['anotherId', 'anotherId'],
+  ]
+  nonUrlStrings.forEach(([input, expected]) => {
+    it(`returns trimmed input "${expected}" for "${input}"`, () => {
+      expect(extractThroughBioId(input)).to.equal(expected)
+    })
   })
 
-  it('returns empty string for empty input', () => {
-    expect(extractThroughBioId('')).to.equal('')
-    expect(extractThroughBioId('   ')).to.equal('')
+  const emptyInputs = [
+    '',
+    '   ',
+  ]
+  emptyInputs.forEach((input) => {
+    it(`returns empty string for empty input "${input}"`, () => {
+      expect(extractThroughBioId(input)).to.equal('')
+    })
   })
 })

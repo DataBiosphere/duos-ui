@@ -38,7 +38,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
 
   const throughBioLink = React.useMemo(() => {
     const id = getStudyPropertyValueByKey(study, 'throughBioId')
-    return id ? `https://through.bio/${id}` : undefined
+    return typeof id === 'string' && id.trim() !== '' ? `https://through.bio/${id}` : undefined
   }, [study])
 
   const onChange = ({ key, value }: { key: string, value: unknown, isValid: boolean }) => {

@@ -337,6 +337,6 @@ export const extractThroughBioId = (input: string): string => {
   }
   catch {
     // Not a URL: return non-empty string, else ''
-    return trimmed !== '' ? trimmed : ''
+    return trimmed === '' ? '' : trimmed
   }
 }
