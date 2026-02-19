@@ -6,8 +6,9 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder, TabConfig } from 'src/types/library'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
-import { useLibraryData } from 'src/hooks/useLibraryData'
+import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
+import { AggregationResult } from 'src/types/elastic'
 
 /**
  * DataLibrary Page Component
@@ -51,29 +52,44 @@ export const DataLibrary: React.FC = () => {
     { key: AssetType.DATASETS, label: 'Datasets' },
   ]
 
-  const availableFilters: AvailableFilters = {
-    accessManagement: [
-      { value: 'controlled', label: 'Controlled' },
-      { value: 'open', label: 'Open' },
-      { value: 'external', label: 'External' },
-    ],
-    dataUse: [
-      { value: 'HMB', label: 'Health/Medical/Biomedical' },
-      { value: 'GRU', label: 'General Research Use' },
-      { value: 'DS', label: 'Disease Specific' },
-      { value: 'NRES', label: 'No Restrictions' },
-    ],
-    dataType: [
-      { value: 'Phenotype', label: 'Phenotype' },
-      { value: 'Genomic', label: 'Genomic' },
-      { value: 'Transcriptomic', label: 'Transcriptomic' },
-    ],
-    dac: [],
-    participantCountRange: {
-      min: 0,
-      max: 100000,
-    },
-  }
+  const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
+
+  const availableFilters: AvailableFilters = useMemo(() => {
+    const dacAgg = (metadata?.dac as AggregationResult)?.buckets || []
+    const dataTypeAgg = (metadata?.data_type as AggregationResult)?.buckets || []
+
+    return {
+      accessManagement: [
+        { value: 'controlled', label: 'Controlled' },
+        { value: 'open', label: 'Open' },
+        { value: 'external', label: 'External' },
+      ],
+      dataUse: [
+        { value: 'HMB', label: 'Health/Medical/Biomedical' },
+        { value: 'GRU', label: 'General Research Use' },
+        { value: 'DS', label: 'Disease Specific' },
+        { value: 'NRES', label: 'No Restrictions' },
+      ],
+      dataType: dataTypeAgg
+        .map(bucket => ({
+          value: bucket.key as string,
+          label: bucket.key as string,
+          count: bucket.doc_count,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+      dac: dacAgg
+        .map(bucket => ({
+          value: bucket.key as string,
+          label: bucket.key as string,
+          count: bucket.doc_count,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+      participantCountRange: {
+        min: 0,
+        max: 100000,
+      },
+    }
+  }, [metadata])
 
   const { data, isLoading, isFetching, error } = useLibraryData(
     libraryConfig,
@@ -198,7 +214,7 @@ export const DataLibrary: React.FC = () => {
             onChange={handleFiltersChange}
             onClear={handleClearFilters}
             availableFilters={availableFilters}
-            loading={isLoading}
+            loading={isLoading || isMetadataLoading}
           />
         </Box>
 

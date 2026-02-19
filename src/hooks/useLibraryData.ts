@@ -338,7 +338,7 @@ export const useLibraryData = (
       return {
         items,
         total: Array.isArray(actualData) ? actualData.length : (actualData.hits?.total?.value || 0),
-        aggregations: {},
+        aggregations: actualData.aggregations || {},
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -348,5 +348,33 @@ export const useLibraryData = (
       total: 0,
       aggregations: {},
     },
+  })
+}
+
+/**
+ * Custom hook for fetching library filter metadata (e.g. unique DACs)
+ */
+export const useLibraryMetadata = (libraryConfig: LibraryVersionNew) => {
+  return useQuery({
+    queryKey: ['library-metadata', libraryConfig.key],
+    queryFn: async () => {
+      const query = buildElasticsearchQuery(
+        libraryConfig,
+        AssetType.DATASETS,
+        {
+          accessManagement: [],
+          dataUse: [],
+          dataType: [],
+          dac: [],
+          participantCount: {},
+        },
+        '',
+        { page: 0, pageSize: 0 },
+      )
+
+      const response = await DataSet.searchDatasetIndexV2(query)
+      return response.aggregations || {}
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
   })
 }
