@@ -11,6 +11,19 @@ import { DatasetTerm } from 'src/types/model'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { makeStudyColumns } from 'src/components/data_library/columns/studyColumns'
 
+const LoadingOverlay = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100%',
+    }}
+  >
+    <CircularProgress />
+  </Box>
+)
+
 export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   assetType,
   data,
@@ -178,18 +191,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
           },
         }}
         slots={{
-          loadingOverlay: () => (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100%',
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          ),
+          loadingOverlay: LoadingOverlay,
         }}
       />
     </Box>
