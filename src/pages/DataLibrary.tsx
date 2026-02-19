@@ -141,7 +141,7 @@ export const DataLibrary: React.FC = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', pb: 5 }}>
       {/* Header */}
       <Box>
         <TableHeaderSection
@@ -188,7 +188,7 @@ export const DataLibrary: React.FC = () => {
         </Box>
 
         {/* Data Grid */}
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+        <Box sx={{ flex: 1, height: '100%', overflow: 'hidden' }}>
           <LibraryDataGrid
             assetType={urlState.tab}
             data={data?.items || []}

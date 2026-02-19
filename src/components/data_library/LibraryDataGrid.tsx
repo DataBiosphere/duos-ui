@@ -151,7 +151,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   }
 
   return (
-    <Box sx={{ width: '100%', height: 600 }}>
+    <Box sx={{ width: '100%', height: '100%' }}>
       <DataGrid
         rows={data as (StudyAggregation | DatasetTerm)[]}
         columns={columns}
