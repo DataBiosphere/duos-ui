@@ -9,9 +9,23 @@ const TestComponent = () => {
     <div>
       <div id="library">{state.library}</div>
       <div id="tab">{state.tab}</div>
+      <div id="filters">{JSON.stringify(state.filters)}</div>
       <button id="update-tab" onClick={() => updateState({ tab: AssetType.DATASETS })}>Update Tab</button>
       <button id="update-library" onClick={() => updateState({ library: 'test' })}>Update Library</button>
       <button id="clear-library" onClick={() => updateState({ library: '' })}>Clear Library</button>
+      <button
+        id="update-filters"
+        onClick={() => updateState({
+          filters: {
+            accessManagement: ['controlled'],
+            dataUse: [],
+            dataType: [],
+            dac: [],
+            participantCount: { min: 10 },
+          },
+        })}
+      >Update Filters
+      </button>
     </div>
   )
 }
@@ -25,16 +39,26 @@ describe('useLibraryUrlState', () => {
     )
     cy.get('#library').should('have.text', 'duos')
     cy.get('#tab').should('have.text', AssetType.STUDIES)
+    cy.get('#filters').then(($el) => {
+      const filters = JSON.parse($el.text())
+      expect(filters.accessManagement).to.have.length(0)
+      expect(filters.participantCount.min).to.be.equal(undefined)
+    })
   })
 
   it('initializes with values from search params', () => {
     cy.mount(
-      <MemoryRouter initialEntries={['/?library=test&tab=datasets']}>
+      <MemoryRouter initialEntries={['/?library=test&tab=datasets&access=controlled,open&minParticipants=5']}>
         <TestComponent />
       </MemoryRouter>,
     )
     cy.get('#library').should('have.text', 'test')
     cy.get('#tab').should('have.text', AssetType.DATASETS)
+    cy.get('#filters').then(($el) => {
+      const filters = JSON.parse($el.text())
+      expect(filters.accessManagement).to.deep.equal(['controlled', 'open'])
+      expect(filters.participantCount.min).to.equal(5)
+    })
   })
 
   it('updates state via updateState', () => {
@@ -49,6 +73,13 @@ describe('useLibraryUrlState', () => {
 
     cy.get('#update-library').click()
     cy.get('#library').should('have.text', 'test')
+
+    cy.get('#update-filters').click()
+    cy.get('#filters').then(($el) => {
+      const filters = JSON.parse($el.text())
+      expect(filters.accessManagement).to.deep.equal(['controlled'])
+      expect(filters.participantCount.min).to.equal(10)
+    })
 
     // Test clearing a value (deleting from params)
     cy.get('#clear-library').click()

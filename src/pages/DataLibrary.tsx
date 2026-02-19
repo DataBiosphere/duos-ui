@@ -4,7 +4,9 @@ import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, TabConfig } from 'src/types/library'
+import { AssetType, AvailableFilters, LibraryVersionNew, TabConfig } from 'src/types/library'
+import LibraryFilters from 'src/components/data_library/LibraryFilters'
+import { useLibraryData } from 'src/hooks/useLibraryData'
 
 /**
  * DataLibrary Page Component
@@ -27,13 +29,69 @@ export const DataLibrary: React.FC = () => {
 
   const searchRef = useRef<HTMLInputElement>(null)
 
+  const libraryConfig: LibraryVersionNew = {
+    key: 'duos',
+    title: 'DUOS Data Library',
+    description: 'Search, filter, and select datasets, then click \'Apply for Access\' to request access',
+    featured: true,
+    order: 0,
+  }
+
   const tabs: TabConfig[] = [
     { key: AssetType.STUDIES, label: 'Studies' },
     { key: AssetType.DATASETS, label: 'Datasets' },
   ]
 
+  const availableFilters: AvailableFilters = {
+    accessManagement: [
+      { value: 'controlled', label: 'Controlled' },
+      { value: 'open', label: 'Open' },
+      { value: 'external', label: 'External' },
+    ],
+    dataUse: [
+      { value: 'HMB', label: 'Health/Medical/Biomedical' },
+      { value: 'GRU', label: 'General Research Use' },
+      { value: 'DS', label: 'Disease Specific' },
+      { value: 'NRES', label: 'No Restrictions' },
+    ],
+    dataType: [
+      { value: 'Phenotype', label: 'Phenotype' },
+      { value: 'Genomic', label: 'Genomic' },
+      { value: 'Transcriptomic', label: 'Transcriptomic' },
+    ],
+    dac: [],
+    participantCountRange: {
+      min: 0,
+      max: 100000,
+    },
+  }
+
+  const { isLoading } = useLibraryData(
+    libraryConfig,
+    urlState.tab,
+    urlState.filters,
+  )
+
   const handleTabChange = (newAssetType: AssetType) => {
     updateUrlState({ tab: newAssetType })
+  }
+
+  const handleFiltersChange = (newFilters: typeof urlState.filters) => {
+    updateUrlState({
+      filters: newFilters,
+    })
+  }
+
+  const handleClearFilters = () => {
+    updateUrlState({
+      filters: {
+        accessManagement: [],
+        dataUse: [],
+        dataType: [],
+        dac: [],
+        participantCount: {},
+      },
+    })
   }
 
   return (
@@ -41,8 +99,8 @@ export const DataLibrary: React.FC = () => {
       {/* Header */}
       <Box>
         <TableHeaderSection
-          title="DUOS Data Library"
-          description="Search, filter, and select datasets, then click 'Apply for Access' to request access"
+          title={libraryConfig.title}
+          description={libraryConfig.description}
         />
         <SearchBar
           handleSearchChange={() => {}}
@@ -60,6 +118,28 @@ export const DataLibrary: React.FC = () => {
           onChange={handleTabChange}
           tabs={tabs}
         />
+      </Box>
+
+      {/* Main content area with filters and grid */}
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', px: 3, pt: 2 }}>
+        {/* Filters Sidebar */}
+        <Box
+          sx={{
+            width: 280,
+            flexShrink: 0,
+            pr: 2,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+          }}
+        >
+          <LibraryFilters
+            filters={urlState.filters}
+            onChange={handleFiltersChange}
+            onClear={handleClearFilters}
+            availableFilters={availableFilters}
+            loading={isLoading}
+          />
+        </Box>
       </Box>
     </Box>
   )
