@@ -2,6 +2,7 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
+import { AccessManagement } from 'src/types/library'
 
 /**
  * Column definitions for dataset view
@@ -74,11 +75,18 @@ export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
             label={summary.name}
             size="small"
             color={
-              params.value === 'controlled'
-                ? 'primary'
-                : params.value === 'open'
-                  ? 'success'
-                  : 'default'
+              (() => {
+                switch (params.value) {
+                  case AccessManagement.CONTROLLED:
+                    return 'primary'
+                  case AccessManagement.OPEN:
+                    return 'success'
+                  case AccessManagement.EXTERNAL:
+                    return 'default'
+                  default:
+                    return 'default'
+                }
+              })()
             }
           />
         </Tooltip>

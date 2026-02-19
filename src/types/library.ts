@@ -18,6 +18,12 @@ export interface LibraryVersionNew {
   order: number
 }
 
+export enum AccessManagement {
+  CONTROLLED = 'controlled',
+  OPEN = 'open',
+  EXTERNAL = 'external',
+}
+
 export interface FilterState {
   accessManagement: string[]
   dataUse: string[]
