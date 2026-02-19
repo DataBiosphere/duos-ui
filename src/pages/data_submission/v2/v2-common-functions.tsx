@@ -41,7 +41,9 @@ import {
   DataURL,
   FileTypes,
   NumberOfParticipants, StudyData,
-  DatasetData } from 'src/pages/data_submission/v2/v2-models'
+  DatasetData,
+  ThroughBioId,
+} from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { set, isEmpty } from 'lodash'
 import { Storage } from 'src/libs/storage'
@@ -189,6 +191,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     piEmail: study.piEmail,
     dataCustodianEmail: getStudyPropertyValueByKey(study, DataCustodianEmail.key) as string[] || undefined,
     publicVisibility: study.publicVisibility || false,
+    throughBioId: getStudyPropertyValueByKey(study, ThroughBioId.key) as string || undefined,
     nihAnvilUse: getStudyPropertyValueByKey(study, NihAnvilUse.key) as NiHAnvilUseValues || undefined,
     submittingToAnvil: getStudyPropertyValueByKey(study, SubmittingToAnvil.key) as boolean || undefined,
     dbGaPPhsID: getStudyPropertyValueByKey(study, DbGaPPhsID.key) as string || undefined,
@@ -318,4 +321,22 @@ const toTitleCase = (str: string): string => {
       return word.charAt(0).toUpperCase() + word.slice(1)
     })
     .join(' ')
+}
+
+// Extracts the Through.Bio ID from a URL or returns the input if not a URL.
+// Returns an empty string if the URL is not from through.bio.
+export const extractThroughBioId = (input: string): string => {
+  const trimmed = input.trim()
+  try {
+    const url = new URL(trimmed)
+    if (url.hostname === 'through.bio') {
+      return url.pathname.slice(1)
+    }
+    // Any other URL: return ''
+    return ''
+  }
+  catch {
+    // Not a URL: return non-empty string, else ''
+    return trimmed === '' ? '' : trimmed
+  }
 }

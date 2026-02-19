@@ -1,4 +1,9 @@
-import { greaterThanZeroValidator, requiredValidator, urlValidator } from 'src/components/forms/formValidation'
+import {
+  greaterThanZeroValidator,
+  NotUrlValidator,
+  requiredValidator,
+  urlValidator,
+} from 'src/components/forms/formValidation'
 
 describe('Form Validator tests', () => {
   describe('Validate number greater than zero tests', () => {
@@ -47,6 +52,26 @@ describe('Form Validator tests', () => {
     })
     it('null should validate to false', () => {
       expect(urlValidator.isValid(null)).to.be.equal(false)
+    })
+  })
+  describe('Validate \'not url\' field tests', () => {
+    it('Non-url string should validate to true', () => {
+      expect(NotUrlValidator.isValid('hello! I am a test')).to.be.equal(true)
+    })
+    it('Valid URL should validate to false', () => {
+      expect(NotUrlValidator.isValid('https://www.broadinstitute.org')).to.be.equal(false)
+    })
+    it('Empty string should validate to true', () => {
+      expect(NotUrlValidator.isValid('')).to.be.equal(true)
+    })
+    it('Whitespace string should validate to true', () => {
+      expect(NotUrlValidator.isValid('   ')).to.be.equal(true)
+    })
+    it('undefined should validate to true', () => {
+      expect(NotUrlValidator.isValid(undefined)).to.be.equal(true)
+    })
+    it('null should validate to true', () => {
+      expect(NotUrlValidator.isValid(null)).to.be.equal(true)
     })
   })
 })
