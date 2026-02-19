@@ -5,7 +5,46 @@ import { DataLibrary } from 'src/pages/DataLibrary'
 
 const queryClient = new QueryClient()
 
+const mockMetadataResponse = {
+  aggregations: {
+    dac: { buckets: [{ key: 'DAC-1', doc_count: 5 }] },
+    data_type: { buckets: [{ key: 'Genomic', doc_count: 10 }] },
+  },
+}
+
+const mockStudiesResponse = {
+  aggregations: {
+    total_studies: { value: 2 },
+    studies: {
+      buckets: [
+        {
+          key: { study_id: 101 },
+          study_details: { hits: { hits: [{ _source: { study: { studyName: 'Study One', description: 'Desc One' } } }] } },
+          dataset_count: { value: 5 },
+          total_participants: { value: 100 },
+          dataset_ids: { buckets: [{ key: 1 }, { key: 2 }] },
+        },
+      ],
+    },
+  },
+}
+
 describe('DataLibrary', () => {
+  beforeEach(() => {
+    cy.initApplicationConfig()
+    cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
+      if (req.body.size === 0 && !req.body.queryTerm) {
+        req.reply(mockMetadataResponse)
+      }
+      else if (req.body.aggs && req.body.aggs.studies) {
+        req.reply(mockStudiesResponse)
+      }
+      else {
+        req.reply({ hits: { hits: [], total: { value: 0 } } })
+      }
+    }).as('searchApi')
+  })
+
   it('renders the data library page', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
@@ -96,14 +135,12 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    // Initially on Studies
-    cy.get('button').contains('Studies').should('have.css', 'font-weight', '700')
-
-    // Click Datasets
-    cy.get('button').contains('Datasets').click()
-
-    // Now on Datasets
+    // Initially on Datasets (due to default in useLibraryUrlState)
     cy.get('button').contains('Datasets').should('have.css', 'font-weight', '700')
-    cy.get('button').contains('Studies').should('have.css', 'font-weight', '400')
+
+    // Switch to Studies
+    cy.get('button').contains('Studies').click()
+    cy.get('button').contains('Studies').should('have.css', 'font-weight', '700')
+    cy.get('button').contains('Datasets').should('have.css', 'font-weight', '400')
   })
 })
