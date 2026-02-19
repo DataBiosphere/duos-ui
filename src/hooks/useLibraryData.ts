@@ -119,9 +119,14 @@ export const buildElasticsearchQuery = (
         },
       },
       aggs: {
+        total_studies: {
+          cardinality: {
+            field: 'study.studyId',
+          },
+        },
         studies: {
           composite: {
-            size: pagination.pageSize,
+            size: (pagination.page + 1) * pagination.pageSize,
             sources: [
               {
                 study_id: {
@@ -287,14 +292,21 @@ export const useLibraryData = (
 
       if (assetType === AssetType.STUDIES && actualData.aggregations) {
         const studies = transformStudyAggregations(actualData)
+        const totalResult = actualData.aggregations.total_studies as { value: number } | undefined
+        const total = totalResult?.value || studies.length
+        const start = pagination.page * pagination.pageSize
+        const slice = studies.slice(start, start + pagination.pageSize)
+
         return {
-          items: studies,
-          total: actualData.aggregations.studies?.buckets?.length || 0,
+          items: slice,
+          total,
           aggregations: actualData.aggregations,
         }
       }
 
-      const items = Array.isArray(actualData) ? actualData : (actualData.hits?.hits?.map((h: unknown) => h._source) || [])
+      const items = Array.isArray(actualData)
+        ? actualData
+        : (actualData.hits?.hits?.map((h: Record<string, unknown>) => h._source) || [])
       return {
         items,
         total: Array.isArray(actualData) ? actualData.length : (actualData.hits?.total?.value || 0),
