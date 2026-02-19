@@ -68,6 +68,7 @@ export const DataLibrary: React.FC = () => {
         { value: 'HMB', label: 'Health/Medical/Biomedical' },
         { value: 'GRU', label: 'General Research Use' },
         { value: 'DS', label: 'Disease Specific' },
+        { value: 'OTHER', label: 'Other Restriction' },
         { value: 'NRES', label: 'No Restrictions' },
       ],
       dataType: dataTypeAgg
