@@ -22,6 +22,7 @@ export const buildElasticsearchQuery = (
   libraryConfig: LibraryVersionNew,
   assetType: AssetType,
   filters: FilterState,
+  queryTerm: string,
   pagination: PaginationState,
   sort?: SortState,
 ): ElasticsearchQuery => {
@@ -36,6 +37,30 @@ export const buildElasticsearchQuery = (
   // Add library-specific query
   if (libraryConfig.query) {
     queryChunks.push(libraryConfig.query as QueryClause)
+  }
+
+  // Add search modifier if search term exists
+  if (queryTerm.length > 0) {
+    queryChunks.push({
+      multi_match: {
+        query: queryTerm,
+        type: 'phrase_prefix',
+        fields: [
+          'datasetName',
+          'dataLocation',
+          'study.description',
+          'study.studyName',
+          'study.species',
+          'study.piName',
+          'study.dataCustodianEmail',
+          'study.dataTypes',
+          'dataUse.primary.code',
+          'dataUse.secondary.code',
+          'dac.dacName',
+          'datasetIdentifier',
+        ],
+      },
+    })
   }
 
   // Build filter query
@@ -265,6 +290,7 @@ export const useLibraryData = (
   libraryConfig: LibraryVersionNew,
   assetType: AssetType,
   filters: FilterState,
+  queryTerm: string,
   pagination: PaginationState,
   sort?: SortState,
 ) => {
@@ -274,6 +300,7 @@ export const useLibraryData = (
       libraryConfig.key,
       assetType,
       filters,
+      queryTerm,
       pagination,
       sort,
     ],
@@ -282,6 +309,7 @@ export const useLibraryData = (
         libraryConfig,
         assetType,
         filters,
+        queryTerm,
         pagination,
         sort,
       )

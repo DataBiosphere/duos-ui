@@ -66,6 +66,7 @@ export interface LibraryUrlState {
   library: string
   tab: AssetType
   filters: FilterState
+  query?: string
   page: number
   pageSize: number
   sortField?: string

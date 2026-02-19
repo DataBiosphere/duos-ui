@@ -32,6 +32,12 @@ export const DataLibrary: React.FC = () => {
 
   const searchRef = useRef<HTMLInputElement>(null)
 
+  React.useEffect(() => {
+    if (searchRef.current && urlState.query) {
+      searchRef.current.value = urlState.query
+    }
+  }, [urlState.query])
+
   const libraryConfig: LibraryVersionNew = {
     key: 'duos',
     title: 'DUOS Data Library',
@@ -73,6 +79,7 @@ export const DataLibrary: React.FC = () => {
     libraryConfig,
     urlState.tab,
     urlState.filters,
+    urlState.query ?? '',
     { page: urlState.page, pageSize: urlState.pageSize },
     urlState.sortField && urlState.sortOrder
       ? { field: urlState.sortField, order: urlState.sortOrder }
@@ -91,6 +98,13 @@ export const DataLibrary: React.FC = () => {
     setSelectedDatasetIds([])
   }
 
+  const handleSearchChange = (query: string) => {
+    updateUrlState({
+      query,
+      page: 0,
+    })
+  }
+
   const handleFiltersChange = (newFilters: typeof urlState.filters) => {
     updateUrlState({
       filters: newFilters,
@@ -106,6 +120,7 @@ export const DataLibrary: React.FC = () => {
         dac: [],
         participantCount: {},
       },
+      page: 0,
     })
   }
 
@@ -149,7 +164,7 @@ export const DataLibrary: React.FC = () => {
           description={libraryConfig.description}
         />
         <SearchBar
-          handleSearchChange={() => {}}
+          handleSearchChange={handleSearchChange}
           searchRef={searchRef}
           style={{
             paddingTop: '10px',
