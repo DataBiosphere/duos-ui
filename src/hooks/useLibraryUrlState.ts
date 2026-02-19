@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { AssetType, FilterState, LibraryUrlState } from 'src/types/library'
+import { AssetType, FilterState, LibraryUrlState, SortOrder } from 'src/types/library'
 
 /**
  * Parse filters from URL search params
@@ -86,7 +86,7 @@ export const useLibraryUrlState = () => {
     page: Number.parseInt(searchParams.get('page') || '0'),
     pageSize: Number.parseInt(searchParams.get('pageSize') || '25'),
     sortField: searchParams.get('sort') || undefined,
-    sortOrder: (searchParams.get('order') as 'asc' | 'desc') || undefined,
+    sortOrder: (searchParams.get('order') as SortOrder) || undefined,
   }
 
   const updateState = (updates: Partial<LibraryUrlState>) => {

@@ -54,6 +54,8 @@ export interface LibraryFiltersProps {
   loading?: boolean
 }
 
+export type SortOrder = 'asc' | 'desc'
+
 export interface LibraryUrlState {
   library: string
   tab: AssetType
@@ -61,7 +63,7 @@ export interface LibraryUrlState {
   page: number
   pageSize: number
   sortField?: string
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: SortOrder
 }
 
 export interface TabConfig {
@@ -86,8 +88,8 @@ export interface LibraryDataGridProps {
     pageSize: number
   }
   onPaginationChange: (model: { page: number, pageSize: number }) => void
-  sortModel: Array<{ field: string, sort: 'asc' | 'desc' | null }>
-  onSortChange: (model: Array<{ field: string, sort: 'asc' | 'desc' | null }>) => void
+  sortModel: Array<{ field: string, sort: SortOrder | null }>
+  onSortChange: (model: Array<{ field: string, sort: SortOrder | null }>) => void
   selectedDatasetIds: number[]
   onSelectionChange: (selectedIds: number[]) => void
 }
@@ -113,5 +115,5 @@ export interface PaginationState {
 
 export interface SortState {
   field: string
-  order: 'asc' | 'desc'
+  order: SortOrder
 }

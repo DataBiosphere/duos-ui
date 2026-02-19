@@ -4,7 +4,7 @@ import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, LibraryVersionNew, TabConfig } from 'src/types/library'
+import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder, TabConfig } from 'src/types/library'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData } from 'src/hooks/useLibraryData'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
@@ -109,7 +109,7 @@ export const DataLibrary: React.FC = () => {
     })
   }
 
-  const handleSortChange = (model: Array<{ field: string, sort: 'asc' | 'desc' | null }>) => {
+  const handleSortChange = (model: Array<{ field: string, sort: SortOrder | null }>) => {
     if (model.length > 0 && model[0].sort) {
       updateUrlState({
         sortField: model[0].field,

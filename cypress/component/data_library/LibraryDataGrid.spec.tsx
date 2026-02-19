@@ -1,6 +1,6 @@
 import React from 'react'
 import { LibraryDataGrid } from 'src/components/data_library/LibraryDataGrid'
-import { AssetType, StudyAggregation } from 'src/types/library'
+import { AssetType, SortOrder, StudyAggregation } from 'src/types/library'
 import { makeDatasetTerm } from '../test-utils'
 
 const mockPaginationModel = {
@@ -8,7 +8,7 @@ const mockPaginationModel = {
   pageSize: 25,
 }
 
-const mockSortModel: Array<{ field: string, sort: 'asc' | 'desc' | null }> = []
+const mockSortModel: Array<{ field: string, sort: SortOrder | null }> = []
 
 const studies: StudyAggregation[] = [
   {
