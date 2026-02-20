@@ -38,10 +38,11 @@ export interface UserRole {
 }
 
 export interface UserStatusInfo {
-  adminEnabled: boolean
+  adminEnabled?: boolean
   enabled: boolean
   userEmail: string
   userSubjectId: string
+  tosAccepted?: boolean
 }
 
 export interface UserProperty {
