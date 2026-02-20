@@ -561,7 +561,7 @@ export const getLibraryVersions = (
       },
       icon: ncpiIcon,
       title: 'NCPI DUO Data Library',
-      featured: false,
+      featured: true,
       order: 22,
     },
     '/custom': {
