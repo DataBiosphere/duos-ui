@@ -45,7 +45,7 @@ describe('useLibraryUrlState', () => {
       </MemoryRouter>,
     )
     cy.get('#library').should('have.text', 'duos')
-    cy.get('#tab').should('have.text', AssetType.STUDIES)
+    cy.get('#tab').should('have.text', AssetType.DATASETS)
     cy.get('#filters').then(($el) => {
       const filters = JSON.parse($el.text())
       expect(filters.accessManagement).to.have.length(0)

@@ -81,10 +81,11 @@ export const useLibraryUrlState = () => {
 
   const state: LibraryUrlState = {
     library: searchParams.get('library') || 'duos',
-    tab: (searchParams.get('tab') as AssetType) || AssetType.STUDIES,
+    tab: (searchParams.get('tab') as AssetType) || AssetType.DATASETS,
     filters: parseFiltersFromUrl(searchParams),
     page: Number.parseInt(searchParams.get('page') || '0'),
     pageSize: Number.parseInt(searchParams.get('pageSize') || '25'),
+    query: searchParams.get('query') || undefined,
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as SortOrder) || undefined,
   }
@@ -125,6 +126,15 @@ export const useLibraryUrlState = () => {
       }
       else {
         newParams.set('pageSize', updates.pageSize.toString())
+      }
+    }
+
+    if (updates.query !== undefined) {
+      if (updates.query) {
+        newParams.set('query', updates.query)
+      }
+      else {
+        newParams.delete('query')
       }
     }
 
