@@ -590,10 +590,10 @@ const DataAccessRequestApplication = (props) => {
 
     const getVoteDate = () => {
       if (finalVote?.updateDate) {
-        return formatDate(finalVote.updateDate)
+        return formatDate(finalVote?.updateDate)
       }
       if (isElectionClosed) {
-        return formatDate(finalVote.createDate)
+        return formatDate(finalVote?.createDate)
       }
       return NO_FINAL_VOTE_STATUS
     }
