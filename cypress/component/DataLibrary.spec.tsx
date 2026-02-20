@@ -36,7 +36,7 @@ describe('DataLibrary', () => {
       if (req.body.size === 0 && !req.body.queryTerm) {
         req.reply(mockMetadataResponse)
       }
-      else if (req.body.aggs && req.body.aggs.studies) {
+      else if (req.body.aggs?.studies) {
         req.reply(mockStudiesResponse)
       }
       else {
