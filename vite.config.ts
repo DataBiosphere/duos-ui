@@ -4,6 +4,18 @@ import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import tsconfig from './tsconfig.json'
 
+const defaultOptions = {
+  host: 'local.dsde-dev.broadinstitute.org',
+  port: 3000,
+  https: (process.env.CI || process.env.CYPRESS)
+    ? undefined
+    : {
+        key: 'server.key',
+        cert: 'server.crt',
+      },
+  open: true,
+}
+
 function aliases_from_tsconfig() {
   const paths: Record<string, string[]> = tsconfig.compilerOptions.paths
   const aliases: Record<string, string> = {}
@@ -26,17 +38,8 @@ export default defineConfig({
     outDir: 'build',
     target: 'es2022',
   },
-  server: {
-    host: 'local.dsde-dev.broadinstitute.org',
-    port: 3000,
-    https: (process.env.CI || process.env.CYPRESS)
-      ? undefined
-      : {
-          key: 'server.key',
-          cert: 'server.crt',
-        },
-    open: true,
-  },
+  server: defaultOptions,
+  preview: defaultOptions,
   resolve: {
     alias: aliases_from_tsconfig(),
   },
