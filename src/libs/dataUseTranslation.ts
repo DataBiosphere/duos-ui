@@ -397,7 +397,11 @@ interface ExtendedDataUse extends DataUse {
   otherRestrictions?: boolean
 }
 
-// Helper function to handle OTHER attribute translations in dataUse
+/**
+ * Normalizes "other" restrictions: converts null/undefined/empty → "Not provided".
+ * Ensures structurally different but semantically equivalent DataUse objects produce
+ * identical translations for correct comparison.
+ */
 const processOtherInDataUse = (
   dataUse: ExtendedDataUse,
   restrictionStatements: Promise<TranslationEntry | undefined>[],
@@ -439,7 +443,15 @@ const translateDataUseRestrictions = async (dataUse: ExtendedDataUse | null): Pr
   return results.filter((value): value is TranslationEntry => !isEmpty(value))
 }
 
-// Function to translate restrictions in an array of dataUses
+/**
+ * Translates DataUse objects to TranslationEntry arrays with normalization.
+ *
+ * Normalizes semantically equivalent values (null/undefined/"" → "Not provided"),
+ * enabling correct semantic comparison. Resolves disease ontology URLs via OntologyService.
+ *
+ * @param dataUses - Array of DataUse objects
+ * @returns 2D array of TranslationEntry objects (one inner array per dataset)
+ */
 export const translateDataUseRestrictionsFromDataUseArray = async (
   dataUses: ExtendedDataUse[],
 ): Promise<(TranslationEntry | undefined)[][]> => {

@@ -13,6 +13,7 @@ import {
   DuosUser,
   Author,
 } from 'src/types/model'
+import { TranslationEntry } from 'src/libs/dataUseTranslation'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
 type ValidationResult = ValidationError
@@ -75,7 +76,11 @@ export const needsPubAcknowledgement = (datasets: Dataset[]): boolean => {
   return datasetsContainDataUseFlag(datasets, 'publicationResults')
 }
 
-export const needsDsAcknowledgement = (dataUseTranslations: DataUse[]): boolean => {
+/**
+ * Determines if datasets have different consent restrictions requiring acknowledgement.
+ * Uses normalized translations to avoid false positives from structural differences.
+ */
+export const needsDsAcknowledgement = (dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]): boolean => {
   return dataUseTranslations.length > 1 && !dataUseTranslations.every(translation => isEqual(dataUseTranslations[0], translation))
 }
 
@@ -193,7 +198,7 @@ const calcResearcherInfoErrors = (
 const calcDarErrors = (
   formData: FormDataBase,
   datasets: Dataset[],
-  dataUseTranslations: DataUse[],
+  dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[],
   irbDocument: FileStorageObject,
   collaborationLetter: FileStorageObject,
 ): FormValidationErrors => {
@@ -321,7 +326,7 @@ const calcPRErrors = (
   nihValid: boolean,
   formData: FormDataBase,
   datasets: Dataset[],
-  dataUseTranslations: DataUse[],
+  dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[],
 ): FormValidationErrors => {
   const errors: FormValidationErrors = {}
   calcSummaryErrors(nihValid, errors, formData)
@@ -331,7 +336,7 @@ const calcPRErrors = (
   return errors
 }
 
-const calcDUAErrors = (formData: FormDataBase, datasets: Dataset[], dataUseTranslations: DataUse[], errors: FormValidationErrors): void => {
+const calcDUAErrors = (formData: FormDataBase, datasets: Dataset[], dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[], errors: FormValidationErrors): void => {
   if (needsGsoAcknowledgement(datasets) && !formData.gsoAcknowledgement) {
     errors.gsoAcknowledgement = requiredError
   }
@@ -449,7 +454,7 @@ export const validateDARFormData = ({
 }: {
   formData: unknown
   datasets: Dataset[]
-  dataUseTranslations: DataUse[]
+  dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
   irbDocument: FileStorageObject
   collaborationLetter: FileStorageObject
   researcher: DuosUser
@@ -470,7 +475,7 @@ export const validatePRFormData = (
   nihValid: boolean,
   formData: unknown,
   datasets: Dataset[] = [],
-  dataUseTranslations: DataUse[] = [],
+  dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[] = [],
 ): PRFormValidationResult => {
   return {
     darErrors: calcPRErrors(nihValid, formData as FormDataBase, datasets, dataUseTranslations),
