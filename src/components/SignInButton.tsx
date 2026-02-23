@@ -155,8 +155,7 @@ export const SignInButton = () => {
     }
   }
 
-  // eslint-disable-next-line
-  const onFailure = (response: any) => {
+  const onFailure = (response: Error) => {
     Storage.clearStorage()
     // Known error case from oidc-client-ts PopupWindow: "new Error("Popup closed by user")"
     if (response.toString().includes('Popup closed by user')) {
