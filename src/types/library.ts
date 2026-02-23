@@ -124,3 +124,9 @@ export interface SortState {
   field: string
   order: SortOrder
 }
+
+export interface LibraryFooterProps {
+  selectedDatasetIds: number[]
+  selectedStudyIds: number[]
+  onApplyForAccess: () => void
+}
