@@ -5,16 +5,19 @@ import { Auth } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
-import { ToS } from 'src/libs/ajax/ToS'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import { mockOidcUser } from '../Auth/mockOidcUser'
 import { BrowserRouter } from 'react-router-dom'
+import { DuosUser, UserStatusInfo } from 'src/types/model'
 
 const signInText = 'Sign In'
 
 const duosUser = {
   displayName: 'display name',
   email: 'test@user.com',
+  emailPreference: true,
+  eraCommonsId: 'eraCommonsId',
+  institutionId: 1,
   isAdmin: true,
   isAlumni: false,
   isChairPerson: false,
@@ -26,15 +29,14 @@ const duosUser = {
   roles: [{
     name: 'Admin',
   }],
-}
+} as unknown as DuosUser
 
 const userStatus = {
   adminEnabled: true,
   enabled: true,
-  inAllUsersGroup: true,
-  inGoogleProxyGroup: true,
+  userSubjectId: '1234',
   tosAccepted: true,
-}
+} as UserStatusInfo
 
 const consentStatus = {
   ok: true,
@@ -47,8 +49,6 @@ const consentStatus = {
     },
   },
 }
-
-const notAcceptedUserStatus = Object.assign({}, userStatus, { tosAccepted: false })
 
 describe('Sign In: Component Loads', function () {
   beforeEach(() => {
@@ -65,16 +65,16 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: On Success', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
-    cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: duosUser }).as('getMe')
+    const tosAcceptedUser = { ...{ userStatusInfo: userStatus }, ...duosUser }
+    cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: tosAcceptedUser }).as('getMe')
     cy.stub(StackdriverReporter, 'report').as('report')
     cy.stub(Metrics, 'identify').as('identify')
     cy.stub(Metrics, 'syncProfile').as('syncProfile')
     cy.stub(Metrics, 'captureEvent').as('captureEvent')
-    cy.stub(ToS, 'getStatus').returns(userStatus)
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
-      expect(Storage.getCurrentUser()).to.deep.equal(duosUser)
+      expect(Storage.getCurrentUser()).to.deep.equal(tosAcceptedUser)
       assert.isNotNull(Storage.getAnonymousId(), 'Anonymous ID should not be null')
       cy.get('@report').should('not.be.called')
       cy.get('@identify').should('be.called')
@@ -85,10 +85,10 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: No Roles Error Reporter Is Called', function () {
     const bareUser = { email: 'test@user.com' }
+    const tosAcceptedUser = { ...{ userStatusInfo: userStatus }, ...bareUser }
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
-    cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: bareUser }).as('getMe')
+    cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: tosAcceptedUser }).as('getMe')
     cy.stub(StackdriverReporter, 'report').as('report')
-    cy.stub(ToS, 'getStatus').returns(userStatus)
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
@@ -99,7 +99,7 @@ describe('Sign In: Component Loads', function () {
   it('Sign In: Redirects to ToS if not accepted', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: duosUser }).as('getMe')
-    cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
+    // cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
@@ -112,7 +112,7 @@ describe('Sign In: Component Loads', function () {
     // Simulate user not found
     cy.stub(User, 'getMe').throws()
     cy.intercept({ method: 'POST', url: '**/api/user' }, { statusCode: 200, body: duosUser }).as('registerUser')
-    cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
+    // cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@registerUser').then(() => {
