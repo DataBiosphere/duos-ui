@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { CombinedDataAccessRequest, Dataset, DataUse, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import {
   CLOSEOUT_KEYS,
@@ -26,6 +26,7 @@ import {
 import { FormValidationState } from 'src/pages/dar_application/FormValidationState'
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
 import { useNavigate } from 'react-router-dom'
+import { isEqual } from 'lodash'
 type ProgressReportApplicationProps = {
   readonly dar: CombinedDataAccessRequest // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[]
@@ -196,30 +197,31 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
       )
   }
 
-  function getDatasetsInApprovedElections(datasets: Dataset[], approvedElectionDatasetIds: number[]) {
-    return datasets.filter((dataset) => {
-      return approvedElectionDatasetIds.includes(dataset.datasetId)
-    })
-  }
-
-  // required because the datasets state changes during component mount
-  useEffect(() => {
-    let approvedDatasets
+  const approvedDatasets = useMemo(() => {
     if (readOnlyMode) {
-      approvedDatasets = datasets.filter(
-        dataset => dar.datasetIds.includes(dataset.datasetId),
-      )
+      return datasets.filter(dataset => dar.datasetIds.includes(dataset.datasetId))
     }
     else {
       const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : []
-      approvedDatasets = getDatasetsInApprovedElections(datasets, approvedDatasetIds)
+      return datasets.filter(dataset => approvedDatasetIds.includes(dataset.datasetId))
         .filter(ds => ds.dacApproval)
     }
+  }, [datasets, readOnlyMode, dar.datasetIds, dar.elections])
 
-    onFormChange({ datasets: approvedDatasets }, false) // Mark as non-user interaction
-    onSelectedDatasetChange(approvedDatasets)
+  const datasetIdsMatch = (a: Dataset[], b: Dataset[]) =>
+    isEqual(
+      a.map(ds => ds.datasetId).sort((a, b) => (a - b)),
+      b.map(ds => ds.datasetId).sort((a, b) => (a - b)),
+    )
+
+  // required because the datasets state changes during component mount
+  useEffect(() => {
+    if (!datasetIdsMatch(approvedDatasets, formState.selectedDatasets)) {
+      onFormChange({ datasets: approvedDatasets }, false) // Mark as non-user interaction
+      onSelectedDatasetChange(approvedDatasets)
+    }
     isMounted.current = true // Mark as mounted after initial setup
-  }, [datasets, readOnlyMode, dar.datasetIds, dar.elections, onFormChange, onSelectedDatasetChange])
+  }, [approvedDatasets, onFormChange, onSelectedDatasetChange, formState.selectedDatasets])
 
   return (
     <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
