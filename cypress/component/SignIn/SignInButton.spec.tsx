@@ -65,7 +65,7 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: On Success', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
-    const tosAcceptedUser = { ...{ userStatusInfo: userStatus }, ...duosUser }
+    const tosAcceptedUser = { userStatusInfo: userStatus, ...duosUser }
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: tosAcceptedUser }).as('getMe')
     cy.stub(StackdriverReporter, 'report').as('report')
     cy.stub(Metrics, 'identify').as('identify')
@@ -85,7 +85,7 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: No Roles Error Reporter Is Called', function () {
     const bareUser = { email: 'test@user.com' }
-    const tosAcceptedUser = { ...{ userStatusInfo: userStatus }, ...bareUser }
+    const tosAcceptedUser = { userStatusInfo: userStatus, ...bareUser }
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: tosAcceptedUser }).as('getMe')
     cy.stub(StackdriverReporter, 'report').as('report')
