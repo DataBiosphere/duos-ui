@@ -99,7 +99,6 @@ describe('Sign In: Component Loads', function () {
   it('Sign In: Redirects to ToS if not accepted', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: duosUser }).as('getMe')
-    // cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
@@ -112,7 +111,6 @@ describe('Sign In: Component Loads', function () {
     // Simulate user not found
     cy.stub(User, 'getMe').throws()
     cy.intercept({ method: 'POST', url: '**/api/user' }, { statusCode: 200, body: duosUser }).as('registerUser')
-    // cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus)
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@registerUser').then(() => {
