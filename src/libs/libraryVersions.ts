@@ -20,7 +20,6 @@ import gp2Icon from 'src/images/gp2-logo.png'
 import asapIcon from 'src/images/asap-logo.png'
 import gedIcon from 'src/images/GED_logo.png'
 import ncpiIcon from 'src/images/ncpi-logo.png'
-import homeIcon from 'src/images/icon_dataset_.png'
 import epi25Icon from 'src/images/Epi25_logo.png'
 import PGCIcon from 'src/images/PGC_logo.jpg'
 import PBNIcon from 'src/images/PBN_logo.jpg'
@@ -69,7 +68,6 @@ export interface LibraryVersions {
 export const getLibraryVersions = (
   institutionId: number | null,
   institutionName: string | null,
-  customQuery: string | null,
 ): LibraryVersions => {
   return {
     '/datalibrary': {
@@ -572,28 +570,6 @@ export const getLibraryVersions = (
       },
       icon: ncpiIcon,
       title: 'NCPI DUO Data Library',
-      featured: false,
-      order: 999,
-    },
-    '/custom': {
-      query: {
-        bool: {
-          should: [
-            {
-              match_phrase: {
-                'study.description': customQuery ?? '',
-              },
-            },
-            {
-              match_phrase: {
-                'submitter.institution.name': customQuery ?? '',
-              },
-            },
-          ],
-        },
-      },
-      icon: homeIcon,
-      title: (customQuery ?? '') + ' Data Library',
       featured: false,
       order: 999,
     },

@@ -13,7 +13,7 @@ const Home = (props) => {
 
   // Get all library versions and filter for featured ones
   const featuredLibraries = useMemo(() => {
-    const allLibraries = getLibraryVersions(null, null, null)
+    const allLibraries = getLibraryVersions(null, null)
     return Object.entries(allLibraries)
       .filter(([_key, library]) => library.featured)
       .map(([key, library]) => ({ key, ...library }))

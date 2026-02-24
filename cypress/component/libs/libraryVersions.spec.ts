@@ -3,14 +3,14 @@ import { getLibraryVersions } from 'src/libs/libraryVersions'
 describe('Library Versions - Tests', function () {
   describe('getLibraryVersions function', function () {
     it('returns an object with library configurations', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       expect(versions).to.be.an('object')
       expect(Object.keys(versions).length).to.be.greaterThan(0)
     })
 
     it('includes required properties for each library', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([_key, library]) => {
         expect(library).to.have.property('title')
@@ -24,7 +24,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('marks exactly the correct libraries as featured', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       const featuredLibraries = Object.entries(versions)
         .filter(([, library]) => library.featured)
@@ -43,7 +43,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('marks non-featured libraries correctly', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       const nonFeaturedLibraries = Object.entries(versions)
         .filter(([, library]) => !library.featured)
@@ -56,7 +56,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('includes all expected library keys', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
       const keys = Object.keys(versions)
 
       // Check for some expected keys
@@ -74,7 +74,7 @@ describe('Library Versions - Tests', function () {
     it('handles myinstitution library with dynamic parameters', function () {
       const institutionId = 123
       const institutionName = 'Test Institution'
-      const versions = getLibraryVersions(institutionId, institutionName, null)
+      const versions = getLibraryVersions(institutionId, institutionName)
 
       const myInstitution = versions.myinstitution
 
@@ -86,23 +86,8 @@ describe('Library Versions - Tests', function () {
       expect(myInstitution.featured).to.equal(false)
     })
 
-    it('handles custom library with dynamic query', function () {
-      const customQuery = 'custom search term'
-      const versions = getLibraryVersions(null, null, customQuery)
-
-      const customLibrary = versions['/custom']
-
-      expect(customLibrary).to.not.equal(undefined)
-      expect(customLibrary.title).to.equal('custom search term Data Library')
-      if (customLibrary.query && 'bool' in customLibrary.query) {
-        expect(customLibrary.query.bool.should).to.be.an('array')
-        expect(customLibrary.query.bool.should.length).to.equal(2)
-      }
-      expect(customLibrary.featured).to.equal(false)
-    })
-
     it('includes Elasticsearch query for most libraries', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([_key, library]) => {
         // Some libraries have null query (/datalibrary, terra)
@@ -119,7 +104,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('maintains consistent title format', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([key, library]) => {
         if (key !== '/datalibrary') {
@@ -131,7 +116,7 @@ describe('Library Versions - Tests', function () {
 
   describe('Featured libraries integration', function () {
     it('provides correct data for Home page rendering', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       const featuredLibraries = Object.entries(versions)
         .filter(([, library]) => library.featured)
