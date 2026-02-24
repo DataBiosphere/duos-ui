@@ -14,7 +14,7 @@ export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
     flex: 1.5,
     minWidth: 200,
     renderCell: params => (
-      <Link href={`/dataset/${params.row.datasetId}`} underline="hover">
+      <Link href={`/dataset/${params.row.datasetIdentifier}`} underline="hover">
         {params.value}
       </Link>
     ),
