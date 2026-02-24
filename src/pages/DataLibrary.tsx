@@ -1,5 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useMemo, useRef, useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Box } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
@@ -13,6 +13,11 @@ import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 import { AggregationResult } from 'src/types/elastic'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { applyForAccess } from 'src/utils/accessUtils'
+import { getBrandedLibrary } from 'src/libs/libraryVersions'
+import { Storage } from 'src/libs/storage'
+import { Notifications } from 'src/libs/utils'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import eventList from 'src/libs/events'
 
 /**
  * DataLibrary Page Component
@@ -31,32 +36,72 @@ import { applyForAccess } from 'src/utils/accessUtils'
  * - Local UI state: selection tracking (useState)
  */
 export const DataLibrary: React.FC = () => {
+  const { query } = useParams()
   const navigate = useNavigate()
 
   const [urlState, updateUrlState] = useLibraryUrlState()
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
 
-  const searchRef = useRef<HTMLInputElement>(null)
-
-  React.useEffect(() => {
-    if (searchRef.current && urlState.query) {
-      searchRef.current.value = urlState.query
-    }
-  }, [urlState.query])
-
-  const libraryConfig: LibraryVersionNew = {
-    key: 'duos',
-    title: 'DUOS Data Library',
-    description: 'Search, filter, and select datasets, then click \'Apply for Access\' to request access',
-    featured: true,
-    order: 0,
-  }
+  const user = Storage.getCurrentUser()
+  const institutionId = user?.institution?.id
+  const institutionName = user?.institution?.name
 
   const tabs: TabConfig[] = [
     { key: AssetType.STUDIES, label: 'Studies' },
     { key: AssetType.DATASETS, label: 'Datasets' },
   ]
+
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (searchRef.current && urlState.query) {
+      searchRef.current.value = urlState.query
+    }
+  }, [urlState.query])
+
+  useEffect(() => {
+    const init = () => {
+      const key = query === undefined ? '/datalibrary' : query.toLowerCase()
+      if (key === 'myinstitution' && !institutionId) {
+        Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' })
+        navigate('/profile')
+      }
+      if (key === '/datalibrary') {
+        Metrics.captureEvent(eventList.dataLibrary)
+      }
+      else {
+        const brand = key.replaceAll('/', '').toLowerCase()
+        Metrics.captureEvent(eventList.dataLibrary, { brand })
+      }
+    }
+    init()
+  }, [query, institutionId, navigate])
+
+  const libraryConfig: LibraryVersionNew = useMemo(() => {
+    const brand = getBrandedLibrary(institutionId, institutionName, query)
+    const description = 'Search, filter, and select datasets, then click \'Apply for Access\' to request access'
+
+    if (brand) {
+      return {
+        key: query || 'default',
+        query: brand.query,
+        icon: brand.icon || undefined,
+        title: brand.title,
+        description,
+        featured: brand.featured,
+        order: brand.order,
+      }
+    }
+
+    return {
+      key: 'duos',
+      title: 'DUOS Data Library',
+      description,
+      featured: true,
+      order: 0,
+    }
+  }, [query, institutionId, institutionName])
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 
@@ -213,6 +258,7 @@ export const DataLibrary: React.FC = () => {
       {/* Header */}
       <Box>
         <TableHeaderSection
+          icon={libraryConfig.icon ? { src: libraryConfig.icon } : undefined}
           title={libraryConfig.title}
           description={libraryConfig.description}
         />
