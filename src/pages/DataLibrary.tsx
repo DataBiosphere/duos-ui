@@ -5,7 +5,8 @@ import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder, TabConfig } from 'src/types/library'
+import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder, StudyAggregation, TabConfig } from 'src/types/library'
+import { DatasetTerm } from 'src/types/model'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
@@ -110,13 +111,28 @@ export const DataLibrary: React.FC = () => {
   const selectedStudyIds = useMemo(() => {
     if (!data?.items) return []
     const studyIds = new Set<number>()
-    data.items.forEach((item: { datasetId: number, study: { studyId: number } }) => {
-      if (selectedDatasetIds.includes(item.datasetId)) {
-        studyIds.add(item.study.studyId)
+    data.items.forEach((item: StudyAggregation | DatasetTerm) => {
+      switch (urlState.tab) {
+        case AssetType.STUDIES: {
+          const study = item as StudyAggregation
+          if (study.datasetIds?.some((id: number) => selectedDatasetIds.includes(id))) {
+            studyIds.add(study.studyId)
+          }
+          break
+        }
+        case AssetType.DATASETS: {
+          const dataset = item as DatasetTerm
+          if (selectedDatasetIds.includes(dataset.datasetId)) {
+            studyIds.add(dataset.study.studyId)
+          }
+          break
+        }
+        default:
+          throw new Error('Unknown asset type')
       }
     })
     return Array.from(studyIds)
-  }, [data, selectedDatasetIds])
+  }, [data, selectedDatasetIds, urlState.tab])
 
   const sortModel = useMemo(() => {
     if (urlState.sortField && urlState.sortOrder) {

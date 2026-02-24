@@ -14,6 +14,7 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   return (
     <Slide direction="up" in={hasSelection} mountOnEnter unmountOnExit>
       <Paper
+        data-cy="library-footer"
         elevation={8}
         sx={{
           position: 'fixed',
