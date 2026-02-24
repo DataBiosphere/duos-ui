@@ -23,6 +23,7 @@ install_duos_cypress() {
 }
 
 install_duos_config() {
+  printf "\n"
   gcloud auth login
   gcloud config set project broad-duos-dev
   gsutil -m cp \
