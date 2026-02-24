@@ -3,7 +3,6 @@ import {
   DataGrid,
   GridRowSelectionModel,
   GridColDef,
-  useGridApiRef,
 } from '@mui/x-data-grid'
 import { Box, Typography, CircularProgress } from '@mui/material'
 import { isEmpty } from 'lodash'
@@ -37,62 +36,6 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   selectedDatasetIds,
   onSelectionChange,
 }) => {
-  // API ref for manual selection workaround (MUI DataGrid checkbox click doesn't fire onChange)
-  const apiRef = useGridApiRef()
-
-  // Manual selection handler - workaround for MUI DataGrid checkbox click issue
-  const handleCheckboxCellClick = (rowId: number | string) => {
-    const api = apiRef.current
-    if (!api) return
-
-    const targetId = typeof rowId === 'string' && !isNaN(Number(rowId)) ? Number(rowId) : rowId
-    const selectedRowsSet = api.getSelectedRows()
-    const newSelectedIds = new Set(selectedRowsSet.keys())
-
-    if (newSelectedIds.has(targetId)) {
-      newSelectedIds.delete(targetId)
-    }
-    else {
-      newSelectedIds.add(targetId)
-    }
-
-    api.setRowSelectionModel({
-      type: 'include',
-      ids: newSelectedIds,
-    })
-  }
-
-  // Manual selection handler for "select all" in the header - workaround for checkbox issues
-  const handleHeaderCheckboxClick = () => {
-    const api = apiRef.current
-    if (!api) return
-
-    const allRowIds = api.getAllRowIds()
-    const selectableRowIds = allRowIds.filter((id) => {
-      const row = api.getRow(id)
-      return row && isRowSelectable({ row })
-    })
-
-    if (selectableRowIds.length === 0) return
-
-    const selectedRowsSet = api.getSelectedRows()
-    const allSelectableAreSelected = selectableRowIds.every(id => selectedRowsSet.has(id))
-
-    const newSelectedIds = new Set(selectedRowsSet.keys())
-
-    if (allSelectableAreSelected) {
-      selectableRowIds.forEach(id => newSelectedIds.delete(id))
-    }
-    else {
-      selectableRowIds.forEach(id => newSelectedIds.add(id))
-    }
-
-    api.setRowSelectionModel({
-      type: 'include',
-      ids: newSelectedIds,
-    })
-  }
-
   const columns = useMemo(() => {
     if (assetType === AssetType.STUDIES) {
       return makeStudyColumns() as GridColDef<DatasetTerm | StudyAggregation>[]
@@ -210,20 +153,6 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   return (
     <Box sx={{ width: '100%', height: '100%' }}>
       <DataGrid
-        apiRef={apiRef}
-        onCellClick={(params) => {
-          // Manual workaround for MUI DataGrid checkbox click issue
-          // The checkbox's internal onChange doesn't fire, so we use onCellClick + API
-          if (params.field === '__check__') {
-            handleCheckboxCellClick(params.id)
-          }
-        }}
-        onColumnHeaderClick={(params) => {
-          // Manual workaround for MUI DataGrid "select all" checkbox click issue
-          if (params.field === '__check__') {
-            handleHeaderCheckboxClick()
-          }
-        }}
         rows={data as (StudyAggregation | DatasetTerm)[]}
         columns={columns}
         rowCount={total}
