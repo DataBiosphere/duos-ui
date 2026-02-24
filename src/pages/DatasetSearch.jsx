@@ -107,7 +107,7 @@ export const DatasetSearch = (props) => {
     [institutionId, institutionName],
   )
 
-  const version = versions[key] === undefined ? versions['/custom'] : versions[key]
+  const version = versions[key]
   const isInstitutionQuery = key === 'myinstitution'
 
   // Memoize fullQuery to prevent recreation on every render

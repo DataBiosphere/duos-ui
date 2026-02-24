@@ -68,7 +68,6 @@ describe('Library Versions - Tests', function () {
       expect(keys).to.include('terra')
       expect(keys).to.include('mgb')
       expect(keys).to.include('myinstitution')
-      expect(keys).to.include('/custom')
     })
 
     it('handles myinstitution library with dynamic parameters', function () {
