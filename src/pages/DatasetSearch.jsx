@@ -103,11 +103,11 @@ export const DatasetSearch = (props) => {
 
   // Memoize versions to prevent recreation on every render
   const versions = useMemo(
-    () => getLibraryVersions(institutionId, institutionName, query),
-    [institutionId, institutionName, query],
+    () => getLibraryVersions(institutionId, institutionName),
+    [institutionId, institutionName],
   )
 
-  const version = versions[key] === undefined ? versions['/custom'] : versions[key]
+  const version = versions[key]
   const isInstitutionQuery = key === 'myinstitution'
 
   // Memoize fullQuery to prevent recreation on every render
