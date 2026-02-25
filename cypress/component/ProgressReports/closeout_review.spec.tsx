@@ -44,7 +44,7 @@ describe('CloseoutReview - Component Tests', () => {
     mountComponent()
 
     cy.get('button').contains('Approve closeout').should('be.visible')
-    cy.get('button').contains('Go to DAR Requests').should('be.visible')
+    cy.get('button').contains('Go to Data Access Requests').should('be.visible')
   })
 
   it('calls onApprove when Approve closeout button is clicked', () => {
@@ -56,11 +56,11 @@ describe('CloseoutReview - Component Tests', () => {
     cy.get('.MuiAlert-message').contains('Closeout review approved successfully.').should('be.visible')
   })
 
-  it('calls onReturn when Go to DAR Requests button is clicked', () => {
+  it('calls onReturn when Go to Data Access Requests button is clicked', () => {
     cy.stub(User, 'getAcknowledgement').returns(null)
     mountComponent()
 
-    cy.get('button').contains('Go to DAR Requests').click()
+    cy.get('button').contains('Go to Data Access Requests').click()
     cy.get('@returnStub').should('have.been.calledOnce')
   })
 

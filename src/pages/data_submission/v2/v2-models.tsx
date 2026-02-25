@@ -1,5 +1,6 @@
 import {
   AiModel,
+  Biospecimen,
   ClinicalTrial,
   Dataset,
   FileStorageObject,
@@ -293,16 +294,29 @@ export class NihProgramOfficerName extends StringStudyProperty {
   }
 }
 
+export class ThroughBioId extends StringStudyProperty {
+  static readonly key = 'throughBioId'
+  static readonly fieldTitle = 'Through Bio ID'
+  static readonly fieldPlaceholderText = 'Enter the Through.Bio ID for this study, if available'
+  constructor(value?: string, studyId?: number, studyPropertyId?: number) {
+    super(ThroughBioId.key, ThroughBioId.fieldTitle, ThroughBioId.fieldPlaceholderText, value, studyId, studyPropertyId)
+  }
+}
+
 export class NihAnvilUse extends StudyProperty {
   static readonly key = 'nihAnvilUse'
   static readonly YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already'
   static readonly YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID'
   static readonly NO_NHGRI_YES_ANVIL = 'I am not NHGRI funded but I am seeking to submit data to AnVIL'
   static readonly NO_NHGRI_NO_ANVIL = 'I am not NHGRI funded and do not plan to store data in AnVIL'
-  static readonly NIH_ANVIL_USE_RADIOGROUP_OPTIONS = [
+
+  static readonly NIH_ANVIL_USE_RADIOGROUP_YES_OPTIONS = [
     { text: NihAnvilUse.YES_NHGRI_YES_PHS_ID, name: NihAnvilUse.YES_NHGRI_YES_PHS_ID },
     { text: NihAnvilUse.YES_NHGRI_NO_PHS_ID, name: NihAnvilUse.YES_NHGRI_NO_PHS_ID },
     { text: NihAnvilUse.NO_NHGRI_YES_ANVIL, name: NihAnvilUse.NO_NHGRI_YES_ANVIL },
+  ]
+
+  static readonly NIH_ANVIL_USE_RADIOGROUP_NO_OPTIONS = [
     { text: NihAnvilUse.NO_NHGRI_NO_ANVIL, name: NihAnvilUse.NO_NHGRI_NO_ANVIL },
   ]
 
@@ -324,6 +338,11 @@ export type NiHAnvilUseValues
     | typeof NihAnvilUse.NO_NHGRI_YES_ANVIL
     | typeof NihAnvilUse.NO_NHGRI_NO_ANVIL
 
+export enum NihAnvilUsePreSelectOptions {
+  YES = 'Yes',
+  NO = 'No',
+}
+
 export class NihGenomicProgramAdministratorName extends StringStudyProperty {
   static readonly key = 'nihGenomicProgramAdministratorName'
   constructor(value?: string, studyId?: number, studyPropertyId?: number) {
@@ -342,6 +361,13 @@ export class ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanat
   static readonly key = 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation'
   constructor(value?: string, studyId?: number, studyPropertyId?: number) {
     super(ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key, 'If yes, explain why controlled access is needed for GSR.', 'Enter explanation here', value, studyId, studyPropertyId)
+  }
+}
+
+export class StudyData extends StudyProperty {
+  static readonly key = 'data'
+  constructor(value: Record<string, unknown>, studyId?: number, studyPropertyId?: number) {
+    super(StudyData.key, 'Json' as StudyPropertyType, value, studyId, studyPropertyId)
   }
 }
 
@@ -372,7 +398,9 @@ export interface Study {
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
     intellectualProperties?: Array<IntellectualProperty>
+    biospecimens?: Array<Biospecimen>
   }
+  data: Record<string, unknown>
 }
 export interface DatasetRegistrationSchemaV1 {
   /** @description The study name */
@@ -397,6 +425,8 @@ export interface DatasetRegistrationSchemaV1 {
   dataCustodianEmail?: string[]
   /** @description Public Visibility of this study */
   publicVisibility: boolean
+  /** @description Through.Bio ID for this study, if available */
+  throughBioId?: string
   /** @enum {string} */
   nihAnvilUse?: NiHAnvilUseValues
   /** @description Are you planning to submit to AnVIL? */
@@ -484,6 +514,7 @@ export interface DatasetRegistrationSchemaV1 {
     funding?: Array<FundingResource>
     intellectualProperties?: Array<IntellectualProperty>
   }
+  data: Record<string, unknown>
 }
 
 export type DatasetPropertyType = 'String' | 'Number' | 'Json'
@@ -586,5 +617,12 @@ export class NumberOfParticipants extends DatasetProperty {
   static readonly propertyName = '# of participants'
   constructor(value: number, datasetId?: number, propertyId?: number) {
     super(NumberOfParticipants.propertyName, NumberOfParticipants.schemaProperty, 'Number' as DatasetPropertyType, value, datasetId, propertyId)
+  }
+}
+export class DatasetData extends DatasetProperty {
+  static readonly schemaProperty = 'data'
+  static readonly propertyName = 'data'
+  constructor(value: Record<string, unknown>, datasetId?: number, propertyId?: number) {
+    super(DatasetData.propertyName, DatasetData.schemaProperty, 'Json' as DatasetPropertyType, value, datasetId, propertyId)
   }
 }

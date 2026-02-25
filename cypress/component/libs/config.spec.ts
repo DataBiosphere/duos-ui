@@ -1,4 +1,4 @@
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getErrorApiKey, getGaId, getHash, getNihUrl, getOntologyApiUrl, getOntologyUrl, getProfileUrl, getProject, getSamApiUrl, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getErrorApiKey, getGaId, getHash, getProject, getSamApiUrl, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 describe('Config', () => {
@@ -10,9 +10,6 @@ describe('Config', () => {
     errorApiKey: 'test-error-key',
     gaId: 'GA-TEST-123',
     hash: 'test-hash-123',
-    nihUrl: 'https://test.nih.gov',
-    ontologyApiUrl: 'https://test.ontology.com',
-    profileUrl: 'https://test.profile.com',
     samApiUrl: 'https://test.sam.com',
     tag: 'v1.0.0-test',
     tdrApiUrl: 'https://test.tdr.com',
@@ -84,30 +81,6 @@ describe('Config', () => {
     it('should get hash', () => {
       cy.wrap(Config.getHash()).then((result) => {
         expect(result).to.equal('test-hash-123')
-      })
-    })
-
-    it('should get nihUrl', () => {
-      cy.wrap(Config.getNihUrl()).then((result) => {
-        expect(result).to.equal('https://test.nih.gov')
-      })
-    })
-
-    it('should get ontologyApiUrl', () => {
-      cy.wrap(Config.getOntologyApiUrl()).then((result) => {
-        expect(result).to.equal('https://test.ontology.com')
-      })
-    })
-
-    it('should get ontologyUrl', () => {
-      cy.wrap(Config.getOntologyUrl()).then((result) => {
-        expect(result).to.equal('https://test.ontology.com')
-      })
-    })
-
-    it('should get profileUrl', () => {
-      cy.wrap(Config.getProfileUrl()).then((result) => {
-        expect(result).to.equal('https://test.profile.com')
       })
     })
 
@@ -188,30 +161,6 @@ describe('Config', () => {
     it('getHash should return hash', () => {
       cy.wrap(getHash()).then((result) => {
         expect(result).to.equal('test-hash-123')
-      })
-    })
-
-    it('getNihUrl should return NIH URL', () => {
-      cy.wrap(getNihUrl()).then((result) => {
-        expect(result).to.equal('https://test.nih.gov')
-      })
-    })
-
-    it('getOntologyApiUrl should return Ontology API URL', () => {
-      cy.wrap(getOntologyApiUrl()).then((result) => {
-        expect(result).to.equal('https://test.ontology.com')
-      })
-    })
-
-    it('getOntologyUrl should return Ontology URL', () => {
-      cy.wrap(getOntologyUrl()).then((result) => {
-        expect(result).to.equal('https://test.ontology.com')
-      })
-    })
-
-    it('getProfileUrl should return Profile URL', () => {
-      cy.wrap(getProfileUrl()).then((result) => {
-        expect(result).to.equal('https://test.profile.com')
       })
     })
 

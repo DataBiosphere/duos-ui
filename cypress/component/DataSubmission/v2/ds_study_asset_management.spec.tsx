@@ -1,6 +1,16 @@
 import React from 'react'
 import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
+import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
+
+const sampleBiospecimens: Biospecimen[] = [{
+  biospecimenId: 'SPEC-001',
+  studyId: 'STUDY-001',
+  donorId: 'DONOR-001',
+  specimenType: BioSpecimenType.BLOOD,
+  preservationMethod: BioSpecimenPreservationMethod.FRESH_FROZEN,
+  organization: 'Johns Hopkins Hospital',
+}]
 
 const baseStudy: Study = {
   assets: {
@@ -11,6 +21,7 @@ const baseStudy: Study = {
     clinicalTrials: [],
     intellectualProperty: [],
     funding: [],
+    biospecimens: sampleBiospecimens,
   },
 } as unknown as Study
 
@@ -28,6 +39,7 @@ describe('StudyAssetManagement component', () => {
       { title: 'Clinical Trials', desc: 'Add clinical trials associated with this study' },
       { title: 'Intellectual Property', desc: 'Add patents or other IP related to this study' },
       { title: 'Funding Resources', desc: 'Add grants and funding sources for this study' },
+      { title: 'Biospecimens', desc: 'View total biospecimens for this study' },
     ]
 
     cy.contains('Study Assets').should('exist')
@@ -37,5 +49,21 @@ describe('StudyAssetManagement component', () => {
       cy.contains('h3', title).should('exist')
       cy.contains(desc).should('exist')
     }
+  })
+
+  it('does not render biospecimens section when biospecimens array is empty', () => {
+    const baseStudyNoBiospecimens = {
+      ...baseStudy,
+      assets: {
+        ...baseStudy.assets,
+        biospecimens: [],
+      },
+    }
+
+    const setStudySpy = cy.spy().as('setStudySpy')
+    cy.mount(<StudyAssetManagement study={baseStudyNoBiospecimens} setStudy={setStudySpy} />)
+
+    cy.contains('h3', 'Biospecimens').should('not.exist')
+    cy.contains('View total biospecimens for this study').should('not.exist')
   })
 })

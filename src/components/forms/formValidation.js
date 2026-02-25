@@ -1,6 +1,10 @@
 import { isEmailAddress } from '../../libs/utils'
 import { isString, isEmpty, isNil, isArray, isNumber } from 'lodash'
+import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
+import { Institution } from 'src/libs/ajax/Institution.js'
+
+let cachedInstitution = null
 
 export const requiredValidator = {
   id: 'required',
@@ -19,10 +23,39 @@ export const urlValidator = {
   msg: 'Please enter a valid url (e.g., https://duos.org)',
 }
 
+export const NotUrlValidator = {
+  id: 'notUri',
+  isValid: (val) => {
+    return !validURLObject(val)
+  },
+  msg: 'Please enter a value that is not a url',
+}
+
 export const emailValidator = {
   id: 'email',
   isValid: isEmailAddress,
   msg: 'Please enter a valid email address (e.g., person@example.com)',
+}
+
+export const emailDomainValidator = {
+  id: 'emailDomain',
+  isValid: async (newUserEmail) => {
+    const institutionId = Storage.getCurrentUser().institutionId
+
+    if (!cachedInstitution) {
+      cachedInstitution = await Institution.getById(institutionId)
+    }
+
+    const institutionDomains = cachedInstitution?.domains || []
+    const newUserDomain = newUserEmail.split('@')[1]
+
+    return institutionDomains.includes(newUserDomain)
+  },
+  get msg() {
+    const domains = cachedInstitution?.domains?.join(', ') || ''
+    const baseMessage = 'Please enter an email that matches your organization domains'
+    return domains ? `${baseMessage}: ${domains}` : baseMessage
+  },
 }
 
 export const dateValidator = {
@@ -49,7 +82,17 @@ export const greaterThanZeroValidator = {
   msg: 'Please enter a number greater than zero',
 }
 
-const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, dayJSValidator, uniqueValidator, greaterThanZeroValidator]
+const validators = [
+  requiredValidator,
+  urlValidator,
+  NotUrlValidator,
+  emailValidator,
+  emailDomainValidator,
+  dateValidator,
+  dayJSValidator,
+  uniqueValidator,
+  greaterThanZeroValidator,
+]
 
 /**
  * Validates the form value
@@ -69,7 +112,7 @@ export const validateFormValue = (formValue, validators) => {
   const failedValidators = []
 
   validators?.forEach((validator) => {
-    let failed = false
+    let failed
     if (isArray(formValue)) {
       failed = formValue.some((val) => {
         return !validator.isValid(val)
@@ -91,7 +134,7 @@ export const validateFormValue = (formValue, validators) => {
 }
 
 /**
- * Gives a human readable validation message. Gives generic message if the validator cannot be found.
+ * Gives a human-readable validation message. Gives generic message if the validator cannot be found.
  *
  * @param {string} failedValidator The id of the failed validator, e.g. 'required'
  * @returns Human readable message, e.g., 'Please enter a value'.

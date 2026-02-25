@@ -69,7 +69,7 @@ describe('DuosHeader', () => {
 
     it('displays correct subtabs for researcher', () => {
       cy.contains('Data Library').should('be.visible')
-      cy.contains('DAR Requests').should('be.visible')
+      cy.contains('Data Access Requests').should('be.visible')
       cy.contains('Datasets').should('be.visible')
     })
   })

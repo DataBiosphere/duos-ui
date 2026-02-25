@@ -1,6 +1,6 @@
-import { Notifications } from './utils'
-import { Config } from './config'
-import { Storage as storage } from '../libs/storage'
+import { Notifications } from 'src/libs/utils'
+import { Config } from 'src/libs/config'
+import { Storage as storage } from 'src/libs/storage'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export const OntologyService = {
@@ -8,15 +8,15 @@ export const OntologyService = {
     if (obolibraryURL.length === 0) {
       return []
     }
-    const baseURL = await Config.getOntologyUrl()
-    const params = { id: obolibraryURL }
+    const baseURL = await Config.getApiUrl()
+    const params = { ids: obolibraryURL }
     try {
       const data = storage.getData(obolibraryURL)
       if (data !== null) {
         return JSON.parse(data)
       }
       else {
-        const response = await fetchGet(`${baseURL}/search`, { params })
+        const response = await fetchGet(`${baseURL}/ontology/search`, { params })
         const data = response.data
         storage.setData(obolibraryURL, JSON.stringify(data))
         return data

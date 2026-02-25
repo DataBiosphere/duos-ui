@@ -54,15 +54,24 @@ export const AddUserModal = (props) => {
       email: state.email,
     }
 
-    const createdUser = await User.create(user)
+    const createUserRequest = async (user) => {
+      try {
+        return await User.create(user)
+      }
+      catch {
+        return false
+      }
+    }
+
+    const createUser = await createUserRequest(user)
 
     setState({
       ...state,
-      emailValid: createdUser,
+      emailValid: !!createUser,
     })
     event.preventDefault()
 
-    if (state.emailValid !== false) {
+    if (createUser) {
       props.onOKRequest('addUser')
     }
   }

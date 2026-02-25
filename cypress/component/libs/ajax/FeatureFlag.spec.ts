@@ -1,5 +1,11 @@
 import { Config } from 'src/libs/config'
-import { getAllFeatureFlags, getFeatureFlag, getFlagEsIndexKeyName, resetEsIndexKeyNamePromise } from 'src/libs/ajax/FeatureFlag'
+import {
+  FeatureFlag,
+  getAllFeatureFlags,
+  getFeatureFlag,
+  getFlagNhgriDacId,
+  resetNhgriDacIdPromise,
+} from 'src/libs/ajax/FeatureFlag'
 
 describe('FeatureFlag ajax', () => {
   let fetchStub: ReturnType<typeof cy.stub>
@@ -33,13 +39,14 @@ describe('FeatureFlag ajax', () => {
 
   it('getFeatureFlag returns the per-key value when available', () => {
     cy.window().then((win) => {
+      const mockFlag = { id: 'someFlag', value: 'enabled', createDate: 123, updateDate: 456 }
       fetchStub.resolves(
-        new win.Response(JSON.stringify('enabled'), {
+        new win.Response(JSON.stringify(mockFlag), {
           status: 200,
           headers: { 'content-type': 'application/json' },
         }),
       )
-      cy.wrap(getFeatureFlag('someFlag')).should('equal', 'enabled')
+      cy.wrap(getFeatureFlag('someFlag')).should('deep.equal', mockFlag)
     })
   })
 
@@ -51,45 +58,67 @@ describe('FeatureFlag ajax', () => {
   })
 })
 
-describe('FeatureFlag tests for ES_TYPE_TO_INDEX_ENABLED flag', () => {
-  let fetchStub: ReturnType<typeof cy.stub>
+const createFlagTestSuite = <T>(
+  flagName: string,
+  getFlagFn: () => Promise<T>,
+  resetFn: () => void,
+  mockResponseValue: FeatureFlag,
+  expectedValue: T,
+  expectedErrorValue: T | undefined = undefined,
+) => {
+  describe(`FeatureFlag tests for ${flagName} flag`, () => {
+    let fetchStub: ReturnType<typeof cy.stub>
 
-  beforeEach(() => {
-    resetEsIndexKeyNamePromise()
-    cy.initApplicationConfig()
-    cy.stub(Config, 'getApiUrl').resolves('')
-    cy.window().then((win) => {
-      fetchStub = cy.stub(win, 'fetch')
+    beforeEach(() => {
+      resetFn()
+      cy.initApplicationConfig()
+      cy.stub(Config, 'getApiUrl').resolves('')
+      cy.window().then((win) => {
+        fetchStub = cy.stub(win, 'fetch')
+      })
+    })
+
+    afterEach(() => {
+      cy.window().then(() => {
+        fetchStub.restore()
+      })
+    })
+
+    it(`${getFlagFn.name} returns the value when available`, () => {
+      cy.window().then((win) => {
+        fetchStub.resolves(
+          new win.Response(JSON.stringify(mockResponseValue), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }),
+        )
+        cy.wrap(getFlagFn()).should('equal', expectedValue)
+      })
+    })
+
+    it(`${getFlagFn.name} returns undefined when the flag fetch errors`, () => {
+      cy.window().then(() => {
+        fetchStub.rejects(new Error('Not found'))
+        cy.wrap(getFlagFn()).should('equal', expectedErrorValue)
+      })
+    })
+
+    it(`${getFlagFn.name} caches the promise and does not refetch on subsequent calls`, () => {
+      cy.window().then((win) => {
+        fetchStub.resolves(
+          new win.Response(JSON.stringify(mockResponseValue), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }),
+        )
+        cy.wrap(getFlagFn()).should('equal', expectedValue)
+        cy.wrap(getFlagFn()).should('equal', expectedValue)
+        cy.wrap(null).then(() => {
+          expect(fetchStub.callCount).to.equal(1)
+        })
+      })
     })
   })
+}
 
-  afterEach(() => {
-    cy.window().then(() => {
-      fetchStub.restore()
-    })
-  })
-
-  it('getFlagEsIndexKeyName returns "_index" when the ES_TYPE_TO_INDEX_ENABLED flag is "true"', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify('true'), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-      cy.wrap(getFlagEsIndexKeyName()).should('equal', '_index')
-    })
-  })
-
-  it('getFlagEsIndexKeyName returns "_type" when the ES_TYPE_TO_INDEX_ENABLED flag is not "true"', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify('false'), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-      cy.wrap(getFlagEsIndexKeyName()).should('equal', '_type')
-    })
-  })
-})
+createFlagTestSuite('NHGRI_RESTRICTED_DAC', getFlagNhgriDacId, resetNhgriDacIdPromise, { id: 'NHGRI_RESTRICTED_DAC', value: 'dac-id', createDate: 123, updateDate: 456 }, 'dac-id')

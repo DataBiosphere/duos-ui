@@ -236,7 +236,7 @@ const DataAccessRequestApplication = (props) => {
   const [selectedDatasets, setSelectedDatasets] = useState([])
   const [dataUseTranslations, setDataUseTranslations] = useState([])
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets)
       setSelectedDatasets(datasets)
@@ -322,7 +322,7 @@ const DataAccessRequestApplication = (props) => {
     setIsLoading(false)
   }, [researcher, existingDarsReadOnlyMode, collectionId, dataRequestId, getDarCollection, getPartialDarRequest, batchFormFieldChange])
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (existingDarsReadOnlyMode) {
       let appTabs = []
       if (isProgressReportApplication) {
@@ -341,7 +341,7 @@ const DataAccessRequestApplication = (props) => {
     }
   }, [formData?.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
 
-  useEffect(() => {
+  React.useEffect(() => {
     init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       setNotificationData(notificationData)
@@ -590,10 +590,10 @@ const DataAccessRequestApplication = (props) => {
 
     const getVoteDate = () => {
       if (finalVote?.updateDate) {
-        return formatDate(finalVote.updateDate)
+        return formatDate(finalVote?.updateDate)
       }
       if (isElectionClosed) {
-        return formatDate(finalVote.createDate)
+        return formatDate(finalVote?.createDate)
       }
       return NO_FINAL_VOTE_STATUS
     }

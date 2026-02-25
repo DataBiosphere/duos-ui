@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'
 import { Tab as TabItem } from 'src/components/DuosHeader'
 import { DuosUser } from 'src/types/model'
+import { ProfileLinks } from 'src/components/navigation/ProfileLinks'
 
 type Orientation = 'horizontal' | 'vertical'
 
@@ -27,8 +28,6 @@ interface NavigationTabsComponentProps {
   initialTab: number
   initialSubTab: number
   onSubtabChange: (event: React.SyntheticEvent, newValue: number) => void
-  showProfileLinks: () => void
-  profileState: boolean
 }
 
 const styles: Record<string, React.CSSProperties> = {
@@ -93,8 +92,6 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
     initialTab,
     initialSubTab,
     onSubtabChange,
-    showProfileLinks,
-    profileState,
   } = props
 
   const selectedMenuTab = initialTab
@@ -231,30 +228,13 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
               <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>
             </button>
             {supportrequestModal}
-            <li className="dropdown user-li" onClick={showProfileLinks} style={{ listStyleType: 'none' }}>
-              <a id="sel_user" role="button" className="dropdown-toggle" data-toggle="dropdown">
-                <div id="dacUser">
-                  {currentUser.displayName}
-                  <span className="caret caret-margin"></span>
-                </div>
-                <small id="dacUserMail">{currentUser.email}</small>
-              </a>
-              <ul
-                className="dropdown-menu navbar-dropdown"
-                role="menu"
-                style={{
-                  display: `${profileState ? 'block' : 'none'}`,
-                  top: orientation === 'vertical' ? '-100%' : '100%',
-                }}
-              >
-                <li>
-                  <Link id="link_profile" to="/profile" onClick={e => onSubtabChange(e, 0)}>Your Profile</Link>
-                </li>
-                <li>
-                  <a id="link_signOut" onClick={signOut}>Sign out</a>
-                </li>
-              </ul>
-            </li>
+            <ProfileLinks
+              currentUser={currentUser}
+              signOut={signOut}
+              onSubtabChange={onSubtabChange}
+              orientation={orientation}
+              menuWidth={190}
+            />
           </div>
         )}
       </ul>

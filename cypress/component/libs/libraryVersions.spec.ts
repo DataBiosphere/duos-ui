@@ -1,16 +1,16 @@
-import { getLibraryVersions } from 'src/libs/libraryVersions'
+import { getLibraryVersions, getBrandedLibrary } from 'src/libs/libraryVersions'
 
 describe('Library Versions - Tests', function () {
   describe('getLibraryVersions function', function () {
     it('returns an object with library configurations', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       expect(versions).to.be.an('object')
       expect(Object.keys(versions).length).to.be.greaterThan(0)
     })
 
     it('includes required properties for each library', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([_key, library]) => {
         expect(library).to.have.property('title')
@@ -24,7 +24,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('marks exactly the correct libraries as featured', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       const featuredLibraries = Object.entries(versions)
         .filter(([, library]) => library.featured)
@@ -43,7 +43,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('marks non-featured libraries correctly', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       const nonFeaturedLibraries = Object.entries(versions)
         .filter(([, library]) => !library.featured)
@@ -56,7 +56,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('includes all expected library keys', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
       const keys = Object.keys(versions)
 
       // Check for some expected keys
@@ -68,13 +68,12 @@ describe('Library Versions - Tests', function () {
       expect(keys).to.include('terra')
       expect(keys).to.include('mgb')
       expect(keys).to.include('myinstitution')
-      expect(keys).to.include('/custom')
     })
 
     it('handles myinstitution library with dynamic parameters', function () {
       const institutionId = 123
       const institutionName = 'Test Institution'
-      const versions = getLibraryVersions(institutionId, institutionName, null)
+      const versions = getLibraryVersions(institutionId, institutionName)
 
       const myInstitution = versions.myinstitution
 
@@ -86,23 +85,8 @@ describe('Library Versions - Tests', function () {
       expect(myInstitution.featured).to.equal(false)
     })
 
-    it('handles custom library with dynamic query', function () {
-      const customQuery = 'custom search term'
-      const versions = getLibraryVersions(null, null, customQuery)
-
-      const customLibrary = versions['/custom']
-
-      expect(customLibrary).to.not.equal(undefined)
-      expect(customLibrary.title).to.equal('custom search term Data Library')
-      if (customLibrary.query && 'bool' in customLibrary.query) {
-        expect(customLibrary.query.bool.should).to.be.an('array')
-        expect(customLibrary.query.bool.should.length).to.equal(2)
-      }
-      expect(customLibrary.featured).to.equal(false)
-    })
-
     it('includes Elasticsearch query for most libraries', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([_key, library]) => {
         // Some libraries have null query (/datalibrary, terra)
@@ -119,7 +103,7 @@ describe('Library Versions - Tests', function () {
     })
 
     it('maintains consistent title format', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([key, library]) => {
         if (key !== '/datalibrary') {
@@ -131,7 +115,7 @@ describe('Library Versions - Tests', function () {
 
   describe('Featured libraries integration', function () {
     it('provides correct data for Home page rendering', function () {
-      const versions = getLibraryVersions(null, null, null)
+      const versions = getLibraryVersions(null, null)
 
       const featuredLibraries = Object.entries(versions)
         .filter(([, library]) => library.featured)
@@ -155,6 +139,98 @@ describe('Library Versions - Tests', function () {
         expect(library).to.have.property('order')
         expect(library.featured).to.equal(true)
       })
+    })
+  })
+
+  describe('getBrandedLibrary function', function () {
+    it('returns the default library when queryParam is undefined', function () {
+      const library = getBrandedLibrary(undefined, undefined, undefined)
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('DUOS Data Library')
+      expect(library.featured).to.equal(true)
+      expect(library.query).to.equal(null)
+    })
+
+    it('returns the default library when queryParam is /datalibrary', function () {
+      const library = getBrandedLibrary(undefined, undefined, '/datalibrary')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('DUOS Data Library')
+      expect(library.featured).to.equal(true)
+    })
+
+    it('returns correct library for branded query param (broad)', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'broad')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Broad Data Library')
+      expect(library.featured).to.equal(true)
+      expect(library.icon).to.not.equal(undefined)
+    })
+
+    it('returns correct library for branded query param (anvil)', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'anvil')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('AnVIL Data Library')
+      expect(library.featured).to.equal(true)
+      expect(library.query).to.not.equal(null)
+    })
+
+    it('handles case-insensitive query param', function () {
+      const library1 = getBrandedLibrary(undefined, undefined, 'BROAD')
+      const library2 = getBrandedLibrary(undefined, undefined, 'Broad')
+      const library3 = getBrandedLibrary(undefined, undefined, 'broad')
+
+      expect(library1).to.deep.equal(library2)
+      expect(library2).to.deep.equal(library3)
+      expect(library1.title).to.equal('Broad Data Library')
+    })
+
+    it('returns myinstitution library with dynamic institution data', function () {
+      const institutionId = 456
+      const institutionName = 'Research Institute'
+      const library = getBrandedLibrary(institutionId, institutionName, 'myinstitution')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Research Institute Data Library')
+      if (library.query && 'match_phrase' in library.query) {
+        expect(library.query.match_phrase['submitter.institution.id']).to.equal(456)
+      }
+      expect(library.featured).to.equal(false)
+    })
+
+    it('handles unknown query param by returning undefined', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'unknownbrand')
+
+      expect(library).to.equal(undefined)
+    })
+
+    it('handles terra library correctly', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'terra')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Terra Data Library')
+      expect(library.featured).to.equal(false)
+      expect(library.query).to.equal(null)
+    })
+
+    it('handles mgb library correctly', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'mgb')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Mass General Brigham Data Library')
+      expect(library.featured).to.equal(false)
+    })
+
+    it('returns library with query for data type restricted libraries', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'elwazi')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('eLwazi Data Library')
+      expect(library.query).to.not.equal(null)
+      expect(library.featured).to.equal(true)
     })
   })
 })

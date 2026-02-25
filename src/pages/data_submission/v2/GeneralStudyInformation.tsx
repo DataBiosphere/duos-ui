@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FormFieldTypes, FormField, FormValidators } from 'src/components/forms/forms'
 import {
   Study,
@@ -8,8 +8,11 @@ import {
   DataCustodianEmail,
   AlternativeDataSharingPlanTargetDeliveryDate,
   AlternativeDataSharingPlanTargetPublicReleaseDate,
+  StudyData,
+  ThroughBioId,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
+  extractThroughBioId,
   generateStudyInputFormTextField,
   generateStudyPropertyFormDateField,
   generateStudyPropertyFormTextField,
@@ -18,6 +21,11 @@ import {
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { DataTypes } from 'src/components/forms/DataTypes'
 import { set } from 'lodash'
+import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+
+interface Validation {
+  throughBioId?: ValidationError
+}
 
 export interface GeneralStudyInformationProps {
   study: Study
@@ -25,10 +33,13 @@ export interface GeneralStudyInformationProps {
 }
 
 export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => {
-  const {
-    setStudy,
-    study,
-  } = props
+  const { setStudy, study } = props
+  const [validation, setValidation] = useState<Validation>({})
+
+  const throughBioLink = React.useMemo(() => {
+    const id = getStudyPropertyValueByKey(study, 'throughBioId')
+    return typeof id === 'string' && id.trim() !== '' ? `https://through.bio/${id}` : undefined
+  }, [study])
 
   const onChange = ({ key, value }: { key: string, value: unknown, isValid: boolean }) => {
     setStudy((val: Study) => {
@@ -63,6 +74,27 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         defaultValue={study?.description}
         validators={[FormValidators.REQUIRED]}
         onChange={onChange}
+      />
+      <FormField
+        id="tags"
+        title="Tags"
+        placeholder="Add tags to help others find your study (e.g. disease area, assay type, etc.)"
+        type={FormFieldTypes.SELECT}
+        isCreatable={true}
+        isMulti={true}
+        optionsAreString={true}
+        defaultValue={(getStudyPropertyValueByKey(study, 'data') as Record<string, unknown> | undefined)?.tags || []}
+        selectOptions={study.data?.tags || []}
+        onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
+          const tags = input.value as string[]
+          setStudyPropertyByKey(study, setStudy, input, new StudyData({ ...getStudyPropertyValueByKey(study, 'data') as Record<string, unknown>, tags } as Record<string, unknown>))
+        }}
+        selectConfig={{
+          components: {
+            DropdownIndicator: null,
+            Menu: () => null,
+          },
+        }}
       />
       <FormField
         id="dataTypes"
@@ -120,6 +152,31 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         ]}
         defaultValue={study?.publicVisibility}
         onChange={onChange}
+      />
+      <FormField
+        id={ThroughBioId.key}
+        title={ThroughBioId.fieldTitle}
+        helpText={
+          throughBioLink
+            ? <a href={throughBioLink} target="_blank" rel="noopener noreferrer">{throughBioLink}</a>
+            : 'Through.bio/'
+        }
+        type={FormFieldTypes.TEXT}
+        placeholder={ThroughBioId.fieldPlaceholderText}
+        defaultValue={getStudyPropertyValueByKey(study, ThroughBioId.key)}
+        validation={validation.throughBioId}
+        onChange={(input: { key: string, value: string, isValid: boolean }) => {
+          const id = extractThroughBioId(input.value)
+          if (!id && input.value) {
+            setValidation({
+              ...validation,
+              throughBioId: { valid: false, failed: ['notUri'] },
+            })
+            return
+          }
+          setValidation({ ...validation, throughBioId: undefined })
+          setStudyPropertyByKey(study, setStudy, { isValid: !!id }, new ThroughBioId(id))
+        }}
       />
     </div>
   )

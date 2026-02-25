@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { isEmpty, isNil } from 'lodash'
 import CollectionVoteYesButton from './CollectionVoteYesButton'
 import CollectionVoteNoButton from './CollectionVoteNoButton'
@@ -151,7 +151,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     return props.isDisabled || (isFinal && submitted) || adminPage
   }, [props.isDisabled, isFinal, submitted, adminPage])
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isEmpty(votes)) {
       const prevVote = votes[0]
 

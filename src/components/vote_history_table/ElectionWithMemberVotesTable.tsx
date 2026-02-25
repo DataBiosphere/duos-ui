@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
-import { formatDate, sortVisibleTable } from '../../libs/utils'
+import { formatDate, sortVisibleTable } from 'src/libs/utils'
 import { ElectionWithMemberVotes, Vote } from 'src/types/model'
 import { ExpandMore, ExpandLess } from '@mui/icons-material'
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable'
@@ -165,7 +165,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     return renderedRow
   }, [electionIsExpanded])
 
-  useEffect(() => {
+  React.useEffect(() => {
     setSortedElections(sortVisibleTable({
       list: processElectionRowData(electionsWithMemberVotes),
       sort,

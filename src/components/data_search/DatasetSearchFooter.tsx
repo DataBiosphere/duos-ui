@@ -1,7 +1,9 @@
-import { uniq, filter } from 'lodash'
+import { uniq, filter, isNil } from 'lodash'
 import { Button } from '@mui/material'
 import * as React from 'react'
 import { DatasetTerm } from 'src/types/model'
+import { Storage } from 'src/libs/storage'
+import Tooltip from '@mui/material/Tooltip'
 
 interface DatasetSearchFooterProps {
   selectedDatasets: number[]
@@ -15,6 +17,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
       .map(dataset => dataset.study.studyId))
   const datasetText = selectedDatasets.length > 1 ? 'datasets' : 'dataset'
   const studyText = selectedStudies.length > 1 ? 'studies' : 'study'
+  const hasLibraryCard = !isNil(Storage.getCurrentUser().libraryCard)
 
   return (
     <div style={{
@@ -41,13 +44,28 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
         {' '}
         {studyText}
       </div>
-      <Button
-        variant="contained"
-        onClick={onClick}
-        sx={{ fontWeight: 600, marginRight: 5 }}
+      <Tooltip
+        title={hasLibraryCard ? '' : 'A Library Card is required to apply for data access'}
+        slotProps={{
+          tooltip: {
+            sx: {
+              backgroundColor: 'red',
+              color: 'white',
+            },
+          },
+        }}
       >
-        Apply for Access
-      </Button>
+        <span>
+          <Button
+            variant="contained"
+            onClick={onClick}
+            sx={{ fontWeight: 600, marginRight: 5 }}
+            disabled={!hasLibraryCard}
+          >
+            Apply for Access
+          </Button>
+        </span>
+      </Tooltip>
     </div>
   )
 }

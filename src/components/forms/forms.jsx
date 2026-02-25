@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { cloneDeep, isFunction, isNil, isArray } from 'lodash'
 import {
   getKey,
@@ -25,8 +25,10 @@ import './forms.css'
 import {
   dateValidator,
   dayJSValidator,
+  emailDomainValidator,
   emailValidator,
   isValid,
+  NotUrlValidator,
   requiredValidator,
   urlValidator,
 } from './formValidation'
@@ -149,7 +151,7 @@ export const FormFieldTypes = {
       //   ^^^ can pass other fields in as extra info, e.g.:
       //  {displayText: 'Dac 1', dacId: 213}
       // ]
-      // can also be array of stirngs: ['Option 1', 'Option 2']
+      // can also be array of strings: ['Option 1', 'Option 2']
     ],
     requiredAsyncSelectProps: [
       'loadOptions',
@@ -196,7 +198,9 @@ export const FormFieldTypes = {
 export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
+  NOTURL: NotUrlValidator,
   EMAIL: emailValidator,
+  EMAILDOMAIN: emailDomainValidator,
   DATE: dateValidator,
   DATEJS: dayJSValidator,
 }
@@ -255,13 +259,13 @@ export const FormField = (config) => {
 
   const required = (validators || []).includes(FormValidators.REQUIRED)
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (defaultValue !== undefined) {
       setFormValue(defaultValue)
     }
   }, [defaultValue, type])
 
-  useEffect(() => {
+  React.useEffect(() => {
     validateFormProps(config)
   }, [config])
 

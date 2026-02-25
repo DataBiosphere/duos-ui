@@ -130,13 +130,14 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
       >
         {rows.length}
         {' '}
-        {capitalize(rows.length < 1 ? tab.plural : tab.singular)}
+        {capitalize(rows.length === 1 ? tab.singular : tab.plural)}
       </div>
       {
         isEmpty(visibleRows)
           ? (
               <div style={{ fontWeight: 600, marginTop: '0.5rem' }}>
                 There are no
+                {' '}
                 {tab.plural}
                 {' '}
                 that fit these criteria.

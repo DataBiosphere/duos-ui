@@ -18,7 +18,7 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 const filterFn = getSearchFilterFunctions().darCollections
 
 export default function ResearcherConsole() {
-  usePageTitle('DAR Requests')
+  usePageTitle('Data Acccess Requests')
   const [isLoading, setIsLoading] = useState(true)
   const [researcherCollections, setResearcherCollections] = useState()
   const [filteredList, setFilteredList] = useState()

@@ -27,6 +27,8 @@ import LaptopMacIcon from '@mui/icons-material/LaptopMac'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
 import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
+import BiospecimenList from 'src/components/biospecimen_list/BiospecimenList'
+import { Biotech } from '@mui/icons-material'
 
 export interface StudyAssetManagementProps {
   study: Study
@@ -55,6 +57,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
   const intellectualProperties = study.assets?.intellectualProperties || []
   const fundingResources = study.assets?.funding || []
   const consentGroups = study.assets?.consentGroups || []
+  const biospecimens = study.assets?.biospecimens || []
 
   return (
     <div className="data-submitter-section">
@@ -196,6 +199,26 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
           />
         )}
       />
+
+      {/* Only show biospecimen section if there are biospecimens to display */}
+      {biospecimens.length > 0 && (
+        <BiospecimenList
+          biospecimens={biospecimens}
+          onBiospecimenChange={() => {}} // Biospecimens are not editable through the UI, so we pass an empty change handler
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <Biotech fontSize="large" />,
+                title: 'Biospecimens',
+                description: 'View total biospecimens for this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+      )}
     </div>
   )
 }

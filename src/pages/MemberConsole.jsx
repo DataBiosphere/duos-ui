@@ -12,7 +12,7 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 
 export default function MemberConsole() {
-  usePageTitle('DAR Requests')
+  usePageTitle('Data Access Requests')
   const navigate = useNavigate()
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])

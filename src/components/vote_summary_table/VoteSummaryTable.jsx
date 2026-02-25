@@ -1,8 +1,7 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
-import { isNil, isEmpty } from 'lodash'
-import { useEffect, useState } from 'react'
+import { isEmpty, isNil } from 'lodash'
 import { formatDate, Notifications, sortVisibleTable } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
 
@@ -156,17 +155,16 @@ export default function VoteSummaryTable(props) {
 
   const updateReminderState = (voteId, sentState) => {
     setReminderSentState((state) => {
-      const newState = {
+      return {
         ...state,
         ...{
           [voteId]: sentState,
         },
       }
-      return newState
     })
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     const sendReminder = (voteId) => {
       updateReminderState(voteId, ReminderStates.SENDING)
 

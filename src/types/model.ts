@@ -38,10 +38,11 @@ export interface UserRole {
 }
 
 export interface UserStatusInfo {
-  adminEnabled: boolean
+  adminEnabled?: boolean
   enabled: boolean
   userEmail: string
   userSubjectId: string
+  tosAccepted?: boolean
 }
 
 export interface UserProperty {
@@ -344,6 +345,7 @@ export interface Study {
     clinicalTrials?: Array<ClinicalTrial>
     funding?: Array<FundingResource>
     intellectualProperties?: Array<IntellectualProperty>
+    biospecimens?: Array<Biospecimen>
   }
 }
 
@@ -454,6 +456,60 @@ export interface IntellectualProperty {
   url: string
   contact: string
   tags?: string[]
+}
+
+export enum BioSpecimenType {
+  BLOOD = 'BLOOD',
+  PLASMA = 'PLASMA',
+  SERUM = 'SERUM',
+  TISSUE = 'TISSUE',
+  SALIVA = 'SALIVA',
+  CSF = 'CSF',
+  PBMC = 'PBMC',
+  TUMOR = 'TUMOR',
+  NORMAL_ADJACENT = 'NORMAL_ADJACENT',
+}
+
+export enum BioSpecimenPreservationMethod {
+  FFPE = 'FFPE',
+  FRESH_FROZEN = 'FRESH_FROZEN',
+  CRYO_PRESERVED = 'CRYO_PRESERVED',
+  RNA_LATER = 'RNA_LATER',
+  FORMALIN_FIXED = 'FORMALIN_FIXED',
+}
+
+export enum PostMortemIntervalUnit {
+  HOURS = 'HOURS',
+  MINUTES = 'MINUTES',
+  DAYS = 'DAYS',
+  WEEKS = 'WEEKS',
+}
+
+export enum Sex {
+  FEMALE = 'FEMALE',
+  MALE = 'MALE',
+  UNKNOWN = 'UNKNOWN',
+  NOT_REPORTED = 'NOT_REPORTED',
+}
+
+export interface Biospecimen {
+  biospecimenId: string
+  studyId: string
+  donorId: string
+  specimenType: BioSpecimenType
+  preservationMethod: BioSpecimenPreservationMethod
+  preservationDetails?: string
+  dateOfCollection?: string
+  postMortemInterval?: { value: number, unit: PostMortemIntervalUnit }
+  sex?: Sex
+  age?: number
+  race?: string
+  countryOfOrigin?: string // {domain}/api-docs/ISO-3166-countries.json e.g. "United States of America (the)"
+  extractedDiagnoses?: string[] // diseaseSpecificUse e.g. "Alzheimer's disease", "Parkinson's disease"
+  pathology?: string
+  organization: string // e.g. institution/biobank/provider
+  sourceSite?: string // e.g. clinic/hospital/collection site
+  optionalDataUse?: string // structured policy (same pattern as dataset Data Use, if supported) OR free-text for MVP
 }
 
 export interface StudyProperty {

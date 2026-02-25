@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { AddUserModal } from 'src/components/modals/AddUserModal'
 import { User } from 'src/libs/ajax/User'
 import { USER_ROLES } from 'src/libs/utils'
@@ -40,7 +40,7 @@ export const AdminManageUsers = function AdminManageUsers() {
 
   const searchRef = useRef('')
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsLoading(true)
     getUserList().then((userList) => {
       setIsLoading(false)

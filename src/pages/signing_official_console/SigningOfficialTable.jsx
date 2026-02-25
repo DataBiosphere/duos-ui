@@ -302,7 +302,7 @@ export default function SigningOfficialTable(props) {
     setShowModal(true)
   }
 
-  const issueLibraryCards = async (cards, researchers) => {
+  const issueLibraryCards = async (cards, researchers, newUser) => {
     const { successfulCards, failedCards } = await processLibraryCards(cards)
 
     // Update researchers list with successful cards
@@ -313,10 +313,11 @@ export default function SigningOfficialTable(props) {
         const targetIndex = findIndex(listCopy, researcher => userId === researcher.userId)
         if (targetIndex === -1) { // if card is not found, push new user to top of list
           listCopy.unshift({
-            email: userEmail,
-            displayName: userName,
+            email: newUser?.email || userEmail,
+            displayName: newUser?.displayName || userName,
+            userId: newUser?.userId,
             libraryCard: newCard,
-            roles: [],
+            roles: newUser?.roles || [],
           })
         }
         else {
@@ -433,7 +434,7 @@ export default function SigningOfficialTable(props) {
       />
       <LibraryCardFormModal
         showModal={showModal}
-        createOnClick={cards => issueLibraryCards(cards, researchers)}
+        createOnClick={(cards, newUser) => issueLibraryCards(cards, researchers, newUser)}
         closeModal={() => setShowModal(false)}
         users={researchers.filter(onlyResearchersWithoutCardFilter)}
         modalType="add"

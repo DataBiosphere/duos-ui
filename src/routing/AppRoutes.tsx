@@ -52,9 +52,9 @@ import SigningOfficialLibraryCards from 'src/pages/signing_official_console/Sign
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
-import Translator from 'src/pages/Translator'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
+import { DataLibrary } from 'src/pages/DataLibrary'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -86,6 +86,9 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/datalibrary" element={<DatasetSearch {...props} />}>
           <Route path=":query" element={<DatasetSearch {...props} />} />
         </Route>
+        <Route path="/datalibrary2" element={<DataLibrary />}>
+          <Route path=":query" element={<DataLibrary />} />
+        </Route>
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -95,9 +98,6 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/dar_application_review/:collectionId" element={<DataAccessRequestApplication existingDarsReadOnlyMode={true} draftDar={false} isProgressReportApplication={false} />} />
           <Route path="/progress_report_application/:collectionId" element={<DataAccessRequestApplication existingDarsReadOnlyMode={true} draftDar={false} isProgressReportApplication={true} />} />
           <Route path="/dar_application/:dataRequestId" element={<DataAccessRequestApplication draftDar={true} isProgressReportApplication={false} />} />
-          <Route element={<EnvRoute env={envGroups.NON_PROD} />}>
-            <Route path="/translate" element={<Translator />} />
-          </Route>
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter, USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />

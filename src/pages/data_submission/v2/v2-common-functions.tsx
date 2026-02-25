@@ -40,7 +40,10 @@ import {
   DataLocationType,
   DataURL,
   FileTypes,
-  NumberOfParticipants } from 'src/pages/data_submission/v2/v2-models'
+  NumberOfParticipants, StudyData,
+  DatasetData,
+  ThroughBioId,
+} from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { set, isEmpty } from 'lodash'
 import { Storage } from 'src/libs/storage'
@@ -188,6 +191,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     piEmail: study.piEmail,
     dataCustodianEmail: getStudyPropertyValueByKey(study, DataCustodianEmail.key) as string[] || undefined,
     publicVisibility: study.publicVisibility || false,
+    throughBioId: getStudyPropertyValueByKey(study, ThroughBioId.key) as string || undefined,
     nihAnvilUse: getStudyPropertyValueByKey(study, NihAnvilUse.key) as NiHAnvilUseValues || undefined,
     submittingToAnvil: getStudyPropertyValueByKey(study, SubmittingToAnvil.key) as boolean || undefined,
     dbGaPPhsID: getStudyPropertyValueByKey(study, DbGaPPhsID.key) as string || undefined,
@@ -212,6 +216,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     alternativeDataSharingPlanTargetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined),
     alternativeDataSharingPlanTargetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined),
     consentGroups: structuredClone(study.assets?.consentGroups) || [],
+    data: getStudyPropertyValueByKey(study, StudyData.key) as Record<string, unknown> || {},
   }
   const assets = structuredClone(study.assets)
   if (assets) {
@@ -280,6 +285,7 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     consentGroup.url = getDatasetPropertyValueByKey(DataURL.propertyName, dataset) as string
     consentGroup.fileTypes = fileTypeAdjustment(getDatasetPropertyValueByKey(FileTypes.propertyName, dataset) as Array<FileType>)
     consentGroup.numberOfParticipants = getDatasetPropertyValueByKey(NumberOfParticipants.propertyName, dataset) as number || 0
+    consentGroup.data = getDatasetPropertyValueByKey(DatasetData.propertyName, dataset) as Record<string, unknown> || {}
     consentGroups.push(consentGroup)
   })
   return consentGroups
@@ -315,4 +321,22 @@ const toTitleCase = (str: string): string => {
       return word.charAt(0).toUpperCase() + word.slice(1)
     })
     .join(' ')
+}
+
+// Extracts the Through.Bio ID from a URL or returns the input if not a URL.
+// Returns an empty string if the URL is not from through.bio.
+export const extractThroughBioId = (input: string): string => {
+  const trimmed = input.trim()
+  try {
+    const url = new URL(trimmed)
+    if (url.hostname === 'through.bio') {
+      return url.pathname.slice(1)
+    }
+    // Any other URL: return ''
+    return ''
+  }
+  catch {
+    // Not a URL: return non-empty string, else ''
+    return trimmed === '' ? '' : trimmed
+  }
 }

@@ -147,7 +147,7 @@ export const DataUseAgreements: React.FC<DataUseAgreementsProps> = (props: DataU
                 onClick={save}
                 className="button button-white"
               >
-                Save
+                Save Draft
               </button>
             )}
         </div>

@@ -92,7 +92,7 @@ export const StudyDetails = () => {
           must: [
             {
               match: {
-                _type: 'dataset',
+                _index: 'dataset',
               },
             },
             {

@@ -76,12 +76,6 @@ export const ServiceStatus = {
     return result.data
   },
 
-  getOntologyStatus: async (): Promise<OntologyStatus> => {
-    const url = `${await Config.getOntologyUrl()}/status`
-    const result = await fetchGet<OntologyStatus>(url)
-    return result.data
-  },
-
   isConsentHealthy: async (): Promise<boolean> => {
     const status = await ServiceStatus.getConsentStatus()
     return status.ok || false
