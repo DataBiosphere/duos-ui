@@ -1,8 +1,9 @@
 import React from 'react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { Storage } from 'src/libs/storage'
+import { Notifications } from 'src/libs/utils'
 
 const mockMetadataResponse = {
   aggregations: {
@@ -216,5 +217,183 @@ describe('DataLibrary', () => {
     // Footer should show 2 datasets (from mockStudiesResponse)
     cy.get('[data-cy="library-footer"]').should('be.visible')
     cy.contains('2 datasets selected from 1 study').should('be.visible')
+  })
+
+  describe('Branded Data Libraries', () => {
+    it('renders branded library based on URL parameter (broad)', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/broad']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.contains('Broad Data Library').should('be.visible')
+      cy.contains('Search, filter, and select datasets').should('be.visible')
+    })
+
+    it('renders branded library based on URL parameter (anvil)', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/anvil']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.contains('AnVIL Data Library').should('be.visible')
+    })
+
+    it('handles case-insensitive branded library query params', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/BROAD']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.contains('Broad Data Library').should('be.visible')
+    })
+
+    it('captures metrics for default library', () => {
+      cy.intercept('**/event').as('event')
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2']}>
+            <Routes>
+              <Route path="/datalibrary2" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.wait('@event').should('exist')
+    })
+
+    it('captures metrics with brand parameter for branded library', () => {
+      cy.intercept('**/event').as('event')
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/broad']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.wait('@event').should('exist')
+    })
+
+    it('renders myinstitution library with user institution', () => {
+      const mockUser = {
+        userId: 123,
+        institution: {
+          id: 456,
+          name: 'Test Institution',
+        },
+      }
+      cy.stub(Storage, 'getCurrentUser').returns(mockUser)
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/myinstitution']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.contains('Test Institution Data Library').should('be.visible')
+    })
+
+    it('redirects to profile when accessing myinstitution without institution', () => {
+      const mockUser = {
+        userId: 123,
+        institution: null,
+      }
+      cy.stub(Storage, 'getCurrentUser').returns(mockUser)
+      cy.stub(Notifications, 'showError').as('showError')
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/myinstitution']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('@showError').should('have.been.calledOnce')
+    })
+
+    it('redirects to profile when accessing myinstitution without user', () => {
+      cy.stub(Storage, 'getCurrentUser').returns(null)
+      cy.stub(Notifications, 'showError').as('showError')
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/myinstitution']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('@showError').should('have.been.calledOnce')
+    })
+
+    it('falls back to default library for unknown brand', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/unknownbrand']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.contains('DUOS Data Library').should('be.visible')
+    })
+
+    it('renders terra library without query filter', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/terra']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.contains('Terra Data Library').should('be.visible')
+    })
+
+    it('renders elwazi library with data type filter', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/datalibrary2/elwazi']}>
+            <Routes>
+              <Route path="/datalibrary2/:query" element={<DataLibrary />} />
+            </Routes>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.contains('eLwazi Data Library').should('be.visible')
+    })
   })
 })
