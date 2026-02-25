@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Box } from '@mui/material'
+import { Box, Skeleton, Typography } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -301,8 +301,28 @@ export const DataLibrary: React.FC = () => {
           />
         </Box>
 
-        {/* Data Grid */}
-        <Box sx={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+        {/* Data Library */}
+        <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {/* Asset count */}
+          {isFetching
+            ? <Skeleton variant="text" width={120} sx={{ fontSize: '1.6rem', mb: 1 }} />
+            : (
+                <Typography sx={{ fontWeight: 600, fontSize: '1.6rem', mb: 1 }}>
+                  {(data?.total ?? 0).toLocaleString()}
+                  {' '}
+                  {(() => {
+                    switch (urlState.tab) {
+                      case AssetType.STUDIES:
+                        return (data?.total === 1) ? 'Study' : 'Studies'
+                      case AssetType.DATASETS:
+                        return (data?.total === 1) ? 'Dataset' : 'Datasets'
+                      default:
+                        return 'Assets'
+                    }
+                  })()}
+                </Typography>
+              )}
+          {/* Data Grid */}
           <LibraryDataGrid
             assetType={urlState.tab}
             data={data?.items || []}
