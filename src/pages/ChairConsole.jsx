@@ -69,7 +69,7 @@ export default function ChairConsole() {
       <div>
         <TableHeaderSection
           title="My DAC's Data Access Requests"
-          description="Select and manage Data Access Request for DAC Review"
+          description="Select and manage Data Access Requests for DAC Review"
         />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
