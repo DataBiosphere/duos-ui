@@ -61,11 +61,8 @@ describe('DataLibrary', () => {
       },
     })
     cy.initApplicationConfig()
-    // Stub user with library card for footer functionality
-    cy.window().then(() => {
-      cy.stub(Storage, 'getCurrentUser').returns({
-        libraryCard: { cardNumber: '12345' },
-      })
+    cy.stub(Storage, 'getCurrentUser').as('getCurrentUserStub').returns({
+      libraryCard: { cardNumber: '12345' },
     })
     cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
       if (req.body.aggs?.studies) {
@@ -301,7 +298,7 @@ describe('DataLibrary', () => {
           name: 'Test Institution',
         },
       }
-      cy.stub(Storage, 'getCurrentUser').returns(mockUser)
+      cy.get('@getCurrentUserStub').invoke('returns', mockUser)
 
       cy.mount(
         <QueryClientProvider client={queryClient}>
@@ -321,7 +318,7 @@ describe('DataLibrary', () => {
         userId: 123,
         institution: null,
       }
-      cy.stub(Storage, 'getCurrentUser').returns(mockUser)
+      cy.get('@getCurrentUserStub').invoke('returns', mockUser)
       cy.stub(Notifications, 'showError').as('showError')
 
       cy.mount(
@@ -338,7 +335,7 @@ describe('DataLibrary', () => {
     })
 
     it('redirects to profile when accessing myinstitution without user', () => {
-      cy.stub(Storage, 'getCurrentUser').returns(null)
+      cy.get('@getCurrentUserStub').invoke('returns', null)
       cy.stub(Notifications, 'showError').as('showError')
 
       cy.mount(
