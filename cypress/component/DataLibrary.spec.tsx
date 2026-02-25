@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 
 const mockMetadataResponse = {
   aggregations: {
@@ -319,6 +320,143 @@ describe('DataLibrary', () => {
       cy.wait('@searchApiDelayed')
       cy.get('[class*="MuiSkeleton"]').should('not.exist')
       cy.contains('2 Studies').should('be.visible')
+    })
+  })
+
+  describe('Export functionality', () => {
+    const emptyTdrResponse = { filteredTotal: 0, total: 0, items: [], roleMap: {} }
+
+    beforeEach(() => {
+      cy.viewport(2000, 900)
+    })
+
+    it('does not show export buttons when TDR returns no snapshots', () => {
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').resolves(emptyTdrResponse)
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('.MuiDataGrid-row').should('have.length', 1)
+      cy.contains('Export').should('not.exist')
+    })
+
+    it('shows export button when TDR returns a snapshot with reader role', () => {
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').resolves({
+        filteredTotal: 1,
+        total: 1,
+        items: [{
+          id: 'snapshot-abc',
+          name: 'Snapshot ABC',
+          duosId: 'DUOS-000001',
+          cloudPlatform: 'gcp',
+          resourceLocks: {},
+        }],
+        roleMap: { 'snapshot-abc': ['reader'] },
+      })
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('.MuiDataGrid-row').should('have.length', 1)
+      cy.contains('Export').should('be.visible')
+    })
+
+    it('shows export button when TDR returns a snapshot with steward role', () => {
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').resolves({
+        filteredTotal: 1,
+        total: 1,
+        items: [{
+          id: 'snapshot-xyz',
+          name: 'Snapshot XYZ',
+          duosId: 'DUOS-000001',
+          cloudPlatform: 'gcp',
+          resourceLocks: {},
+        }],
+        roleMap: { 'snapshot-xyz': ['steward'] },
+      })
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('.MuiDataGrid-row').should('have.length', 1)
+      cy.contains('Export').should('be.visible')
+    })
+
+    it('does not show export button for snapshots without reader or steward role', () => {
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').resolves({
+        filteredTotal: 1,
+        total: 1,
+        items: [{
+          id: 'snapshot-abc',
+          name: 'Snapshot ABC',
+          duosId: 'DUOS-000001',
+          cloudPlatform: 'gcp',
+          resourceLocks: {},
+        }],
+        roleMap: { 'snapshot-abc': ['discoverer'] },
+      })
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('.MuiDataGrid-row').should('have.length', 1)
+      cy.contains('Export').should('not.exist')
+    })
+
+    it('does not show export buttons when on the Studies tab', () => {
+      const listSnapshotsSpy = cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').resolves({
+        filteredTotal: 1,
+        total: 1,
+        items: [{ id: 'snap-1', name: 'Snap', duosId: 'DUOS-000001', cloudPlatform: 'gcp', resourceLocks: {} }],
+        roleMap: { 'snap-1': ['reader'] },
+      })
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=studies']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('.MuiDataGrid-row').should('have.length.at.least', 1)
+      cy.wrap(listSnapshotsSpy).should('not.have.been.called')
+      cy.contains('Export').should('not.exist')
+    })
+
+    it('handles TDR API errors gracefully and shows no export buttons', () => {
+      cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').rejects(new Error('TDR API unavailable'))
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.get('.MuiDataGrid-row').should('have.length', 1)
+      cy.contains('Export').should('not.exist')
     })
   })
 
