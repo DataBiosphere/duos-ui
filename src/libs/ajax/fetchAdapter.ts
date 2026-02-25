@@ -48,7 +48,8 @@ export const reportError = async (url: string, status: number): Promise<void> =>
     .concat(JSON.stringify(url))
     .concat('Status: ')
     .concat(String(status))
-  await StackdriverReporter.report(msg)
+  // noinspection ES6MissingAwait
+  StackdriverReporter.report(msg)
 }
 
 function buildUrlWithParams(url: string, params?: Params): string {
