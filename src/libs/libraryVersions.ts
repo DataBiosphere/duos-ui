@@ -575,3 +575,9 @@ export const getLibraryVersions = (
     },
   }
 }
+
+export const getBrandedLibrary = (institutionId: number | undefined, institutionName: string | undefined, queryParam: string | undefined) => {
+  const key = queryParam === undefined ? '/datalibrary' : queryParam.toLowerCase()
+  const versions = getLibraryVersions(institutionId ?? null, institutionName ?? null)
+  return versions[key]
+}

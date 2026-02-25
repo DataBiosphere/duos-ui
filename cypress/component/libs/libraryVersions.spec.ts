@@ -1,4 +1,4 @@
-import { getLibraryVersions } from 'src/libs/libraryVersions'
+import { getLibraryVersions, getBrandedLibrary } from 'src/libs/libraryVersions'
 
 describe('Library Versions - Tests', function () {
   describe('getLibraryVersions function', function () {
@@ -139,6 +139,98 @@ describe('Library Versions - Tests', function () {
         expect(library).to.have.property('order')
         expect(library.featured).to.equal(true)
       })
+    })
+  })
+
+  describe('getBrandedLibrary function', function () {
+    it('returns the default library when queryParam is undefined', function () {
+      const library = getBrandedLibrary(undefined, undefined, undefined)
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('DUOS Data Library')
+      expect(library.featured).to.equal(true)
+      expect(library.query).to.equal(null)
+    })
+
+    it('returns the default library when queryParam is /datalibrary', function () {
+      const library = getBrandedLibrary(undefined, undefined, '/datalibrary')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('DUOS Data Library')
+      expect(library.featured).to.equal(true)
+    })
+
+    it('returns correct library for branded query param (broad)', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'broad')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Broad Data Library')
+      expect(library.featured).to.equal(true)
+      expect(library.icon).to.not.equal(undefined)
+    })
+
+    it('returns correct library for branded query param (anvil)', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'anvil')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('AnVIL Data Library')
+      expect(library.featured).to.equal(true)
+      expect(library.query).to.not.equal(null)
+    })
+
+    it('handles case-insensitive query param', function () {
+      const library1 = getBrandedLibrary(undefined, undefined, 'BROAD')
+      const library2 = getBrandedLibrary(undefined, undefined, 'Broad')
+      const library3 = getBrandedLibrary(undefined, undefined, 'broad')
+
+      expect(library1).to.deep.equal(library2)
+      expect(library2).to.deep.equal(library3)
+      expect(library1.title).to.equal('Broad Data Library')
+    })
+
+    it('returns myinstitution library with dynamic institution data', function () {
+      const institutionId = 456
+      const institutionName = 'Research Institute'
+      const library = getBrandedLibrary(institutionId, institutionName, 'myinstitution')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Research Institute Data Library')
+      if (library.query && 'match_phrase' in library.query) {
+        expect(library.query.match_phrase['submitter.institution.id']).to.equal(456)
+      }
+      expect(library.featured).to.equal(false)
+    })
+
+    it('handles unknown query param by returning undefined', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'unknownbrand')
+
+      expect(library).to.equal(undefined)
+    })
+
+    it('handles terra library correctly', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'terra')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Terra Data Library')
+      expect(library.featured).to.equal(false)
+      expect(library.query).to.equal(null)
+    })
+
+    it('handles mgb library correctly', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'mgb')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('Mass General Brigham Data Library')
+      expect(library.featured).to.equal(false)
+    })
+
+    it('returns library with query for data type restricted libraries', function () {
+      const library = getBrandedLibrary(undefined, undefined, 'elwazi')
+
+      expect(library).to.not.equal(undefined)
+      expect(library.title).to.equal('eLwazi Data Library')
+      expect(library.query).to.not.equal(null)
+      expect(library.featured).to.equal(true)
     })
   })
 })
