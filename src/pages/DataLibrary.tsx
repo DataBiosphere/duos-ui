@@ -5,7 +5,7 @@ import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder, StudyAggregation, TabConfig } from 'src/types/library'
+import { AssetType, AvailableFilters, ExportableDatasets, LibraryVersionNew, SortOrder, StudyAggregation, TabConfig } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
@@ -18,6 +18,9 @@ import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { chain, intersection } from 'lodash'
+import { EnumerateSnapshotModel } from 'src/types/tdrModel'
 
 /**
  * DataLibrary Page Component
@@ -42,6 +45,7 @@ export const DataLibrary: React.FC = () => {
   const [urlState, updateUrlState] = useLibraryUrlState()
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
+  const [exportableDatasets, setExportableDatasets] = useState<ExportableDatasets>({})
 
   const user = Storage.getCurrentUser()
   const institutionId = user?.institution?.id
@@ -241,8 +245,38 @@ export const DataLibrary: React.FC = () => {
     applyForAccess(selectedDatasetIds, navigate)
   }
 
+  useEffect(() => {
+    const fetchExportable = async () => {
+      if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
+        setExportableDatasets({})
+        return
+      }
+      const datasetIdentifiers = (data.items as DatasetTerm[]).map(d => d.datasetIdentifier).filter(Boolean)
+      if (datasetIdentifiers.length === 0) {
+        setExportableDatasets({})
+        return
+      }
+      try {
+        const result: EnumerateSnapshotModel = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers)
+        if (result.filteredTotal > 0) {
+          const mapped = chain(result.items)
+            .filter(snapshot => intersection(result.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+            .groupBy('duosId')
+            .value()
+          setExportableDatasets(mapped)
+        }
+        else {
+          setExportableDatasets({})
+        }
+      }
+      catch {
+        setExportableDatasets({})
+      }
+    }
+    fetchExportable()
+  }, [data?.items, urlState.tab])
+
   if (error) {
-    console.log(error)
     return (
       <Box sx={{ px: 3, py: 4 }}>
         <Box sx={{ textAlign: 'center', color: 'error.main' }}>
@@ -342,6 +376,7 @@ export const DataLibrary: React.FC = () => {
             onSortChange={handleSortChange}
             selectedDatasetIds={selectedDatasetIds}
             onSelectionChange={handleSelectionChange}
+            exportableDatasets={exportableDatasets}
           />
         </Box>
       </Box>

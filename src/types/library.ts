@@ -1,6 +1,7 @@
 /**
  * Type definitions for the Data Library feature
  */
+import { SnapshotSummaryModel } from 'src/types/tdrModel'
 
 export enum AssetType {
   STUDIES = 'studies',
@@ -85,6 +86,8 @@ export interface LibraryTabsProps {
   tabs: TabConfig[]
 }
 
+export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
+
 export interface LibraryDataGridProps {
   assetType: AssetType
   data: unknown[]
@@ -99,6 +102,7 @@ export interface LibraryDataGridProps {
   onSortChange: (model: Array<{ field: string, sort: SortOrder | null }>) => void
   selectedDatasetIds: number[]
   onSelectionChange: (selectedIds: number[]) => void
+  exportableDatasets?: ExportableDatasets
 }
 
 export interface StudyAggregation {

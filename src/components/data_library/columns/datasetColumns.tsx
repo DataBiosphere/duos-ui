@@ -2,12 +2,13 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
-import { AccessManagement } from 'src/types/library'
+import { AccessManagement, ExportableDatasets } from 'src/types/library'
+import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 
 /**
  * Column definitions for dataset view
  */
-export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
+export const makeDatasetColumns = (exportableDatasets: ExportableDatasets = {}): GridColDef<DatasetTerm>[] => [
   {
     field: 'datasetName',
     headerName: 'Dataset Name',
@@ -103,5 +104,26 @@ export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
     field: 'datasetIdentifier',
     headerName: 'Identifier',
     width: 150,
+  },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    width: 120,
+    sortable: false,
+    renderCell: (params) => {
+      const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
+      if (exportableSnapshots.length === 0) return null
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          {exportableSnapshots.map((snapshot, i) => (
+            <DatasetExportButton
+              key={i}
+              snapshot={snapshot}
+              title={`Export snapshot ${snapshot.name}`}
+            />
+          ))}
+        </Box>
+      )
+    },
   },
 ]

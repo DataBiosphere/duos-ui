@@ -35,13 +35,14 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   onSortChange,
   selectedDatasetIds,
   onSelectionChange,
+  exportableDatasets = {},
 }) => {
   const columns = useMemo(() => {
     if (assetType === AssetType.STUDIES) {
       return makeStudyColumns() as GridColDef<DatasetTerm | StudyAggregation>[]
     }
-    return makeDatasetColumns() as GridColDef<DatasetTerm | StudyAggregation>[]
-  }, [assetType])
+    return makeDatasetColumns(exportableDatasets) as GridColDef<DatasetTerm | StudyAggregation>[]
+  }, [assetType, exportableDatasets])
 
   const getRowId = (row: DatasetTerm | StudyAggregation) => {
     if (assetType === AssetType.STUDIES) {
