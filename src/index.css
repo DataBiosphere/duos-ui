@@ -828,11 +828,13 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
   text-overflow: ellipsis;
 }
 
-input[type=checkbox] {
+.checkbox input[type=checkbox],
+.checkbox-inline input[type=checkbox] {
   display: none;
 }
 
-input[type=checkbox]:checked+label:before {
+.checkbox input[type=checkbox]:checked+label:before,
+.checkbox-inline input[type=checkbox]:checked+label:before {
   content: "\2713";
   text-shadow: 1px 1px 1px rgba(0, 0, 0, .2);
   color: #ffffff;

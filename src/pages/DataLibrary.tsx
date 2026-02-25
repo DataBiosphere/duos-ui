@@ -1,14 +1,18 @@
 import React, { useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Box } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder, TabConfig } from 'src/types/library'
+import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder, StudyAggregation, TabConfig } from 'src/types/library'
+import { DatasetTerm } from 'src/types/model'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 import { AggregationResult } from 'src/types/elastic'
+import LibraryFooter from 'src/components/data_library/LibraryFooter'
+import { applyForAccess } from 'src/utils/accessUtils'
 
 /**
  * DataLibrary Page Component
@@ -27,6 +31,8 @@ import { AggregationResult } from 'src/types/elastic'
  * - Local UI state: selection tracking (useState)
  */
 export const DataLibrary: React.FC = () => {
+  const navigate = useNavigate()
+
   const [urlState, updateUrlState] = useLibraryUrlState()
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
@@ -103,6 +109,32 @@ export const DataLibrary: React.FC = () => {
       : undefined,
   )
 
+  const selectedStudyIds = useMemo(() => {
+    if (!data?.items) return []
+    const studyIds = new Set<number>()
+    data.items.forEach((item: StudyAggregation | DatasetTerm) => {
+      switch (urlState.tab) {
+        case AssetType.STUDIES: {
+          const study = item as StudyAggregation
+          if (study.datasetIds?.some((id: number) => selectedDatasetIds.includes(id))) {
+            studyIds.add(study.studyId)
+          }
+          break
+        }
+        case AssetType.DATASETS: {
+          const dataset = item as DatasetTerm
+          if (selectedDatasetIds.includes(dataset.datasetId)) {
+            studyIds.add(dataset.study.studyId)
+          }
+          break
+        }
+        default:
+          throw new Error('Unknown asset type')
+      }
+    })
+    return Array.from(studyIds)
+  }, [data, selectedDatasetIds, urlState.tab])
+
   const sortModel = useMemo(() => {
     if (urlState.sortField && urlState.sortOrder) {
       return [{ field: urlState.sortField, sort: urlState.sortOrder }]
@@ -158,6 +190,10 @@ export const DataLibrary: React.FC = () => {
 
   const handleSelectionChange = (datasetIds: number[]) => {
     setSelectedDatasetIds(datasetIds)
+  }
+
+  const handleApplyForAccess = () => {
+    applyForAccess(selectedDatasetIds, navigate)
   }
 
   if (error) {
@@ -243,6 +279,13 @@ export const DataLibrary: React.FC = () => {
           />
         </Box>
       </Box>
+
+      {/* Footer (shown when assets are selected) */}
+      <LibraryFooter
+        selectedDatasetIds={selectedDatasetIds}
+        selectedStudyIds={selectedStudyIds}
+        onApplyForAccess={handleApplyForAccess}
+      />
     </Box>
   )
 }
