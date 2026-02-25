@@ -43,12 +43,12 @@ export interface FetchData<T> {
   data: T
 }
 
-export const reportError = async (url: string, status: number): Promise<void> => {
+export const reportError = (url: string, status: number): void => {
   const msg = 'Error fetching response: '
     .concat(JSON.stringify(url))
     .concat('Status: ')
     .concat(String(status))
-  // noinspection ES6MissingAwait
+  // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
   StackdriverReporter.report(msg)
 }
 
@@ -74,7 +74,7 @@ async function handleResponse<T>(
     if (res.status === 401 && !isMeCheck) {
       redirectOnLogout()
     }
-    await reportError(url, res.status)
+    reportError(url, res.status)
 
     // Parse error response and throw with axios-like structure for compatibility
     interface ErrorData {
