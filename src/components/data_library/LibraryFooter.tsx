@@ -1,6 +1,8 @@
 import React from 'react'
-import { Paper, Slide, Button, Typography } from '@mui/material'
+import { Paper, Slide, Button, Typography, Tooltip } from '@mui/material'
+import { isNil } from 'lodash'
 import { LibraryFooterProps } from 'src/types/library'
+import { Storage } from 'src/libs/storage'
 
 export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   selectedDatasetIds,
@@ -10,6 +12,7 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   const hasSelection = selectedDatasetIds.length > 0
   const datasetText = selectedDatasetIds.length === 1 ? 'dataset' : 'datasets'
   const studyText = selectedStudyIds.length === 1 ? 'study' : 'studies'
+  const hasLibraryCard = !isNil(Storage.getCurrentUser().libraryCard)
 
   return (
     <Slide direction="up" in={hasSelection} mountOnEnter unmountOnExit>
@@ -35,14 +38,29 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
           {selectedDatasetIds.length} {datasetText} selected from{' '}
           {selectedStudyIds.length} {studyText}
         </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={onApplyForAccess}
-          sx={{ fontWeight: 600 }}
+        <Tooltip
+          title={hasLibraryCard ? '' : 'A Library Card is required to apply for data access'}
+          slotProps={{
+            tooltip: {
+              sx: {
+                backgroundColor: 'red',
+                color: 'white',
+              },
+            },
+          }}
         >
-          Apply for Access
-        </Button>
+          <span>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={onApplyForAccess}
+              sx={{ fontWeight: 600 }}
+              disabled={!hasLibraryCard}
+            >
+              Apply for Access
+            </Button>
+          </span>
+        </Tooltip>
       </Paper>
     </Slide>
   )

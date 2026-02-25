@@ -2,6 +2,7 @@ import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DataLibrary } from 'src/pages/DataLibrary'
+import { Storage } from 'src/libs/storage'
 
 const mockMetadataResponse = {
   aggregations: {
@@ -59,6 +60,12 @@ describe('DataLibrary', () => {
       },
     })
     cy.initApplicationConfig()
+    // Stub user with library card for footer functionality
+    cy.window().then(() => {
+      cy.stub(Storage, 'getCurrentUser').returns({
+        libraryCard: { cardNumber: '12345' },
+      })
+    })
     cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
       if (req.body.aggs?.studies) {
         req.reply(mockStudiesResponse)

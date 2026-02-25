@@ -12,6 +12,7 @@ import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 import { AggregationResult } from 'src/types/elastic'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
+import { applyForAccess } from 'src/utils/accessUtils'
 
 /**
  * DataLibrary Page Component
@@ -192,8 +193,7 @@ export const DataLibrary: React.FC = () => {
   }
 
   const handleApplyForAccess = () => {
-    const datasetIdsParam = selectedDatasetIds.join(',')
-    navigate(`/dar_application?datasetIds=${datasetIdsParam}`)
+    applyForAccess(selectedDatasetIds, navigate)
   }
 
   if (error) {
