@@ -72,7 +72,6 @@ export const SignInButton = () => {
         if (!duosUser.roles) {
           await StackdriverReporter.report('roles not found for user: ' + duosUser.email)
         }
-        // noinspection ES6MissingAwait
         syncSignInOrRegistrationEvent(eventList.userSignIn)
         await checkToSAndRedirect(shouldRedirect ? redirectTo : null)
       }
@@ -104,18 +103,17 @@ export const SignInButton = () => {
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
     const registeredUser: DuosUser = await User.registerUser()
     setUserRoleStatuses(registeredUser, Storage)
-    // noinspection ES6MissingAwait
     syncSignInOrRegistrationEvent(eventList.userRegister)
     navigate(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`)
   }
 
-  const syncSignInOrRegistrationEvent = async (event: MetricsEventName) => {
+  const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
     Storage.setAnonymousId()
-    // noinspection ES6MissingAwait
+    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
     Metrics.identify(`${Storage.getAnonymousId()}`)
-    // noinspection ES6MissingAwait
+    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
     Metrics.syncProfile()
-    // noinspection ES6MissingAwait
+    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
     Metrics.captureEvent(event)
   }
 
