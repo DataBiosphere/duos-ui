@@ -5,6 +5,8 @@ import { DataLibrary } from 'src/pages/DataLibrary'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import eventList from 'src/libs/events'
 
 const mockMetadataResponse = {
   aggregations: {
@@ -505,7 +507,7 @@ describe('DataLibrary', () => {
     })
 
     it('captures metrics for default library', () => {
-      cy.intercept('**/event').as('event')
+      cy.stub(Metrics, 'captureEvent').as('captureEvent')
       cy.mount(
         <QueryClientProvider client={queryClient}>
           <MemoryRouter initialEntries={['/datalibrary2']}>
@@ -516,11 +518,11 @@ describe('DataLibrary', () => {
         </QueryClientProvider>,
       )
 
-      cy.wait('@event').should('exist')
+      cy.get('@captureEvent').should('have.been.calledWith', eventList.dataLibrary)
     })
 
     it('captures metrics with brand parameter for branded library', () => {
-      cy.intercept('**/event').as('event')
+      cy.stub(Metrics, 'captureEvent').as('captureEvent')
       cy.mount(
         <QueryClientProvider client={queryClient}>
           <MemoryRouter initialEntries={['/datalibrary2/broad']}>
@@ -531,7 +533,7 @@ describe('DataLibrary', () => {
         </QueryClientProvider>,
       )
 
-      cy.wait('@event').should('exist')
+      cy.get('@captureEvent').should('have.been.calledWith', eventList.dataLibrary, { brand: 'broad' })
     })
 
     it('renders myinstitution library with user institution', () => {
