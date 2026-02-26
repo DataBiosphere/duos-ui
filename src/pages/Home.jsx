@@ -170,22 +170,19 @@ const Home = (props) => {
                 <br />
                 {' '}
                 Request a meeting with our team
-                {' '}
                 <br />
                 <span
                   onClick={() => setShowContactModal(true)}
-                  style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
-                >
-                here
+                   style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
+                 >
+                   here
                 </span> to learn more.
               </p>
-              
-                <SupportRequestModal
-                  showModal={showContactModal}
-                  onCloseRequest={() => setShowContactModal(false)}
-                  url={location.pathname}
-                />
-              
+              <SupportRequestModal
+                showModal={showContactModal}
+                onCloseRequest={() => setShowContactModal(false)}
+                url={location.pathname}
+              />
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
                 <a id="blog-support-dac-link" href="https://duos.blog/help/dacguide/" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
@@ -199,11 +196,15 @@ const Home = (props) => {
             </div>
             <div className="col-lg-4 col-md-4">
               <p style={header}>Looking for data?</p>
-              <p style={description}>Find and request access to 100s of datasets through DUOS!
+              <p style={description}>
+                Find and request access to 100s of datasets through DUOS!
+                <br />
                 <span
                   onClick={() => handleSignIn()}
                   style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
-                >Sign in</span> to get started.
+                >
+                  Sign in
+                </span> to get started.
               </p>
             </div>
           </div>
