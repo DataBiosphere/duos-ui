@@ -48,6 +48,12 @@ const datasets = [
     participantCount: 40,
     accessManagement: 'open',
   }),
+  makeDatasetTerm({
+    datasetId: 103,
+    datasetName: 'Dataset 103',
+    participantCount: 20,
+    accessManagement: 'external',
+  }),
 ]
 
 describe('LibraryDataGrid', () => {
@@ -87,7 +93,7 @@ describe('LibraryDataGrid', () => {
         assetType={AssetType.DATASETS}
         data={datasets}
         loading={false}
-        total={2}
+        total={3}
         paginationModel={mockPaginationModel}
         onPaginationChange={cy.stub().as('onPaginationChange')}
         sortModel={mockSortModel}
@@ -99,12 +105,18 @@ describe('LibraryDataGrid', () => {
 
     cy.contains('Dataset 101').should('exist')
     cy.contains('60').should('exist')
-    // Use a more specific selector to find Controlled text, maybe it's in a Chip
     cy.get('.MuiChip-label').contains('Controlled').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorPrimary').should('exist')
 
     cy.contains('Dataset 102').should('exist')
     cy.contains('40').should('exist')
     cy.get('.MuiChip-label').contains('Open').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorSuccess').should('exist')
+
+    cy.contains('Dataset 103').should('exist')
+    cy.contains('20').should('exist')
+    cy.get('.MuiChip-label').contains('External').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorSecondary').should('exist')
   })
 
   it('handles row selection for datasets', () => {
