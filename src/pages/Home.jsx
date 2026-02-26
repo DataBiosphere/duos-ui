@@ -7,15 +7,14 @@ import { OverflowTooltip } from '../components/Tooltips'
 import { Link } from 'react-router-dom'
 import { getLibraryVersions } from '../libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
-import React, { useMemo, useState } from 'react'
 import { SupportRequestModal } from '../components/modals/SupportRequestModal'
 import { useLocation } from 'react-router-dom'
 
 const Home = (props) => {
   const { isLogged } = props
 
-  const location = useLocation();
-  const [showContactModal, setShowContactModal] = useState(false);
+  const location = useLocation()
+  const [showContactModal, setShowContactModal] = useState(false)
 
   // Get all library versions and filter for featured ones
   const featuredLibraries = useMemo(() => {
@@ -165,19 +164,21 @@ const Home = (props) => {
                 <br />
                 {' '}
                 and clearly track data use compliance.
-                 <br />
+                <br />
                 {' '}
                 Interested in uding DUOS for your DAC?
-                 <br />
+                <br />
                 {' '}
-                Request a meeting with our team 
-                 <br />
+                Request a meeting with our team
+                <br />
                 {' '}
                 <span
                   onClick={() => setShowContactModal(true)}
                   style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
-                >here</span> to learn more.
-                </p>
+                >
+                  here
+                </span> to learn more.
+            </p>
               
                 <SupportRequestModal
                   showModal={showContactModal}
@@ -198,7 +199,7 @@ const Home = (props) => {
             </div>
             <div className="col-lg-4 col-md-4">
               <p style={header}>Looking for data?</p>
-              <p style={description}>Find and request access to 100s of datasets through DUOS! 
+              <p style={description}>Find and request access to 100s of datasets through DUOS!
                 <span
                   onClick={() => handleSignIn()}
                   style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
