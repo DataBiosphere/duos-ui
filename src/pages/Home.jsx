@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import homeHeaderBackground from '../images/home_header_background.png'
 import duosLogoImg from '../images/duos_logo.svg'
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg'
@@ -170,15 +170,15 @@ const Home = (props) => {
                 <br />
                 {' '}
                 Request a meeting with our team
-                <br />
                 {' '}
+                <br />
                 <span
                   onClick={() => setShowContactModal(true)}
                   style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
                 >
-                  here
+                here
                 </span> to learn more.
-            </p>
+              </p>
               
                 <SupportRequestModal
                   showModal={showContactModal}
