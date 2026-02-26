@@ -337,7 +337,6 @@ export const DataLibrary: React.FC = () => {
           />
         </Box>
 
-        {/* Data Library */}
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {/* Asset count */}
           {isFetching
@@ -358,28 +357,30 @@ export const DataLibrary: React.FC = () => {
                   })()}
                 </Typography>
               )}
-          {/* Data Grid */}
-          <LibraryDataGrid
-            assetType={urlState.tab}
-            data={data?.items || []}
-            loading={isFetching}
-            total={data?.total || 0}
-            paginationModel={{
-              page: urlState.page,
-              pageSize: urlState.pageSize,
-            }}
-            onPaginationChange={(model) => {
-              updateUrlState({
-                page: model.page,
-                pageSize: model.pageSize,
-              })
-            }}
-            sortModel={sortModel}
-            onSortChange={handleSortChange}
-            selectedDatasetIds={selectedDatasetIds}
-            onSelectionChange={handleSelectionChange}
-            exportableDatasets={exportableDatasets}
-          />
+          {/* Data Library */}
+          <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+            <LibraryDataGrid
+              assetType={urlState.tab}
+              data={data?.items || []}
+              loading={isFetching}
+              total={data?.total || 0}
+              paginationModel={{
+                page: urlState.page,
+                pageSize: urlState.pageSize,
+              }}
+              onPaginationChange={(model) => {
+                updateUrlState({
+                  page: model.page,
+                  pageSize: model.pageSize,
+                })
+              }}
+              sortModel={sortModel}
+              onSortChange={handleSortChange}
+              selectedDatasetIds={selectedDatasetIds}
+              onSelectionChange={handleSelectionChange}
+              exportableDatasets={exportableDatasets}
+            />
+          </Box>
         </Box>
       </Box>
 
