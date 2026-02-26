@@ -138,7 +138,7 @@ export const useLibraryUrlState = () => {
       }
     }
 
-    if (updates.sortField !== undefined) {
+    if ('sortField' in updates) {
       if (updates.sortField) {
         newParams.set('sort', updates.sortField)
       }
@@ -147,7 +147,7 @@ export const useLibraryUrlState = () => {
       }
     }
 
-    if (updates.sortOrder !== undefined) {
+    if ('sortOrder' in updates) {
       if (updates.sortOrder) {
         newParams.set('order', updates.sortOrder)
       }

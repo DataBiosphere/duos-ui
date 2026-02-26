@@ -161,15 +161,17 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
         paginationModel={paginationModel}
         paginationMode="server"
         onPaginationModelChange={onPaginationChange}
-        sortingMode="server"
-        sortModel={sortModel}
-        onSortModelChange={(model) => {
-          // Convert readonly GridSortModel to mutable array with proper type
-          onSortChange(model.map(item => ({
-            field: item.field,
-            sort: item.sort ?? null,
-          })))
-        }}
+        // studies are sorted client-side, other assets are sorted server-side
+        sortingMode={assetType === AssetType.STUDIES ? 'client' : 'server'}
+        {...(assetType !== AssetType.STUDIES && {
+          sortModel,
+          onSortModelChange: (model) => {
+            onSortChange(model.map(item => ({
+              field: item.field,
+              sort: item.sort ?? null,
+            })))
+          },
+        })}
         checkboxSelection
         disableRowSelectionOnClick
         rowSelectionModel={rowSelectionModel}

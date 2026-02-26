@@ -154,6 +154,6 @@ describe('buildElasticsearchQuery', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
     expect(query.sort).to.have.length(1)
     const firstSort = query.sort?.[0] as Record<string, { order: string }>
-    expect(firstSort.studyName.order).to.equal('asc')
+    expect(firstSort['study.studyName.keyword'].order).to.equal('asc')
   })
 })
