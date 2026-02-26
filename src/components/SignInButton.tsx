@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { isEmpty, isNil } from 'lodash'
 import { Alert } from 'src/components/Alert'
 import { Auth } from 'src/libs/auth/auth'
-import { ToS } from 'src/libs/ajax/ToS'
 import { User } from 'src/libs/ajax/User'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
@@ -42,24 +41,22 @@ export const SignInButton = () => {
   // Check for ToS Acceptance - redirect user if not set.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
     // Check if the user has accepted ToS yet or not:
-    const userStatus = await ToS.getStatus()
-    const { tosAccepted } = userStatus
-    if (!isEmpty(userStatus) && !tosAccepted) {
+    const tosAccepted = Storage.getCurrentUser().userStatusInfo?.tosAccepted || false
+    if (tosAccepted) {
+      if (isNil(redirectPath)) {
+        await Navigation.console(Storage.getCurrentUser(), navigate)
+      }
+      else {
+        navigate(redirectPath)
+      }
+    }
+    else {
       // User has authenticated, but has not accepted ToS
       if (isNil(redirectPath)) {
         navigate(`/tos_acceptance`)
       }
       else {
         navigate(`/tos_acceptance?redirectTo=${redirectPath}`)
-      }
-    }
-    else {
-      // User is authenticated, registered and has accepted ToS: redirect to destination.
-      if (isNil(redirectPath)) {
-        await Navigation.console(Storage.getCurrentUser(), navigate)
-      }
-      else {
-        navigate(redirectPath)
       }
     }
   }
@@ -75,7 +72,7 @@ export const SignInButton = () => {
         if (!duosUser.roles) {
           await StackdriverReporter.report('roles not found for user: ' + duosUser.email)
         }
-        await syncSignInOrRegistrationEvent(eventList.userSignIn)
+        syncSignInOrRegistrationEvent(eventList.userSignIn)
         await checkToSAndRedirect(shouldRedirect ? redirectTo : null)
       }
       else {
@@ -106,17 +103,17 @@ export const SignInButton = () => {
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
     const registeredUser: DuosUser = await User.registerUser()
     setUserRoleStatuses(registeredUser, Storage)
-    await syncSignInOrRegistrationEvent(eventList.userRegister)
+    syncSignInOrRegistrationEvent(eventList.userRegister)
     navigate(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`)
   }
 
-  const syncSignInOrRegistrationEvent = async (event: MetricsEventName) => {
+  const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
     Storage.setAnonymousId()
-    // noinspection ES6MissingAwait
+    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
     Metrics.identify(`${Storage.getAnonymousId()}`)
-    // noinspection ES6MissingAwait
+    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
     Metrics.syncProfile()
-    // noinspection ES6MissingAwait
+    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
     Metrics.captureEvent(event)
   }
 
@@ -158,8 +155,7 @@ export const SignInButton = () => {
     }
   }
 
-  // eslint-disable-next-line
-  const onFailure = (response: any) => {
+  const onFailure = (response: Error) => {
     Storage.clearStorage()
     // Known error case from oidc-client-ts PopupWindow: "new Error("Popup closed by user")"
     if (response.toString().includes('Popup closed by user')) {

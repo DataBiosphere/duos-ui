@@ -2,19 +2,20 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
-import { AccessManagement } from 'src/types/library'
+import { AccessManagement, ExportableDatasets } from 'src/types/library'
+import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 
 /**
  * Column definitions for dataset view
  */
-export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
+export const makeDatasetColumns = (exportableDatasets: ExportableDatasets = {}): GridColDef<DatasetTerm>[] => [
   {
     field: 'datasetName',
     headerName: 'Dataset Name',
     flex: 1.5,
     minWidth: 200,
     renderCell: params => (
-      <Link href={`/dataset/${params.row.datasetId}`} underline="hover">
+      <Link href={`/dataset/${params.row.datasetIdentifier}`} underline="hover">
         {params.value}
       </Link>
     ),
@@ -82,7 +83,7 @@ export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
                   case AccessManagement.OPEN:
                     return 'success'
                   case AccessManagement.EXTERNAL:
-                    return 'default'
+                    return 'secondary'
                   default:
                     return 'default'
                 }
@@ -103,5 +104,26 @@ export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
     field: 'datasetIdentifier',
     headerName: 'Identifier',
     width: 150,
+  },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    width: 120,
+    sortable: false,
+    renderCell: (params) => {
+      const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
+      if (exportableSnapshots.length === 0) return null
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          {exportableSnapshots.map((snapshot, i) => (
+            <DatasetExportButton
+              key={i}
+              snapshot={snapshot}
+              title={`Export snapshot ${snapshot.name}`}
+            />
+          ))}
+        </Box>
+      )
+    },
   },
 ]

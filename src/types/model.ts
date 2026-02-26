@@ -38,10 +38,11 @@ export interface UserRole {
 }
 
 export interface UserStatusInfo {
-  adminEnabled: boolean
+  adminEnabled?: boolean
   enabled: boolean
   userEmail: string
   userSubjectId: string
+  tosAccepted?: boolean
 }
 
 export interface UserProperty {
@@ -265,7 +266,7 @@ export const getAccessManagementSummary = (accessManagement: string): AccessMana
       }
     default:
       return {
-        name: '',
+        name: 'Unknown',
         icon: '',
         description: 'Unknown access management',
       }
@@ -559,18 +560,13 @@ export interface Acknowledgement {
   lastAcknowledged: number
 }
 
-export interface DatasetStats {
-  dataset: Dataset
-  dars: Array<DatasetStatisticsDar>
-  elections: Array<Election>
-}
-
 export interface DatasetStatisticsDar {
   updateDate: number
   projectTitle: string
   darCode: string
   nonTechRus: string
   referenceId: string
+  expired: boolean
 }
 
 /**

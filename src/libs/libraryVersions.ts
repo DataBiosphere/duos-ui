@@ -507,17 +507,6 @@ export const getLibraryVersions = (
       featured: true,
       order: 17,
     },
-    'fgc': {
-      query: {
-        match_phrase: {
-          'study.description': 'FGC',
-        },
-      },
-      icon: broadIcon,
-      title: 'Fetal Genomics Consortium Data Library',
-      featured: true,
-      order: 18,
-    },
     'broadibd': {
       query: {
         match_phrase: {
@@ -527,7 +516,7 @@ export const getLibraryVersions = (
       icon: broadIcon,
       title: 'Broad Institute IBD Data Library',
       featured: true,
-      order: 19,
+      order: 18,
     },
     'helmsley': {
       query: {
@@ -538,7 +527,7 @@ export const getLibraryVersions = (
       icon: HelmsleyIcon,
       title: 'Helmsley Data Library',
       featured: true,
-      order: 20,
+      order: 19,
     },
     'ged': {
       query: {
@@ -549,7 +538,7 @@ export const getLibraryVersions = (
       icon: gedIcon,
       title: 'Genetics of Eating Disorders Data Library',
       featured: true,
-      order: 21,
+      order: 20,
     },
     'ccxdp': {
       query: {
@@ -560,7 +549,7 @@ export const getLibraryVersions = (
       icon: ccxdpIcon,
       title: 'CCXDP Data Library',
       featured: true,
-      order: 22,
+      order: 21,
     },
     'ncpi-duo': {
       query: {
@@ -570,8 +559,14 @@ export const getLibraryVersions = (
       },
       icon: ncpiIcon,
       title: 'NCPI DUO Data Library',
-      featured: false,
-      order: 999,
+      featured: true,
+      order: 22,
     },
   }
+}
+
+export const getBrandedLibrary = (institutionId: number | undefined, institutionName: string | undefined, queryParam: string | undefined) => {
+  const key = queryParam === undefined ? '/datalibrary' : queryParam.toLowerCase()
+  const versions = getLibraryVersions(institutionId ?? null, institutionName ?? null)
+  return versions[key]
 }
