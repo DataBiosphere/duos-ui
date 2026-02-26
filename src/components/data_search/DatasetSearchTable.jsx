@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from 'src/components/SearchBar'
 import { Styles } from 'src/libs/theme.js'
 import PropTypes from 'prop-types'
-import { DAC as Dac } from 'src/libs/ajax/DAC'
+import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils.ts'
 
 const styles = {
   subTab: {
@@ -67,53 +67,6 @@ export const DatasetSearchTable = (props) => {
       setExportableDatasets(datasetIdToSnapshot)
     }
   }, [])
-
-  const isOnlyGRUorHMB = useCallback ((dataUse) => {
-    const modifiers = new Set(['IRB', 'COL', 'GSO', 'NPU'])
-    const primaryCodes = dataUse.primary.map(p => p.code)
-    const secondaryCodes = dataUse.secondary.map(s => s.code)
-
-    return (
-      primaryCodes.length === 1
-      && (primaryCodes[0] === 'GRU' || primaryCodes[0] === 'HMB')
-      && (secondaryCodes.length === 0 || !secondaryCodes.some(mod => modifiers.has(mod)))
-    )
-  }, [])
-
-  const getRadarEnabledDatasetsWithRules = useCallback(async (datasets) => {
-    if (isEmpty(datasets)) return
-
-    // Get unique DAC IDs from datasets that have a DAC ID
-    const uniqueDacIds = Array.from(
-      new Set(datasets.filter(dataset => dataset.dacId !== undefined).map(dataset => dataset.dacId)),
-    )
-    const ruleTypesToMatch = new Set(['GRU_V1', 'HMB_V1', 'GRU_DSV1', 'HMB_DSV1'])
-
-    // Fetch DACbot rules for each unique DAC ID
-    const dacIdToRules = {}
-    await Promise.all(
-      uniqueDacIds.map(async (dacId) => {
-        const rules = await Dac.fetchDACbotRules(dacId)
-        const matchingRules = rules.filter(
-          rule => rule.activationDate && ruleTypesToMatch.has(rule.ruleType),
-        )
-        if (matchingRules.length > 0) {
-          dacIdToRules[dacId] = matchingRules
-        }
-      }),
-    )
-
-    // Apply both DAC rule and DataUse (GRU/HMB) filters
-    const datasetIds = datasets
-      .filter(dataset =>
-        dataset.dacId
-        && dacIdToRules[dataset.dacId]
-        && isOnlyGRUorHMB(dataset.dataUse),
-      )
-      .map(dataset => dataset.datasetId)
-
-    setRadarEnabledDatasetIds(new Set(datasetIds))
-  }, [isOnlyGRUorHMB])
 
   const assembleFullQuery = useCallback(() => {
     let searchModifier = null
@@ -254,8 +207,13 @@ export const DatasetSearchTable = (props) => {
     // Calling setState inside this effect is intentional: it updates
     // derived state from `datasets` when they arrive.
     getExportableDatasets(datasets)
-    getRadarEnabledDatasetsWithRules(datasets)
-  }, [datasets, getExportableDatasets, getRadarEnabledDatasetsWithRules])
+
+    const getRadarEnabledDatasets = async (datasets) => {
+      const radarEnabledDatasetIds = await getRadarEnabledDatasetsWithRules(datasets)
+      setRadarEnabledDatasetIds(radarEnabledDatasetIds)
+    }
+    getRadarEnabledDatasets(datasets)
+  }, [datasets, getExportableDatasets])
 
   const abortControllerRef = useRef(null)
 
