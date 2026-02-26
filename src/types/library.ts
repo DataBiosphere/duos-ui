@@ -103,6 +103,7 @@ export interface LibraryDataGridProps {
   selectedDatasetIds: number[]
   onSelectionChange: (selectedIds: number[]) => void
   exportableDatasets?: ExportableDatasets
+  radarEnabledDatasetIds?: Set<number>
 }
 
 export interface StudyAggregation {
