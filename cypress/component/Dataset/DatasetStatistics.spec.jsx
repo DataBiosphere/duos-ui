@@ -12,7 +12,7 @@ describe('Dataset Statistics Tests', () => {
 
   it('Renders the correct dataset from a DUOS-xxx identifier path paramter', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -31,7 +31,7 @@ describe('Dataset Statistics Tests', () => {
 
   it('Renders the correct dataset from a DUOS-Dxxx identifier path parameter', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -51,7 +51,7 @@ describe('Dataset Statistics Tests', () => {
   it('Displays Controlled Access Dataset Apply Button', () => {
     const controlled = { ...datasetTerm, accessManagement: 'controlled' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([controlled]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -73,7 +73,7 @@ describe('Dataset Statistics Tests', () => {
   it('Displays External Access Language With Location', () => {
     const external = { ...datasetTerm, accessManagement: 'external', url: 'https://duos.org' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([external]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -96,7 +96,7 @@ describe('Dataset Statistics Tests', () => {
   it('Displays External Access Language Without Location', () => {
     const external = { ...datasetTerm, accessManagement: 'external' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([external]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -119,7 +119,7 @@ describe('Dataset Statistics Tests', () => {
   it('Displays Open Access Language With Location', () => {
     const open = { ...datasetTerm, accessManagement: 'open', url: 'https://duos.org' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([open]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -142,7 +142,7 @@ describe('Dataset Statistics Tests', () => {
   it('Displays Open Access Language Without Location', () => {
     const open = { ...datasetTerm, accessManagement: 'open' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([open]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -164,7 +164,7 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays with no additional properties', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -192,7 +192,7 @@ describe('Dataset Statistics Tests', () => {
     }
 
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetWithCustodians]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -215,7 +215,7 @@ describe('Dataset Statistics Tests', () => {
   it('Does not display the Data Use field for open datasets', () => {
     const open = { ...datasetTerm, accessManagement: 'open' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([open]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -235,7 +235,7 @@ describe('Dataset Statistics Tests', () => {
   it('Displays the Data Use field for controlled datasets', () => {
     const controlled = { ...datasetTerm, accessManagement: 'controlled' }
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([controlled]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -255,7 +255,7 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays the Principal Investigator field', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: {
@@ -279,10 +279,11 @@ describe('Dataset Statistics Tests', () => {
       projectTitle: 'Test Project',
       updateDate: '2023-01-01',
       nonTechRus: 'Test summary',
+      expired: false,
     }]
 
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({ dars: darsData }))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve(darsData))
 
     const props = {
       match: { params: { datasetIdentifier: datasetTerm.datasetIdentifier } },
@@ -297,7 +298,7 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays message when no DARs exist', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
-    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({ dars: [] }))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
 
     const props = {
       match: { params: { datasetIdentifier: datasetTerm.datasetIdentifier } },
@@ -306,5 +307,38 @@ describe('Dataset Statistics Tests', () => {
 
     cy.mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
     cy.contains('No Data Access Requests have been created for this dataset').should('exist')
+  })
+
+  it('Displays DAR section with expired data', () => {
+    const year = new Date().getFullYear()
+    const expired = new Date()
+    expired.setFullYear(year - 2)
+    const dateString = expired.toISOString().split('T')[0]
+    const dateTime = expired.getTime()
+
+    const darsData = [{
+      darCode: 'DAR-123',
+      projectTitle: 'Test Project',
+      updateDate: dateTime,
+      nonTechRus: 'Test summary',
+      expired: true,
+    }]
+
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTerm]))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve(darsData))
+
+    const props = {
+      match: { params: { datasetIdentifier: datasetTerm.datasetIdentifier } },
+      history: { push() {} },
+    }
+
+    cy.mount(<BrowserRouter><DatasetStatistics {...props} /></BrowserRouter>)
+    cy.contains('Data Access Requests for this dataset').should('exist')
+    cy.contains('DAR-123').should('exist')
+    cy.contains('Test Project').should('exist')
+    cy.contains('Show More').click()
+    cy.contains('Expired').should('exist')
+    cy.contains(dateString).should('exist')
+    cy.contains(darsData[0].nonTechRus).should('exist')
   })
 })

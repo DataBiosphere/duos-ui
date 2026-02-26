@@ -3,7 +3,7 @@ import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export const DatasetMetrics = {
   getDatasetStats: async (datasetId) => {
-    const url = `${await Config.getApiUrl()}/metrics/dataset/${datasetId}`
+    const url = `${await Config.getApiUrl()}/api/metrics/dar-summaries/${datasetId}`
     const res = await fetchGet(url, Config.authOpts())
     return res.data
   },

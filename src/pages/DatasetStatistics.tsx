@@ -8,7 +8,6 @@ import { ReadMore } from 'src/components/ReadMore'
 import { Button } from '@mui/material'
 import {
   DatasetStatisticsDar,
-  DatasetStats,
   DatasetTerm,
 } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
@@ -111,8 +110,8 @@ export default function DatasetStatistics() {
 
         if (datasetTerms.length === 1) {
           setDatasetTerm(datasetTerms[0])
-          const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
-          setDars(metrics.dars)
+          const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
+          setDars(dars)
           setIsLoading(false)
         }
         else {
@@ -181,11 +180,7 @@ export default function DatasetStatistics() {
           <div style={{ marginTop: '25px' }}>
             <div style={{ fontSize: 20, fontWeight: 600 }}>
               <div>
-                {datasetTerm.datasetIdentifier}
-                {' '}
-                -
-                {' '}
-                {datasetTerm.datasetName}
+                {datasetTerm.datasetIdentifier} - {datasetTerm.datasetName}
               </div>
             </div>
             <LabeledField label="Study">
@@ -255,7 +250,10 @@ export default function DatasetStatistics() {
                   <div key="updated" style={{ display: 'flex', backgroundColor: 'white' }}>
                     <div style={{ display: 'flex', paddingRight: '2rem' }}>
                       <div style={Styles.SMALL_BOLD}>Last Updated:</div>
-                      <div style={Styles.SMALL_BOLD}>{formatDate(dar.updateDate)}</div>
+                      <div style={{ ...Styles.SMALL_BOLD, color: `${dar.expired ? 'red' : 'rgb(31, 59, 80)'}` }}>
+                        {formatDate(dar.updateDate)}
+                        {dar.expired && ' (Expired)'}
+                      </div>
                     </div>
                   </div>,
                   <div key="summary" style={{ backgroundColor: 'white' }}>

@@ -560,18 +560,13 @@ export interface Acknowledgement {
   lastAcknowledged: number
 }
 
-export interface DatasetStats {
-  dataset: Dataset
-  dars: Array<DatasetStatisticsDar>
-  elections: Array<Election>
-}
-
 export interface DatasetStatisticsDar {
   updateDate: number
   projectTitle: string
   darCode: string
   nonTechRus: string
   referenceId: string
+  expired: boolean
 }
 
 /**
