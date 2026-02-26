@@ -115,8 +115,8 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
       {generateStudyInputFormTextField(setStudy, 'piEmail', study?.piEmail, 'Principal Investigator Email Address', 'Enter the Principal Investigator\'s email address', [FormValidators.EMAIL])}
       <FormField
         id={DataCustodianEmail.key}
-        title="Data Custodian Email"
-        description="Insert the email for any individual with the authority to add/remove users access to this study&apos;s datasets."
+        title="Data Custodian Email" 
+        description="Data Custodian contacts will be displayed publicly in DUOS and may be contacted regarding data access questions or data quality issues. Please provide the appropriate institutional contact(s)."
         type={FormFieldTypes.SELECT}
         validators={[FormValidators.EMAIL]}
         selectOptions={[]}
