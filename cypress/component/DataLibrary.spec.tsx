@@ -180,6 +180,7 @@ describe('DataLibrary', () => {
   })
 
   it('shows footer when a dataset is selected', () => {
+    cy.viewport(800, 600)
     cy.mount(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/?tab=datasets']}>
@@ -200,6 +201,7 @@ describe('DataLibrary', () => {
   })
 
   it('shows footer when a study is selected', () => {
+    cy.viewport(800, 600)
     cy.mount(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/?tab=studies']}>
@@ -295,6 +297,16 @@ describe('DataLibrary', () => {
       mountDefault('datasets')
       cy.wait('@searchApiMultiple')
       cy.contains('42 Datasets').should('be.visible')
+    })
+
+    it('does not clip the data grid when the asset count header is visible', () => {
+      cy.viewport(1200, 900)
+      mountDefault('datasets')
+      cy.wait('@searchApi')
+
+      cy.contains('1 Dataset').should('be.visible')
+
+      cy.get('.MuiDataGrid-footerContainer').should('be.visible')
     })
 
     it('shows a loading skeleton while data is fetching', () => {
