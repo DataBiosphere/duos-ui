@@ -63,10 +63,11 @@ interface DatasetSearchTableDisplayProps {
   selected: number[]
   exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }
   tab: DatasetSearchTableTab<DatasetTerm | DatasetTerm[]>
+  radarEnabledDatasetIds: Set<number> | undefined
 }
 
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
-  const { onSelect, exportableDatasets, filteredData, selected, tab } = props
+  const { onSelect, exportableDatasets, filteredData, selected, tab, radarEnabledDatasetIds } = props
   const [sort, setSort] = useState<Sort>(getSortForTab(tab.key))
   const [tableSize, setTableSize] = useState(50)
   const [currentPage, setCurrentPage] = useState<number>(1)
@@ -74,8 +75,8 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
 
   // Memoize headers to prevent recreation on every render
   const headers = useMemo(
-    () => tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets),
-    [tab, filteredData, selected, onSelect, exportableDatasets],
+    () => tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets, radarEnabledDatasetIds),
+    [tab, filteredData, selected, onSelect, exportableDatasets, radarEnabledDatasetIds],
   )
 
   // Memoize rows to prevent recreation on every render

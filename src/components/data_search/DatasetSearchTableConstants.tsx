@@ -9,12 +9,20 @@ import { dataUseCellData } from 'src/components/dac_dataset_table/DACDatasetTabl
 import 'src/components/data_search/DatasetSearch.css'
 import { muiCheckboxFix } from 'src/libs/muiThemeFix'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
+import BoltIcon from '@mui/icons-material/Bolt'
+import { ReactNode } from 'react'
 
 export interface DatasetSearchTableTab<T> {
   key: string
   singular: string
   plural: string
-  makeHeaders: (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void, exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }) => HeaderData<T>[]
+  makeHeaders: (
+    datasets: DatasetTerm[],
+    selected: number[],
+    onSelect: (datasetIds: number[]) => void,
+    exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] },
+    radarEnabledDatasetIds: Set<number> | undefined,
+  ) => HeaderData<T>[]
   makeRows: (datasets: DatasetTerm[], headers: HeaderData<T>[]) => CellData[][]
 }
 
@@ -223,7 +231,13 @@ export const makeStudyTableRowData = (datasets: DatasetTerm[], headers: HeaderDa
   return Object.values(studies).map((datasets: DatasetTerm[]) => headers.map(header => header.cellDataFn(datasets)))
 }
 
-export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void, exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }): HeaderData<DatasetTerm>[] => {
+export const makeDatasetTableHeader = (
+  datasets: DatasetTerm[],
+  selected: number[],
+  onSelect: (datasetIds: number[]) => void,
+  exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] },
+  radarEnabledDatasetIds?: Set<number> | undefined,
+): HeaderData<DatasetTerm>[] => {
   interface CellWidths {
     selected: number
     datasetName: string
@@ -253,13 +267,17 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
   }
   const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external'
   const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId)
-  const tooltipIconDisplay = (src: string | unknown, accessType: string, tooltipText: string) => {
+  const tooltipIconDisplay = (src: string | ReactNode, accessType: string, tooltipText: string) => {
     return (
       <div
         data-for={`${accessType}-access-tooltip`}
         style={{ display: 'flex', justifyContent: 'center', marginRight: 20 }}
       >
-        <span title={tooltipText}><img src={src as string} alt={accessType} /></span>
+        <span title={tooltipText}>
+          {React.isValidElement(src)
+            ? src
+            : <img src={src as string} alt={accessType} />}
+        </span>
       </div>
     )
   }
@@ -371,10 +389,22 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.accessType),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data:
-          tooltipIconDisplay(getAccessManagementSummary(dataset.accessManagement).icon,
-            getAccessManagementSummary(dataset.accessManagement).name,
-            getAccessManagementSummary(dataset.accessManagement).description),
+        data: (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {tooltipIconDisplay(
+              getAccessManagementSummary(dataset.accessManagement).icon,
+              getAccessManagementSummary(dataset.accessManagement).name,
+              getAccessManagementSummary(dataset.accessManagement).description,
+            )}
+            {radarEnabledDatasetIds && radarEnabledDatasetIds.has(dataset.datasetId) && (
+              tooltipIconDisplay(
+                <BoltIcon sx={{ color: '#fbc02d' }} />,
+                'RADAR',
+                'Automatic request approvals available for datasets clearly within the data use terms.',
+              )
+            )}
+          </div>
+        ),
         value: dataset.accessManagement,
         id: `${dataset.datasetId}-participant-count`,
         style: makeRowStyle(cellWidths.accessType),
