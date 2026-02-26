@@ -28,23 +28,41 @@ describe('datasetColumns — Access Management chip', () => {
     renderGrid('controlled')
     cy.get('.MuiChip-label').contains('Controlled').should('exist')
     cy.get('.MuiChip-root.MuiChip-colorPrimary').should('exist')
+    cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 
   it('renders "Open" chip with success color for open access', () => {
     renderGrid('open')
     cy.get('.MuiChip-label').contains('Open').should('exist')
     cy.get('.MuiChip-root.MuiChip-colorSuccess').should('exist')
+    cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 
   it('renders "External" chip with secondary color for external access', () => {
     renderGrid('external')
     cy.get('.MuiChip-label').contains('External').should('exist')
     cy.get('.MuiChip-root.MuiChip-colorSecondary').should('exist')
+    cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 
   it('renders "Unknown" chip with default color for unknown access', () => {
     renderGrid('something-unknown')
     cy.get('.MuiChip-label').contains('Unknown').should('exist')
     cy.get('.MuiChip-root.MuiChip-colorDefault').should('exist')
+    cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
+  })
+
+  it('shows Bolt icon for radar enabled datasets', () => {
+    const radarEnabledDatasetIds = new Set([1])
+    const row = makeDatasetTerm({ datasetId: 1, accessManagement: 'controlled' })
+    cy.mount(
+      <DataGrid
+        rows={[row]}
+        columns={makeDatasetColumns({}, radarEnabledDatasetIds)}
+        getRowId={r => r.datasetId}
+        autoHeight
+      />,
+    )
+    cy.get('svg[data-testid="BoltIcon"]').should('exist')
   })
 })

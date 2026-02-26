@@ -398,4 +398,47 @@ describe('LibraryDataGrid', () => {
       cy.contains('Export').should('not.exist')
     })
   })
+
+  describe('radarEnabledDatasetIds prop', () => {
+    it('shows Bolt icon for radar enabled datasets', () => {
+      const radarEnabledDatasetIds = new Set([101])
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.DATASETS}
+          data={datasets}
+          loading={false}
+          total={3}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+          radarEnabledDatasetIds={radarEnabledDatasetIds}
+        />,
+      )
+      cy.get('.MuiDataGrid-row[data-id="101"] svg[data-testid="BoltIcon"]').should('exist')
+      cy.get('.MuiDataGrid-row[data-id="102"] svg[data-testid="BoltIcon"]').should('not.exist')
+      cy.get('.MuiDataGrid-row[data-id="103"] svg[data-testid="BoltIcon"]').should('not.exist')
+    })
+
+    it('does not show Bolt icon when radarEnabledDatasetIds is empty', () => {
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.DATASETS}
+          data={datasets}
+          loading={false}
+          total={3}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+          radarEnabledDatasetIds={new Set()}
+        />,
+      )
+      cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
+    })
+  })
 })
