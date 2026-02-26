@@ -156,4 +156,42 @@ describe('buildElasticsearchQuery', () => {
     const firstSort = query.sort?.[0] as Record<string, { order: string }>
     expect(firstSort['study.studyName.keyword'].order).to.equal('asc')
   })
+
+  it('maps each text field to its .keyword ES sort path', () => {
+    const textFieldCases: Array<[string, string]> = [
+      ['datasetName', 'datasetName.keyword'],
+      ['studyName', 'study.studyName.keyword'],
+      ['accessManagement', 'accessManagement.keyword'],
+      ['dac', 'dac.dacName.keyword'],
+      ['datasetIdentifier', 'datasetIdentifier.keyword'],
+    ]
+
+    textFieldCases.forEach(([columnField, esSortField]) => {
+      const sort: SortState = { field: columnField, order: 'asc' }
+      const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
+      expect(query.sort).to.have.length(1)
+      const firstSort = query.sort?.[0] as Record<string, { order: string }>
+      expect(firstSort[esSortField].order).to.equal('asc')
+    })
+  })
+
+  it('sorts numeric field (participantCount) without .keyword mapping', () => {
+    const sort: SortState = { field: 'participantCount', order: 'desc' }
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
+    expect(query.sort).to.have.length(1)
+    const firstSort = query.sort?.[0] as Record<string, { order: string }>
+    expect(firstSort.participantCount.order).to.equal('desc')
+  })
+
+  it('applies sort order correctly for desc', () => {
+    const sort: SortState = { field: 'datasetName', order: 'desc' }
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
+    const firstSort = query.sort?.[0] as Record<string, { order: string }>
+    expect(firstSort['datasetName.keyword'].order).to.equal('desc')
+  })
+
+  it('omits sort clause when sort is undefined', () => {
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, undefined)
+    expect(query.sort).to.equal(undefined)
+  })
 })
