@@ -36,7 +36,9 @@ import { EnumerateSnapshotModel } from 'src/types/tdrModel'
  * State Management:
  * - URL state: filters, pagination, sort, search, active tab (managed by useLibraryUrlState)
  * - Server state: data fetching, caching (managed by React Query via useLibraryData)
+ * - Metadata fetching for filter options (useLibraryMetadata)
  * - Local UI state: selection tracking (useState)
+ * - Exportable datasets state for enabling export functionality (useState)
  */
 export const DataLibrary: React.FC = () => {
   const { query } = useParams()
