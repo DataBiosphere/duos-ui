@@ -216,6 +216,112 @@ describe('DataLibrary', () => {
     cy.contains('2 datasets selected from 1 study').should('be.visible')
   })
 
+  describe('asset count', () => {
+    const mountDefault = (tab = 'studies') => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[`/?tab=${tab}`]}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+    }
+
+    it('shows the plural studies count after loading', () => {
+      // mockStudiesResponse has total_studies.value = 2
+      mountDefault('studies')
+      cy.wait('@searchApi')
+      cy.contains('2 Studies').should('be.visible')
+    })
+
+    it('shows singular "Study" when total is 1', () => {
+      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
+        if (req.body.aggs?.studies) {
+          req.reply({
+            aggregations: {
+              total_studies: { value: 1 },
+              studies: {
+                buckets: [
+                  {
+                    key: { study_id: 101 },
+                    study_details: { hits: { hits: [{ _source: { study: { studyName: 'Only Study', description: '' } } }] } },
+                    dataset_count: { value: 1 },
+                    total_participants: { value: 50 },
+                    dataset_ids: { buckets: [{ key: 1 }] },
+                  },
+                ],
+              },
+            },
+          })
+        }
+        else {
+          req.reply(mockMetadataResponse)
+        }
+      }).as('searchApiSingular')
+
+      mountDefault('studies')
+      cy.wait('@searchApiSingular')
+      cy.contains('1 Study').should('be.visible')
+    })
+
+    it('shows the datasets count on the datasets tab', () => {
+      // mockDatasetsResponse has hits.total.value = 1
+      mountDefault('datasets')
+      cy.wait('@searchApi')
+      cy.contains('1 Dataset').should('be.visible')
+    })
+
+    it('shows plural "Datasets" when total is greater than 1', () => {
+      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
+        if (req.body.aggs?.studies) {
+          req.reply(mockStudiesResponse)
+        }
+        else if (req.body.size === 0 && !req.body.queryTerm) {
+          req.reply(mockMetadataResponse)
+        }
+        else {
+          req.reply({
+            hits: {
+              total: { value: 42 },
+              hits: [],
+            },
+          })
+        }
+      }).as('searchApiMultiple')
+
+      mountDefault('datasets')
+      cy.wait('@searchApiMultiple')
+      cy.contains('42 Datasets').should('be.visible')
+    })
+
+    it('shows a loading skeleton while data is fetching', () => {
+      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
+        req.on('response', (res) => {
+          res.setDelay(500)
+        })
+        if (req.body.aggs?.studies) {
+          req.reply(mockStudiesResponse)
+        }
+        else if (req.body.size === 0 && !req.body.queryTerm) {
+          req.reply(mockMetadataResponse)
+        }
+        else {
+          req.reply(mockDatasetsResponse)
+        }
+      }).as('searchApiDelayed')
+
+      mountDefault('studies')
+
+      // Skeleton should be visible before the response arrives
+      cy.get('[class*="MuiSkeleton"]').should('be.visible')
+
+      // After loading, skeleton should be gone and count should show
+      cy.wait('@searchApiDelayed')
+      cy.get('[class*="MuiSkeleton"]').should('not.exist')
+      cy.contains('2 Studies').should('be.visible')
+    })
+  })
+
   describe('Branded Data Libraries', () => {
     it('renders branded library based on URL parameter (broad)', () => {
       cy.mount(
