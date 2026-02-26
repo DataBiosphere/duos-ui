@@ -1,6 +1,6 @@
 import React from 'react'
 import { LibraryDataGrid } from 'src/components/data_library/LibraryDataGrid'
-import { AssetType, SortOrder, StudyAggregation } from 'src/types/library'
+import { AssetType, ExportableDatasets, SortOrder, StudyAggregation } from 'src/types/library'
 import { makeDatasetTerm } from '../test-utils'
 
 const mockPaginationModel = {
@@ -244,5 +244,158 @@ describe('LibraryDataGrid', () => {
     cy.get('@onSortChange').should('have.been.calledWith', [
       { field: 'studyName', sort: 'asc' },
     ])
+  })
+
+  describe('exportableDatasets prop', () => {
+    const exportableDataset = makeDatasetTerm({
+      datasetId: 201,
+      datasetName: 'Dataset With Snapshots',
+      datasetIdentifier: 'DUOS-000201',
+      participantCount: 75,
+      accessManagement: 'controlled',
+    })
+
+    const nonExportableDataset = makeDatasetTerm({
+      datasetId: 202,
+      datasetName: 'Dataset Without Snapshots',
+      datasetIdentifier: 'DUOS-000202',
+      participantCount: 25,
+      accessManagement: 'open',
+    })
+
+    const exportableDatasets: ExportableDatasets = {
+      'DUOS-000201': [
+        {
+          id: 'snap-001',
+          name: 'Snapshot 001',
+          duosId: 'DUOS-000201',
+          cloudPlatform: 'gcp',
+          resourceLocks: {},
+        },
+      ],
+    }
+
+    it('renders an Actions column header when exportableDatasets has entries', () => {
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.DATASETS}
+          data={[exportableDataset]}
+          loading={false}
+          total={1}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+          exportableDatasets={exportableDatasets}
+        />,
+      )
+
+      cy.contains('Actions').should('exist')
+    })
+
+    it('renders an Export link for a dataset with matching exportable snapshots', () => {
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.DATASETS}
+          data={[exportableDataset]}
+          loading={false}
+          total={1}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+          exportableDatasets={exportableDatasets}
+        />,
+      )
+
+      cy.contains('a', 'Export')
+        .should('be.visible')
+        .and('have.attr', 'title', 'Export snapshot Snapshot 001')
+    })
+
+    it('does not render an Export link for a dataset with no matching snapshots', () => {
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.DATASETS}
+          data={[nonExportableDataset]}
+          loading={false}
+          total={1}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+          exportableDatasets={exportableDatasets}
+        />,
+      )
+
+      cy.contains('Export').should('not.exist')
+    })
+
+    it('renders Export links only for datasets that have matching snapshots when multiple datasets are shown', () => {
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.DATASETS}
+          data={[exportableDataset, nonExportableDataset]}
+          loading={false}
+          total={2}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+          exportableDatasets={exportableDatasets}
+        />,
+      )
+
+      cy.contains('a', 'Export').should('have.length', 1)
+      cy.get('.MuiDataGrid-row[data-id="201"]').contains('Export').should('exist')
+      cy.get('.MuiDataGrid-row[data-id="202"]').contains('Export').should('not.exist')
+    })
+
+    it('does not render Export links when exportableDatasets is not provided (default)', () => {
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.DATASETS}
+          data={[exportableDataset]}
+          loading={false}
+          total={1}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+        />,
+      )
+
+      cy.contains('Export').should('not.exist')
+    })
+
+    it('does not render Export links for the Studies grid even if exportableDatasets is provided', () => {
+      cy.mount(
+        <LibraryDataGrid
+          assetType={AssetType.STUDIES}
+          data={studies}
+          loading={false}
+          total={2}
+          paginationModel={mockPaginationModel}
+          onPaginationChange={cy.stub()}
+          sortModel={mockSortModel}
+          onSortChange={cy.stub()}
+          selectedDatasetIds={[]}
+          onSelectionChange={cy.stub()}
+          exportableDatasets={exportableDatasets}
+        />,
+      )
+
+      cy.contains('Export').should('not.exist')
+    })
   })
 })
