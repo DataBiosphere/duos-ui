@@ -133,7 +133,7 @@ describe('darFormUtils - DUL Logic', () => {
         // Two DataUse objects that are semantically equivalent but structurally different
         const dataUse1: Partial<DataUse> = {
           generalUse: true,
-          other: null, // null value
+          other: undefined, // null and undefined are semantically equivalent
         }
         const dataUse2: Partial<DataUse> = {
           generalUse: true,
@@ -151,11 +151,11 @@ describe('darFormUtils - DUL Logic', () => {
         expect(needsDsAcknowledgement(translations)).to.equal(false)
       })
 
-      it('would incorrectly return true for raw DataUse objects with null vs undefined', () => {
+      it('would incorrectly return true for raw DataUse objects with empty string vs undefined', () => {
         // This demonstrates the bug when using raw DataUse[] instead of translations
         const dataUse1 = {
           generalUse: true,
-          other: null,
+          other: '',
         }
         const dataUse2 = {
           generalUse: true,
@@ -163,7 +163,7 @@ describe('darFormUtils - DUL Logic', () => {
         }
 
         // Passing raw DataUse objects (the buggy approach)
-        // lodash isEqual treats { other: null } !== { other: undefined }
+        // lodash isEqual treats { other: '' } !== { other: undefined }
         const result = needsDsAcknowledgement([dataUse1, dataUse2])
 
         // This incorrectly returns true even though they're semantically equivalent
@@ -177,7 +177,7 @@ describe('darFormUtils - DUL Logic', () => {
         }
         const dataUse2: Partial<DataUse> = {
           generalUse: true,
-          diseaseRestrictions: null, // null
+          diseaseRestrictions: undefined, // undefined
         }
 
         const translations = await translateDataUseRestrictionsFromDataUseArray([
