@@ -266,7 +266,7 @@ export const getAccessManagementSummary = (accessManagement: string): AccessMana
       }
     default:
       return {
-        name: '',
+        name: 'Unknown',
         icon: '',
         description: 'Unknown access management',
       }

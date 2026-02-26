@@ -82,7 +82,7 @@ export const makeDatasetColumns = (): GridColDef<DatasetTerm>[] => [
                   case AccessManagement.OPEN:
                     return 'success'
                   case AccessManagement.EXTERNAL:
-                    return 'default'
+                    return 'secondary'
                   default:
                     return 'default'
                 }
