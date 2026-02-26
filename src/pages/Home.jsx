@@ -173,9 +173,9 @@ const Home = (props) => {
                 <br />
                 <span
                   onClick={() => setShowContactModal(true)}
-                   style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
-                 >
-                   here
+                  style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
+                >
+                  here
                 </span> to learn more.
               </p>
               <SupportRequestModal
