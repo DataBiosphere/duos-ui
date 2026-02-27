@@ -166,7 +166,7 @@ const Home = (props) => {
                 and clearly track data use compliance.
                 <br />
                 {' '}
-                Interested in uding DUOS for your DAC?
+                Interested in using DUOS for your DAC?
                 <br />
                 {' '}
                 Request a meeting with our team
