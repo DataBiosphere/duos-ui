@@ -1,0 +1,41 @@
+import React from 'react'
+import { GridColDef } from '@mui/x-data-grid'
+import { Biospecimen } from 'src/types/model'
+import { Link } from '@mui/material'
+
+export const makeBiospecimenColumns = (): GridColDef<Biospecimen>[] => [
+  {
+    field: 'studyName',
+    headerName: 'Study Name',
+    flex: 1,
+    minWidth: 150,
+    renderCell: params => (
+      <Link href={`/studies/${params.row?.studyId}`} underline="hover">
+        {params.value}
+      </Link>
+    ),
+  },
+  {
+    field: 'biospecimenId',
+    headerName: 'Biospecimen ID',
+    flex: 1,
+    width: 200,
+  },
+  {
+    field: 'biospecimenType',
+    headerName: 'Type',
+    width: 150,
+  },
+  {
+    field: 'participantId',
+    headerName: 'Participant ID',
+    flex: 1,
+    width: 150,
+  },
+  {
+    field: 'collectionDate',
+    headerName: 'Collection Date',
+    flex: 1,
+    width: 150,
+  },
+]
