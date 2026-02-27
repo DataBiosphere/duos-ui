@@ -2,14 +2,11 @@ import React, { useMemo } from 'react'
 import {
   DataGrid,
   GridRowSelectionModel,
-  GridColDef,
 } from '@mui/x-data-grid'
 import { Box, Typography, CircularProgress } from '@mui/material'
 import { isEmpty } from 'lodash'
-import { LibraryDataGridProps, AssetType, StudyAggregation } from 'src/types/library'
-import { DatasetTerm } from 'src/types/model'
-import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
-import { makeStudyColumns } from 'src/components/data_library/columns/studyColumns'
+import { LibraryDataGridProps } from 'src/types/library'
+import { assetRegistry, LibraryRow } from 'src/components/data_library/assets'
 
 const LoadingOverlay = () => (
   <Box
@@ -38,83 +35,35 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   exportableDatasets = {},
   radarEnabledDatasetIds = new Set(),
 }) => {
-  const columns = useMemo(() => {
-    if (assetType === AssetType.STUDIES) {
-      return makeStudyColumns() as GridColDef<DatasetTerm | StudyAggregation>[]
-    }
-    return makeDatasetColumns(exportableDatasets, radarEnabledDatasetIds) as GridColDef<DatasetTerm | StudyAggregation>[]
-  }, [assetType, exportableDatasets, radarEnabledDatasetIds])
+  const asset = assetRegistry[assetType]
 
-  const getRowId = (row: DatasetTerm | StudyAggregation) => {
-    if (assetType === AssetType.STUDIES) {
-      return (row as StudyAggregation).studyId
-    }
-    return (row as DatasetTerm).datasetId
-  }
+  const columns = useMemo(
+    () => asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds }),
+    [asset, exportableDatasets, radarEnabledDatasetIds],
+  )
 
-  // For studies, we need to map study selection to dataset IDs
-  const rowSelectionModel: GridRowSelectionModel = useMemo(() => {
-    if (!Array.isArray(data)) {
-      return {
-        type: 'include',
-        ids: new Set([]),
-      }
-    }
-    if (assetType === AssetType.STUDIES) {
-      const selectedStudyIds = data
-        .filter((study) => {
-          const studyDatasetIds = (study as StudyAggregation).datasetIds || []
-          return studyDatasetIds.some(id => selectedDatasetIds.includes(id))
-        })
-        .map(study => (study as StudyAggregation).studyId)
-      return {
-        type: 'include',
-        ids: new Set(selectedStudyIds),
-      }
-    }
-    return {
-      type: 'include',
-      ids: new Set(selectedDatasetIds),
-    }
-  }, [assetType, data, selectedDatasetIds])
+  const getRowId = (row: LibraryRow) => asset.getRowId(row)
+
+  // Derive which DataGrid rows should appear checked from the set of selected dataset IDs
+  const rowSelectionModel: GridRowSelectionModel = useMemo(() => ({
+    type: 'include',
+    ids: asset.computeRowSelection(
+      Array.isArray(data) ? data as LibraryRow[] : [],
+      selectedDatasetIds,
+    ),
+  }), [asset, data, selectedDatasetIds])
 
   const handleSelectionChange = (newSelection: GridRowSelectionModel) => {
-    const selectedIds = Array.from(newSelection.ids) as number[]
-
-    if (assetType === AssetType.STUDIES) {
-      // Convert study selection to dataset IDs
-      const newDatasetIds: number[] = []
-
-      if (Array.isArray(data)) {
-        data.forEach((study) => {
-          if (selectedIds.includes((study as StudyAggregation).studyId)) {
-            newDatasetIds.push(...((study as StudyAggregation).datasetIds || []))
-          }
-        })
-      }
-
-      onSelectionChange(newDatasetIds)
-    }
-    else {
-      onSelectionChange(selectedIds)
-    }
+    onSelectionChange(
+      asset.selectionToDatasetIds(
+        Array.isArray(data) ? data as LibraryRow[] : [],
+        Array.from(newSelection.ids) as (string | number)[],
+      ),
+    )
   }
 
-  const isRowSelectable = (params: { row: DatasetTerm | StudyAggregation }) => {
-    if (!params.row) {
-      return false
-    }
-
-    if (assetType === AssetType.DATASETS) {
-      const dataset = params.row as DatasetTerm
-      return (
-        dataset.accessManagement !== 'open'
-        && dataset.accessManagement !== 'external'
-      )
-    }
-    // For studies, check if any dataset in the study is selectable
-    return true
-  }
+  const isRowSelectable = (params: { row: LibraryRow }) =>
+    params.row ? asset.isRowSelectable(params.row) : false
 
   if (isEmpty(data)) {
     // Show loading state when data is empty and loading
@@ -145,7 +94,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
           }}
         >
           <Typography variant="h6" color="text.secondary">
-            No {assetType} found matching your criteria
+            No {asset.label.plural.toLowerCase()} found matching your criteria
           </Typography>
         </Box>
       )
@@ -155,7 +104,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   return (
     <Box sx={{ width: '100%', height: '100%' }}>
       <DataGrid
-        rows={data as (StudyAggregation | DatasetTerm)[]}
+        rows={data as LibraryRow[]}
         columns={columns}
         rowCount={total}
         loading={loading}
@@ -163,8 +112,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
         paginationModel={paginationModel}
         paginationMode="server"
         onPaginationModelChange={onPaginationChange}
-        // studies are sorted client-side, other assets are sorted server-side
-        sortingMode={assetType === AssetType.STUDIES ? 'client' : 'server'}
+        sortingMode={asset.sortingMode}
         sortModel={sortModel}
         onSortModelChange={(model) => {
           onSortChange(model.map(item => ({

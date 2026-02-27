@@ -193,6 +193,51 @@ export interface StudyAggregationResponse {
   after_key?: { study_id: number }
 }
 
+export interface Maintainer {
+  name?: string
+  email?: string
+}
+
+export interface AiModelAsset {
+  modelId?: string
+  studyId?: string
+  name?: string
+  description?: string
+  url?: string
+  format?: string
+  license?: string
+  trainedOnDatasets?: string[]
+  maintainer?: Maintainer
+  tags?: string[]
+}
+
+/** Bucket shape from a terms aggregation on study.studyId, used for the Models view */
+export interface ModelStudyAggregationBucket {
+  key: number
+  doc_count: number
+  study_details?: {
+    hits?: {
+      hits?: Array<{
+        _source?: {
+          study?: {
+            studyId?: number
+            studyName?: string
+            description?: string
+            piName?: string
+            assets?: {
+              models?: AiModelAsset[]
+            }
+          }
+        }
+      }>
+    }
+  }
+}
+
+export interface ModelStudyAggregationResponse {
+  buckets: ModelStudyAggregationBucket[]
+}
+
 export interface PaginatedResponse<T> {
   items: T[]
   total: number

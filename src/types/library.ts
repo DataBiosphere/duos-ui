@@ -135,3 +135,22 @@ export interface LibraryFooterProps {
   selectedStudyIds: number[]
   onApplyForAccess: () => void
 }
+
+export interface Maintainer {
+  name: string
+  email: string
+}
+
+export interface ModelRow {
+  modelId: string
+  studyId: number
+  studyName: string
+  name: string
+  description: string
+  url: string
+  format: string
+  license: string
+  trainedOnDatasets: string[]
+  maintainer: Maintainer
+  tags?: string[]
+}
