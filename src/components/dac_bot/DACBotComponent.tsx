@@ -44,6 +44,39 @@ export type ParsedDACbotRule = DACbotRule & {
  */
 const DEFAULT_MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {}
 
+/** Maps each ruleType to a visual group heading */
+const RULE_GROUP_LABELS: { [key: string]: string } = {
+  GRU_V1: 'Automatic approval',
+  HMB_V1: 'Automatic approval',
+  GRU_DSV1: 'Automatic approval',
+  HMB_DSV1: 'Automatic approval',
+  AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'Automatic open',
+  REQUIRE_SO_DAR_APPROVAL: 'SO prior approval',
+}
+
+/** Order in which groups appear; rules with unknown types go last */
+const GROUP_ORDER = ['Automatic approval', 'Automatic open', 'SO prior approval']
+
+/**
+ * Groups parsed rules by their visual group label, preserving order within each group.
+ * Rules with unrecognized ruleTypes are placed in an "Other" group at the end.
+ */
+const groupRules = (rules: ParsedDACbotRule[]): { label: string, rules: ParsedDACbotRule[] }[] => {
+  const groups = new Map<string, ParsedDACbotRule[]>()
+  for (const rule of rules) {
+    const label = RULE_GROUP_LABELS[rule.ruleType] ?? 'Other'
+    if (!groups.has(label)) {
+      groups.set(label, [])
+    }
+    groups.get(label)!.push(rule)
+  }
+  const orderedLabels = [
+    ...GROUP_ORDER.filter(l => groups.has(l)),
+    ...Array.from(groups.keys()).filter(l => !GROUP_ORDER.includes(l)),
+  ]
+  return orderedLabels.map(label => ({ label, rules: groups.get(label)! }))
+}
+
 export const DACBotComponent = (props: DACBotComponentProps) => {
   const { dacId, 'data-cy': dataCy, mutuallyExclusiveRules = DEFAULT_MUTUALLY_EXCLUSIVE_RULES } = props
   const [DACbotRules, setDACbotRules] = useState<Array<DACbotRule>>([])
@@ -143,17 +176,19 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       <p>
         Check the box below to opt in to this feature, and then select the data use terms for which Data Access Requests you would like automated.
       </p>
-      <h5>Rules</h5>
-      {!isLoading && parsedRules.map((rule) => {
-        return (
-          <DACBotCheckboxComponent
-            rule={rule}
-            key={rule.id}
-            disableEdit={!userIsChair || rule.isDisabled}
-            onRuleChange={handleRuleChange}
-          />
-        )
-      })}
+      {!isLoading && groupRules(parsedRules).map(({ label, rules }) => (
+        <div key={label} data-cy={`rule-group-${label.toLowerCase().replace(/\s+/g, '-')}`} style={{ marginBottom: '1.5rem' }}>
+          <h6 style={{ marginBottom: '0.5rem', color: '#333' }}>{label}</h6>
+          {rules.map(rule => (
+            <DACBotCheckboxComponent
+              rule={rule}
+              key={rule.id}
+              disableEdit={!userIsChair || rule.isDisabled}
+              onRuleChange={handleRuleChange}
+            />
+          ))}
+        </div>
+      ))}
     </div>
   )
 }
