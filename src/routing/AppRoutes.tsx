@@ -83,7 +83,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route element={<Authenticated />}>
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/request_role" element={<RequestForm />} />
-        {checkEnv(envGroups.NON_STAGING)
+        {checkEnv(envGroups.NON_PROD)
           ? (
               <Route path="/datalibrary" element={<DataLibrary />}>
                 <Route path=":query" element={<DataLibrary />} />
