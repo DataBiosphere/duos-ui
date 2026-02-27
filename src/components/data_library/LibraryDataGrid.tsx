@@ -6,10 +6,11 @@ import {
 } from '@mui/x-data-grid'
 import { Box, Typography, CircularProgress } from '@mui/material'
 import { isEmpty } from 'lodash'
-import { LibraryDataGridProps, AssetType, StudyAggregation } from 'src/types/library'
-import { DatasetTerm } from 'src/types/model'
+import { LibraryDataGridProps, AssetType, StudyAggregation, LibraryDataGridRowType } from 'src/types/library'
+import { Biospecimen, DatasetTerm } from 'src/types/model'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { makeStudyColumns } from 'src/components/data_library/columns/studyColumns'
+import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
 
 const LoadingOverlay = () => (
   <Box
@@ -39,17 +40,25 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   radarEnabledDatasetIds = new Set(),
 }) => {
   const columns = useMemo(() => {
-    if (assetType === AssetType.STUDIES) {
-      return makeStudyColumns() as GridColDef<DatasetTerm | StudyAggregation>[]
+    switch (assetType) {
+      case AssetType.STUDIES:
+        return makeStudyColumns() as GridColDef<LibraryDataGridRowType>[]
+      case AssetType.BIOSPECIMENS:
+        return makeBiospecimenColumns() as GridColDef<LibraryDataGridRowType>[]
+      default:
+        return makeDatasetColumns(exportableDatasets, radarEnabledDatasetIds) as GridColDef<LibraryDataGridRowType>[]
     }
-    return makeDatasetColumns(exportableDatasets, radarEnabledDatasetIds) as GridColDef<DatasetTerm | StudyAggregation>[]
   }, [assetType, exportableDatasets, radarEnabledDatasetIds])
 
-  const getRowId = (row: DatasetTerm | StudyAggregation) => {
-    if (assetType === AssetType.STUDIES) {
-      return (row as StudyAggregation).studyId
+  const getRowId = (row: LibraryDataGridRowType) => {
+    switch (assetType) {
+      case AssetType.STUDIES:
+        return (row as StudyAggregation).studyId
+      case AssetType.BIOSPECIMENS:
+        return (row as Biospecimen).biospecimenId
+      default:
+        return (row as DatasetTerm).datasetId
     }
-    return (row as DatasetTerm).datasetId
   }
 
   // For studies, we need to map study selection to dataset IDs
@@ -100,7 +109,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
     }
   }
 
-  const isRowSelectable = (params: { row: DatasetTerm | StudyAggregation }) => {
+  const isRowSelectable = (params: { row: LibraryDataGridRowType }) => {
     if (!params.row) {
       return false
     }
