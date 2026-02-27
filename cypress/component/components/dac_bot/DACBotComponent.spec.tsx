@@ -79,10 +79,10 @@ describe('DACBotComponent', () => {
 
   describe('rule grouping', () => {
     const allRules = [
-      { id: 1, ruleType: 'GRU_V1', description: "Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **General Research Use (GRU)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Health/Medical/Biomedical Use (HMB)** only with no ethical concerns designated.", ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
-      { id: 2, ruleType: 'HMB_V1', description: "Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **Health/Medical/Biomedical Use (HMB)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Health/Medical/Biomedical Use (HMB)** only with no ethical concerns designated.", ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
-      { id: 3, ruleType: 'GRU_DSV1', description: "Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **General Research Use (GRU)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Disease Specific (DS) with one or more selected diseases** with no ethical concerns designated.", ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
-      { id: 4, ruleType: 'HMB_DSV1', description: "Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **Health/Medical/Biomedical Use (HMB)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Disease Specific (DS) with one or more selected diseases** only with no ethical concerns designated.", ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
+      { id: 1, ruleType: 'GRU_V1', description: `Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **General Research Use (GRU)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Health/Medical/Biomedical Use (HMB)** only with no ethical concerns designated.`, ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
+      { id: 2, ruleType: 'HMB_V1', description: `Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **Health/Medical/Biomedical Use (HMB)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Health/Medical/Biomedical Use (HMB)** only with no ethical concerns designated.`, ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
+      { id: 3, ruleType: 'GRU_DSV1', description: `Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **General Research Use (GRU)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Disease Specific (DS) with one or more selected diseases** with no ethical concerns designated.`, ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
+      { id: 4, ruleType: 'HMB_DSV1', description: `Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **Health/Medical/Biomedical Use (HMB)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Disease Specific (DS) with one or more selected diseases** only with no ethical concerns designated.`, ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
       { id: 5, ruleType: 'AUTO_OPEN_DAR_FOR_ALL_MEMBERS', description: 'Automatically open Data Access Requests (DARs) for all DAC members upon submission, **without requiring Chair to open manually**.', ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
       { id: 6, ruleType: 'REQUIRE_SO_DAR_APPROVAL', description: 'Require approval by the Signing Official identified in the Data Access Request (DAR) prior to DAC Voting.', ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
     ]
@@ -122,7 +122,7 @@ describe('DACBotComponent', () => {
     })
 
     it('renders groups in order: Automatic approval, Automatic open, SO prior approval', () => {
-      cy.get('h6').then($headings => {
+      cy.get('h6').then(($headings) => {
         const labels = [...$headings].map(el => el.textContent)
         expect(labels).to.deep.equal(['Automatic approval', 'Automatic open', 'SO prior approval'])
       })
@@ -131,7 +131,7 @@ describe('DACBotComponent', () => {
 
   describe('rule grouping - unknown ruleType', () => {
     const rulesWithUnknown = [
-      { id: 1, ruleType: 'GRU_V1', description: "Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **General Research Use (GRU)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Health/Medical/Biomedical Use (HMB)** only with no ethical concerns designated.", ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
+      { id: 1, ruleType: 'GRU_V1', description: `Automatically approve Data Access Requests (DARs) when the requested datasets' data use term is only **General Research Use (GRU)** with no modifiers (i.e. IRB, COL, GSO, NPU etc.), and the primary purpose of the DAR's research use statement (RUS) is **Health/Medical/Biomedical Use (HMB)** only with no ethical concerns designated.`, ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
       { id: 2, ruleType: 'FUTURE_RULE', description: 'Some future rule', ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
     ]
 
