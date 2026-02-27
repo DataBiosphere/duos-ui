@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { CombinedDataAccessRequest, Dataset, DataUse, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+import { CombinedDataAccessRequest, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+
 import {
   CLOSEOUT_KEYS,
   DMI_INCIDENT_KEYS,
@@ -17,7 +18,7 @@ import IrbDocumentUpload from 'src/pages/progress_reports/IrbDocumentUpload'
 import { Navigation } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements'
-import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation'
+import { translateDataUseRestrictionsFromDataUseArray, TranslationEntry } from 'src/libs/dataUseTranslation'
 import {
   needsIrbApprovalDocument,
   validatePRFormData,
@@ -126,7 +127,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
   const [showValidation, setShowValidation] = useState<boolean>(false)
   const [formValidation, setFormValidation] = useState<FormValidationState>({ darErrors: {} })
   const [nihValid, setNihValid] = useState<boolean>(true)
-  const [dataUseTranslations, setDataUseTranslations] = useState<DataUse[]>([])
+  const [dataUseTranslations, setDataUseTranslations] = useState<(TranslationEntry | undefined)[][]>([])
   const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null)
 
   const eRACommonsDestination = 'progress_report_application/' + dar.collectionId

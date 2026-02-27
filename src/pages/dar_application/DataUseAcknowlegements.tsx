@@ -2,13 +2,14 @@ import { needsDsAcknowledgement, needsGsoAcknowledgement, needsPubAcknowledgemen
 import { FormField, FormFieldTitle, FormFieldTypes } from 'src/components/forms/forms'
 import React from 'react'
 import { Dataset, DataUse } from 'src/types/model'
+import { TranslationEntry } from 'src/libs/dataUseTranslation'
 import { DarErrors, ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { FormState, ValidFormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
 type DataUseAcknowledgementsProps = {
   title: string
   datasets: Dataset[]
-  dataUseTranslations: DataUse[]
+  dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
   formData: FormState
   readOnlyMode: boolean
   includeInstructions?: boolean

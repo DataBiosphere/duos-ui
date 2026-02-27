@@ -1,10 +1,62 @@
 import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash'
 import { OntologyService } from './ontologyService'
 import { Notifications } from './utils'
+import { DataUse, DataUseSummary, DataUseTerm } from '../types/model'
 
 export const ControlledAccessType = {
   permissions: 'Permissions',
   modifiers: 'Modifiers',
+} as const
+
+export type ControlledAccessTypeValue = typeof ControlledAccessType[keyof typeof ControlledAccessType]
+
+export interface TranslationEntry {
+  code: string
+  description: string
+  manualReview?: boolean
+  type: ControlledAccessTypeValue
+  alternateLabel?: string
+}
+
+export interface DiseaseOntology {
+  label: string
+}
+
+/**
+ * Represents Data Access Request information used for translation.
+ *
+ * Note: Many of these fields are required in the DAR form
+ * (see `requiredRusFields` in `darFormUtils.ts`).
+ *
+ * Fields marked as required are present in all DAR records (including
+ * legacy DARs). Optional fields are those that don't exist in older
+ * DARs (e.g., poa, populationMigration, methods, addiction, aiLlmUse).
+ *
+ * Primary purpose fields (form requires at least one of these):
+ * - hmb, diseases, poa / populationMigration, methods, or other
+ */
+export interface DarInfo {
+  hmb: boolean
+  poa?: boolean
+  populationMigration?: boolean
+  diseases: boolean
+  other: boolean
+  otherText: string
+  ontologies: DiseaseOntology[]
+  methods?: boolean
+  aiLlmUse?: boolean
+  controls: boolean
+  forProfit: boolean
+  gender: string
+  pediatric: boolean
+  illegalBehavior: boolean
+  addiction?: boolean
+  sexualDiseases: boolean
+  stigmatizedDiseases: boolean
+  vulnerablePopulation: boolean
+  population: boolean
+  psychiatricTraits: boolean
+  notHealth: boolean
 }
 
 /**
@@ -25,15 +77,16 @@ export const srpTranslations = {
     manualReview: true,
     type: ControlledAccessType.permissions,
   },
-  diseases: (diseases) => {
-    const outputStruct = {
+  diseases: (diseases: DiseaseOntology[]): TranslationEntry => {
+    const outputStruct: TranslationEntry = {
       code: 'DS',
       description: 'The dataset will be used for disease related studies',
       manualReview: false,
       type: ControlledAccessType.permissions,
     }
     if (!isEmpty(diseases)) {
-      const diseaseArray = diseases.sort().map(disease => disease.label)
+      const sortedDiseases = diseases.toSorted((a, b) => a.label.localeCompare(b.label))
+      const diseaseArray = sortedDiseases.map(disease => disease.label)
       const diseaseString = diseaseArray.length > 1 ? join(diseaseArray, '; ') : diseaseArray[0]
       outputStruct.description = outputStruct.description + ` (${diseaseString})`
     }
@@ -45,10 +98,10 @@ export const srpTranslations = {
     manualReview: false,
     type: ControlledAccessType.permissions,
   },
-  other: (otherText) => {
+  other: (otherText: string | null): TranslationEntry => {
     return {
       code: 'OTHER',
-      description: isEmpty(otherText) ? 'Other: Not provided' : otherText,
+      description: isEmpty(otherText) ? 'Other: Not provided' : otherText!,
       manualReview: true,
       type: ControlledAccessType.permissions,
     }
@@ -151,12 +204,18 @@ export const srpTranslations = {
   },
 }
 
+type TranslationFunction = (arg: string[]) => TranslationEntry | string
+
+export interface ConsentTranslationsMap {
+  [key: string]: TranslationEntry | TranslationFunction
+}
+
 /**
  * Primary source of truth for Dataset translations
  * This constant holds all potential DUO codes that a dataset might contain.
  * It is intended to map codes and descriptions for easier viewing.
  */
-export const consentTranslations = {
+export const consentTranslations: ConsentTranslationsMap = {
   noRestrictions: {
     code: 'NRES',
     description: 'No restrictions on data use',
@@ -172,7 +231,7 @@ export const consentTranslations = {
     description: 'Use is permitted for a health, medical, or biomedical research purpose',
     type: ControlledAccessType.permissions,
   },
-  diseaseRestrictions: (restrictions) => {
+  diseaseRestrictions: (restrictions: string[]): TranslationEntry | string => {
     if (isEmpty(restrictions)) {
       return 'Use is permitted for the specified disease(s): Not specified'
     }
@@ -246,68 +305,107 @@ export const consentTranslations = {
   },
 }
 
-const getOntologyName = async (urls) => {
+interface OntologyResult {
+  label: string
+}
+
+const getOntologyName = async (urls: string[]): Promise<string[]> => {
   const doidArr = OntologyService.extractDOIDFromUrl(urls)
   const params = doidArr.join(',')
-  const ontology = await OntologyService.searchOntology(params)
+  const ontology = await OntologyService.searchOntology(params) as OntologyResult[]
   return ontology.map(data => data.label)
 }
 
-export const processRestrictionStatements = async (key, dataUse) => {
-  let resp
-  const value = dataUse[key]
-  if (!isNil(value) && value) {
-    if (key === 'diseaseRestrictions') {
-      // condition for datasets that have ontology labels contained within the dataUse object
-      if (!isNil(head(value)) && !isNil(value[0].label)) {
-        const labels = value.map(ont => ont.label)
-        resp = consentTranslations.diseaseRestrictions(labels)
-      }
-      else {
-        // condition for datasets with dataUses that do not have ontology labels saved on the dataUse object
-        try {
-          const ontologyUrls = uniq(value)
-          if (!isEmpty(ontologyUrls)) {
-            const ontologyLabels = await getOntologyName(ontologyUrls)
-            resp = consentTranslations.diseaseRestrictions(ontologyLabels)
-          }
-        }
-        catch (_error) {
-          Notifications.showError({ text: 'Ontology API Request Error' })
-        }
-      }
+// Helper function to process disease restrictions with ontology labels
+const processDiseaseRestrictionsWithLabels = (diseaseValue: { label: string }[]): TranslationEntry | undefined => {
+  const labels = diseaseValue.map(ont => ont.label)
+  const diseaseRestrictionsFunc = consentTranslations.diseaseRestrictions as (restrictions: string[]) => TranslationEntry | string
+  const result = diseaseRestrictionsFunc(labels)
+  return typeof result !== 'string' ? result : undefined
+}
+
+// Helper function to process disease restrictions with ontology URLs
+const processDiseaseRestrictionsWithUrls = async (diseaseValue: string[]): Promise<TranslationEntry | undefined> => {
+  try {
+    const ontologyUrls = uniq(diseaseValue)
+    if (isEmpty(ontologyUrls)) {
+      return undefined
     }
-    else {
-      resp = processDefinedLimitations(key, dataUse, consentTranslations)
-    }
+    const ontologyLabels = await getOntologyName(ontologyUrls)
+    const diseaseRestrictionsFunc = consentTranslations.diseaseRestrictions as (restrictions: string[]) => TranslationEntry | string
+    const result = diseaseRestrictionsFunc(ontologyLabels)
+    return typeof result !== 'string' ? result : undefined
   }
-  return resp
+  catch (error) {
+    console.error('Ontology API Request Error:', error)
+    Notifications.showError({ text: 'Ontology API Request Error' })
+    return undefined
+  }
+}
+
+export const processRestrictionStatements = async (
+  key: string,
+  dataUse: DataUse,
+): Promise<TranslationEntry | undefined> => {
+  const value = dataUse[key as keyof DataUse]
+  if (isNil(value) || !value) {
+    return undefined
+  }
+
+  if (key !== 'diseaseRestrictions') {
+    return processDefinedLimitations(key, dataUse, consentTranslations)
+  }
+
+  const diseaseValue = value as (string | { label: string })[]
+  const firstElement = head(diseaseValue)
+
+  // Check if ontology labels are contained within the dataUse object
+  if (!isNil(firstElement) && !isNil((firstElement as { label: string }).label)) {
+    return processDiseaseRestrictionsWithLabels(diseaseValue as { label: string }[])
+  }
+
+  // Process datasets without ontology labels saved on the dataUse object
+  return processDiseaseRestrictionsWithUrls(diseaseValue as string[])
 }
 
 export const processDefinedLimitations = (
-  key,
-  dataUse,
-  consentTranslations,
-) => {
+  key: string,
+  dataUse: DataUse,
+  translations: ConsentTranslationsMap,
+): TranslationEntry | undefined => {
   const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse']
-  const isHMBActive
-    = !!dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions)
+  const isHMBActive = !!dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions)
   const isPOAActive = !!dataUse.populationOriginsAncestry
   const isGeneralUseActive = !!dataUse.generalUse && !isHMBActive && !isPOAActive && isEmpty(dataUse.diseaseRestrictions)
-  let statement
+  let statement: TranslationEntry | undefined
   if (
     !targetKeys.includes(key)
     || (key === 'hmbResearch' && isHMBActive)
     || (key === 'populationOriginsAncestry' && isPOAActive)
     || (key === 'generalUse' && isGeneralUseActive)
   ) {
-    statement = consentTranslations[key]
+    const translation = translations[key]
+    if (translation && typeof translation !== 'function') {
+      statement = translation
+    }
   }
   return statement
 }
 
-// Helper function to handle OTHER attribute translations in dataUse
-const processOtherInDataUse = (dataUse, restrictionStatements) => {
+// Extend DataUse to include otherRestrictions for runtime compatibility
+interface ExtendedDataUse extends DataUse {
+  otherRestrictions?: boolean
+}
+
+/**
+ * Normalizes "other" restrictions: converts null/undefined/empty → "Not provided".
+ * Ensures structurally different but semantically equivalent DataUse objects produce
+ * identical translations for correct comparison.
+ */
+const processOtherInDataUse = (
+  dataUse: ExtendedDataUse,
+  restrictionStatements: Promise<TranslationEntry | undefined>[],
+): Promise<TranslationEntry | undefined>[] => {
   // Wrapping the statements in a Promise.resolve before adding it to the array allows the restrictionStatements to be compatible with future Promise.all calls
   if (dataUse.otherRestrictions === true || !isNil(dataUse.other)) {
     restrictionStatements.push(
@@ -331,21 +429,32 @@ const processOtherInDataUse = (dataUse, restrictionStatements) => {
 }
 
 // Function to translate restrictions from a single dataUse
-const translateDataUseRestrictions = async (dataUse) => {
+const translateDataUseRestrictions = async (dataUse: ExtendedDataUse | null): Promise<TranslationEntry[]> => {
   if (!dataUse) {
     return []
   }
-  let restrictionStatements = []
+  let restrictionStatements: Promise<TranslationEntry | undefined>[] = []
   const targetKeys = Object.keys(consentTranslations)
   restrictionStatements = targetKeys.map(async key =>
     await processRestrictionStatements(key, dataUse))
   restrictionStatements = filter(restrictionStatements, statement => !isNil(statement))
   restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements)
-  return (await Promise.all(restrictionStatements)).filter(value => !isEmpty(value))
+  const results = await Promise.all(restrictionStatements)
+  return results.filter((value): value is TranslationEntry => !isEmpty(value))
 }
 
-// Function to translate restrictions in an array of dataUses
-export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {
+/**
+ * Translates DataUse objects to TranslationEntry arrays with normalization.
+ *
+ * Normalizes semantically equivalent values (null/undefined/"" → "Not provided"),
+ * enabling correct semantic comparison. Resolves disease ontology URLs via OntologyService.
+ *
+ * @param dataUses - Array of DataUse objects
+ * @returns 2D array of TranslationEntry objects (one inner array per dataset)
+ */
+export const translateDataUseRestrictionsFromDataUseArray = async (
+  dataUses: ExtendedDataUse[],
+): Promise<(TranslationEntry | undefined)[][]> => {
   const targetKeys = Object.keys(consentTranslations)
   try {
     const translationPromises = dataUses.map((dataUse) => {
@@ -363,6 +472,94 @@ export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => 
   }
 }
 
+// Helper function to add primary codes to DataUseSummary
+const addPrimaryCodes = (darInfo: DarInfo, dataUseSummary: DataUseSummary): void => {
+  if (darInfo.hmb) {
+    dataUseSummary.primary = concat(dataUseSummary.primary, [srpTranslations.hmb]) as DataUseTerm[]
+  }
+
+  /**
+   * population refers to question 2.3.2: The outcome of this study is expected to provide
+   * new knowledge about the origins of a certain population or its ancestry.
+   * populationMigration refers to question 3.1.9: Does the research aim involve the study
+   * of Population Origins/Migration patterns?
+   * Both map to http://purl.obolibrary.org/obo/DUO_0000011 (POA)
+   *
+   * Additional check on hmb, diseases, and other are needed for older DARs where
+   * populationMigration - poa link was not established
+   */
+  if ((darInfo.poa || darInfo.populationMigration) && (!darInfo.hmb && !darInfo.diseases && !darInfo.other)) {
+    dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.poa)
+  }
+
+  if (darInfo.diseases) {
+    const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies || []))
+    dataUseSummary.primary = uniq(concat(dataUseSummary.primary, [diseaseTranslation]))
+  }
+
+  if (darInfo.other) {
+    dataUseSummary.primary = concat(dataUseSummary.primary, [srpTranslations.other(darInfo.otherText || null)])
+  }
+
+  // **FALLBACK CHECK**
+  // If no primary codes were added, add an "OTHER: Not provided" code
+  if (isEmpty(dataUseSummary.primary)) {
+    dataUseSummary.primary = concat(dataUseSummary.primary, [srpTranslations.other(null)])
+  }
+}
+
+// Helper function to add secondary codes to DataUseSummary
+const addSecondaryCodes = (darInfo: DarInfo, dataUseSummary: DataUseSummary): void => {
+  if (darInfo.methods) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.methods]) as DataUseTerm[]
+  }
+  if (darInfo.aiLlmUse) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.aiLlmUse]) as DataUseTerm[]
+  }
+  if (darInfo.controls) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.controls]) as DataUseTerm[]
+  }
+  if (darInfo.forProfit) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.forProfit]) as DataUseTerm[]
+  }
+  else {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.notForProfit]) as DataUseTerm[]
+  }
+  if (darInfo.gender?.slice(0, 1).toLowerCase() === 'f') {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.genderFemale]) as DataUseTerm[]
+  }
+  if (darInfo.gender?.slice(0, 1).toLowerCase() === 'm') {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.genderMale]) as DataUseTerm[]
+  }
+  if (darInfo.pediatric) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.pediatric]) as DataUseTerm[]
+  }
+  if (darInfo.illegalBehavior) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.illegalBehavior]) as DataUseTerm[]
+  }
+  if (darInfo.addiction) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.addiction]) as DataUseTerm[]
+  }
+  if (darInfo.sexualDiseases) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.sexualDiseases]) as DataUseTerm[]
+  }
+  if (darInfo.stigmatizedDiseases) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.stigmatizedDiseases]) as DataUseTerm[]
+  }
+  if (darInfo.vulnerablePopulation) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.vulnerablePopulation]) as DataUseTerm[]
+  }
+  if (darInfo.population) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.population]) as DataUseTerm[]
+  }
+  if (darInfo.psychiatricTraits) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.psychiatricTraits]) as DataUseTerm[]
+  }
+  if (darInfo.notHealth) {
+    dataUseSummary.secondary = concat(dataUseSummary.secondary, [srpTranslations.notHealth]) as DataUseTerm[]
+  }
+}
+
 export const DataUseTranslation = {
 
   /**
@@ -374,97 +571,14 @@ export const DataUseTranslation = {
    * @returns {{primary: [{code: '', description: ''}], secondary: [{code: '', description: ''}]}}
    */
 
-  translateDarInfo: (darInfo) => {
-    const dataUseSummary = {
+  translateDarInfo: (darInfo: DarInfo): DataUseSummary => {
+    const dataUseSummary: DataUseSummary = {
       primary: [],
       secondary: [],
     }
 
-    // Primary Codes
-    if (darInfo.hmb) {
-      dataUseSummary.primary = concat(dataUseSummary.primary,
-        srpTranslations.hmb)
-    }
-    /**
-     * TODO: Resolve confusion on consent/ontology/orsp sides
-     *
-     * population refers to question 2.3.2
-     *      The outcome of this study is expected to provide new knowledge about the origins of a certain population or its ancestry.
-     *      Code is clearly POA
-     * populationMigration refers to question 3.1.9
-     *      Does the research aim involve the study of Population Origins/Migration patterns?
-     *
-     * Tracing this through to Ontology, both refer to http://purl.obolibrary.org/obo/DUO_0000011 which is POA
-     */
-
-    // NOTE: additional check on hmb, diseases, and other are needed for older DARs where populationMigration - poa link was not established
-    if ((darInfo.poa || darInfo.populationMigration) && (!darInfo.hmb && !darInfo.diseases && !darInfo.other)) {
-      dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.poa)
-    }
-
-    if (darInfo.diseases) {
-      const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies))
-      dataUseSummary.primary = uniq(concat(dataUseSummary.primary, diseaseTranslation))
-    }
-    if (darInfo.other) {
-      dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.other(darInfo.otherText))
-    }
-
-    // **FALLBACK CHECK**
-    // If no primary codes were added, add an "OTHER: Not provided" code
-    if (isEmpty(dataUseSummary.primary)) {
-      dataUseSummary.primary = concat(dataUseSummary.primary, srpTranslations.other(null))
-    }
-
-    // Secondary Codes
-    if (darInfo.methods) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.methods)
-    }
-    if (darInfo.aiLlmUse) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.aiLlmUse)
-    }
-    if (darInfo.controls) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.controls)
-    }
-    if (darInfo.forProfit) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.forProfit)
-    }
-    else {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.notForProfit)
-    }
-    if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.genderFemale)
-    }
-    if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.genderFemale)
-    }
-    if (darInfo.pediatric) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.pediatric)
-    }
-    if (darInfo.illegalBehavior) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.illegalBehavior)
-    }
-    if (darInfo.addiction) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.addiction)
-    }
-    if (darInfo.sexualDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.sexualDiseases)
-    }
-    if (darInfo.stigmatizedDiseases) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.stigmatizedDiseases)
-    }
-    if (darInfo.vulnerablePopulation) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.vulnerablePopulation)
-    }
-    if (darInfo.population) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.population)
-    }
-    if (darInfo.psychiatricTraits) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.psychiatricTraits)
-    }
-    if (darInfo.notHealth) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary, srpTranslations.notHealth)
-    }
+    addPrimaryCodes(darInfo, dataUseSummary)
+    addSecondaryCodes(darInfo, dataUseSummary)
 
     return dataUseSummary
   },

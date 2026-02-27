@@ -13,6 +13,7 @@ import {
   validatePRFormData,
   ORCID_REGEX,
 } from 'src/utils/darFormUtils'
+import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation'
 import type {
   Dataset,
   DataUse,
@@ -125,6 +126,85 @@ describe('darFormUtils - DUL Logic', () => {
     it('should return false when there is only one translation', () => {
       const translations = [{ generalUse: true }]
       expect(needsDsAcknowledgement(translations)).to.equal(false)
+    })
+
+    describe('normalization behavior', () => {
+      it('should return false for semantically equivalent DataUse objects when using translations', async () => {
+        // Two DataUse objects that are semantically equivalent but structurally different
+        const dataUse1: Partial<DataUse> = {
+          generalUse: true,
+          other: undefined, // null and undefined are semantically equivalent
+        }
+        const dataUse2: Partial<DataUse> = {
+          generalUse: true,
+          other: undefined, // undefined value
+        }
+
+        // Translate both to normalized entries
+        const translations = await translateDataUseRestrictionsFromDataUseArray([
+          dataUse1 as DataUse,
+          dataUse2 as DataUse,
+        ])
+
+        // With translations, these should be treated as equivalent
+        // (both normalize to "Not provided" for the 'other' field)
+        expect(needsDsAcknowledgement(translations)).to.equal(false)
+      })
+
+      it('would incorrectly return true for raw DataUse objects with empty string vs undefined', () => {
+        // This demonstrates the bug when using raw DataUse[] instead of translations
+        const dataUse1 = {
+          generalUse: true,
+          other: '',
+        }
+        const dataUse2 = {
+          generalUse: true,
+          other: undefined,
+        }
+
+        // Passing raw DataUse objects (the buggy approach)
+        // lodash isEqual treats { other: '' } !== { other: undefined }
+        const result = needsDsAcknowledgement([dataUse1, dataUse2])
+
+        // This incorrectly returns true even though they're semantically equivalent
+        expect(result).to.equal(true)
+      })
+
+      it('should return false for semantically equivalent empty arrays vs null', async () => {
+        const dataUse1: Partial<DataUse> = {
+          generalUse: true,
+          diseaseRestrictions: [], // empty array
+        }
+        const dataUse2: Partial<DataUse> = {
+          generalUse: true,
+          diseaseRestrictions: undefined, // undefined
+        }
+
+        const translations = await translateDataUseRestrictionsFromDataUseArray([
+          dataUse1 as DataUse,
+          dataUse2 as DataUse,
+        ])
+
+        // Both should normalize to no disease restrictions
+        expect(needsDsAcknowledgement(translations)).to.equal(false)
+      })
+
+      it('should still return true when datasets actually have different restrictions', async () => {
+        const dataUse1: Partial<DataUse> = {
+          generalUse: true,
+        }
+        const dataUse2: Partial<DataUse> = {
+          hmbResearch: true,
+        }
+
+        const translations = await translateDataUseRestrictionsFromDataUseArray([
+          dataUse1 as DataUse,
+          dataUse2 as DataUse,
+        ])
+
+        // These are genuinely different and should require acknowledgement
+        expect(needsDsAcknowledgement(translations)).to.equal(true)
+      })
     })
   })
 
