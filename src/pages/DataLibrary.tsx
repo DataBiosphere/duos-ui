@@ -40,6 +40,7 @@ import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
  * - Metadata fetching for filter options (useLibraryMetadata)
  * - Local UI state: selection tracking (useState)
  * - Exportable datasets state for enabling export functionality (useState)
+ * - Radar-enabled datasets state for showing Radar integration (useState)
  */
 export const DataLibrary: React.FC = () => {
   const { query } = useParams()

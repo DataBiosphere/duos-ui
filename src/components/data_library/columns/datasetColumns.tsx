@@ -71,7 +71,7 @@ export const makeDatasetColumns = (
   {
     field: 'accessManagement',
     headerName: 'Access',
-    width: 120,
+    width: 150,
     renderCell: (params) => {
       const summary = getAccessManagementSummary(params.value)
       const isRadarEnabled = radarEnabledDatasetIds.has(params.row.datasetId)
@@ -79,7 +79,16 @@ export const makeDatasetColumns = (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
           <Tooltip title={summary.description}>
             <Chip
-              label={summary.name}
+              label={(
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  {summary.name}
+                  {isRadarEnabled && (
+                    <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
+                      <BoltIcon sx={{ color: 'gold' }} />
+                    </Tooltip>
+                  )}
+                </Box>
+              )}
               size="small"
               color={
                 (() => {
@@ -97,11 +106,6 @@ export const makeDatasetColumns = (
               }
             />
           </Tooltip>
-          {isRadarEnabled && (
-            <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
-              <BoltIcon sx={{ color: 'gold' }} />
-            </Tooltip>
-          )}
         </Box>
       )
     },
