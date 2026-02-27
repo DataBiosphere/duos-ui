@@ -4,6 +4,7 @@ import DatasetSearchTable from 'src/components/data_search/DatasetSearchTable'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { BrowserRouter } from 'react-router-dom'
+import { DAC } from 'src/libs/ajax/DAC'
 
 const datasets = [
   makeDatasetTerm({
@@ -35,6 +36,7 @@ describe('DatasetSearchTable (component) - basic tests', () => {
   beforeEach(() => {
     cy.initApplicationConfig()
     cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
+    cy.stub(DAC, 'fetchDACbotRules').resolves([])
     cy.clock()
   })
 
@@ -123,5 +125,74 @@ describe('DatasetSearchTable (component) - basic tests', () => {
       // Debouncing may collapse rapid inputs into a single request; ensure at least one call occurred
       expect(dsStub.callCount).to.be.at.least(1)
     })
+  })
+})
+
+describe('DatasetSearchTable (component) - RADAR eligibility', () => {
+  beforeEach(() => {
+    cy.initApplicationConfig()
+    cy.stub(DAC, 'fetchDACbotRules').callsFake((dacId) => {
+      // Return a matching rule for the test DAC ID
+      if (dacId === 2) {
+        return Promise.resolve([{ activationDate: '2023-01-01', ruleType: 'GRU_V1' }])
+      }
+      return Promise.resolve([])
+    })
+    cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
+    cy.clock()
+  })
+
+  it('shows RADAR icon for eligible datasets', () => {
+    const radarDataset = {
+      datasetId: 999,
+      datasetIdentifier: 'DUOS-999',
+      datasetName: 'RADAR Dataset',
+      participantCount: 10,
+      dacId: 2,
+      dataUse: { primary: [{ code: 'GRU' }], secondary: [] },
+      accessManagement: 'controlled',
+      study: { studyName: 'Study', studyId: 1, dataCustodianEmail: ['a@b.com'], dataTypes: [] },
+    }
+    const props = {
+      datasets: [radarDataset],
+      isSigningOfficial: false,
+      isInstitutionQuery: false,
+    }
+
+    cy.mount(
+      <BrowserRouter>
+        <DatasetSearchTable {...props} />
+      </BrowserRouter>,
+    )
+
+    cy.contains('RADAR Dataset')
+    cy.get('svg[data-testid="BoltIcon"]').should('exist')
+  })
+
+  it('does not show RADAR icon for ineligible datasets', () => {
+    const nonRadarDataset = {
+      datasetId: 1000,
+      datasetIdentifier: 'DUOS-1000',
+      datasetName: 'Non-RADAR Dataset',
+      participantCount: 5,
+      dacId: 3, // No matching DAC rule
+      dataUse: { primary: [{ code: 'GRU' }], secondary: [] },
+      accessManagement: 'controlled',
+      study: { studyName: 'Study', studyId: 2, dataCustodianEmail: ['b@c.com'], dataTypes: [] },
+    }
+    const props = {
+      datasets: [nonRadarDataset],
+      isSigningOfficial: false,
+      isInstitutionQuery: false,
+    }
+
+    cy.mount(
+      <BrowserRouter>
+        <DatasetSearchTable {...props} />
+      </BrowserRouter>,
+    )
+
+    cy.contains('Non-RADAR Dataset')
+    cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 })

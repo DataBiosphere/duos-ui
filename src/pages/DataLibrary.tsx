@@ -21,6 +21,7 @@ import eventList from 'src/libs/events'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'lodash'
 import { EnumerateSnapshotModel } from 'src/types/tdrModel'
+import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
 
 /**
  * DataLibrary Page Component
@@ -39,6 +40,7 @@ import { EnumerateSnapshotModel } from 'src/types/tdrModel'
  * - Metadata fetching for filter options (useLibraryMetadata)
  * - Local UI state: selection tracking (useState)
  * - Exportable datasets state for enabling export functionality (useState)
+ * - Radar-enabled datasets state for showing Radar integration (useState)
  */
 export const DataLibrary: React.FC = () => {
   const { query } = useParams()
@@ -48,6 +50,7 @@ export const DataLibrary: React.FC = () => {
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
   const [exportableDatasets, setExportableDatasets] = useState<ExportableDatasets>({})
+  const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState<Set<number>>(new Set())
 
   const user = Storage.getCurrentUser()
   const institutionId = user?.institution?.id
@@ -275,7 +278,28 @@ export const DataLibrary: React.FC = () => {
         setExportableDatasets({})
       }
     }
+
+    const fetchRadarEnabled = async () => {
+      if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
+        setRadarEnabledDatasetIds(new Set())
+        return
+      }
+      const datasetIds = (data.items as DatasetTerm[]).map(d => d.datasetId)
+      if (datasetIds.length === 0) {
+        setRadarEnabledDatasetIds(new Set())
+        return
+      }
+      try {
+        const radarEnabledIds = await getRadarEnabledDatasetsWithRules(data.items)
+        setRadarEnabledDatasetIds(new Set(radarEnabledIds))
+      }
+      catch {
+        setRadarEnabledDatasetIds(new Set())
+      }
+    }
+
     fetchExportable()
+    fetchRadarEnabled()
   }, [data?.items, urlState.tab])
 
   if (error) {
@@ -379,6 +403,7 @@ export const DataLibrary: React.FC = () => {
               selectedDatasetIds={selectedDatasetIds}
               onSelectionChange={handleSelectionChange}
               exportableDatasets={exportableDatasets}
+              radarEnabledDatasetIds={radarEnabledDatasetIds}
             />
           </Box>
         </Box>

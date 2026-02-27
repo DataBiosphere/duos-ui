@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from 'src/components/SearchBar'
 import { Styles } from 'src/libs/theme.js'
 import PropTypes from 'prop-types'
+import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils.ts'
 
 const styles = {
   subTab: {
@@ -37,6 +38,7 @@ export const DatasetSearchTable = (props) => {
   const navigate = useNavigate()
   const { datasets, icon, title, assembleFullQuery: assembleBaseQuery, isSigningOfficial, isInstitutionQuery } = props
   const [exportableDatasets, setExportableDatasets] = useState({})
+  const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState(new Set())
   const [filters, setFilters] = useState(defaultFilters(datasets))
   const [filtered, setFiltered] = useState(datasets)
   const [selected, setSelected] = useState([])
@@ -52,7 +54,7 @@ export const DatasetSearchTable = (props) => {
       return isArray(filter) ? filter.length > 0 : filter !== null
     })
 
-  const getExportableDatasets = async (datasets) => {
+  const getExportableDatasets = useCallback(async (datasets) => {
     // Note the dataset identifier is in each sub-table row.
     const datasetIdentifiers = datasets.map(row => row.datasetIdentifier)
     const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers)
@@ -64,7 +66,7 @@ export const DatasetSearchTable = (props) => {
         .value()
       setExportableDatasets(datasetIdToSnapshot)
     }
-  }
+  }, [])
 
   const assembleFullQuery = useCallback(() => {
     let searchModifier = null
@@ -198,15 +200,20 @@ export const DatasetSearchTable = (props) => {
     setFilters(newFilters)
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isEmpty(datasets)) {
       return
     }
     // Calling setState inside this effect is intentional: it updates
     // derived state from `datasets` when they arrive.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     getExportableDatasets(datasets)
-  }, [datasets])
+
+    const getRadarEnabledDatasets = async (datasets) => {
+      const radarEnabledDatasetIds = await getRadarEnabledDatasetsWithRules(datasets)
+      setRadarEnabledDatasetIds(radarEnabledDatasetIds)
+    }
+    getRadarEnabledDatasets(datasets)
+  }, [datasets, getExportableDatasets])
 
   const abortControllerRef = useRef(null)
 
@@ -295,7 +302,14 @@ export const DatasetSearchTable = (props) => {
             searchRef={searchRef}
           />
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'row', padding: '0 5rem', marginTop: '1rem', borderBottom: '1px solid black' }}>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          padding: '0 5rem',
+          marginTop: '1rem',
+          borderBottom: '1px solid black',
+        }}
+        >
           <Tabs
             value={false}
             orientation="horizontal"
@@ -317,7 +331,13 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
           <Box sx={{ width: '14%', padding: '0 1em' }}>
-            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} filters={filters} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters(datasets))} />
+            <DatasetFilterList
+              datasets={datasets}
+              filterHandler={filterHandler}
+              filters={filters}
+              isFiltered={isFilteredArray}
+              onClear={() => setFilters(defaultFilters(datasets))}
+            />
           </Box>
           <Box sx={{ width: '85%', padding: '0 1em' }}>
             {(() => {
@@ -325,20 +345,37 @@ export const DatasetSearchTable = (props) => {
                 return (
                   <Box sx={{
                     display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%',
+                  }}
                   >
                     <h1>No datasets registered for this library.</h1>
                   </Box>
                 )
               }
               else {
-                return <DatasetSearchTableDisplay key={selectedTable.key} tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets} />
+                return (
+                  <DatasetSearchTableDisplay
+                    key={selectedTable.key}
+                    tab={selectedTable}
+                    onSelect={setSelected}
+                    filteredData={filtered}
+                    selected={selected}
+                    exportableDatasets={exportableDatasets}
+                    radarEnabledDatasetIds={radarEnabledDatasetIds}
+                  />
+                )
               }
             })()}
           </Box>
         </Box>
         <Box sx={{ padding: '1em' }} />
-        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, navigate)} />}
+        {!isEmpty(selected) && (
+          <DatasetSearchFooter
+            selectedDatasets={selected}
+            datasets={datasets}
+            onClick={() => applyForAccess(selected, navigate)}
+          />
+        )}
       </Box>
     </>
   )
