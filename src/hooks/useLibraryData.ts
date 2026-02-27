@@ -132,7 +132,7 @@ export const buildElasticsearchQuery = (
     })
   }
 
-  // Build different query structure for studies vs datasets
+  // Build different query structure for studies vs datasets vs biospecimens
   if (assetType === AssetType.STUDIES) {
     // For studies, use aggregations
     return {
@@ -209,6 +209,60 @@ export const buildElasticsearchQuery = (
           },
         },
       },
+    }
+  }
+
+  // For biospecimen, use relevant fields and aggregations
+  if (assetType === AssetType.BIOSPECIMENS) {
+    return {
+      from: pagination.page * pagination.pageSize,
+      size: pagination.pageSize,
+      query: {
+        bool: {
+          must: [
+            {
+              exists: { field: 'study.assets.biospecimens' },
+            },
+            ...(queryTerm
+              ? [{
+                  multi_match: {
+                    query: queryTerm,
+                    type: 'phrase_prefix',
+                    fields: [
+                      'study.assets.biospecimens.biospecimenId',
+                      'study.assets.biospecimens.specimenType',
+                      'study.assets.biospecimens.donorId',
+                      'study.assets.biospecimens.dateOfCollection',
+                      'study.studyName',
+                      'study.studyId',
+                    ],
+                  },
+                }]
+              : []),
+          ],
+          ...(filterQuery.length > 0 && { filter: filterQuery }),
+        },
+      },
+      aggs: {
+        specimen_type: {
+          terms: { field: 'study.assets.biospecimens.specimenType.keyword' },
+        },
+        donor_id: {
+          terms: { field: 'study.assets.biospecimens.donorId.keyword' },
+        },
+        collection_date: {
+          terms: { field: 'study.assets.biospecimens.dateOfCollection.keyword' },
+        },
+      },
+      ...(sort && {
+        sort: [
+          {
+            [`study.assets.biospecimens.${sort.field}`]: {
+              order: sort.order,
+            },
+          },
+        ],
+      }),
     }
   }
 
