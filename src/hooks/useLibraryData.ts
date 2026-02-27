@@ -212,6 +212,19 @@ export const buildElasticsearchQuery = (
     }
   }
 
+  // Text fields cannot be sorted directly and must use their .keyword sub-field.
+  const DATASET_SORT_FIELD_MAP: Record<string, string> = {
+    datasetName: 'datasetName.keyword',
+    studyName: 'study.studyName.keyword',
+    accessManagement: 'accessManagement.keyword',
+    dac: 'dac.dacName.keyword',
+    datasetIdentifier: 'datasetIdentifier.keyword',
+  }
+
+  const esSortField = sort
+    ? (DATASET_SORT_FIELD_MAP[sort.field] ?? sort.field)
+    : undefined
+
   // For datasets, use standard pagination
   return {
     from: pagination.page * pagination.pageSize,
@@ -225,7 +238,7 @@ export const buildElasticsearchQuery = (
     ...(sort && {
       sort: [
         {
-          [sort.field]: {
+          [esSortField!]: {
             order: sort.order,
           },
         },
