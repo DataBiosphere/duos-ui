@@ -66,6 +66,7 @@ export interface DarErrors {
   fundingResources?: ValidationError
   workspaces?: ValidationError
   consentGroups?: ValidationError
+  biospecimens?: ValidationError
 }
 
 export interface RusErrors {
