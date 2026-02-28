@@ -1,12 +1,20 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Skeleton, Typography } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, ExportableDatasets, LibraryVersionNew, SortOrder, StudyAggregation, TabConfig } from 'src/types/library'
-import { DatasetTerm } from 'src/types/model'
+import {
+  AssetType,
+  AvailableFilters,
+  ExportableDatasets, LibraryDataGridRowType,
+  LibraryVersionNew,
+  SortOrder,
+  StudyAggregation,
+  TabConfig,
+} from 'src/types/library'
+import { Biospecimen, DatasetTerm } from 'src/types/model'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
@@ -59,6 +67,7 @@ export const DataLibrary: React.FC = () => {
   const tabs: TabConfig[] = [
     { key: AssetType.STUDIES, label: 'Studies' },
     { key: AssetType.DATASETS, label: 'Datasets' },
+    { key: AssetType.BIOSPECIMENS, label: 'Biospecimens' },
   ]
 
   const searchRef = useRef<HTMLInputElement>(null)
@@ -166,7 +175,7 @@ export const DataLibrary: React.FC = () => {
   const selectedStudyIds = useMemo(() => {
     if (!data?.items) return []
     const studyIds = new Set<number>()
-    data.items.forEach((item: StudyAggregation | DatasetTerm) => {
+    data.items.forEach((item: LibraryDataGridRowType) => {
       switch (urlState.tab) {
         case AssetType.STUDIES: {
           const study = item as StudyAggregation
@@ -179,6 +188,13 @@ export const DataLibrary: React.FC = () => {
           const dataset = item as DatasetTerm
           if (selectedDatasetIds.includes(dataset.datasetId)) {
             studyIds.add(dataset.study.studyId)
+          }
+          break
+        }
+        case AssetType.BIOSPECIMENS: {
+          const dataset = item as DatasetTerm
+          if (dataset?.study?.assets?.biospecimens?.some((bio: Biospecimen) => selectedDatasetIds.map(String).includes(bio.biospecimenId))) {
+            studyIds.add(Number(dataset.study.studyId))
           }
           break
         }
@@ -375,6 +391,8 @@ export const DataLibrary: React.FC = () => {
                         return (data?.total === 1) ? 'Study' : 'Studies'
                       case AssetType.DATASETS:
                         return (data?.total === 1) ? 'Dataset' : 'Datasets'
+                      case AssetType.BIOSPECIMENS:
+                        return (data?.total === 1) ? 'Biospecimen' : 'Biospecimens'
                       default:
                         return 'Assets'
                     }
