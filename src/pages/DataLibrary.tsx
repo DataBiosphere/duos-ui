@@ -197,7 +197,7 @@ export const DataLibrary: React.FC = () => {
   }, [urlState.sortField, urlState.sortOrder])
 
   const handleTabChange = (newAssetType: AssetType) => {
-    updateUrlState({ tab: newAssetType })
+    updateUrlState({ tab: newAssetType, page: 0 })
     setSelectedDatasetIds([])
   }
 
