@@ -202,6 +202,16 @@ export interface StudyTerm {
   dataCustodianEmail: string[]
   publicVisibility: boolean
   dataTypes: string[]
+  assets?: {
+    models?: Array<AiModel>
+    workspaces?: Array<Workspace>
+    publications?: Array<Publication>
+    presentations?: Array<Presentation>
+    clinicalTrials?: Array<ClinicalTrial>
+    funding?: Array<FundingResource>
+    intellectualProperties?: Array<IntellectualProperty>
+    biospecimens?: Array<Biospecimen>
+  }
 }
 
 export interface DataUseTerm {
