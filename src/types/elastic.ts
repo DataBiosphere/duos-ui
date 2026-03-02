@@ -1,4 +1,4 @@
-import { SortOrder } from 'src/types/library'
+import { ModelAsset, SortOrder } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 
 export interface MatchQuery {
@@ -193,23 +193,8 @@ export interface StudyAggregationResponse {
   after_key?: { study_id: number }
 }
 
-export interface Maintainer {
-  name?: string
-  email?: string
-}
-
-export interface AiModelAsset {
-  modelId?: string
-  studyId?: string
-  name?: string
-  description?: string
-  url?: string
-  format?: string
-  license?: string
-  trainedOnDatasets?: string[]
-  maintainer?: Maintainer
-  tags?: string[]
-}
+/** Raw Elasticsearch document shape for a model asset; derived from ModelAsset so both stay in sync. */
+export type PartialModelAsset = Partial<ModelAsset>
 
 /** Bucket shape from a terms aggregation on study.studyId, used for the Models view */
 export interface ModelStudyAggregationBucket {
@@ -225,7 +210,7 @@ export interface ModelStudyAggregationBucket {
             description?: string
             piName?: string
             assets?: {
-              models?: AiModelAsset[]
+              models?: PartialModelAsset[]
             }
           }
         }

@@ -1,12 +1,12 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
-import { ModelRow } from 'src/types/library'
+import { ModelAsset } from 'src/types/library'
 
 /**
  * Column definitions for AI model view
  */
-export const makeModelColumns = (): GridColDef<ModelRow>[] => [
+export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
   {
     field: 'name',
     headerName: 'Model Name',

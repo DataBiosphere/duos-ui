@@ -1,6 +1,6 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, ModelStudyAggregationResponse, QueryClause } from 'src/types/elastic'
-import { ModelRow, PaginationState, SortState } from 'src/types/library'
+import { ModelAsset, PaginationState, SortState } from 'src/types/library'
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
 
@@ -55,7 +55,7 @@ export const modelAsset: AssetDefinition = {
   transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as ModelStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
-    const models: ModelRow[] = []
+    const models: ModelAsset[] = []
 
     for (const bucket of buckets) {
       const studyData = bucket.study_details?.hits?.hits?.[0]?._source?.study || {}
@@ -92,7 +92,7 @@ export const modelAsset: AssetDefinition = {
   },
 
   getRowId(row: LibraryRow): string | number {
-    return (row as ModelRow).modelId
+    return (row as ModelAsset).modelId
   },
 
   isRowSelectable(_row: LibraryRow): boolean {

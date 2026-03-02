@@ -9,11 +9,11 @@
  */
 import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
-import { ExportableDatasets, ModelRow, PaginationState, SortState, StudyAggregation } from 'src/types/library'
+import { ExportableDatasets, ModelAsset, PaginationState, SortState, StudyAggregation } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 
 /** Union of every row type that can appear in the DataGrid */
-export type LibraryRow = DatasetTerm | StudyAggregation | ModelRow
+export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset
 
 /** Normalized result returned by every asset's `transformResponse` */
 export interface LibraryPage {

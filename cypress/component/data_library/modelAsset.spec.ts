@@ -5,7 +5,7 @@
  * in the Cypress component runner via plain `describe` / `it` blocks.
  */
 import { modelAsset } from 'src/components/data_library/assets/modelAsset'
-import { ModelRow, PaginationState, SortState } from 'src/types/library'
+import { ModelAsset, PaginationState, SortState } from 'src/types/library'
 import {
   ElasticsearchResponse,
   ModelStudyAggregationBucket,
@@ -183,7 +183,7 @@ describe('modelAsset — transformResponse', () => {
     expect(result.total).to.equal(3)
   })
 
-  it('maps fields correctly from bucket to ModelRow', () => {
+  it('maps fields correctly from bucket to ModelAsset', () => {
     const response = makeResponse([
       makeBucket(42, [{
         modelId: 'model-xyz',
@@ -196,7 +196,7 @@ describe('modelAsset — transformResponse', () => {
       }], 'NHGRI Study'),
     ])
     const result = modelAsset.transformResponse(response, pagination)
-    const row = result.items[0] as ModelRow
+    const row = result.items[0] as ModelAsset
     expect(row.modelId).to.equal('model-xyz')
     expect(row.studyId).to.equal(42)
     expect(row.studyName).to.equal('NHGRI Study')
@@ -214,7 +214,7 @@ describe('modelAsset — transformResponse', () => {
       makeBucket(99, [{ name: 'NoId Model' }]),
     ])
     const result = modelAsset.transformResponse(response, pagination)
-    const row = result.items[0] as ModelRow
+    const row = result.items[0] as ModelAsset
     // composite fallback: `${bucket.key}-${index}`
     expect(row.modelId).to.equal('99-0')
   })
@@ -228,15 +228,15 @@ describe('modelAsset — transformResponse', () => {
 
     const page0 = modelAsset.transformResponse(response, { page: 0, pageSize: 10 })
     expect(page0.items).to.have.length(10)
-    expect((page0.items[0] as ModelRow).name).to.equal('Model 0')
+    expect((page0.items[0] as ModelAsset).name).to.equal('Model 0')
 
     const page1 = modelAsset.transformResponse(response, { page: 1, pageSize: 10 })
     expect(page1.items).to.have.length(10)
-    expect((page1.items[0] as ModelRow).name).to.equal('Model 10')
+    expect((page1.items[0] as ModelAsset).name).to.equal('Model 10')
 
     const page2 = modelAsset.transformResponse(response, { page: 2, pageSize: 10 })
     expect(page2.items).to.have.length(10)
-    expect((page2.items[0] as ModelRow).name).to.equal('Model 20')
+    expect((page2.items[0] as ModelAsset).name).to.equal('Model 20')
   })
 
   it('reports total as the number of all models across all studies (not just page)', () => {
@@ -250,7 +250,7 @@ describe('modelAsset — transformResponse', () => {
     const response = makeResponse([
       makeBucket(1, [{}]),
     ])
-    const row = modelAsset.transformResponse(response, pagination).items[0] as ModelRow
+    const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
     expect(row.tags).to.deep.equal([])
     expect(row.maintainer.name).to.equal('')
     expect(row.maintainer.email).to.equal('')
@@ -272,7 +272,7 @@ describe('modelAsset — transformResponse', () => {
 
 describe('modelAsset — getRowId', () => {
   it('returns the modelId of the row', () => {
-    const row: ModelRow = {
+    const row: ModelAsset = {
       modelId: 'abc-123',
       studyId: 1,
       studyName: '',
@@ -294,7 +294,7 @@ describe('modelAsset — getRowId', () => {
 
 describe('modelAsset — isRowSelectable', () => {
   it('always returns false — models do not participate in access requests', () => {
-    const row: ModelRow = {
+    const row: ModelAsset = {
       modelId: 'm1',
       studyId: 1,
       studyName: '',
@@ -316,7 +316,7 @@ describe('modelAsset — isRowSelectable', () => {
 
 describe('modelAsset — computeRowSelection', () => {
   it('always returns an empty Set regardless of inputs', () => {
-    const row: ModelRow = {
+    const row: ModelAsset = {
       modelId: 'm1',
       studyId: 1,
       studyName: '',
@@ -350,7 +350,7 @@ describe('modelAsset — selectionToDatasetIds', () => {
 
 describe('modelAsset — getStudyIdsForSelection', () => {
   it('always returns an empty array', () => {
-    const row: ModelRow = {
+    const row: ModelAsset = {
       modelId: 'm1',
       studyId: 42,
       studyName: '',

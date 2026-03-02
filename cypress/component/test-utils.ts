@@ -1,5 +1,5 @@
 import { DatasetTerm, StudyTerm, UserTerm } from 'src/types/model'
-import { ModelRow } from 'src/types/library'
+import { ModelAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -57,7 +57,7 @@ export const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTe
   ...overrides,
 })
 
-export const makeModelRow = (overrides: Partial<ModelRow> = {}): ModelRow => ({
+export const makeModelRow = (overrides: Partial<ModelAsset> = {}): ModelAsset => ({
   modelId: 'model-1',
   studyId: 42,
   studyName: 'Test Study',

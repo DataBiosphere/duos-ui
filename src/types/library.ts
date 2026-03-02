@@ -141,7 +141,7 @@ export interface Maintainer {
   email: string
 }
 
-export interface ModelRow {
+export interface ModelAsset {
   modelId: string
   studyId: number
   studyName: string
