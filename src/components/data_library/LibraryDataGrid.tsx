@@ -57,7 +57,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
     onSelectionChange(
       asset.selectionToDatasetIds(
         Array.isArray(data) ? data as LibraryRow[] : [],
-        Array.from(newSelection.ids) as (string | number)[],
+        Array.from(newSelection.ids),
       ),
     )
   }
