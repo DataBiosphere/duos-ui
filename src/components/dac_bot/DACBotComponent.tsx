@@ -44,8 +44,10 @@ export type ParsedDACbotRule = DACbotRule & {
  */
 const DEFAULT_MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {}
 
+type RuleGroupLabel = 'Automatic approval' | 'Automatic open' | 'SO prior approval'
+
 /** Maps each ruleType to a visual group heading */
-const RULE_GROUP_LABELS: { [key: string]: string } = {
+const RULE_GROUP_LABELS: { [key: string]: RuleGroupLabel } = {
   GRU_V1: 'Automatic approval',
   HMB_V1: 'Automatic approval',
   GRU_DSV1: 'Automatic approval',
@@ -55,14 +57,14 @@ const RULE_GROUP_LABELS: { [key: string]: string } = {
 }
 
 /** Order in which groups appear; rules with unknown types go last */
-const GROUP_ORDER = ['Automatic approval', 'Automatic open', 'SO prior approval']
+const GROUP_ORDER: RuleGroupLabel[] = ['Automatic approval', 'Automatic open', 'SO prior approval']
 
 /**
  * Groups parsed rules by their visual group label, preserving order within each group.
  * Rules with unrecognized ruleTypes are placed in an "Other" group at the end.
  */
-const groupRules = (rules: ParsedDACbotRule[]): { label: string, rules: ParsedDACbotRule[] }[] => {
-  const groups = new Map<string, ParsedDACbotRule[]>()
+const groupRules = (rules: ParsedDACbotRule[]): { label: RuleGroupLabel | 'Other', rules: ParsedDACbotRule[] }[] => {
+  const groups = new Map<RuleGroupLabel | 'Other', ParsedDACbotRule[]>()
   for (const rule of rules) {
     const label = RULE_GROUP_LABELS[rule.ruleType] ?? 'Other'
     if (!groups.has(label)) {
@@ -72,7 +74,7 @@ const groupRules = (rules: ParsedDACbotRule[]): { label: string, rules: ParsedDA
   }
   const orderedLabels = [
     ...GROUP_ORDER.filter(l => groups.has(l)),
-    ...Array.from(groups.keys()).filter(l => !GROUP_ORDER.includes(l)),
+    ...Array.from(groups.keys()).filter(l => !GROUP_ORDER.includes(l as RuleGroupLabel)),
   ]
   return orderedLabels.map(label => ({ label, rules: groups.get(label)! }))
 }

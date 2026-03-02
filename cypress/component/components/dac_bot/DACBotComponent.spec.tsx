@@ -106,18 +106,26 @@ describe('DACBotComponent', () => {
         cy.contains('only General Research Use (GRU)').should('exist')
         cy.contains('only Health/Medical/Biomedical Use (HMB)').should('exist')
         cy.contains('Disease Specific (DS) with one or more selected diseases').should('exist')
+        cy.contains('without requiring Chair to open manually').should('not.exist')
+        cy.contains('Require approval by the Signing Official').should('not.exist')
       })
     })
 
     it('places AUTO_OPEN_DAR_FOR_ALL_MEMBERS under Automatic open', () => {
       cy.get('[data-cy="rule-group-automatic-open"]').within(() => {
         cy.contains('without requiring Chair to open manually').should('exist')
+        cy.contains('only General Research Use (GRU)').should('not.exist')
+        cy.contains('Disease Specific (DS) with one or more selected diseases').should('not.exist')
+        cy.contains('Require approval by the Signing Official').should('not.exist')
       })
     })
 
     it('places REQUIRE_SO_DAR_APPROVAL under SO prior approval', () => {
       cy.get('[data-cy="rule-group-so-prior-approval"]').within(() => {
         cy.contains('Require approval by the Signing Official').should('exist')
+        cy.contains('only General Research Use (GRU)').should('not.exist')
+        cy.contains('Disease Specific (DS) with one or more selected diseases').should('not.exist')
+        cy.contains('without requiring Chair to open manually').should('not.exist')
       })
     })
 
