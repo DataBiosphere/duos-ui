@@ -1,14 +1,13 @@
 import React, { useMemo, useState } from 'react'
-import homeHeaderBackground from '../images/home_header_background.png'
-import duosLogoImg from '../images/duos_logo.svg'
-import duosDiagram from '../images/DUOS_Homepage_diagram.svg'
-import broadLogo from '../images/broad_logo_allwhite.png'
-import { OverflowTooltip } from '../components/Tooltips'
-import { Link } from 'react-router-dom'
-import { getLibraryVersions } from '../libs/libraryVersions'
+import homeHeaderBackground from 'src/images/home_header_background.png'
+import duosLogoImg from 'src/images/duos_logo.svg'
+import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
+import broadLogo from 'src/images/broad_logo_allwhite.png'
+import { OverflowTooltip } from 'src/components/Tooltips'
+import { Link, useLocation } from 'react-router-dom'
+import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
-import { SupportRequestModal } from '../components/modals/SupportRequestModal'
-import { useLocation } from 'react-router-dom'
+import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 
 const Home = (props) => {
   const { isLogged } = props
