@@ -1,5 +1,5 @@
-import { DatasetTerm, StudyTerm, UserTerm } from 'src/types/model'
-import { ModelAsset } from 'src/types/library'
+import { BioSpecimenPreservationMethod, BioSpecimenType, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
+import { BiospecimenAsset, ModelAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -69,5 +69,18 @@ export const makeModelRow = (overrides: Partial<ModelAsset> = {}): ModelAsset =>
   trainedOnDatasets: [],
   maintainer: { name: 'Jane Doe', email: 'jane@example.com' },
   tags: ['genomics', 'classification'],
+  ...overrides,
+})
+
+export const makeBiospecimenRow = (overrides: Partial<BiospecimenAsset> = {}): BiospecimenAsset => ({
+  biospecimenId: 'BS-001',
+  studyId: 1,
+  studyName: 'Test Study',
+  donorId: 'DONOR-001',
+  specimenType: BioSpecimenType.BLOOD,
+  preservationMethod: BioSpecimenPreservationMethod.FRESH_FROZEN,
+  sex: Sex.FEMALE,
+  age: 45,
+  organization: 'Test Biobank',
   ...overrides,
 })
