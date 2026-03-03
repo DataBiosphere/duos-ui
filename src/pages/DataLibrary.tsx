@@ -161,7 +161,7 @@ export const DataLibrary: React.FC = () => {
     }
   }, [metadata])
 
-  const { data: rawData, isLoading, isFetching, error } = useLibraryData(
+  const { data, isLoading, isFetching, error } = useLibraryData(
     libraryConfig,
     urlState.tab,
     urlState.filters,
@@ -171,26 +171,6 @@ export const DataLibrary: React.FC = () => {
       ? { field: urlState.sortField, order: urlState.sortOrder }
       : undefined,
   )
-
-  const data = useMemo(() => {
-    if (urlState.tab === AssetType.BIOSPECIMENS && rawData?.items) {
-      const items = (rawData.items as DatasetTerm[]).flatMap(dataset =>
-        (dataset.study?.assets?.biospecimens || []).map(bio => ({
-          ...bio,
-          studyName: dataset.study.studyName,
-          studyId: dataset.study.studyId,
-        })),
-      )
-      return {
-        items,
-        total: items.length,
-      }
-    }
-    return {
-      items: rawData?.items || [],
-      total: rawData?.total || 0,
-    }
-  }, [rawData?.items, rawData?.total, urlState.tab])
 
   const selectedStudyIds = useMemo(() => {
     if (!data?.items) return []
@@ -212,9 +192,9 @@ export const DataLibrary: React.FC = () => {
           break
         }
         case AssetType.BIOSPECIMENS: {
-          const biospecimen = item as Biospecimen
-          if (selectedDatasetIds.map(String).includes(biospecimen.biospecimenId)) {
-            studyIds.add(Number(biospecimen.studyId))
+          const dataset = item as DatasetTerm
+          if (dataset?.study?.assets?.biospecimens?.some((bio: Biospecimen) => selectedDatasetIds.map(String).includes(bio.biospecimenId))) {
+            studyIds.add(Number(dataset.study.studyId))
           }
           break
         }
