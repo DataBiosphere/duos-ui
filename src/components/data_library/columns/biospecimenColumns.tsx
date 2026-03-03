@@ -1,7 +1,8 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Biospecimen } from 'src/types/model'
-import { Link } from '@mui/material'
+import { Box, Link } from '@mui/material'
+import Tooltip from '@mui/material/Tooltip'
 
 export const makeBiospecimenColumns = (): GridColDef<Biospecimen>[] => [
   {
@@ -10,7 +11,7 @@ export const makeBiospecimenColumns = (): GridColDef<Biospecimen>[] => [
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link href={`/studies/${params.row?.studyId}`} underline="hover">
+      <Link href={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),
@@ -19,23 +20,88 @@ export const makeBiospecimenColumns = (): GridColDef<Biospecimen>[] => [
     field: 'biospecimenId',
     headerName: 'Biospecimen ID',
     flex: 1,
-    width: 200,
+    minWidth: 150,
+    renderCell: (params) => {
+      const text = params.value || ''
+      return (
+        <Tooltip title={text} placement="top">
+          <Box
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {text}
+          </Box>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'specimenType',
     headerName: 'Specimen Type',
     width: 150,
+    renderCell: (params) => {
+      const value = params.value || ''
+      const label = value
+        .toLowerCase()
+        .replaceAll('_', ' ')
+        .replaceAll(/\b\w/g, (c: string) => c.toUpperCase())
+      return (
+        <Tooltip title={label} placement="top">
+          <Box
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {label}
+          </Box>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'donorId',
     headerName: 'Donor ID',
     flex: 1,
-    width: 150,
+    minWidth: 150,
+    renderCell: (params) => {
+      const text = params.value || ''
+      return (
+        <Tooltip title={text} placement="top">
+          <Box
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {text}
+          </Box>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'dateOfCollection',
     headerName: 'Date Of Collection',
-    flex: 1,
     width: 150,
+    renderCell: (params) => {
+      const text = params.value || ''
+      return (
+        <Box
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {text}
+        </Box>
+      )
+    },
   },
 ]

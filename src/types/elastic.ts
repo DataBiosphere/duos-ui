@@ -1,4 +1,4 @@
-import { ModelAsset, SortOrder } from 'src/types/library'
+import { BiospecimenAsset, ModelAsset, SortOrder } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 
 export interface MatchQuery {
@@ -221,6 +221,34 @@ export interface ModelStudyAggregationBucket {
 
 export interface ModelStudyAggregationResponse {
   buckets: ModelStudyAggregationBucket[]
+}
+
+/** Raw Elasticsearch document shape for a biospecimen asset */
+export type PartialBiospecimenAsset = Partial<BiospecimenAsset>
+
+/** Bucket shape from a terms aggregation on study.studyId, used for the Biospecimens view */
+export interface BiospecimenStudyAggregationBucket {
+  key: number
+  doc_count: number
+  study_details?: {
+    hits?: {
+      hits?: Array<{
+        _source?: {
+          study?: {
+            studyId?: number
+            studyName?: string
+            assets?: {
+              biospecimens?: PartialBiospecimenAsset[]
+            }
+          }
+        }
+      }>
+    }
+  }
+}
+
+export interface BiospecimenStudyAggregationResponse {
+  buckets: BiospecimenStudyAggregationBucket[]
 }
 
 export interface PaginatedResponse<T> {
