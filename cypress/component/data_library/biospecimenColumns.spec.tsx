@@ -172,7 +172,7 @@ describe('makeBiospecimenColumns — tooltip and text ellipsis', () => {
 
     cy.get('[role="row"]').eq(1).within(() => {
       cy.get('div').filter((_, el) => {
-        const style = window.getComputedStyle(el)
+        const style = globalThis.getComputedStyle(el)
         return style.textOverflow === 'ellipsis' && style.whiteSpace === 'nowrap'
       }).should('exist')
     })
