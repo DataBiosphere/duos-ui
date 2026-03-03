@@ -1,4 +1,5 @@
 import { DatasetTerm, StudyTerm, UserTerm } from 'src/types/model'
+import { ModelAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -53,5 +54,20 @@ export const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTe
     dacEmail: 'some email',
   },
   piName: 'pi name',
+  ...overrides,
+})
+
+export const makeModelRow = (overrides: Partial<ModelAsset> = {}): ModelAsset => ({
+  modelId: 'model-1',
+  studyId: 42,
+  studyName: 'Test Study',
+  name: 'My Model',
+  description: 'A test model',
+  url: 'https://example.com/model',
+  format: 'ONNX',
+  license: 'MIT',
+  trainedOnDatasets: [],
+  maintainer: { name: 'Jane Doe', email: 'jane@example.com' },
+  tags: ['genomics', 'classification'],
   ...overrides,
 })
