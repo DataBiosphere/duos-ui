@@ -200,7 +200,7 @@ const Home = (props) => {
                 Find and request access to 100s of datasets through DUOS!
                 <br />
                 <span
-                  onClick={() => handleSignIn()}
+                  onClick={() => handleSignIn('/datalibrary')}
                   style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
                 >
                   Sign in
