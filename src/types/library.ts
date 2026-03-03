@@ -2,13 +2,11 @@
  * Type definitions for the Data Library feature
  */
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
-import { Biospecimen, DatasetTerm } from 'src/types/model'
 
 export enum AssetType {
   STUDIES = 'studies',
   DATASETS = 'datasets',
   MODELS = 'models',
-  BIOSPECIMENS = 'biospecimens',
 }
 
 export interface LibraryVersionNew {
@@ -87,8 +85,6 @@ export interface LibraryTabsProps {
   onChange: (assetType: AssetType) => void
   tabs: TabConfig[]
 }
-
-export type LibraryDataGridRowType = DatasetTerm | StudyAggregation | Biospecimen
 
 export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
 
