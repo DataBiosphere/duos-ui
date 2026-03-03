@@ -6,11 +6,10 @@ import { Storage } from 'src/libs/storage'
 export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   selectedDatasetIds,
   selectedStudyIds,
-  selectedItemLabel,
   onApplyForAccess,
 }) => {
   const hasSelection = selectedDatasetIds.length > 0
-  const datasetText = selectedItemLabel ?? (selectedDatasetIds.length === 1 ? 'dataset' : 'datasets')
+  const datasetText = selectedDatasetIds.length === 1 ? 'dataset' : 'datasets'
   const studyText = selectedStudyIds.length === 1 ? 'study' : 'studies'
   const hasLibraryCard = Storage.getCurrentUser()?.libraryCard != null
 

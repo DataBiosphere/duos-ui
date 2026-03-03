@@ -137,6 +137,5 @@ export interface SortState {
 export interface LibraryFooterProps {
   selectedDatasetIds: number[]
   selectedStudyIds: number[]
-  selectedItemLabel?: string
   onApplyForAccess: () => void
 }

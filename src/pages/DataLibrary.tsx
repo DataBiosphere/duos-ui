@@ -451,14 +451,6 @@ export const DataLibrary: React.FC = () => {
       <LibraryFooter
         selectedDatasetIds={selectedDatasetIds}
         selectedStudyIds={selectedStudyIds}
-        selectedItemLabel={
-          (() => {
-            if (urlState.tab === AssetType.BIOSPECIMENS) {
-              return selectedDatasetIds.length === 1 ? 'biospecimen' : 'biospecimens'
-            }
-            return selectedDatasetIds.length === 1 ? 'dataset' : 'datasets'
-          })()
-        }
         onApplyForAccess={handleApplyForAccess}
       />
     </Box>
