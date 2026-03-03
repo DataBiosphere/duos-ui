@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert } from '../../components/Alert'
 import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
 import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab'
-import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab'
+import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalSlab'
 import { User } from '../../libs/ajax/User'
 
 const DatasetVoteSlabs = ({ dataBuckets, collection, dacDatasetIds, isChair, isApprovalDisabled, readOnly, adminPage, updateFinalVote, isLoading, reloadFn }) => {
@@ -28,7 +28,7 @@ const DatasetVoteSlabs = ({ dataBuckets, collection, dacDatasetIds, isChair, isA
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
-    padding: '35px',
+    padding: '15px 35px 35px 35px',
     whiteSpace: 'pre-line',
   },
   slabs: {
@@ -43,6 +43,14 @@ const styles = {
     fontWeight: 'bold',
     paddingBottom: '20px',
     paddingTop: '35px',
+  },
+  firstTitle: {
+    color: '#333F52',
+    fontFamily: 'Montserrat',
+    fontSize: 17,
+    fontWeight: 'bold',
+    paddingBottom: '20px',
+    paddingTop: '15px',
   },
 }
 
@@ -76,7 +84,7 @@ export default function MultiDatasetVotingTab(props) {
   return (
     <div style={styles.baseStyle}>
       <AILLMWarningBanner darInfo={darInfo} />
-      <div style={styles.title}>Research Use Statement</div>
+      <div style={styles.firstTitle}>Research Use Statement</div>
       {dataAccessApprovalDisabled() && !readOnly && (
         <Alert
           type="danger"

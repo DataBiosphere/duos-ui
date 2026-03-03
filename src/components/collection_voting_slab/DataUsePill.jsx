@@ -42,9 +42,32 @@ export const DataUsePill = (props) => {
   )
 }
 
-export const DataUsePills = (dataUses) => {
+export const DataUsePills = (dataUses, twoColumn = false) => {
   const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions)
   const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers)
+
+  if (twoColumn) {
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        <div className="permissions-uses">
+          <h3 style={styles.subheading}>{ControlledAccessType.permissions}</h3>
+          {permissionsUses.map((dataUse, idx) => (
+            <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} index={idx} />
+          ))}
+        </div>
+        <div className="modifier-uses">
+          {modifierUses.length > 0 && (
+            <>
+              <h3 style={styles.subheading}>{ControlledAccessType.modifiers}</h3>
+              {modifierUses.map((dataUse, idx) => (
+                <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} index={idx} />
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
