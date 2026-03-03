@@ -83,8 +83,8 @@ export const makeClinicalTrialColumns = (): GridColDef<ClinicalTrialAsset>[] => 
       const value = params.value || ''
       const label = value
         .toLowerCase()
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (c: string) => c.toUpperCase())
+        .replaceAll('_', ' ')
+        .replaceAll(/\b\w/g, (c: string) => c.toUpperCase())
       return (
         <Chip
           label={label}
@@ -102,7 +102,7 @@ export const makeClinicalTrialColumns = (): GridColDef<ClinicalTrialAsset>[] => 
     renderCell: (params) => {
       const value = params.value || ''
       const label = value
-        .replace(/_/g, ' ')
+        .replaceAll('_', ' ')
         .replace('EARLY ', 'Early ')
       return (
         <Tooltip title={label} placement="top">
@@ -127,8 +127,8 @@ export const makeClinicalTrialColumns = (): GridColDef<ClinicalTrialAsset>[] => 
       const value = params.value || ''
       const label = value
         .toLowerCase()
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (c: string) => c.toUpperCase())
+        .replaceAll('_', ' ')
+        .replaceAll(/\b\w/g, (c: string) => c.toUpperCase())
       return (
         <Tooltip title={label} placement="top">
           <Box
