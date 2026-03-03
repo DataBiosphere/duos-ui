@@ -1,15 +1,19 @@
-import React, { useMemo } from 'react'
-import homeHeaderBackground from '../images/home_header_background.png'
-import duosLogoImg from '../images/duos_logo.svg'
-import duosDiagram from '../images/DUOS_Homepage_diagram.svg'
-import broadLogo from '../images/broad_logo_allwhite.png'
-import { OverflowTooltip } from '../components/Tooltips'
-import { Link } from 'react-router-dom'
-import { getLibraryVersions } from '../libs/libraryVersions'
+import React, { useMemo, useState } from 'react'
+import homeHeaderBackground from 'src/images/home_header_background.png'
+import duosLogoImg from 'src/images/duos_logo.svg'
+import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
+import broadLogo from 'src/images/broad_logo_allwhite.png'
+import { OverflowTooltip } from 'src/components/Tooltips'
+import { Link, useLocation } from 'react-router-dom'
+import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
+import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 
 const Home = (props) => {
   const { isLogged } = props
+
+  const location = useLocation()
+  const [showContactModal, setShowContactModal] = useState(false)
 
   // Get all library versions and filter for featured ones
   const featuredLibraries = useMemo(() => {
@@ -155,25 +159,52 @@ const Home = (props) => {
             <div className="col-lg-4 col-md-4">
               <p style={header}>DUOS for DACs</p>
               <p style={description}>
-                DACs can swiftly manage data access requests
+                Swiftly manage data access requests
                 <br />
                 {' '}
                 and clearly track data use compliance.
+                <br />
+                {' '}
+                Interested in using DUOS for your DAC?
+                <br />
+                {' '}
+                Request a meeting with our team
+                <br />
+                <span
+                  onClick={() => setShowContactModal(true)}
+                  style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
+                >
+                  here
+                </span> to learn more.
               </p>
+              <SupportRequestModal
+                showModal={showContactModal}
+                onCloseRequest={() => setShowContactModal(false)}
+                url={location.pathname}
+              />
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
                 <a id="blog-support-dac-link" href="https://duos.blog/help/dacguide/" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
             </div>
             <div className="col-lg-4 col-md-4 ">
-              <p style={header}>Need to approve researchers to submit or request data?</p>
-              <p style={description}>Signing Officials can login to request status to approve researchers or click below to learn more about our expedite data access agreements</p>
+              <p style={header}>DUOS for Signing Officials</p>
+              <p style={description}>Grant permissions to principal investigators to request data.</p>
               <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
                 <a href="https://duos.blog/help/preauthorize_researchers_librarycards/" target="_blank" rel="noreferrer" id="blog-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
               </div>
             </div>
             <div className="col-lg-4 col-md-4">
               <p style={header}>Looking for data?</p>
-              <p style={description}>Find and request access to 100s of datasets through DUOS! Sign in to get started.</p>
+              <p style={description}>
+                Find and request access to 100s of datasets through DUOS!
+                <br />
+                <span
+                  onClick={() => handleSignIn('/datalibrary')}
+                  style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
+                >
+                  Sign in
+                </span> to get started.
+              </p>
             </div>
           </div>
 
