@@ -1,10 +1,10 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { Biospecimen } from 'src/types/model'
 import { Box, Link } from '@mui/material'
 import Tooltip from '@mui/material/Tooltip'
+import { BiospecimenAsset } from 'src/types/library'
 
-export const makeBiospecimenColumns = (): GridColDef<Biospecimen>[] => [
+export const makeBiospecimenColumns = (): GridColDef<BiospecimenAsset>[] => [
   {
     field: 'studyName',
     headerName: 'Study Name',
