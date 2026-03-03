@@ -245,7 +245,9 @@ export const buildElasticsearchQuery = (
                       'study.assets.biospecimens.biospecimenId',
                       'study.assets.biospecimens.specimenType',
                       'study.assets.biospecimens.donorId',
+                      'study.assets.biospecimens.dateOfCollection',
                       'study.studyName',
+                      'study.studyId',
                     ],
                   },
                 }]
