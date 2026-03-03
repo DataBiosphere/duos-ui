@@ -14,6 +14,7 @@ import { AssetDefinition } from 'src/components/data_library/assets/definition'
 import { studyAsset } from 'src/components/data_library/assets/studyAsset'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { modelAsset } from 'src/components/data_library/assets/modelAsset'
+import { clinicalTrialAsset } from 'src/components/data_library/assets/clinicalTrialAsset'
 import { biospecimenAsset } from 'src/components/data_library/assets/biospecimenAsset'
 
 export type {
@@ -27,5 +28,6 @@ export const assetRegistry: Record<AssetType, AssetDefinition> = {
   [AssetType.STUDIES]: studyAsset,
   [AssetType.DATASETS]: datasetAsset,
   [AssetType.MODELS]: modelAsset,
+  [AssetType.CLINICAL_TRIALS]: clinicalTrialAsset,
   [AssetType.BIOSPECIMENS]: biospecimenAsset,
 }
