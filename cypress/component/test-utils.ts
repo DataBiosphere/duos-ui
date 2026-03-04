@@ -1,5 +1,5 @@
 import { BioSpecimenPreservationMethod, BioSpecimenType, ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
-import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PublicationAsset } from 'src/types/library'
+import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PresentationAsset, PublicationAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -120,5 +120,24 @@ export const makePublicationRow = (overrides: Partial<PublicationAsset> = {}): P
   url: 'https://doi.org/10.1038/ng.1234',
   access: 'open',
   tags: ['genomics', 'GWAS'],
+  ...overrides,
+})
+
+export const makePresentationRow = (overrides: Partial<PresentationAsset> = {}): PresentationAsset => ({
+  presentationId: 'pres-001',
+  studyId: 42,
+  studyName: 'Test Study',
+  title: 'Genomics Data Sharing in the Modern Era',
+  date: '2024-03-15',
+  url: 'https://example.com/presentation',
+  authors: 'Alice Smith, Bob Jones',
+  datasetCitation: 'DUOS-123456',
+  citation: true,
+  presenter: { name: 'Alice Smith', email: 'alice@example.com' },
+  event: 'ASHG 2024',
+  location: 'Denver, CO',
+  format: 'Oral',
+  access: 'open',
+  tags: ['genomics', 'data-sharing'],
   ...overrides,
 })
