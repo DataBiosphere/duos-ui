@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import VotesPieChart from 'src/components/common/VotesPieChart'
 
 const styles = {
@@ -37,4 +38,10 @@ export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
       </div>
     </div>
   )
+}
+
+ChairVoteInfo.propTypes = {
+  dacVotes: PropTypes.array.isRequired,
+  isChair: PropTypes.bool,
+  adminPage: PropTypes.bool,
 }

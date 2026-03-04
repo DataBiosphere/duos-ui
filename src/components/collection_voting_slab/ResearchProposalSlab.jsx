@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import PropTypes from 'prop-types'
 import { DataUseTranslation } from '../../libs/dataUseTranslation'
 import { isNil, flatMap, keys } from 'lodash'
 import { DataUsePills } from './DataUsePill'
@@ -28,6 +29,10 @@ const styles = {
     textTransform: 'capitalize',
   },
   link: {
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    cursor: 'pointer',
     color: '#0948B7',
     fontWeight: '500',
   },
@@ -48,9 +53,6 @@ const styles = {
     fontWeight: '500',
     lineHeight: '20px',
     margin: '1.5rem',
-  },
-  skeletonLoader: {
-    height: '60px',
   },
 }
 
@@ -80,29 +82,35 @@ const DataUseSummary = ({ translatedDataUse }) => {
   return <div className="data-use-summary">{DataUsePills(allDataUses, true)}</div>
 }
 
-const SkeletonLoader = () => {
-  return <div className="text-placeholder" style={styles.skeletonLoader}></div>
+DataUseSummary.propTypes = {
+  translatedDataUse: PropTypes.object.isRequired,
 }
 
 const CollapseExpandLink = ({ expanded, setExpanded }) => {
-  const linkMessage = expanded
-    ? '(Hide)'
-    : '(Show)'
+  const linkMessage = expanded ? '(Hide)' : '(Show)'
 
   return (
-    <a
+    <button
       style={styles.link}
       id="rp-narrative-toggle"
       onClick={() => setExpanded(!expanded)}
     >
       {linkMessage}
-    </a>
+    </button>
   )
 }
 
+CollapseExpandLink.propTypes = {
+  expanded: PropTypes.bool.isRequired,
+  setExpanded: PropTypes.func.isRequired,
+}
+
 const ResearchPurposeSummary = ({ darInfo }) => {
-  return !isNil(darInfo)
+  return isNil(darInfo)
     ? (
+        <div />
+      )
+    : (
         <div style={styles.researchPurposeSummary}>
           <HighlightText
             highlight={highlightedWords}
@@ -110,51 +118,47 @@ const ResearchPurposeSummary = ({ darInfo }) => {
           />
         </div>
       )
-    : (
-        <div />
-      )
+}
+
+ResearchPurposeSummary.propTypes = {
+  darInfo: PropTypes.shape({ rus: PropTypes.string }),
 }
 
 export default function ResearchProposalSlab(props) {
   const [expanded, setExpanded] = useState(true)
   const { darInfo, isLoading } = props
-  const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {}
+  const translatedDataUse = isNil(darInfo) ? {} : DataUseTranslation.translateDarInfo(darInfo)
 
   return (
     <div data-cy="rp-slab" style={styles.baseStyle}>
-      {isLoading && (
-        <div className="text-placeholder" style={{ height: '100px' }} />
-      )}
-
-      {
-        !isLoading && (
-          <div>
-            <div style={styles.collapsedData}>
-              {isLoading
-                ? (
-                    <SkeletonLoader />
-                  )
-                : (
-                    <DataUseSummary translatedDataUse={translatedDataUse} />
-                  )}
-              {!isLoading && (
+      {isLoading
+        ? (
+            <div className="text-placeholder" style={{ height: '100px' }} />
+          )
+        : (
+            <div>
+              <div style={styles.collapsedData}>
+                <DataUseSummary translatedDataUse={translatedDataUse} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginTop: '1rem' }}>
                   <span style={styles.researchPurposeTitle}>Narrative</span>
                   <CollapseExpandLink expanded={expanded} setExpanded={setExpanded} />
                 </div>
-              )}
-              {expanded && (
-                <div data-cy="rp-expanded" style={styles.expandedData}>
-                  <div data-cy="research-purpose">
-                    <ResearchPurposeSummary darInfo={darInfo} />
-                    <DataUseAlertBox translatedDataUse={translatedDataUse} />
+                {expanded && (
+                  <div data-cy="rp-expanded" style={styles.expandedData}>
+                    <div data-cy="research-purpose">
+                      <ResearchPurposeSummary darInfo={darInfo} />
+                      <DataUseAlertBox translatedDataUse={translatedDataUse} />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        )
-      }
+          )}
     </div>
   )
+}
+
+ResearchProposalSlab.propTypes = {
+  darInfo: PropTypes.object,
+  isLoading: PropTypes.bool,
 }
