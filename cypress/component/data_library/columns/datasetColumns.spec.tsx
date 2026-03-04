@@ -1,7 +1,7 @@
 import React from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
-import { makeDatasetTerm } from '../test-utils'
+import { makeDatasetTerm } from '../../test-utils'
 
 /**
  * Tests for makeDatasetColumns — focused on the Access Management chip

@@ -2,11 +2,13 @@
  * Type definitions for the Data Library feature
  */
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
+import { AiModel, Biospecimen } from 'src/types/model'
 
 export enum AssetType {
   STUDIES = 'studies',
   DATASETS = 'datasets',
   MODELS = 'models',
+  BIOSPECIMENS = 'biospecimens',
 }
 
 export interface LibraryVersionNew {
@@ -136,21 +138,12 @@ export interface LibraryFooterProps {
   onApplyForAccess: () => void
 }
 
-export interface Maintainer {
-  name: string
-  email: string
-}
-
-export interface ModelAsset {
-  modelId: string
+export interface ModelAsset extends Omit<AiModel, 'studyId'> {
   studyId: number
   studyName: string
-  name: string
-  description: string
-  url: string
-  format: string
-  license: string
-  trainedOnDatasets: string[]
-  maintainer: Maintainer
-  tags?: string[]
+}
+
+export interface BiospecimenAsset extends Omit<Biospecimen, 'studyId'> {
+  studyId: number
+  studyName: string
 }

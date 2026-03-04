@@ -1,11 +1,18 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Skeleton, Typography } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, ExportableDatasets, LibraryVersionNew, SortOrder, TabConfig } from 'src/types/library'
+import {
+  AssetType,
+  AvailableFilters,
+  ExportableDatasets,
+  LibraryVersionNew,
+  SortOrder,
+  TabConfig,
+} from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 import { assetRegistry } from 'src/components/data_library/assets'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
@@ -61,6 +68,7 @@ export const DataLibrary: React.FC = () => {
     { key: AssetType.STUDIES, label: 'Studies' },
     { key: AssetType.DATASETS, label: 'Datasets' },
     { key: AssetType.MODELS, label: 'AI Models' },
+    { key: AssetType.BIOSPECIMENS, label: 'Biospecimens' },
   ]
 
   const searchRef = useRef<HTMLInputElement>(null)

@@ -30,7 +30,7 @@ export default function BiospecimenList(props: {
       addButtonId="add-biospecimen-btn"
       addButtonLabel={`${props.biospecimens.length}`}
       addButtonIcon=""
-      getValidationState={v => v?.aiModels}
+      getValidationState={v => v?.biospecimens}
       studyAssetWrapper={props.studyAssetWrapper}
       getAddEditProps={(items, closeAction, onItemsChange) => ({
         id: -1,

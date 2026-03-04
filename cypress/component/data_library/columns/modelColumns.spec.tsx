@@ -8,7 +8,7 @@
 import React from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
-import { makeModelRow } from '../test-utils'
+import { makeModelRow } from '../../test-utils'
 
 const renderGrid = (overrides = {}) => {
   const row = makeModelRow(overrides)
