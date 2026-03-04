@@ -70,6 +70,7 @@ export const DataLibrary: React.FC = () => {
     { key: AssetType.MODELS, label: 'AI Models' },
     { key: AssetType.CLINICAL_TRIALS, label: 'Clinical Trials' },
     { key: AssetType.BIOSPECIMENS, label: 'Biospecimens' },
+    { key: AssetType.FUNDING_RESOURCES, label: 'Funding Resources' },
   ]
 
   const searchRef = useRef<HTMLInputElement>(null)

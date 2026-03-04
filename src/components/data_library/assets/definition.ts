@@ -13,6 +13,7 @@ import {
   ClinicalTrialAsset,
   BiospecimenAsset,
   ExportableDatasets,
+  FundingResourceAsset,
   ModelAsset,
   PaginationState,
   SortState,
@@ -21,7 +22,7 @@ import {
 import { DatasetTerm } from 'src/types/model'
 
 /** Union of every row type that can appear in the DataGrid */
-export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | ClinicalTrialAsset | BiospecimenAsset
+export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | ClinicalTrialAsset | BiospecimenAsset | FundingResourceAsset
 
 /** Normalized result returned by every asset's `transformResponse` */
 export interface LibraryPage {
