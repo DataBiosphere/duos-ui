@@ -1,5 +1,5 @@
-import { BioSpecimenPreservationMethod, BioSpecimenType, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
-import { BiospecimenAsset, ModelAsset } from 'src/types/library'
+import { BioSpecimenPreservationMethod, BioSpecimenType, ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
+import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -69,6 +69,24 @@ export const makeModelRow = (overrides: Partial<ModelAsset> = {}): ModelAsset =>
   trainedOnDatasets: [],
   maintainer: { name: 'Jane Doe', email: 'jane@example.com' },
   tags: ['genomics', 'classification'],
+  ...overrides,
+})
+
+export const makeClinicalTrialRow = (overrides: Partial<ClinicalTrialAsset> = {}): ClinicalTrialAsset => ({
+  clinicalTrialId: 'NCT00000001',
+  studyId: 42,
+  studyName: 'Test Study',
+  title: 'A Phase II Trial',
+  registry: 'ClinicalTrials.gov',
+  identifier: 'NCT00000001',
+  status: ClinicalTrialStatus.RECRUITING,
+  sponsor: 'NHGRI',
+  startDate: '2024-01-01',
+  interventionType: ClinicalTrialInterventionType.BIOLOGICAL,
+  description: 'A test clinical trial',
+  phase: ClinicalTrialPhase.PHASE2,
+  url: 'https://clinicaltrials.gov/study/NCT00000001',
+  tags: ['immunotherapy'],
   ...overrides,
 })
 

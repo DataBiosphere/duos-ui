@@ -68,6 +68,7 @@ export const DataLibrary: React.FC = () => {
     { key: AssetType.STUDIES, label: 'Studies' },
     { key: AssetType.DATASETS, label: 'Datasets' },
     { key: AssetType.MODELS, label: 'AI Models' },
+    { key: AssetType.CLINICAL_TRIALS, label: 'Clinical Trials' },
     { key: AssetType.BIOSPECIMENS, label: 'Biospecimens' },
   ]
 
