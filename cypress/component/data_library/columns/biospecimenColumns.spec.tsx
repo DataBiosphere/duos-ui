@@ -8,7 +8,7 @@
 import React from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
-import { makeBiospecimenRow } from '../test-utils'
+import { makeBiospecimenRow } from '../../test-utils'
 
 const renderGrid = (overrides = {}) => {
   const row = makeBiospecimenRow(overrides)
