@@ -1,4 +1,4 @@
-import { BioSpecimenPreservationMethod, BioSpecimenType, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
+import { BioSpecimenPreservationMethod, BioSpecimenType, ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
 import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
@@ -79,12 +79,12 @@ export const makeClinicalTrialRow = (overrides: Partial<ClinicalTrialAsset> = {}
   title: 'A Phase II Trial',
   registry: 'ClinicalTrials.gov',
   identifier: 'NCT00000001',
-  status: 'RECRUITING',
+  status: ClinicalTrialStatus.RECRUITING,
   sponsor: 'NHGRI',
   startDate: '2024-01-01',
-  interventionType: 'BIOLOGICAL',
+  interventionType: ClinicalTrialInterventionType.BIOLOGICAL,
   description: 'A test clinical trial',
-  phase: 'PHASE2',
+  phase: ClinicalTrialPhase.PHASE2,
   url: 'https://clinicaltrials.gov/study/NCT00000001',
   tags: ['immunotherapy'],
   ...overrides,

@@ -8,6 +8,7 @@ import {
 import { ClinicalTrialAsset, PaginationState, SortState } from 'src/types/library'
 import { makeClinicalTrialColumns } from 'src/components/data_library/columns/clinicalTrialColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus } from 'src/types/model'
 
 export const clinicalTrialAsset: AssetDefinition = {
   label: { singular: 'Clinical Trial', plural: 'Clinical Trials' },
@@ -76,13 +77,13 @@ export const clinicalTrialAsset: AssetDefinition = {
           title: trial.title || '',
           registry: trial.registry || '',
           identifier: trial.identifier || '',
-          status: trial.status || '',
+          status: trial.status as ClinicalTrialStatus || '',
           sponsor: trial.sponsor || '',
           startDate: trial.startDate || '',
           endDate: trial.endDate,
-          interventionType: trial.interventionType || '',
+          interventionType: trial.interventionType as ClinicalTrialInterventionType || '',
           description: trial.description || '',
-          phase: trial.phase || '',
+          phase: trial.phase as ClinicalTrialPhase || '',
           url: trial.url || '',
           tags: trial.tags || [],
         })

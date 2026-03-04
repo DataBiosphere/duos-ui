@@ -11,6 +11,7 @@ import {
   ElasticsearchResponse,
   QueryClause,
 } from 'src/types/elastic'
+import { ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus } from 'src/types/model'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -26,13 +27,13 @@ const makeBucket = (
     title?: string
     registry?: string
     identifier?: string
-    status?: string
+    status?: ClinicalTrialStatus
     sponsor?: string
     startDate?: string
     endDate?: string
-    interventionType?: string
+    interventionType?: ClinicalTrialInterventionType
     description?: string
-    phase?: string
+    phase?: ClinicalTrialPhase
     url?: string
     tags?: string[]
   }> = [],
@@ -205,13 +206,13 @@ describe('clinicalTrialAsset — transformResponse', () => {
         title: 'Phase II Immunotherapy Study',
         registry: 'ClinicalTrials.gov',
         identifier: 'NCT00000042',
-        status: 'RECRUITING',
+        status: ClinicalTrialStatus.RECRUITING,
         sponsor: 'NHGRI',
         startDate: '2024-01-01',
         endDate: '2026-12-31',
-        interventionType: 'BIOLOGICAL',
+        interventionType: ClinicalTrialInterventionType.BIOLOGICAL,
         description: 'A phase II study',
-        phase: 'PHASE2',
+        phase: ClinicalTrialPhase.PHASE2,
         url: 'https://clinicaltrials.gov/study/NCT00000042',
         tags: ['immunotherapy', 'cancer'],
       }], 'NHGRI Study'),
@@ -304,12 +305,12 @@ describe('clinicalTrialAsset — getRowId', () => {
       title: '',
       registry: '',
       identifier: '',
-      status: '',
+      status: '' as ClinicalTrialStatus,
       sponsor: '',
       startDate: '',
-      interventionType: '',
+      interventionType: '' as ClinicalTrialInterventionType,
       description: '',
-      phase: '',
+      phase: '' as ClinicalTrialPhase,
       url: '',
     }
     expect(clinicalTrialAsset.getRowId(row)).to.equal('NCT-abc-123')
@@ -329,12 +330,12 @@ describe('clinicalTrialAsset — isRowSelectable', () => {
       title: '',
       registry: '',
       identifier: '',
-      status: '',
+      status: '' as ClinicalTrialStatus,
       sponsor: '',
       startDate: '',
-      interventionType: '',
+      interventionType: '' as ClinicalTrialInterventionType,
       description: '',
-      phase: '',
+      phase: '' as ClinicalTrialPhase,
       url: '',
     }
     expect(clinicalTrialAsset.isRowSelectable(row)).to.equal(false)
@@ -354,12 +355,12 @@ describe('clinicalTrialAsset — computeRowSelection', () => {
       title: '',
       registry: '',
       identifier: '',
-      status: '',
+      status: '' as ClinicalTrialStatus,
       sponsor: '',
       startDate: '',
-      interventionType: '',
+      interventionType: '' as ClinicalTrialInterventionType,
       description: '',
-      phase: '',
+      phase: '' as ClinicalTrialPhase,
       url: '',
     }
     const result = clinicalTrialAsset.computeRowSelection([row], [1, 2, 3])
@@ -391,12 +392,12 @@ describe('clinicalTrialAsset — getStudyIdsForSelection', () => {
       title: '',
       registry: '',
       identifier: '',
-      status: '',
+      status: '' as ClinicalTrialStatus,
       sponsor: '',
       startDate: '',
-      interventionType: '',
+      interventionType: '' as ClinicalTrialInterventionType,
       description: '',
-      phase: '',
+      phase: '' as ClinicalTrialPhase,
       url: '',
     }
     const result = clinicalTrialAsset.getStudyIdsForSelection([row], [1])
