@@ -1,5 +1,5 @@
 import { BioSpecimenPreservationMethod, BioSpecimenType, ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
-import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, FundingResourceAsset } from 'src/types/library'
+import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PublicationAsset, FundingResourceAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -100,6 +100,26 @@ export const makeBiospecimenRow = (overrides: Partial<BiospecimenAsset> = {}): B
   sex: Sex.FEMALE,
   age: 45,
   organization: 'Test Biobank',
+  ...overrides,
+})
+
+export const makePublicationRow = (overrides: Partial<PublicationAsset> = {}): PublicationAsset => ({
+  publicationId: 'pub-001',
+  studyId: 42,
+  studyName: 'Test Study',
+  title: 'A Novel Approach to Genomics',
+  pubmedId: '12345678',
+  publishedDate: '2024-01-15',
+  authors: [{ name: 'Alice Smith' }, { name: 'Bob Jones' }],
+  authorNames: ['Alice Smith', 'Bob Jones'],
+  bibliographicCitation: 'Smith A, Jones B. A Novel Approach. 2024.',
+  datasetCitation: 'DUOS-123456',
+  citation: true,
+  journal: 'Nature Genetics',
+  doi: '10.1038/ng.1234',
+  url: 'https://doi.org/10.1038/ng.1234',
+  access: 'open',
+  tags: ['genomics', 'GWAS'],
   ...overrides,
 })
 

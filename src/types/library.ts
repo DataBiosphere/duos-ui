@@ -2,7 +2,7 @@
  * Type definitions for the Data Library feature
  */
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
-import { AiModel, Biospecimen, ClinicalTrial, FundingResource } from 'src/types/model'
+import { AiModel, Biospecimen, ClinicalTrial, Publication, FundingResource } from 'src/types/model'
 
 export enum AssetType {
   STUDIES = 'studies',
@@ -10,6 +10,7 @@ export enum AssetType {
   MODELS = 'models',
   CLINICAL_TRIALS = 'clinical_trials',
   BIOSPECIMENS = 'biospecimens',
+  PUBLICATIONS = 'publications',
   FUNDING_RESOURCES = 'funding_resources',
 }
 
@@ -153,6 +154,13 @@ export interface ClinicalTrialAsset extends Omit<ClinicalTrial, 'studyId'> {
 export interface BiospecimenAsset extends Omit<Biospecimen, 'studyId'> {
   studyId: number
   studyName: string
+}
+
+export interface PublicationAsset extends Omit<Publication, 'studyId'> {
+  studyId: number
+  studyName: string
+  /** Convenience flattening of the authors array for display/search */
+  authorNames: string[]
 }
 
 export interface FundingResourceAsset extends Omit<FundingResource, 'studyId'> {
