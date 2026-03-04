@@ -1,6 +1,5 @@
 import React from 'react'
 import ResearchProposalSlab from 'src/components/collection_voting_slab/ResearchProposalSlab'
-import { Storage } from 'src/libs/storage'
 
 const darInfoPrimaryUseManualReviewFalse = {
   rus: 'test',

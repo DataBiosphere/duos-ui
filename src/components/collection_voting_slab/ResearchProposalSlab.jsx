@@ -3,7 +3,6 @@ import { DataUseTranslation } from '../../libs/dataUseTranslation'
 import { isNil, flatMap, keys } from 'lodash'
 import { DataUsePills } from './DataUsePill'
 import DataUseAlertBox from './DataUseAlertBox'
-import { Storage } from '../../libs/storage'
 import HighlightText from '../HighlightText'
 
 const styles = {
@@ -118,7 +117,7 @@ const ResearchPurposeSummary = ({ darInfo }) => {
 
 export default function ResearchProposalSlab(props) {
   const [expanded, setExpanded] = useState(true)
-  const { darInfo, bucket, isChair, isLoading, adminPage } = props
+  const { darInfo, isLoading } = props
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {}
 
   return (
