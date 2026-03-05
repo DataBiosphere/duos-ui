@@ -1,4 +1,4 @@
-import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PublicationAsset, FundingResourceAsset, SortOrder } from 'src/types/library'
+import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PresentationAsset, PublicationAsset, FundingResourceAsset, SortOrder } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 
 export interface MatchQuery {
@@ -305,6 +305,34 @@ export interface PublicationStudyAggregationBucket {
 
 export interface PublicationStudyAggregationResponse {
   buckets: PublicationStudyAggregationBucket[]
+}
+
+/** Raw Elasticsearch document shape for a presentation asset */
+export type PartialPresentationAsset = Partial<PresentationAsset>
+
+/** Bucket shape from a terms aggregation on study.studyId, used for the Presentations view */
+export interface PresentationStudyAggregationBucket {
+  key: number
+  doc_count: number
+  study_details?: {
+    hits?: {
+      hits?: Array<{
+        _source?: {
+          study?: {
+            studyId?: number
+            studyName?: string
+            assets?: {
+              presentations?: PartialPresentationAsset[]
+            }
+          }
+        }
+      }>
+    }
+  }
+}
+
+export interface PresentationStudyAggregationResponse {
+  buckets: PresentationStudyAggregationBucket[]
 }
 
 /** Raw Elasticsearch document shape for a funding resource asset */
