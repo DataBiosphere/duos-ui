@@ -1,5 +1,5 @@
 import { BioSpecimenPreservationMethod, BioSpecimenType, ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
-import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PresentationAsset, PublicationAsset, FundingResourceAsset } from 'src/types/library'
+import { ClinicalTrialAsset, BiospecimenAsset, IntellectualPropertyAsset, ModelAsset, PresentationAsset, PublicationAsset, FundingResourceAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -139,6 +139,22 @@ export const makePresentationRow = (overrides: Partial<PresentationAsset> = {}):
   format: 'Oral',
   access: 'open',
   tags: ['genomics', 'data-sharing'],
+  ...overrides,
+})
+
+export const makeIntellectualPropertyRow = (overrides: Partial<IntellectualPropertyAsset> = {}): IntellectualPropertyAsset => ({
+  ipId: 'ip-001',
+  studyId: 42,
+  studyName: 'Test Study',
+  type: 'Patent',
+  title: 'Novel Genomic Sequencing Method',
+  assignee: 'Broad Institute',
+  patentNumber: 'US12345678',
+  filingDate: '2023-06-15',
+  status: 'Granted',
+  url: 'https://patents.example.com/US12345678',
+  contact: 'ip@broadinstitute.org',
+  tags: ['genomics', 'sequencing'],
   ...overrides,
 })
 

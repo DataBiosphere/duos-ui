@@ -72,6 +72,7 @@ export const DataLibrary: React.FC = () => {
     { key: AssetType.BIOSPECIMENS, label: 'Biospecimens' },
     { key: AssetType.PUBLICATIONS, label: 'Publications' },
     { key: AssetType.PRESENTATIONS, label: 'Presentations' },
+    { key: AssetType.INTELLECTUAL_PROPERTY, label: 'Intellectual Property' },
     { key: AssetType.FUNDING_RESOURCES, label: 'Funding Resources' },
   ]
 
