@@ -18,6 +18,7 @@ import { clinicalTrialAsset } from 'src/components/data_library/assets/clinicalT
 import { biospecimenAsset } from 'src/components/data_library/assets/biospecimenAsset'
 import { publicationAsset } from 'src/components/data_library/assets/publicationAsset'
 import { presentationAsset } from 'src/components/data_library/assets/presentationAsset'
+import { fundingResourceAsset } from 'src/components/data_library/assets/fundingResourceAsset'
 
 export type {
   AssetDefinition,
@@ -34,4 +35,5 @@ export const assetRegistry: Record<AssetType, AssetDefinition> = {
   [AssetType.BIOSPECIMENS]: biospecimenAsset,
   [AssetType.PUBLICATIONS]: publicationAsset,
   [AssetType.PRESENTATIONS]: presentationAsset,
+  [AssetType.FUNDING_RESOURCES]: fundingResourceAsset,
 }

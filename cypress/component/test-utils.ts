@@ -1,5 +1,5 @@
 import { BioSpecimenPreservationMethod, BioSpecimenType, ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
-import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PresentationAsset, PublicationAsset } from 'src/types/library'
+import { ClinicalTrialAsset, BiospecimenAsset, ModelAsset, PresentationAsset, PublicationAsset, FundingResourceAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -139,5 +139,20 @@ export const makePresentationRow = (overrides: Partial<PresentationAsset> = {}):
   format: 'Oral',
   access: 'open',
   tags: ['genomics', 'data-sharing'],
+  ...overrides,
+})
+
+export const makeFundingResourceRow = (overrides: Partial<FundingResourceAsset> = {}): FundingResourceAsset => ({
+  fundingId: 'FR-001',
+  studyId: 101,
+  studyName: 'Study A',
+  funderName: 'Funder A',
+  funderProgram: 'Program A',
+  grantNumber: 'GN-1',
+  projectTitle: 'Project A',
+  startDate: '2024-01-01',
+  endDate: '2024-12-31',
+  url: 'https://example.org',
+  tags: ['tag1', 'tag2', 'tag3', 'tag4'],
   ...overrides,
 })
