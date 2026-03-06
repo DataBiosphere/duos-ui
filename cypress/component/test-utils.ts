@@ -1,5 +1,5 @@
 import { BioSpecimenPreservationMethod, BioSpecimenType, ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus, DatasetTerm, Sex, StudyTerm, UserTerm } from 'src/types/model'
-import { ClinicalTrialAsset, BiospecimenAsset, IntellectualPropertyAsset, ModelAsset, PresentationAsset, PublicationAsset, FundingResourceAsset } from 'src/types/library'
+import { ClinicalTrialAsset, BiospecimenAsset, IntellectualPropertyAsset, ModelAsset, PresentationAsset, PublicationAsset, FundingResourceAsset, WorkspaceAsset } from 'src/types/library'
 
 export const makeUserTerm = (overrides: Partial<UserTerm> = {}): UserTerm => ({
   userId: 0,
@@ -155,6 +155,20 @@ export const makeIntellectualPropertyRow = (overrides: Partial<IntellectualPrope
   url: 'https://patents.example.com/US12345678',
   contact: 'ip@broadinstitute.org',
   tags: ['genomics', 'sequencing'],
+  ...overrides,
+})
+
+export const makeWorkspaceRow = (overrides: Partial<WorkspaceAsset> = {}): WorkspaceAsset => ({
+  workspaceId: 'ws-001',
+  studyId: 42,
+  studyName: 'Test Study',
+  name: 'My Workspace',
+  platform: 'Terra',
+  url: 'https://app.terra.bio/#workspaces/test/my-workspace',
+  description: 'A test workspace for genomics analysis',
+  tools: ['WDL', 'Jupyter'],
+  access: 'open',
+  tags: ['genomics', 'cloud'],
   ...overrides,
 })
 

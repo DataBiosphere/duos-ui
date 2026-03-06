@@ -21,11 +21,12 @@ import {
   PublicationAsset,
   SortState,
   StudyAggregation,
+  WorkspaceAsset,
 } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 
 /** Union of every row type that can appear in the DataGrid */
-export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | ClinicalTrialAsset | BiospecimenAsset | PublicationAsset | PresentationAsset | IntellectualPropertyAsset | FundingResourceAsset
+export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | WorkspaceAsset | ClinicalTrialAsset | BiospecimenAsset | PublicationAsset | PresentationAsset | IntellectualPropertyAsset | FundingResourceAsset
 
 /** Normalized result returned by every asset's `transformResponse` */
 export interface LibraryPage {
