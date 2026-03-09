@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Styles } from 'src/libs/theme'
 import { useNavigate } from 'react-router-dom'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
@@ -16,7 +16,6 @@ export default function DatasetSubmissions() {
   const [filteredTerms, setFilteredTerms] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState({})
-  const searchRef = useRef('')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -101,7 +100,6 @@ export default function DatasetSubmissions() {
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchChange}
-          searchRef={searchRef}
         />
         <AddObjectButton
           id="add-dataset-btn"

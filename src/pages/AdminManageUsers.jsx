@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { AddUserModal } from 'src/components/modals/AddUserModal'
 import { User } from 'src/libs/ajax/User'
 import { USER_ROLES } from 'src/libs/utils'
@@ -37,8 +37,6 @@ export const AdminManageUsers = function AdminManageUsers() {
   const [showAddUserModal, setShowAddUserModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState()
   const [isLoading, setIsLoading] = useState(false)
-
-  const searchRef = useRef('')
 
   React.useEffect(() => {
     setIsLoading(true)
@@ -88,7 +86,6 @@ export const AdminManageUsers = function AdminManageUsers() {
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchUser}
-          searchRef={searchRef}
         />
         <AddObjectButton
           id="btn_addUser"

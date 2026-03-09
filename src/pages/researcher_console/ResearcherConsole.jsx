@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { cloneDeep, findIndex } from 'lodash'
 import { Styles } from 'src/libs/theme'
 import { DAR } from 'src/libs/ajax/DAR'
@@ -22,18 +22,18 @@ export default function ResearcherConsole() {
   const [isLoading, setIsLoading] = useState(true)
   const [researcherCollections, setResearcherCollections] = useState()
   const [filteredList, setFilteredList] = useState()
-  const searchRef = useRef('')
+  const [searchText, setSearchText] = useState('')
 
   // Get responsive columns for researcher console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.RESEARCHER)
 
   // callback function passed to search bar to perform filter
-  const handleSearchChange = useCallback(() => searchOnFilteredList(
-    searchRef.current.value,
-    researcherCollections,
-    filterFn,
-    setFilteredList,
-  ), [researcherCollections])
+  const handleSearchChange = useCallback(terms => setSearchText(terms), [])
+
+  // re-filter whenever search text or underlying data changes
+  useEffect(() => {
+    searchOnFilteredList(searchText, researcherCollections, filterFn, setFilteredList)
+  }, [searchText, researcherCollections])
 
   // sequence of init events on component load
   useEffect(() => {
@@ -45,16 +45,6 @@ export default function ResearcherConsole() {
     }
     init()
   }, [])
-
-  // sequence of events when data is updated (perform new filter based on search query)
-  useEffect(() => {
-    searchOnFilteredList(
-      searchRef.current.value,
-      researcherCollections,
-      filterFn,
-      setFilteredList,
-    )
-  }, [researcherCollections])
 
   // cancel collection function, passed to collections table to be used in buttons
   const cancelCollection = async (darCollection) => {
@@ -163,7 +153,7 @@ export default function ResearcherConsole() {
         </div>
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
-        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
+        <SearchBar handleSearchChange={handleSearchChange} />
       </div>
       <div className="table-container">
         <DarCollectionTable

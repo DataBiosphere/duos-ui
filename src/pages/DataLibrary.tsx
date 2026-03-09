@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Skeleton, Typography } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
@@ -76,14 +76,6 @@ export const DataLibrary: React.FC = () => {
     { key: AssetType.INTELLECTUAL_PROPERTY, label: 'Intellectual Property' },
     { key: AssetType.FUNDING_RESOURCES, label: 'Funding Resources' },
   ]
-
-  const searchRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (searchRef.current && urlState.query) {
-      searchRef.current.value = urlState.query
-    }
-  }, [urlState.query])
 
   useEffect(() => {
     const init = () => {
@@ -324,7 +316,7 @@ export const DataLibrary: React.FC = () => {
         />
         <SearchBar
           handleSearchChange={handleSearchChange}
-          searchRef={searchRef}
+          initialValue={urlState.query ?? ''}
           style={{
             paddingTop: '10px',
           }}
