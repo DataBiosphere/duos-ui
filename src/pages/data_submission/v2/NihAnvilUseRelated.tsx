@@ -52,12 +52,48 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     (input: string) => {
       if (input === NihAnvilUsePreSelectOptions.NO) {
         const translatedNoOption = { key: NihAnvilUse.key, value: NihAnvilUse.NO_NHGRI_NO_ANVIL, isValid: true }
-        setStudyPropertyByKey(study, setStudy, translatedNoOption, new NihAnvilUse(translatedNoOption.value))
+        const newVal = structuredClone(study)
+        removeStudyPropertiesByKeys(newVal, new Set([
+          PiInstitution.key,
+          NihGrantContractNumber.key,
+          NihICsSupportingStudy.key,
+          NihProgramOfficerName.key,
+          NihInstitutionCenterSubmission.key,
+          NihGenomicProgramAdministratorName.key,
+          MultiCenterStudy.key,
+          CollaboratingSites.key,
+          ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
+          ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
+          AlternativeDataSharingPlan.key,
+          AlternativeDataSharingPlanReasons.key,
+          AlternativeDataSharingPlanExplanation.key,
+          AlternativeDataSharingPlanDataSubmitted.key,
+          AlternativeDataSharingPlanDataReleased.key,
+        ]))
+        unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
+        setStudyPropertyByKey(newVal, setStudy, translatedNoOption, new NihAnvilUse(translatedNoOption.value))
       }
       else {
         setStudy((val) => {
           const newVal = structuredClone(val)
-          removeStudyPropertiesByKeys(newVal, new Set([NihAnvilUse.key]))
+          removeStudyPropertiesByKeys(newVal, new Set([NihAnvilUse.key,
+            PiInstitution.key,
+            NihGrantContractNumber.key,
+            NihICsSupportingStudy.key,
+            NihProgramOfficerName.key,
+            NihInstitutionCenterSubmission.key,
+            NihGenomicProgramAdministratorName.key,
+            MultiCenterStudy.key,
+            CollaboratingSites.key,
+            ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
+            ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
+            AlternativeDataSharingPlan.key,
+            AlternativeDataSharingPlanReasons.key,
+            AlternativeDataSharingPlanExplanation.key,
+            AlternativeDataSharingPlanDataSubmitted.key,
+            AlternativeDataSharingPlanDataReleased.key,
+          ]))
+          unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
           return newVal
         })
       }
