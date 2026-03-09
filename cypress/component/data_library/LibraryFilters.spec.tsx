@@ -124,3 +124,71 @@ describe('LibraryFilters', () => {
     cy.contains('Access Management').should('not.exist')
   })
 })
+
+describe('LibraryFilters — collapseable panel', () => {
+  const mountWithToggle = (isOpen: boolean, onToggle = cy.stub().as('onToggle')) => {
+    cy.mount(
+      <LibraryFilters
+        filters={emptyFilters}
+        onChange={cy.stub()}
+        onClear={cy.stub()}
+        availableFilters={availableFilters}
+        isOpen={isOpen}
+        onToggle={onToggle}
+      />,
+    )
+  }
+
+  it('shows filter content and collapse button when open', () => {
+    mountWithToggle(true)
+    cy.contains('Filters').should('be.visible')
+    cy.contains('Access Management').should('be.visible')
+    cy.get('[aria-label="Collapse filters"]').should('exist')
+  })
+
+  it('hides filter content and shows expand button when closed', () => {
+    mountWithToggle(false)
+    cy.contains('Access Management').should('not.exist')
+    cy.contains('Filters').should('not.exist')
+    cy.get('[aria-label="Expand filters"]').should('exist')
+  })
+
+  it('calls onToggle when the chevron button is clicked while open', () => {
+    mountWithToggle(true)
+    cy.get('[aria-label="Collapse filters"]').click()
+    cy.get('@onToggle').should('have.been.calledOnce')
+  })
+
+  it('calls onToggle when expand button is clicked while closed', () => {
+    mountWithToggle(false)
+    cy.get('[aria-label="Expand filters"]').click()
+    cy.get('@onToggle').should('have.been.calledOnce')
+  })
+
+  it('does not render the toggle button when onToggle is not provided', () => {
+    cy.mount(
+      <LibraryFilters
+        filters={emptyFilters}
+        onChange={cy.stub()}
+        onClear={cy.stub()}
+        availableFilters={availableFilters}
+      />,
+    )
+    cy.get('[aria-label="Collapse filters"]').should('not.exist')
+    cy.get('[aria-label="Expand filters"]').should('not.exist')
+  })
+
+  it('does not show Clear button when closed even with active filters', () => {
+    cy.mount(
+      <LibraryFilters
+        filters={{ ...emptyFilters, accessManagement: ['controlled'] }}
+        onChange={cy.stub()}
+        onClear={cy.stub()}
+        availableFilters={availableFilters}
+        isOpen={false}
+        onToggle={cy.stub()}
+      />,
+    )
+    cy.contains('Clear').should('not.exist')
+  })
+})

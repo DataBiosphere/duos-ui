@@ -161,6 +161,57 @@ describe('DataLibrary', () => {
     cy.get('button').contains('Studies').should('have.css', 'font-weight', '400')
   })
 
+  it('shows filter panel by default', () => {
+    cy.mount(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/']}>
+          <DataLibrary />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    cy.contains('Access Management').should('be.visible')
+    cy.get('[aria-label="Collapse filters"]').should('exist')
+  })
+
+  it('hides filter panel when hideFilters=true is in the URL', () => {
+    cy.mount(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?hideFilters=true']}>
+          <DataLibrary />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    cy.contains('Access Management').should('not.exist')
+    cy.get('[aria-label="Expand filters"]').should('exist')
+  })
+
+  it('collapses filter panel when the toggle button is clicked', () => {
+    cy.mount(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/']}>
+          <DataLibrary />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    cy.contains('Access Management').should('be.visible')
+    cy.get('[aria-label="Collapse filters"]').click()
+    cy.contains('Access Management').should('not.exist')
+    cy.get('[aria-label="Expand filters"]').should('exist')
+  })
+
+  it('expands filter panel when expand button is clicked while collapsed', () => {
+    cy.mount(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?hideFilters=true']}>
+          <DataLibrary />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    cy.get('[aria-label="Expand filters"]').click()
+    cy.contains('Access Management').should('be.visible')
+    cy.get('[aria-label="Collapse filters"]').should('exist')
+  })
+
   it('switches tabs and updates URL state', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>

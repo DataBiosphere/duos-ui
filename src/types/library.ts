@@ -67,6 +67,8 @@ export interface LibraryFiltersProps {
   onClear: () => void
   availableFilters: AvailableFilters
   loading?: boolean
+  isOpen?: boolean
+  onToggle?: () => void
 }
 
 export type SortOrder = 'asc' | 'desc'
@@ -80,6 +82,7 @@ export interface LibraryUrlState {
   pageSize: number
   sortField?: string
   sortOrder?: SortOrder
+  hideFilters: boolean
 }
 
 export interface TabConfig {
