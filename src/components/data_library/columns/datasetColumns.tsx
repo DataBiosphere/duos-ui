@@ -37,36 +37,9 @@ export const makeDatasetColumns = (
     ),
   },
   {
-    field: 'participantCount',
-    headerName: 'Participants',
-    width: 120,
-    type: 'number',
-    align: 'right',
-    headerAlign: 'right',
-  },
-  {
-    field: 'dataUse',
-    headerName: 'Data Use',
+    field: 'datasetIdentifier',
+    headerName: 'Identifier',
     width: 150,
-    valueGetter: (_value, row) => row.dataUse?.primary?.[0]?.code || '',
-    renderCell: (params) => {
-      const codes = params.row.dataUse?.primary?.map(du => du.code).filter(Boolean) || []
-      if (codes.length === 0) return null
-
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {codes.slice(0, 2).map((code, idx) => (
-            <Chip key={idx} label={code} size="small" variant="outlined" />
-          ))}
-          {codes.length > 2 && (
-            <Tooltip title={codes.slice(2).join(', ')}>
-              <Chip label={`+${codes.length - 2}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
-    sortable: false,
   },
   {
     field: 'accessManagement',
@@ -111,15 +84,42 @@ export const makeDatasetColumns = (
     },
   },
   {
+    field: 'participantCount',
+    headerName: 'Participants',
+    width: 120,
+    type: 'number',
+    align: 'right',
+    headerAlign: 'right',
+  },
+  {
+    field: 'dataUse',
+    headerName: 'Data Use',
+    width: 150,
+    valueGetter: (_value, row) => row.dataUse?.primary?.[0]?.code || '',
+    renderCell: (params) => {
+      const codes = params.row.dataUse?.primary?.map(du => du.code).filter(Boolean) || []
+      if (codes.length === 0) return null
+
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+          {codes.slice(0, 2).map((code, idx) => (
+            <Chip key={idx} label={code} size="small" variant="outlined" />
+          ))}
+          {codes.length > 2 && (
+            <Tooltip title={codes.slice(2).join(', ')}>
+              <Chip label={`+${codes.length - 2}`} size="small" variant="outlined" />
+            </Tooltip>
+          )}
+        </Box>
+      )
+    },
+    sortable: false,
+  },
+  {
     field: 'dac',
     headerName: 'DAC',
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
-  },
-  {
-    field: 'datasetIdentifier',
-    headerName: 'Identifier',
-    width: 150,
   },
   {
     field: 'actions',
