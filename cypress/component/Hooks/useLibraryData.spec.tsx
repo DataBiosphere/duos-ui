@@ -154,6 +154,66 @@ describe('buildElasticsearchQuery', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
     expect(query.sort).to.have.length(1)
     const firstSort = query.sort?.[0] as Record<string, { order: string }>
-    expect(firstSort.studyName.order).to.equal('asc')
+    expect(firstSort['study.studyName.keyword'].order).to.equal('asc')
+  })
+
+  it('maps each text field to its .keyword ES sort path', () => {
+    const textFieldCases: Array<[string, string]> = [
+      ['datasetName', 'datasetName.keyword'],
+      ['studyName', 'study.studyName.keyword'],
+      ['accessManagement', 'accessManagement.keyword'],
+      ['dac', 'dac.dacName.keyword'],
+      ['datasetIdentifier', 'datasetIdentifier.keyword'],
+    ]
+
+    textFieldCases.forEach(([columnField, esSortField]) => {
+      const sort: SortState = { field: columnField, order: 'asc' }
+      const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
+      expect(query.sort).to.have.length(1)
+      const firstSort = query.sort?.[0] as Record<string, { order: string }>
+      expect(firstSort[esSortField].order).to.equal('asc')
+    })
+  })
+
+  it('sorts numeric field (participantCount) without .keyword mapping', () => {
+    const sort: SortState = { field: 'participantCount', order: 'desc' }
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
+    expect(query.sort).to.have.length(1)
+    const firstSort = query.sort?.[0] as Record<string, { order: string }>
+    expect(firstSort.participantCount.order).to.equal('desc')
+  })
+
+  it('applies sort order correctly for desc', () => {
+    const sort: SortState = { field: 'datasetName', order: 'desc' }
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
+    const firstSort = query.sort?.[0] as Record<string, { order: string }>
+    expect(firstSort['datasetName.keyword'].order).to.equal('desc')
+  })
+
+  it('omits sort clause when sort is undefined', () => {
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, undefined)
+    expect(query.sort).to.equal(undefined)
+  })
+
+  it('builds an aggregation query for models (size: 0, studies terms agg)', () => {
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.MODELS, filters, '', pagination)
+    // Models use an aggregation-only query
+    expect(query.size).to.equal(0)
+    expect(query.from).to.equal(undefined)
+    expect(query.aggs).to.have.property('studies')
+    const studiesAgg = query.aggs!.studies as { terms: { field: string, size: number } }
+    expect(studiesAgg.terms.field).to.equal('study.studyId')
+    expect(studiesAgg.terms.size).to.equal(10000)
+  })
+
+  it('adds model-specific search fields for the models asset type', () => {
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.MODELS, filters, 'pytorch', pagination)
+    expect(query.query?.bool.must).to.have.length(2)
+    const searchClause = query.query?.bool.must?.[1] as {
+      multi_match: { fields: string[], query: string }
+    }
+    expect(searchClause.multi_match.fields).to.include('study.assets.models.name')
+    expect(searchClause.multi_match.fields).to.include('study.assets.models.format')
+    expect(searchClause.multi_match.query).to.equal('pytorch')
   })
 })

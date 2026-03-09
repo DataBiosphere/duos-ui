@@ -1,12 +1,20 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Skeleton, Typography } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, ExportableDatasets, LibraryVersionNew, SortOrder, StudyAggregation, TabConfig } from 'src/types/library'
+import {
+  AssetType,
+  AvailableFilters,
+  ExportableDatasets,
+  LibraryVersionNew,
+  SortOrder,
+  TabConfig,
+} from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
+import { assetRegistry } from 'src/components/data_library/assets'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
@@ -59,6 +67,14 @@ export const DataLibrary: React.FC = () => {
   const tabs: TabConfig[] = [
     { key: AssetType.STUDIES, label: 'Studies' },
     { key: AssetType.DATASETS, label: 'Datasets' },
+    { key: AssetType.MODELS, label: 'AI Models' },
+    { key: AssetType.WORKSPACES, label: 'Workspaces' },
+    { key: AssetType.CLINICAL_TRIALS, label: 'Clinical Trials' },
+    { key: AssetType.BIOSPECIMENS, label: 'Biospecimens' },
+    { key: AssetType.PUBLICATIONS, label: 'Publications' },
+    { key: AssetType.PRESENTATIONS, label: 'Presentations' },
+    { key: AssetType.INTELLECTUAL_PROPERTY, label: 'Intellectual Property' },
+    { key: AssetType.FUNDING_RESOURCES, label: 'Funding Resources' },
   ]
 
   const searchRef = useRef<HTMLInputElement>(null)
@@ -163,31 +179,15 @@ export const DataLibrary: React.FC = () => {
       : undefined,
   )
 
+  const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
+
   const selectedStudyIds = useMemo(() => {
     if (!data?.items) return []
-    const studyIds = new Set<number>()
-    data.items.forEach((item: StudyAggregation | DatasetTerm) => {
-      switch (urlState.tab) {
-        case AssetType.STUDIES: {
-          const study = item as StudyAggregation
-          if (study.datasetIds?.some((id: number) => selectedDatasetIds.includes(id))) {
-            studyIds.add(study.studyId)
-          }
-          break
-        }
-        case AssetType.DATASETS: {
-          const dataset = item as DatasetTerm
-          if (selectedDatasetIds.includes(dataset.datasetId)) {
-            studyIds.add(dataset.study.studyId)
-          }
-          break
-        }
-        default:
-          throw new Error('Unknown asset type')
-      }
-    })
-    return Array.from(studyIds)
-  }, [data, selectedDatasetIds, urlState.tab])
+    return currentAsset.getStudyIdsForSelection(
+      data.items,
+      selectedDatasetIds,
+    )
+  }, [data, selectedDatasetIds, currentAsset])
 
   const sortModel = useMemo(() => {
     if (urlState.sortField && urlState.sortOrder) {
@@ -197,7 +197,7 @@ export const DataLibrary: React.FC = () => {
   }, [urlState.sortField, urlState.sortOrder])
 
   const handleTabChange = (newAssetType: AssetType) => {
-    updateUrlState({ tab: newAssetType })
+    updateUrlState({ tab: newAssetType, page: 0 })
     setSelectedDatasetIds([])
   }
 
@@ -290,7 +290,7 @@ export const DataLibrary: React.FC = () => {
         return
       }
       try {
-        const radarEnabledIds = await getRadarEnabledDatasetsWithRules(data.items)
+        const radarEnabledIds = await getRadarEnabledDatasetsWithRules(data.items as DatasetTerm[])
         setRadarEnabledDatasetIds(new Set(radarEnabledIds))
       }
       catch {
@@ -369,16 +369,9 @@ export const DataLibrary: React.FC = () => {
                 <Typography sx={{ fontWeight: 600, fontSize: '1.6rem', mb: 1 }}>
                   {(data?.total ?? 0).toLocaleString()}
                   {' '}
-                  {(() => {
-                    switch (urlState.tab) {
-                      case AssetType.STUDIES:
-                        return (data?.total === 1) ? 'Study' : 'Studies'
-                      case AssetType.DATASETS:
-                        return (data?.total === 1) ? 'Dataset' : 'Datasets'
-                      default:
-                        return 'Assets'
-                    }
-                  })()}
+                  {data?.total === 1
+                    ? currentAsset.label.singular
+                    : currentAsset.label.plural}
                 </Typography>
               )}
           {/* Data Library */}

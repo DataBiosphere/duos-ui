@@ -1,78 +1,48 @@
 import { useQuery } from '@tanstack/react-query'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import {
-  ElasticsearchQuery,
-  ElasticsearchResponse,
-  QueryClause,
-  StudyAggregationResponse,
-} from 'src/types/elastic'
-import {
-  AssetType,
-  FilterState,
-  LibraryVersionNew,
-  PaginationState,
-  SortState,
-  StudyAggregation,
-} from 'src/types/library'
+import { ElasticsearchQuery, QueryClause } from 'src/types/elastic'
+import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
+import { assetRegistry } from 'src/components/data_library/assets'
 
 /**
- * Build ElasticSearch query for datasets or studies
+ * Build the common Elasticsearch query clauses shared by every asset type:
+ * the base `must` clauses (study-exists check + library filter + search term)
+ * and the `filter` clauses derived from the filter panel.
+ *
+ * Asset-specific code (aggregations, pagination, sort) is handled by each
+ * asset's own `buildQuery` method.
  */
-export const buildElasticsearchQuery = (
+const buildCommonQueryClauses = (
   libraryConfig: LibraryVersionNew,
-  assetType: AssetType,
   filters: FilterState,
   queryTerm: string,
-  pagination: PaginationState,
-  sort?: SortState,
-): ElasticsearchQuery => {
+  searchFields: string[],
+): { queryChunks: QueryClause[], filterQuery: QueryClause[] } => {
   const queryChunks: QueryClause[] = [
-    {
-      exists: {
-        field: 'study',
-      },
-    },
+    { exists: { field: 'study' } },
   ]
 
-  // Add library-specific query
   if (libraryConfig.query) {
     queryChunks.push(libraryConfig.query as QueryClause)
   }
 
-  // Add search modifier if search term exists
   if (queryTerm.length > 0) {
     queryChunks.push({
       multi_match: {
         query: queryTerm,
         type: 'phrase_prefix',
-        fields: [
-          'datasetName',
-          'dataLocation',
-          'study.description',
-          'study.studyName',
-          'study.species',
-          'study.piName',
-          'study.dataCustodianEmail',
-          'study.dataTypes',
-          'dataUse.primary.code',
-          'dataUse.secondary.code',
-          'dac.dacName',
-          'datasetIdentifier',
-        ],
+        fields: searchFields,
       },
     })
   }
 
-  // Build filter query
   const filterQuery: QueryClause[] = []
 
   if (filters.accessManagement.length > 0) {
     filterQuery.push({
       bool: {
         should: filters.accessManagement.map(term => ({
-          term: {
-            'accessManagement.keyword': term,
-          },
+          term: { 'accessManagement.keyword': term },
         })),
       },
     })
@@ -82,9 +52,7 @@ export const buildElasticsearchQuery = (
     filterQuery.push({
       bool: {
         should: filters.dataUse.map(term => ({
-          match: {
-            'dataUse.primary.code': term,
-          },
+          match: { 'dataUse.primary.code': term },
         })),
       },
     })
@@ -94,9 +62,7 @@ export const buildElasticsearchQuery = (
     filterQuery.push({
       bool: {
         should: filters.dataType.map(term => ({
-          match: {
-            'study.dataTypes': term,
-          },
+          match: { 'study.dataTypes': term },
         })),
       },
     })
@@ -106,9 +72,7 @@ export const buildElasticsearchQuery = (
     filterQuery.push({
       bool: {
         should: filters.dac.map(term => ({
-          match_phrase: {
-            'dac.dacName': term,
-          },
+          match_phrase: { 'dac.dacName': term },
         })),
       },
     })
@@ -121,166 +85,39 @@ export const buildElasticsearchQuery = (
     filterQuery.push({
       range: {
         participantCount: {
-          ...(filters.participantCount.min !== undefined && {
-            gte: filters.participantCount.min,
-          }),
-          ...(filters.participantCount.max !== undefined && {
-            lte: filters.participantCount.max,
-          }),
+          ...(filters.participantCount.min !== undefined && { gte: filters.participantCount.min }),
+          ...(filters.participantCount.max !== undefined && { lte: filters.participantCount.max }),
         },
       },
     })
   }
 
-  // Build different query structure for studies vs datasets
-  if (assetType === AssetType.STUDIES) {
-    // For studies, use aggregations
-    return {
-      size: 0, // Don't return documents
-      query: {
-        bool: {
-          must: queryChunks,
-          ...(filterQuery.length > 0 && { filter: filterQuery }),
-        },
-      },
-      aggs: {
-        total_studies: {
-          cardinality: {
-            field: 'study.studyId',
-          },
-        },
-        studies: {
-          composite: {
-            size: (pagination.page + 1) * pagination.pageSize,
-            sources: [
-              {
-                study_id: {
-                  terms: {
-                    field: 'study.studyId',
-                  },
-                },
-              },
-            ],
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-            dataset_count: {
-              value_count: {
-                field: 'datasetId',
-              },
-            },
-            total_participants: {
-              sum: {
-                field: 'participantCount',
-              },
-            },
-            dataset_ids: {
-              terms: {
-                field: 'datasetId',
-                size: 10000,
-              },
-            },
-          },
-        },
-        // Add filter aggregations
-        access_management: {
-          terms: {
-            field: 'accessManagement.keyword',
-          },
-        },
-        data_use: {
-          terms: {
-            field: 'dataUse.primary.code.keyword',
-          },
-        },
-        data_type: {
-          terms: {
-            field: 'study.dataTypes.keyword',
-          },
-        },
-        dac: {
-          terms: {
-            field: 'dac.dacName.keyword',
-          },
-        },
-      },
-    }
-  }
-
-  // For datasets, use standard pagination
-  return {
-    from: pagination.page * pagination.pageSize,
-    size: pagination.pageSize,
-    query: {
-      bool: {
-        must: queryChunks,
-        ...(filterQuery.length > 0 && { filter: filterQuery }),
-      },
-    },
-    ...(sort && {
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.order,
-          },
-        },
-      ],
-    }),
-    // Add filter aggregations
-    aggs: {
-      access_management: {
-        terms: {
-          field: 'accessManagement.keyword',
-        },
-      },
-      data_use: {
-        terms: {
-          field: 'dataUse.primary.code.keyword',
-        },
-      },
-      data_type: {
-        terms: {
-          field: 'study.dataTypes.keyword',
-        },
-      },
-      dac: {
-        terms: {
-          field: 'dac.dacName.keyword',
-        },
-      },
-    },
-  }
+  return { queryChunks, filterQuery }
 }
 
 /**
- * Transform aggregation response to study rows
+ * Build the full Elasticsearch query for the given asset type.
+ *
+ * Assembles the common query clauses and then delegates the asset-type-specific
+ * query shape (aggregations, pagination, sort) to the asset registry.
+ * The public signature is preserved so existing tests continue to pass.
  */
-export const transformStudyAggregations = (
-  response: ElasticsearchResponse,
-): StudyAggregation[] => {
-  const studiesAgg = response.aggregations?.studies as StudyAggregationResponse | undefined
-  const buckets = studiesAgg?.buckets || []
-
-  return buckets.map((bucket) => {
-    const studyData = bucket.study_details?.hits?.hits?.[0]?._source?.study || {}
-    return {
-      studyId: bucket.key.study_id,
-      studyName: studyData.studyName || '',
-      studyDescription: studyData.description || '',
-      piName: studyData.piName || '',
-      species: studyData.species || '',
-      phenotype: studyData.phenotype || '',
-      dataCustodianEmail: studyData.dataCustodianEmail || [],
-      datasetCount: bucket.dataset_count?.value || 0,
-      totalParticipants: bucket.total_participants?.value || 0,
-      datasetIds: bucket.dataset_ids?.buckets?.map(b => b.key) || [],
-    }
-  })
+export const buildElasticsearchQuery = (
+  libraryConfig: LibraryVersionNew,
+  assetType: AssetType,
+  filters: FilterState,
+  queryTerm: string,
+  pagination: PaginationState,
+  sort?: SortState,
+): ElasticsearchQuery => {
+  const asset = assetRegistry[assetType]
+  const { queryChunks, filterQuery } = buildCommonQueryClauses(
+    libraryConfig,
+    filters,
+    queryTerm,
+    asset.searchFields,
+  )
+  return asset.buildQuery(queryChunks, filterQuery, pagination, sort)
 }
 
 /**
@@ -315,31 +152,8 @@ export const useLibraryData = (
       )
 
       const response = await DataSet.searchDatasetIndexV2(query)
-
       const actualData = response.data || response
-
-      if (assetType === AssetType.STUDIES && actualData.aggregations) {
-        const studies = transformStudyAggregations(actualData)
-        const totalResult = actualData.aggregations.total_studies as { value: number } | undefined
-        const total = totalResult?.value || studies.length
-        const start = pagination.page * pagination.pageSize
-        const slice = studies.slice(start, start + pagination.pageSize)
-
-        return {
-          items: slice,
-          total,
-          aggregations: actualData.aggregations,
-        }
-      }
-
-      const items = Array.isArray(actualData)
-        ? actualData
-        : (actualData.hits?.hits?.map((h: Record<string, unknown>) => h._source) || [])
-      return {
-        items,
-        total: Array.isArray(actualData) ? actualData.length : (actualData.hits?.total?.value || 0),
-        aggregations: actualData.aggregations || {},
-      }
+      return assetRegistry[assetType].transformResponse(actualData, pagination)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,

@@ -116,4 +116,33 @@ describe('useLibraryUrlState', () => {
     cy.get('#page').should('have.text', '1')
     cy.get('#pageSize').should('have.text', '50')
   })
+
+  it('sets sort state via updateState', () => {
+    cy.mount(
+      <MemoryRouter initialEntries={['/']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    cy.get('#update-sort').click()
+    cy.get('#sortField').should('have.text', 'studyName')
+    cy.get('#sortOrder').should('have.text', 'asc')
+  })
+
+  it('clears sort state when sortField and sortOrder are set to undefined', () => {
+    cy.mount(
+      <MemoryRouter initialEntries={['/?sort=studyName&order=asc']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    // Verify sort is initially set from URL params
+    cy.get('#sortField').should('have.text', 'studyName')
+    cy.get('#sortOrder').should('have.text', 'asc')
+
+    // Clear the sort
+    cy.get('#clear-sort').click()
+    cy.get('#sortField').should('have.text', 'none')
+    cy.get('#sortOrder').should('have.text', 'none')
+  })
 })

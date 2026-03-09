@@ -1,12 +1,29 @@
 import React from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
-import { makeDatasetTerm } from '../test-utils'
+import { makeDatasetTerm } from '../../test-utils'
 
 /**
  * Tests for makeDatasetColumns — focused on the Access Management chip
  * color and label rendering for each AccessManagement value.
  */
+describe('datasetColumns — column order', () => {
+  it('returns columns in the expected order', () => {
+    const columns = makeDatasetColumns()
+    const fields = columns.map(c => c.field)
+    expect(fields).to.deep.equal([
+      'datasetName',
+      'studyName',
+      'datasetIdentifier',
+      'accessManagement',
+      'participantCount',
+      'dataUse',
+      'dac',
+      'actions',
+    ])
+  })
+})
+
 describe('datasetColumns — Access Management chip', () => {
   beforeEach(() => {
     cy.viewport(1200, 800)

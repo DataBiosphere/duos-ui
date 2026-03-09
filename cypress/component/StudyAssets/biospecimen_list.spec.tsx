@@ -5,6 +5,7 @@ import BiospecimenRow from 'src/components/biospecimen_list/BiospecimenRow'
 import BiospecimenSummary from 'src/components/biospecimen_list/BiospecimenSummary'
 import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
 import { testDeleteViaModal } from './testUtils'
+import { MemoryRouter } from 'react-router-dom'
 
 const sampleBiospecimen: Biospecimen = {
   biospecimenId: 'SPEC-001',
@@ -79,44 +80,19 @@ describe('BiospecimenList component', () => {
 })
 
 describe('BiospecimenAddEdit component', () => {
-  it('renders null when not in read-only mode', () => {
+  it('renders nothing after mount', () => {
     cy.mount(
-      <BiospecimenAddEdit
-        id={-1}
-        biospecimen={undefined}
-        biospecimens={[]}
-        closeAction={cy.stub().as('close')}
-        onBiospecimensChange={cy.stub()}
-      />,
+      <MemoryRouter>
+        <BiospecimenAddEdit
+          id={-1}
+          biospecimen={undefined}
+          biospecimens={[]}
+          closeAction={cy.stub()}
+          onBiospecimensChange={cy.stub()}
+        />
+      </MemoryRouter>,
     )
-    cy.get('body').should('exist')
-  })
-
-  it('renders null in edit mode', () => {
-    cy.mount(
-      <BiospecimenAddEdit
-        id={0}
-        biospecimen={sampleBiospecimen}
-        biospecimens={[sampleBiospecimen]}
-        closeAction={cy.stub().as('close')}
-        onBiospecimensChange={cy.stub()}
-      />,
-    )
-    cy.get('body').should('exist')
-  })
-
-  it('renders null even with readOnly prop', () => {
-    cy.mount(
-      <BiospecimenAddEdit
-        id={-1}
-        biospecimen={undefined}
-        biospecimens={[]}
-        closeAction={cy.stub().as('close')}
-        onBiospecimensChange={cy.stub()}
-        readOnly={true}
-      />,
-    )
-    cy.get('body').should('exist')
+    cy.get('[data-cy="biospecimen-add-edit"]').should('not.exist')
   })
 })
 
@@ -204,43 +180,46 @@ describe('BiospecimenRow', () => {
     cy.get('@edit').should('have.been.calledOnce')
   })
 
-  it('renders edit form when editMode true', () => {
+  it('does not render edit form when editMode true (redirects)', () => {
     cy.mount(
-      <BiospecimenRow
-        id={0}
-        editMode={true}
-        biospecimen={sampleBiospecimen}
-        biospecimens={[sampleBiospecimen]}
-        columnsToShow={['specimenType']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        onBiospecimensChange={cy.stub()}
-        disabled={false}
-      />,
+      <MemoryRouter>
+        <BiospecimenRow
+          id={0}
+          editMode={true}
+          biospecimen={sampleBiospecimen}
+          biospecimens={[sampleBiospecimen]}
+          columnsToShow={['specimenType']}
+          editAction={cy.stub()}
+          deleteAction={cy.stub()}
+          closeAction={cy.stub()}
+          onBiospecimensChange={cy.stub()}
+          disabled={false}
+        />
+      </MemoryRouter>,
     )
-    // Since BiospecimenAddEdit returns null, verifying the component renders
-    cy.get('body').should('exist')
+    cy.get('[data-cy="biospecimen-add-edit"]').should('not.exist')
   })
 
-  it('renders view form when viewMode true and is read-only', () => {
+  it('does not render view form when viewMode true (redirects)', () => {
     cy.mount(
-      <BiospecimenRow
-        id={0}
-        editMode={false}
-        viewMode={true}
-        biospecimen={sampleBiospecimen}
-        biospecimens={[sampleBiospecimen]}
-        columnsToShow={['specimenType']}
-        editAction={cy.stub()}
-        deleteAction={cy.stub()}
-        closeAction={cy.stub()}
-        viewAction={cy.stub()}
-        onBiospecimensChange={cy.stub()}
-        disabled={false}
-      />,
+      <MemoryRouter>
+        <BiospecimenRow
+          id={0}
+          editMode={false}
+          viewMode={true}
+          biospecimen={sampleBiospecimen}
+          biospecimens={[sampleBiospecimen]}
+          columnsToShow={['specimenType']}
+          editAction={cy.stub()}
+          deleteAction={cy.stub()}
+          closeAction={cy.stub()}
+          viewAction={cy.stub()}
+          onBiospecimensChange={cy.stub()}
+          disabled={false}
+        />
+      </MemoryRouter>,
     )
-    cy.get('body').should('exist')
+    cy.get('[data-cy="biospecimen-add-edit"]').should('not.exist')
   })
 
   it('triggers viewAction when view button is clicked', () => {
