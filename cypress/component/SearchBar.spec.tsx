@@ -42,7 +42,7 @@ describe('SearchBar', () => {
     // With text: clear icon appears and the input shifts to accommodate it
     cy.get('[data-cy="clear-search"]').should('exist')
     cy.get('[data-cy="search-bar"]').then(($input) => {
-      const paddingRight = parseFloat(getComputedStyle($input[0]).paddingRight)
+      const paddingRight = Number.parseFloat(getComputedStyle($input[0]).paddingRight)
       expect(paddingRight).to.be.greaterThan(0)
     })
   })
