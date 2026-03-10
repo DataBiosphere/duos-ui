@@ -20,6 +20,9 @@ export const LibraryTabs: React.FC<LibraryTabsProps> = ({
         value={value}
         onChange={(_event, newValue) => onChange(newValue)}
         aria-label="library view tabs"
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
         slotProps={{
           indicator: {
             style: { backgroundColor: '#00609f' },

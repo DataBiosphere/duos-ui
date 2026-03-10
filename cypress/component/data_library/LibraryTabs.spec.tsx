@@ -46,4 +46,20 @@ describe('LibraryTabs', () => {
     cy.contains('Datasets').click()
     cy.get('@onChange').should('have.been.calledWith', AssetType.DATASETS)
   })
+
+  it('shows scroll buttons when tabs overflow the container width', () => {
+    cy.viewport(300, 600)
+
+    const manyTabs = Object.values(AssetType).map(type => ({ key: type, label: type }))
+
+    cy.mount(
+      <LibraryTabs
+        value={AssetType.STUDIES}
+        onChange={() => {}}
+        tabs={manyTabs}
+      />,
+    )
+
+    cy.get('.MuiTabs-scrollButtons').should('be.visible')
+  })
 })
