@@ -50,10 +50,13 @@ export default function DataUseAlertBox(props) {
   return (
     /* eslint-disable react/no-unknown-property */
     !isEmpty(descriptions) && (
-      <div datacy="alert-box" style={styles.box}>
-        <span style={styles.exclamationPoint}>!</span>
-        <div style={styles.text}>{descriptions}</div>
-      </div>
+      <>
+        <div>Translated Data Use, Requires Review:</div>
+        <div datacy="alert-box" style={styles.box}>
+          <span style={styles.exclamationPoint}>!</span>
+          <div style={styles.text}>{descriptions}</div>
+        </div>
+      </>
     )
   )
 }

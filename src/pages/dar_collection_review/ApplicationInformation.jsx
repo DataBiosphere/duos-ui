@@ -36,7 +36,7 @@ const styles = {
   subheader: {
     fontWeight: 800,
     fontSize: '2.4rem',
-    margin: '1.5rem 0',
+    margin: '1rem 0',
   },
   textBox: {
     marginTop: '1.5rem',

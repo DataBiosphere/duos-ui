@@ -8,7 +8,7 @@ import { DacTerm, DarCollection, Dataset, DataUse, Election, Vote } from 'src/ty
 // Components
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox'
 import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel'
-import { ChairVoteInfo } from 'src/components/collection_voting_slab/ResearchProposalVoteSlab'
+import { ChairVoteInfo } from 'src/components/collection_voting_slab/ChairVoteInfo'
 import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision'
 import { Alert } from 'src/components/Alert'
 import { DataUsePills } from 'src/components/collection_voting_slab/DataUsePill'
@@ -94,7 +94,7 @@ const styles = {
 // Components
 const DataUseSummary = ({ bucket }: DataUseSummaryProps) => {
   const dataUses = get(bucket, 'dataUses', [])
-  return isNil(dataUses) ? <></> : <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
+  return isNil(dataUses) ? <></> : <div className="data-use-summary" style={styles.dataUses}>{DataUsePills(dataUses)}</div>
 }
 
 const VoteInfoSubsection = ({

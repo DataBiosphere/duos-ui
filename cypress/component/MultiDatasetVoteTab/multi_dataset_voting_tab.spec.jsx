@@ -132,7 +132,7 @@ describe('MultiDatasetVoteTab - Tests', function () {
     )
 
     cy.get('[data-cy=rp-slab]').should('be.visible')
-    cy.get('[data-cy=rp-expanded]').should('not.exist')
+    cy.get('[data-cy=rp-expanded]').should('be.visible')
     cy.contains('DS')
   })
 
