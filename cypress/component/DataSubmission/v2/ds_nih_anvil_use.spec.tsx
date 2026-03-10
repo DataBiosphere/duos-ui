@@ -31,10 +31,10 @@ describe('NihAnvilUseRelated - Tests', () => {
     cy.get('#nihAnvilUse').should('exist')
   })
 
-  it('should show nihAnvilUse form field after selecting NO in pre-selector', () => {
+  it('should not show nihAnvilUse form field after selecting NO in pre-selector', () => {
     cy.mount(<NihAnvilUseRelated {...propCopy} />)
     cy.get('#nihAnvilUse_pre_selector').contains('No').click({ force: true })
-    cy.get('#nihAnvilUse').should('exist')
+    cy.get('#nihAnvilUse').should('not.exist')
   })
 
   it('should show dbGaP form fields if NHGRI funded and has dbGaP ID', () => {
@@ -74,7 +74,7 @@ describe('NihAnvilUseRelated - Tests', () => {
     propCopy.study.properties = [new NihAnvilUse(NihAnvilUse.NO_NHGRI_NO_ANVIL)]
     cy.mount(<NihAnvilUseRelated {...propCopy} />)
     cy.get('#nihAnvilUse_pre_selector').contains('No').click({ force: true })
-    cy.get('#nihAnvilUse').contains(NihAnvilUse.NO_NHGRI_NO_ANVIL).click({ force: true })
+    cy.get('#nihAnvilUse').should('not.exist')
     cy.get('#dbGaPPhsID').should('not.exist')
     cy.get('#dbGaPStudyRegistrationName').should('not.exist')
     cy.get('#embargoReleaseDate').should('not.exist')
@@ -87,7 +87,7 @@ describe('NihAnvilUseRelated - Tests', () => {
     cy.get('#nihAnvilUse_pre_selector').contains('Yes').click({ force: true })
     cy.get('#nihAnvilUse').should('exist')
     cy.get('#nihAnvilUse_pre_selector').contains('No').click({ force: true })
-    cy.get('#nihAnvilUse').should('exist')
+    cy.get('#nihAnvilUse').should('not.exist')
     cy.get('#dbGaPPhsID').should('not.exist')
   })
 
@@ -95,7 +95,7 @@ describe('NihAnvilUseRelated - Tests', () => {
     propCopy.study.properties = [new NihAnvilUse(NihAnvilUse.NO_NHGRI_NO_ANVIL)]
     cy.mount(<NihAnvilUseRelated {...propCopy} />)
     cy.get('#nihAnvilUse_pre_selector').contains('No').click({ force: true })
-    cy.get('#nihAnvilUse').should('exist')
+    cy.get('#nihAnvilUse').should('not.exist')
     cy.get('#nihAnvilUse_pre_selector').contains('Yes').click({ force: true })
     cy.get('#nihAnvilUse').should('exist')
   })
