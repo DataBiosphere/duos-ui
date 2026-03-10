@@ -86,7 +86,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
         )}
       </Box>
 
-      {isOpen && loading
+      {isOpen && (loading
         ? (
             <>
               <Skeleton height={60} />
@@ -94,167 +94,166 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
               <Skeleton height={60} />
             </>
           )
-        : isOpen
-          ? (
-              <>
-                {/* Access Management Filter */}
-                <Accordion defaultExpanded>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Access Management</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <FormGroup>
-                      {availableFilters.accessManagement.map(option => (
-                        <FormControlLabel
-                          key={option.value}
-                          control={(
-                            <Checkbox
-                              checked={filters.accessManagement.includes(
-                                option.value,
-                              )}
-                              onChange={() =>
-                                handleFilterToggle('accessManagement', option.value)}
-                              size="small"
-                            />
-                          )}
-                          label={(
-                            <Typography variant="body2">
-                              {option.label}
-                              {option.count !== undefined && ` (${option.count})`}
-                            </Typography>
-                          )}
-                        />
-                      ))}
-                    </FormGroup>
-                  </AccordionDetails>
-                </Accordion>
-
-                {/* Data Use Filter */}
-                <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Data Use</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <FormGroup>
-                      {availableFilters.dataUse.map(option => (
-                        <FormControlLabel
-                          key={option.value}
-                          control={(
-                            <Checkbox
-                              checked={filters.dataUse.includes(option.value)}
-                              onChange={() =>
-                                handleFilterToggle('dataUse', option.value)}
-                              size="small"
-                            />
-                          )}
-                          label={(
-                            <Typography variant="body2">
-                              {option.label}
-                              {option.count !== undefined && ` (${option.count})`}
-                            </Typography>
-                          )}
-                        />
-                      ))}
-                    </FormGroup>
-                  </AccordionDetails>
-                </Accordion>
-
-                {/* Data Type Filter */}
-                <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Data Type</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <FormGroup>
-                      {availableFilters.dataType.map(option => (
-                        <FormControlLabel
-                          key={option.value}
-                          control={(
-                            <Checkbox
-                              checked={filters.dataType.includes(option.value)}
-                              onChange={() =>
-                                handleFilterToggle('dataType', option.value)}
-                              size="small"
-                            />
-                          )}
-                          label={(
-                            <Typography variant="body2">
-                              {option.label}
-                              {option.count !== undefined && ` (${option.count})`}
-                            </Typography>
-                          )}
-                        />
-                      ))}
-                    </FormGroup>
-                  </AccordionDetails>
-                </Accordion>
-
-                {/* DAC Filter */}
-                <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>DAC</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <FormGroup>
-                      {availableFilters.dac.map(option => (
-                        <FormControlLabel
-                          key={option.value}
-                          control={(
-                            <Checkbox
-                              checked={filters.dac.includes(option.value)}
-                              onChange={() => handleFilterToggle('dac', option.value)}
-                              size="small"
-                            />
-                          )}
-                          label={(
-                            <Typography variant="body2">
-                              {option.label}
-                              {option.count !== undefined && ` (${option.count})`}
-                            </Typography>
-                          )}
-                        />
-                      ))}
-                    </FormGroup>
-                  </AccordionDetails>
-                </Accordion>
-
-                {/* Participant Count Filter */}
-                <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Participants</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <TextField
-                        type="number"
-                        label="Minimum"
-                        size="small"
-                        value={filters.participantCount.min || ''}
-                        onChange={e =>
-                          handleParticipantChange('min', e.target.value)}
-                        inputProps={{
-                          min: availableFilters.participantCountRange.min,
-                          max: availableFilters.participantCountRange.max,
-                        }}
+        : (
+            <>
+              {/* Access Management Filter */}
+              <Accordion defaultExpanded>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Access Management</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormGroup>
+                    {availableFilters.accessManagement.map(option => (
+                      <FormControlLabel
+                        key={option.value}
+                        control={(
+                          <Checkbox
+                            checked={filters.accessManagement.includes(
+                              option.value,
+                            )}
+                            onChange={() =>
+                              handleFilterToggle('accessManagement', option.value)}
+                            size="small"
+                          />
+                        )}
+                        label={(
+                          <Typography variant="body2">
+                            {option.label}
+                            {option.count !== undefined && ` (${option.count})`}
+                          </Typography>
+                        )}
                       />
-                      <TextField
-                        type="number"
-                        label="Maximum"
-                        size="small"
-                        value={filters.participantCount.max || ''}
-                        onChange={e =>
-                          handleParticipantChange('max', e.target.value)}
-                        inputProps={{
-                          min: availableFilters.participantCountRange.min,
-                          max: availableFilters.participantCountRange.max,
-                        }}
+                    ))}
+                  </FormGroup>
+                </AccordionDetails>
+              </Accordion>
+
+              {/* Data Use Filter */}
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Data Use</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormGroup>
+                    {availableFilters.dataUse.map(option => (
+                      <FormControlLabel
+                        key={option.value}
+                        control={(
+                          <Checkbox
+                            checked={filters.dataUse.includes(option.value)}
+                            onChange={() =>
+                              handleFilterToggle('dataUse', option.value)}
+                            size="small"
+                          />
+                        )}
+                        label={(
+                          <Typography variant="body2">
+                            {option.label}
+                            {option.count !== undefined && ` (${option.count})`}
+                          </Typography>
+                        )}
                       />
-                    </Box>
-                  </AccordionDetails>
-                </Accordion>
-              </>
-            )
-          : null}
+                    ))}
+                  </FormGroup>
+                </AccordionDetails>
+              </Accordion>
+
+              {/* Data Type Filter */}
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Data Type</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormGroup>
+                    {availableFilters.dataType.map(option => (
+                      <FormControlLabel
+                        key={option.value}
+                        control={(
+                          <Checkbox
+                            checked={filters.dataType.includes(option.value)}
+                            onChange={() =>
+                              handleFilterToggle('dataType', option.value)}
+                            size="small"
+                          />
+                        )}
+                        label={(
+                          <Typography variant="body2">
+                            {option.label}
+                            {option.count !== undefined && ` (${option.count})`}
+                          </Typography>
+                        )}
+                      />
+                    ))}
+                  </FormGroup>
+                </AccordionDetails>
+              </Accordion>
+
+              {/* DAC Filter */}
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>DAC</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormGroup>
+                    {availableFilters.dac.map(option => (
+                      <FormControlLabel
+                        key={option.value}
+                        control={(
+                          <Checkbox
+                            checked={filters.dac.includes(option.value)}
+                            onChange={() => handleFilterToggle('dac', option.value)}
+                            size="small"
+                          />
+                        )}
+                        label={(
+                          <Typography variant="body2">
+                            {option.label}
+                            {option.count !== undefined && ` (${option.count})`}
+                          </Typography>
+                        )}
+                      />
+                    ))}
+                  </FormGroup>
+                </AccordionDetails>
+              </Accordion>
+
+              {/* Participant Count Filter */}
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Participants</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                      type="number"
+                      label="Minimum"
+                      size="small"
+                      value={filters.participantCount.min || ''}
+                      onChange={e =>
+                        handleParticipantChange('min', e.target.value)}
+                      inputProps={{
+                        min: availableFilters.participantCountRange.min,
+                        max: availableFilters.participantCountRange.max,
+                      }}
+                    />
+                    <TextField
+                      type="number"
+                      label="Maximum"
+                      size="small"
+                      value={filters.participantCount.max || ''}
+                      onChange={e =>
+                        handleParticipantChange('max', e.target.value)}
+                      inputProps={{
+                        min: availableFilters.participantCountRange.min,
+                        max: availableFilters.participantCountRange.max,
+                      }}
+                    />
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </>
+          )
+      )}
     </Box>
   )
 }
