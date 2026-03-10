@@ -337,11 +337,12 @@ export const DataLibrary: React.FC = () => {
         {/* Filters Sidebar */}
         <Box
           sx={{
-            width: 280,
+            width: urlState.hideFilters ? 40 : 280,
             flexShrink: 0,
-            pr: 2,
-            overflowY: 'auto',
+            pr: urlState.hideFilters ? 0 : 2,
+            overflowY: urlState.hideFilters ? 'hidden' : 'auto',
             overflowX: 'hidden',
+            transition: 'width 0.2s ease',
           }}
         >
           <LibraryFilters
@@ -350,6 +351,8 @@ export const DataLibrary: React.FC = () => {
             onClear={handleClearFilters}
             availableFilters={availableFilters}
             loading={isLoading || isMetadataLoading}
+            isOpen={!urlState.hideFilters}
+            onToggle={() => updateUrlState({ hideFilters: !urlState.hideFilters })}
           />
         </Box>
 

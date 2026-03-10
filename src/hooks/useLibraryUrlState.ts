@@ -88,6 +88,7 @@ export const useLibraryUrlState = () => {
     query: searchParams.get('query') || undefined,
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as SortOrder) || undefined,
+    hideFilters: searchParams.get('hideFilters') === 'true',
   }
 
   const updateState = (updates: Partial<LibraryUrlState>) => {
@@ -153,6 +154,15 @@ export const useLibraryUrlState = () => {
       }
       else {
         newParams.delete('order')
+      }
+    }
+
+    if ('hideFilters' in updates) {
+      if (updates.hideFilters) {
+        newParams.set('hideFilters', 'true')
+      }
+      else {
+        newParams.delete('hideFilters')
       }
     }
 

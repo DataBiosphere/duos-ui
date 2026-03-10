@@ -3,7 +3,9 @@ import {
   Box,
   Button,
   Checkbox,
+  IconButton,
   TextField,
+  Tooltip,
   Typography,
   Accordion,
   AccordionSummary,
@@ -12,6 +14,8 @@ import {
   FormControlLabel,
   Skeleton,
 } from '@mui/material'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { LibraryFiltersProps } from 'src/types/library'
 
@@ -21,6 +25,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
   onClear,
   availableFilters,
   loading = false,
+  isOpen = true,
+  onToggle,
 }) => {
   const handleFilterToggle = (category: keyof typeof filters, value: string) => {
     const currentValues = filters[category] as string[]
@@ -63,15 +69,24 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
           mb: 2,
         }}
       >
-        <Typography variant="h6">Filters</Typography>
-        {hasActiveFilters && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {onToggle && (
+            <Tooltip title={isOpen ? 'Collapse filters' : 'Expand filters'} placement="right">
+              <IconButton size="small" onClick={onToggle} aria-label={isOpen ? 'Collapse filters' : 'Expand filters'}>
+                {isOpen ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          )}
+          {isOpen && <Typography variant="h6">Filters</Typography>}
+        </Box>
+        {isOpen && hasActiveFilters && (
           <Button size="small" onClick={onClear}>
             Clear
           </Button>
         )}
       </Box>
 
-      {loading
+      {isOpen && (loading
         ? (
             <>
               <Skeleton height={60} />
@@ -237,7 +252,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
                 </AccordionDetails>
               </Accordion>
             </>
-          )}
+          )
+      )}
     </Box>
   )
 }
