@@ -243,6 +243,83 @@ describe('Support Request Modal Tests', () => {
     })
   })
 
+  describe('"Using DUOS for my DAC" support type option', () => {
+    beforeEach(() => {
+      cy.stub(Storage, 'userIsLogged').returns(true)
+      cy.stub(Storage, 'getCurrentUser').returns(mockUser)
+    })
+
+    it('Renders "Using DUOS for my DAC" as an option in the type dropdown', () => {
+      cy.mount(
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
+      )
+      cy.get('[data-cy="supportFormType"]').click()
+      cy.contains('Using DUOS for my DAC').should('exist')
+    })
+
+    it('Allows selecting "Using DUOS for my DAC" from the type dropdown', () => {
+      cy.mount(
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
+      )
+      cy.get('[data-cy="supportFormType"]').click()
+      cy.contains('Using DUOS for my DAC').click()
+      cy.get('[data-cy="supportFormType"]').should('contain', 'Using DUOS for my DAC')
+    })
+
+    it('Enables submit button when "Using DUOS for my DAC" is selected and required fields are filled', () => {
+      cy.mount(
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
+      )
+      cy.get('[data-cy="supportFormType"]').click()
+      cy.contains('Using DUOS for my DAC').click()
+      cy.get('[data-cy="supportFormSubmit"]').should('be.disabled')
+      cy.get('[data-cy="supportFormSubject"]').type('DAC Setup Question')
+      cy.get('[data-cy="supportFormSubmit"]').should('be.disabled')
+      cy.get('[data-cy="supportFormDescription"]').type('I need help setting up my DAC in DUOS.')
+      cy.get('[data-cy="supportFormSubmit"]').should('not.be.disabled')
+    })
+
+    it('Submits with dac_usage type and correct payload', () => {
+      cy.mount(
+        <BrowserRouter>
+          <SupportRequestModal
+            onCloseRequest={handler}
+            url="url"
+            showModal={true}
+          />
+        </BrowserRouter>,
+      )
+      cy.get('[data-cy="supportFormType"]').click()
+      cy.contains('Using DUOS for my DAC').click()
+      cy.get('[data-cy="supportFormSubject"]').type('DAC Setup Question')
+      cy.get('[data-cy="supportFormDescription"]').type('I need help setting up my DAC in DUOS.')
+      cy.intercept({ method: 'POST', url: '**/support/request' }, (req) => {
+        expect(req.body.type).to.equal('DAC_USAGE')
+        req.reply({ statusCode: 201 })
+      }).as('request')
+      cy.get('[data-cy="supportFormSubmit"]').click()
+      cy.wait('@request')
+    })
+  })
+
   describe('RedirectLink functionality', () => {
     describe('When user is logged in:', () => {
       beforeEach(() => {
