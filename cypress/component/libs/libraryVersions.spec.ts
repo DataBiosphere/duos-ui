@@ -269,7 +269,7 @@ describe('Library Versions - Tests', function () {
         const termsClause = query.bool.should.find(c => 'terms' in c)
 
         const descriptionValue = matchPhraseClause!.match_phrase['study.description'] as string
-        const tagsValue = termsClause!.terms['study.data.tags'] as string[]
+        const tagsValue = termsClause!.terms['study.data.tags']
 
         expect(tagsValue).to.include(descriptionValue, `${key} tags should include the description value`)
       })
