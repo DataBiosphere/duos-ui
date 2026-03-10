@@ -1,20 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { isNil } from 'lodash'
 import VotesPieChart from 'src/components/common/VotesPieChart'
 
 const styles = {
   chairVoteInfo: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '1.5rem',
     fontWeight: 'bold',
-    borderRadius: '0 8px 8px 8px',
-    border: '#84a3db 2px solid',
-    padding: '20px',
   },
 }
 
 export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
-  return (isChair && dacVotes.length > 0) && (
+  return (isChair && dacVotes.some(v => !isNil(v.vote))) && (
     <div
       style={styles.chairVoteInfo}
       data-cy="chair-vote-info"
