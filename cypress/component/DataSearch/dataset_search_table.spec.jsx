@@ -37,7 +37,6 @@ describe('DatasetSearchTable (component) - basic tests', () => {
     cy.initApplicationConfig()
     cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({})
     cy.stub(DAC, 'fetchDACbotRules').resolves([])
-    cy.clock()
   })
 
   it('does not trigger an initial search on mount', () => {
@@ -70,7 +69,6 @@ describe('DatasetSearchTable (component) - basic tests', () => {
     )
 
     cy.get('[data-cy="search-bar"]').type('query')
-    cy.tick(150)
 
     cy.wait('@searchIndex').then(() => {
       expect(seen).to.include('study.publicVisibility')
@@ -93,7 +91,6 @@ describe('DatasetSearchTable (component) - basic tests', () => {
     )
 
     cy.get('[data-cy="search-bar"]').type('query')
-    cy.tick(150)
 
     cy.wait('@searchIndex').then(() => {
       expect(seen).to.not.include('study.publicVisibility')
@@ -114,17 +111,10 @@ describe('DatasetSearchTable (component) - basic tests', () => {
 
     // Trigger first search and quickly trigger a second one
     cy.get('[data-cy="search-bar"]').type('first')
-    cy.tick(50)
     cy.get('[data-cy="search-bar"]').clear()
     cy.get('[data-cy="search-bar"]').type('second')
 
-    // Advance time enough for debounced calls and the fake responses
-    cy.tick(300)
-
-    cy.wrap(null).then(() => {
-      // Debouncing may collapse rapid inputs into a single request; ensure at least one call occurred
-      expect(dsStub.callCount).to.be.at.least(1)
-    })
+    cy.wrap(dsStub).should('have.been.called')
   })
 })
 

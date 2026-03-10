@@ -1,12 +1,11 @@
 import dayjs from 'dayjs'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import ReactTooltip from 'react-tooltip'
 import {
   calcTablePageCount,
   calcVisibleWindow,
   getSearchFilterFunctions,
   Notifications,
-  searchOnFilteredList,
 } from 'src/libs/utils'
 import { cloneDeep, findIndex, isEmpty, isNaN, isNil } from 'lodash'
 import { Styles } from 'src/libs/theme'
@@ -178,7 +177,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   const [visibleCards, setVisibleCards] = useState<LibraryCard[]>([])
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
   const [currentCard, setCurrentCard] = useState<LibraryCard>({} as LibraryCard)
-  const searchRef = useRef<HTMLInputElement>(null)
+  const [searchText, setSearchText] = useState<string>('')
 
   const columnHeaderData: ColumnHeader[] = [
     columnHeaderFormat.researcher,
@@ -214,15 +213,9 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
 
   // Hook to execute on initialization and card creation/deletion, applies filter on updated collection list
   React.useEffect(() => {
-    if (searchRef.current) {
-      const searchTerms = searchRef.current.value ?? ''
-      let filteredList = libraryCards
-      if (!isEmpty(searchTerms)) {
-        filteredList = lcFilterFunction(searchTerms, libraryCards)
-      }
-      setFilteredCards(filteredList)
-    }
-  }, [props.libraryCards, libraryCards])
+    const filteredList = isEmpty(searchText) ? libraryCards : lcFilterFunction(searchText, libraryCards)
+    setFilteredCards(filteredList)
+  }, [searchText, libraryCards])
 
   // Hook that executes on prop load (initialization hook)
   React.useEffect(() => {
@@ -276,14 +269,8 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
 
   // Search function for SearchBar component
   const handleSearchChange = useCallback(
-    (searchTerms: string) =>
-      searchOnFilteredList(
-        searchTerms,
-        libraryCards,
-        lcFilterFunction,
-        setFilteredCards,
-      ),
-    [libraryCards],
+    (searchTerms: string) => setSearchText(searchTerms),
+    [],
   )
 
   // Template for render
@@ -298,7 +285,6 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchChange}
-          searchRef={searchRef}
         />
       </div>
       <SimpleTable

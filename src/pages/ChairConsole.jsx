@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import SearchBar from 'src/components/SearchBar'
 import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
@@ -18,18 +18,16 @@ export default function ChairConsole() {
   const [filteredList, setFilteredList] = useState([])
   const [relevantDatasets, setRelevantDatasets] = useState()
   const [isLoading, setIsLoading] = useState(true)
-  const searchRef = useRef('')
+  const [searchText, setSearchText] = useState('')
   const filterFn = getSearchFilterFunctions().darCollections
 
   // Get responsive columns for chair console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.CHAIR)
 
-  const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
-    searchTerms,
-    collections,
-    filterFn,
-    setFilteredList,
-  ), [collections, filterFn])
+  const handleSearchChange = useCallback((searchTerms) => {
+    setSearchText(searchTerms)
+    searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList)
+  }, [collections, filterFn])
 
   useEffect(() => {
     const init = async () => {
@@ -51,8 +49,8 @@ export default function ChairConsole() {
   }, [])
 
   const updateCollections = useCallback(
-    updatedCollection => updateCollectionFn({ collections, filterFn, searchRef, setCollections, setFilteredList })(updatedCollection),
-    [collections, filterFn, setCollections, setFilteredList],
+    updatedCollection => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),
+    [collections, filterFn, searchText, setCollections, setFilteredList],
   )
   const cancelCollection = useCallback(
     params => cancelCollectionFn({ updateCollections, role: USER_ROLES.chairperson })(params),
@@ -73,7 +71,7 @@ export default function ChairConsole() {
         />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
-        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
+        <SearchBar handleSearchChange={handleSearchChange} />
       </div>
       {responsiveColumns.length > 0 && (
         <DarCollectionTable

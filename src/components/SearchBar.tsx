@@ -1,16 +1,17 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Styles } from 'src/libs/theme'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { styled } from '@mui/material/styles'
 import InputBase from '@mui/material/InputBase'
 import IconButton from '@mui/material/IconButton'
+import { useDebouncedValue } from 'src/hooks/useDebouncedValue'
 
 interface SearchBarProps {
   readonly handleSearchChange: (value: string) => void
+  readonly initialValue?: string
   readonly placeholder?: string
   readonly style?: React.CSSProperties
-  readonly searchRef?: React.RefObject<HTMLInputElement>
 }
 
 const Search = styled('div')(({ theme }) => ({
@@ -71,35 +72,41 @@ const StyledInputBase = styled(InputBase, {
 }))
 
 export default function SearchBar(props: SearchBarProps) {
-  const { handleSearchChange, placeholder = 'Enter search terms', style, searchRef } = props
-  const searchTerms = useRef<HTMLInputElement>(null)
-  const inputRef = searchRef || searchTerms
-  const [showClear, setShowClear] = useState(false)
+  const { handleSearchChange, initialValue = '', placeholder = 'Enter search terms', style } = props
+  const [value, setValue] = useState(initialValue)
+  const debouncedValue = useDebouncedValue(value, 300)
 
-  const emitValue = () => {
-    handleSearchChange(inputRef.current?.value || '')
-  }
+  // Always hold the latest handler without adding it as a dep —
+  // the effect should only fire when the debounced value changes,
+  // not on every parent re-render that produces a new function reference.
+  const handleSearchChangeRef = useRef(handleSearchChange)
+  useEffect(() => {
+    handleSearchChangeRef.current = handleSearchChange
+  })
+
+  // Skip the initial mount; only call when the user actually changes the value.
+  const isMounted = useRef(false)
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
+    }
+    handleSearchChangeRef.current(debouncedValue)
+  }, [debouncedValue])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (inputRef.current) {
-      inputRef.current.value = e.target.value
-      setShowClear(!!inputRef.current.value)
-      emitValue()
-    }
+    setValue(e.target.value)
   }
 
   const handleClear = () => {
-    if (inputRef.current) {
-      inputRef.current.value = ''
-      setShowClear(false)
-      emitValue()
-    }
+    setValue('')
+    handleSearchChange('')
   }
 
   return (
     <div className="right-header-section" style={{ ...Styles.RIGHT_HEADER_SECTION, ...style }}>
       <Search>
-        {showClear && (
+        {!!value && (
           <ClearIconWrapper>
             <IconButton
               size="small"
@@ -113,11 +120,11 @@ export default function SearchBar(props: SearchBarProps) {
           </ClearIconWrapper>
         )}
         <StyledInputBase
-          showClear={showClear}
+          showClear={!!value}
           placeholder={placeholder}
           inputProps={{ 'aria-label': 'search', 'data-cy': 'search-bar' }}
+          value={value}
           onChange={handleChange}
-          inputRef={inputRef}
         />
         <SearchIconWrapper>
           <SearchIcon data-cy="search-icon" />

@@ -224,7 +224,7 @@ const addIfUnique = (newValue, existingValues) => {
   }
 }
 
-export const updateCollectionFn = ({ collections, filterFn, searchRef, setCollections, setFilteredList }) =>
+export const updateCollectionFn = ({ collections, filterFn, searchText, setCollections, setFilteredList }) =>
   (updatedCollection) => {
     const targetIndex = findIndex(collections,
       collection =>
@@ -239,7 +239,7 @@ export const updateCollectionFn = ({ collections, filterFn, searchRef, setCollec
       const collectionsCopy = cloneDeep(collections)
       collectionsCopy[targetIndex] = updatedCollection
       const updatedFilteredList = filterFn(
-        searchRef.current.value,
+        searchText,
         collectionsCopy,
       )
       setCollections(collectionsCopy)

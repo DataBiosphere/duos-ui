@@ -44,7 +44,6 @@ export const DatasetSearchTable = (props) => {
   const [selected, setSelected] = useState([])
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.dataset)
   const [searchTerm, setSearchTerm] = useState('')
-  const searchRef = useRef('')
   const hasRunInitialSearch = useRef(false)
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1
@@ -299,7 +298,6 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
           <SearchBar
             handleSearchChange={handleSearchChange}
-            searchRef={searchRef}
           />
         </Box>
         <Box sx={{

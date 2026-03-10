@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import SearchBar from 'src/components/SearchBar'
 import { Collections } from 'src/libs/ajax/Collections'
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from 'src/libs/utils'
@@ -20,18 +20,16 @@ export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([])
   const [filteredList, setFilteredList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const searchRef = useRef('')
+  const [searchText, setSearchText] = useState('')
   const filterFn = getSearchFilterFunctions().darCollections
 
   // Get responsive columns for admin console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.ADMIN)
 
-  const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
-    searchTerms,
-    collections,
-    filterFn,
-    setFilteredList,
-  ), [collections, filterFn])
+  const handleSearchChange = useCallback((searchTerms) => {
+    setSearchText(searchTerms)
+    searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList)
+  }, [collections, filterFn])
 
   useEffect(() => {
     const init = async () => {
@@ -49,8 +47,8 @@ export default function AdminManageDarCollections() {
   }, [])
 
   const updateCollections = useCallback(
-    updatedCollection => updateCollectionFn({ collections, filterFn, searchRef, setCollections, setFilteredList })(updatedCollection),
-    [collections, filterFn, setCollections, setFilteredList],
+    updatedCollection => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),
+    [collections, filterFn, searchText, setCollections, setFilteredList],
   )
   const cancelCollection = useCallback(
     params => cancelCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
@@ -70,7 +68,7 @@ export default function AdminManageDarCollections() {
         />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
-        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
+        <SearchBar handleSearchChange={handleSearchChange} />
       </div>
       {responsiveColumns.length > 0 && (
         <DarCollectionTable
