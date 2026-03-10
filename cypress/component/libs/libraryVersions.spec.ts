@@ -1,4 +1,4 @@
-import { getLibraryVersions, getBrandedLibrary } from 'src/libs/libraryVersions'
+import { getLibraryVersions, getBrandedLibrary, BoolQuery } from 'src/libs/libraryVersions'
 
 describe('Library Versions - Tests', function () {
   describe('getLibraryVersions function', function () {
@@ -231,6 +231,61 @@ describe('Library Versions - Tests', function () {
       expect(library.title).to.equal('eLwazi Data Library')
       expect(library.query).to.not.equal(null)
       expect(library.featured).to.equal(true)
+    })
+  })
+
+  describe('Bool should query structure', function () {
+    it('uses bool.should with match_phrase and terms for description-based libraries', function () {
+      const versions = getLibraryVersions(null, null)
+
+      const descriptionLibraries = ['elwazi', 'anvil', 'hca', 'scp', 'nhlbi', 'cfde', 'schare', 'stanley', 'stanleycenter']
+
+      descriptionLibraries.forEach((key) => {
+        const library = versions[key]
+        expect(library.query).to.not.equal(null)
+        expect(library.query).to.have.property('bool')
+
+        const query = library.query as { bool: { should: object[] } }
+        expect(query.bool.should).to.be.an('array')
+        expect(query.bool.should.length).to.be.greaterThan(1)
+
+        const hasMatchPhrase = query.bool.should.some(clause => 'match_phrase' in clause)
+        const hasTerms = query.bool.should.some(clause => 'terms' in clause)
+
+        expect(hasMatchPhrase).to.equal(true, `${key} should have a match_phrase clause`)
+        expect(hasTerms).to.equal(true, `${key} should have a terms clause`)
+      })
+    })
+
+    it('has matching values between match_phrase description and terms tags', function () {
+      const versions = getLibraryVersions(null, null)
+
+      const simpleDescriptionLibraries = ['elwazi', 'anvil', 'hca', 'scp', 'nhlbi', 'cfde']
+
+      simpleDescriptionLibraries.forEach((key) => {
+        const query = versions[key].query as BoolQuery
+
+        const matchPhraseClause = query.bool.should.find(c => 'match_phrase' in c)
+        const termsClause = query.bool.should.find(c => 'terms' in c)
+
+        const descriptionValue = matchPhraseClause!.match_phrase['study.description'] as string
+        const tagsValue = termsClause!.terms['study.data.tags'] as string[]
+
+        expect(tagsValue).to.include(descriptionValue, `${key} tags should include the description value`)
+      })
+    })
+
+    it('broad library uses submitter.institution.name and tags', function () {
+      const versions = getLibraryVersions(null, null)
+      const query = versions['broad'].query as BoolQuery
+
+      const matchPhraseClause = query.bool.should.find(c => 'match_phrase' in c)
+      const termsClause = query.bool.should.find(c => 'terms' in c)
+
+      expect(matchPhraseClause).to.not.equal(undefined)
+      expect(termsClause).to.not.equal(undefined)
+      expect(matchPhraseClause!.match_phrase).to.have.property('submitter.institution.name')
+      expect(termsClause!.terms['study.data.tags']).to.include('The Broad Institute of MIT and Harvard')
     })
   })
 })
