@@ -48,12 +48,10 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   const [{ setStudy, study }] = [props]
   const [preSelectorValue, setPreSelectorValue] = React.useState<string | undefined>(undefined)
 
-  const handlePreSelectorChange = React.useCallback(
-    (input: string) => {
-      if (input === NihAnvilUsePreSelectOptions.NO) {
-        const translatedNoOption = { key: NihAnvilUse.key, value: NihAnvilUse.NO_NHGRI_NO_ANVIL, isValid: true }
-        const newVal = structuredClone(study)
-        removeStudyPropertiesByKeys(newVal, new Set([
+  const cleanDownstreamProperties = (newVal: Study) => {
+    removeStudyPropertiesByKeys(newVal,
+      new Set(
+        [
           PiInstitution.key,
           NihGrantContractNumber.key,
           NihICsSupportingStudy.key,
@@ -69,31 +67,27 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
           AlternativeDataSharingPlanExplanation.key,
           AlternativeDataSharingPlanDataSubmitted.key,
           AlternativeDataSharingPlanDataReleased.key,
+          DbGaPPhsID.key,
+          DbGaPStudyRegistrationName.key,
+          EmbargoReleaseDate.key,
+          SequencingCenter.key,
         ]))
-        unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
+    unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
+  }
+
+  const handlePreSelectorChange = React.useCallback(
+    (input: string) => {
+      if (input === NihAnvilUsePreSelectOptions.NO) {
+        const translatedNoOption = { key: NihAnvilUse.key, value: NihAnvilUse.NO_NHGRI_NO_ANVIL, isValid: true }
+        const newVal = structuredClone(study)
+        cleanDownstreamProperties(newVal)
         setStudyPropertyByKey(newVal, setStudy, translatedNoOption, new NihAnvilUse(translatedNoOption.value))
       }
       else {
         setStudy((val) => {
           const newVal = structuredClone(val)
-          removeStudyPropertiesByKeys(newVal, new Set([NihAnvilUse.key,
-            PiInstitution.key,
-            NihGrantContractNumber.key,
-            NihICsSupportingStudy.key,
-            NihProgramOfficerName.key,
-            NihInstitutionCenterSubmission.key,
-            NihGenomicProgramAdministratorName.key,
-            MultiCenterStudy.key,
-            CollaboratingSites.key,
-            ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
-            ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
-            AlternativeDataSharingPlan.key,
-            AlternativeDataSharingPlanReasons.key,
-            AlternativeDataSharingPlanExplanation.key,
-            AlternativeDataSharingPlanDataSubmitted.key,
-            AlternativeDataSharingPlanDataReleased.key,
-          ]))
-          unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
+          cleanDownstreamProperties(newVal)
+          removeStudyPropertiesByKeys(newVal, new Set([NihAnvilUse.key]))
           return newVal
         })
       }
@@ -140,44 +134,9 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
           defaultValue={getStudyPropertyValueByKey(study, 'nihAnvilUse')}
           validators={[FormValidators.REQUIRED]}
           onChange={(input: { key: string, value: string | undefined, isValid: boolean }) => {
-            setStudyPropertyByKey(study, setStudy, input, new NihAnvilUse(input.value as string))
-            if (!NihAnvilUse.requiresNIHAdministrativeInformation(input.value)) {
-              setStudy((val) => {
-                const newVal = structuredClone(val)
-                removeStudyPropertiesByKeys(newVal,
-                  new Set(
-                    [
-                      PiInstitution.key,
-                      NihGrantContractNumber.key,
-                      NihICsSupportingStudy.key,
-                      NihProgramOfficerName.key,
-                      NihInstitutionCenterSubmission.key,
-                      NihGenomicProgramAdministratorName.key,
-                      MultiCenterStudy.key,
-                      CollaboratingSites.key,
-                      ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
-                      ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
-                      AlternativeDataSharingPlan.key,
-                      AlternativeDataSharingPlanReasons.key,
-                      AlternativeDataSharingPlanExplanation.key,
-                      AlternativeDataSharingPlanDataSubmitted.key,
-                      AlternativeDataSharingPlanDataReleased.key,
-                    ]))
-
-                unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
-                return newVal
-              })
-              if (input.value !== NihAnvilUse.YES_NHGRI_YES_PHS_ID) {
-                setStudy((val) => {
-                  const newVal = structuredClone(val)
-                  removeStudyPropertiesByKeys(newVal, new Set([DbGaPPhsID.key,
-                    DbGaPStudyRegistrationName.key,
-                    EmbargoReleaseDate.key,
-                    SequencingCenter.key]))
-                  return newVal
-                })
-              }
-            }
+            const newVal = structuredClone(study)
+            cleanDownstreamProperties(newVal)
+            setStudyPropertyByKey(newVal, setStudy, input, new NihAnvilUse(input.value as string))
           }}
         />
       )}
