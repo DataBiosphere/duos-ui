@@ -37,6 +37,7 @@ export const datasetAsset: AssetDefinition = {
     'dataUse.secondary.code',
     'dac.dacName',
     'datasetIdentifier',
+    'data.tags',
   ],
 
   buildQuery(

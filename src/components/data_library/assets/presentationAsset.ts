@@ -16,6 +16,7 @@ export const presentationAsset: AssetDefinition = {
     'study.assets.presentations.location',
     'study.assets.presentations.authors',
     'study.assets.presentations.format',
+    'study.assets.presentations.tags',
   ],
 
   buildQuery(
