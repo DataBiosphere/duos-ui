@@ -20,6 +20,7 @@ export const studyAsset: AssetDefinition = {
     'dataUse.secondary.code',
     'dac.dacName',
     'datasetIdentifier',
+    'study.data.tags',
   ],
 
   buildQuery(
