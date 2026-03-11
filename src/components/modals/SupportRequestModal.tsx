@@ -255,6 +255,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
               <MenuItem value="question">Question</MenuItem>
               <MenuItem value="bug">Bug</MenuItem>
               <MenuItem value="feature_request">Feature Request</MenuItem>
+              <MenuItem value="dac_usage">Using DUOS for my DAC</MenuItem>
             </Select>
           </FormControl>
 
