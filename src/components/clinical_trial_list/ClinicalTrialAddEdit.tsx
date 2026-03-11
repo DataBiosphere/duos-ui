@@ -14,6 +14,7 @@ import {
   clinicalTrialInterventionSelectOptions,
 } from 'src/utils/ClinicalTrialEnumUtils'
 import { SelectEntry } from 'src/components/forms/SelectOptionInterface'
+import { unset } from 'lodash'
 
 const defaultClinicalTrial: ClinicalTrial = {
   clinicalTrialId: '',
@@ -24,7 +25,6 @@ const defaultClinicalTrial: ClinicalTrial = {
   status: ClinicalTrialStatus.UNKNOWN,
   sponsor: '',
   startDate: '',
-  endDate: '',
   interventionType: ClinicalTrialInterventionType.OTHER,
   description: '',
   phase: ClinicalTrialPhase.NA,
@@ -122,12 +122,17 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
     const validationErrors = calcClinicalTrialErrors(newClinicalTrial)
     setValidation(validationErrors)
     if (validationFailed(validationErrors)) return
+    const clinicalTrialToSave = {
+      ...newClinicalTrial,
+      clinicalTrialId: newClinicalTrial.clinicalTrialId || crypto.randomUUID?.() || Date.now().toString(),
+    } as ClinicalTrial
+    if (clinicalTrialToSave.endDate?.trim() === '') unset(clinicalTrialToSave, 'endDate')
     if (id < 0) {
-      onClinicalTrialChange([...clinicalTrials, newClinicalTrial])
+      onClinicalTrialChange([...clinicalTrials, clinicalTrialToSave])
     }
     else {
       const copy = [...clinicalTrials]
-      copy[id] = newClinicalTrial
+      copy[id] = clinicalTrialToSave
       onClinicalTrialChange(copy)
     }
     closeAction()

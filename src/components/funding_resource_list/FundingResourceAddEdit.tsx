@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { FundingResource } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { unset } from 'lodash'
 
 interface FundingSourceAddEditProps {
   readonly id: number
@@ -81,6 +82,8 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
       ...current,
       fundingId: current.fundingId || crypto.randomUUID?.() || Date.now().toString(),
     }
+    if (toSave.endDate?.trim() === '') unset(toSave, 'endDate')
+    if (toSave.startDate?.trim() === '') unset(toSave, 'startDate')
     if (id < 0) {
       onFundingResourcesChange([...fundingResources, toSave])
     }
