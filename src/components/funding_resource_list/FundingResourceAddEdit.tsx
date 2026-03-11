@@ -3,6 +3,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { FundingResource } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { unset } from 'lodash'
+import { isValidDate } from 'src/pages/data_submission/v2/v2-common-functions'
 
 interface FundingSourceAddEditProps {
   readonly id: number
@@ -30,8 +31,6 @@ const defaultFunding: FundingResource = {
   funderProgram: '',
   grantNumber: '',
   projectTitle: '',
-  startDate: '',
-  endDate: '',
   url: '',
   tags: [],
 }
@@ -44,6 +43,8 @@ const calcErrors = (f: FundingResource): Validation => {
   if (!f.funderProgram?.trim()) v.funderProgram = makeError('required')
   if (!f.grantNumber?.trim()) v.grantNumber = makeError('required')
   if (!f.projectTitle?.trim()) v.projectTitle = makeError('required')
+  if (f.startDate && !isValidDate(f.startDate)) v.startDate = makeError('date')
+  if (f.endDate && !isValidDate(f.endDate)) v.endDate = makeError('date')
   return v
 }
 

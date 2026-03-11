@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { IntellectualProperty } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { isValidDate } from 'src/pages/data_submission/v2/v2-common-functions'
 
 interface IntellectualPropertyAddEditProps {
   readonly id: number
@@ -47,6 +48,7 @@ const calcErrors = (intellectualProperty: IntellectualProperty): Validation => {
   if (!intellectualProperty.title?.trim()) v.title = makeError('required')
   if (!intellectualProperty.assignee?.trim()) v.assignee = makeError('required')
   if (!intellectualProperty.patentNumber?.trim()) v.patentNumber = makeError('required')
+  if (!isValidDate(intellectualProperty.filingDate)) v.filingDate = makeError('date')
 
   // Date validation
   if (!intellectualProperty.filingDate?.trim()) {

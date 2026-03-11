@@ -51,6 +51,10 @@ import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInst
 import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { Dataset } from 'src/types/model'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+dayjs.extend(customParseFormat)
+
 export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
 export const generateStudyPropertyYesNoField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: BooleanStudyProperty) => {
@@ -339,4 +343,9 @@ export const extractThroughBioId = (input: string): string => {
     // Not a URL: return non-empty string, else ''
     return trimmed === '' ? '' : trimmed
   }
+}
+
+export const isValidDate = (dateString: string): boolean => {
+  const format = 'YYYY-MM-DD'
+  return dayjs(dateString, format, true).isValid()
 }
