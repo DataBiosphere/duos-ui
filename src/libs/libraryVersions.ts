@@ -230,7 +230,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['Single Cell Portal'],
+                'study.data.tags': ['Platform: Single Cell Portal'],
               },
             },
           ],

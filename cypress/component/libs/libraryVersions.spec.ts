@@ -260,7 +260,7 @@ describe('Library Versions - Tests', function () {
     it('has matching values between match_phrase description and terms tags', function () {
       const versions = getLibraryVersions(null, null)
 
-      const simpleDescriptionLibraries = ['elwazi', 'anvil', 'hca', 'scp', 'nhlbi', 'cfde']
+      const simpleDescriptionLibraries = ['elwazi', 'anvil', 'hca', 'nhlbi', 'cfde', 'ged']
 
       simpleDescriptionLibraries.forEach((key) => {
         const query = versions[key].query as BoolQuery
