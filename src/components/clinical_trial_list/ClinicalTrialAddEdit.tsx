@@ -61,23 +61,18 @@ interface Validation {
 
 const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
-const isFallback = (v: string) =>
-  v === ClinicalTrialStatus.UNKNOWN
-  || v === ClinicalTrialPhase.NA
-  || v === ClinicalTrialInterventionType.OTHER
-
 const calcClinicalTrialErrors = (ct: ClinicalTrial): Validation => {
   const v: Validation = {}
   if (!ct.title?.trim()) v.title = makeError('required')
   if (!ct.registry?.trim()) v.registry = makeError('required')
   if (!ct.identifier?.trim()) v.identifier = makeError('required')
-  if (isFallback(ct.status)) v.status = makeError('required')
   if (!ct.sponsor?.trim()) v.sponsor = makeError('required')
   if (!ct.startDate?.trim()) v.startDate = makeError('required')
-  else if (!FormValidators.DATE.isValid(ct.startDate)) v.startDate = makeError('date')
+  if (!ct.interventionType?.trim()) v.interventionType = makeError('required')
+  if (!ct.phase?.trim()) v.phase = makeError('required')
+  if (!ct.status?.trim()) v.status = makeError('required')
+  if (!FormValidators.DATE.isValid(ct.startDate)) v.startDate = makeError('date')
   if (ct.endDate?.trim() && !FormValidators.DATE.isValid(ct.endDate)) v.endDate = makeError('date')
-  if (isFallback(ct.interventionType)) v.interventionType = makeError('required')
-  if (isFallback(ct.phase)) v.phase = makeError('required')
   if (!ct.url?.trim()) v.url = makeError('required')
   return v
 }

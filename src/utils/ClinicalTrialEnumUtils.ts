@@ -5,94 +5,44 @@ import {
 } from 'src/types/model'
 import { SelectEntry } from 'src/components/forms/SelectOptionInterface'
 
-export interface LegacyPair<E extends string> {
-  value: E
-  legacyValue: string
-}
-
-const normalize = (s: string) => s.trim().toLowerCase()
-
-const buildAdapter = <E extends string>(pairs: LegacyPair<E>[], fallback: E) => {
-  const legacyToEnum: Record<string, E> = {}
-  const enumToLegacy: Record<E, string> = {} as Record<E, string>
-
-  for (const p of pairs) {
-    enumToLegacy[p.value] = p.legacyValue
-    legacyToEnum[normalize(p.legacyValue)] = p.value
-    legacyToEnum[normalize(p.value)] = p.value
-  }
-
-  const parseLegacy = (legacy?: string | null): E =>
-    legacy ? (legacyToEnum[normalize(legacy)] || fallback) : fallback
-
-  const toDisplay = (value: E): string => enumToLegacy[value] || enumToLegacy[fallback]
-
-  // Return select options (id/displayText) excluding fallback
-  const selectOptions: SelectEntry[] = pairs
-    .filter(p => p.value !== fallback)
-    .map(p => ({ key: p.value, displayText: p.legacyValue }))
-
-  return { parseLegacy, toDisplay, selectOptions }
-}
-
-/* Status */
-const statusPairs: LegacyPair<ClinicalTrialStatus>[] = [
-  { value: ClinicalTrialStatus.ACTIVE_NOT_RECRUITING, legacyValue: 'Active, not recruiting' },
-  { value: ClinicalTrialStatus.COMPLETED, legacyValue: 'Completed' },
-  { value: ClinicalTrialStatus.ENROLLING_BY_INVITATION, legacyValue: 'Enrolling by invitation' },
-  { value: ClinicalTrialStatus.NOT_YET_RECRUITING, legacyValue: 'Not yet recruiting' },
-  { value: ClinicalTrialStatus.RECRUITING, legacyValue: 'Recruiting' },
-  { value: ClinicalTrialStatus.SUSPENDED, legacyValue: 'Suspended' },
-  { value: ClinicalTrialStatus.TERMINATED, legacyValue: 'Terminated' },
-  { value: ClinicalTrialStatus.WITHDRAWN, legacyValue: 'Withdrawn' },
-  { value: ClinicalTrialStatus.AVAILABLE, legacyValue: 'Available' },
-  { value: ClinicalTrialStatus.NO_LONGER_AVAILABLE, legacyValue: 'No longer available' },
-  { value: ClinicalTrialStatus.TEMPORARILY_NOT_AVAILABLE, legacyValue: 'Temporarily not available' },
-  { value: ClinicalTrialStatus.APPROVED_FOR_MARKETING, legacyValue: 'Approved for marketing' },
-  { value: ClinicalTrialStatus.WITHHELD, legacyValue: 'Withheld' },
-  { value: ClinicalTrialStatus.UNKNOWN, legacyValue: 'Unknown' }, // fallback
+/* Status Entries */
+export const clinicalTrialStatusSelectOptions: SelectEntry[] = [
+  { key: ClinicalTrialStatus.ACTIVE_NOT_RECRUITING, displayText: ClinicalTrialStatus.ACTIVE_NOT_RECRUITING },
+  { key: ClinicalTrialStatus.COMPLETED, displayText: ClinicalTrialStatus.COMPLETED },
+  { key: ClinicalTrialStatus.ENROLLING_BY_INVITATION, displayText: ClinicalTrialStatus.ENROLLING_BY_INVITATION },
+  { key: ClinicalTrialStatus.NOT_YET_RECRUITING, displayText: ClinicalTrialStatus.NOT_YET_RECRUITING },
+  { key: ClinicalTrialStatus.RECRUITING, displayText: ClinicalTrialStatus.RECRUITING },
+  { key: ClinicalTrialStatus.SUSPENDED, displayText: ClinicalTrialStatus.SUSPENDED },
+  { key: ClinicalTrialStatus.TERMINATED, displayText: ClinicalTrialStatus.TERMINATED },
+  { key: ClinicalTrialStatus.WITHDRAWN, displayText: ClinicalTrialStatus.WITHDRAWN },
+  { key: ClinicalTrialStatus.AVAILABLE, displayText: ClinicalTrialStatus.AVAILABLE },
+  { key: ClinicalTrialStatus.NO_LONGER_AVAILABLE, displayText: ClinicalTrialStatus.NO_LONGER_AVAILABLE },
+  { key: ClinicalTrialStatus.TEMPORARILY_NOT_AVAILABLE, displayText: ClinicalTrialStatus.TEMPORARILY_NOT_AVAILABLE },
+  { key: ClinicalTrialStatus.APPROVED_FOR_MARKETING, displayText: ClinicalTrialStatus.APPROVED_FOR_MARKETING },
+  { key: ClinicalTrialStatus.WITHHELD, displayText: ClinicalTrialStatus.WITHHELD },
+  { key: ClinicalTrialStatus.UNKNOWN, displayText: ClinicalTrialStatus.UNKNOWN },
 ]
-const statusAdapter = buildAdapter(statusPairs, ClinicalTrialStatus.UNKNOWN)
-export const parseLegacyStatus = statusAdapter.parseLegacy
-export const statusToDisplay = statusAdapter.toDisplay
-export const clinicalTrialStatusSelectOptions = statusAdapter.selectOptions
 
-/* Intervention Type */
-const interventionPairs: LegacyPair<ClinicalTrialInterventionType>[] = [
-  { value: ClinicalTrialInterventionType.BEHAVIORAL, legacyValue: 'Behavioral' },
-  { value: ClinicalTrialInterventionType.BIOLOGICAL, legacyValue: 'Biological' },
-  { value: ClinicalTrialInterventionType.COMBINATION_PRODUCT, legacyValue: 'Combination product' },
-  { value: ClinicalTrialInterventionType.DEVICE, legacyValue: 'Device' },
-  { value: ClinicalTrialInterventionType.DIAGNOSTIC_TEST, legacyValue: 'Diagnostic test' },
-  { value: ClinicalTrialInterventionType.DIETARY_SUPPLEMENT, legacyValue: 'Dietary supplement' },
-  { value: ClinicalTrialInterventionType.DRUG, legacyValue: 'Drug' },
-  { value: ClinicalTrialInterventionType.GENETIC, legacyValue: 'Genetic' },
-  { value: ClinicalTrialInterventionType.PROCEDURE, legacyValue: 'Procedure' },
-  { value: ClinicalTrialInterventionType.RADIATION, legacyValue: 'Radiation' },
-  { value: ClinicalTrialInterventionType.OTHER, legacyValue: 'Other' }, // fallback
+/* Intervention Entries */
+export const clinicalTrialInterventionSelectOptions: SelectEntry[] = [
+  { key: ClinicalTrialInterventionType.BEHAVIORAL, displayText: ClinicalTrialInterventionType.BEHAVIORAL },
+  { key: ClinicalTrialInterventionType.BIOLOGICAL, displayText: ClinicalTrialInterventionType.BIOLOGICAL },
+  { key: ClinicalTrialInterventionType.COMBINATION_PRODUCT, displayText: ClinicalTrialInterventionType.COMBINATION_PRODUCT },
+  { key: ClinicalTrialInterventionType.DEVICE, displayText: ClinicalTrialInterventionType.DEVICE },
+  { key: ClinicalTrialInterventionType.DIAGNOSTIC_TEST, displayText: ClinicalTrialInterventionType.DIAGNOSTIC_TEST },
+  { key: ClinicalTrialInterventionType.DIETARY_SUPPLEMENT, displayText: ClinicalTrialInterventionType.DIETARY_SUPPLEMENT },
+  { key: ClinicalTrialInterventionType.DRUG, displayText: ClinicalTrialInterventionType.DRUG },
+  { key: ClinicalTrialInterventionType.GENETIC, displayText: ClinicalTrialInterventionType.GENETIC },
+  { key: ClinicalTrialInterventionType.PROCEDURE, displayText: ClinicalTrialInterventionType.PROCEDURE },
+  { key: ClinicalTrialInterventionType.RADIATION, displayText: ClinicalTrialInterventionType.RADIATION },
+  { key: ClinicalTrialInterventionType.OTHER, displayText: ClinicalTrialInterventionType.OTHER }, // fallback
 ]
-const interventionAdapter = buildAdapter(interventionPairs, ClinicalTrialInterventionType.OTHER)
-export const parseLegacyInterventionType = interventionAdapter.parseLegacy
-export const interventionTypeToDisplay = interventionAdapter.toDisplay
-export const clinicalTrialInterventionSelectOptions = interventionAdapter.selectOptions
 
-/* Phase */
-const phasePairs: LegacyPair<ClinicalTrialPhase>[] = [
-  { value: ClinicalTrialPhase.EARLY_PHASE1, legacyValue: 'Early Phase 1' },
-  { value: ClinicalTrialPhase.PHASE1, legacyValue: 'Phase 1' },
-  { value: ClinicalTrialPhase.PHASE2, legacyValue: 'Phase 2' },
-  { value: ClinicalTrialPhase.PHASE3, legacyValue: 'Phase 3' },
-  { value: ClinicalTrialPhase.PHASE4, legacyValue: 'Phase 4' },
-  { value: ClinicalTrialPhase.NA, legacyValue: 'Not Applicable' }, // fallback
+export const clinicalTrialPhaseSelectOptions: SelectEntry[] = [
+  { key: ClinicalTrialPhase.EARLY_PHASE1, displayText: ClinicalTrialPhase.EARLY_PHASE1 },
+  { key: ClinicalTrialPhase.PHASE1, displayText: ClinicalTrialPhase.PHASE1 },
+  { key: ClinicalTrialPhase.PHASE2, displayText: ClinicalTrialPhase.PHASE2 },
+  { key: ClinicalTrialPhase.PHASE3, displayText: ClinicalTrialPhase.PHASE3 },
+  { key: ClinicalTrialPhase.PHASE4, displayText: ClinicalTrialPhase.PHASE4 },
+  { key: ClinicalTrialPhase.NA, displayText: ClinicalTrialPhase.NA }, // fallback
 ]
-const phaseAdapter = buildAdapter(phasePairs, ClinicalTrialPhase.NA)
-export const parseLegacyPhase = phaseAdapter.parseLegacy
-export const phaseToDisplay = phaseAdapter.toDisplay
-export const clinicalTrialPhaseSelectOptions = phaseAdapter.selectOptions
-
-/* Convenience lookups */
-export const clinicalTrialEnumDisplay = {
-  status: statusToDisplay,
-  phase: phaseToDisplay,
-  interventionType: interventionTypeToDisplay,
-}

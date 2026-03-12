@@ -2,11 +2,6 @@ import ClinicalTrialAddEdit from './ClinicalTrialAddEdit'
 import ClinicalTrialRow from './ClinicalTrialRow'
 import { ClinicalTrial } from 'src/types/model'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
-import {
-  parseLegacyStatus,
-  parseLegacyPhase,
-  parseLegacyInterventionType,
-} from 'src/utils/ClinicalTrialEnumUtils'
 import React from 'react'
 import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 
@@ -20,9 +15,6 @@ export default function ClinicalTrialList(props: {
 }) {
   const normalized = props.clinicalTrials.map(ct => ({
     ...ct,
-    status: parseLegacyStatus(ct.status as unknown as string),
-    phase: parseLegacyPhase(ct.phase as unknown as string),
-    interventionType: parseLegacyInterventionType(ct.interventionType as unknown as string),
   }))
 
   return (

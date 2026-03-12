@@ -7,9 +7,6 @@ import {
   renderArray,
   renderPresenter,
   renderAuthors,
-  renderStatus,
-  renderPhase,
-  renderInterventionType,
 } from 'src/utils/RenderUtils'
 import { Maintainer, Presenter, Author, ClinicalTrial } from 'src/types/model'
 
@@ -110,27 +107,6 @@ describe('renderAuthors', () => {
   it('renders em dash for empty or null array', () => {
     expect(renderAuthors([])).to.deep.equal('—')
     expect(renderAuthors(null)).to.deep.equal('—')
-  })
-})
-
-describe('renderStatus', () => {
-  it('renders clinical trial status', () => {
-    expect(renderStatus('recruiting')).to.be.a('string')
-    expect(renderStatus('completed')).to.be.a('string')
-  })
-})
-
-describe('renderPhase', () => {
-  it('renders clinical trial phase', () => {
-    expect(renderPhase('phase1')).to.be.a('string')
-    expect(renderPhase('phase2')).to.be.a('string')
-  })
-})
-
-describe('renderInterventionType', () => {
-  it('renders clinical trial intervention type', () => {
-    expect(renderInterventionType('drug')).to.be.a('string')
-    expect(renderInterventionType('behavioral')).to.be.a('string')
   })
 })
 
