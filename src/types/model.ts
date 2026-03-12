@@ -438,8 +438,8 @@ export interface FundingResource {
   funderProgram: string
   grantNumber: string
   projectTitle: string
-  startDate: string
-  endDate: string
+  startDate?: string
+  endDate?: string
   url: string
   tags?: string[]
 }
