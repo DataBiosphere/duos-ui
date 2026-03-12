@@ -14,6 +14,8 @@ import {
   clinicalTrialInterventionSelectOptions,
 } from 'src/utils/ClinicalTrialEnumUtils'
 import { SelectEntry } from 'src/components/forms/SelectOptionInterface'
+import { unset } from 'lodash'
+import { isValidDate } from 'src/pages/data_submission/v2/v2-common-functions'
 
 const defaultClinicalTrial: ClinicalTrial = {
   clinicalTrialId: '',
@@ -24,7 +26,6 @@ const defaultClinicalTrial: ClinicalTrial = {
   status: ClinicalTrialStatus.UNKNOWN,
   sponsor: '',
   startDate: '',
-  endDate: '',
   interventionType: ClinicalTrialInterventionType.OTHER,
   description: '',
   phase: ClinicalTrialPhase.NA,
@@ -67,12 +68,11 @@ const calcClinicalTrialErrors = (ct: ClinicalTrial): Validation => {
   if (!ct.registry?.trim()) v.registry = makeError('required')
   if (!ct.identifier?.trim()) v.identifier = makeError('required')
   if (!ct.sponsor?.trim()) v.sponsor = makeError('required')
-  if (!ct.startDate?.trim()) v.startDate = makeError('required')
+  if (!isValidDate(ct.startDate)) v.startDate = makeError('date')
   if (!ct.interventionType?.trim()) v.interventionType = makeError('required')
   if (!ct.phase?.trim()) v.phase = makeError('required')
   if (!ct.status?.trim()) v.status = makeError('required')
-  if (!FormValidators.DATE.isValid(ct.startDate)) v.startDate = makeError('date')
-  if (ct.endDate?.trim() && !FormValidators.DATE.isValid(ct.endDate)) v.endDate = makeError('date')
+  if (ct.endDate?.trim() && !isValidDate(ct.endDate)) v.endDate = makeError('date')
   if (!ct.url?.trim()) v.url = makeError('required')
   return v
 }
@@ -117,12 +117,17 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
     const validationErrors = calcClinicalTrialErrors(newClinicalTrial)
     setValidation(validationErrors)
     if (validationFailed(validationErrors)) return
+    const clinicalTrialToSave = {
+      ...newClinicalTrial,
+      clinicalTrialId: newClinicalTrial.clinicalTrialId || crypto.randomUUID?.() || Date.now().toString(),
+    } as ClinicalTrial
+    if (clinicalTrialToSave.endDate?.trim() === '') unset(clinicalTrialToSave, 'endDate')
     if (id < 0) {
-      onClinicalTrialChange([...clinicalTrials, newClinicalTrial])
+      onClinicalTrialChange([...clinicalTrials, clinicalTrialToSave])
     }
     else {
       const copy = [...clinicalTrials]
-      copy[id] = newClinicalTrial
+      copy[id] = clinicalTrialToSave
       onClinicalTrialChange(copy)
     }
     closeAction()

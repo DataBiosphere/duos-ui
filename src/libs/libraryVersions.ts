@@ -38,9 +38,15 @@ interface TermQuery {
   }
 }
 
-interface BoolQuery {
+interface TermsQuery {
+  terms: {
+    [key: string]: string[]
+  }
+}
+
+export interface BoolQuery {
   bool: {
-    should: Array<MatchPhraseQuery | TermQuery>
+    should: Array<MatchPhraseQuery | TermQuery | TermsQuery>
   }
 }
 
@@ -79,8 +85,19 @@ export const getLibraryVersions = (
     },
     'broad': {
       query: {
-        match_phrase: {
-          'submitter.institution.name': 'The Broad Institute of MIT and Harvard',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'submitter.institution.name': 'The Broad Institute of MIT and Harvard',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['The Broad Institute of MIT and Harvard'],
+              },
+            },
+          ],
         },
       },
       icon: broadIcon,
@@ -112,6 +129,11 @@ export const getLibraryVersions = (
                 'submitter.institution.name': 'Spaulding Hospital', // TODO: identify exact name
               },
             },
+            {
+              terms: {
+                'study.data.tags': ['mgb', 'Massachusetts General Hospital', 'Brigham and Women\'s Hospital', 'Faulkner Hospital', 'Spaulding Hospital'],
+              },
+            },
           ],
         },
       },
@@ -122,8 +144,19 @@ export const getLibraryVersions = (
     },
     'elwazi': {
       query: {
-        match_phrase: {
-          'study.description': 'elwazi',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'elwazi',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['elwazi'],
+              },
+            },
+          ],
         },
       },
       icon: elwaziIcon,
@@ -144,8 +177,19 @@ export const getLibraryVersions = (
     },
     'nhgri': {
       query: {
-        match_phrase: {
-          'study.description': 'anvil',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'anvil',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['anvil'],
+              },
+            },
+          ],
         },
       },
       icon: nhgriIcon,
@@ -155,8 +199,19 @@ export const getLibraryVersions = (
     },
     'nhlbi': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -166,8 +221,19 @@ export const getLibraryVersions = (
     },
     'scp': {
       query: {
-        match_phrase: {
-          'study.description': 'Single Cell Portal',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'Single Cell Portal',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['Platform: Single Cell Portal'],
+              },
+            },
+          ],
         },
       },
       icon: scpIcon,
@@ -177,8 +243,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-blood-disorders-and-blood-safety': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Blood Disorders and Blood Safety',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Blood Disorders and Blood Safety',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Blood Disorders and Blood Safety'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -188,8 +265,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-health-disparities': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Health Disparities',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Health Disparities',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Health Disparities'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -199,8 +287,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-heart-and-vascular-diseases': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Heart and Vascular Diseases',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Heart and Vascular Diseases',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Heart and Vascular Diseases'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -210,8 +309,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-lung-diseases': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Lung Diseases',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Lung Diseases',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Lung Diseases'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -221,8 +331,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-obesity-nutrition-and-physical-activity': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Obesity, Nutrition, and Physical Activity',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Obesity, Nutrition, and Physical Activity',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Obesity, Nutrition, and Physical Activity'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -232,8 +353,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-population-and-epidemiology-studies': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Population and Epidemiology Studies',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Population and Epidemiology Studies',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Population and Epidemiology Studies'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -243,8 +375,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-precision-medicine-activities': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Precision Medicine Activities',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Precision Medicine Activities',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Precision Medicine Activities'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -254,8 +397,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-research-spectrum': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Research Spectrum',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Research Spectrum',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Research Spectrum'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -265,8 +419,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-sleep-science-and-sleep-disorders': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Sleep Science and Sleep Disorders',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Sleep Science and Sleep Disorders',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Sleep Science and Sleep Disorders'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -276,8 +441,19 @@ export const getLibraryVersions = (
     },
     'nhlbi-womens-health': {
       query: {
-        match_phrase: {
-          'study.description': 'NHLBI Women\'s Health',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NHLBI Women\'s Health',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NHLBI Women\'s Health'],
+              },
+            },
+          ],
         },
       },
       icon: nhlbiIcon,
@@ -287,8 +463,19 @@ export const getLibraryVersions = (
     },
     'anvil': {
       query: {
-        match_phrase: {
-          'study.description': 'anvil',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'anvil',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['anvil'],
+              },
+            },
+          ],
         },
       },
       icon: anvilIcon,
@@ -298,8 +485,19 @@ export const getLibraryVersions = (
     },
     'hca': {
       query: {
-        match_phrase: {
-          'study.description': 'hca dcp',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'hca dcp',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['hca dcp'],
+              },
+            },
+          ],
         },
       },
       icon: hcaIcon,
@@ -309,8 +507,19 @@ export const getLibraryVersions = (
     },
     'zoonomics': {
       query: {
-        match_phrase: {
-          'study.description': 'zoonomics',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'zoonomics',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['zoonomics'],
+              },
+            },
+          ],
         },
       },
       icon: zoonomicsIcon,
@@ -327,8 +536,19 @@ export const getLibraryVersions = (
     },
     'cfde': {
       query: {
-        match_phrase: {
-          'study.description': 'cfde',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'cfde',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['cfde'],
+              },
+            },
+          ],
         },
       },
       icon: cfdeIcon,
@@ -338,8 +558,19 @@ export const getLibraryVersions = (
     },
     'firecloud': {
       query: {
-        match_phrase: {
-          'study.description': 'FireCloud',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'FireCloud',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['FireCloud'],
+              },
+            },
+          ],
         },
       },
       icon: firecloudIcon,
@@ -349,8 +580,19 @@ export const getLibraryVersions = (
     },
     'allofus': {
       query: {
-        match_phrase: {
-          'study.description': 'All of Us',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'All of Us',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['All of Us'],
+              },
+            },
+          ],
         },
       },
       icon: aouIcon,
@@ -377,8 +619,19 @@ export const getLibraryVersions = (
     },
     'ifgc': {
       query: {
-        match_phrase: {
-          'study.description': 'International Fetal Genomics Consortium',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'International Fetal Genomics Consortium',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['International Fetal Genomics Consortium'],
+              },
+            },
+          ],
         },
       },
       icon: ifgcIcon,
@@ -388,8 +641,19 @@ export const getLibraryVersions = (
     },
     'schare': {
       query: {
-        match_phrase: {
-          'study.description': 'SCHARE',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'SCHARE',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['SCHARE'],
+              },
+            },
+          ],
         },
       },
       icon: schareIcon,
@@ -399,8 +663,19 @@ export const getLibraryVersions = (
     },
     'stanley': {
       query: {
-        match_phrase: {
-          'study.description': 'Stanley Center',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'Stanley Center',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['Stanley Center'],
+              },
+            },
+          ],
         },
       },
       icon: stanleyIcon,
@@ -410,8 +685,19 @@ export const getLibraryVersions = (
     },
     'stanleycenter': {
       query: {
-        match_phrase: {
-          'study.description': 'Stanley Center',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'Stanley Center',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['Stanley Center'],
+              },
+            },
+          ],
         },
       },
       icon: stanleyIcon,
@@ -421,8 +707,19 @@ export const getLibraryVersions = (
     },
     'getzlab': {
       query: {
-        match_phrase: {
-          'study.description': 'Getz Lab',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'Getz Lab',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['Getz Lab'],
+              },
+            },
+          ],
         },
       },
       icon: getzLabIcon,
@@ -432,8 +729,19 @@ export const getLibraryVersions = (
     },
     'asap': {
       query: {
-        match_phrase: {
-          'study.description': 'ASAP',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'ASAP',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['ASAP'],
+              },
+            },
+          ],
         },
       },
       icon: asapIcon,
@@ -443,8 +751,19 @@ export const getLibraryVersions = (
     },
     'gp2': {
       query: {
-        match_phrase: {
-          'study.description': 'GP2',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'GP2',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['GP2'],
+              },
+            },
+          ],
         },
       },
       icon: gp2Icon,
@@ -454,8 +773,19 @@ export const getLibraryVersions = (
     },
     'broadasd': {
       query: {
-        match_phrase: {
-          'study.description': 'ASD',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'ASD',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['ASD'],
+              },
+            },
+          ],
         },
       },
       icon: broadIcon,
@@ -465,8 +795,19 @@ export const getLibraryVersions = (
     },
     'pbn': {
       query: {
-        match_phrase: {
-          'study.description': 'PBN',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'PBN',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['PBN'],
+              },
+            },
+          ],
         },
       },
       icon: PBNIcon,
@@ -476,8 +817,19 @@ export const getLibraryVersions = (
     },
     'pgc': {
       query: {
-        match_phrase: {
-          'study.description': 'PGC',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'PGC',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['PGC'],
+              },
+            },
+          ],
         },
       },
       icon: PGCIcon,
@@ -487,8 +839,19 @@ export const getLibraryVersions = (
     },
     'broadsczbd': {
       query: {
-        match_phrase: {
-          'study.description': 'SCZ',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'SCZ',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['SCZ'],
+              },
+            },
+          ],
         },
       },
       icon: broadIcon,
@@ -498,8 +861,19 @@ export const getLibraryVersions = (
     },
     'esp': {
       query: {
-        match_phrase: {
-          'study.description': 'ESP',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'ESP',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['ESP'],
+              },
+            },
+          ],
         },
       },
       icon: epi25Icon,
@@ -509,8 +883,19 @@ export const getLibraryVersions = (
     },
     'broadibd': {
       query: {
-        match_phrase: {
-          'study.description': 'IBD',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'IBD',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['IBD'],
+              },
+            },
+          ],
         },
       },
       icon: broadIcon,
@@ -520,8 +905,19 @@ export const getLibraryVersions = (
     },
     'helmsley': {
       query: {
-        match_phrase: {
-          'study.description': 'Helmsley',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'Helmsley',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['Helmsley'],
+              },
+            },
+          ],
         },
       },
       icon: HelmsleyIcon,
@@ -531,8 +927,19 @@ export const getLibraryVersions = (
     },
     'ged': {
       query: {
-        match_phrase: {
-          'study.description': 'Eating Disorder Sequencing Program',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'Eating Disorder Sequencing Program',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['Eating Disorder Sequencing Program'],
+              },
+            },
+          ],
         },
       },
       icon: gedIcon,
@@ -542,8 +949,19 @@ export const getLibraryVersions = (
     },
     'ccxdp': {
       query: {
-        match_phrase: {
-          'study.description': 'CCXDP',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'CCXDP',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['CCXDP'],
+              },
+            },
+          ],
         },
       },
       icon: ccxdpIcon,
@@ -553,8 +971,19 @@ export const getLibraryVersions = (
     },
     'ncpi-duo': {
       query: {
-        match_phrase: {
-          'study.description': 'NCPI DUO',
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NCPI DUO',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['NCPI DUO'],
+              },
+            },
+          ],
         },
       },
       icon: ncpiIcon,
