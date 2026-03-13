@@ -1,10 +1,5 @@
 import React from 'react'
 import { Maintainer, ClinicalTrial, Presenter, Author } from 'src/types/model'
-import {
-  statusToDisplay,
-  phaseToDisplay,
-  interventionTypeToDisplay,
-} from 'src/utils/ClinicalTrialEnumUtils'
 
 export function renderMaintainer(value: unknown): React.ReactNode {
   const maintainer = value as Maintainer
@@ -24,18 +19,6 @@ export function renderValue(value: unknown): React.ReactNode {
 
 export function renderArray(value: unknown): string {
   return Array.isArray(value) && value.length > 0 ? value.join(', ') : '—'
-}
-
-export function renderStatus(value: unknown): string {
-  return statusToDisplay(value as ClinicalTrial['status'])
-}
-
-export function renderPhase(value: unknown): string {
-  return phaseToDisplay(value as ClinicalTrial['phase'])
-}
-
-export function renderInterventionType(value: unknown): string {
-  return interventionTypeToDisplay(value as ClinicalTrial['interventionType'])
 }
 
 export function renderPresenter(value: unknown): React.ReactNode {
@@ -65,9 +48,6 @@ const renderersByColumn: Record<string, (value: unknown, asset?: unknown) => Rea
   tools: renderArray,
   url: renderUrl,
   filingDate: renderValue,
-  status: renderStatus,
-  phase: renderPhase,
-  interventionType: renderInterventionType,
   presenter: renderPresenter,
   authors: renderAuthors,
   dateRange: (_, asset) => {

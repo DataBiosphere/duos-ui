@@ -138,7 +138,7 @@ describe('IntellectualPropertySummary', () => {
     cy.mount(
       <IntellectualPropertySummary
         intellectualProperty={sampleIp}
-        columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
+        columnsToShow={['title', 'type', 'patentNumber', 'status', 'url', 'tags']}
         editAction={cy.stub()}
         deleteAction={cy.stub()}
         disabled={false}
@@ -147,6 +147,7 @@ describe('IntellectualPropertySummary', () => {
     cy.contains(sampleIp.title).should('exist')
     cy.contains(sampleIp.type).should('exist')
     cy.contains(sampleIp.patentNumber).should('exist')
+    cy.contains(sampleIp.status).should('exist')
     cy.contains('tag1, tag2').should('exist')
     cy.get('a[href="https://example.com/ip"]').should('exist')
   })
@@ -156,7 +157,7 @@ describe('IntellectualPropertySummary', () => {
       cy.mount(
         <IntellectualPropertySummary
           intellectualProperty={sampleIp}
-          columnsToShow={['title', 'type', 'patentNumber', 'url', 'tags']}
+          columnsToShow={['title', 'type', 'patentNumber', 'status', 'url', 'tags']}
           editAction={cy.stub()}
           deleteAction={cy.stub()}
           viewAction={cy.stub().as('view')}
