@@ -188,7 +188,7 @@ describe('makeFundingResourceColumns — accessibility', () => {
       />,
     )
     cy.contains('Study Name').should('exist')
-    cy.contains('FundingResource ID').should('exist')
+    cy.contains('Funding Resource ID').should('exist')
     cy.contains('Funder Name').should('exist')
     cy.contains('Funder Program').should('exist')
     cy.contains('Grant Number').should('exist')
