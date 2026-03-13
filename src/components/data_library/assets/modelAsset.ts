@@ -15,6 +15,11 @@ export const modelAsset: AssetDefinition = {
     'study.assets.models.format',
     'study.assets.models.license',
     'study.assets.models.tags',
+    'study.assets.models.description',
+    'study.assets.models.url',
+    'study.assets.models.trainedOnDatasets',
+    'study.assets.models.maintainer.name',
+    'study.assets.models.maintainer.email',
   ],
 
   buildQuery(

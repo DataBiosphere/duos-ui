@@ -16,6 +16,7 @@ export const intellectualPropertyAsset: AssetDefinition = {
     'study.assets.intellectualProperties.assignee',
     'study.assets.intellectualProperties.patentNumber',
     'study.assets.intellectualProperties.status',
+    'study.assets.intellectualProperties.contact',
     'study.assets.intellectualProperties.tags',
   ],
 

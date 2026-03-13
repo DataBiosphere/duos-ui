@@ -16,6 +16,8 @@ export const workspaceAsset: AssetDefinition = {
     'study.assets.workspaces.description',
     'study.assets.workspaces.tools',
     'study.assets.workspaces.tags',
+    'study.assets.workspaces.access',
+    'study.assets.workspaces.url',
   ],
 
   buildQuery(

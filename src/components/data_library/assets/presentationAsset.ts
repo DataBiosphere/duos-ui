@@ -15,6 +15,7 @@ export const presentationAsset: AssetDefinition = {
     'study.assets.presentations.event',
     'study.assets.presentations.location',
     'study.assets.presentations.authors',
+    'study.assets.presentations.presenter.name',
     'study.assets.presentations.format',
     'study.assets.presentations.tags',
   ],

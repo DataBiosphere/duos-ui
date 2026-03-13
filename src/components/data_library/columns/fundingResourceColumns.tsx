@@ -18,7 +18,7 @@ export const makeFundingResourceColumns = (): GridColDef<FundingResourceAsset>[]
   },
   {
     field: 'fundingId',
-    headerName: 'FundingResource ID',
+    headerName: 'Funding Resource ID',
     flex: 1,
     minWidth: 150,
     renderCell: (params) => {

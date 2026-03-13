@@ -15,6 +15,8 @@ export const publicationAsset: AssetDefinition = {
     'study.assets.publications.journal',
     'study.assets.publications.doi',
     'study.assets.publications.pubmedId',
+    'study.assets.publications.doi',
+    'study.assets.publications.authors.name',
     'study.assets.publications.tags',
   ],
 

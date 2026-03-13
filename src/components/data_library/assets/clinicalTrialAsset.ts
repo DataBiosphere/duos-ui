@@ -22,6 +22,9 @@ export const clinicalTrialAsset: AssetDefinition = {
     'study.assets.clinicalTrials.identifier',
     'study.assets.clinicalTrials.registry',
     'study.assets.clinicalTrials.tags',
+    'study.assets.clinicalTrials.interventionTypes',
+    'study.assets.clinicalTrials.phase',
+    'study.assets.clinicalTrials.status',
   ],
 
   buildQuery(
