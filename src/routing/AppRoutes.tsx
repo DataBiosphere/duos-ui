@@ -83,17 +83,9 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route element={<Authenticated />}>
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/request_role" element={<RequestForm />} />
-        {checkEnv(envGroups.NON_PROD)
-          ? (
-              <Route path="/datalibrary" element={<DataLibrary />}>
-                <Route path=":query" element={<DataLibrary />} />
-              </Route>
-            )
-          : (
-              <Route path="/datalibrary" element={<DatasetSearch {...props} />}>
-                <Route path=":query" element={<DatasetSearch {...props} />} />
-              </Route>
-            )}
+        <Route path="/datalibrary" element={<DataLibrary />}>
+          <Route path=":query" element={<DataLibrary />} />
+        </Route>
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
