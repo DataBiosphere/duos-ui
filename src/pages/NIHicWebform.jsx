@@ -80,7 +80,7 @@ export default function NIHICWebform() {
     'National Institute of Neurological Disorders and Stroke (NINDS)',
     'National Institute of Nursing Research (NINR)',
     'National Library of Medicine (NLM)',
-    'NIH Office of the Director',
+    'NIH Office of the Director (OD)',
   ]
 
   const nihCenterOptions = nihCenterList.map(function (item) {
