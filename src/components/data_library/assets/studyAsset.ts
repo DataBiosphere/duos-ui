@@ -21,6 +21,7 @@ export const studyAsset: AssetDefinition = {
     'dac.dacName',
     'datasetIdentifier',
     'study.data.tags',
+    'study.phenotype',
   ],
 
   buildQuery(
