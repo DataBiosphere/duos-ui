@@ -1,7 +1,10 @@
 import { redirectOnLogout } from 'src/libs/auth/auth'
+import eventList from 'src/libs/events'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import { Storage } from 'src/libs/storage'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
-import { Config } from 'src/libs/config'
+import { Config } from '../config'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -74,6 +77,13 @@ async function handleResponse<T>(
   if (!res.ok) {
     const apiUrl = await Config.getApiUrl()
     if (res.status === 401 && !shouldSkip401Redirect(url, method, apiUrl)) {
+      const oidcUser = Storage.getOidcUser()
+      const expiresOn = oidcUser?.profile?.exp ?? null
+      Metrics.captureEvent(eventList.userAutoLogout401, {
+        expires_on: expiresOn,
+        current_time: Math.floor(Date.now() / 1000),
+        endpoint_url: url,
+      })
       redirectOnLogout()
     }
     reportError(url, res.status)
