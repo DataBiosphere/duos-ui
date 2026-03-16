@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import Home from 'src/pages/Home'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import Authenticated from 'src/routing/Authenticated'
-import { checkEnv, envGroups } from 'src/utils/EnvironmentUtils'
+import { envGroups } from 'src/utils/EnvironmentUtils'
 import HealthCheck from 'src/pages/HealthCheck'
 import Status from 'src/pages/Status'
 import BackgroundSignIn from 'src/pages/BackgroundSignIn'
@@ -16,7 +16,6 @@ import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
 import ConsentTextGenerator from 'src/pages/ConsentTextGenerator'
 import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from 'src/pages/DMSPolicyInfo'
 import RequestForm from 'src/pages/user_profile/RequestForm'
-import DatasetSearch from 'src/pages/DatasetSearch'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
 import RoleBAC from 'src/routing/RoleBAC'
@@ -42,8 +41,6 @@ import { DAAUtils } from 'src/utils/DAAUtils'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
-import DataSubmissionForm from 'src/pages/data_submission/DataSubmissionForm'
-import StudyUpdateForm from 'src/pages/StudyUpdateForm'
 import ChairConsole from 'src/pages/ChairConsole'
 import DACDatasets from 'src/pages/DACDatasets'
 import MemberConsole from 'src/pages/MemberConsole'
@@ -83,17 +80,9 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route element={<Authenticated />}>
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/request_role" element={<RequestForm />} />
-        {checkEnv(envGroups.NON_PROD)
-          ? (
-              <Route path="/datalibrary" element={<DataLibrary />}>
-                <Route path=":query" element={<DataLibrary />} />
-              </Route>
-            )
-          : (
-              <Route path="/datalibrary" element={<DatasetSearch {...props} />}>
-                <Route path=":query" element={<DatasetSearch {...props} />} />
-              </Route>
-            )}
+        <Route path="/datalibrary" element={<DataLibrary />}>
+          <Route path=":query" element={<DataLibrary />} />
+        </Route>
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -106,21 +95,10 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter, USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
-          {checkEnv(envGroups.NON_STAGING) && (
-            <>
-              <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
-                <Route path=":studyId" element={<DataSubmissionFormV2 />} />
-              </Route>
-              <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
-            </>
-          )}
-          {checkEnv(envGroups.PROD_STAGING) && (
-            <>
-              <Route path="/data_submission_form" element={<DataSubmissionForm />}>
-              </Route>
-              <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
-            </>
-          )}
+          <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
+            <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+          </Route>
+          <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
           <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member, USER_ROLES.signingOfficial, USER_ROLES.chairperson]} />}>
