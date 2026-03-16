@@ -582,7 +582,9 @@ describe('fetchAdapter - Fetch methods', () => {
 
 describe('fetchAdapter - 401 Bard metric logging', () => {
   let fetchStub: ReturnType<typeof cy.stub>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let captureEventStub: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let signOutStub: any
 
   const mockExpTime = Math.floor(Date.now() / 1000) + 3600 // 1h from now
@@ -622,7 +624,7 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
       fetchGet('https://consent.example.org/api/something').then(
         () => { throw new Error('Should have thrown') },
         () => {
-          expect(captureEventStub).to.have.been.calledOnce
+          expect(captureEventStub.calledOnce).to.equal(true)
           const [event, details] = captureEventStub.firstCall.args
           expect(event).to.equal(eventList.userAutoLogout401)
           expect(details).to.have.property('expires_on', mockExpTime)
@@ -645,8 +647,8 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
       fetchGet('https://consent.example.org/api/user/me').then(
         () => { throw new Error('Should have thrown') },
         () => {
-          expect(captureEventStub).not.to.have.been.called
-          expect(signOutStub).not.to.have.been.called
+          expect(captureEventStub.called).to.equal(false)
+          expect(signOutStub.called).to.equal(false)
         },
       )
     })
@@ -664,8 +666,8 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
       fetchGet('https://consent.example.org/api/something').then(
         () => { throw new Error('Should have thrown') },
         () => {
-          expect(captureEventStub).not.to.have.been.called
-          expect(signOutStub).not.to.have.been.called
+          expect(captureEventStub.called).to.equal(false)
+          expect(signOutStub.called).to.equal(false)
         },
       )
     })
@@ -689,7 +691,7 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
       fetchGet('https://consent.example.org/api/something').then(
         () => { throw new Error('Should have thrown') },
         () => {
-          expect(captureEventStub).to.have.been.calledOnce
+          expect(captureEventStub.calledOnce).to.equal(true)
           const [, details] = captureEventStub.firstCall.args
           expect(details).to.have.property('expires_on', null)
         },
@@ -709,8 +711,8 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
       fetchGet('https://other-api.example.org/api/resource').then(
         () => { throw new Error('Should have thrown') },
         () => {
-          expect(captureEventStub).not.to.have.been.called
-          expect(signOutStub).not.to.have.been.called
+          expect(captureEventStub.called).to.equal(false)
+          expect(signOutStub.called).to.equal(false)
         },
       )
     })
