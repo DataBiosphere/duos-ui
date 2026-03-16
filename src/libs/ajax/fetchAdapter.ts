@@ -1,6 +1,7 @@
 import { redirectOnLogout } from 'src/libs/auth/auth'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
+import { Config } from 'src/libs/config'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -71,7 +72,8 @@ async function handleResponse<T>(
   method: Method = 'GET',
 ): Promise<FetchData<T>> {
   if (!res.ok) {
-    if (res.status === 401 && !shouldSkip401Redirect(url, method)) {
+    const apiUrl = await Config.getApiUrl()
+    if (res.status === 401 && !shouldSkip401Redirect(url, method, apiUrl)) {
       redirectOnLogout()
     }
     reportError(url, res.status)

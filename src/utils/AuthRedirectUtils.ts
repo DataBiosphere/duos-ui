@@ -1,51 +1,25 @@
 /**
- * Normalizes a URL to its pathname with numeric path segments replaced by ':id'.
- * This allows pattern matching against parameterized routes,
- * e.g. /api/dac/123/rules → /api/dac/:id/rules
- */
-const normalizePath = (url: string): string =>
-  new URL(url, globalThis.location.origin).pathname
-    .split('/')
-    .map(part => (/^\d+$/.test(part) ? ':id' : part))
-    .join('/')
-
-/**
- * Returns true when the user is currently on the Data Library page (/datalibrary or /datalibrary/*).
- */
-const isDataLibraryRoute = (): boolean => {
-  const path = globalThis.location.pathname.toLowerCase()
-  return path === '/datalibrary' || path.startsWith('/datalibrary/')
-}
-
-/**
- * Background GET endpoints on the Data Library page that may return 401 due to
- * missing resource permissions rather than an expired session.
- * A 401 from these should not force a logout redirect.
- */
-const DATA_LIBRARY_SKIP_401_PATHS = new Set([
-  '/api/repository/v1/snapshots',
-  '/api/dac/:id/rules',
-])
-
-/**
- * Determines whether a 401 response should suppress the global logout redirect.
+ * Determines whether to skip the 401 redirect for a given request.
+ * This function checks if the request is a GET request to the DUOS API's auth probe endpoint (`/api/user/me`).
+ * If the request does not meet these criteria, it returns false, indicating that the 401 redirect should not be skipped.
+ * If the request is a GET request to the DUOS API's auth probe endpoint, it returns true, indicating that the 401 redirect should be skipped.
+ * This is used to prevent infinite redirect loops when the auth probe endpoint returns a 401 response, which can happen if the user's session has expired or if they are not authenticated.
  *
- * Two categories of exemptions:
- *  1. GET /api/user/me — used internally to probe auth state; handled separately
- *     by the auth layer and should not trigger a forced logout.
- *  2. Data Library background endpoints — may return 401 due to missing resource
- *     permissions rather than an expired session, so the user should not be
- *     logged out while browsing the library.
- *
- * All non-GET requests fall through immediately: a 401 on a mutating request
- * almost always means the session is invalid and logout is the correct response.
+ * @param url The URL of the request that resulted in a 401 response.
+ * @param method The HTTP method of the request that resulted in a 401 response.
+ * @param apiUrl The base URL of the DUOS API, used to determine if the request was made to the DUOS API.
+ * @returns A boolean indicating whether to skip the 401 redirect.
  */
-export const shouldSkip401Redirect = (url: string, method: string): boolean => {
+export const shouldSkip401Redirect = (
+  url: string, method: string, apiUrl: string): boolean => {
   if (method !== 'GET') return false
 
-  const pathname = normalizePath(url)
+  // Only handle 401s from the DUOS API
+  const requestHostname = new URL(url, globalThis.location.origin).hostname
+  const duosApiHostname = new URL(apiUrl).hostname
+  if (requestHostname !== duosApiHostname) return true
 
-  if (pathname === '/api/user/me') return true
-
-  return isDataLibraryRoute() && DATA_LIBRARY_SKIP_401_PATHS.has(pathname)
+  // Only skip redirect for the auth probe endpoint
+  const pathname = new URL(url, globalThis.location.origin).pathname
+  return pathname === '/api/user/me'
 }
