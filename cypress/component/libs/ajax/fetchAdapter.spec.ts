@@ -582,8 +582,8 @@ describe('fetchAdapter - Fetch methods', () => {
 
 describe('fetchAdapter - 401 Bard metric logging', () => {
   let fetchStub: ReturnType<typeof cy.stub>
-  let captureEventStub: ReturnType<typeof cy.stub>
-  let signOutStub: ReturnType<typeof cy.stub>
+  let captureEventStub: any
+  let signOutStub: any
 
   const mockExpTime = Math.floor(Date.now() / 1000) + 3600 // 1h from now
 
