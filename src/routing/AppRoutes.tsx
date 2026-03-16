@@ -98,21 +98,10 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter, USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
-          {checkEnv(envGroups.NON_STAGING) && (
-            <>
-              <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
-                <Route path=":studyId" element={<DataSubmissionFormV2 />} />
-              </Route>
-              <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
-            </>
-          )}
-          {checkEnv(envGroups.PROD_STAGING) && (
-            <>
-              <Route path="/data_submission_form" element={<DataSubmissionForm />}>
-              </Route>
-              <Route path="/study_update/:studyId" element={<StudyUpdateForm />} />
-            </>
-          )}
+          <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
+            <Route path=":studyId" element={<DataSubmissionFormV2 />} />
+          </Route>
+          <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
           <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member, USER_ROLES.signingOfficial, USER_ROLES.chairperson]} />}>
