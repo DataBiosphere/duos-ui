@@ -4,7 +4,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
-import { Config } from '../config'
+import { Config } from 'src/libs/config'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
