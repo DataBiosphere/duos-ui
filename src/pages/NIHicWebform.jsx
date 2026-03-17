@@ -58,7 +58,8 @@ export default function NIHICWebform() {
     display: 'inline-block',
   }
 
-  const nihCenterList = ['National Cancer Institute (NCI)',
+  const nihCenterList = [
+    'National Cancer Institute (NCI)',
     'National Eye Institute (NEI)',
     'National Heart, Lung, and Blood Institute (NHLBI)',
     'National Human Genome Research Institute (NHGRI)',
@@ -78,7 +79,9 @@ export default function NIHICWebform() {
     'National Institute on Minority Health and Health Disparities (NIMHD)',
     'National Institute of Neurological Disorders and Stroke (NINDS)',
     'National Institute of Nursing Research (NINR)',
-    'National Library of Medicine (NLM)']
+    'National Library of Medicine (NLM)',
+    'NIH Office of the Director (OD)',
+  ]
 
   const nihCenterOptions = nihCenterList.map(function (item) {
     return {

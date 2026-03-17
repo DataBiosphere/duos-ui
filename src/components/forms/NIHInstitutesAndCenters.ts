@@ -158,6 +158,12 @@ export class NIHInstitutesAndCenters {
     abbreviation: 'NCCIH',
   }
 
+  static readonly OD: SelectOptionWithKeyNameAndAbbreviation = {
+    key: 'OD',
+    name: 'NIH Office of the Director',
+    abbreviation: 'OD',
+  }
+
   static readonly VALUES: SelectOptionWithKeyNameAndAbbreviation[] = [
     NIHInstitutesAndCenters.NCI,
     NIHInstitutesAndCenters.NEI,
@@ -185,7 +191,9 @@ export class NIHInstitutesAndCenters {
     NIHInstitutesAndCenters.CSR,
     NIHInstitutesAndCenters.FIC,
     NIHInstitutesAndCenters.NCATS,
-    NIHInstitutesAndCenters.NCCIH]
+    NIHInstitutesAndCenters.NCCIH,
+    NIHInstitutesAndCenters.OD,
+  ]
 
   static readonly ABBREVIATIONS: string[] = NIHInstitutesAndCenters.VALUES.map(val => val.abbreviation || '')
 }
