@@ -23,6 +23,7 @@ import { ToastNotifications } from 'src/libs/ToastNotifications'
 import {
   DuosUser,
   DarCollection,
+  DarCollectionSummary,
   Election,
   Vote,
   LibraryCard,
@@ -337,7 +338,7 @@ interface SearchFilterFunctions {
   dar: (term: string, targetList: ElectionData[]) => ElectionData[]
   libraryCard: (term: string, targetList: LibraryCard[]) => LibraryCard[]
   signingOfficialResearchers: (term: string, targetList: Researcher[]) => Researcher[]
-  darCollections: (term: string, targetList: DarCollection[]) => DarCollection[]
+  darCollections: (term: string, targetList: DarCollectionSummary[]) => DarCollectionSummary[]
   users: (term: string, targetList: DuosUser[]) => DuosUser[]
   datasets: (term: string, targetList: Dataset[]) => Dataset[]
   datasetTerms: (term: string, targetList: DatasetTerm[]) => DatasetTerm[]
@@ -413,22 +414,23 @@ const filterSigningOfficialResearchers = (term: string, targetList: Researcher[]
   })
 }
 
-const filterDarCollections = (term: string, targetList: DarCollection[]): DarCollection[] => {
+const filterDarCollections = (term: string, targetList: DarCollectionSummary[]): DarCollectionSummary[] => {
   if (isEmpty(term)) return targetList
-  return filter(targetList, (collection: DarCollection) => {
-    const { darCode, createDate, updateDate } = collection
-    const datasetCount = collection.datasets?.length || 0
-    const formattedCreateDate = formatDate(createDate)
-    const formattedUpdateDate = formatDate(updateDate)
+  return filter(targetList, (collection: DarCollectionSummary) => {
+    const { darCode, name, researcherName, institutionName, status, dacNames, datasetCount, submissionDate } = collection
     const searchableValues = [
       darCode,
-      String(datasetCount),
-      formattedCreateDate,
-      formattedUpdateDate,
+      name,
+      researcherName,
+      institutionName,
+      status,
+      join(dacNames ?? [], ' '),
+      String(datasetCount ?? 0),
+      formatDate(submissionDate),
     ]
     const termArr = term.split(' ')
     return searchableValues.some(value =>
-      termArr.some(t => includes(toLower(String(value)), toLower(t))),
+      termArr.some(t => includes(toLower(String(value ?? '')), toLower(t))),
     )
   })
 }
