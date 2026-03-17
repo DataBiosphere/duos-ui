@@ -77,7 +77,6 @@ async function handleResponse<T>(
   if (!res.ok) {
     const apiUrl = await Config.getApiUrl()
     if (res.status === 401 && !shouldSkip401Redirect(url, method, apiUrl)) {
-
       // Record relevant 401 logouts to Bard / Mixpanel.
       // This gives systematic, empirical data to assess premature logout issues.
       // More context: https://github.com/DataBiosphere/duos-ui/pull/3389
@@ -90,7 +89,6 @@ async function handleResponse<T>(
         time_until_expires: expiresOn === null ? null : expiresOn - currentTime,
         endpoint_url: url,
       }, AbortSignal.timeout(1000)) // Wait <= 1s, abort if log slower
-
       redirectOnLogout()
     }
     reportError(url, res.status)
