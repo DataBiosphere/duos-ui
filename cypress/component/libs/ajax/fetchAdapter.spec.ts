@@ -629,6 +629,7 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
           expect(event).to.equal(eventList.userAutoLogout401)
           expect(details).to.have.property('expires_on', mockExpTime)
           expect(details).to.have.property('current_time').that.is.a('number')
+          expect(details).to.have.property('time_until_expires').that.is.a('number')
           expect(details).to.have.property('endpoint_url', 'https://consent.example.org/api/something')
         },
       )
@@ -694,6 +695,7 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
           expect(captureEventStub.calledOnce).to.equal(true)
           const [, details] = captureEventStub.firstCall.args
           expect(details).to.have.property('expires_on', null)
+          expect(details).to.have.property('time_until_expires', null)
         },
       )
     })

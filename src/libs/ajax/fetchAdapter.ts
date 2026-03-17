@@ -79,11 +79,13 @@ async function handleResponse<T>(
     if (res.status === 401 && !shouldSkip401Redirect(url, method, apiUrl)) {
       const oidcUser = Storage.getOidcUser()
       const expiresOn = oidcUser?.profile?.exp ?? null
-      Metrics.captureEvent(eventList.userAutoLogout401, {
+      const currentTime = Math.floor(Date.now() / 1000)
+      await Metrics.captureEvent(eventList.userAutoLogout401, {
         expires_on: expiresOn,
-        current_time: Math.floor(Date.now() / 1000),
+        current_time: currentTime,
+        time_until_expires: expiresOn === null ? null : expiresOn - currentTime,
         endpoint_url: url,
-      })
+      }, AbortSignal.timeout(1000)) // Wait <= 1s, abort if log slower
       redirectOnLogout()
     }
     reportError(url, res.status)
