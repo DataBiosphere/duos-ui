@@ -562,7 +562,7 @@ type ListTypeForModel<T extends keyof SearchFilterFunctions>
   = T extends 'dar' ? ElectionData[]
     : T extends 'libraryCard' ? LibraryCard[]
       : T extends 'signingOfficialResearchers' ? Researcher[]
-        : T extends 'darCollections' ? DarCollection[]
+        : T extends 'darCollections' ? DarCollectionSummary[]
           : T extends 'users' ? DuosUser[]
             : T extends 'datasets' ? Dataset[]
               : T extends 'datasetTerms' ? DatasetTerm[]
