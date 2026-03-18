@@ -582,10 +582,8 @@ describe('fetchAdapter - Fetch methods', () => {
 
 describe('fetchAdapter - 401 Bard metric logging', () => {
   let fetchStub: ReturnType<typeof cy.stub>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let captureEventStub: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let signOutStub: any
+  let captureEventStub: Cypress.Agent<sinon.SinonStub> | sinon.SinonStub
+  let signOutStub: Cypress.Agent<sinon.SinonStub> | sinon.SinonStub
 
   const mockExpTime = Math.floor(Date.now() / 1000) + 3600 // 1h from now
 
