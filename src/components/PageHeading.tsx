@@ -1,16 +1,26 @@
-import React from 'react'
+import React, { CSSProperties } from 'react'
 import { isNil } from 'lodash'
 
-const margins = (iconSize) => {
-  const MEDIUM = {
+interface PageHeadingProps {
+  id: string
+  title: string
+  description?: React.ReactNode
+  imgSrc?: string
+  color?: string
+  iconSize?: 'none' | 'large' | 'medium'
+  descriptionStyle?: CSSProperties
+}
+
+const margins = (iconSize: PageHeadingProps['iconSize']): CSSProperties => {
+  const MEDIUM: CSSProperties = {
     marginLeft: '55px',
   }
 
-  const LARGE = {
+  const LARGE: CSSProperties = {
     marginLeft: '70px',
   }
 
-  const NONE = {
+  const NONE: CSSProperties = {
     marginLeft: '0',
   }
 
@@ -25,30 +35,30 @@ const margins = (iconSize) => {
   }
 }
 
-export const PageHeading = (props) => {
+export const PageHeading = (props: PageHeadingProps) => {
   const { id, title, description, imgSrc, color, iconSize, descriptionStyle } = props
 
-  const HEADING = {
+  const HEADING: CSSProperties = {
     width: '100%',
     margin: '20px 0 10px 0',
     position: 'relative',
   }
 
-  const ICON = {
+  const ICON: CSSProperties = {
     position: 'absolute',
     top: '0',
     left: '0',
     height: '50px',
   }
 
-  const DESCRIPTION = {
+  const DESCRIPTION: CSSProperties = {
     color: '#000000',
     height: '25px',
     fontWeight: '400',
     fontSize: '19px',
   }
 
-  const TITLE = {
+  const TITLE: CSSProperties = {
     margin: '7px 0 5px 0',
     lineBreak: 'auto',
   }
