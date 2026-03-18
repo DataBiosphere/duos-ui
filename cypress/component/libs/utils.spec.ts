@@ -1,7 +1,7 @@
 import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
 import { toLower } from 'lodash'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
-import { DuosUser, Election, LibraryCard, Vote, DarCollection, Study } from 'src/types/model'
+import { DuosUser, Election, LibraryCard, Vote, DarCollectionSummary } from 'src/types/model'
 
 const sampleLCList: LibraryCard[] = [
   {
@@ -67,126 +67,52 @@ const sampleResearcherList: DuosUser[] = [
   },
 ]
 
-const darCollectionSummaryOne: DarCollection = {
-  id: 1,
+const darCollectionSummaryOne: DarCollectionSummary = {
   darCode: 'DAR-1',
-  createDate: 1649163460401,
-  createUserId: 1,
-  dars: {},
-  datasets: [{
-    name: 'Dataset 1',
-    datasetId: 1,
-    createUserId: 1,
-    createUser: {} as DuosUser,
-    createDate: new Date(),
-    dacId: 1,
-    translatedDataUse: 'test',
-    deletable: true,
-    properties: [],
-    study: {} as Study,
-    alias: 1,
-    datasetIdentifier: 'TEST-001',
-    dataUse: {},
-  }, {
-    name: 'Dataset 2',
-    datasetId: 2,
-    createUserId: 1,
-    createUser: {} as DuosUser,
-    createDate: new Date(),
-    dacId: 1,
-    translatedDataUse: 'test',
-    deletable: true,
-    properties: [],
-    study: {} as Study,
-    alias: 2,
-    datasetIdentifier: 'TEST-002',
-    dataUse: {},
-  }, {
-    name: 'Dataset 3',
-    datasetId: 3,
-    createUserId: 1,
-    createUser: {} as DuosUser,
-    createDate: new Date(),
-    dacId: 1,
-    translatedDataUse: 'test',
-    deletable: true,
-    properties: [],
-    study: {} as Study,
-    alias: 3,
-    datasetIdentifier: 'TEST-003',
-    dataUse: {},
-  }, {
-    name: 'Dataset 4',
-    datasetId: 4,
-    createUserId: 1,
-    createUser: {} as DuosUser,
-    createDate: new Date(),
-    dacId: 1,
-    translatedDataUse: 'test',
-    deletable: true,
-    properties: [],
-    study: {} as Study,
-    alias: 4,
-    datasetIdentifier: 'TEST-004',
-    dataUse: {},
-  }],
-} as DarCollection
+  darCollectionId: 1,
+  name: 'Test Collection 1',
+  researcherName: 'Researcher One',
+  institutionName: 'Institution One',
+  status: 'Submitted',
+  dacNames: ['Test DAC'],
+  dacCode: 'DAC-1',
+  datasetCount: 4,
+  datasetIds: [1, 2, 3, 4],
+  submissionDate: 1649163460401,
+  actions: [],
+  expired: false,
+  expiresAt: 0,
+  latestReferenceId: 'DAR-1',
+  progressReport: false,
+  referenceIds: [],
+  requiresSOApproval: false,
+}
 
-const darCollectionSummaryTwo: DarCollection = {
-  id: 2,
+const darCollectionSummaryTwo: DarCollectionSummary = {
   darCode: 'DAR-2',
-  createDate: 1629163460401,
-  createUserId: 1,
-  dars: {},
-  datasets: [{
-    name: 'Dataset 5',
-    datasetId: 5,
-    createUserId: 1,
-    createUser: {} as DuosUser,
-    createDate: new Date(),
-    dacId: 1,
-    translatedDataUse: 'test',
-    deletable: true,
-    properties: [],
-    study: {} as Study,
-    alias: 5,
-    datasetIdentifier: 'TEST-005',
-    dataUse: {},
-  }, {
-    name: 'Dataset 6',
-    datasetId: 6,
-    createUserId: 1,
-    createUser: {} as DuosUser,
-    createDate: new Date(),
-    dacId: 1,
-    translatedDataUse: 'test',
-    deletable: true,
-    properties: [],
-    study: {} as Study,
-    alias: 6,
-    datasetIdentifier: 'TEST-006',
-    dataUse: {},
-  }, {
-    name: 'Dataset 7',
-    datasetId: 7,
-    createUserId: 1,
-    createUser: {} as DuosUser,
-    createDate: new Date(),
-    dacId: 1,
-    translatedDataUse: 'test',
-    deletable: true,
-    properties: [],
-    study: {} as Study,
-    alias: 7,
-    datasetIdentifier: 'TEST-007',
-    dataUse: {},
-  }],
-} as DarCollection
+  darCollectionId: 2,
+  name: 'Test Collection 2',
+  researcherName: 'Researcher Two',
+  institutionName: 'Institution Two',
+  status: 'Submitted',
+  dacNames: ['Test DAC'],
+  dacCode: 'DAC-2',
+  datasetCount: 3,
+  datasetIds: [5, 6, 7],
+  submissionDate: 1629163460401,
+  actions: [],
+  expired: false,
+  expiresAt: 0,
+  latestReferenceId: 'DAR-2',
+  progressReport: false,
+  referenceIds: [],
+  requiresSOApproval: false,
+}
 
-let collectionSearchFn: (term: string, list: DarCollection[]) => DarCollection[]
+let collectionSearchFn: (term: string, list: DarCollectionSummary[]) => DarCollectionSummary[]
 let cardSearchFn: (term: string, list: LibraryCard[]) => LibraryCard[]
 let researcherSearchFn: (term: string, list: DuosUser[]) => DuosUser[]
-let summaryList: DarCollection[]
+let summaryList: DarCollectionSummary[]
 const expectResearcherMatch = (actual: DuosUser, expected: DuosUser) => {
   expect(actual.displayName).to.equal(expected.displayName)
   expect(actual.email).to.equal(expected.email)
@@ -196,7 +122,7 @@ const expectResearcherMatch = (actual: DuosUser, expected: DuosUser) => {
 
 beforeEach(() => {
   const searchFunctionsMap = getSearchFilterFunctions()
-  collectionSearchFn = searchFunctionsMap.darCollections as (term: string, list: DarCollection[]) => DarCollection[]
+  collectionSearchFn = searchFunctionsMap.darCollections
   cardSearchFn = searchFunctionsMap.libraryCard as (term: string, list: LibraryCard[]) => LibraryCard[]
   researcherSearchFn = searchFunctionsMap.signingOfficialResearchers
   summaryList = [darCollectionSummaryOne, darCollectionSummaryTwo]
@@ -219,10 +145,10 @@ describe('Dar Collection Search Filter', () => {
   })
 
   it('filters on submission date', () => {
-    const formattedSubmissionDate = formatDate(darCollectionSummaryOne.createDate)
+    const formattedSubmissionDate = formatDate(darCollectionSummaryOne.submissionDate)
     const filteredList = collectionSearchFn(formattedSubmissionDate, summaryList)
     expect(filteredList.length).to.equal(1)
-    expect(formatDate(filteredList[0].createDate)).to.equal(formattedSubmissionDate)
+    expect(formatDate(filteredList[0].submissionDate)).to.equal(formattedSubmissionDate)
     const emptyList = collectionSearchFn('invalid', summaryList)
     expect(emptyList.length).to.equal(0)
   })

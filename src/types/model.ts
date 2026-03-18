@@ -657,6 +657,7 @@ export interface DarCollectionSummary {
   actions: string[]
   dacNames: string[]
   dacCode: string
+  darCode: string
   darCollectionId: number
   datasetCount: number
   datasetIds: number[]
