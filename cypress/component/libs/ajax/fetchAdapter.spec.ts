@@ -7,6 +7,11 @@ import {
   fetchMultipart,
   type Params,
 } from 'src/libs/ajax/fetchAdapter'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import { Storage } from 'src/libs/storage'
+import { Config } from 'src/libs/config'
+import { Auth } from 'src/libs/auth/auth'
+import eventList from 'src/libs/events'
 
 interface StubOptions {
   method?: string
@@ -569,6 +574,145 @@ describe('fetchAdapter - Fetch methods', () => {
             throw new Error('Expected error.response to be defined')
           }
           expect(error.response.data.message).to.equal(backendMessage)
+        },
+      )
+    })
+  })
+})
+
+describe('fetchAdapter - 401 Bard metric logging', () => {
+  let fetchStub: ReturnType<typeof cy.stub>
+  let captureEventStub: Cypress.Agent<sinon.SinonStub> | sinon.SinonStub
+  let signOutStub: Cypress.Agent<sinon.SinonStub> | sinon.SinonStub
+
+  const mockExpTime = Math.floor(Date.now() / 1000) + 3600 // 1h from now
+
+  beforeEach(() => {
+    cy.initApplicationConfig()
+    cy.stub(Config, 'getApiUrl').resolves('https://consent.example.org')
+    captureEventStub = cy.stub(Metrics, 'captureEvent').resolves()
+    signOutStub = cy.stub(Auth, 'signOut').resolves()
+    cy.stub(Storage, 'getOidcUser').returns({
+      profile: { exp: mockExpTime, sub: '', iss: '', aud: '', iat: 0 },
+    })
+
+    // Suppress navigation errors from redirectOnLogout setting window.location.href
+    cy.on('uncaught:exception', () => false)
+
+    cy.window().then((win) => {
+      fetchStub = cy.stub(win, 'fetch')
+    })
+  })
+
+  afterEach(() => {
+    cy.window().then(() => {
+      if (fetchStub) fetchStub.restore()
+    })
+  })
+
+  it('should fire Bard metric with session details on 401 from DUOS API', () => {
+    cy.window().then((win) => {
+      fetchStub.resolves(
+        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      fetchGet('https://consent.example.org/api/something').then(
+        () => { throw new Error('Should have thrown') },
+        () => {
+          expect(captureEventStub.calledOnce).to.equal(true)
+          const [event, details] = captureEventStub.firstCall.args
+          expect(event).to.equal(eventList.userAutoLogout401)
+          expect(details).to.have.property('expires_on', mockExpTime)
+          expect(details).to.have.property('current_time').that.is.a('number')
+          expect(details).to.have.property('time_until_expires').that.is.a('number')
+          expect(details).to.have.property('endpoint_url', 'https://consent.example.org/api/something')
+        },
+      )
+    })
+  })
+
+  it('should NOT fire Bard metric on 401 for GET /api/user/me', () => {
+    cy.window().then((win) => {
+      fetchStub.resolves(
+        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      fetchGet('https://consent.example.org/api/user/me').then(
+        () => { throw new Error('Should have thrown') },
+        () => {
+          expect(captureEventStub.called).to.equal(false)
+          expect(signOutStub.called).to.equal(false)
+        },
+      )
+    })
+  })
+
+  it('should NOT fire Bard metric or redirect on non-401 errors', () => {
+    cy.window().then((win) => {
+      fetchStub.resolves(
+        new win.Response(JSON.stringify({ message: 'Server error' }), {
+          status: 500,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      fetchGet('https://consent.example.org/api/something').then(
+        () => { throw new Error('Should have thrown') },
+        () => {
+          expect(captureEventStub.called).to.equal(false)
+          expect(signOutStub.called).to.equal(false)
+        },
+      )
+    })
+  })
+
+  it('should include null expires_on when OIDC user has no exp', () => {
+    // Override the Storage stub for this test
+    (Storage.getOidcUser as ReturnType<typeof cy.stub>).restore()
+    cy.stub(Storage, 'getOidcUser').returns({
+      profile: { sub: '', iss: '', aud: '', iat: 0 },
+    })
+
+    cy.window().then((win) => {
+      fetchStub.resolves(
+        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      fetchGet('https://consent.example.org/api/something').then(
+        () => { throw new Error('Should have thrown') },
+        () => {
+          expect(captureEventStub.calledOnce).to.equal(true)
+          const [, details] = captureEventStub.firstCall.args
+          expect(details).to.have.property('expires_on', null)
+          expect(details).to.have.property('time_until_expires', null)
+        },
+      )
+    })
+  })
+
+  it('should NOT fire Bard metric on 401 from non-DUOS API', () => {
+    cy.window().then((win) => {
+      fetchStub.resolves(
+        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      fetchGet('https://other-api.example.org/api/resource').then(
+        () => { throw new Error('Should have thrown') },
+        () => {
+          expect(captureEventStub.called).to.equal(false)
+          expect(signOutStub.called).to.equal(false)
         },
       )
     })

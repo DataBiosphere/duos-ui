@@ -5,6 +5,7 @@
 const eventList = {
   userRegister: 'user:register',
   userSignIn: 'user:signin',
+  userAutoLogout401: 'user:autoLogout401',
 
   pageView: 'page:view',
   dataLibrary: 'page:view:data-library',
