@@ -59,11 +59,11 @@ export default function ERACommons({
   // -------------------- Handlers --------------------
 
   const redirectToECMAuthUrl = async () => {
-    const origin = window.location.origin
+    const origin = globalThis.location.origin
     const redirectTo = `${origin}/${destination}`
     try {
       const authUrl = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo)
-      window.location.assign(authUrl)
+      globalThis.location.assign(authUrl)
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -78,7 +78,7 @@ export default function ERACommons({
     try {
       await AuthenticateNIH.deleteAccountLinkage()
       const response = await User.getMe()
-      const eraAuthState = extractEraAuthenticationState(response as DuosUser)
+      const eraAuthState = extractEraAuthenticationState(response)
       setIsAuthorized(eraAuthState.isAuthorized)
       setExpirationCount(eraAuthState.expirationCount)
       setEraCommonsId('')
