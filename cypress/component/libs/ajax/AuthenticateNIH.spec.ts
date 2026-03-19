@@ -2,8 +2,8 @@ import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Config } from 'src/libs/config'
 
 describe('AuthenticateNIH', () => {
-  const apiUrl = 'http://api'
-  const ecmUrl = 'http://ecm'
+  const apiUrl = 'https://api'
+  const ecmUrl = 'https://ecm'
 
   beforeEach(() => {
     cy.stub(Config, 'getApiUrl').resolves(apiUrl)
