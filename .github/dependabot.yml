@@ -3,8 +3,7 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: cron
-      cronjob: "0 0 1,15 * *"
+      interval: weekly
     open-pull-requests-limit: 10
     target-branch: develop
     commit-message:
@@ -22,8 +21,7 @@ updates:
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: cron
-      cronjob: "0 0 1,15 * *"
+      interval: weekly
     open-pull-requests-limit: 10
     target-branch: develop
     labels:
@@ -44,8 +42,7 @@ updates:
   - package-ecosystem: docker
     directory: "/"
     schedule:
-      interval: cron
-      cronjob: "0 0 1,15 * *"
+      interval: weekly
     open-pull-requests-limit: 10
     target-branch: develop
     labels:
