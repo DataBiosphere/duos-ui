@@ -26,7 +26,8 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
       try {
         setIsLoading(true)
         const collectionList = (await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial))
-          .filter((collection: DarCollectionSummary) => collection.requiresSOApproval === true)
+          .filter((collection: DarCollectionSummary) =>
+            collection.requiresSOApproval || collection.actions.includes('Review_Progress_Report'))
         setCollectionList(collectionList)
         setIsLoading(false)
       }
