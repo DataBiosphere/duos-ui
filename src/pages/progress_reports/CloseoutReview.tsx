@@ -51,7 +51,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
       }
       catch (error) {
         const consentError = extractConsentError(error)
-        if (consentError && consentError.code === 404) {
+        if (consentError?.code === 404) {
           // 404 indicates no acknowledgement found, which is not an error
         }
         else {
