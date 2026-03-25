@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import InfoIcon from '@mui/icons-material/Info'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
-import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
+import { extractError } from 'src/utils/ErrorUtils'
 import { Storage } from 'src/libs/storage'
 import { DAR } from 'src/libs/ajax/DAR'
-import { DataAccessRequest } from 'src/types/model'
+import { DataAccessRequest, ResponseError } from 'src/types/model'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
 interface CloseoutReviewProps {
@@ -50,8 +50,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
         }
       }
       catch (error) {
-        const consentError = extractConsentError(error)
-        if (consentError?.code === 404) {
+        if ((error as ResponseError)?.response?.status === 404) {
           // 404 indicates no acknowledgement found, which is not an error
         }
         else {
