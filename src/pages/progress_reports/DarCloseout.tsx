@@ -15,7 +15,7 @@ interface DarCloseoutProps {
   validation?: DarErrors
 }
 
-export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element {
+export default function DarCloseout(props: Readonly<DarCloseoutProps>): React.JSX.Element {
   const { readOnly, datasets, formState, onFormChange, onValidationChange, validation } = props
 
   const [allSigningOfficials, setAllSigningOfficials] = useState<SimplifiedDuosUser[]>([])
@@ -93,17 +93,17 @@ export default function DarCloseout(props: DarCloseoutProps): React.JSX.Element 
               <p>
                 A close out submission will immediately revoke access to all datasets accessed through the
                 original Data Access Request:
-                <ul>
-                  {datasets.map(dataset => (
-                    <li key={dataset.datasetId}>
-                      {dataset.datasetIdentifier}
-                      :
-                      {' '}
-                      {dataset.name}
-                    </li>
-                  ))}
-                </ul>
               </p>
+              <ul>
+                {datasets.map(dataset => (
+                  <li key={dataset.datasetId}>
+                    {dataset.datasetIdentifier}
+                    :
+                    {' '}
+                    {dataset.name}
+                  </li>
+                ))}
+              </ul>
               <p>
                 By completing this page, upon project close-out, the PI and all approved users acknowledge
                 they have destroyed all copies, versions, and derivations of the dataset(s) retrieved from
