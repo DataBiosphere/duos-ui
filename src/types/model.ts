@@ -79,6 +79,13 @@ export interface DuosUser {
   roles: UserRole[]
   userId: number
   userStatusInfo?: UserStatusInfo
+  userData?: {
+    linkedInProfileUrl?: string
+    orcIdProfileUrl?: string
+    throughBioProfileUrl?: string
+    institutionalProfileUrl?: string
+    [key: string]: string | undefined
+  }
 }
 
 export interface SimplifiedDuosUser {
