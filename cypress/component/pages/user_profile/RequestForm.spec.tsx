@@ -58,6 +58,60 @@ describe('SupportRequestsPage Tests', () => {
     })
   })
 
+  it('Shows error notification on failed submission', () => {
+    cy.intercept({ method: 'POST', url: '**/support/request' }, { statusCode: 500 }).as('requestFail')
+    cy.get('[id="checkRegisterDataset"]').check()
+    cy.get('[data-cy="submitButton"]').click()
+    cy.wait(['@requestFail'])
+    cy.contains('ERROR 500 : Unable To Send Requests').should('exist')
+  })
+
+  it('Allows multiple checkbox selection and submits correct data', () => {
+    cy.get('[id="checkRegisterDataset"]').check()
+    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[data-cy="submitButton"]').should('be.enabled')
+    cy.intercept({ method: 'POST', url: '**/support/request' }, (req) => {
+      expect(req.body.description).to.include('Register a dataset')
+      expect(req.body.description).to.include('Signing Official')
+      req.reply({ statusCode: 201 })
+    }).as('multiRequest')
+    cy.get('[data-cy="submitButton"]').click()
+    cy.wait(['@multiRequest'])
+  })
+
+  it('Does not allow submission with only extra request text', () => {
+    cy.get('[id="extraRequest"]').type('Extra only')
+    cy.get('[data-cy="submitButton"]').should('be.disabled')
+  })
+
+  it('Includes extra request text in submission', () => {
+    cy.get('[id="checkJoinDac"]').check()
+    cy.get('[id="extraRequest"]').type('Extra details here')
+    cy.intercept({ method: 'POST', url: '**/support/request' }, (req) => {
+      expect(req.body.description).to.include('Extra details here')
+      req.reply({ statusCode: 201 })
+    }).as('extraRequest')
+    cy.get('[data-cy="submitButton"]').click()
+    cy.wait(['@extraRequest'])
+  })
+
+  it('Disables submit button during submission', () => {
+    cy.get('[id="checkJoinDac"]').check()
+    // Simulate slow response
+    cy.intercept(
+      { method: 'POST', url: '**/support/request' },
+      { statusCode: 201, delay: 1000 },
+    ).as('slowRequest')
+    cy.get('[data-cy="submitButton"]').click()
+    cy.get('[data-cy="submitButton"]').should('be.disabled')
+    cy.wait(['@slowRequest'])
+  })
+
+  it('Navigates away when Back button is clicked', () => {
+    cy.get('[data-cy="backButton"]').click()
+    cy.url().should('include', '/profile')
+  })
+
   it('shows external profile URL fields when SO Permissions is checked', () => {
     cy.get('[id="checkSOPermissions"]').check()
     cy.get('[id="linkedInProfileUrl"]').should('exist')

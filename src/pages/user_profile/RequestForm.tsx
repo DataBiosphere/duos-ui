@@ -5,10 +5,37 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { Link, useNavigate } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
+import { ResponseError } from 'src/types/model'
 
-export default function RequestForm() {
+type SupportRequestKey
+  = | 'checkRegisterDataset'
+    | 'checkRequestDataAccess'
+    | 'checkSOPermissions'
+    | 'checkJoinDac'
+    | 'extraRequest'
+
+type SupportRequests = {
+  checkRegisterDataset: boolean
+  checkRequestDataAccess: boolean
+  checkSOPermissions: boolean
+  checkJoinDac: boolean
+  extraRequest?: string
+}
+
+type SupportRequestOption = {
+  key: Exclude<SupportRequestKey, 'checkRequestDataAccess' | 'extraRequest'>
+  label: string
+  isDefaultOption?: boolean
+}
+
+type HandleSupportRequestsChangeArg = {
+  key: SupportRequestKey
+  value: boolean | string
+}
+
+export default function RequestForm(): JSX.Element {
   const navigate = useNavigate()
-  const headerStyle = {
+  const headerStyle: React.CSSProperties = {
     fontWeight: 'bold',
     color: '#333F52',
     fontSize: '16px',
@@ -16,7 +43,7 @@ export default function RequestForm() {
     marginBottom: '1rem',
   }
 
-  const possibleSupportRequests = [
+  const possibleSupportRequests: SupportRequestOption[] = [
     {
       key: 'checkRegisterDataset',
       label: 'Register a dataset',
@@ -30,8 +57,9 @@ export default function RequestForm() {
       label: 'I am looking to join a DAC',
     },
   ]
+
   const hasSupportRequestsCond = false
-  const supportRequestsCond = {
+  const supportRequestsCond: SupportRequests = {
     checkRegisterDataset: false,
     checkRequestDataAccess: false,
     checkSOPermissions: false,
@@ -39,20 +67,20 @@ export default function RequestForm() {
     extraRequest: undefined,
   }
 
-  const [hasSupportRequests, setHasSupportRequests] = useState(hasSupportRequestsCond)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [supportRequests, setSupportRequests] = useState(supportRequestsCond)
-  const [showExternalProfileUrls, setShowExternalProfileUrls] = useState(false)
-  const [userProfile, setUserProfile] = useState(Storage.getCurrentUser())
+  const [hasSupportRequests, setHasSupportRequests] = useState<boolean>(hasSupportRequestsCond)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [supportRequests, setSupportRequests] = useState<SupportRequests>(supportRequestsCond)
+    const [showExternalProfileUrls, setShowExternalProfileUrls] = useState(false)
+    const [userProfile, setUserProfile] = useState(Storage.getCurrentUser())
 
-  const externalProfileUrlsConfig = [
-    { id: 'linkedInProfileUrl', placeholder: 'LinkedIn Profile URL' },
-    { id: 'orcIdProfileUrl', placeholder: 'ORCID Profile URL' },
-    { id: 'throughBioProfileUrl', placeholder: 'Through.Bio Profile URL' },
-    { id: 'institutionalProfileUrl', placeholder: 'Institutional Profile URL' },
-  ]
+    const externalProfileUrlsConfig = [
+        { id: 'linkedInProfileUrl', placeholder: 'LinkedIn Profile URL' },
+        { id: 'orcIdProfileUrl', placeholder: 'ORCID Profile URL' },
+        { id: 'throughBioProfileUrl', placeholder: 'Through.Bio Profile URL' },
+        { id: 'institutionalProfileUrl', placeholder: 'Institutional Profile URL' },
+    ]
 
-  const handleSupportRequestsChange = ({ key, value }) => {
+  const handleSupportRequestsChange = ({ key, value }: HandleSupportRequestsChangeArg) => {
     const newSupportRequests = { ...supportRequests, [key]: value }
     setSupportRequests(newSupportRequests)
     const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key])
@@ -74,40 +102,35 @@ export default function RequestForm() {
     await sendSupportRequests()
   }
 
-  const processSupportRequests
-    = () => {
-      const filteredRequests = possibleSupportRequests.filter(request => supportRequests[request.key])
-      return [
-        filteredRequests.length > 0,
-        filteredRequests
-          .map(x => `- ${x.label}`)
-          .join('\n'),
-      ]
+  const processSupportRequests = (): [boolean, string] => {
+    const filteredRequests = possibleSupportRequests.filter(request => supportRequests[request.key])
+    return [
+      filteredRequests.length > 0,
+      filteredRequests.map(x => `- ${x.label}`).join('\n'),
+    ]
+  }
+
+  const sendSupportRequests = async () => {
+    const [hasSupportRequests, requestText] = processSupportRequests()
+
+    if (!hasSupportRequests) {
+      return
     }
-
-  const sendSupportRequests
-    = async () => {
-      const [hasSupportRequests, requestText] = processSupportRequests()
-
-      // if there are no supportRequests, don't create a new support ticket
-      if (!hasSupportRequests) {
-        return
-      }
-      const user = Storage.getCurrentUser()
-      const profile = {
-        profileName: user.displayName,
-        email: user.email,
-        emailPreference: user.emailPreference,
-        id: user.userId,
-      }
-      const ticketInfo = {
-        attachmentToken: [],
-        type: 'task',
-        subject: `DUOS: User Request for ${profile.profileName}`,
-        description: `User (${profile.id}, ${profile.email}) has selected the following options:\n`
-          + requestText
-          + (supportRequests.extraRequest ? `\n- ${supportRequests.extraRequest}` : ''),
-      }
+    const user = Storage.getCurrentUser()
+    const profile = {
+      profileName: user.displayName,
+      email: user.email,
+      emailPreference: user.emailPreference,
+      id: user.userId,
+    }
+    const ticketInfo = {
+      attachmentToken: [],
+      type: 'task',
+      subject: `DUOS: User Request for ${profile.profileName}`,
+      description: `User (${profile.id}, ${profile.email}) has selected the following options:\n`
+        + requestText
+        + (supportRequests.extraRequest ? `\n- ${supportRequests.extraRequest}` : ''),
+    }
 
       const ticket = Support.createTicket(
         profile.profileName,
@@ -153,7 +176,7 @@ export default function RequestForm() {
       }
       catch (error) {
         Notifications.showError({
-          text: `ERROR ${error.status} : Unable To Send Requests`,
+          text: `ERROR ${(error as ResponseError)?.response?.status} : Unable To Send Requests`,
           layout: 'topRight',
         })
         setIsSubmitting(false)
@@ -226,8 +249,8 @@ export default function RequestForm() {
           type={FormFieldTypes.TEXTAREA}
           id="extraRequest"
           placeholder="Enter your request"
-          maxLength="512"
-          rows="3"
+          maxLength={512}
+          rows={3}
           onChange={handleSupportRequestsChange}
         />
       </div>
