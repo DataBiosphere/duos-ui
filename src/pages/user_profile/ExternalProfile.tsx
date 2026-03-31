@@ -36,11 +36,9 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   const onChange = ({ key, value }: { key: string, value: unknown }) => {
     setExternalProfilesUpdate((previous) => {
       const next = structuredClone(previous)
-      if (typeof key === 'string' && typeof value === 'string') {
-        next[key as keyof ExternalProfiles] = value as string
-      }
-      else if (typeof key === 'string' && Array.isArray(value)) {
-        next[key as keyof ExternalProfiles] = value as string[]
+      if (typeof key === 'string') {
+        // eslint-disable-next-line - this is the best way to update a keys for both strings and string arrays
+        next[key as keyof ExternalProfiles] = value as any
       }
       return next
     })
