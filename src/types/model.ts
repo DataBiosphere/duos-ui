@@ -59,6 +59,12 @@ export interface UserProperty {
   propertyValue: string
 }
 
+export type ExternalProfileUrl
+  = | 'linkedInProfileUrl'
+    | 'orcIdProfileUrl'
+    | 'throughBioProfileUrl'
+    | 'institutionalProfileUrl'
+
 export interface DuosUser {
   createDate: Date
   displayName: string
@@ -80,11 +86,7 @@ export interface DuosUser {
   userId: number
   userStatusInfo?: UserStatusInfo
   userData?: {
-    linkedInProfileUrl?: string
-    orcIdProfileUrl?: string
-    throughBioProfileUrl?: string
-    institutionalProfileUrl?: string
-    [key: string]: string | undefined
+    [K in ExternalProfileUrl]?: string
   }
 }
 
