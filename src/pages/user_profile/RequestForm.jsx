@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { Support } from 'src/libs/ajax/Support'
 import { Notifications } from 'src/libs/utils'
-import { FormField, FormFieldTypes } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { Link, useNavigate } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
+import { User } from 'src/libs/ajax/User'
 
 export default function RequestForm() {
   const navigate = useNavigate()
@@ -41,12 +42,32 @@ export default function RequestForm() {
   const [hasSupportRequests, setHasSupportRequests] = useState(hasSupportRequestsCond)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [supportRequests, setSupportRequests] = useState(supportRequestsCond)
+  const [showExternalProfileUrls, setShowExternalProfileUrls] = useState(false)
+  const [userProfile, setUserProfile] = useState(Storage.getCurrentUser())
+
+  const externalProfileUrlsConfig = [
+    { id: 'linkedInProfileUrl', placeholder: 'LinkedIn Profile URL' },
+    { id: 'orcIdProfileUrl', placeholder: 'ORCID Profile URL' },
+    { id: 'throughBioProfileUrl', placeholder: 'Through.Bio Profile URL' },
+    { id: 'institutionalProfileUrl', placeholder: 'Institutional Profile URL' },
+  ]
 
   const handleSupportRequestsChange = ({ key, value }) => {
-    const newSupportRequests = Object.assign({}, supportRequests, { [key]: value })
+    const newSupportRequests = { ...supportRequests, [key]: value }
     setSupportRequests(newSupportRequests)
     const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key])
     setHasSupportRequests(hasAnyRequests)
+    setShowExternalProfileUrls(key === 'checkSOPermissions' && value) // When Requesting SO Permissions
+  }
+
+  const handleExternalProfileChange = ({ key, value }) => {
+    setUserProfile({
+      ...userProfile,
+      userData: {
+        ...userProfile.userData,
+        [key]: value,
+      },
+    })
   }
 
   const submitForm = async () => {
@@ -99,6 +120,30 @@ export default function RequestForm() {
       )
       try {
         setIsSubmitting(true)
+
+        const hasAtLeastOneExternalProfileUrl = () => {
+          return externalProfileUrlsConfig.some(({ id }) => {
+            const value = userProfile?.userData?.[id]
+            return value && value.trim() !== ''
+          })
+        }
+
+        // Show error notification if user is requesting SO permissions but has not provided at least one external profile URL
+        if (showExternalProfileUrls && !hasAtLeastOneExternalProfileUrl()) {
+          Notifications.showError({
+            text: 'Please provide at least one external profile URL to request Signing Official permissions',
+            layout: 'topRight',
+          })
+          setIsSubmitting(false)
+          return
+        }
+
+        // Update Profile/LocalStorage with external Profile URLs if the user is requesting SO permissions
+        if (showExternalProfileUrls && hasAtLeastOneExternalProfileUrl()) {
+          await User.updateSelf({ userData: userProfile?.userData })
+          Storage.setCurrentUser(userProfile)
+        }
+
         await Support.createSupportRequest(ticket)
         Notifications.showSuccess(
           { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 },
@@ -117,7 +162,7 @@ export default function RequestForm() {
 
   return (
     <div
-      style={{ padding: '25px 270px 0px 270px' }}
+      style={{ padding: '25px 270px 120px 270px' }}
       data-cy="supportRequestForm"
     >
       <p
@@ -157,6 +202,23 @@ export default function RequestForm() {
             />
           )
         })}
+        {showExternalProfileUrls && (
+          <>
+            {externalProfileUrlsConfig.map(({ id, placeholder }) => (
+              <FormField
+                style={{ marginTop: '15px' }}
+                type={FormFieldTypes.TEXT}
+                id={id}
+                placeholder={placeholder}
+                defaultValue={userProfile?.userData?.[id] || ''}
+                onChange={handleExternalProfileChange}
+                validators={[FormValidators.URL]}
+                key={id}
+              />
+            ),
+            )}
+          </>
+        )}
         <div style={{ margin: '15px 0 10px' }}>
           Is there anything else you would like to request?
         </div>
