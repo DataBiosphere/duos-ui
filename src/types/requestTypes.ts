@@ -16,6 +16,7 @@ export interface UpdateDuosUserRequestV1 {
   suggestedInstitution?: string
   suggestedSigningOfficial?: string
   daaAcceptance?: string
+  userData?: Record<string, unknown>
 }
 
 export interface UpdateDuosUserRequestV2 {
