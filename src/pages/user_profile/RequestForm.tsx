@@ -5,7 +5,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { Link, useNavigate } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { ResponseError } from 'src/types/model'
+import { DuosUser, ExternalProfileUrl, ResponseError } from 'src/types/model'
 
 type SupportRequestKey
   = | 'checkRegisterDataset'
@@ -33,7 +33,12 @@ type HandleSupportRequestsChangeArg = {
   value: boolean | string
 }
 
-export default function RequestForm(): JSX.Element {
+type ExternalProfileChangeArg = {
+  key: ExternalProfileUrl
+  value: string
+}
+
+export default function RequestForm(): React.JSX.Element {
   const navigate = useNavigate()
   const headerStyle: React.CSSProperties = {
     fontWeight: 'bold',
@@ -70,25 +75,25 @@ export default function RequestForm(): JSX.Element {
   const [hasSupportRequests, setHasSupportRequests] = useState<boolean>(hasSupportRequestsCond)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [supportRequests, setSupportRequests] = useState<SupportRequests>(supportRequestsCond)
-    const [showExternalProfileUrls, setShowExternalProfileUrls] = useState(false)
-    const [userProfile, setUserProfile] = useState(Storage.getCurrentUser())
+  const [showExternalProfileUrls, setShowExternalProfileUrls] = useState<boolean>(false)
+  const [userProfile, setUserProfile] = useState<DuosUser>(Storage.getCurrentUser())
 
-    const externalProfileUrlsConfig = [
-        { id: 'linkedInProfileUrl', placeholder: 'LinkedIn Profile URL' },
-        { id: 'orcIdProfileUrl', placeholder: 'ORCID Profile URL' },
-        { id: 'throughBioProfileUrl', placeholder: 'Through.Bio Profile URL' },
-        { id: 'institutionalProfileUrl', placeholder: 'Institutional Profile URL' },
-    ]
+  const externalProfileUrlsConfig: { id: ExternalProfileUrl, placeholder: string }[] = [
+    { id: 'linkedInProfileUrl', placeholder: 'LinkedIn Profile URL' },
+    { id: 'orcIdProfileUrl', placeholder: 'ORCID Profile URL' },
+    { id: 'throughBioProfileUrl', placeholder: 'Through.Bio Profile URL' },
+    { id: 'institutionalProfileUrl', placeholder: 'Institutional Profile URL' },
+  ]
 
   const handleSupportRequestsChange = ({ key, value }: HandleSupportRequestsChangeArg) => {
     const newSupportRequests = { ...supportRequests, [key]: value }
     setSupportRequests(newSupportRequests)
     const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key])
     setHasSupportRequests(hasAnyRequests)
-    setShowExternalProfileUrls(key === 'checkSOPermissions' && value) // When Requesting SO Permissions
+    setShowExternalProfileUrls((key === 'checkSOPermissions' && value) as boolean) // When Requesting SO Permissions
   }
 
-  const handleExternalProfileChange = ({ key, value }) => {
+  const handleExternalProfileChange = ({ key, value }: ExternalProfileChangeArg) => {
     setUserProfile({
       ...userProfile,
       userData: {
@@ -132,56 +137,56 @@ export default function RequestForm(): JSX.Element {
         + (supportRequests.extraRequest ? `\n- ${supportRequests.extraRequest}` : ''),
     }
 
-      const ticket = Support.createTicket(
-        profile.profileName,
-        ticketInfo.type,
-        profile.email,
-        ticketInfo.subject,
-        ticketInfo.description,
-        ticketInfo.attachmentToken,
-        'User Profile Page',
-      )
-      try {
-        setIsSubmitting(true)
+    const ticket = Support.createTicket(
+      profile.profileName,
+      ticketInfo.type,
+      profile.email,
+      ticketInfo.subject,
+      ticketInfo.description,
+      ticketInfo.attachmentToken,
+      'User Profile Page',
+    )
+    try {
+      setIsSubmitting(true)
 
-        const hasAtLeastOneExternalProfileUrl = () => {
-          return externalProfileUrlsConfig.some(({ id }) => {
-            const value = userProfile?.userData?.[id]
-            return value && value.trim() !== ''
-          })
-        }
-
-        // Show error notification if user is requesting SO permissions but has not provided at least one external profile URL
-        if (showExternalProfileUrls && !hasAtLeastOneExternalProfileUrl()) {
-          Notifications.showError({
-            text: 'Please provide at least one external profile URL to request Signing Official permissions',
-            layout: 'topRight',
-          })
-          setIsSubmitting(false)
-          return
-        }
-
-        // Update Profile/LocalStorage with external Profile URLs if the user is requesting SO permissions
-        if (showExternalProfileUrls && hasAtLeastOneExternalProfileUrl()) {
-          await User.updateSelf({ userData: userProfile?.userData })
-          Storage.setCurrentUser(userProfile)
-        }
-
-        await Support.createSupportRequest(ticket)
-        Notifications.showSuccess(
-          { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 },
-        )
-        setIsSubmitting(false)
-        navigate('/profile')
+      const hasAtLeastOneExternalProfileUrl = () => {
+        return externalProfileUrlsConfig.some(({ id }) => {
+          const value = userProfile?.userData?.[id]
+          return value && value.trim() !== ''
+        })
       }
-      catch (error) {
+
+      // Show error notification if user is requesting SO permissions but has not provided at least one external profile URL
+      if (showExternalProfileUrls && !hasAtLeastOneExternalProfileUrl()) {
         Notifications.showError({
-          text: `ERROR ${(error as ResponseError)?.response?.status} : Unable To Send Requests`,
+          text: 'Please provide at least one external profile URL to request Signing Official permissions',
           layout: 'topRight',
         })
         setIsSubmitting(false)
+        return
       }
+
+      // Update Profile/LocalStorage with external Profile URLs if the user is requesting SO permissions
+      if (showExternalProfileUrls && hasAtLeastOneExternalProfileUrl()) {
+        await User.updateSelf({ userData: userProfile?.userData })
+        Storage.setCurrentUser(userProfile)
+      }
+
+      await Support.createSupportRequest(ticket)
+      Notifications.showSuccess(
+        { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 },
+      )
+      setIsSubmitting(false)
+      navigate('/profile')
     }
+    catch (error) {
+      Notifications.showError({
+        text: `ERROR ${(error as ResponseError)?.response?.status} : Unable To Send Requests`,
+        layout: 'topRight',
+      })
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div

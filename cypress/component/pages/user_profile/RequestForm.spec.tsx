@@ -68,11 +68,11 @@ describe('SupportRequestsPage Tests', () => {
 
   it('Allows multiple checkbox selection and submits correct data', () => {
     cy.get('[id="checkRegisterDataset"]').check()
-    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[id="checkJoinDac"]').check()
     cy.get('[data-cy="submitButton"]').should('be.enabled')
     cy.intercept({ method: 'POST', url: '**/support/request' }, (req) => {
       expect(req.body.description).to.include('Register a dataset')
-      expect(req.body.description).to.include('Signing Official')
+      expect(req.body.description).to.include('join a DAC')
       req.reply({ statusCode: 201 })
     }).as('multiRequest')
     cy.get('[data-cy="submitButton"]').click()
