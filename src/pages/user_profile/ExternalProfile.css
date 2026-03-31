@@ -1,0 +1,45 @@
+.external-profile .header-container {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    width: 100%;
+}
+
+.external-profile .header-container h1 {
+    margin: 0px;
+    padding-right: 20px;
+    color: #01549F;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.external-profile .header-container button:hover {
+    background-color: #2FA4E7;
+}
+
+.external-profile td {
+    padding: 0px 10px;
+    padding-bottom: 20px;
+}
+
+.external-profile th {
+    padding: 0px 0px;
+    padding-bottom: 10px;
+}
+
+.external-profile input {
+    padding: 25px 15px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 400px;
+    height: 34px;
+    color: #555555;
+    background-color: #fff;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.external-profile input:invalid {
+  border-color: red; /* Apply a red border to invalid fields */
+  color: rgb(128, 2, 2);
+  background-color: white; /* Apply a light red background */
+}
