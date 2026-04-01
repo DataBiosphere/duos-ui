@@ -123,7 +123,7 @@ describe('SupportRequestsPage Tests', () => {
     cy.get('[id="checkSOPermissions"]').check()
     cy.get('[id="linkedIn"]').should('exist')
     cy.get('[id="ORCID"]').should('exist')
-    cy.get('[id="throughDotBio"]').should('exist')
+    cy.get('[id="throughBio"]').should('exist')
     cy.get('[id="institutionalWebsite"]').should('exist')
   })
 

@@ -83,7 +83,7 @@ export default function RequestForm(): React.JSX.Element {
   const externalProfileUrlsConfig: { id: ExternalProfileUrl, placeholder: string }[] = [
     { id: 'linkedIn', placeholder: 'LinkedIn Profile URL' },
     { id: 'ORCID', placeholder: 'ORCID Profile URL' },
-    { id: 'throughDotBio', placeholder: 'Through.Bio Profile URL' },
+    { id: 'throughBio', placeholder: 'Through.Bio Profile URL' },
     { id: 'institutionalWebsite', placeholder: 'Institutional Profile URL' },
   ]
 
