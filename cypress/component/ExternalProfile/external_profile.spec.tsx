@@ -39,12 +39,6 @@ describe('ExternalProfile', () => {
         body: mockData,
       })
     }).as('getUser')
-    cy.intercept('GET', '**api/user/', (req) => {
-      req.reply({
-        delay: 0,
-        body: mockData,
-      })
-    }).as('getSelf')
   })
 
   it('Renders update table with three columns', () => {
