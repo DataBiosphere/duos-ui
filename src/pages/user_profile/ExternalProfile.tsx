@@ -137,16 +137,20 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }
 
   useEffect(() => {
+      const initializeExternalProfiles = (externalProfiles: ExternalProfiles) => {
+        setExternalProfilesUpdate(externalProfiles ?? {})
+        setLinkedIn(externalProfiles?.linkedIn ?? '')
+        setOrcid(externalProfiles?.ORCID ?? '')
+        setThroughDotBio(externalProfiles?.throughDotBio ?? '')
+        setInstitutionalWebsite(externalProfiles?.institutionalWebsite ?? '')
+        setOtherUrls(externalProfiles?.otherUrls ?? [])
+    }
+      
     const init = async () => {
       if (!readonly) {
         User.getMe().then((response) => {
           const externalProfiles = response.userData?.externalProfiles
-          setExternalProfilesUpdate(externalProfiles ?? {})
-          setLinkedIn(externalProfiles?.linkedIn ?? '')
-          setOrcid(externalProfiles?.ORCID ?? '')
-          setThroughDotBio(externalProfiles?.throughDotBio ?? '')
-          setInstitutionalWebsite(externalProfiles?.institutionalWebsite ?? '')
-          setOtherUrls(externalProfiles?.otherUrls ?? [])
+          initializeExternalProfiles(externalProfiles ?? {})
         }).catch(() => {
           Notifications.showError({ text: 'Some errors occurred, your external profile could not be loaded.' })
         })
@@ -154,11 +158,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
       else if (props.userId) {
         User.getById(props.userId).then((response) => {
           const externalProfiles = response.userData?.externalProfiles
-          setLinkedIn(externalProfiles?.linkedIn ?? '')
-          setOrcid(externalProfiles?.ORCID ?? '')
-          setThroughDotBio(externalProfiles?.throughDotBio ?? '')
-          setInstitutionalWebsite(externalProfiles?.institutionalWebsite ?? '')
-          setOtherUrls(externalProfiles?.otherUrls ?? [])
+          initializeExternalProfiles(externalProfiles ?? {})
         }).catch(() => {
           Notifications.showError({ text: 'Some errors occurred, the user profile could not be loaded.' })
         })
