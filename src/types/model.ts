@@ -55,7 +55,7 @@ export interface UserStatusInfo {
 export interface ExternalProfiles {
   linkedIn?: string
   ORCID?: string
-  throughDotBio?: string
+  throughBio?: string
   institutionalWebsite?: string
   otherUrls?: string[]
 }

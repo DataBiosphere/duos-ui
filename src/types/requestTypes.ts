@@ -1,4 +1,4 @@
-import { ExternalProfiles, UserRole } from './model'
+import { UserRole, ExternalProfiles } from './model'
 
 export interface CreateDuosUserRequest {
   displayName: string
