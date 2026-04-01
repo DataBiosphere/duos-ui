@@ -9,7 +9,7 @@ describe('ExternalProfile', () => {
       otherUrls: [
         'https://www.aol.com',
       ],
-      throughDotBio: 'abc',
+      throughBio: 'abc',
       institutionalWebsite: 'https://www.broadinstitute.org',
     },
   }
@@ -74,16 +74,16 @@ describe('ExternalProfile', () => {
   it('Performs URL validation for ORCID iD', () => {
     cy.mount(<ExternalProfile {...mockExternalProfilePropsForEdit} />)
     cy.wait('@getUser')
-    cy.get('input[name="ORCID iD"]').clear()
-    cy.get('input[name="ORCID iD"]').type('testing')
+    cy.get('input[name="ORCID"]').clear()
+    cy.get('input[name="ORCID"]').type('testing')
     cy.get('[href="https://orcid.org/testing"]').should('have.attr', 'href')
   })
 
   it('Performs URL validation for Through.Bio', () => {
     cy.mount(<ExternalProfile {...mockExternalProfilePropsForEdit} />)
     cy.wait('@getUser')
-    cy.get('input[name="Through.Bio"]').clear()
-    cy.get('input[name="Through.Bio"]').type('testing')
+    cy.get('input[name="throughBio"]').clear()
+    cy.get('input[name="throughBio"]').type('testing')
     cy.get('[href="https://through.bio/testing"]').should('have.attr', 'href')
   })
 

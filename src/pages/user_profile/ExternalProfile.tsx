@@ -16,7 +16,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   const [externalProfilesUpdate, setExternalProfilesUpdate] = useState<ExternalProfiles>({})
   const [linkedIn, setLinkedIn] = useState<string>('')
   const [orcid, setOrcid] = useState<string>('')
-  const [throughDotBio, setThroughDotBio] = useState<string>('')
+  const [throughBio, setThroughBio] = useState<string>('')
   const [institutionalWebsite, setInstitutionalWebsite] = useState<string>('')
   const [otherUrls, setOtherUrls] = useState<string[]>([])
   const [invalidUrls, setInvalidUrls] = useState<Array<string>>([])
@@ -25,11 +25,11 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     return `https://www.linkedin.com/in/${profileId ?? ''}`
   }
 
-  const formattedOrchid = (profileId: string | undefined): string => {
+  const formattedOrcid = (profileId: string | undefined): string => {
     return `https://orcid.org/${profileId ?? ''}`
   }
 
-  const formattedThroughDotBio = (profileId: string | undefined): string => {
+  const formattedThroughBio = (profileId: string | undefined): string => {
     return `https://through.bio/${profileId ?? ''}`
   }
 
@@ -82,12 +82,12 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     onChange({ key: orcid, value })
   }
 
-  const onThroughDotBioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const throughDotBio = 'throughDotBio'
+  const onThroughBioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const throughBio = 'throughBio'
     const value = event.target.value
-    handleValidity(event, throughDotBio)
-    setThroughDotBio(value)
-    onChange({ key: throughDotBio, value })
+    handleValidity(event, throughBio)
+    setThroughBio(value)
+    onChange({ key: throughBio, value })
   }
 
   const onInstitutionalWebsiteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,7 +141,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
       setExternalProfilesUpdate(externalProfiles ?? {})
       setLinkedIn(externalProfiles?.linkedIn ?? '')
       setOrcid(externalProfiles?.ORCID ?? '')
-      setThroughDotBio(externalProfiles?.throughDotBio ?? '')
+      setThroughBio(externalProfiles?.throughBio ?? '')
       setInstitutionalWebsite(externalProfiles?.institutionalWebsite ?? '')
       setOtherUrls(externalProfiles?.otherUrls ?? [])
     }
@@ -209,16 +209,16 @@ export default function ExternalProfile(props: ExternalProfileProps) {
           </tr>
           <tr>
             <td>
-              <label htmlFor="ORCiD">ORCID iD</label>
+              <label htmlFor="ORCID">ORCID iD</label>
             </td>
             {!readonly && (
               <td>
                 <input
                   type="text"
                   id="ORCID"
-                  name="ORCID iD"
+                  name="ORCID"
                   style={{ padding: '25px 15px', borderRadius: '4px', border: '1px solid #ccc', width: '400px', height: '34px', color: '#555555', backgroundColor: '#fff', transition: 'border-color ease-in-out .15s, box-shadow ease-in-out .15s' }}
-                  placeholder="ORCiD iD (e.g. https://orcid.org/0000-0000-0000-0000)"
+                  placeholder="ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)"
                   value={orcid}
                   minLength={2}
                   onChange={onOrcidChange}
@@ -227,32 +227,32 @@ export default function ExternalProfile(props: ExternalProfileProps) {
               </td>
             )}
             <td>
-              <a href={formattedOrchid(orcid)} target="_blank" rel="noopener noreferrer">
-                {formattedOrchid(orcid)}
+              <a href={formattedOrcid(orcid)} target="_blank" rel="noopener noreferrer">
+                {formattedOrcid(orcid)}
               </a>
             </td>
           </tr>
           <tr>
             <td>
-              <label htmlFor="throughDotBio">Through.bio</label>
+              <label htmlFor="throughBio">Through.bio</label>
             </td>
             {!readonly && (
               <td>
                 <input
                   type="text"
-                  id="throughDotBio"
-                  name="Through.Bio"
+                  id="throughBio"
+                  name="throughBio"
                   placeholder="Through.bio profile id (e.g. https://through.bio/<profile-id>)"
-                  value={throughDotBio}
+                  value={throughBio}
                   minLength={2}
-                  onChange={onThroughDotBioChange}
+                  onChange={onThroughBioChange}
                   disabled={readonly}
                 />
               </td>
             )}
             <td>
-              <a href={formattedThroughDotBio(throughDotBio)} target="_blank" rel="noopener noreferrer">
-                {formattedThroughDotBio(throughDotBio)}
+              <a href={formattedThroughBio(throughBio)} target="_blank" rel="noopener noreferrer">
+                {formattedThroughBio(throughBio)}
               </a>
             </td>
           </tr>
