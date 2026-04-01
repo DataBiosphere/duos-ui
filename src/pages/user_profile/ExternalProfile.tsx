@@ -329,9 +329,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
                   </td>
                   <td>
                     && <IconButton aria-label="remove entry" onClick={() => { removeEntry(index) }}><RemoveCircleOutlineIcon /></IconButton>
-                    <a href={url} target="_blank" rel="noopener noreferrer">
-                      {url}
-                    </a>
+                    { getUrlLink(url) }
                   </td>
                 </tr>
               ))}
