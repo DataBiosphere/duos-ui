@@ -137,15 +137,15 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }
 
   useEffect(() => {
-      const initializeExternalProfiles = (externalProfiles: ExternalProfiles) => {
-        setExternalProfilesUpdate(externalProfiles ?? {})
-        setLinkedIn(externalProfiles?.linkedIn ?? '')
-        setOrcid(externalProfiles?.ORCID ?? '')
-        setThroughDotBio(externalProfiles?.throughDotBio ?? '')
-        setInstitutionalWebsite(externalProfiles?.institutionalWebsite ?? '')
-        setOtherUrls(externalProfiles?.otherUrls ?? [])
+    const initializeExternalProfiles = (externalProfiles: ExternalProfiles) => {
+      setExternalProfilesUpdate(externalProfiles ?? {})
+      setLinkedIn(externalProfiles?.linkedIn ?? '')
+      setOrcid(externalProfiles?.ORCID ?? '')
+      setThroughDotBio(externalProfiles?.throughDotBio ?? '')
+      setInstitutionalWebsite(externalProfiles?.institutionalWebsite ?? '')
+      setOtherUrls(externalProfiles?.otherUrls ?? [])
     }
-      
+
     const init = async () => {
       if (!readonly) {
         User.getMe().then((response) => {
