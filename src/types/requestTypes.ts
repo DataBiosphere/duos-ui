@@ -1,4 +1,4 @@
-import { UserRole } from './model'
+import { UserRole, ExternalProfiles } from './model'
 
 export interface CreateDuosUserRequest {
   displayName: string
@@ -16,6 +16,7 @@ export interface UpdateDuosUserRequestV1 {
   suggestedInstitution?: string
   suggestedSigningOfficial?: string
   daaAcceptance?: string
+  userData?: { externalProfiles?: ExternalProfiles }
 }
 
 export interface UpdateDuosUserRequestV2 {

@@ -52,6 +52,14 @@ export interface UserStatusInfo {
   tosAccepted?: boolean
 }
 
+export interface ExternalProfiles {
+  linkedIn?: string
+  ORCID?: string
+  throughBio?: string
+  institutionalWebsite?: string
+  otherUrls?: string[]
+}
+
 export interface UserProperty {
   propertyId: number
   userId: number
@@ -79,6 +87,9 @@ export interface DuosUser {
   roles: UserRole[]
   userId: number
   userStatusInfo?: UserStatusInfo
+  userData?: {
+    externalProfiles?: ExternalProfiles
+  }
 }
 
 export interface SimplifiedDuosUser {

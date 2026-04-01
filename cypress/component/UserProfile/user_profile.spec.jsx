@@ -12,22 +12,34 @@ const duosUser = {
 describe('User Profile', () => {
   beforeEach(() => {
     cy.initApplicationConfig()
+    cy.intercept('GET', '**api/user/**', (req) => {
+      req.reply({
+        delay: 0,
+        body: duosUser,
+      })
+    }).as('getSelf')
+    cy.intercept('GET', '**api/user/signing-officials', (req) => {
+      req.reply({
+        delay: 0,
+        body: [],
+      })
+    }).as('getSigningOfficials')
   })
 
   it('Renders the user profile page', () => {
     cy.stub(Storage, 'getCurrentUser').returns(duosUser)
     cy.stub(Institution, 'list').returns([])
-    cy.stub(User, 'getMe').returns(duosUser)
     cy.stub(User, 'getApprovedDatasets').returns([])
     cy.stub(User, 'getAcknowledgements').returns({})
     cy.mount(<BrowserRouter><UserProfile /></BrowserRouter>)
+    cy.wait('@getSelf')
+    cy.wait('@getSigningOfficials')
     cy.get('h2').should('contain', 'Your Profile')
   })
 
   it('Updates the user email preferences', () => {
     cy.stub(Storage, 'getCurrentUser').returns(duosUser)
     cy.stub(Institution, 'list').returns([])
-    cy.stub(User, 'getMe').returns(duosUser)
     cy.stub(User, 'getApprovedDatasets').returns([])
     cy.stub(User, 'getAcknowledgements').returns({})
     cy.intercept(
@@ -35,6 +47,8 @@ describe('User Profile', () => {
       { statusCode: 200, body: duosUser },
     ).as('updateSelf')
     cy.mount(<BrowserRouter><UserProfile /></BrowserRouter>)
+    cy.wait('@getSelf')
+    cy.wait('@getSigningOfficials')
     cy.get('input[id="profileEmailEnabled_yes"]').check()
     cy.wait('@updateSelf').then(() => {
       cy.get('div').contains('Email preference updated successfully!')

@@ -9,6 +9,7 @@ import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
+import ExternalProfile from './ExternalProfile'
 import ga4ghLogo from 'src/images/ga4gh-logo.png'
 import userProfileIcon from 'src/images/user-profile.png'
 import { Link } from 'react-router-dom'
@@ -213,6 +214,10 @@ export default function UserProfile() {
       />
       <div style={{ marginTop: '60px' }} />
       <AcceptedAcknowledgements />
+      <div style={{ marginTop: '60px' }} />
+      <ExternalProfile
+        readonly={false}
+      />
     </div>
   )
 }
