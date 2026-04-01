@@ -324,7 +324,6 @@ export default function ExternalProfile(props: ExternalProfileProps) {
                         onOtherUrlChange(event, index)
                       }}
                       onBlur={(event) => { event.target.reportValidity() }}
-                      disabled={readonly}
                     />
                   </td>
                   <td>
