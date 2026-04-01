@@ -5,7 +5,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { Link, useNavigate } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { DuosUser, ExternalProfileUrl, ResponseError } from 'src/types/model'
+import { DuosUser, ExternalProfiles, ResponseError } from 'src/types/model'
 
 type SupportRequestKey
   = | 'checkRegisterDataset'
@@ -32,6 +32,8 @@ type HandleSupportRequestsChangeArg = {
   key: SupportRequestKey
   value: boolean | string
 }
+
+type ExternalProfileUrl = keyof ExternalProfiles
 
 type ExternalProfileChangeArg = {
   key: ExternalProfileUrl
@@ -79,10 +81,10 @@ export default function RequestForm(): React.JSX.Element {
   const [userProfile, setUserProfile] = useState<DuosUser>(Storage.getCurrentUser())
 
   const externalProfileUrlsConfig: { id: ExternalProfileUrl, placeholder: string }[] = [
-    { id: 'linkedInProfileUrl', placeholder: 'LinkedIn Profile URL' },
-    { id: 'orcIdProfileUrl', placeholder: 'ORCID Profile URL' },
-    { id: 'throughBioProfileUrl', placeholder: 'Through.Bio Profile URL' },
-    { id: 'institutionalProfileUrl', placeholder: 'Institutional Profile URL' },
+    { id: 'linkedIn', placeholder: 'LinkedIn Profile URL' },
+    { id: 'ORCID', placeholder: 'ORCID Profile URL' },
+    { id: 'throughDotBio', placeholder: 'Through.Bio Profile URL' },
+    { id: 'institutionalWebsite', placeholder: 'Institutional Profile URL' },
   ]
 
   const handleSupportRequestsChange = ({ key, value }: HandleSupportRequestsChangeArg) => {
@@ -97,8 +99,10 @@ export default function RequestForm(): React.JSX.Element {
     setUserProfile({
       ...userProfile,
       userData: {
-        ...userProfile.userData,
-        [key]: value,
+        externalProfiles: {
+          ...userProfile.userData?.externalProfiles,
+          [key]: value,
+        },
       },
     })
   }
@@ -149,10 +153,22 @@ export default function RequestForm(): React.JSX.Element {
     try {
       setIsSubmitting(true)
 
+      // Returns true if the string is non-empty after trimming
+      const isNonEmptyString = (value: string) => value.trim() !== ''
+
+      // Returns true if the value is a non-empty string or an array with at least one non-empty string
+      const hasAtLeastOneNonEmptyValue = (value: string | string[] | undefined) => {
+        if (Array.isArray(value)) {
+          return value.some(v => isNonEmptyString(v))
+        }
+        return isNonEmptyString(value || '')
+      }
+
+      // Returns true if at least one external profile URL is non-empty
       const hasAtLeastOneExternalProfileUrl = () => {
         return externalProfileUrlsConfig.some(({ id }) => {
-          const value = userProfile?.userData?.[id]
-          return value && value.trim() !== ''
+          const value = userProfile?.userData?.externalProfiles?.[id]
+          return hasAtLeastOneNonEmptyValue(value)
         })
       }
 
@@ -238,7 +254,7 @@ export default function RequestForm(): React.JSX.Element {
                 type={FormFieldTypes.TEXT}
                 id={id}
                 placeholder={placeholder}
-                defaultValue={userProfile?.userData?.[id] || ''}
+                defaultValue={userProfile?.userData?.externalProfiles?.[id] || ''}
                 onChange={handleExternalProfileChange}
                 validators={[FormValidators.URL]}
                 key={id}

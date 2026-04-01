@@ -52,18 +52,20 @@ export interface UserStatusInfo {
   tosAccepted?: boolean
 }
 
+export interface ExternalProfiles {
+  linkedIn?: string
+  ORCID?: string
+  throughDotBio?: string
+  institutionalWebsite?: string
+  otherUrls?: string[]
+}
+
 export interface UserProperty {
   propertyId: number
   userId: number
   propertyKey: string
   propertyValue: string
 }
-
-export type ExternalProfileUrl
-  = | 'linkedInProfileUrl'
-    | 'orcIdProfileUrl'
-    | 'throughBioProfileUrl'
-    | 'institutionalProfileUrl'
 
 export interface DuosUser {
   createDate: Date
@@ -86,7 +88,7 @@ export interface DuosUser {
   userId: number
   userStatusInfo?: UserStatusInfo
   userData?: {
-    [K in ExternalProfileUrl]?: string
+    externalProfiles?: ExternalProfiles
   }
 }
 

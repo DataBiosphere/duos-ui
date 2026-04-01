@@ -114,10 +114,10 @@ describe('SupportRequestsPage Tests', () => {
 
   it('shows external profile URL fields when SO Permissions is checked', () => {
     cy.get('[id="checkSOPermissions"]').check()
-    cy.get('[id="linkedInProfileUrl"]').should('exist')
-    cy.get('[id="orcIdProfileUrl"]').should('exist')
-    cy.get('[id="throughBioProfileUrl"]').should('exist')
-    cy.get('[id="institutionalProfileUrl"]').should('exist')
+    cy.get('[id="linkedIn"]').should('exist')
+    cy.get('[id="ORCID"]').should('exist')
+    cy.get('[id="throughDotBio"]').should('exist')
+    cy.get('[id="institutionalWebsite"]').should('exist')
   })
 
   it('prevents submission if no external profile URL is filled', () => {
@@ -129,7 +129,7 @@ describe('SupportRequestsPage Tests', () => {
   it('allows submission if at least one external profile URL is filled', () => {
     cy.intercept({ method: 'POST', url: '**/support/request' }, { statusCode: 201 }).as('request')
     cy.get('[id="checkSOPermissions"]').check()
-    cy.get('[id="linkedInProfileUrl"]').type('https://linkedin.com/in/testuser')
+    cy.get('[id="linkedIn"]').type('https://linkedin.com/in/testuser')
     cy.get('[data-cy="submitButton"]').should('be.enabled').click()
     cy.wait(['@request']).then((interception) => {
       cy.wrap(interception).should('not.be.null')
