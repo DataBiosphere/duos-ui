@@ -5,6 +5,13 @@ import { Storage } from 'src/libs/storage'
 
 describe('SupportRequestsPage Tests', () => {
   beforeEach(() => {
+    // Clean up lingering toast notifications from previous tests
+    cy.get('body').then(($body) => {
+      $body.find('[role="alert"]').each((_, el) => {
+        el.remove()
+      })
+    })
+
     cy.viewport(1000, 500)
     cy.stub(Storage, 'getCurrentUser').returns({
       displayName: 'name',
@@ -122,6 +129,13 @@ describe('SupportRequestsPage Tests', () => {
 
   it('prevents submission if no external profile URL is filled', () => {
     cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[data-cy="submitButton"]').should('be.enabled').click()
+    cy.get('[role="alert"]').should('contain', 'Please provide at least one external profile URL')
+  })
+
+  it('prevents submission if none URL is filled', () => {
+    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[id="linkedIn"]').type('non-url text')
     cy.get('[data-cy="submitButton"]').should('be.enabled').click()
     cy.get('[role="alert"]').should('contain', 'Please provide at least one external profile URL')
   })

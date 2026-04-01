@@ -153,23 +153,25 @@ export default function RequestForm(): React.JSX.Element {
     try {
       setIsSubmitting(true)
 
-      // Returns true if the string is non-empty after trimming
-      const isNonEmptyString = (value: string) => value.trim() !== ''
-
-      // Returns true if the value is a non-empty string or an array with at least one non-empty string
-      const hasAtLeastOneNonEmptyValue = (value: string | string[] | undefined) => {
-        if (Array.isArray(value)) {
-          return value.some(v => isNonEmptyString(v))
-        }
-        return isNonEmptyString(value || '')
+      // Returns true if the string is non-empty and a valid URL
+      const isValidUrl = (value: string) => {
+        const trimmedValue = value.trim()
+        return trimmedValue !== '' && FormValidators.URL.isValid(trimmedValue)
       }
 
-      // Returns true if at least one external profile URL is non-empty
+      // Returns true if the string is empty OR a valid URL (rejects non-URL strings)
+      const isEmptyOrValidUrl = (value: string) => {
+        const trimmedValue = value.trim()
+        return trimmedValue === '' || FormValidators.URL.isValid(trimmedValue)
+      }
+
+      // Returns true if ALL values are empty or valid URLs, AND at least one is a valid URL
       const hasAtLeastOneExternalProfileUrl = () => {
-        return externalProfileUrlsConfig.some(({ id }) => {
+        const allValues = externalProfileUrlsConfig.flatMap(({ id }) => {
           const value = userProfile?.userData?.externalProfiles?.[id]
-          return hasAtLeastOneNonEmptyValue(value)
+          return Array.isArray(value) ? value : [value ?? '']
         })
+        return allValues.every(v => isEmptyOrValidUrl(v)) && allValues.some(v => isValidUrl(v))
       }
 
       // Show error notification if user is requesting SO permissions but has not provided at least one external profile URL
