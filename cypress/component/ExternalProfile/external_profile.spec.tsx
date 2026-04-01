@@ -79,7 +79,7 @@ describe('ExternalProfile', () => {
     cy.get('[href="https://orcid.org/testing"]').should('have.attr', 'href')
   })
 
-  it('Performs URL validation for Through.Bio', () => {
+  it('Performs URL validation for Through.bio', () => {
     cy.mount(<ExternalProfile {...mockExternalProfilePropsForEdit} />)
     cy.wait('@getUser')
     cy.get('input[name="throughBio"]').clear()
