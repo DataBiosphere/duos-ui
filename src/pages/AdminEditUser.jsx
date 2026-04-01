@@ -7,6 +7,7 @@ import editUserIcon from 'src/images/icon_edit_user.png'
 import { PageHeading } from 'src/components/PageHeading'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import { useNavigate, useParams } from 'react-router-dom'
+import ExternalProfile from 'src/pages/user_profile/ExternalProfile'
 
 const adminRole = { roleId: 4, name: USER_ROLES.admin }
 const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
@@ -332,8 +333,11 @@ export const AdminEditUser = () => {
         </div>
         {
           !isEmpty(state.user) && (
-            <div style={{ margin: 50, padding: 80 }}>
+            <div style={{ marginTop: '50px' }} className="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding">
               <ResearcherReview user={state.user} />
+              <div style={{ marginTop: '20px' }}>
+                <ExternalProfile userId={userId} readonly={true} />
+              </div>
             </div>
           )
         }

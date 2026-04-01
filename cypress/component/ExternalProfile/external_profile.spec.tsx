@@ -50,7 +50,6 @@ describe('ExternalProfile', () => {
   it('Renders read-only table with two columns', () => {
     cy.mount(<ExternalProfile {...mockExternalProfilePropsForReadOnly} />)
     cy.wait('@getUser')
-    cy.get('table thead tr th').should('have.length', 2)
     cy.get('btn-secondary').should('not.exist')
     cy.get('btn-primary').should('not.exist')
     cy.get('input').should('not.exist')

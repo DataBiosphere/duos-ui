@@ -167,152 +167,178 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     init()
   }, [readonly, props.userId])
 
-  return (
-    <div className="external-profile">
-      <div className="header-container">
-        <h1> External Profile
-        </h1>
-      </div>
-      <div style={{ marginTop: '20px' }} />
-      <table>
-        <thead>
-          <tr>
-            <th>Site</th>
-            { !readonly && <th>ID</th> }
-            <th>Link</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <label htmlFor="linkedIn">LinkedIn</label>
-            </td>
-            {!readonly && (
-              <td>
-                <input
-                  type="text"
-                  id="linkedIn"
-                  name="linkedIn"
-                  placeholder="LinkedIn Profile User ID (e.g. https://www.linkedin.com/in/username)"
-                  value={linkedIn}
-                  onChange={onLinkedInChange}
-                  minLength={2}
-                  disabled={readonly}
-                />
-              </td>
-            )}
-            <td>
-              <a href={formattedLinkedIn(linkedIn)} target="_blank" rel="noopener noreferrer">
-                {formattedLinkedIn(linkedIn)}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label htmlFor="ORCID">ORCID iD</label>
-            </td>
-            {!readonly && (
-              <td>
-                <input
-                  type="text"
-                  id="ORCID"
-                  name="ORCID"
-                  style={{ padding: '25px 15px', borderRadius: '4px', border: '1px solid #ccc', width: '400px', height: '34px', color: '#555555', backgroundColor: '#fff', transition: 'border-color ease-in-out .15s, box-shadow ease-in-out .15s' }}
-                  placeholder="ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)"
-                  value={orcid}
-                  minLength={2}
-                  onChange={onOrcidChange}
-                  disabled={readonly}
-                />
-              </td>
-            )}
-            <td>
-              <a href={formattedOrcid(orcid)} target="_blank" rel="noopener noreferrer">
-                {formattedOrcid(orcid)}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label htmlFor="throughBio">Through.bio</label>
-            </td>
-            {!readonly && (
-              <td>
-                <input
-                  type="text"
-                  id="throughBio"
-                  name="throughBio"
-                  placeholder="Through.bio profile id (e.g. https://through.bio/<profile-id>)"
-                  value={throughBio}
-                  minLength={2}
-                  onChange={onThroughBioChange}
-                  disabled={readonly}
-                />
-              </td>
-            )}
-            <td>
-              <a href={formattedThroughBio(throughBio)} target="_blank" rel="noopener noreferrer">
-                {formattedThroughBio(throughBio)}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label htmlFor="institutionalWebsite">Institutional Website</label>
-            </td>
-            {!readonly && (
-              <td>
-                <input
-                  type="url"
-                  id="institutionalWebsite"
-                  name="Institutional Website"
-                  placeholder="Institutional Website (e.g. https://www.institution.edu/~username)"
-                  value={institutionalWebsite}
-                  onChange={onInstitutionalWebsiteChange}
-                  disabled={readonly}
-                />
-              </td>
-            )}
-            <td>
-              <a href={institutionalWebsite} target="_blank" rel="noopener noreferrer">
-                {institutionalWebsite}
-              </a>
-            </td>
-          </tr>
-          {otherUrls && otherUrls.length > 0 && otherUrls.map((url, index) => (
-            <tr key={index}>
-              <td>
-                <label htmlFor={`otherUrl${index}`}>Other URL {index + 1}</label>
-              </td>
-              {!readonly && (
+  const getLinkedInLink = () => {
+    return (
+      getUrlLink(formattedLinkedIn(linkedIn))
+    )
+  }
+
+  const getOrcidLink = () => {
+    return (
+      getUrlLink(formattedOrcid(orcid))
+    )
+  }
+
+  const getThroughBioLink = () => {
+    return (
+      getUrlLink(formattedThroughBio(throughBio))
+    )
+  }
+
+  const getInstitutionalWebsiteLink = () => {
+    return (
+      getUrlLink(institutionalWebsite)
+    )
+  }
+
+  const getUrlLink = (url: string) => {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        {url}
+      </a>
+    )
+  }
+
+  return readonly
+    ? (
+        <div>
+          <h4>External Profile</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ fontWeight: 'bold' }}>Linked In</div><div>{getLinkedInLink()}</div>
+            <div style={{ fontWeight: 'bold' }}>ORCID iD</div><div>{getOrcidLink()}</div>
+            <div style={{ fontWeight: 'bold' }}>Through.bio</div><div>{getThroughBioLink()}</div>
+            <div style={{ fontWeight: 'bold' }}>Institutional Website</div><div>{getInstitutionalWebsiteLink()}</div>
+            {otherUrls && otherUrls.length > 0 && otherUrls.map((url, index) => (
+              <React.Fragment key={index}>
+                <div>Other URL {index + 1}</div><div>{getUrlLink(url)}</div>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      )
+    : (
+        <div className="external-profile">
+          <div className="header-container">
+            <h1> External Profile
+            </h1>
+          </div>
+          <div style={{ marginTop: '20px' }} />
+          <table>
+            <thead>
+              <tr>
+                <th>Site</th>
+                <th>ID</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <label htmlFor="linkedIn">LinkedIn</label>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    id="linkedIn"
+                    name="linkedIn"
+                    placeholder="LinkedIn Profile User ID (e.g. https://www.linkedin.com/in/username)"
+                    value={linkedIn}
+                    onChange={onLinkedInChange}
+                    minLength={2}
+                  />
+                </td>
+                <td>
+                  { getLinkedInLink() }
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="ORCID">ORCID iD</label>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    id="ORCID"
+                    name="ORCID"
+                    style={{ padding: '25px 15px', borderRadius: '4px', border: '1px solid #ccc', width: '400px', height: '34px', color: '#555555', backgroundColor: '#fff', transition: 'border-color ease-in-out .15s, box-shadow ease-in-out .15s' }}
+                    placeholder="ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)"
+                    value={orcid}
+                    minLength={2}
+                    onChange={onOrcidChange}
+                  />
+                </td>
+                <td>
+                  { getOrcidLink() }
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="throughBio">Through.bio</label>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    id="throughBio"
+                    name="throughBio"
+                    placeholder="Through.bio profile id (e.g. https://through.bio/<profile-id>)"
+                    value={throughBio}
+                    minLength={2}
+                    onChange={onThroughBioChange}
+                  />
+                </td>
+                <td>
+                  { getThroughBioLink() }
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="institutionalWebsite">Institutional Website</label>
+                </td>
                 <td>
                   <input
                     type="url"
-                    id={`otherUrl${index}`}
-                    name={`Other URL ${index + 1}`}
-                    placeholder="Other URL"
-                    value={url}
-                    onChange={(event) => {
-                      onOtherUrlChange(event, index)
-                    }}
-                    onBlur={(event) => { event.target.reportValidity() }}
-                    disabled={readonly}
+                    id="institutionalWebsite"
+                    name="Institutional Website"
+                    placeholder="Institutional Website (e.g. https://www.institution.edu/~username)"
+                    value={institutionalWebsite}
+                    onChange={onInstitutionalWebsiteChange}
                   />
                 </td>
-              )}
-              <td>
-                {!readonly
-                  && <IconButton aria-label="remove entry" onClick={() => { removeEntry(index) }}><RemoveCircleOutlineIcon /></IconButton>}
-                <a href={url} target="_blank" rel="noopener noreferrer">
-                  {url}
-                </a>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button hidden={readonly} onClick={addNewOtherUrl} className="btn-secondary">Add URL</button>
-      <button style={{ marginLeft: '30px' }} hidden={readonly} disabled={invalidUrls.length > 0} onClick={onSaveClick} className="btn-primary">Save</button>
-    </div>
-  )
+                <td>
+                  { getInstitutionalWebsiteLink() }
+                </td>
+              </tr>
+              {otherUrls && otherUrls.length > 0 && otherUrls.map((url, index) => (
+                <tr key={index}>
+                  <td>
+                    <label htmlFor={`otherUrl${index}`}>Other URL {index + 1}</label>
+                  </td>
+                  <td>
+                    <input
+                      type="url"
+                      id={`otherUrl${index}`}
+                      name={`Other URL ${index + 1}`}
+                      placeholder="Other URL"
+                      value={url}
+                      onChange={(event) => {
+                        onOtherUrlChange(event, index)
+                      }}
+                      onBlur={(event) => { event.target.reportValidity() }}
+                      disabled={readonly}
+                    />
+                  </td>
+                  <td>
+                    && <IconButton aria-label="remove entry" onClick={() => { removeEntry(index) }}><RemoveCircleOutlineIcon /></IconButton>
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      {url}
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button onClick={addNewOtherUrl} className="btn-secondary">Add URL</button>
+          <button style={{ marginLeft: '30px' }}disabled={invalidUrls.length > 0} onClick={onSaveClick} className="btn-primary">Save</button>
+        </div>
+      )
 }
