@@ -13,6 +13,15 @@
     font-weight: 600;
 }
 
+.external-profile .header-container-readonly h1 {
+    margin: 0px;
+    padding-right: 20px;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+}
+
 .external-profile .header-container button:hover {
     background-color: #2FA4E7;
 }
