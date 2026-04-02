@@ -2,16 +2,48 @@ import React from 'react'
 import RequestForm from 'src/pages/user_profile/RequestForm'
 import { BrowserRouter } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
+import { User } from 'src/libs/ajax/User'
 
 describe('SupportRequestsPage Tests', () => {
+  let getCurrentUserStub: sinon.SinonStub
+  let getMeStub: sinon.SinonStub
+
   beforeEach(() => {
-    cy.viewport(1000, 500)
-    cy.stub(Storage, 'getCurrentUser').returns({
+    // Restore stubs if they exist
+    if (getCurrentUserStub) {
+      getCurrentUserStub.restore()
+    }
+    if (getMeStub) {
+      getMeStub.restore()
+    }
+
+    getCurrentUserStub = cy.stub(Storage, 'getCurrentUser').returns({
       displayName: 'name',
       email: 'user@test.com',
       emailPreference: true,
       id: 1,
     })
+
+    // Clean up lingering toast notifications from previous tests
+    cy.get('body').then(($body) => {
+      $body.find('[role="alert"]').each((_, el) => {
+        el.remove()
+      })
+    })
+
+    cy.viewport(1000, 500)
+
+    getMeStub = cy.stub(User, 'getMe').returns(Promise.resolve({
+      userData: {
+        externalProfiles: {
+          linkedIn: '',
+          ORCID: '',
+          throughBio: '',
+          institutionalWebsite: '',
+          otherUrls: [],
+        },
+      },
+    }))
     cy.initApplicationConfig()
     cy.mount(
       <BrowserRouter><RequestForm /></BrowserRouter>,
@@ -68,11 +100,11 @@ describe('SupportRequestsPage Tests', () => {
 
   it('Allows multiple checkbox selection and submits correct data', () => {
     cy.get('[id="checkRegisterDataset"]').check()
-    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[id="checkJoinDac"]').check()
     cy.get('[data-cy="submitButton"]').should('be.enabled')
     cy.intercept({ method: 'POST', url: '**/support/request' }, (req) => {
       expect(req.body.description).to.include('Register a dataset')
-      expect(req.body.description).to.include('Signing Official')
+      expect(req.body.description).to.include('join a DAC')
       req.reply({ statusCode: 201 })
     }).as('multiRequest')
     cy.get('[data-cy="submitButton"]').click()
@@ -110,5 +142,48 @@ describe('SupportRequestsPage Tests', () => {
   it('Navigates away when Back button is clicked', () => {
     cy.get('[data-cy="backButton"]').click()
     cy.url().should('include', '/profile')
+  })
+
+  it('shows external profile URL fields when SO Permissions is checked', () => {
+    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[id="linkedIn"]').should('exist')
+    cy.get('[id="ORCID"]').should('exist')
+    cy.get('[id="throughBio"]').should('exist')
+    cy.get('[id="institutionalWebsite"]').should('exist')
+  })
+
+  it('prevents submission if no external profile URL is filled', () => {
+    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[data-cy="submitButton"]').should('be.enabled').click()
+    cy.get('[role="alert"]').should('contain', 'Please provide at least one external profile URL')
+  })
+
+  it('prevents submission if none URL is filled', () => {
+    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[id="linkedIn"]').type('non-url text')
+    cy.get('[data-cy="submitButton"]').should('be.enabled').click()
+    cy.get('[role="alert"]').should('contain', 'Please provide at least one external profile URL')
+  })
+
+  it('allows submission if at least one external profile URL is filled', () => {
+    // Update the User.getMe stub to return a filled LinkedIn profile
+    getMeStub.returns(Promise.resolve({
+      userData: {
+        externalProfiles: {
+          linkedIn: 'test-linkedin-user',
+          ORCID: '',
+          throughBio: '',
+          institutionalWebsite: '',
+          otherUrls: [],
+        },
+      },
+    }))
+    cy.intercept({ method: 'POST', url: '**/support/request' }, { statusCode: 201 }).as('request')
+    cy.get('[id="checkSOPermissions"]').check()
+    cy.get('[id="linkedIn"]').type('test-linkedin-user')
+    cy.get('[data-cy="submitButton"]').should('be.enabled').click()
+    cy.wait(['@request']).then((interception) => {
+      cy.wrap(interception).should('not.be.null')
+    })
   })
 })

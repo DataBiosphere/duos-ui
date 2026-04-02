@@ -4,7 +4,9 @@ import { Notifications } from 'src/libs/utils'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { Link, useNavigate } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
-import { ResponseError } from 'src/types/model'
+import { User } from 'src/libs/ajax/User'
+import { DuosUser, ExternalProfiles, ResponseError } from 'src/types/model'
+import ExternalProfile from 'src/pages/user_profile/ExternalProfile'
 
 type SupportRequestKey
   = | 'checkRegisterDataset'
@@ -25,6 +27,7 @@ type SupportRequestOption = {
   key: Exclude<SupportRequestKey, 'checkRequestDataAccess' | 'extraRequest'>
   label: string
   isDefaultOption?: boolean
+  isDisabled?: boolean
 }
 
 type HandleSupportRequestsChangeArg = {
@@ -32,7 +35,7 @@ type HandleSupportRequestsChangeArg = {
   value: boolean | string
 }
 
-export default function RequestForm(): JSX.Element {
+export default function RequestForm(): React.JSX.Element {
   const navigate = useNavigate()
   const headerStyle: React.CSSProperties = {
     fontWeight: 'bold',
@@ -42,18 +45,23 @@ export default function RequestForm(): JSX.Element {
     marginBottom: '1rem',
   }
 
+  const user: DuosUser = Storage.getCurrentUser()
+
   const possibleSupportRequests: SupportRequestOption[] = [
     {
       key: 'checkRegisterDataset',
       label: 'Register a dataset',
+      isDisabled: false,
     },
     {
       key: 'checkSOPermissions',
       label: `I am a Signing Official with authority to engage my institution in contracts, and need to issue permissions to my institution's users`,
+      isDisabled: user.isSigningOfficial,
     },
     {
       key: 'checkJoinDac',
       label: 'I am looking to join a DAC',
+      isDisabled: false,
     },
   ]
 
@@ -69,12 +77,14 @@ export default function RequestForm(): JSX.Element {
   const [hasSupportRequests, setHasSupportRequests] = useState<boolean>(hasSupportRequestsCond)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [supportRequests, setSupportRequests] = useState<SupportRequests>(supportRequestsCond)
+  const [showExternalProfileUrls, setShowExternalProfileUrls] = useState<boolean>(false)
 
   const handleSupportRequestsChange = ({ key, value }: HandleSupportRequestsChangeArg) => {
     const newSupportRequests = { ...supportRequests, [key]: value }
     setSupportRequests(newSupportRequests)
     const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key])
     setHasSupportRequests(hasAnyRequests)
+    setShowExternalProfileUrls(newSupportRequests.checkSOPermissions)
   }
 
   const submitForm = async () => {
@@ -89,13 +99,23 @@ export default function RequestForm(): JSX.Element {
     ]
   }
 
+  const hasAtLeastOneExternalProfile = async () => {
+    const { userData } = await User.getMe()
+    const profiles: ExternalProfiles = userData?.externalProfiles || {}
+    return Object.values(profiles).some((value: string | string[]) => {
+      if (Array.isArray(value)) {
+        return value.some(v => v && v.trim() !== '')
+      }
+      return value && value.trim() !== ''
+    })
+  }
+
   const sendSupportRequests = async () => {
     const [hasSupportRequests, requestText] = processSupportRequests()
 
     if (!hasSupportRequests) {
       return
     }
-    const user = Storage.getCurrentUser()
     const profile = {
       profileName: user.displayName,
       email: user.email,
@@ -122,6 +142,17 @@ export default function RequestForm(): JSX.Element {
     )
     try {
       setIsSubmitting(true)
+
+      // Show error notification if user is requesting SO permissions but has not provided at least one external profile URL
+      if (showExternalProfileUrls && !(await hasAtLeastOneExternalProfile())) {
+        Notifications.showError({
+          text: 'Please provide at least one external profile URL to request Signing Official permissions',
+          layout: 'topRight',
+        })
+        setIsSubmitting(false)
+        return
+      }
+
       await Support.createSupportRequest(ticket)
       Notifications.showSuccess(
         { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 },
@@ -140,7 +171,7 @@ export default function RequestForm(): JSX.Element {
 
   return (
     <div
-      style={{ padding: '25px 270px 0px 270px' }}
+      style={{ padding: '25px 270px 120px 270px' }}
       data-cy="supportRequestForm"
     >
       <p
@@ -172,7 +203,7 @@ export default function RequestForm(): JSX.Element {
             <FormField
               toggleText={supportRequest.label}
               defaultValue={supportRequest?.isDefaultOption}
-              disabled={supportRequest?.isDefaultOption}
+              disabled={supportRequest?.isDisabled}
               type={FormFieldTypes.CHECKBOX}
               key={supportRequest.key}
               id={supportRequest.key}
@@ -180,6 +211,9 @@ export default function RequestForm(): JSX.Element {
             />
           )
         })}
+        {showExternalProfileUrls && (
+          <ExternalProfile userId={user.userId} />
+        )}
         <div style={{ margin: '15px 0 10px' }}>
           Is there anything else you would like to request?
         </div>
