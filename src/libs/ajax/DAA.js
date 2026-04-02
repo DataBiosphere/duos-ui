@@ -93,11 +93,6 @@ export const DAA = {
     return res.status
   },
 
-  deleteDaa: async (daaId) => {
-    const url = `${await Config.getApiUrl()}/api/daa/${daaId}`
-    return fetchDelete(url, Config.authOpts())
-  },
-
   deleteDacDaaRelationship: async (daaId, dacId) => {
     const url = `${await Config.getApiUrl()}/api/daa/${daaId}/dac/${dacId}`
     return fetchDelete(url, Config.authOpts())
