@@ -168,26 +168,24 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }, [readonly, props.userId])
 
   const getLinkedInLink = () => {
-    return (
-      getUrlLink(formattedLinkedIn(linkedIn))
-    )
+    return readonly && !linkedIn ? <span>No LinkedIn profile provided</span> : getUrlLink(formattedLinkedIn(linkedIn))
   }
 
   const getOrcidLink = () => {
     return (
-      getUrlLink(formattedOrcid(orcid))
+      readonly && !orcid ? <span>No ORCID iD provided</span> : getUrlLink(formattedOrcid(orcid))
     )
   }
 
   const getThroughBioLink = () => {
     return (
-      getUrlLink(formattedThroughBio(throughBio))
+      readonly && !throughBio ? <span>No Through.bio profile provided</span> : getUrlLink(formattedThroughBio(throughBio))
     )
   }
 
   const getInstitutionalWebsiteLink = () => {
     return (
-      getUrlLink(institutionalWebsite)
+      readonly && !institutionalWebsite ? <span>No institutional website provided</span> : getUrlLink(institutionalWebsite)
     )
   }
 
