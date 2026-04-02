@@ -202,7 +202,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
         <div>
           <h4>External Profile</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div style={{ fontWeight: 'bold' }}>Linked In</div><div>{getLinkedInLink()}</div>
+            <div style={{ fontWeight: 'bold' }}>LinkedIn</div><div>{getLinkedInLink()}</div>
             <div style={{ fontWeight: 'bold' }}>ORCID iD</div><div>{getOrcidLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Through.bio</div><div>{getThroughBioLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Institutional Website</div><div>{getInstitutionalWebsiteLink()}</div>
@@ -278,7 +278,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
                     type="text"
                     id="throughBio"
                     name="throughBio"
-                    placeholder="Through.bio profile id (e.g. https://through.bio/<profile-id>)"
+                    placeholder="Through.bio profile ID (e.g. https://through.bio/<profile-id>)"
                     value={throughBio}
                     minLength={2}
                     onChange={onThroughBioChange}
