@@ -5,7 +5,7 @@ import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { Link, useNavigate } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { ExternalProfiles, ResponseError } from 'src/types/model'
+import { DuosUser, ExternalProfiles, ResponseError } from 'src/types/model'
 import ExternalProfile from 'src/pages/user_profile/ExternalProfile'
 
 type SupportRequestKey
@@ -27,6 +27,7 @@ type SupportRequestOption = {
   key: Exclude<SupportRequestKey, 'checkRequestDataAccess' | 'extraRequest'>
   label: string
   isDefaultOption?: boolean
+  isDisabled?: boolean
 }
 
 type HandleSupportRequestsChangeArg = {
@@ -44,18 +45,23 @@ export default function RequestForm(): React.JSX.Element {
     marginBottom: '1rem',
   }
 
+  const user: DuosUser = Storage.getCurrentUser()
+
   const possibleSupportRequests: SupportRequestOption[] = [
     {
       key: 'checkRegisterDataset',
       label: 'Register a dataset',
+      isDisabled: false,
     },
     {
       key: 'checkSOPermissions',
       label: `I am a Signing Official with authority to engage my institution in contracts, and need to issue permissions to my institution's users`,
+      isDisabled: user.isSigningOfficial,
     },
     {
       key: 'checkJoinDac',
       label: 'I am looking to join a DAC',
+      isDisabled: false,
     },
   ]
 
@@ -110,7 +116,6 @@ export default function RequestForm(): React.JSX.Element {
     if (!hasSupportRequests) {
       return
     }
-    const user = Storage.getCurrentUser()
     const profile = {
       profileName: user.displayName,
       email: user.email,
@@ -198,7 +203,7 @@ export default function RequestForm(): React.JSX.Element {
             <FormField
               toggleText={supportRequest.label}
               defaultValue={supportRequest?.isDefaultOption}
-              disabled={supportRequest?.isDefaultOption}
+              disabled={supportRequest?.isDisabled}
               type={FormFieldTypes.CHECKBOX}
               key={supportRequest.key}
               id={supportRequest.key}
@@ -207,7 +212,7 @@ export default function RequestForm(): React.JSX.Element {
           )
         })}
         {showExternalProfileUrls && (
-          <ExternalProfile userId={Storage.getCurrentUser().userId} />
+          <ExternalProfile userId={user.userId} />
         )}
         <div style={{ margin: '15px 0 10px' }}>
           Is there anything else you would like to request?
