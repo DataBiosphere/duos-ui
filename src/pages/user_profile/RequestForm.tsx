@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { Support } from 'src/libs/ajax/Support'
 import { Notifications } from 'src/libs/utils'
-import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { Link, useNavigate } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { DuosUser, ExternalProfiles, ResponseError } from 'src/types/model'
+import { ExternalProfiles, ResponseError } from 'src/types/model'
+import ExternalProfile from 'src/pages/user_profile/ExternalProfile'
 
 type SupportRequestKey
   = | 'checkRegisterDataset'
@@ -31,13 +32,6 @@ type SupportRequestOption = {
 type HandleSupportRequestsChangeArg = {
   key: SupportRequestKey
   value: boolean | string
-}
-
-type ExternalProfileUrl = keyof ExternalProfiles
-
-type ExternalProfileChangeArg = {
-  key: ExternalProfileUrl
-  value: string
 }
 
 export default function RequestForm(): React.JSX.Element {
@@ -78,33 +72,13 @@ export default function RequestForm(): React.JSX.Element {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [supportRequests, setSupportRequests] = useState<SupportRequests>(supportRequestsCond)
   const [showExternalProfileUrls, setShowExternalProfileUrls] = useState<boolean>(false)
-  const [userProfile, setUserProfile] = useState<DuosUser>(Storage.getCurrentUser())
-
-  const externalProfileUrlsConfig: { id: ExternalProfileUrl, placeholder: string }[] = [
-    { id: 'linkedIn', placeholder: 'LinkedIn Profile URL' },
-    { id: 'ORCID', placeholder: 'ORCID Profile URL' },
-    { id: 'throughBio', placeholder: 'Through.Bio Profile URL' },
-    { id: 'institutionalWebsite', placeholder: 'Institutional Profile URL' },
-  ]
 
   const handleSupportRequestsChange = ({ key, value }: HandleSupportRequestsChangeArg) => {
     const newSupportRequests = { ...supportRequests, [key]: value }
     setSupportRequests(newSupportRequests)
     const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key])
     setHasSupportRequests(hasAnyRequests)
-    setShowExternalProfileUrls((key === 'checkSOPermissions' && value) as boolean) // When Requesting SO Permissions
-  }
-
-  const handleExternalProfileChange = ({ key, value }: ExternalProfileChangeArg) => {
-    setUserProfile({
-      ...userProfile,
-      userData: {
-        externalProfiles: {
-          ...userProfile.userData?.externalProfiles,
-          [key]: value,
-        },
-      },
-    })
+    setShowExternalProfileUrls(newSupportRequests.checkSOPermissions)
   }
 
   const submitForm = async () => {
@@ -117,6 +91,17 @@ export default function RequestForm(): React.JSX.Element {
       filteredRequests.length > 0,
       filteredRequests.map(x => `- ${x.label}`).join('\n'),
     ]
+  }
+
+  const hasAtLeastOneExternalProfile = async () => {
+    const { userData } = await User.getMe()
+    const profiles: ExternalProfiles = userData?.externalProfiles || {}
+    return Object.values(profiles).some((value: string | string[]) => {
+      if (Array.isArray(value)) {
+        return value.some(v => v && v.trim() !== '')
+      }
+      return value && value.trim() !== ''
+    })
   }
 
   const sendSupportRequests = async () => {
@@ -153,41 +138,14 @@ export default function RequestForm(): React.JSX.Element {
     try {
       setIsSubmitting(true)
 
-      // Returns true if the string is non-empty and a valid URL
-      const isValidUrl = (value: string) => {
-        const trimmedValue = value.trim()
-        return trimmedValue !== '' && FormValidators.URL.isValid(trimmedValue)
-      }
-
-      // Returns true if the string is empty OR a valid URL (rejects non-URL strings)
-      const isEmptyOrValidUrl = (value: string) => {
-        const trimmedValue = value.trim()
-        return trimmedValue === '' || FormValidators.URL.isValid(trimmedValue)
-      }
-
-      // Returns true if ALL values are empty or valid URLs, AND at least one is a valid URL
-      const hasAtLeastOneExternalProfileUrl = () => {
-        const allValues = externalProfileUrlsConfig.flatMap(({ id }) => {
-          const value = userProfile?.userData?.externalProfiles?.[id]
-          return Array.isArray(value) ? value : [value ?? '']
-        })
-        return allValues.every(v => isEmptyOrValidUrl(v)) && allValues.some(v => isValidUrl(v))
-      }
-
       // Show error notification if user is requesting SO permissions but has not provided at least one external profile URL
-      if (showExternalProfileUrls && !hasAtLeastOneExternalProfileUrl()) {
+      if (showExternalProfileUrls && !(await hasAtLeastOneExternalProfile())) {
         Notifications.showError({
           text: 'Please provide at least one external profile URL to request Signing Official permissions',
           layout: 'topRight',
         })
         setIsSubmitting(false)
         return
-      }
-
-      // Update Profile/LocalStorage with external Profile URLs if the user is requesting SO permissions
-      if (showExternalProfileUrls && hasAtLeastOneExternalProfileUrl()) {
-        await User.updateSelf({ userData: userProfile?.userData })
-        Storage.setCurrentUser(userProfile)
       }
 
       await Support.createSupportRequest(ticket)
@@ -249,21 +207,7 @@ export default function RequestForm(): React.JSX.Element {
           )
         })}
         {showExternalProfileUrls && (
-          <>
-            {externalProfileUrlsConfig.map(({ id, placeholder }) => (
-              <FormField
-                style={{ marginTop: '15px' }}
-                type={FormFieldTypes.TEXT}
-                id={id}
-                placeholder={placeholder}
-                defaultValue={userProfile?.userData?.externalProfiles?.[id] || ''}
-                onChange={handleExternalProfileChange}
-                validators={[FormValidators.URL]}
-                key={id}
-              />
-            ),
-            )}
-          </>
+          <ExternalProfile userId={Storage.getCurrentUser().userId} />
         )}
         <div style={{ margin: '15px 0 10px' }}>
           Is there anything else you would like to request?
