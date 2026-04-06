@@ -991,6 +991,28 @@ export const getLibraryVersions = (
       featured: true,
       order: 22,
     },
+    'ga4gh': {
+      query: {
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'ga4gh',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['ga4gh'],
+              },
+            },
+          ],
+        },
+      },
+      icon: ga4ghIcon,
+      title: 'GA4GH Data Library',
+      featured: false,
+      order: 999,
+    },
   }
 }
 
