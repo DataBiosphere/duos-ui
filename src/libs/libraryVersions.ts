@@ -25,6 +25,8 @@ import PGCIcon from 'src/images/PGC_logo.jpg'
 import PBNIcon from 'src/images/PBN_logo.jpg'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 import ccxdpIcon from 'src/images/ccxdp-logo.png'
+import ga4ghIcon from 'src/images/ga4ghIcon.png'
+
 
 interface MatchPhraseQuery {
   match_phrase: {
@@ -990,6 +992,28 @@ export const getLibraryVersions = (
       title: 'NCPI DUO Data Library',
       featured: true,
       order: 22,
+    },
+    'ga4gh': {
+      query: {
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'ga4gh',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags': ['ga4gh'],
+              },
+            },
+          ],
+        },
+      },
+      icon: ga4ghIcon,
+      title: 'GA4GH Data Library',
+      featured: false,
+      order: 999,
     },
   }
 }
