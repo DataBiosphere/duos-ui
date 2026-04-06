@@ -100,6 +100,7 @@ export interface SimplifiedDuosUser {
 
 export interface DAAObject {
   // Define the shape of a DAA object as needed
+  broadDaa: boolean
   daaId: number
   createUserId: number
   createDate: string
