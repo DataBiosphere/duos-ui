@@ -25,6 +25,8 @@ import PGCIcon from 'src/images/PGC_logo.jpg'
 import PBNIcon from 'src/images/PBN_logo.jpg'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 import ccxdpIcon from 'src/images/ccxdp-logo.png'
+import ga4ghIcon from 'src/images/ga4gh-logo.png'
+
 
 interface MatchPhraseQuery {
   match_phrase: {
