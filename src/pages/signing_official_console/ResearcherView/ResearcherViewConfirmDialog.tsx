@@ -26,7 +26,7 @@ export default function ResearcherViewConfirmDialog({
   dialog,
   onConfirm,
   onCancel,
-}: ResearcherViewConfirmDialogProps) {
+}: Readonly<ResearcherViewConfirmDialogProps>) {
   if (!dialog) return null
 
   const isAuthorize = dialog.action === 'authorize'
@@ -66,9 +66,9 @@ export default function ResearcherViewConfirmDialog({
           onClick={onConfirm}
           data-cy="confirm-dialog-confirm"
           sx={{
-            fontFamily: FONT,
-            fontWeight: 700,
-            bgcolor: isAuthorize ? BRAND_BLUE : '#dc3545',
+            'fontFamily': FONT,
+            'fontWeight': 700,
+            'bgcolor': isAuthorize ? BRAND_BLUE : '#dc3545',
             '&:hover': { bgcolor: isAuthorize ? '#073a94' : '#b02a37' },
           }}
         >

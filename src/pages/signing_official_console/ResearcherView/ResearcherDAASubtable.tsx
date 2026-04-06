@@ -60,13 +60,13 @@ export default function ResearcherDAASubtable({
   daaRows,
   onAuthorize,
   onRevoke,
-}: ResearcherDAASubtableProps) {
+}: Readonly<ResearcherDAASubtableProps>) {
   return (
     <Box sx={{ bgcolor: '#fafafa' }} data-cy="daa-subtable">
       <Table size="small">
         <TableHead>
           <TableRow sx={{ bgcolor: '#f0f0f0' }}>
-            {COLUMN_HEADERS.map((col) => (
+            {COLUMN_HEADERS.map(col => (
               <TableCell key={col} sx={tableCellHeadSx}>
                 {col}
               </TableCell>
@@ -79,7 +79,7 @@ export default function ResearcherDAASubtable({
               key={daa.daaId}
               data-cy={`daa-row-${daa.daaId}`}
               sx={{
-                bgcolor: rowBgColor(status),
+                'bgcolor': rowBgColor(status),
                 '& td': { borderBottom: rowBorderColor(status) },
               }}
             >

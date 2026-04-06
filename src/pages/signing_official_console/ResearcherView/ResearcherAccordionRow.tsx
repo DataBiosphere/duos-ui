@@ -40,7 +40,7 @@ export default function ResearcherAccordionRow({
   onToggle,
   onAuthorize,
   onRevoke,
-}: ResearcherAccordionRowProps) {
+}: Readonly<ResearcherAccordionRowProps>) {
   const hasPending = pendingCount > 0
   const researcherId = researcher.userId
 
@@ -63,14 +63,14 @@ export default function ResearcherAccordionRow({
         data-cy={`researcher-row-toggle-${researcherId}`}
         onClick={onToggle}
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          px: 3,
-          py: 2,
-          cursor: 'pointer',
-          bgcolor: hasPending ? '#fffdf0' : 'white',
-          borderBottom: isExpanded ? '1px solid #e0e0e0' : 'none',
+          'display': 'flex',
+          'alignItems': 'center',
+          'justifyContent': 'space-between',
+          'px': 3,
+          'py': 2,
+          'cursor': 'pointer',
+          'bgcolor': hasPending ? '#fffdf0' : 'white',
+          'borderBottom': isExpanded ? '1px solid #e0e0e0' : 'none',
           '&:hover': { bgcolor: hasPending ? '#fff8d6' : '#f8f9fa' },
         }}
       >

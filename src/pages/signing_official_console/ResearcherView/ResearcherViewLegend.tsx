@@ -21,7 +21,7 @@ export default function ResearcherViewLegend() {
       data-cy="researcher-view-legend"
       sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}
     >
-      {LEGEND_ITEMS.map((item) => (
+      {LEGEND_ITEMS.map(item => (
         <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
           <Box
             sx={{

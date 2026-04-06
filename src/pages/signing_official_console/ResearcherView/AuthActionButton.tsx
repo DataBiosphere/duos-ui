@@ -90,11 +90,11 @@ export default function AuthActionButton({
         onAuthorize()
       }}
       sx={{
-        bgcolor: BRAND_BLUE,
-        fontFamily: FONT,
-        fontWeight: 700,
-        textTransform: 'uppercase',
-        fontSize: 11,
+        'bgcolor': BRAND_BLUE,
+        'fontFamily': FONT,
+        'fontWeight': 700,
+        'textTransform': 'uppercase',
+        'fontSize': 11,
         '&:hover': { bgcolor: '#073a94' },
       }}
     >
