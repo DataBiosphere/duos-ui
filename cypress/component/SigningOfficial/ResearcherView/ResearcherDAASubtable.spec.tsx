@@ -3,7 +3,8 @@ import ResearcherDAASubtable from 'src/pages/signing_official_console/Researcher
 import { DAARowData } from 'src/pages/signing_official_console/ResearcherView/types'
 import { DAAObject } from 'src/types/model'
 
-const makeDaa = (daaId: number, fileName: string): DAAObject => ({
+const makeDaa = (broadDaa: boolean, daaId: number, fileName: string): DAAObject => ({
+  broadDaa,
   daaId,
   createUserId: 1,
   createDate: '2024-01-15',
@@ -23,9 +24,9 @@ const makeDaa = (daaId: number, fileName: string): DAAObject => ({
 })
 
 const mockDaaRows: DAARowData[] = [
-  { daa: makeDaa(1, 'Default DUOS DAA'), dacName: 'NHGRI DAC', status: 'authorized' },
-  { daa: makeDaa(2, 'GTEx Access Agreement'), dacName: 'GTEx DAC', status: 'pending' },
-  { daa: makeDaa(3, 'eMERGE Institutional Agreement'), dacName: 'eMERGE DAC', status: 'not_requested' },
+  { daa: makeDaa(true, 1, 'Default DUOS DAA'), dacName: 'NHGRI DAC', status: 'authorized' },
+  { daa: makeDaa(false, 2, 'GTEx Access Agreement'), dacName: 'GTEx DAC', status: 'pending' },
+  { daa: makeDaa(false, 3, 'eMERGE Institutional Agreement'), dacName: 'eMERGE DAC', status: 'not_requested' },
 ]
 
 describe('ResearcherDAASubtable', () => {
@@ -33,6 +34,7 @@ describe('ResearcherDAASubtable', () => {
   let revokeSpy: (daaId: number) => void
 
   beforeEach(() => {
+    cy.viewport(600, 300)
     authorizeSpy = cy.stub().as('authorize')
     revokeSpy = cy.stub().as('revoke')
   })

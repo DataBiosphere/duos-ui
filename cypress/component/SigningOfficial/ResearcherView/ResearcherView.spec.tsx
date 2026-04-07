@@ -11,7 +11,8 @@ import { DuosUser, DAAObject } from 'src/types/model'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
-const makeDaa = (daaId: number, fileName: string, dacId = 10): DAAObject => ({
+const makeDaa = (broadDaa: boolean, daaId: number, fileName: string, dacId = 10): DAAObject => ({
+  broadDaa,
   daaId,
   createUserId: 1,
   createDate: '2024-01-15',
@@ -61,8 +62,8 @@ const makeResearcher = (
 })
 
 const mockDaas: DAAObject[] = [
-  makeDaa(1, 'Default DUOS DAA', 10),
-  makeDaa(2, 'GTEx Access Agreement', 20),
+  makeDaa(true, 1, 'Default DUOS DAA', 10),
+  makeDaa(false, 2, 'GTEx Access Agreement', 20),
 ]
 
 const mockResearchers: DuosUser[] = [
@@ -73,20 +74,24 @@ const mockResearchers: DuosUser[] = [
 // ── Pure helper unit tests ────────────────────────────────────────────────────
 
 describe('ResearcherView pure helpers', () => {
+  beforeEach(() => {
+    cy.viewport(600, 300)
+  })
+
   describe('getDacName', () => {
     it('returns the DAC name from daa.dacs', () => {
-      const daa = makeDaa(1, 'Test DAA', 10)
+      const daa = makeDaa(true, 1, 'Test DAA', 10)
       expect(getDacName(daa)).to.equal('DAC-10')
     })
 
     it('returns — when dacs array is empty', () => {
-      const daa = { ...makeDaa(1, 'Test DAA', 10), dacs: [] }
+      const daa = { ...makeDaa(true, 1, 'Test DAA', 10), dacs: [] }
       expect(getDacName(daa)).to.equal('—')
     })
 
     it('joins multiple DAC names', () => {
       const daa: DAAObject = {
-        ...makeDaa(1, 'Multi DAA', 10),
+        ...makeDaa(true, 1, 'Multi DAA', 10),
         dacs: [
           { dacId: 10, name: 'DAC A' },
           { dacId: 20, name: 'DAC B' },
@@ -141,6 +146,7 @@ describe('ResearcherView', () => {
   let refreshSpy: (updated: DuosUser[]) => void
 
   beforeEach(() => {
+    cy.viewport(600, 600)
     cy.initApplicationConfig()
     refreshSpy = cy.stub()
     cy.stub(User, 'list').resolves(mockResearchers)
@@ -165,7 +171,7 @@ describe('ResearcherView', () => {
   it('renders a row for each researcher', () => {
     mount()
     cy.get('[data-cy="researcher-list"]').within(() => {
-      cy.get('[data-cy^="researcher-row-"]').should('have.length', 2)
+      cy.get('[data-cy="researcher-row-1"], [data-cy="researcher-row-2"]').should('have.length', 2)
     })
   })
 

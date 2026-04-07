@@ -6,6 +6,7 @@ describe('AuthActionButton', () => {
   let revokeSpy: () => void
 
   beforeEach(() => {
+    cy.viewport(600, 300)
     authorizeSpy = cy.stub().as('authorize')
     revokeSpy = cy.stub().as('revoke')
   })

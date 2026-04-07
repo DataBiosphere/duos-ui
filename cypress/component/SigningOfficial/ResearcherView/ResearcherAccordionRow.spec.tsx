@@ -29,7 +29,8 @@ const mockResearcher: DuosUser = {
   },
 }
 
-const makeDaa = (daaId: number, fileName: string): DAAObject => ({
+const makeDaa = (broadDaa: boolean, daaId: number, fileName: string): DAAObject => ({
+  broadDaa,
   daaId,
   createUserId: 1,
   createDate: '2024-01-15',
@@ -49,8 +50,8 @@ const makeDaa = (daaId: number, fileName: string): DAAObject => ({
 })
 
 const mockDaaRows: DAARowData[] = [
-  { daa: makeDaa(1, 'Default DUOS DAA'), dacName: 'NHGRI DAC', status: 'authorized' },
-  { daa: makeDaa(2, 'GTEx Agreement'), dacName: 'GTEx DAC', status: 'not_requested' },
+  { daa: makeDaa(true, 1, 'Default DUOS DAA'), dacName: 'NHGRI DAC', status: 'authorized' },
+  { daa: makeDaa(false, 2, 'GTEx Agreement'), dacName: 'GTEx DAC', status: 'not_requested' },
 ]
 
 describe('ResearcherAccordionRow', () => {
@@ -59,6 +60,7 @@ describe('ResearcherAccordionRow', () => {
   let toggleSpy: () => void
 
   beforeEach(() => {
+    cy.viewport(600, 300)
     authorizeSpy = cy.stub().as('authorize')
     revokeSpy = cy.stub().as('revoke')
     toggleSpy = cy.stub().as('toggle')
