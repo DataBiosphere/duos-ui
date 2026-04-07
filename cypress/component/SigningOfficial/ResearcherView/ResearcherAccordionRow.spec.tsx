@@ -41,7 +41,6 @@ describe('ResearcherAccordionRow', () => {
       <ResearcherAccordionRow
         researcher={mockResearcher}
         daaRows={mockDaaRows}
-        pendingCount={0}
         authorizedCount={1}
         isExpanded={false}
         onToggle={toggleSpy}
@@ -58,7 +57,6 @@ describe('ResearcherAccordionRow', () => {
       <ResearcherAccordionRow
         researcher={mockResearcher}
         daaRows={mockDaaRows}
-        pendingCount={0}
         authorizedCount={1}
         isExpanded={false}
         onToggle={toggleSpy}
@@ -69,28 +67,11 @@ describe('ResearcherAccordionRow', () => {
     cy.get('[data-cy="researcher-authorized-badge-42"]').should('contain.text', '1 authorized')
   })
 
-  it('shows pending badge when pendingCount > 0', () => {
+  it('shows no pre-auth status when authorizedCount is 0', () => {
     cy.mount(
       <ResearcherAccordionRow
         researcher={mockResearcher}
         daaRows={mockDaaRows}
-        pendingCount={2}
-        authorizedCount={0}
-        isExpanded={false}
-        onToggle={toggleSpy}
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-      />,
-    )
-    cy.get('[data-cy="researcher-pending-badge-42"]').should('contain.text', '2 pending')
-  })
-
-  it('shows no pre-auth status when both counts are 0', () => {
-    cy.mount(
-      <ResearcherAccordionRow
-        researcher={mockResearcher}
-        daaRows={mockDaaRows}
-        pendingCount={0}
         authorizedCount={0}
         isExpanded={false}
         onToggle={toggleSpy}
@@ -106,7 +87,6 @@ describe('ResearcherAccordionRow', () => {
       <ResearcherAccordionRow
         researcher={mockResearcher}
         daaRows={mockDaaRows}
-        pendingCount={0}
         authorizedCount={1}
         isExpanded={false}
         onToggle={toggleSpy}
@@ -123,7 +103,6 @@ describe('ResearcherAccordionRow', () => {
       <ResearcherAccordionRow
         researcher={mockResearcher}
         daaRows={mockDaaRows}
-        pendingCount={0}
         authorizedCount={1}
         isExpanded={false}
         onToggle={toggleSpy}
@@ -139,7 +118,6 @@ describe('ResearcherAccordionRow', () => {
       <ResearcherAccordionRow
         researcher={mockResearcher}
         daaRows={mockDaaRows}
-        pendingCount={0}
         authorizedCount={1}
         isExpanded={true}
         onToggle={toggleSpy}

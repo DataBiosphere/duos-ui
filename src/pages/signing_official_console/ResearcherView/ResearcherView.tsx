@@ -67,11 +67,6 @@ export default function ResearcherView({
     )
   }, [researcherRows, search])
 
-  const totalPending = useMemo(
-    () => researcherRows.reduce((sum: number, row: ResearcherRowData) => sum + row.pendingCount, 0),
-    [researcherRows],
-  )
-
   const allExpanded
     = filteredRows.length > 0
       && filteredRows.every((row: ResearcherRowData) => expanded[row.researcher.userId])
@@ -250,17 +245,6 @@ export default function ResearcherView({
         </Box>
       </Box>
 
-      {/* Pending summary */}
-      {totalPending > 0 && (
-        <Typography
-          data-cy="pending-summary"
-          sx={{ fontFamily: FONT, fontSize: 13, color: '#856404', mb: 1.5 }}
-        >
-          {totalPending} researcher{totalPending === 1 ? ' has' : 's have'} pending authorization
-          request{totalPending === 1 ? '' : 's'} — sorted to the top.
-        </Typography>
-      )}
-
       {/* Researcher accordion list */}
       <Box
         data-cy="researcher-list"
@@ -285,7 +269,6 @@ export default function ResearcherView({
             key={row.researcher.userId}
             researcher={row.researcher}
             daaRows={row.daaRows}
-            pendingCount={row.pendingCount}
             authorizedCount={row.authorizedCount}
             isExpanded={expanded[row.researcher.userId] ?? false}
             onToggle={() => toggleRow(row.researcher.userId)}

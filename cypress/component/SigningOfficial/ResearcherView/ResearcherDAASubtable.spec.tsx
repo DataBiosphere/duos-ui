@@ -12,7 +12,7 @@ const mockDaaRows: DAARowData[] = [
   {
     daa: makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Access Agreement' }),
     dacName: 'GTEx DAC',
-    status: 'pending',
+    status: 'not_requested',
   },
   {
     daa: makeDaa({ broadDaa: false, daaId: 3, fileName: 'eMERGE Institutional Agreement' }),
@@ -68,7 +68,7 @@ describe('ResearcherDAASubtable', () => {
       />,
     )
     cy.get('[data-cy="daa-row-1"] [data-cy="auth-status-chip-authorized"]').should('exist')
-    cy.get('[data-cy="daa-row-2"] [data-cy="auth-status-chip-pending"]').should('exist')
+    cy.get('[data-cy="daa-row-2"] [data-cy="auth-status-chip-not_requested"]').should('exist')
     cy.get('[data-cy="daa-row-3"] [data-cy="auth-status-chip-not_requested"]').should('exist')
   })
 

@@ -4,7 +4,6 @@ import AuthStatusChip from 'src/pages/signing_official_console/ResearcherView/Au
 describe('AuthStatusChip', () => {
   const cases = [
     { status: 'authorized' as const, label: 'Authorized' },
-    { status: 'pending' as const, label: 'Pending' },
     { status: 'not_requested' as const, label: 'Not Requested' },
     { status: 'revoked' as const, label: 'Revoked' },
   ]

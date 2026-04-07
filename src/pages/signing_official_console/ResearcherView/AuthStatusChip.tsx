@@ -10,7 +10,6 @@ interface StatusConfig {
 
 const STATUS_CONFIG: Record<AuthStatus, StatusConfig> = {
   authorized: { label: 'Authorized', color: '#155724', bgcolor: '#d4edda' },
-  pending: { label: 'Pending', color: '#856404', bgcolor: '#fff3cd' },
   not_requested: { label: 'Not Requested', color: '#6c757d', bgcolor: '#f8f9fa' },
   revoked: { label: 'Revoked', color: '#721c24', bgcolor: '#f8d7da' },
 }

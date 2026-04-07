@@ -16,9 +16,9 @@ interface AuthActionButtonProps {
  * Renders the appropriate action button based on the researcher's current
  * authorization status for a given DAA.
  *
- * - not_requested / pending → "Authorize" (primary filled)
- * - authorized              → "Revoke"    (outlined red)
- * - revoked                 → "Re-authorize" (outlined blue)
+ * - not_requested        → "Authorize" (primary filled)
+ * - authorized           → "Revoke"    (outlined red)
+ * - revoked              → "Re-authorize" (outlined blue)
  */
 export default function AuthActionButton({
   status,
@@ -78,7 +78,7 @@ export default function AuthActionButton({
     )
   }
 
-  // pending or not_requested
+  // not_requested
   return (
     <Button
       variant="contained"

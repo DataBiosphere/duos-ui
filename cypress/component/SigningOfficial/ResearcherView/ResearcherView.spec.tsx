@@ -79,13 +79,6 @@ describe('ResearcherView pure helpers', () => {
   })
 
   describe('buildResearcherRows', () => {
-    it('sorts researchers with hasPending first', () => {
-      // Simulate a pending row by injecting directly (pending comes from future API)
-      const rows = buildResearcherRows(mockResearchers, mockDaas)
-      // All statuses here are authorized / not_requested so order is stable by index
-      expect(rows).to.have.length(2)
-    })
-
     it('counts authorized correctly', () => {
       const rows = buildResearcherRows(mockResearchers, mockDaas)
       const elliot = rows.find(r => r.researcher.userId === 1)

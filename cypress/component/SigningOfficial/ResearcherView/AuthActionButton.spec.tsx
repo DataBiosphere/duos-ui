@@ -24,7 +24,6 @@ describe('AuthActionButton', () => {
 
   const renderCases = [
     { status: 'not_requested' as const, selector: 'auth-action-authorize', text: 'Authorize' },
-    { status: 'pending' as const, selector: 'auth-action-authorize', text: 'Authorize' },
     { status: 'authorized' as const, selector: 'auth-action-revoke', text: 'Revoke' },
     { status: 'revoked' as const, selector: 'auth-action-reauthorize', text: 'Re-authorize' },
   ]

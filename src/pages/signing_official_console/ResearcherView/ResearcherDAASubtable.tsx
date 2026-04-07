@@ -33,13 +33,11 @@ const tableCellBodySx = {
 
 function rowBgColor(status: AuthStatus): string {
   if (status === 'authorized') return '#f0fdf4'
-  if (status === 'pending') return '#fffdf0'
   return '#fafafa'
 }
 
 function rowBorderColor(status: AuthStatus): string {
   if (status === 'authorized') return '1px solid #bbf7d0'
-  if (status === 'pending') return '1px solid #fde68a'
   return '1px solid #e5e7eb'
 }
 

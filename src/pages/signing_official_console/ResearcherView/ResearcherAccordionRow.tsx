@@ -15,7 +15,6 @@ const FONT = 'Montserrat'
 interface ResearcherAccordionRowProps {
   researcher: DuosUser
   daaRows: DAARowData[]
-  pendingCount: number
   authorizedCount: number
   isExpanded: boolean
   onToggle: () => void
@@ -28,20 +27,16 @@ interface ResearcherAccordionRowProps {
  *
  * The card header shows the researcher's name, email, and summary badge counts.
  * When expanded, a sub-table lists each DAA with its status and an action button.
- *
- * Researchers with pending requests have a yellow highlight to draw attention.
  */
 export default function ResearcherAccordionRow({
   researcher,
   daaRows,
-  pendingCount,
   authorizedCount,
   isExpanded,
   onToggle,
   onAuthorize,
   onRevoke,
 }: Readonly<ResearcherAccordionRowProps>) {
-  const hasPending = pendingCount > 0
   const researcherId = researcher.userId
 
   return (
@@ -49,7 +44,7 @@ export default function ResearcherAccordionRow({
       elevation={0}
       data-cy={`researcher-row-${researcherId}`}
       sx={{
-        border: hasPending ? '1.5px solid #fde68a' : '1px solid #e0e0e0',
+        border: '1px solid #e0e0e0',
         borderRadius: 2,
         overflow: 'hidden',
         bgcolor: 'white',
@@ -69,9 +64,9 @@ export default function ResearcherAccordionRow({
           'px': 3,
           'py': 2,
           'cursor': 'pointer',
-          'bgcolor': hasPending ? '#fffdf0' : 'white',
+          'bgcolor': 'white',
           'borderBottom': isExpanded ? '1px solid #e0e0e0' : 'none',
-          '&:hover': { bgcolor: hasPending ? '#fff8d6' : '#f8f9fa' },
+          '&:hover': { bgcolor: '#f8f9fa' },
         }}
       >
         {/* Left: chevron + name/email */}
@@ -102,20 +97,6 @@ export default function ResearcherAccordionRow({
 
         {/* Right: summary badges */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          {pendingCount > 0 && (
-            <Chip
-              label={`${pendingCount} pending`}
-              data-cy={`researcher-pending-badge-${researcherId}`}
-              sx={{
-                bgcolor: '#dc3545',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: 11,
-                height: 22,
-                fontFamily: FONT,
-              }}
-            />
-          )}
           {authorizedCount > 0 && (
             <Chip
               label={`${authorizedCount} authorized`}
@@ -130,7 +111,7 @@ export default function ResearcherAccordionRow({
               }}
             />
           )}
-          {authorizedCount === 0 && pendingCount === 0 && (
+          {authorizedCount === 0 && (
             <Typography
               data-cy={`researcher-no-status-${researcherId}`}
               sx={{ fontFamily: FONT, fontSize: 12, color: '#bbb' }}

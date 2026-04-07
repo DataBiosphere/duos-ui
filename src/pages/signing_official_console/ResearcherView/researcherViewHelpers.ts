@@ -59,8 +59,7 @@ export function getDacName(daa: DAAObject): string {
 
 /**
  * Derives the authorization status for a researcher/DAA pair from the
- * researcher's library card. Pending state is reserved for future API
- * support; today it is never returned for a freshly-loaded researcher list.
+ * researcher's library card.
  */
 export function getAuthStatus(researcher: DuosUser, daaId: number): AuthStatus {
   const normalizedDaaId = normalizeId(daaId)
@@ -85,8 +84,7 @@ export function buildDAARows(researcher: DuosUser, daas: readonly DAAObject[]): 
 }
 
 /**
- * Enriches each researcher with their computed DAA rows and badge counts,
- * then sorts so researchers with pending items appear first.
+ * Enriches each researcher with their computed DAA rows and badge counts.
  */
 export function buildResearcherRows(
   researchers: readonly DuosUser[],
@@ -96,12 +94,6 @@ export function buildResearcherRows(
     .map((researcher) => {
       const daaRows = buildDAARows(researcher, daas)
       const authorizedCount = daaRows.filter(r => r.status === 'authorized').length
-      const pendingCount = daaRows.filter(r => r.status === 'pending').length
-      return { researcher, daaRows, authorizedCount, pendingCount, hasPending: pendingCount > 0 }
+      return { researcher, daaRows, authorizedCount }
     })
-    .sort(
-      (a, b) =>
-        Number(b.hasPending) - Number(a.hasPending)
-        || b.pendingCount - a.pendingCount,
-    )
 }

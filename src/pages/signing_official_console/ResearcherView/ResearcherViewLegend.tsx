@@ -11,7 +11,6 @@ interface LegendItem {
 
 const LEGEND_ITEMS: LegendItem[] = [
   { bg: '#f0fdf4', border: '#bbf7d0', label: 'Pre-authorized' },
-  { bg: '#fffdf0', border: '#fde68a', label: 'Pending' },
   { bg: '#fafafa', border: '#e5e7eb', label: 'Not requested' },
 ]
 
