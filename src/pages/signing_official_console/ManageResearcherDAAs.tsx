@@ -46,7 +46,7 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
 
   return (
     <div>
-      <div style={{ paddingLeft: '5%', maxWidth: '40%', marginBottom: '2rem' }}>
+      <div style={{ paddingLeft: '4rem', maxWidth: '40%', marginBottom: '2rem' }}>
         <TableHeaderSection
           title="Pre-Authorize Researchers"
           description="Review and approve researchers at your institution for access under each Pre-Auth DAA. Researchers must be approved on a per-DAA basis — authorization for one Pre-Auth DAA does not automatically grant access under another."
@@ -84,7 +84,7 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
               fontFamily: 'Montserrat, sans-serif',
               color: '#00609f',
               fontWeight: 'bold',
-              marginLeft: '5rem',
+              marginLeft: '2rem',
               padding: '0 25px',
             }}
           />
@@ -93,7 +93,7 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
       {activeTab === 0 && (
         <Box sx={{
           backgroundColor: '#f5f5f5',
-          paddingLeft: '5rem',
+          paddingLeft: '7rem',
           paddingRight: '5rem',
           paddingTop: '2rem',
           paddingBottom: '2rem',
