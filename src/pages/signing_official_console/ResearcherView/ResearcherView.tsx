@@ -137,7 +137,7 @@ export default function ResearcherView({
     try {
       if (action === 'authorize') {
         await DAA.createDaaLcLink(daaId, researcherId)
-        Notifications.showSuccess({ text: `Authorized ${researcherName} for ${daaLabel}` })
+        Notifications.showSuccess({ text: `Pre-authorized ${researcherName} for ${daaLabel}` })
       }
       else {
         await DAA.deleteDaaLcLink(daaId, researcherId)
@@ -169,30 +169,6 @@ export default function ResearcherView({
 
   return (
     <Box data-cy="researcher-view">
-      {/* Info banner */}
-      <Box
-        data-cy="researcher-view-info-banner"
-        sx={{
-          border: '1px solid #c8e6c9',
-          borderRadius: 2,
-          bgcolor: '#f1f8e9',
-          p: 2.5,
-          mb: 3,
-          display: 'flex',
-          gap: 2,
-          alignItems: 'flex-start',
-        }}
-      >
-        <Box sx={{ fontSize: 18, mt: 0.1 }} aria-hidden="true">ℹ️</Box>
-        <Typography sx={{ fontFamily: FONT, fontSize: 13, color: '#388e3c', lineHeight: 1.7 }}>
-          <strong>Pre-auth authorization is per-DAA.</strong>{' '}
-          Researchers must be approved individually for each Pre-Auth DAA they wish to access.
-          Authorization under one Pre-Auth DAA does not carry over to others.
-          Each DAR operates under the specific DAA version in effect at the time of submission,
-          for its full lifecycle.
-        </Typography>
-      </Box>
-
       {/* Toolbar */}
       <Box
         data-cy="researcher-view-toolbar"

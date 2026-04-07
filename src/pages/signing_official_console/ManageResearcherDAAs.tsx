@@ -46,10 +46,10 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
 
   return (
     <div>
-      <div style={{ paddingLeft: '4rem', maxWidth: '40%', marginBottom: '2rem' }}>
+      <div style={{ paddingLeft: '4rem', maxWidth: '50%', marginBottom: '2rem' }}>
         <TableHeaderSection
-          title="Pre-Authorize Researchers"
-          description="Review and approve researchers at your institution for access under each Pre-Auth DAA. Researchers must be approved on a per-DAA basis — authorization for one Pre-Auth DAA does not automatically grant access under another."
+          title="Pre-Authorize Researchers (DAAs)"
+          description="Grant and revoke pre-authorization for researchers at your institution to submit DARs directly to the DAC (without SO review of the individual DAR first) when permitted by the DAC."
         />
       </div>
       <Box

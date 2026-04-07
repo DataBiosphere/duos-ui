@@ -99,7 +99,7 @@ export default function ResearcherAccordionRow({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           {authorizedCount > 0 && (
             <Chip
-              label={`${authorizedCount} authorized`}
+              label={`${authorizedCount} pre-authorized`}
               data-cy={`researcher-authorized-badge-${researcherId}`}
               sx={{
                 bgcolor: '#d4edda',

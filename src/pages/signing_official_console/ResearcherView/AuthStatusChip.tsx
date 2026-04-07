@@ -9,8 +9,8 @@ interface StatusConfig {
 }
 
 const STATUS_CONFIG: Record<AuthStatus, StatusConfig> = {
-  authorized: { label: 'Authorized', color: '#155724', bgcolor: '#d4edda' },
-  not_requested: { label: 'Not Requested', color: '#6c757d', bgcolor: '#f8f9fa' },
+  authorized: { label: 'Pre-Authorized', color: '#155724', bgcolor: '#d4edda' },
+  not_requested: { label: 'Not Pre-Authorized', color: '#6c757d', bgcolor: '#f8f9fa' },
   revoked: { label: 'Revoked', color: '#721c24', bgcolor: '#f8d7da' },
 }
 

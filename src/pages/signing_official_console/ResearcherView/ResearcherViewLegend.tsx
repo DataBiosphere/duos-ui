@@ -11,7 +11,7 @@ interface LegendItem {
 
 const LEGEND_ITEMS: LegendItem[] = [
   { bg: '#f0fdf4', border: '#bbf7d0', label: 'Pre-authorized' },
-  { bg: '#fafafa', border: '#e5e7eb', label: 'Not requested' },
+  { bg: '#fafafa', border: '#e5e7eb', label: 'Not pre-authorized' },
 ]
 
 export default function ResearcherViewLegend() {

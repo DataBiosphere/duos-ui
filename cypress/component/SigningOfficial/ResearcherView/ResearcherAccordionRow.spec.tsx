@@ -64,7 +64,7 @@ describe('ResearcherAccordionRow', () => {
         onRevoke={revokeSpy}
       />,
     )
-    cy.get('[data-cy="researcher-authorized-badge-42"]').should('contain.text', '1 authorized')
+    cy.get('[data-cy="researcher-authorized-badge-42"]').should('contain.text', '1 pre-authorized')
   })
 
   it('shows no pre-auth status when authorizedCount is 0', () => {
