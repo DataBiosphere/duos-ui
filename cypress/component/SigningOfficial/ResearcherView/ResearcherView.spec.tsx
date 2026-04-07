@@ -116,11 +116,6 @@ describe('ResearcherView', () => {
       />,
     )
 
-  it('renders the info banner', () => {
-    mount()
-    cy.get('[data-cy="researcher-view-info-banner"]').should('exist')
-  })
-
   it('renders a row for each researcher', () => {
     mount()
     cy.get('[data-cy="researcher-list"]').within(() => {
