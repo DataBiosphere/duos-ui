@@ -64,8 +64,8 @@ describe('DAAAccordionRow', () => {
   let toggleSpy: () => void
 
   beforeEach(() => {
-    authorizeSpy = cy.stub().as('authorize')
-    revokeSpy = cy.stub().as('revoke')
+    authorizeSpy = cy.stub()
+    revokeSpy = cy.stub()
     toggleSpy = cy.stub().as('toggle')
   })
 

@@ -71,7 +71,7 @@ export default function DAAView({
   }, [daaRows, search])
 
   const allExpanded = filteredRows.length > 0
-    && filteredRows.every(row => !!expanded[row.daa.daaId])
+    && filteredRows.every(row => expanded[row.daa.daaId])
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -234,7 +234,7 @@ export default function DAAView({
             researcherRows={row.researcherRows}
             authorizedCount={row.authorizedCount}
             isRecentlyUpdated={row.isRecentlyUpdated}
-            isExpanded={!!expanded[row.daa.daaId]}
+            isExpanded={expanded[row.daa.daaId]}
             onToggle={() => toggleRow(row.daa.daaId)}
             onAuthorize={researcherId => openAuthorizeDialog(
               row.daa.daaId,
