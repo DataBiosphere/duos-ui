@@ -6,10 +6,10 @@ const BRAND_BLUE = '#0948b7'
 const FONT = 'Montserrat'
 
 interface AuthActionButtonProps {
-  status: AuthStatus
-  onAuthorize: () => void
-  onRevoke: () => void
-  disabled?: boolean
+  readonly status: AuthStatus
+  readonly onAuthorize: () => void
+  readonly onRevoke: () => void
+  readonly disabled?: boolean
 }
 
 /**

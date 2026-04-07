@@ -15,7 +15,7 @@ const STATUS_CONFIG: Record<AuthStatus, StatusConfig> = {
 }
 
 interface AuthStatusChipProps {
-  status: AuthStatus
+  readonly status: AuthStatus
 }
 
 export default function AuthStatusChip({ status }: AuthStatusChipProps) {
