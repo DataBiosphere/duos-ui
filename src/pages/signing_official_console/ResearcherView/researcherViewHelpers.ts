@@ -1,26 +1,71 @@
 import { DAAObject, DuosUser } from 'src/types/model'
-import { AuthStatus, DAARowData, ResearcherRowData } from './types'
+import { AuthStatus, DAAAccordionData, DAAResearcherRowData, DAARowData, ResearcherRowData } from './types'
+
+function normalizeNumber(value: number): string | null {
+  return Number.isFinite(value) ? String(value) : null
+}
+
+function normalizeString(value: string): string | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  const numeric = Number(trimmed)
+  return Number.isFinite(numeric) ? String(numeric) : trimmed
+}
+
+function normalizeObject(value: Record<string, unknown>): string | null {
+  if ('daaId' in value) return normalizeId(value.daaId)
+  if ('id' in value) return normalizeId(value.id)
+  if ('value' in value) return normalizeId(value.value)
+  return null
+}
 
 function normalizeId(value: unknown): string | null {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return String(value)
-  }
-
-  if (typeof value === 'string') {
-    const trimmed = value.trim()
-    if (!trimmed) return null
-    const numeric = Number(trimmed)
-    return Number.isFinite(numeric) ? String(numeric) : trimmed
-  }
-
-  if (typeof value === 'object' && value !== null) {
-    const record = value as Record<string, unknown>
-    if ('daaId' in record) return normalizeId(record.daaId)
-    if ('id' in record) return normalizeId(record.id)
-    if ('value' in record) return normalizeId(record.value)
-  }
-
+  if (typeof value === 'number') return normalizeNumber(value)
+  if (typeof value === 'string') return normalizeString(value)
+  if (typeof value === 'object' && value !== null) return normalizeObject(value as Record<string, unknown>)
   return null
+}
+
+const DASH = '—'
+
+function toIsoDate(date: Date): string {
+  return Number.isNaN(date.getTime()) ? DASH : date.toISOString().slice(0, 10)
+}
+
+function epochToMs(epoch: number): number {
+  return epoch > 1e12 ? epoch : epoch * 1000
+}
+
+function parseNumericDate(text: string): string {
+  const numeric = Number(text)
+  return Number.isFinite(numeric) ? toIsoDate(new Date(epochToMs(numeric))) : DASH
+}
+
+/**
+ * Formats mixed date inputs (epoch seconds/ms or date strings) as yyyy-mm-dd.
+ */
+export function formatDateYYYYMMDD(value: unknown): string {
+  if (value === null || value === undefined) return DASH
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? toIsoDate(new Date(epochToMs(value))) : DASH
+  }
+
+  if (typeof value !== 'string') return DASH
+
+  const trimmed = value.trim()
+  if (!trimmed) return DASH
+
+  return /^\d+$/.test(trimmed) ? parseNumericDate(trimmed) : toIsoDate(new Date(trimmed))
+}
+
+function addNormalizedId(rawId: unknown, ids: Set<string>): void {
+  const normalized = normalizeId(rawId)
+  if (normalized) ids.add(normalized)
+}
+
+function expandCommaSeparatedIds(raw: string, ids: Set<string>): void {
+  raw.split(',').forEach(part => addNormalizedId(part, ids))
 }
 
 function getAuthorizedDaaIdSet(researcher: DuosUser): Set<string> {
@@ -31,15 +76,10 @@ function getAuthorizedDaaIdSet(researcher: DuosUser): Set<string> {
 
   rawIds.forEach((rawId: unknown) => {
     if (typeof rawId === 'string' && rawId.includes(',')) {
-      rawId.split(',').forEach((idPart: string) => {
-        const normalized = normalizeId(idPart)
-        if (normalized) authorizedIds.add(normalized)
-      })
+      expandCommaSeparatedIds(rawId, authorizedIds)
       return
     }
-
-    const normalized = normalizeId(rawId)
-    if (normalized) authorizedIds.add(normalized)
+    addNormalizedId(rawId, authorizedIds)
   })
 
   return authorizedIds
@@ -96,4 +136,55 @@ export function buildResearcherRows(
       const authorizedCount = daaRows.filter(r => r.status === 'authorized').length
       return { researcher, daaRows, authorizedCount }
     })
+}
+
+/**
+ * Returns true if a DAA's updateDate is within the past 12 months.
+ * Signals to the SO that they should review the updated agreement before
+ * authorizing new researchers.
+ */
+export function isRecentlyUpdated(daa: DAAObject): boolean {
+  const raw = daa.updateDate
+  if (!raw) return false
+  const updateDate = new Date(raw)
+  if (Number.isNaN(updateDate.getTime())) return false
+  const oneYearAgo = new Date()
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+  return updateDate >= oneYearAgo
+}
+
+/**
+ * Builds the per-researcher auth rows for a single DAA.
+ */
+export function buildDAAResearcherRows(
+  daa: DAAObject,
+  researchers: readonly DuosUser[],
+): DAAResearcherRowData[] {
+  return researchers.map(researcher => ({
+    researcher,
+    status: getAuthStatus(researcher, daa.daaId),
+  }))
+}
+
+/**
+ * Builds the full list of DAAAccordionData — one entry per unique DAA —
+ * with each DAA enriched by all researchers' authorization status.
+ */
+export function buildDAAViewRows(
+  daas: readonly DAAObject[],
+  researchers: readonly DuosUser[],
+): DAAAccordionData[] {
+  const uniqueDaas = Array.from(new Map(daas.map(daa => [daa.daaId, daa])).values())
+
+  return uniqueDaas.map((daa) => {
+    const researcherRows = buildDAAResearcherRows(daa, researchers)
+    const authorizedCount = researcherRows.filter(r => r.status === 'authorized').length
+    return {
+      daa,
+      dacName: getDacName(daa),
+      researcherRows,
+      authorizedCount,
+      isRecentlyUpdated: isRecentlyUpdated(daa),
+    }
+  })
 }

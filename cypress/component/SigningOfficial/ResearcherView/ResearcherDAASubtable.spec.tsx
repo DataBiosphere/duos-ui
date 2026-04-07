@@ -5,7 +5,10 @@ import { makeDaa } from './fixtures'
 
 const mockDaaRows: DAARowData[] = [
   {
-    daa: makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA' }),
+    daa: {
+      ...makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA' }),
+      createDate: 1705276800 as unknown as string,
+    },
     dacName: 'NHGRI DAC',
     status: 'authorized',
   },
@@ -55,6 +58,8 @@ describe('ResearcherDAASubtable', () => {
     )
     cy.get('[data-cy="daa-row-1"]').should('contain.text', 'Default DUOS DAA')
     cy.get('[data-cy="daa-row-1"]').should('contain.text', 'NHGRI DAC')
+    cy.get('[data-cy="daa-row-1"]').should('contain.text', '2024-01-15')
+    cy.get('[data-cy="daa-row-1"]').should('not.contain.text', '1705276800')
     cy.get('[data-cy="daa-row-2"]').should('contain.text', 'GTEx Access Agreement')
     cy.get('[data-cy="daa-row-2"]').should('contain.text', 'GTEx DAC')
   })
