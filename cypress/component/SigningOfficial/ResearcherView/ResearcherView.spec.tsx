@@ -8,67 +8,27 @@ import {
 import { DAA } from 'src/libs/ajax/DAA'
 import { User } from 'src/libs/ajax/User'
 import { DuosUser, DAAObject } from 'src/types/model'
+import { makeDaa, makeResearcher } from './fixtures'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
-const makeDaa = (broadDaa: boolean, daaId: number, fileName: string, dacId = 10): DAAObject => ({
-  broadDaa,
-  daaId,
-  createUserId: 1,
-  createDate: '2024-01-15',
-  updateUserId: 1,
-  updateDate: '2024-01-15',
-  initialDacId: dacId,
-  file: {
-    fileStorageObjectId: daaId,
-    entityId: `entity-${daaId}`,
-    fileName,
-    category: 'dataAccessAgreement',
-    mediaType: 'application/pdf',
-    createUserId: 1,
-    createDate: 1705276800,
-  },
-  dacs: [{ dacId, name: `DAC-${dacId}`, dacName: `DAC-${dacId}` }],
-})
-
-const makeResearcher = (
-  userId: number,
-  displayName: string,
-  email: string,
-  authorizedDaaIds: number[] = [],
-): DuosUser => ({
-  userId,
-  displayName,
-  email,
-  createDate: new Date('2020-01-01') as unknown as Date,
-  emailPreference: true,
-  isAdmin: false,
-  isAlumni: false,
-  isChairPerson: false,
-  isDataSubmitter: false,
-  isMember: false,
-  isResearcher: true,
-  isSigningOfficial: false,
-  roles: [],
-  libraryCard: {
-    id: userId * 10,
-    userId,
-    userName: displayName,
-    userEmail: email,
-    createDate: new Date('2023-01-01'),
-    createUserId: 1,
-    daaIds: authorizedDaaIds,
-  },
-})
-
 const mockDaas: DAAObject[] = [
-  makeDaa(true, 1, 'Default DUOS DAA', 10),
-  makeDaa(false, 2, 'GTEx Access Agreement', 20),
+  makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA', dacId: 10 }),
+  makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Access Agreement', dacId: 20 }),
 ]
 
 const mockResearchers: DuosUser[] = [
-  makeResearcher(1, 'Dr. Elliot Otchet', 'eotchet@broadinstitute.org', [1]),
-  makeResearcher(2, 'Dr. Amanda Lee', 'alee@broadinstitute.org', []),
+  makeResearcher({
+    userId: 1,
+    displayName: 'Dr. Elliot Otchet',
+    email: 'eotchet@broadinstitute.org',
+    authorizedDaaIds: [1],
+  }),
+  makeResearcher({
+    userId: 2,
+    displayName: 'Dr. Amanda Lee',
+    email: 'alee@broadinstitute.org',
+  }),
 ]
 
 // ── Pure helper unit tests ────────────────────────────────────────────────────
@@ -80,18 +40,18 @@ describe('ResearcherView pure helpers', () => {
 
   describe('getDacName', () => {
     it('returns the DAC name from daa.dacs', () => {
-      const daa = makeDaa(true, 1, 'Test DAA', 10)
+      const daa = makeDaa({ broadDaa: true, daaId: 1, fileName: 'Test DAA', dacId: 10 })
       expect(getDacName(daa)).to.equal('DAC-10')
     })
 
     it('returns — when dacs array is empty', () => {
-      const daa = { ...makeDaa(true, 1, 'Test DAA', 10), dacs: [] }
+      const daa = { ...makeDaa({ broadDaa: true, daaId: 1, fileName: 'Test DAA', dacId: 10 }), dacs: [] }
       expect(getDacName(daa)).to.equal('—')
     })
 
     it('joins multiple DAC names', () => {
       const daa: DAAObject = {
-        ...makeDaa(true, 1, 'Multi DAA', 10),
+        ...makeDaa({ broadDaa: true, daaId: 1, fileName: 'Multi DAA', dacId: 10 }),
         dacs: [
           { dacId: 10, name: 'DAC A' },
           { dacId: 20, name: 'DAC B' },
@@ -103,17 +63,17 @@ describe('ResearcherView pure helpers', () => {
 
   describe('getAuthStatus', () => {
     it('returns authorized when daaId is in libraryCard.daaIds', () => {
-      const researcher = makeResearcher(1, 'Test', 'test@test.com', [1, 2])
+      const researcher = makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com', authorizedDaaIds: [1, 2] })
       expect(getAuthStatus(researcher, 1)).to.equal('authorized')
     })
 
     it('returns not_requested when daaId is absent from libraryCard', () => {
-      const researcher = makeResearcher(1, 'Test', 'test@test.com', [1])
+      const researcher = makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com', authorizedDaaIds: [1] })
       expect(getAuthStatus(researcher, 99)).to.equal('not_requested')
     })
 
     it('returns not_requested when researcher has no libraryCard', () => {
-      const researcher = { ...makeResearcher(1, 'Test', 'test@test.com'), libraryCard: undefined }
+      const researcher = { ...makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com' }), libraryCard: undefined }
       expect(getAuthStatus(researcher, 1)).to.equal('not_requested')
     })
   })

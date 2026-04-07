@@ -2,56 +2,26 @@ import React from 'react'
 import ResearcherAccordionRow from 'src/pages/signing_official_console/ResearcherView/ResearcherAccordionRow'
 import { DuosUser } from 'src/types/model'
 import { DAARowData } from 'src/pages/signing_official_console/ResearcherView/types'
-import { DAAObject } from 'src/types/model'
+import { makeDaa, makeResearcher } from './fixtures'
 
-const mockResearcher: DuosUser = {
+const mockResearcher: DuosUser = makeResearcher({
   userId: 42,
   displayName: 'Dr. Amanda Lee',
   email: 'alee@broadinstitute.org',
-  createDate: new Date('2020-01-01') as unknown as Date,
-  emailPreference: true,
-  isAdmin: false,
-  isAlumni: false,
-  isChairPerson: false,
-  isDataSubmitter: false,
-  isMember: false,
-  isResearcher: true,
-  isSigningOfficial: false,
-  roles: [],
-  libraryCard: {
-    id: 10,
-    userId: 42,
-    userName: 'Dr. Amanda Lee',
-    userEmail: 'alee@broadinstitute.org',
-    createDate: new Date('2023-01-01'),
-    createUserId: 1,
-    daaIds: [1],
-  },
-}
-
-const makeDaa = (broadDaa: boolean, daaId: number, fileName: string): DAAObject => ({
-  broadDaa,
-  daaId,
-  createUserId: 1,
-  createDate: '2024-01-15',
-  updateUserId: 1,
-  updateDate: '2024-01-15',
-  initialDacId: 10,
-  file: {
-    fileStorageObjectId: daaId,
-    entityId: `entity-${daaId}`,
-    fileName,
-    category: 'dataAccessAgreement',
-    mediaType: 'application/pdf',
-    createUserId: 1,
-    createDate: 1705276800,
-  },
-  dacs: [],
+  authorizedDaaIds: [1],
 })
 
 const mockDaaRows: DAARowData[] = [
-  { daa: makeDaa(true, 1, 'Default DUOS DAA'), dacName: 'NHGRI DAC', status: 'authorized' },
-  { daa: makeDaa(false, 2, 'GTEx Agreement'), dacName: 'GTEx DAC', status: 'not_requested' },
+  {
+    daa: makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA' }),
+    dacName: 'NHGRI DAC',
+    status: 'authorized',
+  },
+  {
+    daa: makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Agreement' }),
+    dacName: 'GTEx DAC',
+    status: 'not_requested',
+  },
 ]
 
 describe('ResearcherAccordionRow', () => {

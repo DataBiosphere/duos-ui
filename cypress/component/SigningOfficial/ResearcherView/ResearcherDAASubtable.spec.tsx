@@ -1,32 +1,24 @@
 import React from 'react'
 import ResearcherDAASubtable from 'src/pages/signing_official_console/ResearcherView/ResearcherDAASubtable'
 import { DAARowData } from 'src/pages/signing_official_console/ResearcherView/types'
-import { DAAObject } from 'src/types/model'
-
-const makeDaa = (broadDaa: boolean, daaId: number, fileName: string): DAAObject => ({
-  broadDaa,
-  daaId,
-  createUserId: 1,
-  createDate: '2024-01-15',
-  updateUserId: 1,
-  updateDate: '2024-01-15',
-  initialDacId: 10,
-  file: {
-    fileStorageObjectId: daaId,
-    entityId: `entity-${daaId}`,
-    fileName,
-    category: 'dataAccessAgreement',
-    mediaType: 'application/pdf',
-    createUserId: 1,
-    createDate: 1705276800,
-  },
-  dacs: [],
-})
+import { makeDaa } from './fixtures'
 
 const mockDaaRows: DAARowData[] = [
-  { daa: makeDaa(true, 1, 'Default DUOS DAA'), dacName: 'NHGRI DAC', status: 'authorized' },
-  { daa: makeDaa(false, 2, 'GTEx Access Agreement'), dacName: 'GTEx DAC', status: 'pending' },
-  { daa: makeDaa(false, 3, 'eMERGE Institutional Agreement'), dacName: 'eMERGE DAC', status: 'not_requested' },
+  {
+    daa: makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA' }),
+    dacName: 'NHGRI DAC',
+    status: 'authorized',
+  },
+  {
+    daa: makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Access Agreement' }),
+    dacName: 'GTEx DAC',
+    status: 'pending',
+  },
+  {
+    daa: makeDaa({ broadDaa: false, daaId: 3, fileName: 'eMERGE Institutional Agreement' }),
+    dacName: 'eMERGE DAC',
+    status: 'not_requested',
+  },
 ]
 
 describe('ResearcherDAASubtable', () => {

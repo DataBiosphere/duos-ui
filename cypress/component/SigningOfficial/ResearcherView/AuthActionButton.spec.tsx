@@ -1,9 +1,20 @@
 import React from 'react'
 import AuthActionButton from 'src/pages/signing_official_console/ResearcherView/AuthActionButton'
+import { AuthStatus } from 'src/pages/signing_official_console/ResearcherView/types'
 
 describe('AuthActionButton', () => {
   let authorizeSpy: () => void
   let revokeSpy: () => void
+
+  const mountButton = (status: AuthStatus, disabled = false) =>
+    cy.mount(
+      <AuthActionButton
+        status={status}
+        onAuthorize={authorizeSpy}
+        onRevoke={revokeSpy}
+        disabled={disabled}
+      />,
+    )
 
   beforeEach(() => {
     cy.viewport(600, 300)
@@ -11,85 +22,36 @@ describe('AuthActionButton', () => {
     revokeSpy = cy.stub().as('revoke')
   })
 
-  it('renders Authorize button for not_requested status', () => {
-    cy.mount(
-      <AuthActionButton
-        status="not_requested"
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-      />,
-    )
-    cy.get('[data-cy="auth-action-authorize"]').should('exist').and('contain.text', 'Authorize')
-  })
+  const renderCases = [
+    { status: 'not_requested' as const, selector: 'auth-action-authorize', text: 'Authorize' },
+    { status: 'pending' as const, selector: 'auth-action-authorize', text: 'Authorize' },
+    { status: 'authorized' as const, selector: 'auth-action-revoke', text: 'Revoke' },
+    { status: 'revoked' as const, selector: 'auth-action-reauthorize', text: 'Re-authorize' },
+  ]
 
-  it('renders Authorize button for pending status', () => {
-    cy.mount(
-      <AuthActionButton
-        status="pending"
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-      />,
-    )
-    cy.get('[data-cy="auth-action-authorize"]').should('exist').and('contain.text', 'Authorize')
-  })
-
-  it('renders Revoke button for authorized status', () => {
-    cy.mount(
-      <AuthActionButton
-        status="authorized"
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-      />,
-    )
-    cy.get('[data-cy="auth-action-revoke"]').should('exist').and('contain.text', 'Revoke')
-  })
-
-  it('renders Re-authorize button for revoked status', () => {
-    cy.mount(
-      <AuthActionButton
-        status="revoked"
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-      />,
-    )
-    cy.get('[data-cy="auth-action-reauthorize"]').should('exist').and('contain.text', 'Re-authorize')
+  renderCases.forEach(({ status, selector, text }) => {
+    it(`renders expected action for ${status} status`, () => {
+      mountButton(status)
+      cy.get(`[data-cy="${selector}"]`).should('exist').and('contain.text', text)
+    })
   })
 
   it('calls onAuthorize when Authorize is clicked', () => {
-    cy.mount(
-      <AuthActionButton
-        status="not_requested"
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-      />,
-    )
+    mountButton('not_requested')
     cy.get('[data-cy="auth-action-authorize"]').click()
     cy.get('@authorize').should('have.been.calledOnce')
     cy.get('@revoke').should('not.have.been.called')
   })
 
   it('calls onRevoke when Revoke is clicked', () => {
-    cy.mount(
-      <AuthActionButton
-        status="authorized"
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-      />,
-    )
+    mountButton('authorized')
     cy.get('[data-cy="auth-action-revoke"]').click()
     cy.get('@revoke').should('have.been.calledOnce')
     cy.get('@authorize').should('not.have.been.called')
   })
 
   it('disables the button when disabled prop is true', () => {
-    cy.mount(
-      <AuthActionButton
-        status="not_requested"
-        onAuthorize={authorizeSpy}
-        onRevoke={revokeSpy}
-        disabled={true}
-      />,
-    )
+    mountButton('not_requested', true)
     cy.get('[data-cy="auth-action-authorize"]').should('be.disabled')
   })
 })
