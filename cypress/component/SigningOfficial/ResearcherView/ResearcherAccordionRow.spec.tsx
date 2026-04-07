@@ -61,8 +61,8 @@ describe('ResearcherAccordionRow', () => {
 
   beforeEach(() => {
     cy.viewport(600, 300)
-    authorizeSpy = cy.stub().as('authorize')
-    revokeSpy = cy.stub().as('revoke')
+    authorizeSpy = cy.stub()
+    revokeSpy = cy.stub()
     toggleSpy = cy.stub().as('toggle')
   })
 
