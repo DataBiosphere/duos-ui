@@ -19,7 +19,7 @@
   "dependencies": {
     "@databiosphere/bard-client": "0.1.0",
     "@mui/icons-material": "7.3.9",
-    "@mui/material": "7.3.9",
+    "@mui/material": "9.0.0",
     "@mui/x-data-grid": "8.28.2",
     "@mui/x-date-pickers": "8.27.2",
     "@tanstack/react-query": "5.96.1",
