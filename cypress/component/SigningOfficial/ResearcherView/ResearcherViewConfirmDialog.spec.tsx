@@ -21,13 +21,13 @@ describe('ResearcherViewConfirmDialog', () => {
     mount({
       daaId: 1,
       researcherId: 101,
-      researcherName: 'Dr. Ada Lovelace',
+      researcherName: 'Test User Delta',
       daaLabel: 'Default DUOS DAA',
       action: 'authorize',
     })
 
     cy.get('[data-cy="confirm-dialog"]').should('exist')
-    cy.get('[data-cy="confirm-dialog"]').should('contain.text', 'Authorize Dr. Ada Lovelace?')
+    cy.get('[data-cy="confirm-dialog"]').should('contain.text', 'Authorize Test User Delta?')
     cy.get('[data-cy="confirm-dialog"]').should('contain.text', 'Default DUOS DAA')
     cy.get('[data-cy="confirm-dialog-confirm"]').should('contain.text', 'Authorize')
   })
@@ -36,12 +36,12 @@ describe('ResearcherViewConfirmDialog', () => {
     mount({
       daaId: 2,
       researcherId: 102,
-      researcherName: 'Dr. Grace Hopper',
+      researcherName: 'Test User Epsilon',
       daaLabel: 'GTEx Agreement',
       action: 'revoke',
     })
 
-    cy.get('[data-cy="confirm-dialog"]').should('contain.text', 'Revoke access for Dr. Grace Hopper?')
+    cy.get('[data-cy="confirm-dialog"]').should('contain.text', 'Revoke access for Test User Epsilon?')
     cy.get('[data-cy="confirm-dialog-confirm"]').should('contain.text', 'Revoke Access')
   })
 
@@ -52,7 +52,7 @@ describe('ResearcherViewConfirmDialog', () => {
     mount({
       daaId: 3,
       researcherId: 103,
-      researcherName: 'Dr. Rosalind Franklin',
+      researcherName: 'Test User Zeta',
       daaLabel: 'eMERGE DAA',
       action: 'authorize',
     }, onConfirm, onCancel)

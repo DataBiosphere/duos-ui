@@ -13,8 +13,8 @@ describe('ManageResearcherDAAs', () => {
   it('loads the page and filters out DAAs with no DAC mapping', () => {
     cy.stub(User, 'list').resolves([makeResearcher({
       userId: 1,
-      displayName: 'Dr. Jane Doe',
-      email: 'jdoe@broadinstitute.org',
+      displayName: 'Test User Eta',
+      email: 'jdoe@test.org',
       authorizedDaaIds: [1, 2],
     })])
     cy.stub(DAA, 'getDaas').resolves([
