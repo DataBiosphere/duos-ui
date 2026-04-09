@@ -6,8 +6,8 @@ import { makeDaa, makeResearcher } from './fixtures'
 
 const mockResearcher: DuosUser = makeResearcher({
   userId: 42,
-  displayName: 'Dr. Amanda Lee',
-  email: 'alee@broadinstitute.org',
+  displayName: 'Test User Gamma',
+  email: 'test.user.gamma@test.org',
   authorizedDaaIds: [1],
 })
 
@@ -48,8 +48,8 @@ describe('ResearcherAccordionRow', () => {
         onRevoke={revokeSpy}
       />,
     )
-    cy.get('[data-cy="researcher-row-42"]').should('contain.text', 'Dr. Amanda Lee')
-    cy.get('[data-cy="researcher-row-42"]').should('contain.text', 'alee@broadinstitute.org')
+    cy.get('[data-cy="researcher-row-42"]').should('contain.text', 'Test User Gamma')
+    cy.get('[data-cy="researcher-row-42"]').should('contain.text', 'test.user.gamma@test.org')
   })
 
   it('shows authorized badge when authorizedCount > 0', () => {

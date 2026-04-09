@@ -20,14 +20,14 @@ const mockDaas: DAAObject[] = [
 const mockResearchers: DuosUser[] = [
   makeResearcher({
     userId: 1,
-    displayName: 'Dr. Elliot Otchet',
-    email: 'eotchet@broadinstitute.org',
+    displayName: 'Test User Alpha',
+    email: 'test.user.alpha@test.org',
     authorizedDaaIds: [1],
   }),
   makeResearcher({
     userId: 2,
-    displayName: 'Dr. Amanda Lee',
-    email: 'alee@broadinstitute.org',
+    displayName: 'Test User Beta',
+    email: 'test.user.beta@test.org',
   }),
 ]
 
@@ -131,14 +131,14 @@ describe('ResearcherView', () => {
 
   it('filters researchers by name', () => {
     mount()
-    cy.get('[data-cy="researcher-search"] input').type('Amanda')
+    cy.get('[data-cy="researcher-search"] input').type('Beta')
     cy.get('[data-cy="researcher-row-1"]').should('not.exist')
     cy.get('[data-cy="researcher-row-2"]').should('exist')
   })
 
   it('filters researchers by email', () => {
     mount()
-    cy.get('[data-cy="researcher-search"] input').type('eotchet')
+    cy.get('[data-cy="researcher-search"] input').type('test.user.alpha')
     cy.get('[data-cy="researcher-row-1"]').should('exist')
     cy.get('[data-cy="researcher-row-2"]').should('not.exist')
   })
