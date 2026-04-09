@@ -20,9 +20,9 @@ const makeResearcher = (userId: number, displayName: string, email: string): Duo
 })
 
 const mockRows: DAAResearcherRowData[] = [
-  { researcher: makeResearcher(1, 'Dr. Elliot Otchet', 'eotchet@broad.org'), status: 'authorized' },
-  { researcher: makeResearcher(2, 'Dr. Amanda Lee', 'alee@broad.org'), status: 'not_requested' },
-  { researcher: makeResearcher(3, 'Eric Weitz', 'eweitz@broad.org'), status: 'revoked' },
+  { researcher: makeResearcher(1, 'Test User Theta', 'test.user.theta@test.org'), status: 'authorized' },
+  { researcher: makeResearcher(2, 'Test User Iota', 'test.user.iota@test.org'), status: 'not_requested' },
+  { researcher: makeResearcher(3, 'Test User Kappa', 'test.user.kappa@test.org'), status: 'revoked' },
 ]
 
 describe('DAAResearcherSubtable', () => {
@@ -56,9 +56,9 @@ describe('DAAResearcherSubtable', () => {
         onRevoke={revokeSpy}
       />,
     )
-    cy.get('[data-cy="daa-researcher-row-1"]').should('contain.text', 'Dr. Elliot Otchet')
-    cy.get('[data-cy="daa-researcher-row-1"]').should('contain.text', 'eotchet@broad.org')
-    cy.get('[data-cy="daa-researcher-row-2"]').should('contain.text', 'Dr. Amanda Lee')
+    cy.get('[data-cy="daa-researcher-row-1"]').should('contain.text', 'Test User Theta')
+    cy.get('[data-cy="daa-researcher-row-1"]').should('contain.text', 'test.user.theta@test.org')
+    cy.get('[data-cy="daa-researcher-row-2"]').should('contain.text', 'Test User Iota')
   })
 
   it('renders the correct status chip for each row', () => {

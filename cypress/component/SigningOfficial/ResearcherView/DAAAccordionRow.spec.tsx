@@ -54,8 +54,8 @@ const mockDaaWithEpochCreateDate: DAAObject = {
 }
 
 const mockRows: DAAResearcherRowData[] = [
-  { researcher: makeResearcher(1, 'Dr. Elliot Otchet', 'eotchet@broad.org'), status: 'authorized' },
-  { researcher: makeResearcher(2, 'Dr. Amanda Lee', 'alee@broad.org'), status: 'not_requested' },
+  { researcher: makeResearcher(1, 'Test User Lambda', 'test.user.lambda@test.org'), status: 'authorized' },
+  { researcher: makeResearcher(2, 'Test User Mu', 'test.user.mu@test.org'), status: 'not_requested' },
 ]
 
 describe('DAAAccordionRow', () => {

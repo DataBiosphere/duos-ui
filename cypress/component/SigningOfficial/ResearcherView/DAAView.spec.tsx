@@ -25,14 +25,14 @@ const recentDaaWithDate: DAAObject = {
 const mockResearchers: DuosUser[] = [
   makeResearcher({
     userId: 1,
-    displayName: 'Dr. Elliot Otchet',
-    email: 'eotchet@broadinstitute.org',
+    displayName: 'Test User Alpha',
+    email: 'test.user.alpha@test.org',
     authorizedDaaIds: [1],
   }),
   makeResearcher({
     userId: 2,
-    displayName: 'Dr. Amanda Lee',
-    email: 'alee@broadinstitute.org',
+    displayName: 'Test User Beta',
+    email: 'test.user.beta@test.org',
   }),
 ]
 
@@ -238,7 +238,7 @@ describe('DAAView', () => {
   it('opens confirm dialog when Pre-Authorize is clicked for an un-authorized researcher', () => {
     mount()
     cy.get('[data-cy="daa-accordion-toggle-1"]').click()
-    // Researcher 2 (Amanda) is not authorized for DAA 1
+    // Researcher 2 (Test User Beta) is not authorized for DAA 1
     cy.get('[data-cy="daa-researcher-row-2"] [data-cy="auth-action-authorize"]').click()
     cy.get('[data-cy="confirm-dialog"]').should('exist')
     cy.get('[data-cy="confirm-dialog"]').should('contain.text', 'Authorize')
@@ -267,7 +267,7 @@ describe('DAAView', () => {
   it('opens revoke confirm dialog when Revoke is clicked for an authorized researcher', () => {
     mount()
     cy.get('[data-cy="daa-accordion-toggle-1"]').click()
-    // Researcher 1 (Elliot) is authorized for DAA 1
+    // Researcher 1 (Test User Alpha) is authorized for DAA 1
     cy.get('[data-cy="daa-researcher-row-1"] [data-cy="auth-action-revoke"]').click()
     cy.get('[data-cy="confirm-dialog"]').should('exist')
     cy.get('[data-cy="confirm-dialog"]').should('contain.text', 'Revoke')
