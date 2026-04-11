@@ -1,7 +1,7 @@
 import {
   buildDAARows,
   getAuthStatus,
-} from 'src/pages/signing_official_console/ResearcherView/researcherViewHelpers'
+} from 'src/pages/signing_official_console/DAAAssignment/researcherViewHelpers'
 import { makeDaa, makeResearcher } from './fixtures'
 
 describe('researcherViewHelpers', () => {

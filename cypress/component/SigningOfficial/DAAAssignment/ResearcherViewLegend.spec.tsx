@@ -1,5 +1,5 @@
 import React from 'react'
-import ResearcherViewLegend from 'src/pages/signing_official_console/ResearcherView/ResearcherViewLegend'
+import ResearcherViewLegend from 'src/pages/signing_official_console/DAAAssignment/ResearcherViewLegend'
 
 describe('ResearcherViewLegend', () => {
   it('renders all legend labels', () => {

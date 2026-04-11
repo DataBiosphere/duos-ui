@@ -1,6 +1,6 @@
 import React from 'react'
-import AuthActionButton from 'src/pages/signing_official_console/ResearcherView/AuthActionButton'
-import { AuthStatus } from 'src/pages/signing_official_console/ResearcherView/types'
+import AuthActionButton from 'src/pages/signing_official_console/DAAAssignment/AuthActionButton'
+import { AuthStatus } from 'src/pages/signing_official_console/DAAAssignment/types'
 
 describe('AuthActionButton', () => {
   let authorizeSpy: () => void

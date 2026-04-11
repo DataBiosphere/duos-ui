@@ -10,6 +10,7 @@ import {
 import AuthStatusChip from './AuthStatusChip'
 import AuthActionButton from './AuthActionButton'
 import { AuthStatus, DAARowData } from './types'
+import { formatDateYYYYMMDD } from './researcherViewHelpers'
 
 const FONT = 'Montserrat'
 
@@ -88,7 +89,7 @@ export default function ResearcherDAASubtable({
               </TableCell>
               <TableCell sx={tableCellBodySx}>{dacName}</TableCell>
               <TableCell sx={tableCellBodySx}>
-                {daa.createDate ?? '—'}
+                {formatDateYYYYMMDD(daa.createDate)}
               </TableCell>
               <TableCell>
                 <AuthStatusChip status={status} />
