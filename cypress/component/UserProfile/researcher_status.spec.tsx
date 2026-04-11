@@ -45,6 +45,7 @@ describe('ResearcherStatus', () => {
   }
 
   const daa: DAAObject = {
+    broadDaa: true,
     daaId: 1,
     createUserId: 3,
     createDate: new Date().toISOString(),
