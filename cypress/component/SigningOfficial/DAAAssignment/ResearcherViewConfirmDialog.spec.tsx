@@ -1,6 +1,6 @@
 import React from 'react'
-import ResearcherViewConfirmDialog from 'src/pages/signing_official_console/ResearcherView/ResearcherViewConfirmDialog'
-import { ConfirmDialogState } from 'src/pages/signing_official_console/ResearcherView/types'
+import ResearcherViewConfirmDialog from 'src/pages/signing_official_console/DAAAssignment/ResearcherViewConfirmDialog'
+import { ConfirmDialogState } from 'src/pages/signing_official_console/DAAAssignment/types'
 
 describe('ResearcherViewConfirmDialog', () => {
   const mount = (dialog: ConfirmDialogState | null, onConfirm = cy.stub(), onCancel = cy.stub()) =>

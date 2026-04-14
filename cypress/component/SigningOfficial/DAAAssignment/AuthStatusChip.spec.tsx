@@ -1,5 +1,5 @@
 import React from 'react'
-import AuthStatusChip from 'src/pages/signing_official_console/ResearcherView/AuthStatusChip'
+import AuthStatusChip from 'src/pages/signing_official_console/DAAAssignment/AuthStatusChip'
 
 describe('AuthStatusChip', () => {
   const cases = [

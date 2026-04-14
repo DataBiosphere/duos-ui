@@ -1,10 +1,10 @@
 import React from 'react'
-import ResearcherView from 'src/pages/signing_official_console/ResearcherView/ResearcherView'
+import ResearcherView from 'src/pages/signing_official_console/DAAAssignment/ResearcherView'
 import {
   buildResearcherRows,
   getDacName,
   getAuthStatus,
-} from 'src/pages/signing_official_console/ResearcherView/researcherViewHelpers'
+} from 'src/pages/signing_official_console/DAAAssignment/researcherViewHelpers'
 import { DAA } from 'src/libs/ajax/DAA'
 import { User } from 'src/libs/ajax/User'
 import { DuosUser, DAAObject } from 'src/types/model'
@@ -81,14 +81,14 @@ describe('ResearcherView pure helpers', () => {
   describe('buildResearcherRows', () => {
     it('counts authorized correctly', () => {
       const rows = buildResearcherRows(mockResearchers, mockDaas)
-      const elliot = rows.find(r => r.researcher.userId === 1)
-      expect(elliot?.authorizedCount).to.equal(1)
+      const userOne = rows.find(r => r.researcher.userId === 1)
+      expect(userOne?.authorizedCount).to.equal(1)
     })
 
     it('counts not_requested as 0 authorized', () => {
       const rows = buildResearcherRows(mockResearchers, mockDaas)
-      const amanda = rows.find(r => r.researcher.userId === 2)
-      expect(amanda?.authorizedCount).to.equal(0)
+      const userTwo = rows.find(r => r.researcher.userId === 2)
+      expect(userTwo?.authorizedCount).to.equal(0)
     })
   })
 })

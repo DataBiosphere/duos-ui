@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Tabs, Tab, Box } from '@mui/material'
 
-import ResearcherView from 'src/pages/signing_official_console/ResearcherView'
+import ResearcherView, { DAAView } from 'src/pages/signing_official_console/DAAAssignment'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { DAA } from 'src/libs/ajax/DAA'
@@ -46,12 +46,12 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
 
   return (
     <div>
-      <div style={{ paddingLeft: '4rem', maxWidth: '50%', marginBottom: '2rem' }}>
+      <Box sx={{ paddingLeft: '4rem', maxWidth: '50%', marginBottom: '2rem' }}>
         <TableHeaderSection
           title="Pre-Authorize Researchers (DAAs)"
           description="Grant and revoke pre-authorization for researchers at your institution to submit DARs directly to the DAC (without SO review of the individual DAR first) when permitted by the DAC."
         />
-      </div>
+      </Box>
       <Box
         sx={{
           borderTop: 1,
@@ -88,6 +88,19 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
               padding: '0 25px',
             }}
           />
+          <Tab
+            key="daaView"
+            value={1}
+            label="DAA View"
+            sx={{
+              textTransform: 'none',
+              fontSize: '15px',
+              fontFamily: 'Montserrat, sans-serif',
+              color: '#00609f',
+              fontWeight: 'bold',
+              padding: '0 25px',
+            }}
+          />
         </Tabs>
       </Box>
       {activeTab === 0 && (
@@ -100,6 +113,23 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
         }}
         >
           <ResearcherView
+            researchers={researchers}
+            daas={daas}
+            isLoading={isLoading}
+            onResearchersRefresh={setResearchers}
+          />
+        </Box>
+      )}
+      {activeTab === 1 && (
+        <Box sx={{
+          backgroundColor: '#f5f5f5',
+          paddingLeft: '7rem',
+          paddingRight: '5rem',
+          paddingTop: '2rem',
+          paddingBottom: '2rem',
+        }}
+        >
+          <DAAView
             researchers={researchers}
             daas={daas}
             isLoading={isLoading}

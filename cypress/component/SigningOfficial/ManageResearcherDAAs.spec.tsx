@@ -3,7 +3,7 @@ import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResea
 import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications } from 'src/libs/utils'
-import { makeDaa, makeResearcher } from './ResearcherView/fixtures'
+import { makeDaa, makeResearcher } from './DAAAssignment/fixtures'
 
 describe('ManageResearcherDAAs', () => {
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('ManageResearcherDAAs', () => {
     cy.stub(User, 'list').resolves([makeResearcher({
       userId: 1,
       displayName: 'Test User Eta',
-      email: 'jdoe@test.org',
+      email: 'test.user.eta@test.org',
       authorizedDaaIds: [1, 2],
     })])
     cy.stub(DAA, 'getDaas').resolves([

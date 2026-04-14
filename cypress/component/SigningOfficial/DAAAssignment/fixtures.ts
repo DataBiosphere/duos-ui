@@ -1,5 +1,5 @@
 import { DAAObject, DuosUser } from 'src/types/model'
-import { DAARowData } from 'src/pages/signing_official_console/ResearcherView/types'
+import { DAARowData } from 'src/pages/signing_official_console/DAAAssignment/types'
 
 interface DaaOptions {
   daaId: number

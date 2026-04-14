@@ -1,7 +1,7 @@
 import React from 'react'
-import ResearcherAccordionRow from 'src/pages/signing_official_console/ResearcherView/ResearcherAccordionRow'
+import ResearcherAccordionRow from 'src/pages/signing_official_console/DAAAssignment/ResearcherAccordionRow'
 import { DuosUser } from 'src/types/model'
-import { DAARowData } from 'src/pages/signing_official_console/ResearcherView/types'
+import { DAARowData } from 'src/pages/signing_official_console/DAAAssignment/types'
 import { makeDaa, makeResearcher } from './fixtures'
 
 const mockResearcher: DuosUser = makeResearcher({
