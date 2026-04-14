@@ -83,8 +83,9 @@ describe('ResearcherStatus', () => {
     cy.contains('Researcher Status')
     cy.contains('RAS Account')
     cy.contains('Library Card issued to you')
-    const formattedDate = new Date(userWithCard.libraryCard?.createDate.toISOString().slice(0, 10)).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
-    cy.contains(signingOfficialUser.displayName + ', ' + formattedDate)
+    const formattedDate = userWithCard.libraryCard.createDate.toISOString().slice(0, 10)
+    cy.contains('Issued on: ' + formattedDate)
+    cy.contains('Issued by: ' + signingOfficialUser.displayName)
   })
 
   it('Renders the Researcher Status Without Library Card Info', () => {
