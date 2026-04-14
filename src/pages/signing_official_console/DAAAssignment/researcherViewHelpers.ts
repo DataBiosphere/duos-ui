@@ -47,7 +47,7 @@ function getAuthorizedDaaIdSet(researcher: DuosUser): Set<number> {
   // Fall back to the legacy daaIds array, assumed to be numbers if valid
   const daaIds = researcher.libraryCard?.daaIds
   if (Array.isArray(daaIds)) {
-    daaIds.forEach(id => {
+    daaIds.forEach((id) => {
       // Cast safely since legacy arrays could be mixed types (we filter bad data out)
       const num = Number(id)
       if (Number.isFinite(num)) authorizedIds.add(num)
