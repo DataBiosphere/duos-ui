@@ -34,10 +34,11 @@ export interface StudyAssetManagementProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
   isEditingExistingStudy?: boolean
+  onOpenContactUs: () => void
 }
 
 export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
-  const { setStudy, study, isEditingExistingStudy } = props
+  const { setStudy, study, isEditingExistingStudy, onOpenContactUs } = props
 
   const onAssetChange = <K extends keyof NonNullable<Study['assets']>>(
     assetType: K,
@@ -62,7 +63,10 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
   return (
     <div className="data-submitter-section">
       <h2>Study Assets</h2>
-      <p>Add datasets, models, workspaces, and other resources associated with this study</p>
+      <p>
+        Add datasets, models, workspaces, and other resources associated with this study. To add biospecimen data,{' '}
+        <a onClick={onOpenContactUs} style={{ cursor: 'pointer' }}>contact the DUOS Team</a>.
+      </p>
 
       <ConsentGroupList
         consentGroups={consentGroups}
