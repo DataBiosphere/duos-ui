@@ -8,7 +8,7 @@ const mockResearcher: DuosUser = makeResearcher({
   userId: 42,
   displayName: 'Test User Gamma',
   email: 'test.user.gamma@test.org',
-  authorizedDaaIds: [1],
+  daaDetails: [{ daaId: 1 }],
 })
 
 const mockDaaRows: DAARowData[] = [

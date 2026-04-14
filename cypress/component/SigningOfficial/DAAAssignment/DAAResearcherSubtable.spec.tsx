@@ -20,9 +20,19 @@ const makeResearcher = (userId: number, displayName: string, email: string): Duo
 })
 
 const mockRows: DAAResearcherRowData[] = [
-  { researcher: makeResearcher(1, 'Test User Theta', 'test.user.theta@test.org'), status: 'authorized' },
-  { researcher: makeResearcher(2, 'Test User Iota', 'test.user.iota@test.org'), status: 'not_requested' },
-  { researcher: makeResearcher(3, 'Test User Kappa', 'test.user.kappa@test.org'), status: 'revoked' },
+  {
+    researcher: makeResearcher(1, 'Test User Theta', 'test.user.theta@test.org'),
+    status: 'authorized',
+    authorizedBy: 'so@test.org',
+  },
+  {
+    researcher: makeResearcher(2, 'Test User Iota', 'test.user.iota@test.org'),
+    status: 'not_requested',
+  },
+  {
+    researcher: makeResearcher(3, 'Test User Kappa', 'test.user.kappa@test.org'),
+    status: 'revoked',
+  },
 ]
 
 describe('DAAResearcherSubtable', () => {
@@ -123,7 +133,7 @@ describe('DAAResearcherSubtable', () => {
     cy.get('[data-cy^="daa-researcher-row-"]').should('not.exist')
   })
 
-  it('renders all column headers', () => {
+  it('renders all five column headers including Authorized By', () => {
     cy.mount(
       <DAAResearcherSubtable
         researcherRows={mockRows}
@@ -135,8 +145,46 @@ describe('DAAResearcherSubtable', () => {
       cy.contains('Researcher').should('exist')
       cy.contains('Email').should('exist')
       cy.contains('Pre-Auth Status').should('exist')
+      cy.contains('Authorized By').should('exist')
       cy.contains('Action').should('exist')
-      cy.contains('Authorized By').should('not.exist')
+    })
+  })
+
+  // ── Authorized By column ───────────────────────────────────────────────────
+
+  it('shows the authorizedBy email when the field is populated', () => {
+    cy.mount(
+      <DAAResearcherSubtable
+        researcherRows={mockRows}
+        onAuthorize={authorizeSpy}
+        onRevoke={revokeSpy}
+      />,
+    )
+    cy.get('[data-cy="daa-authorized-by-1"]').should('contain.text', 'so@test.org')
+  })
+
+  it('shows a dash when authorizedBy is not set', () => {
+    cy.mount(
+      <DAAResearcherSubtable
+        researcherRows={mockRows}
+        onAuthorize={authorizeSpy}
+        onRevoke={revokeSpy}
+      />,
+    )
+    cy.get('[data-cy="daa-authorized-by-2"]').should('contain.text', '—')
+    cy.get('[data-cy="daa-authorized-by-3"]').should('contain.text', '—')
+  })
+
+  it('renders an Authorized By cell for every row', () => {
+    cy.mount(
+      <DAAResearcherSubtable
+        researcherRows={mockRows}
+        onAuthorize={authorizeSpy}
+        onRevoke={revokeSpy}
+      />,
+    )
+    mockRows.forEach(({ researcher }) => {
+      cy.get(`[data-cy="daa-authorized-by-${researcher.userId}"]`).should('exist')
     })
   })
 })

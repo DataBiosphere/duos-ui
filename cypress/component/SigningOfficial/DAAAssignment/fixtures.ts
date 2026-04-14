@@ -9,11 +9,16 @@ interface DaaOptions {
   mapped?: boolean
 }
 
+interface DaaDetailOption {
+  daaId: number
+  authorizedBy?: string
+}
+
 interface ResearcherOptions {
   userId: number
   displayName: string
   email: string
-  authorizedDaaIds?: unknown[]
+  daaDetails?: DaaDetailOption[]
 }
 
 export function makeDaa({
@@ -48,7 +53,7 @@ export function makeResearcher({
   userId,
   displayName,
   email,
-  authorizedDaaIds = [],
+  daaDetails,
 }: ResearcherOptions): DuosUser {
   return {
     userId,
@@ -71,7 +76,7 @@ export function makeResearcher({
       userEmail: email,
       createDate: new Date('2023-01-01'),
       createUserId: 1,
-      daaIds: authorizedDaaIds as number[],
+      ...(daaDetails && { daaDetails }),
     },
   }
 }

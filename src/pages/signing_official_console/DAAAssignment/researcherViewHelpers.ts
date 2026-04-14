@@ -70,8 +70,16 @@ function expandCommaSeparatedIds(raw: string, ids: Set<string>): void {
 
 function getAuthorizedDaaIdSet(researcher: DuosUser): Set<string> {
   const authorizedIds = new Set<string>()
-  const rawIds = researcher.libraryCard?.daaIds as unknown[] | undefined
 
+  // Prefer the newer daaDetails array when available.
+  const daaDetails = researcher.libraryCard?.daaDetails
+  if (Array.isArray(daaDetails) && daaDetails.length > 0) {
+    daaDetails.forEach(detail => addNormalizedId(detail.daaId, authorizedIds))
+    return authorizedIds
+  }
+
+  // Fall back to the legacy daaIds array.
+  const rawIds = researcher.libraryCard?.daaIds as unknown[] | undefined
   if (!Array.isArray(rawIds)) return authorizedIds
 
   rawIds.forEach((rawId: unknown) => {
@@ -83,6 +91,25 @@ function getAuthorizedDaaIdSet(researcher: DuosUser): Set<string> {
   })
 
   return authorizedIds
+}
+
+/**
+ * Returns the email address of the SO who authorized a researcher for a given
+ * DAA, as recorded in the `daaDetails` array of their library card.
+ * Returns `undefined` when not recorded or when the researcher is not
+ * authorized (e.g. the authorization came from the legacy `daaIds` field).
+ */
+export function getAuthorizedBy(researcher: DuosUser, daaId: number): string | undefined {
+  const normalizedDaaId = normalizeId(daaId)
+  if (!normalizedDaaId) return undefined
+
+  const daaDetails = researcher.libraryCard?.daaDetails
+  if (!Array.isArray(daaDetails)) return undefined
+
+  const match = daaDetails.find(
+    detail => normalizeId(detail.daaId) === normalizedDaaId,
+  )
+  return match?.authorizedBy
 }
 
 /**
@@ -163,6 +190,7 @@ export function buildDAAResearcherRows(
   return researchers.map(researcher => ({
     researcher,
     status: getAuthStatus(researcher, daa.daaId),
+    authorizedBy: getAuthorizedBy(researcher, daa.daaId),
   }))
 }
 

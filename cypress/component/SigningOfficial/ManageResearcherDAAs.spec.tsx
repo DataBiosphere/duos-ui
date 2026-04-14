@@ -14,8 +14,8 @@ describe('ManageResearcherDAAs', () => {
     cy.stub(User, 'list').resolves([makeResearcher({
       userId: 1,
       displayName: 'Test User Eta',
-      email: 'test.user.eta@test.org',
-      authorizedDaaIds: [1, 2],
+      email: 'test@test.com',
+      daaDetails: [{ daaId: 1 }, { daaId: 2 }],
     })])
     cy.stub(DAA, 'getDaas').resolves([
       makeDaa({ daaId: 1, broadDaa: false, mapped: true }),
