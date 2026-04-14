@@ -29,6 +29,7 @@ import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList
 import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
 import BiospecimenList from 'src/components/biospecimen_list/BiospecimenList'
 import { Biotech } from '@mui/icons-material'
+import { Button } from '@mui/material'
 
 export interface StudyAssetManagementProps {
   study: Study
@@ -64,8 +65,8 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
     <div className="data-submitter-section">
       <h2>Study Assets</h2>
       <p>
-        Add datasets, models, workspaces, and other resources associated with this study. To add biospecimen data,{' '}
-        <a onClick={onOpenContactUs} style={{ cursor: 'pointer' }}>contact the DUOS Team</a>.
+        Add datasets, models, workspaces, and other resources associated with this study. To add biospecimen data,
+        <Button onClick={onOpenContactUs} style={{ cursor: 'pointer' }}>contact the DUOS Team.</Button>
       </p>
 
       <ConsentGroupList
