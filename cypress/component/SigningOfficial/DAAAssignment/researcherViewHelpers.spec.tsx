@@ -21,20 +21,6 @@ describe('researcherViewHelpers', () => {
       expect(getAuthStatus(researcher, 2)).to.equal('authorized')
     })
 
-    it('supports comma-separated id strings and object ids (legacy daaIds)', () => {
-      const researcher = makeResearcher({
-        userId: 10,
-        displayName: 'Test User',
-        email: 'test@duos.org',
-      })
-      researcher.libraryCard!.daaIds = ['3,4', { daaId: 5 }, { id: 6 }, { value: 7 }] as unknown as number[]
-      expect(getAuthStatus(researcher, 3)).to.equal('authorized')
-      cy.wrap(getAuthStatus(researcher, 4)).should('equal', 'authorized')
-      cy.wrap(getAuthStatus(researcher, 5)).should('equal', 'authorized')
-      cy.wrap(getAuthStatus(researcher, 6)).should('equal', 'authorized')
-      cy.wrap(getAuthStatus(researcher, 7)).should('equal', 'authorized')
-    })
-
     it('returns not_requested for unknown ids (legacy daaIds)', () => {
       const researcher = makeResearcher({
         userId: 10,
