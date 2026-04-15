@@ -22,7 +22,7 @@ const mockResearchers: DuosUser[] = [
     userId: 1,
     displayName: 'Test User Alpha',
     email: 'test.user.alpha@test.org',
-    authorizedDaaIds: [1],
+    daaDetails: [{ daaId: 1 }],
   }),
   makeResearcher({
     userId: 2,
@@ -41,12 +41,12 @@ describe('ResearcherView pure helpers', () => {
   describe('getDacName', () => {
     it('returns the DAC name from daa.dacs', () => {
       const daa = makeDaa({ broadDaa: true, daaId: 1, fileName: 'Test DAA', dacId: 10 })
-      expect(getDacName(daa)).to.equal('DAC-10')
+      cy.wrap(getDacName(daa)).should('equal', 'DAC-10')
     })
 
     it('returns — when dacs array is empty', () => {
       const daa = { ...makeDaa({ broadDaa: true, daaId: 1, fileName: 'Test DAA', dacId: 10 }), dacs: [] }
-      expect(getDacName(daa)).to.equal('—')
+      cy.wrap(getDacName(daa)).should('equal', '—')
     })
 
     it('joins multiple DAC names', () => {
@@ -57,24 +57,24 @@ describe('ResearcherView pure helpers', () => {
           { dacId: 20, name: 'DAC B' },
         ],
       }
-      expect(getDacName(daa)).to.equal('DAC A / DAC B')
+      cy.wrap(getDacName(daa)).should('equal', 'DAC A / DAC B')
     })
   })
 
   describe('getAuthStatus', () => {
-    it('returns authorized when daaId is in libraryCard.daaIds', () => {
-      const researcher = makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com', authorizedDaaIds: [1, 2] })
-      expect(getAuthStatus(researcher, 1)).to.equal('authorized')
+    it('returns authorized when daaId is present in the library card (legacy daaIds)', () => {
+      const researcher = makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com', daaDetails: [{ daaId: 1 }, { daaId: 2 }] })
+      cy.wrap(getAuthStatus(researcher, 1)).should('equal', 'authorized')
     })
 
     it('returns not_requested when daaId is absent from libraryCard', () => {
-      const researcher = makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com', authorizedDaaIds: [1] })
-      expect(getAuthStatus(researcher, 99)).to.equal('not_requested')
+      const researcher = makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com', daaDetails: [{ daaId: 1 }] })
+      cy.wrap(getAuthStatus(researcher, 99)).should('equal', 'not_requested')
     })
 
     it('returns not_requested when researcher has no libraryCard', () => {
       const researcher = { ...makeResearcher({ userId: 1, displayName: 'Test', email: 'test@test.com' }), libraryCard: undefined }
-      expect(getAuthStatus(researcher, 1)).to.equal('not_requested')
+      cy.wrap(getAuthStatus(researcher, 1)).should('equal', 'not_requested')
     })
   })
 
@@ -82,13 +82,13 @@ describe('ResearcherView pure helpers', () => {
     it('counts authorized correctly', () => {
       const rows = buildResearcherRows(mockResearchers, mockDaas)
       const userOne = rows.find(r => r.researcher.userId === 1)
-      expect(userOne?.authorizedCount).to.equal(1)
+      cy.wrap(userOne?.authorizedCount).should('equal', 1)
     })
 
     it('counts not_requested as 0 authorized', () => {
       const rows = buildResearcherRows(mockResearchers, mockDaas)
       const userTwo = rows.find(r => r.researcher.userId === 2)
-      expect(userTwo?.authorizedCount).to.equal(0)
+      cy.wrap(userTwo?.authorizedCount).should('equal', 0)
     })
   })
 })

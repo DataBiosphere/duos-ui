@@ -45,14 +45,16 @@ const COLUMN_HEADERS = [
   'Researcher',
   'Email',
   'Pre-Auth Status',
+  'Pre-authorized By',
   'Action',
 ] as const
 
 const COLUMN_WIDTHS: Record<(typeof COLUMN_HEADERS)[number], string> = {
-  'Researcher': '28%',
-  'Email': '30%',
-  'Pre-Auth Status': '20%',
-  'Action': '22%',
+  'Researcher': '23%',
+  'Email': '25%',
+  'Pre-Auth Status': '17%',
+  'Pre-authorized By': '20%',
+  'Action': '15%',
 }
 
 interface DAAResearcherSubtableProps {
@@ -88,7 +90,7 @@ export default function DAAResearcherSubtable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {researcherRows.map(({ researcher, status }) => (
+          {researcherRows.map(({ researcher, status, authorizedBy }) => (
             <TableRow
               key={researcher.userId}
               data-cy={`daa-researcher-row-${researcher.userId}`}
@@ -108,9 +110,15 @@ export default function DAAResearcherSubtable({
                 <AuthStatusChip status={status} />
               </TableCell>
               <TableCell
+                sx={{ ...tableCellBodySx, width: COLUMN_WIDTHS['Pre-authorized By'] }}
+                data-cy={`daa-authorized-by-${researcher.userId}`}
+              >
+                {authorizedBy ?? '—'}
+              </TableCell>
+              <TableCell
                 sx={{
                   width: COLUMN_WIDTHS.Action,
-                  minWidth: 132,
+                  minWidth: 120,
                   whiteSpace: 'nowrap',
                 }}
               >
