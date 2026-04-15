@@ -45,7 +45,7 @@ const COLUMN_HEADERS = [
   'Researcher',
   'Email',
   'Pre-Auth Status',
-  'Authorized By',
+  'Pre-authorized By',
   'Action',
 ] as const
 
@@ -53,7 +53,7 @@ const COLUMN_WIDTHS: Record<(typeof COLUMN_HEADERS)[number], string> = {
   'Researcher': '23%',
   'Email': '25%',
   'Pre-Auth Status': '17%',
-  'Authorized By': '20%',
+  'Pre-authorized By': '20%',
   'Action': '15%',
 }
 
@@ -110,7 +110,7 @@ export default function DAAResearcherSubtable({
                 <AuthStatusChip status={status} />
               </TableCell>
               <TableCell
-                sx={{ ...tableCellBodySx, width: COLUMN_WIDTHS['Authorized By'] }}
+                sx={{ ...tableCellBodySx, width: COLUMN_WIDTHS['Pre-authorized By'] }}
                 data-cy={`daa-authorized-by-${researcher.userId}`}
               >
                 {authorizedBy ?? '—'}

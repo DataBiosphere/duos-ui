@@ -133,7 +133,7 @@ describe('DAAResearcherSubtable', () => {
     cy.get('[data-cy^="daa-researcher-row-"]').should('not.exist')
   })
 
-  it('renders all five column headers including Authorized By', () => {
+  it('renders all five column headers including Pre-authorized By', () => {
     cy.mount(
       <DAAResearcherSubtable
         researcherRows={mockRows}
@@ -145,12 +145,12 @@ describe('DAAResearcherSubtable', () => {
       cy.contains('Researcher').should('exist')
       cy.contains('Email').should('exist')
       cy.contains('Pre-Auth Status').should('exist')
-      cy.contains('Authorized By').should('exist')
+      cy.contains('Pre-authorized By').should('exist')
       cy.contains('Action').should('exist')
     })
   })
 
-  // ── Authorized By column ───────────────────────────────────────────────────
+  // ── Pre-authorized By column ───────────────────────────────────────────────────
 
   it('shows the authorizedBy email when the field is populated', () => {
     cy.mount(
@@ -175,7 +175,7 @@ describe('DAAResearcherSubtable', () => {
     cy.get('[data-cy="daa-authorized-by-3"]').should('contain.text', '—')
   })
 
-  it('renders an Authorized By cell for every row', () => {
+  it('renders a Pre-authorized By cell for every row', () => {
     cy.mount(
       <DAAResearcherSubtable
         researcherRows={mockRows}

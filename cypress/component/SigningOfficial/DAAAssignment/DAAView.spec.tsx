@@ -286,7 +286,7 @@ describe('DAAView', () => {
     cy.wrap(User.list).should('have.been.called')
   })
 
-  // ── Authorized By column ───────────────────────────────────────────────────
+  // ── Pre-authorized By column ───────────────────────────────────────────────────
 
   it('shows authorizedBy email for an authorized researcher in the expanded subtable', () => {
     mount()
@@ -295,7 +295,7 @@ describe('DAAView', () => {
     cy.get('[data-cy="daa-authorized-by-1"]').should('contain.text', 'so@test.org')
   })
 
-  it('shows a dash in the Authorized By cell for an unauthorized researcher', () => {
+  it('shows a dash in the Pre-authorized By cell for an unauthorized researcher', () => {
     mount()
     cy.get('[data-cy="daa-accordion-toggle-1"]').click()
     // Researcher 2 has no authorizations at all
