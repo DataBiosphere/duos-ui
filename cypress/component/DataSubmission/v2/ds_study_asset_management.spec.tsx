@@ -28,7 +28,7 @@ const baseStudy: Study = {
 describe('StudyAssetManagement component', () => {
   it('renders all asset sections with titles and descriptions', () => {
     const setStudySpy = cy.spy().as('setStudySpy')
-    cy.mount(<StudyAssetManagement study={baseStudy} setStudy={setStudySpy} />)
+    cy.mount(<StudyAssetManagement study={baseStudy} setStudy={setStudySpy} onOpenContactUs={cy.stub()} />)
 
     const sections = [
       { title: 'Datasets', desc: 'Add datasets associated with this study' },
@@ -43,7 +43,8 @@ describe('StudyAssetManagement component', () => {
     ]
 
     cy.contains('Study Assets').should('exist')
-    cy.contains('Add datasets, models, workspaces, and other resources associated with this study').should('exist')
+    cy.contains('Add datasets, models, workspaces, and other resources associated with this study. To add biospecimen data,').should('exist')
+    cy.contains('contact the DUOS Team').should('exist')
 
     for (const { title, desc } of sections) {
       cy.contains('h3', title).should('exist')
@@ -61,7 +62,7 @@ describe('StudyAssetManagement component', () => {
     }
 
     const setStudySpy = cy.spy().as('setStudySpy')
-    cy.mount(<StudyAssetManagement study={baseStudyNoBiospecimens} setStudy={setStudySpy} />)
+    cy.mount(<StudyAssetManagement study={baseStudyNoBiospecimens} setStudy={setStudySpy} onOpenContactUs={cy.stub()} />)
 
     cy.contains('h3', 'Biospecimens').should('not.exist')
     cy.contains('View total biospecimens for this study').should('not.exist')
