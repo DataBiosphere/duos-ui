@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
@@ -31,6 +32,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const [isEditing, setIsEditing] = useState(false)
   const [study, setStudy] = useState({} as Study)
   const [loadingError, setLoadingError] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
 
   const navigate = useNavigate()
 
@@ -123,7 +125,8 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         <NihAnvilUseRelated study={study} setStudy={setStudy} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
-        <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} />
+        <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} onOpenContactUs={() => setShowContactModal(true)} />
+        <SupportRequestModal showModal={showContactModal} onCloseRequest={() => setShowContactModal(false)} />
         {!isEditing && (
           <AsyncSpinnerButton
             onClick={onSubmitStudy}
@@ -131,7 +134,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
             className="button button-white"
             data-cy="data-submission-submit-button"
             hideOnSuccess={true}
-            style={{ marginBottom: '12px' }}
+            style={{ marginTop: '1rem', marginBottom: '12px' }}
           >
             Create Study
           </AsyncSpinnerButton>
