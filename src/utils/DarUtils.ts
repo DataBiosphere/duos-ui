@@ -40,12 +40,17 @@ export function getApprovedElectionDatasetIds(elections: Array<Election>): Array
 }
 
 export function convertFormStateToDAR(formState: FormState): Partial<CombinedDataAccessRequest> {
+  const normalizedDaaIds = [...new Set((formState.daaIds ?? [])
+    .map(id => Number(id))
+    .filter(id => Number.isInteger(id) && id > 0))]
+
   const expectedForm: Partial<CombinedDataAccessRequest> = {} as Partial<CombinedDataAccessRequest>
   expectedForm.progressReportSummary = formState.progressReportSummary
   if (formState.intellectualPropertiesYesNo) {
     expectedForm.intellectualProperties = formState.intellectualProperties
   }
   expectedForm.datasetIds = formState.datasetIds ?? []
+  expectedForm.daaIds = normalizedDaaIds
   if (formState.publicationsYesNo) {
     expectedForm.publications = getPublicationList(formState)
   }

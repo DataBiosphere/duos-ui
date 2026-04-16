@@ -13,6 +13,7 @@ interface DataAccessAgreementsProps {
   isAttested: boolean
   cancelAttest: () => void
   datasets: Dataset[]
+  onDaaIdsChange?: (daaIds: number[]) => void
 }
 
 export const DataAccessAgreements = ({
@@ -22,8 +23,40 @@ export const DataAccessAgreements = ({
   isAttested,
   cancelAttest,
   datasets,
+  onDaaIdsChange,
 }: DataAccessAgreementsProps) => {
   const [daas, setDaas] = useState<DataAccessAgreement[]>([])
+
+  const getDisplayedDaaIds = (availableDatasets: Dataset[], availableDaas: DataAccessAgreement[]): number[] => {
+    const seenFileNames = new Set<string>()
+    const displayedIds: number[] = []
+
+    availableDatasets.forEach((dataset) => {
+      if (!dataset.dacId) {
+        return
+      }
+
+      const matchingDaa = availableDaas.find(daa => daa.dacs?.some(d => d.dacId === dataset.dacId))
+      if (!matchingDaa) {
+        return
+      }
+
+      const rawFileName = matchingDaa.file?.fileName
+      if (!rawFileName) {
+        return
+      }
+
+      const baseFileName = rawFileName.split('.')[0]
+      if (seenFileNames.has(baseFileName)) {
+        return
+      }
+
+      seenFileNames.add(baseFileName)
+      displayedIds.push(matchingDaa.daaId)
+    })
+
+    return displayedIds
+  }
 
   useEffect(() => {
     const init = async () => {
@@ -40,6 +73,12 @@ export const DataAccessAgreements = ({
     }
     init()
   }, [])
+
+  useEffect(() => {
+    if (onDaaIdsChange) {
+      onDaaIdsChange(getDisplayedDaaIds(datasets, daas))
+    }
+  }, [datasets, daas, onDaaIdsChange])
 
   return (
     <div className="dar-step-card">
@@ -87,7 +126,11 @@ export const DataAccessAgreements = ({
         </ol>
       </div>
 
-      <RequiredDAAs datasets={datasets} daas={daas} />
+      <RequiredDAAs
+        datasets={datasets}
+        daas={daas}
+        agreementText="By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below."
+      />
 
       <div className="flex flex-row" style={{ justifyContent: 'around', paddingTop: '4rem' }}>
         <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>

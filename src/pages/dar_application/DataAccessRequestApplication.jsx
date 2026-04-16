@@ -27,7 +27,7 @@ import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
 import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils'
-import { assign, cloneDeep, get, isArray, isEmpty, isNil, isString, map, merge, set } from 'lodash'
+import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'lodash'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Countries } from 'src/libs/ajax/Countries'
 import PropTypes from 'prop-types'
@@ -61,12 +61,19 @@ const fetchAllDatasets = async (dsIds) => {
   return DataSet.getDatasetsByIds(filteredDatasetIds)
 }
 
+const normalizeDaaIds = (ids) => {
+  return [...new Set((ids ?? [])
+    .map(id => Number(id))
+    .filter(id => Number.isInteger(id) && id > 0))]
+}
+
 const DataAccessRequestApplication = (props) => {
   const params = useParams()
   const { collectionId, dataRequestId } = params
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     datasetIds: [],
+    daaIds: [],
     darCode: null,
     labCollaborators: [],
     internalCollaborators: [],
@@ -194,6 +201,19 @@ const DataAccessRequestApplication = (props) => {
       return {
         ...formData,
         ...updates,
+      }
+    })
+  }, [])
+
+  const onDaaIdsChange = useCallback((ids) => {
+    const normalizedIds = normalizeDaaIds(ids)
+    setFormData((prevFormData) => {
+      if (isEqual(prevFormData.daaIds, normalizedIds)) {
+        return prevFormData
+      }
+      return {
+        ...prevFormData,
+        daaIds: normalizedIds,
       }
     })
   }, [])
@@ -453,6 +473,7 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     formattedFormData.userId = userId
+    formattedFormData.daaIds = normalizeDaaIds(formattedFormData.daaIds)
 
     try {
       let referenceId = formData.referenceId
@@ -521,6 +542,7 @@ const DataAccessRequestApplication = (props) => {
     const formattedFormData = cloneDeep(formData)
     // DAR datasetIds needs to be a list of ids
     formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
+    formattedFormData.daaIds = normalizeDaaIds(formattedFormData.daaIds)
 
     // Make sure we navigate back to the current DAR after saving.
     try {
@@ -896,6 +918,7 @@ const DataAccessRequestApplication = (props) => {
                         ? (
                             <DataAccessAgreements
                               datasets={selectedDatasets}
+                              onDaaIdsChange={onDaaIdsChange}
                               isDraft={draftDar}
                               cancelAttest={() => {
                                 setIsAttested(false)

@@ -19,6 +19,7 @@ export interface FormState {
   intellectualPropertiesYesNo: boolean
   intellectualProperties: IntellectualProperty[]
   datasetIds: number[]
+  daaIds: number[]
   publicationsYesNo: boolean
   publications: Publication[]
   presentationsYesNo: boolean
@@ -62,6 +63,7 @@ export enum FormStateKey {
   INTELLECTUAL_PROPERTIES_YES_NO = 'intellectualPropertiesYesNo',
   INTELLECTUAL_PROPERTIES = 'intellectualProperties',
   DATASET_IDS = 'datasetIds',
+  DATA_ACCESS_AGREEMENT_IDS = 'daaIds',
   PUBLICATIONS_YES_NO = 'publicationsYesNo',
   PUBLICATIONS = 'publications',
   PRESENTATIONS_YES_NO = 'presentationsYesNo',

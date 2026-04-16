@@ -3,7 +3,7 @@ import { DAA } from 'src/libs/ajax/DAA.js'
 import PropTypes from 'prop-types'
 
 export default function RequiredDAAs(props) {
-  const { datasets, daas } = props
+  const { datasets, daas, agreementText } = props
   const fileNames = new Set()
   const daaDivs = datasets.map((dataset, index) => {
     const datasetDacId = dataset.dacId
@@ -48,7 +48,7 @@ export default function RequiredDAAs(props) {
   else {
     return (
       <div>
-        <h3>By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.</h3>
+        <h3>{agreementText}</h3>
         <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
           {daaDivs}
         </div>
@@ -60,4 +60,5 @@ export default function RequiredDAAs(props) {
 RequiredDAAs.propTypes = {
   datasets: PropTypes.array.isRequired,
   daas: PropTypes.array.isRequired,
+  agreementText: PropTypes.string,
 }

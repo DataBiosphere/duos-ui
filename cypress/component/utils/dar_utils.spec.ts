@@ -257,6 +257,7 @@ describe('DarUtils', () => {
         irbProtocolExpiration: '2024-01-01',
         collaborationLetterLocation: 'collab_location',
         collaborationLetterName: 'Collaboration Letter',
+        daaIds: [101, '102', 101, 'bad-id'] as unknown as number[],
       } as unknown as FormState
       const result = convertFormStateToDAR(formState)
       expect(result.progressReportSummary).to.equal(formState.progressReportSummary)
@@ -277,6 +278,7 @@ describe('DarUtils', () => {
       expect(result.irbProtocolExpiration).to.equal(formState.irbProtocolExpiration)
       expect(result.collaborationLetterLocation).to.equal(formState.collaborationLetterLocation)
       expect(result.collaborationLetterName).to.equal(formState.collaborationLetterName)
+      expect(result.daaIds).to.deep.equal([101, 102])
     })
   })
 

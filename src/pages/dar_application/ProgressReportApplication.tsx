@@ -15,6 +15,7 @@ import DarCloseout from 'src/pages/progress_reports/DarCloseout'
 import { CloseoutReview } from 'src/pages/progress_reports/CloseoutReview'
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport'
 import IrbDocumentUpload from 'src/pages/progress_reports/IrbDocumentUpload'
+import ProgressReportDataAccessAgreements from 'src/pages/progress_reports/ProgressReportDataAccessAgreements'
 import { Navigation } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements'
@@ -26,6 +27,7 @@ import {
 } from 'src/utils/darFormUtils'
 import { FormValidationState } from 'src/pages/dar_application/FormValidationState'
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
+import { DAAUtils } from 'src/utils/DAAUtils'
 import { useNavigate } from 'react-router-dom'
 import { isEqual } from 'lodash'
 type ProgressReportApplicationProps = {
@@ -82,6 +84,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     // additional state for datasets section populated by useEffect
     datasets: [],
     datasetIds: [],
+    daaIds: [],
     selectedDatasets: [],
 
     // additional state for dmi section
@@ -249,9 +252,17 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           />
         </div>
       </div>
+      {DAAUtils.isEnabled() && (
+        <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+          <ProgressReportDataAccessAgreements
+            datasets={formState.selectedDatasets}
+            onDaaIdsChange={(ids: number[]) => onFormChange({ daaIds: ids })}
+          />
+        </div>
+      )}
       <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
         <DataUseAcknowledgements
-          title="2.1 Data Use Acknowledgements"
+          title={DAAUtils.isEnabled() ? '2.2 Data Use Acknowledgements' : '2.1 Data Use Acknowledgements'}
           datasets={formState.selectedDatasets}
           dataUseTranslations={dataUseTranslations}
           formData={formState}

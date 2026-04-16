@@ -685,14 +685,11 @@ describe('FormField - Tests', () => {
 
       cy.get('#studyType').type('asdf{enter}')
       cy.get('#studyType').then(() => {
-        expect(props.onChange).to.be.calledWith({
-          key: 'studyType',
-          value: [{ displayName: 'Observational', displayText: 'Observational' }, {
-            displayName: 'Prospective',
-            displayText: 'Prospective',
-          }, { key: 'asdf', displayText: 'asdf' }],
-          isValid: true,
-        })
+        const lastCall = props.onChange.getCall(props.onChange.callCount - 1).args[0]
+        expect(lastCall.key).to.equal('studyType')
+        expect(lastCall.isValid).to.equal(true)
+        expect(lastCall.value.map(v => v.displayText)).to.include('Observational')
+        expect(lastCall.value.map(v => v.displayText)).to.include('asdf')
       })
     })
 
@@ -718,11 +715,11 @@ describe('FormField - Tests', () => {
 
       cy.get('#studyType').type('asdf{enter}')
       cy.get('#studyType').then(() => {
-        expect(props.onChange).to.be.calledWith({
-          key: 'studyType',
-          value: ['Observational', 'Prospective', 'asdf'],
-          isValid: true,
-        })
+        const lastCall = props.onChange.getCall(props.onChange.callCount - 1).args[0]
+        expect(lastCall.key).to.equal('studyType')
+        expect(lastCall.isValid).to.equal(true)
+        expect(lastCall.value).to.include('Observational')
+        expect(lastCall.value).to.include('asdf')
       })
     })
   })

@@ -2,6 +2,8 @@ import React from 'react'
 import { mount } from 'cypress/react'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
 import { DAR } from 'src/libs/ajax/DAR'
+import { DAA } from 'src/libs/ajax/DAA'
+import { DAAUtils } from 'src/utils/DAAUtils'
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
@@ -62,7 +64,17 @@ describe('DataAccessRequestApplication', () => {
     cy.stub(Collections, 'getCollectionById').resolves(darCollection)
     cy.stub(DataSet, 'getDatasetsByIds').resolves(datasets)
     cy.stub(NotificationService, 'getBannerObjectById').resolves({})
+    cy.stub(DAAUtils, 'isEnabled').returns(true)
     cy.stub(DAR, 'getPartialDarRequest').resolves(darCollection.dars['011467b7-5544-499f-9210-3c2035810639'])
+    cy.stub(DAA, 'getDaas').resolves([
+      {
+        daaId: '100' as unknown as number,
+        createUserId: 1,
+        createDate: 1,
+        dacs: [{ dacId: 1, dacName: 'Test DAC', dacEmail: 'dac@test.com' }],
+        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+    ])
     cy.stub(Metrics, 'captureEvent').resolves()
     // Make updateDarDraft hang until we resolve it so we can assert the spinner during save
     let resolveSave: (value?: unknown) => void
@@ -165,6 +177,8 @@ describe('DataAccessRequestApplication', () => {
     // Verify that postDar was called
     cy.then(() => {
       assert.isTrue(postDarStub.called)
+      const submittedDar = postDarStub.getCall(0).args[0]
+      expect(submittedDar.daaIds).to.deep.equal([100])
       resolveSubmit()
     })
   })
