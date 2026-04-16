@@ -16,7 +16,6 @@ import { CloseoutReview } from 'src/pages/progress_reports/CloseoutReview'
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport'
 import IrbDocumentUpload from 'src/pages/progress_reports/IrbDocumentUpload'
 import ProgressReportDataAccessAgreements from 'src/pages/progress_reports/ProgressReportDataAccessAgreements'
-import ProgressReportDataAccessAgreements from 'src/pages/progress_reports/ProgressReportDataAccessAgreements'
 import { Navigation } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements'
@@ -179,10 +178,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
       setDataUseTranslations(translations)
     })
     onFormChange({ selectedDatasets: newDatasets, datasetIds: newDatasetIds })
-  }, [onFormChange])
-
-  const onDaaIdsChange = useCallback((ids: number[]) => {
-    onFormChange({ daaIds: ids })
   }, [onFormChange])
 
   const onIrbDocumentChange = (document: File | null, expiration: string) => {
