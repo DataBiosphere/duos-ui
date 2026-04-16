@@ -1,31 +1,6 @@
 import { DAAObject, DuosUser } from 'src/types/model'
 import { AuthStatus, DAAAccordionData, DAAResearcherRowData, DAARowData, ResearcherRowData } from './types'
 
-function normalizeNumber(value: number): string | null {
-  return Number.isFinite(value) ? String(value) : null
-}
-
-function normalizeString(value: string): string | null {
-  const trimmed = value.trim()
-  if (!trimmed) return null
-  const numeric = Number(trimmed)
-  return Number.isFinite(numeric) ? String(numeric) : trimmed
-}
-
-function normalizeObject(value: Record<string, unknown>): string | null {
-  if ('daaId' in value) return normalizeId(value.daaId)
-  if ('id' in value) return normalizeId(value.id)
-  if ('value' in value) return normalizeId(value.value)
-  return null
-}
-
-function normalizeId(value: unknown): string | null {
-  if (typeof value === 'number') return normalizeNumber(value)
-  if (typeof value === 'string') return normalizeString(value)
-  if (typeof value === 'object' && value !== null) return normalizeObject(value as Record<string, unknown>)
-  return null
-}
-
 const DASH = '—'
 
 function toIsoDate(date: Date): string {
@@ -59,30 +34,38 @@ export function formatDateYYYYMMDD(value: unknown): string {
   return /^\d+$/.test(trimmed) ? parseNumericDate(trimmed) : toIsoDate(new Date(trimmed))
 }
 
-function addNormalizedId(rawId: unknown, ids: Set<string>): void {
-  const normalized = normalizeId(rawId)
-  if (normalized) ids.add(normalized)
-}
+function getAuthorizedDaaIdSet(researcher: DuosUser): Set<number> {
+  const authorizedIds = new Set<number>()
 
-function expandCommaSeparatedIds(raw: string, ids: Set<string>): void {
-  raw.split(',').forEach(part => addNormalizedId(part, ids))
-}
+  // Prefer the newer daaDetails array when available.
+  const daaDetails = researcher.libraryCard?.daaDetails
+  if (Array.isArray(daaDetails)) {
+    daaDetails.forEach(detail => authorizedIds.add(detail.daaId))
+    return authorizedIds
+  }
 
-function getAuthorizedDaaIdSet(researcher: DuosUser): Set<string> {
-  const authorizedIds = new Set<string>()
-  const rawIds = researcher.libraryCard?.daaIds as unknown[] | undefined
-
-  if (!Array.isArray(rawIds)) return authorizedIds
-
-  rawIds.forEach((rawId: unknown) => {
-    if (typeof rawId === 'string' && rawId.includes(',')) {
-      expandCommaSeparatedIds(rawId, authorizedIds)
-      return
-    }
-    addNormalizedId(rawId, authorizedIds)
-  })
+  // Fall back to the legacy daaIds array, assumed to be numbers if valid
+  const daaIds = researcher.libraryCard?.daaIds
+  if (Array.isArray(daaIds)) {
+    daaIds.forEach((id) => {
+      // Cast safely since legacy arrays could be mixed types (we filter bad data out)
+      const num = Number(id)
+      if (Number.isFinite(num)) authorizedIds.add(num)
+    })
+  }
 
   return authorizedIds
+}
+
+/**
+ * Returns the email address of the SO who authorized a researcher for a given
+ * DAA, as recorded in the `daaDetails` array of their library card.
+ */
+export function getAuthorizedBy(researcher: DuosUser, daaId: number): string | undefined {
+  const daaDetails = researcher.libraryCard?.daaDetails
+  if (!Array.isArray(daaDetails)) return undefined
+
+  return daaDetails.find(detail => detail.daaId === daaId)?.authorizedBy
 }
 
 /**
@@ -102,7 +85,7 @@ export function getDacName(daa: DAAObject): string {
  * researcher's library card.
  */
 export function getAuthStatus(researcher: DuosUser, daaId: number): AuthStatus {
-  const normalizedDaaId = normalizeId(daaId)
+  const normalizedDaaId = daaId
   if (!normalizedDaaId) return 'not_requested'
 
   const authorizedDaaIds = getAuthorizedDaaIdSet(researcher)
@@ -163,6 +146,7 @@ export function buildDAAResearcherRows(
   return researchers.map(researcher => ({
     researcher,
     status: getAuthStatus(researcher, daa.daaId),
+    authorizedBy: getAuthorizedBy(researcher, daa.daaId),
   }))
 }
 

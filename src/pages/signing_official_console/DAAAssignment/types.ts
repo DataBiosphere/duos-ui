@@ -24,6 +24,8 @@ export interface ResearcherRowData {
 export interface DAAResearcherRowData {
   researcher: DuosUser
   status: AuthStatus
+  /** Email of the SO who granted pre-authorization, if recorded */
+  authorizedBy?: string
 }
 
 /** A DAA enriched with per-researcher auth data, ready for the accordion */

@@ -23,12 +23,15 @@ const recentDaaWithDate: DAAObject = {
 }
 
 const mockResearchers: DuosUser[] = [
+  // Researcher 1: authorized for DAA 1 via the new daaDetails shape,
+  // with an authorizedBy email recorded.
   makeResearcher({
     userId: 1,
     displayName: 'Test User Alpha',
     email: 'test.user.alpha@test.org',
-    authorizedDaaIds: [1],
+    daaDetails: [{ daaId: 1, authorizedBy: 'so@test.org' }],
   }),
+  // Researcher 2: no authorizations.
   makeResearcher({
     userId: 2,
     displayName: 'Test User Beta',
@@ -46,34 +49,34 @@ describe('DAAView pure helpers', () => {
   describe('isRecentlyUpdated', () => {
     it('returns true when updateDate is within the last year', () => {
       const daa = { ...mockDaas[0], updateDate: new Date().toISOString() }
-      expect(isRecentlyUpdated(daa)).to.equal(true)
+      cy.wrap(isRecentlyUpdated(daa)).should('equal', true)
     })
 
     it('returns false when updateDate is more than a year ago', () => {
       const daa = { ...mockDaas[0], updateDate: '2020-01-01' }
-      expect(isRecentlyUpdated(daa)).to.equal(false)
+      cy.wrap(isRecentlyUpdated(daa)).should('equal', false)
     })
 
     it('returns false when updateDate is null/undefined', () => {
       const daa = { ...mockDaas[0], updateDate: undefined }
-      expect(isRecentlyUpdated(daa as unknown as DAAObject)).to.equal(false)
+      cy.wrap(isRecentlyUpdated(daa as unknown as DAAObject)).should('equal', false)
     })
 
     it('returns false when updateDate is not a valid date string', () => {
       const daa = { ...mockDaas[0], updateDate: 'not-a-date' }
-      expect(isRecentlyUpdated(daa)).to.equal(false)
+      cy.wrap(isRecentlyUpdated(daa)).should('equal', false)
     })
   })
 
   describe('buildDAAViewRows', () => {
     it('returns one row per unique DAA', () => {
       const rows = buildDAAViewRows(mockDaas, mockResearchers)
-      expect(rows).to.have.length(2)
+      cy.wrap(rows).should('have.length', 2)
     })
 
     it('deduplicates DAAs with the same daaId', () => {
       const rows = buildDAAViewRows([...mockDaas, mockDaas[0]], mockResearchers)
-      expect(rows).to.have.length(2)
+      cy.wrap(rows).should('have.length', 2)
     })
 
     it('counts authorized researchers correctly per DAA', () => {
@@ -81,15 +84,15 @@ describe('DAAView pure helpers', () => {
       const row1 = rows.find(r => r.daa.daaId === 1)
       const row2 = rows.find(r => r.daa.daaId === 2)
       // Only researcher 1 is authorized for DAA 1
-      expect(row1?.authorizedCount).to.equal(1)
+      cy.wrap(row1?.authorizedCount).should('equal', 1)
       // No one authorized for DAA 2
-      expect(row2?.authorizedCount).to.equal(0)
+      cy.wrap(row2?.authorizedCount).should('equal', 0)
     })
 
     it('includes all researchers in each DAA row', () => {
       const rows = buildDAAViewRows(mockDaas, mockResearchers)
       rows.forEach((row) => {
-        expect(row.researcherRows).to.have.length(mockResearchers.length)
+        cy.wrap(row.researcherRows).should('have.length', mockResearchers.length)
       })
     })
 
@@ -98,19 +101,19 @@ describe('DAAView pure helpers', () => {
       const rows = buildDAAViewRows(daasWithRecent, mockResearchers)
       const oldRow = rows.find(r => r.daa.daaId === 1)
       const recentRow = rows.find(r => r.daa.daaId === 3)
-      expect(oldRow?.isRecentlyUpdated).to.equal(false)
-      expect(recentRow?.isRecentlyUpdated).to.equal(true)
+      cy.wrap(oldRow?.isRecentlyUpdated).should('equal', false)
+      cy.wrap(recentRow?.isRecentlyUpdated).should('equal', true)
     })
 
     it('returns empty array when daas is empty', () => {
-      expect(buildDAAViewRows([], mockResearchers)).to.deep.equal([])
+      cy.wrap(buildDAAViewRows([], mockResearchers)).should('deep.equal', [])
     })
 
     it('returns rows with empty researcherRows when researchers is empty', () => {
       const rows = buildDAAViewRows(mockDaas, [])
       rows.forEach((row) => {
-        expect(row.researcherRows).to.have.length(0)
-        expect(row.authorizedCount).to.equal(0)
+        cy.wrap(row.researcherRows).should('have.length', 0)
+        cy.wrap(row.authorizedCount).should('equal', 0)
       })
     })
   })
@@ -281,5 +284,21 @@ describe('DAAView', () => {
     cy.get('[data-cy="confirm-dialog-confirm"]').click()
     cy.wrap(DAA.deleteDaaLcLink).should('have.been.calledWith', 1, 1)
     cy.wrap(User.list).should('have.been.called')
+  })
+
+  // ── Pre-authorized By column ───────────────────────────────────────────────────
+
+  it('shows authorizedBy email for an authorized researcher in the expanded subtable', () => {
+    mount()
+    cy.get('[data-cy="daa-accordion-toggle-1"]').click()
+    // Researcher 1 has authorizedBy set via daaDetails
+    cy.get('[data-cy="daa-authorized-by-1"]').should('contain.text', 'so@test.org')
+  })
+
+  it('shows a dash in the Pre-authorized By cell for an unauthorized researcher', () => {
+    mount()
+    cy.get('[data-cy="daa-accordion-toggle-1"]').click()
+    // Researcher 2 has no authorizations at all
+    cy.get('[data-cy="daa-authorized-by-2"]').should('contain.text', '—')
   })
 })

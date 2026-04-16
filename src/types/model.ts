@@ -142,6 +142,12 @@ export interface LibraryCard {
   createDate: Date
   createUserId: number
   daaIds?: number[]
+  daaDetails?: DAADetails[]
+}
+
+export interface DAADetails {
+  daaId: number
+  authorizedBy?: string
 }
 
 export type OrganizationType = 'For-Profit' | 'Nonprofit'

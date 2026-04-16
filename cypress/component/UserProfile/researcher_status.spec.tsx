@@ -83,7 +83,8 @@ describe('ResearcherStatus', () => {
     cy.contains('Researcher Status')
     cy.contains('RAS Account')
     cy.contains('Library Card issued to you')
-    cy.contains('Issued on: ' + userWithCard.libraryCard?.createDate.toISOString().slice(0, 10))
+    const formattedDate = userWithCard.libraryCard.createDate.toISOString().slice(0, 10)
+    cy.contains('Issued on: ' + formattedDate)
     cy.contains('Issued by: ' + signingOfficialUser.displayName)
   })
 
