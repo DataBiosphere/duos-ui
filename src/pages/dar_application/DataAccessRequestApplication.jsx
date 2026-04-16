@@ -201,7 +201,7 @@ const DataAccessRequestApplication = (props) => {
 
   const onDaaIdsChange = useCallback((ids) => {
     const normalizedIds = [...new Set((ids ?? [])
-      .map(id => Number(id))
+      .map(Number)
       .filter(id => Number.isInteger(id) && id > 0))]
     setFormData((prevFormData) => {
       if (isEqual(prevFormData.daaIds, normalizedIds)) {
@@ -470,7 +470,7 @@ const DataAccessRequestApplication = (props) => {
     }
     formattedFormData.userId = userId
     formattedFormData.daaIds = [...new Set((formattedFormData.daaIds ?? [])
-      .map(id => Number(id))
+      .map(Number)
       .filter(id => Number.isInteger(id) && id > 0))]
 
     try {
@@ -541,7 +541,7 @@ const DataAccessRequestApplication = (props) => {
     // DAR datasetIds needs to be a list of ids
     formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
     formattedFormData.daaIds = [...new Set((formattedFormData.daaIds ?? [])
-      .map(id => Number(id))
+      .map(Number)
       .filter(id => Number.isInteger(id) && id > 0))]
 
     // Make sure we navigate back to the current DAR after saving.

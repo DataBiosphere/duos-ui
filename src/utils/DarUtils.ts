@@ -47,7 +47,7 @@ export function convertFormStateToDAR(formState: FormState): Partial<CombinedDat
   }
   expectedForm.datasetIds = formState.datasetIds ?? []
   expectedForm.daaIds = [...new Set((formState.daaIds ?? [])
-    .map(id => Number(id))
+    .map(Number)
     .filter(id => Number.isInteger(id) && id > 0))]
   if (formState.publicationsYesNo) {
     expectedForm.publications = getPublicationList(formState)
