@@ -1,10 +1,43 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { isEqual } from 'lodash'
 import { Notifications } from 'src/libs/utils'
 import { DAA } from 'src/libs/ajax/DAA'
 import RequiredDAAs from './RequiredDAAs'
 import { extractError } from 'src/utils/ErrorUtils'
 import 'src/pages/dar_application/dar_application.css'
 import { DataAccessAgreement, Dataset } from 'src/types/model'
+
+const getDisplayedDaaIds = (availableDatasets: Dataset[], availableDaas: DataAccessAgreement[]): number[] => {
+  const seenFileNames = new Set<string>()
+  const displayedIds: number[] = []
+
+  availableDatasets.forEach((dataset) => {
+    if (!dataset.dacId) {
+      return
+    }
+
+    const matchingDaa = availableDaas.find(daa => daa.dacs?.some(d => d.dacId === dataset.dacId))
+    if (!matchingDaa) {
+      return
+    }
+
+    const rawFileName = matchingDaa.file?.fileName
+    if (!rawFileName) {
+      return
+    }
+
+    const parts = rawFileName.split('.')
+    const baseFileName = parts[0]
+    if (!baseFileName || seenFileNames.has(baseFileName)) {
+      return
+    }
+
+    seenFileNames.add(baseFileName)
+    displayedIds.push(matchingDaa.daaId)
+  })
+
+  return displayedIds
+}
 
 interface DataAccessAgreementsProps {
   save: () => void
@@ -26,37 +59,7 @@ export const DataAccessAgreements = ({
   onDaaIdsChange,
 }: DataAccessAgreementsProps) => {
   const [daas, setDaas] = useState<DataAccessAgreement[]>([])
-
-  const getDisplayedDaaIds = (availableDatasets: Dataset[], availableDaas: DataAccessAgreement[]): number[] => {
-    const seenFileNames = new Set<string>()
-    const displayedIds: number[] = []
-
-    availableDatasets.forEach((dataset) => {
-      if (!dataset.dacId) {
-        return
-      }
-
-      const matchingDaa = availableDaas.find(daa => daa.dacs?.some(d => d.dacId === dataset.dacId))
-      if (!matchingDaa) {
-        return
-      }
-
-      const rawFileName = matchingDaa.file?.fileName
-      if (!rawFileName) {
-        return
-      }
-
-      const baseFileName = rawFileName.split('.')[0]
-      if (seenFileNames.has(baseFileName)) {
-        return
-      }
-
-      seenFileNames.add(baseFileName)
-      displayedIds.push(matchingDaa.daaId)
-    })
-
-    return displayedIds
-  }
+  const memoizedDisplayedIds = useMemo(() => getDisplayedDaaIds(datasets, daas), [datasets, daas])
 
   useEffect(() => {
     const init = async () => {
@@ -76,9 +79,9 @@ export const DataAccessAgreements = ({
 
   useEffect(() => {
     if (onDaaIdsChange) {
-      onDaaIdsChange(getDisplayedDaaIds(datasets, daas))
+      onDaaIdsChange(memoizedDisplayedIds)
     }
-  }, [datasets, daas, onDaaIdsChange])
+  }, [memoizedDisplayedIds, onDaaIdsChange])
 
   return (
     <div className="dar-step-card">
