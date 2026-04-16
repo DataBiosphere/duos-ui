@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { isEqual } from 'lodash'
 import { Notifications } from 'src/libs/utils'
 import { DAA } from 'src/libs/ajax/DAA'
 import RequiredDAAs from './RequiredDAAs'
 import { extractError } from 'src/utils/ErrorUtils'
-import 'src/pages/dar_application/dar_application.css'
 import { DataAccessAgreement, Dataset } from 'src/types/model'
 
 const getDisplayedDaaIds = (availableDatasets: Dataset[], availableDaas: DataAccessAgreement[]): number[] => {
