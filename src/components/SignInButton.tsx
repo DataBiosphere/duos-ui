@@ -15,6 +15,7 @@ import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
 import { useNavigate } from 'react-router-dom'
+import { extractError } from 'src/utils/ErrorUtils'
 
 interface ErrorInfo {
   title?: string
@@ -79,8 +80,16 @@ export const SignInButton = () => {
         await handleRegistration(redirectTo, shouldRedirect)
       }
     }
-    catch (_error) {
-      await handleRegistration(redirectTo, shouldRedirect)
+    catch (error) {
+      // Explicitly handle AzureB2C errors from Sam
+      const errorMessage = extractError(error)
+      if (errorMessage.toLowerCase().includes('azureb2c authentication error')) {
+        await Auth.signOut()
+        setErrorDisplay({ show: true, title: 'Error', description: errorMessage })
+      }
+      else {
+        await handleRegistration(redirectTo, shouldRedirect)
+      }
     }
   }
 
