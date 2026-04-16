@@ -61,12 +61,6 @@ const fetchAllDatasets = async (dsIds) => {
   return DataSet.getDatasetsByIds(filteredDatasetIds)
 }
 
-const normalizeDaaIds = (ids) => {
-  return [...new Set((ids ?? [])
-    .map(id => Number(id))
-    .filter(id => Number.isInteger(id) && id > 0))]
-}
-
 const DataAccessRequestApplication = (props) => {
   const params = useParams()
   const { collectionId, dataRequestId } = params
@@ -206,7 +200,9 @@ const DataAccessRequestApplication = (props) => {
   }, [])
 
   const onDaaIdsChange = useCallback((ids) => {
-    const normalizedIds = normalizeDaaIds(ids)
+    const normalizedIds = [...new Set((ids ?? [])
+      .map(id => Number(id))
+      .filter(id => Number.isInteger(id) && id > 0))]
     setFormData((prevFormData) => {
       if (isEqual(prevFormData.daaIds, normalizedIds)) {
         return prevFormData
@@ -473,7 +469,9 @@ const DataAccessRequestApplication = (props) => {
       }
     }
     formattedFormData.userId = userId
-    formattedFormData.daaIds = normalizeDaaIds(formattedFormData.daaIds)
+    formattedFormData.daaIds = [...new Set((formattedFormData.daaIds ?? [])
+      .map(id => Number(id))
+      .filter(id => Number.isInteger(id) && id > 0))]
 
     try {
       let referenceId = formData.referenceId
@@ -542,7 +540,9 @@ const DataAccessRequestApplication = (props) => {
     const formattedFormData = cloneDeep(formData)
     // DAR datasetIds needs to be a list of ids
     formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
-    formattedFormData.daaIds = normalizeDaaIds(formattedFormData.daaIds)
+    formattedFormData.daaIds = [...new Set((formattedFormData.daaIds ?? [])
+      .map(id => Number(id))
+      .filter(id => Number.isInteger(id) && id > 0))]
 
     // Make sure we navigate back to the current DAR after saving.
     try {
