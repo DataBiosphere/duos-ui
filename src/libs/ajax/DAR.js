@@ -44,9 +44,7 @@ export const DAR = {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, { action: 'submit' })
     const filteredDar = omit(dar, ['createDate', 'data_access_request_id'])
-    const url = DAAUtils.isEnabled()
-      ? `${await Config.getApiUrl()}/api/dar/v3`
-      : `${await Config.getApiUrl()}/api/dar/v2`
+    const url = `${await Config.getApiUrl()}/api/dar/v2`
     const res = await fetchPost(url, filteredDar, Config.authOpts())
     return res.data
   },
