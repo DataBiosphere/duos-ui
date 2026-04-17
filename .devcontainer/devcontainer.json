@@ -2,5 +2,16 @@
     "name": "Node.js",
     "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:24-trixie",
     "postCreateCommand": "./scripts/setup-devcontainer.sh",
-    "remoteUser": "node"
+    "remoteUser": "node",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "SonarSource.sonarlint-vscode"
+            ],
+            "settings": {
+                "sonarlint.pathToNodeExecutable": "/usr/local/bin/node",
+                "sonarlint.ls.javaHome": "/usr/lib/jvm/java-25-openjdk-arm64"
+            }
+        }
+    }
 }

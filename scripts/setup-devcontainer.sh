@@ -17,6 +17,25 @@ install_gcloud_cli() {
   sudo apt install -y google-cloud-cli
 }
 
+install_openjdk_25() {
+  sudo apt update
+  sudo apt install -y openjdk-25-jdk
+
+  java_bin="$(readlink -f "$(command -v javac)")"
+  java_home="${java_bin%/bin/javac}"
+
+  # Set JAVA_HOME in /etc/profile.d so it's available to all users in all shells
+  echo "export JAVA_HOME=\"$java_home\"" | sudo tee /etc/profile.d/java-home.sh >/dev/null
+  sudo chmod 644 /etc/profile.d/java-home.sh
+  
+  # Also update /etc/environment for non-interactive shells
+  if sudo grep -q '^JAVA_HOME=' /etc/environment; then
+    sudo sed -i "s|^JAVA_HOME=.*|JAVA_HOME=\"$java_home\"|" /etc/environment
+  else
+    echo "JAVA_HOME=\"$java_home\"" | sudo tee -a /etc/environment >/dev/null
+  fi
+}
+
 install_duos_cypress() {
   npm install
   npx cypress install
@@ -42,6 +61,7 @@ dev_container() {
   cypress_requirements
   gcloud_cli_requirements
   install_gcloud_cli
+  install_openjdk_25
   install_duos_cypress
   install_duos_config
 }
