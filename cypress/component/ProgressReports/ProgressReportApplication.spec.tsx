@@ -10,7 +10,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History
-  let isEnabledStub
+  let isEnabledStub: sinon.SinonStub
 
   beforeEach(() => {
     cy.initApplicationConfig()
@@ -353,7 +353,7 @@ describe('ProgressReportApplication - Component Tests', () => {
           },
         },
       },
-    } as CombinedDataAccessRequest
+    } as unknown as CombinedDataAccessRequest
     const props = {
       dar: fullDar,
       datasets,

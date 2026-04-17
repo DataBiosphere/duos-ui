@@ -6,8 +6,8 @@ describe('DataAccessAgreements Component Tests', () => {
   let saveSpy: () => void
   let attestSpy: () => void
   let cancelAttestSpy: () => void
-  let onDaaIdsChangeSpy
-  let getDaasStub
+  let onDaaIdsChangeSpy: sinon.SinonStub
+  let getDaasStub: sinon.SinonStub
 
   const mountComponent = (customProps = {}) => {
     const defaultProps = {
