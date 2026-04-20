@@ -10,7 +10,8 @@
             ],
             "settings": {
                 "sonarlint.pathToNodeExecutable": "/usr/local/bin/node",
-                "sonarlint.ls.javaHome": "/usr/lib/jvm/java-25-openjdk-arm64"
+                "sonarlint.ls.javaHome": "/usr/lib/jvm/java-25-openjdk-arm64",
+                "sonarlint.disableTelemetry": true
             }
         }
     }
