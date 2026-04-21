@@ -129,4 +129,17 @@ describe('Sign In: Component Loads', function () {
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').should('exist').and('be.disabled')
   })
+
+  it('Sign In: Handles AzureB2C authentication error', function () {
+    cy.stub(Auth, 'signIn').resolves(mockOidcUser)
+    cy.stub(Auth, 'signOut').as('signOut').resolves()
+    const azureError = new Error('AzureB2C authentication error')
+    cy.stub(User, 'getMe').rejects(azureError)
+
+    cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
+    cy.get('button').click()
+
+    cy.get('@signOut').should('have.been.called')
+    cy.contains('AzureB2C authentication error').should('exist')
+  })
 })
