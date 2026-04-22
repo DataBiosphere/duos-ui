@@ -611,6 +611,7 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
   other: boolean
   otherText: string
   ontologies: string[]
+  daaIds?: number[]
   forProfit: boolean
   oneGender: boolean
   gender: string

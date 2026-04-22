@@ -3,11 +3,14 @@ import { ProgressReportApplication } from 'src/pages/dar_application/ProgressRep
 import { CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject } from 'src/types/model'
 import { History, Location, Action } from 'history'
 import { Storage } from 'src/libs/storage'
+import { DAA } from 'src/libs/ajax/DAA'
+import { DAAUtils } from 'src/utils/DAAUtils'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 import { BrowserRouter } from 'react-router-dom'
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History
+  let isEnabledStub: sinon.SinonStub
 
   beforeEach(() => {
     cy.initApplicationConfig()
@@ -28,6 +31,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     })
 
     cy.stub(Storage, 'getCurrentUser').returns(researcher)
+    isEnabledStub = cy.stub(DAAUtils, 'isEnabled').returns(true)
 
     // Create mock history with stubs inside beforeEach
     mockHistory = {
@@ -212,6 +216,182 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     // Just check that the component renders by looking for the step container
     cy.get('.accordion-step-container').should('exist')
+  })
+
+  it('displays required DAA links for selected datasets', () => {
+    cy.stub(DAA, 'getDaas').resolves([
+      {
+        daaId: 100,
+        createUserId: 1,
+        createDate: 1,
+        dacs: [{ dacId: 2, dacName: 'Test DAC', dacEmail: 'dac@test.com' }],
+        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+    ])
+
+    isEnabledStub.returns(true)
+
+    mountComponent({}, true)
+
+    cy.contains('Required Data Access Agreements').should('exist')
+    cy.contains('TestDAA').should('exist')
+  })
+
+  it('renders progress report agreement text in the RequiredDAAs section', () => {
+    cy.stub(DAA, 'getDaas').resolves([
+      {
+        daaId: 100,
+        createUserId: 1,
+        createDate: 1,
+        dacs: [{ dacId: 2, dacName: 'Test DAC', dacEmail: 'dac@test.com' }],
+        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+    ])
+
+    isEnabledStub.returns(true)
+
+    mountComponent({}, true)
+
+    cy.contains('By submitting this progress report and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.').should('exist')
+  })
+
+  it('shows both required DAA step and Data Use Acknowledgements when the DAA feature is enabled', () => {
+    cy.stub(DAA, 'getDaas').resolves([
+      {
+        daaId: 100,
+        createUserId: 1,
+        createDate: 1,
+        dacs: [{ dacId: 2, dacName: 'Test DAC', dacEmail: 'dac@test.com' }],
+        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+    ])
+
+    isEnabledStub.returns(true)
+
+    const datasetsWithAcknowledgementRequirement: Dataset[] = [{
+      ...mockDatasets[0],
+      dataUse: {
+        ...mockDatasets[0].dataUse,
+        publicationResults: true,
+      },
+    }]
+
+    const props = {
+      dar: { ...baseDar } as CombinedDataAccessRequest,
+      datasets: datasetsWithAcknowledgementRequirement,
+      readOnlyMode: true,
+      history: mockHistory,
+      location,
+      researcher,
+      countriesOfOperation: [],
+    }
+
+    cy.mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
+
+    cy.contains('Step 2.1: Required Data Access Agreements').should('exist')
+  })
+
+  it('updates required DAA links when selected datasets change', () => {
+    cy.stub(DAA, 'getDaas').resolves([
+      {
+        daaId: 100,
+        createUserId: 1,
+        createDate: 1,
+        dacs: [{ dacId: 2, dacName: 'Test DAC', dacEmail: 'dac@test.com' }],
+        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+      {
+        daaId: 101,
+        createUserId: 1,
+        createDate: 1,
+        dacs: [{ dacId: 3, dacName: 'Other DAC', dacEmail: 'other@test.com' }],
+        file: { fileStorageObjectId: 2, entityId: '2', fileName: 'OtherDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+    ])
+
+    const datasets: Dataset[] = [
+      {
+        ...mockDatasets[0],
+        datasetId: 1,
+        datasetIdentifier: 'DATASET-1',
+        datasetName: 'Test Dataset 1',
+        dacId: 2,
+      } as Dataset,
+      {
+        ...mockDatasets[0],
+        datasetId: 2,
+        datasetIdentifier: 'DATASET-2',
+        datasetName: 'Test Dataset 2',
+        dacId: 3,
+      } as Dataset,
+    ]
+
+    const fullDar = {
+      ...baseDar,
+      datasetIds: [1, 2],
+      elections: {
+        1: {
+          electionId: 1,
+          datasetId: 1,
+          electionType: 'DataAccess',
+          votes: {
+            1: {
+              type: VOTE_TYPES.FINAL,
+              vote: true,
+            },
+          },
+        },
+        2: {
+          electionId: 2,
+          datasetId: 2,
+          electionType: 'DataAccess',
+          votes: {
+            1: {
+              type: VOTE_TYPES.FINAL,
+              vote: true,
+            },
+          },
+        },
+      },
+    } as unknown as CombinedDataAccessRequest
+    const props = {
+      dar: fullDar,
+      datasets,
+      readOnlyMode: false,
+      history: mockHistory,
+      location,
+      researcher,
+      countriesOfOperation: [],
+    }
+
+    cy.mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
+
+    cy.contains('Required Data Access Agreements').should('exist')
+    cy.contains('TestDAA').should('exist')
+    cy.contains('OtherDAA').should('exist')
+
+    cy.get('#DATASET-1_summary').click()
+
+    cy.contains('TestDAA').should('exist')
+    cy.contains('OtherDAA').should('exist')
+  })
+
+  it('hides the required DAA step when DAAUtils is disabled', () => {
+    cy.stub(DAA, 'getDaas').resolves([
+      {
+        daaId: 100,
+        createUserId: 1,
+        createDate: 1,
+        dacs: [{ dacId: 2, dacName: 'Test DAC', dacEmail: 'dac@test.com' }],
+        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+    ])
+
+    isEnabledStub.returns(false)
+
+    mountComponent({}, true)
+
+    cy.contains('Required Data Access Agreements').should('not.exist')
   })
 
   it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is undefined or empty', () => {

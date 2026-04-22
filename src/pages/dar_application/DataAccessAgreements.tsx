@@ -1,10 +1,41 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Notifications } from 'src/libs/utils'
 import { DAA } from 'src/libs/ajax/DAA'
 import RequiredDAAs from './RequiredDAAs'
 import { extractError } from 'src/utils/ErrorUtils'
-import 'src/pages/dar_application/dar_application.css'
 import { DataAccessAgreement, Dataset } from 'src/types/model'
+
+const getDisplayedDaaIds = (availableDatasets: Dataset[], availableDaas: DataAccessAgreement[]): number[] => {
+  const seenFileNames = new Set<string>()
+  const displayedIds: number[] = []
+
+  availableDatasets.forEach((dataset) => {
+    if (!dataset.dacId) {
+      return
+    }
+
+    const matchingDaa = availableDaas.find(daa => daa.dacs?.some(d => d.dacId === dataset.dacId))
+    if (!matchingDaa) {
+      return
+    }
+
+    const rawFileName = matchingDaa.file?.fileName
+    if (!rawFileName) {
+      return
+    }
+
+    const parts = rawFileName.split('.')
+    const baseFileName = parts[0]
+    if (!baseFileName || seenFileNames.has(baseFileName)) {
+      return
+    }
+
+    seenFileNames.add(baseFileName)
+    displayedIds.push(matchingDaa.daaId)
+  })
+
+  return displayedIds
+}
 
 interface DataAccessAgreementsProps {
   save: () => void
@@ -13,6 +44,7 @@ interface DataAccessAgreementsProps {
   isAttested: boolean
   cancelAttest: () => void
   datasets: Dataset[]
+  onDaaIdsChange?: (daaIds: number[]) => void
 }
 
 export const DataAccessAgreements = ({
@@ -22,8 +54,10 @@ export const DataAccessAgreements = ({
   isAttested,
   cancelAttest,
   datasets,
+  onDaaIdsChange,
 }: DataAccessAgreementsProps) => {
   const [daas, setDaas] = useState<DataAccessAgreement[]>([])
+  const memoizedDisplayedIds = useMemo(() => getDisplayedDaaIds(datasets, daas), [datasets, daas])
 
   useEffect(() => {
     const init = async () => {
@@ -40,6 +74,12 @@ export const DataAccessAgreements = ({
     }
     init()
   }, [])
+
+  useEffect(() => {
+    if (onDaaIdsChange) {
+      onDaaIdsChange(memoizedDisplayedIds)
+    }
+  }, [memoizedDisplayedIds, onDaaIdsChange])
 
   return (
     <div className="dar-step-card">
@@ -87,7 +127,11 @@ export const DataAccessAgreements = ({
         </ol>
       </div>
 
-      <RequiredDAAs datasets={datasets} daas={daas} />
+      <RequiredDAAs
+        datasets={datasets}
+        daas={daas}
+        agreementText="By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below."
+      />
 
       <div className="flex flex-row" style={{ justifyContent: 'around', paddingTop: '4rem' }}>
         <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>

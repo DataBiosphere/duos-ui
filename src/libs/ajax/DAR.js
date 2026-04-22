@@ -2,7 +2,6 @@ import { fileDownload } from '../../utils/FileDownload'
 import { omit } from 'lodash'
 import { Config } from '../config'
 import { isFileEmpty } from '../utils'
-import { DAAUtils } from '../../utils/DAAUtils'
 import { Metrics } from './Metrics'
 import eventList from '../events'
 import { fetchGet, fetchMultipart, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchAdapter'
@@ -44,9 +43,7 @@ export const DAR = {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, { action: 'submit' })
     const filteredDar = omit(dar, ['createDate', 'data_access_request_id'])
-    const url = DAAUtils.isEnabled()
-      ? `${await Config.getApiUrl()}/api/dar/v3`
-      : `${await Config.getApiUrl()}/api/dar/v2`
+    const url = `${await Config.getApiUrl()}/api/dar/v2`
     const res = await fetchPost(url, filteredDar, Config.authOpts())
     return res.data
   },
