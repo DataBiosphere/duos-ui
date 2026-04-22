@@ -10,9 +10,15 @@
             ],
             "settings": {
                 "sonarlint.pathToNodeExecutable": "/usr/local/bin/node",
-                "sonarlint.ls.javaHome": "/usr/lib/jvm/java-25-openjdk-arm64",
+                "sonarlint.ls.javaHome": "/usr/local/sdkman/candidates/java/current",
                 "sonarlint.disableTelemetry": true
             }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "25",
+            "jdkDistro": "tem"
         }
     }
 }
