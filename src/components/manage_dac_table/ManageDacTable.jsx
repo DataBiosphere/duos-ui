@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { DAC } from 'src/libs/ajax/DAC'
 import { filter, isNil } from 'lodash'
 import { recalculateVisibleTable, goToPage as updatePage } from 'src/libs/utils'
@@ -200,8 +200,6 @@ export const ManageDacTable = function ManageDacTable(props) {
       />
       <ReactTooltip
         place="left"
-        effect="solid"
-        multiline={true}
         className="tooltip-wrapper"
       />
     </>
