@@ -178,8 +178,6 @@ export default function SimpleTable(props) {
       </div>
       <ReactTooltip
         place="left"
-        effect="solid"
-        multiline={true}
         className="tooltip-wrapper"
       />
     </div>

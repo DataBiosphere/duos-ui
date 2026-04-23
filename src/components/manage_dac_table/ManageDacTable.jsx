@@ -200,8 +200,6 @@ export const ManageDacTable = function ManageDacTable(props) {
       />
       <ReactTooltip
         place="left"
-        effect="solid"
-        multiline={true}
         className="tooltip-wrapper"
       />
     </>

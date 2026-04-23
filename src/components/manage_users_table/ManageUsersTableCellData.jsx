@@ -19,8 +19,6 @@ export function usernameCellData({ displayName, userId, label = 'user-name' }) {
         <ReactTooltip
           id={`tip_${userId}_edit`}
           place="right"
-          effect="solid"
-          multiline={true}
           className="tooltip-wrapper"
         />
       </div>

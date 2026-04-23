@@ -152,11 +152,10 @@ export default function ERACommons({
               >
                 <span
                   className="glyphicon glyphicon-remove-circle"
-                  data-tip="Clear account"
-                  data-for="tip_clear_era_commons_link"
+                  data-tooltip-id="tip_clear_era_commons_link"
                 />
               </AsyncSpinnerButton>
-              <ReactTooltip place="right" effect="solid" id="tip_clear_era_commons_link">
+              <ReactTooltip place="right" id="tip_clear_era_commons_link">
                 Clear {accountLabel} Account Link.
                 <br />
                 This will <strong>remove</strong> your {accountLabel} account link from your profile and will be

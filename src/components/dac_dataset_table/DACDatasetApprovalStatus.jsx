@@ -89,7 +89,6 @@ export default function DACDatasetApprovalStatus(props) {
       </Button>
       <ReactTooltip
         place="left"
-        effect="solid"
         id={`approve-dataset-button-${dataset.datasetId}`}
       >
         Approve dataset for Data Access Committee
@@ -105,7 +104,6 @@ export default function DACDatasetApprovalStatus(props) {
       </Button>
       <ReactTooltip
         place="right"
-        effect="solid"
         id={`reject-dataset-button-${dataset.datasetId}`}
       >
         Reject dataset for Data Access Committee

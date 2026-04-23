@@ -202,13 +202,12 @@ export const columnConfig: ColumnConfig = {
         if (fullNames.length > 40) {
           return (
             <div>
-              <span data-tip data-for={`signing-officials-tooltip-${row.id}`} className="tooltip-text">
+              <span data-tooltip-id={`signing-officials-tooltip-${row.id}`} className="tooltip-text">
                 {fullNames.slice(0, 40)}
                 ...
               </span>
               <ReactTooltip
                 place="right"
-                effect="solid"
                 id={`signing-officials-tooltip-${row.id}`}
               >
                 <span>

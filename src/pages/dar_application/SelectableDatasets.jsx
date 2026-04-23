@@ -62,7 +62,7 @@ export default function SelectableDatasets(props) {
             )}
             {!isDeletable
               && (
-                <ReactTooltip id="tip_last" place="right" effect="solid">
+                <ReactTooltip id="tip_last" place="right">
                   The last dataset can not be deleted
                 </ReactTooltip>
               )}

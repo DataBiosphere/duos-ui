@@ -303,7 +303,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
         header={`${currentCard.userName ?? currentCard.userEmail}`}
         onConfirm={() => deleteOnClick(currentCard, libraryCards, setLibraryCards, setShowConfirmation)}
       />
-      <ReactTooltip place="left" effect="solid" multiline={true} className="tooltip-wrapper" />
+      <ReactTooltip place="left" className="tooltip-wrapper" anchorSelect="[data-tooltip-content]" />
     </div>
   )
 }

@@ -82,7 +82,6 @@ export function createDataUseDisplay({
       </span>
       <ReactTooltip
         place={tooltipPlace}
-        effect="solid"
         id={`dataset-data-use-${dataset.datasetId}`}
       >
         <ul>
