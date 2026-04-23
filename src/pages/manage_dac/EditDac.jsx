@@ -5,26 +5,26 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, PromiseSerial } from 'src/libs/utils'
 import { Alert } from 'src/components/Alert'
-import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
 import editDACIcon from 'src/images/dac_icon.svg'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Spinner } from 'src/components/Spinner'
 import { Styles } from 'src/libs/theme'
 import DUOSUniformDataAccessAgreement from 'src/assets/DUOS_Uniform_Data_Access_Agreement.pdf'
-import PublishIcon from '@mui/icons-material/Publish'
-import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
 import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DocumentUpload } from 'src/components/forms/DocumentUpload'
+import { FileCategory } from 'src/libs/ajax/FileStorageObject'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
+const CHAIRPERSON = 'Chairperson'
 
 export default function EditDac() {
   const params = useParams()
   const dacId = params.dacId
   const navigate = useNavigate()
-  const location = useLocation()
   const [state, setState] = useState({
     error: {},
     dirtyFlag: false,
@@ -40,14 +40,13 @@ export default function EditDac() {
   const [isLoading, setIsLoading] = useState(true)
   const [newDaaId, setNewDaaId] = useState(null)
   const [selectedDaa, setSelectedDaa] = useState(null)
-  const [createdDaa, setCreatedDaa] = useState(null)
-  const [uploadedDAAFile, setUploadedDaaFile] = useState(null)
   const [daaFileData, setDaaFileData] = useState(null)
-  const [showUploadModal, setShowUploadModal] = useState(false)
   const [fetchedDac, setFetchedDac] = useState(null)
   const [broadDaa, setBroadDaa] = useState(null)
   const [matchingDaas, setMatchingDaas] = useState([])
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
+  const user = Storage.getCurrentUser()
+  const canUploadDAA = user?.isAdmin ?? user?.roles?.some(role => String(role.dacId) === dacId && role.name === CHAIRPERSON)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,7 +84,6 @@ export default function EditDac() {
 
   const okHandler = async (event) => {
     event.preventDefault()
-    const user = Storage.getCurrentUser()
     let currentDac = state.dac
     if (state.dirtyFlag) {
       if (dacId !== undefined) {
@@ -98,8 +96,7 @@ export default function EditDac() {
         }
         else if (user.isAdmin && daaFileData !== null && selectedDaa === undefined) {
           currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email)
-          const createdDaa = await DAA.createDaa(daaFileData, currentDac.dacId)
-          setCreatedDaa(createdDaa.data)
+          await DAA.createDaa(daaFileData, currentDac.dacId)
         }
         else {
           if (user.isAdmin) {
@@ -283,26 +280,16 @@ export default function EditDac() {
     }
   }
 
-  const handleAttachment = async (attachment) => {
-    if (dacId !== undefined) {
-      setUploadedDaaFile(attachment)
-      setDaaFileData(attachment[0])
-      const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId)
-      setCreatedDaa(createdDaa.data)
-      setState(prev => ({
-        ...prev,
-        dirtyFlag: true,
-      }))
-    }
-    else {
-      setUploadedDaaFile(attachment)
-      setDaaFileData(attachment[0])
-      setState(prev => ({
-        ...prev,
-        dirtyFlag: true,
-      }))
+  const handleUploadedDaaFiles = (files) => {
+    const firstFile = files?.[0]?.file ?? null
+    setDaaFileData(firstFile)
+    if (firstFile) {
       setSelectedDaa(undefined)
     }
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true,
+    }))
   }
 
   const handleDaaChange = (daaId) => {
@@ -550,132 +537,96 @@ export default function EditDac() {
                 </div>
               </div>
               <div style={{ flexBasis: '50%', flexGrow: 0, flexShrink: 0 }}>
-                <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }}>
-                  Select a Data Access
-                  Agreement (DAA) to govern access to your DAC&apos;s datasets
-                </label>
-                <ul role="menu" style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
-                  <form>
-                    <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                      <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                        <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
-                          Use default
-                          agreement
+                {dacId === undefined
+                  ? (
+                      <>
+                        <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }}>
+                          Select a Data Access
+                          Agreement (DAA) to govern access to your DAC&apos;s datasets
                         </label>
-                        <br />
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input
-                            type="radio"
-                            name="daa"
-                            checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId}
-                            onChange={() => handleDaaChange(broadDaa.daaId)}
-                            style={{ accentColor: '#00609f' }}
-                            data-cy="daa_radio"
-                          />
-                          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                            <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                              DUOS Uniform DAA
-                            </div>
-                            <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                              <div style={{ marginLeft: '10px' }}>
-                                <a
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  href={DUOSUniformDataAccessAgreement}
-                                  className="button button-white"
-                                  style={{ padding: '10px 12px' }}
-                                >
-                                  <span className="glyphicon glyphicon-download-alt"></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </label>
-                    </li>
-                    <hr />
-                    <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                      <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                        <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
-                          Use your own
-                          agreement
-                        </label>
-                        <br />
-                        {
-                          matchingDaas.map((daa, index) => (
-                            <DaaItem key={index} specificDaa={daa} />
-                          ))
-                        }
-                        {uploadedDAAFile !== null
-                          && (
-                            <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px' }}>
-                              <input
-                                type="radio"
-                                name="daa"
-                                checked={uploadedDAAFile || selectedDaa.daaId === createdDaa.daaId}
-                                onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange(undefined)}
-                                style={{ accentColor: '#00609f' }}
-                              />
-                              <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                                <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                  <div className="row" style={{ paddingLeft: '15px' }}>
-                                    {daaFileData.name}
-                                  </div>
-                                  <div className="row" style={{ fontSize: '1rem', paddingLeft: '15px' }}>
-                                    Uploaded on
-                                    {' '}
-                                    {new Date().toLocaleDateString()}
+                        <ul role="menu" style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
+                          <form>
+                            <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
+                              <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                                <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
+                                  Use default
+                                  agreement
+                                </label>
+                                <br />
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <input
+                                    type="radio"
+                                    name="daa"
+                                    checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId}
+                                    onChange={() => handleDaaChange(broadDaa.daaId)}
+                                    style={{ accentColor: '#00609f' }}
+                                    data-cy="daa_radio"
+                                  />
+                                  <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+                                    <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+                                      DUOS Uniform DAA
+                                    </div>
+                                    <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+                                      <div style={{ marginLeft: '10px' }}>
+                                        <a
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          href={DUOSUniformDataAccessAgreement}
+                                          className="button button-white"
+                                          style={{ padding: '10px 12px' }}
+                                        >
+                                          <span className="glyphicon glyphicon-download-alt"></span>
+                                        </a>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                                <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                  <div style={{ marginLeft: '10px' }}>
-                                    <a
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      download={uploadedDAAFile[0].name}
-                                      href={URL.createObjectURL(uploadedDAAFile[0])}
-                                      className="button button-white"
-                                      style={{ padding: '10px 12px' }}
-                                    >
-                                      <span className="glyphicon glyphicon-download-alt"></span>
-                                    </a>
-                                  </div>
+                              </label>
+                            </li>
+                            <hr />
+                            <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
+                              <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                                <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
+                                  Use your own
+                                  agreement
+                                </label>
+                                <br />
+                                {
+                                  matchingDaas.map((daa, index) => (
+                                    <DaaItem key={index} specificDaa={daa} />
+                                  ))
+                                }
+                                <div style={{ paddingTop: '15px' }}>
+                                  <DocumentUpload
+                                    entity="dac"
+                                    entityId={state.dac?.dacId || 'new-dac'}
+                                    mode="deferred"
+                                    categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
+                                    onFilesReady={handleUploadedDaaFiles}
+                                  />
                                 </div>
-                              </div>
-                            </div>
-                          )}
-                        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
-                          <button
-                            className="button button-white"
-                            onClick={(event) => {
-                              event.preventDefault()
-                              setShowUploadModal(true)
-                            }}
-                            data-cy="daa_upload_button"
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <PublishIcon style={{ scale: '1.5' }} />
-                              <div style={{ marginLeft: '10px' }}>
-                                Upload file
-                              </div>
-                            </div>
-                          </button>
-                        </div>
-                      </label>
-                    </li>
-                  </form>
-                </ul>
+                              </label>
+                            </li>
+                          </form>
+                        </ul>
+                      </>
+                    )
+                  : (
+                      <>
+                        <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }}>
+                          Data Access Agreement
+                        </label>
+                        <DocumentUpload
+                          entity="dac"
+                          entityId={dacId}
+                          mode="immediate"
+                          categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
+                          readOnly={!canUploadDAA}
+                        />
+                      </>
+                    )}
               </div>
             </div>
-            {showUploadModal && (
-              <UploadDaaModal
-                showModal={showUploadModal}
-                setShowModal={setShowUploadModal}
-                userRole={location?.state?.userRole}
-                onCloseRequest={() => setShowUploadModal(false)}
-                onAttachmentChange={handleAttachment}
-              />
-            )}
           </div>
         )
   )

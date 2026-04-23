@@ -21,6 +21,7 @@ describe('EditDAC Tests', () => {
       cy.stub(Storage, 'getCurrentUser').returns(user)
       cy.stub(DAC, 'get').returns(dac)
       cy.stub(DAA, 'getDaas').returns([])
+      cy.intercept('GET', '**/api/dac/*/document', [])
       cy.mount(
         <MemoryRouter initialEntries={[`/manage_edit_dac_daa/${dac.dacId}`]}>
           <Routes>
@@ -34,8 +35,15 @@ describe('EditDAC Tests', () => {
       cy.get('[data-cy="dac_email"]').should('not.be.disabled')
       cy.get('[data-cy="btn_save"]').should('not.be.disabled')
       cy.get('[data-cy="btn_cancel"]').should('not.be.disabled')
-      cy.get('[data-cy="daa_radio"]').should('not.be.disabled')
-      cy.get('[data-cy="daa_upload_button"]').should('not.be.disabled')
+      const isChairRole = Boolean(user.isChairPerson || user.roles?.some(role => role.name === 'Chairperson'))
+      if (isChairRole) {
+        cy.get('[data-cy="document-upload-fixed-category"]').should('contain.text', 'Data Access Agreement')
+        cy.get('[data-cy="document-upload-dropzone"]').should('exist')
+      }
+      else {
+        cy.get('[data-cy="document-upload-dropzone"]').should('not.exist')
+        cy.get('[data-cy="document-upload-empty-readonly"]').should('exist')
+      }
     })
   })
 
