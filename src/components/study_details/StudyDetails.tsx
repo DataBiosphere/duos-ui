@@ -154,7 +154,7 @@ export const StudyDetails = () => {
         <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
           {study?.studyName}
         </div>
-        <Section>
+        <Section style={{ paddingRight: 100 }}>
           {study?.description}
         </Section>
         {!Number.isNaN(participantCount) && (
