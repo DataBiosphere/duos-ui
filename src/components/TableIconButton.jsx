@@ -1,10 +1,8 @@
 import React from 'react'
-import { useEffect } from 'react'
 import { Styles } from '../libs/theme'
 import { applyHoverEffects, setDivAttributes, setStyle } from '../libs/utils'
 import { makeStyles } from 'tss-react/mui'
 import { isNil } from 'lodash'
-import ReactTooltip from 'react-tooltip'
 
 const useStyles = makeStyles()({
   root: {
@@ -16,10 +14,6 @@ const useStyles = makeStyles()({
 })
 
 export default function TableIconButton(props) {
-  useEffect(() => {
-    ReactTooltip.rebuild()
-  }, [])
-
   const onMouseEnterFn = (e) => {
     e.target.style.cursor = 'pointer'
     applyHoverEffects(e, hoverStyle)
