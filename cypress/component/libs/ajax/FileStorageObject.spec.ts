@@ -48,15 +48,6 @@ describe('FileStorageObject ajax', () => {
     })
   })
 
-  const jsonResponse = (body: unknown, status = 200) => {
-    return cy.window().then((win) =>
-      new win.Response(JSON.stringify(body), {
-        status,
-        headers: { 'content-type': 'application/json' },
-      }),
-    )
-  }
-
   describe('uploadDocument', () => {
     it('sends multipart POST and returns the created FSO', () => {
       cy.window().then((win) => {

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import MenuIcon from '@mui/icons-material/Menu'
 import { Box, IconButton } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
@@ -151,7 +152,6 @@ const navbarDuosText: React.CSSProperties = {
   verticalAlign: 'text-bottom',
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   const { classes } = props
   const navigate = useNavigate()
@@ -401,4 +401,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   )
 }
 
-export default withStyles(DuosHeader, styles)
+const StyledDuosHeader = withStyles(DuosHeader, styles)
+
+export default StyledDuosHeader

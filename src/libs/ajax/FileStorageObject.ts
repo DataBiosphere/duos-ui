@@ -77,7 +77,7 @@ export async function getDocumentFile(
     responseType: 'blob',
     headers: {
       ...Config.authOpts().headers,
-      'Accept': 'application/octet-stream',
+      Accept: 'application/octet-stream',
     },
   })
   return res.data
