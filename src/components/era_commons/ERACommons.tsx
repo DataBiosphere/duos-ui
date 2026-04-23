@@ -6,7 +6,7 @@ import '../Animations.css'
 import { Storage } from 'src/libs/storage'
 import { extractEraAuthenticationState, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { DuosUser } from 'src/types/model'
 

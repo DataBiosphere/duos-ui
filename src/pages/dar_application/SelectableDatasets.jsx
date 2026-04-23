@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import DeleteIcon from '@mui/icons-material/Delete'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash'
 
 export default function SelectableDatasets(props) {

@@ -2,7 +2,7 @@ import React from 'react'
 import { isNil, map, sortedUniq } from 'lodash'
 import { styles } from './manageUsersTableUtils'
 import { Link } from 'react-router-dom'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 
 export function usernameCellData({ displayName, userId, label = 'user-name' }) {
   return {

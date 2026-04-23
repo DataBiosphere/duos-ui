@@ -1,4 +1,4 @@
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import React from 'react'
 import { InstitutionInterface, SimplifiedDuosUser } from 'src/types/model'
 import { Link } from 'react-router-dom'

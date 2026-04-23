@@ -1,7 +1,7 @@
 import React from 'react'
 import { isNil } from 'lodash'
 import { Styles } from '../libs/theme'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material'
 import { SpinnerComponent } from './SpinnerComponent'
 import loadingImage from '../images/loading-indicator.svg'

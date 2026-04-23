@@ -1,5 +1,5 @@
 import React, { CSSProperties, ReactNode } from 'react'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { DatasetTerm } from 'src/types/model'
 
 interface DataUseCode {

@@ -1,6 +1,4 @@
-import React from 'react'
-import { useEffect, useState } from 'react'
-import ReactTooltip from 'react-tooltip'
+import React, { useState } from 'react'
 
 export const ReadMore = ({
   inline = false,
@@ -15,10 +13,6 @@ export const ReadMore = ({
   readLessText = 'Read Less',
 }) => {
   const [expanded, setExpanded] = useState(false)
-
-  useEffect(() => {
-    ReactTooltip.rebuild()
-  })
 
   const getUnderLimit = () => {
     return !content || content.length <= charLimit

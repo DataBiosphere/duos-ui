@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import React, { useCallback, useState } from 'react'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import {
   calcTablePageCount,
   calcVisibleWindow,
