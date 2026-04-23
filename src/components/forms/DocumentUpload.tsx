@@ -40,7 +40,7 @@ export interface QueueEntry {
   errorType?: UploadErrorType
 }
 
-export interface DeferredFileRef {
+export interface FileRef {
   id: string
   file: File
   category: FileCategory
@@ -56,7 +56,9 @@ export interface Props {
   entity: EntityType
   entityId: string
   mode?: 'immediate' | 'deferred'
-  onFilesReady?: (files: DeferredFileRef[]) => void
+  onFilesReady?: (files: FileRef[]) => void
+  categories?: FileCategory[]
+  readOnly?: boolean
   api?: DocumentUploadApi
 }
 
@@ -79,15 +81,9 @@ const PROGRESS_INTERVAL_MS = 180
 const MAX_SIMULATED_PROGRESS = 92
 
 const defaultDocumentUploadApi: DocumentUploadApi = {
-  uploadDocument: (...args: Parameters<typeof uploadDocument>) => {
-    return uploadDocument(...args)
-  },
-  deleteDocument: (...args: Parameters<typeof deleteDocument>) => {
-    return deleteDocument(...args)
-  },
-  listDocuments: (...args: Parameters<typeof listDocuments>) => {
-    return listDocuments(...args)
-  },
+  uploadDocument: (...args: Parameters<typeof uploadDocument>) => uploadDocument(...args),
+  deleteDocument: (...args: Parameters<typeof deleteDocument>) => deleteDocument(...args),
+  listDocuments: (...args: Parameters<typeof listDocuments>) => listDocuments(...args),
 }
 
 const formatBytes = (bytes: number): string => {
@@ -111,7 +107,7 @@ const createLocalId = (): string => {
   return `document-upload-${Date.now()}-${Math.round(Math.random() * 100000)}`
 }
 
-const toDeferredFiles = (docs: QueueEntry[]): DeferredFileRef[] => {
+const toDeferredFiles = (docs: QueueEntry[]): FileRef[] => {
   return docs.map(doc => ({
     id: doc.id,
     file: doc.file,
@@ -142,31 +138,21 @@ const getStatusText = (doc: QueueEntry): string => {
 
 const getErrorMessage = (errorType?: UploadErrorType): string => {
   if (errorType === 'permission') {
-    return 'You do not have permission to upload this document.'
+    return 'No permission'
   }
   if (errorType === 'validation') {
-    return 'The document was rejected by the server validation rules.'
+    return 'Invalid document type'
   }
-  return 'Something went wrong while uploading this document.'
+  return 'Upload failed'
 }
 
-const advanceUploadingProgress = (
-  doc: QueueEntry,
-  id: string,
-): QueueEntry => {
+const advanceUploadingProgress = (doc: QueueEntry, id: string): QueueEntry => {
   if (doc.id !== id || doc.status !== 'uploading') {
     return doc
   }
 
-  const nextProgress = Math.min(
-    doc.progress + 7 + Math.random() * 13,
-    MAX_SIMULATED_PROGRESS,
-  )
-
-  return {
-    ...doc,
-    progress: nextProgress,
-  }
+  const nextProgress = Math.min(doc.progress + 7 + Math.random() * 13, MAX_SIMULATED_PROGRESS)
+  return { ...doc, progress: nextProgress }
 }
 
 const advanceProgressForTick = (currentDocs: QueueEntry[], id: string): QueueEntry[] => {
@@ -178,6 +164,8 @@ export const DocumentUpload = ({
   entityId,
   mode = 'immediate',
   onFilesReady,
+  categories,
+  readOnly = false,
   api = defaultDocumentUploadApi,
 }: Props): React.JSX.Element => {
   const [selectedType, setSelectedType] = useState<FileCategory | null>(null)
@@ -185,10 +173,30 @@ export const DocumentUpload = ({
   const [isDragActive, setIsDragActive] = useState<boolean>(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const progressTimersRef = useRef<Record<string, ReturnType<typeof globalThis.setInterval>>>({})
+  const lastUploadedSnapshotRef = useRef<string>('')
+
+  const allowedCategories = useMemo((): FileCategory[] => {
+    if (categories?.length) {
+      return [...new Set(categories)]
+    }
+    return DOCUMENT_TYPES.map(({ id }) => id)
+  }, [categories])
+
+  useEffect(() => {
+    if (allowedCategories.length === 1) {
+      setSelectedType(allowedCategories[0])
+      return
+    }
+
+    setSelectedType(current => current && allowedCategories.includes(current) ? current : null)
+  }, [allowedCategories])
+
+  const selectedCategory = selectedType
+  const showTypeSelection = allowedCategories.length > 1
 
   const selectedTypeLabel = useMemo(() => {
-    return selectedType ? getDocumentTypeLabel(selectedType) : null
-  }, [selectedType])
+    return selectedCategory ? getDocumentTypeLabel(selectedCategory) : null
+  }, [selectedCategory])
 
   const clearProgressTimer = useCallback((id: string): void => {
     const timerId = progressTimersRef.current[id]
@@ -205,7 +213,6 @@ export const DocumentUpload = ({
     }
   }, [clearProgressTimer])
 
-  // Load existing documents on mount
   useEffect(() => {
     if (mode !== 'immediate') {
       return
@@ -225,7 +232,6 @@ export const DocumentUpload = ({
         setDocs(mapped)
       }
       catch (error) {
-        // Log error but don't block UI
         console.error('Failed to load documents:', error)
       }
     }
@@ -233,10 +239,19 @@ export const DocumentUpload = ({
     void loadDocuments()
   }, [api, entity, entityId, mode])
 
-  // Clear queued documents when changing selected type
   useEffect(() => {
-    setDocs([])
-  }, [selectedType])
+    const uploadedDocs = docs.filter(doc => doc.status === 'uploaded')
+    const snapshot = uploadedDocs.map(doc => `${doc.id}:${doc.fsoId ?? 'local'}`).join('|')
+
+    if (snapshot === lastUploadedSnapshotRef.current) {
+      return
+    }
+
+    lastUploadedSnapshotRef.current = snapshot
+    const uploadedFiles = toDeferredFiles(uploadedDocs)
+
+    onFilesReady?.(uploadedFiles)
+  }, [docs, onFilesReady])
 
   const startProgressSimulation = useCallback((id: string): void => {
     clearProgressTimer(id)
@@ -251,66 +266,50 @@ export const DocumentUpload = ({
     try {
       const uploadedDocument = await api.uploadDocument(entity, entityId, entry.file, entry.typeId)
       clearProgressTimer(entry.id)
-      setDocs((currentDocs) => {
-        return currentDocs.map((doc) => {
-          if (doc.id !== entry.id) {
-            return doc
-          }
-          return {
+      setDocs(currentDocs => currentDocs.map(doc => doc.id === entry.id
+        ? {
             ...doc,
             status: 'uploaded',
             progress: 100,
             fsoId: uploadedDocument.fileStorageObjectId,
             errorType: undefined,
           }
-        })
-      })
+        : doc))
     }
     catch (error) {
       clearProgressTimer(entry.id)
-      setDocs((currentDocs) => {
-        return currentDocs.map((doc) => {
-          if (doc.id !== entry.id) {
-            return doc
-          }
-          return {
+      setDocs(currentDocs => currentDocs.map(doc => doc.id === entry.id
+        ? {
             ...doc,
             status: 'error',
             progress: 0,
             errorType: mapUploadError(error),
           }
-        })
-      })
+        : doc))
     }
   }, [api, clearProgressTimer, entity, entityId, startProgressSimulation])
 
   const addFiles = useCallback((fileList: FileList): void => {
-    if (!selectedType) {
+    if (!selectedCategory || readOnly) {
       return
     }
 
     const newDocs = Array.from(fileList).map<QueueEntry>(file => ({
       id: createLocalId(),
       file,
-      typeId: selectedType,
+      typeId: selectedCategory,
       status: mode === 'deferred' ? 'uploaded' : 'uploading',
       progress: mode === 'deferred' ? 100 : 0,
     }))
 
-    setDocs((currentDocs) => {
-      const nextDocs = [...currentDocs, ...newDocs]
-      if (mode === 'deferred') {
-        onFilesReady?.(toDeferredFiles(nextDocs))
-      }
-      return nextDocs
-    })
+    setDocs(currentDocs => [...currentDocs, ...newDocs])
 
     if (mode === 'immediate') {
       newDocs.forEach((doc) => {
         void uploadFile(doc)
       })
     }
-  }, [mode, onFilesReady, selectedType, uploadFile])
+  }, [mode, readOnly, selectedCategory, uploadFile])
 
   const handleFileInputChange = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files?.length) {
@@ -321,16 +320,23 @@ export const DocumentUpload = ({
 
   const handleDrop = useCallback((event: DragEvent<HTMLDivElement>): void => {
     event.preventDefault()
+    if (readOnly) {
+      return
+    }
     setIsDragActive(false)
-    if (!selectedType) {
+    if (!selectedCategory) {
       return
     }
     if (event.dataTransfer.files?.length) {
       addFiles(event.dataTransfer.files)
     }
-  }, [addFiles, selectedType])
+  }, [addFiles, readOnly, selectedCategory])
 
   const handleRemove = useCallback(async (id: string): Promise<void> => {
+    if (readOnly) {
+      return
+    }
+
     const docToRemove = docs.find(doc => doc.id === id)
     if (!docToRemove) {
       return
@@ -347,17 +353,11 @@ export const DocumentUpload = ({
       }
     }
 
-    setDocs((currentDocs) => {
-      const nextDocs = currentDocs.filter(doc => doc.id !== id)
-      if (mode === 'deferred') {
-        onFilesReady?.(toDeferredFiles(nextDocs))
-      }
-      return nextDocs
-    })
-  }, [api, clearProgressTimer, docs, entity, entityId, mode, onFilesReady])
+    setDocs(currentDocs => currentDocs.filter(doc => doc.id !== id))
+  }, [api, clearProgressTimer, docs, entity, entityId, mode, readOnly])
 
   const handleRetry = useCallback((id: string): void => {
-    if (mode !== 'immediate') {
+    if (mode !== 'immediate' || readOnly) {
       return
     }
 
@@ -374,16 +374,87 @@ export const DocumentUpload = ({
       fsoId: undefined,
     }
 
-    setDocs((currentDocs) => {
-      return currentDocs.map(doc => doc.id === id ? resetEntry : doc)
-    })
+    setDocs(currentDocs => currentDocs.map(doc => doc.id === id ? resetEntry : doc))
     void uploadFile(resetEntry)
-  }, [docs, mode, uploadFile])
+  }, [docs, mode, readOnly, uploadFile])
+
+  const emptyState = readOnly
+    ? <Typography variant="body2" color="text.secondary" data-cy="document-upload-empty-readonly">No uploaded documents</Typography>
+    : null
+
+  const queueSection = (
+    docs.length > 0
+      ? (
+          <Box sx={{ mt: readOnly ? 0 : 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Uploaded</Typography>
+              <Chip label={docs.length} size="small" variant="outlined" sx={{ minWidth: 24 }} data-cy="document-upload-count" />
+            </Box>
+
+            <Stack spacing={2} data-cy="document-upload-queue">
+              {docs.map((doc) => {
+                const canRetry = !readOnly && mode === 'immediate' && doc.status === 'error'
+                const canDelete = !readOnly && doc.status !== 'uploading'
+
+                return (
+                  <Card key={doc.id} sx={{ border: '1px solid', borderColor: doc.status === 'error' ? 'error.main' : 'divider' }} data-cy="document-upload-card">
+                    {doc.status === 'uploading' && (
+                      <LinearProgress variant="determinate" value={doc.progress} sx={{ height: 3 }} data-cy="document-upload-progress" />
+                    )}
+
+                    <CardContent sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                      <FileIcon sx={{ mt: 0.5, color: 'action.disabled' }} />
+
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>{doc.file.name}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }} data-cy="document-upload-status">
+                          {getStatusText(doc)} · {formatBytes(doc.file.size)}
+                        </Typography>
+                        <Chip label={getDocumentTypeLabel(doc.typeId)} size="small" variant="outlined" sx={{ mt: 1 }} />
+                        {doc.status === 'error' && (
+                          <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }} data-cy="document-upload-error">
+                            {getErrorMessage(doc.errorType)}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Stack direction="row" spacing={1}>
+                        {canRetry && (
+                          <Button size="small" variant="outlined" color="error" startIcon={<RetryIcon />} onClick={() => handleRetry(doc.id)} data-cy="document-upload-retry">
+                            Retry
+                          </Button>
+                        )}
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="inherit"
+                          onClick={() => {
+                            void handleRemove(doc.id)
+                          }}
+                          disabled={!canDelete}
+                          sx={{ minWidth: 40 }}
+                          data-cy="document-upload-delete"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </Button>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </Stack>
+          </Box>
+        )
+      : emptyState
+  )
+
+  if (readOnly) {
+    return <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>{queueSection}</Box>
+  }
 
   return (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
-        {/* Step 1: Select Document Type */}
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <Box
@@ -400,40 +471,41 @@ export const DocumentUpload = ({
                 fontWeight: 600,
               }}
             >
-              {selectedType ? '✓' : '1'}
+              {selectedCategory ? '✓' : '1'}
             </Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Select document type
-            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Select document type</Typography>
             {selectedTypeLabel && (
-              <Typography
-                variant="caption"
-                sx={{ ml: 'auto', color: 'text.secondary', fontWeight: 500 }}
-                data-cy="document-upload-selected-type"
-              >
+              <Typography variant="caption" sx={{ ml: 'auto', color: 'text.secondary', fontWeight: 500 }} data-cy="document-upload-selected-type">
                 {selectedTypeLabel}
               </Typography>
             )}
           </Box>
 
-          <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }} data-cy="document-upload-type-list">
-            {DOCUMENT_TYPES.map(type => (
-              <Chip
-                key={type.id}
-                label={type.label}
-                onClick={() => setSelectedType(type.id)}
-                variant={selectedType === type.id ? 'filled' : 'outlined'}
-                color={selectedType === type.id ? 'primary' : 'default'}
-                data-cy={`document-upload-type-${type.id}`}
-                sx={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Stack>
+          {showTypeSelection
+            ? (
+                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }} data-cy="document-upload-type-list">
+                  {DOCUMENT_TYPES.filter(type => allowedCategories.includes(type.id)).map(type => (
+                    <Chip
+                      key={type.id}
+                      label={type.label}
+                      onClick={() => setSelectedType(type.id)}
+                      variant={selectedType === type.id ? 'filled' : 'outlined'}
+                      color={selectedType === type.id ? 'primary' : 'default'}
+                      data-cy={`document-upload-type-${type.id}`}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  ))}
+                </Stack>
+              )
+            : (
+                <Typography variant="body2" color="text.secondary" data-cy="document-upload-fixed-category">
+                  {selectedCategory ? getDocumentTypeLabel(selectedCategory) : 'Document'}
+                </Typography>
+              )}
         </Box>
 
         <Box sx={{ height: 1, bgcolor: 'divider' }} />
 
-        {/* Step 2: Drop or Browse Files */}
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <Box
@@ -452,12 +524,10 @@ export const DocumentUpload = ({
             >
               2
             </Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Drop or browse files
-            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Drop or browse files</Typography>
           </Box>
 
-          {selectedType
+          {selectedCategory
             ? (
                 <Paper
                   onDragOver={(e) => {
@@ -483,31 +553,16 @@ export const DocumentUpload = ({
                   data-cy="document-upload-dropzone"
                 >
                   <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                  <Typography variant="h6" sx={{ mb: 0.5 }}>
-                    Drop files to upload
-                  </Typography>
+                  <Typography variant="h6" sx={{ mb: 0.5 }}>Drop files to upload</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     or <Box component="span" sx={{ textDecoration: 'underline', color: 'primary.main', fontWeight: 500 }}>browse to add</Box>
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    PDF, DOCX, DOC — max {MAX_FILE_SIZE_MB} MB each
-                  </Typography>
+                  <Typography variant="caption" color="text.secondary">PDF, DOCX, DOC — max {MAX_FILE_SIZE_MB} MB each</Typography>
                 </Paper>
               )
             : (
-                <Paper
-                  sx={{
-                    p: 3,
-                    textAlign: 'center',
-                    bgcolor: 'action.hover',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    cursor: 'not-allowed',
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Select a document type above to enable upload
-                  </Typography>
+                <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', cursor: 'not-allowed' }}>
+                  <Typography variant="body2" color="text.secondary">Select a document type above to enable upload</Typography>
                 </Paper>
               )}
         </Box>
@@ -518,123 +573,13 @@ export const DocumentUpload = ({
         type="file"
         accept={ACCEPTED_EXTENSIONS}
         multiple
+        disabled={readOnly}
         style={{ display: 'none' }}
         data-cy="document-upload-input"
         onChange={handleFileInputChange}
       />
 
-      {/* Uploaded Queue */}
-      {docs.length > 0 && (
-        <Box sx={{ mt: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Uploaded
-            </Typography>
-            <Chip
-              label={docs.length}
-              size="small"
-              variant="outlined"
-              sx={{ minWidth: 24 }}
-              data-cy="document-upload-count"
-            />
-          </Box>
-
-          <Stack spacing={2} data-cy="document-upload-queue">
-            {docs.map((doc) => {
-              const canRetry = mode === 'immediate' && doc.status === 'error'
-              const canDelete = doc.status !== 'uploading'
-
-              return (
-                <Card
-                  key={doc.id}
-                  sx={{
-                    border: '1px solid',
-                    borderColor: doc.status === 'error' ? 'error.main' : 'divider',
-                  }}
-                  data-cy="document-upload-card"
-                >
-                  {doc.status === 'uploading' && (
-                    <LinearProgress
-                      variant="determinate"
-                      value={doc.progress}
-                      sx={{ height: 3 }}
-                      data-cy="document-upload-progress"
-                    />
-                  )}
-
-                  <CardContent sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                    <FileIcon sx={{ mt: 0.5, color: 'action.disabled' }} />
-
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: 600, wordBreak: 'break-word' }}
-                      >
-                        {doc.file.name}
-                      </Typography>
-
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: 'block', mt: 0.5 }}
-                        data-cy="document-upload-status"
-                      >
-                        {getStatusText(doc)} · {formatBytes(doc.file.size)}
-                      </Typography>
-
-                      <Chip
-                        label={getDocumentTypeLabel(doc.typeId)}
-                        size="small"
-                        variant="outlined"
-                        sx={{ mt: 1 }}
-                      />
-
-                      {doc.status === 'error' && (
-                        <Typography
-                          variant="caption"
-                          color="error"
-                          sx={{ display: 'block', mt: 1 }}
-                          data-cy="document-upload-error"
-                        >
-                          {getErrorMessage(doc.errorType)}
-                        </Typography>
-                      )}
-                    </Box>
-
-                    <Stack direction="row" spacing={1}>
-                      {canRetry && (
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          color="error"
-                          startIcon={<RetryIcon />}
-                          onClick={() => handleRetry(doc.id)}
-                          data-cy="document-upload-retry"
-                        >
-                          Retry
-                        </Button>
-                      )}
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="inherit"
-                        onClick={() => {
-                          void handleRemove(doc.id)
-                        }}
-                        disabled={!canDelete}
-                        sx={{ minWidth: 40 }}
-                        data-cy="document-upload-delete"
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </Button>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </Stack>
-        </Box>
-      )}
+      {queueSection}
     </Box>
   )
 }

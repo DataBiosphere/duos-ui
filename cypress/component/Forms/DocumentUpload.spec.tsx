@@ -49,6 +49,7 @@ describe('DocumentUpload', () => {
   })
 
   it('uploads files immediately and stores uploaded state', () => {
+    const onFilesReady = cy.stub().as('filesReady')
     const api = {
       uploadDocument: cy.stub().callsFake(async () => {
         await new Promise(resolve => setTimeout(resolve, 250))
@@ -70,6 +71,7 @@ describe('DocumentUpload', () => {
       <DocumentUpload
         entity={EntityType.DAR}
         entityId="dar-1"
+        onFilesReady={onFilesReady}
         api={api}
       />,
     )
@@ -81,6 +83,7 @@ describe('DocumentUpload', () => {
     cy.get('[data-cy="document-upload-status"]', { timeout: 5000 }).should('contain.text', 'Uploading')
     cy.get('[data-cy="document-upload-status"]', { timeout: 5000 }).should('contain.text', 'Uploaded')
     cy.get('[data-cy="document-upload-count"]').should('contain.text', '1')
+    cy.get('@filesReady').should('have.been.called')
   })
 
   it('stages files in deferred mode without API calls', () => {
@@ -149,7 +152,7 @@ describe('DocumentUpload', () => {
     selectPdf('letter.pdf')
 
     cy.get('[data-cy="document-upload-error"]', { timeout: 5000 })
-      .should('contain.text', 'You do not have permission to upload this document.')
+      .should('contain.text', 'No permission')
 
     cy.get('[data-cy="document-upload-retry"]').click()
     cy.get('[data-cy="document-upload-status"]', { timeout: 5000 }).should('contain.text', 'Uploaded')
@@ -190,5 +193,68 @@ describe('DocumentUpload', () => {
     cy.get('[data-cy="document-upload-delete"]').click()
     cy.wrap(deleteStub).should('have.been.calledOnceWith', EntityType.DATASET, 'dataset-5', 303)
     cy.contains('data.pdf').should('not.exist')
+  })
+
+  it('uses fixed category and bypasses type selection', () => {
+    const api = {
+      uploadDocument: cy.stub().callsFake(async () => ({
+        fileStorageObjectId: 404,
+        entityId: 'dac-7',
+        fileName: 'daa.pdf',
+        category: FileCategory.DATA_ACCESS_AGREEMENT,
+        mediaType: 'application/pdf',
+        createUserId: 1,
+        createDate: Date.now(),
+      })),
+      deleteDocument: cy.stub().resolves({} as never),
+      listDocuments: cy.stub().resolves([]),
+    }
+
+    cy.mount(
+      <DocumentUpload
+        entity={EntityType.DAC}
+        entityId="dac-7"
+        categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
+        api={api}
+      />,
+    )
+
+    cy.get('[data-cy="document-upload-fixed-category"]').should('contain.text', 'Data Access Agreement')
+    cy.get('[data-cy="document-upload-type-list"]').should('not.exist')
+    selectPdf('daa.pdf')
+    cy.get('[data-cy="document-upload-status"]', { timeout: 5000 }).should('contain.text', 'Uploaded')
+  })
+
+  it('renders read-only mode with documents and no upload actions', () => {
+    const api = {
+      uploadDocument: cy.stub().resolves({} as never),
+      deleteDocument: cy.stub().resolves({} as never),
+      listDocuments: cy.stub().resolves([
+        {
+          fileStorageObjectId: 808,
+          entityId: 'dac-8',
+          fileName: 'existing_daa.pdf',
+          category: FileCategory.DATA_ACCESS_AGREEMENT,
+          mediaType: 'application/pdf',
+          createUserId: 1,
+          createDate: Date.now(),
+        },
+      ]),
+    }
+
+    cy.mount(
+      <DocumentUpload
+        entity={EntityType.DAC}
+        entityId="dac-8"
+        categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
+        readOnly={true}
+        api={api}
+      />,
+    )
+
+    cy.get('[data-cy="document-upload-dropzone"]').should('not.exist')
+    cy.contains('existing_daa.pdf').should('exist')
+    cy.get('[data-cy="document-upload-delete"]').should('be.disabled')
+    cy.get('[data-cy="document-upload-retry"]').should('not.exist')
   })
 })
