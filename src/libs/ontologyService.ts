@@ -22,14 +22,12 @@ export const OntologyService = {
       if (cached !== null) {
         return cached
       }
-      else {
-        const response = await fetchGet<OntologyEntry[]>(`${baseURL}/ontology/search`, { params })
-        const data = response.data
-        Storage.setData(obolibraryURL, data)
-        return data
-      }
+      const response = await fetchGet<OntologyEntry[]>(`${baseURL}/ontology/search`, { params })
+      const data = response.data
+      Storage.setData(obolibraryURL, data)
+      return data
     }
-    catch (_error) {
+    catch {
       Notifications.showError({ text: 'Error: Ontology Search Request failed' })
       return []
     }

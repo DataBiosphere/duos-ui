@@ -48,12 +48,14 @@ describe('OntologyService', () => {
     it('should return cached results without making another API call', () => {
       Storage.setData('DOID_9351', mockOntologyResults)
 
-      const interceptSpy = cy.intercept('GET', `${mockApiUrl}/ontology/search*`, cy.spy().as('apiSpy'))
-      void interceptSpy
+      let networkCallMade = false
+      cy.intercept('GET', `${mockApiUrl}/ontology/search*`, () => {
+        networkCallMade = true
+      })
 
       cy.wrap(OntologyService.searchOntology('DOID_9351')).then((result) => {
         expect(result).to.deep.equal(mockOntologyResults)
-        cy.get('@apiSpy').should('not.have.been.called')
+        expect(networkCallMade).to.equal(false)
       })
     })
 
@@ -61,7 +63,7 @@ describe('OntologyService', () => {
       cy.intercept('GET', `${mockApiUrl}/ontology/search*`, {
         statusCode: 200,
         body: mockOntologyResults,
-      }).as('ontologySearch')
+      })
 
       cy.wrap(OntologyService.searchOntology('DOID_9351')).then(() => {
         const cached = Storage.getData<OntologyEntry[]>('DOID_9351')
@@ -70,14 +72,12 @@ describe('OntologyService', () => {
     })
 
     it('should show error notification and return empty array on API failure', () => {
-      const showErrorStub = cy.stub(Notifications, 'showError').as('showError')
-      void showErrorStub
+      cy.stub(Notifications, 'showError').as('showError')
 
       cy.intercept('GET', `${mockApiUrl}/ontology/search*`, {
         statusCode: 500,
         body: { message: 'Internal Server Error' },
-        forceNetworkError: false,
-      }).as('ontologySearchFail')
+      })
 
       cy.wrap(OntologyService.searchOntology('DOID_9351')).then((result) => {
         expect(result).to.deep.equal([])
@@ -142,4 +142,3 @@ describe('OntologyService', () => {
     })
   })
 })
-
