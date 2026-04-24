@@ -389,7 +389,7 @@ describe('DocumentUpload', () => {
         },
       }
 
-      cy.stub(win, 'open').returns(previewWindow).as('windowOpen')
+      cy.stub(win, 'open').as('windowOpen').returns(previewWindow)
       cy.stub(win.URL, 'createObjectURL').callsFake((file) => {
         expect(file).to.be.instanceOf(File)
         expect((file as File).name).to.equal('viewable.pdf')
@@ -505,7 +505,8 @@ describe('DocumentUpload', () => {
     })
 
     cy.get(`[data-cy="document-upload-type-${FileCategory.DATA_ACCESS_AGREEMENT}"]`).click()
-    cy.get('[data-cy="document-upload-dropzone-trigger"]').focus().type('{enter}')
+    cy.get('[data-cy="document-upload-dropzone-trigger"]').focus()
+    cy.get('[data-cy="document-upload-dropzone-trigger"]').type('{enter}')
     cy.get('@keyboardInputClick').should('have.been.calledOnce')
   })
 
