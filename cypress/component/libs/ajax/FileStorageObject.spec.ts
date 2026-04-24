@@ -61,7 +61,7 @@ describe('FileStorageObject ajax', () => {
         cy.wrap(uploadDocument(EntityType.DATASET, '42', file, FileCategory.IRB_COLLABORATION_LETTER)).then((result) => {
           expect(result).to.deep.equal(mockFso)
           const [url, opts] = fetchStub.firstCall.args
-          expect(url).to.equal('/api/dataset/42/document')
+          expect(url).to.equal('/api/document/dataset/42')
           expect(opts.method).to.equal('POST')
           expect(opts.body).to.be.instanceOf(win.FormData)
         })
@@ -81,7 +81,7 @@ describe('FileStorageObject ajax', () => {
         cy.wrap(updateDocumentCategory(EntityType.DATASET, '42', 1, FileCategory.DATA_ACCESS_AGREEMENT)).then((result) => {
           expect(result).to.deep.equal(mockFso)
           const [url, opts] = fetchStub.firstCall.args
-          expect(url).to.equal('/api/dataset/42/document/1')
+          expect(url).to.equal('/api/document/dataset/42/1')
           expect(opts.method).to.equal('PUT')
           expect(JSON.parse(opts.body)).to.deep.equal({ category: 'dataAccessAgreement' })
         })
@@ -101,7 +101,7 @@ describe('FileStorageObject ajax', () => {
         cy.wrap(getDocument(EntityType.DAC, '10', 1)).then((result) => {
           expect(result).to.deep.equal(mockFso)
           const [url, opts] = fetchStub.firstCall.args
-          expect(url).to.equal('/api/dac/10/document/1')
+          expect(url).to.equal('/api/document/dac/10/1')
           expect(opts.method).to.equal('GET')
         })
       })
@@ -121,7 +121,7 @@ describe('FileStorageObject ajax', () => {
         cy.wrap(getDocumentFile(EntityType.STUDY, '7', 2)).then((result) => {
           expect(result).to.be.instanceOf(win.Blob)
           const [url, opts] = fetchStub.firstCall.args
-          expect(url).to.equal('/api/study/7/document/2/file')
+          expect(url).to.equal('/api/document/study/7/2/file')
           expect(opts.method).to.equal('GET')
           expect(opts.headers['Accept']).to.equal('application/octet-stream')
         })
@@ -141,7 +141,7 @@ describe('FileStorageObject ajax', () => {
         cy.wrap(listDocuments(EntityType.DAR, '99')).then((result) => {
           expect(result).to.deep.equal([mockFso])
           const [url, opts] = fetchStub.firstCall.args
-          expect(url).to.equal('/api/dar/99/document')
+          expect(url).to.equal('/api/document/dar/99')
           expect(opts.method).to.equal('GET')
         })
       })
@@ -160,7 +160,7 @@ describe('FileStorageObject ajax', () => {
         cy.wrap(deleteDocument(EntityType.DATASET, '42', 1)).then((result) => {
           expect(result).to.deep.equal(mockDeletedFso)
           const [url, opts] = fetchStub.firstCall.args
-          expect(url).to.equal('/api/dataset/42/document/1')
+          expect(url).to.equal('/api/document/dataset/42/1')
           expect(opts.method).to.equal('DELETE')
         })
       })
