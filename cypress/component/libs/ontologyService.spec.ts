@@ -11,22 +11,22 @@ const mockOntologyResults: OntologyEntry[] = [
 ]
 
 const doidUrls = [
-  'http://purl.obolibrary.org/obo/DOID_0001',
-  'http://purl.obolibrary.org/obo/DOID_0002',
+  'https://purl.obolibrary.org/obo/DOID_0001',
+  'https://purl.obolibrary.org/obo/DOID_0002',
 ]
 
 const nonDoidUrls = [
-  'http://purl.obolibrary.org/obo/HP_0001250',
-  'http://example.com/no-doid',
+  'https://purl.obolibrary.org/obo/HP_0001250',
+  'https://example.com/no-doid',
 ]
 
 const mixedDoidUrls = [
-  'http://purl.obolibrary.org/obo/DOID_0001',
-  'http://purl.obolibrary.org/obo/HP_0001250',
-  'http://purl.obolibrary.org/obo/DOID_0002',
+  'https://purl.obolibrary.org/obo/DOID_0001',
+  'https://purl.obolibrary.org/obo/HP_0001250',
+  'https://purl.obolibrary.org/obo/DOID_0002',
 ]
 
-const midPathDoidUrl = 'http://purl.obolibrary.org/obo/extra/path/DOID_0003/suffix'
+const midPathDoidUrl = 'https://purl.obolibrary.org/obo/extra/path/DOID_0003/suffix'
 
 describe('OntologyService', () => {
   beforeEach(() => {
