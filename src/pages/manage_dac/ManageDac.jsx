@@ -63,8 +63,7 @@ export const ManageDac = function ManageDac() {
 
   useEffect(() => {
     if (showDatasetsPage && selectedDatasets.length > 0) {
-      navigate({
-        pathname: '/manage_dac_datasets',
+      navigate('/manage_dac_datasets', {
         state: { dac: selectedDac, datasets: selectedDatasets },
       })
     }
