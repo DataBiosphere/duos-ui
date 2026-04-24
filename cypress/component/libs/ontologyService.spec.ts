@@ -6,9 +6,27 @@ import { Notifications } from 'src/libs/utils'
 const mockApiUrl = 'https://consent.example.org'
 
 const mockOntologyResults: OntologyEntry[] = [
-  { id: 'DOID_9351', label: 'diabetes mellitus' },
-  { id: 'DOID_10652', label: 'Alzheimer\'s disease' },
+  { id: 'DOID_0001', label: 'test disease alpha' },
+  { id: 'DOID_0002', label: 'test disease beta' },
 ]
+
+const doidUrls = [
+  'http://purl.obolibrary.org/obo/DOID_0001',
+  'http://purl.obolibrary.org/obo/DOID_0002',
+]
+
+const nonDoidUrls = [
+  'http://purl.obolibrary.org/obo/HP_0001250',
+  'http://example.com/no-doid',
+]
+
+const mixedDoidUrls = [
+  'http://purl.obolibrary.org/obo/DOID_0001',
+  'http://purl.obolibrary.org/obo/HP_0001250',
+  'http://purl.obolibrary.org/obo/DOID_0002',
+]
+
+const midPathDoidUrl = 'http://purl.obolibrary.org/obo/extra/path/DOID_0003/suffix'
 
 describe('OntologyService', () => {
   beforeEach(() => {
@@ -38,22 +56,22 @@ describe('OntologyService', () => {
         body: mockOntologyResults,
       }).as('ontologySearch')
 
-      cy.wrap(OntologyService.searchOntology('DOID_9351')).then((result) => {
+      cy.wrap(OntologyService.searchOntology('DOID_0001')).then((result) => {
         expect(result).to.deep.equal(mockOntologyResults)
       })
 
-      cy.wait('@ontologySearch').its('request.url').should('include', 'ids=DOID_9351')
+      cy.wait('@ontologySearch').its('request.url').should('include', 'ids=DOID_0001')
     })
 
     it('should return cached results without making another API call', () => {
-      Storage.setData('DOID_9351', mockOntologyResults)
+      Storage.setData('DOID_0001', mockOntologyResults)
 
       let networkCallMade = false
       cy.intercept('GET', `${mockApiUrl}/ontology/search*`, () => {
         networkCallMade = true
       })
 
-      cy.wrap(OntologyService.searchOntology('DOID_9351')).then((result) => {
+      cy.wrap(OntologyService.searchOntology('DOID_0001')).then((result) => {
         expect(result).to.deep.equal(mockOntologyResults)
         expect(networkCallMade).to.equal(false)
       })
@@ -65,8 +83,8 @@ describe('OntologyService', () => {
         body: mockOntologyResults,
       })
 
-      cy.wrap(OntologyService.searchOntology('DOID_9351')).then(() => {
-        const cached = Storage.getData<OntologyEntry[]>('DOID_9351')
+      cy.wrap(OntologyService.searchOntology('DOID_0001')).then(() => {
+        const cached = Storage.getData<OntologyEntry[]>('DOID_0001')
         expect(cached).to.deep.equal(mockOntologyResults)
       })
     })
@@ -79,14 +97,14 @@ describe('OntologyService', () => {
         body: { message: 'Internal Server Error' },
       })
 
-      cy.wrap(OntologyService.searchOntology('DOID_9351')).then((result) => {
+      cy.wrap(OntologyService.searchOntology('DOID_0001')).then((result) => {
         expect(result).to.deep.equal([])
         cy.get('@showError').should('have.been.calledOnce')
       })
     })
 
     it('should pass the ids param to the API', () => {
-      const ontologyId = 'DOID_9351,DOID_10652'
+      const ontologyId = 'DOID_0001,DOID_0002'
 
       cy.intercept('GET', `${mockApiUrl}/ontology/search*`, {
         statusCode: 200,
@@ -101,20 +119,12 @@ describe('OntologyService', () => {
 
   describe('extractDOIDFromUrl', () => {
     it('should extract DOID identifiers from a list of URLs', () => {
-      const urls = [
-        'http://purl.obolibrary.org/obo/DOID_9351',
-        'http://purl.obolibrary.org/obo/DOID_10652',
-      ]
-      const result = OntologyService.extractDOIDFromUrl(urls)
-      expect(result).to.deep.equal(['DOID_9351', 'DOID_10652'])
+      const result = OntologyService.extractDOIDFromUrl(doidUrls)
+      expect(result).to.deep.equal(['DOID_0001', 'DOID_0002'])
     })
 
     it('should return an empty array when no URLs contain DOID identifiers', () => {
-      const urls = [
-        'http://purl.obolibrary.org/obo/HP_0001250',
-        'http://example.com/no-doid',
-      ]
-      const result = OntologyService.extractDOIDFromUrl(urls)
+      const result = OntologyService.extractDOIDFromUrl(nonDoidUrls)
       expect(result).to.deep.equal([])
     })
 
@@ -124,21 +134,13 @@ describe('OntologyService', () => {
     })
 
     it('should only extract DOID identifiers and skip non-DOID URLs', () => {
-      const urls = [
-        'http://purl.obolibrary.org/obo/DOID_9351',
-        'http://purl.obolibrary.org/obo/HP_0001250',
-        'http://purl.obolibrary.org/obo/DOID_10652',
-      ]
-      const result = OntologyService.extractDOIDFromUrl(urls)
-      expect(result).to.deep.equal(['DOID_9351', 'DOID_10652'])
+      const result = OntologyService.extractDOIDFromUrl(mixedDoidUrls)
+      expect(result).to.deep.equal(['DOID_0001', 'DOID_0002'])
     })
 
     it('should handle URLs where DOID identifier appears mid-path', () => {
-      const urls = [
-        'http://purl.obolibrary.org/obo/extra/path/DOID_12345/suffix',
-      ]
-      const result = OntologyService.extractDOIDFromUrl(urls)
-      expect(result).to.deep.equal(['DOID_12345/suffix'])
+      const result = OntologyService.extractDOIDFromUrl([midPathDoidUrl])
+      expect(result).to.deep.equal(['DOID_0003/suffix'])
     })
   })
 })
