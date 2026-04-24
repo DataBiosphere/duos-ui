@@ -691,7 +691,7 @@ export const setStyle = (
   targetColorAttribute: string,
 ): Record<string, unknown> => {
   const appliedStyle = disabled ? { [targetColorAttribute]: Theme.palette.disabled } : {}
-  return Object.assign(baseStyle, appliedStyle)
+  return { ...baseStyle, ...appliedStyle }
 }
 
 interface DivAttributes {
