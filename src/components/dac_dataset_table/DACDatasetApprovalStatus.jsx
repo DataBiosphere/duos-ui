@@ -4,7 +4,7 @@ import { DAC } from '../../libs/ajax/DAC'
 import { Link, useNavigate } from 'react-router-dom'
 import { isNil } from 'lodash'
 import Button from '@mui/material/Button'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import style from '../../pages/DACDatasets.module.css'
 import { ConfirmationDialog } from '../modals/ConfirmationDialog'
 import { Notifications } from '../../libs/utils'
@@ -89,7 +89,6 @@ export default function DACDatasetApprovalStatus(props) {
       </Button>
       <ReactTooltip
         place="left"
-        effect="solid"
         id={`approve-dataset-button-${dataset.datasetId}`}
       >
         Approve dataset for Data Access Committee
@@ -105,7 +104,6 @@ export default function DACDatasetApprovalStatus(props) {
       </Button>
       <ReactTooltip
         place="right"
-        effect="solid"
         id={`reject-dataset-button-${dataset.datasetId}`}
       >
         Reject dataset for Data Access Committee

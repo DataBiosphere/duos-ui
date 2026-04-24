@@ -7,7 +7,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { Navigation, setUserRoleStatuses } from 'src/libs/utils'
 import loadingIndicator from 'src/images/loading-indicator.svg'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import eventList, { MetricsEventName } from 'src/libs/events'
 import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { OidcUser } from 'src/libs/auth/oidcBroker'
@@ -198,8 +198,7 @@ export const SignInButton = () => {
     return (
       <div style={{ display: 'flex', marginRight: 30 }}>
         <div
-          data-tip="Full details"
-          data-for="sam-disabled-sign-in-tooltip"
+          data-tooltip-id="sam-disabled-sign-in-tooltip"
         >
           <button
             style={{
@@ -220,32 +219,34 @@ export const SignInButton = () => {
             {isLoading ? loadingElement() : 'Sign In'}
           </button>
         </div>
-        <ReactTooltip
-          place="top"
-          disable={!isConsentDown && !isSamDown}
-          effect="solid"
-          id="sam-disabled-sign-in-tooltip"
-          className="interactiveTooltip"
-          delayHide={1000}
-        >
-          <div style={tooltipStyle}>
-            <span>
-              DUOS is currently unavailable. Please check the
-              <a href="status">status page</a>
-              {' '}
-              for more details.
-            </span>
-          </div>
-        </ReactTooltip>
+        {(isConsentDown || isSamDown)
+          ? (
+              <ReactTooltip
+                place="top"
+                id="sam-disabled-sign-in-tooltip"
+                className="interactiveTooltip"
+                delayHide={1000}
+              >
+                <div style={tooltipStyle}>
+                  <span>
+                    DUOS is currently unavailable. Please check the
+                    <a href="status">status page</a>
+                    {' '}
+                    for more details.
+                  </span>
+                </div>
+              </ReactTooltip>
+            )
+          : null}
         <a
           className="navbar-duos-icon-help"
           style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
           href="https://duos.blog/link_institutional_email_to_gmail/"
-          data-for="tip_google-help"
-          data-tip="Need account help? Click here!"
+          data-tooltip-id="tip_google-help"
+          data-tooltip-content="Need account help? Click here!"
           aria-label="Need account help? Click here!"
         />
-        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
+        <ReactTooltip id="tip_google-help" place="top" className="tooltip-wrapper" />
       </div>
     )
   }

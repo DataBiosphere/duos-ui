@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { isEmpty } from 'lodash'
-import ReactTooltip from 'react-tooltip'
 import PaginationBar from 'src/components/PaginationBar'
 import SimpleTable from 'src/components/SimpleTable'
 import { Storage } from 'src/libs/storage'
@@ -43,7 +42,6 @@ export default function InstitutionTable(props: InstitutionTableProps) {
       setVisibleList: setVisibleRows,
       sort,
     })
-    ReactTooltip.rebuild()
   }, [tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, sort])
 
   const changeTableSize = (newTableSize: number) => {

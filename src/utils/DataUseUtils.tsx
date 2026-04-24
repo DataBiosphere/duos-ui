@@ -1,5 +1,5 @@
 import React, { CSSProperties, ReactNode } from 'react'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { DatasetTerm } from 'src/types/model'
 
 interface DataUseCode {
@@ -82,7 +82,6 @@ export function createDataUseDisplay({
       </span>
       <ReactTooltip
         place={tooltipPlace}
-        effect="solid"
         id={`dataset-data-use-${dataset.datasetId}`}
       >
         <ul>
