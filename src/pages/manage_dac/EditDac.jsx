@@ -600,7 +600,7 @@ export default function EditDac() {
                                   <DocumentUpload
                                     entity="dac"
                                     entityId={state.dac?.dacId || 'new-dac'}
-                                    mode="deferred"
+                                    isLiveUpload={false}
                                     categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
                                     onFilesReady={handleUploadedDaaFiles}
                                   />
@@ -619,7 +619,7 @@ export default function EditDac() {
                         <DocumentUpload
                           entity="dac"
                           entityId={dacId}
-                          mode="immediate"
+                          isLiveUpload={true}
                           categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
                           readOnly={!canUploadDAA}
                         />
