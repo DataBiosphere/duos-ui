@@ -20,7 +20,7 @@ export enum EntityType {
 export type FileStorageObject = SharedFileStorageObject
 
 function basePath(entity: EntityType, entityId: string): string {
-  return `/api/${encodeURIComponent(entity)}/${encodeURIComponent(entityId)}/document`
+  return `/api/document/${encodeURIComponent(entity)}/${encodeURIComponent(entityId)}`
 }
 
 function documentPath(entity: EntityType, entityId: string, id: number): string {
