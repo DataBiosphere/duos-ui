@@ -18,7 +18,7 @@ interface SectionProps {
 }
 
 const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
-  <div style={{ paddingTop: 20, ...style }}>{children}</div>
+  <div style={{ paddingTop: 20, paddingRight: 100, ...style }}>{children}</div>
 
 const styles = {
   row: {
@@ -154,7 +154,7 @@ export const StudyDetails = () => {
         <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
           {study?.studyName}
         </div>
-        <Section style={{ paddingRight: 100 }}>
+        <Section>
           {study?.description}
         </Section>
         {!Number.isNaN(participantCount) && (
