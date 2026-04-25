@@ -15,7 +15,7 @@ import DUOSUniformDataAccessAgreement from 'src/assets/DUOS_Uniform_Data_Access_
 import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { DocumentUpload } from 'src/components/forms/DocumentUpload'
-import { FileCategory } from 'src/libs/ajax/FileStorageObject'
+import { FileCategory, uploadDocument } from 'src/libs/ajax/FileStorageObject'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -41,6 +41,7 @@ export default function EditDac() {
   const [newDaaId, setNewDaaId] = useState(null)
   const [selectedDaa, setSelectedDaa] = useState(null)
   const [daaFileData, setDaaFileData] = useState(null)
+  const [selectedDAAFiles, setSelectedDAAFiles] = useState(null)
   const [fetchedDac, setFetchedDac] = useState(null)
   const [broadDaa, setBroadDaa] = useState(null)
   const [matchingDaas, setMatchingDaas] = useState([])
@@ -94,9 +95,13 @@ export default function EditDac() {
           handleErrors('Please select either the default agreement or upload your own agreement before saving.')
           return
         }
-        else if (user.isAdmin && daaFileData !== null && selectedDaa === undefined) {
+        else if (user.isAdmin && selectedDAAFiles !== null && selectedDaa === undefined) {
           currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email)
-          await DAA.createDaa(daaFileData, currentDac.dacId)
+          // Upload all new DAA agreements linked to this DAC.
+          // We have to do this after creating the DAC since we need the DAC ID for the upload.
+          for (const selectedDAAFile of selectedDAAFiles) {
+            await uploadDocument('dac', currentDac.dacId, selectedDAAFile.file, FileCategory.DATA_ACCESS_AGREEMENT)
+          }
         }
         else {
           if (user.isAdmin) {
@@ -281,6 +286,7 @@ export default function EditDac() {
   }
 
   const handleUploadedDaaFiles = (files) => {
+    setSelectedDAAFiles(files)
     const firstFile = files?.[0]?.file ?? null
     setDaaFileData(firstFile)
     if (firstFile) {
