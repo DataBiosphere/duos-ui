@@ -58,6 +58,7 @@ interface DaaItemProps {
 }
 
 type DacEditableField = 'name' | 'description' | 'email'
+type RemovalListKey = 'chairIdsToRemove' | 'memberIdsToRemove'
 
 function DaaItem({ specificDaa, selectedDaa, onChangeSelection }: Readonly<DaaItemProps>): React.JSX.Element {
   return (
@@ -340,39 +341,28 @@ export default function EditDac(): React.JSX.Element {
     }))
   }
 
+  const toggleRemovalList = (key: RemovalListKey, userId: number): void => {
+    setState((prev) => {
+      const currentIds = prev[key]
+      const nextIds = currentIds.includes(userId)
+        ? difference(currentIds, [userId])
+        : union(currentIds, [userId])
+
+      return {
+        ...prev,
+        [key]: nextIds,
+        dirtyFlag: true,
+      }
+    })
+  }
+
   const removeDacMember = (_dacId: string | number, userId: number, role: DacRole): void => {
     switch (role) {
       case CHAIR:
-        if (state.chairIdsToRemove.includes(userId)) {
-          setState(prev => ({
-            ...prev,
-            chairIdsToRemove: difference(prev.chairIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
-        else {
-          setState(prev => ({
-            ...prev,
-            chairIdsToRemove: union(prev.chairIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
+        toggleRemovalList('chairIdsToRemove', userId)
         break
       case MEMBER:
-        if (state.memberIdsToRemove.includes(userId)) {
-          setState(prev => ({
-            ...prev,
-            memberIdsToRemove: difference(prev.memberIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
-        else {
-          setState(prev => ({
-            ...prev,
-            memberIdsToRemove: union(prev.memberIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
+        toggleRemovalList('memberIdsToRemove', userId)
         break
       default:
         break
