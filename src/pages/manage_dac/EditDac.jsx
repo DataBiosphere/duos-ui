@@ -553,7 +553,7 @@ export default function EditDac() {
                         <ul role="menu" style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
                           <form>
                             <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                              <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                              <div style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
                                 <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
                                   Use default
                                   agreement
@@ -587,11 +587,11 @@ export default function EditDac() {
                                     </div>
                                   </div>
                                 </div>
-                              </label>
+                              </div>
                             </li>
                             <hr />
                             <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                              <label style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                              <div style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
                                 <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
                                   Use your own
                                   agreement
@@ -611,7 +611,7 @@ export default function EditDac() {
                                     onFilesReady={handleUploadedDaaFiles}
                                   />
                                 </div>
-                              </label>
+                              </div>
                             </li>
                           </form>
                         </ul>
