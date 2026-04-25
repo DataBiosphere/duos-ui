@@ -19,12 +19,12 @@ export enum EntityType {
 
 export type FileStorageObject = SharedFileStorageObject
 
-function basePath(entity: EntityType, entityId: string): string {
-  return `/api/document/${encodeURIComponent(entity)}/${encodeURIComponent(entityId)}`
+async function basePath(entity: EntityType, entityId: string): Promise<string> {
+  return `${await Config.getApiUrl()}/api/document/${entity}/${encodeURIComponent(entityId)}`
 }
 
-function documentPath(entity: EntityType, entityId: string, id: number): string {
-  return `${basePath(entity, entityId)}/${encodeURIComponent(id)}`
+async function documentPath(entity: EntityType, entityId: string, id: number): Promise<string> {
+  return `${await basePath(entity, entityId)}/${id}`
 }
 
 export async function uploadDocument(
@@ -33,8 +33,7 @@ export async function uploadDocument(
   file: File,
   category: FileCategory,
 ): Promise<FileStorageObject> {
-  const apiUrl = await Config.getApiUrl()
-  const url = `${apiUrl}${basePath(entity, entityId)}`
+  const url = await basePath(entity, entityId)
   const formData = new FormData()
   formData.append('file', file)
   formData.append('category', category)
@@ -48,8 +47,7 @@ export async function updateDocumentCategory(
   id: number,
   category: FileCategory,
 ): Promise<FileStorageObject> {
-  const apiUrl = await Config.getApiUrl()
-  const url = `${apiUrl}${documentPath(entity, entityId, id)}`
+  const url = await documentPath(entity, entityId, id)
   const res = await fetchPut<FileStorageObject>(url, { category }, Config.authOpts())
   return res.data
 }
@@ -59,8 +57,7 @@ export async function getDocument(
   entityId: string,
   id: number,
 ): Promise<FileStorageObject> {
-  const apiUrl = await Config.getApiUrl()
-  const url = `${apiUrl}${documentPath(entity, entityId, id)}`
+  const url = await documentPath(entity, entityId, id)
   const res = await fetchGet<FileStorageObject>(url, Config.authOpts())
   return res.data
 }
@@ -70,8 +67,7 @@ export async function getDocumentFile(
   entityId: string,
   id: number,
 ): Promise<Blob> {
-  const apiUrl = await Config.getApiUrl()
-  const url = `${apiUrl}${documentPath(entity, entityId, id)}/file`
+  const url = `${await documentPath(entity, entityId, id)}/file`
   const res = await fetchGet<Blob>(url, {
     ...Config.authOpts(),
     responseType: 'blob',
@@ -87,8 +83,7 @@ export async function listDocuments(
   entity: EntityType,
   entityId: string,
 ): Promise<FileStorageObject[]> {
-  const apiUrl = await Config.getApiUrl()
-  const url = `${apiUrl}${basePath(entity, entityId)}`
+  const url = await basePath(entity, entityId)
   const res = await fetchGet<FileStorageObject[]>(url, Config.authOpts())
   return res.data
 }
@@ -98,8 +93,7 @@ export async function deleteDocument(
   entityId: string,
   id: number,
 ): Promise<FileStorageObject> {
-  const apiUrl = await Config.getApiUrl()
-  const url = `${apiUrl}${documentPath(entity, entityId, id)}`
+  const url = await documentPath(entity, entityId, id)
   const res = await fetchDelete<FileStorageObject>(url, Config.authOpts())
   return res.data
 }
