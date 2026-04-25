@@ -694,7 +694,9 @@ export const DocumentUpload = ({
   useEffect(() => {
     const timers = progressTimersRef.current
     return () => {
-      Object.keys(timers).forEach(clearProgressTimer)
+      Object.keys(timers).forEach((timerId) => {
+        clearProgressTimer(timerId)
+      })
     }
   }, [clearProgressTimer])
 
