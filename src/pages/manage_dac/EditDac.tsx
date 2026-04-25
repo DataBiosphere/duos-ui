@@ -1,11 +1,12 @@
 import { difference, filter, isEmpty, map, union } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
+import type { MultiValue } from 'react-select'
 import { DAC } from 'src/libs/ajax/DAC'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, PromiseSerial } from 'src/libs/utils'
 import { Alert } from 'src/components/Alert'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
 import editDACIcon from 'src/images/dac_icon.svg'
 import backArrowIcon from 'src/images/back_arrow.svg'
@@ -14,18 +15,99 @@ import { Styles } from 'src/libs/theme'
 import DUOSUniformDataAccessAgreement from 'src/assets/DUOS_Uniform_Data_Access_Agreement.pdf'
 import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DocumentUpload } from 'src/components/forms/DocumentUpload'
-import { FileCategory, uploadDocument } from 'src/libs/ajax/FileStorageObject'
+import { DocumentUpload, type FileRef } from 'src/components/forms/DocumentUpload'
+import { EntityType, FileCategory, uploadDocument } from 'src/libs/ajax/FileStorageObject'
+import type { DAAObject, DacObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
 const CHAIRPERSON = 'Chairperson'
 
-export default function EditDac() {
-  const params = useParams()
+type DacRole = typeof CHAIR | typeof MEMBER
+
+interface ErrorState {
+  show?: boolean
+  title?: string
+  msg?: string
+}
+
+interface UserSelectOption {
+  key: number
+  value: number
+  label: string
+  item: SimplifiedDuosUser
+}
+
+interface EditDacState {
+  error: ErrorState
+  dirtyFlag: boolean
+  dac: DacObject
+  chairsSelectedOptions: UserSelectOption[]
+  chairIdsToAdd: number[]
+  chairIdsToRemove: number[]
+  membersSelectedOptions: UserSelectOption[]
+  memberIdsToAdd: number[]
+  memberIdsToRemove: number[]
+  searchInputChanged: boolean
+}
+
+interface DaaItemProps {
+  specificDaa: DAAObject
+  selectedDaa: DAAObject | null | undefined
+  onChangeSelection: (daaId?: number) => void
+}
+
+type DacEditableField = 'name' | 'description' | 'email'
+
+function DaaItem({ specificDaa, selectedDaa, onChangeSelection }: Readonly<DaaItemProps>): React.JSX.Element {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px' }}>
+      <input
+        id={`radio_daa_${specificDaa.daaId}`}
+        type="radio"
+        name="daa"
+        checked={selectedDaa?.daaId === specificDaa.daaId}
+        onChange={() => onChangeSelection(specificDaa.daaId)}
+        style={{ accentColor: '#00609f' }}
+      />
+      <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+        <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+          <label htmlFor={`radio_daa_${specificDaa.daaId}`} style={{ cursor: 'pointer', margin: 0 }}>
+            <div className="row" style={{ paddingLeft: '15px' }}>
+              {specificDaa.file.fileName}
+            </div>
+            <div className="row" style={{ fontSize: '1rem', paddingLeft: '15px' }}>
+              Uploaded on
+              {' '}
+              {specificDaa?.updateDate ? new Date(specificDaa.updateDate).toLocaleDateString() : ''}
+            </div>
+          </label>
+        </div>
+        <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+          <div style={{ marginLeft: '10px' }}>
+            <button
+              onClick={() => {
+                void DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName)
+              }}
+              className="button button-white"
+              style={{ padding: '10px 12px' }}
+              title="Download file"
+              aria-label={`Download ${specificDaa.file.fileName}`}
+            >
+              <span className="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function EditDac(): React.JSX.Element {
+  const params = useParams<{ dacId?: string }>()
   const dacId = params.dacId
   const navigate = useNavigate()
-  const [state, setState] = useState({
+  const [state, setState] = useState<EditDacState>({
     error: {},
     dirtyFlag: false,
     dac: {},
@@ -37,111 +119,127 @@ export default function EditDac() {
     memberIdsToRemove: [],
     searchInputChanged: false,
   })
-  const [isLoading, setIsLoading] = useState(true)
-  const [newDaaId, setNewDaaId] = useState(null)
-  const [selectedDaa, setSelectedDaa] = useState(null)
-  const [daaFileData, setDaaFileData] = useState(null)
-  const [selectedDAAFiles, setSelectedDAAFiles] = useState(null)
-  const [fetchedDac, setFetchedDac] = useState(null)
-  const [broadDaa, setBroadDaa] = useState(null)
-  const [matchingDaas, setMatchingDaas] = useState([])
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [newDaaId, setNewDaaId] = useState<number | null>(null)
+  const [selectedDaa, setSelectedDaa] = useState<DAAObject | null | undefined>(null)
+  const [daaFileData, setDaaFileData] = useState<File | null>(null)
+  const [selectedDAAFiles, setSelectedDAAFiles] = useState<FileRef[] | null>(null)
+  const [fetchedDac, setFetchedDac] = useState<DacObject | null>(null)
+  const [broadDaa, setBroadDaa] = useState<DAAObject | null>(null)
+  const [matchingDaas, setMatchingDaas] = useState<DAAObject[]>([])
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
-  const user = Storage.getCurrentUser()
-  const canUploadDAA = user?.isAdmin ?? user?.roles?.some(role => String(role.dacId) === dacId && role.name === CHAIRPERSON)
+  const user = Storage.getCurrentUser() as DuosUser | undefined
+  const canUploadDAA = (user?.isAdmin ?? user?.roles?.some(role => String(role.dacId) === dacId && role.name === CHAIRPERSON)) ?? false
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (dacId !== undefined) {
+    const fetchData = async (): Promise<void> => {
+      if (dacId) {
         try {
-          const fetchedDac = await DAC.get(dacId)
+          const fetchedDac = await DAC.get(dacId) as DacObject
           setFetchedDac(fetchedDac)
-          const daas = await DAA.getDaas()
-          const broadDaa = daas.find(daa => daa.broadDaa === true)
+          const daas = await DAA.getDaas() as DAAObject[]
+          const broadDaa = daas.find(daa => daa.broadDaa) ?? null
           setBroadDaa(broadDaa)
           setState(prev => ({ ...prev, dac: fetchedDac }))
           const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId)
           setMatchingDaas(matchingDaas)
-          const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null
+          const daa = fetchedDac?.associatedDaa ?? null
           setSelectedDaa(daa?.daaId ? daa : null)
         }
-        catch (_e) {
+        catch {
           Notifications.showError({ text: 'Error: Unable to retrieve current DAC from server' })
         }
       }
       else {
         try {
-          const daas = await DAA.getDaas()
-          const broadDaa = daas.find(daa => daa.broadDaa === true)
+          const daas = await DAA.getDaas() as DAAObject[]
+          const broadDaa = daas.find(daa => daa.broadDaa) ?? null
           setBroadDaa(broadDaa)
         }
-        catch (_e) {
+        catch {
           Notifications.showError({ text: 'Error: Unable to retrieve current DAC from server' })
         }
       }
+
+      setIsLoading(false)
     }
-    fetchData()
-    setIsLoading(false)
-  }, [dacId, setState])
 
-  const okHandler = async (event) => {
-    event.preventDefault()
-    let currentDac = state.dac
-    if (state.dirtyFlag) {
-      if (dacId !== undefined) {
-        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email)
-      }
-      else {
-        if (daaFileData === null && selectedDaa.daaId !== broadDaa.daaId) {
-          handleErrors('Please select either the default agreement or upload your own agreement before saving.')
-          return
-        }
-        else if (user.isAdmin && selectedDAAFiles !== null && selectedDaa === undefined) {
-          currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email)
-          // Upload all new DAA agreements linked to this DAC.
-          // We have to do this after creating the DAC since we need the DAC ID for the upload.
-          for (const selectedDAAFile of selectedDAAFiles) {
-            await uploadDocument('dac', currentDac.dacId, selectedDAAFile.file, FileCategory.DATA_ACCESS_AGREEMENT)
-          }
-        }
-        else {
-          if (user.isAdmin) {
-            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email)
-          }
-        }
-      }
+    void fetchData()
+  }, [dacId])
 
-      // Order here is important. Since users cannot have multiple roles in the
-      // same DAC, we have to make sure we remove users before re-adding any
-      // back in a different role.
-      // Chairs are a special case since we cannot remove all chairs from a DAC
-      // so we handle that case first.
-      const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id))
-      const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id))
-      const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id))
-      const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id))
-      const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id))
-      const ops5 = newDaaId !== null && selectedDaa !== undefined ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : []
-      const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5)
-      const responses = await PromiseSerial(allOperations)
-      const errorCodes = filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201')
-      if (!isEmpty(errorCodes)) {
-        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.')
+  const validateDaaForNewDac = (): boolean => {
+    if (daaFileData === null && selectedDaa?.daaId !== broadDaa?.daaId) {
+      handleErrors('Please select either the default agreement or upload your own agreement before saving.')
+      return false
+    }
+    return true
+  }
+
+  const ensureDacExists = async (dacToProcess: DacObject): Promise<DacObject> => {
+    if (dacId) {
+      await DAC.update(dacToProcess.dacId, dacToProcess.name, dacToProcess.description, dacToProcess.email)
+      return dacToProcess
+    }
+
+    if (!user?.isAdmin) {
+      return dacToProcess
+    }
+
+    const newDac = await DAC.create(dacToProcess.name, dacToProcess.description, dacToProcess.email) as DacObject
+    if (selectedDAAFiles !== null && selectedDaa === undefined) {
+      for (const selectedDAAFile of selectedDAAFiles) {
+        await uploadDocument(EntityType.DAC, String(newDac.dacId), selectedDAAFile.file, FileCategory.DATA_ACCESS_AGREEMENT)
       }
-      else {
-        closeHandler()
-      }
+    }
+    return newDac
+  }
+
+  const buildDacOperations = (dacForOps: DacObject): Array<() => Promise<unknown>> => {
+    const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(dacForOps.dacId, id))
+    const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(dacForOps.dacId, id))
+    const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(dacForOps.dacId, id))
+    const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(dacForOps.dacId, id))
+    const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(dacForOps.dacId, id))
+    const ops5 = newDaaId !== null && selectedDaa?.daaId !== undefined ? [() => DAA.addDaaToDac(newDaaId, dacForOps.dacId)] : []
+    return ops0.concat(ops1, ops2, ops3, ops4, ops5)
+  }
+
+  const executeDacOperations = async (allOperations: Array<() => Promise<unknown>>): Promise<void> => {
+    const responses = await PromiseSerial(allOperations)
+    const errorCodes = filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify((r as { status?: number }).status) !== '201')
+    if (isEmpty(errorCodes)) {
+      closeHandler()
+    }
+    else {
+      handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.')
     }
   }
 
-  const closeHandler = () => {
+  const okHandler = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+    event.preventDefault()
+
+    if (!state.dirtyFlag) {
+      return
+    }
+
+    if (!dacId && !validateDaaForNewDac()) {
+      return
+    }
+
+    const currentDac = await ensureDacExists(state.dac)
+    const allOperations = buildDacOperations(currentDac)
+    await executeDacOperations(allOperations)
+  }
+
+  const closeHandler = (): void => {
     navigate('/manage_dac')
   }
 
-  const handleErrors = (message) => {
+  const handleErrors = (message: string): void => {
     Notifications.showError({ text: message })
   }
 
-  const chairSearch = (query, callback) => {
+  const chairSearch = (query: string, callback: (options: UserSelectOption[]) => void): void => {
     // A valid chair is any user:
     //    * minus current chairs
     //    * minus current members (you shouldn't be both a chair and a member)
@@ -155,11 +253,11 @@ export default function EditDac() {
         map(state.dac.members, 'userId'),
         state.memberIdsToAdd),
       state.memberIdsToRemove,
-      state.chairIdsToRemove)
+      state.chairIdsToRemove) as number[]
     userSearch(invalidChairs, query, callback)
   }
 
-  const memberSearch = (query, callback) => {
+  const memberSearch = (query: string, callback: (options: UserSelectOption[]) => void): void => {
     // A valid member is any user:
     //    * minus current members
     //    * minus current chairs (you shouldn't be both a chair and a member)
@@ -173,13 +271,13 @@ export default function EditDac() {
         map(state.dac.chairpersons, 'userId'),
         state.chairIdsToAdd),
       state.memberIdsToRemove,
-      state.chairIdsToRemove)
+      state.chairIdsToRemove) as number[]
     userSearch(invalidMembers, query, callback)
   }
 
-  const userSearch = (invalidUserIds, query, callback) => {
+  const userSearch = (invalidUserIds: number[], query: string, callback: (options: UserSelectOption[]) => void): void => {
     DAC.autocompleteUsers(query).then(
-      (items) => {
+      (items: SimplifiedDuosUser[]) => {
         const filteredUsers = filter(items, (item) => {
           return !invalidUserIds.includes(item.userId)
         })
@@ -187,66 +285,62 @@ export default function EditDac() {
           return {
             key: item.userId,
             value: item.userId,
-            label: item.displayName + ' (' + item.email + ')',
+            label: `${item.displayName} (${item.email})`,
             item: item,
           }
         })
         callback(options)
       },
-      (rejected) => {
-        handleErrors(rejected)
+      (error_: string) => {
+        handleErrors(String(error_))
       })
   }
 
-  const onChairSearchChange = (data) => {
+  const onChairSearchChange = (data: MultiValue<UserSelectOption>): void => {
     setState(prev => ({
       ...prev,
-      chairIdsToAdd: map(data, 'item.userId'),
-      chairsSelectedOptions: data,
+      chairIdsToAdd: map(data, 'item.userId') as number[],
+      chairsSelectedOptions: [...data],
       dirtyFlag: true,
     }))
   }
 
-  const onMemberSearchChange = (data) => {
+  const onMemberSearchChange = (data: MultiValue<UserSelectOption>): void => {
     setState(prev => ({
       ...prev,
-      memberIdsToAdd: map(data, 'item.userId'),
-      membersSelectedOptions: data,
+      memberIdsToAdd: map(data, 'item.userId') as number[],
+      membersSelectedOptions: [...data],
       dirtyFlag: true,
     }))
   }
 
-  const onSearchInputChanged = () => {
+  const onSearchInputChanged = (): void => {
     setState(prev => ({
       ...prev,
       searchInputChanged: true,
     }))
   }
 
-  const onSearchMenuClosed = () => {
+  const onSearchMenuClosed = (): void => {
     setState(prev => ({
       ...prev,
       searchInputChanged: false,
     }))
   }
 
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const target = event.target
     const value = target.value
-    const name = target.name
+    const name = target.name as DacEditableField
 
-    setState((prev) => {
-      const newDac = Object.assign({}, prev.dac)
-      newDac[name] = value
-      return {
-        ...prev,
-        dac: newDac,
-        dirtyFlag: true,
-      }
-    })
+    setState(prev => ({
+      ...prev,
+      dac: { ...prev.dac, [name]: value } as DacObject,
+      dirtyFlag: true,
+    }))
   }
 
-  const removeDacMember = (_dacId, userId, role) => {
+  const removeDacMember = (_dacId: string | number, userId: number, role: DacRole): void => {
     switch (role) {
       case CHAIR:
         if (state.chairIdsToRemove.includes(userId)) {
@@ -285,7 +379,7 @@ export default function EditDac() {
     }
   }
 
-  const handleUploadedDaaFiles = (files) => {
+  const handleUploadedDaaFiles = (files: FileRef[]): void => {
     setSelectedDAAFiles(files)
     const firstFile = files?.[0]?.file ?? null
     setDaaFileData(firstFile)
@@ -298,63 +392,25 @@ export default function EditDac() {
     }))
   }
 
-  const handleDaaChange = (daaId) => {
+  const handleDaaChange = (daaId?: number): void => {
     if (daaId === undefined) {
       setSelectedDaa(undefined)
       setState(prev => ({
         ...prev,
         dirtyFlag: true,
       }))
+      return
     }
-    else {
-      setSelectedDaa({ ...selectedDaa, daaId: daaId })
-      setNewDaaId(daaId)
-      setState(prev => ({
-        ...prev,
-        dirtyFlag: true,
-      }))
-    }
-  }
 
-  const DaaItem = ({ specificDaa }) => (
-    <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px' }}>
-      <input
-        type="radio"
-        name="daa"
-        checked={selectedDaa.daaId === specificDaa.daaId}
-        onChange={() => handleDaaChange(specificDaa.daaId)}
-        style={{ accentColor: '#00609f' }}
-      />
-      <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-        <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-          <div className="row" style={{ paddingLeft: '15px' }}>
-            {specificDaa.file.fileName}
-          </div>
-          <div className="row" style={{ fontSize: '1rem', paddingLeft: '15px' }}>
-            Uploaded on
-            {' '}
-            {specificDaa?.updateDate ? new Date(specificDaa.updateDate).toLocaleDateString() : ''}
-          </div>
-        </div>
-        <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-          <div style={{ marginLeft: '10px' }}>
-            <a
-              target="_blank"
-              rel="noreferrer"
-              download={specificDaa.file.fileName}
-              onClick={() => {
-                DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName)
-              }}
-              className="button button-white"
-              style={{ padding: '10px 12px' }}
-            >
-              <span className="glyphicon glyphicon-download-alt"></span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+    const selectedFromList = matchingDaas.find(daa => daa.daaId === daaId)
+    const selectedFromBroad = broadDaa?.daaId === daaId ? broadDaa : undefined
+    setSelectedDaa(selectedFromList ?? selectedFromBroad ?? ({ daaId } as DAAObject))
+    setNewDaaId(daaId)
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true,
+    }))
+  }
 
   return (
     isLoading
@@ -371,7 +427,7 @@ export default function EditDac() {
                 <img id="back-arrow-icon" src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
               </Link>
               <TableHeaderSection
-                icon={editDACIcon}
+                icon={{ src: editDACIcon }}
                 title={dacText}
                 description={dacId === undefined ? 'Create DAC' : fetchedDac?.name}
               />
@@ -387,7 +443,7 @@ export default function EditDac() {
                     style={{ width: '83.33%', maxWidth: '1200px' }}
                   >
                     <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                      <label id="lbl_dacName" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                      <label htmlFor="txt_dacName" id="lbl_dacName" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
                         DAC
                         Name
                       </label>
@@ -407,6 +463,7 @@ export default function EditDac() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
                       <label
+                        htmlFor="txt_dacDescription"
                         id="lbl_dacDescription"
                         style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}
                       >
@@ -426,7 +483,7 @@ export default function EditDac() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                      <label id="lbl_dacEmail" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                      <label htmlFor="txt_dacEmail" id="lbl_dacEmail" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
                         DAC
                         Email
                       </label>
@@ -444,10 +501,10 @@ export default function EditDac() {
                       </div>
                     </div>
                     {
-                      (state.dac.chairpersons?.length > 0 || state.dac.members?.length > 0)
+                      ((state.dac.chairpersons?.length ?? 0) > 0 || (state.dac.members?.length ?? 0) > 0)
                       && (
                         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                          <label id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                          <label htmlFor="sel_dacChair" id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
                             DAC
                             Members
                           </label>
@@ -463,16 +520,16 @@ export default function EditDac() {
                     }
 
                     <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                      <label id="lbl_dacChair" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                      <label htmlFor="sel_dacChair" id="lbl_dacChair" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
                         Add
                         Chairperson(s)
                       </label>
                       <div style={{ flexBasis: '66.67%' }}>
-                        <AsyncSelect
+                        <AsyncSelect<UserSelectOption, true>
                           id="sel_dacChair"
                           isDisabled={false}
                           isMulti
-                          loadOptions={(query, callback) => chairSearch(query, callback)}
+                          loadOptions={(query, callback) => chairSearch(query, callback as (options: UserSelectOption[]) => void)}
                           onChange={option => onChairSearchChange(option)}
                           onInputChange={() => onSearchInputChanged()}
                           onMenuClose={() => onSearchMenuClosed()}
@@ -485,7 +542,7 @@ export default function EditDac() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-                      <label id="lbl_dacMember" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
+                      <label htmlFor="sel_dacMember" id="lbl_dacMember" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize: '16px' }}>
                         Add
                         Member(s)
                       </label>
@@ -496,11 +553,11 @@ export default function EditDac() {
                           }
                         : { flexBasis: '66.67%' }}
                       >
-                        <AsyncSelect
+                        <AsyncSelect<UserSelectOption, true>
                           id="sel_dacMember"
                           isDisabled={false}
                           isMulti={true}
-                          loadOptions={(query, callback) => memberSearch(query, callback)}
+                          loadOptions={(query, callback) => memberSearch(query, callback as (options: UserSelectOption[]) => void)}
                           onChange={option => onMemberSearchChange(option)}
                           onInputChange={() => onSearchInputChanged()}
                           onMenuClose={() => onSearchMenuClosed()}
@@ -536,7 +593,7 @@ export default function EditDac() {
                   {
                     state.error.show && (
                       <div>
-                        <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+                        <Alert id="modal" type="danger" title={state.error.title ?? ''} description={state.error.msg ?? ''} />
                       </div>
                     )
                   }
@@ -546,25 +603,26 @@ export default function EditDac() {
                 {dacId === undefined
                   ? (
                       <>
-                        <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }}>
+                        <div id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }} aria-level={3}>
                           Select a Data Access
                           Agreement (DAA) to govern access to your DAC&apos;s datasets
-                        </label>
-                        <ul role="menu" style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
+                        </div>
+                        <ul style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
                           <form>
                             <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
                               <div style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                                <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
+                                <label htmlFor="radio_daa_default" id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
                                   Use default
                                   agreement
                                 </label>
                                 <br />
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <input
+                                    id="radio_daa_default"
                                     type="radio"
                                     name="daa"
                                     checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId}
-                                    onChange={() => handleDaaChange(broadDaa.daaId)}
+                                    onChange={() => handleDaaChange(broadDaa?.daaId)}
                                     style={{ accentColor: '#00609f' }}
                                     data-cy="daa_radio"
                                   />
@@ -574,15 +632,17 @@ export default function EditDac() {
                                     </div>
                                     <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
                                       <div style={{ marginLeft: '10px' }}>
-                                        <a
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          href={DUOSUniformDataAccessAgreement}
+                                        <button
+                                          onClick={() => {
+                                            window.open(DUOSUniformDataAccessAgreement, '_blank')
+                                          }}
                                           className="button button-white"
                                           style={{ padding: '10px 12px' }}
+                                          title="Download DUOS Uniform Data Access Agreement"
+                                          aria-label="Download DUOS Uniform Data Access Agreement"
                                         >
-                                          <span className="glyphicon glyphicon-download-alt"></span>
-                                        </a>
+                                          <span className="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                                        </button>
                                       </div>
                                     </div>
                                   </div>
@@ -592,20 +652,20 @@ export default function EditDac() {
                             <hr />
                             <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
                               <div style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                                <label id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }}>
+                                <div id="lbl_daaCreation" className="control-label" style={{ marginTop: '0px' }} aria-level={4}>
                                   Use your own
                                   agreement
-                                </label>
+                                </div>
                                 <br />
                                 {
-                                  matchingDaas.map((daa, index) => (
-                                    <DaaItem key={index} specificDaa={daa} />
+                                  matchingDaas.map(daa => (
+                                    <DaaItem key={daa.daaId} specificDaa={daa} selectedDaa={selectedDaa} onChangeSelection={handleDaaChange} />
                                   ))
                                 }
                                 <div style={{ paddingTop: '15px' }}>
                                   <DocumentUpload
-                                    entity="dac"
-                                    entityId={state.dac?.dacId || 'new-dac'}
+                                    entity={EntityType.DAC}
+                                    entityId={state.dac?.dacId?.toString() || 'new-dac'}
                                     isLiveUpload={false}
                                     categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
                                     onFilesReady={handleUploadedDaaFiles}
@@ -619,11 +679,11 @@ export default function EditDac() {
                     )
                   : (
                       <>
-                        <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }}>
+                        <div id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%' }} aria-level={3}>
                           Data Access Agreement
-                        </label>
+                        </div>
                         <DocumentUpload
-                          entity="dac"
+                          entity={EntityType.DAC}
                           entityId={dacId}
                           isLiveUpload={true}
                           categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
