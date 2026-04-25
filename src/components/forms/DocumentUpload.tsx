@@ -104,6 +104,7 @@ const ACCEPTED_EXTENSIONS = '.pdf,.doc,.docx'
 const MAX_FILE_SIZE_MB = 25
 const PROGRESS_INTERVAL_MS = 180
 const MAX_SIMULATED_PROGRESS = 92
+let localIdCounter = 0
 
 const defaultDocumentUploadApi: DocumentUploadApi = {
   uploadDocument: (...args: Parameters<typeof uploadDocument>) => uploadDocument(...args),
@@ -128,11 +129,34 @@ const getDocumentTypeLabel = (typeId: FileCategory): string => {
   return DOCUMENT_TYPES.find(type => type.id === typeId)?.label ?? typeId
 }
 
-const createLocalId = (): string => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
+const getCryptoObject = (): Crypto | undefined => {
+  if (typeof globalThis === 'undefined') {
+    return undefined
   }
-  return `document-upload-${Date.now()}-${Math.round(Math.random() * 100000)}`
+  return globalThis.crypto
+}
+
+const getSecureRandomInt = (maxExclusive: number): number => {
+  const cryptoObject = getCryptoObject()
+  if (cryptoObject?.getRandomValues) {
+    const randomBuffer = new Uint32Array(1)
+    cryptoObject.getRandomValues(randomBuffer)
+    return randomBuffer[0] % maxExclusive
+  }
+
+  // Deterministic fallback when crypto is unavailable.
+  localIdCounter = (localIdCounter + 1) % maxExclusive
+  return localIdCounter
+}
+
+const createLocalId = (): string => {
+  const cryptoObject = getCryptoObject()
+  if (cryptoObject?.randomUUID) {
+    return cryptoObject.randomUUID()
+  }
+
+  localIdCounter += 1
+  return `document-upload-${Date.now()}-${localIdCounter}`
 }
 
 const toDeferredFiles = (docs: QueueEntry[]): FileRef[] => {
@@ -182,7 +206,7 @@ const advanceUploadingProgress = (doc: QueueEntry, id: string): QueueEntry => {
     return doc
   }
 
-  const nextProgress = Math.min(doc.progress + 7 + Math.random() * 13, MAX_SIMULATED_PROGRESS)
+  const nextProgress = Math.min(doc.progress + 7 + getSecureRandomInt(14), MAX_SIMULATED_PROGRESS)
   return { ...doc, progress: nextProgress }
 }
 
