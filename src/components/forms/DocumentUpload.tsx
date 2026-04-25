@@ -39,6 +39,7 @@ import {
   uploadDocument,
   type FileStorageObject as StoredDocument,
 } from 'src/libs/ajax/FileStorageObject'
+import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 import { Notifications } from 'src/libs/utils'
 import type { ResponseError } from 'src/types/model'
 import { fileDownload } from 'src/utils/FileDownload'
@@ -310,7 +311,7 @@ interface DocumentQueueCardProps {
   onRetry: (id: string) => void
   onView: (doc: QueueEntry) => Promise<void>
   onToggleDetails: (doc: QueueEntry) => Promise<void>
-  onRemove: (id: string) => Promise<void>
+  onRemoveRequest: (doc: QueueEntry) => void
   onCategoryChange: (docId: string, nextCategory: FileCategory) => Promise<void>
 }
 
@@ -329,7 +330,7 @@ interface DocumentQueueSectionProps {
   onRetry: (id: string) => void
   onView: (doc: QueueEntry) => Promise<void>
   onToggleDetails: (doc: QueueEntry) => Promise<void>
-  onRemove: (id: string) => Promise<void>
+  onRemoveRequest: (doc: QueueEntry) => void
   onCategoryChange: (docId: string, nextCategory: FileCategory) => Promise<void>
 }
 
@@ -393,7 +394,7 @@ const DocumentQueueCard = ({
   onRetry,
   onView,
   onToggleDetails,
-  onRemove,
+  onRemoveRequest,
   onCategoryChange,
 }: DocumentQueueCardProps): React.JSX.Element => {
   const canRetry = !readOnly && isLiveUpload && doc.status === 'error'
@@ -515,7 +516,7 @@ const DocumentQueueCard = ({
             variant="outlined"
             color="inherit"
             onClick={() => {
-              void onRemove(doc.id)
+              onRemoveRequest(doc)
             }}
             disabled={!canDelete}
             sx={{ minWidth: 40 }}
@@ -544,7 +545,7 @@ const DocumentQueueSection = ({
   onRetry,
   onView,
   onToggleDetails,
-  onRemove,
+  onRemoveRequest,
   onCategoryChange,
 }: DocumentQueueSectionProps): React.JSX.Element | null => {
   if (visibleDocs.length === 0 && !hasDeletedDocs) {
@@ -586,7 +587,7 @@ const DocumentQueueSection = ({
             onRetry={onRetry}
             onView={onView}
             onToggleDetails={onToggleDetails}
-            onRemove={onRemove}
+            onRemoveRequest={onRemoveRequest}
             onCategoryChange={onCategoryChange}
           />
         ))}
@@ -620,6 +621,7 @@ export const DocumentUpload = ({
   const [detailsById, setDetailsById] = useState<Record<string, StoredDocument | undefined>>({})
   const [loadingDetailsById, setLoadingDetailsById] = useState<Record<string, boolean>>({})
   const [updatingCategoryById, setUpdatingCategoryById] = useState<Record<string, boolean>>({})
+  const [docPendingDeletion, setDocPendingDeletion] = useState<QueueEntry | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const fileDialogGuardRef = useRef<boolean>(false)
   const suppressFilePickerRef = useRef<boolean>(false)
@@ -835,6 +837,23 @@ export const DocumentUpload = ({
     setDocs(currentDocs => currentDocs.filter(doc => doc.id !== id))
   }, [api, clearProgressTimer, docs, entity, entityId, liveUpload, readOnly])
 
+  const handleRemoveRequest = useCallback((doc: QueueEntry): void => {
+    setDocPendingDeletion(doc)
+  }, [])
+
+  const handleCloseDeleteConfirmation = useCallback((): void => {
+    setDocPendingDeletion(null)
+  }, [])
+
+  const handleConfirmDelete = useCallback((): void => {
+    const pendingDocId = docPendingDeletion?.id
+    setDocPendingDeletion(null)
+    if (!pendingDocId) {
+      return
+    }
+    void handleRemove(pendingDocId)
+  }, [docPendingDeletion, handleRemove])
+
   const handleRetry = useCallback((id: string): void => {
     if (!liveUpload || readOnly) {
       return
@@ -944,7 +963,7 @@ export const DocumentUpload = ({
       onRetry={handleRetry}
       onView={handleViewDocument}
       onToggleDetails={handleToggleDetails}
-      onRemove={handleRemove}
+      onRemoveRequest={handleRemoveRequest}
       onCategoryChange={handleCategoryChange}
     />
   )
@@ -1107,6 +1126,14 @@ export const DocumentUpload = ({
         style={{ display: 'none' }}
         data-cy="document-upload-input"
         onChange={handleFileInputChange}
+      />
+
+      <ConfirmationDialog
+        title="Delete File"
+        openState={docPendingDeletion !== null}
+        close={handleCloseDeleteConfirmation}
+        action={handleConfirmDelete}
+        description={`Are you sure you want to delete the file '${docPendingDeletion?.file.name ?? ''}'?`}
       />
 
       {queueSection}

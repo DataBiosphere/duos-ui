@@ -191,8 +191,49 @@ describe('DocumentUpload', () => {
 
     cy.get('[data-cy="document-upload-status"]', { timeout: 5000 }).should('contain.text', 'Uploaded')
     cy.get('[data-cy="document-upload-delete"]').click()
+    cy.contains('Delete File').should('exist')
+    cy.contains('Are you sure you want to delete the file \'data.pdf\'?').should('exist')
+    cy.contains('Cancel').click()
+    cy.wrap(deleteStub).should('not.have.been.called')
+    cy.contains('data.pdf').should('exist')
+
+    cy.get('[data-cy="document-upload-delete"]').click()
+    cy.contains('Confirm').click()
     cy.wrap(deleteStub).should('have.been.calledOnceWith', EntityType.DATASET, 'dataset-5', 303)
     cy.contains('data.pdf').should('not.exist')
+  })
+
+  it('confirms deletion before removing deferred documents', () => {
+    const onFilesReady = cy.stub().as('filesReady')
+    const deleteStub = cy.stub().resolves({} as never)
+    const api = {
+      uploadDocument: cy.stub().resolves({} as never),
+      deleteDocument: deleteStub,
+      listDocuments: cy.stub().resolves([]),
+    }
+
+    cy.mount(
+      <DocumentUpload
+        entity={EntityType.DATASET}
+        entityId="dataset-deferred-delete"
+        isLiveUpload={false}
+        onFilesReady={onFilesReady}
+        api={api}
+      />,
+    )
+
+    cy.get(`[data-cy="document-upload-type-${FileCategory.DATA_USE_LETTER}"]`).click()
+    selectPdf('staged-delete.pdf')
+
+    cy.contains('staged-delete.pdf').should('exist')
+    cy.get('[data-cy="document-upload-delete"]').click()
+    cy.contains('Delete File').should('exist')
+    cy.contains('Are you sure you want to delete the file \'staged-delete.pdf\'?').should('exist')
+    cy.contains('Confirm').click()
+
+    cy.contains('staged-delete.pdf').should('not.exist')
+    cy.wrap(deleteStub).should('not.have.been.called')
+    cy.get('@filesReady').should('have.been.called')
   })
 
   it('uses fixed category and bypasses type selection', () => {
