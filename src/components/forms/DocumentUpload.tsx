@@ -225,6 +225,10 @@ const showUploadError = (message: string, error: unknown): void => {
   Notifications.showError({ text: `${message}: ${extractError(error)}` })
 }
 
+const runAsyncSafely = (operation: Promise<unknown>): void => {
+  operation.catch(() => undefined)
+}
+
 const isPreviewableDocument = (file: Blob | File): boolean => {
   return file.type === 'application/pdf'
 }
@@ -282,7 +286,7 @@ const useInitialDocumentsLoad = ({
       }
     }
 
-    void loadDocuments()
+    runAsyncSafely(loadDocuments())
   }, [api, entity, entityId, isLiveUpload, setDocs])
 }
 
@@ -446,7 +450,7 @@ const DocumentQueueCard = ({
             size="small"
             value={doc.typeId}
             onChange={(event) => {
-              void onCategoryChange(doc.id, event.target.value as FileCategory)
+              runAsyncSafely(onCategoryChange(doc.id, event.target.value as FileCategory))
             }}
             disabled={readOnly || doc.status === 'uploading' || doc.deleted || updatingCategory}
             sx={{
@@ -516,7 +520,7 @@ const DocumentQueueCard = ({
             variant="outlined"
             startIcon={<OpenInNewIcon />}
             onClick={() => {
-              void onView(doc)
+              runAsyncSafely(onView(doc))
             }}
             disabled={!canView}
             data-cy="document-upload-view"
@@ -528,7 +532,7 @@ const DocumentQueueCard = ({
             variant="outlined"
             startIcon={<DetailsIcon />}
             onClick={() => {
-              void onToggleDetails(doc)
+              runAsyncSafely(onToggleDetails(doc))
             }}
             disabled={!canView}
             data-cy="document-upload-details-toggle"
@@ -770,7 +774,7 @@ export const DocumentUpload = ({
 
     if (liveUpload) {
       newDocs.forEach((doc) => {
-        void uploadFile(doc)
+        runAsyncSafely(uploadFile(doc))
       })
     }
   }, [liveUpload, readOnly, selectedCategory, uploadFile])
@@ -875,7 +879,7 @@ export const DocumentUpload = ({
     if (!pendingDocId) {
       return
     }
-    void handleRemove(pendingDocId)
+    runAsyncSafely(handleRemove(pendingDocId))
   }, [docPendingDeletion, handleRemove])
 
   const handleRetry = useCallback((id: string): void => {
@@ -897,7 +901,7 @@ export const DocumentUpload = ({
     }
 
     setDocs(currentDocs => currentDocs.map(doc => doc.id === id ? resetEntry : doc))
-    void uploadFile(resetEntry)
+    runAsyncSafely(uploadFile(resetEntry))
   }, [docs, liveUpload, readOnly, uploadFile])
 
   const handleViewDocument = useCallback(async (doc: QueueEntry): Promise<void> => {
