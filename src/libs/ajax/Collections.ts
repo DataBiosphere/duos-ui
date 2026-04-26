@@ -5,7 +5,7 @@ import { DarCollection, DarCollectionSummary } from 'src/types/model'
 export const Collections = {
   cancelCollection: async (id: number, roleName: string): Promise<DarCollection> => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}/cancel`
-    const config = Object.assign({ params: { roleName } }, Config.authOpts())
+    const config = { ...Config.authOpts(), params: { roleName } }
     const res = await fetchPut<DarCollection>(url, {}, config)
     return res.data
   },
