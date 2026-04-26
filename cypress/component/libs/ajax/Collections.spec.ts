@@ -12,7 +12,7 @@ describe('Collections ajax', () => {
     darCode: 'DAR-0001',
     createDate: 1700000000000,
     createUserId: 10,
-    dars: {} as Record<string, never>,
+    dars: {} as DarCollection['dars'],
     datasets: [],
   }
 

@@ -1,9 +1,9 @@
 import { Config } from 'src/libs/config'
 import { fetchPut, fetchGet, fetchPost } from 'src/libs/ajax/fetchAdapter'
-import { DarCollection, DarCollectionSummary } from 'src/types/model'
+import type { DarCollection, DarCollectionSummary, UserRoleName } from 'src/types/model'
 
 export const Collections = {
-  cancelCollection: async (id: number, roleName: string): Promise<DarCollection> => {
+  cancelCollection: async (id: number, roleName: UserRoleName): Promise<DarCollection> => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}/cancel`
     const config = { ...Config.authOpts(), params: { roleName } }
     const res = await fetchPut<DarCollection>(url, {}, config)
@@ -28,13 +28,13 @@ export const Collections = {
     return res.data
   },
 
-  getCollectionSummariesByRoleName: async (roleName: string): Promise<DarCollectionSummary[]> => {
+  getCollectionSummariesByRoleName: async (roleName: UserRoleName): Promise<DarCollectionSummary[]> => {
     const url = `${await Config.getApiUrl()}/api/collections/role/${roleName}/summary`
     const res = await fetchGet<DarCollectionSummary[]>(url, Config.authOpts())
     return res.data
   },
 
-  getCollectionSummaryByRoleNameAndId: async ({ roleName, id }: { roleName: string, id: number }): Promise<DarCollectionSummary> => {
+  getCollectionSummaryByRoleNameAndId: async ({ roleName, id }: { roleName: UserRoleName, id: number }): Promise<DarCollectionSummary> => {
     const url = `${await Config.getApiUrl()}/api/collections/role/${roleName}/summary/${id}`
     const res = await fetchGet<DarCollectionSummary>(url, Config.authOpts())
     return res.data
