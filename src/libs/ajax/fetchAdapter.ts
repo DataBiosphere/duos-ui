@@ -203,7 +203,7 @@ async function fetchMultipartRequest<T>(
     params,
     headers = {},
     credentials,
-    returnError = false,
+    returnError = true,
     signal,
   } = options
 
@@ -283,5 +283,5 @@ export const fetchMultipart = <T>(
   formData: FormData,
   config: FetchMultipartConfig = {},
   method: Exclude<Method, 'GET' | 'DELETE'> = 'POST',
-  returnError: boolean = false,
+  returnError: boolean = true,
 ) => fetchMultipartRequest<T>({ url, data: formData, ...config, method, returnError })
