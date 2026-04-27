@@ -1,5 +1,5 @@
 import React from 'react'
-import { DAA } from 'src/libs/ajax/DAA.js'
+import { DAA } from 'src/libs/ajax/DAA'
 import PropTypes from 'prop-types'
 
 export default function RequiredDAAs(props) {

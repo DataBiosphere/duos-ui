@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Notifications } from 'src/libs/utils'
 import { DAA } from 'src/libs/ajax/DAA'
 import RequiredDAAs from 'src/pages/dar_application/RequiredDAAs'
-import { DataAccessAgreement, Dataset } from 'src/types/model'
+import { DAAObject, Dataset } from 'src/types/model'
 import { FormFieldTitle } from 'src/components/forms/forms'
 import { isEqual } from 'lodash'
 
@@ -11,7 +11,7 @@ interface ProgressReportDataAccessAgreementsProps {
   onDaaIdsChange: (daaIds: number[]) => void
 }
 
-const getRequiredDaaIds = (datasets: Dataset[], daas: DataAccessAgreement[]): number[] => {
+const getRequiredDaaIds = (datasets: Dataset[], daas: DAAObject[]): number[] => {
   const ids = new Set<number>()
   datasets.forEach((dataset) => {
     if (!dataset.dacId) {
@@ -25,8 +25,8 @@ const getRequiredDaaIds = (datasets: Dataset[], daas: DataAccessAgreement[]): nu
   return Array.from(ids).sort((a, b) => a - b)
 }
 
-export default function ProgressReportDataAccessAgreements({ datasets, onDaaIdsChange }: ProgressReportDataAccessAgreementsProps) {
-  const [daas, setDaas] = useState<DataAccessAgreement[]>([])
+export default function ProgressReportDataAccessAgreements({ datasets, onDaaIdsChange }: Readonly<ProgressReportDataAccessAgreementsProps>) {
+  const [daas, setDaas] = useState<DAAObject[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string>('')
   const previousDaaIds = useRef<number[]>([])

@@ -3,9 +3,9 @@ import { Notifications } from 'src/libs/utils'
 import { DAA } from 'src/libs/ajax/DAA'
 import RequiredDAAs from './RequiredDAAs'
 import { extractError } from 'src/utils/ErrorUtils'
-import { DataAccessAgreement, Dataset } from 'src/types/model'
+import { DAAObject, Dataset } from 'src/types/model'
 
-const getDisplayedDaaIds = (availableDatasets: Dataset[], availableDaas: DataAccessAgreement[]): number[] => {
+const getDisplayedDaaIds = (availableDatasets: Dataset[], availableDaas: DAAObject[]): number[] => {
   const seenFileNames = new Set<string>()
   const displayedIds: number[] = []
 
@@ -56,7 +56,7 @@ export const DataAccessAgreements = ({
   datasets,
   onDaaIdsChange,
 }: DataAccessAgreementsProps) => {
-  const [daas, setDaas] = useState<DataAccessAgreement[]>([])
+  const [daas, setDaas] = useState<DAAObject[]>([])
   const memoizedDisplayedIds = useMemo(() => getDisplayedDaaIds(datasets, daas), [datasets, daas])
 
   useEffect(() => {
