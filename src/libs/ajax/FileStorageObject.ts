@@ -37,7 +37,7 @@ export async function uploadDocument(
   const formData = new FormData()
   formData.append('file', file)
   formData.append('category', category)
-  const res = await fetchMultipart<FileStorageObject>(url, formData, Config.multiPartOpts())
+  const res = await fetchMultipart<FileStorageObject>(url, formData, Config.multiPartOpts(), 'POST', true)
   return res.data
 }
 
