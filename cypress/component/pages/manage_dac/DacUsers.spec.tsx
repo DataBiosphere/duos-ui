@@ -1,7 +1,7 @@
 import React from 'react'
 import { DacUsers } from 'src/pages/manage_dac/DacUsers'
 import { DacObject } from 'src/types/model'
-import dac from './dac.json'
+import dac from '../../DAC/dac.json'
 
 const dacData = dac as unknown as DacObject
 
