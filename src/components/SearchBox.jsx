@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import ReactTooltip from 'react-tooltip'
 import './SearchBox.css'
 
 export class SearchBox extends Component {
@@ -18,10 +17,6 @@ export class SearchBox extends Component {
   reset = () => {
     this.myRef.current.value = ''
     this.props.searchHandler('')
-  }
-
-  componentDidMount() {
-    ReactTooltip.rebuild()
   }
 
   render() {

@@ -9,14 +9,9 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { DarCollectionSummary } from 'src/types/model'
 
-interface CollectionSummary {
-  darCollectionId: string
-  [key: string]: unknown
-}
-
 export default function SigningOfficialDarApprovals(): React.JSX.Element {
   usePageTitle('My DAR Approvals')
-  const [collectionList, setCollectionList] = useState<CollectionSummary[]>([])
+  const [collectionList, setCollectionList] = useState<DarCollectionSummary[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.SIGNING_OFFICIAL)
@@ -39,7 +34,7 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
     init()
   }, [])
 
-  const updateCollections = useCallback((updatedCollection: CollectionSummary) => {
+  const updateCollections = useCallback((updatedCollection: DarCollectionSummary) => {
     setCollectionList((prevList) => {
       const index = prevList.findIndex(c => c.darCollectionId === updatedCollection.darCollectionId)
       if (index === -1) return prevList

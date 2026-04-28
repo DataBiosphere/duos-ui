@@ -18,7 +18,7 @@ interface SectionProps {
 }
 
 const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
-  <div style={{ paddingTop: 20, ...style }}>{children}</div>
+  <div style={{ paddingTop: 20, paddingRight: 100, ...style }}>{children}</div>
 
 const styles = {
   row: {
