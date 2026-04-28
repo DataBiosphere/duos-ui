@@ -1,22 +1,34 @@
 import React from 'react'
-import { DAA } from '../../libs/ajax/DAA'
+import { DAA } from 'src/libs/ajax/DAA'
+import { DAAObject } from 'src/types/model'
 
-export default function DAAs(props) {
+interface DAAsProps {
+  readonly issuedOn: string
+  readonly issuedBy: string
+  readonly daas: DAAObject[]
+}
+
+export default function DAAs(props: DAAsProps) {
   const {
     issuedOn,
     issuedBy,
     daas,
   } = props
 
-  const DAADownload = (id, fileName) => {
+  const DAADownload = (id: number, fileName: string) => {
     return (
       <div className="flex flex-row" style={{ justifyContent: 'flex-start', marginBottom: '30px' }}>
         <div>
-          <a target="_blank" rel="noreferrer" onClick={() => DAA.getDaaFileById(id, fileName)} className="button button-white" style={{ marginRight: '2rem', display: 'flex', alignItems: 'center' }}>
-            <span style={{ paddingRight: '1rem' }}className="glyphicon glyphicon-download"></span>
+          <button
+            type="button"
+            onClick={() => DAA.getDaaFileById(id, fileName)}
+            className="button button-white"
+            style={{ marginRight: '2rem', display: 'flex', alignItems: 'center' }}
+          >
+            <span style={{ paddingRight: '1rem' }} className="glyphicon glyphicon-download"></span>
             {' '}
             {fileName}
-          </a>
+          </button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <p style={{ margin: '0px 0px 0px 10px' }}>Issued by</p>
@@ -31,7 +43,7 @@ export default function DAAs(props) {
     )
   }
 
-  const daaDivs = daas.map((daa) => {
+  const daaDivs = daas.map((daa: DAAObject) => {
     const id = daa.daaId
     const fileName = daa.file.fileName.split('.')[0]
     return (
