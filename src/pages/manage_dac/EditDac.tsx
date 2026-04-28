@@ -1,7 +1,7 @@
 import { difference, filter, isEmpty, map, union } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
-import type { MultiValue } from 'react-select'
+import { MultiValue } from 'react-select'
 import { DAC } from 'src/libs/ajax/DAC'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, PromiseSerial } from 'src/libs/utils'
@@ -16,9 +16,9 @@ import { Styles } from 'src/libs/theme'
 import DUOSUniformDataAccessAgreement from 'src/assets/DUOS_Uniform_Data_Access_Agreement.pdf'
 import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DocumentUpload, type FileRef } from 'src/components/forms/DocumentUpload'
-import { EntityType, FileCategory, uploadDocument } from 'src/libs/ajax/FileStorageObject'
-import type { DAAObject, DacObject, SimplifiedDuosUser } from 'src/types/model'
+import { DocumentUpload, FileRef } from 'src/components/forms/DocumentUpload'
+import { EntityType, FileCategory } from 'src/libs/ajax/FileStorageObject'
+import { DAAObject, DacObject, DuosUser } from 'src/types/model'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -36,7 +36,7 @@ interface UserSelectOption {
   key: number
   value: number
   label: string
-  item: SimplifiedDuosUser
+  item: DuosUser
 }
 
 interface EditDacState {
@@ -192,7 +192,7 @@ export default function EditDac(): React.JSX.Element {
     const newDac = await DAC.create(dacToProcess.name, dacToProcess.description, dacToProcess.email) as DacObject
     if (selectedDAAFiles !== null && selectedDaa === undefined) {
       for (const selectedDAAFile of selectedDAAFiles) {
-        await uploadDocument(EntityType.DAC, String(newDac.dacId), selectedDAAFile.file, FileCategory.DATA_ACCESS_AGREEMENT)
+        await DAA.createDaa(selectedDAAFile.file, newDac.dacId)
       }
     }
     return newDac
@@ -281,7 +281,7 @@ export default function EditDac(): React.JSX.Element {
 
   const userSearch = (invalidUserIds: number[], query: string, callback: (options: UserSelectOption[]) => void): void => {
     DAC.autocompleteUsers(query).then(
-      (items: SimplifiedDuosUser[]) => {
+      (items: DuosUser[]) => {
         const filteredUsers = filter(items, (item) => {
           return !invalidUserIds.includes(item.userId)
         })
