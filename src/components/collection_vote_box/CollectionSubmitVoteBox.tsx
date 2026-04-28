@@ -276,7 +276,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
                 <textarea
                   name="Rationale Input"
                   value={rationale}
-                  placeholder="Optional: Enter your comments and describe your rationale prior to voting."
+                  placeholder={isVotingDisabled ? '' : 'Optional: Enter your comments and describe your rationale prior to voting.'}
                   onChange={e => setRationale(e.target.value)}
                   onBlur={updateRationale}
                   style={styles.rationaleTextArea}
