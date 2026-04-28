@@ -9,7 +9,7 @@ import chairJson from '../../DAC/chair.json'
 import daas from '../../DAC/daas.json'
 import dac from '../../DAC/dac.json'
 import { Notifications } from 'src/libs/utils'
-import type { DuosUser } from 'src/types/model'
+import type { DAAObject, DuosUser } from 'src/types/model'
 
 const admin = adminJson as DuosUser
 const chair = chairJson as DuosUser
@@ -22,16 +22,39 @@ const withRoleStatuses = (user: DuosUser): DuosUser => ({
   isChairPerson: Boolean(user.isChairPerson || user.roles?.some(role => role.name === 'Chairperson')),
 })
 
+const createdUploadDaa: DAAObject = {
+  daaId: 999,
+  broadDaa: false,
+  createUserId: 1,
+  createDate: String(Date.now()),
+  updateUserId: 1,
+  updateDate: String(Date.now()),
+  initialDacId: dac.dacId,
+  dacs: [],
+  file: {
+    fileStorageObjectId: 999,
+    entityId: String(dac.dacId),
+    fileName: 'uploaded-daa.pdf',
+    category: 'dataAccessAgreement',
+    mediaType: 'application/pdf',
+    createUserId: 1,
+    createDate: Date.now(),
+    deleted: false,
+  },
+}
+
 const stubCurrentUser = (user: DuosUser, { normalizeRoleFlags = false }: { normalizeRoleFlags?: boolean } = {}): void => {
   cy.stub(Storage, 'getCurrentUser').returns(normalizeRoleFlags ? withRoleStatuses(user) : user)
 }
 
-const stubRoleMutations = (): void => {
-  cy.stub(DAC, 'removeDacMember').returns(Promise.resolve(200))
-  cy.stub(DAC, 'addDacChair').returns(Promise.resolve(200))
-  cy.stub(DAC, 'removeDacChair').returns(Promise.resolve(200))
-  cy.stub(DAC, 'addDacMember').returns(Promise.resolve(200))
-  cy.stub(DAA, 'addDaaToDac').returns(Promise.resolve(200))
+const stubRoleMutations = () => {
+  return {
+    removeDacMember: cy.stub(DAC, 'removeDacMember').returns(Promise.resolve(200)),
+    addDacChair: cy.stub(DAC, 'addDacChair').returns(Promise.resolve(200)),
+    removeDacChair: cy.stub(DAC, 'removeDacChair').returns(Promise.resolve(200)),
+    addDacMember: cy.stub(DAC, 'addDacMember').returns(Promise.resolve(200)),
+    addDaaToDac: cy.stub(DAA, 'addDaaToDac').returns(Promise.resolve(200)),
+  }
 }
 
 const mountNewDac = (user: DuosUser, daaList: DaaFixtureList = daas): void => {
@@ -44,7 +67,7 @@ const mountExistingDac = (user: DuosUser, daaList: DaaFixtureList = []): void =>
   stubCurrentUser(user)
   cy.stub(DAC, 'get').returns(dac)
   cy.stub(DAA, 'getDaas').returns(daaList)
-  cy.intercept('GET', '**/api/dac/*/document', [])
+  cy.intercept('GET', '**/api/document/dac/*', [])
   cy.mount(
     <MemoryRouter initialEntries={[`/manage_edit_dac_daa/${dac.dacId}`]}>
       <Routes>
@@ -72,6 +95,11 @@ const selectPdf = (name: string): void => {
   )
 }
 
+const openUploadPanel = (): void => {
+  cy.get('[data-cy="daa_upload_button"]').click()
+  cy.get('[data-cy="document-upload-root"]').should('exist')
+}
+
 const assertEditableForm = ({ empty = false }: { empty?: boolean } = {}): void => {
   cy.get('[data-cy="dac_name"]').should('not.be.disabled')
   cy.get('[data-cy="dac_description"]').should('not.be.disabled')
@@ -93,15 +121,12 @@ describe('EditDAC Tests', () => {
       mountExistingDac(user)
       cy.contains(dac.name).should('exist')
       assertEditableForm()
-      const isChairRole = Boolean(user.isChairPerson || user.roles?.some(role => role.name === 'Chairperson'))
-      if (isChairRole) {
-        cy.get('[data-cy="document-upload-fixed-category"]').should('contain.text', 'Data Access Agreement')
-        cy.get('[data-cy="document-upload-dropzone"]').should('exist')
-      }
-      else {
-        cy.get('[data-cy="document-upload-dropzone"]').should('not.exist')
-        cy.get('[data-cy="document-upload-empty-readonly"]').should('exist')
-      }
+      cy.get('[data-cy="daa_upload_button"]').should('exist')
+      cy.get('[data-cy="document-upload-root"]').should('not.exist')
+
+      openUploadPanel()
+      cy.get('[data-cy="document-upload-fixed-category"]').should('contain.text', 'Data Access Agreement')
+      cy.get('[data-cy="document-upload-dropzone"]').should('exist')
     })
   })
 
@@ -165,6 +190,7 @@ describe('EditDAC Tests', () => {
   it('Does not open file browser when clicking outside upload dropzone in New DAC flow', () => {
     cy.viewport(600, 600)
     mountNewDac(admin)
+    openUploadPanel()
 
     cy.get('[data-cy="document-upload-input"]').then(($input) => {
       cy.stub($input[0], 'click').as('newDacFileInputClick')
@@ -180,43 +206,74 @@ describe('EditDAC Tests', () => {
     cy.get('@newDacFileInputClick').should('have.been.calledOnce')
   })
 
-  it('Uploads a DAA file when editing an existing DAC', () => {
-    cy.viewport(600, 800)
-    mountExistingDac(chair, daas)
-
-    cy.get('[data-cy="document-upload-dropzone"]').should('exist')
-    cy.get('[data-cy="document-upload-fixed-category"]').should('contain.text', 'Data Access Agreement')
-    selectPdf('edited-daa.pdf')
-
-    cy.contains('edited-daa.pdf').should('exist')
-    cy.get('[data-cy="document-upload-status"]', { timeout: 5000 }).should(($status) => {
-      expect($status.text()).to.match(/Uploading|Uploaded|Upload failed/)
-    })
-  })
-
   it('Uploads custom DAA file when creating a new DAC with file upload', () => {
     cy.viewport(600, 600)
-    stubRoleMutations()
+    const mutations = stubRoleMutations()
     mountNewDac(admin)
 
     const dacCreate = cy.stub(DAC, 'create').returns(dac)
+    const daaCreate = cy.stub(DAA, 'createDaa').returns(Promise.resolve({ data: createdUploadDaa }))
 
     fillDacForm({ name: 'DAC With Custom DAA', description: 'DAC with uploaded DAA', email: 'customdaa@example.org' })
+    openUploadPanel()
+    selectPdf('new-custom-daa.pdf')
 
-    // Simulate file upload by calling handleUploadedDaaFiles indirectly
-    // For now, verify the uploaded file flow blocks until DAA is selected or uploaded
-    const showError = cy.stub(Notifications, 'showError')
-    cy.get('[data-cy="btn_save"]').click()
+    cy.contains('new-custom-daa.pdf').should('exist')
+    cy.get('[data-cy="uploaded_daa_radio"]').should('be.checked')
+    cy.get('[data-cy="document-upload-root"]').should('not.exist')
 
-    // Should block without DAA selection or upload
-    cy.wrap(showError).should('have.been.calledWithMatch', {
-      text: saveDaaErrorText,
-    })
-
-    // Select default DAA and try again
-    cy.get('[data-cy="daa_radio"]').first().check()
     cy.get('[data-cy="btn_save"]').click()
 
     cy.wrap(dacCreate).should('have.been.calledOnce')
+    cy.wrap(daaCreate).should('have.been.calledOnce')
+    cy.wrap(daaCreate).its('firstCall.args.1').should('equal', dac.dacId)
+    cy.wrap(mutations.addDaaToDac).should('not.have.been.called')
+  })
+
+  it('Uploads and auto-selects a DAA file when editing an existing DAC', () => {
+    cy.viewport(600, 800)
+    const mutations = stubRoleMutations()
+    mountExistingDac(chair, daas)
+    const dacUpdate = cy.stub(DAC, 'update').returns(dac)
+    const daaCreate = cy.stub(DAA, 'createDaa').returns(Promise.resolve({ data: createdUploadDaa }))
+
+    openUploadPanel()
+    cy.get('[data-cy="document-upload-fixed-category"]').should('contain.text', 'Data Access Agreement')
+    selectPdf('edited-daa.pdf')
+
+    cy.wrap(daaCreate, { timeout: 10000 }).should('have.been.calledOnce')
+    cy.contains('edited-daa.pdf', { timeout: 10000 }).should('exist')
+    cy.get('[data-cy="uploaded_daa_radio"]').should('be.checked')
+    cy.get('[data-cy="document-upload-root"]').should('not.exist')
+
+    cy.get('[data-cy="dac_name"]').clear()
+    cy.get('[data-cy="dac_name"]').type('Updated After Upload')
+    cy.get('[data-cy="btn_save"]').click()
+
+    cy.wrap(dacUpdate).should('have.been.calledOnce')
+    cy.wrap(mutations.addDaaToDac).should('not.have.been.called')
+  })
+
+  it('Allows switching away from an uploaded DAA to the default agreement for an existing DAC', () => {
+    cy.viewport(600, 800)
+    const mutations = stubRoleMutations()
+    mountExistingDac(chair, daas)
+    cy.stub(DAC, 'update').returns(dac)
+    cy.stub(DAA, 'createDaa').returns(Promise.resolve({ data: createdUploadDaa }))
+
+    openUploadPanel()
+    selectPdf('switchable-daa.pdf')
+    cy.contains('switchable-daa.pdf', { timeout: 10000 }).should('exist')
+
+    cy.get('[data-cy="uploaded_daa_radio"]').should('be.checked')
+    cy.get('[data-cy="daa_radio"]').first().check()
+    cy.get('[data-cy="uploaded_daa_radio"]').should('not.be.checked')
+
+    cy.get('[data-cy="dac_name"]').clear()
+    cy.get('[data-cy="dac_name"]').type('Updated With Default DAA')
+    cy.get('[data-cy="btn_save"]').click()
+
+    cy.wrap(mutations.addDaaToDac).should('have.been.calledOnce')
+    cy.wrap(mutations.addDaaToDac).its('firstCall.args').should('deep.equal', [daas[0].daaId, dac.dacId])
   })
 })

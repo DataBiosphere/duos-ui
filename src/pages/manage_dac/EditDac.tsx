@@ -16,9 +16,9 @@ import { Styles } from 'src/libs/theme'
 import DUOSUniformDataAccessAgreement from 'src/assets/DUOS_Uniform_Data_Access_Agreement.pdf'
 import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DocumentUpload, FileRef } from 'src/components/forms/DocumentUpload'
+import { DocumentUpload, type FileRef } from 'src/components/forms/DocumentUpload'
 import { EntityType, FileCategory } from 'src/libs/ajax/FileStorageObject'
-import { DAAObject, DacObject, DuosUser } from 'src/types/model'
+import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -133,7 +133,15 @@ export default function EditDac(): React.JSX.Element {
   const [matchingDaas, setMatchingDaas] = useState<DAAObject[]>([])
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
   const user = Storage.getCurrentUser()
-  const canUploadDAA = (user?.isAdmin ?? user?.roles?.some(role => String(role.dacId) === dacId && role.name === CHAIRPERSON)) ?? false
+  const canUploadDAA = Boolean(
+    user?.isAdmin
+    || user?.roles?.some(role => role.name === 'Admin')
+    || user?.roles?.some(role => String(role.dacId) === dacId && role.name === CHAIRPERSON),
+  )
+  const uploadedDaaId = createdDaa?.daaId
+  const isUploadedDaaSelected = createdDaa
+    ? selectedDaa?.daaId === createdDaa.daaId
+    : daaFileData !== null && selectedDaa === undefined
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -204,7 +212,9 @@ export default function EditDac(): React.JSX.Element {
     const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(dacForOps.dacId, id))
     const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(dacForOps.dacId, id))
     const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(dacForOps.dacId, id))
-    const ops5 = newDaaId !== null && selectedDaa?.daaId !== undefined ? [() => DAA.addDaaToDac(newDaaId, dacForOps.dacId)] : []
+    const ops5 = newDaaId !== null && selectedDaa?.daaId !== undefined && selectedDaa?.daaId !== uploadedDaaId
+      ? [() => DAA.addDaaToDac(newDaaId, dacForOps.dacId)]
+      : []
     return ops0.concat(ops1, ops2, ops3, ops4, ops5)
   }
 
@@ -372,19 +382,55 @@ export default function EditDac(): React.JSX.Element {
     }
   }
 
+  const selectUploadedDaa = (): void => {
+    if (createdDaa) {
+      setSelectedDaa(createdDaa)
+      setNewDaaId(null)
+    }
+    else {
+      setSelectedDaa(undefined)
+      setNewDaaId(null)
+    }
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true,
+    }))
+  }
+
   const handleUploadedDaaFiles = async (files: FileRef[]): Promise<void> => {
     setShowUploadModal(false)
-    setSelectedDAAFiles(files)
 
-    for (const file of files) {
-      const uploadedFile = file?.file
-      setDaaFileData(uploadedFile)
-      if (dacId === undefined) {
-        setSelectedDaa(undefined)
+    const uploadedFile = files?.[0]?.file ?? null
+    setSelectedDAAFiles(uploadedFile && files[0] ? [files[0]] : null)
+    setDaaFileData(uploadedFile)
+
+    if (!uploadedFile) {
+      return
+    }
+
+    if (dacId === undefined) {
+      setCreatedDaa(null)
+      setSelectedDaa(undefined)
+      setNewDaaId(null)
+    }
+    else {
+      if (state.dac.dacId === undefined) {
+        handleErrors('Error: Unable to associate uploaded DAA with the current DAC.')
+        return
       }
-      else {
-        const createdDaa = await DAA.createDaa(uploadedFile, state.dac.dacId)
-        setCreatedDaa(createdDaa.data)
+
+      try {
+        const createdDaaResponse = await DAA.createDaa(uploadedFile, state.dac.dacId)
+        const nextCreatedDaa = createdDaaResponse?.data ?? null
+        setCreatedDaa(nextCreatedDaa)
+        if (nextCreatedDaa?.daaId !== undefined) {
+          setSelectedDaa(nextCreatedDaa)
+          setNewDaaId(null)
+        }
+      }
+      catch {
+        handleErrors('Error: Unable to upload DAA file.')
+        return
       }
     }
 
@@ -662,9 +708,10 @@ export default function EditDac(): React.JSX.Element {
                             <input
                               type="radio"
                               name="daa"
-                              checked={selectedDaa?.daaId === createdDaa?.daaId}
-                              onChange={() => handleDaaChange(createdDaa?.daaId)}
+                              checked={isUploadedDaaSelected}
+                              onChange={selectUploadedDaa}
                               style={{ accentColor: '#00609f' }}
+                              data-cy="uploaded_daa_radio"
                             />
                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                               <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
@@ -686,6 +733,7 @@ export default function EditDac(): React.JSX.Element {
                                     href={URL.createObjectURL(daaFileData)}
                                     className="button button-white"
                                     style={{ padding: '10px 12px' }}
+                                    data-cy="uploaded_daa_download"
                                   >
                                     <span className="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                                   </a>
@@ -728,8 +776,9 @@ export default function EditDac(): React.JSX.Element {
                                   <DocumentUpload
                                     entity={EntityType.DAC}
                                     entityId={dacId}
-                                    isLiveUpload={true}
+                                    isLiveUpload={false}
                                     categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
+                                    onFilesReady={handleUploadedDaaFiles}
                                     readOnly={!canUploadDAA}
                                     styles={{ root: { p: 0, maxWidth: 'none', mx: 0 } }}
                                   />
