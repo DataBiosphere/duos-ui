@@ -20,6 +20,8 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import type { Theme } from '@mui/material/styles'
+import type { SystemStyleObject } from '@mui/system'
 import {
   CloudUpload as CloudUploadIcon,
   DeleteOutline as DeleteIcon,
@@ -85,6 +87,9 @@ export interface Props {
   readOnly?: boolean
   api?: DocumentUploadApi
   deletedDocumentsView?: DeletedDocumentsView
+  styles?: {
+    root?: SystemStyleObject<Theme>
+  }
 }
 
 interface DocumentTypeOption {
@@ -639,6 +644,7 @@ export const DocumentUpload = ({
   readOnly = false,
   api = defaultDocumentUploadApi,
   deletedDocumentsView = 'active',
+  styles,
 }: Props): React.JSX.Element => {
   const liveUpload = isLiveUpload ?? true
   const [selectedType, setSelectedType] = useState<FileCategory | null>(null)
@@ -998,12 +1004,17 @@ export const DocumentUpload = ({
     />
   )
 
+  const defaultRootSx: SystemStyleObject<Theme> = { p: 3, maxWidth: 800, mx: 'auto' }
+  const rootSx: SystemStyleObject<Theme> = styles?.root
+    ? { ...defaultRootSx, ...styles.root }
+    : defaultRootSx
+
   if (readOnly) {
-    return <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }} data-cy="document-upload-root">{queueSection}</Box>
+    return <Box sx={rootSx} data-cy="document-upload-root">{queueSection}</Box>
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }} data-cy="document-upload-root">
+    <Box sx={rootSx} data-cy="document-upload-root">
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
         <Box
           sx={{ p: 3 }}
