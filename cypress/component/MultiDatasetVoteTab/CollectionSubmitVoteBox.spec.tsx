@@ -479,6 +479,42 @@ describe('CollectionSubmitVoteBox - Tests', function () {
     cy.get('[data-cy=radar-icon]').should('exist')
   })
 
+  it('renders a blank placeholder on the rationale textarea when voting is disabled and no rationale exists', () => {
+    cy.mount(
+      <CollectionSubmitVoteBox
+        question="question"
+        votes={[{ voteId: 5, rationale: undefined } as Vote]}
+        isFinal={false}
+        isLoading={false}
+        isDisabled={true}
+        adminPage={false}
+        bucketKey="collection-submit-vote-box"
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
+      />,
+    )
+    cy.get('textarea').should('have.attr', 'placeholder', '')
+    cy.get('textarea').should('have.value', '')
+  })
+
+  it('renders existing rationale in the textarea when voting is disabled', () => {
+    cy.mount(
+      <CollectionSubmitVoteBox
+        question="question"
+        votes={votesMatch}
+        isFinal={false}
+        isLoading={false}
+        isDisabled={true}
+        adminPage={false}
+        bucketKey="collection-submit-vote-box"
+        updateFinalVote={() => {}}
+        reloadFn={() => {}}
+      />,
+    )
+    cy.get('textarea').should('be.disabled')
+    cy.get('textarea').should('have.value', 'test')
+  })
+
   it('shows disabled Yes/No buttons as member when election is closed', () => {
     const updateFunction = cy.spy().as('updateFunction')
     cy.mount(
