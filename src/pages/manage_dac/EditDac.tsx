@@ -22,8 +22,6 @@ import type { DAAObject, DacObject, DuosUser, SimplifiedDuosUser } from 'src/typ
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
 
-type DacRole = typeof CHAIR | typeof MEMBER
-
 interface ErrorState {
   show?: boolean
   title?: string
@@ -103,7 +101,8 @@ function DaaItem({ specificDaa, selectedDaa, onChangeSelection }: Readonly<DaaIt
 
 export default function EditDac(): React.JSX.Element {
   const params = useParams<{ dacId?: string }>()
-  const dacId = params.dacId
+  const dacIdParam = params.dacId
+  const dacId = dacIdParam === undefined ? undefined : Number.parseInt(dacIdParam, 10)
   const navigate = useNavigate()
   const location = useLocation() as { state?: { userRole?: string } }
   const [state, setState] = useState<EditDacState>({
@@ -128,13 +127,13 @@ export default function EditDac(): React.JSX.Element {
   const [fetchedDac, setFetchedDac] = useState<DacObject | null>(null)
   const [broadDaa, setBroadDaa] = useState<DAAObject | null>(null)
   const [matchingDaas, setMatchingDaas] = useState<DAAObject[]>([])
-  const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
+  const dacText = dacIdParam === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      if (dacId === undefined) {
+      if (dacIdParam === undefined) {
         try {
-          const daas = await DAA.getDaas() as DAAObject[]
+          const daas = await DAA.getDaas()
           const broadDaa = daas.find(daa => daa.broadDaa)
           setBroadDaa(broadDaa ?? null)
         }
@@ -144,9 +143,15 @@ export default function EditDac(): React.JSX.Element {
       }
       else {
         try {
-          const fetchedDac = await DAC.get(dacId) as DacObject
+          if (dacId === undefined) {
+            Notifications.showError({ text: 'Error: Unable to retrieve current DAC from server' })
+            setIsLoading(false)
+            return
+          }
+
+          const fetchedDac = await DAC.get(dacId)
           setFetchedDac(fetchedDac)
-          const daas = await DAA.getDaas() as DAAObject[]
+          const daas = await DAA.getDaas()
           const broadDaa = daas.find(daa => daa.broadDaa)
           setBroadDaa(broadDaa ?? null)
           setState(prev => ({ ...prev, dac: fetchedDac }))
@@ -164,51 +169,91 @@ export default function EditDac(): React.JSX.Element {
     }
 
     void fetchData()
-  }, [dacId])
+  }, [dacId, dacIdParam])
 
-  const okHandler = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
-    event.preventDefault()
-    const user = Storage.getCurrentUser() as Partial<DuosUser> | null
-    let currentDac = state.dac
+  const saveErrorMessage = 'There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.'
 
-    if (!state.dirtyFlag) {
-      return
-    }
-
-    if (dacId === undefined) {
+  const persistDacChanges = async (
+    user: Partial<DuosUser> | null,
+    currentDac: DacObject,
+    dacName: string,
+    dacDescription: string,
+    dacEmail: string,
+  ): Promise<DacObject | null> => {
+    if (dacIdParam === undefined) {
       if (daaFileData === null && selectedDaa?.daaId !== broadDaa?.daaId) {
         handleErrors('Please select either the default agreement or upload your own agreement before saving.')
-        return
+        return null
       }
 
       if (!user?.isAdmin) {
-        return
+        return null
       }
 
-      currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email) as DacObject
+      const createdDac = await DAC.create(dacName, dacDescription, dacEmail)
       if (daaFileData !== null && selectedDaa === undefined) {
-        const createdDaaResponse = await DAA.createDaa(daaFileData, currentDac.dacId)
+        const createdDacId = createdDac.dacId
+        if (createdDacId === undefined) {
+          handleErrors(saveErrorMessage)
+          return null
+        }
+        const createdDaaResponse = await DAA.createDaa(daaFileData, createdDacId)
         setCreatedDaa((createdDaaResponse as { data?: DAAObject })?.data ?? null)
       }
-    }
-    else {
-      await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email)
+      return createdDac
     }
 
+    const existingDacId = currentDac.dacId
+    if (existingDacId === undefined) {
+      handleErrors(saveErrorMessage)
+      return null
+    }
+
+    await DAC.update(existingDacId, dacName, dacDescription, dacEmail)
+    return currentDac
+  }
+
+  const buildSaveOperations = (currentDacId: number): Array<() => Promise<number>> => {
     // Order here is important. Since users cannot have multiple roles in the
     // same DAC, we have to make sure we remove users before re-adding any
     // back in a different role.
     // Chairs are a special case since we cannot remove all chairs from a DAC
     // so we handle that case first.
-    const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id))
-    const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id))
-    const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id))
-    const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id))
-    const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id))
-    const ops5 = newDaaId !== null && selectedDaa !== undefined && currentDac.dacId !== undefined
-      ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)]
+    const ops0: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDacId, id))
+    const ops1: Array<() => Promise<number>> = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDacId, id))
+    const ops2: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDacId, id))
+    const ops3: Array<() => Promise<number>> = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDacId, id))
+    const ops4: Array<() => Promise<number>> = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDacId, id))
+    const ops5: Array<() => Promise<number>> = newDaaId !== null && selectedDaa !== undefined
+      ? [() => DAA.addDaaToDac(newDaaId, currentDacId)]
       : []
-    const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5)
+    return [...ops0, ...ops1, ...ops2, ...ops3, ...ops4, ...ops5]
+  }
+
+  const okHandler = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+    event.preventDefault()
+    if (!state.dirtyFlag) {
+      return
+    }
+
+    const user = Storage.getCurrentUser() as Partial<DuosUser> | null
+    const currentDac = state.dac
+    const dacName = currentDac.name ?? ''
+    const dacDescription = currentDac.description ?? ''
+    const dacEmail = currentDac.email ?? ''
+
+    const persistedDac = await persistDacChanges(user, currentDac, dacName, dacDescription, dacEmail)
+    if (persistedDac === null) {
+      return
+    }
+
+    const currentDacId = persistedDac.dacId
+    if (currentDacId === undefined) {
+      handleErrors(saveErrorMessage)
+      return
+    }
+
+    const allOperations = buildSaveOperations(currentDacId)
     const responses = await PromiseSerial(allOperations)
     const errorCodes = filter(
       responses,
@@ -219,7 +264,7 @@ export default function EditDac(): React.JSX.Element {
       closeHandler()
     }
     else {
-      handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.')
+      handleErrors(saveErrorMessage)
     }
   }
 
@@ -332,7 +377,7 @@ export default function EditDac(): React.JSX.Element {
     }))
   }
 
-  const removeDacMember = (_dacId: string | number, userId: number, role: DacRole): void => {
+  const removeDacMember = (_dacId: number | undefined, userId: number, role: string): void => {
     switch (role) {
       case CHAIR:
         if (state.chairIdsToRemove.includes(userId)) {
@@ -448,7 +493,7 @@ export default function EditDac(): React.JSX.Element {
               <TableHeaderSection
                 icon={{ src: editDACIcon }}
                 title={dacText}
-                description={dacId === undefined ? 'Create DAC' : fetchedDac?.name}
+                description={dacIdParam === undefined ? 'Create DAC' : fetchedDac?.name}
               />
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '2rem' }}>
