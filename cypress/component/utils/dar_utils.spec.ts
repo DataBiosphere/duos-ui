@@ -278,7 +278,36 @@ describe('DarUtils', () => {
       expect(result.irbProtocolExpiration).to.equal(formState.irbProtocolExpiration)
       expect(result.collaborationLetterLocation).to.equal(formState.collaborationLetterLocation)
       expect(result.collaborationLetterName).to.equal(formState.collaborationLetterName)
+      // closeoutYesNo is true in this formState, so daaIds should be absent
+      expect(result.daaIds).to.equal(undefined)
+    })
+
+    it('should include daaIds when closeoutYesNo is false', () => {
+      const formState = {
+        progressReportSummary: 'Test summary',
+        datasetIds: [1],
+        daaIds: [101, 102, 101] as number[],
+        closeoutYesNo: false,
+        labCollaborators: [],
+        internalCollaborators: [],
+        externalCollaborators: [],
+      } as unknown as FormState
+      const result = convertFormStateToDAR(formState)
       expect(result.daaIds).to.deep.equal([101, 102])
+    })
+
+    it('should omit daaIds when closeoutYesNo is true', () => {
+      const formState = {
+        progressReportSummary: 'Test summary',
+        datasetIds: [1],
+        daaIds: [101, 102] as number[],
+        closeoutYesNo: true,
+        labCollaborators: [],
+        internalCollaborators: [],
+        externalCollaborators: [],
+      } as unknown as FormState
+      const result = convertFormStateToDAR(formState)
+      expect(result.daaIds).to.equal(undefined)
     })
   })
 
