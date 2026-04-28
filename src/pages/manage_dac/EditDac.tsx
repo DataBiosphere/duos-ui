@@ -377,39 +377,27 @@ export default function EditDac(): React.JSX.Element {
     }))
   }
 
+  const toggleRemovalUserId = (key: 'chairIdsToRemove' | 'memberIdsToRemove', userId: number): void => {
+    setState((prev) => {
+      const ids = prev[key]
+      const nextIds = ids.includes(userId)
+        ? difference(ids, [userId])
+        : union(ids, [userId])
+      return {
+        ...prev,
+        [key]: nextIds,
+        dirtyFlag: true,
+      }
+    })
+  }
+
   const removeDacMember = (_dacId: number | undefined, userId: number, role: string): void => {
     switch (role) {
       case CHAIR:
-        if (state.chairIdsToRemove.includes(userId)) {
-          setState(prev => ({
-            ...prev,
-            chairIdsToRemove: difference(prev.chairIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
-        else {
-          setState(prev => ({
-            ...prev,
-            chairIdsToRemove: union(prev.chairIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
+        toggleRemovalUserId('chairIdsToRemove', userId)
         break
       case MEMBER:
-        if (state.memberIdsToRemove.includes(userId)) {
-          setState(prev => ({
-            ...prev,
-            memberIdsToRemove: difference(prev.memberIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
-        else {
-          setState(prev => ({
-            ...prev,
-            memberIdsToRemove: union(prev.memberIdsToRemove, [userId]),
-            dirtyFlag: true,
-          }))
-        }
+        toggleRemovalUserId('memberIdsToRemove', userId)
         break
       default:
         break
