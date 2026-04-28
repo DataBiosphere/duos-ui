@@ -8,20 +8,21 @@ import { Notifications } from 'src/libs/utils'
 import radarIcon from 'src/images/google-svg/radar.svg'
 import { Spinner } from 'src/components/Spinner'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DacObject } from 'src/types/model'
 
 const ManageRadar = () => {
   const params = useParams<{ dacId: string }>()
   const dacIdParam = params.dacId || ''
-  const dacId = parseInt(dacIdParam, 10)
+  const dacId = Number.parseInt(dacIdParam, 10)
 
-  const [fetchedDac, setFetchedDac] = useState<{ name: string } | null>(null)
+  const [fetchedDac, setFetchedDac] = useState<DacObject>({ name: '' })
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!dacIdParam || isNaN(dacId)) {
+        if (!dacIdParam || Number.isNaN(dacId)) {
           setHasError(true)
           setIsLoading(false)
           return
@@ -66,7 +67,7 @@ const ManageRadar = () => {
                   color: '#d32f2f',
                 }}
               >
-                {(!dacIdParam || isNaN(dacId)) ? 'Invalid DAC ID' : 'Error loading DAC information'}
+                {(!dacIdParam || Number.isNaN(dacId)) ? 'Invalid DAC ID' : 'Error loading DAC information'}
               </div>
             )}
           />

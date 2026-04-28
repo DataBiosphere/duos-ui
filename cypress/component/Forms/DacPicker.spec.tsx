@@ -10,7 +10,7 @@ describe('Data Library Filters', () => {
   // Intercept configuration calls
   beforeEach(() => {
     cy.initApplicationConfig()
-    cy.intercept('GET', '/api/dac', (req) => {
+    cy.intercept('GET', '**/api/dac*', (req) => {
       req.reply({
         body: dacs,
       })
