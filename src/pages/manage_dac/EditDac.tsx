@@ -1,4 +1,3 @@
-import { difference, filter, isEmpty, map, union } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
 import type { MultiValue } from 'react-select'
@@ -255,12 +254,11 @@ export default function EditDac(): React.JSX.Element {
 
     const allOperations = buildSaveOperations(currentDacId)
     const responses = await PromiseSerial(allOperations)
-    const errorCodes = filter(
-      responses,
+    const errorCodes = responses.filter(
       r => JSON.stringify(r) !== '200' && JSON.stringify((r as { status?: number })?.status) !== '201',
     )
 
-    if (isEmpty(errorCodes)) {
+    if (errorCodes.length === 0) {
       closeHandler()
     }
     else {
@@ -284,13 +282,14 @@ export default function EditDac(): React.JSX.Element {
     //    * plus any members that are slated for removal
     //    * plus any chairs that are slated for removal
 
-    const invalidChairs = difference(
-      union(
-        map(state.dac.chairpersons, 'userId'),
-        map(state.dac.members, 'userId'),
-        state.memberIdsToAdd),
-      state.memberIdsToRemove,
-      state.chairIdsToRemove)
+    const allInvalidChairIds = [
+      ...(state.dac.chairpersons?.map(c => c.userId) ?? []),
+      ...(state.dac.members?.map(m => m.userId) ?? []),
+      ...state.memberIdsToAdd,
+    ]
+    const invalidChairs = [...new Set(allInvalidChairIds)].filter(
+      id => !state.memberIdsToRemove.includes(id) && !state.chairIdsToRemove.includes(id),
+    )
     userSearch(invalidChairs, query, callback)
   }
 
@@ -302,22 +301,21 @@ export default function EditDac(): React.JSX.Element {
     //    * plus any members that are slated for removal
     //    * plus any chairs that are slated for removal
 
-    const invalidMembers = difference(
-      union(
-        map(state.dac.members, 'userId'),
-        map(state.dac.chairpersons, 'userId'),
-        state.chairIdsToAdd),
-      state.memberIdsToRemove,
-      state.chairIdsToRemove)
+    const allInvalidMemberIds = [
+      ...(state.dac.members?.map(m => m.userId) ?? []),
+      ...(state.dac.chairpersons?.map(c => c.userId) ?? []),
+      ...state.chairIdsToAdd,
+    ]
+    const invalidMembers = [...new Set(allInvalidMemberIds)].filter(
+      id => !state.memberIdsToRemove.includes(id) && !state.chairIdsToRemove.includes(id),
+    )
     userSearch(invalidMembers, query, callback)
   }
 
   const userSearch = (invalidUserIds: number[], query: string, callback: (options: UserSelectOption[]) => void): void => {
     DAC.autocompleteUsers(query).then(
       (items: SimplifiedDuosUser[]) => {
-        const filteredUsers = filter(items, (item) => {
-          return !invalidUserIds.includes(item.userId)
-        })
+        const filteredUsers = items.filter(item => !invalidUserIds.includes(item.userId))
         const options = filteredUsers.map((item): UserSelectOption => {
           return {
             key: item.userId,
@@ -336,7 +334,7 @@ export default function EditDac(): React.JSX.Element {
   const onChairSearchChange = (data: MultiValue<UserSelectOption>): void => {
     setState(prev => ({
       ...prev,
-      chairIdsToAdd: map(data, 'item.userId') as number[],
+      chairIdsToAdd: data.map(d => d.item.userId),
       chairsSelectedOptions: [...data],
       dirtyFlag: true,
     }))
@@ -345,7 +343,7 @@ export default function EditDac(): React.JSX.Element {
   const onMemberSearchChange = (data: MultiValue<UserSelectOption>): void => {
     setState(prev => ({
       ...prev,
-      memberIdsToAdd: map(data, 'item.userId') as number[],
+      memberIdsToAdd: data.map(d => d.item.userId),
       membersSelectedOptions: [...data],
       dirtyFlag: true,
     }))
@@ -381,8 +379,8 @@ export default function EditDac(): React.JSX.Element {
     setState((prev) => {
       const ids = prev[key]
       const nextIds = ids.includes(userId)
-        ? difference(ids, [userId])
-        : union(ids, [userId])
+        ? ids.filter(id => id !== userId)
+        : [...new Set([...ids, userId])]
       return {
         ...prev,
         [key]: nextIds,
