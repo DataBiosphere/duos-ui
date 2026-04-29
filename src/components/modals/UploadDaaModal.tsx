@@ -9,6 +9,8 @@ import styles from 'src/pages/manage_dac/ManageDac.module.css'
 
 interface UploadDaaModalProps {
   showModal: boolean
+  setShowModal?: (show: boolean) => void
+  userRole?: string
   onAttachmentChange: (files: File[]) => void
   onCloseRequest: () => void
 }
