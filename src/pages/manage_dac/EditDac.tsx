@@ -219,15 +219,15 @@ export default function EditDac(): React.JSX.Element {
     // back in a different role.
     // Chairs are a special case since we cannot remove all chairs from a DAC
     // so we handle that case first.
-    const ops0: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDacId, id))
-    const ops1: Array<() => Promise<number>> = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDacId, id))
-    const ops2: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDacId, id))
-    const ops3: Array<() => Promise<number>> = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDacId, id))
-    const ops4: Array<() => Promise<number>> = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDacId, id))
-    const ops5: Array<() => Promise<number>> = newDaaId !== null && selectedDaa !== undefined
+    const demoteChairsFromMember: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDacId, id))
+    const removeMembers: Array<() => Promise<number>> = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDacId, id))
+    const addChairs: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDacId, id))
+    const removeChairs: Array<() => Promise<number>> = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDacId, id))
+    const addMembers: Array<() => Promise<number>> = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDacId, id))
+    const assignDaa: Array<() => Promise<number>> = newDaaId !== null && selectedDaa !== undefined
       ? [() => DAA.addDaaToDac(newDaaId, currentDacId)]
       : []
-    return [...ops0, ...ops1, ...ops2, ...ops3, ...ops4, ...ops5]
+    return [...demoteChairsFromMember, ...removeMembers, ...addChairs, ...removeChairs, ...addMembers, ...assignDaa]
   }
 
   const okHandler = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
