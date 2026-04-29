@@ -196,7 +196,23 @@ describe('Config', () => {
   })
 
   describe('Token', () => {
-    it('should get token from storage when available', () => {
+    it('should prefer idp_access_token from profile when available', () => {
+      const idpToken = 'idp-access-token-123'
+      cy.stub(Storage, 'getOidcUser').returns({ profile: { idp_access_token: idpToken }, id_token: 'fallback-token' })
+
+      const token = Token.getToken()
+      expect(token).to.equal(idpToken)
+    })
+
+    it('should fall back to id_token when idp_access_token is not available', () => {
+      const mockToken = 'test-token-123'
+      cy.stub(Storage, 'getOidcUser').returns({ profile: {}, id_token: mockToken })
+
+      const token = Token.getToken()
+      expect(token).to.equal(mockToken)
+    })
+
+    it('should fall back to id_token when profile is not present', () => {
       const mockToken = 'test-token-123'
       cy.stub(Storage, 'getOidcUser').returns({ id_token: mockToken })
 
@@ -227,7 +243,18 @@ describe('Config', () => {
       })
     })
 
-    it('should create auth options with token from storage if not provided', () => {
+    it('should create auth options with idp_access_token from storage if not provided', () => {
+      const mockToken = 'idp-access-token'
+      cy.stub(Storage, 'getOidcUser').returns({ profile: { idp_access_token: mockToken }, id_token: 'fallback-token' })
+
+      const opts = authOpts()
+
+      expect(opts.headers['Authorization']).to.equal(`Bearer ${mockToken}`)
+      expect(opts.headers['Accept']).to.equal('application/json')
+      expect(opts.headers['X-App-ID']).to.equal('DUOS')
+    })
+
+    it('should create auth options with id_token from storage when idp_access_token is not present', () => {
       const mockToken = 'storage-token'
       cy.stub(Storage, 'getOidcUser').returns({ id_token: mockToken })
 
@@ -284,7 +311,18 @@ describe('Config', () => {
       })
     })
 
-    it('should create multipart options with token from storage if not provided', () => {
+    it('should create multipart options with idp_access_token from storage if not provided', () => {
+      const mockToken = 'idp-access-token'
+      cy.stub(Storage, 'getOidcUser').returns({ profile: { idp_access_token: mockToken }, id_token: 'fallback-token' })
+
+      const opts = multiPartOpts()
+
+      expect(opts.headers['Authorization']).to.equal(`Bearer ${mockToken}`)
+      expect(opts.headers['Content-Type']).to.equal('multipart/form-data')
+      expect(opts.headers['X-App-ID']).to.equal('DUOS')
+    })
+
+    it('should create multipart options with id_token from storage when idp_access_token is not present', () => {
       const mockToken = 'storage-token'
       cy.stub(Storage, 'getOidcUser').returns({ id_token: mockToken })
 
