@@ -167,8 +167,12 @@ export const getTerraUrl = async (): Promise<string> => {
 }
 
 export const Token = {
+  // Note that there are multiple tokens available in OidcUser. There is an encoded JWT stored in id_token,
+  // access_token, and refresh_token. There is also a Google OAuth2 access token stored in profile.idp_access_token
+  // Favor the idp_access_token which bypasses all AzureB2C error cases and fall back to the regular id_token if the
+  // Google token is not present.
   getToken: () => {
-    return Storage.getOidcUser()?.id_token
+    return Storage.getOidcUser()?.profile?.idp_access_token || Storage.getOidcUser()?.id_token
   },
 }
 
