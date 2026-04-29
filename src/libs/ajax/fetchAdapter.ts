@@ -13,7 +13,7 @@ export type ParamValue = string | number | boolean
 export type Params = Record<string, ParamValue>
 export type HeadersMap = Record<string, string>
 type FetchRequestConfig<TBody = unknown> = Omit<FetchRequestOptions<TBody>, 'url' | 'method' | 'data'>
-type FetchMultipartConfig = Omit<FetchMultipartOptions, 'url' | 'method' | 'data' | 'returnError'>
+type FetchMultipartConfig = Omit<FetchMultipartOptions, 'url' | 'method' | 'data'>
 
 interface MinimalRequestInit {
   method: Method
@@ -41,7 +41,6 @@ interface FetchRequestOptions<TBody = unknown> extends FetchOptionsBase {
 interface FetchMultipartOptions extends Omit<FetchOptionsBase, 'method'> {
   method?: Exclude<Method, 'GET' | 'DELETE'>
   data?: FormData
-  returnError?: boolean
 }
 
 export interface FetchData<T> {
@@ -203,7 +202,6 @@ async function fetchMultipartRequest<T>(
     params,
     headers = {},
     credentials,
-    returnError = false,
     signal,
   } = options
 
@@ -223,31 +221,31 @@ async function fetchMultipartRequest<T>(
     signal,
   }
 
+  const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
+  let res: Response
   try {
-    const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
-    const res = await fetchFn(fullUrl, fetchOptions)
-    if (!res.ok) {
-      let message = `Request failed with status ${res.status}`
-      try {
-        const errorData = await res.json() as { message?: string }
-        if (errorData?.message) message = errorData.message
-      }
-      catch {
-        // ignore parse errors
-      }
-      throw new Error(message)
-    }
-    return handleResponse<T>(res, fullUrl, 'json', method)
+    res = await fetchFn(fullUrl, fetchOptions)
   }
   catch (error) {
-    if (returnError) {
-      throw error instanceof Error ? error : new Error(String(error))
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error
     }
-    else {
-      reportError(fullUrl, 502)
-      throw new Error(`Request to ${fullUrl} failed with status 502`)
-    }
+    reportError(fullUrl, 502)
+    throw new Error(`Request to ${fullUrl} failed with status 502`)
   }
+  if (!res.ok) {
+    let message = `Request failed with status ${res.status}. Please contact the help desk at duos@duos.org.`
+    try {
+      const errorData = await res.json() as { message?: string }
+      if (errorData?.message) message = errorData.message
+    }
+    catch {
+      // ignore parse errors, use generic message
+    }
+    reportError(fullUrl, res.status)
+    throw new Error(message)
+  }
+  return handleResponse<T>(res, fullUrl, 'json', method)
 }
 
 export const fetchGet = <T>(
@@ -283,5 +281,4 @@ export const fetchMultipart = <T>(
   formData: FormData,
   config: FetchMultipartConfig = {},
   method: Exclude<Method, 'GET' | 'DELETE'> = 'POST',
-  returnError: boolean = false,
-) => fetchMultipartRequest<T>({ url, data: formData, ...config, method, returnError })
+) => fetchMultipartRequest<T>({ url, data: formData, ...config, method })

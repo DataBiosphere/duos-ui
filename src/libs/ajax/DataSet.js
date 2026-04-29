@@ -17,7 +17,7 @@ export const DataSet = {
 
   registerDataset: async (registration) => {
     const url = `${await Config.getApiUrl()}/api/dataset/v3`
-    const res = await fetchMultipart(url, registration, Config.multiPartOpts(), 'POST', true)
+    const res = await fetchMultipart(url, registration, Config.multiPartOpts(), 'POST')
     return res.data
   },
 
@@ -66,7 +66,7 @@ export const DataSet = {
 
   updateStudy: async (studyId, studyObject) => {
     const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchMultipart(url, studyObject, Config.multiPartOpts(), 'PUT', true)
+    const res = await fetchMultipart(url, studyObject, Config.multiPartOpts(), 'PUT')
     return res.data
   },
 

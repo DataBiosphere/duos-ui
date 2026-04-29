@@ -286,7 +286,23 @@ describe('fetchAdapter - Fetch methods', () => {
     })
   })
 
-  it('should handle error response with message field', () => {
+  it('fetchMultipart - should report 502 on network-level failure', () => {
+    cy.window().then((win) => {
+      const formData = new win.FormData()
+      fetchStub.rejects(new win.TypeError('Network error'))
+
+      fetchMultipart('/api/progress_report/123', formData).then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          expect(error.message).to.include('failed with status 502')
+        },
+      )
+    })
+  })
+
+  it('fetchMultipart - should use backend error message when provided', () => {
     cy.window().then((win) => {
       const formData = new win.FormData()
       fetchStub.resolves(
@@ -296,7 +312,7 @@ describe('fetchAdapter - Fetch methods', () => {
         }),
       )
 
-      fetchMultipart('/api/upload', formData, {}, 'POST', true).then(
+      fetchMultipart('/api/upload', formData).then(
         () => {
           throw new Error('Should have thrown')
         },
@@ -307,7 +323,7 @@ describe('fetchAdapter - Fetch methods', () => {
     })
   })
 
-  it('should handle error response without message field', () => {
+  it('fetchMultipart - should fall back to help desk message when no message field in error body', () => {
     cy.window().then((win) => {
       const formData = new win.FormData()
       fetchStub.resolves(
@@ -317,18 +333,19 @@ describe('fetchAdapter - Fetch methods', () => {
         }),
       )
 
-      fetchMultipart('/api/upload', formData, {}, 'POST', true).then(
+      fetchMultipart('/api/upload', formData).then(
         () => {
           throw new Error('Should have thrown')
         },
         (error) => {
-          expect(error.message).to.include('Request failed with status 400')
+          expect(error.message).to.include('400')
+          expect(error.message).to.include('duos@duos.org')
         },
       )
     })
   })
 
-  it('should handle non-JSON error responses', () => {
+  it('fetchMultipart - should fall back to help desk message for non-JSON error responses', () => {
     cy.window().then((win) => {
       const formData = new win.FormData()
       fetchStub.resolves(
@@ -338,12 +355,34 @@ describe('fetchAdapter - Fetch methods', () => {
         }),
       )
 
-      fetchMultipart('/api/upload', formData, {}, 'POST', true).then(
+      fetchMultipart('/api/upload', formData).then(
         () => {
           throw new Error('Should have thrown')
         },
         (error) => {
-          expect(error.message).to.include('Request failed with status 500')
+          expect(error.message).to.include('500')
+          expect(error.message).to.include('duos@duos.org')
+        },
+      )
+    })
+  })
+
+  it('fetchMultipart - should always throw errors regardless of method', () => {
+    cy.window().then((win) => {
+      const formData = new win.FormData()
+      fetchStub.resolves(
+        new win.Response(JSON.stringify({ message: 'Missing library card' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      fetchMultipart('/api/progress_report/123', formData, {}, 'POST').then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          expect(error.message).to.equal('Missing library card')
         },
       )
     })
