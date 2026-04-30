@@ -5,7 +5,7 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, PromiseSerial } from 'src/libs/utils'
 import { Alert } from 'src/components/Alert'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
 import editDACIcon from 'src/images/dac_icon.svg'
 import backArrowIcon from 'src/images/back_arrow.svg'
@@ -81,6 +81,7 @@ function DaaItem({ specificDaa, selectedDaa, onChangeSelection }: Readonly<DaaIt
         <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
           <div style={{ marginLeft: '10px' }}>
             <button
+              type="button"
               onClick={async () => {
                 await DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName)
               }}
@@ -103,7 +104,6 @@ export default function EditDac(): React.JSX.Element {
   const dacIdParam = params.dacId
   const dacId = dacIdParam === undefined ? undefined : Number.parseInt(dacIdParam, 10)
   const navigate = useNavigate()
-  const location = useLocation() as { state?: { userRole?: string } }
   const [state, setState] = useState<EditDacState>({
     error: {},
     dirtyFlag: false,
@@ -117,16 +117,20 @@ export default function EditDac(): React.JSX.Element {
     searchInputChanged: false,
   })
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isDaaOperationInProgress, setIsDaaOperationInProgress] = useState<boolean>(false)
   const [newDaaId, setNewDaaId] = useState<number | null>(null)
   const [selectedDaa, setSelectedDaa] = useState<DAAObject | null | undefined>(null)
   const [createdDaa, setCreatedDaa] = useState<DAAObject | null>(null)
   const [uploadedDAAFile, setUploadedDAAFile] = useState<File[] | null>(null)
-  const [daaFileData, setDaaFileData] = useState<File | null>(null)
+  const [selectedUploadedFileName, setSelectedUploadedFileName] = useState<string | null>(null)
+  const [daaFileData, setDaaFileData] = useState<File[] | null>(null)
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false)
   const [fetchedDac, setFetchedDac] = useState<DacObject | null>(null)
   const [broadDaa, setBroadDaa] = useState<DAAObject | null>(null)
   const [matchingDaas, setMatchingDaas] = useState<DAAObject[]>([])
   const dacText = dacIdParam === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
+  const user = Storage.getCurrentUser()
+  const canUpload = (user?.isAdmin || user?.roles?.some(r => r.dacId === fetchedDac?.dacId && r.name === 'Chairperson')) ?? false
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -172,36 +176,93 @@ export default function EditDac(): React.JSX.Element {
 
   const saveErrorMessage = 'There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.'
 
-  const persistDacChanges = async (
+  const validateNewDacDaaSelection = (): boolean => {
+    const hasNoDaaSelected = (daaFileData === null || daaFileData.length === 0) && selectedDaa?.daaId !== broadDaa?.daaId
+    if (hasNoDaaSelected) {
+      handleErrors('Please select either the default agreement or upload your own agreement before saving.')
+      return false
+    }
+    return true
+  }
+
+  const createDaasForNewDac = async (createdDacId: number): Promise<DAAObject | null> => {
+    if (daaFileData === null || daaFileData.length === 0 || selectedDaa !== undefined) {
+      return null
+    }
+
+    setIsDaaOperationInProgress(true)
+    let lastCreatedDaa: DAAObject | null = null
+
+    try {
+      for (const file of daaFileData) {
+        try {
+          const createdDaaResponse = await DAA.createDaa(file, createdDacId)
+          const freshDaa = (createdDaaResponse as { data?: DAAObject })?.data ?? null
+          if (freshDaa) {
+            lastCreatedDaa = freshDaa
+          }
+          else {
+            Notifications.showError({ text: `Unable to create DAA for '${file.name}'.` })
+          }
+        }
+        catch {
+          Notifications.showError({ text: `Unable to create DAA for '${file.name}'.` })
+        }
+      }
+    }
+    finally {
+      setIsDaaOperationInProgress(false)
+    }
+
+    setCreatedDaa(lastCreatedDaa)
+    return lastCreatedDaa
+  }
+
+  const addInitialChairsToDac = async (createdDacId: number): Promise<void> => {
+    if (state.chairIdsToAdd.length > 0) {
+      await Promise.all(state.chairIdsToAdd.map(id => DAC.addDacChair(createdDacId, id)))
+    }
+  }
+
+  const persistNewDac = async (
     user: Partial<DuosUser> | null,
+    dacName: string,
+    dacDescription: string,
+    dacEmail: string,
+  ): Promise<DacObject | null> => {
+    if (!validateNewDacDaaSelection()) {
+      return null
+    }
+
+    if (!user?.isAdmin) {
+      return null
+    }
+
+    const createdDac = await DAC.create(dacName, dacDescription, dacEmail)
+    const createdDacId = createdDac.dacId
+
+    if (createdDacId === undefined) {
+      handleErrors(saveErrorMessage)
+      return null
+    }
+
+    // Add chairs FIRST so the current user has permission to create the DAA.
+    // Chair/member operations are normally handled in buildSaveOperations, but for
+    // new DAC creation the DAA must be uploaded after chairs are in place.
+    await addInitialChairsToDac(createdDacId)
+
+    // Create DAAs for all uploaded files now that chairs have been granted
+    await createDaasForNewDac(createdDacId)
+
+    return createdDac
+  }
+
+  const persistExistingDac = async (
     currentDac: DacObject,
     dacName: string,
     dacDescription: string,
     dacEmail: string,
   ): Promise<DacObject | null> => {
-    if (dacIdParam === undefined) {
-      if (daaFileData === null && selectedDaa?.daaId !== broadDaa?.daaId) {
-        handleErrors('Please select either the default agreement or upload your own agreement before saving.')
-        return null
-      }
-
-      if (!user?.isAdmin) {
-        return null
-      }
-
-      const createdDac = await DAC.create(dacName, dacDescription, dacEmail)
-      if (daaFileData !== null && selectedDaa === undefined) {
-        const createdDacId = createdDac.dacId
-        if (createdDacId === undefined) {
-          handleErrors(saveErrorMessage)
-          return null
-        }
-        const createdDaaResponse = await DAA.createDaa(daaFileData, createdDacId)
-        setCreatedDaa((createdDaaResponse as { data?: DAAObject })?.data ?? null)
-      }
-      return createdDac
-    }
-
     const existingDacId = currentDac.dacId
     if (existingDacId === undefined) {
       handleErrors(saveErrorMessage)
@@ -212,15 +273,33 @@ export default function EditDac(): React.JSX.Element {
     return currentDac
   }
 
-  const buildSaveOperations = (currentDacId: number): Array<() => Promise<number>> => {
+  const persistDacChanges = async (
+    user: Partial<DuosUser> | null,
+    currentDac: DacObject,
+    dacName: string,
+    dacDescription: string,
+    dacEmail: string,
+  ): Promise<DacObject | null> => {
+    if (dacIdParam === undefined) {
+      return persistNewDac(user, dacName, dacDescription, dacEmail)
+    }
+
+    return persistExistingDac(currentDac, dacName, dacDescription, dacEmail)
+  }
+
+  const buildSaveOperations = (currentDacId: number, chairsAlreadyAdded = false): Array<() => Promise<number>> => {
     // Order here is important. Since users cannot have multiple roles in the
     // same DAC, we have to make sure we remove users before re-adding any
     // back in a different role.
     // Chairs are a special case since we cannot remove all chairs from a DAC
     // so we handle that case first.
-    const demoteChairsFromMember: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDacId, id))
+    //
+    // When chairsAlreadyAdded is true (new DAC creation), chair operations are
+    // skipped here because they were already performed in persistDacChanges to
+    // ensure the user has permission to upload the DAA.
+    const demoteChairsFromMember: Array<() => Promise<number>> = chairsAlreadyAdded ? [] : state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDacId, id))
     const removeMembers: Array<() => Promise<number>> = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDacId, id))
-    const addChairs: Array<() => Promise<number>> = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDacId, id))
+    const addChairs: Array<() => Promise<number>> = chairsAlreadyAdded ? [] : state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDacId, id))
     const removeChairs: Array<() => Promise<number>> = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDacId, id))
     const addMembers: Array<() => Promise<number>> = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDacId, id))
     const assignDaa: Array<() => Promise<number>> = newDaaId !== null && selectedDaa !== undefined
@@ -235,7 +314,6 @@ export default function EditDac(): React.JSX.Element {
       return
     }
 
-    const user = Storage.getCurrentUser() as Partial<DuosUser> | null
     const currentDac = state.dac
     const dacName = currentDac.name ?? ''
     const dacDescription = currentDac.description ?? ''
@@ -252,7 +330,7 @@ export default function EditDac(): React.JSX.Element {
       return
     }
 
-    const allOperations = buildSaveOperations(currentDacId)
+    const allOperations = buildSaveOperations(currentDacId, dacIdParam === undefined)
     const responses = await PromiseSerial(allOperations)
     const errorCodes = responses.filter(
       r => JSON.stringify(r) !== '200' && JSON.stringify((r as { status?: number })?.status) !== '201',
@@ -402,34 +480,89 @@ export default function EditDac(): React.JSX.Element {
     }
   }
 
+  const createDaasForExistingDac = async (attachment: File[], dacIdToUse: number): Promise<{ newDaas: DAAObject[], lastCreatedDaa: DAAObject | null }> => {
+    const newDaas: DAAObject[] = []
+    let lastCreatedDaa: DAAObject | null = null
+
+    for (const file of attachment) {
+      try {
+        const createdDaaResponse = await DAA.createDaa(file, dacIdToUse)
+        const freshDaa = (createdDaaResponse as { data?: DAAObject })?.data ?? null
+        if (freshDaa) {
+          newDaas.push(freshDaa)
+          lastCreatedDaa = freshDaa
+        }
+        else {
+          Notifications.showError({ text: `Unable to create DAA for '${file.name}'.` })
+        }
+      }
+      catch {
+        Notifications.showError({ text: `Unable to create DAA for '${file.name}'.` })
+      }
+    }
+
+    return { newDaas, lastCreatedDaa }
+  }
+
+  const handleExistingDacAttachment = async (attachment: File[]): Promise<void> => {
+    setIsDaaOperationInProgress(true)
+
+    try {
+      const dacIdToUse = state.dac.dacId
+      if (dacIdToUse === undefined) {
+        return
+      }
+
+      const { newDaas, lastCreatedDaa } = await createDaasForExistingDac(attachment, dacIdToUse)
+
+      // Add all newly created DAAs to the displayed list
+      setMatchingDaas(prev => [...prev, ...newDaas])
+      setCreatedDaa(lastCreatedDaa)
+
+      // Clear pending-upload state since DAAs are now in matchingDaas
+      setUploadedDAAFile(null)
+      setDaaFileData(null)
+
+      // Update selected DAA based on creation success
+      if (lastCreatedDaa?.daaId === undefined) {
+        setSelectedDaa(undefined)
+      }
+      else {
+        setSelectedDaa(lastCreatedDaa)
+        setNewDaaId(null)
+      }
+    }
+    finally {
+      setIsDaaOperationInProgress(false)
+    }
+  }
+
+  const handleNewDacAttachment = (attachment: File[]): void => {
+    // New DAC: store all files; they will be created after the DAC is persisted
+    setUploadedDAAFile(attachment)
+    setDaaFileData(attachment)
+    setSelectedDaa(undefined)
+    setSelectedUploadedFileName(attachment[0]?.name ?? null)
+    setNewDaaId(null)
+  }
+
   const handleAttachment = async (attachment: File[]): Promise<void> => {
-    const firstAttachment = attachment?.[0]
-    if (!firstAttachment) {
+    if (!attachment || attachment.length === 0) {
       return
     }
 
-    setUploadedDAAFile(attachment)
-    setDaaFileData(firstAttachment)
     setState(prev => ({
       ...prev,
       dirtyFlag: true,
     }))
 
-    if (dacId !== undefined && state.dac.dacId !== undefined) {
-      const createdDaaResponse = await DAA.createDaa(firstAttachment, state.dac.dacId)
-      const freshDaa = ((createdDaaResponse as { data?: DAAObject })?.data ?? null)
-      setCreatedDaa(freshDaa)
-      if (freshDaa?.daaId === undefined) {
-        setSelectedDaa(undefined)
-      }
-      else {
-        setSelectedDaa(freshDaa)
-        setNewDaaId(null)
-      }
+    const isExistingDac = dacId !== undefined && state.dac.dacId !== undefined
+
+    if (isExistingDac) {
+      await handleExistingDacAttachment(attachment)
     }
     else {
-      setSelectedDaa(undefined)
-      setNewDaaId(null)
+      handleNewDacAttachment(attachment)
     }
 
     setShowUploadModal(false)
@@ -454,6 +587,7 @@ export default function EditDac(): React.JSX.Element {
         fallbackDaa = createdDaa
       }
       setSelectedDaa(matchingDaa ?? fallbackDaa ?? ({ daaId } as DAAObject))
+      setSelectedUploadedFileName(null)
       setNewDaaId(createdDaa?.daaId === daaId ? null : daaId)
       setState(prev => ({
         ...prev,
@@ -462,8 +596,18 @@ export default function EditDac(): React.JSX.Element {
     }
   }
 
+  const handleUploadedFileSelection = (fileName: string): void => {
+    setSelectedDaa(undefined)
+    setSelectedUploadedFileName(fileName)
+    setNewDaaId(null)
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true,
+    }))
+  }
+
   return (
-    isLoading
+    (isLoading || isDaaOperationInProgress)
       ? <Spinner />
       : (
           <div style={Styles.PAGE}>
@@ -727,50 +871,51 @@ export default function EditDac(): React.JSX.Element {
                             <DaaItem key={daa.daaId} specificDaa={daa} selectedDaa={selectedDaa} onChangeSelection={handleDaaChange} />
                           ))
                         }
-                        {uploadedDAAFile !== null
+                        {uploadedDAAFile !== null && uploadedDAAFile.length > 0
                           && (
-                            <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px' }}>
-                              <input
-                                id="uploaded_daa_radio_input"
-                                type="radio"
-                                name="daa"
-                                checked={selectedDaa === undefined || (createdDaa?.daaId !== undefined && selectedDaa?.daaId === createdDaa.daaId)}
-                                onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange()}
-                                style={{ accentColor: '#00609f' }}
-                                data-cy="uploaded_daa_radio"
-                                aria-label={`Use uploaded agreement: ${daaFileData?.name ?? uploadedDAAFile?.[0]?.name ?? 'uploaded file'}`}
-                              />
-                              <div
-                                style={{ marginLeft: '10px', marginBottom: '0', fontWeight: 'normal', flex: 1 }}
-                              >
-                                <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                                  <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0 }}>
-                                    <div className="row" style={{ paddingLeft: '15px' }} data-cy="uploaded_daa_name">
-                                      {daaFileData?.name ?? uploadedDAAFile[0]?.name}
-                                    </div>
-                                    <div className="row" style={{ paddingLeft: '15px' }}>
-                                      Uploaded on
-                                      {' '}
-                                      {new Date().toLocaleDateString()}
-                                    </div>
-                                  </div>
-                                  <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                    <div style={{ marginLeft: '10px' }}>
-                                      <a
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        download={uploadedDAAFile[0].name}
-                                        href={URL.createObjectURL(uploadedDAAFile[0])}
-                                        className="button button-white"
-                                        style={{ padding: '10px 12px' }}
-                                        data-cy="uploaded_daa_download"
-                                      >
-                                        <span className="glyphicon glyphicon-download-alt"></span>
-                                      </a>
+                            <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: '15px' }}>
+                              {uploadedDAAFile.map((file, idx) => (
+                                <div key={`${file.name}-${idx}`} style={{ display: 'flex', alignItems: 'flex-start', marginTop: '5px' }}>
+                                  <input
+                                    type="radio"
+                                    name="daa"
+                                    checked={selectedDaa === undefined && selectedUploadedFileName === file.name}
+                                    onChange={() => handleUploadedFileSelection(file.name)}
+                                    style={{ accentColor: '#00609f', marginTop: '8px' }}
+                                    data-cy={idx === 0 ? 'uploaded_daa_radio' : undefined}
+                                    aria-label={`Use uploaded agreement ${file.name}`}
+                                  />
+                                  <div style={{ marginLeft: '10px', marginBottom: '0', fontWeight: 'normal', flex: 1 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+                                      <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0 }}>
+                                        <div className="row" style={{ paddingLeft: '15px' }} data-cy={idx === 0 ? 'uploaded_daa_name' : undefined}>
+                                          {file.name}
+                                        </div>
+                                        <div className="row" style={{ paddingLeft: '15px' }}>
+                                          Uploaded on
+                                          {' '}
+                                          {new Date().toLocaleDateString()}
+                                        </div>
+                                      </div>
+                                      <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
+                                        <div style={{ marginLeft: '10px' }}>
+                                          <a
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            download={file.name}
+                                            href={URL.createObjectURL(file)}
+                                            className="button button-white"
+                                            style={{ padding: '10px 12px' }}
+                                            data-cy={idx === 0 ? 'uploaded_daa_download' : undefined}
+                                          >
+                                            <span className="glyphicon glyphicon-download-alt"></span>
+                                          </a>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              ))}
                             </div>
                           )}
                         <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
@@ -799,8 +944,9 @@ export default function EditDac(): React.JSX.Element {
             {showUploadModal && (
               <UploadDaaModal
                 showModal={showUploadModal}
-                setShowModal={setShowUploadModal}
-                userRole={location?.state?.userRole}
+                dacId={dacIdParam ?? 'new'}
+                isLiveUpload={!!dacIdParam}
+                isReadOnly={!canUpload}
                 onCloseRequest={() => setShowUploadModal(false)}
                 onAttachmentChange={handleAttachment}
               />
