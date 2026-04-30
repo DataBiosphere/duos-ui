@@ -1,5 +1,8 @@
 import React from 'react'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
+import { EntityType, FileCategory } from 'src/libs/ajax/FileStorageObject'
+import type { FileStorageObject } from 'src/libs/ajax/FileStorageObject'
+import type { Props as DocumentUploadProps } from 'src/components/forms/DocumentUpload'
 
 describe('UploadDaaModal Component', () => {
   const fileName = 'test-file.pdf'
@@ -7,6 +10,8 @@ describe('UploadDaaModal Component', () => {
 
   const mountModal = (overrides?: {
     showModal?: boolean
+    isLiveUpload?: boolean
+    documentUploadApi?: DocumentUploadProps['api']
     onAttachmentChange?: Cypress.Agent<sinon.SinonStub>
     onCloseRequest?: Cypress.Agent<sinon.SinonStub>
   }) => {
@@ -16,6 +21,8 @@ describe('UploadDaaModal Component', () => {
     cy.mount(
       <UploadDaaModal
         showModal={overrides?.showModal ?? true}
+        isLiveUpload={overrides?.isLiveUpload}
+        documentUploadApi={overrides?.documentUploadApi}
         onAttachmentChange={onAttachmentChange}
         onCloseRequest={onCloseRequest}
       />,
@@ -24,26 +31,52 @@ describe('UploadDaaModal Component', () => {
     return { onAttachmentChange, onCloseRequest }
   }
 
-  const uploadTestFile = () => {
-    cy.get('input[type="file"]').selectFile(
+  const uploadTestFile = (name: string = fileName) => {
+    cy.get('.ReactModalPortal input[type="file"]').selectFile(
       {
         contents: Cypress.Buffer.from(fileContent),
-        fileName,
+        fileName: name,
         mimeType: 'application/pdf',
       },
       { force: true },
     )
   }
 
+  const buildStoredDocument = (
+    fileStorageObjectId: number,
+    fileName: string,
+    category: FileCategory,
+  ): FileStorageObject => {
+    return {
+      fileStorageObjectId,
+      entityId: 'test-dac-id',
+      fileName,
+      category,
+      mediaType: 'application/pdf',
+      createUserId: 1,
+      createDate: Date.now(),
+    }
+  }
+
+  const buildDocumentUploadApi = (overrides?: Partial<NonNullable<DocumentUploadProps['api']>>): NonNullable<DocumentUploadProps['api']> => {
+    return {
+      uploadDocument: async (_entity, _entityId, file, category) => {
+        return buildStoredDocument(500, file.name, category)
+      },
+      deleteDocument: async () => ({}) as never,
+      listDocuments: async () => [],
+      ...overrides,
+    }
+  }
+
   it('renders modal when showModal is true', () => {
     mountModal()
-    cy.contains('Upload a file').should('be.visible')
-    cy.contains('Drag and drop a file to upload or click to browse files').should('be.visible')
+    cy.contains('Upload Documents').should('be.visible')
   })
 
   it('does not render modal when showModal is false', () => {
     mountModal({ showModal: false })
-    cy.contains('Upload a file').should('not.exist')
+    cy.contains('Upload Documents').should('not.exist')
   })
 
   it('calls onCloseRequest when Cancel button is clicked', () => {
@@ -64,58 +97,62 @@ describe('UploadDaaModal Component', () => {
     cy.wrap(onCloseRequest).should('not.have.been.called')
   })
 
-  it('enables Save after selecting a file', () => {
-    mountModal()
-
-    cy.get('#btn_save').should('be.disabled')
-    uploadTestFile()
-    cy.contains(fileName).should('be.visible')
-    cy.get('#btn_save').should('not.be.disabled')
-  })
-
-  it('disables Save again after removing the selected file', () => {
-    mountModal()
-
-    uploadTestFile()
-    cy.get('#btn_save').should('not.be.disabled')
-
-    cy.get('button[aria-label="Remove file"]').click()
-    cy.get('#btn_save').should('be.disabled')
-  })
-
-  it('calls onAttachmentChange and onCloseRequest when Save is clicked after file upload', () => {
+  it('live mode uploads first, then enables Save and returns uploaded files only', () => {
     const onAttachmentChange = cy.stub()
     const onCloseRequest = cy.stub()
-    mountModal({ onAttachmentChange, onCloseRequest })
+    const documentUploadApi = buildDocumentUploadApi()
+
+    mountModal({ onAttachmentChange, onCloseRequest, documentUploadApi })
 
     uploadTestFile()
-    cy.contains(fileName).should('be.visible')
 
-    cy.get('#btn_save').click()
+    cy.get('#btn_save').should('not.be.disabled').click()
 
     cy.wrap(onAttachmentChange).should('have.been.calledOnce')
+    cy.wrap(onAttachmentChange).its('firstCall.args.0').should('have.length', 1)
+    cy.wrap(onAttachmentChange).its('firstCall.args.0.0.name').should('equal', fileName)
     cy.wrap(onCloseRequest).should('have.been.calledOnce')
   })
 
-  it('removes file when cancel icon is clicked', () => {
-    mountModal()
+  it('non-live mode enables Save after staging and does not call uploadDocument', () => {
+    const onAttachmentChange = cy.stub()
+    const uploadSpy = cy.stub().callsFake(async (_entity: EntityType, _entityId: string, file: File, category: FileCategory) => {
+      return buildStoredDocument(777, file.name, category)
+    })
+    const documentUploadApi = buildDocumentUploadApi({
+      uploadDocument: uploadSpy as NonNullable<DocumentUploadProps['api']>['uploadDocument'],
+    })
+    mountModal({ onAttachmentChange, isLiveUpload: false, documentUploadApi })
 
-    uploadTestFile()
-    cy.contains(fileName).should('be.visible')
+    uploadTestFile('deferred-file.pdf')
+    cy.get('#btn_save').should('not.be.disabled').click()
 
-    cy.get('button[aria-label="Remove file"]').click()
-
-    cy.contains('Drag and drop a file to upload or click to browse files').should('be.visible')
-    cy.contains(fileName).should('not.exist')
+    cy.wrap(uploadSpy).should('not.have.been.called')
+    cy.wrap(onAttachmentChange).should('have.been.calledOnce')
+    cy.wrap(onAttachmentChange).its('firstCall.args.0').should('have.length', 1)
+    cy.wrap(onAttachmentChange).its('firstCall.args.0.0.name').should('equal', 'deferred-file.pdf')
   })
 
-  it('displays confirmation message when file is selected', () => {
-    mountModal()
+  it('only returns newly uploaded files when existing docs are present', () => {
+    const onAttachmentChange = cy.stub()
+    const documentUploadApi = buildDocumentUploadApi({
+      listDocuments: async () => {
+        return [
+          buildStoredDocument(1, 'existing-daa.pdf', FileCategory.DATA_ACCESS_AGREEMENT),
+        ]
+      },
+      uploadDocument: async (_entity, _entityId, file, category) => {
+        return buildStoredDocument(501, file.name, category)
+      },
+    })
 
-    cy.contains('Clicking Save will create this new Data Access Agreement').should('not.exist')
+    mountModal({ onAttachmentChange, documentUploadApi })
 
-    uploadTestFile()
+    uploadTestFile('new-daa.pdf')
+    cy.get('#btn_save').should('not.be.disabled').click()
 
-    cy.contains('Clicking Save will create this new Data Access Agreement').should('be.visible')
+    cy.wrap(onAttachmentChange).should('have.been.calledOnce')
+    cy.wrap(onAttachmentChange).its('firstCall.args.0').should('have.length', 1)
+    cy.wrap(onAttachmentChange).its('firstCall.args.0.0.name').should('equal', 'new-daa.pdf')
   })
 })
