@@ -5,7 +5,7 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, PromiseSerial } from 'src/libs/utils'
 import { Alert } from 'src/components/Alert'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DacUsers } from './DacUsers'
 import editDACIcon from 'src/images/dac_icon.svg'
 import backArrowIcon from 'src/images/back_arrow.svg'
@@ -103,7 +103,6 @@ export default function EditDac(): React.JSX.Element {
   const dacIdParam = params.dacId
   const dacId = dacIdParam === undefined ? undefined : Number.parseInt(dacIdParam, 10)
   const navigate = useNavigate()
-  const location = useLocation() as { state?: { userRole?: string } }
   const [state, setState] = useState<EditDacState>({
     error: {},
     dirtyFlag: false,
@@ -799,8 +798,6 @@ export default function EditDac(): React.JSX.Element {
             {showUploadModal && (
               <UploadDaaModal
                 showModal={showUploadModal}
-                setShowModal={setShowUploadModal}
-                userRole={location?.state?.userRole}
                 onCloseRequest={() => setShowUploadModal(false)}
                 onAttachmentChange={handleAttachment}
               />

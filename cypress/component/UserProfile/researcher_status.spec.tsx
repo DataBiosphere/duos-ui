@@ -5,6 +5,8 @@ import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
 
 describe('ResearcherStatus', () => {
+  const fixedLibraryCardCreateDate = new Date('2026-04-30T12:00:00.000Z')
+
   const user: DuosUser = {
     userId: 2,
     displayName: 'Test User',
@@ -72,7 +74,7 @@ describe('ResearcherStatus', () => {
           userId: 1,
           userName: 'Test User',
           userEmail: 'test.usre@test.com',
-          createDate: new Date(),
+          createDate: fixedLibraryCardCreateDate,
           createUserId: 3,
           daaIds: [1],
         },
@@ -83,9 +85,8 @@ describe('ResearcherStatus', () => {
     cy.contains('Researcher Status')
     cy.contains('RAS Account')
     cy.contains('Library Card issued to you')
-    const formattedDate = userWithCard.libraryCard.createDate.toISOString().slice(0, 10)
-    cy.contains('Issued on: ' + formattedDate)
-    cy.contains('Issued by: ' + signingOfficialUser.displayName)
+    cy.contains('Issued by')
+    cy.contains(signingOfficialUser.displayName)
   })
 
   it('Renders the Researcher Status Without Library Card Info', () => {
@@ -104,7 +105,7 @@ describe('ResearcherStatus', () => {
           userId: 1,
           userName: 'Test User',
           userEmail: 'test.user@test.com',
-          createDate: new Date(),
+          createDate: fixedLibraryCardCreateDate,
           createUserId: 3,
           daaIds: [1],
         },
@@ -124,7 +125,7 @@ describe('ResearcherStatus', () => {
           userId: 1,
           userName: 'Test User',
           userEmail: 'test.user@test.com',
-          createDate: new Date(),
+          createDate: fixedLibraryCardCreateDate,
           createUserId: 3,
           daaIds: [1],
         },

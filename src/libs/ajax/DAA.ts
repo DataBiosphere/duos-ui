@@ -92,6 +92,22 @@ export const DAA = {
     fileDownload(res.data, daaFileName)
   },
 
+  getDaaFileBlob: async (daaId: number): Promise<Blob> => {
+    const auth = Config.authOpts()
+    const authOpts: DaaBinaryDownloadConfig = {
+      ...auth,
+      responseType: 'blob',
+      headers: {
+        ...auth.headers,
+        'Content-Type': 'application/octet-stream',
+        'Accept': 'application/octet-stream',
+      },
+    }
+    const url = `${await Config.getApiUrl()}/api/daa/${daaId}/file`
+    const res = await fetchGet<Blob>(url, authOpts)
+    return res.data
+  },
+
   createDaa: async (file: File | null | undefined, dacId: number): Promise<FetchData<DAAObject | null>> => {
     if (isFileEmpty(file)) {
       return { data: null }

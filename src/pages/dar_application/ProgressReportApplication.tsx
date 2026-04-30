@@ -30,6 +30,7 @@ import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
 import { DAAUtils } from 'src/utils/DAAUtils'
 import { useNavigate } from 'react-router-dom'
 import { isEqual } from 'lodash'
+import { DatasetDaaSnapshotRelationships } from 'src/pages/dar_application/DatasetDaaSnapshotRelationships'
 type ProgressReportApplicationProps = {
   readonly dar: CombinedDataAccessRequest // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[]
@@ -252,6 +253,12 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           />
         </div>
       </div>
+      {readOnlyMode && DAAUtils.isEnabled() && (
+        <DatasetDaaSnapshotRelationships
+          referenceId={dar.referenceId}
+          title="Dataset and Data Access Agreement Relationships"
+        />
+      )}
       {DAAUtils.isEnabled() && (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
           <ProgressReportDataAccessAgreements

@@ -182,4 +182,55 @@ describe('DataAccessRequestApplication', () => {
       resolveSubmit()
     })
   })
+
+  it('renders dataset/DAA relationship section in submitted read-only DAR review container', () => {
+    cy.stub(Countries, 'getCountries').resolves(['United States of America (the)', 'Canada'])
+    cy.stub(Storage, 'getCurrentUser').returns(user)
+    cy.stub(Collections, 'getCollectionById').resolves(darCollection)
+    cy.stub(DataSet, 'getDatasetsByIds').resolves([
+      {
+        datasetId: 2352,
+        datasetIdentifier: 'DUOS-READONLY-2352',
+        name: 'Read-only Dataset',
+        dacId: 1,
+        dataUse: {},
+      },
+    ])
+    cy.stub(NotificationService, 'getBannerObjectById').resolves({})
+    cy.stub(DAAUtils, 'isEnabled').returns(true)
+    cy.stub(DAR, 'getPartialDarRequest').resolves(darCollection.dars['011467b7-5544-499f-9210-3c2035810639'])
+    cy.stub(DAR, 'getDatasetDaaSnapshots').resolves([
+      {
+        datasetId: 2352,
+        datasetIdentifier: 'DUOS-READONLY-2352',
+        datasetName: 'Read-only Dataset',
+        daaId: 100,
+        daaName: 'Read-only DAA',
+        daaFileName: 'ReadonlyDAA.pdf',
+      },
+    ])
+
+    mount(
+      <MemoryRouter initialEntries={['/dar_application_review/211']}>
+        <Routes>
+          <Route
+            path="/dar_application_review/:collectionId"
+            element={(
+              <DataAccessRequestApplication
+                draftDar={false}
+                isProgressReportApplication={false}
+                existingDarsReadOnlyMode={true}
+              />
+            )}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    cy.get('.dar-summary').should('exist')
+    cy.contains('Dataset and Data Access Agreement Relationships').should('exist')
+    cy.contains('Read-only Dataset').should('exist')
+    cy.contains('DUOS-READONLY-2352').should('exist')
+    cy.contains('button', 'Download and view').should('exist')
+  })
 })
