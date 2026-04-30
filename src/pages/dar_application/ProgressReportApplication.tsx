@@ -259,7 +259,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           title="Dataset and Data Access Agreement Relationships"
         />
       )}
-      {DAAUtils.isEnabled() && (
+      {DAAUtils.isEnabled() && !formState.closeoutYesNo && (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
           <ProgressReportDataAccessAgreements
             datasets={formState.selectedDatasets}

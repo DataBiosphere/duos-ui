@@ -9,6 +9,7 @@ import chairJson from '../../DAC/chair.json'
 import daas from '../../DAC/daas.json'
 import dac from '../../DAC/dac.json'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import { Config } from 'src/libs/config'
 import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
 
 const adminUser = setUserRoleStatuses({ ...(adminJson as object) } as DuosUser, Storage)
@@ -56,22 +57,66 @@ const fillNewDacForm = (name: string = 'New DAC Name', description: string = 'Ne
   cy.get('[data-cy="dac_email"]').type(email)
 }
 
-const uploadDaaFile = (fileName: string, fileContent: string = 'mock daa file'): void => {
+const uploadDaaFile = (
+  fileName: string,
+  fileContent: string = 'mock daa file',
+): void => {
   cy.get('[data-cy="daa_upload_button"]').click()
-  cy.get('.ReactModalPortal input[type="file"]').selectFile(
+
+  // Wait for DocumentUpload initialization (selected category) before picking files.
+  cy.get('.ReactModalPortal [data-cy="document-upload-fixed-category"]')
+    .should('contain', 'Data Access Agreement')
+
+  cy.get('.ReactModalPortal [data-cy="document-upload-dropzone"]').selectFile(
     {
       contents: Cypress.Buffer.from(fileContent),
       fileName,
       mimeType: 'application/pdf',
     },
-    { force: true },
+    {
+      action: 'drag-drop',
+      force: true,
+    },
   )
-  cy.get('.ReactModalPortal #btn_save').click()
+
+  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).should('not.be.disabled').click()
+}
+
+const uploadDaaFiles = (files: Array<{ fileName: string, fileContent?: string }>): void => {
+  cy.get('[data-cy="daa_upload_button"]').click()
+
+  cy.get('.ReactModalPortal [data-cy="document-upload-fixed-category"]')
+    .should('contain', 'Data Access Agreement')
+
+  cy.get('.ReactModalPortal [data-cy="document-upload-dropzone"]').selectFile(
+    files.map(file => ({
+      contents: Cypress.Buffer.from(file.fileContent ?? 'mock daa file'),
+      fileName: file.fileName,
+      mimeType: 'application/pdf',
+    })),
+    {
+      action: 'drag-drop',
+      force: true,
+    },
+  )
+
+  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).should('not.be.disabled').click()
+}
+
+const stubDocumentUploadApis = (): void => {
+  cy.stub(Config, 'getApiUrl').resolves('')
+  cy.intercept('GET', '**/api/document/**', []).as('listDocuments')
+  cy.intercept('POST', '**/api/document/**', {
+    fileStorageObjectId: 101,
+    fileName: 'uploaded-daa.pdf',
+    category: 'dataAccessAgreement',
+  }).as('uploadDocument')
 }
 
 const setupCreateFlow = (user: DuosUser): void => {
   cy.stub(Storage, 'getCurrentUser').returns(user)
   cy.stub(DAA, 'getDaas').resolves(broadDaaList)
+  stubDocumentUploadApis()
   stubCommonDacApis()
   cy.mount(<BrowserRouter><EditDac /></BrowserRouter>)
 }
@@ -80,6 +125,7 @@ const setupExistingEditFlow = (daasToReturn: DAAObject[], user: DuosUser = admin
   cy.stub(Storage, 'getCurrentUser').returns(user)
   cy.stub(DAC, 'get').resolves(existingDac)
   cy.stub(DAA, 'getDaas').resolves(daasToReturn)
+  stubDocumentUploadApis()
   stubCommonDacApis()
   mountExistingEditDac(existingDac.dacId as number)
 }
@@ -201,11 +247,60 @@ describe('EditDAC Tests', () => {
 
     uploadDaaFile('existing-custom-daa.pdf', 'existing dac daa')
 
-    cy.get('[data-cy="uploaded_daa_radio"]').should('be.checked')
+    cy.get('[data-cy="daa_option_77"]').should('be.checked')
     cy.get('[data-cy="btn_save"]').click()
 
     cy.wrap(createDaaStub).should('have.been.called')
     cy.wrap(updateStub).should('have.been.called')
     cy.wrap(addDaaToDacStub).should('not.have.been.calledWith', 77, existingDac.dacId)
+  })
+
+  it('Creates one DAA per uploaded file when creating a new DAC with multiple files', () => {
+    setupCreateFlow(adminUser)
+    cy.stub(DAA, 'addDaaToDac').resolves(200)
+    const createStub = cy.stub(DAC, 'create').resolves({ ...existingDac, dacId: 99 })
+    const createDaaStub = cy.stub(DAA, 'createDaa')
+      .onCall(0).resolves({ data: { ...broadDaaList[0], daaId: 201, broadDaa: false } })
+      .onCall(1).resolves({ data: { ...broadDaaList[0], daaId: 202, broadDaa: false } })
+      .onCall(2).resolves({ data: { ...broadDaaList[0], daaId: 203, broadDaa: false } })
+      .onCall(3).resolves({ data: { ...broadDaaList[0], daaId: 204, broadDaa: false } })
+
+    uploadDaaFiles([
+      { fileName: 'new-custom-daa-1.pdf', fileContent: 'file 1' },
+      { fileName: 'new-custom-daa-2.pdf', fileContent: 'file 2' },
+      { fileName: 'new-custom-daa-3.pdf', fileContent: 'file 3' },
+      { fileName: 'new-custom-daa-4.pdf', fileContent: 'file 4' },
+    ])
+
+    fillNewDacForm()
+    cy.get('[data-cy="btn_save"]').click()
+
+    cy.wrap(createStub).should('have.been.calledOnce')
+    cy.wrap(createDaaStub).should('have.callCount', 4)
+  })
+
+  it('Shows per-file error and continues creating remaining DAAs when one uploaded file fails', () => {
+    setupCreateFlow(adminUser)
+    cy.stub(DAA, 'addDaaToDac').resolves(200)
+    cy.stub(DAC, 'create').resolves({ ...existingDac, dacId: 99 })
+    const notificationsStub = cy.stub(Notifications, 'showError')
+    const createDaaStub = cy.stub(DAA, 'createDaa')
+      .onCall(0).resolves({ data: { ...broadDaaList[0], daaId: 301, broadDaa: false } })
+      .onCall(1).rejects(new Error('upload failed'))
+      .onCall(2).resolves({ data: { ...broadDaaList[0], daaId: 303, broadDaa: false } })
+      .onCall(3).resolves({ data: { ...broadDaaList[0], daaId: 304, broadDaa: false } })
+
+    uploadDaaFiles([
+      { fileName: 'f1.pdf', fileContent: 'file 1' },
+      { fileName: 'f2.pdf', fileContent: 'file 2' },
+      { fileName: 'f3.pdf', fileContent: 'file 3' },
+      { fileName: 'f4.pdf', fileContent: 'file 4' },
+    ])
+
+    fillNewDacForm()
+    cy.get('[data-cy="btn_save"]').click()
+
+    cy.wrap(createDaaStub).should('have.callCount', 4)
+    cy.wrap(notificationsStub).should('have.been.calledWithMatch', { text: 'Unable to create DAA for \'f2.pdf\'.' })
   })
 })
