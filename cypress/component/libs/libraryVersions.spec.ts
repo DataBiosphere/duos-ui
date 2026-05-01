@@ -299,7 +299,7 @@ describe('Library Versions - Tests', function () {
           if ('terms' in clause) {
             expect(clause.terms).to.not.have.property(
               'study.data.tags',
-              `${key} should use study.data.tags.keyword, not study.data.tags`
+              `${key} should use study.data.tags.keyword, not study.data.tags`,
             )
             expect(clause.terms).to.have.property('study.data.tags.keyword')
           }
