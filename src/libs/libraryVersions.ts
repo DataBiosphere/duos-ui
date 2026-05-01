@@ -95,7 +95,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['The Broad Institute of MIT and Harvard'],
+                'study.data.tags.keyword': ['The Broad Institute of MIT and Harvard'],
               },
             },
           ],
@@ -132,7 +132,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['mgb', 'Massachusetts General Hospital', 'Brigham and Women\'s Hospital', 'Faulkner Hospital', 'Spaulding Hospital'],
+                'study.data.tags.keyword': ['mgb', 'Massachusetts General Hospital', 'Brigham and Women\'s Hospital', 'Faulkner Hospital', 'Spaulding Hospital'],
               },
             },
           ],
@@ -154,7 +154,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['elwazi'],
+                'study.data.tags.keyword': ['elwazi'],
               },
             },
           ],
@@ -187,7 +187,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['anvil'],
+                'study.data.tags.keyword': ['anvil'],
               },
             },
           ],
@@ -209,7 +209,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI'],
+                'study.data.tags.keyword': ['NHLBI'],
               },
             },
           ],
@@ -231,7 +231,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['Platform: Single Cell Portal'],
+                'study.data.tags.keyword': ['(Platform: Single Cell Portal)'],
               },
             },
           ],
@@ -253,7 +253,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Blood Disorders and Blood Safety'],
+                'study.data.tags.keyword': ['NHLBI Blood Disorders and Blood Safety'],
               },
             },
           ],
@@ -275,7 +275,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Health Disparities'],
+                'study.data.tags.keyword': ['NHLBI Health Disparities'],
               },
             },
           ],
@@ -297,7 +297,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Heart and Vascular Diseases'],
+                'study.data.tags.keyword': ['NHLBI Heart and Vascular Diseases'],
               },
             },
           ],
@@ -319,7 +319,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Lung Diseases'],
+                'study.data.tags.keyword': ['NHLBI Lung Diseases'],
               },
             },
           ],
@@ -341,7 +341,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Obesity, Nutrition, and Physical Activity'],
+                'study.data.tags.keyword': ['NHLBI Obesity, Nutrition, and Physical Activity'],
               },
             },
           ],
@@ -363,7 +363,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Population and Epidemiology Studies'],
+                'study.data.tags.keyword': ['NHLBI Population and Epidemiology Studies'],
               },
             },
           ],
@@ -385,7 +385,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Precision Medicine Activities'],
+                'study.data.tags.keyword': ['NHLBI Precision Medicine Activities'],
               },
             },
           ],
@@ -407,7 +407,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Research Spectrum'],
+                'study.data.tags.keyword': ['NHLBI Research Spectrum'],
               },
             },
           ],
@@ -429,7 +429,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Sleep Science and Sleep Disorders'],
+                'study.data.tags.keyword': ['NHLBI Sleep Science and Sleep Disorders'],
               },
             },
           ],
@@ -451,7 +451,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NHLBI Women\'s Health'],
+                'study.data.tags.keyword': ['NHLBI Women\'s Health'],
               },
             },
           ],
@@ -473,7 +473,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['anvil'],
+                'study.data.tags.keyword': ['anvil'],
               },
             },
           ],
@@ -495,7 +495,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['hca dcp'],
+                'study.data.tags.keyword': ['hca dcp'],
               },
             },
           ],
@@ -517,7 +517,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['zoonomics'],
+                'study.data.tags.keyword': ['zoonomics'],
               },
             },
           ],
@@ -546,7 +546,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['cfde'],
+                'study.data.tags.keyword': ['cfde'],
               },
             },
           ],
@@ -568,7 +568,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['FireCloud'],
+                'study.data.tags.keyword': ['FireCloud'],
               },
             },
           ],
@@ -590,7 +590,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['All of Us'],
+                'study.data.tags.keyword': ['All of Us'],
               },
             },
           ],
@@ -629,7 +629,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['International Fetal Genomics Consortium'],
+                'study.data.tags.keyword': ['International Fetal Genomics Consortium'],
               },
             },
           ],
@@ -651,7 +651,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['SCHARE'],
+                'study.data.tags.keyword': ['SCHARE'],
               },
             },
           ],
@@ -673,7 +673,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['Stanley Center'],
+                'study.data.tags.keyword': ['Stanley Center'],
               },
             },
           ],
@@ -695,7 +695,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['Stanley Center'],
+                'study.data.tags.keyword': ['Stanley Center'],
               },
             },
           ],
@@ -717,7 +717,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['Getz Lab'],
+                'study.data.tags.keyword': ['Getz Lab'],
               },
             },
           ],
@@ -739,7 +739,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['ASAP'],
+                'study.data.tags.keyword': ['ASAP'],
               },
             },
           ],
@@ -761,7 +761,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['GP2'],
+                'study.data.tags.keyword': ['GP2'],
               },
             },
           ],
@@ -783,7 +783,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['ASD'],
+                'study.data.tags.keyword': ['ASD'],
               },
             },
           ],
@@ -805,7 +805,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['PBN'],
+                'study.data.tags.keyword': ['PBN'],
               },
             },
           ],
@@ -827,7 +827,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['PGC'],
+                'study.data.tags.keyword': ['PGC'],
               },
             },
           ],
@@ -849,7 +849,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['SCZ'],
+                'study.data.tags.keyword': ['Broad: SCZ_BD'],
               },
             },
           ],
@@ -871,7 +871,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['ESP'],
+                'study.data.tags.keyword': ['ESP'],
               },
             },
           ],
@@ -893,7 +893,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['IBD'],
+                'study.data.tags.keyword': ['IBD'],
               },
             },
           ],
@@ -915,7 +915,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['Helmsley'],
+                'study.data.tags.keyword': ['Helmsley'],
               },
             },
           ],
@@ -937,7 +937,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['Eating Disorder Sequencing Program'],
+                'study.data.tags.keyword': ['Eating Disorder Sequencing Program'],
               },
             },
           ],
@@ -959,7 +959,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['CCXDP'],
+                'study.data.tags.keyword': ['CCXDP'],
               },
             },
           ],
@@ -981,7 +981,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['NCPI DUO'],
+                'study.data.tags.keyword': ['NCPI DUO'],
               },
             },
           ],
@@ -1003,7 +1003,7 @@ export const getLibraryVersions = (
             },
             {
               terms: {
-                'study.data.tags': ['ga4gh'],
+                'study.data.tags.keyword': ['ga4gh'],
               },
             },
           ],
