@@ -35,7 +35,6 @@ import AdminManageLC from 'src/pages/AdminManageLC'
 import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
-import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
@@ -124,7 +123,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
         <Route path="/manage_dac" element={<ManageDac />} />
         <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
-        <Route path="/manage_edit_dac/:dacId" element={<ManageEditDac />} />
         <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
         <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />
       </Route>
@@ -137,7 +135,6 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
         <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
         <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
-        <Route path="/manage_add_dac" element={<ManageEditDac />} />
         <Route path="/manage_add_dac_daa" element={<EditDac />} />
       </Route>
       <Route path="*" element={<NotFound />} />

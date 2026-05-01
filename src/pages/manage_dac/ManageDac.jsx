@@ -6,7 +6,6 @@ import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { DacMembersModal } from 'src/pages/manage_dac/DacMembersModal'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
-import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
 import { useNavigate } from 'react-router-dom'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { usePageTitle } from 'src/hooks/usePageTitle'
@@ -147,7 +146,7 @@ export const ManageDac = function ManageDac() {
         />
       )}
       {showAddPage && (
-        <ManageEditDac />
+        <EditDac />
       )}
       {showEditPage && (
         <EditDac />
