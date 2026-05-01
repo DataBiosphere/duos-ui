@@ -239,11 +239,11 @@ async function fetchMultipartRequest<T>(
       const errorData = await res.json() as { message?: string }
       if (errorData?.message) message = errorData.message
     }
-    finally {
+    catch {
+      // ignore parse errors, use generic message
+    }
     reportError(fullUrl, res.status)
     throw new Error(message)
-}
-
   }
   return handleResponse<T>(res, fullUrl, 'json', method)
 }
