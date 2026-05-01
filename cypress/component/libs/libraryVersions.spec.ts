@@ -294,7 +294,7 @@ describe('Library Versions - Tests', function () {
       Object.entries(versions).forEach(([key, library]) => {
         if (library.query === null || !('bool' in library.query)) return
 
-        const query = library.query as BoolQuery
+        const query = library.query
         query.bool.should.forEach((clause) => {
           if ('terms' in clause) {
             expect(clause.terms).to.not.have.property(
