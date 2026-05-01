@@ -65,14 +65,13 @@ snapshot for a submitted DAR. The response is an array; each element may use eit
 `daa.daaId`, `daa.file.fileName`). The `DatasetDaaSnapshotRelationships` component
 (`src/pages/dar_application/DatasetDaaSnapshotRelationships.tsx`) normalises both shapes.
 
-## `DAAUtils.isEnabled()` Feature Flag
+## DAA Is Always Enabled
 
-`DAAUtils.isEnabled()` (`src/utils/DAAUtils.ts`) gates all DAA-related UI. Wrap any new DAA-specific JSX in
-this guard:
+DAA-related UI and workflows are permanently enabled in this codebase.
 
-```tsx
-{DAAUtils.isEnabled() && <DAASpecificComponent />}
-```
+- Do not add or reintroduce a DAA feature-flag guard.
+- Implement new DAA UI directly where appropriate.
+- Routes and views that support DAA functionality should remain active by default.
 
 ## Component Test Conventions (Cypress)
 

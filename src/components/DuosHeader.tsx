@@ -10,7 +10,6 @@ import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
 import { Auth } from 'src/libs/auth/auth'
 import { NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
-import { DAAUtils } from 'src/utils/DAAUtils'
 import { withStyles } from 'tss-react/mui'
 import { SupportRequestModal } from './modals/SupportRequestModal'
 import './DuosHeader.css'
@@ -92,7 +91,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
-      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() },
+      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations' },
     ],
     isRendered: user => user.isSigningOfficial,
   },

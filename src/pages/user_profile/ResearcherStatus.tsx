@@ -4,9 +4,7 @@ import { Notifications } from 'src/libs/utils'
 import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
 import { isNil } from 'lodash'
-import LibraryCard from 'src/pages/user_profile/LibraryCard'
 import DAAs from './DAAs'
-import { DAAUtils } from 'src/utils/DAAUtils'
 import { nihAccountInstructions, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import { DAAObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
@@ -63,23 +61,6 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
     init()
   }, [user])
 
-  const cardComponent = () => {
-    return DAAUtils.isEnabled()
-      ? (
-          <DAAs
-            issuedOn={issuedOn}
-            issuedBy={issuedBy}
-            daas={daaObjects}
-          />
-        )
-      : (
-          <LibraryCard
-            issuedOn={issuedOn}
-            issuedBy={issuedBy}
-          />
-        )
-  }
-
   const subheadStyle = {
     color: '#000',
     fontFamily: 'Montserrat',
@@ -127,7 +108,13 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
       </p>
       <div style={{ marginTop: '15px' }} />
       {hasCard
-        ? cardComponent()
+        ? (
+            <DAAs
+              issuedOn={issuedOn}
+              issuedBy={issuedBy}
+              daas={daaObjects}
+            />
+          )
         : (
             <div>
               <p>No Library Card Found</p>

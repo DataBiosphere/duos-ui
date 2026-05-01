@@ -86,12 +86,7 @@ describe('Data Management Incident - Component Tests', () => {
   it('enforces character limit on incident description', () => {
     mountComponent({ dmiYesNo: true })
 
-    // Generate a string longer than the max length character limit
-    const longText = 'A'.repeat(FORM_TEXT_AREA_MAX_LENGTH + 100)
-    const expectedText = longText.substring(0, FORM_TEXT_AREA_MAX_LENGTH)
-
-    cy.get('#dmiDescription').type(longText, { delay: 0 })
-    cy.get('#dmiDescription').should('have.value', expectedText)
+    cy.get('#dmiDescription').should('have.attr', 'maxlength', `${FORM_TEXT_AREA_MAX_LENGTH}`)
   })
 
   it('allows toggling checkboxes on and off', () => {
