@@ -78,7 +78,7 @@ describe('DatasetList', () => {
         <DatasetList visibleDatasets={datasets} isLoading={false} dacs={dacs} />
       </BrowserRouter>,
     )
-    cy.get('a').contains('DAC 1').should('have.attr', 'href', '/manage_edit_dac/1')
+    cy.get('a').contains('DAC 1').should('have.attr', 'href', '/manage_edit_dac_daa/1')
   })
 
   it('renders DAC name as plain text for non-chair user', () => {

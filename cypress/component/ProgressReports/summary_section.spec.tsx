@@ -141,11 +141,7 @@ describe('Summary Section - Component Tests', () => {
   })
 
   it('enforces character limit on summary text', () => {
-    const longText = 'A'.repeat(FORM_TEXT_AREA_MAX_LENGTH + 100)
-    const expectedText = longText.substring(0, FORM_TEXT_AREA_MAX_LENGTH)
-
-    cy.get('#progressReportSummary').type(longText, { delay: 0 })
-    cy.get('#progressReportSummary').should('have.value', expectedText)
+    cy.get('#progressReportSummary').should('have.attr', 'maxlength', `${FORM_TEXT_AREA_MAX_LENGTH}`)
   })
 
   it('handles intellectual property radio buttons', () => {

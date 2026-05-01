@@ -7,7 +7,6 @@ import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { DownloadLink } from 'src/components/DownloadLink'
-import { DAAUtils } from 'src/utils/DAAUtils'
 
 const buildDaaByDacId = (daaList) => {
   const nextDaaByDacId = {}
@@ -39,10 +38,6 @@ export default function SelectableDatasets(props) {
   const [daaByDacId, setDaaByDacId] = useState({})
 
   useEffect(() => {
-    if (!DAAUtils.isEnabled()) {
-      return
-    }
-
     let isMounted = true
 
     const loadDaas = async () => {
@@ -109,21 +104,17 @@ export default function SelectableDatasets(props) {
         <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>{ds.datasetIdentifier}</div>
         <div>|</div>
         <div style={{ marginLeft: '0.5rem' }}>{ds.datasetName}</div>
-        {DAAUtils.isEnabled() && (
-          <>
-            <div style={{ marginLeft: '1rem' }}>|</div>
-            <div style={{ marginLeft: '1rem' }}>
-              {daaForDataset
-                ? (
-                    <DownloadLink
-                      label={daaForDataset.fileName}
-                      onDownload={event => onDaaLinkClick(event, daaForDataset.daaId, daaForDataset.fileName)}
-                    />
-                  )
-                : '-'}
-            </div>
-          </>
-        )}
+        <div style={{ marginLeft: '1rem' }}>|</div>
+        <div style={{ marginLeft: '1rem' }}>
+          {daaForDataset
+            ? (
+                <DownloadLink
+                  label={daaForDataset.fileName}
+                  onDownload={event => onDaaLinkClick(event, daaForDataset.daaId, daaForDataset.fileName)}
+                />
+              )
+            : '-'}
+        </div>
       </div>
     )
   }

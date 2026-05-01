@@ -12,7 +12,7 @@ export function Spinner() {
 
 // TODO: implement this spinner in every componentDidMount or Init method on
 // pages that call async methods upon loading the page.
-// ManageDac, AddDacModal, DataAccessRequest, AppSummary, AccessReview, SigningOfficialConsole,
+// ManageDac, DataAccessRequest, AppSummary, AccessReview, SigningOfficialConsole,
 // ResearcherProfile, NewMemberConsole, DataSharingLanguageTool,
 // DatasetStatistics, DatasetRegistration, DatasetCatalog, DataOwnerReview, DataAccessRequestApplication,
 // ChairConsole, BackgroundSignIn, AdminManageUser, AdminManageLC, AdminMaangeInstitutions,

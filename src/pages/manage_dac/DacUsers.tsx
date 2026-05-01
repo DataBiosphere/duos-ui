@@ -1,7 +1,9 @@
 import { difference, union, flatMap } from 'lodash'
 import React, { useState, FC, CSSProperties } from 'react'
 import { DacObject, DuosUser } from 'src/types/model'
-import { CHAIR, MEMBER } from 'src/pages/manage_dac/AddDacModal'
+
+const CHAIR = 'chair'
+const MEMBER = 'member'
 
 interface DacUsersProps {
   dac: DacObject

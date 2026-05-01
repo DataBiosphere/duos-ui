@@ -1,7 +1,6 @@
 import { React } from 'react'
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets.jsx'
 import { DAA } from 'src/libs/ajax/DAA'
-import { DAAUtils } from 'src/utils/DAAUtils'
 
 const datasets = [
   {
@@ -45,14 +44,11 @@ const propsDisabled = {
 describe('Selectable Datasets - Not Read Only', () => {
   describe('With 4 Datasets', () => {
     beforeEach(() => {
-      cy.stub(DAAUtils, 'isEnabled').returns(false)
       cy.stub(DAA, 'getDaas').resolves([])
       cy.mount(<SelectableDatasets {...props} />)
     })
 
     it('Shows DAA file name link for rows with matching DAC and hides it otherwise', () => {
-      DAAUtils.isEnabled.restore()
-      cy.stub(DAAUtils, 'isEnabled').returns(true)
       DAA.getDaas.restore()
       cy.stub(DAA, 'getDaas').resolves([
         {
