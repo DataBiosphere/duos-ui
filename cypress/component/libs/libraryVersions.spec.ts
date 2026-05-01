@@ -269,7 +269,7 @@ describe('Library Versions - Tests', function () {
         const termsClause = query.bool.should.find(c => 'terms' in c)
 
         const descriptionValue = matchPhraseClause!.match_phrase['study.description'] as string
-        const tagsValue = termsClause!.terms['study.data.tags']
+        const tagsValue = termsClause!.terms['study.data.tags.keyword']
 
         expect(tagsValue).to.include(descriptionValue, `${key} tags should include the description value`)
       })
@@ -285,7 +285,26 @@ describe('Library Versions - Tests', function () {
       expect(matchPhraseClause).to.not.equal(undefined)
       expect(termsClause).to.not.equal(undefined)
       expect(matchPhraseClause!.match_phrase).to.have.property('submitter.institution.name')
-      expect(termsClause!.terms['study.data.tags']).to.include('The Broad Institute of MIT and Harvard')
+      expect(termsClause!.terms['study.data.tags.keyword']).to.include('The Broad Institute of MIT and Harvard')
+    })
+
+    it('all terms clauses use study.data.tags.keyword (not study.data.tags) for case-sensitive matching', function () {
+      const versions = getLibraryVersions(null, null)
+
+      Object.entries(versions).forEach(([key, library]) => {
+        if (library.query === null || !('bool' in library.query)) return
+
+        const query = library.query
+        query.bool.should.forEach((clause) => {
+          if ('terms' in clause) {
+            expect(clause.terms).to.not.have.property(
+              'study.data.tags',
+              `${key} should use study.data.tags.keyword, not study.data.tags`,
+            )
+            expect(clause.terms).to.have.property('study.data.tags.keyword')
+          }
+        })
+      })
     })
   })
 })
