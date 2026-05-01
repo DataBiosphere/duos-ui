@@ -843,11 +843,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'SCZ',
-              },
-            },
-            {
               terms: {
                 'study.data.tags.keyword': ['Broad: SCZ_BD'],
               },
