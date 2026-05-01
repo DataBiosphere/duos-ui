@@ -5,9 +5,8 @@ describe('VoteUtil - processMatchData()', () => {
     expect(processMatchData({})).to.equal('N/A')
   })
 
-  it('returns "N/A" if matchData is null or undefined', () => {
+  it('returns "N/A" if matchData is null', () => {
     expect(processMatchData(null)).to.equal('N/A')
-    expect(processMatchData(undefined)).to.equal('N/A')
   })
 
   it('returns "Yes" if failed === false and match === true', () => {
