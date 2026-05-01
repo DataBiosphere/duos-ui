@@ -43,6 +43,7 @@ export const TableHeaderSection: React.FC<TableHeaderSectionProps> = ({
               fontFamily: 'Montserrat',
               fontWeight: 600,
               fontSize: '2.8rem',
+              width: '150%',
             }}
           >
             {title}
