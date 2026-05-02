@@ -1,5 +1,6 @@
 import { Storage } from 'src/libs/storage'
-import { includes } from 'lodash'
+
+export type AppEnvironment = 'prod' | 'staging' | 'local' | 'dev'
 
 /**
  * Predefined groups of environments for which certain features might be valid for.
@@ -9,14 +10,13 @@ import { includes } from 'lodash'
  *      * alpha
  *      * dev
  *      * local
- * @type {{PROD_STAGING: string[], NON_STAGING: string[], NON_PROD: string[]}}
  */
 export const envGroups = {
   PROD_STAGING: ['prod', 'staging'],
   NON_PROD: ['local', 'dev', 'staging'],
   NON_STAGING: ['local', 'dev'],
   DEV: ['local', 'dev'],
-}
+} as const satisfies Record<string, readonly AppEnvironment[]>
 
 /**
  * Returns true if the current application `Storage.ENV` variable exists as an element
@@ -31,9 +31,9 @@ export const envGroups = {
  * @param envGroup
  * @returns {boolean}
  */
-export const checkEnv = (envGroup) => {
+export const checkEnv = (envGroup: readonly string[]): boolean => {
   const env = Storage.getEnv()
-  return env ? includes(envGroup, env) : false
+  return env === null ? false : envGroup.includes(env)
 }
 
 /**
@@ -44,7 +44,7 @@ export const checkEnv = (envGroup) => {
  * isDevEnv()
  * @returns {boolean}
  */
-export const isDevEnv = () => checkEnv(envGroups.DEV)
+export const isDevEnv = (): boolean => checkEnv(envGroups.DEV)
 
 export default {
   checkEnv,
