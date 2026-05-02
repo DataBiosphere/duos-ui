@@ -1,4 +1,4 @@
-import { DarCollectionTableColumnOptions, consoleTypes } from './DarCollectionUtils'
+import { DarCollectionTableColumnOptions, consoleTypes } from 'src/utils/DarCollectionUtils'
 
 // Default base columns (most consoles)
 const defaultBaseColumns: string[] = [
