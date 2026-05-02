@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react'
-import { getDarCollectionColumns } from '../utils/darCollectionColumns'
+import { useEffect, useState } from 'react'
+import { getDarCollectionColumns } from 'src/utils/darCollectionColumns'
 
 /**
  * Custom hook for responsive DAR collection columns
  * Handles window resize events and returns appropriate columns for the console type
  *
- * @param {string} consoleType - The type of console (ADMIN, CHAIR, MEMBER, etc.)
- * @returns {Array} responsiveColumns - Array of column options based on current window width
+ * @param consoleType - The type of console (ADMIN, CHAIR, MEMBER, etc.)
+ * @returns Array of column options based on current window width
  */
-export function useResponsiveDarCollectionColumns(consoleType) {
-  const [responsiveColumns, setResponsiveColumns] = useState(() =>
+export function useResponsiveDarCollectionColumns(consoleType: string): string[] {
+  const [responsiveColumns, setResponsiveColumns] = useState<string[]>(() =>
     getDarCollectionColumns(consoleType, window.innerWidth),
   )
 
   useEffect(() => {
-    const handleResize = () => {
+    const handleResize = (): void => {
       const newWidth = window.innerWidth
       setResponsiveColumns(getDarCollectionColumns(consoleType, newWidth))
     }
