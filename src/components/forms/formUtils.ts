@@ -1,3 +1,5 @@
+import { FormFieldTypes } from './forms'
+
 // Helper functions to replace lodash
 const isNil = (value: unknown): value is null | undefined => value === null || value === undefined
 const isFunction = (value: unknown): value is (...args: unknown[]) => unknown => typeof value === 'function'
@@ -48,8 +50,7 @@ const commonOptionalProps = [
 ]
 
 export const validateFormProps = (props: Record<string, unknown>): void => {
-  // Use a default type object if type is not provided
-  const type = (isNil(props.type) ? { requiredProps: [], optionalProps: [] } : props.type) as FormFieldType
+  const type = (isNil(props.type) ? FormFieldTypes.TEXT : props.type) as FormFieldType
 
   const requiredProps = (type.requiredProps || []).concat(commonRequiredProps)
   const optionalProps = new Set((type.optionalProps || []).concat(commonOptionalProps).concat(requiredProps))
