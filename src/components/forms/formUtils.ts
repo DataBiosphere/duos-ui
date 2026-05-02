@@ -1,5 +1,3 @@
-import { FormFieldTypes } from './forms'
-
 // Helper functions to replace lodash
 const isNil = (value: unknown): value is null | undefined => value === null || value === undefined
 const isFunction = (value: unknown): value is (...args: unknown[]) => unknown => typeof value === 'function'
@@ -22,6 +20,12 @@ interface RadioOption {
   name: string
   text: string
   [key: string]: unknown
+}
+
+// Keeping this local to avoid a circular dependency with forms.jsx
+const defaultTextFieldType: FormFieldType = {
+  requiredProps: [],
+  optionalProps: ['placeholder', 'inputStyle', 'readOnly'],
 }
 
 const commonRequiredProps = [
@@ -50,7 +54,7 @@ const commonOptionalProps = [
 ]
 
 export const validateFormProps = (props: Record<string, unknown>): void => {
-  const type = (isNil(props.type) ? FormFieldTypes.TEXT : props.type) as FormFieldType
+  const type = (isNil(props.type) ? defaultTextFieldType : props.type) as FormFieldType
 
   const requiredProps = (type.requiredProps || []).concat(commonRequiredProps)
   const optionalProps = new Set((type.optionalProps || []).concat(commonOptionalProps).concat(requiredProps))
