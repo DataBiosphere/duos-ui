@@ -114,8 +114,8 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
         variant="scrollable"
         scrollButtons="auto"
         orientation="vertical"
-        TabIndicatorProps={{
-          style: { background: '#2BBD9B' },
+        slotProps={{
+          indicator: { style: { background: '#2BBD9B' } },
         }}
         // CASE 3 - the user selects a new tab by clicking on it
         onChange={(_event, step) => {
