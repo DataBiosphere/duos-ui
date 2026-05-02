@@ -37,10 +37,17 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Flag to indicate the tab change was driven by the scroll handler itself (CASE 2),
+  // so CASE 1 should not also trigger a programmatic scroll (which would cause a feedback loop).
+  const scrollHandlerUpdatedTab = useRef(false)
+
   // CASE 1 - the form scrolls to a new tab based on validation errors
   useEffect(() => {
     if (typeof formSelectedTabId === 'string') {
-      goToStep(formSelectedTabId)
+      if (!scrollHandlerUpdatedTab.current) {
+        goToStep(formSelectedTabId)
+      }
+      scrollHandlerUpdatedTab.current = false
     }
   }, [goToStep, formSelectedTabId])
 
@@ -84,6 +91,9 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
         }
 
         if (tabId && tabId !== formSelectedTabId && onTabChange) {
+          // Mark that this tab change originated from scrolling so CASE 1
+          // does not also trigger a programmatic scroll-to, creating a loop.
+          scrollHandlerUpdatedTab.current = true
           onTabChange(tabId)
         }
       }, 80)
