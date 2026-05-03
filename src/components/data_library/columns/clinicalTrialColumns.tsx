@@ -7,7 +7,7 @@ import { Link as RouterLink } from 'react-router-dom'
 /**
  * Column definitions for the Clinical Trials view
  */
-export const makeClinicalTrialColumns = (selectedMenuTab?: number): GridColDef<ClinicalTrialAsset>[] => [
+export const makeClinicalTrialColumns = (): GridColDef<ClinicalTrialAsset>[] => [
   {
     field: 'title',
     headerName: 'Trial Title',
@@ -43,7 +43,7 @@ export const makeClinicalTrialColumns = (selectedMenuTab?: number): GridColDef<C
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

@@ -115,6 +115,6 @@ export const intellectualPropertyAsset: AssetDefinition = {
   },
 
   makeColumns(props?: ColumnsProps): GridColDef[] {
-    return makeIntellectualPropertyColumns(props?.selectedMenuTab) as GridColDef[]
+    return makeIntellectualPropertyColumns() as GridColDef[]
   },
 }

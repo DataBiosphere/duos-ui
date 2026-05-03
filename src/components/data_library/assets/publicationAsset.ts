@@ -118,6 +118,6 @@ export const publicationAsset: AssetDefinition = {
   },
 
   makeColumns(props?: ColumnsProps): GridColDef[] {
-    return makePublicationColumns(props?.selectedMenuTab) as GridColDef[]
+    return makePublicationColumns() as GridColDef[]
   },
 }

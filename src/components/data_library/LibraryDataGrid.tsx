@@ -7,7 +7,6 @@ import { Box, Typography, CircularProgress } from '@mui/material'
 import { isEmpty } from 'lodash'
 import { LibraryDataGridProps } from 'src/types/library'
 import { assetRegistry, LibraryRow } from 'src/components/data_library/assets'
-import { useLocation } from 'react-router-dom'
 
 const LoadingOverlay = () => (
   <Box
@@ -37,12 +36,10 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   radarEnabledDatasetIds = new Set(),
 }) => {
   const asset = assetRegistry[assetType]
-  const location = useLocation()
-  const selectedMenuTab: number | undefined = location.state?.selectedMenuTab
 
   const columns = useMemo(
-    () => asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds, selectedMenuTab }),
-    [asset, exportableDatasets, radarEnabledDatasetIds, selectedMenuTab],
+    () => asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds }),
+    [asset, exportableDatasets, radarEnabledDatasetIds],
   )
 
   const getRowId = (row: LibraryRow) => asset.getRowId(row)

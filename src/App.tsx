@@ -14,6 +14,7 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
+import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,16 +105,18 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={muiThemeFix}>
-        <div className="body">
-          <div className="wrap">
-            <div className="main">
-              <DuosHeader />
-              {isLoading && <div style={loadingSyle}><Spinner /></div>}
-              {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+        <NavigationStateProvider>
+          <div className="body">
+            <div className="wrap">
+              <div className="main">
+                <DuosHeader />
+                {isLoading && <div style={loadingSyle}><Spinner /></div>}
+                {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+              </div>
             </div>
+            <DuosFooter />
           </div>
-          <DuosFooter />
-        </div>
+        </NavigationStateProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

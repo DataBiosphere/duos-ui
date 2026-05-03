@@ -117,6 +117,6 @@ export const biospecimenAsset: AssetDefinition = {
   },
 
   makeColumns(props?: ColumnsProps): GridColDef[] {
-    return makeBiospecimenColumns(props?.selectedMenuTab) as GridColDef[]
+    return makeBiospecimenColumns() as GridColDef[]
   },
 }

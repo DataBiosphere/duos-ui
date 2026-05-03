@@ -144,6 +144,6 @@ export const studyAsset: AssetDefinition = {
   },
 
   makeColumns(props?: ColumnsProps): GridColDef[] {
-    return makeStudyColumns(props?.selectedMenuTab) as GridColDef[]
+    return makeStudyColumns() as GridColDef[]
   },
 }

@@ -7,7 +7,7 @@ import { Link as RouterLink } from 'react-router-dom'
 /**
  * Column definitions for the Intellectual Property view in the Data Library.
  */
-export const makeIntellectualPropertyColumns = (selectedMenuTab?: number): GridColDef<IntellectualPropertyAsset>[] => [
+export const makeIntellectualPropertyColumns = (): GridColDef<IntellectualPropertyAsset>[] => [
   {
     field: 'title',
     headerName: 'Title',
@@ -43,7 +43,7 @@ export const makeIntellectualPropertyColumns = (selectedMenuTab?: number): GridC
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

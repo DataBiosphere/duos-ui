@@ -5,14 +5,14 @@ import Tooltip from '@mui/material/Tooltip'
 import { FundingResourceAsset } from 'src/types/library'
 import { Link as RouterLink } from 'react-router-dom'
 
-export const makeFundingResourceColumns = (selectedMenuTab?: number): GridColDef<FundingResourceAsset>[] => [
+export const makeFundingResourceColumns = (): GridColDef<FundingResourceAsset>[] => [
   {
     field: 'studyName',
     headerName: 'Study Name',
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

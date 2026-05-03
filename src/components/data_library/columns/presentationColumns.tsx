@@ -7,7 +7,7 @@ import { Link as RouterLink } from 'react-router-dom'
 /**
  * Column definitions for the Presentations view in the Data Library.
  */
-export const makePresentationColumns = (selectedMenuTab?: number): GridColDef<PresentationAsset>[] => [
+export const makePresentationColumns = (): GridColDef<PresentationAsset>[] => [
   {
     field: 'title',
     headerName: 'Title',
@@ -43,7 +43,7 @@ export const makePresentationColumns = (selectedMenuTab?: number): GridColDef<Pr
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

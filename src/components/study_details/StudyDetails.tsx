@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetTerm, StudyTerm } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
-import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { makeDatasetTableHeader, makeDatasetTableRows } from 'src/components/data_search/DatasetSearchTableConstants'
 import SimpleTable from 'src/components/SimpleTable'
 import { Styles } from 'src/libs/theme'
@@ -60,8 +60,6 @@ export const StudyDetails = () => {
   const params = useParams<{ studyId: string }>()
   const studyId = params.studyId
   const navigate = useNavigate()
-  const location = useLocation()
-  const selectedMenuTab: number | undefined = location.state?.selectedMenuTab
   const [loading, setLoading] = useState(true)
   const [datasets, setDatasets] = useState<DatasetTerm[]>([])
   const [exportableDatasets, setExportableDatasets] = useState<Dictionary<SnapshotSummaryModel[]>>({})
@@ -138,7 +136,6 @@ export const StudyDetails = () => {
         <Link
           id="link_datalibrary"
           to="/datalibrary"
-          state={{ selectedMenuTab }}
           className="navbar-brand"
           style={{ height: 28, width: 28 }}
         >

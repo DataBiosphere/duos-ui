@@ -113,6 +113,6 @@ export const fundingResourceAsset: AssetDefinition = {
   },
 
   makeColumns(props?: ColumnsProps): GridColDef[] {
-    return makeFundingResourceColumns(props?.selectedMenuTab) as GridColDef[]
+    return makeFundingResourceColumns() as GridColDef[]
   },
 }

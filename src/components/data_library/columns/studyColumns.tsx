@@ -7,14 +7,14 @@ import { Link as RouterLink } from 'react-router-dom'
 /**
  * Column definitions for study view
  */
-export const makeStudyColumns = (selectedMenuTab?: number): GridColDef<StudyAggregation>[] => [
+export const makeStudyColumns = (): GridColDef<StudyAggregation>[] => [
   {
     field: 'studyName',
     headerName: 'Study Name',
     flex: 1.5,
     minWidth: 200,
     renderCell: params => (
-      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

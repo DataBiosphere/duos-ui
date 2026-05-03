@@ -39,8 +39,6 @@ export interface LibraryPage {
 export interface ColumnsProps {
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
-  /** Forwarded navigation state so internal links preserve the active nav tab */
-  selectedMenuTab?: number
 }
 
 export interface AssetDefinition {

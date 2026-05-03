@@ -5,7 +5,7 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material'
 import Actions from './Actions'
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink'
 import { consoleTypes, styles } from '../../utils/DarCollectionUtils'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function projectTitleCellData({ name = '- -', darCollectionId, label = 'project-title' }) {
@@ -68,17 +68,12 @@ export function darCodeCellData({ darCode = '- -', darCollectionId, collectionIs
 }
 
 const DacLinkToCollection = ({ darCode, status = '', darCollectionId }) => {
-  const location = useLocation()
   const hasOpenElections = includes(toLower(status), 'open')
   const path = hasOpenElections
     ? `/dar_collection/${darCollectionId}`
     : `/dar_vote_review/${darCollectionId}`
 
-  return (
-    <Link to={path} state={{ selectedMenuTab: location.state?.selectedMenuTab }}>
-      {darCode}
-    </Link>
-  )
+  return <Link to={path}>{darCode}</Link>
 }
 
 export function DacCellData({ dacNames, darCollectionId, label = 'dacNames' }) {

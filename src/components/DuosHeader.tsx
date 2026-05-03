@@ -17,6 +17,7 @@ import './DuosHeader.css'
 import { Notification } from './Notification'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { DuosUser } from 'src/types/model'
+import { useNavigationState } from 'src/contexts/NavigationStateContext'
 
 interface SubTab {
   label: string
@@ -156,6 +157,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   const { classes } = props
   const navigate = useNavigate()
   const location = useLocation()
+  const { activeTab, setActiveTab } = useNavigationState()
   const [state, setState] = useState<DuosHeaderState>({
     showSupportRequestModal: false,
     hover: false,
@@ -291,30 +293,33 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   let initialSubTab: number = -1
-  let initialTab: number
 
-  // note: location.state.selectedMenuTab will be populated if the user navigated
-  // to the current page by clicking on a tab from the nav bar, or from a detail
-  // page that forwards navigation state (e.g. the DAR review page).
+  // Step 1: Try to determine the active tab from the current URL alone.
+  const urlDerivedTab = tabs.findIndex(isValidTab)
 
-  // populate initialTab based on state (if valid) or by manually searching through all tabs.
-  const stateTab = location?.state?.selectedMenuTab
-  if (stateTab != null && tabs.length > stateTab && isValidTab(tabs[stateTab])) {
-    // State points to a tab that owns this URL – use it (also handles selectedMenuTab === 0).
-    initialTab = stateTab
+  // Step 2: When the URL matches a tab, persist it in the nav context so detail
+  // pages (whose URLs don't appear in the tab config) can fall back to it.
+  // This replaces manual state-threading through every navigate() / Link call.
+  useEffect(() => {
+    if (urlDerivedTab !== -1) {
+      setActiveTab(urlDerivedTab)
+    }
+  }, [urlDerivedTab, setActiveTab])
+
+  // Step 3: Resolve the tab to display.
+  //   a) URL match wins (most accurate).
+  //   b) Context fallback — last tab the user was on before navigating to a detail page.
+  //   c) First tab when there is truly no signal.
+  let initialTab = urlDerivedTab
+  if (initialTab === -1 && activeTab != null && tabs.length > activeTab) {
+    initialTab = activeTab
   }
-  else {
-    initialTab = tabs.findIndex(isValidTab)
+  if (initialTab === -1 && tabs.length > 0) {
+    initialTab = 0
   }
 
-  // If URL doesn't match any tab's routes (e.g. a detail page) but we have a
-  // forwarded selectedMenuTab in state, honour it so the parent tab stays highlighted.
-  if (initialTab === -1 && stateTab != null && tabs.length > stateTab) {
-    initialTab = stateTab
-  }
-
-  // populate initialSubTab
-  if (initialTab !== -1) {
+  // populate initialSubTab (only meaningful when URL matched a configured tab route)
+  if (urlDerivedTab !== -1) {
     // Only consider subtabs that should be rendered for the user
     const renderedSubtabs = tabs[initialTab].children?.filter(
       subtab => (subtab.isRenderedForUser ?? subtab.isRendered ?? (() => true))(currentUser),
@@ -325,10 +330,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     )
   }
 
-  // Final fallback: if still unresolved, default to the first available tab.
-  if (initialTab === -1 && tabs.length > 0) {
-    initialTab = 0
-  }
 
   return (
     <nav className="navbar-duos" role="navigation">

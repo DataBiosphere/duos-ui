@@ -8,7 +8,7 @@ import { DACDatasetsTable } from '../components/dac_dataset_table/DACDatasetsTab
 import { DACDatasetTableColumnOptions } from '../components/dac_dataset_table/DACDatasetConstants.js'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from '../libs/utils'
 import { consoleTypes } from '../components/dac_dataset_table/DACDatasetTableCellData'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton.tsx'
@@ -17,8 +17,6 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
   const navigate = useNavigate()
-  const location = useLocation()
-  const selectedMenuTab = location.state?.selectedMenuTab
   const [datasets, setDatasets] = useState([])
   const [filteredList, setFilteredList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -84,7 +82,7 @@ export default function DACDatasets() {
         <AddObjectButton
           id="add-dataset-btn"
           label="ADD DATASET"
-          onClick={() => navigate('/data_submission_form', { state: { selectedMenuTab } })}
+          onClick={() => navigate('/data_submission_form')}
           icon={<AddCircleOutlineIcon />}
           className="button button-blue"
         />

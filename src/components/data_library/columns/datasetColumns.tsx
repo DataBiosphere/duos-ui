@@ -13,7 +13,6 @@ import { Link as RouterLink } from 'react-router-dom'
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
-  selectedMenuTab?: number,
 ): GridColDef<DatasetTerm>[] => [
   {
     field: 'datasetName',
@@ -21,7 +20,7 @@ export const makeDatasetColumns = (
     flex: 1.5,
     minWidth: 200,
     renderCell: params => (
-      <Link component={RouterLink} to={`/dataset/${params.row.datasetIdentifier}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/dataset/${params.row.datasetIdentifier}`} underline="hover">
         {params.value}
       </Link>
     ),
@@ -33,7 +32,7 @@ export const makeDatasetColumns = (
     minWidth: 150,
     valueGetter: (_value, row) => row.study?.studyName || '',
     renderCell: params => (
-      <Link component={RouterLink} to={`/studies/${params.row.study?.studyId}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.study?.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

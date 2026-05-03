@@ -7,7 +7,7 @@ import { Link as RouterLink } from 'react-router-dom'
 /**
  * Column definitions for the Workspaces view
  */
-export const makeWorkspaceColumns = (selectedMenuTab?: number): GridColDef<WorkspaceAsset>[] => [
+export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
   {
     field: 'name',
     headerName: 'Workspace Name',
@@ -36,7 +36,7 @@ export const makeWorkspaceColumns = (selectedMenuTab?: number): GridColDef<Works
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

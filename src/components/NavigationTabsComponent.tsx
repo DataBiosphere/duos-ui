@@ -133,7 +133,6 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                       label={tab.label}
                       style={selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab}
                       to={{ pathname: tab.link }}
-                      state={{ selectedMenuTab: tabIndex }}
                       component={Link}
                     />
                   ))}
@@ -263,7 +262,6 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                       label={tab.label}
                       style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
                       to={{ pathname: tab.link }}
-                      state={{ selectedMenuTab: selectedMenuTab }}
                       component={Link}
                     />
                   )
