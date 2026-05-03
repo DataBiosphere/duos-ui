@@ -59,10 +59,10 @@ function App() {
   })
 
   /**
-   * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
-   * information and user linkage information. With that, we can sync the users account linkage and then redirect the
-   * user to the original page they authenticated from.
-   */
+     * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
+     * information and user linkage information. With that, we can sync the users account linkage and then redirect the
+     * user to the original page they authenticated from.
+     */
   useEffect(() => {
     const checkRASAuthentication = async () => {
       const queryParams = new URLSearchParams(location.search)
@@ -106,16 +106,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={muiThemeFix}>
         <NavigationStateProvider>
-        <div className="body">
-          <div className="wrap">
-            <div className="main">
-              <DuosHeader />
-              {isLoading && <div style={loadingSyle}><Spinner /></div>}
-              {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+          <div className="body">
+            <div className="wrap">
+              <div className="main">
+                <DuosHeader />
+                {isLoading && <div style={loadingSyle}><Spinner /></div>}
+                {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+              </div>
             </div>
+            <DuosFooter />
           </div>
-          <DuosFooter />
-        </div>
         </NavigationStateProvider>
       </ThemeProvider>
     </QueryClientProvider>
