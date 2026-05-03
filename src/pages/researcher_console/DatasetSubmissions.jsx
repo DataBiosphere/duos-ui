@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Styles } from 'src/libs/theme'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from 'src/libs/utils'
 import SearchBar from 'src/components/SearchBar'
@@ -17,6 +17,8 @@ export default function DatasetSubmissions() {
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState({})
   const navigate = useNavigate()
+  const location = useLocation()
+  const selectedMenuTab = location.state?.selectedMenuTab
 
   useEffect(() => {
     const init = async () => {
@@ -104,7 +106,7 @@ export default function DatasetSubmissions() {
         <AddObjectButton
           id="add-dataset-btn"
           label="ADD DATASET"
-          onClick={() => navigate('/data_submission_form')}
+          onClick={() => navigate('/data_submission_form', { state: { selectedMenuTab } })}
           icon={<AddCircleOutlineIcon />}
           className="button button-blue"
           disabled={!currentUser.isDataSubmitter}

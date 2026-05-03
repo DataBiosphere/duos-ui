@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DataSet } from '../../libs/ajax/DataSet'
 import { DAC } from '../../libs/ajax/DAC'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { isNil } from 'lodash'
 import Button from '@mui/material/Button'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
@@ -11,6 +11,8 @@ import { Notifications } from '../../libs/utils'
 
 export default function DACDatasetApprovalStatus(props) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const selectedMenuTab = location.state?.selectedMenuTab
   const [dataset, setDataset] = useState(props.dataset)
   const [open, setOpen] = useState(false)
 
@@ -52,6 +54,7 @@ export default function DACDatasetApprovalStatus(props) {
             id={`${dataset.datasetId}_edit`}
             className="glyphicon glyphicon-pencil"
             to={`/study_update/${dataset.study.studyId}`}
+            state={{ selectedMenuTab }}
           />
         )}
       {dataset.deletable

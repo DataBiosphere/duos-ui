@@ -5,12 +5,14 @@ import loadingIndicator from 'src/images/loading-indicator.svg'
 import SortableTable from 'src/components/sortable_table/SortableTable'
 import { concat, isNil, join } from 'lodash'
 import Button from '@mui/material/Button'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 
 export default function DatasetSubmissionsTable(props) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const selectedMenuTab = location.state?.selectedMenuTab
   const spinner = (
     <div style={{ textAlign: 'center', height: '44', width: '180' }}>
       <img src={loadingIndicator} alt="Loading" />
@@ -114,7 +116,9 @@ export default function DatasetSubmissionsTable(props) {
         : (
             <div>
               <Button
-                href={editLink}
+                component={Link}
+                to={editLink}
+                state={{ selectedMenuTab }}
                 sx={{
                   fontSize: '1.25rem',
                   border: '1px solid #0948B7',
@@ -160,7 +164,7 @@ export default function DatasetSubmissionsTable(props) {
       }
     })
     setRows(rows)
-  }, [removeDataset, terms, handleClose, handleClick])
+  }, [removeDataset, terms, handleClose, handleClick, selectedMenuTab])
 
   useEffect(() => {
     const init = async () => {
