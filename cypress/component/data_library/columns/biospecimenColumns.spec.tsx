@@ -6,6 +6,7 @@
  * inspects the rendered HTML to verify the column behaviour.
  */
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
 import { makeBiospecimenRow } from '../../test-utils'
@@ -13,12 +14,14 @@ import { makeBiospecimenRow } from '../../test-utils'
 const renderGrid = (overrides = {}) => {
   const row = makeBiospecimenRow(overrides)
   cy.mount(
-    <DataGrid
-      rows={[row]}
-      columns={makeBiospecimenColumns()}
-      getRowId={r => r.biospecimenId}
-      autoHeight
-    />,
+    <MemoryRouter>
+      <DataGrid
+        rows={[row]}
+        columns={makeBiospecimenColumns()}
+        getRowId={r => r.biospecimenId}
+        autoHeight
+      />,
+    </MemoryRouter>,
   )
 }
 
@@ -190,12 +193,14 @@ describe('makeBiospecimenColumns — accessibility', () => {
 
   it('renders headers with proper labels', () => {
     cy.mount(
-      <DataGrid
-        rows={[makeBiospecimenRow()]}
-        columns={makeBiospecimenColumns()}
-        getRowId={r => r.biospecimenId}
-        autoHeight
-      />,
+      <MemoryRouter>
+        <DataGrid
+          rows={[makeBiospecimenRow()]}
+          columns={makeBiospecimenColumns()}
+          getRowId={r => r.biospecimenId}
+          autoHeight
+        />,
+      </MemoryRouter>,
     )
     cy.contains('Study Name').should('exist')
     cy.contains('Biospecimen ID').should('exist')

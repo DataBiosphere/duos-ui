@@ -6,6 +6,7 @@
  * rendered HTML to verify column behaviour.
  */
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makePublicationColumns } from 'src/components/data_library/columns/publicationColumns'
 import { makePublicationRow } from '../../test-utils'
@@ -13,12 +14,14 @@ import { makePublicationRow } from '../../test-utils'
 const renderGrid = (overrides = {}) => {
   const row = makePublicationRow(overrides)
   cy.mount(
-    <DataGrid
-      rows={[row]}
-      columns={makePublicationColumns()}
-      getRowId={r => r.publicationId}
-      autoHeight
-    />,
+    <MemoryRouter>
+      <DataGrid
+        rows={[row]}
+        columns={makePublicationColumns()}
+        getRowId={r => r.publicationId}
+        autoHeight
+      />,
+    </MemoryRouter>,
   )
 }
 

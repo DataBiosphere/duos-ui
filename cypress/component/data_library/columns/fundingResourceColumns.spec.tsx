@@ -6,6 +6,7 @@
  * inspects the rendered HTML to verify the column behaviour.
  */
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeFundingResourceColumns } from 'src/components/data_library/columns/fundingResourceColumns'
 import { makeFundingResourceRow } from '../../test-utils'
@@ -13,13 +14,15 @@ import { makeFundingResourceRow } from '../../test-utils'
 const renderGrid = (overrides = {}) => {
   const row = makeFundingResourceRow(overrides)
   cy.mount(
-    <DataGrid
-      rows={[row]}
-      columns={makeFundingResourceColumns()}
-      getRowId={r => r.fundingId}
-      autoHeight
-      sx={{ width: 1200 }} // Ensures grid is wide enough for all columns
-    />,
+    <MemoryRouter>
+      <DataGrid
+        rows={[row]}
+        columns={makeFundingResourceColumns()}
+        getRowId={r => r.fundingId}
+        autoHeight
+        sx={{ width: 1200 }} // Ensures grid is wide enough for all columns
+      />,
+    </MemoryRouter>,
   )
 }
 
@@ -179,13 +182,15 @@ describe('makeFundingResourceColumns — column structure', () => {
 describe('makeFundingResourceColumns — accessibility', () => {
   it('renders headers with proper labels', () => {
     cy.mount(
-      <DataGrid
-        rows={[makeFundingResourceRow()]}
-        columns={makeFundingResourceColumns()}
-        getRowId={r => r.fundingId}
-        autoHeight
-        sx={{ width: 1200 }} // Ensures grid is wide enough for all columns
-      />,
+      <MemoryRouter>
+        <DataGrid
+          rows={[makeFundingResourceRow()]}
+          columns={makeFundingResourceColumns()}
+          getRowId={r => r.fundingId}
+          autoHeight
+          sx={{ width: 1200 }} // Ensures grid is wide enough for all columns
+        />,
+      </MemoryRouter>,
     )
     cy.contains('Study Name').should('exist')
     cy.contains('Funding Resource ID').should('exist')
