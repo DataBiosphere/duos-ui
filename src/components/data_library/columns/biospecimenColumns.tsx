@@ -3,15 +3,16 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Box, Link } from '@mui/material'
 import Tooltip from '@mui/material/Tooltip'
 import { BiospecimenAsset } from 'src/types/library'
+import { Link as RouterLink } from 'react-router-dom'
 
-export const makeBiospecimenColumns = (): GridColDef<BiospecimenAsset>[] => [
+export const makeBiospecimenColumns = (selectedMenuTab?: number): GridColDef<BiospecimenAsset>[] => [
   {
     field: 'studyName',
     headerName: 'Study Name',
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link href={`/studies/${params.row.studyId}`} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
         {params.value}
       </Link>
     ),

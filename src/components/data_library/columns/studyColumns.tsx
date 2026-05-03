@@ -2,18 +2,19 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Tooltip, Box } from '@mui/material'
 import { StudyAggregation } from 'src/types/library'
+import { Link as RouterLink } from 'react-router-dom'
 
 /**
  * Column definitions for study view
  */
-export const makeStudyColumns = (): GridColDef<StudyAggregation>[] => [
+export const makeStudyColumns = (selectedMenuTab?: number): GridColDef<StudyAggregation>[] => [
   {
     field: 'studyName',
     headerName: 'Study Name',
     flex: 1.5,
     minWidth: 200,
     renderCell: params => (
-      <Link href={`/studies/${params.row.studyId}`} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
         {params.value}
       </Link>
     ),

@@ -108,6 +108,6 @@ export const datasetAsset: AssetDefinition = {
   },
 
   makeColumns(props?: ColumnsProps): GridColDef[] {
-    return makeDatasetColumns(props?.exportableDatasets, props?.radarEnabledDatasetIds) as GridColDef[]
+    return makeDatasetColumns(props?.exportableDatasets, props?.radarEnabledDatasetIds, props?.selectedMenuTab) as GridColDef[]
   },
 }

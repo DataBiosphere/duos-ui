@@ -117,7 +117,7 @@ export const modelAsset: AssetDefinition = {
     return []
   },
 
-  makeColumns(_props?: ColumnsProps): GridColDef[] {
-    return makeModelColumns() as GridColDef[]
+  makeColumns(props?: ColumnsProps): GridColDef[] {
+    return makeModelColumns(props?.selectedMenuTab) as GridColDef[]
   },
 }

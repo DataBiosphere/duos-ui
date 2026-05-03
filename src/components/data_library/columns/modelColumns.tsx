@@ -2,11 +2,12 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { ModelAsset } from 'src/types/library'
+import { Link as RouterLink } from 'react-router-dom'
 
 /**
  * Column definitions for AI model view
  */
-export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
+export const makeModelColumns = (selectedMenuTab?: number): GridColDef<ModelAsset>[] => [
   {
     field: 'name',
     headerName: 'Model Name',
@@ -35,7 +36,7 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link href={`/studies/${params.row.studyId}`} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
         {params.value}
       </Link>
     ),

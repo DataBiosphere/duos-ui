@@ -111,7 +111,7 @@ export const workspaceAsset: AssetDefinition = {
     return []
   },
 
-  makeColumns(_props?: ColumnsProps): GridColDef[] {
-    return makeWorkspaceColumns() as GridColDef[]
+  makeColumns(props?: ColumnsProps): GridColDef[] {
+    return makeWorkspaceColumns(props?.selectedMenuTab) as GridColDef[]
   },
 }

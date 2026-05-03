@@ -143,7 +143,7 @@ export const studyAsset: AssetDefinition = {
       .map(study => (study as StudyAggregation).studyId)
   },
 
-  makeColumns(_props?: ColumnsProps): GridColDef[] {
-    return makeStudyColumns() as GridColDef[]
+  makeColumns(props?: ColumnsProps): GridColDef[] {
+    return makeStudyColumns(props?.selectedMenuTab) as GridColDef[]
   },
 }

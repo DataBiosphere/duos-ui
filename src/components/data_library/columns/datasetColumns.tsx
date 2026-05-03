@@ -5,6 +5,7 @@ import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import BoltIcon from '@mui/icons-material/Bolt'
+import { Link as RouterLink } from 'react-router-dom'
 
 /**
  * Column definitions for dataset view
@@ -12,6 +13,7 @@ import BoltIcon from '@mui/icons-material/Bolt'
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
+  selectedMenuTab?: number,
 ): GridColDef<DatasetTerm>[] => [
   {
     field: 'datasetName',
@@ -19,7 +21,7 @@ export const makeDatasetColumns = (
     flex: 1.5,
     minWidth: 200,
     renderCell: params => (
-      <Link href={`/dataset/${params.row.datasetIdentifier}`} underline="hover">
+      <Link component={RouterLink} to={`/dataset/${params.row.datasetIdentifier}`} state={{ selectedMenuTab }} underline="hover">
         {params.value}
       </Link>
     ),
@@ -31,7 +33,7 @@ export const makeDatasetColumns = (
     minWidth: 150,
     valueGetter: (_value, row) => row.study?.studyName || '',
     renderCell: params => (
-      <Link href={`/studies/${params.row.study?.studyId}`} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.study?.studyId}`} state={{ selectedMenuTab }} underline="hover">
         {params.value}
       </Link>
     ),

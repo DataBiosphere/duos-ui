@@ -2,11 +2,12 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { PresentationAsset } from 'src/types/library'
+import { Link as RouterLink } from 'react-router-dom'
 
 /**
  * Column definitions for the Presentations view in the Data Library.
  */
-export const makePresentationColumns = (): GridColDef<PresentationAsset>[] => [
+export const makePresentationColumns = (selectedMenuTab?: number): GridColDef<PresentationAsset>[] => [
   {
     field: 'title',
     headerName: 'Title',
@@ -42,7 +43,7 @@ export const makePresentationColumns = (): GridColDef<PresentationAsset>[] => [
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link href={`/studies/${params.row.studyId}`} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} state={{ selectedMenuTab }} underline="hover">
         {params.value}
       </Link>
     ),

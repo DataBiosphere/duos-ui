@@ -123,7 +123,7 @@ export const clinicalTrialAsset: AssetDefinition = {
     return []
   },
 
-  makeColumns(_props?: ColumnsProps): GridColDef[] {
-    return makeClinicalTrialColumns() as GridColDef[]
+  makeColumns(props?: ColumnsProps): GridColDef[] {
+    return makeClinicalTrialColumns(props?.selectedMenuTab) as GridColDef[]
   },
 }

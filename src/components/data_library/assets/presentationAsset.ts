@@ -116,7 +116,7 @@ export const presentationAsset: AssetDefinition = {
     return []
   },
 
-  makeColumns(_props?: ColumnsProps): GridColDef[] {
-    return makePresentationColumns() as GridColDef[]
+  makeColumns(props?: ColumnsProps): GridColDef[] {
+    return makePresentationColumns(props?.selectedMenuTab) as GridColDef[]
   },
 }
