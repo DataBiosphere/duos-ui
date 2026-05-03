@@ -1,9 +1,10 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { styles } from '../../utils/DarCollectionUtils'
 
 export default function DarCollectionAdminReviewLink(props) {
   const { darCollectionId, darCode } = props
+  const location = useLocation()
   return (
     <NavLink
       style={{
@@ -12,6 +13,7 @@ export default function DarCollectionAdminReviewLink(props) {
         fontWeight: 600,
       }}
       to={`/admin_review_collection/${darCollectionId}`}
+      state={{ selectedMenuTab: location.state?.selectedMenuTab }}
       id={`/collection-review-${darCollectionId}`}
     >
       {darCode}

@@ -3,7 +3,7 @@ import TableIconButton from 'src/components/TableIconButton'
 import { Styles, Theme } from 'src/libs/theme'
 import { Block, Delete } from '@mui/icons-material'
 import SimpleButton from 'src/components/SimpleButton'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { includes, toLower } from 'lodash'
 import './dar_collection_table.css'
 
@@ -28,7 +28,8 @@ export default function Actions(props) {
   const collectionId = collection.darCollectionId
   const uniqueId = (collectionId ? collectionId : collection.referenceIds[0])
   const navigate = useNavigate()
-
+  const location = useLocation()
+  const navigateWithState = path => navigate(path, { state: { selectedMenuTab: location.state?.selectedMenuTab } })
   const openButtonAttributes = {
     keyProp: `${consoleType}-open-${uniqueId}`,
     label: includes(['complete', 'canceled'], toLower(status)) ? 'Re-Open' : 'Open',
@@ -97,7 +98,7 @@ export default function Actions(props) {
   const reviewButtonAttributes = {
     keyProp: `${consoleType}-review-${uniqueId}`,
     label: 'Review',
-    onClick: () => navigate(`/dar_application_review/${collectionId}`),
+    onClick: () => navigateWithState(`/dar_application_review/${collectionId}`),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -116,7 +117,7 @@ export default function Actions(props) {
   const reviewCloseoutButtonAttributes = {
     keyProp: `${consoleType}-review-closeout-${uniqueId}`,
     label: 'Review Closeout',
-    onClick: () => navigate(`/dar_application_review/${collectionId}`),
+    onClick: () => navigateWithState(`/dar_application_review/${collectionId}`),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -144,7 +145,7 @@ export default function Actions(props) {
 
   const resumeButtonAttributes = {
     keyProp: `${consoleType}-resume-${uniqueId}`,
-    onClick: () => navigate(`/dar_application/${uniqueId}`),
+    onClick: () => navigateWithState(`/dar_application/${uniqueId}`),
     label: 'Resume',
     baseColor: Theme.palette.secondary,
     fontColor: 'white',
@@ -192,7 +193,7 @@ export default function Actions(props) {
 
   const createProgressReportButtonAttributes = {
     keyProp: `${consoleType}-create-progress-report-${uniqueId}`,
-    onClick: () => { navigate(`/progress_report_application/${uniqueId}`) },
+    onClick: () => { navigateWithState(`/progress_report_application/${uniqueId}`) },
     label: 'Update',
     baseColor: 'white',
     fontColor: Theme.palette.secondary,

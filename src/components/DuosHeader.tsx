@@ -279,12 +279,12 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   // returns true if the current page the app is on is a part of this tab
   const isValidTab = (tab: Tab): boolean => {
-    if (tab.link === location.pathname || location.pathname.includes(tab.search || '')) {
+    if (tab.link === location.pathname || (tab.search && location.pathname.includes(tab.search))) {
       return true
     }
     if (tab.children) {
       return tab.children.some((subtab: SubTab) => {
-        return subtab.link === location.pathname || location.pathname.includes(subtab.search || '')
+        return subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search))
       })
     }
     return false
@@ -294,14 +294,23 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   let initialTab: number
 
   // note: location.state.selectedMenuTab will be populated if the user navigated
-  // to the current page by clicking on a tab from the nav bar.
+  // to the current page by clicking on a tab from the nav bar, or from a detail
+  // page that forwards navigation state (e.g. the DAR review page).
 
   // populate initialTab based on state (if valid) or by manually searching through all tabs.
-  if (location?.state?.selectedMenuTab && tabs.length > location.state.selectedMenuTab && isValidTab(tabs[location.state.selectedMenuTab])) {
-    initialTab = location.state.selectedMenuTab
+  const stateTab = location?.state?.selectedMenuTab
+  if (stateTab != null && tabs.length > stateTab && isValidTab(tabs[stateTab])) {
+    // State points to a tab that owns this URL – use it (also handles selectedMenuTab === 0).
+    initialTab = stateTab
   }
   else {
     initialTab = tabs.findIndex(isValidTab)
+  }
+
+  // If URL doesn't match any tab's routes (e.g. a detail page) but we have a
+  // forwarded selectedMenuTab in state, honour it so the parent tab stays highlighted.
+  if (initialTab === -1 && stateTab != null && tabs.length > stateTab) {
+    initialTab = stateTab
   }
 
   // populate initialSubTab
@@ -316,7 +325,8 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     )
   }
 
-  if (initialTab === -1) {
+  // Final fallback: if still unresolved, default to the first available tab.
+  if (initialTab === -1 && tabs.length > 0) {
     initialTab = 0
   }
 
