@@ -138,5 +138,29 @@ describe('DuosHeader', () => {
         .should('be.visible')
         .should('have.class', 'Mui-selected')
     })
+
+    it('preserves the active tab when navigating to a detail page with forwarded state', () => {
+      // Simulate arriving at a DAR review URL with selectedMenuTab forwarded in state.
+      // The URL itself doesn't match any tab's configured routes, so the tab must be
+      // determined from the navigation state rather than the URL.
+      cy.viewport(1280, 720)
+      cy.intercept('GET', '**/api/notifications/banners', []).as('getBanners')
+      cy.stub(StorageModule.Storage, 'userIsLogged').returns(true)
+      cy.stub(StorageModule.Storage, 'getCurrentUser').returns(mockUser)
+
+      // The researcher console is index 0 for a plain researcher user.
+      // Pass that index as state to simulate the nav state forwarded by Actions.jsx.
+      cy.mount(
+        <MemoryRouter initialEntries={[{ pathname: '/dar_application_review/999', state: { selectedMenuTab: 0 } }]}>
+          <Routes>
+            <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      cy.contains('Researcher Console')
+        .should('be.visible')
+        .should('have.class', 'Mui-selected')
+    })
   })
 })
