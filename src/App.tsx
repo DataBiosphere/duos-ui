@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
+import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import 'src/App.css'
 import { muiThemeFix } from 'src/libs/muiThemeFix'
@@ -104,6 +105,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={muiThemeFix}>
+        <NavigationStateProvider>
         <div className="body">
           <div className="wrap">
             <div className="main">
@@ -114,6 +116,7 @@ function App() {
           </div>
           <DuosFooter />
         </div>
+        </NavigationStateProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

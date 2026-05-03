@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import DuosHeader from 'src/components/DuosHeader'
 import { DuosUser } from 'src/types/model'
 import * as StorageModule from 'src/libs/storage'
+import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 
 const mockUser: DuosUser = {
   createDate: new Date(),
@@ -36,9 +37,11 @@ const mountHeader = (path: string, user?: DuosUser) => {
 
   cy.mount(
     <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
-      </Routes>
+      <NavigationStateProvider>
+        <Routes>
+          <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
+        </Routes>
+      </NavigationStateProvider>
     </MemoryRouter>,
   )
 }
