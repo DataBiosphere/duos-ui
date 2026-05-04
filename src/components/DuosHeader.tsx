@@ -293,19 +293,18 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   // Prefer a direct top-level match over a child-only match.
   // This prevents e.g. Admin Console (which has /datalibrary as a child) from winning
   // over Researcher Console (whose own link IS /datalibrary).
-  const urlDerivedTab = (() => {
-    const direct = tabs.findIndex(isDirectTabMatch)
-    return direct !== -1 ? direct : tabs.findIndex(isChildTabMatch)
-  })()
+  const directTabMatch = tabs.findIndex(isDirectTabMatch)
+  const urlDerivedTab = directTabMatch >= 0 ? directTabMatch : tabs.findIndex(isChildTabMatch)
 
   // NavigationTabsComponent always sets location.state.selectedMenuTab when a tab is clicked.
   // Honour that so clicking e.g. "Researcher Console" always wins, even when the destination
   // URL is also reachable via another tab's children.
   const stateTab: number | undefined = location?.state?.selectedMenuTab
 
-  const urlMatchedTab = (stateTab != null && tabs.length > stateTab && (isDirectTabMatch(tabs[stateTab]) || isChildTabMatch(tabs[stateTab])))
-    ? stateTab
-    : urlDerivedTab
+  let urlMatchedTab = urlDerivedTab
+  if (stateTab != null && tabs.length > stateTab && (isDirectTabMatch(tabs[stateTab]) || isChildTabMatch(tabs[stateTab]))) {
+    urlMatchedTab = stateTab
+  }
 
   useEffect(() => {
     if (urlMatchedTab !== -1) {
