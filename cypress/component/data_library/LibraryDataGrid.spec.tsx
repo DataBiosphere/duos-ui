@@ -1,4 +1,5 @@
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { LibraryDataGrid } from 'src/components/data_library/LibraryDataGrid'
 import { AssetType, ExportableDatasets, SortOrder, StudyAggregation } from 'src/types/library'
 import { makeDatasetTerm } from '../test-utils'
@@ -57,12 +58,15 @@ const datasets = [
 ]
 
 describe('LibraryDataGrid', () => {
+  const mountGrid = (element: React.ReactElement): Cypress.Chainable =>
+    cy.mount(<MemoryRouter>{element}</MemoryRouter>)
+
   beforeEach(() => {
     cy.viewport(1200, 800)
   })
 
   it('renders study data correctly', () => {
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.STUDIES}
         data={studies}
@@ -88,7 +92,7 @@ describe('LibraryDataGrid', () => {
   })
 
   it('renders dataset data correctly', () => {
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.DATASETS}
         data={datasets}
@@ -121,7 +125,7 @@ describe('LibraryDataGrid', () => {
 
   it('handles row selection for datasets', () => {
     const onSelectionChange = cy.stub().as('onSelectionChange')
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.DATASETS}
         data={datasets}
@@ -142,7 +146,7 @@ describe('LibraryDataGrid', () => {
 
   it('handles row selection for studies (mapping to dataset IDs)', () => {
     const onSelectionChange = cy.stub().as('onSelectionChange')
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.STUDIES}
         data={studies}
@@ -162,7 +166,7 @@ describe('LibraryDataGrid', () => {
   })
 
   it('renders loading state', () => {
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.STUDIES}
         data={[]}
@@ -181,7 +185,7 @@ describe('LibraryDataGrid', () => {
   })
 
   it('renders empty state when no data exists', () => {
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.STUDIES}
         data={[]}
@@ -201,7 +205,7 @@ describe('LibraryDataGrid', () => {
 
   it('calls onPaginationChange when page changes', () => {
     const onPaginationChange = cy.stub().as('onPaginationChange')
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.STUDIES}
         data={studies}
@@ -225,7 +229,7 @@ describe('LibraryDataGrid', () => {
 
   it('calls onSortChange when header is clicked', () => {
     const onSortChange = cy.stub().as('onSortChange')
-    cy.mount(
+    mountGrid(
       <LibraryDataGrid
         assetType={AssetType.STUDIES}
         data={studies}
@@ -276,7 +280,7 @@ describe('LibraryDataGrid', () => {
     }
 
     it('renders an Actions column header when exportableDatasets has entries', () => {
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}
           data={[exportableDataset]}
@@ -296,7 +300,7 @@ describe('LibraryDataGrid', () => {
     })
 
     it('renders an Export link for a dataset with matching exportable snapshots', () => {
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}
           data={[exportableDataset]}
@@ -318,7 +322,7 @@ describe('LibraryDataGrid', () => {
     })
 
     it('does not render an Export link for a dataset with no matching snapshots', () => {
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}
           data={[nonExportableDataset]}
@@ -338,7 +342,7 @@ describe('LibraryDataGrid', () => {
     })
 
     it('renders Export links only for datasets that have matching snapshots when multiple datasets are shown', () => {
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}
           data={[exportableDataset, nonExportableDataset]}
@@ -360,7 +364,7 @@ describe('LibraryDataGrid', () => {
     })
 
     it('does not render Export links when exportableDatasets is not provided (default)', () => {
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}
           data={[exportableDataset]}
@@ -379,7 +383,7 @@ describe('LibraryDataGrid', () => {
     })
 
     it('does not render Export links for the Studies grid even if exportableDatasets is provided', () => {
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.STUDIES}
           data={studies}
@@ -402,7 +406,7 @@ describe('LibraryDataGrid', () => {
   describe('radarEnabledDatasetIds prop', () => {
     it('shows Bolt icon for radar enabled datasets', () => {
       const radarEnabledDatasetIds = new Set([101])
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}
           data={datasets}
@@ -423,7 +427,7 @@ describe('LibraryDataGrid', () => {
     })
 
     it('does not show Bolt icon when radarEnabledDatasetIds is empty', () => {
-      cy.mount(
+      mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}
           data={datasets}

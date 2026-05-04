@@ -1,4 +1,5 @@
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { makeDatasetTerm } from '../../test-utils'
@@ -32,12 +33,14 @@ describe('datasetColumns — Access Management chip', () => {
   const renderGrid = (accessManagement: string) => {
     const row = makeDatasetTerm({ datasetId: 1, accessManagement })
     cy.mount(
-      <DataGrid
-        rows={[row]}
-        columns={makeDatasetColumns()}
-        getRowId={r => r.datasetId}
-        autoHeight
-      />,
+      <MemoryRouter>
+        <DataGrid
+          rows={[row]}
+          columns={makeDatasetColumns()}
+          getRowId={r => r.datasetId}
+          autoHeight
+        />,
+      </MemoryRouter>,
     )
   }
 
@@ -73,12 +76,14 @@ describe('datasetColumns — Access Management chip', () => {
     const radarEnabledDatasetIds = new Set([1])
     const row = makeDatasetTerm({ datasetId: 1, accessManagement: 'controlled' })
     cy.mount(
-      <DataGrid
-        rows={[row]}
-        columns={makeDatasetColumns({}, radarEnabledDatasetIds)}
-        getRowId={r => r.datasetId}
-        autoHeight
-      />,
+      <MemoryRouter>
+        <DataGrid
+          rows={[row]}
+          columns={makeDatasetColumns({}, radarEnabledDatasetIds)}
+          getRowId={r => r.datasetId}
+          autoHeight
+        />,
+      </MemoryRouter>,
     )
     cy.get('svg[data-testid="BoltIcon"]').should('exist')
   })

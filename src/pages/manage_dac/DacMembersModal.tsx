@@ -1,8 +1,15 @@
 import React from 'react'
-import { BaseModal } from '../../components/BaseModal'
-import { DacUsers } from './DacUsers'
+import { BaseModal } from 'src/components/BaseModal'
+import { DacUsers } from 'src/pages/manage_dac/DacUsers'
+import { DacObject } from 'src/types/model'
 
-export const DacMembersModal = ({ showModal, onCloseRequest, dac }) => {
+export interface DacMembersModalProps {
+  showModal: boolean
+  onCloseRequest: () => void
+  dac: DacObject
+}
+
+export const DacMembersModal = ({ showModal, onCloseRequest, dac }: DacMembersModalProps) => {
   return (
     <BaseModal
       id="dacMembersModal"

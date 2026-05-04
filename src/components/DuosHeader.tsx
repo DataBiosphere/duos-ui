@@ -17,6 +17,7 @@ import './DuosHeader.css'
 import { Notification } from './Notification'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { DuosUser } from 'src/types/model'
+import { useNavigationState } from 'src/contexts/NavigationStateContext'
 
 interface SubTab {
   label: string
@@ -164,6 +165,8 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     showProfileLinks: false,
   })
 
+  const { activeTab, setActiveTab } = useNavigationState()
+
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
@@ -277,31 +280,47 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   const tabs = headerTabsConfig.filter(data => data.isRendered(currentUser))
 
-  // returns true if the current page the app is on is a part of this tab
-  const isValidTab = (tab: Tab): boolean => {
-    if (tab.link === location.pathname || location.pathname.includes(tab.search || '')) {
-      return true
-    }
-    if (tab.children) {
-      return tab.children.some((subtab: SubTab) => {
-        return subtab.link === location.pathname || location.pathname.includes(subtab.search || '')
-      })
-    }
-    return false
+  // returns true if the tab's own link/search matches the current URL (not via children)
+  const isDirectTabMatch = (tab: Tab): boolean =>
+    tab.link === location.pathname || !!(tab.search && location.pathname.includes(tab.search))
+
+  // returns true if any child of this tab matches the current URL
+  const isChildTabMatch = (tab: Tab): boolean =>
+    tab.children?.some(subtab =>
+      subtab.link === location.pathname || !!(subtab.search && location.pathname.includes(subtab.search)),
+    ) ?? false
+
+  // Prefer a direct top-level match over a child-only match.
+  // This prevents e.g. Admin Console (which has /datalibrary as a child) from winning
+  // over Researcher Console (whose own link IS /datalibrary).
+  const directTabMatch = tabs.findIndex(isDirectTabMatch)
+  const urlDerivedTab = directTabMatch >= 0 ? directTabMatch : tabs.findIndex(isChildTabMatch)
+
+  // NavigationTabsComponent always sets location.state.selectedMenuTab when a tab is clicked.
+  // Honour that so clicking e.g. "Researcher Console" always wins, even when the destination
+  // URL is also reachable via another tab's children.
+  const stateTab: number | undefined = location?.state?.selectedMenuTab
+
+  let urlMatchedTab = urlDerivedTab
+  if (stateTab != null && tabs.length > stateTab && (isDirectTabMatch(tabs[stateTab]) || isChildTabMatch(tabs[stateTab]))) {
+    urlMatchedTab = stateTab
   }
+
+  useEffect(() => {
+    if (urlMatchedTab !== -1) {
+      setActiveTab(urlMatchedTab)
+    }
+  }, [urlMatchedTab, setActiveTab])
 
   let initialSubTab: number = -1
-  let initialTab: number
 
-  // note: location.state.selectedMenuTab will be populated if the user navigated
-  // to the current page by clicking on a tab from the nav bar.
-
-  // populate initialTab based on state (if valid) or by manually searching through all tabs.
-  if (location?.state?.selectedMenuTab && tabs.length > location.state.selectedMenuTab && isValidTab(tabs[location.state.selectedMenuTab])) {
-    initialTab = location.state.selectedMenuTab
-  }
-  else {
-    initialTab = tabs.findIndex(isValidTab)
+  // populate initialTab:
+  //   1. URL match (with state from tab click taking priority over findIndex)
+  //   2. Context fallback for detail pages whose URL doesn't appear in any tab config
+  //   3. First available tab as last resort
+  let initialTab = urlMatchedTab
+  if (initialTab === -1 && activeTab != null && tabs.length > activeTab) {
+    initialTab = activeTab
   }
 
   // populate initialSubTab
@@ -316,7 +335,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     )
   }
 
-  if (initialTab === -1) {
+  if (initialTab === -1 && tabs.length > 0) {
     initialTab = 0
   }
 

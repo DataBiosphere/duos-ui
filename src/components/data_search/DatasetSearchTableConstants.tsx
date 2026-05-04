@@ -2,6 +2,7 @@ import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { groupBy, intersection, without, xor } from 'lodash'
 import { Checkbox, Link } from '@mui/material'
 import * as React from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import { OverflowTooltip } from 'src/components/Tooltips'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
@@ -131,7 +132,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       cellStyle: makeHeaderStyle(studyCellWidths.studyName),
       cellDataFn: datasets => ({
         data: (
-          <Link key={datasets[0].study.studyId} id="link_study" href={`/studies/${datasets[0].study.studyId}`}>
+          <Link key={datasets[0].study.studyId} id="link_study" component={RouterLink} to={`/studies/${datasets[0].study.studyId}`}>
             {trimNewlineCharacters(datasets[0].study.studyName)}
           </Link>
         ),
@@ -328,7 +329,8 @@ export const makeDatasetTableHeader = (
             <Link
               key={dataset.datasetId}
               id={`${dataset.datasetId}-link-dataset-name`}
-              href={`/dataset/${dataset.datasetIdentifier}`}
+              component={RouterLink}
+              to={`/dataset/${dataset.datasetIdentifier}`}
             >
               {trimNewlineCharacters(dataset.datasetName)}
             </Link>
@@ -353,7 +355,8 @@ export const makeDatasetTableHeader = (
             <Link
               key={dataset.study.studyId}
               id={`${dataset.datasetId}-link-study-name`}
-              href={`/studies/${dataset.study.studyId}`}
+              component={RouterLink}
+              to={`/studies/${dataset.study.studyId}`}
             >
               {trimNewlineCharacters(dataset.study.studyName)}
             </Link>
@@ -373,7 +376,8 @@ export const makeDatasetTableHeader = (
         data: (
           <Link
             key={dataset.datasetId}
-            href={`/dataset/${dataset.datasetIdentifier}`}
+            component={RouterLink}
+            to={`/dataset/${dataset.datasetIdentifier}`}
           >
             {dataset.datasetIdentifier}
           </Link>

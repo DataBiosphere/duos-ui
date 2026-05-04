@@ -4,7 +4,7 @@ import { checkEnv } from 'src/utils/EnvironmentUtils'
 import NotFound from 'src/pages/NotFound'
 
 interface EnvRouteProps {
-  readonly env: Array<string>
+  readonly env: readonly string[]
 }
 
 const EnvRoute = ({ env }: EnvRouteProps) => {

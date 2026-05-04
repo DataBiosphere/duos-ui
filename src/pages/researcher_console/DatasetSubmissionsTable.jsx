@@ -114,7 +114,8 @@ export default function DatasetSubmissionsTable(props) {
         : (
             <div>
               <Button
-                href={editLink}
+                component={Link}
+                to={editLink}
                 sx={{
                   fontSize: '1.25rem',
                   border: '1px solid #0948B7',

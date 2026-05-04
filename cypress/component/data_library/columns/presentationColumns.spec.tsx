@@ -6,6 +6,7 @@
  * rendered HTML to verify column behaviour.
  */
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makePresentationColumns } from 'src/components/data_library/columns/presentationColumns'
 import { makePresentationRow } from '../../test-utils'
@@ -13,12 +14,14 @@ import { makePresentationRow } from '../../test-utils'
 const renderGrid = (overrides = {}) => {
   const row = makePresentationRow(overrides)
   cy.mount(
-    <DataGrid
-      rows={[row]}
-      columns={makePresentationColumns()}
-      getRowId={r => r.presentationId}
-      autoHeight
-    />,
+    <MemoryRouter>
+      <DataGrid
+        rows={[row]}
+        columns={makePresentationColumns()}
+        getRowId={r => r.presentationId}
+        autoHeight
+      />,
+    </MemoryRouter>,
   )
 }
 
