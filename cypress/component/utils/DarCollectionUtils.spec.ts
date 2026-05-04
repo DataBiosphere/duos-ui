@@ -17,27 +17,58 @@ import {
 } from 'src/utils/DarCollectionUtils'
 import { Collections } from 'src/libs/ajax/Collections'
 import { formatDate, Notifications } from 'src/libs/utils'
-import { DarCollectionSummary, Vote } from 'src/types/model'
+import { DarCollectionSummary, Election, Vote } from 'src/types/model'
 
 // Helper to cast partial bucket objects for tests
-const asBucket = (partial: object): VoteBucket => partial as unknown as VoteBucket
-const asCollections = (partial: object[]): DarCollectionSummary[] => partial as unknown as DarCollectionSummary[]
-const asCollection = (partial: object): DarCollectionSummary => partial as unknown as DarCollectionSummary
+const asBucket = (partial: object): VoteBucket => partial as VoteBucket
+const asCollections = (partial: object[]): DarCollectionSummary[] => partial as DarCollectionSummary[]
+const asCollection = (partial: object): DarCollectionSummary => partial as DarCollectionSummary
+const asVotes = (partial: Array<Partial<Vote>>): Vote[] => partial as Vote[]
 
-const expectIncludedVotes = (votes: unknown[], expected: unknown[]) => {
+type UpdateFinalVoteArgs = Parameters<typeof updateFinalVote>[0]
+type UpdateFinalVoteBuckets = UpdateFinalVoteArgs['dataUseBuckets']
+
+const asUpdateFinalVoteBuckets = (partial: object[]): UpdateFinalVoteBuckets => partial as UpdateFinalVoteBuckets
+
+const makeElection = ({
+  electionId,
+  electionType,
+  status,
+  votes,
+}: {
+  electionId: number
+  electionType: string
+  status: string
+  votes: Record<number, Vote>
+}): Election => ({
+  electionId,
+  electionType,
+  status,
+  votes,
+  createDate: 0,
+  lastUpdate: 0,
+  referenceId: `ref-${electionId}`,
+  datasetId: 0,
+  displayId: `display-${electionId}`,
+  dulName: `dul-${electionId}`,
+  version: 1,
+  archived: false,
+})
+
+const expectIncludedVotes = (votes: Array<Partial<Vote>>, expected: Array<Partial<Vote>>) => {
   expected.forEach((vote) => {
     expect(votes).to.deep.include(vote)
   })
 }
 
-const expectExcludedVotes = (votes: unknown[], unexpected: unknown[]) => {
+const expectExcludedVotes = (votes: Array<Partial<Vote>>, unexpected: Array<Partial<Vote>>) => {
   unexpected.forEach((vote) => {
     expect(votes).to.not.deep.include(vote)
   })
 }
 
 type DacVoteScope = 'dataAccess' | 'rp'
-type DacVoteExtractor = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean) => unknown[]
+type DacVoteExtractor = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean) => Vote[]
 type VotePayloadExpectation = {
   vote: boolean
   rationale?: string | null
@@ -182,7 +213,7 @@ type UserVoteExtractor = (
   user: { userId: number },
   isChair?: boolean,
   adminPage?: boolean,
-) => unknown[]
+) => Vote[]
 
 const runUserExtractionSuite = ({
   suiteName,
@@ -332,8 +363,8 @@ describe('extractUserRPVotesFromBucket edge cases', () => {
 
 describe('processVotesForBucket', () => {
   it('preserves output bucketing and source vote mutation for mixed RP/DataAccess elections', () => {
-    const elections = [
-      {
+    const elections: Election[] = [
+      makeElection({
         electionId: 11,
         electionType: 'RP',
         status: 'Open',
@@ -341,8 +372,8 @@ describe('processVotesForBucket', () => {
           1: { voteId: 1, userId: 1, type: 'Chairperson', electionId: 11, displayName: 'RP Chair', createDate: '100' },
           2: { voteId: 2, userId: 2, type: 'DAC', electionId: 11, displayName: 'RP Member', createDate: '101' },
         },
-      },
-      {
+      }),
+      makeElection({
         electionId: 12,
         electionType: 'DataAccess',
         status: 'Closed',
@@ -351,10 +382,10 @@ describe('processVotesForBucket', () => {
           4: { voteId: 4, userId: 4, type: 'DAC', electionId: 12, displayName: 'DA Member', createDate: '103' },
           5: { voteId: 5, userId: 5, type: 'Final', electionId: 12, displayName: 'DA Final', createDate: '104' },
         },
-      },
+      }),
     ]
 
-    const result = processVotesForBucket(elections as never)
+    const result = processVotesForBucket(elections)
 
     expect(result.rp.chairpersonVotes).to.have.lengthOf(1)
     expect(result.rp.memberVotes).to.have.lengthOf(1)
@@ -363,11 +394,11 @@ describe('processVotesForBucket', () => {
     expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
     expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
 
-    expect((elections[0].votes[1] as { electionStatus?: string }).electionStatus).to.equal('Open')
-    expect((elections[0].votes[2] as { electionStatus?: string }).electionStatus).to.equal('Open')
-    expect((elections[1].votes[3] as { electionStatus?: string }).electionStatus).to.equal('Closed')
-    expect((elections[1].votes[4] as { electionStatus?: string }).electionStatus).to.equal('Closed')
-    expect((elections[1].votes[5] as { electionStatus?: string }).electionStatus).to.equal('Closed')
+    expect(elections[0].votes[1].electionStatus).to.equal('Open')
+    expect(elections[0].votes[2].electionStatus).to.equal('Open')
+    expect(elections[1].votes[3].electionStatus).to.equal('Closed')
+    expect(elections[1].votes[4].electionStatus).to.equal('Closed')
+    expect(elections[1].votes[5].electionStatus).to.equal('Closed')
   })
 
   it('returns empty vote arrays for no elections', () => {
@@ -382,7 +413,7 @@ describe('processVotesForBucket', () => {
   })
 
   it('categorizes RP election votes correctly', () => {
-    const elections = [{
+    const elections: Election[] = [makeElection({
       electionId: 1,
       electionType: 'RP',
       status: 'Open',
@@ -390,8 +421,8 @@ describe('processVotesForBucket', () => {
         1: { voteId: 1, userId: 1, type: 'Chairperson', electionId: 1, displayName: 'Chair', createDate: '100' },
         2: { voteId: 2, userId: 2, type: 'DAC', electionId: 1, displayName: 'Member', createDate: '100' },
       },
-    }]
-    const result = processVotesForBucket(elections as never)
+    })]
+    const result = processVotesForBucket(elections)
     expect(result.rp.chairpersonVotes).to.have.lengthOf(1)
     expect(result.rp.memberVotes).to.have.lengthOf(1)
     // RP chairperson votes also go to finalVotes
@@ -402,7 +433,7 @@ describe('processVotesForBucket', () => {
   })
 
   it('categorizes data access election votes correctly', () => {
-    const elections = [{
+    const elections: Election[] = [makeElection({
       electionId: 2,
       electionType: 'DataAccess',
       status: 'Open',
@@ -411,8 +442,8 @@ describe('processVotesForBucket', () => {
         2: { voteId: 2, userId: 2, type: 'DAC', electionId: 2, displayName: 'Member', createDate: '100' },
         3: { voteId: 3, userId: 3, type: 'Final', electionId: 2, displayName: 'Final', createDate: '100' },
       },
-    }]
-    const result = processVotesForBucket(elections as never)
+    })]
+    const result = processVotesForBucket(elections)
     expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(1)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
     expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
@@ -421,54 +452,54 @@ describe('processVotesForBucket', () => {
   })
 
   it('routes radar_approve votes to radarVotes', () => {
-    const elections = [{
+    const elections: Election[] = [makeElection({
       electionId: 3,
       electionType: 'DataAccess',
       status: 'Open',
       votes: {
         1: { voteId: 1, userId: 1, type: 'RADAR_APPROVE', electionId: 3, displayName: 'Radar', createDate: '100' },
       },
-    }]
-    const result = processVotesForBucket(elections as never)
+    })]
+    const result = processVotesForBucket(elections)
     expect(result.dataAccess.radarVotes).to.have.lengthOf(1)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
     expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(0)
   })
 
   it('annotates votes with electionStatus from election', () => {
-    const elections = [{
+    const elections: Election[] = [makeElection({
       electionId: 4,
       electionType: 'DataAccess',
       status: 'Closed',
       votes: {
         1: { voteId: 1, userId: 1, type: 'DAC', electionId: 4, displayName: 'Member', createDate: '100' },
       },
-    }]
-    const result = processVotesForBucket(elections as never)
+    })]
+    const result = processVotesForBucket(elections)
     const vote = result.dataAccess.memberVotes[0]
-    expect((vote as never as { electionStatus: string }).electionStatus).to.equal('Closed')
+    expect(vote.electionStatus).to.equal('Closed')
   })
 
   it('handles multiple elections of different types', () => {
-    const elections = [
-      {
+    const elections: Election[] = [
+      makeElection({
         electionId: 1,
         electionType: 'RP',
         status: 'Open',
         votes: {
           1: { voteId: 1, userId: 1, type: 'DAC', electionId: 1, displayName: 'Member', createDate: '100' },
         },
-      },
-      {
+      }),
+      makeElection({
         electionId: 2,
         electionType: 'DataAccess',
         status: 'Open',
         votes: {
           2: { voteId: 2, userId: 2, type: 'DAC', electionId: 2, displayName: 'Member', createDate: '100' },
         },
-      },
+      }),
     ]
-    const result = processVotesForBucket(elections as never)
+    const result = processVotesForBucket(elections)
     expect(result.rp.memberVotes).to.have.lengthOf(1)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
   })
@@ -640,7 +671,7 @@ describe('collapseVotesByUser', () => {
       { userId: 3, displayName: 'Lauren', vote: true, voteId: 3 },
     ]
 
-    const collapsedVotes = collapseVotesByUser(votes as never)
+    const collapsedVotes = collapseVotesByUser(asVotes(votes))
     expect(collapsedVotes).to.have.lengthOf(3)
     expect(collapsedVotes).to.deep.include({ userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
     expect(collapsedVotes).to.deep.include({ userId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
@@ -654,7 +685,7 @@ describe('collapseVotesByUser', () => {
       { userId: 1, displayName: 'John', voteId: 3 },
     ]
 
-    const collapsedVotes = collapseVotesByUser(votes as never)
+    const collapsedVotes = collapseVotesByUser(asVotes(votes))
     expect(collapsedVotes).to.have.lengthOf(3)
     expect(collapsedVotes).to.deep.include({ userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
     expect(collapsedVotes).to.deep.include({ userId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, lastUpdated: null })
@@ -667,7 +698,7 @@ describe('collapseVotesByUser', () => {
       { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', updateDate: '30000', voteId: 2 },
     ]
 
-    const collapsedVotes = collapseVotesByUser(votes as never)
+    const collapsedVotes = collapseVotesByUser(asVotes(votes))
     expect(collapsedVotes).to.have.lengthOf(1)
     expect(collapsedVotes).to.deep.include({
       userId: 1,
@@ -684,7 +715,7 @@ describe('collapseVotesByUser', () => {
       { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '10000', updateDate: '20000', voteId: 1 },
       { userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '10000', updateDate: '30000', voteId: 2 },
     ]
-    const collapsedVotes = collapseVotesByUser(votes as never)
+    const collapsedVotes = collapseVotesByUser(asVotes(votes))
     const formattedDate = `${formatDate('20000')}\n${formatDate('30000')}\n`
 
     expect(collapsedVotes).to.have.lengthOf(1)
@@ -704,7 +735,7 @@ describe('collapseVotesByUser', () => {
       { userId: 1, displayName: 'John', vote: true, rationale: 'rationale2', createDate: '20000', voteId: 2 },
     ]
 
-    const collapsedVotes = collapseVotesByUser(votes as never)
+    const collapsedVotes = collapseVotesByUser(asVotes(votes))
     expect(collapsedVotes).to.have.lengthOf(1)
     expect(collapsedVotes).to.deep.include({
       userId: 1,
@@ -722,7 +753,7 @@ describe('collapseVotesByUser', () => {
       { userId: 1, displayName: 'John', vote: true, voteId: 2 },
     ]
 
-    const collapsedVotes = collapseVotesByUser(votes as never)
+    const collapsedVotes = collapseVotesByUser(asVotes(votes))
     expect(collapsedVotes).to.have.lengthOf(1)
     expect(collapsedVotes).to.deep.include({
       userId: 1,
@@ -745,14 +776,14 @@ describe('updateFinalVote()', () => {
     const voteIds = [1, 2, 3]
     const votePayload = { vote: true, rationale: 'test rationale' }
     const key = 'targetKey'
-    let dataUseBuckets = [asBucket({ key, votes: [{ dataAccess: {
+    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ dataAccess: {
       finalVotes: [{ voteId: 1 }, { voteId: 2 }, { voteId: 4 }],
       chairpersonVotes: [{ voteId: 3 }],
-    } }] })]
+    } }] })])
     const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
       dataUseBuckets = newBucketArray
     }
-    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets as never, setDataUseBuckets: setDataUseBuckets as never })!
+    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
 
     updatedBuckets.forEach((bucket) => {
       expectVotePayloadApplied({
@@ -769,14 +800,14 @@ describe('updateFinalVote()', () => {
     const voteIds = [1, 2, 3]
     const votePayload = { vote: false, rationale: 'false rationale' }
     const key = rpVoteKey
-    let dataUseBuckets = [asBucket({ key, votes: [{ rp: {
+    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ rp: {
       finalVotes: [{ voteId: 1 }, { voteId: 2 }, { voteId: 4 }],
       chairpersonVotes: [{ voteId: 1 }, { voteId: 2 }, { voteId: 4 }],
-    } }] })]
+    } }] })])
     const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
       dataUseBuckets = newBucketArray
     }
-    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets as never, setDataUseBuckets: setDataUseBuckets as never })!
+    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
 
     updatedBuckets.forEach((bucket) => {
       expectVotePayloadApplied({
@@ -794,7 +825,7 @@ describe('updateFinalVote()', () => {
       key: 'someKey',
       votePayload: {},
       voteIds: [1],
-      dataUseBuckets: [] as never,
+      dataUseBuckets: asUpdateFinalVoteBuckets([]),
       setDataUseBuckets: () => {},
     })
     expect(result).to.equal(undefined)
@@ -804,14 +835,14 @@ describe('updateFinalVote()', () => {
     const voteIds = [1]
     const votePayload = { vote: true, rationale: 'test' }
     const key = 'RUS VOTE' // uppercase version of rpVoteKey
-    let dataUseBuckets = [asBucket({ key: rpVoteKey, votes: [{ rp: {
+    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key: rpVoteKey, votes: [{ rp: {
       finalVotes: [{ voteId: 1 }],
       chairpersonVotes: [],
-    } }] })]
+    } }] })])
     const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
       dataUseBuckets = newBucketArray
     }
-    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets as never, setDataUseBuckets: setDataUseBuckets as never })!
+    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
 
     expect(updatedBuckets).to.have.lengthOf(1)
   })
@@ -820,10 +851,10 @@ describe('updateFinalVote()', () => {
     const voteIds = [1]
     const votePayload = { vote: false, rationale: null }
     const key = 'targetKey'
-    let dataUseBuckets = [asBucket({ key, votes: [{ dataAccess: {
+    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ dataAccess: {
       finalVotes: [{ voteId: 1, rationale: 'existing rationale' }],
       chairpersonVotes: [],
-    } }] })]
+    } }] })])
     const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
       dataUseBuckets = newBucketArray
     }
@@ -832,8 +863,8 @@ describe('updateFinalVote()', () => {
       key,
       votePayload,
       voteIds,
-      dataUseBuckets: dataUseBuckets as never,
-      setDataUseBuckets: setDataUseBuckets as never,
+      dataUseBuckets,
+      setDataUseBuckets,
     })!
 
     const votes = getBucketVotesForScope(updatedBuckets[0], 'dataAccess')
@@ -845,10 +876,10 @@ describe('updateFinalVote()', () => {
     const voteIds = [1]
     const votePayload = { vote: true }
     const key = 'targetKey'
-    let dataUseBuckets = [asBucket({ key, votes: [{ dataAccess: {
+    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ dataAccess: {
       finalVotes: [{ voteId: 1, rationale: 'existing rationale' }],
       chairpersonVotes: [],
-    } }] })]
+    } }] })])
     const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
       dataUseBuckets = newBucketArray
     }
@@ -857,8 +888,8 @@ describe('updateFinalVote()', () => {
       key,
       votePayload,
       voteIds,
-      dataUseBuckets: dataUseBuckets as never,
-      setDataUseBuckets: setDataUseBuckets as never,
+      dataUseBuckets,
+      setDataUseBuckets,
     })!
 
     const votes = getBucketVotesForScope(updatedBuckets[0], 'dataAccess')
