@@ -772,6 +772,25 @@ describe('collapseVotesByUser', () => {
 })
 
 describe('updateFinalVote()', () => {
+  const makeSingleVoteDataAccessSetup = () => {
+    const voteIds = [1]
+    const key = 'targetKey'
+    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ dataAccess: {
+      finalVotes: [{ voteId: 1, rationale: 'existing rationale' }],
+      chairpersonVotes: [],
+    } }] })])
+    const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
+      dataUseBuckets = newBucketArray
+    }
+
+    return {
+      key,
+      voteIds,
+      dataUseBuckets,
+      setDataUseBuckets,
+    }
+  }
+
   it('updates votes for the target bucket in the source collection (non-RP)', () => {
     const voteIds = [1, 2, 3]
     const votePayload = { vote: true, rationale: 'test rationale' }
@@ -848,16 +867,8 @@ describe('updateFinalVote()', () => {
   })
 
   it('clears rationale when votePayload.rationale is null', () => {
-    const voteIds = [1]
+    const { key, voteIds, dataUseBuckets, setDataUseBuckets } = makeSingleVoteDataAccessSetup()
     const votePayload = { vote: false, rationale: null }
-    const key = 'targetKey'
-    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ dataAccess: {
-      finalVotes: [{ voteId: 1, rationale: 'existing rationale' }],
-      chairpersonVotes: [],
-    } }] })])
-    const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
-      dataUseBuckets = newBucketArray
-    }
 
     const updatedBuckets = updateFinalVote({
       key,
@@ -873,16 +884,8 @@ describe('updateFinalVote()', () => {
   })
 
   it('keeps existing rationale when payload omits rationale', () => {
-    const voteIds = [1]
+    const { key, voteIds, dataUseBuckets, setDataUseBuckets } = makeSingleVoteDataAccessSetup()
     const votePayload = { vote: true }
-    const key = 'targetKey'
-    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ dataAccess: {
-      finalVotes: [{ voteId: 1, rationale: 'existing rationale' }],
-      chairpersonVotes: [],
-    } }] })])
-    const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
-      dataUseBuckets = newBucketArray
-    }
 
     const updatedBuckets = updateFinalVote({
       key,
