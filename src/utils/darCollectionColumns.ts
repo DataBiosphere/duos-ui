@@ -1,7 +1,7 @@
-import { DarCollectionTableColumnOptions, consoleTypes } from './DarCollectionUtils'
+import { DarCollectionTableColumnOptions, consoleTypes } from 'src/utils/DarCollectionUtils'
 
 // Default base columns (most consoles)
-const defaultBaseColumns = [
+const defaultBaseColumns: string[] = [
   DarCollectionTableColumnOptions.DAR_CODE,
   DarCollectionTableColumnOptions.NAME,
   DarCollectionTableColumnOptions.SUBMISSION_DATE,
@@ -14,13 +14,13 @@ const defaultBaseColumns = [
 ]
 
 // Only specify differences from the default
-const baseColumnsOverrides = {
+const baseColumnsOverrides: Record<string, string[]> = {
   [consoleTypes.ADMIN]: [DarCollectionTableColumnOptions.DAC],
   [consoleTypes.CHAIR]: [DarCollectionTableColumnOptions.DAC],
   // Add more overrides if needed for other console types
 }
 
-function getBaseColumns(consoleType) {
+function getBaseColumns(consoleType: string): string[] {
   const overrides = baseColumnsOverrides[consoleType] || []
   // Insert DAC after DAR_CODE if present in overrides
   if (overrides.includes(DarCollectionTableColumnOptions.DAC)) {
@@ -34,7 +34,12 @@ function getBaseColumns(consoleType) {
 }
 
 // Responsive breakpoints for each console type
-const breakpoints = {
+interface Breakpoint {
+  datasetCount: number
+  expiresAt: number
+}
+
+const breakpoints: Record<string, Breakpoint> = {
   [consoleTypes.ADMIN]: { datasetCount: 1450, expiresAt: 1250 },
   [consoleTypes.CHAIR]: { datasetCount: 1450, expiresAt: 1250 },
   [consoleTypes.MEMBER]: { datasetCount: 1450, expiresAt: 1250 },
@@ -42,7 +47,7 @@ const breakpoints = {
   [consoleTypes.RESEARCHER]: { datasetCount: 1200, expiresAt: 1000 },
 }
 
-export function getDarCollectionColumns(consoleType, windowWidth) {
+export function getDarCollectionColumns(consoleType: string, windowWidth: number): string[] {
   const baseColumns = getBaseColumns(consoleType)
   const { datasetCount, expiresAt } = breakpoints[consoleType] || breakpoints[consoleTypes.ADMIN]
   let columns = [...baseColumns]
