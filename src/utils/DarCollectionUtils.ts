@@ -3,10 +3,9 @@ import { Styles } from 'src/libs/theme'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DarCollectionSummary, Election, UserRoleName, Vote } from 'src/types/model'
+import { groupBy, isEmpty, isNil } from 'src/utils/NodashUtil'
 
 export const rpVoteKey = 'RUS Vote'
-
-// --- Type definitions ---
 
 interface VotesByType {
   chairpersonVotes: Vote[]
@@ -22,26 +21,6 @@ interface ProcessedVotes extends Record<string, VotesByType> {
 }
 
 type VoteArrayGroup = Partial<Record<'rp' | 'dataAccess', Partial<VotesByType>>>
-
-// --- Helper functions to replace lodash ---
-
-const isNil = (value: unknown): value is null | undefined => value === null || value === undefined
-
-const isEmpty = (value: unknown): boolean => {
-  if (isNil(value)) return true
-  if (typeof value === 'string' || Array.isArray(value)) return value.length === 0
-  if (typeof value === 'object') return Object.keys(value).length === 0
-  return false
-}
-
-const groupBy = <T>(arr: T[], keyFn: (item: T) => string): Record<string, T[]> =>
-  arr.reduce((acc: Record<string, T[]>, item) => {
-    const key = keyFn(item)
-    acc[key] = acc[key] ? [...acc[key], item] : [item]
-    return acc
-  }, {})
-
-// --- Exported functions ---
 
 // Helper function for processDataUseBuckets, essentially organizes votes in a dar's elections by type
 export const processVotesForBucket = (darElections: Election[] = []): ProcessedVotes => {
