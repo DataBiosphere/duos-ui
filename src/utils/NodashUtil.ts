@@ -1,5 +1,11 @@
 export const isNil = (value: unknown): value is null | undefined => value === null || value === undefined
 
+export const isFunction = (value: unknown): value is (...args: unknown[]) => unknown => typeof value === 'function'
+
+export const isArray = (value: unknown): value is unknown[] => Array.isArray(value)
+
+export const isString = (value: unknown): value is string => typeof value === 'string'
+
 export const isEmpty = (value: unknown): boolean => {
   if (isNil(value)) return true
   if (typeof value === 'string' || Array.isArray(value)) return value.length === 0

@@ -1,6 +1,50 @@
-import { groupBy, isEmpty, isNil } from 'src/utils/NodashUtil'
+import { groupBy, isArray, isEmpty, isFunction, isNil, isString } from 'src/utils/NodashUtil'
 
 describe('NodashUtil', () => {
+  describe('isFunction', () => {
+    it('returns true for function values', () => {
+      expect(isFunction(() => true)).to.equal(true)
+      expect(isFunction(function namedFn() {
+        return false
+      })).to.equal(true)
+    })
+
+    it('returns false for non-function values', () => {
+      expect(isFunction(null)).to.equal(false)
+      expect(isFunction(undefined)).to.equal(false)
+      expect(isFunction({})).to.equal(false)
+      expect(isFunction('value')).to.equal(false)
+    })
+  })
+
+  describe('isArray', () => {
+    it('returns true for arrays', () => {
+      expect(isArray([])).to.equal(true)
+      expect(isArray([1, 2, 3])).to.equal(true)
+    })
+
+    it('returns false for non-array values', () => {
+      expect(isArray({})).to.equal(false)
+      expect(isArray('value')).to.equal(false)
+      expect(isArray(123)).to.equal(false)
+      expect(isArray(null)).to.equal(false)
+    })
+  })
+
+  describe('isString', () => {
+    it('returns true for string values', () => {
+      expect(isString('')).to.equal(true)
+      expect(isString('value')).to.equal(true)
+    })
+
+    it('returns false for non-string values', () => {
+      expect(isString(1)).to.equal(false)
+      expect(isString(false)).to.equal(false)
+      expect(isString([])).to.equal(false)
+      expect(isString(null)).to.equal(false)
+    })
+  })
+
   describe('isNil', () => {
     it('returns true for null and undefined', () => {
       expect(isNil(null)).to.equal(true)
