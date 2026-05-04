@@ -331,6 +331,45 @@ describe('extractUserRPVotesFromBucket edge cases', () => {
 })
 
 describe('processVotesForBucket', () => {
+  it('preserves output bucketing and source vote mutation for mixed RP/DataAccess elections', () => {
+    const elections = [
+      {
+        electionId: 11,
+        electionType: 'RP',
+        status: 'Open',
+        votes: {
+          1: { voteId: 1, userId: 1, type: 'Chairperson', electionId: 11, displayName: 'RP Chair', createDate: '100' },
+          2: { voteId: 2, userId: 2, type: 'DAC', electionId: 11, displayName: 'RP Member', createDate: '101' },
+        },
+      },
+      {
+        electionId: 12,
+        electionType: 'DataAccess',
+        status: 'Closed',
+        votes: {
+          3: { voteId: 3, userId: 3, type: 'Chairperson', electionId: 12, displayName: 'DA Chair', createDate: '102' },
+          4: { voteId: 4, userId: 4, type: 'DAC', electionId: 12, displayName: 'DA Member', createDate: '103' },
+          5: { voteId: 5, userId: 5, type: 'Final', electionId: 12, displayName: 'DA Final', createDate: '104' },
+        },
+      },
+    ]
+
+    const result = processVotesForBucket(elections as never)
+
+    expect(result.rp.chairpersonVotes).to.have.lengthOf(1)
+    expect(result.rp.memberVotes).to.have.lengthOf(1)
+    expect(result.rp.finalVotes).to.have.lengthOf(1)
+    expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(1)
+    expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
+    expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
+
+    expect((elections[0].votes[1] as { electionStatus?: string }).electionStatus).to.equal('Open')
+    expect((elections[0].votes[2] as { electionStatus?: string }).electionStatus).to.equal('Open')
+    expect((elections[1].votes[3] as { electionStatus?: string }).electionStatus).to.equal('Closed')
+    expect((elections[1].votes[4] as { electionStatus?: string }).electionStatus).to.equal('Closed')
+    expect((elections[1].votes[5] as { electionStatus?: string }).electionStatus).to.equal('Closed')
+  })
+
   it('returns empty vote arrays for no elections', () => {
     const result = processVotesForBucket([])
     expect(result.rp.chairpersonVotes).to.have.lengthOf(0)
@@ -408,22 +447,6 @@ describe('processVotesForBucket', () => {
     const result = processVotesForBucket(elections as never)
     const vote = result.dataAccess.memberVotes[0]
     expect((vote as never as { electionStatus: string }).electionStatus).to.equal('Closed')
-  })
-
-  it('mutates source election votes with electionStatus annotations', () => {
-    const elections = [{
-      electionId: 40,
-      electionType: 'DataAccess',
-      status: 'Closed',
-      votes: {
-        1: { voteId: 1, userId: 1, type: 'DAC', electionId: 40, displayName: 'Member', createDate: '100' },
-      },
-    }]
-
-    processVotesForBucket(elections as never)
-
-    const updatedVote = elections[0].votes[1] as { electionStatus?: string }
-    expect(updatedVote.electionStatus).to.equal('Closed')
   })
 
   it('handles multiple elections of different types', () => {
