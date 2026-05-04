@@ -6,6 +6,7 @@
  * inspects the rendered HTML to verify the column behaviour.
  */
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeWorkspaceColumns } from 'src/components/data_library/columns/workspaceColumns'
 import { makeWorkspaceRow } from '../../test-utils'
@@ -13,12 +14,14 @@ import { makeWorkspaceRow } from '../../test-utils'
 const renderGrid = (overrides = {}) => {
   const row = makeWorkspaceRow(overrides)
   cy.mount(
-    <DataGrid
-      rows={[row]}
-      columns={makeWorkspaceColumns()}
-      getRowId={r => r.workspaceId}
-      autoHeight
-    />,
+    <MemoryRouter>
+      <DataGrid
+        rows={[row]}
+        columns={makeWorkspaceColumns()}
+        getRowId={r => r.workspaceId}
+        autoHeight
+      />,
+    </MemoryRouter>,
   )
 }
 

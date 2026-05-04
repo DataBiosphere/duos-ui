@@ -6,6 +6,7 @@
  * rendered HTML to verify column behaviour.
  */
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeIntellectualPropertyColumns } from 'src/components/data_library/columns/intellectualPropertyColumns'
 import { makeIntellectualPropertyRow } from '../../test-utils'
@@ -13,12 +14,14 @@ import { makeIntellectualPropertyRow } from '../../test-utils'
 const renderGrid = (overrides = {}) => {
   const row = makeIntellectualPropertyRow(overrides)
   cy.mount(
-    <DataGrid
-      rows={[row]}
-      columns={makeIntellectualPropertyColumns()}
-      getRowId={r => r.ipId}
-      autoHeight
-    />,
+    <MemoryRouter>
+      <DataGrid
+        rows={[row]}
+        columns={makeIntellectualPropertyColumns()}
+        getRowId={r => r.ipId}
+        autoHeight
+      />,
+    </MemoryRouter>,
   )
 }
 

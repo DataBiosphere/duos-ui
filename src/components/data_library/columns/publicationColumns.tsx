@@ -1,6 +1,7 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
 import { PublicationAsset } from 'src/types/library'
 
 /**
@@ -42,7 +43,7 @@ export const makePublicationColumns = (): GridColDef<PublicationAsset>[] => [
     flex: 1,
     minWidth: 150,
     renderCell: params => (
-      <Link href={`/studies/${params.row.studyId}`} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),

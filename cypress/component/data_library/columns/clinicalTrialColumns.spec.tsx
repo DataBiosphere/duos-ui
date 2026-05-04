@@ -6,6 +6,7 @@
  * inspects the rendered HTML to verify the column behaviour.
  */
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import { makeClinicalTrialColumns } from 'src/components/data_library/columns/clinicalTrialColumns'
 import { makeClinicalTrialRow } from '../../test-utils'
@@ -13,12 +14,14 @@ import { makeClinicalTrialRow } from '../../test-utils'
 const renderGrid = (overrides = {}) => {
   const row = makeClinicalTrialRow(overrides)
   cy.mount(
-    <DataGrid
-      rows={[row]}
-      columns={makeClinicalTrialColumns()}
-      getRowId={r => r.clinicalTrialId}
-      autoHeight
-    />,
+    <MemoryRouter>
+      <DataGrid
+        rows={[row]}
+        columns={makeClinicalTrialColumns()}
+        getRowId={r => r.clinicalTrialId}
+        autoHeight
+      />,
+    </MemoryRouter>,
   )
 }
 

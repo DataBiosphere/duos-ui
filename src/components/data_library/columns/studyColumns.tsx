@@ -1,6 +1,7 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Tooltip, Box } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
 import { StudyAggregation } from 'src/types/library'
 
 /**
@@ -13,7 +14,7 @@ export const makeStudyColumns = (): GridColDef<StudyAggregation>[] => [
     flex: 1.5,
     minWidth: 200,
     renderCell: params => (
-      <Link href={`/studies/${params.row.studyId}`} underline="hover">
+      <Link component={RouterLink} to={`/studies/${params.row.studyId}`} underline="hover">
         {params.value}
       </Link>
     ),
