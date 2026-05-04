@@ -40,7 +40,7 @@ type DacVoteScope = 'dataAccess' | 'rp'
 type DacVoteExtractor = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean) => unknown[]
 type VotePayloadExpectation = {
   vote: boolean
-  rationale: string
+  rationale?: string | null
 }
 
 const getBucketVotesForScope = (bucket: VoteBucket, scope: DacVoteScope): Vote[] =>
@@ -61,7 +61,7 @@ const expectVotePayloadApplied = ({
   votes.forEach((vote) => {
     if (voteIds.includes(vote.voteId)) {
       expect(vote.vote).to.equal(votePayload.vote)
-      expect(vote.rationale).to.equal(votePayload.rationale)
+      expect(vote.rationale).to.equal(votePayload.rationale ?? undefined)
     }
     else {
       expect(vote.vote).to.equal(undefined)
@@ -814,6 +814,56 @@ describe('updateFinalVote()', () => {
     const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets as never, setDataUseBuckets: setDataUseBuckets as never })!
 
     expect(updatedBuckets).to.have.lengthOf(1)
+  })
+
+  it('clears rationale when votePayload.rationale is null', () => {
+    const voteIds = [1]
+    const votePayload = { vote: false, rationale: null }
+    const key = 'targetKey'
+    let dataUseBuckets = [asBucket({ key, votes: [{ dataAccess: {
+      finalVotes: [{ voteId: 1, rationale: 'existing rationale' }],
+      chairpersonVotes: [],
+    } }] })]
+    const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
+      dataUseBuckets = newBucketArray
+    }
+
+    const updatedBuckets = updateFinalVote({
+      key,
+      votePayload,
+      voteIds,
+      dataUseBuckets: dataUseBuckets as never,
+      setDataUseBuckets: setDataUseBuckets as never,
+    })!
+
+    const votes = getBucketVotesForScope(updatedBuckets[0], 'dataAccess')
+    expect(votes[0].vote).to.equal(false)
+    expect(votes[0].rationale).to.equal(undefined)
+  })
+
+  it('keeps existing rationale when payload omits rationale', () => {
+    const voteIds = [1]
+    const votePayload = { vote: true }
+    const key = 'targetKey'
+    let dataUseBuckets = [asBucket({ key, votes: [{ dataAccess: {
+      finalVotes: [{ voteId: 1, rationale: 'existing rationale' }],
+      chairpersonVotes: [],
+    } }] })]
+    const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
+      dataUseBuckets = newBucketArray
+    }
+
+    const updatedBuckets = updateFinalVote({
+      key,
+      votePayload,
+      voteIds,
+      dataUseBuckets: dataUseBuckets as never,
+      setDataUseBuckets: setDataUseBuckets as never,
+    })!
+
+    const votes = getBucketVotesForScope(updatedBuckets[0], 'dataAccess')
+    expect(votes[0].vote).to.equal(true)
+    expect(votes[0].rationale).to.equal('existing rationale')
   })
 })
 

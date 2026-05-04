@@ -378,7 +378,9 @@ export const updateFinalVote = ({
   votes
     .filter(vote => voteIds.includes(vote.voteId))
     .forEach((currentVote) => {
-      currentVote.rationale = votePayload.rationale
+      if ('rationale' in votePayload) {
+        currentVote.rationale = votePayload.rationale ?? undefined
+      }
       currentVote.vote = votePayload.vote
     })
   // set new bucket to trigger re-render, return clonedBuckets for debugging/testing efforts
@@ -473,11 +475,16 @@ type VoteGroup = Record<string, VotesByType>
 
 interface VotePayload {
   vote: boolean
-  rationale: string
+  rationale?: string | null
 }
 
 const isVotePayload = (value: VotePayload | Record<string, unknown>): value is VotePayload =>
-  typeof value.vote === 'boolean' && typeof value.rationale === 'string'
+  typeof value.vote === 'boolean'
+  && (
+    value.rationale === undefined
+    || value.rationale === null
+    || typeof value.rationale === 'string'
+  )
 
 interface CollapsedVoteAccumulator {
   userId: number
