@@ -1,10 +1,5 @@
-// Helper functions to replace lodash
-const isNil = (value: unknown): value is null | undefined => value === null || value === undefined
-const isFunction = (value: unknown): value is (...args: unknown[]) => unknown => typeof value === 'function'
-const isArray = (value: unknown): value is unknown[] => Array.isArray(value)
-const isString = (value: unknown): value is string => typeof value === 'string'
+import { isArray, isFunction, isNil, isString } from 'src/utils/NodashUtil'
 
-// Type definitions
 interface FormFieldType {
   requiredProps?: string[]
   optionalProps?: string[]
