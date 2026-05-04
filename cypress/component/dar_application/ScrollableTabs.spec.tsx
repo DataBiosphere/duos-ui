@@ -86,6 +86,29 @@ describe('ScrollableTabs Component - Integration Tests', () => {
     cy.get('.Mui-selected').contains('Research Purpose Statement', { timeout: 2000 }).should('exist')
   })
 
+  it('Case 2 - Scroll-driven tab update should NOT trigger a programmatic window.scrollTo (no feedback loop)', () => {
+    // Spy on window.scrollTo so we can count calls
+    cy.window().then((win) => {
+      cy.spy(win, 'scrollTo').as('scrollTo')
+    })
+
+    // Simulate the user scrolling to the second section - this should update the selected tab
+    // via the scroll handler (CASE 2), but must NOT cause a secondary window.scrollTo call
+    // (which was the feedback-loop bug: CASE 2 → onTabChange → formSelectedTabId change → CASE 1 → scrollTo)
+    cy.get('#data-access-request').then(($el) => {
+      cy.window().then((win) => {
+        win.scrollTo(0, $el[0].offsetTop)
+      })
+    })
+
+    // Wait for the debounced scroll handler and any React renders to settle
+    cy.get('.Mui-selected').contains('Data Access Request', { timeout: 2000 }).should('exist')
+
+    // window.scrollTo should have been called exactly once (our manual scroll above),
+    // not a second time as a reaction to the tab indicator update.
+    cy.get('@scrollTo').should('have.been.calledOnce')
+  })
+
   it('Case 3 - First tab selected by default and can click and select another tab', () => {
     cy.get('.Mui-selected').contains('Researcher Information').should('exist')
     cy.get('.Mui-selected').contains('Data Access Request').should('not.exist')
