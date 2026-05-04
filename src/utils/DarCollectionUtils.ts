@@ -46,6 +46,9 @@ export const processVotesForBucket = (darElections: Election[] = []): ProcessedV
       ...vote,
       electionStatus: status,
     }))
+    updatedVotes.forEach((vote) => {
+      votes[vote.voteId] = vote
+    })
     const dateSortedVotes = [...updatedVotes].sort((a, b) =>
       (a.updateDate ?? '') < (b.updateDate ?? '') ? -1 : 1,
     )

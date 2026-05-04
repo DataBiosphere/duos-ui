@@ -410,6 +410,22 @@ describe('processVotesForBucket', () => {
     expect((vote as never as { electionStatus: string }).electionStatus).to.equal('Closed')
   })
 
+  it('mutates source election votes with electionStatus annotations', () => {
+    const elections = [{
+      electionId: 40,
+      electionType: 'DataAccess',
+      status: 'Closed',
+      votes: {
+        1: { voteId: 1, userId: 1, type: 'DAC', electionId: 40, displayName: 'Member', createDate: '100' },
+      },
+    }]
+
+    processVotesForBucket(elections as never)
+
+    const updatedVote = elections[0].votes[1] as { electionStatus?: string }
+    expect(updatedVote.electionStatus).to.equal('Closed')
+  })
+
   it('handles multiple elections of different types', () => {
     const elections = [
       {
