@@ -55,11 +55,22 @@ export const ManageDac = function ManageDac() {
   }, [chairDACIds, roles])
 
   useEffect(() => {
-    const timeoutId = globalThis.setTimeout(() => {
-      void initializeDACs()
-    }, 0)
+    let isMounted = true
 
-    return () => globalThis.clearTimeout(timeoutId)
+    const loadDACs = async () => {
+      await initializeDACs()
+    }
+
+    loadDACs().catch((error) => {
+      if (isMounted) {
+        Notifications.showError({ text: 'Failed to load DACs.' })
+        console.error('Error loading DACs:', error)
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
   }, [initializeDACs])
 
   const navigate = useNavigate()

@@ -19,7 +19,7 @@ const makeUser = ({
 }): DuosUser => ({
   createDate: fixedDate,
   displayName,
-  email: `${displayName.toLowerCase().replace(/\s+/g, '.')}@example.org`,
+  email: `${displayName.toLowerCase().replaceAll(/\s+/g, '.')}@example.org`,
   emailPreference: true,
   isAdmin: roles.some(role => role.name === 'Admin'),
   isAlumni: false,
