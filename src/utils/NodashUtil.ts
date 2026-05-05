@@ -156,16 +156,23 @@ export const isEqual = (value: any, other: any): boolean => {
   return true
 }
 
-export const kebabCase = (str: string) =>
-  String(str)
-    .replaceAll(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
-    .replaceAll(/([a-z\d])([A-Z])/g, '$1-$2')
-    .replaceAll(/([a-zA-Z])(\d)/g, '$1-$2')
-    .replaceAll(/(\d)([a-zA-Z])/g, '$1-$2')
-    .replaceAll(/[\s_]+/g, '-')
-    .replaceAll(/-+/g, '-')
-    .replaceAll(/^-|-$/g, '')
-    .toLowerCase()
+export const kebabCase = (str: string): string => {
+  const result: string[] = []
+
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i]
+    const p = str.at(i - 1) ?? ''
+    const n = str.at(i + 1) ?? ''
+
+    const space = /[\s_]/.test(c)
+    const sep = space || (/[A-Z]/.test(c) && (/[a-z0-9]/.test(p) || (/[A-Z]/.test(p) && /[a-z]/.test(n)))) || (/\d/.test(c) && /[a-zA-Z]/.test(p)) || (/[a-z]/.test(c) && /\d/.test(p))
+
+    if (sep && (result.length === 0 || result.at(-1) !== '-')) result.push('-')
+    if (!space) result.push(c.toLowerCase())
+  }
+
+  return result.join('').replaceAll(/-+/g, '-').replaceAll(/^-|-$/g, '')
+}
 
 export const matches = (source: any) => (object: any) => isEqual(object, source) || (typeof source === 'object' && Object.keys(source).every(key => isEqual(object?.[key], source[key])))
 
