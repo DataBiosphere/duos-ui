@@ -68,3 +68,26 @@
   letter-spacing: 0;
   line-height: 24px;
 }
+
+.dataset-daa-relationship-card {
+  margin-top: 16px;
+}
+
+.dataset-daa-relationship-card table {
+  margin-bottom: 0;
+}
+
+.dataset-daa-relationship-card .button-link {
+  background: none;
+  border: none;
+  color: #2FA4E7;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.dataset-daa-relationship-card .button-link:disabled {
+  color: #777777;
+  cursor: default;
+  text-decoration: none;
+}

@@ -4,13 +4,13 @@ import { CombinedDataAccessRequest, Dataset, DuosUser, FileStorageObject } from 
 import { History, Location, Action } from 'history'
 import { Storage } from 'src/libs/storage'
 import { DAA } from 'src/libs/ajax/DAA'
-import { DAAUtils } from 'src/utils/DAAUtils'
+import { DAR } from 'src/libs/ajax/DAR'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 import { BrowserRouter } from 'react-router-dom'
 
 describe('ProgressReportApplication - Component Tests', () => {
   let mockHistory: History
-  let isEnabledStub: sinon.SinonStub
+  let datasetSnapshotsStub: sinon.SinonStub
 
   beforeEach(() => {
     cy.initApplicationConfig()
@@ -31,7 +31,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     })
 
     cy.stub(Storage, 'getCurrentUser').returns(researcher)
-    isEnabledStub = cy.stub(DAAUtils, 'isEnabled').returns(true)
+    datasetSnapshotsStub = cy.stub(DAR, 'getDatasetDaaSnapshots').resolves([])
 
     // Create mock history with stubs inside beforeEach
     mockHistory = {
@@ -218,6 +218,31 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('.accordion-step-container').should('exist')
   })
 
+  it('renders dataset/DAA relationship section inside read-only containers', () => {
+    datasetSnapshotsStub.resolves([
+      {
+        datasetId: 1,
+        datasetIdentifier: 'DUOS-PR-001',
+        datasetName: 'Progress Report Dataset',
+        daaId: 100,
+        daaName: 'Progress Report DAA',
+      },
+    ])
+
+    mountComponent({}, true)
+
+    cy.get('.accordion-step-container').contains('Dataset and Data Access Agreement Relationships').should('be.visible')
+    cy.get('.accordion-step-container').contains('Progress Report Dataset').should('be.visible')
+    cy.get('.accordion-step-container').contains('DUOS-PR-001').should('be.visible')
+    cy.get('.accordion-step-container').contains('button', 'Download and view').should('be.visible')
+  })
+
+  it('does not render dataset/DAA relationship section in non-read-only mode', () => {
+    mountComponent({}, false)
+
+    cy.contains('Dataset and Data Access Agreement Relationships').should('not.exist')
+  })
+
   it('displays required DAA links for selected datasets', () => {
     cy.stub(DAA, 'getDaas').resolves([
       {
@@ -228,8 +253,6 @@ describe('ProgressReportApplication - Component Tests', () => {
         file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
       },
     ])
-
-    isEnabledStub.returns(true)
 
     mountComponent({}, true)
 
@@ -248,8 +271,6 @@ describe('ProgressReportApplication - Component Tests', () => {
       },
     ])
 
-    isEnabledStub.returns(true)
-
     mountComponent({}, true)
 
     cy.contains('By submitting this progress report and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.').should('exist')
@@ -265,8 +286,6 @@ describe('ProgressReportApplication - Component Tests', () => {
         file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
       },
     ])
-
-    isEnabledStub.returns(true)
 
     const datasetsWithAcknowledgementRequirement: Dataset[] = [{
       ...mockDatasets[0],
@@ -374,24 +393,6 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     cy.contains('TestDAA').should('exist')
     cy.contains('OtherDAA').should('exist')
-  })
-
-  it('hides the required DAA step when DAAUtils is disabled', () => {
-    cy.stub(DAA, 'getDaas').resolves([
-      {
-        daaId: 100,
-        createUserId: 1,
-        createDate: 1,
-        dacs: [{ dacId: 2, dacName: 'Test DAC', dacEmail: 'dac@test.com' }],
-        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
-      },
-    ])
-
-    isEnabledStub.returns(false)
-
-    mountComponent({}, true)
-
-    cy.contains('Required Data Access Agreements').should('not.exist')
   })
 
   it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is undefined or empty', () => {

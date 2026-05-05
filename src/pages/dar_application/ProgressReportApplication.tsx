@@ -27,9 +27,9 @@ import {
 } from 'src/utils/darFormUtils'
 import { FormValidationState } from 'src/pages/dar_application/FormValidationState'
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
-import { DAAUtils } from 'src/utils/DAAUtils'
 import { useNavigate } from 'react-router-dom'
 import { isEqual } from 'lodash'
+import { DatasetDaaSnapshotRelationships } from 'src/pages/dar_application/DatasetDaaSnapshotRelationships'
 type ProgressReportApplicationProps = {
   readonly dar: CombinedDataAccessRequest // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[]
@@ -252,7 +252,13 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           />
         </div>
       </div>
-      {DAAUtils.isEnabled() && !formState.closeoutYesNo && (
+      {readOnlyMode && (
+        <DatasetDaaSnapshotRelationships
+          referenceId={dar.referenceId}
+          title="Dataset and Data Access Agreement Relationships"
+        />
+      )}
+      {!formState.closeoutYesNo && (
         <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
           <ProgressReportDataAccessAgreements
             datasets={formState.selectedDatasets}
@@ -262,7 +268,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
       )}
       <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
         <DataUseAcknowledgements
-          title={DAAUtils.isEnabled() ? '2.2 Data Use Acknowledgements' : '2.1 Data Use Acknowledgements'}
+          title="2.2 Data Use Acknowledgements"
           datasets={formState.selectedDatasets}
           dataUseTranslations={dataUseTranslations}
           formData={formState}

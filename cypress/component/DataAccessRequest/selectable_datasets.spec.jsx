@@ -1,26 +1,31 @@
 import { React } from 'react'
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets.jsx'
+import { DAA } from 'src/libs/ajax/DAA'
 
 const datasets = [
   {
     datasetId: 123456,
     datasetIdentifier: `DUOS-123456`,
     datasetName: 'Some Dataset 1',
+    dacId: 1,
   },
   {
     datasetId: 234567,
     datasetIdentifier: `DUOS-234567`,
     datasetName: 'Some Dataset 2',
+    dacId: 2,
   },
   {
     datasetId: 345678,
     datasetIdentifier: `DUOS-345678`,
     datasetName: 'Some Dataset 3',
+    dacId: 3,
   },
   {
     datasetId: 456789,
     datasetIdentifier: `DUOS-456789`,
     datasetName: 'Some Dataset 4',
+    dacId: 4,
   },
 ]
 
@@ -39,7 +44,31 @@ const propsDisabled = {
 describe('Selectable Datasets - Not Read Only', () => {
   describe('With 4 Datasets', () => {
     beforeEach(() => {
+      cy.stub(DAA, 'getDaas').resolves([])
       cy.mount(<SelectableDatasets {...props} />)
+    })
+
+    it('Shows DAA file name link for rows with matching DAC and hides it otherwise', () => {
+      DAA.getDaas.restore()
+      cy.stub(DAA, 'getDaas').resolves([
+        {
+          daaId: 101,
+          file: { fileName: 'daa-101.pdf' },
+          dacs: [{ dacId: 1 }],
+        },
+        {
+          daaId: 303,
+          file: { fileName: 'daa-303.pdf' },
+          dacs: [{ dacId: 3 }],
+        },
+      ])
+
+      cy.mount(<SelectableDatasets {...props} />)
+
+      cy.get('#DUOS-123456_summary').contains('daa-101.pdf').should('exist')
+      cy.get('#DUOS-345678_summary').contains('daa-303.pdf').should('exist')
+      cy.get('#DUOS-234567_summary').should('not.contain', 'daa')
+      cy.get('#DUOS-456789_summary').should('not.contain', 'daa')
     })
 
     it('Marks 2 datasets for removal', () => {

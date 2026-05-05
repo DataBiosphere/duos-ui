@@ -21,7 +21,7 @@ export default function DatasetList(props: DatasetListProps) {
     const dac = dacs?.find(dacItem => dacItem.dacId === dataset.dacId)
     const dacLink = userIsChair
       ? (
-          <Link to={`/manage_edit_dac/${dac?.dacId}`}>
+          <Link to={`/manage_edit_dac_daa/${dac?.dacId}`}>
             {dac?.dacName}
           </Link>
         )

@@ -6,10 +6,8 @@ import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { DacMembersModal } from 'src/pages/manage_dac/DacMembersModal'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
-import ManageEditDac from 'src/pages/manage_dac/ManageEditDac'
 import { useNavigate } from 'react-router-dom'
 import EditDac from 'src/pages/manage_dac/EditDac'
-import { DAAUtils } from 'src/utils/DAAUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton.tsx'
@@ -98,7 +96,7 @@ export const ManageDac = function ManageDac() {
 
   const addDac = () => {
     setShowAddPage(true)
-    navigate(DAAUtils.isEnabled() ? '/manage_add_dac_daa' : '/manage_add_dac', {
+    navigate('/manage_add_dac_daa', {
       state: { userRole: userRole },
     })
   }
@@ -148,12 +146,10 @@ export const ManageDac = function ManageDac() {
         />
       )}
       {showAddPage && (
-        <ManageEditDac />
+        <EditDac />
       )}
       {showEditPage && (
-        DAAUtils.isEnabled()
-          ? <EditDac />
-          : <ManageEditDac />
+        <EditDac />
       )}
     </div>
   )

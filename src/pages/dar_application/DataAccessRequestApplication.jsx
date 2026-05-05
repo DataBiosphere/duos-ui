@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
-import { DataUseAgreements } from 'src/pages/dar_application/DataUseAgreements'
 import DataAccessRequest from 'src/pages/dar_application/DataAccessRequest'
 import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement'
 import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation'
@@ -17,7 +16,6 @@ import { NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
-import { DAAUtils } from 'src/utils/DAAUtils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import ReactMarkdown from 'react-markdown'
@@ -35,6 +33,7 @@ import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils'
 import { useNavigate, useParams } from 'react-router-dom'
+import { DatasetDaaSnapshotRelationships } from 'src/pages/dar_application/DatasetDaaSnapshotRelationships'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -258,8 +257,7 @@ const DataAccessRequestApplication = (props) => {
       setSelectedDatasets(datasets)
     })
     if (!existingDarsReadOnlyMode) {
-      const tabName = DAAUtils.isEnabled() ? 'Data Access Agreements (DAA)' : 'Data Use Agreement'
-      const updatedTabs = [...ApplicationTabs, { name: tabName, id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
+      const updatedTabs = [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
       setApplicationTabs(updatedTabs)
     }
   }, [formData.datasetIds, existingDarsReadOnlyMode])
@@ -892,6 +890,9 @@ const DataAccessRequestApplication = (props) => {
                     referenceId={formData.referenceId}
                     draftDar={draftDar}
                   />
+                  {existingDarsReadOnlyMode && (
+                    <DatasetDaaSnapshotRelationships referenceId={formData.referenceId} />
+                  )}
                 </ConditionalAccordion>
               </div>
 
@@ -914,33 +915,18 @@ const DataAccessRequestApplication = (props) => {
               {!existingDarsReadOnlyMode
                 ? (
                     <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} className="step-container">
-                      {DAAUtils.isEnabled()
-                        ? (
-                            <DataAccessAgreements
-                              datasets={selectedDatasets}
-                              onDaaIdsChange={onDaaIdsChange}
-                              isDraft={draftDar}
-                              cancelAttest={() => {
-                                setIsAttested(false)
-                                removeAddendumTab()
-                              }}
-                              isAttested={isAttested}
-                              attest={attemptSubmit}
-                              save={() => setShowDialogSave(true)}
-                            />
-                          )
-                        : (
-                            <DataUseAgreements
-                              isDraft={draftDar}
-                              cancelAttest={() => {
-                                setIsAttested(false)
-                                removeAddendumTab()
-                              }}
-                              isAttested={isAttested}
-                              attest={attemptSubmit}
-                              save={() => setShowDialogSave(true)}
-                            />
-                          )}
+                      <DataAccessAgreements
+                        datasets={selectedDatasets}
+                        onDaaIdsChange={onDaaIdsChange}
+                        isDraft={draftDar}
+                        cancelAttest={() => {
+                          setIsAttested(false)
+                          removeAddendumTab()
+                        }}
+                        isAttested={isAttested}
+                        attest={attemptSubmit}
+                        save={() => setShowDialogSave(true)}
+                      />
                     </div>
                   )
                 : <div />}

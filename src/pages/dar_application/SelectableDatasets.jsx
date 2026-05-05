@@ -1,11 +1,66 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash'
+import { DAA } from 'src/libs/ajax/DAA'
+import { Notifications } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
+import { DownloadLink } from 'src/components/DownloadLink'
+
+const buildDaaByDacId = (daaList) => {
+  const nextDaaByDacId = {}
+
+  for (const daa of daaList) {
+    if (!daa?.daaId || !Array.isArray(daa.dacs)) {
+      continue
+    }
+
+    for (const dac of daa.dacs) {
+      if (!dac?.dacId || nextDaaByDacId[dac.dacId]) {
+        continue
+      }
+
+      const rawFileName = daa.file?.fileName || ''
+      nextDaaByDacId[dac.dacId] = {
+        daaId: daa.daaId,
+        fileName: rawFileName || `daa-${daa.daaId}`,
+      }
+    }
+  }
+
+  return nextDaaByDacId
+}
 
 export default function SelectableDatasets(props) {
   const { datasets, setSelectedDatasets, disabled } = props
   const [removedIds, setRemovedIds] = useState([])
+  const [daaByDacId, setDaaByDacId] = useState({})
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadDaas = async () => {
+      try {
+        const daaList = await DAA.getDaas()
+        if (!isMounted) {
+          return
+        }
+        setDaaByDacId(buildDaaByDacId(daaList))
+      }
+      catch (error) {
+        Notifications.showError({
+          text: 'Unable to load data access agreements: ' + extractError(error),
+        })
+      }
+    }
+
+    loadDaas()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const updateLocalState = (ds) => {
     let newRemovedIds = []
@@ -21,7 +76,26 @@ export default function SelectableDatasets(props) {
     setSelectedDatasets(newSelectedDatasets)
   }
 
+  const onDaaLinkClick = async (event, daaId, fileName) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (!daaId) {
+      return
+    }
+
+    try {
+      await DAA.getDaaFileById(daaId, fileName)
+    }
+    catch (error) {
+      Notifications.showError({
+        text: 'Unable to download data access agreement: ' + extractError(error),
+      })
+    }
+  }
+
   const datasetDescriptionDiv = (ds) => {
+    const daaForDataset = ds.dacId ? daaByDacId[ds.dacId] : undefined
+
     return (
       <div
         id={ds.datasetIdentifier + '_name'}
@@ -30,6 +104,17 @@ export default function SelectableDatasets(props) {
         <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>{ds.datasetIdentifier}</div>
         <div>|</div>
         <div style={{ marginLeft: '0.5rem' }}>{ds.datasetName}</div>
+        <div style={{ marginLeft: '1rem' }}>|</div>
+        <div style={{ marginLeft: '1rem' }}>
+          {daaForDataset
+            ? (
+                <DownloadLink
+                  label={daaForDataset.fileName}
+                  onDownload={event => onDaaLinkClick(event, daaForDataset.daaId, daaForDataset.fileName)}
+                />
+              )
+            : '-'}
+        </div>
       </div>
     )
   }
@@ -47,26 +132,24 @@ export default function SelectableDatasets(props) {
       >
         {datasetDescriptionDiv(ds)}
         <span id={'remove_dataset_' + ds.datasetId} style={{ marginLeft: 10 }}>
-          <>
-            {!disabled && (
-              <DeleteIcon
-                data-tip="Delete dataset"
-                data-for={removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.datasetId) ? 'tip_last' : ''}
-                style={{
-                  color: '#0948B7',
-                  fontSize: '2.3rem',
-                  verticalAlign: 'middle',
-                  opacity: removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.datasetId) ? 0.5 : 1,
-                }}
-              />
+          {!disabled && (
+            <DeleteIcon
+              data-tip="Delete dataset"
+              data-for={removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.datasetId) ? 'tip_last' : ''}
+              style={{
+                color: '#0948B7',
+                fontSize: '2.3rem',
+                verticalAlign: 'middle',
+                opacity: removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.datasetId) ? 0.5 : 1,
+              }}
+            />
+          )}
+          {!isDeletable
+            && (
+              <ReactTooltip id="tip_last" place="right">
+                The last dataset can not be deleted
+              </ReactTooltip>
             )}
-            {!isDeletable
-              && (
-                <ReactTooltip id="tip_last" place="right">
-                  The last dataset can not be deleted
-                </ReactTooltip>
-              )}
-          </>
           <span style={{ marginLeft: '1rem' }}></span>
         </span>
       </div>
@@ -107,4 +190,15 @@ export default function SelectableDatasets(props) {
       {datasetList()}
     </div>
   )
+}
+
+SelectableDatasets.propTypes = {
+  datasets: PropTypes.arrayOf(PropTypes.shape({
+    datasetId: PropTypes.number,
+    datasetIdentifier: PropTypes.string,
+    datasetName: PropTypes.string,
+    dacId: PropTypes.number,
+  })).isRequired,
+  setSelectedDatasets: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 }

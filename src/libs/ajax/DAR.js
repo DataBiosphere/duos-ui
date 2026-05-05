@@ -99,6 +99,12 @@ export const DAR = {
     return res.data
   },
 
+  getDatasetDaaSnapshots: async (referenceId) => {
+    const url = `${await Config.getApiUrl()}/api/dar/v2/${referenceId}/dataset-daa-snapshots`
+    const res = await fetchGet(url, Config.authOpts())
+    return res.data
+  },
+
   // NOTE: endpoints requires a dar id
   uploadDARDocument: async (file, darId, fileType) => {
     if (isFileEmpty(file)) {
