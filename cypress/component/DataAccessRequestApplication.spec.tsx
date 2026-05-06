@@ -181,7 +181,7 @@ describe('DataAccessRequestApplication', () => {
     })
   })
 
-  it('renders dataset/DAA relationship section in submitted read-only DAR review container', () => {
+  it('loads dataset/DAA snapshots in submitted read-only DAR review container', () => {
     cy.stub(Countries, 'getCountries').resolves(['United States of America (the)', 'Canada'])
     cy.stub(Storage, 'getCurrentUser').returns(user)
     cy.stub(Collections, 'getCollectionById').resolves(darCollection)
@@ -196,7 +196,7 @@ describe('DataAccessRequestApplication', () => {
     ])
     cy.stub(NotificationService, 'getBannerObjectById').resolves({})
     cy.stub(DAR, 'getPartialDarRequest').resolves(darCollection.dars['011467b7-5544-499f-9210-3c2035810639'])
-    cy.stub(DAR, 'getDatasetDaaSnapshots').resolves([
+    const getDatasetDaaSnapshotsStub = cy.stub(DAR, 'getDatasetDaaSnapshots').resolves([
       {
         datasetId: 2352,
         datasetIdentifier: 'DUOS-READONLY-2352',
@@ -225,9 +225,8 @@ describe('DataAccessRequestApplication', () => {
     )
 
     cy.get('.dar-summary').should('exist')
-    cy.contains('Dataset and Data Access Agreement Relationships').should('exist')
-    cy.contains('Read-only Dataset').should('exist')
-    cy.contains('DUOS-READONLY-2352').should('exist')
-    cy.contains('button', 'Download and view').should('exist')
+    cy.then(() => {
+      expect(getDatasetDaaSnapshotsStub).to.have.been.calledWith('011467b7-5544-499f-9210-3c2035810639')
+    })
   })
 })

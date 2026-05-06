@@ -186,8 +186,8 @@ describe('Selectable Datasets - Not Read Only', () => {
 
       cy.mount(<SelectableDatasets {...propsDisabled} />)
 
-      cy.get('#DUOS-123456_summary').contains('The DUOS Library Card Agreements in effect at the time this request was made apply.').should('exist')
-      cy.get('#DUOS-234567_summary').contains('The DUOS Library Card Agreements in effect at the time this request was made apply.').should('exist')
+      cy.get('#DUOS-123456_summary').contains('The DUOS Library Card Agreements in effect at the time this request was made govern the use of this data.').should('be.visible')
+      cy.get('#DUOS-234567_summary').contains('The DUOS Library Card Agreements in effect at the time this request was made govern the use of this data.').should('be.visible')
     })
 
     it('Can not click on any dataset', () => {
