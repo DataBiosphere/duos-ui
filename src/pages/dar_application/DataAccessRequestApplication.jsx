@@ -33,7 +33,6 @@ import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils'
 import { useNavigate, useParams } from 'react-router-dom'
-import { DatasetDaaSnapshotRelationships } from 'src/pages/dar_application/DatasetDaaSnapshotRelationships'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -890,9 +889,6 @@ const DataAccessRequestApplication = (props) => {
                     referenceId={formData.referenceId}
                     draftDar={draftDar}
                   />
-                  {existingDarsReadOnlyMode && (
-                    <DatasetDaaSnapshotRelationships referenceId={formData.referenceId} />
-                  )}
                 </ConditionalAccordion>
               </div>
 

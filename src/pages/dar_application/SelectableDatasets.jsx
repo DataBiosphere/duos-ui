@@ -9,7 +9,7 @@ import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { DownloadLink } from 'src/components/DownloadLink'
 
-const NO_SNAPSHOT_MESSAGE = 'The DUOS Library Card Agreements in effect at the time this request was made apply.'
+const NO_SNAPSHOT_MESSAGE = 'The DUOS Library Card Agreements in effect at the time this request was made govern the use of this data.'
 
 const getSnapshotDatasetId = (snapshot) => {
   const value = snapshot?.datasetId ?? snapshot?.dataset?.datasetId
@@ -278,7 +278,7 @@ export default function SelectableDatasets(props) {
     }
 
     let daaText = '-'
-    if (disabled && snapshotNotFound) {
+    if (disabled && (!daaForDataset || snapshotNotFound)) {
       daaText = NO_SNAPSHOT_MESSAGE
     }
 
