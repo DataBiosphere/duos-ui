@@ -2,6 +2,7 @@ import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType } from 'src/types/library'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const TestComponent = () => {
   const [state, updateState] = useLibraryUrlState()
@@ -24,10 +25,8 @@ const TestComponent = () => {
         id="update-filters"
         onClick={() => updateState({
           filters: {
+            ...EMPTY_FILTERS,
             accessManagement: ['controlled'],
-            dataUse: [],
-            dataType: [],
-            dac: [],
             participantCount: { min: 10 },
           },
         })}

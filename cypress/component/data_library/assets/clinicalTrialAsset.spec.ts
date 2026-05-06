@@ -12,6 +12,7 @@ import {
   QueryClause,
 } from 'src/types/elastic'
 import { ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus } from 'src/types/model'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -289,6 +290,59 @@ describe('clinicalTrialAsset — transformResponse', () => {
     const result = clinicalTrialAsset.transformResponse(response, pagination)
     expect(result.items).to.have.length(0)
     expect(result.total).to.equal(0)
+  })
+
+  it('returns only matching clinical trials when filtered within a shared study', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        {
+          clinicalTrialId: 'CT-RECRUITING',
+          status: ClinicalTrialStatus.RECRUITING,
+          phase: ClinicalTrialPhase.PHASE1,
+        },
+        {
+          clinicalTrialId: 'CT-COMPLETED',
+          status: ClinicalTrialStatus.COMPLETED,
+          phase: ClinicalTrialPhase.PHASE2,
+        },
+      ]),
+    ])
+
+    const result = clinicalTrialAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      clinicalTrialStatus: [ClinicalTrialStatus.RECRUITING],
+    })
+
+    expect(result.items).to.have.length(1)
+    expect((result.items[0] as ClinicalTrialAsset).clinicalTrialId).to.equal('CT-RECRUITING')
+  })
+
+  it('applies row-level date filtering to nested clinical trial rows', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        {
+          clinicalTrialId: 'CT-INSIDE',
+          startDate: '2024-02-01',
+          endDate: '2024-06-01',
+        },
+        {
+          clinicalTrialId: 'CT-OUTSIDE',
+          startDate: '2023-01-01',
+          endDate: '2024-12-31',
+        },
+      ]),
+    ])
+
+    const result = clinicalTrialAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      clinicalTrialDates: {
+        startDate: '2024-01-01',
+        endDate: '2024-07-01',
+      },
+    })
+
+    expect(result.items).to.have.length(1)
+    expect((result.items[0] as ClinicalTrialAsset).clinicalTrialId).to.equal('CT-INSIDE')
   })
 })
 

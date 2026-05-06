@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
-import { AvailableFilters, FilterState, LibraryFiltersProps } from 'src/types/library'
+import { AvailableFilters, AssetType, FilterState, LibraryFiltersProps } from 'src/types/library'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
+import { getFilterSectionsForAsset } from 'src/components/data_library/filterRegistry'
 
 const availableFilters: AvailableFilters = {
   accessManagement: [
@@ -16,6 +18,26 @@ const availableFilters: AvailableFilters = {
     { value: 'Genomic', label: 'Genomic', count: 4 },
   ],
   dac: [],
+  workspaceTools: [],
+  workspacePlatform: [],
+  clinicalTrialStatus: [],
+  clinicalTrialPhase: [],
+  clinicalTrialInterventionType: [],
+  clinicalTrialRegistry: [],
+  biospecimenType: [],
+  biospecimenDataUse: [],
+  biospecimenPostMortemIntervalUnit: [
+    { value: 'HOURS', label: 'HOURS' },
+    { value: 'DAYS', label: 'DAYS' },
+  ],
+  datasetsCited: [
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
+  ],
+  biospecimenPostMortemIntervalRange: {
+    min: 0,
+    max: 1000,
+  },
   participantCountRange: {
     min: 0,
     max: 1000,
@@ -23,11 +45,7 @@ const availableFilters: AvailableFilters = {
 }
 
 const emptyFilters: FilterState = {
-  accessManagement: [],
-  dataUse: [],
-  dataType: [],
-  dac: [],
-  participantCount: {},
+  ...EMPTY_FILTERS,
 }
 
 const LibraryFiltersWrapper = ({ filters: initialFilters = emptyFilters, onChange: externalOnChange, onClear: externalOnClear, loading = false }: Partial<LibraryFiltersProps>) => {
@@ -55,7 +73,7 @@ const LibraryFiltersWrapper = ({ filters: initialFilters = emptyFilters, onChang
       filters={filters}
       onChange={handleOnChange}
       onClear={handleOnClear}
-      availableFilters={availableFilters}
+      sections={getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)}
       loading={loading}
     />
   )
@@ -123,6 +141,55 @@ describe('LibraryFilters', () => {
     cy.get('.MuiSkeleton-root').should('have.length', 3)
     cy.contains('Access Management').should('not.exist')
   })
+
+  it('renders only configured filters for presentations', () => {
+    cy.mount(
+      <LibraryFilters
+        filters={emptyFilters}
+        onChange={cy.stub()}
+        onClear={cy.stub()}
+        sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)}
+      />,
+    )
+
+    cy.contains('Datasets Cited?').should('exist')
+    cy.contains('Participants').should('not.exist')
+    cy.contains('Access Management').should('not.exist')
+  })
+
+  it('shows post-mortem warning when range is set without a unit', () => {
+    cy.mount(
+      <LibraryFilters
+        filters={{
+          ...emptyFilters,
+          biospecimenPostMortemInterval: { min: 2 },
+        }}
+        onChange={cy.stub()}
+        onClear={cy.stub()}
+        sections={getFilterSectionsForAsset(AssetType.BIOSPECIMENS, availableFilters)}
+      />,
+    )
+
+    cy.contains('Post-mortem Interval').click()
+    cy.contains('Select a post-mortem interval unit to avoid ambiguous results.').should('exist')
+  })
+
+  it('hides post-mortem warning when a unit is selected', () => {
+    cy.mount(
+      <LibraryFilters
+        filters={{
+          ...emptyFilters,
+          biospecimenPostMortemInterval: { min: 2 },
+          biospecimenPostMortemIntervalUnit: ['HOURS'],
+        }}
+        onChange={cy.stub()}
+        onClear={cy.stub()}
+        sections={getFilterSectionsForAsset(AssetType.BIOSPECIMENS, availableFilters)}
+      />,
+    )
+
+    cy.contains('Select a post-mortem interval unit to avoid ambiguous results.').should('not.exist')
+  })
 })
 
 describe('LibraryFilters — collapseable panel', () => {
@@ -132,7 +199,7 @@ describe('LibraryFilters — collapseable panel', () => {
         filters={emptyFilters}
         onChange={cy.stub()}
         onClear={cy.stub()}
-        availableFilters={availableFilters}
+        sections={getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)}
         isOpen={isOpen}
         onToggle={onToggle}
       />,
@@ -171,7 +238,7 @@ describe('LibraryFilters — collapseable panel', () => {
         filters={emptyFilters}
         onChange={cy.stub()}
         onClear={cy.stub()}
-        availableFilters={availableFilters}
+        sections={getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)}
       />,
     )
     cy.get('[aria-label="Collapse filters"]').should('not.exist')
@@ -184,7 +251,7 @@ describe('LibraryFilters — collapseable panel', () => {
         filters={{ ...emptyFilters, accessManagement: ['controlled'] }}
         onChange={cy.stub()}
         onClear={cy.stub()}
-        availableFilters={availableFilters}
+        sections={getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)}
         isOpen={false}
         onToggle={cy.stub()}
       />,

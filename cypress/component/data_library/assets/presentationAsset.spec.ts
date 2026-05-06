@@ -11,6 +11,7 @@ import {
   PresentationStudyAggregationBucket,
   QueryClause,
 } from 'src/types/elastic'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -288,6 +289,31 @@ describe('presentationAsset — transformResponse', () => {
     const result = presentationAsset.transformResponse(response, pagination)
     expect(result.items).to.have.length(0)
     expect(result.total).to.equal(0)
+  })
+
+  it('returns only matching presentations when filtered within a shared study', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        {
+          presentationId: 'PRES-CITED',
+          title: 'Cited',
+          citation: true,
+        },
+        {
+          presentationId: 'PRES-NOT-CITED',
+          title: 'Not Cited',
+          citation: false,
+        },
+      ]),
+    ])
+
+    const result = presentationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      datasetsCited: true,
+    })
+
+    expect(result.items).to.have.length(1)
+    expect((result.items[0] as PresentationAsset).presentationId).to.equal('PRES-CITED')
   })
 })
 
