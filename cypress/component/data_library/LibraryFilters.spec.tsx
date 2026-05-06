@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { AvailableFilters, AssetType, FilterState, LibraryFiltersProps } from 'src/types/library'
-import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
-import { getFilterSectionsForAsset } from 'src/components/data_library/filterRegistry'
+import { EMPTY_FILTERS, getFilterSectionsForAsset } from 'src/components/data_library/filterRegistry'
 
 const availableFilters: AvailableFilters = {
   accessManagement: [
