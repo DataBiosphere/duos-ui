@@ -3,10 +3,122 @@ import PropTypes from 'prop-types'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash'
+import { DAR } from 'src/libs/ajax/DAR'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { DownloadLink } from 'src/components/DownloadLink'
+
+const NO_SNAPSHOT_MESSAGE = 'The DUOS Library Card Agreements in effect at the time this request was made apply.'
+
+const getSnapshotDatasetId = (snapshot) => {
+  const value = snapshot?.datasetId ?? snapshot?.dataset?.datasetId
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
+}
+
+const getSnapshotDatasetIdentifier = (snapshot) => {
+  const value = snapshot?.datasetIdentifier ?? snapshot?.dataset?.datasetIdentifier
+  return (typeof value === 'string' && value.trim().length > 0) ? value : undefined
+}
+
+const getSnapshotDaaId = (snapshot) => {
+  const value = snapshot?.daaId ?? snapshot?.daa?.daaId
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
+}
+
+const getSnapshotDaaFileName = (snapshot, daaId, daaFileNameByDaaId) => {
+  return daaFileNameByDaaId[daaId]
+    || snapshot?.daaFileName
+    || snapshot?.fileName
+    || snapshot?.daaFile?.fileName
+    || snapshot?.daa?.file?.fileName
+    || (daaId ? `daa-${daaId}` : '')
+}
+
+const buildDaaMapsFromSnapshots = (snapshotList, daaFileNameByDaaId) => {
+  const nextDaaByDatasetId = {}
+  const nextDaaByDatasetIdentifier = {}
+
+  for (const snapshot of snapshotList) {
+    const datasetId = getSnapshotDatasetId(snapshot)
+    const datasetIdentifier = getSnapshotDatasetIdentifier(snapshot)
+
+    const daaId = getSnapshotDaaId(snapshot)
+    if (!daaId) {
+      continue
+    }
+
+    const daaDetails = {
+      daaId,
+      fileName: getSnapshotDaaFileName(snapshot, daaId, daaFileNameByDaaId),
+    }
+
+    if (datasetId && !nextDaaByDatasetId[datasetId]) {
+      nextDaaByDatasetId[datasetId] = daaDetails
+    }
+
+    if (datasetIdentifier && !nextDaaByDatasetIdentifier[datasetIdentifier]) {
+      nextDaaByDatasetIdentifier[datasetIdentifier] = daaDetails
+    }
+  }
+
+  return {
+    byDatasetId: nextDaaByDatasetId,
+    byDatasetIdentifier: nextDaaByDatasetIdentifier,
+  }
+}
+
+const buildDaaFileNameByDaaId = (daaList) => {
+  const nextFileNameByDaaId = {}
+
+  for (const daa of daaList) {
+    if (!daa?.daaId) {
+      continue
+    }
+
+    const rawFileName = daa.file?.fileName || ''
+    nextFileNameByDaaId[daa.daaId] = rawFileName || `daa-${daa.daaId}`
+  }
+
+  return nextFileNameByDaaId
+}
+
+const buildSnapshotList = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  if (Array.isArray(response?.datasetDaaSnapshots)) {
+    return response.datasetDaaSnapshots
+  }
+
+  // Some snapshot endpoints return a map keyed by datasetId string:
+  // { "1969": { daaId: 36, capturedAt: ... } }
+  if (response && typeof response === 'object') {
+    const entries = Object.entries(response)
+    const mappedEntries = []
+
+    for (const [datasetIdKey, snapshotValue] of entries) {
+      if (!snapshotValue || typeof snapshotValue !== 'object') {
+        continue
+      }
+
+      const parsedDatasetId = Number(datasetIdKey)
+      mappedEntries.push({
+        datasetId: Number.isInteger(parsedDatasetId) && parsedDatasetId > 0
+          ? parsedDatasetId
+          : undefined,
+        ...snapshotValue,
+      })
+    }
+
+    return mappedEntries
+  }
+
+  return []
+}
 
 const buildDaaByDacId = (daaList) => {
   const nextDaaByDacId = {}
@@ -33,34 +145,96 @@ const buildDaaByDacId = (daaList) => {
 }
 
 export default function SelectableDatasets(props) {
-  const { datasets, setSelectedDatasets, disabled } = props
+  const { datasets, setSelectedDatasets, disabled, referenceId } = props
   const [removedIds, setRemovedIds] = useState([])
   const [daaByDacId, setDaaByDacId] = useState({})
+  const [daaByDatasetId, setDaaByDatasetId] = useState({})
+  const [daaByDatasetIdentifier, setDaaByDatasetIdentifier] = useState({})
+  const [snapshotNotFound, setSnapshotNotFound] = useState(false)
 
   useEffect(() => {
     let isMounted = true
 
-    const loadDaas = async () => {
+    const loadCurrentDaas = async () => {
       try {
+        if (!disabled) {
+          setSnapshotNotFound(false)
+        }
         const daaList = await DAA.getDaas()
+        if (!isMounted) {
+          return {}
+        }
+        setDaaByDacId(buildDaaByDacId(daaList))
+        return buildDaaFileNameByDaaId(daaList)
+      }
+      catch (error) {
+        if (error?.response?.status === 404) {
+          setDaaByDacId({})
+          if (disabled) {
+            setSnapshotNotFound(true)
+          }
+          return {}
+        }
+
+        Notifications.showError({
+          text: 'Unable to load data access agreements: ' + extractError(error),
+        })
+        return {}
+      }
+    }
+
+    const loadSnapshotDaas = async (fileNameByDaaId = {}) => {
+      if (!referenceId) {
+        setDaaByDatasetId({})
+        setDaaByDatasetIdentifier({})
+        setSnapshotNotFound(false)
+        return
+      }
+
+      try {
+        setSnapshotNotFound(false)
+        const response = await DAR.getDatasetDaaSnapshots(referenceId)
         if (!isMounted) {
           return
         }
-        setDaaByDacId(buildDaaByDacId(daaList))
+
+        const snapshotList = buildSnapshotList(response)
+
+        const snapshotMaps = buildDaaMapsFromSnapshots(snapshotList, fileNameByDaaId)
+        setDaaByDatasetId(snapshotMaps.byDatasetId)
+        setDaaByDatasetIdentifier(snapshotMaps.byDatasetIdentifier)
       }
       catch (error) {
+        if (error?.response?.status === 404) {
+          setDaaByDatasetId({})
+          setDaaByDatasetIdentifier({})
+          setSnapshotNotFound(true)
+          return
+        }
+
         Notifications.showError({
-          text: 'Unable to load data access agreements: ' + extractError(error),
+          text: 'Unable to load dataset and DAA snapshot relationships: ' + extractError(error),
         })
       }
     }
 
-    loadDaas()
+    if (disabled) {
+      ;(async () => {
+        const fileNameByDaaId = await loadCurrentDaas()
+        if (!isMounted) {
+          return
+        }
+        await loadSnapshotDaas(fileNameByDaaId)
+      })()
+    }
+    else {
+      loadCurrentDaas()
+    }
 
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [disabled, referenceId])
 
   const updateLocalState = (ds) => {
     let newRemovedIds = []
@@ -94,7 +268,19 @@ export default function SelectableDatasets(props) {
   }
 
   const datasetDescriptionDiv = (ds) => {
-    const daaForDataset = ds.dacId ? daaByDacId[ds.dacId] : undefined
+    let daaForDataset
+    if (disabled) {
+      daaForDataset = (ds.datasetId ? daaByDatasetId[ds.datasetId] : undefined)
+        || (ds.datasetIdentifier ? daaByDatasetIdentifier[ds.datasetIdentifier] : undefined)
+    }
+    else {
+      daaForDataset = ds.dacId ? daaByDacId[ds.dacId] : undefined
+    }
+
+    let daaText = '-'
+    if (disabled && snapshotNotFound) {
+      daaText = NO_SNAPSHOT_MESSAGE
+    }
 
     return (
       <div
@@ -113,7 +299,7 @@ export default function SelectableDatasets(props) {
                   onDownload={event => onDaaLinkClick(event, daaForDataset.daaId, daaForDataset.fileName)}
                 />
               )
-            : '-'}
+            : daaText}
         </div>
       </div>
     )
@@ -201,4 +387,5 @@ SelectableDatasets.propTypes = {
   })).isRequired,
   setSelectedDatasets: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
+  referenceId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 }

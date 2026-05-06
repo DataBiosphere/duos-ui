@@ -249,6 +249,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             disabled={readOnlyMode}
             datasets={formState.datasets}
             setSelectedDatasets={onSelectedDatasetChange}
+            referenceId={dar.referenceId}
           />
         </div>
       </div>
