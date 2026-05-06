@@ -16,6 +16,7 @@ import {
   IntellectualPropertyAsset,
   FundingResourceAsset,
   ModelAsset,
+  FilterState,
   PaginationState,
   PresentationAsset,
   PublicationAsset,
@@ -68,7 +69,7 @@ export interface AssetDefinition {
   ): ElasticsearchQuery
 
   /** Turn a raw Elasticsearch response into a typed, paginated page */
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage
 
   /** Unique DataGrid row identifier */
   getRowId(row: LibraryRow): string | number

@@ -13,7 +13,7 @@ import {
   SortOrder,
   TabConfig,
 } from 'src/types/library'
-import { DatasetTerm } from 'src/types/model'
+import { BioSpecimenType, DatasetTerm, PostMortemIntervalUnit } from 'src/types/model'
 import { assetRegistry } from 'src/components/data_library/assets'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
@@ -30,6 +30,16 @@ import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'lodash'
 import { EnumerateSnapshotModel } from 'src/types/tdrModel'
 import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
+import {
+  EMPTY_FILTERS,
+  getFilterSectionsForAsset,
+  sanitizeFiltersForAsset,
+} from 'src/components/data_library/filterRegistry'
+import {
+  clinicalTrialInterventionSelectOptions,
+  clinicalTrialPhaseSelectOptions,
+  clinicalTrialStatusSelectOptions,
+} from 'src/utils/ClinicalTrialEnumUtils'
 
 /**
  * DataLibrary Page Component
@@ -122,9 +132,38 @@ export const DataLibrary: React.FC = () => {
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 
+  const { data, isLoading, isFetching, error } = useLibraryData(
+    libraryConfig,
+    urlState.tab,
+    urlState.filters,
+    urlState.query ?? '',
+    { page: urlState.page, pageSize: urlState.pageSize },
+    urlState.sortField && urlState.sortOrder
+      ? { field: urlState.sortField, order: urlState.sortOrder }
+      : undefined,
+  )
+
   const availableFilters: AvailableFilters = useMemo(() => {
     const dacAgg = (metadata?.dac as AggregationResult)?.buckets || []
     const dataTypeAgg = (metadata?.data_type as AggregationResult)?.buckets || []
+
+    const uniqueValues = (values: Array<string | undefined | null>) =>
+      [...new Set(values.map(value => value?.trim()).filter(Boolean) as string[])]
+        .sort((a, b) => a.localeCompare(b))
+        .map(value => ({ value, label: value }))
+
+    const workspaceItems = urlState.tab === AssetType.WORKSPACES ? data?.items as Array<{ tools?: string[], platform?: string }> : []
+    const clinicalTrialItems = urlState.tab === AssetType.CLINICAL_TRIALS
+      ? data?.items as Array<{ registry?: string }>
+      : []
+    const biospecimenItems = urlState.tab === AssetType.BIOSPECIMENS
+      ? data?.items as Array<{ optionalDataUse?: string }>
+      : []
+
+    const workspaceTools = uniqueValues(workspaceItems?.flatMap(item => item.tools || []) || [])
+    const workspacePlatform = uniqueValues(workspaceItems?.map(item => item.platform) || [])
+    const clinicalTrialRegistry = uniqueValues(clinicalTrialItems?.map(item => item.registry) || [])
+    const biospecimenDataUse = uniqueValues(biospecimenItems?.map(item => item.optionalDataUse) || [])
 
     return {
       accessManagement: [
@@ -153,25 +192,35 @@ export const DataLibrary: React.FC = () => {
           count: bucket.doc_count,
         }))
         .sort((a, b) => a.label.localeCompare(b.label)),
+      workspaceTools,
+      workspacePlatform,
+      clinicalTrialStatus: clinicalTrialStatusSelectOptions.map(option => ({ value: option.key, label: option.displayText })),
+      clinicalTrialPhase: clinicalTrialPhaseSelectOptions.map(option => ({ value: option.key, label: option.displayText })),
+      clinicalTrialInterventionType: clinicalTrialInterventionSelectOptions.map(option => ({ value: option.key, label: option.displayText })),
+      clinicalTrialRegistry,
+      biospecimenType: Object.values(BioSpecimenType).map(value => ({ value, label: value })),
+      biospecimenDataUse,
+      biospecimenPostMortemIntervalUnit: Object.values(PostMortemIntervalUnit).map(value => ({ value, label: value })),
+      datasetsCited: [
+        { value: 'true', label: 'Yes' },
+        { value: 'false', label: 'No' },
+      ],
+      biospecimenPostMortemIntervalRange: {
+        min: 0,
+        max: 1000000,
+      },
       participantCountRange: {
         min: 0,
         max: 100000,
       },
     }
-  }, [metadata])
-
-  const { data, isLoading, isFetching, error } = useLibraryData(
-    libraryConfig,
-    urlState.tab,
-    urlState.filters,
-    urlState.query ?? '',
-    { page: urlState.page, pageSize: urlState.pageSize },
-    urlState.sortField && urlState.sortOrder
-      ? { field: urlState.sortField, order: urlState.sortOrder }
-      : undefined,
-  )
+  }, [metadata, data?.items, urlState.tab])
 
   const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
+  const filterSections = useMemo(
+    () => getFilterSectionsForAsset(urlState.tab, availableFilters),
+    [urlState.tab, availableFilters],
+  )
 
   const selectedStudyIds = useMemo(() => {
     if (!data?.items) return []
@@ -189,7 +238,11 @@ export const DataLibrary: React.FC = () => {
   }, [urlState.sortField, urlState.sortOrder])
 
   const handleTabChange = (newAssetType: AssetType) => {
-    updateUrlState({ tab: newAssetType, page: 0 })
+    updateUrlState({
+      tab: newAssetType,
+      page: 0,
+      filters: sanitizeFiltersForAsset(newAssetType, urlState.filters),
+    })
     setSelectedDatasetIds([])
   }
 
@@ -202,19 +255,13 @@ export const DataLibrary: React.FC = () => {
 
   const handleFiltersChange = (newFilters: typeof urlState.filters) => {
     updateUrlState({
-      filters: newFilters,
+      filters: sanitizeFiltersForAsset(urlState.tab, newFilters),
     })
   }
 
   const handleClearFilters = () => {
     updateUrlState({
-      filters: {
-        accessManagement: [],
-        dataUse: [],
-        dataType: [],
-        dac: [],
-        participantCount: {},
-      },
+      filters: sanitizeFiltersForAsset(urlState.tab, EMPTY_FILTERS),
       page: 0,
     })
   }
@@ -346,10 +393,10 @@ export const DataLibrary: React.FC = () => {
           }}
         >
           <LibraryFilters
-            filters={urlState.filters}
+            filters={sanitizeFiltersForAsset(urlState.tab, urlState.filters)}
             onChange={handleFiltersChange}
             onClear={handleClearFilters}
-            availableFilters={availableFilters}
+            sections={filterSections}
             loading={isLoading || isMetadataLoading}
             isOpen={!urlState.hideFilters}
             onToggle={() => updateUrlState({ hideFilters: !urlState.hideFilters })}
@@ -406,5 +453,3 @@ export const DataLibrary: React.FC = () => {
     </Box>
   )
 }
-
-export default DataLibrary

@@ -3,6 +3,11 @@ import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery, QueryClause } from 'src/types/elastic'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
+import {
+  buildFilterClausesForAsset,
+  EMPTY_FILTERS,
+  sanitizeFiltersForAsset,
+} from 'src/components/data_library/filterRegistry'
 
 /**
  * Build the common Elasticsearch query clauses shared by every asset type:
@@ -13,6 +18,7 @@ import { assetRegistry } from 'src/components/data_library/assets'
  * asset's own `buildQuery` method.
  */
 const buildCommonQueryClauses = (
+  assetType: AssetType,
   libraryConfig: LibraryVersionNew,
   filters: FilterState,
   queryTerm: string,
@@ -36,61 +42,7 @@ const buildCommonQueryClauses = (
     })
   }
 
-  const filterQuery: QueryClause[] = []
-
-  if (filters.accessManagement.length > 0) {
-    filterQuery.push({
-      bool: {
-        should: filters.accessManagement.map(term => ({
-          term: { 'accessManagement.keyword': term },
-        })),
-      },
-    })
-  }
-
-  if (filters.dataUse.length > 0) {
-    filterQuery.push({
-      bool: {
-        should: filters.dataUse.map(term => ({
-          match: { 'dataUse.primary.code': term },
-        })),
-      },
-    })
-  }
-
-  if (filters.dataType.length > 0) {
-    filterQuery.push({
-      bool: {
-        should: filters.dataType.map(term => ({
-          match: { 'study.dataTypes': term },
-        })),
-      },
-    })
-  }
-
-  if (filters.dac.length > 0) {
-    filterQuery.push({
-      bool: {
-        should: filters.dac.map(term => ({
-          match_phrase: { 'dac.dacName': term },
-        })),
-      },
-    })
-  }
-
-  if (
-    filters.participantCount.min !== undefined
-    || filters.participantCount.max !== undefined
-  ) {
-    filterQuery.push({
-      range: {
-        participantCount: {
-          ...(filters.participantCount.min !== undefined && { gte: filters.participantCount.min }),
-          ...(filters.participantCount.max !== undefined && { lte: filters.participantCount.max }),
-        },
-      },
-    })
-  }
+  const filterQuery = buildFilterClausesForAsset(assetType, filters)
 
   return { queryChunks, filterQuery }
 }
@@ -111,9 +63,11 @@ export const buildElasticsearchQuery = (
   sort?: SortState,
 ): ElasticsearchQuery => {
   const asset = assetRegistry[assetType]
+  const sanitizedFilters = sanitizeFiltersForAsset(assetType, filters)
   const { queryChunks, filterQuery } = buildCommonQueryClauses(
+    assetType,
     libraryConfig,
-    filters,
+    sanitizedFilters,
     queryTerm,
     asset.searchFields,
   )
@@ -131,12 +85,14 @@ export const useLibraryData = (
   pagination: PaginationState,
   sort?: SortState,
 ) => {
+  const sanitizedFilters = sanitizeFiltersForAsset(assetType, filters)
+
   return useQuery({
     queryKey: [
       'library-data',
       libraryConfig.key,
       assetType,
-      filters,
+      sanitizedFilters,
       queryTerm,
       pagination,
       sort,
@@ -145,7 +101,7 @@ export const useLibraryData = (
       const query = buildElasticsearchQuery(
         libraryConfig,
         assetType,
-        filters,
+        sanitizedFilters,
         queryTerm,
         pagination,
         sort,
@@ -153,7 +109,7 @@ export const useLibraryData = (
 
       const response = await DataSet.searchDatasetIndexV2(query)
       const actualData = response.data || response
-      return assetRegistry[assetType].transformResponse(actualData, pagination)
+      return assetRegistry[assetType].transformResponse(actualData, pagination, sanitizedFilters)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
@@ -175,13 +131,7 @@ export const useLibraryMetadata = (libraryConfig: LibraryVersionNew) => {
       const query = buildElasticsearchQuery(
         libraryConfig,
         AssetType.DATASETS,
-        {
-          accessManagement: [],
-          dataUse: [],
-          dataType: [],
-          dac: [],
-          participantCount: {},
-        },
+        EMPTY_FILTERS,
         '',
         { page: 0, pageSize: 0 },
       )

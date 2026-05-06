@@ -1,9 +1,62 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { BiospecimenStudyAggregationResponse, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
-import { BiospecimenAsset, PaginationState, SortState } from 'src/types/library'
+import { BiospecimenAsset, FilterState, PaginationState, SortState } from 'src/types/library'
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
 import { BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit, Sex } from 'src/types/model'
+
+const includesIgnoreCase = (source: string | undefined, values: string[]) => {
+  if (values.length === 0) {
+    return true
+  }
+
+  const normalizedSource = source?.toLowerCase() || ''
+  return values.some(value => normalizedSource.includes(value.toLowerCase()))
+}
+
+const matchesBiospecimenFilters = (biospecimen: BiospecimenAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  if (filters.biospecimenType.length > 0 && !filters.biospecimenType.includes(biospecimen.specimenType)) {
+    return false
+  }
+
+  if (!includesIgnoreCase(biospecimen.optionalDataUse, filters.biospecimenDataUse)) {
+    return false
+  }
+
+  const collectionDate = biospecimen.dateOfCollection || ''
+  if (filters.biospecimenCollectionDate.after && collectionDate < filters.biospecimenCollectionDate.after) {
+    return false
+  }
+  if (filters.biospecimenCollectionDate.before && collectionDate > filters.biospecimenCollectionDate.before) {
+    return false
+  }
+
+  if (
+    filters.biospecimenPostMortemIntervalUnit.length > 0
+    && !filters.biospecimenPostMortemIntervalUnit.includes(biospecimen.postMortemInterval?.unit || '')
+  ) {
+    return false
+  }
+
+  const postMortemValue = biospecimen.postMortemInterval?.value
+  const belowMinPostMortemInterval = (
+    filters.biospecimenPostMortemInterval.min !== undefined
+    && (postMortemValue === undefined || postMortemValue < filters.biospecimenPostMortemInterval.min)
+  )
+  if (belowMinPostMortemInterval) {
+    return false
+  }
+
+  const aboveMaxPostMortemInterval = (
+    filters.biospecimenPostMortemInterval.max !== undefined
+    && (postMortemValue === undefined || postMortemValue > filters.biospecimenPostMortemInterval.max)
+  )
+  return !aboveMaxPostMortemInterval
+}
 
 export const biospecimenAsset: AssetDefinition = {
   label: { singular: 'Biospecimen', plural: 'Biospecimens' },
@@ -52,7 +105,7 @@ export const biospecimenAsset: AssetDefinition = {
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as BiospecimenStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const biospecimens: BiospecimenAsset[] = []
@@ -63,7 +116,7 @@ export const biospecimenAsset: AssetDefinition = {
       for (const [biospecimenIndex, biospecimen] of studyBiospecimens.entries()) {
         // biospecimenId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        biospecimens.push({
+        const row: BiospecimenAsset = {
           biospecimenId: biospecimen.biospecimenId || `${bucket.key}-${biospecimenIndex}`,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
@@ -82,7 +135,11 @@ export const biospecimenAsset: AssetDefinition = {
           organization: biospecimen.organization || '',
           sourceSite: biospecimen.sourceSite || '',
           optionalDataUse: biospecimen.optionalDataUse || '',
-        })
+        }
+
+        if (matchesBiospecimenFilters(row, filters)) {
+          biospecimens.push(row)
+        }
       }
     }
 

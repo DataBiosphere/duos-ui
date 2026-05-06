@@ -1,8 +1,20 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, PublicationStudyAggregationResponse, QueryClause } from 'src/types/elastic'
-import { PaginationState, PublicationAsset, SortState } from 'src/types/library'
+import { FilterState, PaginationState, PublicationAsset, SortState } from 'src/types/library'
 import { makePublicationColumns } from 'src/components/data_library/columns/publicationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+
+const matchesPublicationFilters = (publication: PublicationAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  if (filters.datasetsCited === undefined) {
+    return true
+  }
+
+  return publication.citation === filters.datasetsCited
+}
 
 export const publicationAsset: AssetDefinition = {
   label: { singular: 'Publication', plural: 'Publications' },
@@ -55,7 +67,7 @@ export const publicationAsset: AssetDefinition = {
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as PublicationStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const publications: PublicationAsset[] = []
@@ -66,7 +78,7 @@ export const publicationAsset: AssetDefinition = {
       for (const [pubIndex, pub] of studyPublications.entries()) {
         // publicationId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        publications.push({
+        const row: PublicationAsset = {
           publicationId: pub.publicationId || `${bucket.key}-${pubIndex}`,
           studyId: bucket.key,
           studyName: (studyData as { studyName?: string }).studyName || '',
@@ -83,7 +95,11 @@ export const publicationAsset: AssetDefinition = {
           url: pub.url || '',
           access: pub.access || '',
           tags: pub.tags || [],
-        })
+        }
+
+        if (matchesPublicationFilters(row, filters)) {
+          publications.push(row)
+        }
       }
     }
 
