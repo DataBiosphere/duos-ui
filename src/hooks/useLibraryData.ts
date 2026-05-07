@@ -86,6 +86,11 @@ export const useLibraryData = (
   sort?: SortState,
 ) => {
   const sanitizedFilters = sanitizeFiltersForAsset(assetType, filters)
+  const emptyResult = {
+    items: [],
+    total: 0,
+    aggregations: {},
+  }
 
   return useQuery({
     queryKey: [
@@ -113,11 +118,8 @@ export const useLibraryData = (
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
-    placeholderData: {
-      items: [],
-      total: 0,
-      aggregations: {},
-    },
+    // Preserve previous rows/options while new filters load to avoid UI flicker.
+    placeholderData: previousData => previousData ?? emptyResult,
   })
 }
 

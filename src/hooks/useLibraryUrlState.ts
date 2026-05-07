@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
+import { useCallback } from 'react'
 import { AssetType, FilterState, LibraryUrlState, SortOrder } from 'src/types/library'
 
 type ArrayFilterParamConfig = {
@@ -300,7 +301,7 @@ export const useLibraryUrlState = () => {
     hideFilters: searchParams.get('hideFilters') === 'true',
   }
 
-  const updateState = (updates: Partial<LibraryUrlState>) => {
+  const updateState = useCallback((updates: Partial<LibraryUrlState>) => {
     const newParams = new URLSearchParams(searchParams)
 
     applyStringStateUpdate(updates, newParams, 'library', 'library')
@@ -317,7 +318,7 @@ export const useLibraryUrlState = () => {
     }
 
     setSearchParams(newParams)
-  }
+  }, [searchParams, setSearchParams])
 
   return [state, updateState] as const
 }

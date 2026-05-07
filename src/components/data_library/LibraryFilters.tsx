@@ -44,7 +44,7 @@ type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
 const isCheckboxFilterKey = (key: FilterKey): key is CheckboxFilterKey =>
   (CHECKBOX_FILTER_KEYS as readonly string[]).includes(key)
 
-export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
+export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   filters,
   onChange,
   onClear,
@@ -413,6 +413,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = ({
       )}
     </Box>
   )
-}
+})
+
+LibraryFilters.displayName = 'LibraryFilters'
 
 export default LibraryFilters

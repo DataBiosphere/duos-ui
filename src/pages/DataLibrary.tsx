@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Skeleton, Typography } from '@mui/material'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
@@ -132,7 +132,7 @@ export const DataLibrary: React.FC = () => {
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 
-  const { data, isLoading, isFetching, error } = useLibraryData(
+  const { data, isFetching, error } = useLibraryData(
     libraryConfig,
     urlState.tab,
     urlState.filters,
@@ -217,6 +217,10 @@ export const DataLibrary: React.FC = () => {
   }, [metadata, data?.items, urlState.tab])
 
   const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
+  const sanitizedFilters = useMemo(
+    () => sanitizeFiltersForAsset(urlState.tab, urlState.filters),
+    [urlState.tab, urlState.filters],
+  )
   const filterSections = useMemo(
     () => getFilterSectionsForAsset(urlState.tab, availableFilters),
     [urlState.tab, availableFilters],
@@ -237,36 +241,36 @@ export const DataLibrary: React.FC = () => {
     return []
   }, [urlState.sortField, urlState.sortOrder])
 
-  const handleTabChange = (newAssetType: AssetType) => {
+  const handleTabChange = useCallback((newAssetType: AssetType) => {
     updateUrlState({
       tab: newAssetType,
       page: 0,
       filters: sanitizeFiltersForAsset(newAssetType, urlState.filters),
     })
     setSelectedDatasetIds([])
-  }
+  }, [updateUrlState, urlState.filters])
 
-  const handleSearchChange = (query: string) => {
+  const handleSearchChange = useCallback((query: string) => {
     updateUrlState({
       query,
       page: 0,
     })
-  }
+  }, [updateUrlState])
 
-  const handleFiltersChange = (newFilters: typeof urlState.filters) => {
+  const handleFiltersChange = useCallback((newFilters: typeof urlState.filters) => {
     updateUrlState({
       filters: sanitizeFiltersForAsset(urlState.tab, newFilters),
     })
-  }
+  }, [updateUrlState, urlState])
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     updateUrlState({
       filters: sanitizeFiltersForAsset(urlState.tab, EMPTY_FILTERS),
       page: 0,
     })
-  }
+  }, [updateUrlState, urlState.tab])
 
-  const handleSortChange = (model: Array<{ field: string, sort: SortOrder | null }>) => {
+  const handleSortChange = useCallback((model: Array<{ field: string, sort: SortOrder | null }>) => {
     if (model.length > 0 && model[0].sort) {
       updateUrlState({
         sortField: model[0].field,
@@ -279,15 +283,19 @@ export const DataLibrary: React.FC = () => {
         sortOrder: undefined,
       })
     }
-  }
+  }, [updateUrlState])
 
-  const handleSelectionChange = (datasetIds: number[]) => {
+  const handleSelectionChange = useCallback((datasetIds: number[]) => {
     setSelectedDatasetIds(datasetIds)
-  }
+  }, [])
 
   const handleApplyForAccess = () => {
     applyForAccess(selectedDatasetIds, navigate)
   }
+
+  const handleToggleFilters = useCallback(() => {
+    updateUrlState({ hideFilters: !urlState.hideFilters })
+  }, [updateUrlState, urlState.hideFilters])
 
   useEffect(() => {
     const fetchExportable = async () => {
@@ -393,13 +401,13 @@ export const DataLibrary: React.FC = () => {
           }}
         >
           <LibraryFilters
-            filters={sanitizeFiltersForAsset(urlState.tab, urlState.filters)}
+            filters={sanitizedFilters}
             onChange={handleFiltersChange}
             onClear={handleClearFilters}
             sections={filterSections}
-            loading={isLoading || isMetadataLoading}
+            loading={isMetadataLoading}
             isOpen={!urlState.hideFilters}
-            onToggle={() => updateUrlState({ hideFilters: !urlState.hideFilters })}
+            onToggle={handleToggleFilters}
           />
         </Box>
 
