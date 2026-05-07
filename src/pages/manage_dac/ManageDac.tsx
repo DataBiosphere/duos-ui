@@ -1,5 +1,5 @@
 import ManageDacTable from 'src/components/manage_dac_table/ManageDacTable'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Styles } from 'src/libs/theme'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
@@ -10,52 +10,68 @@ import { useNavigate } from 'react-router-dom'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import AddObjectButton from 'src/components/AddObjectButton.tsx'
+import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import type { DacObject, Dataset } from 'src/types/model'
 
 const CHAIR = 'Chairperson'
 const ADMIN = 'Admin'
+type ManageDacRole = typeof CHAIR | typeof ADMIN
 
 export const ManageDac = function ManageDac() {
   usePageTitle('DACs')
-  const [isLoading, setIsLoading] = useState(false)
-  const [dacs, setDacs] = useState([])
-  const [userRole, setUserRole] = useState()
+  const currentUser = useMemo(() => Storage.getCurrentUser(), [])
+  const roles = useMemo(() => currentUser.roles?.map(r => r.name) ?? [], [currentUser])
+  const userRole: ManageDacRole = roles.includes(ADMIN) ? ADMIN : CHAIR
+  const chairDACIds = useMemo(() => new Set(
+    currentUser.roles
+      .filter(roleItem => roleItem.name === CHAIR && roleItem.dacId !== undefined)
+      .map(roleItem => roleItem.dacId as number),
+  ), [currentUser])
+
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [dacs, setDacs] = useState<DacObject[]>([])
 
   // modal state
-  const [showEditPage, setShowEditPage] = useState(false)
-  const [showAddPage, setShowAddPage] = useState(false)
-  const [showDatasetsPage, setShowDatasetsPage] = useState(false)
-  const [showMembersModal, setShowMembersModal] = useState(false)
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+  const [showEditPage, setShowEditPage] = useState<boolean>(false)
+  const [showAddPage, setShowAddPage] = useState<boolean>(false)
+  const [showDatasetsPage, setShowDatasetsPage] = useState<boolean>(false)
+  const [showMembersModal, setShowMembersModal] = useState<boolean>(false)
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false)
 
   // modal data
-  const [selectedDac, setSelectedDac] = useState({})
-  const [selectedDatasets, setSelectedDatasets] = useState([])
+  const [selectedDac, setSelectedDac] = useState<DacObject | null>(null)
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([])
 
-  const initializeDACs = async () => {
-    const currentUser = Storage.getCurrentUser()
-    const roles = (currentUser.roles) ? currentUser.roles.map(r => r.name) : []
-    const role = roles.includes(ADMIN) ? ADMIN : CHAIR
-    setUserRole(role)
-    const chairDACIds = new Set(currentUser.roles.filter(r => r.name === CHAIR).map(r => r.dacId))
-    setIsLoading(true)
+  const initializeDACs = useCallback(async () => {
     const allDacs = await DAC.list()
     if (roles.includes(ADMIN)) {
       setDacs(allDacs)
     }
     else {
-      setDacs(allDacs.filter(dac => chairDACIds.has(dac.dacId)))
+      setDacs(allDacs.filter(dac => dac.dacId !== undefined && chairDACIds.has(dac.dacId)))
     }
     setIsLoading(false)
-  }
+  }, [chairDACIds, roles])
 
   useEffect(() => {
-    const init = async () => {
+    let isMounted = true
+
+    const loadDACs = async () => {
       await initializeDACs()
     }
-    init()
-  }, [])
+
+    loadDACs().catch((error) => {
+      if (isMounted) {
+        Notifications.showError({ text: 'Failed to load DACs.' })
+        console.error('Error loading DACs:', error)
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [initializeDACs])
 
   const navigate = useNavigate()
 
@@ -71,10 +87,12 @@ export const ManageDac = function ManageDac() {
   }, [showDatasetsPage, selectedDac, selectedDatasets, navigate])
 
   const handleDeleteDac = async () => {
-    let status
-    await DAC.delete(selectedDac.dacId).then((resp) => {
-      status = resp.status
-    })
+    if (selectedDac?.dacId === undefined) {
+      Notifications.showError({ text: 'DAC could not be deleted.' })
+      return
+    }
+
+    const { status } = await DAC.delete(selectedDac.dacId)
     if (Number(status) === 200) {
       Notifications.showSuccess({ text: 'DAC successfully deleted.' })
       setShowConfirmationModal(false)
@@ -87,7 +105,7 @@ export const ManageDac = function ManageDac() {
 
   const closeViewMembersModal = () => {
     setShowMembersModal(false)
-    setSelectedDac({})
+    setSelectedDac(null)
   }
 
   const closeConfirmation = () => {
@@ -134,21 +152,17 @@ export const ManageDac = function ManageDac() {
         closeConfirmation={closeConfirmation}
         title="Delete DAC?"
         message="Are you sure you want to delete this Data Access Committee?"
-        header={selectedDac.name}
+        header={selectedDac?.name}
         onConfirm={handleDeleteDac}
       />
       {showMembersModal && (
         <DacMembersModal
           showModal={showMembersModal}
-          onOKRequest={closeViewMembersModal}
           onCloseRequest={closeViewMembersModal}
-          dac={selectedDac}
+          dac={selectedDac ?? {}}
         />
       )}
-      {showAddPage && (
-        <EditDac />
-      )}
-      {showEditPage && (
+      {(showAddPage || showEditPage) && (
         <EditDac />
       )}
     </div>
