@@ -27,6 +27,7 @@ const TestComponent = () => {
           filters: {
             ...EMPTY_FILTERS,
             accessManagement: ['controlled'],
+            clinicalTrialStatus: ['Active, not recruiting'],
             participantCount: { min: 10 },
           },
         })}
@@ -84,6 +85,7 @@ describe('useLibraryUrlState', () => {
     cy.get('#filters').then(($el) => {
       const filters = JSON.parse($el.text())
       expect(filters.accessManagement).to.deep.equal(['controlled'])
+      expect(filters.clinicalTrialStatus).to.deep.equal(['Active, not recruiting'])
       expect(filters.participantCount.min).to.equal(10)
     })
 
@@ -143,5 +145,31 @@ describe('useLibraryUrlState', () => {
     cy.get('#clear-sort').click()
     cy.get('#sortField').should('have.text', 'none')
     cy.get('#sortOrder').should('have.text', 'none')
+  })
+
+  it('parses comma-containing array values as single filter values', () => {
+    cy.mount(
+      <MemoryRouter initialEntries={['/?clinicalTrialStatus=Active,%20not%20recruiting']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    cy.get('#filters').then(($el) => {
+      const filters = JSON.parse($el.text())
+      expect(filters.clinicalTrialStatus).to.deep.equal(['Active, not recruiting'])
+    })
+  })
+
+  it('parses repeated array params without splitting comma-containing values', () => {
+    cy.mount(
+      <MemoryRouter initialEntries={['/?clinicalTrialStatus=Recruiting&clinicalTrialStatus=Active,%20not%20recruiting']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    cy.get('#filters').then(($el) => {
+      const filters = JSON.parse($el.text())
+      expect(filters.clinicalTrialStatus).to.deep.equal(['Recruiting', 'Active, not recruiting'])
+    })
   })
 })

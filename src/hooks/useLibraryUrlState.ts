@@ -72,8 +72,30 @@ const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'fundingDate', startParam: 'fundingStartDate', endParam: 'fundingEndDate' },
 ]
 
+const parseArrayParamValues = (searchParams: URLSearchParams, param: string): string[] => {
+  const values = searchParams.getAll(param).map(value => value.trim()).filter(Boolean)
+
+  if (values.length > 1) {
+    return values
+  }
+
+  if (values.length === 1) {
+    const [singleValue] = values
+
+    // Backward compatibility for older URLs that stored arrays as CSV.
+    // Preserve literal values that intentionally include comma + space.
+    if (singleValue.includes(',') && !singleValue.includes(', ')) {
+      return singleValue.split(',').map(value => value.trim()).filter(Boolean)
+    }
+
+    return [singleValue]
+  }
+
+  return []
+}
+
 const parseArrayFilters = (searchParams: URLSearchParams) => Object.fromEntries(
-  ARRAY_FILTER_PARAM_CONFIG.map(({ key, param }) => [key, searchParams.get(param)?.split(',').filter(Boolean) || []]),
+  ARRAY_FILTER_PARAM_CONFIG.map(({ key, param }) => [key, parseArrayParamValues(searchParams, param)]),
 )
 
 const parseRangeFilters = (searchParams: URLSearchParams) => Object.fromEntries(
@@ -100,11 +122,10 @@ const parseDateFilters = (searchParams: URLSearchParams) => Object.fromEntries(
 
 const serializeArrayFiltersToUrl = (filters: FilterState, searchParams: URLSearchParams) => {
   ARRAY_FILTER_PARAM_CONFIG.forEach(({ key, param }) => {
+    searchParams.delete(param)
+
     if (filters[key].length > 0) {
-      searchParams.set(param, filters[key].join(','))
-    }
-    else {
-      searchParams.delete(param)
+      filters[key].forEach(value => searchParams.append(param, value))
     }
   })
 }
