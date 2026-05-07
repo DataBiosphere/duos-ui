@@ -218,7 +218,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.get('.accordion-step-container').should('exist')
   })
 
-  it('renders dataset/DAA relationship section inside read-only containers', () => {
+  it('does not render dataset/DAA relationship section in read-only mode', () => {
     datasetSnapshotsStub.resolves([
       {
         datasetId: 1,
@@ -231,10 +231,7 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     mountComponent({}, true)
 
-    cy.get('.accordion-step-container').contains('Dataset and Data Access Agreement Relationships').should('be.visible')
-    cy.get('.accordion-step-container').contains('Progress Report Dataset').should('be.visible')
-    cy.get('.accordion-step-container').contains('DUOS-PR-001').should('be.visible')
-    cy.get('.accordion-step-container').contains('button', 'Download and view').should('be.visible')
+    cy.contains('Dataset and Data Access Agreement Relationships').should('not.exist')
   })
 
   it('does not render dataset/DAA relationship section in non-read-only mode', () => {
@@ -243,7 +240,7 @@ describe('ProgressReportApplication - Component Tests', () => {
     cy.contains('Dataset and Data Access Agreement Relationships').should('not.exist')
   })
 
-  it('displays required DAA links for selected datasets', () => {
+  it('does not display required DAA links in read-only mode', () => {
     cy.stub(DAA, 'getDaas').resolves([
       {
         daaId: 100,
@@ -256,11 +253,11 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     mountComponent({}, true)
 
-    cy.contains('Required Data Access Agreements').should('exist')
-    cy.contains('TestDAA').should('exist')
+    cy.contains('Required Data Access Agreements').should('not.exist')
+    cy.contains('TestDAA').should('not.exist')
   })
 
-  it('renders progress report agreement text in the RequiredDAAs section', () => {
+  it('does not render progress report agreement text from RequiredDAAs in read-only mode', () => {
     cy.stub(DAA, 'getDaas').resolves([
       {
         daaId: 100,
@@ -273,10 +270,10 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     mountComponent({}, true)
 
-    cy.contains('By submitting this progress report and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.').should('exist')
+    cy.contains('By submitting this progress report and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.').should('not.exist')
   })
 
-  it('shows both required DAA step and Data Use Acknowledgements when the DAA feature is enabled', () => {
+  it('does not show the required DAA step in read-only mode when the DAA feature is enabled', () => {
     cy.stub(DAA, 'getDaas').resolves([
       {
         daaId: 100,
@@ -307,7 +304,7 @@ describe('ProgressReportApplication - Component Tests', () => {
 
     cy.mount(<BrowserRouter><ProgressReportApplication {...props} /></BrowserRouter> as ReactNode)
 
-    cy.contains('Step 2.1: Required Data Access Agreements').should('exist')
+    cy.contains('Step 2.1: Required Data Access Agreements').should('not.exist')
   })
 
   it('updates required DAA links when selected datasets change', () => {

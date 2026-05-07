@@ -112,6 +112,7 @@ export default function DataAccessRequest(props) {
             disabled={readOnlyMode}
             datasets={datasets}
             setSelectedDatasets={setSelectedDatasets}
+            referenceId={referenceId}
           />
         </div>
 

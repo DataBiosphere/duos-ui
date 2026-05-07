@@ -1,5 +1,6 @@
 import { React } from 'react'
 import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets.jsx'
+import { DAR } from 'src/libs/ajax/DAR'
 import { DAA } from 'src/libs/ajax/DAA'
 
 const datasets = [
@@ -33,12 +34,14 @@ const props = {
   datasets: datasets,
   setSelectedDatasets: () => {},
   disabled: false,
+  referenceId: 'ref-1',
 }
 
 const propsDisabled = {
   datasets: datasets,
   setSelectedDatasets: () => {},
   disabled: true,
+  referenceId: 'ref-1',
 }
 
 describe('Selectable Datasets - Not Read Only', () => {
@@ -121,7 +124,70 @@ describe('Selectable Datasets - Not Read Only', () => {
 
   describe('Selectable Datasets - Read Only', () => {
     beforeEach(() => {
+      cy.stub(DAA, 'getDaas').resolves([
+        {
+          daaId: 101,
+          file: { fileName: 'mapped-daa-101.pdf' },
+          dacs: [{ dacId: 1 }],
+        },
+      ])
+      cy.stub(DAR, 'getDatasetDaaSnapshots').resolves([])
       cy.mount(<SelectableDatasets {...propsDisabled} />)
+    })
+
+    it('Uses historical snapshot mapping for DAA links', () => {
+      DAR.getDatasetDaaSnapshots.restore()
+      cy.stub(DAR, 'getDatasetDaaSnapshots').resolves([
+        {
+          datasetId: 123456,
+          daaId: 101,
+          daaFileName: 'historical-daa-101.pdf',
+        },
+      ])
+
+      cy.mount(<SelectableDatasets {...propsDisabled} />)
+
+      cy.get('#DUOS-123456_summary').contains('mapped-daa-101.pdf').should('exist')
+      cy.get('#DUOS-234567_summary').should('not.contain', 'historical-daa-101.pdf')
+    })
+
+    it('Uses historical snapshot mapping by datasetIdentifier when datasetId is absent', () => {
+      DAR.getDatasetDaaSnapshots.restore()
+      cy.stub(DAR, 'getDatasetDaaSnapshots').resolves([
+        {
+          datasetIdentifier: 'DUOS-123456',
+          daaId: 101,
+          daaFileName: 'identifier-mapped-daa.pdf',
+        },
+      ])
+
+      cy.mount(<SelectableDatasets {...propsDisabled} />)
+
+      cy.get('#DUOS-123456_summary').contains('mapped-daa-101.pdf').should('exist')
+    })
+
+    it('Uses historical snapshot mapping when snapshots are returned as datasetId-keyed object map', () => {
+      DAR.getDatasetDaaSnapshots.restore()
+      cy.stub(DAR, 'getDatasetDaaSnapshots').resolves({
+        123456: {
+          daaId: 101,
+          capturedAt: 1778006370183,
+        },
+      })
+
+      cy.mount(<SelectableDatasets {...propsDisabled} />)
+
+      cy.get('#DUOS-123456_summary').contains('mapped-daa-101.pdf').should('exist')
+    })
+
+    it('Shows fallback text when snapshot lookup returns 404', () => {
+      DAR.getDatasetDaaSnapshots.restore()
+      cy.stub(DAR, 'getDatasetDaaSnapshots').rejects({ response: { status: 404 } })
+
+      cy.mount(<SelectableDatasets {...propsDisabled} />)
+
+      cy.get('#DUOS-123456_summary').contains('The DUOS Library Card Agreements in effect at the time this request was made govern the use of this data.').should('be.visible')
+      cy.get('#DUOS-234567_summary').contains('The DUOS Library Card Agreements in effect at the time this request was made govern the use of this data.').should('be.visible')
     })
 
     it('Can not click on any dataset', () => {
