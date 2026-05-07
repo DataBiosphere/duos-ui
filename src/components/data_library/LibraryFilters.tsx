@@ -136,26 +136,34 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <FormGroup>
-            {options.map(option => (
-              <FormControlLabel
-                key={option.value}
-                control={(
-                  <Checkbox
-                    checked={(filters[key]).includes(option.value)}
-                    onChange={() => handleFilterToggle(key, option.value)}
-                    size="small"
-                  />
-                )}
-                label={(
-                  <Typography variant="body2">
-                    {option.label}
-                    {option.count !== undefined && ` (${option.count})`}
-                  </Typography>
-                )}
-              />
-            ))}
-          </FormGroup>
+          {options.length === 0
+            ? (
+                <Typography variant="body2" color="text.secondary">
+                  No filters available
+                </Typography>
+              )
+            : (
+                <FormGroup>
+                  {options.map(option => (
+                    <FormControlLabel
+                      key={option.value}
+                      control={(
+                        <Checkbox
+                          checked={(filters[key]).includes(option.value)}
+                          onChange={() => handleFilterToggle(key, option.value)}
+                          size="small"
+                        />
+                      )}
+                      label={(
+                        <Typography variant="body2">
+                          {option.label}
+                          {option.count !== undefined && ` (${option.count})`}
+                        </Typography>
+                      )}
+                    />
+                  ))}
+                </FormGroup>
+              )}
         </AccordionDetails>
       </Accordion>
     )

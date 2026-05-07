@@ -95,6 +95,13 @@ describe('LibraryFilters', () => {
     cy.contains('Open (5)').should('be.visible')
   })
 
+  it('shows a helper label when a visible filter section has no options', () => {
+    cy.mount(<LibraryFiltersWrapper />)
+
+    cy.contains('DAC').click()
+    cy.contains('No filters available').should('be.visible')
+  })
+
   it('calls onChange when a filter is toggled', () => {
     const onChange = cy.stub().as('onChange')
     cy.mount(<LibraryFiltersWrapper onChange={onChange} />)
