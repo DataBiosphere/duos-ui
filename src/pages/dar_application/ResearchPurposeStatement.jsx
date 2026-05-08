@@ -1,5 +1,5 @@
 import React from 'react'
-import { isEmpty } from 'lodash'
+import { isEmpty } from 'src/utils/NodashUtil'
 import './dar_application.css'
 import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms'
 

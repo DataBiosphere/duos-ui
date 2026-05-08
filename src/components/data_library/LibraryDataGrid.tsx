@@ -4,7 +4,7 @@ import {
   GridRowSelectionModel,
 } from '@mui/x-data-grid'
 import { Box, Typography, CircularProgress } from '@mui/material'
-import { isEmpty } from 'lodash'
+import { isEmpty } from 'src/utils/NodashUtil'
 import { LibraryDataGridProps } from 'src/types/library'
 import { assetRegistry, LibraryRow } from 'src/components/data_library/assets'
 

@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { isFunction, isNil } from 'lodash'
+import { isFunction, isNil } from 'src/utils/NodashUtil'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import SignInButton from 'src/components/SignInButton.js'

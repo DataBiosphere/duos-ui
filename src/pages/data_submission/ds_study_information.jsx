@@ -1,7 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { isEmpty } from 'lodash'
-
+import { isEmpty } from 'src/utils/NodashUtil'
 import { Notifications } from '../../libs/utils'
 import { User } from '../../libs/ajax/User'
 import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms'

@@ -1,5 +1,5 @@
 import { isEmailAddress } from '../../libs/utils'
-import { isString, isEmpty, isNil, isArray, isNumber } from 'lodash'
+import { isString, isEmpty, isNil, isArray, isNumber } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
 import { Institution } from 'src/libs/ajax/Institution.js'

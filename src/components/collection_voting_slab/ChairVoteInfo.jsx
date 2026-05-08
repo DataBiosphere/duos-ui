@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { isNil } from 'lodash'
+import { isNil } from 'src/utils/NodashUtil'
 import VotesPieChart from 'src/components/common/VotesPieChart'
 
 const styles = {

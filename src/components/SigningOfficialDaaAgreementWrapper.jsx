@@ -1,5 +1,5 @@
 import React from 'react'
-import { isNull } from 'lodash'
+import { isNull } from 'src/utils/NodashUtil'
 import { Notifications } from 'src/libs/utils'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
