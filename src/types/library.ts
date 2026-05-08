@@ -38,10 +38,47 @@ export interface FilterState {
   dataUse: string[]
   dataType: string[]
   dac: string[]
+  workspaceTools: string[]
+  workspacePlatform: string[]
+  clinicalTrialStatus: string[]
+  clinicalTrialPhase: string[]
+  clinicalTrialInterventionType: string[]
+  clinicalTrialRegistry: string[]
+  biospecimenType: string[]
+  biospecimenDataUse: string[]
+  biospecimenPostMortemIntervalUnit: string[]
+  datasetsCited?: boolean
   participantCount: {
     min?: number
     max?: number
   }
+  biospecimenPostMortemInterval: {
+    min?: number
+    max?: number
+  }
+  clinicalTrialDates: {
+    startDate?: string
+    endDate?: string
+  }
+  biospecimenCollectionDate: {
+    after?: string
+    before?: string
+  }
+  ipFiledDate: {
+    after?: string
+    before?: string
+  }
+  fundingDate: {
+    startDate?: string
+    endDate?: string
+  }
+}
+
+export type FilterKey = keyof FilterState
+
+export interface AssetFilterConfig {
+  visibleFilters: FilterKey[]
+  labels?: Partial<Record<FilterKey, string>>
 }
 
 export interface FilterOption {
@@ -50,11 +87,38 @@ export interface FilterOption {
   count?: number
 }
 
+export type LibraryFilterSectionControl = 'checkbox' | 'boolean' | 'range' | 'dateRange'
+
+export interface LibraryFilterSection {
+  key: FilterKey
+  label: string
+  control: LibraryFilterSectionControl
+  options?: FilterOption[]
+  range?: {
+    min: number
+    max: number
+  }
+}
+
 export interface AvailableFilters {
   accessManagement: FilterOption[]
   dataUse: FilterOption[]
   dataType: FilterOption[]
   dac: FilterOption[]
+  workspaceTools: FilterOption[]
+  workspacePlatform: FilterOption[]
+  clinicalTrialStatus: FilterOption[]
+  clinicalTrialPhase: FilterOption[]
+  clinicalTrialInterventionType: FilterOption[]
+  clinicalTrialRegistry: FilterOption[]
+  biospecimenType: FilterOption[]
+  biospecimenDataUse: FilterOption[]
+  biospecimenPostMortemIntervalUnit: FilterOption[]
+  datasetsCited: FilterOption[]
+  biospecimenPostMortemIntervalRange: {
+    min: number
+    max: number
+  }
   participantCountRange: {
     min: number
     max: number
@@ -65,7 +129,7 @@ export interface LibraryFiltersProps {
   filters: FilterState
   onChange: (filters: FilterState) => void
   onClear: () => void
-  availableFilters: AvailableFilters
+  sections: LibraryFilterSection[]
   loading?: boolean
   isOpen?: boolean
   onToggle?: () => void

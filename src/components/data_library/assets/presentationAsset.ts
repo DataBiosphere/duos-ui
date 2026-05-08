@@ -1,8 +1,20 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, PresentationStudyAggregationResponse, QueryClause } from 'src/types/elastic'
-import { PaginationState, PresentationAsset, SortState } from 'src/types/library'
+import { FilterState, PaginationState, PresentationAsset, SortState } from 'src/types/library'
 import { makePresentationColumns } from 'src/components/data_library/columns/presentationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+
+const matchesPresentationFilters = (presentation: PresentationAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  if (filters.datasetsCited === undefined) {
+    return true
+  }
+
+  return presentation.citation === filters.datasetsCited
+}
 
 export const presentationAsset: AssetDefinition = {
   label: { singular: 'Presentation', plural: 'Presentations' },
@@ -55,7 +67,7 @@ export const presentationAsset: AssetDefinition = {
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as PresentationStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const presentations: PresentationAsset[] = []
@@ -66,7 +78,7 @@ export const presentationAsset: AssetDefinition = {
       for (const [presIndex, pres] of studyPresentations.entries()) {
         // presentationId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        presentations.push({
+        const row: PresentationAsset = {
           presentationId: pres.presentationId || `${bucket.key}-${presIndex}`,
           studyId: bucket.key,
           studyName: (studyData as { studyName?: string }).studyName || '',
@@ -82,7 +94,11 @@ export const presentationAsset: AssetDefinition = {
           format: pres.format || '',
           access: pres.access || '',
           tags: pres.tags || [],
-        })
+        }
+
+        if (matchesPresentationFilters(row, filters)) {
+          presentations.push(row)
+        }
       }
     }
 

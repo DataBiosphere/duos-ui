@@ -5,10 +5,52 @@ import {
   ClinicalTrialStudyAggregationResponse,
   QueryClause,
 } from 'src/types/elastic'
-import { ClinicalTrialAsset, PaginationState, SortState } from 'src/types/library'
+import { ClinicalTrialAsset, FilterState, PaginationState, SortState } from 'src/types/library'
 import { makeClinicalTrialColumns } from 'src/components/data_library/columns/clinicalTrialColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
 import { ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus } from 'src/types/model'
+
+const includesIgnoreCase = (source: string | undefined, values: string[]) => {
+  if (values.length === 0) {
+    return true
+  }
+
+  const normalizedSource = source?.toLowerCase() || ''
+  return values.some(value => normalizedSource.includes(value.toLowerCase()))
+}
+
+const matchesClinicalTrialFilters = (trial: ClinicalTrialAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  if (filters.clinicalTrialStatus.length > 0 && !filters.clinicalTrialStatus.includes(trial.status)) {
+    return false
+  }
+
+  if (filters.clinicalTrialPhase.length > 0 && !filters.clinicalTrialPhase.includes(trial.phase)) {
+    return false
+  }
+
+  if (!includesIgnoreCase(trial.interventionType, filters.clinicalTrialInterventionType)) {
+    return false
+  }
+
+  if (!includesIgnoreCase(trial.registry, filters.clinicalTrialRegistry)) {
+    return false
+  }
+
+  const { startDate, endDate } = filters.clinicalTrialDates
+  if (startDate && endDate && startDate > endDate) {
+    return true
+  }
+
+  if (startDate && (!trial.startDate || trial.startDate < startDate)) {
+    return false
+  }
+
+  return !(endDate && (!trial.endDate || trial.endDate > endDate))
+}
 
 export const clinicalTrialAsset: AssetDefinition = {
   label: { singular: 'Clinical Trial', plural: 'Clinical Trials' },
@@ -22,7 +64,7 @@ export const clinicalTrialAsset: AssetDefinition = {
     'study.assets.clinicalTrials.identifier',
     'study.assets.clinicalTrials.registry',
     'study.assets.clinicalTrials.tags',
-    'study.assets.clinicalTrials.interventionTypes',
+    'study.assets.clinicalTrials.interventionType',
     'study.assets.clinicalTrials.phase',
     'study.assets.clinicalTrials.status',
   ],
@@ -62,7 +104,7 @@ export const clinicalTrialAsset: AssetDefinition = {
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as ClinicalTrialStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const trials: ClinicalTrialAsset[] = []
@@ -73,7 +115,7 @@ export const clinicalTrialAsset: AssetDefinition = {
       for (const [trialIndex, trial] of studyTrials.entries()) {
         // clinicalTrialId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        trials.push({
+        const row: ClinicalTrialAsset = {
           clinicalTrialId: trial.clinicalTrialId || `${bucket.key}-${trialIndex}`,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
@@ -89,7 +131,11 @@ export const clinicalTrialAsset: AssetDefinition = {
           phase: trial.phase as ClinicalTrialPhase || '',
           url: trial.url || '',
           tags: trial.tags || [],
-        })
+        }
+
+        if (matchesClinicalTrialFilters(row, filters)) {
+          trials.push(row)
+        }
       }
     }
 

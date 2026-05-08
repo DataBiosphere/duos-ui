@@ -2,6 +2,7 @@ import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType } from 'src/types/library'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const TestComponent = () => {
   const [state, updateState] = useLibraryUrlState()
@@ -24,10 +25,9 @@ const TestComponent = () => {
         id="update-filters"
         onClick={() => updateState({
           filters: {
+            ...EMPTY_FILTERS,
             accessManagement: ['controlled'],
-            dataUse: [],
-            dataType: [],
-            dac: [],
+            clinicalTrialStatus: ['Active, not recruiting'],
             participantCount: { min: 10 },
           },
         })}
@@ -85,6 +85,7 @@ describe('useLibraryUrlState', () => {
     cy.get('#filters').then(($el) => {
       const filters = JSON.parse($el.text())
       expect(filters.accessManagement).to.deep.equal(['controlled'])
+      expect(filters.clinicalTrialStatus).to.deep.equal(['Active, not recruiting'])
       expect(filters.participantCount.min).to.equal(10)
     })
 
@@ -144,5 +145,31 @@ describe('useLibraryUrlState', () => {
     cy.get('#clear-sort').click()
     cy.get('#sortField').should('have.text', 'none')
     cy.get('#sortOrder').should('have.text', 'none')
+  })
+
+  it('parses comma-containing array values as single filter values', () => {
+    cy.mount(
+      <MemoryRouter initialEntries={['/?clinicalTrialStatus=Active,%20not%20recruiting']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    cy.get('#filters').then(($el) => {
+      const filters = JSON.parse($el.text())
+      expect(filters.clinicalTrialStatus).to.deep.equal(['Active, not recruiting'])
+    })
+  })
+
+  it('parses repeated array params without splitting comma-containing values', () => {
+    cy.mount(
+      <MemoryRouter initialEntries={['/?clinicalTrialStatus=Recruiting&clinicalTrialStatus=Active,%20not%20recruiting']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    cy.get('#filters').then(($el) => {
+      const filters = JSON.parse($el.text())
+      expect(filters.clinicalTrialStatus).to.deep.equal(['Recruiting', 'Active, not recruiting'])
+    })
   })
 })

@@ -5,6 +5,28 @@
 DUOS UI is a React/TypeScript single-page application for the Data Use Oversight System. It uses Vite for
 bundling, ESLint for linting, TypeScript strict mode, and Cypress for component and e2e testing.
 
+## Data Library Filters and Nested Asset Rows
+
+Data Library filter behavior is configuration-driven and must stay consistent across UI rendering, URL state,
+Elasticsearch query generation, and post-transform row filtering.
+
+- Per-asset visible filters are defined in `src/libs/dataLibraryFilterConfig.ts` (`assetFilterRegistry`).
+- Filter definitions and query clause builders live in `src/components/data_library/filterRegistry.ts`.
+- `sanitizeFiltersForAsset(assetType, filters)` is the single source for dropping hidden/unsupported filters.
+- `LibraryFilters` receives prebuilt `sections` only; do not reintroduce separate visible/available props.
+- For study-aggregated nested tabs (e.g. biospecimens, clinical trials, presentations, publications),
+  `transformResponse` must apply row-level predicate filtering so one matching nested item does not cause all
+  sibling rows from the same study to be returned.
+
+When adding a new filter:
+
+1. Extend `FilterState`/`AvailableFilters` in `src/types/library.ts`.
+2. Add filter clause + section behavior in `src/components/data_library/filterRegistry.ts`.
+3. Register visibility per `AssetType` in `src/libs/dataLibraryFilterConfig.ts`.
+4. Update URL parse/serialize mapping in `src/hooks/useLibraryUrlState.ts`.
+5. Add/adjust component tests for filter visibility, sanitization, query clause generation, and nested row
+   post-transform behavior.
+
 ## Download Links — Use `DownloadLink` for All File Downloads
 
 The shared `DownloadLink` component (`src/components/DownloadLink.jsx`) is the single canonical way to render

@@ -230,6 +230,101 @@ describe('DataLibrary', () => {
     cy.get('button').contains('Datasets').should('have.css', 'font-weight', '400')
   })
 
+  it('removes incompatible filters when switching to an asset with a narrower filter set', () => {
+    cy.mount(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?tab=datasets&access=controlled&minParticipants=10']}>
+          <DataLibrary />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    cy.contains('Access Management').should('exist')
+    cy.contains('Participants').should('exist')
+    cy.contains('Clear').should('exist')
+
+    cy.get('button').contains('Publications').click()
+
+    cy.contains('Access Management').should('not.exist')
+    cy.contains('Participants').should('not.exist')
+    cy.contains('Datasets Cited?').should('not.exist')
+    cy.contains('Clear').should('not.exist')
+    cy.location('search').should('not.contain', 'access=')
+    cy.location('search').should('not.contain', 'minParticipants=')
+  })
+
+  it('applies row-level filtering for nested presentation rows when Datasets Cited is selected', () => {
+    cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
+      if (req.body.aggs?.studies) {
+        req.reply({
+          aggregations: {
+            studies: {
+              buckets: [
+                {
+                  key: 501,
+                  doc_count: 1,
+                  study_details: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            study: {
+                              studyId: 501,
+                              studyName: 'Shared Study',
+                              assets: {
+                                presentations: [
+                                  {
+                                    presentationId: 'pres-match',
+                                    title: 'Nested Match Presentation',
+                                    citation: true,
+                                  },
+                                  {
+                                    presentationId: 'pres-non-match',
+                                    title: 'Nested Non-Match Presentation',
+                                    citation: false,
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        })
+      }
+      else if (req.body.size === 0 && !req.body.queryTerm) {
+        req.reply(mockMetadataResponse)
+      }
+      else {
+        req.reply(mockDatasetsResponse)
+      }
+    }).as('nestedPresentationSearchApi')
+
+    cy.mount(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?tab=presentations']}>
+          <DataLibrary />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    cy.wait('@nestedPresentationSearchApi')
+    cy.contains('Nested Match Presentation').should('exist')
+    cy.contains('Nested Non-Match Presentation').should('exist')
+
+    cy.contains('Datasets Cited?').click()
+    cy.contains('Yes').closest('label').find('input[type="radio"]').check({ force: true })
+
+    cy.wait('@nestedPresentationSearchApi')
+    cy.contains('Nested Match Presentation').should('exist')
+    cy.contains('Nested Non-Match Presentation').should('not.exist')
+  })
+
   it('shows footer when a dataset is selected', () => {
     cy.viewport(800, 600)
     cy.mount(

@@ -12,6 +12,7 @@ import {
   QueryClause,
 } from 'src/types/elastic'
 import { BioSpecimenType, BioSpecimenPreservationMethod, Sex } from 'src/types/model'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -283,6 +284,33 @@ describe('biospecimenAsset — transformResponse', () => {
     const result = biospecimenAsset.transformResponse(response, pagination)
     expect(result.items).to.have.length(0)
     expect(result.total).to.equal(0)
+  })
+
+  it('returns only matching biospecimens when filtered within a shared study', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        {
+          biospecimenId: 'BS-HOURS',
+          specimenType: BioSpecimenType.BLOOD,
+          dateOfCollection: '2024-01-01',
+          organization: 'Org',
+        },
+        {
+          biospecimenId: 'BS-DAYS',
+          specimenType: BioSpecimenType.TISSUE,
+          dateOfCollection: '2024-02-01',
+          organization: 'Org',
+        },
+      ]),
+    ])
+
+    const result = biospecimenAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      biospecimenType: [BioSpecimenType.BLOOD],
+    })
+
+    expect(result.items).to.have.length(1)
+    expect((result.items[0] as BiospecimenAsset).biospecimenId).to.equal('BS-HOURS')
   })
 })
 

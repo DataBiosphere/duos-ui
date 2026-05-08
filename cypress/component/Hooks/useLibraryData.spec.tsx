@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { useLibraryData, buildElasticsearchQuery } from 'src/hooks/useLibraryData'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
 import { BoolQuery, ExistsQuery, MultiMatchQuery, TermQuery } from 'src/types/elastic'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const TestComponent = ({
   libraryConfig,
@@ -43,11 +44,7 @@ describe('useLibraryData', () => {
   }
 
   const filters: FilterState = {
-    accessManagement: [],
-    dataUse: [],
-    dataType: [],
-    dac: [],
-    participantCount: {},
+    ...EMPTY_FILTERS,
   }
 
   it('initializes query with correct keys', () => {
@@ -107,11 +104,7 @@ describe('buildElasticsearchQuery', () => {
   }
 
   const filters: FilterState = {
-    accessManagement: [],
-    dataUse: [],
-    dataType: [],
-    dac: [],
-    participantCount: {},
+    ...EMPTY_FILTERS,
   }
 
   const pagination: PaginationState = { page: 0, pageSize: 25 }
@@ -215,5 +208,25 @@ describe('buildElasticsearchQuery', () => {
     expect(searchClause.multi_match.fields).to.include('study.assets.models.name')
     expect(searchClause.multi_match.fields).to.include('study.assets.models.format')
     expect(searchClause.multi_match.query).to.equal('pytorch')
+  })
+
+  it('ignores filters that are not visible for the selected asset type', () => {
+    const filtersWithDatasetOnlyValues: FilterState = {
+      ...filters,
+      accessManagement: ['controlled'],
+      participantCount: { min: 25 },
+      dac: ['DAC-1'],
+      dataUse: ['HMB'],
+    }
+
+    const query = buildElasticsearchQuery(
+      libraryConfig,
+      AssetType.PUBLICATIONS,
+      filtersWithDatasetOnlyValues,
+      '',
+      pagination,
+    )
+
+    expect(query.query?.bool.filter).to.equal(undefined)
   })
 })
