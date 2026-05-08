@@ -26,6 +26,8 @@ import PBNIcon from 'src/images/PBN_logo.jpg'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 import ccxdpIcon from 'src/images/ccxdp-logo.png'
 import ga4ghIcon from 'src/images/ga4gh-logo.svg'
+import nasaIcon from 'src/images/nasa-logo.svg'
+import nasaWormIcon from 'src/images/nasa-logo-worm.svg'
 
 interface MatchPhraseQuery {
   match_phrase: {
@@ -986,6 +988,50 @@ export const getLibraryVersions = (
       title: 'NCPI DUO Data Library',
       featured: true,
       order: 22,
+    },
+    'nasa': {
+      query: {
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NASA',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags.keyword': ['NASA'],
+              },
+            },
+          ],
+        },
+      },
+      icon: nasaIcon,
+      title: 'NASA Data Library',
+      featured: false,
+      order: 23,
+    },
+    'nasa2': {
+      query: {
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                'study.description': 'NASA',
+              },
+            },
+            {
+              terms: {
+                'study.data.tags.keyword': ['NASA'],
+              },
+            },
+          ],
+        },
+      },
+      icon: nasaWormIcon,
+      title: 'NASA Data Library',
+      featured: false,
+      order: 24,
     },
     'ga4gh': {
       query: {
