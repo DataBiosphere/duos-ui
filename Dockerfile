@@ -22,8 +22,9 @@ RUN npm config set update-notifier false
 RUN npm install --loglevel verbose
 RUN npm run build
 
-FROM us.gcr.io/broad-dsp-gcr-public/base/nginx:mainline-alpine
-COPY --from=builder /usr/src/app/build /usr/share/nginx/html
-RUN rm -rf /etc/nginx/conf.d
-COPY conf /etc/nginx
-CMD ["nginx", "-g", "daemon off;"]
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs:20-debian
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/build ./build
+RUN npm install -g serve
+EXPOSE 8080
+CMD ["serve", "-s", "build", "-l", "8080"]
