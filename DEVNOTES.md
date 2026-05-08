@@ -65,7 +65,7 @@ the `env` value to the desired environment will simulate it for local developmen
 
 ```yaml
     volumes:
-      - ./public/config.json:/usr/share/nginx/html/config.json
+      - ./public/config.json:/usr/src/app/build/config.json
 ```
 
 Build and run:
