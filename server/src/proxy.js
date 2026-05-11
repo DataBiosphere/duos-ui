@@ -6,6 +6,9 @@ const { get: getConfigValue } = require('./config')
 const { createSession } = require('./sessionStore')
 const { callTool } = require('./mcpClient')
 
+// node 18+ has native fetch; guard for older runtimes just in case
+const nodeFetch = globalThis.fetch ?? require('node-fetch')
+
 const router = express.Router()
 router.use(express.json())
 
@@ -161,6 +164,80 @@ async function runAgenticLoop(chat, userMessage, sessionId, res) {
 }
 
 // ---------------------------------------------------------------------------
+// Ollama agentic loop (local dev only)
+// ---------------------------------------------------------------------------
+
+/**
+ * Ollama exposes an OpenAI-compatible chat-completions API at
+ * POST /api/chat (non-streaming) or with stream:true for token streaming.
+ * We use the tool-calling format so function declarations translate directly.
+ */
+function vertexToolsToOllamaTools(declarations) {
+  return declarations.map((d) => ({
+    type: 'function',
+    function: {
+      name: d.name,
+      description: d.description,
+      parameters: d.parameters ?? { type: 'object', properties: {} },
+    },
+  }))
+}
+
+/**
+ * Run the agentic loop against a local Ollama instance.
+ * Uses the same SSE event shapes as runAgenticLoop so the browser client
+ * sees identical output regardless of which backend is active.
+ *
+ * @param {string} ollamaUrl - e.g. "http://ollama:11434"
+ * @param {string} model     - Ollama model name, e.g. "gemma3:4b"
+ * @param {string} userMessage
+ * @param {string} sessionId
+ * @param {import('express').Response} res
+ */
+async function runOllamaLoop(ollamaUrl, model, userMessage, sessionId, res) {
+  const tools = vertexToolsToOllamaTools(TOOL_DECLARATIONS)
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'user', content: userMessage },
+  ]
+
+  for (let i = 0; i < MAX_LOOP_ITERATIONS; i++) {
+    const response = await nodeFetch(`${ollamaUrl}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, messages, tools, stream: false }),
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      sse(res, { type: 'error', content: `Ollama error ${response.status}: ${text}` })
+      return
+    }
+
+    const data = await response.json()
+    const msg = data.message ?? {}
+
+    // No tool calls — final answer
+    if (!msg.tool_calls || msg.tool_calls.length === 0) {
+      sse(res, { type: 'token', content: msg.content ?? '' })
+      return
+    }
+
+    // Execute tool calls and collect results
+    messages.push(msg) // assistant turn with tool_calls
+    for (const tc of msg.tool_calls) {
+      const { name, arguments: args } = tc.function
+      const label = name.replace(/_/g, ' ')
+      sse(res, { type: 'status', content: `Looking up ${label}…` })
+      const result = await callTool(sessionId, name, args ?? {})
+      messages.push({ role: 'tool', content: JSON.stringify(result) })
+    }
+  }
+
+  sse(res, { type: 'token', content: 'I was unable to complete the request within the allowed steps.' })
+}
+
+// ---------------------------------------------------------------------------
 // Route
 // ---------------------------------------------------------------------------
 
@@ -201,31 +278,37 @@ router.post('/api/chat', async (req, res) => {
   res.flushHeaders()
 
   try {
-    // --- Resolve Vertex config -------------------------------------------------
-    const project = getConfigValue('projectId', 'VERTEX_PROJECT_ID')
-    const location = getConfigValue('region', 'VERTEX_LOCATION', 'us-central1')
-    const model = getConfigValue('modelVersion', 'VERTEX_MODEL', 'gemini-2.0-flash-001')
+    const ollamaUrl = process.env.OLLAMA_URL
 
-    if (!project) {
-      sse(res, { type: 'error', content: 'Vertex AI project ID is not configured.' })
-      return res.end()
+    if (ollamaUrl) {
+      // --- Local dev: route through Ollama --------------------------------------
+      const model = getConfigValue('modelVersion', 'VERTEX_MODEL', 'gemma3:4b')
+      await runOllamaLoop(ollamaUrl, model, message, sessionId, res)
+    } else {
+      // --- Production: route through Vertex AI ----------------------------------
+      const project = getConfigValue('projectId', 'VERTEX_PROJECT_ID')
+      const location = getConfigValue('region', 'VERTEX_LOCATION', 'us-central1')
+      const model = getConfigValue('modelVersion', 'VERTEX_MODEL', 'gemini-2.0-flash-001')
+
+      if (!project) {
+        sse(res, { type: 'error', content: 'Vertex AI project ID is not configured.' })
+        return res.end()
+      }
+
+      // Authentication uses Application Default Credentials.  In GKE this is
+      // Workload Identity; locally it is gcloud ADC or GOOGLE_APPLICATION_CREDENTIALS.
+      const vertexAI = new VertexAI({ project, location })
+      const generativeModel = vertexAI.getGenerativeModel({
+        model,
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      })
+
+      const chat = generativeModel.startChat({
+        tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
+      })
+
+      await runAgenticLoop(chat, message, sessionId, res)
     }
-
-    // --- Build Vertex client ---------------------------------------------------
-    // Authentication uses Application Default Credentials.  In GKE this is
-    // Workload Identity; locally it is gcloud ADC or GOOGLE_APPLICATION_CREDENTIALS.
-    const vertexAI = new VertexAI({ project, location })
-    const generativeModel = vertexAI.getGenerativeModel({
-      model,
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    })
-
-    const chat = generativeModel.startChat({
-      tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
-    })
-
-    // --- Run the agentic loop --------------------------------------------------
-    await runAgenticLoop(chat, message, sessionId, res)
   }
   catch (err) {
     console.error('[proxy] Unhandled error:', err)
