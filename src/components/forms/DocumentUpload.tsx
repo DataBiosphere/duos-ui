@@ -53,6 +53,7 @@ export type UploadErrorType = 'permission' | 'validation' | 'unknown'
 export interface QueueEntry {
   id: string
   file: File
+  fileSizeBytes?: number
   typeId: FileCategory
   status: UploadStatus
   progress: number
@@ -128,6 +129,65 @@ const formatBytes = (bytes: number): string => {
     return `${(bytes / 1024).toFixed(1)} KB`
   }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const getQueueEntrySize = (doc: QueueEntry): number | undefined => {
+  if (doc.fileSizeBytes !== undefined) {
+    return doc.fileSizeBytes
+  }
+  if (doc.file.size > 0) {
+    return doc.file.size
+  }
+  if (doc.fsoId !== undefined) {
+    return undefined
+  }
+  return doc.file.size
+}
+
+const applyLoadedDocumentSize = (
+  docs: QueueEntry[],
+  docId: string,
+  fileSizeBytes: number,
+): QueueEntry[] => {
+  return docs.map(doc => doc.id === docId
+    ? {
+        ...doc,
+        fileSizeBytes,
+      }
+    : doc)
+}
+
+const populateLoadedDocumentSizes = ({
+  api,
+  entity,
+  entityId,
+  existingDocs,
+  mappedDocs,
+  setDocs,
+}: {
+  api: DocumentUploadApi
+  entity: EntityType
+  entityId: string
+  existingDocs: StoredDocument[]
+  mappedDocs: QueueEntry[]
+  setDocs: React.Dispatch<React.SetStateAction<QueueEntry[]>>
+}): void => {
+  const fetchDocumentFile = api.getDocumentFile ?? getDocumentFile
+
+  mappedDocs.forEach((mappedDoc, index) => {
+    const existingDoc = existingDocs[index]
+    if (!existingDoc || mappedDoc.fileSizeBytes !== undefined) {
+      return
+    }
+
+    runAsyncSafely(fetchDocumentFile(entity, entityId, existingDoc.fileStorageObjectId)
+      .then((blob) => {
+        setDocs(currentDocs => applyLoadedDocumentSize(currentDocs, mappedDoc.id, blob.size))
+      })
+      .catch(() => {
+        // Size is informational only; keep the document visible even if the blob fetch fails.
+      }))
+  })
 }
 
 const getDocumentTypeLabel = (typeId: FileCategory): string => {
@@ -285,6 +345,7 @@ const useInitialDocumentsLoad = ({
           deleted: Boolean(doc.deleted || doc.deleteDate),
         }))
         setDocs(mapped)
+        populateLoadedDocumentSizes({ api, entity, entityId, existingDocs, mappedDocs: mapped, setDocs })
       }
       catch (error) {
         showUploadError('Unable to load documents', error)
@@ -433,6 +494,10 @@ const DocumentQueueCard = ({
   const canRetry = !readOnly && isLiveUpload && doc.status === 'error'
   const canView = doc.status !== 'uploading' && !doc.deleted
   const canDelete = !readOnly && doc.status !== 'uploading' && !doc.deleted
+  const documentSize = getQueueEntrySize(doc)
+  const statusText = documentSize === undefined
+    ? getStatusText(doc)
+    : `${getStatusText(doc)} · ${formatBytes(documentSize)}`
 
   return (
     <Card key={doc.id} sx={{ border: '1px solid', borderColor: doc.status === 'error' ? 'error.main' : 'divider' }} data-cy="document-upload-card">
@@ -449,7 +514,7 @@ const DocumentQueueCard = ({
             {doc.deleted && <Chip label="Deleted" size="small" color="warning" variant="outlined" sx={{ ml: 1 }} data-cy="document-upload-deleted-status" />}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }} data-cy="document-upload-status">
-            {getStatusText(doc)} · {formatBytes(doc.file.size)}
+            {statusText}
           </Typography>
           <Select
             size="small"
