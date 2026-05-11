@@ -3,7 +3,7 @@ import React from 'react'
 import { InstitutionInterface, SimplifiedDuosUser } from 'src/types/model'
 import { Link } from 'react-router-dom'
 import { Storage } from 'src/libs/storage'
-import { isEmpty } from 'lodash'
+import { isEmpty } from 'src/utils/NodashUtil'
 
 // Sort functionality for the institution table.
 export interface SortType {

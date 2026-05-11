@@ -1,5 +1,5 @@
 import React, { CSSProperties } from 'react'
-import { isNil } from 'lodash'
+import { isNil } from 'src/utils/NodashUtil'
 
 interface PageHeadingProps {
   id: string

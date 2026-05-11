@@ -1,6 +1,6 @@
 import { React } from 'react'
 import { formatDate } from '../libs/utils'
-import { isEmpty, isNil } from 'lodash'
+import { isEmpty, isNil } from 'src/utils/NodashUtil'
 
 export default function CollectionAlgorithmDecision(props) {
   const { algorithmResult = {}, styleOverride = {} } = props

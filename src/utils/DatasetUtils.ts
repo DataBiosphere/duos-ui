@@ -1,5 +1,5 @@
 import { Dataset, DatasetProperty, DatasetTerm, DataUseSummary, StudyProperty } from 'src/types/model'
-import { isEmpty } from 'lodash'
+import { isEmpty } from 'src/utils/NodashUtil'
 import { DAC as Dac } from 'src/libs/ajax/DAC'
 import { DACbotRule } from 'src/components/dac_bot/DACBotComponent'
 

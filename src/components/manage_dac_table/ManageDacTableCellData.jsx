@@ -1,5 +1,5 @@
 import React from 'react'
-import { isNil, isEmpty } from 'lodash'
+import { isNil, isEmpty } from 'src/utils/NodashUtil'
 import { styles } from './manageDacTableUtils'
 import TableIconButton from 'src/components/TableIconButton'
 import { Styles } from 'src/libs/theme'

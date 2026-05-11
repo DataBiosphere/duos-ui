@@ -1,6 +1,6 @@
 import { DacTerm, Dataset, DuosUser } from 'src/types/model'
 import React from 'react'
-import { isNil } from 'lodash'
+import { isNil } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { Link } from 'react-router-dom'
 

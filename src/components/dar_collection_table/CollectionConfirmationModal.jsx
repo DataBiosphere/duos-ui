@@ -1,5 +1,5 @@
 import React from 'react'
-import { isNil } from 'lodash'
+import { isNil } from 'src/utils/NodashUtil'
 import ConfirmationModal from '../modals/ConfirmationModal'
 import { isCollectionCanceled } from '../../libs/utils'
 

@@ -1,5 +1,5 @@
 import { selectedPrimaryGroup } from './consentGroupUtils'
-import { isNil, isEmpty } from 'lodash'
+import { isNil, isEmpty } from 'src/utils/NodashUtil'
 import { dateValidator, uniqueValidator } from '../../../components/forms/formValidation'
 import { FormValidators } from '../../../components/forms/forms'
 

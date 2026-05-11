@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRef, useEffect } from 'react'
-import { toNumber } from 'lodash'
+import { toNumber } from 'src/utils/NodashUtil'
 import { Styles, Theme } from '../libs/theme'
 
 // NOTE: This is a new pagination made to fit with the updated table look
