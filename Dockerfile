@@ -25,6 +25,7 @@ RUN npm run build
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs:20-debian
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/build ./build
-RUN npm install -g serve
+COPY server /usr/src/app/server
+RUN cd server && npm install --omit=dev
 EXPOSE 8080
-CMD ["serve", "-s", "build", "-l", "8080"]
+CMD ["node", "server/src/index.js"]
