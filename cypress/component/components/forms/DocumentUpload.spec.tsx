@@ -27,11 +27,13 @@ describe('DocumentUpload', () => {
         createDate: Date.now(),
       },
     ])
+    const getDocumentFileStub = cy.stub().resolves(new Blob([new Uint8Array(4096)], { type: 'application/pdf' }))
 
     const api = {
       uploadDocument: cy.stub().resolves({} as never),
       deleteDocument: cy.stub().resolves({} as never),
       listDocuments: listStub,
+      getDocumentFile: getDocumentFileStub,
     }
 
     cy.mount(
@@ -43,8 +45,11 @@ describe('DocumentUpload', () => {
     )
 
     cy.wrap(listStub).should('have.been.calledOnce')
+    cy.wrap(getDocumentFileStub).should('have.been.calledOnceWith', EntityType.DAR, 'dar-1', 101)
     cy.contains('existing_consent.pdf').should('exist')
     cy.get('[data-cy="document-upload-status"]').should('contain.text', 'Uploaded')
+    cy.get('[data-cy="document-upload-status"]').should('contain.text', '4.0 KB')
+    cy.get('[data-cy="document-upload-status"]').should('not.contain.text', '0 B')
     cy.get('[data-cy="document-upload-count"]').should('contain.text', '1')
   })
 
