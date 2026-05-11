@@ -2,6 +2,7 @@
 
 const express = require('express')
 const path = require('path')
+const proxyRouter = require('./proxy')
 
 const app = express()
 const PORT = process.env.PORT || 8080
@@ -11,6 +12,10 @@ const BUILD_DIR = path.join(__dirname, '..', '..', 'build')
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' })
 })
+
+// API routes — mounted before static so /api/* is never swallowed by the
+// SPA fallback
+app.use(proxyRouter)
 
 // Serve the React build as static files
 app.use(express.static(BUILD_DIR))
