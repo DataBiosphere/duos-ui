@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash'
+import { cloneDeep } from 'src/utils/NodashUtil'
 import { Styles } from 'src/libs/theme'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Collections } from 'src/libs/ajax/Collections'
