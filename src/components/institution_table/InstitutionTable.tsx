@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { isEmpty } from 'lodash'
+import { isEmpty } from 'src/utils/NodashUtil'
 import PaginationBar from 'src/components/PaginationBar'
 import SimpleTable from 'src/components/SimpleTable'
 import { Storage } from 'src/libs/storage'

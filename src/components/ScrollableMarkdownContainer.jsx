@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 import DOMPurify from 'dompurify'
 import React, { useEffect, useState } from 'react'
-import { isEmpty } from 'lodash'
+import { isEmpty } from 'src/utils/NodashUtil'
 
 export default function ScrollableMarkdownContainer(props) {
   const [text, setText] = useState('')

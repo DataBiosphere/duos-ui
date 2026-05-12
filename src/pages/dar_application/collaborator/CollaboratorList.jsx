@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import CollaboratorForm from './CollaboratorForm'
 import CollaboratorRow from 'src/components/collaborator_list/CollaboratorRow'
 import './collaborator.css'
-import { isNil } from 'lodash'
+import { isNil } from 'src/utils/NodashUtil'
 
 export default function CollaboratorList(props) {
   const {

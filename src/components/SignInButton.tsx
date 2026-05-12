@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { isEmpty, isNil } from 'lodash'
+import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
 import { Auth } from 'src/libs/auth/auth'
 import { User } from 'src/libs/ajax/User'

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
-import { isEmpty, isNil } from 'lodash'
+import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import { formatDate, Notifications, sortVisibleTable } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
 

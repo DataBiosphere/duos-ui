@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { isNil } from 'lodash'
+import { isNil } from 'src/utils/NodashUtil'
 import { Styles, Theme } from 'src/libs/theme'
 import CloseIconComponent from 'src/components/CloseIconComponent'
 import ModalWrapper from 'src/components/collaborator_list/ModalWrapper'

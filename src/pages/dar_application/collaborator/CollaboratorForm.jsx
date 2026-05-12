@@ -4,7 +4,7 @@ import {
   FormValidators,
 } from 'src/components/forms/forms.jsx'
 import React, { useEffect, useState } from 'react'
-import { isEmpty, isNil } from 'lodash'
+import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import { v4 as uuidV4 } from 'uuid'
 import { computeCollaboratorErrors } from 'src/utils/darFormUtils'
 import DeleteCollaboratorModal from './DeleteCollaboratorModal'

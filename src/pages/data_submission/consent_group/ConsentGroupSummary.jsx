@@ -1,5 +1,5 @@
 import React from 'react'
-import { isNil, isString, isArray } from 'lodash'
+import { isNil, isString, isArray } from 'src/utils/NodashUtil'
 
 const primaryConsentText = {
   generalResearchUse: 'General Research Use',

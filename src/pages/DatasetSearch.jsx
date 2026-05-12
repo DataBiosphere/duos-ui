@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { Box, CircularProgress } from '@mui/material'
-import { toLower } from 'lodash'
+import { toLower } from 'src/utils/NodashUtil'
 import { Notifications } from 'src/libs/utils'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import DatasetSearchTable from 'src/components/data_search/DatasetSearchTable'
