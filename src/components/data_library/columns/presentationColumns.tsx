@@ -3,6 +3,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import { PresentationAsset } from 'src/types/library'
+import { getSafeHttpUrl } from 'src/utils/UrlUtils'
 
 /**
  * Column definitions for the Presentations view in the Data Library.
@@ -15,7 +16,7 @@ export const makePresentationColumns = (): GridColDef<PresentationAsset>[] => [
     minWidth: 220,
     renderCell: (params) => {
       const text = params.value || ''
-      const url = params.row.url
+      const url = getSafeHttpUrl(params.row.url)
       return (
         <Tooltip title={text} placement="top">
           <Box

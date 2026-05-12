@@ -12,6 +12,7 @@ import { muiCheckboxFix } from 'src/libs/muiThemeFix'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { ReactNode } from 'react'
+import { getSafeHttpUrl } from 'src/utils/UrlUtils'
 
 export interface DatasetSearchTableTab<T> {
   key: string
@@ -456,23 +457,24 @@ export const makeDatasetTableHeader = (
       cellDataFn: (dataset: DatasetTerm) => {
         let dataLocation
         const TERRA_DATA_REPO = 'Terra Data Repo'
+        const safeDatasetUrl = getSafeHttpUrl(dataset.url)
         if (dataset.dataLocation === DataLocationType.TDRLocation) {
           dataLocation = TERRA_DATA_REPO
         }
         else if (dataset.dataLocation === DataLocationType.TerraWorkspace) {
-          dataLocation = dataset.url
-            ? <Link href={dataset.url}>{DataLocationType.TerraWorkspace}</Link>
+          dataLocation = safeDatasetUrl
+            ? <Link href={safeDatasetUrl}>{DataLocationType.TerraWorkspace}</Link>
             : TERRA_DATA_REPO
         }
         else if (dataset.dataLocation === DataLocationType.NotDetermined) {
           dataLocation = DataLocationType.NotDetermined
         }
         else if (dataset.dataLocation === DataLocationType.Other) {
-          dataLocation = dataset.url ? new URL(dataset.url).hostname : ''
+          dataLocation = safeDatasetUrl ? new URL(safeDatasetUrl).hostname : ''
         }
         else {
-          dataLocation = dataset.url
-            ? <Link href={dataset.url}>External to DUOS</Link>
+          dataLocation = safeDatasetUrl
+            ? <Link href={safeDatasetUrl}>External to DUOS</Link>
             : 'External Location'
         }
         return {

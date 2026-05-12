@@ -309,8 +309,16 @@ const openPreviewWindow = (file: Blob | File, fileName: string): void => {
   }
 
   previewWindow.document.title = fileName
+  const iframe = previewWindow.document.createElement('iframe')
+  iframe.title = fileName
+  iframe.src = objectUrl
+  iframe.style.border = '0'
+  iframe.style.width = '100vw'
+  iframe.style.height = '100vh'
+
   previewWindow.document.body.style.margin = '0'
-  previewWindow.document.body.innerHTML = `<iframe title="${fileName}" src="${objectUrl}" style="border:0;width:100vw;height:100vh;"></iframe>`
+  previewWindow.document.body.textContent = ''
+  previewWindow.document.body.appendChild(iframe)
   globalThis.setTimeout(() => globalThis.URL.revokeObjectURL(objectUrl), 60000)
 }
 

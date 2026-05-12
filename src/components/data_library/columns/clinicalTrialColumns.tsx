@@ -3,6 +3,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import { ClinicalTrialAsset } from 'src/types/library'
+import { getSafeHttpUrl } from 'src/utils/UrlUtils'
 
 /**
  * Column definitions for the Clinical Trials view
@@ -15,7 +16,7 @@ export const makeClinicalTrialColumns = (): GridColDef<ClinicalTrialAsset>[] => 
     minWidth: 220,
     renderCell: (params) => {
       const text = params.value || ''
-      const url = params.row.url
+      const url = getSafeHttpUrl(params.row.url)
       return (
         <Tooltip title={text} placement="top">
           <Box
@@ -54,7 +55,7 @@ export const makeClinicalTrialColumns = (): GridColDef<ClinicalTrialAsset>[] => 
     width: 140,
     renderCell: (params) => {
       const text = params.value || ''
-      const url = params.row.url
+      const url = getSafeHttpUrl(params.row.url)
       return (
         <Tooltip title={text} placement="top">
           <Box

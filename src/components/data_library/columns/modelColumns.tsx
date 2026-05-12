@@ -3,6 +3,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import { ModelAsset } from 'src/types/library'
+import { getSafeHttpUrl } from 'src/utils/UrlUtils'
 
 /**
  * Column definitions for AI model view
@@ -112,11 +113,12 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
     headerName: 'URL',
     width: 80,
     sortable: false,
-    renderCell: params =>
-      params.value
+    renderCell: (params) => {
+      const url = getSafeHttpUrl(params.value)
+      return url
         ? (
             <Link
-              href={params.value}
+              href={url}
               underline="hover"
               target="_blank"
               rel="noopener noreferrer"
@@ -124,7 +126,8 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
               Link
             </Link>
           )
-        : null,
+        : null
+    },
   },
   {
     field: 'tags',
