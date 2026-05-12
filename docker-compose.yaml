@@ -14,9 +14,9 @@
 #   docker build . -t duos
 # Run (standard):
 #   docker compose up -d
-# Run with local AI (Ollama + Gemma):
+# Run with local AI (Ollama + llama3.2):
 #   docker compose --profile local-ai up -d
-#   docker exec duos-ollama ollama pull gemma3:4b
+#   docker exec duos-ollama ollama pull llama3.2:3b
 # Test
 #   https://local.broadinstitute.org/
 version: '3.8'
@@ -36,21 +36,23 @@ services:
     restart: always
 
   # ---------------------------------------------------------------------------
-  # Local AI — Ollama running Google's Gemma 3 4B model.
+  # Local AI — Ollama running llama3.2:3b.
   #
-  # Gemma is the open-weight model family that underlies Gemini. Running it
-  # locally via Ollama lets you exercise the full chat → proxy → MCP flow
-  # without hitting Vertex AI or incurring API costs.
+  # Running a local LLM via Ollama lets you exercise the full chat → proxy → MCP
+  # flow without hitting Vertex AI or incurring API costs.
   #
   # Ollama exposes an OpenAI-compatible API on port 11434. The DUOS proxy
   # detects the OLLAMA_URL env var and routes requests through Ollama instead
   # of the Vertex AI SDK when it is set.
   #
-  # First-time setup (after `docker compose --profile local-ai up -d`):
-  #   docker exec duos-ollama ollama pull gemma3:4b
+  # NOTE: Gemma models do not support tool/function calling in Ollama and will
+  # return a 400 error. Use a model with tool-calling support instead.
   #
-  # Gemma 3 4B requires ~4 GB RAM. For a lighter footprint use gemma3:1b (~1 GB).
-  # For higher fidelity use gemma3:12b if your machine has >= 16 GB available.
+  # First-time setup (after `docker compose --profile local-ai up -d`):
+  #   docker exec duos-ollama ollama pull llama3.2:3b
+  #
+  # llama3.2:3b requires ~2 GB RAM and starts quickly — good default for dev.
+  # For higher fidelity use llama3.1:8b (~5 GB) or mistral:7b (~4 GB).
   # ---------------------------------------------------------------------------
   ollama:
     image: ollama/ollama:latest

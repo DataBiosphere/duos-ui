@@ -282,7 +282,10 @@ router.post('/api/chat', async (req, res) => {
 
     if (ollamaUrl) {
       // --- Local dev: route through Ollama --------------------------------------
-      const model = getConfigValue('modelVersion', 'VERTEX_MODEL', 'gemma3:4b')
+      // Default is llama3.2:3b — small (~2 GB), fast, and supports tool calling.
+      // Gemma models do not support tool calling in Ollama and will error.
+      // Override with VERTEX_MODEL env var or modelVersion in config.json.
+      const model = getConfigValue('modelVersion', 'VERTEX_MODEL', 'llama3.2:3b')
       await runOllamaLoop(ollamaUrl, model, message, sessionId, res)
     } else {
       // --- Production: route through Vertex AI ----------------------------------
