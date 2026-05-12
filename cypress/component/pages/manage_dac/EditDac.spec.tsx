@@ -9,7 +9,6 @@ import chairJson from '../../DAC/chair.json'
 import daas from '../../DAC/daas.json'
 import dac from '../../DAC/dac.json'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
-import { Config } from 'src/libs/config'
 import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
 
 const adminUser = setUserRoleStatuses({ ...(adminJson as object) } as DuosUser, Storage)
@@ -103,20 +102,9 @@ const uploadDaaFiles = (files: Array<{ fileName: string, fileContent?: string }>
   cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).should('not.be.disabled').click()
 }
 
-const stubDocumentUploadApis = (): void => {
-  cy.stub(Config, 'getApiUrl').resolves('')
-  cy.intercept('GET', '**/api/document/**', []).as('listDocuments')
-  cy.intercept('POST', '**/api/document/**', {
-    fileStorageObjectId: 101,
-    fileName: 'uploaded-daa.pdf',
-    category: 'dataAccessAgreement',
-  }).as('uploadDocument')
-}
-
 const setupCreateFlow = (user: DuosUser): void => {
   cy.stub(Storage, 'getCurrentUser').returns(user)
   cy.stub(DAA, 'getDaas').resolves(broadDaaList)
-  stubDocumentUploadApis()
   stubCommonDacApis()
   cy.mount(<BrowserRouter><EditDac /></BrowserRouter>)
 }
@@ -125,7 +113,6 @@ const setupExistingEditFlow = (daasToReturn: DAAObject[], user: DuosUser = admin
   cy.stub(Storage, 'getCurrentUser').returns(user)
   cy.stub(DAC, 'get').resolves(existingDac)
   cy.stub(DAA, 'getDaas').resolves(daasToReturn)
-  stubDocumentUploadApis()
   stubCommonDacApis()
   mountExistingEditDac(existingDac.dacId as number)
 }
@@ -218,7 +205,7 @@ describe('EditDAC Tests', () => {
     cy.get('[data-cy="btn_save"]').click()
 
     cy.wrap(createStub).should('have.been.called')
-    cy.wrap(createDaaStub).should('have.been.called')
+    cy.wrap(createDaaStub).should('have.been.calledWithMatch', Cypress.sinon.match.has('name', customFileName), 99)
   })
 
   it('Associates selected non-default DAA when editing an existing DAC', () => {
@@ -250,7 +237,7 @@ describe('EditDAC Tests', () => {
     cy.get('[data-cy="daa_option_77"]').should('be.checked')
     cy.get('[data-cy="btn_save"]').click()
 
-    cy.wrap(createDaaStub).should('have.been.called')
+    cy.wrap(createDaaStub).should('have.been.calledWithMatch', Cypress.sinon.match.has('name', 'existing-custom-daa.pdf'), existingDac.dacId)
     cy.wrap(updateStub).should('have.been.called')
     cy.wrap(addDaaToDacStub).should('not.have.been.calledWith', 77, existingDac.dacId)
   })
