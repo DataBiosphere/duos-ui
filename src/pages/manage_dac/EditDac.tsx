@@ -504,6 +504,46 @@ export default function EditDac(): React.JSX.Element {
     return { newDaas, lastCreatedDaa }
   }
 
+  const delay = async (ms: number): Promise<void> => {
+    await new Promise(resolve => globalThis.setTimeout(resolve, ms))
+  }
+
+  const mergeDaasById = (baseDaas: DAAObject[], additionalDaas: DAAObject[]): DAAObject[] => {
+    const daaById = new Map<number, DAAObject>()
+
+    for (const daa of baseDaas) {
+      if (daa.daaId !== undefined) {
+        daaById.set(daa.daaId, daa)
+      }
+    }
+
+    for (const daa of additionalDaas) {
+      if (daa.daaId !== undefined) {
+        daaById.set(daa.daaId, daa)
+      }
+    }
+
+    return Array.from(daaById.values())
+  }
+
+  const refreshMatchingDaas = async (currentDacId: number, expectedDaaIds: number[]): Promise<DAAObject[]> => {
+    const maxAttempts = 3
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const daas = await DAA.getDaas()
+      const refreshedMatchingDaas = daas.filter(daa => daa.initialDacId === currentDacId)
+      const allExpectedPresent = expectedDaaIds.every(id => refreshedMatchingDaas.some(daa => daa.daaId === id))
+
+      if (allExpectedPresent || attempt === maxAttempts) {
+        return refreshedMatchingDaas
+      }
+
+      await delay(attempt * 250)
+    }
+
+    return []
+  }
+
   const handleExistingDacAttachment = async (attachment: File[]): Promise<void> => {
     setIsDaaOperationInProgress(true)
 
@@ -514,21 +554,38 @@ export default function EditDac(): React.JSX.Element {
       }
 
       const { newDaas, lastCreatedDaa } = await createDaasForExistingDac(attachment, dacIdToUse)
+      const expectedDaaIds = newDaas
+        .map(daa => daa.daaId)
+        .filter((id): id is number => id !== undefined)
 
-      // Add all newly created DAAs to the displayed list
-      setMatchingDaas(prev => [...prev, ...newDaas])
-      setCreatedDaa(lastCreatedDaa)
+      let displayedDaas = newDaas
+      try {
+        const refreshedMatchingDaas = await refreshMatchingDaas(dacIdToUse, expectedDaaIds)
+        displayedDaas = mergeDaasById(refreshedMatchingDaas, newDaas)
+      }
+      catch {
+        // Preserve newly uploaded DAAs in the UI if refresh fails.
+        Notifications.showError({ text: 'Unable to refresh DAA list after upload. Showing latest uploaded agreements.' })
+      }
+
+      setMatchingDaas(displayedDaas)
+
+      const selectedCreatedDaa = lastCreatedDaa?.daaId === undefined
+        ? lastCreatedDaa
+        : displayedDaas.find(daa => daa.daaId === lastCreatedDaa.daaId) ?? lastCreatedDaa
+
+      setCreatedDaa(selectedCreatedDaa ?? null)
 
       // Clear pending-upload state since DAAs are now in matchingDaas
       setUploadedDAAFile(null)
       setDaaFileData(null)
 
       // Update selected DAA based on creation success
-      if (lastCreatedDaa?.daaId === undefined) {
+      if (selectedCreatedDaa?.daaId === undefined) {
         setSelectedDaa(undefined)
       }
       else {
-        setSelectedDaa(lastCreatedDaa)
+        setSelectedDaa(selectedCreatedDaa)
         setNewDaaId(null)
       }
     }
@@ -945,7 +1002,7 @@ export default function EditDac(): React.JSX.Element {
               <UploadDaaModal
                 showModal={showUploadModal}
                 dacId={dacIdParam ?? 'new'}
-                isLiveUpload={!!dacIdParam}
+                isLiveUpload={false}
                 isReadOnly={!canUpload}
                 onCloseRequest={() => setShowUploadModal(false)}
                 onAttachmentChange={handleAttachment}
