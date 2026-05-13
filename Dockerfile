@@ -22,7 +22,8 @@ RUN npm config set update-notifier false
 RUN npm install --loglevel verbose
 RUN npm run build
 
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
+# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:7bb73493171d6c0b1bf00018915266cf8e80910b172d14bf249dcd01af8f3aa9
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/build ./build
