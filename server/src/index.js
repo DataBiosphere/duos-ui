@@ -4,6 +4,7 @@ const express = require('express')
 const path = require('node:path')
 
 const app = express()
+app.disable('x-powered-by') // S5689: do not disclose technology fingerprints
 const PORT = process.env.PORT || 8080
 const BUILD_DIR = path.join(__dirname, '..', '..', 'build')
 
