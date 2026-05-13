@@ -23,6 +23,7 @@ RUN npm install --loglevel verbose
 RUN npm run build
 
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
+ENV NODE_ENV=production
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/build ./build
 COPY server /usr/src/app/server
