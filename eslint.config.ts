@@ -67,4 +67,11 @@ export default defineConfig([
       '@stylistic/jsx-one-expression-per-line': ['off'],
     },
   },
+  // Server is an explicit CommonJS package — allow require() there
+  {
+    files: ['server/**/*.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 ])
