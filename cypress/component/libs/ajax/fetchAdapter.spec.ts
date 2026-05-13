@@ -280,13 +280,66 @@ describe('fetchAdapter - Fetch methods', () => {
           throw new Error('Should have thrown')
         },
         (error) => {
-          expect(error.message).to.include('failed with status 502')
+          expect(error.message).to.include('Network error on request to')
+          expect(error.message).to.include('TypeError: Network error')
+          expect(error.message).to.include('duos@duos.org')
         },
       )
     })
   })
 
-  it('fetchMultipart - should report 502 on network-level failure', () => {
+  it('should handle AbortError as a DOMException network error', () => {
+    cy.window().then((win) => {
+      const abortError = new win.DOMException('The user aborted a request.', 'AbortError')
+      fetchStub.rejects(abortError)
+
+      fetchGet('/api/test').then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          expect(error.message).to.include('Network error on request to')
+          expect(error.message).to.include('AbortError: The user aborted a request.')
+          expect(error.message).to.include('duos@duos.org')
+        },
+      )
+    })
+  })
+
+  it('should handle DOMException (e.g. NotAllowedError) as a network error', () => {
+    cy.window().then((win) => {
+      const notAllowedError = new win.DOMException('The operation is not allowed.', 'NotAllowedError')
+      fetchStub.rejects(notAllowedError)
+
+      fetchGet('/api/test').then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          expect(error.message).to.include('Network error on request to')
+          expect(error.message).to.include('NotAllowedError: The operation is not allowed.')
+          expect(error.message).to.include('duos@duos.org')
+        },
+      )
+    })
+  })
+
+  it('should include help desk message for unknown thrown errors', () => {
+    cy.window().then((_win) => {
+      fetchStub.rejects({ message: 'Something unexpected', toString: () => 'Something unexpected' })
+
+      fetchGet('/api/test').then(
+        () => {
+          throw new Error('Should have thrown')
+        },
+        (error) => {
+          expect(error.message).to.include('duos@duos.org')
+        },
+      )
+    })
+  })
+
+  it('fetchMultipart - should report network error (not 502) on network-level failure', () => {
     cy.window().then((win) => {
       const formData = new win.FormData()
       fetchStub.rejects(new win.TypeError('Network error'))
@@ -296,7 +349,9 @@ describe('fetchAdapter - Fetch methods', () => {
           throw new Error('Should have thrown')
         },
         (error) => {
-          expect(error.message).to.include('failed with status 502')
+          expect(error.message).to.include('Network error on request to')
+          expect(error.message).to.include('TypeError: Network error')
+          expect(error.message).to.include('duos@duos.org')
         },
       )
     })

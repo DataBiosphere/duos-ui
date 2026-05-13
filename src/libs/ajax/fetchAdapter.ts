@@ -47,6 +47,8 @@ export interface FetchData<T> {
   data: T
 }
 
+const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
+
 export const reportError = (url: string, status: number): void => {
   const msg = 'Error fetching response: '
     .concat(JSON.stringify(url))
@@ -183,12 +185,15 @@ async function fetchRequest<T>(
     return handleResponse<T>(res, fullUrl, responseType, method)
   }
   catch (error) {
-    // Re-throw AbortError without reporting
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw error
+    // TypeError = network-level failure (offline, invalid URL, CORS, etc.) that never reached the server
+    // DOMException (e.g. AbortError, NotAllowedError) = aborted request or blocked by permissions policy
+    // Report with status 0 (no HTTP response) rather than 502 (bad gateway) to avoid misleading monitoring
+    if (error instanceof TypeError || error instanceof DOMException) {
+      reportError(fullUrl, 0)
+      throw new Error(`Network error on request to ${fullUrl}: ${error.toString()} ${HELP_DESK_MESSAGE}`)
     }
-    reportError(fullUrl, 502)
-    throw new Error(`Request to ${fullUrl} failed with status 502`)
+    reportError(fullUrl, 0)
+    throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`)
   }
 }
 
@@ -227,14 +232,18 @@ async function fetchMultipartRequest<T>(
     res = await fetchFn(fullUrl, fetchOptions)
   }
   catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw error
+    // TypeError = network-level failure (offline, invalid URL, CORS, etc.) that never reached the server
+    // DOMException (e.g. AbortError, NotAllowedError) = aborted request or blocked by permissions policy
+    // Report with status 0 (no HTTP response) rather than 502 (bad gateway) to avoid misleading monitoring
+    if (error instanceof TypeError || error instanceof DOMException) {
+      reportError(fullUrl, 0)
+      throw new Error(`Network error on request to ${fullUrl}: ${error.toString()} ${HELP_DESK_MESSAGE}`)
     }
-    reportError(fullUrl, 502)
-    throw new Error(`Request to ${fullUrl} failed with status 502`)
+    reportError(fullUrl, 0)
+    throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`)
   }
   if (!res.ok) {
-    let message = `Request failed with status ${res.status}. Please contact the help desk at duos@duos.org.`
+    let message = `Request failed with status ${res.status}. ${HELP_DESK_MESSAGE}`
     try {
       const errorData = await res.json() as { message?: string }
       if (errorData?.message) message = errorData.message
