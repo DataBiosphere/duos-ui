@@ -22,8 +22,10 @@ RUN npm config set update-notifier false
 RUN npm install --loglevel verbose
 RUN npm run build
 
-FROM us.gcr.io/broad-dsp-gcr-public/base/nginx:mainline-alpine
-COPY --from=builder /usr/src/app/build /usr/share/nginx/html
-RUN rm -rf /etc/nginx/conf.d
-COPY conf /etc/nginx
-CMD ["nginx", "-g", "daemon off;"]
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/build ./build
+COPY server /usr/src/app/server
+RUN cd server && npm install --omit=dev
+EXPOSE 8080
+CMD ["node", "server/src/index.js"]

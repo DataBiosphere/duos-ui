@@ -24,8 +24,8 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./public/config.json:/usr/share/nginx/html/config.json
-    command: ["nginx", "-g", "daemon off;"]
+      - ./public/config.json:/usr/src/app/build/config.json
+    command: ["node", "server/src/index.js"]
     restart: always
 
   proxy:
