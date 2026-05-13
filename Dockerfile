@@ -26,8 +26,9 @@ RUN npm run build
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:7bb73493171d6c0b1bf00018915266cf8e80910b172d14bf249dcd01af8f3aa9
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app/build ./build
-COPY server /usr/src/app/server
+COPY --chown=node:node --from=builder /usr/src/app/build ./build
+COPY --chown=node:node server /usr/src/app/server
 RUN cd server && npm install --omit=dev
+USER node
 EXPOSE 8080
 CMD ["node", "server/src/index.js"]
