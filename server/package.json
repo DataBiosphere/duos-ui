@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "type": "commonjs",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "express": "4.22.2"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.23",
+    "@types/node": "24.12.3",
+    "typescript": "5.9.3"
   }
 }

@@ -22,13 +22,16 @@ RUN npm config set update-notifier false
 RUN npm install --loglevel verbose
 RUN npm run build
 
+# build the server
+COPY server /usr/src/app/server
+RUN cd server && npm install && npm run build && npm prune --omit=dev
+
 # Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:7bb73493171d6c0b1bf00018915266cf8e80910b172d14bf249dcd01af8f3aa9
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
 COPY --chown=node:node --from=builder /usr/src/app/build ./build
-COPY --chown=node:node server /usr/src/app/server
-RUN cd server && npm install --omit=dev
+COPY --chown=node:node --from=builder /usr/src/app/server ./server
 USER node
 EXPOSE 8080
-CMD ["node", "server/src/index.js"]
+CMD ["node", "server/dist/index.js"]

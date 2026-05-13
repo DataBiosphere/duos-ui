@@ -1,7 +1,5 @@
-'use strict'
-
-const express = require('express')
-const path = require('node:path')
+import express, { ErrorRequestHandler } from 'express'
+import path from 'node:path'
 
 const app = express()
 app.disable('x-powered-by') // S5689: do not disclose technology fingerprints
@@ -24,10 +22,11 @@ app.get('*', (_req, res) => {
 // Error handler — must have 4 args so Express treats it as an error handler.
 // Suppresses stack traces from responses; NODE_ENV=production also prevents
 // Express's default handler from leaking them.
-app.use((err, _req, res, _next) => {
+const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   console.error('[server] Unhandled error:', err)
-  res.status(err.status ?? 500).json({ error: 'An unexpected error occurred.' })
-})
+  res.status((err as { status?: number }).status ?? 500).json({ error: 'An unexpected error occurred.' })
+}
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`DUOS server listening on port ${PORT}`)
