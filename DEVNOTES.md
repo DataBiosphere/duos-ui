@@ -71,7 +71,7 @@ the `env` value to the desired environment will simulate it for local developmen
 Build and run:
 
 ```shell
-docker build . -t duos
+docker build . -t duos --platform linux/amd64
 docker compose up -d
 ```
 
