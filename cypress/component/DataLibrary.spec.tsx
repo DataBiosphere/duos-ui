@@ -26,7 +26,10 @@ type DatasetApprovalBranch = {
 type DatasetSearchBody = {
   query?: {
     bool?: {
+      should?: DatasetApprovalBranch[]
+      minimum_should_match?: number
       must?: DatasetApprovalBranch[]
+      filter?: DatasetApprovalBranch[]
     }
   }
 }
@@ -838,23 +841,20 @@ describe('DataLibrary', () => {
       cy.wait('@searchApi').then(() => {
         cy.wrap(capturedBody).should('exist')
         cy.then(() => {
-          // Find the top-level must array
-          const must = capturedBody?.query?.bool?.must
-          assert.exists(must)
-          if (!must) {
-            throw new Error('Expected top-level bool.must clause in dataset search query')
+          // ES 9: top-level bool.should + minimum_should_match drives approval logic
+          const topBool = capturedBody?.query?.bool
+          assert.exists(topBool)
+          if (!topBool) {
+            throw new Error('Expected top-level bool clause in dataset search query')
           }
 
-          // Find the should clause using optional chaining
-          const should = must.find(
-            clause => clause.bool?.should && Array.isArray(clause.bool.should),
-          )?.bool?.should
+          assert.equal(topBool.minimum_should_match, 1)
+
+          const should = topBool.should
           assert.exists(should)
           if (!should) {
             throw new Error('Expected bool.should clause for approval filtering')
           }
-
-          // Should have two branches
           assert.lengthOf(should, 2)
 
           // First branch: must_not accessManagement: controlled
