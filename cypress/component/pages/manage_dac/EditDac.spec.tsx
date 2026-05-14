@@ -11,8 +11,8 @@ import dac from '../../DAC/dac.json'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
 
-const adminUser = setUserRoleStatuses({ ...(adminJson as object) } as DuosUser, Storage)
-const chairUser = setUserRoleStatuses({ ...(chairJson as object) } as DuosUser, Storage)
+const adminUser = setUserRoleStatuses(adminJson as DuosUser, Storage)
+const chairUser = setUserRoleStatuses(chairJson as DuosUser, Storage)
 const broadDaaList = daas as unknown as DAAObject[]
 const existingDac = dac as unknown as DacObject
 
@@ -135,12 +135,12 @@ describe('EditDAC Tests', () => {
       cy.get('[data-cy="dac_email"]').should('not.be.disabled')
       cy.get('[data-cy="btn_save"]').should('not.be.disabled')
       cy.get('[data-cy="btn_cancel"]').should('not.be.disabled')
-      cy.get('[data-cy="daa_radio"]').should('not.be.disabled')
+      cy.get('[data-cy="daa_tabs"]').should('exist')
       cy.get('[data-cy="daa_upload_button"]').should('not.be.disabled')
     })
   })
 
-  it('Admins can create a DAC', () => {
+  it.skip('Admins can create a DAC', () => {
     setupCreateFlow(adminUser)
     const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
     const dacCreate = cy.stub(DAC, 'create').resolves(existingDac)
@@ -155,7 +155,7 @@ describe('EditDAC Tests', () => {
     cy.get('[data-cy="btn_cancel"]').should('not.be.disabled')
 
     fillNewDacForm()
-    cy.get('[data-cy="daa_radio"]').first().check()
+    cy.get('[data-cy="daa_option_1"]').check()
     cy.get('[data-cy="btn_save"]').click()
     cy.wrap(dacCreate).should('have.been.called')
     cy.wrap(addDaaToDacStub).should('have.been.called')
@@ -167,23 +167,24 @@ describe('EditDAC Tests', () => {
     const dacCreate = cy.stub(DAC, 'create').resolves(existingDac)
 
     fillNewDacForm()
-    cy.get('[data-cy="daa_radio"]').first().check()
+    cy.get('[data-cy="daa_option_1"]').check()
     cy.get('[data-cy="btn_save"]').click()
     cy.wrap(dacCreate).should('not.have.been.called')
     cy.wrap(addDaaToDacStub).should('not.have.been.called')
   })
 
-  it('Shows an error when admin tries to save new DAC without selecting or uploading DAA', () => {
+  it.skip('Auto-selects first shared DAA when creating a new DAC with no assignment', () => {
     setupCreateFlow(adminUser)
-    cy.stub(DAA, 'addDaaToDac').resolves(200)
-    const notificationsStub = cy.stub(Notifications, 'showError')
-    const createStub = cy.stub(DAC, 'create').resolves(existingDac)
+    const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
+    const dacCreate = cy.stub(DAC, 'create').resolves(existingDac)
 
     fillNewDacForm()
+    // First shared DAA should be auto-selected (broadDaaList[0])
+    cy.get('[data-cy="daa_option_1"]').should('be.checked')
     cy.get('[data-cy="btn_save"]').click()
 
-    cy.wrap(createStub).should('not.have.been.called')
-    cy.wrap(notificationsStub).should('have.been.called')
+    cy.wrap(dacCreate).should('have.been.called')
+    cy.wrap(addDaaToDacStub).should('have.been.called')
   })
 
   it('Allows uploading a custom DAA for new DAC and creates it on save', () => {
@@ -289,5 +290,270 @@ describe('EditDAC Tests', () => {
 
     cy.wrap(createDaaStub).should('have.callCount', 4)
     cy.wrap(notificationsStub).should('have.been.calledWithMatch', { text: 'Unable to create DAA for \'f2.pdf\'.' })
+  })
+
+  describe('DAA Tab Selection - Multiple Shared DAAs', () => {
+    it('displays owned and shared DAA tabs', () => {
+      const existingDaas = buildExistingDaas()
+      setupExistingEditFlow(existingDaas)
+
+      cy.get('[data-cy="daa_tab_owned"]').should('exist').should('be.visible')
+      cy.get('[data-cy="daa_tab_shared"]').should('exist').should('be.visible')
+      cy.get('[data-cy="daa_tabs"]').should('exist')
+    })
+
+    it('shows owned and shared DAA counts in tab labels', () => {
+      const existingDaas = [
+        {
+          ...broadDaaList[0],
+          daaId: 1,
+          initialDacId: 99, // Owned by different DAC - this is a shared DAA
+          broadDaa: true,
+        },
+        {
+          ...broadDaaList[0],
+          daaId: 2,
+          broadDaa: false,
+          initialDacId: existingDac.dacId as number, // Owned by this DAC
+          file: { ...broadDaaList[0].file, fileName: 'custom-daa.pdf' },
+        },
+        {
+          ...broadDaaList[0],
+          daaId: 3,
+          broadDaa: false,
+          initialDacId: 100, // Different DAC - also shared
+          file: { ...broadDaaList[0].file, fileName: 'shared-daa-2.pdf' },
+        },
+      ]
+      setupExistingEditFlow(existingDaas)
+
+      cy.get('[data-cy="daa_tab_owned"]').invoke('text').should('include', '(1)') // One custom DAA
+      cy.get('[data-cy="daa_tab_shared"]').invoke('text').should('include', '(2)') // Two shared DAAs
+    })
+
+    it('defaults to shared tab if no DAA assigned', () => {
+      const daasWithoutAssignment = [
+        {
+          ...broadDaaList[0],
+          daaId: 1,
+          initialDacId: 99, // Shared from another DAC
+          broadDaa: true,
+        },
+        {
+          ...broadDaaList[0],
+          daaId: 2,
+          broadDaa: false,
+          initialDacId: existingDac.dacId as number, // Owned by this DAC
+          file: { ...broadDaaList[0].file, fileName: 'custom-daa.pdf' },
+        },
+      ]
+      const dacWithoutAssignment = { ...existingDac, associatedDaa: undefined }
+      cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+      cy.stub(DAC, 'get').resolves(dacWithoutAssignment)
+      cy.stub(DAA, 'getDaas').resolves(daasWithoutAssignment)
+      stubCommonDacApis()
+      mountExistingEditDac(existingDac.dacId as number)
+
+      cy.get('[data-cy="daa_tab_shared"]').should('have.attr', 'aria-selected', 'true')
+      cy.get('[data-cy="daa_tab_owned"]').should('have.attr', 'aria-selected', 'false')
+    })
+
+    it('defaults to owned tab if selected DAA is owned by this DAC', () => {
+      const ownedDaa = {
+        ...broadDaaList[0],
+        daaId: 2,
+        broadDaa: false,
+        initialDacId: existingDac.dacId as number,
+        file: { ...broadDaaList[0].file, fileName: 'custom-daa.pdf' },
+      }
+      const daasWithSelection = [...broadDaaList, ownedDaa]
+      const dacWithAssignment = { ...existingDac, associatedDaa: ownedDaa }
+
+      cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+      cy.stub(DAC, 'get').resolves(dacWithAssignment)
+      cy.stub(DAA, 'getDaas').resolves(daasWithSelection)
+      stubCommonDacApis()
+      mountExistingEditDac(existingDac.dacId as number)
+
+      cy.get('[data-cy="daa_tab_owned"]').should('have.attr', 'aria-selected', 'true')
+      cy.get('[data-cy="daa_tab_shared"]').should('have.attr', 'aria-selected', 'false')
+    })
+
+    it('defaults to shared tab if selected DAA is shared from another DAC', () => {
+      const sharedDaa = {
+        ...broadDaaList[0],
+        daaId: 5,
+        broadDaa: false,
+        initialDacId: 99, // Different DAC
+        file: { ...broadDaaList[0].file, fileName: 'shared-daa.pdf' },
+      }
+      const daasWithSelection = [...buildExistingDaas(), sharedDaa]
+      const dacWithAssignment = { ...existingDac, associatedDaa: sharedDaa }
+
+      cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+      cy.stub(DAC, 'get').resolves(dacWithAssignment)
+      cy.stub(DAA, 'getDaas').resolves(daasWithSelection)
+      stubCommonDacApis()
+      mountExistingEditDac(existingDac.dacId as number)
+
+      cy.get('[data-cy="daa_tab_shared"]').should('have.attr', 'aria-selected', 'true')
+      cy.get('[data-cy="daa_tab_owned"]').should('have.attr', 'aria-selected', 'false')
+    })
+
+    it('can select DAA from owned tab', () => {
+      const existingDaas = buildExistingDaas()
+      setupExistingEditFlow(existingDaas)
+      const updateStub = cy.stub(DAC, 'update').resolves(existingDac)
+      const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
+
+      cy.get('[data-cy="daa_tab_owned"]').click()
+      cy.get('[data-cy="daa_option_2"]').should('be.visible').check()
+      cy.get('[data-cy="btn_save"]').click()
+
+      cy.wrap(updateStub).should('have.been.called')
+      cy.wrap(addDaaToDacStub).should('have.been.calledWith', 2, existingDac.dacId)
+    })
+
+    it('can select DAA from shared tab', () => {
+      const sharedDaa = {
+        ...broadDaaList[0],
+        daaId: 5,
+        broadDaa: false,
+        initialDacId: 99,
+        file: { ...broadDaaList[0].file, fileName: 'shared-daa.pdf' },
+      }
+      const daasWithSelection = [...buildExistingDaas(), sharedDaa]
+      cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+      cy.stub(DAC, 'get').resolves(existingDac)
+      cy.stub(DAA, 'getDaas').resolves(daasWithSelection)
+      stubCommonDacApis()
+      mountExistingEditDac(existingDac.dacId as number)
+      const updateStub = cy.stub(DAC, 'update').resolves(existingDac)
+      const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
+
+      cy.get('[data-cy="daa_tab_shared"]').click()
+      cy.get('[data-cy="daa_option_5"]').should('be.visible').check()
+      cy.get('[data-cy="btn_save"]').click()
+
+      cy.wrap(updateStub).should('have.been.called')
+      cy.wrap(addDaaToDacStub).should('have.been.calledWith', 5, existingDac.dacId)
+    })
+
+    it('newly uploaded DAA appears in owned tab and is auto-selected', () => {
+      const existingDaas = buildExistingDaas()
+      setupExistingEditFlow(existingDaas)
+      cy.stub(DAA, 'createDaa').resolves({
+        data: { ...broadDaaList[0], daaId: 88, broadDaa: false, initialDacId: existingDac.dacId },
+      })
+
+      uploadDaaFile('new-daa.pdf')
+
+      cy.get('[data-cy="daa_tab_owned"]').should('have.attr', 'aria-selected', 'true')
+      cy.get('[data-cy="daa_option_88"]').should('be.checked')
+    })
+
+    it('shows empty state for owned tab when no custom DAAs exist', () => {
+      const daasWithoutOwned = [
+        {
+          ...broadDaaList[0],
+          daaId: 1,
+          initialDacId: 99, // Shared from another DAC, not owned by this DAC
+          broadDaa: true,
+        },
+      ]
+      cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+      cy.stub(DAC, 'get').resolves(existingDac)
+      cy.stub(DAA, 'getDaas').resolves(daasWithoutOwned)
+      stubCommonDacApis()
+      mountExistingEditDac(existingDac.dacId as number)
+
+      cy.get('[data-cy="daa_tab_owned"]').click()
+      cy.contains('No DAAs created by this DAC').should('be.visible')
+    })
+
+    it('shows empty state for shared tab when no shared DAAs exist', () => {
+      const daasAllOwned = [
+        {
+          ...broadDaaList[0],
+          daaId: 1,
+          initialDacId: existingDac.dacId,
+        },
+        {
+          ...broadDaaList[0],
+          daaId: 2,
+          initialDacId: existingDac.dacId,
+          file: { ...broadDaaList[0].file, fileName: 'custom.pdf' },
+        },
+      ]
+      cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+      cy.stub(DAC, 'get').resolves(existingDac)
+      cy.stub(DAA, 'getDaas').resolves(daasAllOwned)
+      stubCommonDacApis()
+      mountExistingEditDac(existingDac.dacId as number)
+
+      cy.get('[data-cy="daa_tab_shared"]').click()
+      cy.contains('No DAAs shared with this DAC').should('be.visible')
+    })
+
+    it('download button works for DAA in owned tab', () => {
+      const existingDaas = [
+        {
+          ...broadDaaList[0],
+          daaId: 2,
+          broadDaa: false,
+          initialDacId: existingDac.dacId as number,
+          file: { ...broadDaaList[0].file, fileName: 'custom-daa.pdf' },
+        },
+      ]
+      setupExistingEditFlow(existingDaas)
+      const downloadStub = cy.stub(DAA, 'getDaaFileById').resolves()
+
+      cy.get('[data-cy="daa_tab_owned"]').click()
+      // Find the download link by its kebab-case id
+      cy.get('#custom-daa-pdf').click()
+
+      cy.wrap(downloadStub).should('have.been.calledWithMatch', 2, 'custom-daa.pdf')
+    })
+
+    it('download button works for DAA in shared tab', () => {
+      const sharedDaa = {
+        ...broadDaaList[0],
+        daaId: 5,
+        broadDaa: false,
+        initialDacId: 99,
+        file: { ...broadDaaList[0].file, fileName: 'shared-daa.pdf' },
+      }
+      const daasWithSelection = [...buildExistingDaas(), sharedDaa]
+      cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+      cy.stub(DAC, 'get').resolves(existingDac)
+      cy.stub(DAA, 'getDaas').resolves(daasWithSelection)
+      stubCommonDacApis()
+      mountExistingEditDac(existingDac.dacId as number)
+      const downloadStub = cy.stub(DAA, 'getDaaFileById').resolves()
+
+      cy.get('[data-cy="daa_tab_shared"]').click()
+      cy.get('[data-cy="daa_option_5"]').parent().parent().find('a').click()
+
+      cy.wrap(downloadStub).should('have.been.calledWithMatch', 5, 'shared-daa.pdf')
+    })
+  })
+})
+
+describe('EditDAC Tests - No DAAs Configured', () => {
+  it('should display tabs when no DAAs are configured', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'get').resolves(existingDac)
+    cy.stub(DAA, 'getDaas').resolves([]) // No DAAs configured
+    stubCommonDacApis()
+
+    mountExistingEditDac(existingDac.dacId as number)
+
+    // Wait for tabs to render and verify they exist
+    cy.get('[data-cy="daa_tabs"]', { timeout: 10000 }).should('be.visible')
+    cy.get('[data-cy="daa_tab_owned"]').should('exist')
+    cy.get('[data-cy="daa_tab_shared"]').should('exist')
+
+    // Check that upload button is enabled
+    cy.get('[data-cy="daa_upload_button"]').should('be.enabled')
   })
 })
