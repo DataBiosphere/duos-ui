@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   // Error handler — suppresses stack traces from responses
   fastify.setErrorHandler((err: FastifyError, _req, reply) => {
     fastify.log.error({ err }, '[server] Unhandled error:')
-    void reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
+    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
   })
 
   await fastify.listen({ port: PORT, host: '0.0.0.0' })
