@@ -8,6 +8,29 @@ import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 
+type DatasetApprovalTerm = {
+  term?: {
+    accessManagement?: string
+    dacApproval?: boolean
+  }
+}
+
+type DatasetApprovalBranch = {
+  bool?: {
+    should?: DatasetApprovalBranch[]
+    must_not?: DatasetApprovalTerm[]
+    must?: DatasetApprovalTerm[]
+  }
+}
+
+type DatasetSearchBody = {
+  query?: {
+    bool?: {
+      must?: DatasetApprovalBranch[]
+    }
+  }
+}
+
 const mockMetadataResponse = {
   aggregations: {
     dac: { buckets: [{ key: 'DAC-1', doc_count: 5 }] },
@@ -798,9 +821,9 @@ describe('DataLibrary', () => {
     })
 
     it('sends correct query for controlled/open dataset approval logic', () => {
-      let capturedBody = undefined
+      let capturedBody: DatasetSearchBody | undefined
       cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        capturedBody = req.body
+        capturedBody = req.body as DatasetSearchBody
         req.reply(mockDatasetsResponse)
       }).as('searchApi')
 
@@ -817,23 +840,39 @@ describe('DataLibrary', () => {
         cy.then(() => {
           // Find the top-level must array
           const must = capturedBody?.query?.bool?.must
-          expect(must).to.exist
-          // Find the should clause
+          assert.exists(must)
+          if (!must) {
+            throw new Error('Expected top-level bool.must clause in dataset search query')
+          }
+
+          // Find the should clause using optional chaining
           const should = must.find(
-            (clause) => clause.bool && Array.isArray(clause.bool.should)
+            clause => clause.bool?.should && Array.isArray(clause.bool.should),
           )?.bool?.should
-          expect(should).to.exist
+          assert.exists(should)
+          if (!should) {
+            throw new Error('Expected bool.should clause for approval filtering')
+          }
+
           // Should have two branches
-          expect(should.length).to.equal(2)
+          assert.lengthOf(should, 2)
+
           // First branch: must_not accessManagement: controlled
           const mustNot = should[0]?.bool?.must_not
-          expect(mustNot).to.exist
-          expect(mustNot[0]?.term).to.deep.equal({ accessManagement: 'controlled' })
+          assert.exists(mustNot)
+          if (!mustNot) {
+            throw new Error('Expected must_not branch excluding controlled datasets')
+          }
+          assert.deepEqual(mustNot[0]?.term, { accessManagement: 'controlled' })
+
           // Second branch: must accessManagement: controlled AND dacApproval: true
           const mustArr = should[1]?.bool?.must
-          expect(mustArr).to.exist
-          expect(mustArr.some(q => q.term && q.term.accessManagement === 'controlled')).to.be.true
-          expect(mustArr.some(q => q.term && q.term.dacApproval === true)).to.be.true
+          assert.exists(mustArr)
+          if (!mustArr) {
+            throw new Error('Expected must branch for controlled approved datasets')
+          }
+          assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.accessManagement === 'controlled'))
+          assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.dacApproval === true))
         })
       })
     })
