@@ -1,11 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 // The runtime config.json is mounted into build/ at deploy time.
 // Respect CONFIG_PATH so tests or local dev can point elsewhere.
 const CONFIG_PATH
   = process.env.CONFIG_PATH
-    || path.join(__dirname, '..', '..', 'build', 'config.json')
+    || path.join(fileURLToPath(new URL('.', import.meta.url)), '..', '..', 'build', 'config.json')
 
 type Config = Record<string, unknown>
 

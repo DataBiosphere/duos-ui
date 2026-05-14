@@ -1,9 +1,10 @@
 import Fastify, { FastifyError } from 'fastify'
 import fastifyStatic from '@fastify/static'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const PORT = Number(process.env.PORT) || 8080
-const BUILD_DIR = path.join(__dirname, '..', '..', 'build')
+const BUILD_DIR = path.join(fileURLToPath(new URL('.', import.meta.url)), '..', '..', 'build')
 
 const fastify = Fastify({ logger: true })
 
