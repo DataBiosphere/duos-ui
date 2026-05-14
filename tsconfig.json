@@ -21,5 +21,6 @@
     }
   },
   "plugins": ["@typescript-eslint"],
-  "include": ["**/*","src/custom.d.ts"]
+  "include": ["**/*","src/custom.d.ts"],
+  "exclude": ["server", "node_modules", "build"]
 }
