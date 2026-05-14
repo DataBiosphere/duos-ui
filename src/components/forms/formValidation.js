@@ -3,7 +3,7 @@ import { isString, isEmpty, isNil, isArray, isNumber } from 'src/utils/NodashUti
 import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
 import { Institution } from 'src/libs/ajax/Institution.js'
-import { isSafeHttpUrl } from 'src/utils/UrlUtils'
+import { isValidHttpUrl } from 'src/utils/UrlUtils'
 
 let cachedInstitution = null
 
@@ -19,7 +19,7 @@ export const requiredValidator = {
 export const urlValidator = {
   id: 'uri',
   isValid: (val) => {
-    return isSafeHttpUrl(val)
+    return isValidHttpUrl(val)
   },
   msg: 'Please enter a valid url (e.g., https://duos.org)',
 }

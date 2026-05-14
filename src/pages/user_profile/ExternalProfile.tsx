@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { ExternalProfiles } from 'src/types/model'
-import { getSafeHttpUrl } from 'src/utils/UrlUtils'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 interface ExternalProfileProps {
   readonly userId?: number
@@ -191,13 +191,13 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }
 
   const getUrlLink = (url: string) => {
-    const safeUrl = getSafeHttpUrl(url)
-    if (!safeUrl) {
+    const validUrl = validateHttpUrl(url)
+    if (!validUrl) {
       return <span>{url}</span>
     }
 
     return (
-      <a href={safeUrl} target="_blank" rel="noopener noreferrer">
+      <a href={validUrl} target="_blank" rel="noopener noreferrer">
         {url}
       </a>
     )

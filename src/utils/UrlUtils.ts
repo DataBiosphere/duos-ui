@@ -1,6 +1,6 @@
-const SAFE_HTTP_PROTOCOLS = new Set(['http:', 'https:'])
+const VALID_HTTP_PROTOCOLS = new Set(['http:', 'https:'])
 
-export const getSafeHttpUrl = (value: unknown): string | undefined => {
+export const validateHttpUrl = (value: unknown): string | undefined => {
   if (typeof value !== 'string') {
     return undefined
   }
@@ -12,11 +12,11 @@ export const getSafeHttpUrl = (value: unknown): string | undefined => {
 
   try {
     const url = new URL(trimmedValue)
-    return SAFE_HTTP_PROTOCOLS.has(url.protocol) ? trimmedValue : undefined
+    return VALID_HTTP_PROTOCOLS.has(url.protocol) ? trimmedValue : undefined
   }
   catch {
     return undefined
   }
 }
 
-export const isSafeHttpUrl = (value: unknown): boolean => getSafeHttpUrl(value) !== undefined
+export const isValidHttpUrl = (value: unknown): boolean => validateHttpUrl(value) !== undefined

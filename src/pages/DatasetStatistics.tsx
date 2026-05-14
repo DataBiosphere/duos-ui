@@ -15,7 +15,7 @@ import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { getSafeHttpUrl } from 'src/utils/UrlUtils'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
@@ -132,7 +132,7 @@ export default function DatasetStatistics() {
   const accessInstructions = () => {
     const accessManagement = datasetTerm?.accessManagement as AccessManagement
     const locationUrl = datasetTerm?.url
-    const safeLocationUrl = getSafeHttpUrl(locationUrl)
+    const validLocationUrl = validateHttpUrl(locationUrl)
     switch (accessManagement) {
       case AccessManagement.CONTROLLED:
         return (
@@ -144,11 +144,11 @@ export default function DatasetStatistics() {
         return (
           <span>
             This dataset is open access, does not require an access request
-            {safeLocationUrl
+            {validLocationUrl
               && (
                 <span>
                   , and can be accessed directly through this{' '}
-                  <a href={safeLocationUrl}>link</a>.
+                  <a href={validLocationUrl}>link</a>.
                 </span>
               )}
           </span>
@@ -157,12 +157,12 @@ export default function DatasetStatistics() {
         return (
           <span>
             This dataset is externally managed. Requests cannot be made via DUOS
-            {safeLocationUrl
+            {validLocationUrl
               && (
                 <span>
                   , but must be made directly through the{' '}
                   <a
-                    href={safeLocationUrl}
+                    href={validLocationUrl}
                   >
                     dataset&apos;s host repository
                   </a>.

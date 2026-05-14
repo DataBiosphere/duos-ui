@@ -4,7 +4,7 @@ import { Box, Chip, Link } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import Tooltip from '@mui/material/Tooltip'
 import { FundingResourceAsset } from 'src/types/library'
-import { getSafeHttpUrl } from 'src/utils/UrlUtils'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 export const makeFundingResourceColumns = (): GridColDef<FundingResourceAsset>[] => [
   {
@@ -153,7 +153,7 @@ export const makeFundingResourceColumns = (): GridColDef<FundingResourceAsset>[]
     width: 80,
     sortable: false,
     renderCell: (params) => {
-      const url = getSafeHttpUrl(params.value)
+      const url = validateHttpUrl(params.value)
       return url
         ? (
             <Link

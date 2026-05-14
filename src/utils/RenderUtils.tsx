@@ -1,6 +1,6 @@
 import React from 'react'
 import { Maintainer, ClinicalTrial, Presenter, Author } from 'src/types/model'
-import { getSafeHttpUrl } from 'src/utils/UrlUtils'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 export function renderMaintainer(value: unknown): React.ReactNode {
   const maintainer = value as Maintainer
@@ -10,7 +10,7 @@ export function renderMaintainer(value: unknown): React.ReactNode {
 
 export function renderUrl(value: unknown): React.ReactNode {
   if (typeof value !== 'string' || !value) return '—'
-  const href = getSafeHttpUrl(value)
+  const href = validateHttpUrl(value)
   return href
     ? <a href={href} target="_blank" rel="noreferrer">{value}</a>
     : value
