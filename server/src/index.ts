@@ -29,7 +29,10 @@ async function main(): Promise<void> {
   await fastify.listen({ port: PORT, host: '0.0.0.0' })
 }
 
-main().catch((err: unknown) => {
+try {
+  await main()
+}
+catch (err: unknown) {
   console.error(err)
   process.exit(1)
-})
+}
