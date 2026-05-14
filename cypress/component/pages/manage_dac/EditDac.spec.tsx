@@ -192,18 +192,25 @@ describe('EditDAC Tests', () => {
     cy.wrap(addDaaToDacStub).should('not.have.been.called')
   })
 
-  it.skip('Auto-selects first shared DAA when creating a new DAC with no assignment', () => {
+  it('Does not auto-select a DAA when creating a new DAC', () => {
     setupCreateFlow(adminUser)
-    const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
-    const dacCreate = cy.stub(DAC, 'create').resolves(existingDac)
+
+    // No DAA should be pre-selected
+    cy.get('[data-cy="daa_option_1"]').should('not.be.checked')
+  })
+
+  it('Shows error when saving a new DAC without selecting a data access agreement', () => {
+    setupCreateFlow(adminUser)
+    const errorStub = cy.stub(Notifications, 'showError')
+    const createStub = cy.stub(DAC, 'create').resolves(existingDac)
 
     fillNewDacForm()
-    // First shared DAA should be auto-selected (broadDaaList[0])
-    cy.get('[data-cy="daa_option_1"]').should('be.checked')
     cy.get('[data-cy="btn_save"]').click()
 
-    cy.wrap(dacCreate).should('have.been.called')
-    cy.wrap(addDaaToDacStub).should('have.been.called')
+    cy.wrap(errorStub).should('have.been.calledWithMatch', {
+      text: 'Please select a data access agreement or upload your own data access agreement before saving.',
+    })
+    cy.wrap(createStub).should('not.have.been.called')
   })
 
   it('Allows uploading a custom DAA for new DAC and creates it on save', () => {

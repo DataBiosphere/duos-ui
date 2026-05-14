@@ -114,7 +114,7 @@ export default function EditDac(): React.JSX.Element {
           setOwnedDaas([])
           setSharedDaas(sortedDaas)
           setActiveTab('shared')
-          setSelectedDaa(sortedDaas[0] ?? null)
+          setSelectedDaa(null)
         }
         catch {
           Notifications.showError({ text: 'Error: Unable to retrieve current DAC from server' })
@@ -165,7 +165,7 @@ export default function EditDac(): React.JSX.Element {
   const validateNewDacDaaSelection = (): boolean => {
     const hasNoDaaSelected = (daaFileData === null || daaFileData.length === 0) && !selectedDaa
     if (hasNoDaaSelected) {
-      handleErrors('Please select an agreement or upload your own agreement before saving.')
+      handleErrors('Please select a data access agreement or upload your own data access agreement before saving.')
       return false
     }
     return true
