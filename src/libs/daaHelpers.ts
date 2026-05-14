@@ -109,16 +109,6 @@ export function getDefaultTabForDac(
   // Default to owned tab
   return 'owned'
 }
-
-/**
- * Check if a DAA is a broad/default DAA
- * @param daa - The DAA to check
- * @returns true if broadDaa is true, false otherwise
- */
-export function isBroadDaa(daa: DAAObject | null | undefined): boolean {
-  return daa?.broadDaa === true
-}
-
 /**
  * Check if a DAA is owned by a specific DAC
  * @param daa - The DAA to check

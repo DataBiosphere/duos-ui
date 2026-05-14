@@ -5,13 +5,11 @@ import {
   sortDaasByCreationDate,
   getDefaultDaaForDac,
   getDefaultTabForDac,
-  isBroadDaa,
   isDaaOwnedByDac,
 } from 'src/libs/daaHelpers'
 
 // Mock DAA objects for testing
 const createMockDaa = (overrides: Partial<DAAObject>): DAAObject => ({
-  broadDaa: false,
   daaId: 1,
   createUserId: 1,
   createDate: '2026-01-01T00:00:00Z',
@@ -216,26 +214,6 @@ describe('daaHelpers', () => {
     })
   })
 
-  describe('isBroadDaa', () => {
-    it('returns true for broad DAA', () => {
-      const daa = createMockDaa({ broadDaa: true })
-      expect(isBroadDaa(daa)).to.equal(true)
-    })
-
-    it('returns false for non-broad DAA', () => {
-      const daa = createMockDaa({ broadDaa: false })
-      expect(isBroadDaa(daa)).to.equal(false)
-    })
-
-    it('returns false for null', () => {
-      expect(isBroadDaa(null)).to.equal(false)
-    })
-
-    it('returns false for undefined', () => {
-      expect(isBroadDaa(undefined)).to.equal(false)
-    })
-  })
-
   describe('isDaaOwnedByDac', () => {
     it('returns true if DAA is owned by the DAC', () => {
       const daa = createMockDaa({ initialDacId: 1 })
@@ -267,17 +245,6 @@ describe('daaHelpers', () => {
     it('getDefaultTabForDac should return "owned" tab when no DAAs are configured', () => {
       const defaultTab = getDefaultTabForDac(1, [])
       expect(defaultTab).to.equal('owned')
-    })
-
-    it('isBroadDaa should return correct boolean values', () => {
-      const daa = createMockDaa({ broadDaa: true })
-      expect(isBroadDaa(daa)).to.equal(true)
-
-      const nonBroadDaa = createMockDaa({ broadDaa: false })
-      expect(isBroadDaa(nonBroadDaa)).to.equal(false)
-
-      expect(isBroadDaa(null)).to.equal(false)
-      expect(isBroadDaa(undefined)).to.equal(false)
     })
 
     it('isDaaOwnedByDac should return correct ownership status', () => {

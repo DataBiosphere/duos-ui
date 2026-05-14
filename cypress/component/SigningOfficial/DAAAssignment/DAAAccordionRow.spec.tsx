@@ -20,7 +20,6 @@ const makeResearcher = (userId: number, displayName: string, email: string): Duo
 })
 
 const mockDaa: DAAObject = {
-  broadDaa: false,
   daaId: 5,
   createUserId: 1,
   createDate: '2024-03-01',

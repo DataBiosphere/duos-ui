@@ -96,7 +96,6 @@ export default function EditDac(): React.JSX.Element {
   const [daaFileData, setDaaFileData] = useState<File[] | null>(null)
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false)
   const [fetchedDac, setFetchedDac] = useState<DacObject | null>(null)
-  const [broadDaa, setBroadDaa] = useState<DAAObject | null>(null)
   const [ownedDaas, setOwnedDaas] = useState<DAAObject[]>([])
   const [sharedDaas, setSharedDaas] = useState<DAAObject[]>([])
   const [activeTab, setActiveTab] = useState<'owned' | 'shared'>('shared')
@@ -109,8 +108,6 @@ export default function EditDac(): React.JSX.Element {
       if (dacIdParam === undefined) {
         try {
           const daas = await DAA.getDaas()
-          const broadDaa = daas.find(daa => daa.broadDaa)
-          setBroadDaa(broadDaa ?? null)
           // For new DACs, set owned and shared based on all available DAAs
           // Owned is empty (no DAC created yet), shared is all non-owned DAAs
           const sortedDaas = sortDaasByCreationDate(daas)
@@ -134,8 +131,6 @@ export default function EditDac(): React.JSX.Element {
           const fetchedDac = await DAC.get(dacId)
           setFetchedDac(fetchedDac)
           const daas = await DAA.getDaas()
-          const broadDaa = daas.find(daa => daa.broadDaa)
-          setBroadDaa(broadDaa ?? null)
           setState(prev => ({ ...prev, dac: fetchedDac }))
 
           // Calculate owned and shared DAAs
@@ -168,9 +163,9 @@ export default function EditDac(): React.JSX.Element {
   const saveErrorMessage = 'There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.'
 
   const validateNewDacDaaSelection = (): boolean => {
-    const hasNoDaaSelected = (daaFileData === null || daaFileData.length === 0) && selectedDaa?.daaId !== broadDaa?.daaId
+    const hasNoDaaSelected = (daaFileData === null || daaFileData.length === 0) && !selectedDaa
     if (hasNoDaaSelected) {
-      handleErrors('Please select either the default agreement or upload your own agreement before saving.')
+      handleErrors('Please select an agreement or upload your own agreement before saving.')
       return false
     }
     return true

@@ -6,26 +6,45 @@ import EditDac from 'src/pages/manage_dac/EditDac'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import adminJson from '../../DAC/admin.json'
 import chairJson from '../../DAC/chair.json'
-import daas from '../../DAC/daas.json'
 import dac from '../../DAC/dac.json'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
 
 const adminUser = setUserRoleStatuses(adminJson as DuosUser, Storage)
 const chairUser = setUserRoleStatuses(chairJson as DuosUser, Storage)
-const broadDaaList = daas as unknown as DAAObject[]
 const existingDac = dac as unknown as DacObject
+
+const createMockBroadDaa = (overrides: Partial<DAAObject> = {}): DAAObject => ({
+  daaId: 1,
+  createUserId: 3479,
+  createDate: '2024-08-27T00:00:00Z',
+  updateUserId: 3479,
+  updateDate: '2024-08-27T00:00:00Z',
+  initialDacId: 1,
+  file: {
+    fileStorageObjectId: 1,
+    entityId: '1',
+    fileName: 'DUOS_Uniform_Data_Access_Agreement.pdf',
+    category: 'dataAccessAgreement' as const,
+    mediaType: 'application/octet-stream',
+    createUserId: 3479,
+    createDate: 1722023675199,
+  },
+  dacs: [],
+  ...overrides,
+})
+
+const broadDaaList = [createMockBroadDaa()]
 
 const buildExistingDaas = (): DAAObject[] => {
   return [
-    ...broadDaaList,
+    createMockBroadDaa(),
     {
-      ...broadDaaList[0],
+      ...createMockBroadDaa(),
       daaId: 2,
-      broadDaa: false,
       initialDacId: existingDac.dacId as number,
       file: {
-        ...broadDaaList[0].file,
+        ...createMockBroadDaa().file,
         fileStorageObjectId: 2,
         fileName: 'custom-daa.pdf',
       },
@@ -194,7 +213,7 @@ describe('EditDAC Tests', () => {
     cy.stub(DAA, 'addDaaToDac').resolves(200)
     const createStub = cy.stub(DAC, 'create').resolves({ ...existingDac, dacId: 99 })
     const createDaaStub = cy.stub(DAA, 'createDaa').resolves({
-      data: { ...broadDaaList[0], daaId: 55, broadDaa: false },
+      data: { ...broadDaaList[0], daaId: 55 },
     })
 
     uploadDaaFile(customFileName)
@@ -230,7 +249,7 @@ describe('EditDAC Tests', () => {
     const updateStub = cy.stub(DAC, 'update').resolves(existingDac)
     const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
     const createDaaStub = cy.stub(DAA, 'createDaa').resolves({
-      data: { ...broadDaaList[0], daaId: 77, broadDaa: false },
+      data: { ...broadDaaList[0], daaId: 77 },
     })
 
     uploadDaaFile('existing-custom-daa.pdf', 'existing dac daa')
@@ -248,10 +267,10 @@ describe('EditDAC Tests', () => {
     cy.stub(DAA, 'addDaaToDac').resolves(200)
     const createStub = cy.stub(DAC, 'create').resolves({ ...existingDac, dacId: 99 })
     const createDaaStub = cy.stub(DAA, 'createDaa')
-      .onCall(0).resolves({ data: { ...broadDaaList[0], daaId: 201, broadDaa: false } })
-      .onCall(1).resolves({ data: { ...broadDaaList[0], daaId: 202, broadDaa: false } })
-      .onCall(2).resolves({ data: { ...broadDaaList[0], daaId: 203, broadDaa: false } })
-      .onCall(3).resolves({ data: { ...broadDaaList[0], daaId: 204, broadDaa: false } })
+      .onCall(0).resolves({ data: { ...broadDaaList[0], daaId: 201 } })
+      .onCall(1).resolves({ data: { ...broadDaaList[0], daaId: 202 } })
+      .onCall(2).resolves({ data: { ...broadDaaList[0], daaId: 203 } })
+      .onCall(3).resolves({ data: { ...broadDaaList[0], daaId: 204 } })
 
     uploadDaaFiles([
       { fileName: 'new-custom-daa-1.pdf', fileContent: 'file 1' },

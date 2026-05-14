@@ -15,7 +15,6 @@ describe('DAAs', () => {
   }
 
   const daa: DAAObject = {
-    broadDaa: false,
     daaId: 1,
     createUserId: 3,
     createDate: new Date().toISOString(),
