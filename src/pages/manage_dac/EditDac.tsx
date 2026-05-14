@@ -430,13 +430,25 @@ export default function EditDac(): React.JSX.Element {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const target = event.target
     const value = target.value
-    const name = target.name as DacEditableField
+    const name = target.name
 
-    setState(prev => ({
-      ...prev,
-      dac: { ...prev.dac, [name]: value } as DacObject,
-      dirtyFlag: true,
-    }))
+    // Validate that name is a valid DacEditableField before updating
+    const validFields: ReadonlyArray<DacEditableField> = ['name', 'description', 'email']
+    if (!validFields.includes(name as DacEditableField)) {
+      return
+    }
+
+    setState((prev) => {
+      const updatedDac: DacObject = {
+        ...prev.dac,
+        [name]: value,
+      }
+      return {
+        ...prev,
+        dac: updatedDac,
+        dirtyFlag: true,
+      }
+    })
   }
 
   const toggleRemovalUserId = (key: 'chairIdsToRemove' | 'memberIdsToRemove', userId: number): void => {
@@ -630,11 +642,11 @@ export default function EditDac(): React.JSX.Element {
     setSelectedDaa(daa)
     setSelectedUploadedFileName(null)
     // Only update newDaaId if this is not a newly created DAA being selected
-    if (daa.daaId !== createdDaa?.daaId) {
-      setNewDaaId(daa.daaId)
+    if (daa.daaId === createdDaa?.daaId) {
+      setNewDaaId(null)
     }
     else {
-      setNewDaaId(null)
+      setNewDaaId(daa.daaId)
     }
     setState(prev => ({
       ...prev,
@@ -784,7 +796,7 @@ export default function EditDac(): React.JSX.Element {
                           id="sel_dacChair"
                           isDisabled={false}
                           isMulti
-                          loadOptions={(query, callback) => chairSearch(query, callback as (options: UserSelectOption[]) => void)}
+                          loadOptions={(query, callback) => chairSearch(query, callback)}
                           onChange={option => onChairSearchChange(option)}
                           onInputChange={() => onSearchInputChanged()}
                           onMenuClose={() => onSearchMenuClosed()}
@@ -816,7 +828,7 @@ export default function EditDac(): React.JSX.Element {
                           id="sel_dacMember"
                           isDisabled={false}
                           isMulti={true}
-                          loadOptions={(query, callback) => memberSearch(query, callback as (options: UserSelectOption[]) => void)}
+                          loadOptions={(query, callback) => memberSearch(query, callback)}
                           onChange={option => onMemberSearchChange(option)}
                           onInputChange={() => onSearchInputChanged()}
                           onMenuClose={() => onSearchMenuClosed()}

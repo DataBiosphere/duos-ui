@@ -42,14 +42,14 @@ const recentDaa: DAAObject = {
   ...mockDaa,
   daaId: 6,
   updateDate: new Date().toISOString(), // today — always recent
-  file: { ...mockDaa.file!, fileStorageObjectId: 6, fileName: 'Updated Agreement' },
+  file: { ...mockDaa.file, fileStorageObjectId: 6, fileName: 'Updated Agreement' },
 }
 
 const mockDaaWithEpochCreateDate: DAAObject = {
   ...mockDaa,
   daaId: 7,
   createDate: 1709251200 as unknown as string,
-  file: { ...mockDaa.file!, fileStorageObjectId: 7, fileName: 'Epoch DAA' },
+  file: { ...mockDaa.file, fileStorageObjectId: 7, fileName: 'Epoch DAA' },
 }
 
 const mockRows: DAAResearcherRowData[] = [
