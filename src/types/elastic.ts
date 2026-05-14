@@ -50,6 +50,7 @@ export interface BoolQuery {
     should?: QueryClause[]
     must_not?: QueryClause[]
     filter?: QueryClause[]
+    minimum_should_match?: number
   }
 }
 

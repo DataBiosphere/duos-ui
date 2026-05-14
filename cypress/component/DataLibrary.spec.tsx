@@ -796,5 +796,46 @@ describe('DataLibrary', () => {
 
       cy.contains('eLwazi Data Library').should('be.visible')
     })
+
+    it('sends correct query for controlled/open dataset approval logic', () => {
+      let capturedBody = undefined
+      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
+        capturedBody = req.body
+        req.reply(mockDatasetsResponse)
+      }).as('searchApi')
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.wait('@searchApi').then(() => {
+        cy.wrap(capturedBody).should('exist')
+        cy.then(() => {
+          // Find the top-level must array
+          const must = capturedBody?.query?.bool?.must
+          expect(must).to.exist
+          // Find the should clause
+          const should = must.find(
+            (clause) => clause.bool && Array.isArray(clause.bool.should)
+          )?.bool?.should
+          expect(should).to.exist
+          // Should have two branches
+          expect(should.length).to.equal(2)
+          // First branch: must_not accessManagement: controlled
+          const mustNot = should[0]?.bool?.must_not
+          expect(mustNot).to.exist
+          expect(mustNot[0]?.term).to.deep.equal({ accessManagement: 'controlled' })
+          // Second branch: must accessManagement: controlled AND dacApproval: true
+          const mustArr = should[1]?.bool?.must
+          expect(mustArr).to.exist
+          expect(mustArr.some(q => q.term && q.term.accessManagement === 'controlled')).to.be.true
+          expect(mustArr.some(q => q.term && q.term.dacApproval === true)).to.be.true
+        })
+      })
+    })
   })
 })

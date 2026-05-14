@@ -40,6 +40,7 @@ export const datasetAsset: AssetDefinition = {
     'data.tags',
   ],
 
+  // Always filter for DAC-approved datasets
   buildQuery(
     queryChunks: QueryClause[],
     filterQuery: QueryClause[],
@@ -47,12 +48,27 @@ export const datasetAsset: AssetDefinition = {
     sort?: SortState,
   ): ElasticsearchQuery {
     const esSortField = sort ? (SORT_FIELD_MAP[sort.field] ?? sort.field) : undefined
+    // Only require dacApproval: true for controlled access datasets
+    const must: QueryClause[] = [
+      {
+        bool: {
+          should: [
+            // Non-controlled datasets (open/external/etc) are always included
+            { bool: { must_not: [{ term: { accessManagement: 'controlled' } }] } },
+            // Controlled datasets must be approved
+            { bool: { must: [{ term: { accessManagement: 'controlled' } }, { term: { dacApproval: true } }] } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      ...queryChunks,
+    ]
     return {
       from: pagination.page * pagination.pageSize,
       size: pagination.pageSize,
       query: {
         bool: {
-          must: queryChunks,
+          must,
           ...(filterQuery.length > 0 && { filter: filterQuery }),
         },
       },
