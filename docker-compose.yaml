@@ -16,7 +16,6 @@
 #   docker compose up -d
 # Test
 #   https://local.broadinstitute.org/
-version: '3.8'
 services:
   app:
     image: duos:latest
