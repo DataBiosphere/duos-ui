@@ -30,8 +30,8 @@ RUN cd server && npm install && npm run build && npm prune --omit=dev
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:7bb73493171d6c0b1bf00018915266cf8e80910b172d14bf249dcd01af8f3aa9
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
-COPY --chown=node:node --from=builder /usr/src/app/build ./build
-COPY --chown=node:node --from=builder /usr/src/app/server ./server
+COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/build ./build
+COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/server ./server
 USER node
 EXPOSE 8080
 CMD ["node", "server/dist/index.js"]
