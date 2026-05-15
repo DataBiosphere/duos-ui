@@ -3,6 +3,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import { WorkspaceAsset } from 'src/types/library'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 /**
  * Column definitions for the Workspaces view
@@ -67,11 +68,12 @@ export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
     headerName: 'URL',
     width: 80,
     sortable: false,
-    renderCell: params =>
-      params.value
+    renderCell: (params) => {
+      const url = validateHttpUrl(params.value)
+      return url
         ? (
             <Link
-              href={params.value}
+              href={url}
               underline="hover"
               target="_blank"
               rel="noopener noreferrer"
@@ -79,7 +81,8 @@ export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
               Link
             </Link>
           )
-        : null,
+        : null
+    },
   },
   {
     field: 'description',

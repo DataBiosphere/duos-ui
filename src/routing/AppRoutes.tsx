@@ -115,27 +115,27 @@ const AppRoutes = (props: AppRoutesProps) => {
             <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
           </Route>
         </Route>
-      </Route>
-      <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
-        <Route path="/chair_console" element={<ChairConsole />} />
-        <Route path="/dac_datasets" element={<DACDatasets />} />
-      </Route>
-      <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
-        <Route path="/manage_dac" element={<ManageDac />} />
-        <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
-        <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
-        <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />
-      </Route>
-      <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
-        <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />
-        <Route path="/admin_manage_users" element={<AdminManageUsers />} />
-        <Route path="/admin_edit_user/:userId" element={<AdminEditUser />} />
-        <Route path="/admin_manage_institutions/create_new" element={<InstitutionDetails formMode={FORM_MODES.createNew} />} />
-        <Route path="/admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
-        <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
-        <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
-        <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
-        <Route path="/manage_add_dac_daa" element={<EditDac />} />
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
+          <Route path="/chair_console" element={<ChairConsole />} />
+          <Route path="/dac_datasets" element={<DACDatasets />} />
+        </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
+          <Route path="/manage_dac" element={<ManageDac />} />
+          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
+          <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
+          <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />
+        </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
+          <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />
+          <Route path="/admin_manage_users" element={<AdminManageUsers />} />
+          <Route path="/admin_edit_user/:userId" element={<AdminEditUser />} />
+          <Route path="/admin_manage_institutions/create_new" element={<InstitutionDetails formMode={FORM_MODES.createNew} />} />
+          <Route path="/admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
+          <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
+          <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
+          <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
+          <Route path="/manage_add_dac_daa" element={<EditDac />} />
+        </Route>
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

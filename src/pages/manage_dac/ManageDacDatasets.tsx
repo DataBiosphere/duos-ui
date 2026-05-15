@@ -10,6 +10,7 @@ import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
 import { Styles } from 'src/libs/theme'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 const PAGE_SIZE = 10
 
@@ -44,8 +45,9 @@ export const ManageDacDatasets: React.FC = () => {
 
   const getDbGapLinkValue = (properties: DatasetProperty[]) => {
     const href = getPropertyValue(properties, 'url', '')
-    return typeof href === 'string' && href.length > 0
-      ? <a href={href} target="_blank" className="enabled" rel="noreferrer">Link</a>
+    const validUrl = validateHttpUrl(href)
+    return validUrl
+      ? <a href={validUrl} target="_blank" className="enabled" rel="noreferrer">Link</a>
       : <span className="disabled">---</span>
   }
 

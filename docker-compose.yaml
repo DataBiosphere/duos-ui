@@ -19,20 +19,21 @@
 #   docker exec duos-ollama ollama pull llama3.2:3b
 # Test
 #   https://local.broadinstitute.org/
-version: '3.8'
 services:
   app:
     image: duos:latest
     container_name: duos
     ports:
-      - 8080:8080
-    volumes:
-      - ./public/config.json:/usr/src/app/build/config.json
+      - ${PORT:-8080}:${PORT:-8080}
     environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-8080}
       # When running with --profile local-ai, point the proxy at Ollama instead
       # of Vertex AI. Remove or leave blank to use real Vertex AI.
       OLLAMA_URL: http://ollama:11434
-    command: ["node", "server/src/index.js"]
+    volumes:
+      - ./public/config.json:/usr/src/app/build/config.json
+    command: ["node", "server/dist/index.js"]
     restart: always
 
   # ---------------------------------------------------------------------------

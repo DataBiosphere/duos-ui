@@ -35,9 +35,6 @@ export const datasetAsset: AssetDefinition = {
     'study.dataTypes',
     'dataUse.primary.code',
     'dataUse.secondary.code',
-    'dac.dacName',
-    'datasetIdentifier',
-    'data.tags',
   ],
 
   buildQuery(
@@ -47,12 +44,23 @@ export const datasetAsset: AssetDefinition = {
     sort?: SortState,
   ): ElasticsearchQuery {
     const esSortField = sort ? (SORT_FIELD_MAP[sort.field] ?? sort.field) : undefined
+    // ES 9: top-level bool should/minimum_should_match, must/filter for additional clauses
     return {
       from: pagination.page * pagination.pageSize,
       size: pagination.pageSize,
       query: {
         bool: {
-          must: queryChunks,
+          should: [
+            // Non-controlled datasets (open/external/etc) are always included
+            { bool: { must_not: [{ term: { accessManagement: 'controlled' } }] } },
+            // Controlled datasets must be approved
+            { bool: { must: [
+              { term: { accessManagement: 'controlled' } },
+              { term: { dacApproval: true } },
+            ] } },
+          ],
+          minimum_should_match: 1,
+          ...(queryChunks.length > 0 && { must: queryChunks }),
           ...(filterQuery.length > 0 && { filter: filterQuery }),
         },
       },

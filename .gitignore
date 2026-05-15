@@ -50,3 +50,6 @@ site.conf
 
 ## GHA Credentials
 gha-creds-*.json
+
+## Server build output
+server/dist/

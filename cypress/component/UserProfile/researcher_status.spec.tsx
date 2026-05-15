@@ -47,7 +47,6 @@ describe('ResearcherStatus', () => {
   }
 
   const daa: DAAObject = {
-    broadDaa: true,
     daaId: 1,
     createUserId: 3,
     createDate: new Date().toISOString(),
@@ -68,16 +67,15 @@ describe('ResearcherStatus', () => {
   it('Renders the Researcher Status With Library Card Info', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser])
     const userWithCard = {
-      ...user, ...{
-        libraryCard: {
-          id: 1,
-          userId: 1,
-          userName: 'Test User',
-          userEmail: 'test.usre@test.com',
-          createDate: fixedLibraryCardCreateDate,
-          createUserId: 3,
-          daaIds: [1],
-        },
+      ...user,
+      libraryCard: {
+        id: 1,
+        userId: 1,
+        userName: 'Test User',
+        userEmail: 'test.usre@test.com',
+        createDate: fixedLibraryCardCreateDate,
+        createUserId: 3,
+        daaIds: [1],
       },
     }
 
@@ -99,16 +97,15 @@ describe('ResearcherStatus', () => {
   it('shows message when no signing officials are found', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([])
     const userWithCard = {
-      ...user, ...{
-        libraryCard: {
-          id: 1,
-          userId: 1,
-          userName: 'Test User',
-          userEmail: 'test.user@test.com',
-          createDate: fixedLibraryCardCreateDate,
-          createUserId: 3,
-          daaIds: [1],
-        },
+      ...user,
+      libraryCard: {
+        id: 1,
+        userId: 1,
+        userName: 'Test User',
+        userEmail: 'test.user@test.com',
+        createDate: fixedLibraryCardCreateDate,
+        createUserId: 3,
+        daaIds: [1],
       },
     }
     cy.mount(<ResearcherStatus user={userWithCard} />)
@@ -119,16 +116,15 @@ describe('ResearcherStatus', () => {
   it('shows the Institutional Signing Officials list', () => {
     cy.stub(User, 'getSOsForCurrentUser').resolves([signingOfficialUser])
     const userWithCard = {
-      ...user, ...{
-        libraryCard: {
-          id: 1,
-          userId: 1,
-          userName: 'Test User',
-          userEmail: 'test.user@test.com',
-          createDate: fixedLibraryCardCreateDate,
-          createUserId: 3,
-          daaIds: [1],
-        },
+      ...user,
+      libraryCard: {
+        id: 1,
+        userId: 1,
+        userName: 'Test User',
+        userEmail: 'test.user@test.com',
+        createDate: fixedLibraryCardCreateDate,
+        createUserId: 3,
+        daaIds: [1],
       },
     }
     cy.mount(<ResearcherStatus user={userWithCard} />)

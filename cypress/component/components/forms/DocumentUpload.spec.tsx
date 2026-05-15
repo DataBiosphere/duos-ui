@@ -425,14 +425,9 @@ describe('DocumentUpload', () => {
     )
 
     cy.window().then((win) => {
+      const previewDocument = win.document.implementation.createHTMLDocument('')
       const previewWindow = {
-        document: {
-          title: '',
-          body: {
-            style: {},
-            innerHTML: '',
-          },
-        },
+        document: previewDocument,
       }
 
       cy.stub(win, 'open').as('windowOpen').returns(previewWindow)
@@ -443,6 +438,7 @@ describe('DocumentUpload', () => {
       }).as('createObjectURL')
 
       cy.wrap(previewWindow).as('previewWindow')
+      cy.wrap(previewDocument).as('previewDocument')
     })
 
     cy.contains('viewable.pdf')
@@ -455,11 +451,68 @@ describe('DocumentUpload', () => {
     cy.get('@windowOpen').should('have.been.calledOnce')
     cy.get('@createObjectURL').should('have.been.calledOnce')
     cy.get('@previewWindow').its('document.title').should('equal', 'viewable.pdf')
-    cy.get('@previewWindow').its('document.body.innerHTML').should('contain', 'blob:viewable')
+    cy.get('@previewDocument').then((doc) => {
+      const iframe = (doc as unknown as Document).querySelector('iframe')
+      expect(iframe).not.to.equal(null)
+      expect(iframe?.title).to.equal('viewable.pdf')
+      expect(iframe?.getAttribute('src')).to.equal('blob:viewable')
+    })
     cy.wrap(getDocumentStub).should('have.been.calledOnceWith', EntityType.DAR, 'dar-7', 777)
     cy.get('[data-cy="document-upload-details"]').should('contain.text', 'Document ID: 777')
     cy.get('[data-cy="document-upload-details"]').should('contain.text', 'Deleted:')
     cy.get('[data-cy="document-upload-details"]').should('not.contain.text', 'Deleted On:')
+  })
+
+  it('does not inject uploaded PDF filenames into preview HTML', () => {
+    const maliciousFileName = 'report"><img src=x onerror=alert(1)>.pdf'
+    const api = {
+      uploadDocument: cy.stub().resolves({} as never),
+      deleteDocument: cy.stub().resolves({} as never),
+      listDocuments: cy.stub().resolves([
+        {
+          fileStorageObjectId: 778,
+          entityId: 'dar-8',
+          fileName: maliciousFileName,
+          category: FileCategory.DATA_USE_LETTER,
+          mediaType: 'application/pdf',
+          createUserId: 1,
+          createDate: Date.now(),
+        },
+      ]),
+      getDocumentFile: cy.stub().resolves(new Blob(['pdf'], { type: 'application/pdf' })),
+    }
+
+    cy.mount(
+      <DocumentUpload
+        entity={EntityType.DAR}
+        entityId="dar-8"
+        api={api}
+      />,
+    )
+
+    cy.window().then((win) => {
+      const previewDocument = win.document.implementation.createHTMLDocument('')
+      cy.stub(win, 'open').as('windowOpen').returns({ document: previewDocument })
+      cy.stub(win.URL, 'createObjectURL').returns('blob:malicious-preview')
+      cy.wrap(previewDocument).as('previewDocument')
+    })
+
+    cy.contains(maliciousFileName)
+      .closest('[data-cy="document-upload-card"]')
+      .within(() => {
+        cy.get('[data-cy="document-upload-view"]').click()
+      })
+
+    cy.get('@windowOpen').should('have.been.calledOnce')
+    cy.get('@previewDocument').then((doc) => {
+      const document = doc as unknown as Document
+      const iframe = document.querySelector('iframe')
+      expect(iframe).not.to.equal(null)
+      expect(iframe?.title).to.equal(maliciousFileName)
+      expect(iframe?.getAttribute('onerror')).to.equal(null)
+      expect(document.querySelector('img')).to.equal(null)
+      expect(document.body.children).to.have.length(1)
+    })
   })
 
   it('updates category for an uploaded document', () => {

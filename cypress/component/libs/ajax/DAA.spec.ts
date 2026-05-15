@@ -11,7 +11,6 @@ describe('DAA ajax', () => {
   }
 
   const mockDaa: DAAObject = {
-    broadDaa: false,
     daaId: 12,
     createUserId: 1001,
     createDate: '2026-01-01',

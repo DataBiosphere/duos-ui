@@ -11,12 +11,19 @@ import editDACIcon from 'src/images/dac_icon.svg'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Spinner } from 'src/components/Spinner'
 import { Styles } from 'src/libs/theme'
-import DUOSUniformDataAccessAgreement from 'src/assets/DUOS_Uniform_Data_Access_Agreement.pdf'
 import PublishIcon from '@mui/icons-material/Publish'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
 import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import type { DAAObject, DacObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+import { DaaTabs } from 'src/components/DaaTabs'
+import {
+  getOwnedDaas,
+  getSharedDaas,
+  getDefaultDaaForDac,
+  getDefaultTabForDac,
+  sortDaasByCreationDate,
+} from 'src/libs/daaHelpers'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -47,57 +54,20 @@ interface EditDacState {
   searchInputChanged: boolean
 }
 
-interface DaaItemProps {
-  specificDaa: DAAObject
-  selectedDaa: DAAObject | null | undefined
-  onChangeSelection: (daaId: number) => void
+interface EditDacState {
+  error: ErrorState
+  dirtyFlag: boolean
+  dac: DacObject
+  chairsSelectedOptions: UserSelectOption[]
+  chairIdsToAdd: number[]
+  chairIdsToRemove: number[]
+  membersSelectedOptions: UserSelectOption[]
+  memberIdsToAdd: number[]
+  memberIdsToRemove: number[]
+  searchInputChanged: boolean
 }
 
 type DacEditableField = 'name' | 'description' | 'email'
-
-function DaaItem({ specificDaa, selectedDaa, onChangeSelection }: Readonly<DaaItemProps>): React.JSX.Element {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px' }}>
-      <input
-        type="radio"
-        name="daa"
-        checked={selectedDaa?.daaId === specificDaa.daaId}
-        onChange={() => onChangeSelection(specificDaa.daaId)}
-        style={{ accentColor: '#00609f' }}
-        data-cy={`daa_option_${specificDaa.daaId}`}
-        aria-label={`Use agreement ${specificDaa.file.fileName}`}
-      />
-      <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-        <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-          <div className="row" style={{ paddingLeft: '15px' }}>
-            {specificDaa.file.fileName}
-          </div>
-          <div className="row" style={{ paddingLeft: '15px' }}>
-            Uploaded on
-            {' '}
-            {specificDaa?.updateDate ? new Date(specificDaa.updateDate).toLocaleDateString() : ''}
-          </div>
-        </div>
-        <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-          <div style={{ marginLeft: '10px' }}>
-            <button
-              type="button"
-              onClick={async () => {
-                await DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName)
-              }}
-              className="button button-white"
-              style={{ padding: '10px 12px' }}
-              title="Download file"
-              aria-label={`Download ${specificDaa.file.fileName}`}
-            >
-              <span className="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function EditDac(): React.JSX.Element {
   const params = useParams<{ dacId?: string }>()
@@ -126,8 +96,9 @@ export default function EditDac(): React.JSX.Element {
   const [daaFileData, setDaaFileData] = useState<File[] | null>(null)
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false)
   const [fetchedDac, setFetchedDac] = useState<DacObject | null>(null)
-  const [broadDaa, setBroadDaa] = useState<DAAObject | null>(null)
-  const [matchingDaas, setMatchingDaas] = useState<DAAObject[]>([])
+  const [ownedDaas, setOwnedDaas] = useState<DAAObject[]>([])
+  const [sharedDaas, setSharedDaas] = useState<DAAObject[]>([])
+  const [activeTab, setActiveTab] = useState<'owned' | 'shared'>('shared')
   const dacText = dacIdParam === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee'
   const user = Storage.getCurrentUser()
   const canUpload = (user?.isAdmin || user?.roles?.some(r => r.dacId === fetchedDac?.dacId && r.name === 'Chairperson')) ?? false
@@ -137,8 +108,13 @@ export default function EditDac(): React.JSX.Element {
       if (dacIdParam === undefined) {
         try {
           const daas = await DAA.getDaas()
-          const broadDaa = daas.find(daa => daa.broadDaa)
-          setBroadDaa(broadDaa ?? null)
+          // For new DACs, set owned and shared based on all available DAAs
+          // Owned is empty (no DAC created yet), shared is all non-owned DAAs
+          const sortedDaas = sortDaasByCreationDate(daas)
+          setOwnedDaas([])
+          setSharedDaas(sortedDaas)
+          setActiveTab('shared')
+          setSelectedDaa(null)
         }
         catch {
           Notifications.showError({ text: 'Error: Unable to retrieve current DAC from server' })
@@ -155,13 +131,23 @@ export default function EditDac(): React.JSX.Element {
           const fetchedDac = await DAC.get(dacId)
           setFetchedDac(fetchedDac)
           const daas = await DAA.getDaas()
-          const broadDaa = daas.find(daa => daa.broadDaa)
-          setBroadDaa(broadDaa ?? null)
           setState(prev => ({ ...prev, dac: fetchedDac }))
-          const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId)
-          setMatchingDaas(matchingDaas)
-          const daa = fetchedDac?.associatedDaa ?? null
-          setSelectedDaa(daa?.daaId ? daa : null)
+
+          // Calculate owned and shared DAAs
+          const sortedDaas = sortDaasByCreationDate(daas)
+          const ownedDaasForDac = getOwnedDaas(sortedDaas, fetchedDac.dacId ?? 0)
+          const sharedDaasForDac = getSharedDaas(sortedDaas, fetchedDac.dacId ?? 0)
+
+          setOwnedDaas(ownedDaasForDac)
+          setSharedDaas(sharedDaasForDac)
+
+          // Determine default tab and DAA
+          const currentlyAssigned = fetchedDac?.associatedDaa ?? undefined
+          const defaultTab = getDefaultTabForDac(fetchedDac.dacId ?? 0, sortedDaas, currentlyAssigned)
+          const defaultDaa = getDefaultDaaForDac(fetchedDac.dacId ?? 0, sortedDaas, currentlyAssigned)
+
+          setActiveTab(defaultTab)
+          setSelectedDaa(defaultDaa)
         }
         catch {
           Notifications.showError({ text: 'Error: Unable to retrieve current DAC from server' })
@@ -177,9 +163,9 @@ export default function EditDac(): React.JSX.Element {
   const saveErrorMessage = 'There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.'
 
   const validateNewDacDaaSelection = (): boolean => {
-    const hasNoDaaSelected = (daaFileData === null || daaFileData.length === 0) && selectedDaa?.daaId !== broadDaa?.daaId
+    const hasNoDaaSelected = (daaFileData === null || daaFileData.length === 0) && !selectedDaa
     if (hasNoDaaSelected) {
-      handleErrors('Please select either the default agreement or upload your own agreement before saving.')
+      handleErrors('Please select a data access agreement or upload your own data access agreement before saving.')
       return false
     }
     return true
@@ -444,13 +430,25 @@ export default function EditDac(): React.JSX.Element {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const target = event.target
     const value = target.value
-    const name = target.name as DacEditableField
+    const name = target.name
 
-    setState(prev => ({
-      ...prev,
-      dac: { ...prev.dac, [name]: value } as DacObject,
-      dirtyFlag: true,
-    }))
+    // Validate that name is a valid DacEditableField before updating
+    const validFields: ReadonlyArray<DacEditableField> = ['name', 'description', 'email']
+    if (!validFields.includes(name as DacEditableField)) {
+      return
+    }
+
+    setState((prev) => {
+      const updatedDac: DacObject = {
+        ...prev.dac,
+        [name]: value,
+      }
+      return {
+        ...prev,
+        dac: updatedDac,
+        dirtyFlag: true,
+      }
+    })
   }
 
   const toggleRemovalUserId = (key: 'chairIdsToRemove' | 'memberIdsToRemove', userId: number): void => {
@@ -504,6 +502,46 @@ export default function EditDac(): React.JSX.Element {
     return { newDaas, lastCreatedDaa }
   }
 
+  const delay = async (ms: number): Promise<void> => {
+    await new Promise(resolve => globalThis.setTimeout(resolve, ms))
+  }
+
+  const mergeDaasById = (baseDaas: DAAObject[], additionalDaas: DAAObject[]): DAAObject[] => {
+    const daaById = new Map<number, DAAObject>()
+
+    for (const daa of baseDaas) {
+      if (daa.daaId !== undefined) {
+        daaById.set(daa.daaId, daa)
+      }
+    }
+
+    for (const daa of additionalDaas) {
+      if (daa.daaId !== undefined) {
+        daaById.set(daa.daaId, daa)
+      }
+    }
+
+    return Array.from(daaById.values())
+  }
+
+  const refreshMatchingDaas = async (currentDacId: number, expectedDaaIds: number[]): Promise<DAAObject[]> => {
+    const maxAttempts = 3
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const daas = await DAA.getDaas()
+      const refreshedMatchingDaas = daas.filter(daa => daa.initialDacId === currentDacId)
+      const allExpectedPresent = expectedDaaIds.every(id => refreshedMatchingDaas.some(daa => daa.daaId === id))
+
+      if (allExpectedPresent || attempt === maxAttempts) {
+        return refreshedMatchingDaas
+      }
+
+      await delay(attempt * 250)
+    }
+
+    return []
+  }
+
   const handleExistingDacAttachment = async (attachment: File[]): Promise<void> => {
     setIsDaaOperationInProgress(true)
 
@@ -514,22 +552,54 @@ export default function EditDac(): React.JSX.Element {
       }
 
       const { newDaas, lastCreatedDaa } = await createDaasForExistingDac(attachment, dacIdToUse)
+      const expectedDaaIds = newDaas
+        .map(daa => daa.daaId)
+        .filter((id): id is number => id !== undefined)
 
-      // Add all newly created DAAs to the displayed list
-      setMatchingDaas(prev => [...prev, ...newDaas])
-      setCreatedDaa(lastCreatedDaa)
+      let displayedDaas = newDaas
+      try {
+        const refreshedMatchingDaas = await refreshMatchingDaas(dacIdToUse, expectedDaaIds)
+        displayedDaas = mergeDaasById(refreshedMatchingDaas, newDaas)
+      }
+      catch {
+        // Preserve newly uploaded DAAs in the UI if refresh fails.
+        Notifications.showError({ text: 'Unable to refresh DAA list after upload. Showing latest uploaded agreements.' })
+      }
+
+      // Update both the old matchingDaas and the new ownedDaas state
+      setOwnedDaas(displayedDaas)
+
+      // Refresh shared DAAs in case there were changes
+      try {
+        const allDaas = await DAA.getDaas()
+        const sortedSharedDaas = sortDaasByCreationDate(
+          getSharedDaas(allDaas, dacIdToUse),
+        )
+        setSharedDaas(sortedSharedDaas)
+      }
+      catch {
+        // Continue with existing shared DAAs if refresh fails
+      }
+
+      const selectedCreatedDaa = lastCreatedDaa?.daaId === undefined
+        ? lastCreatedDaa
+        : displayedDaas.find(daa => daa.daaId === lastCreatedDaa.daaId) ?? lastCreatedDaa
+
+      setCreatedDaa(selectedCreatedDaa ?? null)
 
       // Clear pending-upload state since DAAs are now in matchingDaas
       setUploadedDAAFile(null)
       setDaaFileData(null)
 
       // Update selected DAA based on creation success
-      if (lastCreatedDaa?.daaId === undefined) {
+      if (selectedCreatedDaa?.daaId === undefined) {
         setSelectedDaa(undefined)
       }
       else {
-        setSelectedDaa(lastCreatedDaa)
+        setSelectedDaa(selectedCreatedDaa)
         setNewDaaId(null)
+        // Make sure we're on the owned tab to see the newly created DAA
+        setActiveTab('owned')
       }
     }
     finally {
@@ -568,32 +638,20 @@ export default function EditDac(): React.JSX.Element {
     setShowUploadModal(false)
   }
 
-  const handleDaaChange = (daaId?: number): void => {
-    if (daaId === undefined) {
-      setSelectedDaa(undefined)
+  const handleDaaChange = (daa: DAAObject): void => {
+    setSelectedDaa(daa)
+    setSelectedUploadedFileName(null)
+    // Only update newDaaId if this is not a newly created DAA being selected
+    if (daa.daaId === createdDaa?.daaId) {
       setNewDaaId(null)
-      setState(prev => ({
-        ...prev,
-        dirtyFlag: true,
-      }))
     }
     else {
-      const matchingDaa = matchingDaas.find(daa => daa.daaId === daaId)
-      let fallbackDaa: DAAObject | undefined
-      if (broadDaa?.daaId === daaId) {
-        fallbackDaa = broadDaa
-      }
-      else if (createdDaa?.daaId === daaId) {
-        fallbackDaa = createdDaa
-      }
-      setSelectedDaa(matchingDaa ?? fallbackDaa ?? ({ daaId } as DAAObject))
-      setSelectedUploadedFileName(null)
-      setNewDaaId(createdDaa?.daaId === daaId ? null : daaId)
-      setState(prev => ({
-        ...prev,
-        dirtyFlag: true,
-      }))
+      setNewDaaId(daa.daaId)
     }
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true,
+    }))
   }
 
   const handleUploadedFileSelection = (fileName: string): void => {
@@ -738,7 +796,7 @@ export default function EditDac(): React.JSX.Element {
                           id="sel_dacChair"
                           isDisabled={false}
                           isMulti
-                          loadOptions={(query, callback) => chairSearch(query, callback as (options: UserSelectOption[]) => void)}
+                          loadOptions={(query, callback) => chairSearch(query, callback)}
                           onChange={option => onChairSearchChange(option)}
                           onInputChange={() => onSearchInputChanged()}
                           onMenuClose={() => onSearchMenuClosed()}
@@ -770,7 +828,7 @@ export default function EditDac(): React.JSX.Element {
                           id="sel_dacMember"
                           isDisabled={false}
                           isMulti={true}
-                          loadOptions={(query, callback) => memberSearch(query, callback as (options: UserSelectOption[]) => void)}
+                          loadOptions={(query, callback) => memberSearch(query, callback)}
                           onChange={option => onMemberSearchChange(option)}
                           onInputChange={() => onSearchInputChanged()}
                           onMenuClose={() => onSearchMenuClosed()}
@@ -815,40 +873,56 @@ export default function EditDac(): React.JSX.Element {
                   Select a Data Access
                   Agreement (DAA) to govern access to your DAC&apos;s datasets
                 </div>
-                <ul style={{ padding: '0px', textTransform: 'none', listStyle: 'none' }}>
-                  <form>
-                    <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                      <fieldset style={{ border: 'none', padding: '0', margin: '0' }} aria-labelledby="default_daa_heading">
-                        <div id="default_daa_heading" className="control-label" style={{ marginTop: 0 }}>
-                          Use default agreement
-                        </div>
-                        <br />
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ marginTop: '20px' }}>
+                  <DaaTabs
+                    ownedDaas={ownedDaas}
+                    sharedDaas={sharedDaas}
+                    selectedDaa={selectedDaa}
+                    onSelectDaa={handleDaaChange}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    isLoading={isDaaOperationInProgress}
+                  />
+                </div>
+                {uploadedDAAFile !== null && uploadedDAAFile.length > 0
+                  && (
+                    <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: '15px', marginTop: '20px' }}>
+                      <div className="control-label" style={{ marginTop: 0 }}>
+                        Pending Upload
+                      </div>
+                      {uploadedDAAFile.map((file, idx) => (
+                        <div key={`${file.name}-${idx}`} style={{ display: 'flex', alignItems: 'flex-start', marginTop: '5px' }}>
                           <input
-                            id="default_daa_radio"
                             type="radio"
                             name="daa"
-                            checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId}
-                            onChange={() => handleDaaChange(broadDaa?.daaId)}
-                            style={{ accentColor: '#00609f' }}
-                            data-cy="daa_radio"
-                            aria-label="Use default DUOS Uniform Data Access Agreement"
+                            checked={selectedDaa === undefined && selectedUploadedFileName === file.name}
+                            onChange={() => handleUploadedFileSelection(file.name)}
+                            style={{ accentColor: '#00609f', marginTop: '8px' }}
+                            data-cy={idx === 0 ? 'uploaded_daa_radio' : undefined}
+                            aria-label={`Use uploaded agreement ${file.name}`}
                           />
-                          <div
-                            style={{ marginLeft: '10px', marginBottom: '0', fontWeight: 'normal' }}
-                          >
+                          <div style={{ marginLeft: '10px', marginBottom: '0', fontWeight: 'normal', flex: 1 }}>
                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                               <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0 }}>
-                                DUOS Uniform DAA
+                                <div className="row" style={{ paddingLeft: '15px' }} data-cy={idx === 0 ? 'uploaded_daa_name' : undefined}>
+                                  {file.name}
+                                </div>
+                                <div className="row" style={{ paddingLeft: '15px' }}>
+                                  Uploaded on
+                                  {' '}
+                                  {new Date().toLocaleDateString()}
+                                </div>
                               </div>
                               <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
                                 <div style={{ marginLeft: '10px' }}>
                                   <a
                                     target="_blank"
                                     rel="noreferrer"
-                                    href={DUOSUniformDataAccessAgreement}
+                                    download={file.name}
+                                    href={URL.createObjectURL(file)}
                                     className="button button-white"
                                     style={{ padding: '10px 12px' }}
+                                    data-cy={idx === 0 ? 'uploaded_daa_download' : undefined}
                                   >
                                     <span className="glyphicon glyphicon-download-alt"></span>
                                   </a>
@@ -857,95 +931,33 @@ export default function EditDac(): React.JSX.Element {
                             </div>
                           </div>
                         </div>
-                      </fieldset>
-                    </li>
-                    <hr />
-                    <li style={{ paddingTop: '5px', paddingBottom: '5px' }}>
-                      <fieldset style={{ border: 'none', padding: '0', margin: '0' }} aria-labelledby="custom_daa_heading">
-                        <div id="custom_daa_heading" className="control-label" style={{ marginTop: 0 }}>
-                          Use your own agreement
-                        </div>
-                        <br />
-                        {
-                          matchingDaas.map(daa => (
-                            <DaaItem key={daa.daaId} specificDaa={daa} selectedDaa={selectedDaa} onChangeSelection={handleDaaChange} />
-                          ))
-                        }
-                        {uploadedDAAFile !== null && uploadedDAAFile.length > 0
-                          && (
-                            <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: '15px' }}>
-                              {uploadedDAAFile.map((file, idx) => (
-                                <div key={`${file.name}-${idx}`} style={{ display: 'flex', alignItems: 'flex-start', marginTop: '5px' }}>
-                                  <input
-                                    type="radio"
-                                    name="daa"
-                                    checked={selectedDaa === undefined && selectedUploadedFileName === file.name}
-                                    onChange={() => handleUploadedFileSelection(file.name)}
-                                    style={{ accentColor: '#00609f', marginTop: '8px' }}
-                                    data-cy={idx === 0 ? 'uploaded_daa_radio' : undefined}
-                                    aria-label={`Use uploaded agreement ${file.name}`}
-                                  />
-                                  <div style={{ marginLeft: '10px', marginBottom: '0', fontWeight: 'normal', flex: 1 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                                      <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0 }}>
-                                        <div className="row" style={{ paddingLeft: '15px' }} data-cy={idx === 0 ? 'uploaded_daa_name' : undefined}>
-                                          {file.name}
-                                        </div>
-                                        <div className="row" style={{ paddingLeft: '15px' }}>
-                                          Uploaded on
-                                          {' '}
-                                          {new Date().toLocaleDateString()}
-                                        </div>
-                                      </div>
-                                      <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
-                                        <div style={{ marginLeft: '10px' }}>
-                                          <a
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            download={file.name}
-                                            href={URL.createObjectURL(file)}
-                                            className="button button-white"
-                                            style={{ padding: '10px 12px' }}
-                                            data-cy={idx === 0 ? 'uploaded_daa_download' : undefined}
-                                          >
-                                            <span className="glyphicon glyphicon-download-alt"></span>
-                                          </a>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
-                          <button
-                            className="button button-white"
-                            onClick={(event) => {
-                              event.preventDefault()
-                              setShowUploadModal(true)
-                            }}
-                            data-cy="daa_upload_button"
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <PublishIcon style={{ scale: '1.5' }} />
-                              <div style={{ marginLeft: '10px' }}>
-                                Upload file
-                              </div>
-                            </div>
-                          </button>
-                        </div>
-                      </fieldset>
-                    </li>
-                  </form>
-                </ul>
+                      ))}
+                    </div>
+                  )}
+                <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
+                  <button
+                    className="button button-white"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      setShowUploadModal(true)
+                    }}
+                    data-cy="daa_upload_button"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <PublishIcon style={{ scale: '1.5' }} />
+                      <div style={{ marginLeft: '10px' }}>
+                        Upload file
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
             {showUploadModal && (
               <UploadDaaModal
                 showModal={showUploadModal}
                 dacId={dacIdParam ?? 'new'}
-                isLiveUpload={!!dacIdParam}
+                isLiveUpload={false}
                 isReadOnly={!canUpload}
                 onCloseRequest={() => setShowUploadModal(false)}
                 onAttachmentChange={handleAttachment}

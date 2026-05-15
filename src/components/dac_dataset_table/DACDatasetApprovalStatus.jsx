@@ -84,8 +84,9 @@ export default function DACDatasetApprovalStatus(props) {
         id={`btn_approveDataset-${dataset.datasetId}`}
         onClick={() => updateApprovalStatus(true)}
         className={style['btn-primary-dac-datasets']}
+        style={{ minWidth: '90px' }}
       >
-        YES
+        APPROVE
       </Button>
       <ReactTooltip
         place="left"
@@ -99,8 +100,9 @@ export default function DACDatasetApprovalStatus(props) {
         id={`btn_rejectDataset-${dataset.datasetId}`}
         onClick={() => updateApprovalStatus(false)}
         className={style['btn-primary-dac-datasets']}
+        style={{ minWidth: '70px' }}
       >
-        NO
+        REJECT
       </Button>
       <ReactTooltip
         place="right"

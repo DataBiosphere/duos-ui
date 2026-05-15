@@ -44,6 +44,13 @@ describe('renderUrl', () => {
     mountAndAssertLink(renderUrl(url), url, url)
   })
 
+  it('renders unsafe URL as inert text', () => {
+    const url = 'javascript:alert(1)'
+    cy.mount(<div>{renderUrl(url)}</div>)
+    cy.get('a').should('not.exist')
+    cy.contains(url).should('exist')
+  })
+
   it('renders em dash for empty or null URL', () => {
     expect(renderUrl('')).to.equal('—')
     expect(renderUrl(null)).to.equal('—')
