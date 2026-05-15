@@ -22,8 +22,19 @@ RUN npm config set update-notifier false
 RUN npm install --loglevel verbose
 RUN npm run build
 
-FROM us.gcr.io/broad-dsp-gcr-public/base/nginx:mainline-alpine
-COPY --from=builder /usr/src/app/build /usr/share/nginx/html
-RUN rm -rf /etc/nginx/conf.d
-COPY conf /etc/nginx
-CMD ["nginx", "-g", "daemon off;"]
+# build the server
+COPY server /usr/src/app/server
+RUN cd server && npm install && npm run build && npm prune --omit=dev
+
+# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:7bb73493171d6c0b1bf00018915266cf8e80910b172d14bf249dcd01af8f3aa9
+ARG NODE_ENV=production
+ARG PORT=8080
+ENV NODE_ENV=${NODE_ENV}
+ENV PORT=${PORT}
+WORKDIR /usr/src/app
+COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/build ./build
+COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/server ./server
+USER node
+EXPOSE ${PORT}
+CMD ["node", "server/dist/index.js"]

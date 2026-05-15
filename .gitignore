@@ -10,6 +10,7 @@ jsconfig.json
 # dependencies
 /node_modules
 /.pnpm-store
+server/node_modules
 
 # IDE
 ./idea
@@ -49,3 +50,6 @@ site.conf
 
 ## GHA Credentials
 gha-creds-*.json
+
+## Server build output
+server/dist/

@@ -16,16 +16,18 @@
 #   docker compose up -d
 # Test
 #   https://local.broadinstitute.org/
-version: '3.8'
 services:
   app:
     image: duos:latest
     container_name: duos
     ports:
-      - 8080:8080
+      - ${PORT:-8080}:${PORT:-8080}
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-8080}
     volumes:
-      - ./public/config.json:/usr/share/nginx/html/config.json
-    command: ["nginx", "-g", "daemon off;"]
+      - ./public/config.json:/usr/src/app/build/config.json
+    command: ["node", "server/dist/index.js"]
     restart: always
 
   proxy:
