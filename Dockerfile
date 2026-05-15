@@ -26,7 +26,7 @@ RUN pnpm run build
 
 # build the server
 COPY server /usr/src/app/server
-RUN cd server && pnpm install --frozen-lockfile && pnpm run build && pnpm prune --prod
+RUN cd server && pnpm install --frozen-lockfile && pnpm run build && pnpm install --prod --frozen-lockfile --loglevel warn
 
 # Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:7bb73493171d6c0b1bf00018915266cf8e80910b172d14bf249dcd01af8f3aa9
