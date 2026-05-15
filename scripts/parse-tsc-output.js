@@ -74,7 +74,7 @@ const tsc_subset_files = (files, errors) => {
 // runs tsc and parse the output
 const tsc_run_and_parse = (files) => {
   return new Promise((resolve, reject) => {
-    const cmd = ['npx', 'tsc', '--noEmit']
+    const cmd = ['pnpm', 'exec', 'tsc', '--noEmit']
     const tsc = spawn(cmd[0], cmd.slice(1), {
       stdio: ['pipe', 'pipe', 'pipe'],
     })

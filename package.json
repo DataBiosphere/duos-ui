@@ -2,6 +2,7 @@
   "name": "duos-ui",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "analyze": "VISUALIZER_PLUGIN=true vite build",
     "start": "vite",

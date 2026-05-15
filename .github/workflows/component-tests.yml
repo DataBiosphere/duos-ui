@@ -15,8 +15,14 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: NPM Install
-        run: npm ci
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.1.2 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name : Cypress run component tests
         uses: cypress-io/github-action@v7
         with:

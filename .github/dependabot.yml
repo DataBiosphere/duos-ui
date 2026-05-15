@@ -32,16 +32,16 @@ updates:
     target-branch: develop
     labels:
       - "dependency"
-      - "npm"
+      - "pnpm"
     commit-message:
-      prefix: "[DT-400-npm]"
+      prefix: "[DT-400-pnpm]"
     groups:
-      npm-major-updates:
+      pnpm-major-updates:
         patterns:
           - "*"
         update-types:
           - "major"
-      npm-other-updates:
+      pnpm-other-updates:
         update-types:
           - "minor"
           - "patch"

@@ -1,8 +1,8 @@
 on: [pull_request]
-name: npm audit
+name: dependency audit
 jobs:
   scan:
-    name: npm audit
+    name: dependency audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -12,7 +12,13 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.1.2 --activate
       - name: install dependencies
-        run: npm ci
-      - name: npm audit
-        run: npm audit --omit=dev
+        run: pnpm install --frozen-lockfile
+      - name: pnpm audit
+        run: pnpm audit --prod
