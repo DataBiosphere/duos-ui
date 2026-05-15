@@ -8,6 +8,32 @@ import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 
+type DatasetApprovalTerm = {
+  term?: {
+    accessManagement?: string
+    dacApproval?: boolean
+  }
+}
+
+type DatasetApprovalBranch = {
+  bool?: {
+    should?: DatasetApprovalBranch[]
+    must_not?: DatasetApprovalTerm[]
+    must?: DatasetApprovalTerm[]
+  }
+}
+
+type DatasetSearchBody = {
+  query?: {
+    bool?: {
+      should?: DatasetApprovalBranch[]
+      minimum_should_match?: number
+      must?: DatasetApprovalBranch[]
+      filter?: DatasetApprovalBranch[]
+    }
+  }
+}
+
 const mockMetadataResponse = {
   aggregations: {
     dac: { buckets: [{ key: 'DAC-1', doc_count: 5 }] },
@@ -795,6 +821,60 @@ describe('DataLibrary', () => {
       )
 
       cy.contains('eLwazi Data Library').should('be.visible')
+    })
+
+    it('sends correct query for controlled/open dataset approval logic', () => {
+      let capturedBody: DatasetSearchBody | undefined
+      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
+        capturedBody = req.body as DatasetSearchBody
+        req.reply(mockDatasetsResponse)
+      }).as('searchApi')
+
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      cy.wait('@searchApi').then(() => {
+        cy.wrap(capturedBody).should('exist')
+        cy.then(() => {
+          // ES 9: top-level bool.should + minimum_should_match drives approval logic
+          const topBool = capturedBody?.query?.bool
+          assert.exists(topBool)
+          if (!topBool) {
+            throw new Error('Expected top-level bool clause in dataset search query')
+          }
+
+          assert.equal(topBool.minimum_should_match, 1)
+
+          const should = topBool.should
+          assert.exists(should)
+          if (!should) {
+            throw new Error('Expected bool.should clause for approval filtering')
+          }
+          assert.lengthOf(should, 2)
+
+          // First branch: must_not accessManagement: controlled
+          const mustNot = should[0]?.bool?.must_not
+          assert.exists(mustNot)
+          if (!mustNot) {
+            throw new Error('Expected must_not branch excluding controlled datasets')
+          }
+          assert.deepEqual(mustNot[0]?.term, { accessManagement: 'controlled' })
+
+          // Second branch: must accessManagement: controlled AND dacApproval: true
+          const mustArr = should[1]?.bool?.must
+          assert.exists(mustArr)
+          if (!mustArr) {
+            throw new Error('Expected must branch for controlled approved datasets')
+          }
+          assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.accessManagement === 'controlled'))
+          assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.dacApproval === true))
+        })
+      })
     })
   })
 })
