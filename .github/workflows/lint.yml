@@ -14,16 +14,16 @@ jobs:
           fetch-depth: 0
       - name: Extract Node.js version
         run: echo "NODE_VERSION=$(sed -n 's/FROM node:\([0-9.]*\).*/\1/p' Dockerfile)" >> $GITHUB_ENV
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 11.1.2
       - name: Install Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - name: Install pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
-        with:
-          version: 11.1.2
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint changed files
