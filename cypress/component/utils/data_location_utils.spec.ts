@@ -52,8 +52,18 @@ describe('DataLocationUtils', () => {
 
       cy.mount(getDataLocationLink(dataLocation))
 
-      cy.get('a')
-        .should('contain', 'Terra Workspace')
+      cy.get('a').should('not.exist')
+      cy.contains('Terra Workspace')
+    })
+
+    it('should render unsafe dataUrl as inert text', () => {
+      const dataLocation = 'Terra Workspace'
+      const dataUrl = 'javascript:alert(1)'
+
+      cy.mount(getDataLocationLink(dataLocation, dataUrl))
+
+      cy.get('a').should('not.exist')
+      cy.contains('Terra Workspace')
     })
   })
 })

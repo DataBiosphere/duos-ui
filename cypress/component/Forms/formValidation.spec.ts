@@ -47,6 +47,18 @@ describe('Form Validator tests', () => {
     it('Whitespace trailing URL should validate to true', () => {
       expect(urlValidator.isValid('   https://www.broadinstitute.org    ')).to.be.equal(true)
     })
+    it('https URL should validate to true', () => {
+      expect(urlValidator.isValid('https://www.broadinstitute.org')).to.be.equal(true)
+    })
+    it('javascript URL should validate to false', () => {
+      expect(urlValidator.isValid('javascript:alert(1)')).to.be.equal(false)
+    })
+    it('data URL should validate to false', () => {
+      expect(urlValidator.isValid('data:text/html,<script>alert(1)</script>')).to.be.equal(false)
+    })
+    it('ftp URL should validate to false', () => {
+      expect(urlValidator.isValid('ftp://example.com/file.txt')).to.be.equal(false)
+    })
     it('undefined should validate to false', () => {
       expect(urlValidator.isValid(undefined)).to.be.equal(false)
     })
