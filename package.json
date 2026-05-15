@@ -23,7 +23,7 @@
     "@mui/material": "7.3.11",
     "@mui/x-data-grid": "9.1.0",
     "@mui/x-date-pickers": "8.28.5",
-    "@tanstack/react-query": "5.100.9",
+    "@tanstack/react-query": "5.100.10",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "dayjs": "1.11.20",
@@ -38,11 +38,11 @@
     "react-markdown": "10.1.0",
     "react-modal": "3.16.3",
     "react-paginating": "1.4.0",
-    "react-router-dom": "7.12.0",
+    "react-router-dom": "7.15.0",
     "react-select": "5.10.2",
     "react-tooltip": "6.0.2",
     "stackdriver-errors-js": "0.12.0",
-    "tss-react": "4.9.20",
+    "tss-react": "4.9.21",
     "uuid": "14.0.0"
   },
   "devDependencies": {
@@ -60,7 +60,7 @@
     "eslint": "9.39.4",
     "eslint-plugin-cypress": "6.4.1",
     "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "7.0.1",
+    "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-react-refresh": "0.5.2",
     "globals": "17.6.0",
     "google-auth-library": "10.6.2",
@@ -69,7 +69,7 @@
     "prop-types": "15.8.1",
     "rollup-plugin-visualizer": "7.0.1",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.59.2",
+    "typescript-eslint": "8.59.3",
     "vite": "7.3.3"
   },
   "browserslist": [
