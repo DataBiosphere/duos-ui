@@ -1,6 +1,8 @@
 import Fastify, { FastifyError } from 'fastify'
 import fastifyStatic from '@fastify/static'
 import path from 'node:path'
+import { proxyPlugin } from './proxy.js'
+import { mcpPlugin } from './mcp.js'
 
 const PORT = Number(process.env.PORT) || 8080
 const BUILD_DIR = path.join(import.meta.dirname, '..', '..', 'build')
@@ -10,6 +12,9 @@ const fastify = Fastify({ logger: true })
 async function main(): Promise<void> {
   // Health check — registered before static middleware so it always resolves
   fastify.get('/health', async () => ({ status: 'ok' }))
+
+  await fastify.register(proxyPlugin)
+  await fastify.register(mcpPlugin)
 
   // Serve the React build as static files
   await fastify.register(fastifyStatic, { root: BUILD_DIR, wildcard: false })
