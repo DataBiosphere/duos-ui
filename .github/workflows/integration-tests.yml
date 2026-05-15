@@ -23,7 +23,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm ci
       - name: Copy Configs
         run: cp config/base_config.json public/config.json
       - name: Build app

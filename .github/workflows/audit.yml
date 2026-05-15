@@ -19,6 +19,6 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - name: install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm ci
       - name: pnpm audit
         run: pnpm audit --prod
