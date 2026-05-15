@@ -139,7 +139,7 @@ export function DaaTabs({
         }}
       >
         <Tab
-          label={`DAC DAAs (${ownedDaas.length})`}
+          label={`MY DAC's DAAs (${ownedDaas.length})`}
           value="owned"
           id="daa-tab-owned"
           aria-controls="daa-tabpanel-owned"
@@ -147,7 +147,7 @@ export function DaaTabs({
           sx={{ textTransform: 'none' }}
         />
         <Tab
-          label={`Shared DAAs (${sharedDaas.length})`}
+          label={`OTHER DAC's DAAs (${sharedDaas.length})`}
           value="shared"
           id="daa-tab-shared"
           aria-controls="daa-tabpanel-shared"
