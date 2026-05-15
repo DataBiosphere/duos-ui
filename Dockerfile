@@ -14,6 +14,7 @@ COPY src /usr/src/app/src
 COPY public /usr/src/app/public
 COPY package.json /usr/src/app/package.json
 COPY pnpm-lock.yaml /usr/src/app/pnpm-lock.yaml
+COPY pnpm-workspace.yaml /usr/src/app/pnpm-workspace.yaml
 COPY index.html /usr/src/app/index.html
 COPY tsconfig.json /usr/src/app/tsconfig.json
 COPY vite.config.ts /usr/src/app/vite.config.ts
