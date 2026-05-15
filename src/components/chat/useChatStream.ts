@@ -19,10 +19,10 @@ export interface ChatMessage {
 }
 
 // SSE event shapes emitted by /api/chat
-interface SseToken  { type: 'token';  content: string }
-interface SseStatus { type: 'status'; content: string }
-interface SseDone   { type: 'done' }
-interface SseError  { type: 'error';  content: string }
+interface SseToken { type: 'token', content: string }
+interface SseStatus { type: 'status', content: string }
+interface SseDone { type: 'done' }
+interface SseError { type: 'error', content: string }
 type SseEvent = SseToken | SseStatus | SseDone | SseError
 
 // ---------------------------------------------------------------------------
@@ -46,7 +46,7 @@ export function useChatStream(): UseChatStreamReturn {
     (updater: (msg: ChatMessage) => ChatMessage) => {
       setMessages((prev) => {
         const next = [...prev]
-        const idx = next.findLastIndex((m) => m.role === 'assistant')
+        const idx = next.findLastIndex(m => m.role === 'assistant')
         if (idx !== -1) next[idx] = updater(next[idx])
         return next
       })
@@ -65,7 +65,7 @@ export function useChatStream(): UseChatStreamReturn {
 
     const token = Token.getToken()
     if (!token) {
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         {
           id: crypto.randomUUID(),
@@ -79,7 +79,7 @@ export function useChatStream(): UseChatStreamReturn {
 
     // Append user message and an empty streaming assistant message
     const assistantId = crypto.randomUUID()
-    setMessages((prev) => [
+    setMessages(prev => [
       ...prev,
       { id: crypto.randomUUID(), role: 'user', content: trimmed },
       { id: assistantId, role: 'assistant', content: '', isStreaming: true },
@@ -91,7 +91,7 @@ export function useChatStream(): UseChatStreamReturn {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ message: trimmed }),
         signal: controller.signal,
@@ -117,52 +117,58 @@ export function useChatStream(): UseChatStreamReturn {
         buffer = chunks.pop() ?? ''
 
         for (const chunk of chunks) {
-          const dataLine = chunk.split('\n').find((l) => l.startsWith('data: '))
+          const dataLine = chunk.split('\n').find(l => l.startsWith('data: '))
           if (!dataLine) continue
           try {
             const event: SseEvent = JSON.parse(dataLine.slice(6))
 
             if (event.type === 'token') {
-              updateLastAssistantMessage((m) => ({
+              updateLastAssistantMessage(m => ({
                 ...m,
                 content: m.content + event.content,
                 status: undefined,
               }))
-            } else if (event.type === 'status') {
-              updateLastAssistantMessage((m) => ({ ...m, status: event.content }))
-            } else if (event.type === 'error') {
-              updateLastAssistantMessage((m) => ({
+            }
+            else if (event.type === 'status') {
+              updateLastAssistantMessage(m => ({ ...m, status: event.content }))
+            }
+            else if (event.type === 'error') {
+              updateLastAssistantMessage(m => ({
                 ...m,
                 content: event.content,
                 status: undefined,
                 isStreaming: false,
                 isError: true,
               }))
-            } else if (event.type === 'done') {
-              updateLastAssistantMessage((m) => ({
+            }
+            else if (event.type === 'done') {
+              updateLastAssistantMessage(m => ({
                 ...m,
                 status: undefined,
                 isStreaming: false,
               }))
             }
-          } catch {
+          }
+          catch {
             // Malformed SSE data — skip
           }
         }
       }
-    } catch (err: unknown) {
+    }
+    catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') return
       console.error('[useChatStream]', err)
-      updateLastAssistantMessage((m) => ({
+      updateLastAssistantMessage(m => ({
         ...m,
         content: 'Something went wrong. Please try again.',
         status: undefined,
         isStreaming: false,
         isError: true,
       }))
-    } finally {
+    }
+    finally {
       setIsStreaming(false)
-      updateLastAssistantMessage((m) => ({ ...m, isStreaming: false, status: undefined }))
+      updateLastAssistantMessage(m => ({ ...m, isStreaming: false, status: undefined }))
     }
   }, [isStreaming, updateLastAssistantMessage])
 

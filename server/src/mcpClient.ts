@@ -25,13 +25,14 @@ export async function callTool(
       body,
       signal: controller.signal,
     })
-    const parsed = await res.json() as { result?: unknown; error?: { message?: string } }
+    const parsed = await res.json() as { result?: unknown, error?: { message?: string } }
     if (parsed.error) {
       console.warn(`[mcpClient] Tool "${toolName}" returned error:`, parsed.error)
       return { error: parsed.error.message ?? 'Tool returned an error' }
     }
     return parsed.result ?? {}
-  } catch (err: unknown) {
+  }
+  catch (err: unknown) {
     if (err instanceof Error && err.name === 'AbortError') {
       console.warn(`[mcpClient] Tool "${toolName}" timed out`)
       return { error: `Tool "${toolName}" timed out` }
@@ -39,7 +40,8 @@ export async function callTool(
     const msg = err instanceof Error ? err.message : String(err)
     console.warn(`[mcpClient] Could not reach MCP server for tool "${toolName}": ${msg}`)
     return { error: `Tool "${toolName}" is not available` }
-  } finally {
+  }
+  finally {
     clearTimeout(timer)
   }
 }

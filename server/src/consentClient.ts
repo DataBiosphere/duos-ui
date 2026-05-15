@@ -15,8 +15,8 @@ async function consentFetch(url: string, token: string, options: RequestInit = {
     const res = await fetch(url, {
       ...options,
       headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
         'X-App-ID': 'DUOS',
         ...(options.headers ?? {}),
       },
@@ -27,7 +27,8 @@ async function consentFetch(url: string, token: string, options: RequestInit = {
       throw new Error(`Consent API ${res.status} ${res.statusText}: ${body}`)
     }
     return res.json()
-  } finally {
+  }
+  finally {
     clearTimeout(timer)
   }
 }
@@ -52,12 +53,12 @@ export async function listDatasets(token: string, args: { query?: string } = {})
       size: 25,
       _source: ['datasetId', 'datasetName', 'study.studyName', 'study.description', 'dataUse.primary', 'dataUse.secondary', 'dacId'],
     }),
-  }) as { hits?: { hits?: { _source?: Record<string, unknown> }[]; total?: { value?: number } } }
+  }) as { hits?: { hits?: { _source?: Record<string, unknown> }[], total?: { value?: number } } }
   const hits = raw.hits?.hits ?? []
   const datasets = hits.map((h) => {
     const s = h._source ?? {}
     const study = s['study'] as Record<string, unknown> | undefined
-    const dataUse = s['dataUse'] as { primary?: string[]; secondary?: string[] } | undefined
+    const dataUse = s['dataUse'] as { primary?: string[], secondary?: string[] } | undefined
     return {
       datasetId: s['datasetId'],
       datasetName: s['datasetName'],
@@ -81,7 +82,7 @@ export async function listDarCollections(token: string): Promise<unknown> {
   const items = Array.isArray(raw) ? raw as Record<string, unknown>[] : []
   return {
     total: items.length,
-    collections: items.map((c) => ({
+    collections: items.map(c => ({
       darCollectionId: c['darCollectionId'],
       darCode: c['darCode'],
       projectTitle: c['projectTitle'],
@@ -92,7 +93,7 @@ export async function listDarCollections(token: string): Promise<unknown> {
   }
 }
 
-function formatDataUse(dataUse: { primary?: string[]; secondary?: string[] } | undefined): string | null {
+function formatDataUse(dataUse: { primary?: string[], secondary?: string[] } | undefined): string | null {
   if (!dataUse) return null
   const parts = [...(dataUse.primary ?? []), ...(dataUse.secondary ?? [])]
   return parts.length ? parts.join(', ') : null
@@ -101,7 +102,7 @@ function formatDataUse(dataUse: { primary?: string[]; secondary?: string[] } | u
 function summariseDataset(d: Record<string, unknown>): unknown {
   if (!d) return null
   const study = d['study'] as Record<string, unknown> | undefined
-  const dataUse = d['dataUse'] as { primary?: string[]; secondary?: string[] } | undefined
+  const dataUse = d['dataUse'] as { primary?: string[], secondary?: string[] } | undefined
   return {
     datasetId: d['datasetId'],
     datasetName: d['datasetName'],
@@ -119,7 +120,7 @@ function summariseDataset(d: Record<string, unknown>): unknown {
 const TOOLS: Record<string, (token: string, args: Record<string, unknown>) => Promise<unknown>> = {
   list_datasets: (token, args) => listDatasets(token, args as { query?: string }),
   get_dataset: (token, args) => getDataset(token, args as { datasetId?: number }),
-  list_dar_collections: (token) => listDarCollections(token),
+  list_dar_collections: token => listDarCollections(token),
 }
 
 export async function callConsentTool(toolName: string, args: Record<string, unknown>, token: string): Promise<unknown> {

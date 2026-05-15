@@ -19,7 +19,8 @@ function parseExpiry(token: string): number {
     const payload = token.split('.')[1]
     const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as { exp?: number }
     if (decoded.exp) return decoded.exp * 1000
-  } catch { /* fall through */ }
+  }
+  catch { /* fall through */ }
   return Date.now() + 60 * 60 * 1000
 }
 

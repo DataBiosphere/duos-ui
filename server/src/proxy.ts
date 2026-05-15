@@ -7,16 +7,16 @@ import { callTool } from './mcpClient.js'
 // Types
 // ---------------------------------------------------------------------------
 
-type SseEvent =
-  | { type: 'token'; content: string }
-  | { type: 'status'; content: string }
-  | { type: 'done' }
-  | { type: 'error'; content: string }
+type SseEvent
+  = | { type: 'token', content: string }
+    | { type: 'status', content: string }
+    | { type: 'done' }
+    | { type: 'error', content: string }
 
 interface OllamaMessage {
   role: string
   content?: string
-  tool_calls?: { function: { name: string; arguments: Record<string, unknown> } }[]
+  tool_calls?: { function: { name: string, arguments: Record<string, unknown> } }[]
 }
 
 interface OllamaResponse {
@@ -82,7 +82,7 @@ const TOOLS = [
     function: {
       name: 'list_dar_collections',
       description:
-        "List the current user's Data Access Request (DAR) collections. "
+        `List the current user's Data Access Request (DAR) collections. `
         + 'Returns each collection with its constituent DARs and their current approval status.',
       parameters: { type: 'object', properties: {} },
     },
@@ -180,7 +180,8 @@ export async function proxyPlugin(fastify: FastifyInstance): Promise<void> {
     try {
       const model = String(getConfigValue('modelVersion', 'VERTEX_MODEL', 'llama3.2:3b') ?? 'llama3.2:3b')
       await runOllamaLoop(ollamaUrl, model, message, sessionId, sse)
-    } catch (err: unknown) {
+    }
+    catch (err: unknown) {
       fastify.log.error({ err }, '[proxy] Unhandled error:')
       sse({ type: 'error', content: 'An unexpected error occurred. Please try again.' })
     }

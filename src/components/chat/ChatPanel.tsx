@@ -241,7 +241,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isLoggedIn }) => {
                     size="small"
                     onClick={clearMessages}
                     aria-label="Clear conversation"
-                    sx={{ color: 'rgba(255,255,255,0.75)', '&:hover': { color: '#ffffff' } }}
+                    sx={{ 'color': 'rgba(255,255,255,0.75)', '&:hover': { color: '#ffffff' } }}
                   >
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>
@@ -252,7 +252,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isLoggedIn }) => {
                   size="small"
                   onClick={handleClose}
                   aria-label="Close DUOS Assistant"
-                  sx={{ color: 'rgba(255,255,255,0.75)', '&:hover': { color: '#ffffff' } }}
+                  sx={{ 'color': 'rgba(255,255,255,0.75)', '&:hover': { color: '#ffffff' } }}
                 >
                   <CloseIcon fontSize="small" />
                 </IconButton>
@@ -276,7 +276,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isLoggedIn }) => {
                 )
               : (
                   <>
-                    {messages.map((msg) => (
+                    {messages.map(msg => (
                       <ChatMessage key={msg.id} message={msg} />
                     ))}
                     <div ref={messagesEndRef} />

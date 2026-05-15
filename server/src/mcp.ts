@@ -21,7 +21,7 @@ function rpcErr(id: number | string | null | undefined, code: number, message: s
 }
 
 export async function mcpPlugin(fastify: FastifyInstance): Promise<void> {
-  fastify.post<{ Params: { sessionId: string }; Body: RpcRequest }>(
+  fastify.post<{ Params: { sessionId: string }, Body: RpcRequest }>(
     '/mcp/:sessionId',
     async (request, reply) => {
       const { sessionId } = request.params
@@ -50,7 +50,8 @@ export async function mcpPlugin(fastify: FastifyInstance): Promise<void> {
       try {
         const result = await callConsentTool(toolName, toolArgs, session.token)
         return reply.send(rpcOk(id, result))
-      } catch (err: unknown) {
+      }
+      catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err)
         fastify.log.error({ err }, `[mcp] Tool "${toolName}" error:`)
         return reply.send(rpcErr(id, -32603, msg))
