@@ -19,9 +19,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - name: Install pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@11.1.2 --activate
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.2
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Copy Configs
@@ -37,6 +37,7 @@ jobs:
           CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
+          install: false
           start: pnpm start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
