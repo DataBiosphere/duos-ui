@@ -1,4 +1,4 @@
-import { Config } from '../config'
+import { Config } from 'src/libs/config'
 import { fetchPut } from 'src/libs/ajax/fetchAdapter'
 import type { Vote } from 'src/types/model'
 
