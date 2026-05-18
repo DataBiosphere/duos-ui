@@ -190,7 +190,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   const onVoteError = (error: unknown, isChair: boolean) => {
     setVoteInProgress(false)
     const consentError = extractConsentError(error)
-    if (consentError?.code === 409) {
+    if (consentError && consentError.code === 409) {
       const voteText = isChair ? 'Chair vote' : 'Vote'
       Notifications.showError({ text: `${consentError.message} ${voteText} not submitted, updating vote display.` })
       reloadFn()
@@ -208,7 +208,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     }
     catch (error: unknown) {
       const consentError = extractConsentError(error)
-      if (consentError?.code === 409) {
+      if (consentError && consentError.code === 409) {
         Notifications.showError({ text: `${consentError.message} Rationale not submitted, updating vote display.` })
         reloadFn()
       }
