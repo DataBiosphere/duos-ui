@@ -1,5 +1,5 @@
 import React from 'react'
-import { cloneDeep } from 'lodash'
+import { cloneDeep } from 'src/utils/NodashUtil'
 import NihAnvilUse, { YES_NHGRI_YES_PHS_ID } from 'src/pages/data_submission/NihAnvilUse'
 
 let propCopy
