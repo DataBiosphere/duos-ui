@@ -20,6 +20,11 @@ interface RowData {
   onClick?: () => void
 }
 
+interface RowWrapperProps {
+  renderedRow: React.ReactNode
+  rowData: TableData[]
+}
+
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
@@ -36,12 +41,10 @@ const styles = {
   },
   columnStyle: {
     ...Styles.TABLE.HEADER_ROW,
-    ...{
-      fontFamily: 'Montserrat',
-      fontSize: '1.4rem',
-      color: '#333F52',
-      justifyContent: 'space-between',
-    },
+    fontFamily: 'Montserrat',
+    fontSize: '1.4rem',
+    color: '#333F52',
+    justifyContent: 'space-between',
   },
   containerOverride: {
     marginTop: '0',
@@ -61,8 +64,7 @@ const processVotesCast = (memberVotes: Vote[]) => {
 }
 
 const processVoteSummary = (memberVotes: Vote[]) => {
-  if (!memberVotes || memberVotes.length === 0
-    || memberVotes.every(v => v.vote === null || v.vote === undefined)) {
+  if (!memberVotes || memberVotes.every(v => v.vote === null || v.vote === undefined)) {
     return 'No votes cast'
   }
   const positives = memberVotes.filter(v => v.vote === true).length
@@ -146,7 +148,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     })
   }, [electionIsExpanded, toggleElectionExpansion])
 
-  const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode, rowData: TableData[] }) => {
+  const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: RowWrapperProps) => {
     const electionId = rowData[0].electionId ?? -1
     if (electionIsExpanded(electionId)) {
       return (
