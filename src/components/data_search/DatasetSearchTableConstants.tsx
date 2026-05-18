@@ -494,8 +494,7 @@ export const makeDatasetTableHeader = (
         return dataUseCellData({
           dataset,
           label: `Data Use for dataset ${dataset.datasetId}: ${dataset.dataUse}`,
-          divClass: ['data-use-cell'],
-          spanClass: [],
+          divClass: 'data-use-cell',
           cellWidth: cellWidths.dataUse,
           tooltipPlace: 'top',
         })
