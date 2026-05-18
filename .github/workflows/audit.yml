@@ -1,18 +1,24 @@
 on: [pull_request]
-name: npm audit
+name: dependency audit
 jobs:
   scan:
-    name: npm audit
+    name: dependency audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - run: echo "NODE_VERSION=$(sed -n 's/FROM node:\([0-9.]*\).*/\1/p' Dockerfile)" >> $GITHUB_ENV
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: 11.1.2
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - name: install dependencies
-        run: npm ci
-      - name: npm audit
-        run: npm audit --omit=dev
+        run: pnpm ci
+      - name: pnpm audit
+        run: pnpm audit --prod

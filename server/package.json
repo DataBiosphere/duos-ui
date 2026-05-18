@@ -2,6 +2,7 @@
   "name": "duos-server",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@11.1.2",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

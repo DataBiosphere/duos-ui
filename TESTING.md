@@ -8,7 +8,7 @@ cp config/base_config.json public/config.json
 
 ## Run All Tests
 ```
-npm test
+pnpm test
 ```
 
 ## Local Test Development
@@ -31,7 +31,7 @@ Set `env` to `local` in `config.json`
 
 Start a local server:
 ```
-npm start
+pnpm start
 ```
 
 Generate configs locally
@@ -41,12 +41,12 @@ Generate configs locally
 
 Open Cypress' interactive view:
 ```
-    npm run cypress:open
+    pnpm run cypress:open
 ```
 
 Run Cypress headless:
 ```
-    npm run cypress:run
+    pnpm run cypress:run
 ```
 
 ## Component Testing
@@ -57,10 +57,10 @@ This command opens a browser window with component tests visible.
 You don't need to have a running server started, this will do that for you.
 (Note that specifying any port with `open-ct` will default to 3000, this seems to be a cypress bug) 
 ```
-    npx cypress open
+    pnpm exec cypress open
 ```
 
 This runs component tests headless:
 ```
-    npx cypress run --component
+    pnpm exec cypress run --component
 ```

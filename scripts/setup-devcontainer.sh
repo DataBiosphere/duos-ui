@@ -18,8 +18,10 @@ install_gcloud_cli() {
 }
 
 install_duos_cypress() {
-  npm install
-  npx cypress install
+  corepack enable
+  corepack prepare pnpm@11.1.2 --activate
+  pnpm install
+  pnpm exec cypress install
 }
 
 install_duos_config() {
