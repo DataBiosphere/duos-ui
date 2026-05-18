@@ -179,6 +179,7 @@ export default function VoteSummaryTable(props) {
         })
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisibleVotes(
       sortVisibleTable({
         list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }),

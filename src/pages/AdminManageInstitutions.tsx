@@ -45,20 +45,21 @@ export default function AdminManageInstitutions() {
     init()
   }, [])
 
+  const filter = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
+    if (value) {
+      return getSearchFilterFunctions().institutions(value, list)
+    }
+    return list
+  }
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredList(filter(institutionList, searchTerm))
   }, [searchTerm, institutionList])
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
     setFilteredList(filter(institutionList, value))
-  }
-
-  const filter = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
-    if (value) {
-      return getSearchFilterFunctions().institutions(value, list)
-    }
-    return list
   }
 
   const addInstitution = () => {
