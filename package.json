@@ -21,7 +21,7 @@
   "dependencies": {
     "@databiosphere/bard-client": "0.1.0",
     "@mui/icons-material": "7.3.11",
-    "@mui/material": "7.3.11",
+    "@mui/material": "9.0.1",
     "@mui/system": "7.3.11",
     "@mui/x-data-grid": "9.1.0",
     "@mui/x-date-pickers": "8.28.5",
