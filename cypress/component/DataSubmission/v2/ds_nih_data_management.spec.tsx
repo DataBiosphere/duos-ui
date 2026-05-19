@@ -1,5 +1,5 @@
 import React from 'react'
-import { cloneDeep } from 'lodash'
+import { cloneDeep } from 'src/utils/NodashUtil'
 import {
   Study,
   NihAnvilUse,

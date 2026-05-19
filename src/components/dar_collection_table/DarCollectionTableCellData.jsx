@@ -1,5 +1,5 @@
 import React from 'react'
-import { includes, isEmpty, isNil, toLower, uniq } from 'lodash'
+import { includes, isEmpty, isNil, toLower, uniq } from 'src/utils/NodashUtil'
 import { formatDate } from '../../libs/utils'
 import { ExpandMore, ExpandLess } from '@mui/icons-material'
 import Actions from './Actions'

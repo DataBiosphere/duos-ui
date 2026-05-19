@@ -1,5 +1,5 @@
 import { fileDownload } from '../../utils/FileDownload'
-import { omit } from 'lodash'
+import { omit } from 'src/utils/NodashUtil'
 import { Config } from '../config'
 import { isFileEmpty } from '../utils'
 import { Metrics } from './Metrics'

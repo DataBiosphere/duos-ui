@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { cloneDeep, findIndex } from 'lodash'
+import { cloneDeep, findIndex } from 'src/utils/NodashUtil'
 import { Styles } from 'src/libs/theme'
 import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'

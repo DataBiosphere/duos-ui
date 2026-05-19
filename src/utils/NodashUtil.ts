@@ -1,30 +1,122 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export type Dictionary<T> = Record<string, T>
+
+type CollectionKey = number | string
+type Collection<T> = T[] | Record<string, T> | null | undefined
+type Iteratee<T, U> = ((value: T, key: CollectionKey, collection: Collection<T>) => U) | string
+type Predicate<T> = ((value: T, key: CollectionKey, collection: Collection<T>) => any) | Record<string, any> | string
+type SortOrder = 'asc' | 'desc'
+type Falsey = false | '' | 0 | null | undefined
+type Truthy<T> = T extends Falsey ? never : T
+
+const toPath = (path: string | string[]) =>
+  Array.isArray(path) ? path : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
+
+const getAtPath = (obj: any, path: string | string[], defaultValue?: any) => {
+  if (obj == null) return defaultValue
+  const keys = toPath(path)
+  let result = obj
+  for (const key of keys) {
+    result = result?.[key]
+    if (result === undefined) return defaultValue
+  }
+  return result
+}
+
+const collectionEntries = <T>(collection: Collection<T>): Array<[CollectionKey, T]> => {
+  if (Array.isArray(collection)) return collection.map((value, index) => [index, value] as [number, T])
+  if (collection != null && typeof collection === 'object') return Object.entries(collection) as Array<[string, T]>
+  return []
+}
+
+const collectionValues = <T>(collection: Collection<T>): T[] =>
+  collectionEntries(collection).map(([, value]) => value)
+
+const isPlainObject = (value: any): value is Record<string, any> =>
+  Object.prototype.toString.call(value) === '[object Object]'
+
+const deepEqual = (value: any, other: any): boolean => {
+  if (value === other) return true
+  if (value == null || other == null) return value === other
+  if (value instanceof Date && other instanceof Date) return value.getTime() === other.getTime()
+  if (Array.isArray(value) || Array.isArray(other)) {
+    if (!Array.isArray(value) || !Array.isArray(other) || value.length !== other.length) return false
+    return value.every((item, index) => deepEqual(item, other[index]))
+  }
+  if (typeof value !== 'object' || typeof other !== 'object') return false
+
+  const keysA = Object.keys(value)
+  const keysB = Object.keys(other)
+  if (keysA.length !== keysB.length) return false
+
+  return keysA.every(key => keysB.includes(key) && deepEqual(value[key], other[key]))
+}
+
+const property = (path: string) => (value: any) => getAtPath(value, path)
+
+const predicateFor = <T>(predicate: Predicate<T>): ((value: T, key?: CollectionKey, collection?: Collection<T>) => boolean) => {
+  if (typeof predicate === 'function') {
+    return (value: T, key?: CollectionKey, collection?: Collection<T>) => Boolean(predicate(value, key as CollectionKey, collection as Collection<T>))
+  }
+  if (typeof predicate === 'string') {
+    return (value: T) => Boolean(property(predicate)(value))
+  }
+  if (predicate != null && typeof predicate === 'object') {
+    return (value: T) => Object.entries(predicate).every(([key, expected]) => deepEqual(getAtPath(value, key), expected))
+  }
+  return Boolean
+}
+
+const iterateeFor = <T, U>(iteratee: Iteratee<T, U>) => {
+  if (typeof iteratee === 'function') {
+    return iteratee
+  }
+  return (value: T) => property(iteratee)(value) as U
+}
+
+const normalizeArray = <T>(value: T | T[] | undefined): T[] => {
+  if (value === undefined) return []
+  return Array.isArray(value) ? value : [value]
+}
+
 export const assign = Object.assign
 
-export const concat = <T>(arr: T[], ...values: (T | T[])[]) => arr.concat(...values)
+export const concat = <T>(arr: T[] | null | undefined, ...values: (T | T[])[]) => (arr ?? []).concat(...values)
 
-export const every = <T>(arr: T[], predicate: (value: T, index: number, array: T[]) => any) =>
-  arr.every((value, index, array) => Boolean(predicate(value, index, array)))
+export const every = <T>(collection: Collection<T>, predicate: Predicate<T>) => {
+  const matches = predicateFor(predicate)
+  return collectionEntries(collection).every(([key, value]) => matches(value, key, collection))
+}
 
-export const filter = <T>(arr: T[], predicate: (value: T, index: number, array: T[]) => any) =>
-  arr.filter((value, index, array) => Boolean(predicate(value, index, array)))
+export const filter = <T>(collection: Collection<T>, predicate: Predicate<T>) => {
+  const matches = predicateFor(predicate)
+  return collectionEntries(collection)
+    .filter(([key, value]) => matches(value, key, collection))
+    .map(([, value]) => value)
+}
 
-export const find = <T>(arr: T[], predicate: (value: T, index: number, obj: T[]) => any) =>
-  arr.find((value, index, obj) => Boolean(predicate(value, index, obj)))
+export const find = <T>(collection: Collection<T>, predicate: Predicate<T>) => {
+  const matches = predicateFor(predicate)
+  return collectionEntries(collection).find(([key, value]) => matches(value, key, collection))?.[1]
+}
 
-export const findIndex = <T>(arr: T[], predicate: (value: T, index: number, obj: T[]) => any) =>
-  arr.findIndex((value, index, obj) => Boolean(predicate(value, index, obj)))
+export const findIndex = <T>(arr: T[], predicate: Predicate<T>) => {
+  const matches = predicateFor(predicate)
+  return arr.findIndex((value, index, obj) => matches(value, index, obj))
+}
 
-export const flatMap = <T, U>(arr: T[], iteratee: (value: T, index: number, array: T[]) => U | ReadonlyArray<U>) =>
-  arr.flatMap((value, index, array) => iteratee(value, index, array))
+export const flatMap = <T, U>(collection: Collection<T>, iteratee: Iteratee<T, U | ReadonlyArray<U>>) => {
+  const transform = iterateeFor(iteratee)
+  return collectionEntries(collection).flatMap(([key, value]) => transform(value, key, collection))
+}
 
-export const flatten = <T>(arr: any[], depth: number = 1): T[] => arr.flat(depth)
+export const flatten = <T = any>(arr: any[] | null | undefined, depth: number = 1): T[] => (arr ?? []).flat(depth) as T[]
 
-export const forEach = <T>(arr: T[], iteratee: (value: T, index: number, array: T[]) => void) =>
-  arr.forEach((value, index, array) => iteratee(value, index, array))
+export const forEach = <T>(collection: Collection<T>, iteratee: (value: T, key: CollectionKey, collection: Collection<T>) => void) =>
+  collectionEntries(collection).forEach(([key, value]) => iteratee(value, key, collection))
 
-export const includes = (collection: any[] | string, target: any, fromIndex?: number) => {
+export const includes = (collection: any[] | string | null | undefined, target: any, fromIndex?: number) => {
   if (typeof collection === 'string') return collection.includes(target, fromIndex)
   return Array.isArray(collection) ? collection.includes(target, fromIndex) : false
 }
@@ -36,20 +128,61 @@ export { numberIsNaN as isNaN }
 
 export const join = (arr: any[], separator?: string) => arr.join(separator)
 
-export const keys = Object.keys
+export const keys = (obj: any) => obj == null ? [] : Object.keys(obj)
 
-export const map = <T, U>(arr: T[], iteratee: (value: T, index: number, array: T[]) => U) =>
-  arr.map((value, index, array) => iteratee(value, index, array))
+export const map = <T, U>(collection: Collection<T>, iteratee: Iteratee<T, U>) => {
+  const transform = iterateeFor(iteratee)
+  return collectionEntries(collection).map(([key, value]) => transform(value, key, collection))
+}
 
 export const toLower = (value: any) => (value == null ? '' : String(value).toLowerCase())
 
-export const values = Object.values
+export const values = (obj: any) => obj == null ? [] : Object.values(obj)
 
-export const clone = <T>(obj: T): T => (Array.isArray(obj) ? [...obj] : { ...obj }) as T
+export const clone = <T>(obj: T): T => {
+  if (Array.isArray(obj)) return [...obj] as T
+  if (obj != null && typeof obj === 'object') return { ...obj }
+  return obj
+}
 
-export const cloneDeep = <T>(obj: T): T => structuredClone(obj)
+const cloneDeepValue = <T>(obj: T, seen: WeakMap<object, any>): T => {
+  if (obj == null || typeof obj !== 'object') return obj
+  if (seen.has(obj)) return seen.get(obj)
+  if (obj instanceof Date) return new Date(obj.getTime()) as T
+  if (obj instanceof RegExp) return new RegExp(obj.source, obj.flags) as T
+  if (obj instanceof Map) {
+    const result = new Map()
+    seen.set(obj, result)
+    obj.forEach((value, key) => result.set(cloneDeepValue(key, seen), cloneDeepValue(value, seen)))
+    return result as T
+  }
+  if (obj instanceof Set) {
+    const result = new Set()
+    seen.set(obj, result)
+    obj.forEach(value => result.add(cloneDeepValue(value, seen)))
+    return result as T
+  }
+  if (Array.isArray(obj)) {
+    const result: any[] = []
+    seen.set(obj, result)
+    obj.forEach((value, index) => {
+      result[index] = cloneDeepValue(value, seen)
+    })
+    return result as T
+  }
+  if (!isPlainObject(obj)) return obj
 
-export const compact = <T>(arr: (T | null | undefined | false | '' | 0)[]) => arr.filter(Boolean) as T[]
+  const result: Record<PropertyKey, any> = {}
+  seen.set(obj, result)
+  Reflect.ownKeys(obj).forEach((key) => {
+    result[key] = cloneDeepValue((obj as Record<PropertyKey, any>)[key], seen)
+  })
+  return result as T
+}
+
+export const cloneDeep = <T>(obj: T): T => cloneDeepValue(obj, new WeakMap())
+
+export const compact = <T>(arr: T[] | null | undefined) => (arr ?? []).filter(Boolean) as Array<Truthy<T>>
 
 export const first = <T>(arr: T[]): T | undefined => arr?.[0]
 export const head = first
@@ -96,10 +229,15 @@ export const chunk = <T>(array: T[], size: number = 1): T[][] => {
 
 export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
   let timeout: any
-  return function (this: any, ...args: Parameters<T>) {
+  const debounced = function (this: any, ...args: Parameters<T>) {
     clearTimeout(timeout)
     timeout = setTimeout(() => func.apply(this, args), wait)
   }
+  debounced.cancel = () => {
+    clearTimeout(timeout)
+    timeout = undefined
+  }
+  return debounced
 }
 
 export const difference = <T>(array: T[], ...values: T[][]): T[] => {
@@ -107,20 +245,11 @@ export const difference = <T>(array: T[], ...values: T[][]): T[] => {
   return array.filter(x => !valuesSet.has(x))
 }
 
-export const get = (obj: any, path: string | string[], defaultValue?: any) => {
-  if (obj == null) return defaultValue
-  const keys = Array.isArray(path) ? path : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
-  let result = obj
-  for (const key of keys) {
-    result = result?.[key]
-    if (result === undefined) return defaultValue
-  }
-  return result
-}
+export const get = getAtPath
 
-export const groupBy = <T>(collection: T[], iteratee: string | ((value: T) => string | number)) => {
-  const getKey = typeof iteratee === 'function' ? iteratee : (item: any) => item[iteratee]
-  return collection.reduce((result: any, item) => {
+export const groupBy = <T>(collection: Collection<T>, iteratee: string | ((value: T) => string | number)): Record<string, T[]> => {
+  const getKey = typeof iteratee === 'function' ? iteratee : (item: any) => getAtPath(item, iteratee)
+  return collectionValues(collection).reduce((result: Record<string, T[]>, item) => {
     const key = getKey(item);
     (result[key] || (result[key] = [])).push(item)
     return result
@@ -143,17 +272,7 @@ export const isEmpty = (value: any): boolean => {
 }
 
 export const isEqual = (value: any, other: any): boolean => {
-  if (value === other) return true
-  if (value == null || other == null || typeof value !== 'object' || typeof other !== 'object') return false
-
-  const keysA = Object.keys(value)
-  const keysB = Object.keys(other)
-  if (keysA.length !== keysB.length) return false
-
-  for (const key of keysA) {
-    if (!keysB.includes(key) || !isEqual(value[key], other[key])) return false
-  }
-  return true
+  return deepEqual(value, other)
 }
 
 export const kebabCase = (str: string): string => {
@@ -174,10 +293,7 @@ export const kebabCase = (str: string): string => {
   return result.join('').replaceAll(/-+/g, '-').replaceAll(/^-|-$/g, '')
 }
 
-export const matches = (source: any) => (object: any) => isEqual(object, source) || (typeof source === 'object' && Object.keys(source).every(key => isEqual(object?.[key], source[key])))
-
-const isPlainObject = (value: any): value is Record<string, any> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
+export const matches = (source: any) => predicateFor(source)
 
 const mergeInto = (target: Record<string, any>, source: Record<string, any>) => {
   Object.entries(source).forEach(([key, sourceValue]) => {
@@ -213,7 +329,7 @@ export const omit = (obj: any, keys: string[]) => {
   return result
 }
 
-const compareAny = (a: any, b: any, order: 'asc' | 'desc') => {
+const compareAny = (a: any, b: any, order: SortOrder) => {
   if (a === b) return 0
   const direction = order === 'asc' ? 1 : -1
   return a < b ? -direction : direction
@@ -223,26 +339,37 @@ const compareByIteratee = <T>(
   a: T,
   b: T,
   iteratee: string | ((item: T) => any),
-  order: 'asc' | 'desc',
+  order: SortOrder,
 ) => {
-  const getValue = typeof iteratee === 'function' ? iteratee : (item: any) => item[iteratee]
+  const getValue = typeof iteratee === 'function' ? iteratee : (item: any) => getAtPath(item, iteratee)
   return compareAny(getValue(a), getValue(b), order)
 }
 
-export const orderBy = <T>(collection: T[], iteratees: (string | ((item: T) => any))[], orders: ('asc' | 'desc')[] = []) => {
-  const result = [...collection]
+export const orderBy = <T>(
+  collection: Collection<T>,
+  iteratees: string | ((item: T) => any) | Array<string | ((item: T) => any)> = value => value,
+  orders: SortOrder | SortOrder[] = [],
+) => {
+  const result = collectionValues(collection)
+  const iterateeList = normalizeArray(iteratees)
+  const orderList = normalizeArray(orders)
   return result.sort((a: T, b: T) => {
-    for (const [index, iteratee] of iteratees.entries()) {
-      const comparison = compareByIteratee(a, b, iteratee, orders[index] || 'asc')
+    for (const [index, iteratee] of iterateeList.entries()) {
+      const comparison = compareByIteratee(a, b, iteratee, orderList[index] || 'asc')
       if (comparison !== 0) return comparison
     }
     return 0
   })
 }
 
+export const sortBy = <T>(
+  collection: Collection<T>,
+  iteratees: string | ((item: T) => any) | Array<string | ((item: T) => any)> = value => value,
+) => orderBy(collection, iteratees)
+
 export const set = (obj: any, path: string | string[], value: any) => {
   if (typeof obj !== 'object' || obj === null) return obj
-  const keys = Array.isArray(path) ? path : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
+  const keys = toPath(path)
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i]
@@ -262,7 +389,7 @@ export const sortedUniq = uniq
 
 export const unset = (obj: any, path: string | string[]) => {
   if (obj == null) return true
-  const keys = Array.isArray(path) ? path : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
+  const keys = toPath(path)
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
     current = current[keys[i]]
@@ -295,7 +422,7 @@ export const xor = <T>(...arrays: T[][]): T[] => {
 const _allMethods = {
   assign, concat, every, filter, find, findIndex, flatMap, flatten, forEach, includes, isArray, isNaN: numberIsNaN, join, keys, map, toLower, values,
   clone, cloneDeep, compact, first, head, isFunction, isNil, isNull, isNumber, isString, isUndefined, toNumber, uniq, union, without,
-  capitalize, chunk, debounce, difference, get, groupBy, intersection, isEmpty, isEqual, kebabCase, matches, merge, omit, orderBy, set, sortedUniq, unset, xor,
+  capitalize, chunk, debounce, difference, get, groupBy, intersection, isEmpty, isEqual, kebabCase, matches, merge, omit, orderBy, set, sortBy, sortedUniq, unset, xor,
 }
 
 export const chain = (value: any) => {

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import { findIndex } from 'lodash'
+import { findIndex } from 'src/utils/NodashUtil'
 
 type ApplicationTab = {
   id: string

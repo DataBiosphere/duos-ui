@@ -1,4 +1,4 @@
-import { uniq, filter, isNil } from 'lodash'
+import { uniq, filter, isNil } from 'src/utils/NodashUtil'
 import { Button } from '@mui/material'
 import * as React from 'react'
 import { DatasetTerm } from 'src/types/model'

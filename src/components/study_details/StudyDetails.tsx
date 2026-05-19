@@ -7,7 +7,7 @@ import { makeDatasetTableHeader, makeDatasetTableRows } from 'src/components/dat
 import SimpleTable from 'src/components/SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
-import { chain, Dictionary, intersection, isEmpty } from 'lodash'
+import { chain, Dictionary, intersection, isEmpty } from 'src/utils/NodashUtil'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { applyForAccess } from 'src/utils/accessUtils'

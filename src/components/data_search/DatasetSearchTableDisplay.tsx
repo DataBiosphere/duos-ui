@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { capitalize, isEmpty } from 'lodash'
+import { capitalize, isEmpty } from 'src/utils/NodashUtil'
 import { DatasetTerm } from 'src/types/model'
 import SimpleTable from 'src/components/SimpleTable'
 import { Styles } from 'src/libs/theme'

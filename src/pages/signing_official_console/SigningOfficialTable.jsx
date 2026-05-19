@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Info } from '@mui/icons-material'
 import { Styles, Theme } from 'src/libs/theme'
-import { chain, cloneDeep, findIndex, isNil } from 'lodash'
+import { chain, cloneDeep, findIndex, isNil } from 'src/utils/NodashUtil'
 import SimpleTable from 'src/components/SimpleTable'
 import SimpleButton from 'src/components/SimpleButton'
 import PaginationBar from 'src/components/PaginationBar'

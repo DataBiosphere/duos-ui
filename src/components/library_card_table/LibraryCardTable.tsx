@@ -7,7 +7,7 @@ import {
   getSearchFilterFunctions,
   Notifications,
 } from 'src/libs/utils'
-import { cloneDeep, findIndex, isEmpty, isNaN, isNil } from 'lodash'
+import { cloneDeep, findIndex, isEmpty, isNaN, isNil } from 'src/utils/NodashUtil'
 import { Styles } from 'src/libs/theme'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'

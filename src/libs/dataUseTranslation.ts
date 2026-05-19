@@ -1,4 +1,4 @@
-import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash'
+import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'src/utils/NodashUtil'
 import { OntologyService } from './ontologyService'
 import { Notifications } from './utils'
 import { DataUse, DataUseSummary, DataUseTerm } from '../types/model'

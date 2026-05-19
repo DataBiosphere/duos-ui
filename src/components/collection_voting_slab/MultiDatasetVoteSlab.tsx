@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { get, isEmpty, isNil } from 'lodash'
+import { get, isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
 import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'

@@ -1,4 +1,4 @@
-import { kebabCase } from 'lodash'
+import { kebabCase } from 'src/utils/NodashUtil'
 import React from 'react'
 import { Theme } from '../libs/theme'
 

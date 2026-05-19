@@ -1,4 +1,4 @@
-import { isNil, isEmpty, set, unset } from 'lodash'
+import { isNil, isEmpty, set, unset } from 'src/utils/NodashUtil'
 import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'

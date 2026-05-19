@@ -27,8 +27,8 @@ import { Notifications } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
-import { chain, intersection } from 'lodash'
-import { EnumerateSnapshotModel } from 'src/types/tdrModel'
+import { chain, intersection } from 'src/utils/NodashUtil'
+import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
 import {
   EMPTY_FILTERS,
@@ -312,7 +312,7 @@ export const DataLibrary: React.FC = () => {
         const result: EnumerateSnapshotModel = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers)
         if (result.filteredTotal > 0) {
           const mapped = chain(result.items)
-            .filter(snapshot => intersection(result.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+            .filter((snapshot: SnapshotSummaryModel) => intersection(result.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
             .groupBy('duosId')
             .value()
           setExportableDatasets(mapped)

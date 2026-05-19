@@ -14,7 +14,7 @@ import {
   clinicalTrialInterventionSelectOptions,
 } from 'src/utils/ClinicalTrialEnumUtils'
 import { SelectEntry } from 'src/components/forms/SelectOptionInterface'
-import { unset } from 'lodash'
+import { unset } from 'src/utils/NodashUtil'
 import { isValidDate } from 'src/pages/data_submission/v2/v2-common-functions'
 
 const defaultClinicalTrial: ClinicalTrial = {
