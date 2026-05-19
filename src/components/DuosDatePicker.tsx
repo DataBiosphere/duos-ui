@@ -23,6 +23,43 @@ interface DUOSDatePickerProps {
   readOnly: boolean
 }
 
+const WeekendFormattedDay = (props: PickerDayProps) => {
+  const isWeekendDay = props.day.day() === 0 || props.day.day() === 6
+  const weekendStyle = isWeekendDay
+    ? { color: 'var(--weekend)' }
+    : {}
+  return <PickerDay {...props} sx={{ ...weekendStyle }} />
+}
+
+const CancelSelectActionBar = (props: PickersActionBarProps) => {
+  // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
+  // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
+  const { actions, ...other } = props
+  const { acceptValueChanges,
+    cancelValueChanges } = usePickerContext()
+  const buttons = actions?.map((actionType: React.Key | null | undefined) => {
+    switch (actionType) {
+      case 'cancel':
+        return (
+          <Button color="secondary" variant="contained" onClick={cancelValueChanges} key={actionType}>
+            Cancel
+          </Button>
+        )
+
+      case 'accept':
+        return (
+          <Button color="primary" variant="contained" onClick={acceptValueChanges} key={actionType}>
+            Select
+          </Button>
+        )
+
+      default:
+        return null
+    }
+  })
+  return <DialogActions {...other}>{buttons}</DialogActions>
+}
+
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   const { inputFormat, defaultValue, onChange, onError, readOnly } = props
   const duosColorBlue = '#216FB4'
@@ -161,43 +198,6 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
       },
     },
   })
-
-  const CancelSelectActionBar = (props: PickersActionBarProps) => {
-    // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
-    // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
-    const { actions, ...other } = props
-    const { acceptValueChanges,
-      cancelValueChanges } = usePickerContext()
-    const buttons = actions?.map((actionType: React.Key | null | undefined) => {
-      switch (actionType) {
-        case 'cancel':
-          return (
-            <Button color="secondary" variant="contained" onClick={cancelValueChanges} key={actionType}>
-              Cancel
-            </Button>
-          )
-
-        case 'accept':
-          return (
-            <Button color="primary" variant="contained" onClick={acceptValueChanges} key={actionType}>
-              Select
-            </Button>
-          )
-
-        default:
-          return null
-      }
-    })
-    return <DialogActions {...other}>{buttons}</DialogActions>
-  }
-
-  const WeekendFormattedDay = (props: PickerDayProps) => {
-    const isWeekendDay = props.day.day() === 0 || props.day.day() === 6
-    const weekendStyle = isWeekendDay
-      ? { color: 'var(--weekend)' }
-      : {}
-    return <PickerDay {...props} sx={{ ...weekendStyle }} />
-  }
 
   return (
     <ThemeProvider theme={theme}>
