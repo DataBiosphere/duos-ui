@@ -24,7 +24,7 @@ import type { Theme } from '@mui/material/styles'
 import type { SystemStyleObject } from '@mui/system'
 import {
   CloudUpload as CloudUploadIcon,
-  DeleteOutline as DeleteIcon,
+  DeleteOutlined as DeleteIcon,
   FilePresent as FileIcon,
   InfoOutlined as DetailsIcon,
   OpenInNew as OpenInNewIcon,
@@ -544,10 +544,12 @@ const DocumentQueueCard = ({
               },
             }}
             MenuProps={{
-              PaperProps: {
-                sx: {
-                  '& .MuiMenuItem-root': {
-                    fontSize: '0.875rem',
+              slotProps: {
+                paper: {
+                  sx: {
+                    '& .MuiMenuItem-root': {
+                      fontSize: '0.875rem',
+                    },
                   },
                 },
               },
@@ -1127,8 +1129,7 @@ export const DocumentUpload = ({
                 <Stack
                   direction="row"
                   spacing={1}
-                  flexWrap="wrap"
-                  sx={{ gap: 1 }}
+                  sx={{ flexWrap: 'wrap', gap: 1 }}
                   data-cy="document-upload-type-list"
                   onClick={handleTypeSelectionAreaClick}
                 >

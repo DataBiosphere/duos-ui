@@ -4,9 +4,16 @@ import { ToastNotifications, ToastPosition } from 'src/libs/ToastNotifications'
 describe('ToastNotifications', () => {
   beforeEach(() => {
     cy.get('body').then(($body) => {
-      $body.find('[role="presentation"]').each((_, el) => {
+      $body.find('[data-cy="notification-alert"]').closest('div[style*="position"]').each((_, el) => {
         if (el.parentNode) {
           el.parentNode.removeChild(el)
+        }
+      })
+      // Also clean up any MuiSnackbar portals
+      $body.find('.MuiSnackbar-root').each((_, el) => {
+        const root = el.closest('[style*="z-index"]') ?? el.parentElement
+        if (root && root.parentNode) {
+          root.parentNode.removeChild(root)
         }
       })
     })
@@ -14,9 +21,15 @@ describe('ToastNotifications', () => {
 
   afterEach(() => {
     cy.get('body').then(($body) => {
-      $body.find('[role="presentation"]').each((_, el) => {
+      $body.find('[data-cy="notification-alert"]').closest('div[style*="position"]').each((_, el) => {
         if (el.parentNode) {
           el.parentNode.removeChild(el)
+        }
+      })
+      $body.find('.MuiSnackbar-root').each((_, el) => {
+        const root = el.closest('[style*="z-index"]') ?? el.parentElement
+        if (root && root.parentNode) {
+          root.parentNode.removeChild(root)
         }
       })
     })
