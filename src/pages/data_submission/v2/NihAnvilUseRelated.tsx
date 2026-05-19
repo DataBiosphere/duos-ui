@@ -100,6 +100,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
     if (nihAnvilUseStudyValue) {
       if (nihAnvilUseStudyValue === NihAnvilUse.NO_NHGRI_NO_ANVIL) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPreSelectorValue(NihAnvilUsePreSelectOptions.NO)
       }
       else {

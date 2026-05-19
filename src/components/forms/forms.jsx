@@ -261,6 +261,7 @@ export const FormField = (config) => {
 
   React.useEffect(() => {
     if (defaultValue !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormValue(defaultValue)
     }
   }, [defaultValue, type])
