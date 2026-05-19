@@ -117,8 +117,8 @@ export const ManageDacDatasets: React.FC = () => {
     }
     if (columnHeaders[sort.colIndex]?.sortable) {
       filtered = [...filtered].sort((a, b) => {
-        let aValue = ''
-        let bValue = ''
+        let aValue
+        let bValue
         switch (sort.colIndex) {
           case 0: // Dataset ID
             aValue = a.datasetIdentifier

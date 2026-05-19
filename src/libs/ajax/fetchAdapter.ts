@@ -190,10 +190,10 @@ async function fetchRequest<T>(
     // Report with status 0 (no HTTP response) rather than 502 (bad gateway) to avoid misleading monitoring
     if (error instanceof TypeError || error instanceof DOMException) {
       reportError(fullUrl, 0)
-      throw new Error(`Network error on request to ${fullUrl}: ${error.toString()} ${HELP_DESK_MESSAGE}`)
+      throw new Error(`Network error on request to ${fullUrl}: ${error.toString()} ${HELP_DESK_MESSAGE}`, { cause: error })
     }
     reportError(fullUrl, 0)
-    throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`)
+    throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`, { cause: error })
   }
 }
 
@@ -237,10 +237,10 @@ async function fetchMultipartRequest<T>(
     // Report with status 0 (no HTTP response) rather than 502 (bad gateway) to avoid misleading monitoring
     if (error instanceof TypeError || error instanceof DOMException) {
       reportError(fullUrl, 0)
-      throw new Error(`Network error on request to ${fullUrl}: ${error.toString()} ${HELP_DESK_MESSAGE}`)
+      throw new Error(`Network error on request to ${fullUrl}: ${error.toString()} ${HELP_DESK_MESSAGE}`, { cause: error })
     }
     reportError(fullUrl, 0)
-    throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`)
+    throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`, { cause: error })
   }
   if (!res.ok) {
     let message = `Request failed with status ${res.status}. ${HELP_DESK_MESSAGE}`
