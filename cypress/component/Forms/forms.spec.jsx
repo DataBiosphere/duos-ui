@@ -49,7 +49,8 @@ describe('FormField - Tests', () => {
       cy.mount(<FormField {...props} />)
       cy.get('#lbl_optionalDate').contains('Optional Date')
       cy.get('#lbl_optionalDate').should('not.contain', '*')
-      cy.get('[role="spinbutton"]').eq(2).click().type('30')
+      cy.get('[role="spinbutton"]').eq(2).click()
+      cy.get('[role="spinbutton"]').eq(2).type('30')
       cy.get('.formField-optionalDate .error-message').contains(FormValidators.DATEJS.msg)
     })
     it('should render a calendar picker control initialized with an error', () => {
@@ -911,20 +912,15 @@ describe('FormField - Tests', () => {
       })
 
       cy.mount(
-        <FormField {
-          ...{
-            type: {
-              ...FormFieldTypes.TEXT,
-              ...{
-                customPropValidation: () => {
-                  throw 'example failure'
-                },
-              },
+        <FormField
+          type={{
+            ...FormFieldTypes.TEXT,
+            customPropValidation: () => {
+              throw new Error('example failure')
             },
-            id: 'example',
-            onChange: () => {},
-          } // requires id
-        }
+          }}
+          id="example"
+          onChange={() => {}}
         />,
       )
     })
