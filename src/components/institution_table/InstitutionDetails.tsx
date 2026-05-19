@@ -301,11 +301,9 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
                   disabled={!isEditing}
                   error={isEditing && nameError.length > 0}
                   helperText={isEditing && nameError.length > 0 ? nameError : ''}
-                  InputProps={{
-                    style: { fontSize: 14 },
-                  }}
-                  FormHelperTextProps={{
-                    style: { fontSize: 14 },
+                  slotProps={{
+                    input: { style: { fontSize: 14 } },
+                    formHelperText: { style: { fontSize: 14 } },
                   }}
                   style={{ width: 300 }}
                   onChange={(e) => {

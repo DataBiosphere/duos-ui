@@ -42,13 +42,9 @@ export const SigningOfficialsList = ({ signingOfficials = [] }: SigningOfficials
             label="Name"
             disabled={true}
             value={so.displayName}
-            InputProps={{
-              style: { fontSize: 14 },
-              size: 'small',
-              readOnly: true,
-            }}
-            InputLabelProps={{
-              style: { fontSize: 14 },
+            slotProps={{
+              input: { style: { fontSize: 14 }, size: 'small', readOnly: true },
+              inputLabel: { style: { fontSize: 14 } },
             }}
             variant="outlined"
             style={{ marginRight: 10, width: 300 }}
@@ -63,13 +59,9 @@ export const SigningOfficialsList = ({ signingOfficials = [] }: SigningOfficials
             disabled={true}
             value={so.email}
             style={{ width: 300 }}
-            InputProps={{
-              style: { fontSize: 14 },
-              size: 'small',
-              readOnly: true,
-            }}
-            InputLabelProps={{
-              style: { fontSize: 14 },
+            slotProps={{
+              input: { style: { fontSize: 14 }, size: 'small', readOnly: true },
+              inputLabel: { style: { fontSize: 14 } },
             }}
             variant="outlined"
             sx={{

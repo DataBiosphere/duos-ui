@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton.tsx'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
@@ -83,7 +83,7 @@ export default function DACDatasets() {
           id="add-dataset-btn"
           label="ADD DATASET"
           onClick={() => navigate('/data_submission_form')}
-          icon={<AddCircleOutlineIcon />}
+          icon={<AddCircleOutlineOutlinedIcon />}
           className="button button-blue"
         />
       </div>

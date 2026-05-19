@@ -4,23 +4,60 @@ import {
   DesktopDatePicker,
   LocalizationProvider,
   PickersActionBarProps,
-  PickersDay,
-  PickersDayProps,
   DateValidationError,
+  PickerDay,
+  PickerDayProps,
   usePickerContext,
 } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Button } from '@mui/material'
 import DialogActions from '@mui/material/DialogActions'
 import dayjs, { Dayjs } from 'dayjs'
-import type {} from '@mui/x-date-pickers/themeAugmentation'
+import '@mui/x-date-pickers/themeAugmentation'
 
 interface DUOSDatePickerProps {
   inputFormat: string
   defaultValue: Dayjs | string | null
   onChange: (value: Dayjs | string | undefined) => void
-  onError: (error: DateValidationError | string, value: Dayjs | string | undefined) => void
+  onError: (error: DateValidationError | null, value: Dayjs | string | undefined) => void
   readOnly: boolean
+}
+
+const WeekendFormattedDay = (props: PickerDayProps) => {
+  const isWeekendDay = props.day.day() === 0 || props.day.day() === 6
+  const weekendStyle = isWeekendDay
+    ? { color: 'var(--weekend)' }
+    : {}
+  return <PickerDay {...props} sx={{ ...weekendStyle }} />
+}
+
+const CancelSelectActionBar = (props: PickersActionBarProps) => {
+  // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
+  // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
+  const { actions, ...other } = props
+  const { acceptValueChanges,
+    cancelValueChanges } = usePickerContext()
+  const buttons = actions?.map((actionType: React.Key | null | undefined) => {
+    switch (actionType) {
+      case 'cancel':
+        return (
+          <Button color="secondary" variant="contained" onClick={cancelValueChanges} key={actionType}>
+            Cancel
+          </Button>
+        )
+
+      case 'accept':
+        return (
+          <Button color="primary" variant="contained" onClick={acceptValueChanges} key={actionType}>
+            Select
+          </Button>
+        )
+
+      default:
+        return null
+    }
+  })
+  return <DialogActions {...other}>{buttons}</DialogActions>
 }
 
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
@@ -44,9 +81,8 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
       onError('invalidDate', defaultValueAsDayjs)
     }
     return true
-  },
-  // eslint-disable-next-line
-        [defaultValueAsDayjs]);
+  }, [defaultValueAsDayjs, onError])
+
   const theme = createTheme({
     palette: {
       primary: {
@@ -99,7 +135,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
           },
         },
       },
-      MuiPickersDay: {
+      MuiPickerDay: {
         styleOverrides: {
           root: {
             '--weekend': 'red',
@@ -163,43 +199,6 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
     },
   })
 
-  const CancelSelectActionBar = (props: PickersActionBarProps) => {
-    // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
-    // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
-    const { actions, ...other } = props
-    const { acceptValueChanges,
-      cancelValueChanges } = usePickerContext()
-    const buttons = actions?.map((actionType: React.Key | null | undefined) => {
-      switch (actionType) {
-        case 'cancel':
-          return (
-            <Button color="secondary" variant="contained" onClick={cancelValueChanges} key={actionType}>
-              Cancel
-            </Button>
-          )
-
-        case 'accept':
-          return (
-            <Button color="primary" variant="contained" onClick={acceptValueChanges} key={actionType}>
-              Select
-            </Button>
-          )
-
-        default:
-          return null
-      }
-    })
-    return <DialogActions {...other}>{buttons}</DialogActions>
-  }
-
-  const WeekendFormattedDay = (props: PickersDayProps) => {
-    const isWeekendDay = props.day.day() === 0 || props.day.day() === 6
-    const weekendStyle = isWeekendDay
-      ? { color: 'var(--weekend)' }
-      : {}
-    return <PickersDay {...props} sx={{ ...weekendStyle }} />
-  }
-
   return (
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -215,7 +214,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             onAccept={(value) => {
               onChange(value?.format(inputFormat))
             }}
-            onError={value => onError && onError(value?.toString() === 'Invalid Date' ? 'Invalid Date' : '', value?.toString())}
+            onError={(error, value) => onError?.(error, value?.format(inputFormat))}
             dayOfWeekFormatter={day => (`${day.format('ddd')}`)}
             readOnly={readOnly}
             slotProps={{
@@ -224,7 +223,6 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
               },
             }}
             slots={{ day: WeekendFormattedDay, actionBar: CancelSelectActionBar }}
-            enableAccessibleFieldDOMStructure={false}
           />
         )}
       </LocalizationProvider>

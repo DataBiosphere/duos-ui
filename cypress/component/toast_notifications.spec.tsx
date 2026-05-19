@@ -4,20 +4,25 @@ import { ToastNotifications, ToastPosition } from 'src/libs/ToastNotifications'
 describe('ToastNotifications', () => {
   beforeEach(() => {
     cy.get('body').then(($body) => {
-      $body.find('[role="presentation"]').each((_, el) => {
-        if (el.parentNode) {
-          el.parentNode.removeChild(el)
-        }
+      $body.find('[data-cy="notification-alert"]').closest('div[style*="position"]').each((_, el) => {
+        el.remove()
+      })
+      // Also clean up any MuiSnackbar portals
+      $body.find('.MuiSnackbar-root').each((_, el) => {
+        const root = el.closest('[style*="z-index"]') ?? el.parentElement
+        root?.remove()
       })
     })
   })
 
   afterEach(() => {
     cy.get('body').then(($body) => {
-      $body.find('[role="presentation"]').each((_, el) => {
-        if (el.parentNode) {
-          el.parentNode.removeChild(el)
-        }
+      $body.find('[data-cy="notification-alert"]').closest('div[style*="position"]').each((_, el) => {
+        el.remove()
+      })
+      $body.find('.MuiSnackbar-root').each((_, el) => {
+        const root = el.closest('[style*="z-index"]') ?? el.parentElement
+        root?.remove()
       })
     })
   })
@@ -31,7 +36,7 @@ describe('ToastNotifications', () => {
         .and('contain.text', 'Test notification')
 
       cy.get('[data-cy="notification-alert"]')
-        .should('have.class', 'MuiAlert-filledInfo')
+        .should('have.class', 'MuiAlert-colorInfo')
     })
 
     it('should display notification with custom severity', () => {
@@ -43,7 +48,7 @@ describe('ToastNotifications', () => {
       cy.get('[data-cy="notification-alert"]')
         .should('be.visible')
         .and('contain.text', 'Warning message')
-        .and('have.class', 'MuiAlert-filledWarning')
+        .and('have.class', 'MuiAlert-colorWarning')
     })
 
     it('should display notification with React node as text', () => {
@@ -111,7 +116,7 @@ describe('ToastNotifications', () => {
       cy.get('[data-cy="notification-alert"]')
         .should('be.visible')
         .and('contain.text', 'Error message')
-        .and('have.class', 'MuiAlert-filledError')
+        .and('have.class', 'MuiAlert-colorError')
     })
 
     it('should override severity prop for error notifications', () => {
@@ -121,8 +126,8 @@ describe('ToastNotifications', () => {
       })
 
       cy.get('[data-cy="notification-alert"]')
-        .should('have.class', 'MuiAlert-filledError')
-        .and('not.have.class', 'MuiAlert-filledSuccess')
+        .should('have.class', 'MuiAlert-colorError')
+        .and('not.have.class', 'MuiAlert-colorSuccess')
     })
   })
 
@@ -133,7 +138,7 @@ describe('ToastNotifications', () => {
       cy.get('[data-cy="notification-alert"]')
         .should('be.visible')
         .and('contain.text', 'Success message')
-        .and('have.class', 'MuiAlert-filledSuccess')
+        .and('have.class', 'MuiAlert-colorSuccess')
     })
 
     it('should accept custom layout for success notifications', () => {
@@ -154,7 +159,7 @@ describe('ToastNotifications', () => {
       cy.get('[data-cy="notification-alert"]')
         .should('be.visible')
         .and('contain.text', 'Warning message')
-        .and('have.class', 'MuiAlert-filledWarning')
+        .and('have.class', 'MuiAlert-colorWarning')
     })
   })
 
@@ -165,7 +170,7 @@ describe('ToastNotifications', () => {
       cy.get('[data-cy="notification-alert"]')
         .should('be.visible')
         .and('contain.text', 'Info message')
-        .and('have.class', 'MuiAlert-filledInfo')
+        .and('have.class', 'MuiAlert-colorInfo')
     })
   })
 

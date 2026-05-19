@@ -19,7 +19,7 @@ import { processLibraryCards } from 'src/utils/LibraryCardUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton.tsx'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 
 // Styles specific to this table
 const styles = {
@@ -418,7 +418,7 @@ export default function SigningOfficialTable(props) {
             id="btn_addUser"
             label="ADD LIBRARY CARD"
             onClick={showModalOnClick}
-            icon={<AddCircleOutlineIcon />}
+            icon={<AddCircleOutlineOutlinedIcon />}
             className="button button-blue"
           />
         </div>

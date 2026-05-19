@@ -11,7 +11,7 @@ import EditDac from 'src/pages/manage_dac/EditDac'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import type { DacObject, Dataset } from 'src/types/model'
 
 const CHAIR = 'Chairperson'
@@ -132,7 +132,7 @@ export const ManageDac = function ManageDac() {
           id="btn_addDAC"
           label="ADD DAC"
           onClick={addDac}
-          icon={<AddCircleOutlineIcon />}
+          icon={<AddCircleOutlineOutlinedIcon />}
           className="button button-blue"
         />
       </div>

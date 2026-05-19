@@ -97,11 +97,10 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         margin="dense"
         variant="outlined"
         helperText="minimum"
-        inputProps={minInputPropsComplete}
         onChange={event => filterHandler(minCategory, Number(event.target.value))}
-        slotProps={muiTextFieldFix}
+        slotProps={{ ...muiTextFieldFix, htmlInput: minInputPropsComplete }}
       />
-      <Box padding="0rem 1rem 1rem"> - </Box>
+      <Box sx={{ padding: '0rem 1rem 1rem' }}> - </Box>
       <TextField
         type="number"
         value={max}
@@ -110,9 +109,8 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         margin="dense"
         variant="outlined"
         helperText="maximum"
-        inputProps={maxInputPropsComplete}
         onChange={event => filterHandler(maxCategory, Number(event.target.value))}
-        slotProps={muiTextFieldFix}
+        slotProps={{ ...muiTextFieldFix, htmlInput: maxInputPropsComplete }}
       />
     </Box>
   )
