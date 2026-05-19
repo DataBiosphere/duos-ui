@@ -54,7 +54,7 @@ importers:
         specifier: 18.*
         version: 18.3.1
       react-dom:
-        specifier: 18.*
+        specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       react-dropzone:
         specifier: 15.0.0
@@ -109,7 +109,7 @@ importers:
         specifier: 18.*
         version: 18.3.28
       '@types/react-dom':
-        specifier: 18.*
+        specifier: 18.3.1
         version: 18.3.1
       '@types/react-modal':
         specifier: 3.16.3
@@ -798,9 +798,6 @@ packages:
 
   '@types/react@18.3.28':
     resolution: {integrity: sha512-z9VXpC7MWrhfWipitjNdgCauoMLRdIILQsAEV+ZesIzBq/oUlxk0m3ApZuMFCXdnS4U7KrI+l3WRUEGQ8K1QKw==}
-
-  '@types/react@19.2.14':
-    resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
 
   '@types/sinonjs__fake-timers@8.1.1':
     resolution: {integrity: sha512-0kSuKjAS0TrGLJ0M/+8MaFkGsQhZpB6pxOmvS3K8FYI72K//YmdfoW9X2qPsAKh1mkwxGD5zib9s1FIFed6E8g==}
@@ -3741,11 +3738,11 @@ snapshots:
 
   '@types/react-dom@18.3.1':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 18.3.28
 
   '@types/react-modal@3.16.3':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 18.3.28
 
   '@types/react-transition-group@4.4.12(@types/react@18.3.28)':
     dependencies:
@@ -3754,10 +3751,6 @@ snapshots:
   '@types/react@18.3.28':
     dependencies:
       '@types/prop-types': 15.7.15
-      csstype: 3.2.3
-
-  '@types/react@19.2.14':
-    dependencies:
       csstype: 3.2.3
 
   '@types/sinonjs__fake-timers@8.1.1': {}
