@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './ExternalProfile.css'
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
+import RemoveCircleOutlinedIcon from '@mui/icons-material/RemoveCircleOutlined'
 import IconButton from '@mui/material/IconButton'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
@@ -331,7 +331,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
                     />
                   </td>
                   <td>
-                    && <IconButton aria-label="remove entry" onClick={() => { removeEntry(index) }}><RemoveCircleOutlineIcon /></IconButton>
+                    && <IconButton aria-label="remove entry" onClick={() => { removeEntry(index) }}><RemoveCircleOutlinedIcon /></IconButton>
                     { getUrlLink(url) }
                   </td>
                 </tr>
