@@ -7,36 +7,38 @@ export const Votes = {
    * Update votes by their IDs.
    * @param voteIds Array of vote IDs to update
    * @param vote Vote object containing vote and rationale
-   * @returns Promise resolving when the request completes (no data returned)
+   * @returns Promise resolving to the updated list of votes
    */
   updateVotesByIds: async (
     voteIds: number[],
     vote: Pick<Vote, 'vote' | 'rationale'>,
-  ): Promise<void> => {
+  ): Promise<Vote[]> => {
     const voteUpdate = {
       vote: vote.vote,
       rationale: vote.rationale,
       voteIds: voteIds,
     }
     const url = `${await Config.getApiUrl()}/api/votes`
-    await fetchPut(url, voteUpdate, Config.authOpts())
+    const res = await fetchPut<Vote[]>(url, voteUpdate, Config.authOpts())
+    return res.data
   },
 
   /**
    * Update rationale for votes by their IDs.
    * @param voteIds Array of vote IDs to update
    * @param rationale New rationale string
-   * @returns Promise resolving when the request completes (no data returned)
+   * @returns Promise resolving to the updated list of votes
    */
   updateRationaleByIds: async (
     voteIds: number[],
     rationale: string,
-  ): Promise<void> => {
+  ): Promise<Vote[]> => {
     const rationaleUpdate = {
       rationale: rationale,
       voteIds: voteIds,
     }
     const url = `${await Config.getApiUrl()}/api/votes/rationale`
-    await fetchPut(url, rationaleUpdate, Config.authOpts())
+    const res = await fetchPut<Vote[]>(url, rationaleUpdate, Config.authOpts())
+    return res.data
   },
 }
