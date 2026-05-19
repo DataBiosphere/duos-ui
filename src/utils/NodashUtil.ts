@@ -276,21 +276,26 @@ export const isEqual = (value: any, other: any): boolean => {
 }
 
 export const kebabCase = (str: string): string => {
-  const result: string[] = []
+  if (!str) return ''
 
-  for (let i = 0; i < str.length; i++) {
-    const c = str[i]
-    const p = str.at(i - 1) ?? ''
-    const n = str.at(i + 1) ?? ''
+  const s = String(str)
 
-    const space = /[\s_]/.test(c)
-    const sep = space || (/[A-Z]/.test(c) && (/[a-z0-9]/.test(p) || (/[A-Z]/.test(p) && /[a-z]/.test(n)))) || (/\d/.test(c) && /[a-zA-Z]/.test(p)) || (/[a-z]/.test(c) && /\d/.test(p))
+  // Insert spaces at boundaries where words should be split:
+  //  - between lower/number and upper (myHTTP -> my HTTP)
+  //  - between an upper sequence and an upper+lower (HTTPServer -> HTTP Server)
+  //  - between letters and numbers (Server2 -> Server 2)
+  const withSpaces = s
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .replace(/([a-zA-Z])([0-9])/g, '$1 $2')
+    .replace(/([0-9])([a-zA-Z])/g, '$1 $2')
 
-    if (sep && (result.length === 0 || result.at(-1) !== '-')) result.push('-')
-    if (!space) result.push(c.toLowerCase())
-  }
-
-  return result.join('').replaceAll(/-+/g, '-').replaceAll(/^-|-$/g, '')
+  return withSpaces
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase()
 }
 
 export const matches = (source: any) => predicateFor(source)
