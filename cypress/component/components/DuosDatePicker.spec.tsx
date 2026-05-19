@@ -47,7 +47,7 @@ describe('DuosDatePicker', () => {
   it('renders a formatted initial value from a string default', () => {
     mountPicker({ defaultValue: '2026-04-30' })
 
-    cy.get('input.MuiInputBase-input').should('have.value', '2026-04-30')
+    cy.get('input.MuiPickersInputBase-input').should('have.value', '2026-04-30')
   })
 
   it('propagates the selected date using the configured format', () => {
@@ -58,12 +58,12 @@ describe('DuosDatePicker', () => {
     cy.contains('button', 'Select').click()
 
     cy.wrap(onChange).should('have.been.calledWith', '2026-04-15')
-    cy.get('input.MuiInputBase-input').should('have.value', '2026-04-15')
+    cy.get('input.MuiPickersInputBase-input').should('have.value', '2026-04-15')
   })
 
   it('renders the input as read-only when requested', () => {
     mountPicker({ defaultValue: '2026-04-30', readOnly: true })
 
-    cy.get('input.MuiInputBase-input').should('have.attr', 'readonly')
+    cy.get('input.MuiPickersInputBase-input').should('have.attr', 'readonly')
   })
 })

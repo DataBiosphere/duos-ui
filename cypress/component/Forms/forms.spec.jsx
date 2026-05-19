@@ -43,13 +43,13 @@ describe('FormField - Tests', () => {
         type: FormFieldTypes.CALENDAR,
         id: 'optionalDate',
         title: 'Optional Date',
-        defaultValue: dayjs(),
+        defaultValue: dayjs('2026-02-01'),
         validators: [FormValidators.DATEJS],
       }
       cy.mount(<FormField {...props} />)
       cy.get('#lbl_optionalDate').contains('Optional Date')
       cy.get('#lbl_optionalDate').should('not.contain', '*')
-      cy.get('input').type('{end}{del}9999')
+      cy.get('[role="spinbutton"]').eq(2).click().type('30')
       cy.get('.formField-optionalDate .error-message').contains(FormValidators.DATEJS.msg)
     })
     it('should render a calendar picker control initialized with an error', () => {
@@ -97,7 +97,7 @@ describe('FormField - Tests', () => {
       }
       cy.mount(<FormField {...props} />)
       cy.get('#lbl_fixedDate').contains('Fixed Date')
-      cy.get('input.MuiInputBase-input').should('have.value', '1970-01-01')
+      cy.get('input.MuiPickersInputBase-input').should('have.value', '1970-01-01')
     })
     it('Select closes calendar as expected.', () => {
       props = {
@@ -110,12 +110,12 @@ describe('FormField - Tests', () => {
       }
       cy.mount(<FormField {...props} />)
       cy.get('#lbl_fixedDate').contains('Fixed Date')
-      cy.get('input.MuiInputBase-input').should('have.value', '1970-01-01')
-      cy.get('button').click()
-      cy.get('button').contains('5').click()
-      cy.get('button').contains('Select').should('be.visible')
-      cy.get('button').contains('Select').click()
-      cy.get('button').contains('Select').should('not.be.visible')
+      cy.get('input.MuiPickersInputBase-input').should('have.value', '1970-01-01')
+      cy.get('button[aria-label*="Choose date"]').click()
+      cy.contains('button', /^5$/).click()
+      cy.contains('button', 'Select').should('be.visible')
+      cy.contains('button', 'Select').click()
+      cy.contains('button', 'Select').should('not.exist')
       cy.get('.formField-fixedDate .error-message').should('not.exist')
     })
   })
