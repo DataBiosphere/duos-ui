@@ -1,4 +1,4 @@
-import { uniq } from 'lodash'
+import { uniq } from 'src/utils/NodashUtil'
 import { Config } from '../config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 

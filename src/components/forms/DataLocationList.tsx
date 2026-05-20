@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { DataLocation, DataLocationInfo } from './DataLocation'
-import { cloneDeep } from 'lodash'
+import { cloneDeep } from 'src/utils/NodashUtil'
 
 export type DataLocationsProps = {
   locations: DataLocationInfo[]

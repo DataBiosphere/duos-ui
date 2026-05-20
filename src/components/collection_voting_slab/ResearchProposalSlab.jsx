@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { DataUseTranslation } from '../../libs/dataUseTranslation'
-import { isNil, flatMap, keys } from 'lodash'
+import { isNil, flatMap, keys } from 'src/utils/NodashUtil'
 import { DataUsePills } from './DataUsePill'
 import DataUseAlertBox from './DataUseAlertBox'
 import HighlightText from '../HighlightText'

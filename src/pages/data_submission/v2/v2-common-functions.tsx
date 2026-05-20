@@ -45,7 +45,7 @@ import {
   ThroughBioId,
 } from 'src/pages/data_submission/v2/v2-models'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { set, isEmpty } from 'lodash'
+import { set, isEmpty } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'

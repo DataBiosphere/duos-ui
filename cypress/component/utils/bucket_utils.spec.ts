@@ -1,5 +1,5 @@
 import { binCollectionToBuckets, Bucket, shouldAbstain } from 'src/utils/BucketUtils'
-import { isEmpty, isUndefined } from 'lodash'
+import { isEmpty, isUndefined } from 'src/utils/NodashUtil'
 import { Match } from 'src/libs/ajax/Match'
 import {
   DacTerm,

@@ -1,4 +1,4 @@
-import { concat, filter, includes, isEmpty, map, union, matches as lodashMatches } from 'lodash'
+import { concat, filter, includes, isEmpty, map, union, matches as lodashMatches } from 'src/utils/NodashUtil'
 import React, { useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, USER_ROLES } from 'src/libs/utils'

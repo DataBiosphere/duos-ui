@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { DAC } from 'src/libs/ajax/DAC'
-import { filter, isNil } from 'lodash'
+import { filter, isNil } from 'src/utils/NodashUtil'
 import { recalculateVisibleTable, goToPage as updatePage } from 'src/libs/utils'
 import cellData from 'src/components/manage_dac_table/ManageDacTableCellData'
 import { styles } from 'src/components/manage_dac_table/manageDacTableUtils'

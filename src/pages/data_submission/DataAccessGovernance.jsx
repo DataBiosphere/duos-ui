@@ -1,6 +1,6 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm'
 import React, { useEffect, useState, useCallback } from 'react'
-import { isNil, every, cloneDeep, isEmpty, find } from 'lodash'
+import { isNil, every, cloneDeep, isEmpty, find } from 'src/utils/NodashUtil'
 import { DAR } from '../../libs/ajax/DAR'
 import { DAC } from '../../libs/ajax/DAC'
 

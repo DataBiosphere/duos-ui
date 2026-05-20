@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { cloneDeep, isNil, isEmpty } from 'lodash'
+import { cloneDeep, isNil, isEmpty } from 'src/utils/NodashUtil'
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../../components/forms/forms'
 import { selectedPrimaryGroup } from './consentGroupUtils'
 import { DAR } from '../../../libs/ajax/DAR'

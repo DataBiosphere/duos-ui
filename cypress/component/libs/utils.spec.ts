@@ -1,5 +1,5 @@
 import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
-import { toLower } from 'lodash'
+import { toLower } from 'src/utils/NodashUtil'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 import { DuosUser, Election, LibraryCard, Vote, DarCollectionSummary } from 'src/types/model'
 

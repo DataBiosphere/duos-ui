@@ -1,4 +1,4 @@
-import { filter, find, isEmpty } from 'lodash'
+import { filter, find, isEmpty } from 'src/utils/NodashUtil'
 import { Config } from './config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 

@@ -4,7 +4,7 @@ import { Styles, Theme } from 'src/libs/theme'
 import { Block, Delete } from '@mui/icons-material'
 import SimpleButton from 'src/components/SimpleButton'
 import { useNavigate } from 'react-router-dom'
-import { includes, toLower } from 'lodash'
+import { includes, toLower } from 'src/utils/NodashUtil'
 import './dar_collection_table.css'
 
 const duosBlue = '#0948B7'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { isEmpty, map } from 'lodash'
+import { isEmpty, map } from 'src/utils/NodashUtil'
 
 const styles = {
   box: {

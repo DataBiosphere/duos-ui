@@ -1,5 +1,5 @@
 import React from 'react'
-import { cloneDeep } from 'lodash'
+import { cloneDeep } from 'src/utils/NodashUtil'
 import { User } from 'src/libs/ajax/User'
 import DataSubmissionStudyInformation from 'src/pages/data_submission/ds_study_information'
 

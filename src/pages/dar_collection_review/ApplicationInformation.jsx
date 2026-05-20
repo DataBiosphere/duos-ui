@@ -1,5 +1,5 @@
 import React from 'react'
-import { chunk, filter, isEmpty } from 'lodash'
+import { chunk, filter, isEmpty } from 'src/utils/NodashUtil'
 import { DAR } from '../../libs/ajax/DAR'
 import { DownloadLink } from '../../components/DownloadLink'
 

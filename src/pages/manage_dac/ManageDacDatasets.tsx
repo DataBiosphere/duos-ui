@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import find from 'lodash/find'
-import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
+import { find, get, isEmpty } from 'src/utils/NodashUtil'
 import { DataUseTranslation } from 'src/libs/dataUseTranslation'
 import { Link, useLocation } from 'react-router-dom'
 import { Dataset, DatasetProperty } from 'src/types/model'
