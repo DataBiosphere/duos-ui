@@ -30,6 +30,13 @@ services:
     command: ["node", "server/dist/index.js"]
     restart: always
 
+  redis:
+    image: redis:8.6-trixie
+    container_name: duos-redis
+    command: ["--save", "", "--maxmemory", "96mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "6379:6379"
+
   proxy:
     image: us.gcr.io/broad-dsp-gcr-public/httpd-terra-proxy:v0.1.16
     container_name: duos-proxy
