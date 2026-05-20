@@ -8,10 +8,10 @@
 #   * site.conf
 # Ensure that /etc/hosts contains an entry for:
 # 	127.0.0.1	local.broadinstitute.org
-# Ensure that `public/config.json` is pointing to the correct env (not local), i.e.:
+# Ensure that `public/config.json` is pointing to the correct env, e.g.:
 #   ... "env": "dev", ...
 # Build:
-#   docker build . -t duos
+#   docker buildx build . -t duos --platform linux/amd64
 # Run:
 #   docker compose up -d
 # Test
@@ -34,8 +34,9 @@ services:
     image: redis:8.6-trixie
     container_name: duos-redis
     command: ["--save", "", "--maxmemory", "96mb", "--maxmemory-policy", "allkeys-lru"]
-    ports:
-      - "6379:6379"
+#    Enable for local testing of Redis code path, but not needed for single-instance local development
+#    ports:
+#      - "6379:6379"
 
   proxy:
     image: us.gcr.io/broad-dsp-gcr-public/httpd-terra-proxy:v0.1.16
