@@ -87,7 +87,7 @@ colima start
 Build and run:
 
 ```shell
-docker buildx build . -t duos --platform linux/amd64
+docker buildx build . -t duos --platform linux/amd64 --load
 docker compose up -d
 ```
 

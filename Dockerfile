@@ -21,7 +21,8 @@ COPY vite.config.ts /usr/src/app/vite.config.ts
 COPY config/base_config.json /usr/src/app/public/config.json
 RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
 RUN pnpm config set update-notifier false
-RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm ci --loglevel warn
+ENV NODE_OPTIONS=--max-old-space-size=4096
+RUN pnpm ci --loglevel warn
 RUN pnpm run build
 
 # build the server
