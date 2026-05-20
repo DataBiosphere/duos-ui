@@ -68,10 +68,26 @@ the `env` value to the desired environment will simulate it for local developmen
       - ./public/config.json:/usr/src/app/build/config.json
 ```
 
+Our team uses Colima as its container runtime. If you haven't already, install and start it:
+
+```shell
+brew install colima
+```
+
+On Apple Silicon, start Colima with Rosetta for reliable linux/amd64 emulation (avoids QEMU compatibility issues with Node.js):
+```shell
+colima start --arch aarch64 --vm-type=vz --vz-rosetta
+```
+
+On Intel Macs, a standard start is sufficient:
+```shell
+colima start
+```
+
 Build and run:
 
 ```shell
-docker build . -t duos --platform linux/amd64
+docker buildx build . -t duos --platform linux/amd64
 docker compose up -d
 ```
 
