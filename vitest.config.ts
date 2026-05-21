@@ -11,14 +11,10 @@ export default defineConfig({
     alias: aliases_from_tsconfig(),
   },
   test: {
-    clearMocks: true,
     css: true,
-    environment: 'jsdom',
-    exclude: ['build/**', 'cypress/**', 'node_modules/**', 'server/**'],
     globals: true,
+    environment: 'jsdom',
     include: ['test/**/*.{spec,test}.{js,jsx,ts,tsx}'],
-    restoreMocks: true,
-    setupFiles: ['./test/setup.ts'],
-    unstubGlobals: true,
+    exclude: ['build/**', 'cypress/**', 'node_modules/**', 'server/**'],
   },
 })
