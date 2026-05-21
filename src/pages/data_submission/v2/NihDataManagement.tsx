@@ -13,7 +13,7 @@ import {
   removeStudyPropertiesByKeys, setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
-import { set, unset } from 'lodash'
+import { set, unset } from 'src/utils/NodashUtil'
 import { ALTERNATIVE_DATA_SHARING_PLAN_FILE } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import { FileInput } from 'src/components/forms/FileInput'
 

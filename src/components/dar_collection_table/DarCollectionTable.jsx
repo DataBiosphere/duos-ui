@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useCallback } from 'react'
-import { cloneDeep, isNil } from 'lodash'
+import { cloneDeep, isNil } from 'src/utils/NodashUtil'
 import { DarCollectionTableColumnOptions, styles, consoleTypes } from '../../utils/DarCollectionUtils'
 import { Storage } from '../../libs/storage'
 import PaginationBar from '../PaginationBar'

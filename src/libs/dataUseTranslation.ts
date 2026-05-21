@@ -1,4 +1,4 @@
-import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'lodash'
+import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'src/utils/NodashUtil'
 import { OntologyService } from './ontologyService'
 import { Notifications } from './utils'
 import { DataUse, DataUseSummary, DataUseTerm } from '../types/model'
@@ -433,7 +433,7 @@ const translateDataUseRestrictions = async (dataUse: ExtendedDataUse | null): Pr
   if (!dataUse) {
     return []
   }
-  let restrictionStatements: Promise<TranslationEntry | undefined>[] = []
+  let restrictionStatements: Promise<TranslationEntry | undefined>[]
   const targetKeys = Object.keys(consentTranslations)
   restrictionStatements = targetKeys.map(async key =>
     await processRestrictionStatements(key, dataUse))
@@ -468,7 +468,7 @@ export const translateDataUseRestrictionsFromDataUseArray = async (
     )
   }
   catch (_error) {
-    throw new Error('Failed to translate Data Use Restrictions from list')
+    throw new Error('Failed to translate Data Use Restrictions from list', { cause: _error })
   }
 }
 

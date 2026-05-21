@@ -1,6 +1,6 @@
 // ********************** DUL LOGIC ********************** //
 
-import { isEmpty, isNil, isEqual, isString } from 'lodash'
+import { isEmpty, isNil, isEqual, isString } from 'src/utils/NodashUtil'
 import { FormValidators } from '../components/forms/forms'
 import { extractEraAuthenticationState } from 'src/components/era_commons/ERACommonsUtils'
 import {

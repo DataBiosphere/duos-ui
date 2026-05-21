@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Styles } from 'src/libs/theme'
 import { useNavigate } from 'react-router-dom'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from 'src/libs/utils'
 import SearchBar from 'src/components/SearchBar'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -105,7 +105,7 @@ export default function DatasetSubmissions() {
           id="add-dataset-btn"
           label="ADD DATASET"
           onClick={() => navigate('/data_submission_form')}
-          icon={<AddCircleOutlineIcon />}
+          icon={<AddCircleOutlineOutlinedIcon />}
           className="button button-blue"
           disabled={!currentUser.isDataSubmitter}
         />

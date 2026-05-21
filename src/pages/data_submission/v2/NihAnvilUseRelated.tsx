@@ -32,7 +32,7 @@ import {
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { ALTERNATIVE_DATA_SHARING_PLAN_FILE } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
-import { unset } from 'lodash'
+import { unset } from 'src/utils/NodashUtil'
 
 export interface NihAnvilUseRelatedProps {
   study: Study
@@ -100,6 +100,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
     if (nihAnvilUseStudyValue) {
       if (nihAnvilUseStudyValue === NihAnvilUse.NO_NHGRI_NO_ANVIL) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPreSelectorValue(NihAnvilUsePreSelectOptions.NO)
       }
       else {

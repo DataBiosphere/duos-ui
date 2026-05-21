@@ -1,4 +1,4 @@
-import { difference, union, flatMap } from 'lodash'
+import { difference, union, flatMap } from 'src/utils/NodashUtil'
 import React, { useState, FC, CSSProperties } from 'react'
 import { DacObject, DuosUser } from 'src/types/model'
 

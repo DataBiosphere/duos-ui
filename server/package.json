@@ -2,6 +2,7 @@
   "name": "duos-server",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@11.1.2",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +14,7 @@
     "fastify": "5.8.5"
   },
   "devDependencies": {
-    "@types/node": "24.12.3",
-    "typescript": "5.9.3"
+    "@types/node": "24.12.4",
+    "typescript": "6.0.3"
   }
 }

@@ -108,11 +108,11 @@ DAA-related UI and workflows are permanently enabled in this codebase.
 
 Before raising a pull request, ensure:
 
-1. `npm run lint` exits with **0 errors**.
-2. `npm run type-check` exits with **0 errors**.
+1. `pnpm run lint` exits with **0 errors**.
+2. `pnpm run type-check` exits with **0 errors**.
 3. All new code is covered by component tests with meaningful assertions.
 4. Using SonarQube for IDE, verify no new SonarQube bugs, issues, or vulnerabilities are introduced.
-5. `npm run cypress:run:component` exits with **0 failing specs**.
+5. `pnpm run cypress:run:component` exits with **0 failing specs**.
 
 
 ### Common Lint / TypeScript Pitfalls to Avoid

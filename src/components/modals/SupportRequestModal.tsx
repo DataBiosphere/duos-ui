@@ -172,8 +172,8 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
       data-cy="supportRequestModal"
     >
       <DialogTitle>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5" component="div" fontWeight={600}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
             Contact Us
           </Typography>
           <IconButton
@@ -190,9 +190,9 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
 
       <DialogContent dividers>
         {/* FAQ Section */}
-        <Box mb={3}>
+        <Box sx={{ mb: 3 }}>
           <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600} gutterBottom>
+            <Typography variant="body2" sx={{ fontWeight: 600 }} gutterBottom>
               Having issues accessing data you were already approved to use?
             </Typography>
             <Typography variant="body2">
@@ -201,7 +201,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
           </Alert>
 
           <Alert severity="info">
-            <Typography variant="body2" fontWeight={600} gutterBottom>
+            <Typography variant="body2" sx={{ fontWeight: 600 }} gutterBottom>
               Want to ask the data access committee(s) about your requests&apos; expected turnaround time?
             </Typography>
             <Typography variant="body2">
@@ -286,7 +286,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
           />
 
           {/* Attachment Dropzone */}
-          <Box mt={2} mb={2}>
+          <Box sx={{ mt: 2, mb: 2 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               Attachment(s)
             </Typography>
@@ -324,7 +324,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
                     )}
                     {hasAttachments && (
                       <Box>
-                        <Box display="flex" flexWrap="wrap" gap={1} justifyContent="center" mb={1}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mb: 1 }}>
                           {formData.attachment.map((file, index) => (
                             <Chip
                               key={index}

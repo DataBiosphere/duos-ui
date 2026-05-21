@@ -7,7 +7,7 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
-import { flatten, uniq, compact, orderBy } from 'lodash'
+import { flatten, uniq, compact, orderBy } from 'src/utils/NodashUtil'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { FiltersTypes, generateDefaultParticipantCountValues } from 'src/components/data_search/DatasetFilterConstants'
 import { muiSmallButtonFix, muiCheckboxFix, muiListItemTextFix, muiTextFieldFix, muiH5Fix, muiHeaderFix } from 'src/libs/muiThemeFix'
@@ -97,11 +97,10 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         margin="dense"
         variant="outlined"
         helperText="minimum"
-        inputProps={minInputPropsComplete}
         onChange={event => filterHandler(minCategory, Number(event.target.value))}
-        slotProps={muiTextFieldFix}
+        slotProps={{ ...muiTextFieldFix, htmlInput: minInputPropsComplete }}
       />
-      <Box padding="0rem 1rem 1rem"> - </Box>
+      <Box sx={{ padding: '0rem 1rem 1rem' }}> - </Box>
       <TextField
         type="number"
         value={max}
@@ -110,9 +109,8 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         margin="dense"
         variant="outlined"
         helperText="maximum"
-        inputProps={maxInputPropsComplete}
         onChange={event => filterHandler(maxCategory, Number(event.target.value))}
-        slotProps={muiTextFieldFix}
+        slotProps={{ ...muiTextFieldFix, htmlInput: maxInputPropsComplete }}
       />
     </Box>
   )

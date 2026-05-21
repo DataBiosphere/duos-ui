@@ -25,7 +25,7 @@ import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
 import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils'
-import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'lodash'
+import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'src/utils/NodashUtil'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Countries } from 'src/libs/ajax/Countries'
 import PropTypes from 'prop-types'
@@ -257,6 +257,7 @@ const DataAccessRequestApplication = (props) => {
     })
     if (!existingDarsReadOnlyMode) {
       const updatedTabs = [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setApplicationTabs(updatedTabs)
     }
   }, [formData.datasetIds, existingDarsReadOnlyMode])
@@ -342,6 +343,7 @@ const DataAccessRequestApplication = (props) => {
         // if we are creating a new progress report, we need to add another tab for the application
         appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setApplicationTabs([...appTabs,
         ...reverseOrderedDARs.map((_dar, index) => {
           const whichPRIsThis = reverseOrderedDARs.length - index - 1
@@ -355,6 +357,7 @@ const DataAccessRequestApplication = (props) => {
   }, [formData?.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       setNotificationData(notificationData)

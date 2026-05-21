@@ -17,7 +17,7 @@ import {
   join,
   map,
   toLower,
-} from 'lodash'
+} from 'src/utils/NodashUtil'
 import { headerTabsConfig } from 'src/components/DuosHeader'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
 import {

@@ -11,7 +11,7 @@ import { Notification } from 'src/components/Notification'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton.tsx'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 
 const getUserList = async () => {
   const users = await User.list(USER_ROLES.admin)
@@ -39,6 +39,7 @@ export const AdminManageUsers = function AdminManageUsers() {
   const [isLoading, setIsLoading] = useState(false)
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true)
     getUserList().then((userList) => {
       setIsLoading(false)
@@ -91,7 +92,7 @@ export const AdminManageUsers = function AdminManageUsers() {
           id="btn_addUser"
           label="ADD USER"
           onClick={addUser}
-          icon={<AddCircleOutlineIcon />}
+          icon={<AddCircleOutlineOutlinedIcon />}
           className="button button-blue"
         />
       </div>

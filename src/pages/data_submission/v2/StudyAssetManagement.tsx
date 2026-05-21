@@ -17,6 +17,9 @@ import AiModelList from 'src/components/ai_models_list/AiModelList'
 import WorkspaceList from 'src/components/workspaces_list/WorkspaceList'
 import ClinicalTrialList from 'src/components/clinical_trial_list/ClinicalTrialList'
 import FundingResourceList from 'src/components/funding_resource_list/FundingResourceList'
+import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
+import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
+import BiospecimenList from 'src/components/biospecimen_list/BiospecimenList'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import DescriptionIcon from '@mui/icons-material/Description'
 import MonitorIcon from '@mui/icons-material/Monitor'
@@ -25,10 +28,7 @@ import StorageIcon from '@mui/icons-material/Storage'
 import DatasetIcon from '@mui/icons-material/Dataset'
 import LaptopMacIcon from '@mui/icons-material/LaptopMac'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
-import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
-import { ConsentGroup2 } from '../consent_group/consentGroupUtils'
-import BiospecimenList from 'src/components/biospecimen_list/BiospecimenList'
-import { Biotech } from '@mui/icons-material'
+import BiotechIcon from '@mui/icons-material/Biotech'
 import { Button } from '@mui/material'
 
 export interface StudyAssetManagementProps {
@@ -214,7 +214,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
           studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
             <StudyAsset
               config={{
-                icon: <Biotech fontSize="large" />,
+                icon: <BiotechIcon fontSize="large" />,
                 title: 'Biospecimens',
                 description: 'View total biospecimens for this study',
                 children: content,

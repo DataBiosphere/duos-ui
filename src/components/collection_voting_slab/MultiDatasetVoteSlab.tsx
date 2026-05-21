@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { get, isEmpty, isNil } from 'lodash'
+import { get, isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
 import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
@@ -174,6 +174,7 @@ export default function MultiDatasetVoteSlab({
     const darData = mostRecentDar?.data
 
     if (darData && Object.keys(darData).includes('dmi')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsDMI(true)
     }
 

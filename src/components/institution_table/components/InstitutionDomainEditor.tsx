@@ -117,11 +117,9 @@ export const InstitutionDomainEditor = ({ domains, isEditing, onDomainsChange, i
               value={tempDomain}
               placeholder="e.g., example.com"
               size="small"
-              InputProps={{
-                style: { fontSize: 14 },
-              }}
-              FormHelperTextProps={{
-                style: { fontSize: 14 },
+              slotProps={{
+                input: { style: { fontSize: 14 } },
+                formHelperText: { style: { fontSize: 14 } },
               }}
               style={{ width: 250 }}
               onChange={(e) => {

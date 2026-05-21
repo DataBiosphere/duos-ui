@@ -19,7 +19,7 @@ volta install node@24.11.1
 2. Next, install the project dependencies.
 
 ```
-npm install
+pnpm install
 ```
 
 3. Ensure you are connected to the Broad VPN. Copy the configuration files and certificates locally by running the [render-configs.sh](scripts/render-configs.sh) script. By default, the DUOS UI points to the dev environment.
@@ -54,7 +54,7 @@ will simulate it for local development.
 6. Start the development server:
 
 ```shell
-npm start
+pnpm start
 ```
 
 ## Running using Docker Compose
@@ -103,14 +103,14 @@ To run cypress integration tests, first start up the app in one terminal
 and in another terminal window, spin up the tests headless:
 
 ```shell
-npm start
-npm run cypress:run
+pnpm start
+pnpm run cypress:run
 ```
 
 To run cypress component tests headless:
 
 ```shell
-npm run cypress:run:component
+pnpm run cypress:run:component
 ```
 
 ### Interactive
@@ -119,18 +119,18 @@ To run cypress integration tests, first start up the app in one terminal
 and in another terminal window, spin up the tests for viewing:
 
 ```shell
-npm start
-npm run cypress:open
+pnpm start
+pnpm run cypress:open
 ```
 
 To run cypress component tests in a browser:
 
 ```shell
-npm run cypress:open:component
+pnpm run cypress:open:component
 ```
 
 To run a single test suite:
 
 ```shell
-npm run cypress:open:component --spec "**/data_access_governance.spec.js"
+pnpm run cypress:open:component --spec "**/data_access_governance.spec.js"
 ```

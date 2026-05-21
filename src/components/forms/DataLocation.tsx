@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from './forms'
-import { cloneDeep, set } from 'lodash'
+import { cloneDeep, set } from 'src/utils/NodashUtil'
 import { Link } from 'react-router-dom'
 import { asIdAndDisplayText, SelectEntry } from './SelectOptionInterface'
 import { CloudProviders } from './CloudProviders'

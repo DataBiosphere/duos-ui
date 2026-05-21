@@ -1,6 +1,6 @@
 import { Config } from 'src/libs/config'
 import { fetchGet, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
-import { merge } from 'lodash'
+import { merge } from 'src/utils/NodashUtil'
 import { DuosUser } from 'src/types/model'
 
 /**

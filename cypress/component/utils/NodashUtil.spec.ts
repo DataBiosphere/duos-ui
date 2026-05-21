@@ -41,6 +41,7 @@ import {
   omit,
   orderBy,
   set,
+  sortBy,
   sortedUniq,
   toLower,
   toNumber,
@@ -67,6 +68,19 @@ describe('NodashUtil', () => {
     expect(filter(data, n => n % 2 === 0)).to.deep.equal([2, 4])
     expect(find(data, n => n > 2)).to.equal(3)
     expect(findIndex(data, n => n === 3)).to.equal(2)
+  })
+
+  it('filter, find, and map support lodash-style shorthands and objects', () => {
+    const rows = [
+      { id: 1, active: true, role: { name: 'Admin' } },
+      { id: 2, active: false, role: { name: 'Member' } },
+    ]
+    const rowMap = { a: rows[0], b: rows[1] }
+
+    expect(filter(rows, { active: true })).to.deep.equal([rows[0]])
+    expect(find(rows, { role: { name: 'Member' } })).to.deep.equal(rows[1])
+    expect(map(rows, 'id')).to.deep.equal([1, 2])
+    expect(map(rowMap, (row, key) => [key, row.id])).to.deep.equal([['a', 1], ['b', 2]])
   })
 
   it('flatMap and flatten flatten values as expected', () => {
@@ -103,7 +117,8 @@ describe('NodashUtil', () => {
   })
 
   it('clone and cloneDeep create copies with expected depth behavior', () => {
-    const source = { a: 1, nested: { b: 2 } }
+    const fn = () => true
+    const source = { a: 1, nested: { b: 2 }, fn }
     const shallow = clone(source)
     const deep = cloneDeep(source)
 
@@ -111,6 +126,7 @@ describe('NodashUtil', () => {
 
     expect(shallow.nested.b).to.equal(5)
     expect(deep.nested.b).to.equal(2)
+    expect(deep.fn).to.equal(fn)
   })
 
   it('compact removes falsey values', () => {
@@ -148,17 +164,26 @@ describe('NodashUtil', () => {
     expect(chunk([1, 2, 3], 0)).to.deep.equal([])
   })
 
-  it('debounce delays invocation until wait period', () => {
+  it('debounce delays invocation until wait period and supports cancel', () => {
     cy.clock()
     const spy = cy.spy().as('debouncedSpy')
     const fn = debounce(spy, 50)
 
-    fn('a')
-    fn('b')
+    cy.then(() => {
+      fn('a')
+      fn('b')
+    })
     cy.tick(49)
     cy.get('@debouncedSpy').should('not.have.been.called')
     cy.tick(1)
     cy.get('@debouncedSpy').should('have.been.calledOnceWith', 'b')
+
+    cy.then(() => {
+      fn('c')
+      fn.cancel()
+    })
+    cy.tick(50)
+    cy.get('@debouncedSpy').should('have.been.calledOnce')
   })
 
   it('difference computes relative complement', () => {
@@ -241,6 +266,12 @@ describe('NodashUtil', () => {
 
     const result = orderBy(rows, ['score', 'name'], ['desc', 'asc'])
     expect(result).to.deep.equal([
+      { name: 'a', score: 2 },
+      { name: 'b', score: 2 },
+      { name: 'c', score: 1 },
+    ])
+    expect(orderBy(['b', 'a'], value => value, 'asc')).to.deep.equal(['a', 'b'])
+    expect(sortBy(rows, 'name')).to.deep.equal([
       { name: 'a', score: 2 },
       { name: 'b', score: 2 },
       { name: 'c', score: 1 },

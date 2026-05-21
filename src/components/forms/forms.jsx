@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, useCallback } from 'react'
-import { cloneDeep, isFunction, isNil, isArray } from 'lodash'
+import { cloneDeep, isFunction, isNil, isArray } from 'src/utils/NodashUtil'
 import {
   getKey,
   validateFormProps,
@@ -261,6 +261,7 @@ export const FormField = (config) => {
 
   React.useEffect(() => {
     if (defaultValue !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormValue(defaultValue)
     }
   }, [defaultValue, type])

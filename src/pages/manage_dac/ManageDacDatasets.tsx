@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import find from 'lodash/find'
-import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
+import { find, get, isEmpty } from 'src/utils/NodashUtil'
 import { DataUseTranslation } from 'src/libs/dataUseTranslation'
 import { Link, useLocation } from 'react-router-dom'
 import { Dataset, DatasetProperty } from 'src/types/model'
@@ -117,8 +115,8 @@ export const ManageDacDatasets: React.FC = () => {
     }
     if (columnHeaders[sort.colIndex]?.sortable) {
       filtered = [...filtered].sort((a, b) => {
-        let aValue = ''
-        let bValue = ''
+        let aValue
+        let bValue
         switch (sort.colIndex) {
           case 0: // Dataset ID
             aValue = a.datasetIdentifier

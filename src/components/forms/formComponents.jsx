@@ -1,7 +1,7 @@
 import PublishIcon from '@mui/icons-material/Publish'
 
 import './formComponents.css'
-import { cloneDeep, isArray, isEmpty, isNil, isString } from 'lodash'
+import { cloneDeep, isArray, isEmpty, isNil, isString } from 'src/utils/NodashUtil'
 import React, { useState } from 'react'
 import Select from 'react-select'
 import AsyncSelect from 'react-select/async'

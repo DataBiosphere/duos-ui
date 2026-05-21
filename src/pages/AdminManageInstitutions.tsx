@@ -12,7 +12,7 @@ import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 
 export default function AdminManageInstitutions() {
   usePageTitle('Institutions')
@@ -45,20 +45,21 @@ export default function AdminManageInstitutions() {
     init()
   }, [])
 
+  const filter = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
+    if (value) {
+      return getSearchFilterFunctions().institutions(value, list)
+    }
+    return list
+  }
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredList(filter(institutionList, searchTerm))
   }, [searchTerm, institutionList])
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
     setFilteredList(filter(institutionList, value))
-  }
-
-  const filter = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
-    if (value) {
-      return getSearchFilterFunctions().institutions(value, list)
-    }
-    return list
   }
 
   const addInstitution = () => {
@@ -83,7 +84,7 @@ export default function AdminManageInstitutions() {
           id="btn_addInstitution"
           label="ADD INSTITUTION"
           onClick={addInstitution}
-          icon={<AddCircleOutlineIcon />}
+          icon={<AddCircleOutlineOutlinedIcon />}
           className="button button-blue"
         />
       </div>

@@ -4,7 +4,7 @@ import { DAA } from 'src/libs/ajax/DAA'
 import RequiredDAAs from 'src/pages/dar_application/RequiredDAAs'
 import { DAAObject, Dataset } from 'src/types/model'
 import { FormFieldTitle } from 'src/components/forms/forms'
-import { isEqual } from 'lodash'
+import { isEqual } from 'src/utils/NodashUtil'
 
 interface ProgressReportDataAccessAgreementsProps {
   datasets: Dataset[]

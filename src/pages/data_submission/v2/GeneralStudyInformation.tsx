@@ -20,7 +20,7 @@ import {
   setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { DataTypes } from 'src/components/forms/DataTypes'
-import { set } from 'lodash'
+import { set } from 'src/utils/NodashUtil'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
 interface Validation {

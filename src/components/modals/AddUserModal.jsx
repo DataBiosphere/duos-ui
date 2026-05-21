@@ -1,4 +1,4 @@
-import { concat, filter, isEmpty, matches } from 'lodash'
+import { concat, filter, isEmpty, matches } from 'src/utils/NodashUtil'
 import React, { Fragment, useState, useRef, useEffect } from 'react'
 import { User } from '../../libs/ajax/User'
 import { USER_ROLES } from '../../libs/utils'
@@ -98,7 +98,7 @@ export const AddUserModal = (props) => {
     const checkState = e.target.checked
     // True? add admin role to state.updatedRoles
     // False? remove admin role from state.updatedRoles
-    let newRoles = [researcherRole]
+    let newRoles
     if (checkState) {
       newRoles = concat(state.updatedRoles, adminRole)
     }

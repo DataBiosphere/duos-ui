@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ErrorOutline, TaskAltOutlined } from '@mui/icons-material'
+import { ErrorOutlined, TaskAltOutlined } from '@mui/icons-material'
 import { ConsentStatus, SamDetails, ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 
 const Status = () => {
@@ -16,7 +16,7 @@ const Status = () => {
   }, [])
 
   const healthyState = <TaskAltOutlined sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'green' }} />
-  const unhealthyState = <ErrorOutline sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'red' }} />
+  const unhealthyState = <ErrorOutlined sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'red' }} />
 
   const consentHealthy = consentStatus?.ok ? healthyState : unhealthyState
   const samHealthy = samStatus?.ok ? healthyState : unhealthyState

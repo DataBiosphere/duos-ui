@@ -1,5 +1,5 @@
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
-import { groupBy, intersection, without, xor } from 'lodash'
+import { groupBy, intersection, without, xor } from 'src/utils/NodashUtil'
 import { Checkbox, Link } from '@mui/material'
 import * as React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
@@ -494,8 +494,7 @@ export const makeDatasetTableHeader = (
         return dataUseCellData({
           dataset,
           label: `Data Use for dataset ${dataset.datasetId}: ${dataset.dataUse}`,
-          divClass: ['data-use-cell'],
-          spanClass: [],
+          divClass: 'data-use-cell',
           cellWidth: cellWidths.dataUse,
           tooltipPlace: 'top',
         })

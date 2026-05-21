@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ConsentGroupSummary from './ConsentGroupSummary'
 import { EditConsentGroup } from './EditConsentGroup'
 import { computeConsentGroupValidationErrors } from './ConsentGroupErrors'
-import { isEmpty, cloneDeep, set } from 'lodash'
+import { isEmpty, cloneDeep, set } from 'src/utils/NodashUtil'
 
 export const ConsentGroupForm = (props) => {
   const {

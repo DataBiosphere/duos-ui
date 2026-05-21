@@ -1,7 +1,7 @@
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
 import { dateValidator, emailValidator, urlValidator } from '../../components/forms/formValidation'
-import { get, isNil, set } from 'lodash'
+import { get, isNil, set } from 'src/utils/NodashUtil'
 
 /**
  * Generate a ValidateFunction from a dataset registration schema

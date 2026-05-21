@@ -1,9 +1,8 @@
-import { cloneDeep } from 'lodash'
 import { Styles } from 'src/libs/theme'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DarCollectionSummary, Election, UserRoleName, Vote } from 'src/types/model'
-import { groupBy, isEmpty, isNil } from 'src/utils/NodashUtil'
+import { groupBy, isEmpty, isNil, cloneDeep } from 'src/utils/NodashUtil'
 
 export const rpVoteKey = 'RUS Vote'
 

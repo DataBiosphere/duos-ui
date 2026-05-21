@@ -1,5 +1,5 @@
 import { processDefinedLimitations, consentTranslations, TranslationEntry } from 'src/libs/dataUseTranslation'
-import { isEmpty, cloneDeep } from 'lodash'
+import { isEmpty, cloneDeep } from 'src/utils/NodashUtil'
 import { DataUse } from 'src/types/model'
 
 interface MockDataUse extends DataUse {

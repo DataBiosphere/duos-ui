@@ -13,21 +13,25 @@ ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 COPY src /usr/src/app/src
 COPY public /usr/src/app/public
 COPY package.json /usr/src/app/package.json
-COPY package-lock.json /usr/src/app/package-lock.json
+COPY pnpm-lock.yaml /usr/src/app/pnpm-lock.yaml
+COPY pnpm-workspace.yaml /usr/src/app/pnpm-workspace.yaml
 COPY index.html /usr/src/app/index.html
 COPY tsconfig.json /usr/src/app/tsconfig.json
 COPY vite.config.ts /usr/src/app/vite.config.ts
 COPY config/base_config.json /usr/src/app/public/config.json
-RUN npm config set update-notifier false
-RUN npm install --loglevel verbose
-RUN npm run build
+RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
+RUN pnpm config set update-notifier false
+RUN pnpm ci --loglevel warn
+RUN pnpm run build
 
 # build the server
 COPY server /usr/src/app/server
-RUN cd server && npm install && npm run build && npm prune --omit=dev
+RUN pnpm --dir /usr/src/app/server --ignore-workspace ci \
+	&& pnpm --dir /usr/src/app/server --ignore-workspace run build \
+	&& CI=true pnpm --dir /usr/src/app/server --ignore-workspace prune --prod --loglevel warn
 
-# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-alpine
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:7bb73493171d6c0b1bf00018915266cf8e80910b172d14bf249dcd01af8f3aa9
+# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:9383ff586d7d17d76ec2c31fc6c0559d625beff285c024f6d88e93ed5b746fa1
 ARG NODE_ENV=production
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}

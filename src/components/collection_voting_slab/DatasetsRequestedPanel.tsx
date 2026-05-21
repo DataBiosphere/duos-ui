@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { filter, includes } from 'lodash'
+import { filter, includes } from 'src/utils/NodashUtil'
 import { DacTerm, Dataset } from 'src/types/model'
 import SectionHeading from 'src/components/collection_voting_slab/SectionHeading'
 import DatasetList from 'src/components/collection_voting_slab/DatasetList'
@@ -39,6 +39,7 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
           return includes(dacDatasetIds, datasetId)
         })
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredDatasets(datasets)
     setDatasetCount(datasets.length)
     collapseView(datasets)

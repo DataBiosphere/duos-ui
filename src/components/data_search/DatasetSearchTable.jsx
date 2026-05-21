@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs'
 import * as React from 'react'
 import { Box, Button } from '@mui/material'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'lodash'
+import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'src/utils/NodashUtil'
 import { applyForAccess } from 'src/utils/accessUtils.js'
 import { defaultFilters } from 'src/components/data_search/DatasetFilterConstants'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
@@ -205,6 +205,7 @@ export const DatasetSearchTable = (props) => {
     }
     // Calling setState inside this effect is intentional: it updates
     // derived state from `datasets` when they arrive.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     getExportableDatasets(datasets)
 
     const getRadarEnabledDatasets = async (datasets) => {
@@ -261,7 +262,7 @@ export const DatasetSearchTable = (props) => {
     if (!hasRunInitialSearch.current) {
       hasRunInitialSearch.current = true
       // Intentionally setting initial filtered state from datasets.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+
       setFiltered(datasets)
       return
     }

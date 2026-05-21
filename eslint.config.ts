@@ -26,7 +26,7 @@ This is required since the project uses both JSX and TSX. The other settings tha
 
 */
 export default defineConfig([
-  globalIgnores(['build', 'server/dist']),
+  globalIgnores(['build/**', 'server/dist/**']),
   {
     extends: [
       js.configs.recommended,

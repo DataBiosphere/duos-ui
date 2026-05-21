@@ -67,6 +67,7 @@ export default function CollectionVoteButton({
   }, [baseColor, disabled, updateStyle])
 
   React.useEffect(() =>
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     isSelected ? selectedButtonStyle() : defaultButtonStyle(),
   [defaultButtonStyle, isSelected, selectedButtonStyle])
 

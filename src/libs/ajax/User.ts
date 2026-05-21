@@ -1,4 +1,4 @@
-import { cloneDeep, unset } from 'lodash'
+import { cloneDeep, unset } from 'src/utils/NodashUtil'
 import { Config } from 'src/libs/config'
 import { fetchGet, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes'
