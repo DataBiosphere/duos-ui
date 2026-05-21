@@ -469,13 +469,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'anvil',
-              },
-            },
-            {
               terms: {
-                'study.data.tags.keyword': ['anvil'],
+                'study.data.tags.keyword': ['Platform: AnVIL'],
               },
             },
           ],

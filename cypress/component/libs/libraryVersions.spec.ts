@@ -238,7 +238,7 @@ describe('Library Versions - Tests', function () {
     it('uses bool.should with match_phrase and terms for description-based libraries', function () {
       const versions = getLibraryVersions(null, null)
 
-      const descriptionLibraries = ['elwazi', 'anvil', 'hca', 'scp', 'nhlbi', 'cfde', 'schare', 'stanley', 'stanleycenter']
+      const descriptionLibraries = ['elwazi', 'hca', 'scp', 'nhlbi', 'cfde', 'schare', 'stanley', 'stanleycenter']
 
       descriptionLibraries.forEach((key) => {
         const library = versions[key]
@@ -260,7 +260,7 @@ describe('Library Versions - Tests', function () {
     it('has matching values between match_phrase description and terms tags', function () {
       const versions = getLibraryVersions(null, null)
 
-      const simpleDescriptionLibraries = ['elwazi', 'anvil', 'hca', 'nhlbi', 'cfde', 'ged']
+      const simpleDescriptionLibraries = ['elwazi', 'hca', 'nhlbi', 'cfde', 'ged']
 
       simpleDescriptionLibraries.forEach((key) => {
         const query = versions[key].query as BoolQuery
@@ -273,6 +273,18 @@ describe('Library Versions - Tests', function () {
 
         expect(tagsValue).to.include(descriptionValue, `${key} tags should include the description value`)
       })
+    })
+
+    it('anvil library uses a single terms clause with Platform: AnVIL tag', function () {
+      const versions = getLibraryVersions(null, null)
+      const query = versions['anvil'].query as { bool: { should: object[] } }
+
+      expect(query).to.have.property('bool')
+      expect(query.bool.should).to.have.length(1)
+
+      const clause = query.bool.should[0] as { terms: { 'study.data.tags.keyword': string[] } }
+      expect(clause).to.have.property('terms')
+      expect(clause.terms['study.data.tags.keyword']).to.deep.equal(['Platform: AnVIL'])
     })
 
     it('broad library uses submitter.institution.name and tags', function () {
