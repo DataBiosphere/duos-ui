@@ -10,7 +10,7 @@ export const renderWithRouter = (
   ui: ReactElement,
   { route = '/', ...options }: RouterRenderOptions = {},
 ) => {
-  window.history.pushState({}, 'Test page', route)
+  globalThis.history.pushState({}, 'Test page', route)
 
   return render(
     <MemoryRouter initialEntries={[route]}>
