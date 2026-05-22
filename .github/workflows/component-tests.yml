@@ -1,5 +1,5 @@
 on: [pull_request]
-name: cypress component tests
+name: Vitest and Cypress tests
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
