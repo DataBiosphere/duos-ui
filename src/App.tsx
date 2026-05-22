@@ -15,6 +15,7 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
+import { ChatPanel } from 'src/components/chat/ChatPanel'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,6 +117,7 @@ function App() {
             </div>
             <DuosFooter />
           </div>
+          <ChatPanel isLoggedIn={isLoggedIn} />
         </NavigationStateProvider>
       </ThemeProvider>
     </QueryClientProvider>

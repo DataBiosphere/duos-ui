@@ -12,8 +12,11 @@
 #   ... "env": "dev", ...
 # Build:
 #   docker build . -t duos
-# Run:
+# Run (standard):
 #   docker compose up -d
+# Run with local AI (Ollama + llama3.2):
+#   docker compose --profile local-ai up -d
+#   docker exec duos-ollama ollama pull llama3.2:3b
 # Test
 #   https://local.broadinstitute.org/
 services:
@@ -25,9 +28,42 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT:-8080}
+      # When running with --profile local-ai, point the proxy at Ollama instead
+      # of Vertex AI. Remove or leave blank to use real Vertex AI.
+      OLLAMA_URL: http://ollama:11434
     volumes:
       - ./public/config.json:/usr/src/app/build/config.json
     command: ["node", "server/dist/index.js"]
+    restart: always
+
+  # ---------------------------------------------------------------------------
+  # Local AI — Ollama running llama3.2:3b.
+  #
+  # Running a local LLM via Ollama lets you exercise the full chat → proxy → MCP
+  # flow without hitting Vertex AI or incurring API costs.
+  #
+  # Ollama exposes an OpenAI-compatible API on port 11434. The DUOS proxy
+  # detects the OLLAMA_URL env var and routes requests through Ollama instead
+  # of the Vertex AI SDK when it is set.
+  #
+  # NOTE: Gemma models do not support tool/function calling in Ollama and will
+  # return a 400 error. Use a model with tool-calling support instead.
+  #
+  # First-time setup (after `docker compose --profile local-ai up -d`):
+  #   docker exec duos-ollama ollama pull llama3.2:3b
+  #
+  # llama3.2:3b requires ~2 GB RAM and starts quickly — good default for dev.
+  # For higher fidelity use llama3.1:8b (~5 GB) or mistral:7b (~4 GB).
+  # ---------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: duos-ollama
+    ports:
+      - 11434:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    profiles:
+      - local-ai
     restart: always
 
   proxy:
@@ -54,3 +90,6 @@ services:
       SERVER_NAME_INT: local.dsde-dev.broadinstitute.org
       ENABLE_TCELL: 'no'
     restart: always
+
+volumes:
+  ollama_data:
