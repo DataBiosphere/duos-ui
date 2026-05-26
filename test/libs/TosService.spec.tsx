@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import { TosService } from 'src/libs/TosService'
-import { ToS } from 'src/libs/ajax/ToS'
+import { ToS, ToSStatus } from 'src/libs/ajax/ToS'
 import { UserStatusInfo } from 'src/types/model'
-import { ToSStatus } from 'src/libs/ajax/ToS'
 
 vi.mock('src/libs/ajax/ToS', () => ({
   ToS: {
