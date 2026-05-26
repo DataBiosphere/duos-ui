@@ -3,7 +3,7 @@ import DOMPurify from 'dompurify'
 import React, { CSSProperties } from 'react'
 import { ToS, ToSStatus } from './ajax/ToS'
 import { UserStatusInfo } from 'src/types/model'
-import homeHeaderBackground from '../images/home_header_background.png'
+import homeHeaderBackground from 'src/images/home_header_background.png'
 
 export const TosService = {
 
