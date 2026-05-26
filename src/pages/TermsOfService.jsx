@@ -1,9 +1,8 @@
-import React from 'react'
-import { useEffect, useState } from 'react'
-import { Auth } from '../libs/auth/auth'
-import { Storage } from '../libs/storage'
-import { TosService } from '../libs/tosService'
-import SimpleButton from '../components/SimpleButton'
+import React, { useEffect, useState } from 'react'
+import { Auth } from 'src/libs/auth/auth'
+import { Storage } from 'src/libs/storage'
+import { TosService } from 'src/libs/TosService'
+import SimpleButton from 'src/components/SimpleButton'
 import { useNavigate } from 'react-router-dom'
 
 export default function TermsOfService() {
