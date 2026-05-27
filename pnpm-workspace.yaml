@@ -1,3 +1,6 @@
 allowBuilds:
   cypress: false
   esbuild: false
+minimumReleaseAgeExclude:
+  - qs@6.15.2
+  - tmp@0.2.6
