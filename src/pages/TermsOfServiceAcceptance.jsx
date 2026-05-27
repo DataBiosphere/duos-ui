@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Auth } from 'src/libs/auth/auth'
-import { TosService } from 'src/libs/tosService'
+import { TosService } from 'src/libs/TosService'
 import SimpleButton from 'src/components/SimpleButton'
 import { Theme } from 'src/libs/theme'
 import { useNavigate } from 'react-router-dom'

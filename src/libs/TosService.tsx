@@ -1,12 +1,13 @@
 import ReactMarkdown from 'react-markdown'
 import DOMPurify from 'dompurify'
-import React from 'react'
-import { ToS } from './ajax/ToS'
-import homeHeaderBackground from '../images/home_header_background.png'
+import React, { CSSProperties } from 'react'
+import { ToS, ToSStatus } from './ajax/ToS'
+import { UserStatusInfo } from 'src/types/model'
+import homeHeaderBackground from 'src/images/home_header_background.png'
 
 export const TosService = {
 
-  getBackgroundStyle: () => {
+  getBackgroundStyle: (): CSSProperties => {
     return {
       marginTop: '-50px',
       paddingTop: '25px',
@@ -17,7 +18,7 @@ export const TosService = {
     }
   },
 
-  getContainerStyle: () => {
+  getContainerStyle: (): CSSProperties => {
     return {
       margin: '50px',
       maxWidth: '800px',
@@ -29,7 +30,7 @@ export const TosService = {
     }
   },
 
-  getScrollableStyle: () => {
+  getScrollableStyle: (): CSSProperties => {
     return {
       marginLeft: '25px',
       marginTop: '2rem',
@@ -40,7 +41,7 @@ export const TosService = {
     }
   },
 
-  getFormattedText: async () => {
+  getFormattedText: async (): Promise<React.ReactElement> => {
     const markdown = await ToS.getDUOSText()
     const text = markdown.replace('https://app.terra.bio/#', '/')
     return (
@@ -52,11 +53,11 @@ export const TosService = {
     )
   },
 
-  acceptTos: async () => {
+  acceptTos: async (): Promise<UserStatusInfo> => {
     return await ToS.acceptToS()
   },
 
-  rejectTos: async () => {
+  rejectTos: async (): Promise<ToSStatus> => {
     return await ToS.rejectToS()
   },
 
