@@ -2,20 +2,23 @@ import React, { useEffect, useState } from 'react'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Styles, Theme } from 'src/libs/theme'
 import { ReadMore } from 'src/components/ReadMore'
+import { DatasetExportButton } from 'src/components/data_search/DatasetExportButton'
 import { Button } from '@mui/material'
 import {
   DatasetStatisticsDar,
   DatasetTerm,
 } from 'src/types/model'
+import { SnapshotSummaryModel, EnumerateSnapshotModel } from 'src/types/tdrModel'
 import { extractError } from 'src/utils/ErrorUtils'
-import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { intersection } from 'src/utils/NodashUtil'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
@@ -46,6 +49,7 @@ export default function DatasetStatistics() {
   const [datasetTerm, setDatasetTerm] = useState<DatasetTerm>()
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>()
   const [isLoading, setIsLoading] = useState(true)
+  const [exportableSnapshots, setExportableSnapshots] = useState<SnapshotSummaryModel[]>([])
 
   const showError = (message: string) => {
     Notifications.showError({
@@ -129,6 +133,31 @@ export default function DatasetStatistics() {
     init()
   }, [datasetIdentifier])
 
+  useEffect(() => {
+    const fetchExportableSnapshots = async () => {
+      if (!datasetIdentifier) {
+        setExportableSnapshots([])
+        return
+      }
+      try {
+        const result: EnumerateSnapshotModel = await TerraDataRepo.listSnapshotsByDatasetIds([datasetIdentifier])
+        if (result.filteredTotal > 0) {
+          const exportable = result.items.filter(
+            (snapshot: SnapshotSummaryModel) => intersection(result.roleMap[snapshot.id] ?? [], ['steward', 'reader']).length > 0,
+          )
+          setExportableSnapshots(exportable)
+        }
+        else {
+          setExportableSnapshots([])
+        }
+      }
+      catch {
+        setExportableSnapshots([])
+      }
+    }
+    fetchExportableSnapshots()
+  }, [datasetIdentifier])
+
   const accessInstructions = () => {
     const accessManagement = datasetTerm?.accessManagement as AccessManagement
     const locationUrl = datasetTerm?.url
@@ -202,7 +231,22 @@ export default function DatasetStatistics() {
                 </LabeledField>
               )}
             <LabeledField label="Data Location">
-              {getDataLocationLink(datasetTerm.dataLocation, datasetTerm.url)}
+              <div style={{ display: 'inline-flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {validateHttpUrl(datasetTerm.url)
+                  ? (
+                      <a href={datasetTerm.url} target="_blank" rel="noopener noreferrer">
+                        {datasetTerm.dataLocation}
+                      </a>
+                    )
+                  : datasetTerm.dataLocation}
+                {exportableSnapshots.map((snapshot: SnapshotSummaryModel) => (
+                  <DatasetExportButton
+                    key={snapshot.id}
+                    snapshot={snapshot}
+                    title={`Export snapshot ${snapshot.name}`}
+                  />
+                ))}
+              </div>
             </LabeledField>
             <LabeledField label="Phenotype">
               {datasetTerm.study?.phenotype ?? 'N/A'}
@@ -246,7 +290,7 @@ export default function DatasetStatistics() {
                     </div>
                     <div style={{ ...Styles.MEDIUM, margin: '15px' }}>{dar.projectTitle}</div>
                   </div>,
-                  LINE,
+                  React.cloneElement(LINE, { key: 'line' }),
                 ]}
                 moreContent={[
                   <div key="updated" style={{ display: 'flex', backgroundColor: 'white' }}>
@@ -264,7 +308,7 @@ export default function DatasetStatistics() {
                       {dar.nonTechRus}
                     </div>
                   </div>,
-                  LINE,
+                  React.cloneElement(LINE, { key: 'line' }),
                 ]}
               />
             </div>

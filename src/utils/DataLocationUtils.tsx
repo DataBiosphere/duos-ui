@@ -20,6 +20,11 @@ export const getDataLocationLink = (dataLocation: string, dataUrl?: string): Rea
     case 'Not Determined':
       dataLocationLink = 'Not Determined'
       break
+    case 'AnVIL Workspace':
+      dataLocationLink = validDataUrl
+        ? <a href={validDataUrl} target="_blank" rel="noopener noreferrer">AnVIL Workspace</a>
+        : 'AnVIL Workspace'
+      break
     default:
       dataLocationLink = validDataUrl
         ? <a href={validDataUrl} target="_blank" rel="noopener noreferrer">External to DUOS</a>
