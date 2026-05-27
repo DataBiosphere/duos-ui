@@ -1,6 +1,6 @@
 import React from 'react'
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
@@ -35,8 +35,9 @@ const mockConfig = {
 }
 
 const originalFetch = globalThis.fetch
-globalThis.fetch = vi.fn((url: string) => {
-  if (url === '/config.json' || url.endsWith('/config.json')) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+globalThis.fetch = vi.fn((url: any) => {
+  if (url === '/config.json' || url.endsWith?.('/config.json')) {
     return Promise.resolve(
       new Response(JSON.stringify(mockConfig), {
         status: 200,
@@ -45,7 +46,7 @@ globalThis.fetch = vi.fn((url: string) => {
     )
   }
   return originalFetch(url)
-}) as any
+}) as typeof fetch
 
 const mockDatasetTerm = {
   datasetId: 1,
@@ -92,6 +93,7 @@ const buildTdrResponse = (
   total: items.length,
   items,
   roleMap,
+  errors: [],
 })
 
 const mockEmptyTdrResponse = buildTdrResponse([], {})
@@ -135,7 +137,7 @@ describe('DatasetStatistics', () => {
       vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockRejectedValue(tdrError)
     }
     else {
-      vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(tdrResponse)
+      vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(tdrResponse as unknown as Awaited<ReturnType<typeof TerraDataRepo.listSnapshotsByDatasetIds>>)
     }
 
     return render(
