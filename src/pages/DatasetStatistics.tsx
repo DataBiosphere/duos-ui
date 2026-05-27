@@ -14,7 +14,6 @@ import {
 } from 'src/types/model'
 import { SnapshotSummaryModel, EnumerateSnapshotModel } from 'src/types/tdrModel'
 import { extractError } from 'src/utils/ErrorUtils'
-import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
@@ -231,25 +230,24 @@ export default function DatasetStatistics() {
                   })}
                 </LabeledField>
               )}
-            {exportableSnapshots.length > 0
-              ? (
-                  <LabeledField label="Data Location">
-                    <div style={{ display: 'inline-flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                      {exportableSnapshots.map((snapshot: SnapshotSummaryModel) => (
-                        <DatasetExportButton
-                          key={snapshot.id}
-                          snapshot={snapshot}
-                          title={`Export snapshot ${snapshot.name}`}
-                        />
-                      ))}
-                    </div>
-                  </LabeledField>
-                )
-              : (
-                  <LabeledField label="Data Location">
-                    {getDataLocationLink(datasetTerm.dataLocation, datasetTerm.url)}
-                  </LabeledField>
-                )}
+            <LabeledField label="Data Location">
+              <div style={{ display: 'inline-flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {validateHttpUrl(datasetTerm.url)
+                  ? (
+                      <a href={datasetTerm.url} target="_blank" rel="noopener noreferrer">
+                        {datasetTerm.dataLocation}
+                      </a>
+                    )
+                  : datasetTerm.dataLocation}
+                {exportableSnapshots.map((snapshot: SnapshotSummaryModel) => (
+                  <DatasetExportButton
+                    key={snapshot.id}
+                    snapshot={snapshot}
+                    title={`Export snapshot ${snapshot.name}`}
+                  />
+                ))}
+              </div>
+            </LabeledField>
             <LabeledField label="Phenotype">
               {datasetTerm.study?.phenotype ?? 'N/A'}
             </LabeledField>

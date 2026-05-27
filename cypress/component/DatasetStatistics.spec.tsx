@@ -133,6 +133,7 @@ describe('DatasetStatistics', () => {
     mountDatasetStatistics()
 
     cy.contains('Data Location').should('be.visible')
+    cy.contains('TDR Location').should('be.visible')
     cy.contains('Export').should('not.exist')
   })
 
@@ -140,6 +141,7 @@ describe('DatasetStatistics', () => {
     mountDatasetStatistics({ tdrResponse: mockTdrResponseWithSnapshot })
 
     cy.contains('Data Location').should('be.visible')
+    cy.contains('TDR Location').should('be.visible')
     cy.contains('Export').should('be.visible')
     cy.contains('Export').should('have.attr', 'href').and('include', 'snapshot-abc')
   })
@@ -147,6 +149,7 @@ describe('DatasetStatistics', () => {
   it('shows export button when TDR returns a snapshot with steward role', () => {
     mountDatasetStatistics({ tdrResponse: mockTdrResponseWithStewardSnapshot })
 
+    cy.contains('TDR Location').should('be.visible')
     cy.contains('Export').should('be.visible')
     cy.contains('Export').should('have.attr', 'href').and('include', 'snapshot-xyz')
   })
@@ -156,11 +159,13 @@ describe('DatasetStatistics', () => {
 
     cy.contains('Export').should('not.exist')
     cy.contains('Data Location').should('be.visible')
+    cy.contains('TDR Location').should('be.visible')
   })
 
   it('shows multiple export buttons for multiple snapshots', () => {
     mountDatasetStatistics({ tdrResponse: mockTdrResponseWithMultipleSnapshots })
 
+    cy.contains('TDR Location').should('be.visible')
     cy.contains('Export').should('exist')
     cy.get('a[title*="Export snapshot"]').should('have.length', 2)
   })
@@ -170,6 +175,7 @@ describe('DatasetStatistics', () => {
 
     cy.contains('Export').should('not.exist')
     cy.contains('Data Location').should('be.visible')
+    cy.contains('TDR Location').should('be.visible')
   })
 
   it('displays data access requests for the dataset', () => {
