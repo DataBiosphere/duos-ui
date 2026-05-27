@@ -290,7 +290,7 @@ export default function DatasetStatistics() {
                     </div>
                     <div style={{ ...Styles.MEDIUM, margin: '15px' }}>{dar.projectTitle}</div>
                   </div>,
-                  LINE,
+                  React.cloneElement(LINE, { key: 'line' }),
                 ]}
                 moreContent={[
                   <div key="updated" style={{ display: 'flex', backgroundColor: 'white' }}>
@@ -308,7 +308,7 @@ export default function DatasetStatistics() {
                       {dar.nonTechRus}
                     </div>
                   </div>,
-                  LINE,
+                  React.cloneElement(LINE, { key: 'line' }),
                 ]}
               />
             </div>
