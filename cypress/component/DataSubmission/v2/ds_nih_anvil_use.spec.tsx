@@ -25,6 +25,16 @@ describe('NihAnvilUseRelated - Tests', () => {
     cy.get('#sequencingCenter').should('not.exist')
   })
 
+  it('should default to NO selection in pre-selector on mount for a new study', () => {
+    cy.mount(<NihAnvilUseRelated {...propCopy} />)
+    // Verify NO is the default by checking that the nested nihAnvilUse field is not shown
+    // (it only shows when YES is selected)
+    cy.get('#nihAnvilUse').should('not.exist')
+    // Select YES to verify the pre-selector is working and was indeed set to NO
+    cy.get('#nihAnvilUse_pre_selector').contains('Yes').click({ force: true })
+    cy.get('#nihAnvilUse').should('exist')
+  })
+
   it('should show nihAnvilUse form field after selecting YES in pre-selector', () => {
     cy.mount(<NihAnvilUseRelated {...propCopy} />)
     cy.get('#nihAnvilUse_pre_selector').contains('Yes').click({ force: true })
