@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
@@ -208,18 +208,16 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText('TDR Location')).toBeTruthy()
   })
 
-  it('shows multiple export buttons for multiple snapshots', async () => {
+  it('shows a dropdown menu with an item per snapshot when multiple snapshots are available', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithMultipleSnapshots })
 
     expect(await screen.findByText('TDR Location')).toBeTruthy()
-    const exportLinks = await screen.findAllByText('Export')
-    expect(exportLinks.length).toBeGreaterThan(0)
 
-    const exportAnchors = screen.queryAllByRole('link').filter((link) => {
-      const title = link.getAttribute('title')
-      return title?.includes('Export snapshot')
-    })
-    expect(exportAnchors.length).toBe(2)
+    const exportButton = await screen.findByRole('button', { name: /export/i })
+    fireEvent.click(exportButton)
+
+    expect(await screen.findByText('Snapshot ABC')).toBeTruthy()
+    expect(await screen.findByText('Snapshot XYZ')).toBeTruthy()
   })
 
   it('handles TDR API errors gracefully and shows Data Location', async () => {
