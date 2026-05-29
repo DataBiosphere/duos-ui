@@ -46,7 +46,7 @@ export interface NihAnvilUseVisibleOptions {
 
 export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   const [{ setStudy, study }] = [props]
-  const [preSelectorValue, setPreSelectorValue] = React.useState<string | undefined>(undefined)
+  const [preSelectorValue, setPreSelectorValue] = React.useState<string | undefined>(NihAnvilUsePreSelectOptions.NO)
 
   const cleanDownstreamProperties = (newVal: Study) => {
     removeStudyPropertiesByKeys(newVal,
