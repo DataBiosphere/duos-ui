@@ -54,7 +54,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     return NihAnvilUsePreSelectOptions.NO
   })
   const didApplyDefaultNoRef = React.useRef(false)
-  const lastStudyNihAnvilUseValueRef = React.useRef<string | undefined>(
+  const lastStudyNihAnvilUseValueRef = React.useRef(
     getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined,
   )
 
