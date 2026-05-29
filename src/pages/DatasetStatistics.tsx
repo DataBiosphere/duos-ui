@@ -239,13 +239,7 @@ export default function DatasetStatistics() {
                       </a>
                     )
                   : datasetTerm.dataLocation}
-                {exportableSnapshots.map((snapshot: SnapshotSummaryModel) => (
-                  <DatasetExportButton
-                    key={snapshot.id}
-                    snapshot={snapshot}
-                    title={`Export snapshot ${snapshot.name}`}
-                  />
-                ))}
+                <DatasetExportButton snapshots={exportableSnapshots} />
               </div>
             </LabeledField>
             <LabeledField label="Phenotype">

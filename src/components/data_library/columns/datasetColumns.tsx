@@ -132,13 +132,7 @@ export const makeDatasetColumns = (
       if (exportableSnapshots.length === 0) return null
       return (
         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-          {exportableSnapshots.map((snapshot, i) => (
-            <DatasetExportButton
-              key={i}
-              snapshot={snapshot}
-              title={`Export snapshot ${snapshot.name}`}
-            />
-          ))}
+          <DatasetExportButton snapshots={exportableSnapshots} />
         </Box>
       )
     },
