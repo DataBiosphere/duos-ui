@@ -53,6 +53,10 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     }
     return NihAnvilUsePreSelectOptions.NO
   })
+  const didApplyDefaultNoRef = React.useRef(false)
+  const lastStudyNihAnvilUseValueRef = React.useRef<string | undefined>(
+    getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined,
+  )
 
   const cleanDownstreamProperties = (newVal: Study) => {
     removeStudyPropertiesByKeys(newVal,
@@ -104,24 +108,29 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
 
   React.useEffect(() => {
     const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
-    if (!nihAnvilUseStudyValue && preSelectorValue === NihAnvilUsePreSelectOptions.NO) {
+    if (!nihAnvilUseStudyValue) {
+      if (!didApplyDefaultNoRef.current && preSelectorValue === NihAnvilUsePreSelectOptions.NO) {
+        didApplyDefaultNoRef.current = true
+        handlePreSelectorChange(NihAnvilUsePreSelectOptions.NO)
+      }
+      lastStudyNihAnvilUseValueRef.current = nihAnvilUseStudyValue
+      return
+    }
+
+    didApplyDefaultNoRef.current = true
+    if (lastStudyNihAnvilUseValueRef.current === nihAnvilUseStudyValue) {
+      return
+    }
+    lastStudyNihAnvilUseValueRef.current = nihAnvilUseStudyValue
+
+    const derivedPreSelectorValue = nihAnvilUseStudyValue === NihAnvilUse.NO_NHGRI_NO_ANVIL
+      ? NihAnvilUsePreSelectOptions.NO
+      : NihAnvilUsePreSelectOptions.YES
+    if (preSelectorValue !== derivedPreSelectorValue) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      handlePreSelectorChange(NihAnvilUsePreSelectOptions.NO)
+      setPreSelectorValue(derivedPreSelectorValue)
     }
   }, [handlePreSelectorChange, preSelectorValue, study])
-
-  React.useEffect(() => {
-    const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
-    if (nihAnvilUseStudyValue) {
-      if (nihAnvilUseStudyValue === NihAnvilUse.NO_NHGRI_NO_ANVIL) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPreSelectorValue(NihAnvilUsePreSelectOptions.NO)
-      }
-      else {
-        setPreSelectorValue(NihAnvilUsePreSelectOptions.YES)
-      }
-    }
-  }, [study, setPreSelectorValue])
 
   return (
     <div className="data-submitter-section">
