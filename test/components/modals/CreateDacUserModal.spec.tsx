@@ -20,7 +20,7 @@ vi.mock('src/libs/ajax/User', () => ({
 const mockCreatedUser: DuosUser = {
   userId: 42,
   displayName: 'New User',
-  email: 'newuser@broad.org',
+  email: 'newuser@example.org',
   emailPreference: true,
   isAdmin: false,
   isAlumni: false,
@@ -36,7 +36,7 @@ const mockCreatedUser: DuosUser = {
 const defaultProps = {
   showModal: true,
   targetRole: 'chair' as const,
-  allowedDomains: ['broad.org'],
+  allowedDomains: ['example.org'],
   onUserCreated: vi.fn(),
   onCloseRequest: vi.fn(),
 }
@@ -69,8 +69,8 @@ describe('CreateDacUserModal', () => {
   })
 
   it('uses the first allowed domain in the email placeholder', () => {
-    render(<CreateDacUserModal {...defaultProps} allowedDomains={['broad.org', 'other.org']} />)
-    expect(screen.getByPlaceholderText('e.g. username@broad.org')).toBeTruthy()
+    render(<CreateDacUserModal {...defaultProps} allowedDomains={['example.org', 'other.org']} />)
+    expect(screen.getByPlaceholderText('e.g. username@example.org')).toBeTruthy()
   })
 
   it('falls back to generic placeholder when allowedDomains is null', () => {
@@ -110,7 +110,7 @@ describe('CreateDacUserModal', () => {
     render(<CreateDacUserModal {...defaultProps} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'Test User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'notanemail')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'notanemail')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
     expect(screen.getByText('Please enter a valid email address (e.g., person@example.com)')).toBeTruthy()
@@ -119,39 +119,39 @@ describe('CreateDacUserModal', () => {
 
   it('shows domain error when email domain does not match allowedDomains', async () => {
     const user = userEvent.setup()
-    render(<CreateDacUserModal {...defaultProps} allowedDomains={['broad.org']} />)
+    render(<CreateDacUserModal {...defaultProps} allowedDomains={['example.org']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'Test User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'user@other.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'user@other.example')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
     expect(screen.getByText('Invalid email domain')).toBeTruthy()
-    expect(screen.getByText(/broad\.org/)).toBeTruthy()
+    expect(screen.getByText(/example\.org/)).toBeTruthy()
     expect(User.create).not.toHaveBeenCalled()
   })
 
   it('domain error message lists all allowed domains', async () => {
     const user = userEvent.setup()
-    render(<CreateDacUserModal {...defaultProps} allowedDomains={['broad.org', 'mit.edu']} />)
+    render(<CreateDacUserModal {...defaultProps} allowedDomains={['example.org', 'example.edu']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'Test User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'user@other.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'user@other.example')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
-    expect(screen.getByText(/broad\.org.*mit\.edu|mit\.edu.*broad\.org/)).toBeTruthy()
+    expect(screen.getByText(/example\.org.*example\.edu|example\.edu.*example\.org/)).toBeTruthy()
   })
 
   it('clears domain error when email field is changed', async () => {
     const user = userEvent.setup()
-    render(<CreateDacUserModal {...defaultProps} allowedDomains={['broad.org']} />)
+    render(<CreateDacUserModal {...defaultProps} allowedDomains={['example.org']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'Test User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'user@other.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'user@other.example')
     await user.click(screen.getByRole('button', { name: /create/i }))
     expect(screen.getByText('Invalid email domain')).toBeTruthy()
 
-    await user.clear(screen.getByPlaceholderText('e.g. username@broad.org'))
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'n')
+    await user.clear(screen.getByPlaceholderText('e.g. username@example.org'))
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'n')
     expect(screen.queryByText('Invalid email domain')).toBeNull()
   })
 
@@ -163,7 +163,7 @@ describe('CreateDacUserModal', () => {
     render(<CreateDacUserModal {...defaultProps} allowedDomains={null} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'Test User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broadinstitute.org'), 'test@anyDomain.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@broadinstitute.org'), 'test@anydomain.example')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
     await waitFor(() => expect(User.create).toHaveBeenCalledOnce())
@@ -175,16 +175,16 @@ describe('CreateDacUserModal', () => {
   it('calls User.create with the correct payload', async () => {
     const user = userEvent.setup()
     vi.mocked(User.create).mockResolvedValue(mockCreatedUser)
-    render(<CreateDacUserModal {...defaultProps} allowedDomains={['broad.org']} />)
+    render(<CreateDacUserModal {...defaultProps} allowedDomains={['example.org']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'New User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'newuser@broad.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'newuser@example.org')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
     await waitFor(() => {
       expect(User.create).toHaveBeenCalledWith({
         displayName: 'New User',
-        email: 'newuser@broad.org',
+        email: 'newuser@example.org',
         emailPreference: true,
         roles: [{ roleId: 5, name: 'Researcher' }],
       })
@@ -195,10 +195,10 @@ describe('CreateDacUserModal', () => {
     const user = userEvent.setup()
     const onUserCreated = vi.fn()
     vi.mocked(User.create).mockResolvedValue(mockCreatedUser)
-    render(<CreateDacUserModal {...defaultProps} targetRole="chair" onUserCreated={onUserCreated} allowedDomains={['broad.org']} />)
+    render(<CreateDacUserModal {...defaultProps} targetRole="chair" onUserCreated={onUserCreated} allowedDomains={['example.org']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'New User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'newuser@broad.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'newuser@example.org')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
     await waitFor(() => expect(onUserCreated).toHaveBeenCalledWith(mockCreatedUser, 'chair'))
@@ -208,10 +208,10 @@ describe('CreateDacUserModal', () => {
     const user = userEvent.setup()
     const onUserCreated = vi.fn()
     vi.mocked(User.create).mockResolvedValue(mockCreatedUser)
-    render(<CreateDacUserModal {...defaultProps} targetRole="member" onUserCreated={onUserCreated} allowedDomains={['broad.org']} />)
+    render(<CreateDacUserModal {...defaultProps} targetRole="member" onUserCreated={onUserCreated} allowedDomains={['example.org']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'New User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'newuser@broad.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'newuser@example.org')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
     await waitFor(() => expect(onUserCreated).toHaveBeenCalledWith(mockCreatedUser, 'member'))
@@ -221,30 +221,30 @@ describe('CreateDacUserModal', () => {
 
   it('shows a server error alert when User.create throws', async () => {
     const user = userEvent.setup()
-    vi.mocked(User.create).mockRejectedValue(new Error('User exists with this email address: newuser@broad.org'))
-    render(<CreateDacUserModal {...defaultProps} allowedDomains={['broad.org']} />)
+    vi.mocked(User.create).mockRejectedValue(new Error('User exists with this email address: newuser@example.org'))
+    render(<CreateDacUserModal {...defaultProps} allowedDomains={['example.org']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'New User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'newuser@broad.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'newuser@example.org')
     await user.click(screen.getByRole('button', { name: /create/i }))
 
     await waitFor(() => expect(screen.getByText('Error creating user')).toBeTruthy())
-    expect(screen.getByText('User exists with this email address: newuser@broad.org')).toBeTruthy()
+    expect(screen.getByText('User exists with this email address: newuser@example.org')).toBeTruthy()
     expect(defaultProps.onUserCreated).not.toHaveBeenCalled()
   })
 
   it('clears the server error when email is changed after a failure', async () => {
     const user = userEvent.setup()
-    vi.mocked(User.create).mockRejectedValue(new Error('User exists with this email address: newuser@broad.org'))
-    render(<CreateDacUserModal {...defaultProps} allowedDomains={['broad.org']} />)
+    vi.mocked(User.create).mockRejectedValue(new Error('User exists with this email address: newuser@example.org'))
+    render(<CreateDacUserModal {...defaultProps} allowedDomains={['example.org']} />)
 
     await user.type(screen.getByPlaceholderText('User name'), 'New User')
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'newuser@broad.org')
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'newuser@example.org')
     await user.click(screen.getByRole('button', { name: /create/i }))
     await waitFor(() => expect(screen.getByText('Error creating user')).toBeTruthy())
 
-    await user.clear(screen.getByPlaceholderText('e.g. username@broad.org'))
-    await user.type(screen.getByPlaceholderText('e.g. username@broad.org'), 'o')
+    await user.clear(screen.getByPlaceholderText('e.g. username@example.org'))
+    await user.type(screen.getByPlaceholderText('e.g. username@example.org'), 'o')
     expect(screen.queryByText('Error creating user')).toBeNull()
   })
 })
