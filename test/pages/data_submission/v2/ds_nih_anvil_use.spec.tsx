@@ -21,6 +21,14 @@ const buildProps = (properties: StudyProperty[] = []): NihAnvilUseRelatedProps =
   study: { properties } as Study,
 })
 
+const getNextStudyFromSetStudyCall = (setStudyMock: ReturnType<typeof vi.fn>, baseStudy: Study): Study => {
+  const firstCallArg = setStudyMock.mock.calls[0]?.[0]
+  if (typeof firstCallArg === 'function') {
+    return firstCallArg(baseStudy)
+  }
+  return firstCallArg
+}
+
 const renderComponent = (nihAnvilUseValue?: string) => {
   const properties = nihAnvilUseValue ? [new NihAnvilUse(nihAnvilUseValue)] : []
   render(<NihAnvilUseRelated {...buildProps(properties)} />)
@@ -40,6 +48,18 @@ describe('NihAnvilUseRelated', () => {
 
     clickPreSelector(NihAnvilUsePreSelectOptions.YES)
     expect(queryById(NIH_ANVIL_FIELD_ID)).not.toBeNull()
+  })
+
+  it('applies NO initialization logic on mount for a new study', () => {
+    const setStudyMock = vi.fn()
+    const baseStudy = buildProps([]).study
+
+    render(<NihAnvilUseRelated study={baseStudy} setStudy={setStudyMock} />)
+
+    expect(setStudyMock).toHaveBeenCalled()
+    const nextStudy = getNextStudyFromSetStudyCall(setStudyMock, baseStudy)
+    const nihAnvilUseProperty = nextStudy.properties?.find(prop => prop.key === NihAnvilUse.key)
+    expect(nihAnvilUseProperty?.value).toBe(NihAnvilUse.NO_NHGRI_NO_ANVIL)
   })
 
   it('shows nihAnvilUse field after selecting YES in pre-selector', () => {
