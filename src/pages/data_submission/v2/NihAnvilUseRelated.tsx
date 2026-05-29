@@ -45,7 +45,7 @@ export interface NihAnvilUseVisibleOptions {
 }
 
 export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
-  const [{ setStudy, study }] = [props]
+  const { setStudy, study } = props
   const [preSelectorValue, setPreSelectorValue] = React.useState<string | undefined>(() => {
     const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
     if (nihAnvilUseStudyValue && nihAnvilUseStudyValue !== NihAnvilUse.NO_NHGRI_NO_ANVIL) {
@@ -158,9 +158,11 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
           defaultValue={getStudyPropertyValueByKey(study, 'nihAnvilUse')}
           validators={[FormValidators.REQUIRED]}
           onChange={(input: { key: string, value: string | undefined, isValid: boolean }) => {
-            const newVal = structuredClone(study)
-            cleanDownstreamProperties(newVal)
-            setStudyPropertyByKey(newVal, setStudy, input, new NihAnvilUse(input.value as string))
+            if (input.value) {
+              const newVal = structuredClone(study)
+              cleanDownstreamProperties(newVal)
+              setStudyPropertyByKey(newVal, setStudy, input, new NihAnvilUse(input.value))
+            }
           }}
         />
       )}
