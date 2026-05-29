@@ -9,6 +9,7 @@ import { Alert } from 'src/components/Alert'
 import { Spinner } from 'src/components/Spinner'
 import { User } from 'src/libs/ajax/User'
 import type { DuosUser, UserRole } from 'src/types/model'
+import { extractError } from 'src/utils/ErrorUtils'
 
 const researcherRole = { roleId: 5, name: 'Researcher' as const } as UserRole
 
@@ -39,7 +40,7 @@ export const CreateDacUserModal: React.FC<CreateDacUserModalProps> = (props) => 
   const [validation, setValidation] = useState<Validation>({})
   const [hasValidated, setHasValidated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [duplicateEmail, setDuplicateEmail] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
   const [domainError, setDomainError] = useState(false)
 
   const isEmailDomainAllowed = (emailValue: string): boolean => {
@@ -70,7 +71,7 @@ export const CreateDacUserModal: React.FC<CreateDacUserModalProps> = (props) => 
     if (key === 'name') setName(value)
     if (key === 'email') {
       setEmail(value)
-      setDuplicateEmail(false)
+      setServerError(null)
       setDomainError(false)
     }
     if (hasValidated) {
@@ -80,7 +81,7 @@ export const CreateDacUserModal: React.FC<CreateDacUserModalProps> = (props) => 
 
   const submitHandler = async (): Promise<void> => {
     setHasValidated(true)
-    setDuplicateEmail(false)
+    setServerError(null)
     setDomainError(false)
 
     const errors = calcErrors(name, email)
@@ -102,11 +103,14 @@ export const CreateDacUserModal: React.FC<CreateDacUserModalProps> = (props) => 
       })
 
       if (!createdUser) {
-        setDuplicateEmail(true)
+        setServerError('User could not be created. Please try again.')
         return
       }
 
       onUserCreated(createdUser, targetRole)
+    }
+    catch (error) {
+      setServerError(extractError(error))
     }
     finally {
       setIsLoading(false)
@@ -127,7 +131,7 @@ export const CreateDacUserModal: React.FC<CreateDacUserModalProps> = (props) => 
       onRequestClose={onCloseRequest}
       shouldCloseOnOverlayClick={true}
       style={{
-        content: { ...Styles.MODAL.CONTENT, maxHeight: '550px' },
+        content: { ...Styles.MODAL.CONTENT, maxHeight: '600px' },
         overlay: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
       }}
     >
@@ -188,12 +192,12 @@ export const CreateDacUserModal: React.FC<CreateDacUserModalProps> = (props) => 
             description={`Email must belong to one of your institution's domains: ${(allowedDomains ?? []).join(', ') || 'none configured'}`}
           />
         )}
-        {duplicateEmail && (
+        {serverError !== null && (
           <Alert
-            id="duplicateEmail"
+            id="serverError"
             type="danger"
-            title="Conflicts to resolve!"
-            description="There is a user already registered with this email account."
+            title="Error creating user"
+            description={serverError}
           />
         )}
       </div>
