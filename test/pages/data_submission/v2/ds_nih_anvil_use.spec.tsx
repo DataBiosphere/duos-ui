@@ -58,7 +58,7 @@ describe('NihAnvilUseRelated', () => {
 
     expect(setStudy).toHaveBeenCalled()
     const nextStudy = getNextStudyFromSetStudyCall(setStudy, baseStudy)
-    const nihAnvilUseProperty = nextStudy.properties?.find((prop) => prop.key === NihAnvilUse.key)
+    const nihAnvilUseProperty = nextStudy.properties?.find(prop => prop.key === NihAnvilUse.key)
     expect(nihAnvilUseProperty?.value).toBe(NihAnvilUse.NO_NHGRI_NO_ANVIL)
   })
 
