@@ -51,13 +51,13 @@ describe('NihAnvilUseRelated', () => {
   })
 
   it('applies NO initialization logic on mount for a new study', () => {
-    const setStudy = vi.fn()
-    const baseStudy = { properties: [] } as Study
+    const setStudyMock = vi.fn()
+    const baseStudy = buildProps([]).study
 
-    render(<NihAnvilUseRelated study={baseStudy} setStudy={setStudy} />)
+    render(<NihAnvilUseRelated study={baseStudy} setStudy={setStudyMock} />)
 
-    expect(setStudy).toHaveBeenCalled()
-    const nextStudy = getNextStudyFromSetStudyCall(setStudy, baseStudy)
+    expect(setStudyMock).toHaveBeenCalled()
+    const nextStudy = getNextStudyFromSetStudyCall(setStudyMock, baseStudy)
     const nihAnvilUseProperty = nextStudy.properties?.find(prop => prop.key === NihAnvilUse.key)
     expect(nihAnvilUseProperty?.value).toBe(NihAnvilUse.NO_NHGRI_NO_ANVIL)
   })
