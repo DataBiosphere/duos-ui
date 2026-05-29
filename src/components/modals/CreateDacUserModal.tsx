@@ -193,7 +193,7 @@ export const CreateDacUserModal: React.FC<CreateDacUserModalProps> = (props) => 
             id="duplicateEmail"
             type="danger"
             title="Conflicts to resolve!"
-            description="There is a user already registered with this Google account."
+            description="There is a user already registered with this email account."
           />
         )}
       </div>
