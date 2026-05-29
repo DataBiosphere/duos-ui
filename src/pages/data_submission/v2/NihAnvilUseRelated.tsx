@@ -46,7 +46,13 @@ export interface NihAnvilUseVisibleOptions {
 
 export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   const [{ setStudy, study }] = [props]
-  const [preSelectorValue, setPreSelectorValue] = React.useState<string | undefined>(NihAnvilUsePreSelectOptions.NO)
+  const [preSelectorValue, setPreSelectorValue] = React.useState<string | undefined>(() => {
+    const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
+    if (nihAnvilUseStudyValue && nihAnvilUseStudyValue !== NihAnvilUse.NO_NHGRI_NO_ANVIL) {
+      return NihAnvilUsePreSelectOptions.YES
+    }
+    return NihAnvilUsePreSelectOptions.NO
+  })
 
   const cleanDownstreamProperties = (newVal: Study) => {
     removeStudyPropertiesByKeys(newVal,
@@ -95,6 +101,14 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     },
     [setStudy, study],
   )
+
+  React.useEffect(() => {
+    const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
+    if (!nihAnvilUseStudyValue && preSelectorValue === NihAnvilUsePreSelectOptions.NO) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      handlePreSelectorChange(NihAnvilUsePreSelectOptions.NO)
+    }
+  }, [handlePreSelectorChange, preSelectorValue, study])
 
   React.useEffect(() => {
     const nihAnvilUseStudyValue = getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined
