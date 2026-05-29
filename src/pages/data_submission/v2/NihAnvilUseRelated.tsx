@@ -55,7 +55,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   })
   const didApplyDefaultNoRef = React.useRef(false)
   const lastStudyNihAnvilUseValueRef = React.useRef(
-    getStudyPropertyValueByKey(study, 'nihAnvilUse') as string | undefined,
+    getStudyPropertyValueByKey(study, 'nihAnvilUse'),
   )
 
   const cleanDownstreamProperties = (newVal: Study) => {
