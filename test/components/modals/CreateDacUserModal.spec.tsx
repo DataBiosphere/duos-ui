@@ -97,9 +97,12 @@ describe('CreateDacUserModal', () => {
   it('calls onCloseRequest when the close icon is clicked', async () => {
     const user = userEvent.setup()
     const onCloseRequest = vi.fn()
-    render(<CreateDacUserModal {...defaultProps} onCloseRequest={onCloseRequest} />)
-
-    await user.click(document.querySelector('.modal-close-btn')!)
+    const { container } = render(
+      <CreateDacUserModal {...defaultProps} onCloseRequest={onCloseRequest} />,
+    )
+    const closeBtn = container.querySelector('.modal-close-btn')
+    if (!closeBtn) throw new Error('Expected .modal-close-btn to be present')
+    await user.click(closeBtn)
     expect(onCloseRequest).toHaveBeenCalledOnce()
   })
 
