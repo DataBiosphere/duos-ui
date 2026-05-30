@@ -652,10 +652,6 @@ describe('EditDAC Tests', () => {
 })
 
 describe('EditDAC Tests - No DAAs Configured', () => {
-  beforeEach(() => {
-    cy.initApplicationConfig()
-  })
-
   it('should display tabs when no DAAs are configured', () => {
     cy.stub(Storage, 'getCurrentUser').returns(adminUser)
     cy.stub(DAC, 'get').resolves(existingDac)
