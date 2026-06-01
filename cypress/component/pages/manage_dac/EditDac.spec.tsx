@@ -1,6 +1,7 @@
 import React from 'react'
 import { DAA } from 'src/libs/ajax/DAA'
 import { DAC } from 'src/libs/ajax/DAC'
+import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -75,6 +76,16 @@ const fillNewDacForm = (name: string = 'New DAC Name', description: string = 'Ne
   cy.get('[data-cy="dac_email"]').type(email)
 }
 
+const createUserFromModal = (buttonDataCy: 'btn_create_chair' | 'btn_create_member', name: string, email: string): void => {
+  cy.get(`[data-cy="${buttonDataCy}"]`).click()
+  cy.contains('Create New User').should('be.visible')
+  cy.get('#name').type(name)
+  cy.get('#email').type(email)
+  cy.get('.ReactModalPortal').contains('button', 'Create').should('not.be.disabled')
+  cy.get('.ReactModalPortal').contains('button', 'Create').click()
+  cy.contains('Create New User').should('not.exist')
+}
+
 const uploadDaaFile = (
   fileName: string,
   fileContent: string = 'mock daa file',
@@ -97,7 +108,8 @@ const uploadDaaFile = (
     },
   )
 
-  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).should('not.be.disabled').click()
+  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).should('not.be.disabled')
+  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).click()
 }
 
 const uploadDaaFiles = (files: Array<{ fileName: string, fileContent?: string }>): void => {
@@ -118,7 +130,8 @@ const uploadDaaFiles = (files: Array<{ fileName: string, fileContent?: string }>
     },
   )
 
-  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).should('not.be.disabled').click()
+  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).should('not.be.disabled')
+  cy.get('.ReactModalPortal #btn_save', { timeout: 10000 }).click()
 }
 
 const setupCreateFlow = (user: DuosUser): void => {
@@ -197,6 +210,77 @@ describe('EditDAC Tests', () => {
 
     // No DAA should be pre-selected
     cy.get('[data-cy="daa_option_1"]').should('not.be.checked')
+  })
+
+  it('Handles onUserCreated for a new chair by selecting the user and adding them during new DAC save', () => {
+    const createdChair = {
+      userId: 7001,
+      displayName: 'New Chair User',
+      email: 'new-chair@broadinstitute.org',
+    } as DuosUser
+
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAA, 'getDaas').resolves(broadDaaList)
+    cy.stub(DAC, 'removeDacMember').resolves(200)
+    const addDacChairStub = cy.stub(DAC, 'addDacChair').resolves(200)
+    cy.stub(DAC, 'removeDacChair').resolves(200)
+    const addDacMemberStub = cy.stub(DAC, 'addDacMember').resolves(200)
+    const createStub = cy.stub(DAC, 'create').resolves({ ...existingDac, dacId: 99 })
+    cy.stub(DAA, 'addDaaToDac').resolves(200)
+    const createUserStub = cy.stub(User, 'create').resolves(createdChair)
+
+    cy.mount(<BrowserRouter><EditDac /></BrowserRouter>)
+
+    createUserFromModal('btn_create_chair', createdChair.displayName, createdChair.email)
+
+    cy.wrap(createUserStub).should('have.been.calledWithMatch', {
+      displayName: createdChair.displayName,
+      email: createdChair.email,
+      emailPreference: true,
+    })
+    cy.contains(`${createdChair.displayName} (${createdChair.email})`).should('be.visible')
+
+    fillNewDacForm()
+    cy.get('[data-cy="daa_option_1"]').check()
+    cy.get('[data-cy="btn_save"]').click()
+
+    cy.wrap(createStub).should('have.been.calledOnce')
+    cy.wrap(addDacChairStub).should('have.been.calledWith', 99, createdChair.userId)
+    cy.wrap(addDacMemberStub).should('not.have.been.calledWith', 99, createdChair.userId)
+  })
+
+  it('Handles onUserCreated for a new member by selecting the user and adding them during existing DAC save', () => {
+    const createdMember = {
+      userId: 7002,
+      displayName: 'New Member User',
+      email: 'new-member@broadinstitute.org',
+    } as DuosUser
+
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'get').resolves(existingDac)
+    cy.stub(DAA, 'getDaas').resolves(buildExistingDaas())
+    cy.stub(DAC, 'removeDacMember').resolves(200)
+    cy.stub(DAC, 'addDacChair').resolves(200)
+    cy.stub(DAC, 'removeDacChair').resolves(200)
+    const addDacMemberStub = cy.stub(DAC, 'addDacMember').resolves(200)
+    const updateStub = cy.stub(DAC, 'update').resolves(existingDac)
+    const createUserStub = cy.stub(User, 'create').resolves(createdMember)
+
+    mountExistingEditDac(existingDac.dacId as number)
+
+    createUserFromModal('btn_create_member', createdMember.displayName, createdMember.email)
+
+    cy.wrap(createUserStub).should('have.been.calledWithMatch', {
+      displayName: createdMember.displayName,
+      email: createdMember.email,
+      emailPreference: true,
+    })
+    cy.contains(`${createdMember.displayName} (${createdMember.email})`).should('be.visible')
+
+    cy.get('[data-cy="btn_save"]').click()
+
+    cy.wrap(updateStub).should('have.been.calledOnce')
+    cy.wrap(addDacMemberStub).should('have.been.calledWith', existingDac.dacId, createdMember.userId)
   })
 
   it('Shows error when saving a new DAC without selecting a data access agreement', () => {
@@ -433,7 +517,8 @@ describe('EditDAC Tests', () => {
       const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
 
       cy.get('[data-cy="daa_tab_owned"]').click()
-      cy.get('[data-cy="daa_option_2"]').should('be.visible').check()
+      cy.get('[data-cy="daa_option_2"]').should('be.visible')
+      cy.get('[data-cy="daa_option_2"]').check()
       cy.get('[data-cy="btn_save"]').click()
 
       cy.wrap(updateStub).should('have.been.called')
@@ -458,7 +543,8 @@ describe('EditDAC Tests', () => {
       const addDaaToDacStub = cy.stub(DAA, 'addDaaToDac').resolves(200)
 
       cy.get('[data-cy="daa_tab_shared"]').click()
-      cy.get('[data-cy="daa_option_5"]').should('be.visible').check()
+      cy.get('[data-cy="daa_option_5"]').should('be.visible')
+      cy.get('[data-cy="daa_option_5"]').check()
       cy.get('[data-cy="btn_save"]').click()
 
       cy.wrap(updateStub).should('have.been.called')

@@ -3,6 +3,7 @@ import AsyncSelect from 'react-select/async'
 import type { MultiValue } from 'react-select'
 import { DAC } from 'src/libs/ajax/DAC'
 import { DAA } from 'src/libs/ajax/DAA'
+import { Institution } from 'src/libs/ajax/Institution'
 import { Notifications, PromiseSerial } from 'src/libs/utils'
 import { Alert } from 'src/components/Alert'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -13,6 +14,7 @@ import { Spinner } from 'src/components/Spinner'
 import { Styles } from 'src/libs/theme'
 import PublishIcon from '@mui/icons-material/Publish'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
+import { CreateDacUserModal } from 'src/components/modals/CreateDacUserModal'
 import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import type { DAAObject, DacObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
@@ -95,6 +97,9 @@ export default function EditDac(): React.JSX.Element {
   const [selectedUploadedFileName, setSelectedUploadedFileName] = useState<string | null>(null)
   const [daaFileData, setDaaFileData] = useState<File[] | null>(null)
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false)
+  const [showCreateUserModal, setShowCreateUserModal] = useState<boolean>(false)
+  const [createUserTargetRole, setCreateUserTargetRole] = useState<'chair' | 'member'>('chair')
+  const [allowedDomains, setAllowedDomains] = useState<string[] | null>(null)
   const [fetchedDac, setFetchedDac] = useState<DacObject | null>(null)
   const [ownedDaas, setOwnedDaas] = useState<DAAObject[]>([])
   const [sharedDaas, setSharedDaas] = useState<DAAObject[]>([])
@@ -159,6 +164,28 @@ export default function EditDac(): React.JSX.Element {
 
     void fetchData()
   }, [dacId, dacIdParam])
+
+  useEffect(() => {
+    const loadAllowedDomains = async (): Promise<void> => {
+      if (user?.isAdmin) {
+        setAllowedDomains(null)
+        return
+      }
+      if (user?.institutionId) {
+        try {
+          const institution = await Institution.getById(user.institutionId)
+          setAllowedDomains(institution?.domains ?? [])
+        }
+        catch {
+          setAllowedDomains([])
+        }
+      }
+      else {
+        setAllowedDomains([])
+      }
+    }
+    void loadAllowedDomains()
+  }, [user?.isAdmin, user?.institutionId])
 
   const saveErrorMessage = 'There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.'
 
@@ -411,6 +438,36 @@ export default function EditDac(): React.JSX.Element {
       membersSelectedOptions: [...data],
       dirtyFlag: true,
     }))
+  }
+
+  const onUserCreated = (newUser: DuosUser, role: 'chair' | 'member'): void => {
+    const newOption: UserSelectOption = {
+      key: newUser.userId,
+      value: newUser.userId,
+      label: `${newUser.displayName} (${newUser.email})`,
+      item: {
+        userId: newUser.userId,
+        displayName: newUser.displayName,
+        email: newUser.email,
+      },
+    }
+    if (role === CHAIR) {
+      setState(prev => ({
+        ...prev,
+        chairIdsToAdd: [...prev.chairIdsToAdd, newUser.userId],
+        chairsSelectedOptions: [...prev.chairsSelectedOptions, newOption],
+        dirtyFlag: true,
+      }))
+    }
+    else {
+      setState(prev => ({
+        ...prev,
+        memberIdsToAdd: [...prev.memberIdsToAdd, newUser.userId],
+        membersSelectedOptions: [...prev.membersSelectedOptions, newOption],
+        dirtyFlag: true,
+      }))
+    }
+    setShowCreateUserModal(false)
   }
 
   const onSearchInputChanged = (): void => {
@@ -806,6 +863,18 @@ export default function EditDac(): React.JSX.Element {
                           placeholder="Select a DUOS User..."
                           className="select-autocomplete"
                         />
+                        <button
+                          className="btn btn-link"
+                          style={{ paddingLeft: 0, fontSize: '0.9em' }}
+                          data-cy="btn_create_chair"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setCreateUserTargetRole('chair')
+                            setShowCreateUserModal(true)
+                          }}
+                        >
+                          + Create new user as Chairperson
+                        </button>
                       </div>
                     </div>
                     <div style={{ display: 'flex', marginBottom: '15px' }}>
@@ -838,6 +907,18 @@ export default function EditDac(): React.JSX.Element {
                           placeholder="Select a DUOS User..."
                           className="select-autocomplete"
                         />
+                        <button
+                          className="btn btn-link"
+                          style={{ paddingLeft: 0, fontSize: '0.9em' }}
+                          data-cy="btn_create_member"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setCreateUserTargetRole('member')
+                            setShowCreateUserModal(true)
+                          }}
+                        >
+                          + Create new user as Member
+                        </button>
                       </div>
                     </div>
                     <div style={{ paddingBottom: '20px', float: 'right' }}>
@@ -953,6 +1034,15 @@ export default function EditDac(): React.JSX.Element {
                 </div>
               </div>
             </div>
+            {showCreateUserModal && (
+              <CreateDacUserModal
+                showModal={showCreateUserModal}
+                targetRole={createUserTargetRole}
+                allowedDomains={allowedDomains}
+                onUserCreated={onUserCreated}
+                onCloseRequest={() => setShowCreateUserModal(false)}
+              />
+            )}
             {showUploadModal && (
               <UploadDaaModal
                 showModal={showUploadModal}
