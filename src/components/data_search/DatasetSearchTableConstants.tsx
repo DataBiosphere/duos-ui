@@ -508,16 +508,7 @@ export const makeDatasetTableHeader = (
         const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || []
         return {
           data: (
-            <>
-              {exportableSnapshots
-                .map((snapshot, i) => (
-                  <DatasetExportButton
-                    key={`${i}`}
-                    snapshot={snapshot}
-                    title={`Export snapshot ${snapshot.name}`}
-                  />
-                ))}
-            </>
+            <DatasetExportButton snapshots={exportableSnapshots} />
           ),
           value: 'Export to Workspace',
           id: `${dataset.datasetId}-export-to-terra`,
