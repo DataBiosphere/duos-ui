@@ -13,7 +13,6 @@
             "installMaven": true,
             "installGradle": true
         },
-        "ghcr.io/devcontainers/features/node:2": {},
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "moby": false
         }
