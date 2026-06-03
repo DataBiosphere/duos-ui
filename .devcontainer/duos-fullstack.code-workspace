@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "name": "duos-ui",
+      "path": ".."
+    },
+    {
+      "name": "consent",
+      "path": "../../consent"
+    }
+  ],
+  "settings": {
+    "sonarlint.pathToNodeExecutable": "/usr/local/bin/node",
+    "sonarlint.ls.javaHome": "/usr/local/sdkman/candidates/java/current",
+    "sonarlint.disableTelemetry": true,
+    "java.compile.nullAnalysis.mode": "automatic"
+  },
+  "extensions": {
+    "recommendations": [
+      "SonarSource.sonarlint-vscode",
+      "vscjava.vscode-java-pack",
+      "vscjava.vscode-gradle"
+    ]
+  }
+}

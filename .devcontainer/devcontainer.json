@@ -6,7 +6,9 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "SonarSource.sonarlint-vscode"
+                "SonarSource.sonarlint-vscode",
+                "vscjava.vscode-java-pack",
+                "vscjava.vscode-gradle"
             ],
             "settings": {
                 "sonarlint.pathToNodeExecutable": "/usr/local/bin/node",
