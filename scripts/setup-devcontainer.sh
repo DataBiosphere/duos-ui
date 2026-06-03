@@ -40,39 +40,12 @@ install_duos_config() {
     /workspaces/duos-ui/public
 }
 
-# Clone the consent backend repo as a sibling of duos-ui so the multi-root
-# workspace (.devcontainer/duos-fullstack.code-workspace) can include both
-# projects in a single VS Code window. Idempotent: skipped if already present.
-clone_consent_repo() {
-  if [ -d "/workspaces/consent/.git" ]; then
-    echo "consent repo already present at /workspaces/consent; skipping clone."
-    return 0
-  fi
-  # /workspaces is root-owned by default; ensure the target dir is writable by
-  # the non-root devcontainer user before cloning.
-  if [ ! -d /workspaces/consent ]; then
-    sudo mkdir -p /workspaces/consent
-    sudo chown "$(id -u):$(id -g)" /workspaces/consent
-  fi
-  # Ensure github.com host key is trusted for non-interactive SSH clone.
-  mkdir -p "$HOME/.ssh"
-  if ! grep -q "github.com" "$HOME/.ssh/known_hosts" 2>/dev/null; then
-    ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
-  fi
-  if ! git clone git@github.com:DataBiosphere/consent.git /workspaces/consent; then
-    echo "WARNING: failed to clone consent via SSH. Ensure SSH agent forwarding is enabled" >&2
-    echo "         (see https://code.visualstudio.com/remote/advancedcontainers/sharing-git-credentials)." >&2
-    return 0
-  fi
-}
-
 dev_container() {
   cypress_requirements
   gcloud_cli_requirements
   install_gcloud_cli
   install_duos_cypress
   install_duos_config
-  clone_consent_repo
 }
 
 dev_container
