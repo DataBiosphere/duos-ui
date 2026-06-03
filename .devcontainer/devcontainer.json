@@ -1,23 +1,8 @@
 {
-    "name": "Combined DUOS",
+    "name": "Node.js",
     "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:24-trixie",
-    "workspaceFolder": "/workspaces",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
-    "mounts": [
-        "source=${localWorkspaceFolder}/../consent,target=/workspaces/consent,type=bind,consistency=cached"
-    ],
-    "features": {
-        "ghcr.io/devcontainers/features/java:1": {
-            "version": "25",
-            "jdkDistro": "tem",
-            "installMaven": true,
-            "installGradle": true
-        },
-        "ghcr.io/devcontainers/features/node:2": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {
-            "moby": false
-        }
-    },
+    "postCreateCommand": "./scripts/setup-devcontainer.sh",
+    "remoteUser": "node",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -30,6 +15,10 @@
             }
         }
     },
-    "postCreateCommand": "cd /workspaces/duos-ui && ./scripts/setup-devcontainer.sh",
-    "remoteUser": "node"
+    "features": {
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "25",
+            "jdkDistro": "tem"
+        }
+    }
 }
