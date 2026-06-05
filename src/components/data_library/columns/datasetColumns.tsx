@@ -6,6 +6,7 @@ import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import BoltIcon from '@mui/icons-material/Bolt'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 /**
  * Column definitions for dataset view
@@ -121,6 +122,20 @@ export const makeDatasetColumns = (
     headerName: 'DAC',
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
+  },
+  {
+    field: 'requestLocation',
+    headerName: 'Request Location',
+    width: 180,
+    sortable: false,
+    renderCell: params =>
+      params.value
+        ? (
+            <Link href={validateHttpUrl(params.value) ? params.value : undefined} target="_blank" rel="noopener noreferrer" underline="hover">
+              {params.value}
+            </Link>
+          )
+        : null,
   },
   {
     field: 'actions',

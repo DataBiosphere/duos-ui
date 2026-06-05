@@ -604,6 +604,14 @@ export class DataURL extends StringDatasetProperty {
   }
 }
 
+export class RequestLocation extends StringDatasetProperty {
+  static readonly schemaProperty = 'requestLocation'
+  static readonly propertyName = 'Request Location'
+  constructor(value?: string, datasetId?: number, propertyId?: number) {
+    super('Request Location', '', RequestLocation.propertyName, RequestLocation.schemaProperty, value, datasetId, propertyId)
+  }
+}
+
 export class FileTypes extends DatasetProperty {
   static readonly schemaProperty = 'fileTypes'
   static readonly propertyName = 'File Types'

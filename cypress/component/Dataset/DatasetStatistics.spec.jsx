@@ -139,6 +139,25 @@ describe('Dataset Statistics Tests', () => {
     cy.contains(datasetTerm.study.piName).should('exist')
   })
 
+  it('Displays the Request Location field as a link when present', () => {
+    const requestLocationUrl = 'https://request.example.org/apply'
+    const withRequestLocation = { ...datasetTerm, requestLocation: requestLocationUrl }
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([withRequestLocation]))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
+    mountDatasetStatistics(datasetTerm.datasetIdentifier)
+    cy.contains('Request Location').should('exist')
+    cy.get(`a[href="${requestLocationUrl}"]`).should('exist')
+  })
+
+  it('Does not display the Request Location field when absent', () => {
+    const withoutRequestLocation = { ...datasetTerm }
+    delete withoutRequestLocation.requestLocation
+    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([withoutRequestLocation]))
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve([]))
+    mountDatasetStatistics(datasetTerm.datasetIdentifier)
+    cy.contains('Request Location').should('not.exist')
+  })
+
   it('Displays DAR section with data', () => {
     const darsData = [{
       darCode: 'DAR-123',

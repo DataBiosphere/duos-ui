@@ -38,6 +38,7 @@ export interface ConsentGroup2 {
   otherSecondary?: string
   dataLocation?: DataLocationType
   url?: string
+  requestLocation?: string
   fileTypes?: Array<FileType>
 };
 
