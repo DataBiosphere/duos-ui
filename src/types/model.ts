@@ -379,6 +379,7 @@ export interface AiModel {
   name: string
   description: string
   url: string
+  cloud?: string
   format: string
   license: string
   trainedOnDatasets: string[]
@@ -392,6 +393,7 @@ export interface Workspace {
   name: string
   platform: string
   url: string
+  cloud?: string
   description: string
   tools?: string[]
   access?: string
