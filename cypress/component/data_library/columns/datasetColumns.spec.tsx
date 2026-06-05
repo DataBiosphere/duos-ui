@@ -20,6 +20,7 @@ describe('datasetColumns — column order', () => {
       'participantCount',
       'dataUse',
       'dac',
+      'requestLocation',
       'actions',
     ])
   })

@@ -123,6 +123,20 @@ export const makeDatasetColumns = (
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
   {
+    field: 'requestLocation',
+    headerName: 'Request Location',
+    width: 180,
+    sortable: false,
+    renderCell: params =>
+      params.value
+        ? (
+            <Link href={params.value} target="_blank" rel="noopener noreferrer" underline="hover">
+              {params.value}
+            </Link>
+          )
+        : null,
+  },
+  {
     field: 'actions',
     headerName: 'Actions',
     width: 120,

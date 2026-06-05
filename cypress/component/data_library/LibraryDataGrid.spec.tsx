@@ -300,6 +300,7 @@ describe('LibraryDataGrid', () => {
     })
 
     it('renders an Export link for a dataset with matching exportable snapshots', () => {
+      cy.viewport(1600, 800)
       mountGrid(
         <LibraryDataGrid
           assetType={AssetType.DATASETS}

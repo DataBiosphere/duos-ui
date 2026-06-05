@@ -242,6 +242,13 @@ export default function DatasetStatistics() {
                 <DatasetExportButton snapshots={exportableSnapshots} />
               </div>
             </LabeledField>
+            {datasetTerm.requestLocation && (
+              <LabeledField label="Request Location">
+                <a href={datasetTerm.requestLocation} target="_blank" rel="noopener noreferrer">
+                  {datasetTerm.requestLocation}
+                </a>
+              </LabeledField>
+            )}
             <LabeledField label="Phenotype">
               {datasetTerm.study?.phenotype ?? 'N/A'}
             </LabeledField>
