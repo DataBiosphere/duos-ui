@@ -169,6 +169,29 @@ describe('ConsentGroupList component', () => {
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
       expect(collected[0].consentGroupName).to.eq('New Consent Group')
+      expect(collected[0].data?.cloud).to.eq(undefined)
+    })
+  })
+
+  it('saves a selected cloud value', () => {
+    const collected: ConsentGroup2[] = []
+    cy.mount(
+      <ConsentGroupList
+        consentGroups={[]}
+        columnsToShow={['consentGroupName']}
+        onConsentGroupChange={(items) => { collected.splice(0, collected.length, ...items) }}
+        disabled={false}
+      />,
+    )
+    cy.get('#add-consent-group-btn').click()
+    cy.contains('label', 'Cloud').should('exist')
+    fillConsentGroupForm()
+    cy.get('#cloud').type('Azure{enter}')
+    clickSaveButton()
+
+    cy.wrap(null).then(() => {
+      expect(collected.length).to.eq(1)
+      expect(collected[0].data?.cloud).to.eq('Azure')
     })
   })
 

@@ -58,6 +58,32 @@ describe('WorkspaceList component', () => {
       expect(collected.length).to.eq(1)
       expect(collected[0].name).to.eq('New Workspace')
       expect(collected[0].platform).to.eq('New Platform')
+      expect(collected[0].cloud).to.eq('')
+    })
+  })
+
+  it('saves a selected cloud value', () => {
+    const collected: Workspace[] = []
+    cy.mount(
+      <WorkspaceAddEdit
+        id={-1}
+        workspace={undefined}
+        workspaces={[]}
+        closeAction={cy.stub().as('close')}
+        onWorkspaceChange={(items) => { collected.splice(0, collected.length, ...items) }}
+      />,
+    )
+    cy.contains('label', 'Cloud').should('exist')
+    cy.get('#name').type('Cloud Workspace')
+    cy.get('#platform').type('Terra')
+    cy.get('#url').type('https://workspace.example.com')
+    cy.get('#cloud').type('Oracle{enter}')
+    cy.get('#description').type('Cloud workspace description')
+    cy.get('#access').type('open')
+    cy.get('.collaborator-form-add-save-button').click()
+    cy.wrap(null).then(() => {
+      expect(collected.length).to.eq(1)
+      expect(collected[0].cloud).to.eq('Oracle')
     })
   })
 
