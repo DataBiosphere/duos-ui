@@ -1,6 +1,7 @@
 import { isNil, isEmpty, set, unset } from 'src/utils/NodashUtil'
 import React, { useState, useEffect } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
+import { CloudProviders } from 'src/components/forms/CloudProviders'
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
@@ -185,7 +186,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     setValidation(calcErrors(next))
   }
 
-  const onTagsChange = ({ key, value }: { key: string, value: unknown }) => {
+  const onDatasetDataChange = ({ key, value }: { key: string, value: unknown }) => {
     const next = structuredClone(current)
     next.data ??= {}
     set(next.data, key, value)
@@ -236,7 +237,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             isCreatable={true}
             isMulti={true}
             optionsAreString={true}
-            onChange={onTagsChange}
+            onChange={onDatasetDataChange}
             disabled={readOnly}
             defaultValue={current?.data?.tags || []}
             selectOptions={(current?.data?.tags as string[]) || []}
@@ -246,6 +247,19 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                 Menu: () => null,
               },
             }}
+          />
+          <FormField
+            id="cloud"
+            name="cloud"
+            title="Cloud"
+            placeholder="Select or enter cloud environment"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            optionsAreString={true}
+            selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
+            defaultValue={current?.data?.cloud as string | undefined}
+            onChange={onDatasetDataChange}
+            disabled={readOnly}
           />
 
           {/* controlled, open and external access */}
