@@ -244,7 +244,7 @@ export default function DatasetStatistics() {
             </LabeledField>
             {datasetTerm.requestLocation && (
               <LabeledField label="Request Location">
-                <a href={datasetTerm.requestLocation} target="_blank" rel="noopener noreferrer">
+                <a href={validateHttpUrl(datasetTerm.requestLocation) ? datasetTerm.requestLocation : undefined} target="_blank" rel="noopener noreferrer">
                   {datasetTerm.requestLocation}
                 </a>
               </LabeledField>

@@ -6,6 +6,7 @@ import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import BoltIcon from '@mui/icons-material/Bolt'
+import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 /**
  * Column definitions for dataset view
@@ -130,7 +131,7 @@ export const makeDatasetColumns = (
     renderCell: params =>
       params.value
         ? (
-            <Link href={params.value} target="_blank" rel="noopener noreferrer" underline="hover">
+            <Link href={validateHttpUrl(params.value) ? params.value : undefined} target="_blank" rel="noopener noreferrer" underline="hover">
               {params.value}
             </Link>
           )
