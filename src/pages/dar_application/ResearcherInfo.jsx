@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import { Alert } from 'src/components/Alert'
-import { Link } from 'react-router-dom'
 import ERACommons from 'src/components/era_commons/ERACommons'
 import CollaboratorList from './collaborator/CollaboratorList'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
@@ -9,22 +8,11 @@ import './dar_application.css'
 import { nihAccountLabel, nihAccountInstructions } from 'src/components/era_commons/ERACommonsUtils'
 import {
   ERACommonsDisplay,
-} from '../../components/era_commons/ERACommonsDisplay'
+} from 'src/components/era_commons/ERACommonsDisplay'
 
 const linkStyle = { color: '#2FA4E7' }
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' }
 const noTopMarginStyle = { marginTop: 0, paddingTop: 0 }
-const profileLink = <Link to="/profile" style={linkStyle}>Your Profile</Link>
-const profileUnsubmitted = (
-  <span>
-    Please submit {profileLink} to be able to create a Data Access Request
-  </span>
-)
-const profileSubmitted = (
-  <span>
-    Please make sure {profileLink} is updated as it will be used to pre-populate parts of the Data Access Request
-  </span>
-)
 const libraryCardLink = (
   <a
     href="https://support.terra.bio/hc/en-us/articles/28510945983003-How-to-Submit-a-Data-Access-Request-DAR-in-DUOS"
@@ -41,7 +29,6 @@ export default function ResearcherInfo(props) {
     allSigningOfficials,
     readOnlyMode,
     includeInstructions,
-    completed,
     countriesOfOperation,
     darCode,
     eRACommonsDestination,
@@ -80,19 +67,15 @@ export default function ResearcherInfo(props) {
   return (
     <div data-cy="researcher-info">
       <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
-        {(completed === false || libraryCardReqSatisfied === false) && (
-          <div data-cy="researcher-info-profile-submitted">
+        {(libraryCardReqSatisfied === false) && (
+          <div data-cy="researcher-info-library-card-required">
             {!readOnlyMode && (
               <Alert
-                id="profileSubmitted"
+                id="libraryCardRequired"
                 type="danger"
                 title={(
                   <span className="errored">
-                    {`You must submit `}
-                    {profileLink}
-                    {` and obtain a `}
-                    {libraryCardLink}
-                    {` from your Signing official before you can submit a Data Access Request.`}
+                    You must obtain a {libraryCardLink} from your Signing official before you can submit a Data Access Request.
                   </span>
                 )}
               />
@@ -135,22 +118,6 @@ export default function ResearcherInfo(props) {
                 )
               : (<ERACommonsDisplay eraCommonsId={eraCommonsId} />)}
           </div>
-          <fieldset>
-            {
-              (completed === false && libraryCardReqSatisfied === true) && (
-                <div data-cy="researcher-info-profile-unsubmitted" className="rp-alert">
-                  {!readOnlyMode && <Alert id="profileUnsubmitted" type="danger" title={profileUnsubmitted} />}
-                </div>
-              )
-            }
-            {
-              (completed === true && libraryCardReqSatisfied === true) && (
-                <div data-cy="researcher-info-profile-submitted" className="rp-alert">
-                  {!readOnlyMode && <Alert id="profileSubmitted" type="info" title={profileSubmitted} />}
-                </div>
-              )
-            }
-          </fieldset>
         </div>
 
         <div className="dar-application-row">

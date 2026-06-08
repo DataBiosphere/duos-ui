@@ -6,21 +6,16 @@ import { BrowserRouter } from 'react-router-dom'
 
 const props = {
   allSigningOfficials: [],
-  completed: true,
   countriesOfOperation: ['United States of America (the)', 'France', 'Canada'],
   darCode: undefined,
   eRACommonsDestination: undefined,
   formFieldChange: () => {},
-  invalidResearcher: false,
-  location: undefined,
   onNihStatusUpdate: () => {},
-  partialSave: () => {},
   setLabCollaboratorsCompleted: () => {},
   setInternalCollaboratorsCompleted: () => {},
   setExternalCollaboratorsCompleted: () => {},
   researcher: { displayName: 'Researcher Name', email: 'name@email.com' },
   showValidationMessages: false,
-  nextPage: () => {},
   validation: {},
   formValidationChange: () => {},
   formData: {
@@ -86,25 +81,23 @@ describe('Researcher Info', () => {
     cy.get('[data-cy=researcher-info]').should('be.visible')
   })
 
-  it('renders the missing library cards alert correctly', () => {
+  it('renders the library card required alert when researcher has no library card', () => {
     const mergedProps = { ...props, ...{ formData: { ...props.formData } } }
     cy.mount(<WrappedResearcherInfo {...mergedProps} />)
-    cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist')
-    cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible')
+    cy.get('[data-cy=researcher-info-library-card-required]').should('be.visible')
   })
 
-  it('renders the profile submitted alert', () => {
-    const mergedProps = { ...props, ...{ completed: true, researcher: researcherWithLibraryCard } }
+  it('does not render the library card required alert when researcher has a library card', () => {
+    const mergedProps = { ...props, ...{ researcher: researcherWithLibraryCard } }
     cy.mount(<WrappedResearcherInfo {...mergedProps} />)
-    cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible')
-    cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist')
+    cy.get('[data-cy=researcher-info-library-card-required]').should('not.exist')
   })
 
-  it('renders the profile unsubmitted alert', () => {
-    const mergedProps = { ...props, ...{ completed: false, researcher: researcherWithLibraryCard } }
+  it('hides the alert content inside the library card required section in read-only mode', () => {
+    const mergedProps = { ...props, ...{ readOnlyMode: true } }
     cy.mount(<WrappedResearcherInfo {...mergedProps} />)
-    cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('be.visible')
-    cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible')
+    cy.get('[data-cy=researcher-info-library-card-required]').should('exist')
+    cy.get('[data-cy=researcher-info-library-card-required]').find('[id=libraryCardRequired]').should('not.exist')
   })
 
   it('renders the internal lab staff button and form', () => {
