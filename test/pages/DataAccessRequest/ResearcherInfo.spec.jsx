@@ -3,10 +3,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
-import { User } from 'src/libs/ajax/User.js'
+import { User } from 'src/libs/ajax/User'
 import { renderWithRouter } from '../../test-utils'
 
-vi.mock('src/libs/ajax/User.js', () => ({
+vi.mock('src/libs/ajax/User', () => ({
   User: {
     getMe: vi.fn(),
   },
