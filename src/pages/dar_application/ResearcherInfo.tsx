@@ -9,6 +9,35 @@ import { nihAccountLabel, nihAccountInstructions } from 'src/components/era_comm
 import {
   ERACommonsDisplay,
 } from 'src/components/era_commons/ERACommonsDisplay'
+import { CombinedDataAccessRequest, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+import { ValidationError } from './FormValidationState'
+
+interface FieldChange {
+  key: string
+  value: unknown
+}
+
+export interface ResearcherInfoProps {
+  allSigningOfficials?: SimplifiedDuosUser[]
+  readOnlyMode?: boolean
+  includeInstructions?: boolean
+  countriesOfOperation: string[]
+  darCode?: string
+  eRACommonsDestination?: string
+  formFieldChange: (change: FieldChange) => void
+  onNihStatusUpdate: (valid: boolean) => void
+  formData: Partial<CombinedDataAccessRequest>
+  researcher: Partial<DuosUser>
+  setLabCollaboratorsCompleted: (completed: boolean) => void
+  setInternalCollaboratorsCompleted: (completed: boolean) => void
+  setExternalCollaboratorsCompleted: (completed: boolean) => void
+  showNihValidationError?: boolean
+  showValidationMessages?: boolean
+  validation: Record<string, ValidationError | undefined>
+  formValidationChange: (change: { key: Array<string | number> | string, validation: ValidationError }) => void
+  ariaLevel?: number
+  eraCommonsId?: string
+}
 
 const linkStyle = { color: '#2FA4E7' }
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' }
@@ -24,7 +53,7 @@ const libraryCardLink = (
   </a>
 )
 
-export default function ResearcherInfo(props) {
+export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
   const {
     allSigningOfficials,
     readOnlyMode,
@@ -49,7 +78,7 @@ export default function ResearcherInfo(props) {
   const accountLabel = nihAccountLabel()
   const accountLink = nihAccountInstructions()
 
-  const formatSOString = (name, email) => {
+  const formatSOString = (name?: string, email?: string) => {
     if (isEmpty(name)) {
       return ''
     }
@@ -77,11 +106,12 @@ export default function ResearcherInfo(props) {
               <Alert
                 id="libraryCardRequired"
                 type="danger"
+                description=""
                 title={(
                   <span className="errored">
                     You must obtain a {libraryCardLink} from your Signing official before you can submit a Data Access Request.
                   </span>
-                )}
+                ) as unknown as string}
               />
             )}
           </div>
@@ -113,7 +143,7 @@ export default function ResearcherInfo(props) {
               ? (
                   <ERACommons
                     destination={eRACommonsDestination}
-                    researcherProfile={researcher}
+                    researcherProfile={researcher as DuosUser}
                     onNihStatusUpdate={onNihStatusUpdate}
                     validationError={showNihValidationError}
                     header={true}
@@ -160,7 +190,7 @@ export default function ResearcherInfo(props) {
             onValidationChange={onValidationChange}
             selectOptions={countriesOfOperation}
             optionsAreString={true}
-            onChange={({ key, value }) => formFieldChange({ key, value })}
+            onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
           />
         </div>
 
@@ -233,11 +263,11 @@ export default function ResearcherInfo(props) {
             validation={validation.signingOfficial}
             onValidationChange={onValidationChange}
             disabled={readOnlyMode}
-            onChange={({ key, value: { displayText, email } }) => {
+            onChange={({ key, value: { displayText, email } }: { key: string, value: { displayText: string, email?: string } }) => {
               formFieldChange({ key, value: displayText })
               formFieldChange({ key: 'signingOfficialEmail', value: email })
             }}
-            selectOptions={(allSigningOfficials?.map((so) => {
+            selectOptions={(allSigningOfficials?.map((so: SimplifiedDuosUser) => {
               const displayText = formatSOString(so.displayName, so.email)
               return { displayText, email: so.email }
             }) || [''])}
@@ -260,7 +290,7 @@ export default function ResearcherInfo(props) {
               ariaLevel={ariaLevel + 1}
               validation={validation.itDirector}
               onValidationChange={onValidationChange}
-              onChange={({ key, value }) => formFieldChange({ key, value })}
+              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
               defaultValue={formData.itDirector}
             />
             <FormField
@@ -271,7 +301,7 @@ export default function ResearcherInfo(props) {
               ariaLevel={ariaLevel + 1}
               validation={validation.itDirectorEmail}
               onValidationChange={onValidationChange}
-              onChange={({ key, value }) => formFieldChange({ key, value })}
+              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
               defaultValue={formData.itDirectorEmail}
             />
           </div>
@@ -301,7 +331,7 @@ export default function ResearcherInfo(props) {
               orientation="horizontal"
               validation={validation.anvilUse}
               onValidationChange={onValidationChange}
-              onChange={({ key, value }) => {
+              onChange={({ key, value }: FieldChange) => {
                 const normalizedValue = value === 'yes'
                 formFieldChange({ key, value: normalizedValue })
               }}
@@ -332,7 +362,7 @@ export default function ResearcherInfo(props) {
                             ariaLevel={ariaLevel + 2}
                             validation={validation.localUse}
                             onValidationChange={onValidationChange}
-                            onChange={({ key, value }) => formFieldChange({ key, value })}
+                            onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                           />
                         </div>
                       </div>
@@ -347,7 +377,7 @@ export default function ResearcherInfo(props) {
                           ariaLevel={ariaLevel + 2}
                           validation={validation.cloudUse}
                           onValidationChange={onValidationChange}
-                          onChange={({ key, value }) => formFieldChange({ key, value })}
+                          onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                         />
                       </div>
                     </div>
@@ -358,7 +388,7 @@ export default function ResearcherInfo(props) {
                             <FormField
                               id="cloudProvider"
                               title="Name of Cloud Provider"
-                              onChange={({ key, value }) => formFieldChange({ key, value })}
+                              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                               defaultValue={formData.cloudProvider}
                               validators={[FormValidators.REQUIRED]}
                               disabled={!isEmpty(darCode) || readOnlyMode}
@@ -375,7 +405,7 @@ export default function ResearcherInfo(props) {
                               validators={[FormValidators.REQUIRED]}
                               disabled={!isNil(darCode) || readOnlyMode}
                               ariaLevel={ariaLevel + 3}
-                              onChange={({ key, value }) => formFieldChange({ key, value })}
+                              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                               validation={validation.cloudProviderType}
                               onValidationChange={onValidationChange}
                             />
@@ -397,7 +427,7 @@ export default function ResearcherInfo(props) {
                               rows={6}
                               maxLength={2000}
                               ariaLevel={ariaLevel + 3}
-                              onChange={({ key, value }) => formFieldChange({ key, value })}
+                              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                               validation={validation.cloudProviderDescription}
                               onValidationChange={onValidationChange}
                             />

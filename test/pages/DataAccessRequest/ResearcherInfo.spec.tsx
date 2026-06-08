@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
+import ResearcherInfo, { ResearcherInfoProps } from 'src/pages/dar_application/ResearcherInfo'
 import { User } from 'src/libs/ajax/User'
+import { DuosUser } from 'src/types/model'
 import { renderWithRouter } from '../../test-utils'
+
+type UserEventInstance = ReturnType<typeof userEvent.setup>
 
 vi.mock('src/libs/ajax/User', () => ({
   User: {
@@ -12,7 +15,7 @@ vi.mock('src/libs/ajax/User', () => ({
   },
 }))
 
-const props = {
+const props: ResearcherInfoProps = {
   allSigningOfficials: [],
   countriesOfOperation: ['United States of America (the)', 'France', 'Canada'],
   darCode: undefined,
@@ -38,34 +41,38 @@ const props = {
   },
 }
 
-const researcherWithLibraryCard = {
+const researcherWithLibraryCard: Partial<DuosUser> = {
   libraryCard: {
     id: 1,
     userId: 1,
-    institutionId: 150,
-    eraCommonsId: 'user',
     userName: 'Sample User',
     userEmail: 'sample.user@example.test',
-    institution: {
-      id: 150,
-      name: 'The Broad Institute of MIT and Harvard',
-    },
+    createDate: new Date(),
+    createUserId: 1,
   },
 }
 
-const renderResearcherInfo = (overrideProps = {}) => renderWithRouter(<ResearcherInfo {...props} {...overrideProps} />)
+const renderResearcherInfo = (overrideProps: Partial<ResearcherInfoProps> = {}) =>
+  renderWithRouter(<ResearcherInfo {...props} {...overrideProps} />)
 
-const byId = id => document.getElementById(id)
-const getSection = dataCy => document.querySelector(`[data-cy="${dataCy}"]`)
+const byId = <T extends HTMLElement = HTMLElement>(id: string): T | null => document.getElementById(id) as T | null
+const getSection = (dataCy: string): HTMLElement | null => document.querySelector<HTMLElement>(`[data-cy="${dataCy}"]`)
 
-const openAddCollaboratorForm = async (user, dataCy) => {
+const openAddCollaboratorForm = async (user: UserEventInstance, dataCy: string): Promise<HTMLElement> => {
   const section = getSection(dataCy)
   expect(section).not.toBeNull()
-  await user.click(within(section).getByRole('button', { name: /add/i }))
-  return section
+  await user.click(within(section!).getByRole('button', { name: /add/i }))
+  return section!
 }
 
-const fillCollaboratorForm = async (user, { name, eraCommonsId, title, email }) => {
+interface CollaboratorFormValues {
+  name: string
+  eraCommonsId: string
+  title: string
+  email: string
+}
+
+const fillCollaboratorForm = async (user: UserEventInstance, { name, eraCommonsId, title, email }: CollaboratorFormValues) => {
   const nameInput = byId('0_collaboratorName')
   const eraInput = byId('0_collaboratorEraCommonsId')
   const titleInput = byId('0_collaboratorTitle')
@@ -76,18 +83,18 @@ const fillCollaboratorForm = async (user, { name, eraCommonsId, title, email }) 
   expect(titleInput).not.toBeNull()
   expect(emailInput).not.toBeNull()
 
-  await user.clear(nameInput)
-  await user.type(nameInput, name)
-  await user.clear(eraInput)
-  await user.type(eraInput, eraCommonsId)
-  await user.clear(titleInput)
-  await user.type(titleInput, title)
-  await user.clear(emailInput)
-  await user.type(emailInput, email)
+  await user.clear(nameInput!)
+  await user.type(nameInput!, name)
+  await user.clear(eraInput!)
+  await user.type(eraInput!, eraCommonsId)
+  await user.clear(titleInput!)
+  await user.type(titleInput!, title)
+  await user.clear(emailInput!)
+  await user.type(emailInput!, email)
 }
 
-const AsyncResearcherWrapper = (componentProps) => {
-  const [asyncResearcher, setAsyncResearcher] = useState({})
+const AsyncResearcherWrapper = (componentProps: ResearcherInfoProps) => {
+  const [asyncResearcher, setAsyncResearcher] = useState<Partial<DuosUser>>({})
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -103,11 +110,11 @@ const AsyncResearcherWrapper = (componentProps) => {
 describe('Researcher Info', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    User.getMe.mockReturnValue({
+    vi.mocked(User.getMe).mockResolvedValue({
       userId: 1,
       displayName: 'Sample User',
       email: 'sample.user@example.test',
-    })
+    } as Awaited<ReturnType<typeof User.getMe>>)
   })
 
   it('does not show the library card warning before async researcher load completes', async () => {
@@ -183,8 +190,8 @@ describe('Researcher Info', () => {
     expect(approval).not.toBeNull()
     expect(saveButton).not.toBeNull()
 
-    await user.click(approval)
-    await user.click(saveButton)
+    await user.click(approval!)
+    await user.click(saveButton!)
 
     await waitFor(() => {
       expect(byId('0_summary')).not.toBeNull()
@@ -213,12 +220,12 @@ describe('Researcher Info', () => {
     expect(approval).not.toBeNull()
     expect(saveButton).not.toBeNull()
 
-    await user.click(approval)
-    await user.click(saveButton)
+    await user.click(approval!)
+    await user.click(saveButton!)
 
     const deleteMember = byId('0_deleteMember')
     expect(deleteMember).not.toBeNull()
-    await user.click(deleteMember)
+    await user.click(deleteMember!)
 
     await waitFor(() => {
       expect(document.querySelector('.delete-modal-primary-button')).not.toBeNull()
@@ -242,8 +249,8 @@ describe('Researcher Info', () => {
     expect(approval).not.toBeNull()
     expect(cancelButton).not.toBeNull()
 
-    await user.click(approval)
-    await user.click(cancelButton)
+    await user.click(approval!)
+    await user.click(cancelButton!)
 
     await waitFor(() => {
       expect(byId('0_collaboratorName')).toBeNull()
@@ -268,13 +275,13 @@ describe('Researcher Info', () => {
     expect(approval).not.toBeNull()
     expect(saveButton).not.toBeNull()
 
-    await user.click(approval)
-    await user.click(saveButton)
+    await user.click(approval!)
+    await user.click(saveButton!)
 
     // edit and switch back to form view
     const editButton = byId('0_editCollaborator')
     expect(editButton).not.toBeNull()
-    await user.click(editButton)
+    await user.click(editButton!)
 
     await waitFor(() => {
       expect(byId('0_summary')).toBeNull()
@@ -282,7 +289,7 @@ describe('Researcher Info', () => {
 
     const section = getSection('internal-lab-staff')
     expect(section).not.toBeNull()
-    expect(section.querySelector('.form-group')).not.toBeNull()
+    expect(section!.querySelector('.form-group')).not.toBeNull()
 
     await fillCollaboratorForm(user, {
       name: 'Updated Collaborator',
@@ -293,7 +300,7 @@ describe('Researcher Info', () => {
 
     const saveButtonOnEdit = document.querySelector('.collaborator-form-add-save-button')
     expect(saveButtonOnEdit).not.toBeNull()
-    await user.click(saveButtonOnEdit)
+    await user.click(saveButtonOnEdit!)
 
     await waitFor(() => {
       expect(byId('0_summary')).not.toBeNull()
@@ -303,15 +310,15 @@ describe('Researcher Info', () => {
     // also check delete on edit form
     const editAgain = byId('0_editCollaborator')
     expect(editAgain).not.toBeNull()
-    await user.click(editAgain)
+    await user.click(editAgain!)
 
     const deleteMember = byId('0_deleteMember')
     expect(deleteMember).not.toBeNull()
-    await user.click(deleteMember)
+    await user.click(deleteMember!)
 
     const confirmDelete = document.querySelector('.delete-modal-primary-button')
     expect(confirmDelete).not.toBeNull()
-    await user.click(confirmDelete)
+    await user.click(confirmDelete!)
 
     await waitFor(() => {
       expect(byId('0_summary')).toBeNull()
@@ -320,16 +327,16 @@ describe('Researcher Info', () => {
 
   it('renders researcher and pi as disabled with pi fields populated with the researcher data when not in read only mode', () => {
     renderResearcherInfo()
-    expect(byId('researcherName')?.value).toBe(props.researcher.displayName)
-    expect(byId('piName')?.value).toBe(props.researcher.displayName)
-    expect(byId('piEmail')?.value).toBe(props.researcher.email)
+    expect(byId<HTMLInputElement>('researcherName')?.value).toBe(props.researcher.displayName)
+    expect(byId<HTMLInputElement>('piName')?.value).toBe(props.researcher.displayName)
+    expect(byId<HTMLInputElement>('piEmail')?.value).toBe(props.researcher.email)
   })
 
   it('renders researcher and pi as disabled with pi fields populated with saved pi info in read only mode', () => {
     renderResearcherInfo({ readOnlyMode: true, eraCommonsId: 'scoobydoo' })
-    expect(byId('researcherName')?.value).toBe(props.researcher.displayName)
-    expect(byId('piName')?.value).toBe(props.formData.piName)
-    expect(byId('piEmail')?.value).toBe(props.formData.piEmail)
+    expect(byId<HTMLInputElement>('researcherName')?.value).toBe(props.researcher.displayName)
+    expect(byId<HTMLInputElement>('piName')?.value).toBe(props.formData.piName)
+    expect(byId<HTMLInputElement>('piEmail')?.value).toBe(props.formData.piEmail)
     expect(screen.getByText('scoobydoo')).not.toBeNull()
   })
 })
