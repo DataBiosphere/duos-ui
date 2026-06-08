@@ -255,9 +255,10 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             placeholder="Select or enter cloud environment"
             type={FormFieldTypes.SELECT}
             isCreatable={true}
+            isMulti={true}
             optionsAreString={true}
             selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
-            defaultValue={current?.data?.cloud as string | undefined}
+            defaultValue={current?.data?.cloud as string[] | undefined}
             onChange={onDatasetDataChange}
             disabled={readOnly}
           />

@@ -26,7 +26,7 @@ const defaultWorkspace: Workspace = {
   name: '',
   platform: '',
   url: '',
-  cloud: '',
+  cloud: [],
   description: '',
   tools: [],
   access: '',
@@ -139,6 +139,7 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
             placeholder="Select or enter cloud environment"
             type={FormFieldTypes.SELECT}
             isCreatable={true}
+            isMulti={true}
             optionsAreString={true}
             selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
             defaultValue={workspace?.cloud}

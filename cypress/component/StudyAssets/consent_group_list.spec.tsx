@@ -173,7 +173,7 @@ describe('ConsentGroupList component', () => {
     })
   })
 
-  it('saves a selected cloud value', () => {
+  it('saves selected cloud values', () => {
     const collected: ConsentGroup2[] = []
     cy.mount(
       <ConsentGroupList
@@ -186,12 +186,12 @@ describe('ConsentGroupList component', () => {
     cy.get('#add-consent-group-btn').click()
     cy.contains('label', 'Cloud').should('exist')
     fillConsentGroupForm()
-    cy.get('#cloud').type('Azure{enter}')
+    cy.get('#cloud').type('Azure{enter}AWS{enter}')
     clickSaveButton()
 
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
-      expect(collected[0].data?.cloud).to.eq('Azure')
+      expect(collected[0].data?.cloud).to.deep.eq(['Azure', 'AWS'])
     })
   })
 

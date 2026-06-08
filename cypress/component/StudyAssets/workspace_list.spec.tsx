@@ -58,11 +58,11 @@ describe('WorkspaceList component', () => {
       expect(collected.length).to.eq(1)
       expect(collected[0].name).to.eq('New Workspace')
       expect(collected[0].platform).to.eq('New Platform')
-      expect(collected[0].cloud).to.eq('')
+      expect(collected[0].cloud).to.deep.eq([])
     })
   })
 
-  it('saves a selected cloud value', () => {
+  it('saves selected cloud values', () => {
     const collected: Workspace[] = []
     cy.mount(
       <WorkspaceAddEdit
@@ -77,13 +77,13 @@ describe('WorkspaceList component', () => {
     cy.get('#name').type('Cloud Workspace')
     cy.get('#platform').type('Terra')
     cy.get('#url').type('https://workspace.example.com')
-    cy.get('#cloud').type('Oracle{enter}')
+    cy.get('#cloud').type('Oracle{enter}AWS{enter}')
     cy.get('#description').type('Cloud workspace description')
     cy.get('#access').type('open')
     cy.get('.collaborator-form-add-save-button').click()
     cy.wrap(null).then(() => {
       expect(collected.length).to.eq(1)
-      expect(collected[0].cloud).to.eq('Oracle')
+      expect(collected[0].cloud).to.deep.eq(['Oracle', 'AWS'])
     })
   })
 
