@@ -98,13 +98,13 @@ describe('Researcher Info', () => {
   })
 
   it('does not render the library card required alert when researcher has a library card', () => {
-    const mergedProps = { ...props, ...{ researcher: researcherWithLibraryCard } }
+    const mergedProps = { ...props, researcher: researcherWithLibraryCard }
     cy.mount(<WrappedResearcherInfo {...mergedProps} />)
     cy.get('[data-cy=researcher-info-library-card-required]').should('not.exist')
   })
 
   it('hides the alert content inside the library card required section in read-only mode', () => {
-    const mergedProps = { ...props, ...{ readOnlyMode: true } }
+    const mergedProps = { ...props, readOnlyMode: true }
     cy.mount(<WrappedResearcherInfo {...mergedProps} />)
     cy.get('[data-cy=researcher-info-library-card-required]').should('exist')
     cy.get('[data-cy=researcher-info-library-card-required]').find('[id=libraryCardRequired]').should('not.exist')
