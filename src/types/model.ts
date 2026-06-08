@@ -251,6 +251,7 @@ export interface DatasetTerm {
   dataUse: DataUseSummary
   dataLocation: string
   url: string
+  requestLocation?: string
   dacId: number
   dacApproval: boolean
   accessManagement: string

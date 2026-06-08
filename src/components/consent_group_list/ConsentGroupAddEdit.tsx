@@ -673,6 +673,17 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               onChange={onChange}
             />
           </div>
+          <FormField
+            id="requestLocation"
+            name="requestLocation"
+            title="Request Location"
+            description="URL of an external location where data access requests should be submitted (e.g. a DAC website or data access request form)"
+            placeholder="https://..."
+            validators={[FormValidators.URL]}
+            defaultValue={consentGroup?.requestLocation}
+            onChange={onChange}
+            disabled={readOnly}
+          />
 
           <FormTable
             id="fileTypes"

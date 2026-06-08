@@ -256,3 +256,61 @@ describe('ConsentGroupRow', () => {
     testViewActionTrigger<React.ComponentProps<typeof ConsentGroupRow>>(mountRow)
   })
 })
+
+describe('ConsentGroupAddEdit requestLocation', () => {
+  it('renders the Request Location field', () => {
+    mountAddEdit()
+    cy.get('#requestLocation').should('exist')
+  })
+
+  it('pre-fills Request Location when editing an existing consent group', () => {
+    const existingGroup: ConsentGroup2 = {
+      ...sampleConsentGroup,
+      requestLocation: 'https://request.example.org/apply',
+    }
+    mountAddEdit({ consentGroup: existingGroup, consentGroups: [existingGroup], id: 0 })
+    cy.get('#requestLocation').should('have.value', 'https://request.example.org/apply')
+  })
+
+  it('saves a new consent group with a requestLocation value', () => {
+    const collected: ConsentGroup2[] = []
+    cy.mount(
+      <ConsentGroupList
+        consentGroups={[]}
+        columnsToShow={['consentGroupName']}
+        onConsentGroupChange={(items) => { collected.splice(0, collected.length, ...items) }}
+        disabled={false}
+      />,
+    )
+    cy.get('#add-consent-group-btn').click()
+    fillConsentGroupForm()
+    cy.get('#requestLocation').type('https://request.example.org/apply')
+    clickSaveButton()
+
+    cy.wrap(null).then(() => {
+      expect(collected.length).to.eq(1)
+      expect(collected[0].requestLocation).to.eq('https://request.example.org/apply')
+    })
+  })
+
+  it('saves a consent group without requestLocation when field is left empty', () => {
+    const collected: ConsentGroup2[] = []
+    cy.mount(
+      <ConsentGroupList
+        consentGroups={[]}
+        columnsToShow={['consentGroupName']}
+        onConsentGroupChange={(items) => { collected.splice(0, collected.length, ...items) }}
+        disabled={false}
+      />,
+    )
+    cy.get('#add-consent-group-btn').click()
+    fillConsentGroupForm()
+    // Leave requestLocation blank
+    clickSaveButton()
+
+    cy.wrap(null).then(() => {
+      expect(collected.length).to.eq(1)
+      expect(collected[0].requestLocation).to.eq(undefined)
+    })
+  })
+})
