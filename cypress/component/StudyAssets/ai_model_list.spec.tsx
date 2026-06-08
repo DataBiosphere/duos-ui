@@ -60,6 +60,33 @@ describe('AiModelList component', () => {
       expect(onChangeSpy.length).to.eq(1)
       expect(onChangeSpy[0].name).to.eq('My Model')
       expect(onChangeSpy[0].maintainer.email).to.eq('bob@example.com')
+      expect(onChangeSpy[0].cloud).to.deep.eq([])
+    })
+  })
+
+  it('saves selected cloud values', () => {
+    const onChangeSpy: AiModel[] = []
+    cy.mount(
+      <AiModelAddEdit
+        id={-1}
+        aiModel={undefined}
+        aiModels={[]}
+        closeAction={cy.stub().as('close')}
+        onAiModelsChange={(models) => { onChangeSpy.push(...models) }}
+      />,
+    )
+    cy.contains('label', 'Cloud').should('exist')
+    cy.get('#name').type('Cloud Model')
+    cy.get('#url').type('https://cloud-model.com')
+    cy.get('#cloud').type('AWS{enter}Azure{enter}')
+    cy.get('#format').type('ONNX')
+    cy.get('#license').type('Apache-2.0')
+    cy.get('#maintainerName').type('Bob')
+    cy.get('#maintainerEmail').type('bob@example.com')
+    cy.get('.collaborator-form-add-save-button').click()
+    cy.wrap(null).then(() => {
+      expect(onChangeSpy.length).to.eq(1)
+      expect(onChangeSpy[0].cloud).to.deep.eq(['AWS', 'Azure'])
     })
   })
 

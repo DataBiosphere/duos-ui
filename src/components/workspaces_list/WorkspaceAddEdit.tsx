@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { CloudProviders } from 'src/components/forms/CloudProviders'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { Workspace } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
@@ -25,6 +26,7 @@ const defaultWorkspace: Workspace = {
   name: '',
   platform: '',
   url: '',
+  cloud: [],
   description: '',
   tools: [],
   access: '',
@@ -129,6 +131,19 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={validation.url}
+            disabled={readOnly}
+          />
+          <FormField
+            id="cloud"
+            title="Cloud"
+            placeholder="Select or enter cloud environment"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
+            defaultValue={workspace?.cloud}
+            onChange={onChange}
             disabled={readOnly}
           />
           <FormField

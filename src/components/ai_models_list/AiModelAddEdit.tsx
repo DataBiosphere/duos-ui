@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { CloudProviders } from 'src/components/forms/CloudProviders'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AiModel, Maintainer } from 'src/types/model'
@@ -14,6 +15,7 @@ const defaultAiModel: AiModel = {
   name: '',
   description: '',
   url: '',
+  cloud: [],
   format: '',
   license: '',
   trainedOnDatasets: [],
@@ -23,7 +25,7 @@ const defaultAiModel: AiModel = {
 
 interface FormFieldChange {
   key: string
-  value: string
+  value: string | string[]
 }
 
 interface AiModelAddEditProps {
@@ -78,15 +80,16 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
 
   const onChange = ({ key, value }: FormFieldChange) => {
     let updated: AiModel = { ...newAiModel }
+    const valueAsString = Array.isArray(value) ? value.join(',') : value
 
     if (key === 'trainedOnDatasets') {
-      updated.trainedOnDatasets = value.split(',').map((s: string) => s.trim()).filter(Boolean)
+      updated.trainedOnDatasets = valueAsString.split(',').map((s: string) => s.trim()).filter(Boolean)
     }
     else if (key === 'maintainerName') {
-      updated.maintainer = { ...updated.maintainer, name: value }
+      updated.maintainer = { ...updated.maintainer, name: valueAsString }
     }
     else if (key === 'maintainerEmail') {
-      updated.maintainer = { ...updated.maintainer, email: value }
+      updated.maintainer = { ...updated.maintainer, email: valueAsString }
     }
     else {
       // generic assignment
@@ -147,6 +150,19 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             validators={[FormValidators.REQUIRED, FormValidators.URL]}
             onChange={onChange}
             validation={validation.url}
+            disabled={readOnly}
+          />
+          <FormField
+            id="cloud"
+            title="Cloud"
+            placeholder="Select or enter cloud environment"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
+            defaultValue={aiModel?.cloud}
+            onChange={onChange}
             disabled={readOnly}
           />
           <FormField
