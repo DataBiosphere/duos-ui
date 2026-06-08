@@ -248,20 +248,6 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               },
             }}
           />
-          <FormField
-            id="cloud"
-            name="cloud"
-            title="Cloud"
-            placeholder="Select or enter cloud environment"
-            type={FormFieldTypes.SELECT}
-            isCreatable={true}
-            isMulti={true}
-            optionsAreString={true}
-            selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
-            defaultValue={current?.data?.cloud as string[] | undefined}
-            onChange={onDatasetDataChange}
-            disabled={readOnly}
-          />
 
           {/* controlled, open and external access */}
           <div>
@@ -673,6 +659,22 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               onChange={onChange}
             />
           </div>
+
+          <FormField
+            id="cloud"
+            name="cloud"
+            title="Cloud"
+            placeholder="Select or enter cloud environment"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
+            defaultValue={current?.data?.cloud as string[] | undefined}
+            onChange={onDatasetDataChange}
+            disabled={readOnly}
+          />
+
           <FormField
             id="requestLocation"
             name="requestLocation"
