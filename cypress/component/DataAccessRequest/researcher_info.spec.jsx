@@ -1,4 +1,4 @@
-import { React } from 'react'
+import { React, useEffect, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { User } from 'src/libs/ajax/User.js'
 
@@ -79,6 +79,16 @@ describe('Researcher Info', () => {
   it('renders the researcher info component', () => {
     cy.mount(<WrappedResearcherInfo {...props} />)
     cy.get('[data-cy=researcher-info]').should('be.visible')
+  })
+
+  it('does not show the library card warning before async researcher load completes', () => {
+    cy.clock()
+    cy.mount(<AsyncResearcherWrapper {...props} />)
+
+    cy.get('[data-cy=researcher-info-library-card-required]').should('not.exist')
+
+    cy.tick(50)
+    cy.get('[data-cy=researcher-info-library-card-required]').should('be.visible')
   })
 
   it('renders the library card required alert when researcher has no library card', () => {
@@ -215,3 +225,21 @@ describe('Researcher Info', () => {
     cy.get('[data-cy=era-commons-display-id-value]').should('have.text', 'scoobydoo')
   })
 })
+
+const AsyncResearcherWrapper = (props) => {
+  const [asyncResearcher, setAsyncResearcher] = useState({})
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAsyncResearcher({ displayName: 'Researcher Name', email: 'name@email.com' })
+    }, 50)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  return (
+    <BrowserRouter>
+      <ResearcherInfo {...props} researcher={asyncResearcher} />
+    </BrowserRouter>
+  )
+}

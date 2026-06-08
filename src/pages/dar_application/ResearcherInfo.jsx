@@ -61,6 +61,10 @@ export default function ResearcherInfo(props) {
   const onValidationChange = formValidationChange
 
   const libraryCardReqSatisfied = useMemo(() => {
+    // Avoid showing the warning before researcher data has loaded.
+    if (isNil(researcher) || isEmpty(researcher)) {
+      return null
+    }
     return !isNil(researcher.libraryCard)
   }, [researcher])
 
