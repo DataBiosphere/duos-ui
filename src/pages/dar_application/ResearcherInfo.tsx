@@ -27,7 +27,7 @@ export interface ResearcherInfoProps {
   formFieldChange: (change: FieldChange) => void
   onNihStatusUpdate: (valid: boolean) => void
   formData: Partial<CombinedDataAccessRequest>
-  researcher: Partial<DuosUser>
+  researcher: DuosUser
   setLabCollaboratorsCompleted: (completed: boolean) => void
   setInternalCollaboratorsCompleted: (completed: boolean) => void
   setExternalCollaboratorsCompleted: (completed: boolean) => void
@@ -83,7 +83,7 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
       return ''
     }
     const nameString = `${name}`
-    const emailString = !isNil(email) ? ` (${email})` : ''
+    const emailString = isNil(email) ? '' : ` (${email})`
     return nameString + emailString
   }
 
@@ -133,9 +133,9 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
           <h3>1.2 Researcher Identification</h3>
           {!readOnlyMode && (
             <span className={`${showNihValidationError ? 'errored' : 'default-color'}`}>
-              Please authenticate with&nbsp;
+              Please authenticate with {' '}
               <a target="_blank" rel="noreferrer" href={accountLink}>{accountLabel}</a>
-              &nbsp;in order to proceed.
+              {' '}in order to proceed.
             </span>
           )}
           <div className="flex-row" style={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}>
@@ -143,7 +143,7 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
               ? (
                   <ERACommons
                     destination={eRACommonsDestination}
-                    researcherProfile={researcher as DuosUser}
+                    researcherProfile={researcher}
                     onNihStatusUpdate={onNihStatusUpdate}
                     validationError={showNihValidationError}
                     header={true}

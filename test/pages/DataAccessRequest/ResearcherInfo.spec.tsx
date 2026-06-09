@@ -26,7 +26,7 @@ const props: ResearcherInfoProps = {
   setLabCollaboratorsCompleted: vi.fn(),
   setInternalCollaboratorsCompleted: vi.fn(),
   setExternalCollaboratorsCompleted: vi.fn(),
-  researcher: { displayName: 'Sample Researcher', email: 'researcher@example.test' },
+  researcher: { displayName: 'Sample Researcher', email: 'researcher@example.test' } as DuosUser,
   showValidationMessages: false,
   validation: {},
   formValidationChange: vi.fn(),
@@ -42,7 +42,7 @@ const props: ResearcherInfoProps = {
   },
 }
 
-const researcherWithLibraryCard: Partial<DuosUser> = {
+const researcherWithLibraryCard: DuosUser = {
   libraryCard: {
     id: 1,
     userId: 1,
@@ -51,7 +51,7 @@ const researcherWithLibraryCard: Partial<DuosUser> = {
     createDate: new Date(),
     createUserId: 1,
   },
-}
+} as DuosUser
 
 const renderResearcherInfo = (overrideProps: Partial<ResearcherInfoProps> = {}) =>
   renderWithRouter(<ResearcherInfo {...props} {...overrideProps} />)
@@ -95,11 +95,11 @@ const fillCollaboratorForm = async (user: UserEventInstance, { name, eraCommonsI
 }
 
 const AsyncResearcherWrapper = (componentProps: ResearcherInfoProps) => {
-  const [asyncResearcher, setAsyncResearcher] = useState<Partial<DuosUser>>({})
+  const [asyncResearcher, setAsyncResearcher] = useState<DuosUser>({} as DuosUser)
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setAsyncResearcher({ displayName: 'Sample Researcher', email: 'researcher@example.test' })
+      setAsyncResearcher({ displayName: 'Sample Researcher', email: 'researcher@example.test' } as DuosUser)
     }, 50)
 
     return () => clearTimeout(timer)
