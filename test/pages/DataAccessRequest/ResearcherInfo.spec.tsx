@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import Modal from 'react-modal'
 import ResearcherInfo, { ResearcherInfoProps } from 'src/pages/dar_application/ResearcherInfo'
 import { User } from 'src/libs/ajax/User'
 import { DuosUser } from 'src/types/model'
@@ -110,11 +111,18 @@ const AsyncResearcherWrapper = (componentProps: ResearcherInfoProps) => {
 describe('Researcher Info', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    let appRoot = document.getElementById('root')
+    if (!appRoot) {
+      appRoot = document.createElement('div')
+      appRoot.setAttribute('id', 'root')
+      document.body.appendChild(appRoot)
+    }
+    Modal.setAppElement(appRoot)
     vi.mocked(User.getMe).mockResolvedValue({
       userId: 1,
       displayName: 'Sample User',
       email: 'sample.user@example.test',
-    } as Awaited<ReturnType<typeof User.getMe>>)
+    } as Awaited<Promise<DuosUser>>)
   })
 
   it('does not show the library card warning before async researcher load completes', async () => {
