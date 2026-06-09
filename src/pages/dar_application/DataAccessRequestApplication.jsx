@@ -845,7 +845,6 @@ const DataAccessRequestApplication = (props) => {
                   defaultExpanded={reverseOrderedDARs.length === 1}
                 >
                   <ResearcherInfo
-                    completed={!isNil(get(researcher, 'institutionId'))}
                     readOnlyMode={existingDarsReadOnlyMode || isAttested}
                     includeInstructions={!existingDarsReadOnlyMode}
                     darCode={formData.darCode}

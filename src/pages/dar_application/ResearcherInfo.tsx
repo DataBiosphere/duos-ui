@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import { Alert } from 'src/components/Alert'
-import { Link } from 'react-router-dom'
 import ERACommons from 'src/components/era_commons/ERACommons'
 import CollaboratorList from './collaborator/CollaboratorList'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
@@ -9,22 +8,40 @@ import './dar_application.css'
 import { nihAccountLabel, nihAccountInstructions } from 'src/components/era_commons/ERACommonsUtils'
 import {
   ERACommonsDisplay,
-} from '../../components/era_commons/ERACommonsDisplay'
+} from 'src/components/era_commons/ERACommonsDisplay'
+import { CombinedDataAccessRequest, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+import { ValidationError } from './FormValidationState'
+
+interface FieldChange {
+  key: string
+  value: unknown
+}
+
+export interface ResearcherInfoProps {
+  allSigningOfficials?: SimplifiedDuosUser[]
+  readOnlyMode?: boolean
+  includeInstructions?: boolean
+  countriesOfOperation: string[]
+  darCode?: string
+  eRACommonsDestination?: string
+  formFieldChange: (change: FieldChange) => void
+  onNihStatusUpdate: (valid: boolean) => void
+  formData: Partial<CombinedDataAccessRequest>
+  researcher: DuosUser
+  setLabCollaboratorsCompleted: (completed: boolean) => void
+  setInternalCollaboratorsCompleted: (completed: boolean) => void
+  setExternalCollaboratorsCompleted: (completed: boolean) => void
+  showNihValidationError?: boolean
+  showValidationMessages?: boolean
+  validation: Record<string, ValidationError | undefined>
+  formValidationChange: (change: { key: Array<string | number> | string, validation: ValidationError }) => void
+  ariaLevel?: number
+  eraCommonsId?: string
+}
 
 const linkStyle = { color: '#2FA4E7' }
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' }
 const noTopMarginStyle = { marginTop: 0, paddingTop: 0 }
-const profileLink = <Link to="/profile" style={linkStyle}>Your Profile</Link>
-const profileUnsubmitted = (
-  <span>
-    Please submit {profileLink} to be able to create a Data Access Request
-  </span>
-)
-const profileSubmitted = (
-  <span>
-    Please make sure {profileLink} is updated as it will be used to pre-populate parts of the Data Access Request
-  </span>
-)
 const libraryCardLink = (
   <a
     href="https://support.terra.bio/hc/en-us/articles/28510945983003-How-to-Submit-a-Data-Access-Request-DAR-in-DUOS"
@@ -36,12 +53,11 @@ const libraryCardLink = (
   </a>
 )
 
-export default function ResearcherInfo(props) {
+export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
   const {
     allSigningOfficials,
     readOnlyMode,
     includeInstructions,
-    completed,
     countriesOfOperation,
     darCode,
     eRACommonsDestination,
@@ -62,39 +78,46 @@ export default function ResearcherInfo(props) {
   const accountLabel = nihAccountLabel()
   const accountLink = nihAccountInstructions()
 
-  const formatSOString = (name, email) => {
+  const formatSOString = (name?: string, email?: string) => {
     if (isEmpty(name)) {
       return ''
     }
     const nameString = `${name}`
-    const emailString = !isNil(email) ? ` (${email})` : ''
+    const emailString = isNil(email) ? '' : ` (${email})`
     return nameString + emailString
   }
 
   const onValidationChange = formValidationChange
 
   const libraryCardReqSatisfied = useMemo(() => {
+    // Avoid showing the warning before researcher data has loaded.
+    if (isNil(researcher) || isEmpty(researcher)) {
+      return null
+    }
     return !isNil(researcher.libraryCard)
   }, [researcher])
+
+  const anvilUseYesNoUndefined = (anvilUse: boolean | undefined): string | undefined => {
+    if (anvilUse === true) return 'yes'
+    if (anvilUse === false) return 'no'
+    return undefined
+  }
 
   return (
     <div data-cy="researcher-info">
       <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
-        {(completed === false || libraryCardReqSatisfied === false) && (
-          <div data-cy="researcher-info-profile-submitted">
+        {(libraryCardReqSatisfied === false) && (
+          <div data-cy="researcher-info-library-card-required">
             {!readOnlyMode && (
               <Alert
-                id="profileSubmitted"
+                id="libraryCardRequired"
                 type="danger"
+                description=""
                 title={(
                   <span className="errored">
-                    {`You must submit `}
-                    {profileLink}
-                    {` and obtain a `}
-                    {libraryCardLink}
-                    {` from your Signing official before you can submit a Data Access Request.`}
+                    You must obtain a {libraryCardLink} from your Signing official before you can submit a Data Access Request.
                   </span>
-                )}
+                ) as unknown as string}
               />
             )}
           </div>
@@ -116,14 +139,15 @@ export default function ResearcherInfo(props) {
           <h3>1.2 Researcher Identification</h3>
           {!readOnlyMode && (
             <span className={`${showNihValidationError ? 'errored' : 'default-color'}`}>
-              Please authenticate with&nbsp;
+              Please authenticate with {' '}
               <a target="_blank" rel="noreferrer" href={accountLink}>{accountLabel}</a>
-              &nbsp;in order to proceed.
+              {' '}in order to proceed.
             </span>
           )}
           <div className="flex-row" style={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-            {!readOnlyMode
-              ? (
+            {readOnlyMode
+              ? (<ERACommonsDisplay eraCommonsId={eraCommonsId} />)
+              : (
                   <ERACommons
                     destination={eRACommonsDestination}
                     researcherProfile={researcher}
@@ -132,25 +156,8 @@ export default function ResearcherInfo(props) {
                     header={true}
                     required={!readOnlyMode} // In read-only mode, this is not required
                   />
-                )
-              : (<ERACommonsDisplay eraCommonsId={eraCommonsId} />)}
+                )}
           </div>
-          <fieldset>
-            {
-              (completed === false && libraryCardReqSatisfied === true) && (
-                <div data-cy="researcher-info-profile-unsubmitted" className="rp-alert">
-                  {!readOnlyMode && <Alert id="profileUnsubmitted" type="danger" title={profileUnsubmitted} />}
-                </div>
-              )
-            }
-            {
-              (completed === true && libraryCardReqSatisfied === true) && (
-                <div data-cy="researcher-info-profile-submitted" className="rp-alert">
-                  {!readOnlyMode && <Alert id="profileSubmitted" type="info" title={profileSubmitted} />}
-                </div>
-              )
-            }
-          </fieldset>
         </div>
 
         <div className="dar-application-row">
@@ -189,7 +196,7 @@ export default function ResearcherInfo(props) {
             onValidationChange={onValidationChange}
             selectOptions={countriesOfOperation}
             optionsAreString={true}
-            onChange={({ key, value }) => formFieldChange({ key, value })}
+            onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
           />
         </div>
 
@@ -262,11 +269,11 @@ export default function ResearcherInfo(props) {
             validation={validation.signingOfficial}
             onValidationChange={onValidationChange}
             disabled={readOnlyMode}
-            onChange={({ key, value: { displayText, email } }) => {
+            onChange={({ key, value: { displayText, email } }: { key: string, value: { displayText: string, email?: string } }) => {
               formFieldChange({ key, value: displayText })
               formFieldChange({ key: 'signingOfficialEmail', value: email })
             }}
-            selectOptions={(allSigningOfficials?.map((so) => {
+            selectOptions={(allSigningOfficials?.map((so: SimplifiedDuosUser) => {
               const displayText = formatSOString(so.displayName, so.email)
               return { displayText, email: so.email }
             }) || [''])}
@@ -289,7 +296,7 @@ export default function ResearcherInfo(props) {
               ariaLevel={ariaLevel + 1}
               validation={validation.itDirector}
               onValidationChange={onValidationChange}
-              onChange={({ key, value }) => formFieldChange({ key, value })}
+              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
               defaultValue={formData.itDirector}
             />
             <FormField
@@ -300,7 +307,7 @@ export default function ResearcherInfo(props) {
               ariaLevel={ariaLevel + 1}
               validation={validation.itDirectorEmail}
               onValidationChange={onValidationChange}
-              onChange={({ key, value }) => formFieldChange({ key, value })}
+              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
               defaultValue={formData.itDirectorEmail}
             />
           </div>
@@ -316,9 +323,8 @@ export default function ResearcherInfo(props) {
               titleStyle={titleStyle}
               description={(
                 <span key="anvil-use-description" style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline' }}>
-                  Will you perform all of your data storage and analysis for this project on the&nbsp;
-                  <a rel="noopener noreferrer" href="https://anvil.terra.bio/" target="_blank"> AnVIL</a>
-                  ?
+                  Will you perform all of your data storage and analysis for this project on the {' '}
+                  <a rel="noopener noreferrer" href="https://anvil.terra.bio/" target="_blank">AnVIL</a>?
                 </span>
               )}
               options={[
@@ -330,15 +336,11 @@ export default function ResearcherInfo(props) {
               orientation="horizontal"
               validation={validation.anvilUse}
               onValidationChange={onValidationChange}
-              onChange={({ key, value }) => {
+              onChange={({ key, value }: FieldChange) => {
                 const normalizedValue = value === 'yes'
                 formFieldChange({ key, value: normalizedValue })
               }}
-              defaultValue={formData.anvilUse === true
-                ? 'yes'
-                : formData.anvilUse === false
-                  ? 'no'
-                  : undefined}
+              defaultValue={anvilUseYesNoUndefined(formData.anvilUse)}
             />
 
             <div className="row no-margin">
@@ -361,7 +363,7 @@ export default function ResearcherInfo(props) {
                             ariaLevel={ariaLevel + 2}
                             validation={validation.localUse}
                             onValidationChange={onValidationChange}
-                            onChange={({ key, value }) => formFieldChange({ key, value })}
+                            onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                           />
                         </div>
                       </div>
@@ -376,7 +378,7 @@ export default function ResearcherInfo(props) {
                           ariaLevel={ariaLevel + 2}
                           validation={validation.cloudUse}
                           onValidationChange={onValidationChange}
-                          onChange={({ key, value }) => formFieldChange({ key, value })}
+                          onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                         />
                       </div>
                     </div>
@@ -387,7 +389,7 @@ export default function ResearcherInfo(props) {
                             <FormField
                               id="cloudProvider"
                               title="Name of Cloud Provider"
-                              onChange={({ key, value }) => formFieldChange({ key, value })}
+                              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                               defaultValue={formData.cloudProvider}
                               validators={[FormValidators.REQUIRED]}
                               disabled={!isEmpty(darCode) || readOnlyMode}
@@ -404,7 +406,7 @@ export default function ResearcherInfo(props) {
                               validators={[FormValidators.REQUIRED]}
                               disabled={!isNil(darCode) || readOnlyMode}
                               ariaLevel={ariaLevel + 3}
-                              onChange={({ key, value }) => formFieldChange({ key, value })}
+                              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                               validation={validation.cloudProviderType}
                               onValidationChange={onValidationChange}
                             />
@@ -426,7 +428,7 @@ export default function ResearcherInfo(props) {
                               rows={6}
                               maxLength={2000}
                               ariaLevel={ariaLevel + 3}
-                              onChange={({ key, value }) => formFieldChange({ key, value })}
+                              onChange={({ key, value }: FieldChange) => formFieldChange({ key, value })}
                               validation={validation.cloudProviderDescription}
                               onValidationChange={onValidationChange}
                             />
