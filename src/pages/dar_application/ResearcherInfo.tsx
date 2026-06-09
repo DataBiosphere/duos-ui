@@ -97,6 +97,12 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
     return !isNil(researcher.libraryCard)
   }, [researcher])
 
+  const anvilUseYesNoUndefined = (anvilUse: boolean | undefined): string | undefined => {
+    if (anvilUse === true) return 'yes'
+    if (anvilUse === false) return 'no'
+    return undefined
+  }
+
   return (
     <div data-cy="researcher-info">
       <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
@@ -139,8 +145,9 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
             </span>
           )}
           <div className="flex-row" style={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-            {!readOnlyMode
-              ? (
+            {readOnlyMode
+              ? (<ERACommonsDisplay eraCommonsId={eraCommonsId} />)
+              : (
                   <ERACommons
                     destination={eRACommonsDestination}
                     researcherProfile={researcher}
@@ -149,8 +156,7 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
                     header={true}
                     required={!readOnlyMode} // In read-only mode, this is not required
                   />
-                )
-              : (<ERACommonsDisplay eraCommonsId={eraCommonsId} />)}
+                )}
           </div>
         </div>
 
@@ -317,9 +323,8 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
               titleStyle={titleStyle}
               description={(
                 <span key="anvil-use-description" style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline' }}>
-                  Will you perform all of your data storage and analysis for this project on the&nbsp;
-                  <a rel="noopener noreferrer" href="https://anvil.terra.bio/" target="_blank"> AnVIL</a>
-                  ?
+                  Will you perform all of your data storage and analysis for this project on the {' '}
+                  <a rel="noopener noreferrer" href="https://anvil.terra.bio/" target="_blank">AnVIL</a>?
                 </span>
               )}
               options={[
@@ -335,11 +340,7 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
                 const normalizedValue = value === 'yes'
                 formFieldChange({ key, value: normalizedValue })
               }}
-              defaultValue={formData.anvilUse === true
-                ? 'yes'
-                : formData.anvilUse === false
-                  ? 'no'
-                  : undefined}
+              defaultValue={anvilUseYesNoUndefined(formData.anvilUse)}
             />
 
             <div className="row no-margin">

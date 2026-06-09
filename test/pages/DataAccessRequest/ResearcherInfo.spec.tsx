@@ -122,7 +122,7 @@ describe('Researcher Info', () => {
       userId: 1,
       displayName: 'Sample User',
       email: 'sample.user@example.test',
-    } as Awaited<Promise<DuosUser>>)
+    } as DuosUser)
   })
 
   it('does not show the library card warning before async researcher load completes', async () => {
