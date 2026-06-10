@@ -1,20 +1,13 @@
 import { Config } from './config'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import { extractError } from 'src/utils/ErrorUtils'
-import { Notifications } from 'src/libs/utils'
 
 export const ErrorReporter = {
 
   report: async (msg: string): Promise<void> => {
     const formattedMsg = await ErrorReporter.format(msg)
-    try {
-      await Metrics.captureEvent(eventList.errorReport, { error: formattedMsg })
-    }
-    catch (error) {
-      const message = extractError(error)
-      Notifications.showError({ text: message })
-    }
+    // Best-effort telemetry: a failure to report must never surface to the user.
+    await Metrics.captureEvent(eventList.errorReport, { error: formattedMsg }).catch(() => {})
   },
 
   format: async (msg: string): Promise<string> => {
@@ -26,5 +19,3 @@ export const ErrorReporter = {
   },
 
 }
-
-export default ErrorReporter
