@@ -37,6 +37,7 @@ export const SignInButton = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConsentDown, setIsConsentDown] = useState<boolean>(false)
   const [isSamDown, setIsSamDown] = useState<boolean>(false)
+  const [isButtonActive, setIsButtonActive] = useState<boolean>(false)
 
   // Utility function called in the normal success case and in the undocumented 409 case
   // Check for ToS Acceptance - redirect user if not set.
@@ -185,6 +186,20 @@ export const SignInButton = () => {
   }
 
   const tooltipStyle: React.CSSProperties = { maxWidth: '30vw', textWrap: 'wrap' }
+  const isSignInDisabled = isLoading || isConsentDown || isSamDown
+  const signInButtonStyle: React.CSSProperties = {
+    height: 50,
+    width: 200,
+    fontSize: 18,
+    fontWeight: 500,
+    color: '#fff',
+    background: isButtonActive && !isSignInDisabled ? '#005d9a' : 'transparent',
+    border: '2px solid #fff',
+    borderRadius: 5,
+    cursor: isSignInDisabled ? 'not-allowed' : 'pointer',
+    opacity: isSignInDisabled ? 0.55 : 1,
+    transition: 'background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease',
+  }
 
   useEffect(() => {
     const init = async () => {
@@ -201,20 +216,17 @@ export const SignInButton = () => {
           data-tooltip-id="sam-disabled-sign-in-tooltip"
         >
           <button
-            style={{
-              height: 50,
-              width: 200,
-              fontSize: 18,
-              fontWeight: 500,
-              color: 'rgb(77, 114, 170)',
-              borderRadius: 5,
-            }}
+            style={signInButtonStyle}
+            onMouseEnter={() => setIsButtonActive(true)}
+            onMouseLeave={() => setIsButtonActive(false)}
+            onFocus={() => setIsButtonActive(true)}
+            onBlur={() => setIsButtonActive(false)}
             onClick={async () => {
               setIsLoading(true)
               Auth.signIn().then(onSuccess, onFailure)
               setIsLoading(false)
             }}
-            disabled={isLoading || isConsentDown || isSamDown}
+            disabled={isSignInDisabled}
           >
             {isLoading ? loadingElement() : 'Sign In'}
           </button>

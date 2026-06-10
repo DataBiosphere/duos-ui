@@ -61,6 +61,9 @@ describe('Sign In: Component Loads', function () {
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.contains(signInText).should('exist')
     cy.get('button').should('exist').and('not.be.disabled')
+    cy.get('button')
+      .should('have.css', 'color', 'rgb(255, 255, 255)')
+      .and('have.css', 'border-color', 'rgb(255, 255, 255)')
   })
 
   it('Sign In: On Success', function () {
