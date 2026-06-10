@@ -1,6 +1,5 @@
 import React from 'react'
 import App from 'src/App'
-import ErrorReporter from 'src/libs/ErrorReporter'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
