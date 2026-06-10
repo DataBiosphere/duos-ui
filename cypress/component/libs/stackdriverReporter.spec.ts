@@ -1,4 +1,4 @@
-import StackdriverReporter from 'src/libs/stackdriverReporter'
+import ErrorReporter from 'src/libs/ErrorReporter'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
 
@@ -26,7 +26,7 @@ describe('StackdriverReporter', () => {
       // The errorHandler.context will be undefined in this case
 
       // Call report without calling start first
-      cy.wrap(StackdriverReporter.report('Test error message')).then(() => {
+      cy.wrap(ErrorReporter.report('Test error message')).then(() => {
         // If the fix is working, this should not throw an error
         // The test passing means the error was silently handled
       })
@@ -35,7 +35,7 @@ describe('StackdriverReporter', () => {
     it('should format message correctly', () => {
       cy.stub(Config, 'getEnv').resolves('production')
 
-      cy.wrap(StackdriverReporter.format('Test message')).should('equal', '[production] Test message ')
+      cy.wrap(ErrorReporter.format('Test message')).should('equal', '[production] Test message ')
     })
   })
 
@@ -50,7 +50,7 @@ describe('StackdriverReporter', () => {
       cy.stub(Config, 'getEnv').resolves('prod')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      cy.wrap(StackdriverReporter.generateErrorConfig()).then((config: any) => {
+      cy.wrap(ErrorReporter.generateErrorConfig()).then((config: any) => {
         expect(config).to.deep.include({
           key: 'test-api-key',
           projectId: 'test-project',
@@ -74,7 +74,7 @@ describe('StackdriverReporter', () => {
       cy.stub(Config, 'getEnv').resolves('staging')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      cy.wrap(StackdriverReporter.generateErrorConfig()).then((config: any) => {
+      cy.wrap(ErrorReporter.generateErrorConfig()).then((config: any) => {
         expect(config.context.user).to.equal('anonymous')
       })
     })
@@ -90,7 +90,7 @@ describe('StackdriverReporter', () => {
       cy.stub(Config, 'getEnv').resolves('test')
 
       // Should not throw error even when key is nil
-      cy.wrap(StackdriverReporter.start())
+      cy.wrap(ErrorReporter.start())
     })
   })
 })

@@ -1,6 +1,6 @@
 import React from 'react'
 import App from 'src/App'
-import StackdriverReporter from 'src/libs/stackdriverReporter'
+import ErrorReporter from 'src/libs/ErrorReporter'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
@@ -43,7 +43,6 @@ describe('Main App Functions', () => {
   beforeEach(() => {
     cy.viewport(800, 600)
     cy.initApplicationConfig()
-    cy.stub(StackdriverReporter, 'start')
     cy.stub(Storage, 'setCurrentUser')
     cy.stub(ServiceStatus, 'getConsentStatus').returns(Promise.resolve(
       {
@@ -100,15 +99,6 @@ describe('Main App Functions', () => {
     cy.get('.wrap').should('exist')
     cy.get('.main').should('exist')
     cy.get('.body').contains('Data Use Oversight System').should('exist')
-  })
-
-  it('should initialize StackdriverReporter', () => {
-    cy.mount(
-      <MemoryRouter initialEntries={['/']}>
-        <App />
-      </MemoryRouter>,
-    )
-    cy.wrap(StackdriverReporter.start).should('have.been.calledOnce')
   })
 
   it('should display an error when ECM fails', () => {

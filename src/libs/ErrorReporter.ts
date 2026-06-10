@@ -2,10 +2,10 @@ import { Config } from './config'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 
-export const StackdriverReporter = {
+export const ErrorReporter = {
 
   report: async (msg) => {
-    const formattedMsg = await StackdriverReporter.format(msg)
+    const formattedMsg = await ErrorReporter.format(msg)
     try {
       await Metrics.captureEvent(eventList.errorReport, { error: formattedMsg })
     }
@@ -24,4 +24,4 @@ export const StackdriverReporter = {
 
 }
 
-export default StackdriverReporter
+export default ErrorReporter

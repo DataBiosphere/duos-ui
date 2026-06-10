@@ -2,7 +2,7 @@ import { redirectOnLogout } from 'src/libs/auth/auth'
 import eventList from 'src/libs/events'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
-import { StackdriverReporter } from 'src/libs/stackdriverReporter'
+import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
 import { Config } from 'src/libs/config'
 
@@ -55,7 +55,7 @@ export const reportError = (url: string, status: number): void => {
     .concat('Status: ')
     .concat(String(status))
   // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
-  StackdriverReporter.report(msg)
+  ErrorReporter.report(msg)
 }
 
 function buildUrlWithParams(url: string, params?: Params): string {

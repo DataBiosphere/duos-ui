@@ -4,7 +4,7 @@ import { User } from 'src/libs/ajax/User'
 import { Auth } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import { Metrics } from 'src/libs/ajax/Metrics'
-import { StackdriverReporter } from 'src/libs/stackdriverReporter'
+import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import { mockOidcUser } from '../Auth/mockOidcUser'
 import { BrowserRouter } from 'react-router-dom'
@@ -67,7 +67,7 @@ describe('Sign In: Component Loads', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
     const tosAcceptedUser = { userStatusInfo: userStatus, ...duosUser }
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: tosAcceptedUser }).as('getMe')
-    cy.stub(StackdriverReporter, 'report').as('report')
+    cy.stub(ErrorReporter, 'report').as('report')
     cy.stub(Metrics, 'identify').as('identify')
     cy.stub(Metrics, 'syncProfile').as('syncProfile')
     cy.stub(Metrics, 'captureEvent').as('captureEvent')
@@ -88,7 +88,7 @@ describe('Sign In: Component Loads', function () {
     const tosAcceptedUser = { userStatusInfo: userStatus, ...bareUser }
     cy.stub(Auth, 'signIn').resolves(mockOidcUser)
     cy.intercept({ method: 'GET', url: '**/api/user/me' }, { statusCode: 200, body: tosAcceptedUser }).as('getMe')
-    cy.stub(StackdriverReporter, 'report').as('report')
+    cy.stub(ErrorReporter, 'report').as('report')
     cy.mount(<BrowserRouter><SignInButton /></BrowserRouter>)
     cy.get('button').click()
     cy.wait('@getMe').then(() => {
