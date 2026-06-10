@@ -1,6 +1,8 @@
 import { Config } from './config'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
+import { extractError } from 'src/utils/ErrorUtils'
+import { Notifications } from 'src/libs/utils'
 
 export const ErrorReporter = {
 
@@ -9,8 +11,9 @@ export const ErrorReporter = {
     try {
       await Metrics.captureEvent(eventList.errorReport, { error: formattedMsg })
     }
-    catch (_error) {
-      // swallow error to avoid user visible errors
+    catch (error) {
+      const message = extractError(error)
+      Notifications.showError({ text: message })
     }
   },
 

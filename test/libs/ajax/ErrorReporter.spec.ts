@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Config } from 'src/libs/config'
+import { Notifications } from 'src/libs/utils'
 import eventList from 'src/libs/events'
 
 vi.mock('src/libs/ajax/Metrics', () => ({
@@ -13,6 +14,12 @@ vi.mock('src/libs/ajax/Metrics', () => ({
 vi.mock('src/libs/config', () => ({
   Config: {
     getEnv: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/utils', () => ({
+  Notifications: {
+    showError: vi.fn(),
   },
 }))
 
@@ -48,7 +55,25 @@ describe('ErrorReporter', () => {
       })
     })
 
-    it('swallows errors thrown by Metrics.captureEvent', async () => {
+    it('does not show a notification when capture succeeds', async () => {
+      await ErrorReporter.report('all good')
+      expect(Notifications.showError).not.toHaveBeenCalled()
+    })
+
+    it('shows an error notification when Metrics.captureEvent throws', async () => {
+      vi.mocked(Metrics.captureEvent).mockRejectedValue(new Error('network down'))
+      await ErrorReporter.report('boom')
+      expect(Notifications.showError).toHaveBeenCalledOnce()
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'network down' })
+    })
+
+    it('shows a fallback message when the thrown error has no message', async () => {
+      vi.mocked(Metrics.captureEvent).mockRejectedValue('just a string')
+      await ErrorReporter.report('boom')
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Unknown error' })
+    })
+
+    it('does not throw when capture fails', async () => {
       vi.mocked(Metrics.captureEvent).mockRejectedValue(new Error('network down'))
       await expect(ErrorReporter.report('boom')).resolves.toBeUndefined()
     })
