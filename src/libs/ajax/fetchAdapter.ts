@@ -49,7 +49,13 @@ export interface FetchData<T> {
 
 const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
 
-export const reportError = (url: string, status: number): void => {
+export const reportError = async (url: string, status: number): Promise<void> => {
+  // Requests to the Bard API are metrics calls (its only consumer). ErrorReporter
+  // reports via metrics, so reporting a Bard failure would recurse infinitely.
+  const bardApiUrl = await Config.getBardApiUrl()
+  if (url.startsWith(bardApiUrl)) {
+    return
+  }
   const msg = 'Error fetching response: '
     .concat(JSON.stringify(url))
     .concat('Status: ')
