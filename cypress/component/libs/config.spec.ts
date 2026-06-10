@@ -1,4 +1,4 @@
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getSamApiUrl, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 describe('Config', () => {
@@ -134,12 +134,6 @@ describe('Config', () => {
     it('getProject should return project name based on environment', () => {
       cy.wrap(getProject()).then((result) => {
         expect(result).to.equal('broad-duos-test')
-      })
-    })
-
-    it('getSamApiUrl should return SAM API URL', () => {
-      cy.wrap(getSamApiUrl()).then((result) => {
-        expect(result).to.equal('https://test.sam.com')
       })
     })
 
