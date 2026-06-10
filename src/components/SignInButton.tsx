@@ -14,6 +14,7 @@ import { OidcUser } from 'src/libs/auth/oidcBroker'
 import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
+import './SignInButton.css'
 import { useNavigate } from 'react-router-dom'
 import { extractError } from 'src/utils/ErrorUtils'
 
@@ -201,14 +202,7 @@ export const SignInButton = () => {
           data-tooltip-id="sam-disabled-sign-in-tooltip"
         >
           <button
-            style={{
-              height: 50,
-              width: 200,
-              fontSize: 18,
-              fontWeight: 500,
-              color: 'rgb(77, 114, 170)',
-              borderRadius: 5,
-            }}
+            className="sign-in-button"
             onClick={async () => {
               setIsLoading(true)
               Auth.signIn().then(onSuccess, onFailure)
