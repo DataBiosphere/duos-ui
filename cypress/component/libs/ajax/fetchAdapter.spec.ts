@@ -688,15 +688,16 @@ describe('fetchAdapter - Fetch methods', () => {
           }),
         )
 
-        return fetchPost('https://bard.example.org/api/event', { event: 'test' }).then(
-          () => {
-            throw new Error('Should have thrown')
-          },
-          () => {
-            // Reporting a metrics failure via metrics would recurse infinitely.
-            expect(reportStub.called).to.equal(false)
-          },
-        )
+        // The request rejects; reportError runs async (fire-and-forget).
+        return fetchPost('https://bard.example.org/api/event', { event: 'test' }).catch(() => {})
+      })
+
+      // Reporting a Bard failure via Bard would recurse infinitely, so it stays silent.
+      // Wait to give the fire-and-forget reportError a chance to (wrongly) report.
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(50)
+      cy.then(() => {
+        expect(reportStub.called).to.equal(false)
       })
     })
 
@@ -713,14 +714,13 @@ describe('fetchAdapter - Fetch methods', () => {
           }),
         )
 
-        return fetchPost('/api/dar/v2', { data: 'test' }).then(
-          () => {
-            throw new Error('Should have thrown')
-          },
-          () => {
-            expect(reportStub.calledOnce).to.equal(true)
-          },
-        )
+        // The request rejects; reportError runs async (fire-and-forget).
+        return fetchPost('/api/dar/v2', { data: 'test' }).catch(() => {})
+      })
+
+      // Retries until the async reportError reports the failure.
+      cy.wrap(null).should(() => {
+        expect(reportStub.calledOnce).to.equal(true)
       })
     })
   })
