@@ -17,7 +17,7 @@
 .sign-in-button:not(:disabled):hover,
 .sign-in-button:not(:disabled):focus-visible {
   color: #fff;
-  background-color: rgba(255, 255, 255, 0.16);
+  background-color: #005d9a;
   border-color: #fff;
 }
 

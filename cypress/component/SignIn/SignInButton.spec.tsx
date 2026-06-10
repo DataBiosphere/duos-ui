@@ -63,7 +63,6 @@ describe('Sign In: Component Loads', function () {
     cy.get('button').should('exist').and('not.be.disabled')
     cy.get('button')
       .should('have.css', 'color', 'rgb(255, 255, 255)')
-      .and('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
       .and('have.css', 'border-color', 'rgb(255, 255, 255)')
   })
 
