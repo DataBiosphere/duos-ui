@@ -414,9 +414,17 @@ export const DataLibrary: React.FC = () => {
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {/* Asset count */}
           {isFetching
-            ? <Skeleton variant="text" width={120} sx={{ fontSize: '1.6rem', mb: 1 }} />
+            ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px', mb: 1 }} />
             : (
-                <Typography sx={{ fontWeight: 600, fontSize: '1.6rem', mb: 1 }}>
+                <Typography
+                  sx={{
+                    color: '#00609f',
+                    fontFamily: 'Montserrat, sans-serif',
+                    fontSize: '15px',
+                    fontWeight: 'bold',
+                    mb: 1,
+                  }}
+                >
                   {(data?.total ?? 0).toLocaleString()}
                   {' '}
                   {data?.total === 1
