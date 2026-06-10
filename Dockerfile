@@ -27,9 +27,9 @@ RUN pnpm run build
 
 # build the server
 COPY server /usr/src/app/server
-RUN pnpm --dir /usr/src/app/server --ignore-workspace ci \
-	&& pnpm --dir /usr/src/app/server --ignore-workspace run build \
-	&& CI=true pnpm --dir /usr/src/app/server --ignore-workspace prune --prod --loglevel warn
+RUN pnpm --dir /usr/src/app/server ci \
+	&& pnpm --dir /usr/src/app/server run build \
+	&& CI=true pnpm --dir /usr/src/app/server prune --prod --loglevel warn
 
 # Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:5352ed178d580cf294f97d3fdc3641be82678da72d85d863455f6fdd51bb52f9
