@@ -46,14 +46,9 @@ Cypress.Commands.add('initApplicationConfig', () => {
     tag: '',
     bardApiUrl: '',
     apiUrl: '',
-    ontologyApiUrl: '',
     terraUrl: '',
     tdrApiUrl: '',
     ecmApiUrl: '',
-    errorApiKey: '',
-    profileUrl: '',
-    nihUrl: '',
-    gaId: '',
     features: {},
   })
 })
