@@ -4,7 +4,7 @@ import eventList from 'src/libs/events'
 
 export const ErrorReporter = {
 
-  report: async (msg) => {
+  report: async (msg: string): Promise<void> => {
     const formattedMsg = await ErrorReporter.format(msg)
     try {
       await Metrics.captureEvent(eventList.errorReport, { error: formattedMsg })
@@ -14,7 +14,7 @@ export const ErrorReporter = {
     }
   },
 
-  format: async (msg) => {
+  format: async (msg: string): Promise<string> => {
     const env = await Config.getEnv()
     return '['.concat(env)
       .concat('] ')
