@@ -3,12 +3,12 @@ name: Vitest and Cypress tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-permissions:
-  contents: read
-  pull-requests: write
 jobs:
   vitest-run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -36,18 +36,20 @@ jobs:
           path: |
             coverage/coverage-report.xml
           if-no-files-found: warn
-      - name: Publish JaCoCo report to PR
+      - name: Publish coverage report to PR
         if: github.event_name == 'pull_request' && always()
-        uses: madrapps/jacoco-report@50d3aff4548aa991e6753342d9ba291084e63848 # v1.7.2
+        uses: 5monkeys/cobertura-action@ee5787cc56634acddedc51f21c7947985531e6eb # v14
         with:
-          paths: ${{ github.workspace }}/coverage/coverage-report.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: DUOS Coverage Report
-          update-comment: true
-          skip-if-no-changes: false
-          comment-type: pr_comment
+          path: coverage/coverage-report.xml
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          report_name: DUOS Coverage Report
+          minimum_coverage: 0
+          show_line: true
+          show_branch: true
   cypress-run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
