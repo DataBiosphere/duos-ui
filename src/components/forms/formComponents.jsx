@@ -554,7 +554,7 @@ export const FormDatePicker = (config) => {
     readOnly ? 'readonly' : '',
   ].filter(Boolean).join(' ')
   return (
-    <div className={`form-calendar ${stateClassNames} ${!isValid(validation) ? 'errored' : ''}`}>
+    <div className={`form-calendar ${stateClassNames} ${isValid(validation) ? '' : 'errored'}`}>
       <DuosDatePicker
         id={id}
         label={label}
