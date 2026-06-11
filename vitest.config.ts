@@ -16,5 +16,9 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['test/**/*.{spec,test}.{js,jsx,ts,tsx}'],
     exclude: ['build/**', 'cypress/**', 'node_modules/**', 'server/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: [['cobertura', { file: 'coverage-report.xml' }]],
+    },
   },
 })
