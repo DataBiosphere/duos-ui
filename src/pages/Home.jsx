@@ -121,10 +121,36 @@ const Home = (props) => {
           width: 320px;
           height: 160px;
         }
+        .library-item {
+          width: 344px;
+          height: 240px;
+          border: 1.5px solid rgba(0, 0, 0, 0.08);
+          border-radius: 12px;
+          padding: 0.75rem;
+          cursor: pointer;
+          box-sizing: border-box;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        .library-item:hover {
+          transform: translateY(-4px) scale(1.03);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+          border-color: rgba(0, 0, 0, 0.18);
+        }
+        .library-item-label {
+          height: 44px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          overflow: hidden;
+        }
         @media (max-width: 768px) {
           .logo-card {
             width: 280px;
             height: 140px;
+          }
+          .library-item {
+            width: 304px;
+            height: 220px;
           }
           .logo-grid {
             gap: 1.5rem !important;
@@ -135,6 +161,11 @@ const Home = (props) => {
             width: 100%;
             max-width: 320px;
             height: 160px;
+          }
+          .library-item {
+            width: 100%;
+            max-width: 344px;
+            height: 240px;
           }
           .logo-grid {
             gap: 1rem !important;
@@ -238,7 +269,7 @@ const Home = (props) => {
 
                   return (
                     <OverflowTooltip key={library.key} id={library.key} tooltipText={tooltipText}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                      <div className="library-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                         <div className="logo-card" style={cardStyle}>
                           <Link
                             to={isLogged ? libraryPath : '#'}
@@ -265,13 +296,13 @@ const Home = (props) => {
                           </Link>
                         </div>
                         {label && (
-                          <div style={{
+                          <div className="library-item-label" style={{
                             fontSize: '16px',
                             color: '#333',
                             textAlign: 'center',
                             fontWeight: '600',
-                            maxWidth: '320px',
                             wordWrap: 'break-word',
+                            width: '100%',
                           }}
                           >
                             {label}
