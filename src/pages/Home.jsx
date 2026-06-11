@@ -296,14 +296,16 @@ const Home = (props) => {
                           </Link>
                         </div>
                         {label && (
-                          <div className="library-item-label" style={{
-                            fontSize: '16px',
-                            color: '#333',
-                            textAlign: 'center',
-                            fontWeight: '600',
-                            wordWrap: 'break-word',
-                            width: '100%',
-                          }}
+                          <div
+                            className="library-item-label"
+                            style={{
+                              fontSize: '16px',
+                              color: '#333',
+                              textAlign: 'center',
+                              fontWeight: '600',
+                              wordWrap: 'break-word',
+                              width: '100%',
+                            }}
                           >
                             {label}
                           </div>
