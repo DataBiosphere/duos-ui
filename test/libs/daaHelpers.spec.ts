@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import type { DAAObject } from 'src/types/model'
 import {
   getOwnedDaas,
@@ -39,8 +40,8 @@ describe('daaHelpers', () => {
       ]
 
       const ownedByDac1 = getOwnedDaas(daas, 1)
-      expect(ownedByDac1).to.have.lengthOf(2)
-      expect(ownedByDac1.map(d => d.daaId)).to.deep.equal([1, 3])
+      expect(ownedByDac1).toHaveLength(2)
+      expect(ownedByDac1.map(d => d.daaId)).toEqual([1, 3])
     })
 
     it('returns empty array when no DAAs are owned by the DAC', () => {
@@ -50,12 +51,12 @@ describe('daaHelpers', () => {
       ]
 
       const ownedByDac1 = getOwnedDaas(daas, 1)
-      expect(ownedByDac1).to.have.lengthOf(0)
+      expect(ownedByDac1).toHaveLength(0)
     })
 
     it('returns empty array for empty input', () => {
       const ownedByDac1 = getOwnedDaas([], 1)
-      expect(ownedByDac1).to.have.lengthOf(0)
+      expect(ownedByDac1).toHaveLength(0)
     })
   })
 
@@ -68,8 +69,8 @@ describe('daaHelpers', () => {
       ]
 
       const sharedWithDac1 = getSharedDaas(daas, 1)
-      expect(sharedWithDac1).to.have.lengthOf(2)
-      expect(sharedWithDac1.map(d => d.daaId)).to.deep.equal([2, 3])
+      expect(sharedWithDac1).toHaveLength(2)
+      expect(sharedWithDac1.map(d => d.daaId)).toEqual([2, 3])
     })
 
     it('returns empty array when no DAAs are shared with the DAC', () => {
@@ -79,12 +80,12 @@ describe('daaHelpers', () => {
       ]
 
       const sharedWithDac1 = getSharedDaas(daas, 1)
-      expect(sharedWithDac1).to.have.lengthOf(0)
+      expect(sharedWithDac1).toHaveLength(0)
     })
 
     it('returns empty array for empty input', () => {
       const sharedWithDac1 = getSharedDaas([], 1)
-      expect(sharedWithDac1).to.have.lengthOf(0)
+      expect(sharedWithDac1).toHaveLength(0)
     })
   })
 
@@ -97,7 +98,7 @@ describe('daaHelpers', () => {
       ]
 
       const sorted = sortDaasByCreationDate(daas)
-      expect(sorted.map(d => d.daaId)).to.deep.equal([2, 3, 1])
+      expect(sorted.map(d => d.daaId)).toEqual([2, 3, 1])
     })
 
     it('does not modify the original array', () => {
@@ -108,19 +109,19 @@ describe('daaHelpers', () => {
       const original = [...daas]
 
       sortDaasByCreationDate(daas)
-      expect(daas).to.deep.equal(original)
+      expect(daas).toEqual(original)
     })
 
     it('handles empty array', () => {
       const sorted = sortDaasByCreationDate([])
-      expect(sorted).to.have.lengthOf(0)
+      expect(sorted).toHaveLength(0)
     })
 
     it('handles single DAA', () => {
       const daas = [createMockDaa({ daaId: 1 })]
       const sorted = sortDaasByCreationDate(daas)
-      expect(sorted).to.have.lengthOf(1)
-      expect(sorted[0].daaId).to.equal(1)
+      expect(sorted).toHaveLength(1)
+      expect(sorted[0].daaId).toBe(1)
     })
   })
 
@@ -133,7 +134,7 @@ describe('daaHelpers', () => {
       ]
 
       const defaultDaa = getDefaultDaaForDac(1, daas, assigned)
-      expect(defaultDaa?.daaId).to.equal(5)
+      expect(defaultDaa?.daaId).toBe(5)
     })
 
     it('returns first shared DAA if none assigned and shared DAAs exist', () => {
@@ -144,7 +145,7 @@ describe('daaHelpers', () => {
       ]
 
       const defaultDaa = getDefaultDaaForDac(1, daas)
-      expect(defaultDaa?.daaId).to.equal(1) // First by creation date
+      expect(defaultDaa?.daaId).toBe(1) // First by creation date
     })
 
     it('returns first owned DAA if no assigned and no shared DAAs', () => {
@@ -154,12 +155,12 @@ describe('daaHelpers', () => {
       ]
 
       const defaultDaa = getDefaultDaaForDac(1, daas)
-      expect(defaultDaa?.daaId).to.equal(2) // First by creation date
+      expect(defaultDaa?.daaId).toBe(2) // First by creation date
     })
 
     it('returns null if no DAAs available', () => {
       const defaultDaa = getDefaultDaaForDac(1, [])
-      expect(defaultDaa).to.equal(null)
+      expect(defaultDaa).toBe(null)
     })
 
     it('prefers shared DAAs over owned DAAs when none assigned', () => {
@@ -169,7 +170,7 @@ describe('daaHelpers', () => {
       ]
 
       const defaultDaa = getDefaultDaaForDac(1, daas)
-      expect(defaultDaa?.daaId).to.equal(2) // Shared DAA, earlier date
+      expect(defaultDaa?.daaId).toBe(2) // Shared DAA, earlier date
     })
   })
 
@@ -179,7 +180,7 @@ describe('daaHelpers', () => {
       const daas = [selected]
 
       const tab = getDefaultTabForDac(1, daas, selected)
-      expect(tab).to.equal('owned')
+      expect(tab).toBe('owned')
     })
 
     it('returns "shared" tab if selected DAA is from another DAC', () => {
@@ -187,7 +188,7 @@ describe('daaHelpers', () => {
       const daas = [selected]
 
       const tab = getDefaultTabForDac(1, daas, selected)
-      expect(tab).to.equal('shared')
+      expect(tab).toBe('shared')
     })
 
     it('returns "shared" tab if no DAA assigned and shared DAAs exist', () => {
@@ -196,7 +197,7 @@ describe('daaHelpers', () => {
       ]
 
       const tab = getDefaultTabForDac(1, daas)
-      expect(tab).to.equal('shared')
+      expect(tab).toBe('shared')
     })
 
     it('returns "owned" tab if no DAA assigned and no shared DAAs', () => {
@@ -205,52 +206,52 @@ describe('daaHelpers', () => {
       ]
 
       const tab = getDefaultTabForDac(1, daas)
-      expect(tab).to.equal('owned')
+      expect(tab).toBe('owned')
     })
 
     it('returns "owned" tab as fallback when no DAAs at all', () => {
       const tab = getDefaultTabForDac(1, [])
-      expect(tab).to.equal('owned')
+      expect(tab).toBe('owned')
     })
   })
 
   describe('isDaaOwnedByDac', () => {
     it('returns true if DAA is owned by the DAC', () => {
       const daa = createMockDaa({ initialDacId: 1 })
-      expect(isDaaOwnedByDac(daa, 1)).to.equal(true)
+      expect(isDaaOwnedByDac(daa, 1)).toBe(true)
     })
 
     it('returns false if DAA is not owned by the DAC', () => {
       const daa = createMockDaa({ initialDacId: 1 })
-      expect(isDaaOwnedByDac(daa, 2)).to.equal(false)
+      expect(isDaaOwnedByDac(daa, 2)).toBe(false)
     })
   })
 
   describe('daaHelpers - No DAAs Configured', () => {
     it('getOwnedDaas should return empty array when no DAAs are configured', () => {
       const ownedDaas = getOwnedDaas([], 1)
-      expect(ownedDaas).to.have.lengthOf(0)
+      expect(ownedDaas).toHaveLength(0)
     })
 
     it('getSharedDaas should return empty array when no DAAs are configured', () => {
       const sharedDaas = getSharedDaas([], 1)
-      expect(sharedDaas).to.have.lengthOf(0)
+      expect(sharedDaas).toHaveLength(0)
     })
 
     it('getDefaultDaaForDac should return null when no DAAs are configured', () => {
       const defaultDaa = getDefaultDaaForDac(1, [])
-      expect(defaultDaa).to.equal(null)
+      expect(defaultDaa).toBe(null)
     })
 
     it('getDefaultTabForDac should return "owned" tab when no DAAs are configured', () => {
       const defaultTab = getDefaultTabForDac(1, [])
-      expect(defaultTab).to.equal('owned')
+      expect(defaultTab).toBe('owned')
     })
 
     it('isDaaOwnedByDac should return correct ownership status', () => {
       const daa = createMockDaa({ initialDacId: 1 })
-      expect(isDaaOwnedByDac(daa, 1)).to.equal(true)
-      expect(isDaaOwnedByDac(daa, 2)).to.equal(false)
+      expect(isDaaOwnedByDac(daa, 1)).toBe(true)
+      expect(isDaaOwnedByDac(daa, 2)).toBe(false)
     })
   })
 })
