@@ -92,6 +92,82 @@
 }
 
 /* ----------------------------------------------------
+  formDatePicker
+------------------------------------------------------*/
+.form-calendar {
+  position: relative;
+  width: 100%;
+}
+
+.form-calendar .MuiFormControl-root,
+.form-calendar .MuiPickersTextField-root,
+.form-calendar .MuiPickersInputBase-root {
+  width: 100%;
+}
+
+.form-calendar .MuiPickersInputBase-root {
+  background-color: #fff;
+  border-color: #ccc;
+  color: #555555;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  min-height: 40px;
+}
+
+.form-calendar .MuiPickersInputBase-input {
+  box-sizing: border-box;
+  color: #555555;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  padding: 8px 46px 8px 15px;
+}
+
+.form-calendar .MuiInputLabel-root {
+  color: #555555;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
+
+.form-calendar.disabled .MuiPickersInputBase-input,
+.form-calendar.readonly .MuiPickersInputBase-input {
+  -webkit-text-fill-color: #555555;
+  color: #555555;
+  opacity: 1;
+  padding: 16px 46px 16px 15px;
+}
+
+.form-calendar.disabled .MuiPickersInputBase-root,
+.form-calendar.readonly .MuiPickersInputBase-root {
+  background-color: #eeeeee;
+  color: #555555;
+  min-height: 52px;
+  opacity: 1;
+  padding-right: 8px;
+}
+
+.form-calendar.disabled .MuiInputLabel-root,
+.form-calendar.readonly .MuiInputLabel-root {
+  color: #555555;
+}
+
+.form-calendar.disabled,
+.form-calendar.readonly {
+  cursor: not-allowed;
+  margin-bottom: 1rem;
+}
+
+.form-calendar.disabled .MuiPickersInputBase-root,
+.form-calendar.disabled .MuiPickersInputBase-input,
+.form-calendar.disabled button,
+.form-calendar.readonly .MuiPickersInputBase-root,
+.form-calendar.readonly .MuiPickersInputBase-input,
+.form-calendar.readonly button {
+  cursor: not-allowed;
+}
+
+/* ----------------------------------------------------
   formInputFile
 ------------------------------------------------------*/
 .form-file-upload {
@@ -149,4 +225,3 @@
   justify-content: flex-end;
   background: red;
 }
-
