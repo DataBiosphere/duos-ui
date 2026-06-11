@@ -18,7 +18,7 @@ export default defineConfig({
     exclude: ['build/**', 'cypress/**', 'node_modules/**', 'server/**'],
     coverage: {
       provider: 'v8',
-      reporter: ['cobertura'],
+      reporter: [['cobertura', { file: 'coverage-report.xml' }]],
     },
   },
 })
