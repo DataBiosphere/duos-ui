@@ -47,6 +47,8 @@ jobs:
           minimum_coverage: 0
           show_line: true
           show_branch: true
+          show_class_names: true
+          only_changed_files: true
   cypress-run:
     runs-on: ubuntu-latest
     permissions:
