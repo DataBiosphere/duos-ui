@@ -32,7 +32,7 @@ RUN pnpm --dir /usr/src/app/server ci \
 	&& CI=true pnpm --dir /usr/src/app/server prune --prod --loglevel warn
 
 # Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:5352ed178d580cf294f97d3fdc3641be82678da72d85d863455f6fdd51bb52f9
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:9f2376913120be40d4c7029b0cfbfce95536e73469c5f008263db3a901612cc6
 ARG NODE_ENV=production
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}
