@@ -104,6 +104,34 @@ DAA-related UI and workflows are permanently enabled in this codebase.
 - Stub all AJAX calls (`DAA`, `DAR`, `Collections`, etc.) using `cy.stub(Module, 'method').resolves(...)`.
 - Use `cy.initApplicationConfig()` in `beforeEach` for all component specs.
 
+## Unit / Integration Test Conventions (Vitest)
+
+Vitest covers pure functions, hooks, and component-level rendering that doesn't need a real
+browser. Cypress component specs remain the home for browser-dependent behavior. Coverage is
+collected via V8 and reported on PRs (see `.github/workflows/component-tests.yml`).
+
+- All Vitest specs live under `test/`, mirroring the `src/` path of the unit under test
+  (e.g. `src/components/Foo.tsx` → `test/components/Foo.spec.tsx`). Use the `.spec.{ts,tsx}`
+  suffix.
+- Import test globals explicitly from `vitest` (`import { describe, it, expect, vi } from 'vitest'`)
+  even though `globals` is enabled — keep it consistent with existing specs.
+- Render components with `@testing-library/react`. For anything that consumes the router, use the
+  shared `renderWithRouter` helper in `test/test-utils.tsx` rather than wrapping `MemoryRouter`
+  inline.
+- Wrap renders/interactions that trigger async state in `await act(async () => { ... })`, and prefer
+  `findBy*` queries over manual waits.
+- **Do not use `@testing-library/jest-dom` matchers** (`toBeInTheDocument`, `toHaveAttribute`, etc.) —
+  they are not set up. Assert with `.toBeTruthy()`, `.toBeNull()`, `.textContent`, and
+  `.getAttribute(...)`, matching existing specs.
+- Mock modules with `vi.mock('src/libs/...', () => ({ ... }))` and stub functions with
+  `vi.fn().mockResolvedValue(...)`. Call `vi.clearAllMocks()` in `beforeEach`.
+- Build fixtures with small factory helpers (e.g. `buildSnapshot(id, name)`) instead of repeating
+  object literals, so individual tests vary only the fields they assert on.
+- **Never use `new Date()` as a fixture value** that feeds an assertion — use a fixed ISO date
+  (e.g. `new Date('2026-04-30T12:00:00.000Z')`) so tests stay deterministic across timezones/midnight.
+- Query by accessible role/text (`getByRole('link', { name: ... })`, `findByText`) rather than by
+  DOM structure or test IDs where practical.
+
 ## Pre-PR Checklist
 
 Before raising a pull request, ensure:
@@ -113,6 +141,7 @@ Before raising a pull request, ensure:
 3. All new code is covered by component tests with meaningful assertions.
 4. Using SonarQube for IDE, verify no new SonarQube bugs, issues, or vulnerabilities are introduced.
 5. `pnpm run cypress:run:component` exits with **0 failing specs**.
+6. `pnpm test` exits with **0 failing specs** (run `pnpm run test:coverage` to check coverage locally).
 
 
 ### Common Lint / TypeScript Pitfalls to Avoid
