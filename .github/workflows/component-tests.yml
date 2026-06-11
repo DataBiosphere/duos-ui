@@ -1,8 +1,11 @@
 on: [pull_request]
 name: Vitest and Cypress tests
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
   vitest-run:
     runs-on: ubuntu-latest
@@ -24,7 +27,25 @@ jobs:
       - name: Install dependencies
         run: pnpm ci
       - name: Run Vitest
-        run: pnpm test
+        run: pnpm test --coverage
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: jacoco-report
+          path: |
+            coverage/cobertura-coverage.xml
+          if-no-files-found: warn
+      - name: Publish JaCoCo report to PR
+        if: github.event_name == 'pull_request' && always()
+        uses: madrapps/jacoco-report@50d3aff4548aa991e6753342d9ba291084e63848 # v1.7.2
+        with:
+          paths: ${{ github.workspace }}/build/jacoco-report/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: DUOS Coverage Report
+          update-comment: true
+          skip-if-no-changes: false
+          comment-type: pr_comment
   cypress-run:
     runs-on: ubuntu-latest
     steps:
