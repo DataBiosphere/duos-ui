@@ -9,7 +9,7 @@ import { DuosUser } from 'src/types/model'
 
 type MockDataCustodianTableProps = {
   researchers: DuosUser[]
-  signingOfficial: Partial<DuosUser>
+  signingOfficial: DuosUser
   isLoading: boolean
 }
 
@@ -37,6 +37,7 @@ const user = (overrides: Partial<DuosUser> = {}): DuosUser => {
     displayName: 'Signing Official',
     email: 'so@example.com',
     emailPreference: true,
+    institutionId: 1,
     isAdmin: false,
     isAlumni: false,
     isChairPerson: false,
@@ -93,7 +94,6 @@ describe('SigningOfficialDataSubmitters', () => {
       })
     })
 
-    expect(await screen.findByTestId('data-custodian-table')).toHaveAttribute('data-loading', 'false')
-    expect(screen.getByText('No Signing Official')).toBeInTheDocument()
+    expect(screen.queryByTestId('data-custodian-table')).not.toBeInTheDocument()
   })
 })

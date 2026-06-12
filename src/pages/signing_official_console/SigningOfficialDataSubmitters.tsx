@@ -2,16 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { User } from 'src/libs/ajax/User'
-import DataCustodianTable from './DataCustodianTable'
+import DataCustodianTable from 'src/pages/signing_official_console/DataCustodianTable'
 import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DuosUser } from 'src/types/model'
 
-type SigningOfficialTableUser = Partial<DuosUser> & { institutionId: number | string }
-
 export default function SigningOfficialDataSubmitters(): React.JSX.Element {
   usePageTitle('Data Submitters')
-  const [signingOfficial, setSigningOfficial] = useState<SigningOfficialTableUser>({ institutionId: 0 })
+  const [signingOfficial, setSigningOfficial] = useState<DuosUser>()
   const [researchers, setResearchers] = useState<DuosUser[]>([])
 
   // states to be added
@@ -25,7 +23,7 @@ export default function SigningOfficialDataSubmitters(): React.JSX.Element {
         const soUser = await User.getMe()
         const soUsers = await User.list(USER_ROLES.signingOfficial)
         setResearchers(soUsers)
-        setSigningOfficial({ ...soUser, institutionId: soUser.institutionId ?? 0 })
+        setSigningOfficial(soUser)
         setIsLoading(false)
       }
       catch (error) {
@@ -40,7 +38,13 @@ export default function SigningOfficialDataSubmitters(): React.JSX.Element {
   return (
     <div style={Styles.PAGE}>
       <div className="signing-official-tabs">
-        <DataCustodianTable researchers={researchers} signingOfficial={signingOfficial} isLoading={isLoading} />
+        {signingOfficial && (
+          <DataCustodianTable
+            researchers={researchers}
+            signingOfficial={signingOfficial as DuosUser & { institutionId: number }}
+            isLoading={isLoading}
+          />
+        )}
       </div>
     </div>
   )
