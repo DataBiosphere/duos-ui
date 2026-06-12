@@ -1,5 +1,4 @@
 import React from 'react'
-import { isNull } from 'src/utils/NodashUtil'
 import { Notifications } from 'src/libs/utils'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
@@ -7,17 +6,21 @@ import DataSubmitterAgreementLink from 'src/assets/Data_Registrant_Agreement_7.2
 import Acknowledgments, { acceptAcknowledgments } from 'src/libs/acknowledgements'
 import { Styles } from 'src/libs/theme'
 import { NIHDataUseCertificationAgreement } from 'src/components/external_docs/NIHDataUseCertificationAgreement'
-import { extractError } from 'src/utils/ErrorUtils.ts'
+import { extractError } from 'src/utils/ErrorUtils'
 
-export const SigningOfficialDaaAgreementWrapper = (props) => {
+interface SigningOfficialDaaAgreementWrapperProps {
+  readonly isDataSubmitterTab: boolean
+}
+
+export const SigningOfficialDaaAgreementWrapper = (props: SigningOfficialDaaAgreementWrapperProps): React.JSX.Element => {
   const {
     isDataSubmitterTab,
   } = props
 
-  const acceptDaas = async () => {
+  const acceptDaas = async (): Promise<void> => {
     try {
       await acceptAcknowledgments(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement)
-      window.location = '/signing_official_console/library_cards'
+      globalThis.location.assign('/signing_official_console/library_cards')
     }
     catch (error) {
       const message = extractError(error)
@@ -31,18 +34,18 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
         <h2>
           Agree to
           {' '}
-          {isDataSubmitterTab === true ? 'Data Submitter' : 'Library Card'}
+          {isDataSubmitterTab ? 'Data Submitter' : 'Library Card'}
           {' '}
           Terms
         </h2>
         <p style={{ marginBottom: '20px' }}>
           To begin issuing
           {' '}
-          {isDataSubmitterTab === true ? 'Data Submitter privilege' : 'Library Card'}
+          {isDataSubmitterTab ? 'Data Submitter privilege' : 'Library Card'}
           s to researchers from your institution, please review the terms of the data access agreement(s) below and click &apos;I agree&apos; when finished.
         </p>
         <div style={{ marginBottom: '25px' }}>
-          {isDataSubmitterTab === true
+          {isDataSubmitterTab
             ? (
                 <a target="_blank" rel="noreferrer" href={DataSubmitterAgreementLink} className="button button-white">
                   <span className="glyphicon glyphicon-download" />
@@ -59,8 +62,8 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
               )}
         </div>
         <div>
-          {isDataSubmitterTab === true
-            ? isNull
+          {isDataSubmitterTab
+            ? null
             : (
                 <div>
                   <div style={{ marginBottom: '25px' }}>
