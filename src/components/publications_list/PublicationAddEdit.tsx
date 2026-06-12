@@ -85,7 +85,7 @@ function AuthorsFieldset({
 }) {
   return (
     <div style={{ marginBottom: '1rem', width: '100%' }}>
-      <fieldset style={{ fontWeight: 600, marginTop: '1rem' }} aria-label="Authors (Name + ORCID)">
+      <fieldset style={{ fontWeight: 600, marginTop: '4rem' }} aria-label="Authors (Name + ORCID)">
         <legend style={{ fontSize: 16 }}>Authors (Name + ORCID)*</legend>
         {(submitted || touched.authors) && validation.authors && (
           <div className="error-message">
@@ -262,8 +262,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
           <FormField
             id="publishedDate"
             title="Publication Date"
+            type={FormFieldTypes.CALENDAR}
             defaultValue={newPublication.publishedDate}
-            placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={(submitted || touched.publishedDate) ? validation.publishedDate : undefined}

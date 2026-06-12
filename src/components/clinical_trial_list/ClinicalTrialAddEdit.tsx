@@ -195,8 +195,8 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
           <FormField
             id="startDate"
             title="Start Date"
+            type={FormFieldTypes.CALENDAR}
             defaultValue={clinicalTrial?.startDate}
-            placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={validation.startDate}
@@ -205,8 +205,8 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
           <FormField
             id="endDate"
             title="End Date"
+            type={FormFieldTypes.CALENDAR}
             defaultValue={clinicalTrial?.endDate}
-            placeholder="YYYY-MM-DD"
             validators={[FormValidators.DATE]}
             onChange={onChange}
             validation={validation.endDate}

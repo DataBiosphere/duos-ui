@@ -4,12 +4,8 @@
   "tag": "",
   "bardApiUrl": "",
   "apiUrl": "",
-  "ontologyApiUrl": "",
   "terraUrl": "",
   "tdrApiUrl": "",
-  "errorApiKey": "",
-  "profileUrl": "",
-  "nihUrl": "",
-  "gaId": "",
+  "ecmApiUrl": "",
   "features": {}
 }
