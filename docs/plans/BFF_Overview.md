@@ -72,3 +72,156 @@ before cutting over.
 - **`openid-client` for all OAuth/OIDC operations** — library-maintained PKCE,
   token exchange, and ID-token validation (signature, `iss`, `aud`, `exp`,
   `nonce`) rather than hand-rolled crypto.
+
+## Target Architecture Sequence Diagrams
+
+Four flows are shown: sign-in (including PKCE and token exchange), the multi-IDP
+sign-in variant, an authenticated API request (including proactive token refresh),
+and sign-out (including server-side session destruction and IdP token revocation).
+Tokens appear only on the server side of the dashed boundary. All four flows are
+IDP-parameterized via the session's `idp` field — the BFF selects the matching OIDC
+client with `getOidcClient(idp)` at every step that contacts an IdP. The Azure B2C
+variant is shown separately only where the sign-in flow differs.
+
+### Authentication Flow (Google)
+```mermaid
+sequenceDiagram
+    participant B   as Browser
+    participant BFF as Fastify BFF (DUOS)
+    participant PG  as PostgreSQL
+    participant IdP as Google IdP
+
+    rect rgb(235, 245, 255)
+        Note over B,IdP: Sign-In
+
+        B->>BFF: POST /auth/login (idp defaults to "google")
+        BFF->>BFF: Generate code_verifier, code_challenge (PKCE), state
+        BFF->>PG: Store pkceVerifier, pkceState, idp="google", returnTo in session
+        PG-->>BFF: ok
+        BFF-->>B: 200 redirectUrl + Set-Cookie: sessionId (HttpOnly, Secure, SameSite=Strict)
+
+        B->>IdP: GET /oauth2/auth?code_challenge=...&state=...&client_id=...
+        Note over IdP: User authenticates
+        IdP-->>B: 302 to /auth/callback?code=...&state=...
+
+        B->>BFF: GET /auth/callback?code=...&state=... [cookie: sessionId]
+        BFF->>PG: Read session -- pkceVerifier, pkceState, idp
+        PG-->>BFF: session data
+        BFF->>BFF: getOidcClient(idp) -- selects the Google client
+        BFF->>BFF: Validate state parameter
+        BFF->>IdP: POST /token -- code + code_verifier + client_id + client_secret
+        IdP-->>BFF: access_token, refresh_token, id_token, expires_at
+        Note over BFF,PG: Tokens stored server-side -- never sent to browser
+        BFF->>PG: Store tokens in session, clear pkceVerifier + pkceState
+        PG-->>BFF: ok
+        BFF-->>B: 302 to returnTo
+    end
+```
+
+### Authentication Flow — Multi-IDP Variant (Azure B2C)
+
+The sign-in flow with IDP selection. The authenticated API call and sign-out flows are identical to the Google flows — `getOidcClient(idp)` simply resolves to the B2C client. The trailing API request is included here only to illustrate that Consent accepts B2C-issued tokens with no proxy changes.
+
+```mermaid
+sequenceDiagram
+    participant B   as Browser
+    participant BFF as Fastify BFF (DUOS)
+    participant PG  as PostgreSQL
+    participant AZ  as Azure B2C Tenant
+    participant API as DUOS API (Consent)
+
+    rect rgb(235, 245, 255)
+        Note over B,AZ: Sign-In (multi-IDP)
+
+        B->>BFF: POST /auth/login?idp=azure
+        BFF->>BFF: Generate code_verifier, code_challenge (PKCE), state
+        BFF->>PG: Store pkceVerifier, pkceState, idp="azure", returnTo in session
+        PG-->>BFF: ok
+        BFF->>BFF: getOidcClient("azure") — returns cached B2C client
+        BFF-->>B: 200 { redirectUrl } + Set-Cookie: sessionId
+
+        B->>AZ: GET /oauth2/v2.0/authorize?code_challenge=...&state=...&client_id=<b2c-id>&p=<policy>
+        Note over AZ: User authenticates with Microsoft (via the DSP B2C tenant)
+        AZ-->>B: 302 to /auth/callback?code=...&state=...
+
+        B->>BFF: GET /auth/callback?code=...&state=... [cookie: sessionId]
+        BFF->>PG: Read session — pkceVerifier, pkceState, idp="azure"
+        PG-->>BFF: session data
+        BFF->>BFF: getOidcClient("azure")
+        BFF->>AZ: POST /token — code + code_verifier + azure_client_id + azure_client_secret
+        AZ-->>BFF: access_token, refresh_token, id_token, expires_at
+        Note over BFF,PG: Tokens stored server-side — never sent to browser
+        BFF->>PG: Store tokens + idp="azure" in session
+        PG-->>BFF: ok
+        BFF-->>B: 302 to returnTo
+
+        B->>BFF: GET /api/user/me [cookie: sessionId]
+        BFF->>PG: Read session — accessToken (from Azure B2C)
+        PG-->>BFF: session data
+        BFF->>API: GET /api/user/me + Authorization: Bearer <b2c-token> + X-App-ID: DUOS
+        Note over API: Consent accepts Azure B2C tokens (oauth2.conf already trusts the B2C issuer)
+        API-->>BFF: 200 user data
+        BFF-->>B: 200 user data
+    end
+```
+
+### Authenticated API Call Flow
+```mermaid
+sequenceDiagram
+    participant B   as Browser
+    participant BFF as Fastify BFF (DUOS)
+    participant PG  as PostgreSQL
+    participant IdP as Identity Provider (Google or Azure B2C)
+    participant API as DUOS API (Consent)
+
+    rect rgb(235, 255, 235)
+        Note over B,API: Authenticated API Request
+
+        B->>BFF: GET /api/user/me [cookie: sessionId]
+        BFF->>PG: Read session -- accessToken, tokenExpiry, idp
+        PG-->>BFF: session data
+
+        alt token expires within 60s
+            BFF->>BFF: getOidcClient(idp) -- refresh goes to the issuing IdP
+            BFF->>IdP: POST /token (grant_type=refresh_token)
+            IdP-->>BFF: new access_token, expires_at
+            BFF->>PG: Update session with refreshed token
+            PG-->>BFF: ok
+        end
+
+        BFF->>API: GET /api/user/me + Authorization: Bearer [token] + X-App-ID: DUOS
+        API-->>BFF: 200 user data
+        BFF-->>B: 200 user data
+    end
+```
+
+### Sign-out Flow
+```mermaid
+sequenceDiagram
+    participant B   as Browser
+    participant BFF as Fastify BFF (DUOS)
+    participant PG  as PostgreSQL
+    participant IdP as Identity Provider (Google or Azure B2C)
+
+    rect rgb(255, 240, 240)
+        Note over B,IdP: Sign-Out
+
+        B->>BFF: POST /auth/logout [cookie: sessionId]
+        BFF->>PG: Read session -- accessToken, refreshToken, idp
+        PG-->>BFF: session data
+        BFF->>BFF: getOidcClient(idp)
+
+        opt revocation_endpoint available (Google yes, Azure B2C typically not)
+            BFF->>IdP: POST /revoke (access_token)
+            IdP-->>BFF: 200
+            BFF->>IdP: POST /revoke (refresh_token)
+            IdP-->>BFF: 200
+        end
+
+        BFF->>PG: Stamp user_session_audit end_reason='logout'
+        PG-->>BFF: ok
+        BFF->>PG: Destroy session
+        PG-->>BFF: ok
+        BFF-->>B: 204 + Set-Cookie: sessionId (cleared, Max-Age=0)
+    end
+```
