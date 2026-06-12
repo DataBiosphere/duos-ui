@@ -73,7 +73,7 @@ const collection = (overrides: Partial<DarCollectionSummary> = {}): DarCollectio
     referenceIds: ['reference-id-1'],
   }
 
-  return { ...baseCollection, ...overrides } as DarCollectionSummary
+  return { ...baseCollection, ...overrides }
 }
 
 describe('SigningOfficialDarRequests', () => {
@@ -103,8 +103,16 @@ describe('SigningOfficialDarRequests', () => {
       requiresSOApproval: false,
       status: 'Approved',
     })
+    const approvedDarCollection: DarCollection = {
+      id: approvedCollection.darCollectionId,
+      darCode: approvedCollection.darCode,
+      createDate: approvedCollection.submissionDate,
+      createUserId: 1,
+      dars: {},
+      datasets: [],
+    }
 
-    vi.mocked(Collections.approveCollectionById).mockResolvedValue(approvedCollection as unknown as DarCollection)
+    vi.mocked(Collections.approveCollectionById).mockResolvedValue(approvedDarCollection)
     vi.mocked(Collections.getCollectionSummaryByRoleNameAndId).mockResolvedValue(approvedCollection)
 
     render(<SigningOfficialDarRequests />)
