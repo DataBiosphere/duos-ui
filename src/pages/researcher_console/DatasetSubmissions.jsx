@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Skeleton, Typography } from '@mui/material'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
@@ -46,6 +46,7 @@ export default function DatasetSubmissions() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [urlState, updateUrlState] = useLibraryUrlState()
+  const [hideFilters, setHideFilters] = useState(true)
   const [deleteDialog, setDeleteDialog] = useState({ open: false, term: null })
 
   const user = Storage.getCurrentUser()
@@ -56,13 +57,17 @@ export default function DatasetSubmissions() {
     return {
       bool: {
         should: [
-          ...(user.userId ? [
-            { term: { createUserId: user.userId } },
-            { term: { 'study.dataSubmitterId': user.userId } },
-          ] : []),
-          ...(user.email ? [
-            { term: { 'study.dataCustodianEmail': user.email } },
-          ] : []),
+          ...(user.userId
+            ? [
+                { term: { createUserId: user.userId } },
+                { term: { 'study.dataSubmitterId': user.userId } },
+              ]
+            : []),
+          ...(user.email
+            ? [
+                { term: { 'study.dataCustodianEmail': user.email } },
+              ]
+            : []),
         ],
         minimum_should_match: 1,
       },
@@ -188,8 +193,8 @@ export default function DatasetSubmissions() {
   }, [updateUrlState])
 
   const handleToggleFilters = useCallback(() => {
-    updateUrlState({ hideFilters: !urlState.hideFilters })
-  }, [updateUrlState, urlState.hideFilters])
+    setHideFilters(h => !h)
+  }, [])
 
   const handleDeleteClick = useCallback((term) => {
     setDeleteDialog({ open: true, term })
@@ -279,10 +284,10 @@ export default function DatasetSubmissions() {
         {/* Filters sidebar */}
         <Box
           sx={{
-            width: urlState.hideFilters ? 40 : 280,
+            width: hideFilters ? 40 : 280,
             flexShrink: 0,
-            pr: urlState.hideFilters ? 0 : 2,
-            overflowY: urlState.hideFilters ? 'hidden' : 'auto',
+            pr: hideFilters ? 0 : 2,
+            overflowY: hideFilters ? 'hidden' : 'auto',
             overflowX: 'hidden',
             transition: 'width 0.2s ease',
           }}
@@ -293,7 +298,7 @@ export default function DatasetSubmissions() {
             onClear={handleClearFilters}
             sections={filterSections}
             loading={isMetadataLoading}
-            isOpen={!urlState.hideFilters}
+            isOpen={!hideFilters}
             onToggle={handleToggleFilters}
           />
         </Box>

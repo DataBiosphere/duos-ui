@@ -86,6 +86,14 @@ export const makeDatasetColumns = (
     },
   },
   {
+    field: 'participantCount',
+    headerName: 'Participants',
+    width: 120,
+    type: 'number',
+    align: 'right',
+    headerAlign: 'right',
+  },
+  {
     field: 'dataUse',
     headerName: 'Data Use',
     width: 150,
@@ -96,8 +104,8 @@ export const makeDatasetColumns = (
 
       return (
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {codes.slice(0, 2).map((code, idx) => (
-            <Chip key={idx} label={code} size="small" variant="outlined" />
+          {codes.slice(0, 2).map(code => (
+            <Chip key={code} label={code} size="small" variant="outlined" />
           ))}
           {codes.length > 2 && (
             <Tooltip title={codes.slice(2).join(', ')}>
@@ -116,21 +124,6 @@ export const makeDatasetColumns = (
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
   {
-    field: 'actions',
-    headerName: 'Actions',
-    width: 120,
-    sortable: false,
-    renderCell: (params) => {
-      const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
-      if (exportableSnapshots.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-          <DatasetExportButton snapshots={exportableSnapshots} />
-        </Box>
-      )
-    },
-  },
-  {
     field: 'requestLocation',
     headerName: 'Request Location',
     width: 180,
@@ -145,11 +138,18 @@ export const makeDatasetColumns = (
         : null,
   },
   {
-    field: 'participantCount',
-    headerName: 'Participants',
+    field: 'actions',
+    headerName: 'Actions',
     width: 120,
-    type: 'number',
-    align: 'right',
-    headerAlign: 'right',
+    sortable: false,
+    renderCell: (params) => {
+      const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
+      if (exportableSnapshots.length === 0) return null
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          <DatasetExportButton snapshots={exportableSnapshots} />
+        </Box>
+      )
+    },
   },
 ]
