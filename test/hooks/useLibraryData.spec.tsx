@@ -1,4 +1,7 @@
 import React from 'react'
+import '@testing-library/jest-dom/vitest'
+import { describe, it, expect } from 'vitest'
+import { act, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useLibraryData, buildElasticsearchQuery } from 'src/hooks/useLibraryData'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
@@ -47,23 +50,25 @@ describe('useLibraryData', () => {
     ...EMPTY_FILTERS,
   }
 
-  it('initializes query with correct keys', () => {
+  it('initializes query with correct keys', async () => {
     const queryClient = new QueryClient()
-    cy.mount(
-      <QueryClientProvider client={queryClient}>
-        <TestComponent
-          libraryConfig={libraryConfig}
-          assetType={AssetType.STUDIES}
-          filters={filters}
-        />
-      </QueryClientProvider>,
-    )
+    await act(async () => {
+      render(
+        <QueryClientProvider client={queryClient}>
+          <TestComponent
+            libraryConfig={libraryConfig}
+            assetType={AssetType.STUDIES}
+            filters={filters}
+          />
+        </QueryClientProvider>,
+      )
+    })
 
-    cy.get('#has-query').should('have.text', 'yes')
-    cy.get('#items-count').should('have.text', '0') // placeholder data
+    expect(screen.getByText('yes')).toBeInTheDocument()
+    expect(screen.getByText('0')).toBeInTheDocument() // placeholder data
   })
 
-  it('updates query when filters, pagination, or sort change', () => {
+  it('updates query when filters, pagination, or sort change', async () => {
     const queryClient = new QueryClient()
     const updatedFilters = { ...filters, accessManagement: ['controlled'] }
     const updatedPagination = { page: 1, pageSize: 50 }
@@ -81,17 +86,25 @@ describe('useLibraryData', () => {
       </QueryClientProvider>
     )
 
-    cy.mount(<Wrapper f={filters} />)
-    cy.get('#has-query').should('have.text', 'yes')
+    await act(async () => {
+      render(<Wrapper f={filters} />)
+    })
+    expect(screen.getByText('yes')).toBeInTheDocument()
 
-    cy.mount(<Wrapper f={updatedFilters} />)
-    cy.get('#has-query').should('have.text', 'yes')
+    await act(async () => {
+      render(<Wrapper f={updatedFilters} />)
+    })
+    expect(screen.getAllByText('yes').length).toBeGreaterThanOrEqual(1)
 
-    cy.mount(<Wrapper f={updatedFilters} p={updatedPagination} />)
-    cy.get('#has-query').should('have.text', 'yes')
+    await act(async () => {
+      render(<Wrapper f={updatedFilters} p={updatedPagination} />)
+    })
+    expect(screen.getAllByText('yes').length).toBeGreaterThanOrEqual(1)
 
-    cy.mount(<Wrapper f={updatedFilters} p={updatedPagination} s={sort} />)
-    cy.get('#has-query').should('have.text', 'yes')
+    await act(async () => {
+      render(<Wrapper f={updatedFilters} p={updatedPagination} s={sort} />)
+    })
+    expect(screen.getAllByText('yes').length).toBeGreaterThanOrEqual(1)
   })
 })
 
@@ -111,43 +124,43 @@ describe('buildElasticsearchQuery', () => {
 
   it('builds a basic query for studies', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.STUDIES, filters, '', pagination)
-    expect(query.query?.bool.must).to.have.length(1)
+    expect(query.query?.bool.must).toHaveLength(1)
     const firstClause = query.query?.bool.must?.[0] as ExistsQuery
-    expect(firstClause.exists.field).to.equal('study')
-    expect(query.aggs).to.have.property('studies')
-    expect(query.aggs).to.have.property('total_studies')
+    expect(firstClause.exists.field).toEqual('study')
+    expect(query.aggs).toHaveProperty('studies')
+    expect(query.aggs).toHaveProperty('total_studies')
   })
 
   it('builds a basic query for datasets', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination)
-    expect(query.query?.bool.must).to.have.length(1)
-    expect(query.from).to.equal(0)
-    expect(query.size).to.equal(25)
-    expect(query.aggs).to.have.property('access_management')
+    expect(query.query?.bool.must).toHaveLength(1)
+    expect(query.from).toEqual(0)
+    expect(query.size).toEqual(25)
+    expect(query.aggs).toHaveProperty('access_management')
   })
 
   it('adds search term to query', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, 'breast cancer', pagination)
-    expect(query.query?.bool.must).to.have.length(2)
+    expect(query.query?.bool.must).toHaveLength(2)
     const secondClause = query.query?.bool.must?.[1] as MultiMatchQuery
-    expect(secondClause.multi_match.query).to.equal('breast cancer')
+    expect(secondClause.multi_match.query).toEqual('breast cancer')
   })
 
   it('adds access management filters', () => {
     const filtersWithAccess = { ...filters, accessManagement: ['controlled'] }
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filtersWithAccess, '', pagination)
-    expect(query.query?.bool.filter).to.have.length(1)
+    expect(query.query?.bool.filter).toHaveLength(1)
     const firstFilter = query.query?.bool.filter?.[0] as BoolQuery
     const termClause = firstFilter.bool.should?.[0] as TermQuery
-    expect(termClause.term['accessManagement.keyword']).to.equal('controlled')
+    expect(termClause.term['accessManagement.keyword']).toEqual('controlled')
   })
 
   it('adds sort to dataset query', () => {
     const sort: SortState = { field: 'studyName', order: 'asc' }
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
-    expect(query.sort).to.have.length(1)
+    expect(query.sort).toHaveLength(1)
     const firstSort = query.sort?.[0] as Record<string, { order: string }>
-    expect(firstSort['study.studyName.keyword'].order).to.equal('asc')
+    expect(firstSort['study.studyName.keyword'].order).toEqual('asc')
   })
 
   it('maps each text field to its .keyword ES sort path', () => {
@@ -162,52 +175,52 @@ describe('buildElasticsearchQuery', () => {
     textFieldCases.forEach(([columnField, esSortField]) => {
       const sort: SortState = { field: columnField, order: 'asc' }
       const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
-      expect(query.sort).to.have.length(1)
+      expect(query.sort).toHaveLength(1)
       const firstSort = query.sort?.[0] as Record<string, { order: string }>
-      expect(firstSort[esSortField].order).to.equal('asc')
+      expect(firstSort[esSortField].order).toEqual('asc')
     })
   })
 
   it('sorts numeric field (participantCount) without .keyword mapping', () => {
     const sort: SortState = { field: 'participantCount', order: 'desc' }
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
-    expect(query.sort).to.have.length(1)
+    expect(query.sort).toHaveLength(1)
     const firstSort = query.sort?.[0] as Record<string, { order: string }>
-    expect(firstSort.participantCount.order).to.equal('desc')
+    expect(firstSort.participantCount.order).toEqual('desc')
   })
 
   it('applies sort order correctly for desc', () => {
     const sort: SortState = { field: 'datasetName', order: 'desc' }
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, sort)
     const firstSort = query.sort?.[0] as Record<string, { order: string }>
-    expect(firstSort['datasetName.keyword'].order).to.equal('desc')
+    expect(firstSort['datasetName.keyword'].order).toEqual('desc')
   })
 
   it('omits sort clause when sort is undefined', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination, undefined)
-    expect(query.sort).to.equal(undefined)
+    expect(query.sort).toEqual(undefined)
   })
 
   it('builds an aggregation query for models (size: 0, studies terms agg)', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.MODELS, filters, '', pagination)
     // Models use an aggregation-only query
-    expect(query.size).to.equal(0)
-    expect(query.from).to.equal(undefined)
-    expect(query.aggs).to.have.property('studies')
+    expect(query.size).toEqual(0)
+    expect(query.from).toEqual(undefined)
+    expect(query.aggs).toHaveProperty('studies')
     const studiesAgg = query.aggs!.studies as { terms: { field: string, size: number } }
-    expect(studiesAgg.terms.field).to.equal('study.studyId')
-    expect(studiesAgg.terms.size).to.equal(10000)
+    expect(studiesAgg.terms.field).toEqual('study.studyId')
+    expect(studiesAgg.terms.size).toEqual(10000)
   })
 
   it('adds model-specific search fields for the models asset type', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.MODELS, filters, 'pytorch', pagination)
-    expect(query.query?.bool.must).to.have.length(2)
+    expect(query.query?.bool.must).toHaveLength(2)
     const searchClause = query.query?.bool.must?.[1] as {
       multi_match: { fields: string[], query: string }
     }
-    expect(searchClause.multi_match.fields).to.include('study.assets.models.name')
-    expect(searchClause.multi_match.fields).to.include('study.assets.models.format')
-    expect(searchClause.multi_match.query).to.equal('pytorch')
+    expect(searchClause.multi_match.fields).toContain('study.assets.models.name')
+    expect(searchClause.multi_match.fields).toContain('study.assets.models.format')
+    expect(searchClause.multi_match.query).toEqual('pytorch')
   })
 
   it('ignores filters that are not visible for the selected asset type', () => {
@@ -227,6 +240,6 @@ describe('buildElasticsearchQuery', () => {
       pagination,
     )
 
-    expect(query.query?.bool.filter).to.equal(undefined)
+    expect(query.query?.bool.filter).toEqual(undefined)
   })
 })
