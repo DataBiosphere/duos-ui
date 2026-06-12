@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
-import SigningOfficialTable from './SigningOfficialTable'
+import SigningOfficialTable from 'src/pages/signing_official_console/SigningOfficialTable'
 import { User } from 'src/libs/ajax/User'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import { DuosUser } from 'src/types/model'
 
-export default function SigningOfficialLibraryCards() {
+export default function SigningOfficialLibraryCards(): React.JSX.Element {
   usePageTitle('Library Cards')
-  const [signingOfficial, setSigningOfficial] = useState({})
-  const [researchers, setResearchers] = useState([])
+  const [signingOfficial, setSigningOfficial] = useState<DuosUser>()
+  const [researchers, setResearchers] = useState<DuosUser[]>([])
 
   // states to be added and used for manage researcher component
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    const init = async () => {
+    const init = async (): Promise<void> => {
       try {
         setIsLoading(true)
         const soUser = await User.getMe()
@@ -24,18 +25,24 @@ export default function SigningOfficialLibraryCards() {
         setSigningOfficial(soUser)
         setIsLoading(false)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error: Unable to retrieve current user from server' })
         setIsLoading(false)
       }
     }
-    init()
+    void init()
   }, [])
 
   return (
     <div style={Styles.PAGE}>
       <div className="signing-official-tabs">
-        <SigningOfficialTable researchers={researchers} signingOfficial={signingOfficial} isLoading={isLoading} />
+        {signingOfficial && (
+          <SigningOfficialTable
+            researchers={researchers}
+            signingOfficial={signingOfficial as DuosUser & { institutionId: number }}
+            isLoading={isLoading}
+          />
+        )}
       </div>
     </div>
   )
