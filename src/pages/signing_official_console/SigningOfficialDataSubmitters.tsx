@@ -3,26 +3,29 @@ import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { User } from 'src/libs/ajax/User'
 import DataCustodianTable from './DataCustodianTable'
-import { extractError } from 'src/utils/ErrorUtils.ts'
+import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import { DuosUser } from 'src/types/model'
 
-export default function SigningOfficialConsole() {
+type SigningOfficialTableUser = Partial<DuosUser> & { institutionId: number | string }
+
+export default function SigningOfficialDataSubmitters(): React.JSX.Element {
   usePageTitle('Data Submitters')
-  const [signingOfficial, setSigningOfficial] = useState({})
-  const [researchers, setResearchers] = useState([])
+  const [signingOfficial, setSigningOfficial] = useState<SigningOfficialTableUser>({ institutionId: 0 })
+  const [researchers, setResearchers] = useState<DuosUser[]>([])
 
   // states to be added
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    const init = async () => {
+    const init = async (): Promise<void> => {
       try {
         setIsLoading(true)
         // Need to assign to state variable on Component init for template reference
         const soUser = await User.getMe()
         const soUsers = await User.list(USER_ROLES.signingOfficial)
         setResearchers(soUsers)
-        setSigningOfficial(soUser)
+        setSigningOfficial({ ...soUser, institutionId: soUser.institutionId ?? 0 })
         setIsLoading(false)
       }
       catch (error) {
@@ -31,7 +34,7 @@ export default function SigningOfficialConsole() {
         setIsLoading(false)
       }
     }
-    init()
+    void init()
   }, [])
 
   return (
