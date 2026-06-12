@@ -69,7 +69,7 @@ const collection = (overrides: Partial<DarCollectionSummary> = {}): DarCollectio
     submissionDate: 1640995200000,
   }
 
-  return { ...baseCollection, ...overrides } as DarCollectionSummary
+  return { ...baseCollection, ...overrides }
 }
 
 const mockCollectionList = [
