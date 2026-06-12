@@ -67,6 +67,8 @@ describe('FundingResourceList component', () => {
     cy.contains(sampleFunding.funderName).should('exist')
     cy.get('#funderName').should('be.disabled')
     cy.get('#projectTitle').should('be.disabled')
+    cy.get('#startDate').should('have.value', sampleFunding.startDate)
+    cy.get('#endDate').should('have.value', sampleFunding.endDate)
     cy.get('.collaborator-form-add-save-button').should('not.exist')
     cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
   })

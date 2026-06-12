@@ -16,11 +16,13 @@ import dayjs, { Dayjs } from 'dayjs'
 import '@mui/x-date-pickers/themeAugmentation'
 
 interface DUOSDatePickerProps {
+  id?: string
   inputFormat: string
-  defaultValue: Dayjs | string | null
+  defaultValue: Dayjs | string | number | Date | null | undefined
   onChange: (value: Dayjs | string | undefined) => void
   onError: (error: DateValidationError | null, value: Dayjs | string | undefined) => void
   readOnly: boolean
+  disabled?: boolean
 }
 
 const WeekendFormattedDay = (props: PickerDayProps) => {
@@ -61,14 +63,18 @@ const CancelSelectActionBar = (props: PickersActionBarProps) => {
 }
 
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
-  const { inputFormat, defaultValue, onChange, onError, readOnly } = props
+  const { id, inputFormat, defaultValue, onChange, onError, readOnly, disabled } = props
   const duosColorBlue = '#216FB4'
 
   // Convert defaultValue to Dayjs object if it's a string, or use it directly if it's already Dayjs
   const defaultValueAsDayjs = useMemo(() => {
-    if (!defaultValue) return dayjs()
+    if (!defaultValue) return null
     if (typeof defaultValue === 'string') {
       const parsed = dayjs(defaultValue, inputFormat)
+      return parsed.isValid() ? parsed : null
+    }
+    if (typeof defaultValue === 'number' || defaultValue instanceof Date) {
+      const parsed = dayjs(defaultValue)
       return parsed.isValid() ? parsed : null
     }
     return defaultValue
@@ -217,7 +223,11 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             onError={(error, value) => onError?.(error, value?.format(inputFormat))}
             dayOfWeekFormatter={day => (`${day.format('ddd')}`)}
             readOnly={readOnly}
+            disabled={disabled}
             slotProps={{
+              textField: {
+                id,
+              },
               actionBar: {
                 actions: ['cancel', 'accept'],
               },

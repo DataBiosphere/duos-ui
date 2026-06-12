@@ -14,6 +14,14 @@ import {
   testSummaryViewActionTrigger,
 } from './testUtils'
 
+const selectDate = (fieldId: string) => {
+  cy.get(`#${fieldId}`).parent().find('button[aria-label*="Choose date"]').click()
+  cy.get('[role="dialog"]').filter(':visible').last().within(() => {
+    cy.contains('button', /^15$/).click()
+    cy.contains('button', 'Select').click()
+  })
+}
+
 const sampleIp: IntellectualProperty = {
   ipId: 'ip-1',
   studyId: 'study-1',
@@ -68,7 +76,7 @@ function fillForm(overrides: Partial<IntellectualProperty> = {}) {
   cy.get('#title').type(overrides.title ?? 'New IP')
   cy.get('#assignee').type(overrides.assignee ?? 'Assignee Name')
   cy.get('#patentNumber').type(overrides.patentNumber ?? 'PAT123')
-  cy.get('#filingDate').type(overrides.filingDate ?? '2024-01-01')
+  selectDate('filingDate')
   cy.get('#status').type(overrides.status ?? 'Pending')
   cy.get('#url').type(overrides.url ?? 'https://example.com')
   cy.get('#contact').type(overrides.contact ?? 'contact@example.com')
@@ -107,7 +115,6 @@ describe('IntellectualPropertyAddEdit', () => {
   })
 
   const invalidInputTests = [
-    { field: '#filingDate', value: 'invalid-date', label: 'date' },
     { field: '#url', value: 'invalid-url', label: 'URL' },
   ]
 
@@ -223,6 +230,7 @@ describe('IntellectualPropertyList', () => {
 
   it('opens intellectual property in view mode when view button is clicked', () => {
     testViewModeFlow(mountListWithItem, sampleIp.title, { fieldId: '#title' })
+    cy.get('#filingDate').should('have.value', sampleIp.filingDate)
   })
 
   it('closes view mode when close button is clicked', () => {

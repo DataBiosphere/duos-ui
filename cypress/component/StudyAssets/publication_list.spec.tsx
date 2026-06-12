@@ -6,6 +6,14 @@ import PublicationSummary from 'src/components/publications_list/PublicationSumm
 import { Publication, Author } from 'src/types/model'
 import { testDeleteViaModal } from './testUtils'
 
+const selectDate = (fieldId: string) => {
+  cy.get(`#${fieldId}`).parent().find('button[aria-label*="Choose date"]').click()
+  cy.get('[role="dialog"]').filter(':visible').last().within(() => {
+    cy.contains('button', /^15$/).click()
+    cy.contains('button', 'Select').click()
+  })
+}
+
 const authorsSample: Author[] = [
   { name: 'Author One', orcId: '0000-0000-0000-0001' },
   { name: 'Author Two', orcId: '0000-0000-0000-0002' },
@@ -61,7 +69,7 @@ describe('PublicationList component', () => {
     )
 
     cy.get('#title').type('New Pub')
-    cy.get('#publishedDate').type('2024-07-15')
+    selectDate('publishedDate')
     cy.get('#pubmedId').type('99999')
     cy.get('#bibliographicCitation').type('Bib Cit X')
     cy.get('#datasetCitation').type('Dataset Cit X')
@@ -88,6 +96,7 @@ describe('PublicationList component', () => {
     cy.contains(samplePublication.title).should('exist')
     cy.get('#title').should('be.disabled')
     cy.get('#publishedDate').should('be.disabled')
+    cy.get('#publishedDate').should('have.value', samplePublication.publishedDate)
     cy.get('.collaborator-form-add-save-button').should('not.exist')
     cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
   })

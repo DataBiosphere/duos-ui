@@ -32,7 +32,6 @@ import {
   requiredValidator,
   urlValidator,
 } from './formValidation'
-import dayjs from 'dayjs'
 
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                  MAIN FORM FIELD TYPES                                  ====== //
@@ -184,7 +183,7 @@ export const FormFieldTypes = {
     ],
   },
   CALENDAR: {
-    defaultValue: dayjs(),
+    defaultValue: null,
     component: FormDatePicker,
     requiredProps: [],
     optionalProps: ['readOnly'],
