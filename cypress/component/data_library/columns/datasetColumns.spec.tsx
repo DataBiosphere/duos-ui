@@ -17,11 +17,11 @@ describe('datasetColumns — column order', () => {
       'studyName',
       'datasetIdentifier',
       'accessManagement',
-      'participantCount',
       'dataUse',
       'dac',
-      'requestLocation',
       'actions',
+      'requestLocation',
+      'participantCount',
     ])
   })
 })

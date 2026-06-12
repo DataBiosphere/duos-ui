@@ -294,8 +294,8 @@ const applySortOrderUpdate = (updates: Partial<LibraryUrlState>, searchParams: U
 
 const applyHideFiltersUpdate = (updates: Partial<LibraryUrlState>, searchParams: URLSearchParams) => {
   if (hasOwnUpdate(updates, 'hideFilters')) {
-    if (updates.hideFilters) {
-      searchParams.set('hideFilters', 'true')
+    if (updates.hideFilters === false) {
+      searchParams.set('hideFilters', 'false')
     }
     else {
       searchParams.delete('hideFilters')
@@ -319,7 +319,7 @@ export const useLibraryUrlState = () => {
     query: searchParams.get('query') || undefined,
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as SortOrder) || undefined,
-    hideFilters: searchParams.get('hideFilters') === 'true',
+    hideFilters: searchParams.get('hideFilters') !== 'false',
   }
 
   const updateState = useCallback((updates: Partial<LibraryUrlState>) => {

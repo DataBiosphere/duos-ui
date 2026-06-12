@@ -123,7 +123,7 @@ describe('DataLibrary', () => {
   it('renders filter categories', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/']}>
+        <MemoryRouter initialEntries={['/?hideFilters=false']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,
@@ -138,7 +138,7 @@ describe('DataLibrary', () => {
   it('toggles filters and updates URL state', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/']}>
+        <MemoryRouter initialEntries={['/?hideFilters=false']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,
@@ -157,7 +157,7 @@ describe('DataLibrary', () => {
   it('clears all filters', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/?access=controlled']}>
+        <MemoryRouter initialEntries={['/?access=controlled&hideFilters=false']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,
@@ -187,34 +187,34 @@ describe('DataLibrary', () => {
     cy.get('button').contains('Studies').should('have.css', 'font-weight', '400')
   })
 
-  it('shows filter panel by default', () => {
+  it('hides filter panel by default', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/']}>
-          <DataLibrary />
-        </MemoryRouter>
-      </QueryClientProvider>,
-    )
-    cy.contains('Access Management').should('be.visible')
-    cy.get('[aria-label="Collapse filters"]').should('exist')
-  })
-
-  it('hides filter panel when hideFilters=true is in the URL', () => {
-    cy.mount(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/?hideFilters=true']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,
     )
     cy.contains('Access Management').should('not.exist')
-    cy.get('[aria-label="Expand filters"]').should('exist')
+    cy.get('[aria-label="Show filters"]').should('exist')
+  })
+
+  it('shows filter panel when hideFilters=false is in the URL', () => {
+    cy.mount(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?hideFilters=false']}>
+          <DataLibrary />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    cy.contains('Access Management').should('exist')
+    cy.get('[aria-label="Collapse filters"]').should('exist')
   })
 
   it('collapses filter panel when the toggle button is clicked', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/']}>
+        <MemoryRouter initialEntries={['/?hideFilters=false']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,
@@ -222,18 +222,18 @@ describe('DataLibrary', () => {
     cy.contains('Access Management').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').click()
     cy.contains('Access Management').should('not.exist')
-    cy.get('[aria-label="Expand filters"]').should('exist')
+    cy.get('[aria-label="Show filters"]').should('exist')
   })
 
   it('expands filter panel when expand button is clicked while collapsed', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/?hideFilters=true']}>
+        <MemoryRouter initialEntries={['/']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.get('[aria-label="Expand filters"]').click()
+    cy.get('[aria-label="Show filters"]').click()
     cy.contains('Access Management').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').should('exist')
   })
@@ -259,7 +259,7 @@ describe('DataLibrary', () => {
   it('removes incompatible filters when switching to an asset with a narrower filter set', () => {
     cy.mount(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/?tab=datasets&access=controlled&minParticipants=10']}>
+        <MemoryRouter initialEntries={['/?tab=datasets&access=controlled&minParticipants=10&hideFilters=false']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,
@@ -333,7 +333,7 @@ describe('DataLibrary', () => {
 
     cy.mount(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/?tab=presentations']}>
+        <MemoryRouter initialEntries={['/?tab=presentations&hideFilters=false']}>
           <DataLibrary />
         </MemoryRouter>
       </QueryClientProvider>,

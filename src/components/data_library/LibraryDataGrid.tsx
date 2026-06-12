@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import {
   DataGrid,
+  GridColDef,
   GridRowSelectionModel,
 } from '@mui/x-data-grid'
 import { Box, Typography, CircularProgress } from '@mui/material'
@@ -21,7 +22,12 @@ const LoadingOverlay = () => (
   </Box>
 )
 
-export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
+interface LibraryDataGridExtendedProps extends LibraryDataGridProps {
+  extraColumns?: GridColDef[]
+  checkboxSelection?: boolean
+}
+
+export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   assetType,
   data,
   loading,
@@ -34,13 +40,20 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
   onSelectionChange,
   exportableDatasets = {},
   radarEnabledDatasetIds = new Set(),
+  extraColumns,
+  checkboxSelection = true,
 }) => {
   const asset = assetRegistry[assetType]
 
-  const columns = useMemo(
-    () => asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds }),
-    [asset, exportableDatasets, radarEnabledDatasetIds],
-  )
+  const columns = useMemo(() => {
+    const base = asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds })
+    if (!extraColumns || extraColumns.length === 0) return base
+    const extraFields = new Set(extraColumns.map(c => c.field))
+    return [
+      ...base.filter(col => !extraFields.has(col.field)),
+      ...extraColumns,
+    ]
+  }, [asset, exportableDatasets, radarEnabledDatasetIds, extraColumns])
 
   const getRowId = (row: LibraryRow) => asset.getRowId(row)
 
@@ -120,7 +133,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridProps> = ({
             sort: item.sort ?? null,
           })))
         }}
-        checkboxSelection
+        checkboxSelection={checkboxSelection}
         disableRowSelectionOnClick
         rowSelectionModel={rowSelectionModel}
         onRowSelectionModelChange={handleSelectionChange}

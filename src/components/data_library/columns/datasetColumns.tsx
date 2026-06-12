@@ -46,7 +46,7 @@ export const makeDatasetColumns = (
   {
     field: 'accessManagement',
     headerName: 'Access',
-    width: 150,
+    width: 115,
     renderCell: (params) => {
       const summary = getAccessManagementSummary(params.value)
       const isRadarEnabled = radarEnabledDatasetIds.has(params.row.datasetId)
@@ -86,14 +86,6 @@ export const makeDatasetColumns = (
     },
   },
   {
-    field: 'participantCount',
-    headerName: 'Participants',
-    width: 120,
-    type: 'number',
-    align: 'right',
-    headerAlign: 'right',
-  },
-  {
     field: 'dataUse',
     headerName: 'Data Use',
     width: 150,
@@ -124,6 +116,21 @@ export const makeDatasetColumns = (
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
   {
+    field: 'actions',
+    headerName: 'Actions',
+    width: 120,
+    sortable: false,
+    renderCell: (params) => {
+      const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
+      if (exportableSnapshots.length === 0) return null
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          <DatasetExportButton snapshots={exportableSnapshots} />
+        </Box>
+      )
+    },
+  },
+  {
     field: 'requestLocation',
     headerName: 'Request Location',
     width: 180,
@@ -138,18 +145,11 @@ export const makeDatasetColumns = (
         : null,
   },
   {
-    field: 'actions',
-    headerName: 'Actions',
+    field: 'participantCount',
+    headerName: 'Participants',
     width: 120,
-    sortable: false,
-    renderCell: (params) => {
-      const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
-      if (exportableSnapshots.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-          <DatasetExportButton snapshots={exportableSnapshots} />
-        </Box>
-      )
-    },
+    type: 'number',
+    align: 'right',
+    headerAlign: 'right',
   },
 ]
