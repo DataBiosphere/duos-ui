@@ -7,17 +7,18 @@ import { consoleTypes, approveCollectionFn } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DarCollectionSummary } from 'src/types/model'
 
-export default function SigningOfficialDarRequests() {
+export default function SigningOfficialDarRequests(): React.JSX.Element {
   usePageTitle('Data Access Requests')
-  const [collectionList, setCollectionList] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [collectionList, setCollectionList] = useState<DarCollectionSummary[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   // Get responsive columns for signing official console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.SIGNING_OFFICIAL)
 
   useEffect(() => {
-    const init = async () => {
+    const init = async (): Promise<void> => {
       try {
         setIsLoading(true)
         const collectionList = await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial)
@@ -32,7 +33,7 @@ export default function SigningOfficialDarRequests() {
     void init()
   }, [])
 
-  const updateCollections = useCallback((updatedCollection) => {
+  const updateCollections = useCallback((updatedCollection: DarCollectionSummary) => {
     setCollectionList((prevList) => {
       const index = prevList.findIndex(c => c.darCollectionId === updatedCollection.darCollectionId)
       if (index === -1) return prevList
