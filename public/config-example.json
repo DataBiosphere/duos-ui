@@ -6,7 +6,6 @@
   "terraUrl": "https://terraURL.org/",
   "tdrApiUrl": "https://tdrApiUrl.org/",
   "ecmApiUrl": "https://ecmApiUrl.org",
-  "errorApiKey": "example",
   "features": {
     "featureX" : true,
     "featureY" : false
