@@ -14,11 +14,19 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchPost: vi.fn(),
 }))
 
+const headers = {
+  headers: {
+    'Authorization': 'Bearer token',
+    'Accept': 'application/json',
+    'X-App-ID': 'DUOS',
+  },
+}
+
 describe('Email', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue({ headers: { Authorization: 'Bearer token' } })
+    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchPost).mockResolvedValue({} as never)
   })
 
@@ -31,7 +39,7 @@ describe('Email', () => {
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/emailNotifier/reminderMessage/42',
         undefined,
-        { headers: { Authorization: 'Bearer token' } },
+        headers,
       )
     })
 
@@ -42,4 +50,3 @@ describe('Email', () => {
     })
   })
 })
-
