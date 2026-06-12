@@ -1,0 +1,45 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { Config } from 'src/libs/config'
+import { fetchPost } from 'src/libs/ajax/fetchAdapter'
+import { Email } from 'src/libs/ajax/Email'
+
+vi.mock('src/libs/config', () => ({
+  Config: {
+    getApiUrl: vi.fn(),
+    authOpts: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/fetchAdapter', () => ({
+  fetchPost: vi.fn(),
+}))
+
+describe('Email', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
+    vi.mocked(Config.authOpts).mockReturnValue({ headers: { Authorization: 'Bearer token' } })
+    vi.mocked(fetchPost).mockResolvedValue({} as never)
+  })
+
+  describe('sendReminderEmail', () => {
+    it('posts to the reminder endpoint with auth options', async () => {
+      await Email.sendReminderEmail(42)
+
+      expect(Config.getApiUrl).toHaveBeenCalledOnce()
+      expect(Config.authOpts).toHaveBeenCalledOnce()
+      expect(fetchPost).toHaveBeenCalledWith(
+        'https://duos.example.org/api/emailNotifier/reminderMessage/42',
+        undefined,
+        { headers: { Authorization: 'Bearer token' } },
+      )
+    })
+
+    it('propagates fetch failures from the API call', async () => {
+      vi.mocked(fetchPost).mockRejectedValueOnce(new Error('network failure'))
+
+      await expect(Email.sendReminderEmail(7)).rejects.toThrow('network failure')
+    })
+  })
+})
+
