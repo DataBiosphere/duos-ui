@@ -1,9 +1,11 @@
 import React from 'react'
+import { describe, it, expect } from 'vitest'
+import { render } from '@testing-library/react'
 import { RadioButton } from 'src/components/RadioButton'
 
 describe('RadioButton', () => {
   it('renders correctly and does not mutate shared styles', () => {
-    cy.mount(
+    const { container } = render(
       <div>
         <RadioButton
           id="radio-1"
@@ -24,15 +26,19 @@ describe('RadioButton', () => {
 
     // The checked radio button should have the blue background
     // In RadioButton.jsx: backgroundColor: '#2196F3'
-    cy.get('#radio-1').siblings('span').should('have.css', 'background-color', 'rgb(33, 150, 243)')
+    const radio1 = container.querySelector('#radio-1')
+    const checkedSpan = radio1?.nextElementSibling as HTMLElement | null
+    expect(checkedSpan?.style.backgroundColor).toBe('rgb(33, 150, 243)')
 
     // The unchecked radio button should have white background
     // In RadioButton.jsx basicUnchecked: backgroundColor: 'white'
-    cy.get('#radio-2').siblings('span').should('have.css', 'background-color', 'rgb(255, 255, 255)')
+    const radio2 = container.querySelector('#radio-2')
+    const uncheckedSpan = radio2?.nextElementSibling as HTMLElement | null
+    expect(uncheckedSpan?.style.backgroundColor).toBe('white')
   })
 
   it('maintains independent styles for multiple instances', () => {
-    cy.mount(
+    const { container } = render(
       <div>
         <RadioButton
           id="radio-a"
@@ -59,10 +65,17 @@ describe('RadioButton', () => {
     )
 
     // Verify checked one is blue
-    cy.get('#radio-a').siblings('span').should('have.css', 'background-color', 'rgb(33, 150, 243)')
+    const radioA = container.querySelector('#radio-a')
+    const checkedSpan = radioA?.nextElementSibling as HTMLElement | null
+    expect(checkedSpan?.style.backgroundColor).toBe('rgb(33, 150, 243)')
 
     // Verify others are white (not mutated by the first one)
-    cy.get('#radio-b').siblings('span').should('have.css', 'background-color', 'rgb(255, 255, 255)')
-    cy.get('#radio-c').siblings('span').should('have.css', 'background-color', 'rgb(255, 255, 255)')
+    const radioB = container.querySelector('#radio-b')
+    const uncheckedSpanB = radioB?.nextElementSibling as HTMLElement | null
+    expect(uncheckedSpanB?.style.backgroundColor).toBe('white')
+
+    const radioC = container.querySelector('#radio-c')
+    const uncheckedSpanC = radioC?.nextElementSibling as HTMLElement | null
+    expect(uncheckedSpanC?.style.backgroundColor).toBe('white')
   })
 })
