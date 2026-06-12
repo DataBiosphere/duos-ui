@@ -21,7 +21,7 @@ vi.mock('react-modal', () => {
     children?: React.ReactNode
     className?: string
     overlayClassName?: string
-    style?: { content?: React.CSSProperties; overlay?: React.CSSProperties }
+    style?: { content?: React.CSSProperties, overlay?: React.CSSProperties }
     contentLabel?: string
   }) => {
     React.useEffect(() => {
