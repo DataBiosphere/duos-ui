@@ -28,7 +28,7 @@ describe('Email', () => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
     vi.mocked(Config.authOpts).mockReturnValue(headers)
-    vi.mocked(fetchPost).mockResolvedValue({} as never)
+    vi.mocked(fetchPost).mockResolvedValue({ data: undefined })
   })
 
   describe('sendReminderEmail', () => {
