@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Config } from 'src/libs/config'
 import { fetchPost } from 'src/libs/ajax/fetchAdapter'
 import { Email } from 'src/libs/ajax/Email'
+import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 
 vi.mock('src/libs/config', () => ({
   Config: {
@@ -47,6 +48,19 @@ describe('Email', () => {
       vi.mocked(fetchPost).mockRejectedValueOnce(new Error('network failure'))
 
       await expect(Email.sendReminderEmail(7)).rejects.toThrow('network failure')
+    })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Vote 7 is not eligible for a reminder', code: 400 }
+      vi.mocked(fetchPost).mockRejectedValueOnce(consentError)
+
+      const error = await Email.sendReminderEmail(7).then(
+        () => { throw new Error('expected sendReminderEmail to reject') },
+        e => e,
+      )
+
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Vote 7 is not eligible for a reminder')
     })
   })
 })
