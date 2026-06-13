@@ -366,33 +366,32 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
   ): Promise<void> => {
     const { successfulCards, failedCards } = await processLibraryCards(cards as LibraryCardModel[])
 
-    // Update researchers list with successful cards
     if (successfulCards.length > 0) {
       const listCopy = cloneDeep(researchers)
       successfulCards.forEach((newCard) => {
         const { userEmail, userName, userId } = newCard
-        const targetIndex = findIndex(listCopy, researcher => userId === researcher.userId)
-        if (targetIndex === -1) { // if card is not found, push new user to top of list
-          listCopy.unshift({
-            email: newUser ? newUser.email : userEmail,
-            displayName: newUser ? newUser.displayName : userName,
-            userId: newUser ? newUser.userId : userId,
-            libraryCard: newCard,
-            roles: newUser ? newUser.roles : [],
-            createDate: newUser ? newUser.createDate : new Date(),
-            emailPreference: newUser ? newUser.emailPreference : true,
-            isAdmin: newUser ? newUser.isAdmin : false,
-            isAlumni: newUser ? newUser.isAlumni : false,
-            isChairPerson: newUser ? newUser.isChairPerson : false,
-            isDataSubmitter: newUser ? newUser.isDataSubmitter : false,
-            isMember: newUser ? newUser.isMember : false,
-            isResearcher: newUser ? newUser.isResearcher : true,
-            isSigningOfficial: newUser ? newUser.isSigningOfficial : false,
-          })
-        }
-        else {
+        const targetIndex = findIndex(listCopy, researcher => newCard.userId === researcher.userId)
+        if (targetIndex !== -1) { // this means the library card was issued to an existing user, so we just need to update their library card info
           listCopy[targetIndex].libraryCard = newCard
+          return
         }
+
+        listCopy.unshift({
+          email: newUser ? newUser.email : userEmail,
+          displayName: newUser ? newUser.displayName : userName,
+          userId: newUser ? newUser.userId : userId,
+          libraryCard: newCard,
+          roles: newUser ? newUser.roles : [],
+          createDate: newUser ? newUser.createDate : new Date(),
+          emailPreference: newUser ? newUser.emailPreference : true,
+          isAdmin: newUser ? newUser.isAdmin : false,
+          isAlumni: newUser ? newUser.isAlumni : false,
+          isChairPerson: newUser ? newUser.isChairPerson : false,
+          isDataSubmitter: newUser ? newUser.isDataSubmitter : false,
+          isMember: newUser ? newUser.isMember : false,
+          isResearcher: newUser ? newUser.isResearcher : true,
+          isSigningOfficial: newUser ? newUser.isSigningOfficial : false,
+        })
       })
       setResearchers(listCopy)
     }
@@ -401,17 +400,21 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     setShowModal(false)
 
     const successNotificationText = `Issued ${successfulCards.length} library card${successfulCards.length > 1 ? 's' : ''}`
-    const errorNotificationText = `Error issuing library card${failedCards.length > 1 ? 's' : ''}.`
-    const warningNotificationText = `${successNotificationText}, but encountered errors issuing library cards to ${failedCards.map(fc => fc.card.userEmail).join(', ')}`
 
     if (successfulCards.length > 0 && failedCards.length > 0) {
-      Notifications.showWarning({ text: warningNotificationText })
+      Notifications.showWarning({
+        text: `${successNotificationText}, but encountered errors issuing library cards to ${failedCards.map(fc => fc.card.userEmail).join(', ')}`,
+      })
+      return
     }
-    else if (successfulCards.length > 0) {
+
+    if (successfulCards.length > 0) {
       Notifications.showSuccess({ text: successNotificationText })
+      return
     }
-    else if (failedCards.length > 0) {
-      Notifications.showError({ text: errorNotificationText })
+
+    if (failedCards.length > 0) {
+      Notifications.showError({ text: `Error issuing library card${failedCards.length > 1 ? 's' : ''}.` })
     }
   }
 
