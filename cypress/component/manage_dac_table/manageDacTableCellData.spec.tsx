@@ -28,6 +28,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
       const mockProps = {
         dac: mockDac,
         deleteDac: cy.stub(),
+        editDac: cy.stub(),
         userRole: 'Admin',
       }
 
@@ -51,6 +52,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
       const mockProps = {
         dac: mockDac,
         deleteDac: cy.stub(),
+        editDac: cy.stub(),
         userRole: 'Admin',
       }
 
@@ -74,6 +76,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
       const mockProps = {
         dac: mockDac,
         deleteDac: cy.stub(),
+        editDac: cy.stub(),
         userRole: 'Admin',
       }
 
@@ -97,6 +100,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
       const mockProps = {
         dac: mockDac,
         deleteDac: cy.stub(),
+        editDac: cy.stub(),
         userRole: 'Admin',
       }
 
@@ -120,6 +124,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
       const mockProps = {
         dac: mockDac,
         deleteDac: cy.stub(),
+        editDac: cy.stub(),
         userRole: 'Admin',
       }
 
@@ -144,6 +149,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
       const mockProps = {
         dac: mockDac,
         deleteDac: cy.stub(),
+        editDac: cy.stub(),
         userRole: 'Admin',
       }
 
@@ -165,6 +171,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
     const mockProps = {
       dac: mockDac,
       deleteDac: cy.stub(),
+      editDac: cy.stub(),
       userRole: 'Admin',
     }
 

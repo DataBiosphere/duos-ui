@@ -8,18 +8,23 @@ import { Link } from 'react-router-dom'
 import editPencilIcon from 'src/images/edit_pencil.svg'
 import radarIcon from 'src/images/google-svg/radar.svg'
 
-export function nameCellData({ name = '- -', dac, viewMembers, dacId, label = 'dac-name' }) {
+export function nameCellData({ name = '- -', dacId, label = 'dac-name' }) {
   return {
-    data: name,
+    isComponent: true,
     id: dacId,
-    style: {
-      color: styles.color.name,
-      fontSize: styles.fontSize.name,
-      fontWeight: '500',
-      cursor: 'pointer',
-    },
-    onClick: () => viewMembers(dac),
     label,
+    data: (
+      <Link
+        to={`/manage_dac/${dacId}`}
+        style={{
+          color: styles.color.name,
+          fontSize: styles.fontSize.name,
+          fontWeight: '500',
+        }}
+      >
+        {name || '- -'}
+      </Link>
+    ),
   }
 }
 
@@ -37,25 +42,22 @@ export function descriptionCellData({ description = '- -', dacId, label = 'dac-d
 
 export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) {
   return {
+    isComponent: true,
+    id: dac.dacId,
+    label,
     data: (
-      <a
-        id={dac.dacId + '_dacDatasets'}
-        name="dacDatasets"
+      <button
+        id={`${dac.dacId}_dacDatasets`}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#354052', fontSize: styles.fontSize.datasets }}
         onClick={() => viewDatasets(dac)}
       >
         View Datasets
-      </a>
+      </button>
     ),
-    id: dac.dacId,
-    style: {
-      color: '#354052',
-      fontSize: styles.fontSize.datasets,
-    },
-    label,
   }
 }
 
-export function actionsCellData({ dac, deleteDac, userRole }) {
+export function actionsCellData({ dac, deleteDac, editDac, userRole }) {
   const isAdmin = (userRole === 'Admin')
   const deleteDisabled = (!isNil(dac.datasets) && !isEmpty(dac.datasets))
 
@@ -63,25 +65,21 @@ export function actionsCellData({ dac, deleteDac, userRole }) {
     <>
       <div style={{ paddingTop: '5px', paddingRight: '4px' }}>
         <Link
-          to={{
-            pathname: `/manage_radar/${dac.dacId}`,
-            state: { userRole: userRole },
-          }}
+          to={`/manage_radar/${dac.dacId}`}
           data-tip={`Edit rule automation for DARs in ${dac.name}`}
         >
           <img className="radar-icon" src={radarIcon} alt="Edit rule automation" />
         </Link>
       </div>
       <div style={{ paddingTop: '5px' }}>
-        <Link
-          to={{
-            pathname: `/manage_edit_dac_daa/${dac.dacId}`,
-            state: { userRole: userRole },
-          }}
+        <button
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           data-tip={`Edit ${dac.name}`}
+          onClick={() => editDac(dac)}
+          aria-label={`Edit ${dac.name}`}
         >
-          <img id="edit-pencil-icon" src={editPencilIcon} />
-        </Link>
+          <img id="edit-pencil-icon" src={editPencilIcon} alt="Edit DAC" />
+        </button>
       </div>
       {isAdmin && (
         <TableIconButton
@@ -90,8 +88,8 @@ export function actionsCellData({ dac, deleteDac, userRole }) {
           disabled={deleteDisabled}
           onClick={() => deleteDac(dac)}
           icon={Delete}
-          style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
-          hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
+          style={{ ...Styles.TABLE.TABLE_ICON_BUTTON }}
+          hoverStyle={{ ...Styles.TABLE.TABLE_BUTTON_ICON_HOVER }}
         />
       )}
     </>

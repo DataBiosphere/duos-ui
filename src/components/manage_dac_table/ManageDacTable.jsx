@@ -56,7 +56,7 @@ const getInitialSort = (columns = []) => {
   }
 }
 
-const processDacRowData = ({ dacs, viewDatasets, viewMembers, editDac, deleteDac, userRole, columns = columns }) => {
+const processDacRowData = ({ dacs, viewDatasets, editDac, deleteDac, userRole, columns = columns }) => {
   if (!isNil(dacs)) {
     return dacs.map((dac) => {
       const {
@@ -72,7 +72,6 @@ const processDacRowData = ({ dacs, viewDatasets, viewMembers, editDac, deleteDac
           description,
           name,
           viewDatasets,
-          viewMembers,
           editDac,
           deleteDac,
           userRole,
@@ -98,7 +97,6 @@ export const ManageDacTable = function ManageDacTable(props) {
     userRole,
     setShowEditPage,
     setShowDatasetsPage,
-    setShowMembersModal,
     setShowConfirmationModal,
     setSelectedDac,
     setSelectedDatasets,
@@ -113,11 +111,6 @@ export const ManageDacTable = function ManageDacTable(props) {
     setShowConfirmationModal(true)
     setSelectedDac(selectedDac)
   }, [setShowConfirmationModal, setSelectedDac])
-
-  const viewMembers = useCallback((selectedDac) => {
-    setShowMembersModal(true)
-    setSelectedDac(selectedDac)
-  }, [setShowMembersModal, setSelectedDac])
 
   const viewDatasets = useCallback(async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId)
@@ -134,7 +127,6 @@ export const ManageDacTable = function ManageDacTable(props) {
       filteredList: processDacRowData({
         dacs,
         viewDatasets,
-        viewMembers,
         editDac,
         deleteDac,
         userRole,
@@ -146,7 +138,7 @@ export const ManageDacTable = function ManageDacTable(props) {
       setVisibleList: l => setVisibleDacs(l),
       sort,
     })
-  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers])
+  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets])
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !Number.isNaN(Number.parseInt(value))) {
@@ -169,7 +161,6 @@ export const ManageDacTable = function ManageDacTable(props) {
     userRole: PropTypes.string,
     setShowEditPage: PropTypes.func,
     setShowDatasetsPage: PropTypes.func,
-    setShowMembersModal: PropTypes.func,
     setShowConfirmationModal: PropTypes.func,
     setSelectedDac: PropTypes.func,
     setSelectedDatasets: PropTypes.func,
