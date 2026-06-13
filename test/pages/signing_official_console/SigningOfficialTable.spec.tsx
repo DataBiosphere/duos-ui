@@ -87,6 +87,16 @@ const libraryCard = (overrides: Partial<LibraryCard> = {}): LibraryCard => ({
   ...overrides,
 })
 
+const libraryCardError = (message: string): Error => {
+  return Object.assign(new Error(message), {
+    response: {
+      data: {
+        message,
+      },
+    },
+  })
+}
+
 const mockSigningOfficial = user({
   displayName: 'Test Signing Official',
   email: 'so@example.com',
@@ -154,13 +164,9 @@ describe('SigningOfficialTable', () => {
   })
 
   it('displays an error message when issuing a library card fails', async () => {
-    vi.mocked(LibraryCardApi.createLibraryCard).mockRejectedValue({
-      response: {
-        data: {
-          message: `Failed to issue library card for ${mockResearcher1.email}`,
-        },
-      },
-    })
+    vi.mocked(LibraryCardApi.createLibraryCard).mockRejectedValue(
+      libraryCardError(`Failed to issue library card for ${mockResearcher1.email}`),
+    )
 
     renderTable()
 
@@ -209,13 +215,7 @@ describe('SigningOfficialTable', () => {
       if (card.userEmail === mockResearcher1.email) {
         return Promise.resolve(newCard)
       }
-      return Promise.reject({
-        response: {
-          data: {
-            message: `Failed to issue library card for ${card.userEmail}`,
-          },
-        },
-      })
+      return Promise.reject(libraryCardError(`Failed to issue library card for ${card.userEmail}`))
     })
 
     renderTable()

@@ -253,7 +253,7 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     searchOnFilteredList(
       searchTerms,
       researchers,
-      researcherFilterFunction as (term: string, list: DuosUser[]) => DuosUser[],
+      researcherFilterFunction,
       setFilteredResearchers,
     )
   }, [researchers])
@@ -283,7 +283,7 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     searchOnFilteredList(
       searchText,
       researchers,
-      researcherFilterFunction as (term: string, list: DuosUser[]) => DuosUser[],
+      researcherFilterFunction,
       setFilteredResearchers,
     )
   }, [researchers, searchText])
