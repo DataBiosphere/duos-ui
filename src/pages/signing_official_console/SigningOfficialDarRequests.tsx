@@ -26,11 +26,11 @@ export default function SigningOfficialDarRequests(): React.JSX.Element {
         setIsLoading(false)
       }
       catch {
-        Notifications.showError({ text: 'Error: Unable to retrieve current user from server' })
+        Notifications.showError({ text: 'Error: Unable to retrieve Data Access Requests' })
         setIsLoading(false)
       }
     }
-    void init()
+    init()
   }, [])
 
   const updateCollections = useCallback((updatedCollection: DarCollectionSummary) => {
