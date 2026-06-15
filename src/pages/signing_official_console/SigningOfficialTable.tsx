@@ -20,10 +20,9 @@ import { extractError } from 'src/utils/ErrorUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
-import { DuosUser, LibraryCard as LibraryCardModel } from 'src/types/model'
+import { DuosUser, DuosUserWithInstitutionId, LibraryCard as LibraryCardModel } from 'src/types/model'
 
 type TableRowId = number | string
-type SigningOfficialUser = DuosUser & { institutionId: number }
 
 interface LibraryCardRequest {
   userEmail: string
@@ -37,7 +36,7 @@ interface SelectedLibraryCard extends LibraryCardRequest {
 }
 
 interface SigningOfficialTableProps {
-  readonly signingOfficial: SigningOfficialUser
+  readonly signingOfficial: DuosUserWithInstitutionId
   readonly isLoading: boolean
   readonly researchers: DuosUser[]
 }

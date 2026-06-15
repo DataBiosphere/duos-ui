@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SigningOfficialTable from 'src/pages/signing_official_console/SigningOfficialTable'
 import { LibraryCard as LibraryCardApi } from 'src/libs/ajax/LibraryCard'
 import { Notifications } from 'src/libs/utils'
-import { DuosUser, LibraryCard, UserRole } from 'src/types/model'
+import { DuosUser, DuosUserWithInstitutionId, LibraryCard, UserRole } from 'src/types/model'
 
 vi.mock('src/components/modals/LibraryCardFormModal', () => ({
   default: ({
@@ -103,7 +103,7 @@ const mockSigningOfficial = user({
   isResearcher: false,
   isSigningOfficial: true,
   userId: 10,
-}) as DuosUser & { institutionId: number }
+}) as DuosUserWithInstitutionId
 
 const mockResearcher1 = user({
   userId: 1,
