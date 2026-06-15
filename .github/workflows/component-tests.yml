@@ -29,26 +29,13 @@ jobs:
         run: pnpm ci
       - name: Run Vitest
         run: pnpm run test:coverage
-      - name: Upload coverage artifacts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: coverage-report
-          path: |
-            coverage/coverage-report.xml
-          if-no-files-found: warn
       - name: Publish coverage report to PR
-        if: github.event_name == 'pull_request' && always()
-        uses: 5monkeys/cobertura-action@ee5787cc56634acddedc51f21c7947985531e6eb # v14
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@02f3c2e641286b7fa308cd3e430783103ce6103b # v2.12.0
         with:
-          path: coverage/coverage-report.xml
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          report_name: DUOS Coverage Report
-          minimum_coverage: 0
-          show_line: true
-          show_branch: true
-          show_class_names: true
-          only_changed_files: true
+          name: DUOS Coverage Report
+          json-summary-path: coverage/coverage-summary.json
+          json-final-path: coverage/coverage-final.json
   cypress-run:
     runs-on: ubuntu-latest
     permissions:
