@@ -190,12 +190,11 @@ export const DAR = {
   /**
    * Approve the closeout of a DAR.
    * @param referenceId The DAR reference ID
-   * @returns The HTTP status from the response envelope (undefined in practice; preserved for API compatibility)
+   * @returns 200 on success; throws on error so callers can catch the error code and message
    */
-  approveCloseout: async (referenceId: string): Promise<number | undefined> => {
+  approveCloseout: async (referenceId: string): Promise<number> => {
     const url = `${await Config.getApiUrl()}/api/dar/${referenceId}/approveCloseout`
-    const res = await fetchPut(url, {}, Config.authOpts())
-    // FetchData only exposes .data; .status is always undefined here, preserved for API compatibility
-    return (res as unknown as { status?: number }).status
+    await fetchPut<void>(url, {}, Config.authOpts())
+    return 200
   },
 }
