@@ -32,7 +32,7 @@ export default function SigningOfficialDataSubmitters(): React.JSX.Element {
         setIsLoading(false)
       }
     }
-    void init()
+    init()
   }, [])
 
   return (
