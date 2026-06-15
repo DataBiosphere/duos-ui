@@ -5,11 +5,11 @@ import { User } from 'src/libs/ajax/User'
 import DataCustodianTable from 'src/pages/signing_official_console/DataCustodianTable'
 import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { DuosUser } from 'src/types/model'
+import { DuosUser, DuosUserWithInstitutionId } from 'src/types/model'
 
 export default function SigningOfficialDataSubmitters(): React.JSX.Element {
   usePageTitle('Data Submitters')
-  const [signingOfficial, setSigningOfficial] = useState<DuosUser>()
+  const [signingOfficial, setSigningOfficial] = useState<DuosUserWithInstitutionId>()
   const [researchers, setResearchers] = useState<DuosUser[]>([])
 
   // states to be added
@@ -20,8 +20,8 @@ export default function SigningOfficialDataSubmitters(): React.JSX.Element {
       try {
         setIsLoading(true)
         // Need to assign to state variable on Component init for template reference
-        const soUser = await User.getMe()
-        const soUsers = await User.list(USER_ROLES.signingOfficial)
+        const soUser = await User.getMe() as DuosUserWithInstitutionId
+        const soUsers = await User.list(USER_ROLES.signingOfficial) as DuosUserWithInstitutionId[]
         setResearchers(soUsers)
         setSigningOfficial(soUser)
         setIsLoading(false)
@@ -41,7 +41,7 @@ export default function SigningOfficialDataSubmitters(): React.JSX.Element {
         {signingOfficial && (
           <DataCustodianTable
             researchers={researchers}
-            signingOfficial={signingOfficial as DuosUser & { institutionId: number }}
+            signingOfficial={signingOfficial}
             isLoading={isLoading}
           />
         )}
