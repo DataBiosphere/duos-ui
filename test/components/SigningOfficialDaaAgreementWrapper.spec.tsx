@@ -6,6 +6,8 @@ import SigningOfficialDaaAgreementWrapper from 'src/components/SigningOfficialDa
 import Acknowledgments, { acceptAcknowledgments } from 'src/libs/acknowledgements'
 import { Notifications } from 'src/libs/utils'
 
+const navigate = vi.fn()
+
 vi.mock('src/libs/acknowledgements', () => ({
   default: {
     broadLcaAcknowledgement: 'broad-lca',
@@ -13,6 +15,14 @@ vi.mock('src/libs/acknowledgements', () => ({
   },
   acceptAcknowledgments: vi.fn(),
 }))
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>()
+  return {
+    ...actual,
+    useNavigate: () => navigate,
+  }
+})
 
 vi.mock('src/components/external_docs/NIHDataUseCertificationAgreement', () => ({
   NIHDataUseCertificationAgreement: () => (
@@ -47,7 +57,7 @@ describe('SigningOfficialDaaAgreementWrapper', () => {
   })
 
   it('accepts signing official DAA acknowledgements', async () => {
-    vi.mocked(acceptAcknowledgments).mockReturnValue(new Promise(() => undefined))
+    vi.mocked(acceptAcknowledgments).mockResolvedValue(undefined)
 
     render(<SigningOfficialDaaAgreementWrapper isDataSubmitterTab={false} />)
 
@@ -58,6 +68,7 @@ describe('SigningOfficialDaaAgreementWrapper', () => {
         Acknowledgments.broadLcaAcknowledgement,
         Acknowledgments.nihLcaAcknowledgement,
       )
+      expect(navigate).toHaveBeenCalledWith('/signing_official_console/library_cards')
     })
   })
 

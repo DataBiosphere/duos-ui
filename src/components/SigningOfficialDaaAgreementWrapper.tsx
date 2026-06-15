@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Notifications } from 'src/libs/utils'
 import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
@@ -13,6 +14,7 @@ interface SigningOfficialDaaAgreementWrapperProps {
 }
 
 export const SigningOfficialDaaAgreementWrapper = (props: SigningOfficialDaaAgreementWrapperProps): React.JSX.Element => {
+  const navigate = useNavigate()
   const {
     isDataSubmitterTab,
   } = props
@@ -20,7 +22,7 @@ export const SigningOfficialDaaAgreementWrapper = (props: SigningOfficialDaaAgre
   const acceptDaas = async (): Promise<void> => {
     try {
       await acceptAcknowledgments(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement)
-      globalThis.location.assign('/signing_official_console/library_cards')
+      navigate('/signing_official_console/library_cards')
     }
     catch (error) {
       const message = extractError(error)
