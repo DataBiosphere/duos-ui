@@ -90,6 +90,14 @@ describe('DAR', () => {
       vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
       await expect(DAR.getPartialDarRequest('ref-abc')).rejects.toThrow('network failure')
     })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'DAR ref-abc not found', code: 404 }
+      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
+      const error = await DAR.getPartialDarRequest('ref-abc').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('DAR ref-abc not found')
+    })
   })
 
   describe('updateDarDraft', () => {
@@ -113,6 +121,14 @@ describe('DAR', () => {
     it('propagates fetch failures', async () => {
       vi.mocked(fetchPut).mockRejectedValueOnce(new Error('server error'))
       await expect(DAR.updateDarDraft({}, 'ref-001')).rejects.toThrow('server error')
+    })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Draft ref-001 is locked', code: 409 }
+      vi.mocked(fetchPut).mockRejectedValueOnce(consentError)
+      const error = await DAR.updateDarDraft({}, 'ref-001').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Draft ref-001 is locked')
     })
   })
 
@@ -138,6 +154,14 @@ describe('DAR', () => {
       vi.mocked(fetchPost).mockRejectedValueOnce(new Error('network failure'))
       await expect(DAR.postDarDraft({})).rejects.toThrow('network failure')
     })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Dataset not eligible for a DAR', code: 400 }
+      vi.mocked(fetchPost).mockRejectedValueOnce(consentError)
+      const error = await DAR.postDarDraft({}).then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Dataset not eligible for a DAR')
+    })
   })
 
   describe('deleteDar', () => {
@@ -154,6 +178,14 @@ describe('DAR', () => {
     it('propagates fetch failures', async () => {
       vi.mocked(fetchDelete).mockRejectedValueOnce(new Error('not found'))
       await expect(DAR.deleteDar('ref-001')).rejects.toThrow('not found')
+    })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'DAR ref-001 cannot be deleted', code: 403 }
+      vi.mocked(fetchDelete).mockRejectedValueOnce(consentError)
+      const error = await DAR.deleteDar('ref-001').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('DAR ref-001 cannot be deleted')
     })
   })
 
@@ -183,6 +215,14 @@ describe('DAR', () => {
       vi.mocked(fetchPost).mockRejectedValueOnce(new Error('server error'))
       await expect(DAR.postDar({})).rejects.toThrow('server error')
     })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Submission rejected: missing required fields', code: 422 }
+      vi.mocked(fetchPost).mockRejectedValueOnce(consentError)
+      const error = await DAR.postDar({}).then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Submission rejected: missing required fields')
+    })
   })
 
   describe('getAutoCompleteOT', () => {
@@ -202,6 +242,14 @@ describe('DAR', () => {
     it('propagates fetch failures', async () => {
       vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
       await expect(DAR.getAutoCompleteOT('HP:')).rejects.toThrow('network failure')
+    })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Ontology service unavailable', code: 503 }
+      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
+      const error = await DAR.getAutoCompleteOT('HP:').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Ontology service unavailable')
     })
   })
 
@@ -257,6 +305,14 @@ describe('DAR', () => {
       vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
       await expect(DAR.downloadDARDocument('ref-001', 'irbDocument', 'irb.pdf')).rejects.toThrow('network failure')
     })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Document not found', code: 404 }
+      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
+      const error = await DAR.downloadDARDocument('ref-001', 'irbDocument', 'irb.pdf').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Document not found')
+    })
   })
 
   describe('getDARDocumentAsBlob', () => {
@@ -276,6 +332,14 @@ describe('DAR', () => {
     it('propagates fetch failures', async () => {
       vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
       await expect(DAR.getDARDocumentAsBlob('ref-001', 'irbDocument')).rejects.toThrow('network failure')
+    })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Document not found', code: 404 }
+      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
+      const error = await DAR.getDARDocumentAsBlob('ref-001', 'irbDocument').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Document not found')
     })
   })
 
@@ -344,6 +408,15 @@ describe('DAR', () => {
       const file = new File(['content'], 'irb.pdf', { type: 'application/pdf' })
       await expect(DAR.uploadDARDocument(file, 'ref-001', 'irbDocument')).rejects.toThrow('upload failed')
     })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'File type not permitted', code: 415 }
+      vi.mocked(fetchMultipart).mockRejectedValueOnce(consentError)
+      const file = new File(['content'], 'irb.pdf', { type: 'application/pdf' })
+      const error = await DAR.uploadDARDocument(file, 'ref-001', 'irbDocument').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('File type not permitted')
+    })
   })
 
   describe('approveCloseout', () => {
@@ -360,6 +433,14 @@ describe('DAR', () => {
     it('propagates fetch failures', async () => {
       vi.mocked(fetchPut).mockRejectedValueOnce(new Error('forbidden'))
       await expect(DAR.approveCloseout('ref-001')).rejects.toThrow('forbidden')
+    })
+
+    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
+      const consentError = { message: 'Closeout not permitted for this DAR', code: 403 }
+      vi.mocked(fetchPut).mockRejectedValueOnce(consentError)
+      const error = await DAR.approveCloseout('ref-001').then(() => { throw new Error('expected rejection') }, e => e)
+      expect(extractConsentError(error)).toEqual(consentError)
+      expect(extractError(error)).toBe('Closeout not permitted for this DAR')
     })
   })
 })
