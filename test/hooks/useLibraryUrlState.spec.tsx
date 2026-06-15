@@ -1,4 +1,7 @@
 import React from 'react'
+import '@testing-library/jest-dom/vitest'
+import { describe, it, expect } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType } from 'src/types/library'
@@ -39,137 +42,128 @@ const TestComponent = () => {
 
 describe('useLibraryUrlState', () => {
   it('initializes with default values when no search params are present', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/']}>
         <TestComponent />
       </MemoryRouter>,
     )
-    cy.get('#library').should('have.text', 'duos')
-    cy.get('#tab').should('have.text', AssetType.DATASETS)
-    cy.get('#filters').then(($el) => {
-      const filters = JSON.parse($el.text())
-      expect(filters.accessManagement).to.have.length(0)
-      expect(filters.participantCount.min).to.be.equal(undefined)
-    })
+    expect(screen.getByText('duos')).toBeInTheDocument()
+    expect(screen.getByText(AssetType.DATASETS)).toBeInTheDocument()
+    const filtersEl = document.getElementById('filters')!
+    const filters = JSON.parse(filtersEl.textContent!)
+    expect(filters.accessManagement).toHaveLength(0)
+    expect(filters.participantCount.min).toBeUndefined()
   })
 
   it('initializes with values from search params', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/?library=test&tab=datasets&access=controlled,open&minParticipants=5']}>
         <TestComponent />
       </MemoryRouter>,
     )
-    cy.get('#library').should('have.text', 'test')
-    cy.get('#tab').should('have.text', AssetType.DATASETS)
-    cy.get('#filters').then(($el) => {
-      const filters = JSON.parse($el.text())
-      expect(filters.accessManagement).to.deep.equal(['controlled', 'open'])
-      expect(filters.participantCount.min).to.equal(5)
-    })
+    expect(document.getElementById('library')!.textContent).toBe('test')
+    expect(document.getElementById('tab')!.textContent).toBe(AssetType.DATASETS)
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.accessManagement).toEqual(['controlled', 'open'])
+    expect(filters.participantCount.min).toBe(5)
   })
 
   it('updates state via updateState', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/']}>
         <TestComponent />
       </MemoryRouter>,
     )
 
-    cy.get('#update-tab').click()
-    cy.get('#tab').should('have.text', AssetType.DATASETS)
+    fireEvent.click(screen.getByText('Update Tab'))
+    expect(document.getElementById('tab')!.textContent).toBe(AssetType.DATASETS)
 
-    cy.get('#update-library').click()
-    cy.get('#library').should('have.text', 'test')
+    fireEvent.click(screen.getByText('Update Library'))
+    expect(document.getElementById('library')!.textContent).toBe('test')
 
-    cy.get('#update-filters').click()
-    cy.get('#filters').then(($el) => {
-      const filters = JSON.parse($el.text())
-      expect(filters.accessManagement).to.deep.equal(['controlled'])
-      expect(filters.clinicalTrialStatus).to.deep.equal(['Active, not recruiting'])
-      expect(filters.participantCount.min).to.equal(10)
-    })
+    fireEvent.click(screen.getByText('Update Filters'))
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.accessManagement).toEqual(['controlled'])
+    expect(filters.clinicalTrialStatus).toEqual(['Active, not recruiting'])
+    expect(filters.participantCount.min).toBe(10)
 
     // Test clearing a value (deleting from params)
-    cy.get('#clear-library').click()
-    cy.get('#library').should('have.text', 'duos') // back to default
+    fireEvent.click(screen.getByText('Clear Library'))
+    expect(document.getElementById('library')!.textContent).toBe('duos') // back to default
   })
 
   it('initializes with pagination and sort from search params', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/?page=2&pageSize=100&sort=studyName&order=desc']}>
         <TestComponent />
       </MemoryRouter>,
     )
-    cy.get('#page').should('have.text', '2')
-    cy.get('#pageSize').should('have.text', '100')
-    cy.get('#sortField').should('have.text', 'studyName')
-    cy.get('#sortOrder').should('have.text', 'desc')
+    expect(document.getElementById('page')!.textContent).toBe('2')
+    expect(document.getElementById('pageSize')!.textContent).toBe('100')
+    expect(document.getElementById('sortField')!.textContent).toBe('studyName')
+    expect(document.getElementById('sortOrder')!.textContent).toBe('desc')
   })
 
   it('updates pagination via updateState', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/']}>
         <TestComponent />
       </MemoryRouter>,
     )
 
-    cy.get('#update-pagination').click()
-    cy.get('#page').should('have.text', '1')
-    cy.get('#pageSize').should('have.text', '50')
+    fireEvent.click(screen.getByText('Update Pagination'))
+    expect(document.getElementById('page')!.textContent).toBe('1')
+    expect(document.getElementById('pageSize')!.textContent).toBe('50')
   })
 
   it('sets sort state via updateState', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/']}>
         <TestComponent />
       </MemoryRouter>,
     )
 
-    cy.get('#update-sort').click()
-    cy.get('#sortField').should('have.text', 'studyName')
-    cy.get('#sortOrder').should('have.text', 'asc')
+    fireEvent.click(screen.getByText('Update Sort'))
+    expect(document.getElementById('sortField')!.textContent).toBe('studyName')
+    expect(document.getElementById('sortOrder')!.textContent).toBe('asc')
   })
 
   it('clears sort state when sortField and sortOrder are set to undefined', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/?sort=studyName&order=asc']}>
         <TestComponent />
       </MemoryRouter>,
     )
 
     // Verify sort is initially set from URL params
-    cy.get('#sortField').should('have.text', 'studyName')
-    cy.get('#sortOrder').should('have.text', 'asc')
+    expect(document.getElementById('sortField')!.textContent).toBe('studyName')
+    expect(document.getElementById('sortOrder')!.textContent).toBe('asc')
 
     // Clear the sort
-    cy.get('#clear-sort').click()
-    cy.get('#sortField').should('have.text', 'none')
-    cy.get('#sortOrder').should('have.text', 'none')
+    fireEvent.click(screen.getByText('Clear Sort'))
+    expect(document.getElementById('sortField')!.textContent).toBe('none')
+    expect(document.getElementById('sortOrder')!.textContent).toBe('none')
   })
 
   it('parses comma-containing array values as single filter values', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/?clinicalTrialStatus=Active,%20not%20recruiting']}>
         <TestComponent />
       </MemoryRouter>,
     )
 
-    cy.get('#filters').then(($el) => {
-      const filters = JSON.parse($el.text())
-      expect(filters.clinicalTrialStatus).to.deep.equal(['Active, not recruiting'])
-    })
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.clinicalTrialStatus).toEqual(['Active, not recruiting'])
   })
 
   it('parses repeated array params without splitting comma-containing values', () => {
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/?clinicalTrialStatus=Recruiting&clinicalTrialStatus=Active,%20not%20recruiting']}>
         <TestComponent />
       </MemoryRouter>,
     )
 
-    cy.get('#filters').then(($el) => {
-      const filters = JSON.parse($el.text())
-      expect(filters.clinicalTrialStatus).to.deep.equal(['Recruiting', 'Active, not recruiting'])
-    })
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.clinicalTrialStatus).toEqual(['Recruiting', 'Active, not recruiting'])
   })
 })
