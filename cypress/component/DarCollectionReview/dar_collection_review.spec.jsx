@@ -722,20 +722,16 @@ describe('DAR Review', () => {
     const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
-    const chairContainer = cy.get('.collection-review-page').find('.tab-selection-Chair')
-    const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member')
+    const voteContainer = cy.get('.collection-review-page').find('.tab-selection-Vote')
 
     voteHistoryTab.should('exist').should('be.visible')
     applicationTab.should('exist').should('be.visible')
     fullDarTab.should('exist').should('be.visible')
-    chairContainer.should('exist').should('be.visible')
-    memberContainer.should('exist').should('be.visible')
+    voteContainer.should('exist').should('be.visible')
+    cy.get('.tab-selection-Chair').should('not.exist')
     cy.get('[data-cy=dataset-list]').should('not.exist')
 
-    chairContainer.click().then(() => {
-      cy.get('[data-cy=dataset-list]').should('exist').should('be.visible').contains('Sleep Apnea')
-    })
-    memberContainer.click().then(() => {
+    voteContainer.click().then(() => {
       cy.get('[data-cy=dataset-list]').should('exist').should('be.visible').contains('Sleep Apnea')
     })
   })
@@ -749,15 +745,15 @@ describe('DAR Review', () => {
     const voteHistoryTab = cy.get('.collection-review-page').find('.tab-selection-Voting')
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
-    const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member')
+    const voteContainer = cy.get('.collection-review-page').find('.tab-selection-Vote')
 
     voteHistoryTab.should('exist').should('be.visible')
     applicationTab.should('exist').should('be.visible')
     fullDarTab.should('exist').should('be.visible')
-    memberContainer.should('exist').should('be.visible')
+    voteContainer.should('exist').should('be.visible')
     cy.get('[data-cy=dataset-list]').should('not.exist')
 
-    memberContainer.click().then(() => {
+    voteContainer.click().then(() => {
       cy.get('[data-cy=dataset-list]').should('exist').should('be.visible').contains('Sleep Apnea')
     })
   })
@@ -774,7 +770,7 @@ describe('DAR Review', () => {
 
     cy.get('.tab-selection-Voting').should('not.exist')
     cy.get('.tab-selection-Chair').should('not.exist')
-    cy.get('.tab-selection-Member').should('not.exist')
+    cy.get('.tab-selection-Vote').should('not.exist')
 
     const applicationTab = cy.get('.collection-review-page').find('.tab-selection-Application')
     const fullDarTab = cy.get('.collection-review-page').find('.tab-selection-Full')
