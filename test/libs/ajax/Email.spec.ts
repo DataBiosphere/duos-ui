@@ -55,7 +55,9 @@ describe('Email', () => {
       vi.mocked(fetchPost).mockRejectedValueOnce(consentError)
 
       const error = await Email.sendReminderEmail(7).then(
-        () => { throw new Error('expected sendReminderEmail to reject') },
+        () => {
+          throw new Error('expected sendReminderEmail to reject')
+        },
         e => e,
       )
 
