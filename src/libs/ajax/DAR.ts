@@ -105,8 +105,7 @@ export const DAR = {
       const res = await fetchGet<OntologyEntry[]>(url, Config.authOpts())
       return res.data
     }
-    catch (_error) {
-      // Return empty array on error (original behavior)
+    catch {
       return []
     }
   },
