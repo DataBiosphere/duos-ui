@@ -63,7 +63,7 @@ const IrbDocumentUpload: React.FC<IrbDocumentUploadProps> = ({
                 <DownloadLink
                   label="Download"
                   onDownload={() => {
-                    DAR.downloadDARDocument(referenceId, 'irbDocument', formState.irbDocumentName!)
+                    DAR.downloadDARDocument(referenceId, 'irbDocument', formState.irbDocumentName ?? '')
                   }}
                 />
               </div>

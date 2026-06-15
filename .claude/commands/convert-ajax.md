@@ -16,6 +16,7 @@ Steps:
    - Pass explicit type parameters to the fetch helpers (e.g. `fetchPost<void>(...)`).
    - Add a JSDoc comment per exported method describing what it does, its params, and return.
    - Do not change runtime behavior, URLs, or method signatures beyond typing.
+   - When tightening types in the module causes type errors in callers, fix them with `?? fallback` rather than `!` assertions — `!` lies to the type checker and triggers Sonar's "unnecessary assertion" warning. Use `!` only when narrowing is genuinely impossible (e.g. inside a callback closure where TypeScript can't follow a JSX conditional guard).
    - Commit the rename + rewrite together as `feat: convert to typescript`.
    - **Why one commit:** GitHub's PR diff uses similarity-based rename detection on the net base→HEAD diff. A separate "rename only" commit doesn't help — GitHub still compares the original `.js` to the final `.ts`. Combining rename + rewrite into one commit keeps the history clean and avoids a pointless intermediate state.
 4. Create `test/libs/ajax/<Name>.spec.ts` mirroring `test/libs/ajax/Email.spec.ts`:
