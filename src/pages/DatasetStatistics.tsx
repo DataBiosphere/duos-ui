@@ -69,9 +69,6 @@ export default function DatasetStatistics() {
       if (draftResponse.referenceId) {
         navigate(`/dar_application/${draftResponse.referenceId}`)
       }
-      else if (draftResponse.message) {
-        showError(draftResponse.message + ' Please contact customer support for help.')
-      }
       else {
         showError('Unable to create a Draft Data Access Request')
       }
