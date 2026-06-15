@@ -1,11 +1,17 @@
 import React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import AddObjectButton from 'src/components/AddObjectButton'
 
 describe('AddObjectButton', () => {
-  it('renders with required props', () => {
-    const onClickSpy = cy.spy().as('onClickSpy')
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-    cy.mount(
+  it('renders with required props', () => {
+    const onClickSpy = vi.fn()
+
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -13,15 +19,15 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('exist')
-    cy.get('#test-button').should('contain.text', 'Add Test')
-    cy.get('#test-button').find('svg').should('exist') // AddIcon
+    expect(screen.getByRole('button', { name: /Add Test/i })).toBeInTheDocument()
+    expect(screen.getByText('Add Test')).toBeInTheDocument()
+    expect(document.querySelector('#test-button svg')).not.toBeNull() // AddIcon
   })
 
   it('calls onClick when clicked', () => {
-    const onClickSpy = cy.spy().as('onClickSpy')
+    const onClickSpy = vi.fn()
 
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -29,14 +35,14 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').click()
-    cy.get('@onClickSpy').should('have.been.calledOnce')
+    fireEvent.click(screen.getByRole('button', { name: /Add Test/i }))
+    expect(onClickSpy).toHaveBeenCalledOnce()
   })
 
   it('does not call onClick when disabled', () => {
-    const onClickSpy = cy.spy().as('onClickSpy')
+    const onClickSpy = vi.fn()
 
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -45,13 +51,14 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('be.disabled')
-    cy.get('#test-button').click({ force: true })
-    cy.get('@onClickSpy').should('not.have.been.called')
+    const button = screen.getByRole('button', { name: /Add Test/i })
+    expect(button).toBeDisabled()
+    fireEvent.click(button)
+    expect(onClickSpy).not.toHaveBeenCalled()
   })
 
   it('applies correct styling when disabled', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -60,11 +67,12 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('have.css', 'cursor', 'not-allowed')
+    const button = document.getElementById('test-button')!
+    expect(button.style.cursor).toBe('not-allowed')
   })
 
   it('shows validation error styling', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -73,12 +81,13 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('have.css', 'border', '1px solid rgb(255, 0, 0)')
-    cy.get('#test-button').should('have.css', 'box-shadow').and('include', 'rgb(255, 0, 0)')
+    const button = document.getElementById('test-button')!
+    expect(button.style.border).toBe('1px solid red')
+    expect(button.style.boxShadow).toContain('red')
   })
 
   it('shows default styling without validation error', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -87,12 +96,13 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('have.css', 'border').and('include', 'rgb(9, 72, 183)')
-    cy.get('#test-button').should('have.css', 'box-shadow', 'none')
+    const button = document.getElementById('test-button')!
+    expect(button.style.border).toContain('rgb(9, 72, 183)')
+    expect(button.style.boxShadow).toBe('none')
   })
 
   it('applies button-white class', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -100,12 +110,13 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('have.class', 'button')
-    cy.get('#test-button').should('have.class', 'button-white')
+    const button = document.getElementById('test-button')!
+    expect(button.classList.contains('button')).toBe(true)
+    expect(button.classList.contains('button-white')).toBe(true)
   })
 
   it('applies correct layout styles', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -113,16 +124,17 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('have.css', 'display', 'flex')
-    cy.get('#test-button').should('have.css', 'align-items', 'center')
-    cy.get('#test-button').should('have.css', 'margin-top', '0px')
-    cy.get('#test-button').should('have.css', 'margin-bottom', '5px')
+    const button = document.getElementById('test-button')!
+    expect(button.style.display).toBe('flex')
+    expect(button.style.alignItems).toBe('center')
+    expect(button.style.marginTop).toBe('0px')
+    expect(button.style.marginBottom).toBe('5px')
   })
 
   it('renders with custom icon', () => {
     const CustomIcon = () => <span data-testid="custom-icon">★</span>
 
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -131,12 +143,12 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('[data-testid="custom-icon"]').should('exist')
-    cy.get('[data-testid="custom-icon"]').should('contain.text', '★')
+    expect(screen.getByTestId('custom-icon')).toBeInTheDocument()
+    expect(screen.getByTestId('custom-icon')).toHaveTextContent('★')
   })
 
   it('renders with default AddIcon when icon prop not provided', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -144,12 +156,12 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').find('svg').should('exist')
-    cy.get('#test-button').find('[data-testid="AddIcon"]').should('exist')
+    expect(document.querySelector('#test-button svg')).not.toBeNull()
+    expect(document.querySelector('#test-button [data-testid="AddIcon"]')).not.toBeNull()
   })
 
   it('applies custom className', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -158,12 +170,13 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('have.class', 'custom-class')
-    cy.get('#test-button').should('have.class', 'another-class')
+    const button = document.getElementById('test-button')!
+    expect(button.classList.contains('custom-class')).toBe(true)
+    expect(button.classList.contains('another-class')).toBe(true)
   })
 
   it('applies default className when not provided', () => {
-    cy.mount(
+    render(
       <AddObjectButton
         id="test-button"
         label="Add Test"
@@ -171,7 +184,8 @@ describe('AddObjectButton', () => {
       />,
     )
 
-    cy.get('#test-button').should('have.class', 'button')
-    cy.get('#test-button').should('have.class', 'button-white')
+    const button = document.getElementById('test-button')!
+    expect(button.classList.contains('button')).toBe(true)
+    expect(button.classList.contains('button-white')).toBe(true)
   })
 })
