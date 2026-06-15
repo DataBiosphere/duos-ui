@@ -12,7 +12,7 @@ export interface DatasetDaaSnapshot {
   daaId?: number
   daaFileName?: string
   dataset?: { datasetId: number }
-  daa?: { daaId: number; file?: { fileName: string } }
+  daa?: { daaId: number, file?: { fileName: string } }
 }
 
 export const DAR = {
@@ -45,11 +45,11 @@ export const DAR = {
    * @param dar The initial DAR form data
    * @returns The newly created DataAccessRequest
    */
-  postDarDraft: async (dar: Record<string, unknown>): Promise<DataAccessRequest & { code?: number; message?: string }> => {
+  postDarDraft: async (dar: Record<string, unknown>): Promise<DataAccessRequest & { code?: number, message?: string }> => {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, { action: 'draft' })
     const url = `${await Config.getApiUrl()}/api/dar/v2/draft`
-    const res = await fetchPost<DataAccessRequest & { code?: number; message?: string }>(url, dar, Config.authOpts())
+    const res = await fetchPost<DataAccessRequest & { code?: number, message?: string }>(url, dar, Config.authOpts())
     return res.data
   },
 
