@@ -175,7 +175,7 @@ export const DAR = {
    */
   uploadDARDocument: async (file: File, darId: string, fileType: string): Promise<FetchData<DataAccessRequest | null>> => {
     if (isFileEmpty(file)) {
-      return Promise.resolve({ data: null })
+      return { data: null }
     }
     else {
       const authOpts = Config.authOpts()
