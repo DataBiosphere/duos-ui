@@ -5,10 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
-import { DuosUser, DuosUserWithInstitutionId } from 'src/types/model'
+import { DuosUserWithInstitutionId } from 'src/types/model'
 
 type MockDataCustodianTableProps = {
-  researchers: DuosUser[]
+  researchers: DuosUserWithInstitutionId[]
   signingOfficial: DuosUserWithInstitutionId
   isLoading: boolean
 }
@@ -31,8 +31,8 @@ vi.mock('src/libs/ajax/User', () => ({
   },
 }))
 
-const user = (overrides: Partial<DuosUser> = {}): DuosUser => {
-  const baseUser: DuosUser = {
+const user = (overrides: Partial<DuosUserWithInstitutionId> = {}): DuosUserWithInstitutionId => {
+  const baseUser: DuosUserWithInstitutionId = {
     createDate: new Date('2022-01-01T00:00:00.000Z'),
     displayName: 'Signing Official',
     email: 'so@example.com',
