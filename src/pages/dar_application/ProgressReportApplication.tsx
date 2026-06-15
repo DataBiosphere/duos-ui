@@ -130,7 +130,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
   const [showValidation, setShowValidation] = useState<boolean>(false)
   const [formValidation, setFormValidation] = useState<FormValidationState>({ darErrors: {} })
   const [nihValid, setNihValid] = useState<boolean>(true)
-  const [scrollToFirstError, setScrollToFirstError] = useState<boolean>(false)
   const [dataUseTranslations, setDataUseTranslations] = useState<(TranslationEntry | undefined)[][]>([])
   const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null)
 
@@ -138,7 +137,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
 
   const isFormEmpty = () => {
     return validationFailed(
-      validatePRFormData(nihValid, formState, formState.selectedDatasets, dataUseTranslations)
+      validatePRFormData(nihValid, formState, formState.selectedDatasets, dataUseTranslations),
     )
   }
 
@@ -146,18 +145,13 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     const validation = validatePRFormData(nihValid, formState, formState.selectedDatasets, dataUseTranslations)
     setShowValidation(true)
     setFormValidation(validation)
-    setScrollToFirstError(true)
-  }, [nihValid, formState, dataUseTranslations])
-
-  useEffect(() => {
-    if (scrollToFirstError) {
-      setScrollToFirstError(false)
+    setTimeout(() => {
       const firstError = document.querySelector<HTMLElement>('.errored')
       if (firstError) {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-    }
-  }, [scrollToFirstError])
+    }, 0)
+  }, [nihValid, formState, dataUseTranslations])
 
   const getValidation = useCallback((newState: FormState) => {
     if (!readOnlyMode && showValidation) {

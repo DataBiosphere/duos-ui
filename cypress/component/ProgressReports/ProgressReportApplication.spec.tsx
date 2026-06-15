@@ -1242,7 +1242,7 @@ describe('ProgressReportApplication - Component Tests', () => {
         publications: [],
         presentations: [],
         dmi: { incidents: [], description: '' },
-        closeoutSupplement: { reasons: [], otherText: '' },
+        closeoutSupplement: { reasons: [], otherText: '', signingOfficialId: 0 },
       }
 
       cy.mount(
