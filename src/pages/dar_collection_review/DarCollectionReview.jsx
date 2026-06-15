@@ -54,10 +54,13 @@ const tabStyleOverride = {
 const tabsForUser = (user, buckets, adminPage = false) => {
   if (adminPage) {
     return {
-      applicationInformation: 'Application Information',
-      fullDAR: 'Full DAR',
-      chairVote: 'Chair Vote',
-      votingHistory: 'Voting History',
+      tabs: {
+        applicationInformation: 'Application Information',
+        fullDAR: 'Full DAR',
+        chairVote: 'Chair Vote',
+        votingHistory: 'Voting History',
+      },
+      userHasChairVotes: false,
     }
   }
   const dataAccessBuckets = filter(buckets, bucket => get(bucket, 'isRP') !== true)
@@ -73,17 +76,20 @@ const tabsForUser = (user, buckets, adminPage = false) => {
     .flatMap(da => da.chairpersonVotes)
     .filter(v => v.userId === user.userId)
     .value()
+  const hasChairAndMemberVotes = !isEmpty(myMemberVotes) && !isEmpty(myChairVotes)
   const updatedTabs = { applicationInformation: 'Application Information', fullDAR: 'Full DAR' }
   if (!isEmpty(myMemberVotes)) {
-    updatedTabs.memberVote = 'Member Vote'
+    updatedTabs.memberVote = 'Vote'
   }
-  if (!isEmpty(myChairVotes)) {
+  // Only show a standalone Chair Vote tab when the user has no member votes;
+  // when both exist, chair voting is folded into the Member Vote tab.
+  if (!isEmpty(myChairVotes) && !hasChairAndMemberVotes) {
     updatedTabs.chairVote = 'Chair Vote'
   }
   if (userIsDacUser(user)) {
     updatedTabs.votingHistory = 'Voting History'
   }
-  return updatedTabs
+  return { tabs: updatedTabs, userHasChairVotes: hasChairAndMemberVotes }
 }
 
 const getApprovedDatasetsFromLatestDar = (darCollection, dacIds) => {
@@ -168,6 +174,7 @@ export default function DarCollectionReview(props) {
   const [dacIds, setDacIds] = useState([])
   const { adminPage = false, readOnly = false } = props
   const [canVote, setCanVote] = useState(undefined)
+  const [userHasChairVotes, setUserHasChairVotes] = useState(false)
 
   const init = useCallback(async () => {
     const user = await Storage.getCurrentUser()
@@ -201,7 +208,9 @@ export default function DarCollectionReview(props) {
       setDarInfo(darInfo)
       setResearcherProfile(researcherProfile)
       setApprovedDatasets(approvedDatasetNames)
-      setTabs(tabsForUser(user, processedBuckets, adminPage))
+      const { tabs: newTabs, userHasChairVotes: hasChairVotes } = tabsForUser(user, processedBuckets, adminPage)
+      setTabs(newTabs)
+      setUserHasChairVotes(hasChairVotes)
       setDacIds(dacIds)
       setIsLoading(false)
       setSubcomponentLoading(false)
@@ -330,6 +339,9 @@ export default function DarCollectionReview(props) {
             isChair={false}
             readOnly={readOnly}
             isLoading={isLoading || subcomponentLoading}
+            showBothVotes={userHasChairVotes}
+            updateFinalVote={updateFinalVoteFn}
+            reloadFn={init}
           />
         )}
         {selectedTab === tabs.chairVote && (

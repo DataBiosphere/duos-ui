@@ -6,7 +6,7 @@ import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiD
 import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalSlab'
 import { User } from '../../libs/ajax/User'
 
-const DatasetVoteSlabs = ({ dataBuckets, collection, dacDatasetIds, isChair, isApprovalDisabled, readOnly, adminPage, updateFinalVote, isLoading, reloadFn }) => {
+const DatasetVoteSlabs = ({ dataBuckets, collection, dacDatasetIds, isChair, isApprovalDisabled, readOnly, adminPage, updateFinalVote, isLoading, reloadFn, showBothVotes }) => {
   return dataBuckets.map(bucket => (
     <MultiDatasetVoteSlab
       title={bucket.label}
@@ -21,6 +21,7 @@ const DatasetVoteSlabs = ({ dataBuckets, collection, dacDatasetIds, isChair, isA
       updateFinalVote={updateFinalVote}
       isLoading={isLoading}
       reloadFn={reloadFn}
+      showBothVotes={showBothVotes}
     />
   ))
 }
@@ -56,7 +57,7 @@ const styles = {
 
 export default function MultiDatasetVotingTab(props) {
   const [dacDatasetIds, setDacDatasetIds] = useState([])
-  const { darInfo, buckets, collection, isChair, isLoading, readOnly, adminPage, updateFinalVote, reloadFn } = props
+  const { darInfo, buckets, collection, isChair, isLoading, readOnly, adminPage, updateFinalVote, reloadFn, showBothVotes } = props
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n'
     + (!adminPage ? 'You can still deny this request and/or vote on the Structured Research Purpose.' : '')
 
@@ -115,6 +116,7 @@ export default function MultiDatasetVotingTab(props) {
           updateFinalVote={updateFinalVote}
           isLoading={isLoading}
           reloadFn={reloadFn}
+          showBothVotes={showBothVotes}
         />
       </div>
     </div>
