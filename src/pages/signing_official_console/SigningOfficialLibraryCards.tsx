@@ -4,11 +4,11 @@ import { Styles } from 'src/libs/theme'
 import SigningOfficialTable from 'src/pages/signing_official_console/SigningOfficialTable'
 import { User } from 'src/libs/ajax/User'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { DuosUser } from 'src/types/model'
+import { DuosUser, DuosUserWithInstitutionId } from 'src/types/model'
 
 export default function SigningOfficialLibraryCards(): React.JSX.Element {
   usePageTitle('Library Cards')
-  const [signingOfficial, setSigningOfficial] = useState<DuosUser>()
+  const [signingOfficial, setSigningOfficial] = useState<DuosUserWithInstitutionId>()
   const [researchers, setResearchers] = useState<DuosUser[]>([])
 
   // states to be added and used for manage researcher component
@@ -18,7 +18,7 @@ export default function SigningOfficialLibraryCards(): React.JSX.Element {
     const init = async (): Promise<void> => {
       try {
         setIsLoading(true)
-        const soUser = await User.getMe()
+        const soUser = await User.getMe() as DuosUserWithInstitutionId
         const researcherList = await User.list(USER_ROLES.signingOfficial)
 
         setResearchers(researcherList)
@@ -30,7 +30,7 @@ export default function SigningOfficialLibraryCards(): React.JSX.Element {
         setIsLoading(false)
       }
     }
-    void init()
+    init()
   }, [])
 
   return (
@@ -39,7 +39,7 @@ export default function SigningOfficialLibraryCards(): React.JSX.Element {
         {signingOfficial && (
           <SigningOfficialTable
             researchers={researchers}
-            signingOfficial={signingOfficial as DuosUser & { institutionId: number }}
+            signingOfficial={signingOfficial}
             isLoading={isLoading}
           />
         )}

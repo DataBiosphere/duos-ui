@@ -5,11 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
-import { DuosUser } from 'src/types/model'
+import { DuosUser, DuosUserWithInstitutionId } from 'src/types/model'
 
 type MockSigningOfficialTableProps = {
   researchers: DuosUser[]
-  signingOfficial: DuosUser
+  signingOfficial: DuosUserWithInstitutionId
   isLoading: boolean
 }
 
