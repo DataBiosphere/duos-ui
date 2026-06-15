@@ -31,7 +31,7 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
         setIsLoading(false)
       }
     }
-    void init()
+    init()
   }, [])
 
   const updateCollections = useCallback((updatedCollection: DarCollectionSummary) => {
