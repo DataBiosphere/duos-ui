@@ -1,4 +1,6 @@
 import React from 'react'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { act, render, screen, fireEvent } from '@testing-library/react'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 
 // Test component that uses the hook
@@ -11,24 +13,22 @@ describe('usePageTitle Hook', () => {
   const originalTitle = 'Original Title'
 
   beforeEach(() => {
-    cy.document().then((doc) => {
-      doc.title = originalTitle
-    })
+    document.title = originalTitle
   })
 
   it('sets the document title with default DUOS suffix', () => {
-    cy.mount(<TestComponent title="Test Page" />)
-    cy.title().should('equal', 'Test Page | DUOS')
+    render(<TestComponent title="Test Page" />)
+    expect(document.title).toBe('Test Page | DUOS')
   })
 
   it('sets the document title with custom suffix', () => {
-    cy.mount(<TestComponent title="Test Page" suffix="Custom" />)
-    cy.title().should('equal', 'Test Page | Custom')
+    render(<TestComponent title="Test Page" suffix="Custom" />)
+    expect(document.title).toBe('Test Page | Custom')
   })
 
   it('sets only suffix when pageTitle is empty', () => {
-    cy.mount(<TestComponent title="" />)
-    cy.title().should('equal', 'DUOS')
+    render(<TestComponent title="" />)
+    expect(document.title).toBe('DUOS')
   })
 
   it('updates title when props change', () => {
@@ -43,10 +43,12 @@ describe('usePageTitle Hook', () => {
       )
     }
 
-    cy.mount(<TestWrapper />)
-    cy.title().should('equal', 'First Page | DUOS')
+    render(<TestWrapper />)
+    expect(document.title).toBe('First Page | DUOS')
 
-    cy.contains('Change Title').click()
-    cy.title().should('equal', 'Second Page | DUOS')
+    act(() => {
+      fireEvent.click(screen.getByText('Change Title'))
+    })
+    expect(document.title).toBe('Second Page | DUOS')
   })
 })
