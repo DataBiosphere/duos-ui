@@ -2,8 +2,8 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import DataCustodianTable, { DuosUserWithInstitution } from 'src/pages/signing_official_console/DataCustodianTable'
-import { UserRole } from 'src/types/model'
+import DataCustodianTable from 'src/pages/signing_official_console/DataCustodianTable'
+import { UserRole, DuosUserWithInstitutionId } from 'src/types/model'
 
 vi.mock('src/components/modals/ConfirmationModal', () => ({
   default: ({
@@ -37,7 +37,7 @@ const role = (overrides: Partial<UserRole> = {}): UserRole => ({
   ...overrides,
 })
 
-const user = (overrides: Partial<DuosUserWithInstitution> = {}): DuosUserWithInstitution => ({
+const user = (overrides: Partial<DuosUserWithInstitutionId> = {}): DuosUserWithInstitutionId => ({
   createDate: new Date('2022-01-01T00:00:00.000Z'),
   displayName: 'Researcher',
   email: 'researcher@example.com',

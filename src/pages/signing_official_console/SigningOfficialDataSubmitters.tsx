@@ -5,12 +5,12 @@ import { User } from 'src/libs/ajax/User'
 import DataCustodianTable from 'src/pages/signing_official_console/DataCustodianTable'
 import { extractError } from 'src/utils/ErrorUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { DuosUser, DuosUserWithInstitutionId } from 'src/types/model'
+import { DuosUserWithInstitutionId } from 'src/types/model'
 
 export default function SigningOfficialDataSubmitters(): React.JSX.Element {
   usePageTitle('Data Submitters')
   const [signingOfficial, setSigningOfficial] = useState<DuosUserWithInstitutionId>()
-  const [researchers, setResearchers] = useState<DuosUser[]>([])
+  const [researchers, setResearchers] = useState<DuosUserWithInstitutionId[]>([])
 
   // states to be added
   const [isLoading, setIsLoading] = useState<boolean>(true)

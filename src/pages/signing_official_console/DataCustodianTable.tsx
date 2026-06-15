@@ -17,31 +17,27 @@ import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContainer'
 import { confirmModalType } from 'src/libs/libraryCardUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DuosUser } from 'src/types/model'
+import { DuosUserWithInstitutionId } from 'src/types/model'
 
 const DpaMarkdown = new URL('../../assets/DPA.md', import.meta.url).href
 
 type TableRowId = number | string
 
-export type DuosUserWithInstitution = DuosUser & {
-  institutionId: number
-}
-
 interface DataCustodianTableProps {
-  readonly signingOfficial: DuosUserWithInstitution
+  readonly signingOfficial: DuosUserWithInstitutionId
   readonly isLoading: boolean
-  readonly researchers: DuosUserWithInstitution[]
+  readonly researchers: DuosUserWithInstitutionId[]
 }
 
 interface ShowConfirmationModalParams {
-  researcher: DuosUserWithInstitution
+  researcher: DuosUserWithInstitutionId
   message: string
   title: string
   confirmType: string
 }
 
 interface ButtonProps {
-  researcher: DuosUserWithInstitution
+  researcher: DuosUserWithInstitutionId
   showConfirmationModal: (params: ShowConfirmationModalParams) => void
 }
 
@@ -166,7 +162,7 @@ const SubmitterCell = ({
   }
 }
 
-const roleCell = (roles: DuosUserWithInstitution['roles'], id: TableRowId): TableCell => {
+const roleCell = (roles: DuosUserWithInstitutionId['roles'], id: TableRowId): TableCell => {
   const roleString = chain(roles.map(role => role.name))
     .sortBy()
     .sortedUniq()
@@ -203,13 +199,13 @@ const displayNameCell = (displayName: string, id: TableRowId): TableCell => {
 }
 
 export default function DataCustodianTable(props: DataCustodianTableProps): React.JSX.Element {
-  const [researchers, setResearchers] = useState<DuosUserWithInstitution[]>(props.researchers)
+  const [researchers, setResearchers] = useState<DuosUserWithInstitutionId[]>(props.researchers)
   const [tableSize, setTableSize] = useState<number>(10)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageCount, setPageCount] = useState<number>(1)
-  const [filteredResearchers, setFilteredResearchers] = useState<DuosUserWithInstitution[]>([])
-  const [visibleResearchers, setVisibleResearchers] = useState<DuosUserWithInstitution[]>([])
-  const [selectedResearcher, setSelectedResearcher] = useState<DuosUserWithInstitution | null>(null)
+  const [filteredResearchers, setFilteredResearchers] = useState<DuosUserWithInstitutionId[]>([])
+  const [visibleResearchers, setVisibleResearchers] = useState<DuosUserWithInstitutionId[]>([])
+  const [selectedResearcher, setSelectedResearcher] = useState<DuosUserWithInstitutionId | null>(null)
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [confirmationModalMsg, setConfirmationModalMsg] = useState<string>('')
@@ -222,7 +218,7 @@ export default function DataCustodianTable(props: DataCustodianTableProps): Reac
     searchOnFilteredList(
       value,
       researchers,
-      researcherFilterFunction as (term: string, list: DuosUserWithInstitution[]) => DuosUserWithInstitution[],
+      researcherFilterFunction as (term: string, list: DuosUserWithInstitutionId[]) => DuosUserWithInstitutionId[],
       setFilteredResearchers,
     )
     setCurrentPage(1)
@@ -260,7 +256,7 @@ export default function DataCustodianTable(props: DataCustodianTableProps): Reac
     searchOnFilteredList(
       searchText,
       researchers,
-      researcherFilterFunction as (term: string, list: DuosUserWithInstitution[]) => DuosUserWithInstitution[],
+      researcherFilterFunction as (term: string, list: DuosUserWithInstitutionId[]) => DuosUserWithInstitutionId[],
       setFilteredResearchers,
     )
   }, [researchers, searchText])
@@ -306,7 +302,7 @@ export default function DataCustodianTable(props: DataCustodianTableProps): Reac
     />
   )
 
-  const processResearcherRowData = (researchers: DuosUserWithInstitution[]): TableCell[][] => {
+  const processResearcherRowData = (researchers: DuosUserWithInstitutionId[]): TableCell[][] => {
     return researchers.map((researcher) => {
       const { displayName, email, roles } = researcher
       const id = researcher.userId
@@ -329,12 +325,12 @@ export default function DataCustodianTable(props: DataCustodianTableProps): Reac
     columnHeaderFormat.role,
   ]
 
-  const issueCustodian = async (selectedResearcher: DuosUserWithInstitution, researchers: DuosUserWithInstitution[]): Promise<void> => {
+  const issueCustodian = async (selectedResearcher: DuosUserWithInstitutionId, researchers: DuosUserWithInstitutionId[]): Promise<void> => {
     let messageName = selectedResearcher.displayName
     const { userId, displayName } = selectedResearcher
     try {
       const updatedResearcher = await User.addRoleToUser(userId, 8)
-      const updatedResearcherWithInstitution: DuosUserWithInstitution = {
+      const updatedResearcherWithInstitution: DuosUserWithInstitutionId = {
         ...updatedResearcher,
         institutionId: updatedResearcher.institutionId ?? selectedResearcher.institutionId,
       }
@@ -365,17 +361,17 @@ export default function DataCustodianTable(props: DataCustodianTableProps): Reac
     }
   }
 
-  const removeDataCustodian = async (selectedResearcher: DuosUserWithInstitution, researchers: DuosUserWithInstitution[]): Promise<void> => {
+  const removeDataCustodian = async (selectedResearcher: DuosUserWithInstitutionId, researchers: DuosUserWithInstitutionId[]): Promise<void> => {
     const { displayName, userId } = selectedResearcher
     const listCopy = cloneDeep(researchers)
     const messageName = displayName
     try {
       const updatedResearcher = await User.deleteRoleFromUser(userId, 8)
-      const updatedResearcherWithInstitution: DuosUserWithInstitution = {
+      const updatedResearcherWithInstitution: DuosUserWithInstitutionId = {
         ...updatedResearcher,
         institutionId: updatedResearcher.institutionId ?? selectedResearcher.institutionId,
       }
-      const targetIndex = findIndex(listCopy, (researcher: DuosUserWithInstitution) => {
+      const targetIndex = findIndex(listCopy, (researcher: DuosUserWithInstitutionId) => {
         return selectedResearcher.userId === researcher.userId
       })
       if (targetIndex === -1) {
