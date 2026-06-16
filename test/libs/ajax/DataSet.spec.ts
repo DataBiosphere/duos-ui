@@ -62,12 +62,14 @@ const buildStudy = (overrides = {}) => ({
   description: 'A study',
   dataTypes: [],
   piName: 'Dr. PI',
+  piEmail: 'pi@example.org',
   publicVisibility: true,
   datasetIds: [],
   datasets: [],
   properties: [],
   createDate: '2026-01-01',
   createUserId: 1,
+  data: {},
   ...overrides,
 })
 
