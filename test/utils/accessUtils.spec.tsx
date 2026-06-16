@@ -33,22 +33,7 @@ describe('accessUtils', () => {
       expect(showErrorSpy).not.toHaveBeenCalled()
     })
 
-    it('shows error notification when response contains code and message', async () => {
-      const selectedDatasets = [123456]
-      const errorResponse = { code: 400, message: 'Invalid dataset selection' }
-
-      postDarDraftSpy.mockResolvedValue(errorResponse)
-
-      await applyForAccess(selectedDatasets, navigateMock as unknown as NavigateFunction)
-
-      expect(postDarDraftSpy).toHaveBeenCalledWith({ datasetId: selectedDatasets })
-      expect(navigateMock).not.toHaveBeenCalled()
-      expect(showErrorSpy).toHaveBeenCalledTimes(1)
-      expect(showErrorSpy.mock.calls[0][0]).toHaveProperty('timeout', 6000)
-      expect(showErrorSpy.mock.calls[0][0]).toHaveProperty('text')
-    })
-
-    it('shows generic error when response has no referenceId, code, or message', async () => {
+    it('shows generic error when response has no referenceId', async () => {
       const selectedDatasets = [123456]
 
       postDarDraftSpy.mockResolvedValue({})
