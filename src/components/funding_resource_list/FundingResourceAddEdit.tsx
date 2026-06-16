@@ -147,8 +147,8 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="startDate"
             title="Start Date"
+            type={FormFieldTypes.CALENDAR}
             defaultValue={fundingResource?.startDate}
-            placeholder="YYYY-MM-DD"
             validators={[FormValidators.DATE]}
             onChange={onChange}
             validation={validation.startDate}
@@ -157,8 +157,8 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           <FormField
             id="endDate"
             title="End Date"
+            type={FormFieldTypes.CALENDAR}
             defaultValue={fundingResource?.endDate}
-            placeholder="YYYY-MM-DD"
             validators={[FormValidators.DATE]}
             onChange={onChange}
             validation={validation.endDate}

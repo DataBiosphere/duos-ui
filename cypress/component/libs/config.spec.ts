@@ -1,4 +1,4 @@
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getErrorApiKey, getGaId, getHash, getProject, getSamApiUrl, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 describe('Config', () => {
@@ -7,10 +7,7 @@ describe('Config', () => {
     apiUrl: 'https://test.api.com',
     bardApiUrl: 'https://test.bard.com',
     ecmApiUrl: 'https://test.ecm.com',
-    errorApiKey: 'test-error-key',
-    gaId: 'GA-TEST-123',
     hash: 'test-hash-123',
-    samApiUrl: 'https://test.sam.com',
     tag: 'v1.0.0-test',
     tdrApiUrl: 'https://test.tdr.com',
     terraUrl: 'https://test.terra.bio',
@@ -66,18 +63,6 @@ describe('Config', () => {
       })
     })
 
-    it('should get errorApiKey', () => {
-      cy.wrap(Config.getErrorApiKey()).then((result) => {
-        expect(result).to.equal('test-error-key')
-      })
-    })
-
-    it('should get gaId', () => {
-      cy.wrap(Config.getGaId()).then((result) => {
-        expect(result).to.equal('GA-TEST-123')
-      })
-    })
-
     it('should get hash', () => {
       cy.wrap(Config.getHash()).then((result) => {
         expect(result).to.equal('test-hash-123')
@@ -87,12 +72,6 @@ describe('Config', () => {
     it('should get project', () => {
       cy.wrap(Config.getProject()).then((result) => {
         expect(result).to.equal('broad-duos-test')
-      })
-    })
-
-    it('should get samApiUrl', () => {
-      cy.wrap(Config.getSamApiUrl()).then((result) => {
-        expect(result).to.equal('https://test.sam.com')
       })
     })
 
@@ -146,18 +125,6 @@ describe('Config', () => {
       })
     })
 
-    it('getErrorApiKey should return error API key', () => {
-      cy.wrap(getErrorApiKey()).then((result) => {
-        expect(result).to.equal('test-error-key')
-      })
-    })
-
-    it('getGaId should return Google Analytics ID', () => {
-      cy.wrap(getGaId()).then((result) => {
-        expect(result).to.equal('GA-TEST-123')
-      })
-    })
-
     it('getHash should return hash', () => {
       cy.wrap(getHash()).then((result) => {
         expect(result).to.equal('test-hash-123')
@@ -167,12 +134,6 @@ describe('Config', () => {
     it('getProject should return project name based on environment', () => {
       cy.wrap(getProject()).then((result) => {
         expect(result).to.equal('broad-duos-test')
-      })
-    })
-
-    it('getSamApiUrl should return SAM API URL', () => {
-      cy.wrap(getSamApiUrl()).then((result) => {
-        expect(result).to.equal('https://test.sam.com')
       })
     })
 

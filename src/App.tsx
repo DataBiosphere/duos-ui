@@ -9,7 +9,6 @@ import { Config } from 'src/libs/config'
 import DuosFooter from 'src/components/DuosFooter'
 import DuosHeader from 'src/components/DuosHeader'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { StackdriverReporter } from 'src/libs/stackdriverReporter'
 import { Storage } from 'src/libs/storage'
 import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
@@ -42,13 +41,6 @@ function App() {
     }
     setEnvironment()
   })
-
-  useEffect(() => {
-    const stackdriverStart = async () => {
-      await StackdriverReporter.start()
-    }
-    stackdriverStart()
-  }, [])
 
   useEffect(() => {
     const setUserIsLogged = () => {

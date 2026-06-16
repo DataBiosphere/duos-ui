@@ -36,6 +36,7 @@ export function descriptionCellData({ description = '- -', dacId, label = 'dac-d
 }
 
 export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) {
+  const datasetCount = (dac.datasets || []).length
   return {
     data: (
       <a
@@ -43,7 +44,7 @@ export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) 
         name="dacDatasets"
         onClick={() => viewDatasets(dac)}
       >
-        View Datasets
+        {datasetCount}
       </a>
     ),
     id: dac.dacId,

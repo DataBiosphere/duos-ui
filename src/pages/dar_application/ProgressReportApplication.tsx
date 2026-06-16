@@ -29,6 +29,7 @@ import { FormValidationState } from 'src/pages/dar_application/FormValidationSta
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
 import { useNavigate } from 'react-router-dom'
 import { isEqual } from 'src/utils/NodashUtil'
+import 'src/pages/dar_application/DataAccessRequestApplication.css'
 type ProgressReportApplicationProps = {
   readonly dar: CombinedDataAccessRequest // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[]
@@ -135,17 +136,22 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
   const eRACommonsDestination = 'progress_report_application/' + dar.collectionId
 
   const isFormEmpty = () => {
-    // Run validation without showing errors
-    const validation = validatePRFormData(
-      nihValid,
-      formState,
-      formState.selectedDatasets,
-      dataUseTranslations,
+    return validationFailed(
+      validatePRFormData(nihValid, formState, formState.selectedDatasets, dataUseTranslations),
     )
-
-    // If there are validation errors, it means user hasn't filled required fields
-    return validationFailed(validation)
   }
+
+  const handleValidate = useCallback(() => {
+    const validation = validatePRFormData(nihValid, formState, formState.selectedDatasets, dataUseTranslations)
+    setShowValidation(true)
+    setFormValidation(validation)
+    setTimeout(() => {
+      const firstError = document.querySelector<HTMLElement>('.errored')
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 0)
+  }, [nihValid, formState, dataUseTranslations])
 
   const getValidation = useCallback((newState: FormState) => {
     if (!readOnlyMode && showValidation) {
@@ -336,7 +342,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             onCancel={() => {
               Navigation.console(Storage.getCurrentUser(), navigate)
             }}
-            disabled={isFormEmpty()}
+            isValid={!isFormEmpty()}
+            onValidate={handleValidate}
             uploadedIrbDocument={uploadedIrbDocument}
             parentDar={dar}
           />

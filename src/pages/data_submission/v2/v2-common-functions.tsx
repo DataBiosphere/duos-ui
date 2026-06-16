@@ -113,12 +113,12 @@ export const generateStudyPropertyFormDateField = (formData: Study, setStudy: Re
     <FormField
       id={studyProperty.key}
       title={studyProperty.fieldTitle}
-      placeholder={studyProperty.fieldPlaceholderText}
+      type={FormFieldTypes.CALENDAR}
       validators={validators}
       style={style}
       defaultValue={convertDateEpochToString(getStudyPropertyValueByKey(formData, studyProperty.key))}
       onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-        studyProperty.value = input.value as Date
+        studyProperty.value = input.value as string
         setStudyPropertyByKey(formData, setStudy, input, studyProperty)
       }}
     />

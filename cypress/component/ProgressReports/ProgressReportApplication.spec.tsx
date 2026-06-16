@@ -1195,4 +1195,70 @@ describe('ProgressReportApplication - Component Tests', () => {
       cy.wrap($card).find('input[type="checkbox"]').should('not.exist')
     })
   })
+
+  describe('Validate and Submit button', () => {
+    it('shows Validate button in create mode when required fields are missing', () => {
+      mountComponent({}, false)
+      cy.get('[data-cy="pr-validate-button"]').should('exist').and('contain', 'Validate')
+      cy.get('[data-cy="pr-submit-button"]').should('not.exist')
+    })
+
+    it('does not show Validate or Submit button in read-only mode', () => {
+      mountComponent({}, true)
+      cy.get('[data-cy="pr-validate-button"]').should('not.exist')
+      cy.get('[data-cy="pr-submit-button"]').should('not.exist')
+    })
+
+    it('Validate button stays visible after being clicked', () => {
+      mountComponent({}, false)
+      cy.get('[data-cy="pr-validate-button"]').click()
+      cy.get('[data-cy="pr-validate-button"]').should('exist')
+    })
+
+    it('clicking Validate reveals error indicators on required fields', () => {
+      mountComponent({}, false)
+      cy.get('[data-cy="pr-validate-button"]').click()
+      cy.get('.errored').should('exist')
+    })
+
+    it('clicking Validate shows error styling on ERA Commons authenticate button when NIH is not linked', () => {
+      mountComponent({}, false)
+      cy.get('[data-cy="pr-validate-button"]').click()
+      cy.get('[data-cy="era-commons-authenticate-link"]').should('have.class', 'era-button-state-error')
+    })
+
+    it('shows Submit button when all required fields are complete and NIH is linked', () => {
+      const validResearcher: DuosUser = {
+        ...researcher,
+        properties: [
+          { propertyId: 1, userId: 1, propertyKey: 'eraAuthorized', propertyValue: 'true' },
+          { propertyId: 2, userId: 1, propertyKey: 'eraExpiration', propertyValue: '4000000000000' },
+        ],
+      }
+
+      const completeDar = {
+        progressReportSummary: 'A complete summary of research progress.',
+        intellectualProperties: [],
+        publications: [],
+        presentations: [],
+        dmi: { incidents: [], description: '' },
+        closeoutSupplement: { reasons: [], otherText: '', signingOfficialId: 0 },
+      }
+
+      cy.mount(
+        <BrowserRouter>
+          <ProgressReportApplication
+            dar={{ ...baseDar, ...completeDar } as CombinedDataAccessRequest}
+            datasets={mockDatasets}
+            readOnlyMode={false}
+            researcher={validResearcher}
+            countriesOfOperation={[]}
+          />
+        </BrowserRouter> as ReactNode,
+      )
+
+      cy.get('[data-cy="pr-submit-button"]').should('exist').and('contain', 'Submit')
+      cy.get('[data-cy="pr-validate-button"]').should('not.exist')
+    })
+  })
 })

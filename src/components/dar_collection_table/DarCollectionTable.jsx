@@ -144,7 +144,9 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
     approveCollection,
   } = props
-  const isUnfilteredView = consoleType === consoleTypes.ADMIN || consoleType === consoleTypes.RESEARCHER
+  const isUnfilteredView = consoleType === consoleTypes.ADMIN
+    || consoleType === consoleTypes.RESEARCHER
+    || consoleType === consoleTypes.SIGNING_OFFICIAL
 
   /*
     NOTE: This component will most likely be used in muliple consoles

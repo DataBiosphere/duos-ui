@@ -13,7 +13,7 @@ interface VotingHistoryProps {
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
-    padding: '35px',
+    padding: 'clamp(1.2rem, 3vw, 3.5rem)',
     whiteSpace: 'pre-line',
   },
   container: {
@@ -25,7 +25,7 @@ const styles = {
   },
   tableTitle: {
     fontFamily: 'Montserrat',
-    fontSize: '1.8rem',
+    fontSize: 'clamp(1.4rem, 2.4vw, 1.8rem)',
     fontWeight: 600,
     color: '#333F52',
     marginBottom: '1rem',
@@ -58,8 +58,12 @@ const styles = {
   },
   title: {
     fontWeight: 800,
-    fontSize: '2.7rem',
+    fontSize: 'clamp(1.9rem, 3.5vw, 2.7rem)',
     margin: '1.5rem 0',
+  },
+  tableWrapper: {
+    overflowX: 'auto' as const,
+    maxWidth: '100%',
   },
 }
 
@@ -142,16 +146,20 @@ export default function VotingHistory({ darCollection, dacIds }: VotingHistoryPr
 
       <div style={styles.tableSection}>
         <div style={styles.tableTitle}>Chair Votes</div>
-        <ChairVoteHistoryTable
-          voteHistory={chairVotes}
-        />
+        <div style={styles.tableWrapper}>
+          <ChairVoteHistoryTable
+            voteHistory={chairVotes}
+          />
+        </div>
       </div>
 
       <div style={styles.tableSection}>
         <div style={styles.tableTitle}>Member Votes</div>
-        <ElectionWithMemberVotesTable
-          electionsWithMemberVotes={memberVotes}
-        />
+        <div style={styles.tableWrapper}>
+          <ElectionWithMemberVotesTable
+            electionsWithMemberVotes={memberVotes}
+          />
+        </div>
       </div>
     </div>
   )

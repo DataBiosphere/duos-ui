@@ -502,7 +502,7 @@ export const FormInputFile = (config) => {
   } = config
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', rowGap: '1rem', columnGap: '1rem' }}>
       {hideInput === false && (
         <div className={`form-file-upload ${disabled ? 'disabled' : ''}`}>
           <input
@@ -533,7 +533,7 @@ export const FormInputFile = (config) => {
         </div>
       )}
       {hideTextBar === false && (
-        <div style={{ marginLeft: '20px', width: '450px' }}>
+        <div style={{ flex: '1 1 28rem', width: '100%', maxWidth: '450px', minWidth: 0 }}>
           <FormField
             id={`${id}_fileName`}
             placeholder={placeholder}
@@ -548,10 +548,15 @@ export const FormInputFile = (config) => {
 }
 
 export const FormDatePicker = (config) => {
-  const { label, formValue, validation, readOnly } = config
+  const { id, label, formValue, validation, readOnly, disabled } = config
+  const stateClassNames = [
+    disabled ? 'disabled' : '',
+    readOnly ? 'readonly' : '',
+  ].filter(Boolean).join(' ')
   return (
-    <div className={`form-calendar ${!isValid(validation) ? 'errored' : ''}`}>
+    <div className={`form-calendar ${stateClassNames} ${isValid(validation) ? '' : 'errored'}`}>
       <DuosDatePicker
+        id={id}
         label={label}
         onChange={(value) => { onFormInputChange(config, value) }}
         onError={(_error, value) => { updateValidation(config, value) }}
@@ -559,6 +564,7 @@ export const FormDatePicker = (config) => {
         inputFormat="YYYY-MM-DD"
         highlightWeekends={true}
         readOnly={readOnly}
+        disabled={disabled}
       />
       {errorMessages(validation)}
     </div>

@@ -3,7 +3,6 @@ import { ProgressReport } from 'src/libs/ajax/ProgressReport'
 import { Notifications } from 'src/libs/utils'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 import { CombinedDataAccessRequest } from 'src/types/model'
-import { Theme } from 'src/libs/theme'
 import { convertFormStateToDAR } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { DAR } from 'src/libs/ajax/DAR'
@@ -14,13 +13,14 @@ interface SubmitProgressReportProps {
   readonly parentReferenceId: string
   readonly onSuccess: (result: unknown) => void
   readonly onCancel: () => void
-  readonly disabled?: boolean
+  readonly isValid?: boolean
+  readonly onValidate?: () => void
   readonly uploadedIrbDocument?: File | null
   readonly parentDar?: CombinedDataAccessRequest
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const { formState, parentReferenceId, onSuccess, onCancel, disabled, uploadedIrbDocument, parentDar } = props
+  const { formState, parentReferenceId, onSuccess, onCancel, isValid, onValidate, uploadedIrbDocument, parentDar } = props
 
   const submit = async () => {
     try {
@@ -82,25 +82,35 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
   const handleError = (message: string, error: unknown): void => {
     Notifications.showError({ text: message + extractError(error) })
   }
-  const disabledStyle = {
-    backgroundColor: Theme.palette.disabled,
-    borderColor: Theme.palette.disabled,
-  }
-
   return (
     <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
       <span>
-        <AsyncSpinnerButton
-          id="btn_submit"
-          className="button button-blue"
-          style={{ marginRight: '2rem', cursor: 'pointer', ...(disabled ? disabledStyle : {}) }}
-          data-cy="pr-submit-button"
-          disabled={disabled}
-          aria-label="Complete required form fields to enable submission."
-          onClick={submit}
-        >
-          Submit
-        </AsyncSpinnerButton>
+        {isValid
+          ? (
+              <AsyncSpinnerButton
+                id="btn_submit"
+                className="button button-blue"
+                style={{ marginRight: '2rem', cursor: 'pointer' }}
+                data-cy="pr-submit-button"
+                aria-label="Submit progress report"
+                onClick={submit}
+              >
+                Submit
+              </AsyncSpinnerButton>
+            )
+          : (
+              <button
+                id="btn_validate"
+                type="button"
+                className="button button-blue"
+                style={{ marginRight: '2rem', cursor: 'pointer' }}
+                data-cy="pr-validate-button"
+                aria-label="Validate form and scroll to first required field"
+                onClick={onValidate}
+              >
+                Validate
+              </button>
+            )}
       </span>
       <button
         type="button"
