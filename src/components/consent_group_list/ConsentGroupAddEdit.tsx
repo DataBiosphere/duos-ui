@@ -742,7 +742,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
               }}
               title="NIH Institutional Certification"
               disabled={readOnly}
-              onClick={current.nihInstitutionalCertificationFile ? () => { DataSet.getNIHInstitutionalCertification(current.datasetId!) } : undefined}
+              onClick={current.nihInstitutionalCertificationFile ? () => { DataSet.getNIHInstitutionalCertification(current.datasetId) } : undefined}
             />
           </div>
           <div className="row" style={{ marginTop: 20 }}>

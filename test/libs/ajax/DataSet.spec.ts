@@ -481,6 +481,12 @@ describe('DataSet', () => {
       expect(fileDownload).toHaveBeenCalledWith(expect.any(Blob), 'cert.pdf')
     })
 
+    it('returns immediately without fetching when datasetId is undefined', async () => {
+      await DataSet.getNIHInstitutionalCertification(undefined)
+
+      expect(fetchGet).not.toHaveBeenCalled()
+    })
+
     it('falls back to an empty filename when nihInstitutionalCertificationFile is absent', async () => {
       const { fileDownload } = await import('src/utils/FileDownload')
       vi.mocked(fetchGet)

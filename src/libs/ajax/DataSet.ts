@@ -133,7 +133,8 @@ export const DataSet = {
    * @param datasetId The dataset ID whose certification file should be downloaded
    * @returns Promise that resolves when the download is triggered
    */
-  getNIHInstitutionalCertification: async (datasetId: number): Promise<void> => {
+  getNIHInstitutionalCertification: async (datasetId: number | undefined): Promise<void> => {
+    if (datasetId === undefined) return
     const datasetInfo = await DataSet.getDataSetsByDatasetId(datasetId)
     const fileName = datasetInfo.nihInstitutionalCertificationFile?.fileName ?? ''
     const authOpts = {
