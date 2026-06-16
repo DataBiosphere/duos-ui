@@ -1,6 +1,7 @@
 import { chain, filter, includes, isEmpty, isNil, map, values } from 'src/utils/NodashUtil'
 import { Match } from 'src/libs/ajax/Match'
-import { DataSet } from 'src/libs/ajax/DataSet.js'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { ElasticsearchQuery } from 'src/types/elastic'
 import { processVotesForBucket } from './DarCollectionUtils'
 import { processMatchData } from './VoteUtils'
 import {
@@ -353,7 +354,7 @@ const getDatasetTerms = async (datasets: Dataset[]): Promise<DatasetTerm[]> => {
         ],
       },
     },
-  })
+  } as ElasticsearchQuery)
   try {
     return await datasetQuery
   }

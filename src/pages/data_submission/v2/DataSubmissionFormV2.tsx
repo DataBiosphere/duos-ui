@@ -39,10 +39,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const onLoadFormData = (studyId: string | undefined) => {
     if (studyId) {
       DataSet.getStudyById(studyId).then((study) => {
-        const consentGroupAssets: ConsentGroup2[] = buildConsentGroupsFromStudy(study)
-        const studyAssets = getStudyPropertyValueByKey(study, 'assets') as object || {}
-        study.assets = { ...studyAssets, consentGroups: consentGroupAssets }
-        setStudy(study)
+        const v2Study = study as unknown as Study
+        const consentGroupAssets: ConsentGroup2[] = buildConsentGroupsFromStudy(v2Study)
+        const studyAssets = getStudyPropertyValueByKey(v2Study, 'assets') as object || {}
+        v2Study.assets = { ...studyAssets, consentGroups: consentGroupAssets }
+        setStudy(v2Study)
         setIsEditing(true)
       }).catch(() => {
         setStudy({} as Study)
