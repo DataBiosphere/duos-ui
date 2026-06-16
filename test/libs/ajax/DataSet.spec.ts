@@ -115,7 +115,7 @@ describe('DataSet', () => {
 
   describe('getRegistrationSchema', () => {
     it('fetches the registration schema and returns the data', async () => {
-      const schema = { type: 'object', properties: {} }
+      const schema = { studyName: 'My Study', studyDescription: 'desc', dataTypes: [], piName: 'Dr. PI', publicVisibility: true }
       vi.mocked(fetchGet).mockResolvedValue({ data: schema })
 
       const result = await DataSet.getRegistrationSchema()
