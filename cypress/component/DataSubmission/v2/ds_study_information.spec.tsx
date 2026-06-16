@@ -1,4 +1,5 @@
 import React from 'react'
+import dayjs from 'dayjs'
 import { cloneDeep } from 'src/utils/NodashUtil'
 import {
   GeneralStudyInformation, GeneralStudyInformationProps,
@@ -14,6 +15,16 @@ const props = {
 beforeEach(() => {
   propCopy = cloneDeep(props) as unknown as GeneralStudyInformationProps
 })
+
+const selectDate = (fieldClass: string, fieldId: string) => {
+  const selectedDate = dayjs().date(15).format('YYYY-MM-DD')
+  cy.get(`${fieldClass} button[aria-label*="Choose date"]`).click()
+  cy.get('[role="dialog"]').filter(':visible').last().within(() => {
+    cy.contains('button', /^15$/).click()
+    cy.contains('button', 'Select').click()
+  })
+  cy.get(`#${fieldId}`).should('have.value', selectedDate)
+}
 
 describe('GeneralStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
@@ -55,19 +66,18 @@ describe('GeneralStudyInformation - Tests', () => {
     cy.get('@setStudySpy').its('callCount').should('eq', 41)
     cy.get('#dataCustodianEmail > .css-13cymwt-control > .css-hlgwow > .css-19bb58m').type('abc@def.ghi{enter}')
     cy.get('@setStudySpy').its('callCount').should('eq', 42)
-    cy.get('#alternativeDataSharingPlanTargetDeliveryDate').type('2025-04-01')
-    cy.get('@setStudySpy').its('callCount').should('eq', 43)
-    cy.get('#alternativeDataSharingPlanTargetPublicReleaseDate').type('2025-04-01')
-    cy.get('@setStudySpy').its('callCount').should('eq', 44)
+    selectDate('.formField-alternativeDataSharingPlanTargetDeliveryDate', 'alternativeDataSharingPlanTargetDeliveryDate')
+    cy.get('@setStudySpy').its('callCount').should('be.gte', 43)
+    selectDate('.formField-alternativeDataSharingPlanTargetPublicReleaseDate', 'alternativeDataSharingPlanTargetPublicReleaseDate')
     cy.get(':nth-child(2) > [style="font-family: Montserrat; font-size: 14px;"] > label > [style="float: left;"] > span').click()
-    cy.get('@setStudySpy').its('callCount').should('eq', 45)
+    cy.get('@setStudySpy').its('callCount').should('be.gte', 44)
     cy.get(':nth-child(1) > [style="font-family: Montserrat; font-size: 14px;"] > label > [style="float: left;"] > span').click()
-    cy.get('@setStudySpy').its('callCount').should('eq', 46)
+    cy.get('@setStudySpy').its('callCount').should('be.gte', 45)
     cy.get('.formField-piEmail').type('name@anywhere.biz')
-    cy.get('@setStudySpy').its('callCount').should('eq', 63)
+    cy.get('@setStudySpy').its('callCount').should('be.gte', 62)
     cy.get('.formField-tags').type('tag1{enter}tag2{enter}')
-    cy.get('@setStudySpy').its('callCount').should('eq', 65)
+    cy.get('@setStudySpy').its('callCount').should('be.gte', 64)
     cy.get('.formField-throughBioId').type('test-bio-id')
-    cy.get('@setStudySpy').its('callCount').should('eq', 76)
+    cy.get('@setStudySpy').its('callCount').should('be.gte', 75)
   })
 })

@@ -41,6 +41,7 @@ export function descriptionCellData({ description = '- -', dacId, label = 'dac-d
 }
 
 export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) {
+  const datasetCount = (dac.datasets || []).length
   return {
     isComponent: true,
     id: dac.dacId,
@@ -51,8 +52,8 @@ export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) 
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#354052', fontSize: styles.fontSize.datasets }}
         onClick={() => viewDatasets(dac)}
       >
-        View Datasets
-      </button>
+        {datasetCount}
+      </a>
     ),
   }
 }

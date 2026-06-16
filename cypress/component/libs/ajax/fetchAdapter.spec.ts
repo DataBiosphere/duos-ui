@@ -11,6 +11,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
 import { Auth } from 'src/libs/auth/auth'
+import { ErrorReporter } from 'src/libs/ErrorReporter'
 import eventList from 'src/libs/events'
 
 interface StubOptions {
@@ -670,6 +671,57 @@ describe('fetchAdapter - Fetch methods', () => {
           expect(error.response.data.message).to.equal(backendMessage)
         },
       )
+    })
+  })
+
+  describe('reportError recursion guard', () => {
+    it('does not report failures of the Bard metrics API', () => {
+      const reportStub = cy.stub(ErrorReporter, 'report')
+      cy.stub(Config, 'getApiUrl').resolves('https://consent.example.org')
+      cy.stub(Config, 'getBardApiUrl').resolves('https://bard.example.org')
+
+      cy.window().then((win) => {
+        fetchStub.resolves(
+          new win.Response('Not Found', {
+            status: 404,
+            headers: { 'content-type': 'text/html' },
+          }),
+        )
+
+        // The request rejects; reportError runs async (fire-and-forget).
+        return fetchPost('https://bard.example.org/api/event', { event: 'test' }).catch(() => {})
+      })
+
+      // Reporting a Bard failure via Bard would recurse infinitely, so it stays silent.
+      // Wait to give the fire-and-forget reportError a chance to (wrongly) report.
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(50)
+      cy.then(() => {
+        expect(reportStub.called).to.equal(false)
+      })
+    })
+
+    it('reports failures of other endpoints', () => {
+      const reportStub = cy.stub(ErrorReporter, 'report')
+      cy.stub(Config, 'getApiUrl').resolves('https://consent.example.org')
+      cy.stub(Config, 'getBardApiUrl').resolves('https://bard.example.org')
+
+      cy.window().then((win) => {
+        fetchStub.resolves(
+          new win.Response('Not Found', {
+            status: 404,
+            headers: { 'content-type': 'text/html' },
+          }),
+        )
+
+        // The request rejects; reportError runs async (fire-and-forget).
+        return fetchPost('/api/dar/v2', { data: 'test' }).catch(() => {})
+      })
+
+      // Retries until the async reportError reports the failure.
+      cy.wrap(null).should(() => {
+        expect(reportStub.calledOnce).to.equal(true)
+      })
     })
   })
 })

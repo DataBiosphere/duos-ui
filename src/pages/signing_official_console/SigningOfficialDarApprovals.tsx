@@ -26,7 +26,7 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
         setCollectionList(collectionList)
         setIsLoading(false)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error: Unable to retrieve current user from server' })
         setIsLoading(false)
       }
@@ -38,7 +38,7 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
     setCollectionList((prevList) => {
       const index = prevList.findIndex(c => c.darCollectionId === updatedCollection.darCollectionId)
       if (index === -1) return prevList
-      if (updatedCollection.requiresSOApproval === false) {
+      if (!updatedCollection.requiresSOApproval) {
         return prevList.filter((_, i) => i !== index)
       }
       const newList = [...prevList]

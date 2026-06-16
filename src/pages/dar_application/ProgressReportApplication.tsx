@@ -29,6 +29,7 @@ import { FormValidationState } from 'src/pages/dar_application/FormValidationSta
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
 import { useNavigate } from 'react-router-dom'
 import { isEqual } from 'src/utils/NodashUtil'
+import 'src/pages/dar_application/DataAccessRequestApplication.css'
 type ProgressReportApplicationProps = {
   readonly dar: CombinedDataAccessRequest // corresponds either to the parent DAR for a new application or an existing readonly progress report
   readonly datasets: Dataset[]
