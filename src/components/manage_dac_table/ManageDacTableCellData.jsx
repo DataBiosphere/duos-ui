@@ -53,7 +53,7 @@ export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) 
         onClick={() => viewDatasets(dac)}
       >
         {datasetCount}
-      </a>
+      </button>
     ),
   }
 }

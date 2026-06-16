@@ -233,7 +233,7 @@ describe('ManageDac', () => {
 
     mountManageDac()
 
-    cy.get('.row-data-0').contains('View Datasets').click()
+    cy.get(`#${primaryDac.dacId}_dacDatasets`).click()
 
     cy.wrap(datasetsStub).should('have.been.calledWith', 1)
     cy.contains('DAC Datasets associated with DAC: Alpha DAC').should('be.visible')
@@ -250,7 +250,7 @@ describe('ManageDac', () => {
 
     mountManageDac()
 
-    cy.get('.row-data-0').contains('View Datasets').click()
+    cy.get(`#${primaryDac.dacId}_dacDatasets`).click()
 
     cy.get('@showError').should('have.been.calledWith', { text: 'DAC has no datasets.' })
     cy.contains('Manage My Data Access Committee').should('be.visible')

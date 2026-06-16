@@ -125,12 +125,14 @@ export const DacProfile: React.FC = () => {
   }, [dacId])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadDacData()
   }, [loadDacData])
 
   // Translate data use restrictions whenever the dataset list changes
   useEffect(() => {
     if (datasets.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTranslatedDataUse(new Map())
       return
     }
