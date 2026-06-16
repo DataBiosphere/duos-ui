@@ -129,7 +129,7 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    cy.contains('Access Management').should('exist')
+    cy.contains('Access Request Process').should('exist')
     cy.contains('Data Use').should('exist')
     cy.contains('Data Type').should('exist')
     cy.contains('Participants').should('exist')
@@ -145,13 +145,13 @@ describe('DataLibrary', () => {
     )
 
     // Check a filter
-    cy.contains('Controlled').closest('label').find('input[type="checkbox"]').check()
+    cy.contains('via DUOS').closest('label').find('input[type="checkbox"]').check()
 
     // Clear button should appear
     cy.contains('Clear').should('exist')
 
     // Check filter is active in UI
-    cy.contains('Controlled').closest('label').find('input[type="checkbox"]').should('be.checked')
+    cy.contains('via DUOS').closest('label').find('input[type="checkbox"]').should('be.checked')
   })
 
   it('clears all filters', () => {
@@ -167,7 +167,7 @@ describe('DataLibrary', () => {
     cy.contains('Clear').click()
 
     // Check filter is unchecked
-    cy.contains('Controlled').closest('label').find('input[type="checkbox"]').should('not.be.checked')
+    cy.contains('via DUOS').closest('label').find('input[type="checkbox"]').should('not.be.checked')
 
     // Clear button should disappear
     cy.contains('Clear').should('not.exist')
@@ -195,7 +195,7 @@ describe('DataLibrary', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').should('exist')
   })
 
@@ -207,7 +207,7 @@ describe('DataLibrary', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
     cy.get('[aria-label="Expand filters"]').should('exist')
   })
 
@@ -219,9 +219,9 @@ describe('DataLibrary', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').click()
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
     cy.get('[aria-label="Expand filters"]').should('exist')
   })
 
@@ -234,7 +234,7 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
     cy.get('[aria-label="Expand filters"]').click()
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').should('exist')
   })
 
@@ -265,13 +265,13 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    cy.contains('Access Management').should('exist')
+    cy.contains('Access Request Process').should('exist')
     cy.contains('Participants').should('exist')
     cy.contains('Clear').should('exist')
 
     cy.get('button').contains('Publications').click()
 
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
     cy.contains('Participants').should('not.exist')
     cy.contains('Datasets Cited?').should('not.exist')
     cy.contains('Clear').should('not.exist')
