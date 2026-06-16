@@ -9,7 +9,7 @@ import { Navigation, setUserRoleStatuses } from 'src/libs/utils'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import eventList, { MetricsEventName } from 'src/libs/events'
-import { StackdriverReporter } from 'src/libs/stackdriverReporter'
+import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { OidcUser } from 'src/libs/auth/oidcBroker'
 import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
@@ -72,7 +72,7 @@ export const SignInButton = () => {
         Storage.setCurrentUser(duosUser)
         setUserRoleStatuses(duosUser, Storage)
         if (!duosUser.roles) {
-          await StackdriverReporter.report('roles not found for user: ' + duosUser.email)
+          await ErrorReporter.report('roles not found for user: ' + duosUser.email)
         }
         syncSignInOrRegistrationEvent(eventList.userSignIn)
         await checkToSAndRedirect(shouldRedirect ? redirectTo : null)

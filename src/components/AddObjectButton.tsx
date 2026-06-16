@@ -1,4 +1,5 @@
 import React from 'react'
+import '@testing-library/jest-dom/vitest'
 import AddIcon from '@mui/icons-material/Add'
 
 interface StudyAssetAddButtonProps {

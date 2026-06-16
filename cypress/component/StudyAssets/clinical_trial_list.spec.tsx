@@ -11,6 +11,14 @@ import {
 } from 'src/types/model'
 import { testDeleteViaModal } from './testUtils'
 
+const selectDate = (fieldId: string) => {
+  cy.get(`#${fieldId}`).parent().find('button[aria-label*="Choose date"]').click()
+  cy.get('[role="dialog"]').filter(':visible').last().within(() => {
+    cy.contains('button', /^15$/).click()
+    cy.contains('button', 'Select').click()
+  })
+}
+
 const sampleTrial: ClinicalTrial = {
   clinicalTrialId: 'ct1',
   studyId: 's1',
@@ -64,7 +72,7 @@ describe('ClinicalTrialList component', () => {
     cy.get('#status').click()
     cy.get('#status').type('Completed{enter}')
     cy.get('#sponsor').type('Sponsor Y')
-    cy.get('#startDate').type('2024-06-01')
+    selectDate('startDate')
     cy.get('#interventionType').click()
     cy.get('#interventionType').type('Drug{enter}')
     cy.get('#phase').click()
@@ -85,6 +93,8 @@ describe('ClinicalTrialList component', () => {
     cy.contains(sampleTrial.title).should('exist')
     cy.get('#title').should('be.disabled')
     cy.get('#registry').should('be.disabled')
+    cy.get('#startDate').should('have.value', sampleTrial.startDate)
+    cy.get('#endDate').should('have.value', sampleTrial.endDate)
     cy.get('.collaborator-form-add-save-button').should('not.exist')
     cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
   })
@@ -114,7 +124,7 @@ describe('ClinicalTrialList component', () => {
     cy.get('#status').click()
     cy.get('#status').type('Completed{enter}')
     cy.get('#sponsor').type('Org Z')
-    cy.get('#startDate').type('2024-02-02')
+    selectDate('startDate')
     cy.get('#interventionType').click()
     cy.get('#interventionType').type('Device{enter}')
     cy.get('#phase').click()

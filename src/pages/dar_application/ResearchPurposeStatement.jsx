@@ -16,12 +16,12 @@ const ResearchPurposeRow = (props) => {
   } = props
 
   return (
-    <div className="rp-row flex flex-row">
-      <div style={{ width: '70%' }}>
+    <div className="rp-row flex flex-row" style={{ flexWrap: 'wrap', columnGap: '2rem', rowGap: '1rem' }}>
+      <div style={{ flex: '1 1 28rem', minWidth: 0 }}>
         <div className="rp-row-title">{title}</div>
         <div className="rp-row-description">{description}</div>
       </div>
-      <div style={{ width: '20%' }}>
+      <div style={{ flex: '0 1 auto', minWidth: '12rem' }}>
         <FormField
           type={FormFieldTypes.YESNORADIOGROUP}
           id={id}
