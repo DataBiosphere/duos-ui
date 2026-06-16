@@ -294,7 +294,7 @@ const applySortOrderUpdate = (updates: Partial<LibraryUrlState>, searchParams: U
 
 const applyHideFiltersUpdate = (updates: Partial<LibraryUrlState>, searchParams: URLSearchParams) => {
   if (hasOwnUpdate(updates, 'hideFilters')) {
-    if (updates.hideFilters === true) {
+    if (updates.hideFilters) {
       searchParams.set('hideFilters', 'true')
     }
     else {
