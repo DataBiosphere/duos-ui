@@ -26,7 +26,7 @@ Steps:
    - For every method that propagates fetch errors (i.e. does NOT catch them internally), add a ConsentError test: reject the fetch mock with `{ message: '<descriptive message>', code: <status> }` (the `ConsentError` shape from `src/types/model.ts`), capture the rejection, and assert that the real (unmocked) `extractConsentError` and `extractError` from `src/utils/ErrorUtils` recover the shape and message. Always expand the `.then(onFulfilled, onRejected)` call across multiple lines — putting `() => { throw ... }` inline triggers the `@stylistic/max-statements-per-line` lint rule. The one exception is methods that catch all errors internally and return a fallback (e.g. `searchOntologyIdList` returns `[]` on error) — those swallow ConsentErrors too, so no test is needed. See `test/libs/ajax/DAR.spec.ts` for examples of this pattern across multiple methods.
    - Commit as `test: add tests`.
 5. Verify, fixing anything that fails before finishing:
-   - `npm run type-check`
-   - `npm run test -- test/libs/ajax/<Name>.spec.ts`
-   - `npx eslint src/libs/ajax/<Name>.ts test/libs/ajax/<Name>.spec.ts`
+   - `pnpm run type-check`
+   - `pnpm run test -- test/libs/ajax/<Name>.spec.ts`
+   - `pnpx eslint src/libs/ajax/<Name>.ts test/libs/ajax/<Name>.spec.ts`
    - Grep for imports of the old module path; the extension change should be transparent, but confirm nothing imported it with an explicit `.js` extension.
