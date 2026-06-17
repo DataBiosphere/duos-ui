@@ -218,7 +218,7 @@ describe('ManageDac', () => {
 
     mountManageDac()
 
-    cy.get('.row-data-0 [role="cell"]').first().click()
+    cy.get('.row-data-0 [role="cell"]').first().find('a').click()
     cy.get('[data-cy="route-path"]').should('contain', '/manage_dac/1')
   })
 
