@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetTerm, StudyTerm } from 'src/types/model'
+import { ElasticsearchQuery } from 'src/types/elastic'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { makeDatasetTableHeader, makeDatasetTableRows } from 'src/components/data_search/DatasetSearchTableConstants'
@@ -109,7 +110,7 @@ export const StudyDetails = () => {
         },
       },
     }
-    DataSet.searchDatasetIndex(query).then((datasets) => {
+    DataSet.searchDatasetIndex(query as ElasticsearchQuery).then((datasets) => {
       setDatasets(datasets)
       setLoading(false)
     })
