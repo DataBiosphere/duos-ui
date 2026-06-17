@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import DatasetsRequestedPanel from 'src/components/collection_voting_slab/DatasetsRequestedPanel'
 import { Storage } from 'src/libs/storage'
-import { DacTerm, Dataset } from 'src/types/model'
+import { DacTerm, Dataset, DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/storage', () => ({
   Storage: {
@@ -46,7 +46,7 @@ const user = {
   roles: [{ dacId: 4 }],
   isAdmin: true,
   isChairPerson: true,
-}
+} as DuosUser
 
 describe('DatasetsRequestedPanel - Tests', () => {
   beforeEach(() => {
