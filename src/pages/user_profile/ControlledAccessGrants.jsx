@@ -1,67 +1,34 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import SortableTable from 'src/components/sortable_table/SortableTable'
+import { DataGrid } from '@mui/x-data-grid'
+import { Box } from '@mui/material'
 import { User } from 'src/libs/ajax/User'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection.tsx'
 import { Styles } from 'src/libs/theme.js'
 
-const headCells = [
-  {
-    id: 'darCode',
-    numeric: false,
-    disablePadding: false,
-    label: 'DAR Code',
-  },
-  {
-    id: 'datasetIdentifier',
-    numeric: false,
-    disablePadding: false,
-    label: 'Dataset Identifier',
-  },
-  {
-    id: 'datasetName',
-    numeric: false,
-    disablePadding: false,
-    label: 'Dataset Name',
-  },
-  {
-    id: 'dacName',
-    numeric: false,
-    disablePadding: false,
-    label: 'DAC Name',
-  },
-  {
-    id: 'expirationDate',
-    numeric: false,
-    disablePadding: false,
-    label: 'Expiration Date',
-  },
+const columns = [
+  { field: 'darCode', headerName: 'DAR Code', flex: 1 },
+  { field: 'datasetIdentifier', headerName: 'Dataset Identifier', flex: 1 },
+  { field: 'datasetName', headerName: 'Dataset Name', flex: 1 },
+  { field: 'dacName', headerName: 'DAC Name', flex: 1 },
+  { field: 'expirationDate', headerName: 'Expiration Date', flex: 1 },
 ]
 
-function createData(darCode, datasetIdentifier, datasetName, dacName, expirationDate) {
-  return {
-    darCode,
-    datasetIdentifier,
-    datasetName,
-    dacName,
-    expirationDate,
-  }
-}
-
 function createRows(userRows) {
-  return userRows.map(exampleRow => createData(
-    exampleRow.darCode,
-    exampleRow.datasetIdentifier,
-    exampleRow.datasetName,
-    exampleRow.dacName,
-    formatDate(exampleRow.expirationDate),
-  ))
+  return userRows.map((row, index) => ({
+    id: index,
+    darCode: row.darCode,
+    datasetIdentifier: row.datasetIdentifier,
+    datasetName: row.datasetName,
+    dacName: row.dacName,
+    expirationDate: formatDate(row.expirationDate),
+  }))
 }
 
 export default function ControlledAccessGrants() {
-  usePageTitle('My Datasets')
+  usePageTitle('My Dataset Approvals')
   const [rows, setRows] = useState([])
 
   useEffect(() => {
@@ -81,13 +48,28 @@ export default function ControlledAccessGrants() {
     <div style={Styles.PAGE}>
       <div>
         <TableHeaderSection
-          title="Controlled Access Grants"
+          title="My Dataset Approvals"
           description="Your current dataset approvals"
         />
       </div>
-      <div style={{ marginTop: '2rem' }}>
-        <SortableTable rows={rows} headCells={headCells} />
-      </div>
+      <Box sx={{ marginTop: '2rem', width: '100%' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
+          disableRowSelectionOnClick
+          autoHeight
+          sx={{
+            '& .MuiDataGrid-cell:focus': { outline: 'none' },
+            '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
+            '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
+            '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+          }}
+        />
+      </Box>
     </div>
   )
 }

@@ -182,9 +182,9 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    // Should be on Datasets tab (bold font-weight: 700)
-    cy.get('button').contains('Datasets').should('have.css', 'font-weight', '700')
-    cy.get('button').contains('Studies').should('have.css', 'font-weight', '400')
+    // Should be on Datasets tab
+    cy.contains('[role="tab"]', 'Datasets').should('have.attr', 'aria-selected', 'true')
+    cy.contains('[role="tab"]', 'Studies').should('have.attr', 'aria-selected', 'false')
   })
 
   it('shows filter panel by default', () => {
@@ -248,12 +248,12 @@ describe('DataLibrary', () => {
     )
 
     // Initially on Datasets (due to default in useLibraryUrlState)
-    cy.get('button').contains('Datasets').should('have.css', 'font-weight', '700')
+    cy.contains('[role="tab"]', 'Datasets').should('have.attr', 'aria-selected', 'true')
 
     // Switch to Studies
-    cy.get('button').contains('Studies').click()
-    cy.get('button').contains('Studies').should('have.css', 'font-weight', '700')
-    cy.get('button').contains('Datasets').should('have.css', 'font-weight', '400')
+    cy.contains('[role="tab"]', 'Studies').click()
+    cy.contains('[role="tab"]', 'Studies').should('have.attr', 'aria-selected', 'true')
+    cy.contains('[role="tab"]', 'Datasets').should('have.attr', 'aria-selected', 'false')
   })
 
   it('removes incompatible filters when switching to an asset with a narrower filter set', () => {
@@ -269,7 +269,7 @@ describe('DataLibrary', () => {
     cy.contains('Participants').should('exist')
     cy.contains('Clear').should('exist')
 
-    cy.get('button').contains('Publications').click()
+    cy.contains('[role="tab"]', 'Publications').click()
 
     cy.contains('Access Request Process').should('not.exist')
     cy.contains('Participants').should('not.exist')
