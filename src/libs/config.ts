@@ -5,13 +5,7 @@ interface ConfigType {
   apiUrl: string
   bardApiUrl: string
   ecmApiUrl: string
-  errorApiKey: string
-  gaId: string
   hash: string
-  nihUrl: string
-  ontologyApiUrl: string
-  profileUrl: string
-  samApiUrl: string
   tag: string
   tdrApiUrl: string
   terraUrl: string
@@ -51,24 +45,12 @@ class ConfigClass {
     return getECMUrl()
   }
 
-  async getErrorApiKey(): Promise<string> {
-    return getErrorApiKey()
-  }
-
-  async getGaId(): Promise<string> {
-    return getGaId()
-  }
-
   async getHash(): Promise<string> {
     return getHash()
   }
 
   async getProject(): Promise<string> {
     return getProject()
-  }
-
-  async getSamApiUrl(): Promise<string> {
-    return getSamApiUrl()
   }
 
   async getTag(): Promise<string> {
@@ -126,16 +108,6 @@ export const getECMUrl = async (): Promise<string> => {
   return await getEcmApiUrl()
 }
 
-export const getErrorApiKey = async (): Promise<string> => {
-  const config = await loadConfig()
-  return config.errorApiKey
-}
-
-export const getGaId = async (): Promise<string> => {
-  const config = await loadConfig()
-  return config.gaId
-}
-
 export const getHash = async (): Promise<string> => {
   const config = await loadConfig()
   return config.hash
@@ -144,11 +116,6 @@ export const getHash = async (): Promise<string> => {
 export const getProject = async (): Promise<string> => {
   const env = await getEnv()
   return `broad-duos-${env}`
-}
-
-export const getSamApiUrl = async (): Promise<string> => {
-  const config = await loadConfig()
-  return config.samApiUrl
 }
 
 export const getTag = async (): Promise<string> => {

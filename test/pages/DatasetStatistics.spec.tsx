@@ -22,15 +22,9 @@ const mockConfig = {
   tag: '',
   bardApiUrl: '',
   apiUrl: '',
-  ontologyApiUrl: '',
   terraUrl: '',
   tdrApiUrl: '',
   ecmApiUrl: '',
-  errorApiKey: '',
-  profileUrl: '',
-  nihUrl: '',
-  gaId: '',
-  samApiUrl: '',
   features: {},
 }
 

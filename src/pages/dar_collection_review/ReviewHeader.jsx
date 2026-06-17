@@ -20,21 +20,25 @@ const styles = {
     justifyContent: 'flex-start',
     alignItems: 'baseline',
     marginLeft: '0px',
+    flexWrap: 'wrap',
+    rowGap: '0.8rem',
   },
   primaryHeaderRow: {
-    fontSize: '2.1rem',
-    marginBottom: '3.2rem',
+    fontSize: 'clamp(1.8rem, 3vw, 2.1rem)',
+    marginBottom: 'clamp(1rem, 3vw, 3.2rem)',
   },
   projectTitle: {
     fontWeight: 'normal',
-    fontSize: '2.5rem',
+    fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)',
+    overflowWrap: 'anywhere',
   },
   user: {
     fontWeight: 'normal',
-    fontSize: '2rem',
+    fontSize: 'clamp(1.4rem, 3vw, 2rem)',
+    overflowWrap: 'anywhere',
   },
   secondaryHeaderRow: {
-    fontSize: '3rem',
+    fontSize: 'clamp(1.4rem, 3vw, 2rem)',
     fontWeight: 600,
   },
 }

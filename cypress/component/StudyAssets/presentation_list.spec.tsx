@@ -6,6 +6,14 @@ import PresentationSummary from 'src/components/presentations_list/PresentationS
 import { Presentation } from 'src/types/model'
 import { testDeleteViaModal } from './testUtils'
 
+const selectDate = (fieldId: string) => {
+  cy.get(`#${fieldId}`).parent().find('button[aria-label*="Choose date"]').click()
+  cy.get('[role="dialog"]').filter(':visible').last().within(() => {
+    cy.contains('button', /^15$/).click()
+    cy.contains('button', 'Select').click()
+  })
+}
+
 const samplePresentation: Presentation = {
   presentationId: 'p1',
   studyId: 's1',
@@ -52,7 +60,7 @@ describe('PresentationList component', () => {
       />,
     )
     cy.get('#title').type('New Title')
-    cy.get('#date').type('2024-07-15')
+    selectDate('date')
     cy.get('#url').type('https://example.org/new')
     cy.get('#authors').type('Author One; Author Two')
     cy.get('#datasetCitation').type('Dataset Y')
@@ -76,6 +84,7 @@ describe('PresentationList component', () => {
       cy.contains(samplePresentation.title).should('exist')
       cy.get('#title').should('be.disabled')
       cy.get('#date').should('be.disabled')
+      cy.get('#date').should('have.value', samplePresentation.date)
       cy.get('.collaborator-form-add-save-button').should('not.exist')
       cy.get('.collaborator-form-cancel-button').contains('Close').should('exist')
     })
@@ -94,7 +103,7 @@ describe('PresentationList component', () => {
     cy.get('#add-presentation-btn').click()
     cy.contains('New Presentation').should('exist')
     cy.get('#title').type('Added Talk')
-    cy.get('#date').type('2024-08-20')
+    selectDate('date')
     cy.get('#url').type('https://example.org/added')
     cy.get('#authors').type('Auth A')
     cy.get('#datasetCitation').type('Dataset Added')

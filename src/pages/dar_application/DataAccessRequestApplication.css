@@ -109,15 +109,38 @@ fieldset[disabled] .regular-checkbox:before {
   flex-direction: row;
   margin-top: 30px;
   padding: 0;
+  width: 100%;
+  max-width: 100%;
+  align-items: flex-start;
 }
 
 .step-container {
   clear: both;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .accordion-step-container {
   clear: both;
   margin-top: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+#form-views {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.progress-report-step-card,
+.progress-report-row {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* ------------------------------------- */
@@ -176,3 +199,25 @@ fieldset[disabled] .regular-checkbox:before {
   background-color: rgba(43, 189, 155, .3);
 }
 
+@media (max-width: 1024px) {
+  .forms-v2 {
+    flex-direction: column;
+  }
+
+  .multi-step-buttons-container {
+    position: static;
+    top: auto;
+    width: 100%;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .multi-step-buttons-container .MuiTabs-root {
+    width: 100%;
+  }
+
+  .multi-step-buttons-container .MuiButtonBase-root {
+    margin-top: 10px;
+  }
+}
