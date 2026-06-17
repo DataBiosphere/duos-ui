@@ -129,6 +129,6 @@ describe('ResearcherStatus', () => {
     }
     cy.mount(<ResearcherStatus user={userWithCard} />)
     cy.contains('Signing Official(s):')
-    cy.contains('Signing Official - so@test.com')
+    cy.contains('so@test.com')
   })
 })

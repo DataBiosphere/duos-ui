@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { chunk, filter, isEmpty } from 'src/utils/NodashUtil'
 import { DAR } from '../../libs/ajax/DAR'
 import { DownloadLink } from '../../components/DownloadLink'
+import { User } from 'src/libs/ajax/User'
+import SigningOfficialReadOnlyCard from 'src/components/SigningOfficialReadOnlyCard'
 
 const styles = {
   flexRowElement: {
@@ -142,7 +144,9 @@ export default function ApplicationInformation(props) {
     isLoading = false,
     externalCollaborators = [],
     internalCollaborators = [],
-    signingOfficialEmail = '- -',
+    signingOfficialName = '',
+    signingOfficialEmail = '',
+    researcherInstitutionId,
     itDirectorEmail = '- -',
     internalLabStaff = [],
     anvilStorage = false,
@@ -157,6 +161,18 @@ export default function ApplicationInformation(props) {
     _irbDocumentName,
     collaborationLetterName,
   } = props
+
+  const [selectedSO, setSelectedSO] = useState(null)
+
+  useEffect(() => {
+    if (!researcherInstitutionId || !signingOfficialEmail) return
+    User.getSOsForInstitution(researcherInstitutionId)
+      .then((sos) => {
+        const match = sos.find(so => so.email === signingOfficialEmail)
+        setSelectedSO(match ?? null)
+      })
+      .catch(() => setSelectedSO(null))
+  }, [researcherInstitutionId, signingOfficialEmail])
 
   const processCollaborators = collaborators =>
     collaborators.map(collaborator => collaborator.name).join(', ')
@@ -175,8 +191,7 @@ export default function ApplicationInformation(props) {
     { value: processCollaborators(internalLabStaff), title: 'Internal Lab Staff', key: 'internal-lab-staff' },
   ]
 
-  const institutionLabels = [
-    { value: signingOfficialEmail, title: 'Signing Official', key: 'signing-official' },
+  const itDirectorLabels = [
     { value: itDirectorEmail, title: 'IT Director', key: 'it-director' },
   ]
 
@@ -241,7 +256,26 @@ export default function ApplicationInformation(props) {
       </div>
       <div className="institution-details-container" style={{ margin: '3rem 0' }}>
         <div className="institution-details-subheader" style={styles.subheader}>Institution</div>
-        {dynamicRowGeneration(2, institutionLabels, isLoading)}
+        {(signingOfficialName || signingOfficialEmail) && (
+          <div className="information-row" style={styles.applicantInfoRow}>
+            <div className="flex-row-element" style={styles.flexRowElement}>
+              {isLoading
+                ? <div className="text-placeholder" style={{ width: '50%', height: '4rem' }} />
+                : (
+                    <>
+                      <label style={styles.label}>Signing Official</label>
+                      <SigningOfficialReadOnlyCard
+                        name={selectedSO ? selectedSO.displayName : signingOfficialName}
+                        email={selectedSO ? selectedSO.email : signingOfficialEmail}
+                        institutionName={selectedSO?.institutionName}
+                        externalProfiles={selectedSO?.userData?.externalProfiles}
+                      />
+                    </>
+                  )}
+            </div>
+          </div>
+        )}
+        {dynamicRowGeneration(2, itDirectorLabels, isLoading)}
       </div>
       <div className="cloud-use-details-container" style={{ margin: '3rem 0' }}>
         <div className="cloud-use-details-subheader" style={styles.subheader}>Cloud Use</div>

@@ -100,6 +100,14 @@ export interface SimplifiedDuosUser {
   email: string
 }
 
+export interface SigningOfficialUserWithData extends SimplifiedDuosUser {
+  institutionId?: number
+  institutionName?: string
+  userData?: {
+    externalProfiles?: ExternalProfiles
+  }
+}
+
 export interface DAAObject {
   // Define the shape of a DAA object as needed
   daaId: number
