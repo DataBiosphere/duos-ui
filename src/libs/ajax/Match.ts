@@ -1,5 +1,5 @@
 import { uniq } from 'src/utils/NodashUtil'
-import { Config } from '../config'
+import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 import { MatchResult } from 'src/types/model'
 
@@ -12,7 +12,7 @@ export const Match = {
   findMatchBatch: async (purposeIdsArr: string[] = []): Promise<MatchResult[]> => {
     const purposeIds = uniq(purposeIdsArr).join(',')
     const url = `${await Config.getApiUrl()}/api/match/purpose/batch`
-    const config = Object.assign({}, Config.authOpts(), { params: { purposeIds } })
+    const config = { ...Config.authOpts(), params: { purposeIds } }
     const res = await fetchGet<MatchResult[]>(url, config)
     return res.data
   },
