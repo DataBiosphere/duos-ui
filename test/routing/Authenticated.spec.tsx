@@ -1,20 +1,33 @@
 import React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import Authenticated from 'src/routing/Authenticated'
 import { Storage } from 'src/libs/storage'
 
-const ProtectedComponent = () => <div data-cy="protected-content">Protected Content</div>
-const HomeComponent = () => <div data-cy="home-content">Home Page</div>
+vi.mock('src/libs/storage', () => ({
+  Storage: {
+    userIsLogged: vi.fn(),
+  },
+}))
+
+const ProtectedComponent = () => <div data-testid="protected-content">Protected Content</div>
+const HomeComponent = () => <div data-testid="home-content">Home Page</div>
 
 interface LocationSpyProps {
   onLocationChange: (location: string) => void
 }
 
 describe('Authenticated', () => {
-  it('should render the protected component if the user is logged in', () => {
-    cy.stub(Storage, 'userIsLogged').returns(true)
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-    cy.mount(
+  it('should render the protected component if the user is logged in', () => {
+    vi.mocked(Storage.userIsLogged).mockReturnValue(true)
+
+    render(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route element={<Authenticated />}>
@@ -25,14 +38,14 @@ describe('Authenticated', () => {
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="protected-content"]').should('be.visible')
-    cy.get('[data-cy="home-content"]').should('not.exist')
+    expect(screen.getByTestId('protected-content')).toBeInTheDocument()
+    expect(screen.queryByTestId('home-content')).not.toBeInTheDocument()
   })
 
   it('should redirect to the home page if the user is not logged in', () => {
-    cy.stub(Storage, 'userIsLogged').returns(false)
+    vi.mocked(Storage.userIsLogged).mockReturnValue(false)
 
-    cy.mount(
+    render(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route element={<Authenticated />}>
@@ -43,13 +56,13 @@ describe('Authenticated', () => {
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="home-content"]').should('be.visible')
-    cy.get('[data-cy="protected-content"]').should('not.exist')
+    expect(screen.getByTestId('home-content')).toBeInTheDocument()
+    expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
   })
 
-  it.only('should redirect with a redirectTo query param if the user is not logged in', () => {
-    cy.stub(Storage, 'userIsLogged').returns(false)
-    const pageVisitStub = cy.stub()
+  it('should redirect with a redirectTo query param if the user is not logged in', () => {
+    vi.mocked(Storage.userIsLogged).mockReturnValue(false)
+    const pageVisitStub = vi.fn()
     const LocationSpy = ({ onLocationChange }: LocationSpyProps) => {
       const location = useLocation()
       React.useEffect(() => {
@@ -57,7 +70,8 @@ describe('Authenticated', () => {
       }, [location, onLocationChange])
       return null
     }
-    cy.mount(
+
+    render(
       <MemoryRouter initialEntries={['/protected']}>
         <LocationSpy onLocationChange={pageVisitStub} />
         <Routes>
@@ -68,8 +82,9 @@ describe('Authenticated', () => {
         </Routes>
       </MemoryRouter>,
     )
-    cy.get('[data-cy="home-content"]').should('be.visible')
-    cy.wrap(pageVisitStub).should('have.been.calledWith', '/protected')
-    cy.wrap(pageVisitStub).should('have.been.calledWith', '/?redirectTo=/protected')
+
+    expect(screen.getByTestId('home-content')).toBeInTheDocument()
+    expect(pageVisitStub).toHaveBeenCalledWith('/protected')
+    expect(pageVisitStub).toHaveBeenCalledWith('/?redirectTo=/protected')
   })
 })

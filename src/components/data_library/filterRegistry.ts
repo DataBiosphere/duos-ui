@@ -173,7 +173,7 @@ const dateRangeClause = (field: string, range: { gte?: string, lte?: string }): 
 
 const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   accessManagement: {
-    label: 'Access Management',
+    label: 'Access Request Process',
     buildClause: (filters) => {
       if (filters.accessManagement.length === 0) {
         return undefined
