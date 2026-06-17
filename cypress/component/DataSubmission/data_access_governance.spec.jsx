@@ -2,7 +2,6 @@ import React from 'react'
 import { DAC } from 'src/libs/ajax/DAC'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Institution } from 'src/libs/ajax/Institution'
-import { Schema } from 'src/libs/ajax/Schema'
 import { Study } from 'src/libs/ajax/Study'
 import { User } from 'src/libs/ajax/User'
 import DataSubmissionForm from 'src/pages/data_submission/DataSubmissionForm'
@@ -25,12 +24,8 @@ beforeEach(() => {
   cy.stub(DAC, 'list').returns(Promise.resolve(dacs))
   cy.stub(User, 'getMe').returns(user)
   cy.stub(Institution, 'list').returns([{ name: 'Test Institution' }])
-  cy.stub(Schema, 'datasetRegistrationV1').returns({})
   cy.stub(Study, 'getStudyNames').returns([])
   cy.stub(DataSet, 'getDatasetNames').returns([])
-  cy.fixture('dataset-registration-schema_v1').then(function (data) {
-    cy.stub(DataSet, 'getRegistrationSchema').returns(data)
-  })
 })
 
 describe('Data Access Governance', function () {
