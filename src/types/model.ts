@@ -92,6 +92,8 @@ export interface DuosUser {
   }
 }
 
+export type DuosUserWithInstitutionId = DuosUser & { institutionId: number }
+
 export interface SimplifiedDuosUser {
   userId: number
   displayName: string

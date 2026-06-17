@@ -148,8 +148,8 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           <FormField
             id="date"
             title="Presentation Date"
+            type={FormFieldTypes.CALENDAR}
             defaultValue={newPresentation.date}
-            placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={(submitted || touched.date) ? validation.date : undefined}

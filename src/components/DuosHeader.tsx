@@ -124,7 +124,7 @@ export const headerTabsConfig: Tab[] = [
     children: [
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'Data Access Requests', link: '/researcher_console' },
-      { label: 'Datasets', link: '/datasets' },
+      { label: 'My Dataset Approvals', link: '/datasets' },
       { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter },
     ],
     isRendered: user => user.isResearcher && !isOnlySigningOfficial(user),

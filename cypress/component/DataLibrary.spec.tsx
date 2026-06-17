@@ -129,7 +129,7 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    cy.contains('Access Management').should('exist')
+    cy.contains('Access Request Process').should('exist')
     cy.contains('Data Use').should('exist')
     cy.contains('Data Type').should('exist')
     cy.contains('Participants').should('exist')
@@ -145,13 +145,13 @@ describe('DataLibrary', () => {
     )
 
     // Check a filter
-    cy.contains('Controlled').closest('label').find('input[type="checkbox"]').check()
+    cy.contains('via DUOS').closest('label').find('input[type="checkbox"]').check()
 
     // Clear button should appear
     cy.contains('Clear').should('exist')
 
     // Check filter is active in UI
-    cy.contains('Controlled').closest('label').find('input[type="checkbox"]').should('be.checked')
+    cy.contains('via DUOS').closest('label').find('input[type="checkbox"]').should('be.checked')
   })
 
   it('clears all filters', () => {
@@ -167,7 +167,7 @@ describe('DataLibrary', () => {
     cy.contains('Clear').click()
 
     // Check filter is unchecked
-    cy.contains('Controlled').closest('label').find('input[type="checkbox"]').should('not.be.checked')
+    cy.contains('via DUOS').closest('label').find('input[type="checkbox"]').should('not.be.checked')
 
     // Clear button should disappear
     cy.contains('Clear').should('not.exist')
@@ -182,9 +182,9 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    // Should be on Datasets tab (bold font-weight: 700)
-    cy.get('button').contains('Datasets').should('have.css', 'font-weight', '700')
-    cy.get('button').contains('Studies').should('have.css', 'font-weight', '400')
+    // Should be on Datasets tab
+    cy.contains('[role="tab"]', 'Datasets').should('have.attr', 'aria-selected', 'true')
+    cy.contains('[role="tab"]', 'Studies').should('have.attr', 'aria-selected', 'false')
   })
 
   it('shows filter panel by default', () => {
@@ -195,7 +195,7 @@ describe('DataLibrary', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').should('exist')
   })
 
@@ -207,7 +207,7 @@ describe('DataLibrary', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
     cy.get('[aria-label="Expand filters"]').should('exist')
   })
 
@@ -219,9 +219,9 @@ describe('DataLibrary', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').click()
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
     cy.get('[aria-label="Expand filters"]').should('exist')
   })
 
@@ -234,7 +234,7 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
     cy.get('[aria-label="Expand filters"]').click()
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').should('exist')
   })
 
@@ -248,12 +248,12 @@ describe('DataLibrary', () => {
     )
 
     // Initially on Datasets (due to default in useLibraryUrlState)
-    cy.get('button').contains('Datasets').should('have.css', 'font-weight', '700')
+    cy.contains('[role="tab"]', 'Datasets').should('have.attr', 'aria-selected', 'true')
 
     // Switch to Studies
-    cy.get('button').contains('Studies').click()
-    cy.get('button').contains('Studies').should('have.css', 'font-weight', '700')
-    cy.get('button').contains('Datasets').should('have.css', 'font-weight', '400')
+    cy.contains('[role="tab"]', 'Studies').click()
+    cy.contains('[role="tab"]', 'Studies').should('have.attr', 'aria-selected', 'true')
+    cy.contains('[role="tab"]', 'Datasets').should('have.attr', 'aria-selected', 'false')
   })
 
   it('removes incompatible filters when switching to an asset with a narrower filter set', () => {
@@ -265,13 +265,13 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    cy.contains('Access Management').should('exist')
+    cy.contains('Access Request Process').should('exist')
     cy.contains('Participants').should('exist')
     cy.contains('Clear').should('exist')
 
-    cy.get('button').contains('Publications').click()
+    cy.contains('[role="tab"]', 'Publications').click()
 
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
     cy.contains('Participants').should('not.exist')
     cy.contains('Datasets Cited?').should('not.exist')
     cy.contains('Clear').should('not.exist')

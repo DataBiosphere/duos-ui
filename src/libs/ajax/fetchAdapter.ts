@@ -2,7 +2,7 @@ import { redirectOnLogout } from 'src/libs/auth/auth'
 import eventList from 'src/libs/events'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
-import { StackdriverReporter } from 'src/libs/stackdriverReporter'
+import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
 import { Config } from 'src/libs/config'
 
@@ -49,13 +49,19 @@ export interface FetchData<T> {
 
 const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
 
-export const reportError = (url: string, status: number): void => {
+export const reportError = async (url: string, status: number): Promise<void> => {
+  // Requests to the Bard API are metrics calls (its only consumer). ErrorReporter
+  // reports via metrics, so reporting a Bard failure would recurse infinitely.
+  const bardApiUrl = await Config.getBardApiUrl()
+  if (url.startsWith(bardApiUrl)) {
+    return
+  }
   const msg = 'Error fetching response: '
     .concat(JSON.stringify(url))
     .concat('Status: ')
     .concat(String(status))
   // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
-  StackdriverReporter.report(msg)
+  ErrorReporter.report(msg)
 }
 
 function buildUrlWithParams(url: string, params?: Params): string {

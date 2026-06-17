@@ -166,8 +166,8 @@ export default function IntellectualPropertyAddEdit(props: IntellectualPropertyA
           <FormField
             id="filingDate"
             title="Filing Date"
+            type={FormFieldTypes.CALENDAR}
             defaultValue={intellectualProperty?.filingDate}
-            placeholder="YYYY-MM-DD"
             validators={[FormValidators.REQUIRED, FormValidators.DATE]}
             onChange={onChange}
             validation={validation.filingDate}

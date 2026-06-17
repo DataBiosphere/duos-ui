@@ -25,12 +25,13 @@ const tabContainerColor = 'rgb(115,154,164)'
 const tabStyleOverride = {
   baseStyle: {
     fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
+    fontSize: 'clamp(1.2rem, 2vw, 1.6rem)',
     width: 'fit-content',
     fontWeight: 600,
     border: '0px',
     display: 'flex',
     justifyContent: 'center',
+    whiteSpace: 'nowrap',
     padding: '1%',
   },
   tabSelected: {
@@ -47,6 +48,8 @@ const tabStyleOverride = {
   tabContainer: {
     backgroundColor: tabContainerColor,
     display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.6rem',
     border: '0px',
   },
 }
@@ -263,7 +266,7 @@ export default function DarCollectionReview(props) {
 
   return (
     <div className="collection-review-page">
-      <div className="review-page-header" style={{ width: '90%', margin: '0 auto auto auto' }}>
+      <div className="review-page-header" style={{ width: 'min(100%, 120rem)', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
         <ReviewHeader
           darCode={collection.darCode || '- -'}
           projectTitle={darInfo.projectTitle || '- -'}
@@ -283,7 +286,7 @@ export default function DarCollectionReview(props) {
           />
         )}
       </div>
-      <div className="review-page-body" style={{ marginTop: '1rem', padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }}>
+      <div className="review-page-body" style={{ marginTop: '1rem', padding: '1rem clamp(0.8rem, 2.5vw, 2.2rem) 0', backgroundColor: tabContainerColor }}>
         <TabControl
           labels={Object.values(tabs)}
           selectedTab={selectedTab}

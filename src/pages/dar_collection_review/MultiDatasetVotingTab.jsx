@@ -29,7 +29,7 @@ const DatasetVoteSlabs = ({ dataBuckets, collection, dacDatasetIds, isChair, isA
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
-    padding: '15px 35px 35px 35px',
+    padding: 'clamp(1.2rem, 2.5vw, 1.5rem) clamp(1rem, 3.5vw, 3.5rem) clamp(1.5rem, 3.5vw, 3.5rem)',
     whiteSpace: 'pre-line',
   },
   slabs: {

@@ -532,8 +532,8 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                     <FormField
                       id="morText"
                       name="morDate"
+                      type={FormFieldTypes.CALENDAR}
                       validators={[FormValidators.REQUIRED, FormValidators.DATE]}
-                      placeholder="Please specify date (YYYY-MM-DD)"
                       defaultValue={morText}
                       onChange={({ key, value }: { key: string, value: string }) => {
                         onChange({ key: key, value: value })

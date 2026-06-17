@@ -13,18 +13,18 @@ describe('ControlledAccessGrants', () => {
     cy.mount(<ControlledAccessGrants />)
 
     cy.get('[data-cy="table-header-title"]').should('exist')
-    cy.get('[data-cy="table-header-title"]').should('contain', 'Controlled Access Grants')
+    cy.get('[data-cy="table-header-title"]').should('contain', 'My Dataset Approvals')
 
     cy.get('[data-cy="table-header-description"]').should('exist')
     cy.get('[data-cy="table-header-description"]').should('contain', 'Your current dataset approvals')
 
     // Check if all the expected table headers are present
-    cy.get('table').should('exist')
-    cy.contains('th', 'DAR Code').should('be.visible')
-    cy.contains('th', 'Dataset Identifier').should('be.visible')
-    cy.contains('th', 'Dataset Name').should('be.visible')
-    cy.contains('th', 'DAC Name').should('be.visible')
-    cy.contains('th', 'Expiration Date').should('be.visible')
+    cy.get('[role="grid"]').should('exist')
+    cy.contains('[role="columnheader"]', 'DAR Code').should('be.visible')
+    cy.contains('[role="columnheader"]', 'Dataset Identifier').should('be.visible')
+    cy.contains('[role="columnheader"]', 'Dataset Name').should('be.visible')
+    cy.contains('[role="columnheader"]', 'DAC Name').should('be.visible')
+    cy.contains('[role="columnheader"]', 'Expiration Date').should('be.visible')
   })
 
   it('should display dataset information', () => {
