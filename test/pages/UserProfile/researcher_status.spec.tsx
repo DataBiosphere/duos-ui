@@ -23,7 +23,7 @@ vi.mock('src/components/era_commons/ERACommons', () => ({
 }))
 
 vi.mock('src/pages/user_profile/DAAs', () => ({
-  default: ({ issuedOn, issuedBy }: { issuedOn: string; issuedBy: string }) => (
+  default: ({ issuedOn, issuedBy }: { issuedOn: string, issuedBy: string }) => (
     <div data-testid="daas-mock">
       <span>{issuedOn}</span>
       <span>{issuedBy}</span>
