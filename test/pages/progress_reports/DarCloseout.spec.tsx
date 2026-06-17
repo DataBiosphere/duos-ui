@@ -16,7 +16,7 @@ vi.mock('src/libs/ajax/User', () => ({
 vi.mock('src/components/forms/forms', () => ({
   FormField: ({ id, disabled, defaultValue }: { id: string, disabled?: boolean, defaultValue?: unknown }) => (
     <div data-testid={`form-field-${id}`} data-disabled={String(disabled)}>
-      {defaultValue != null && typeof defaultValue === 'object' && 'displayText' in (defaultValue as object)
+      {defaultValue != null && typeof defaultValue === 'object' && 'displayText' in defaultValue
         ? String((defaultValue as { displayText: string }).displayText)
         : null}
     </div>

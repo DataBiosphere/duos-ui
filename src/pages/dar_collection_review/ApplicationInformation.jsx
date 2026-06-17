@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
 import { chunk, filter, isEmpty } from 'src/utils/NodashUtil'
 import { DAR } from '../../libs/ajax/DAR'
 import { DownloadLink } from '../../components/DownloadLink'
@@ -263,7 +264,7 @@ export default function ApplicationInformation(props) {
                 ? <div className="text-placeholder" style={{ width: '50%', height: '4rem' }} />
                 : (
                     <>
-                      <label style={styles.label}>Signing Official</label>
+                      <span style={styles.label}>Signing Official</span>
                       <SigningOfficialReadOnlyCard
                         name={selectedSO ? selectedSO.displayName : signingOfficialName}
                         email={selectedSO ? selectedSO.email : signingOfficialEmail}
@@ -309,4 +310,28 @@ export default function ApplicationInformation(props) {
       </div>
     </div>
   )
+}
+
+ApplicationInformation.propTypes = {
+  researcher: PropTypes.string,
+  email: PropTypes.string,
+  institution: PropTypes.string,
+  nonTechSummary: PropTypes.string,
+  isLoading: PropTypes.bool,
+  externalCollaborators: PropTypes.arrayOf(PropTypes.shape({ name: PropTypes.string })),
+  internalCollaborators: PropTypes.arrayOf(PropTypes.shape({ name: PropTypes.string })),
+  internalLabStaff: PropTypes.arrayOf(PropTypes.shape({ name: PropTypes.string })),
+  signingOfficialName: PropTypes.string,
+  signingOfficialEmail: PropTypes.string,
+  researcherInstitutionId: PropTypes.number,
+  itDirectorEmail: PropTypes.string,
+  anvilStorage: PropTypes.bool,
+  localComputing: PropTypes.bool,
+  cloudComputing: PropTypes.bool,
+  cloudProvider: PropTypes.string,
+  cloudProviderDescription: PropTypes.string,
+  rus: PropTypes.string,
+  referenceId: PropTypes.string,
+  collaborationLetterLocation: PropTypes.string,
+  collaborationLetterName: PropTypes.string,
 }
