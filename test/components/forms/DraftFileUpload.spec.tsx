@@ -75,7 +75,7 @@ describe('Draft File Upload - Tests', () => {
     render(
       <BrowserRouter>
         <DraftFileUpload {...customProps} />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
     expect(screen.getByRole('button', { name: /Upload a file/i })).toBeDisabled()
     expect(screen.getByText('blank.pdf')).toBeInTheDocument()
@@ -89,7 +89,7 @@ describe('Draft File Upload - Tests', () => {
     render(
       <BrowserRouter>
         <DraftFileUpload {...customProps} />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
     const deleteLink = document.querySelector('a.glyphicon.glyphicon-trash')!

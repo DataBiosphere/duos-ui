@@ -47,7 +47,7 @@ describe('Data Locations List Component - Tests', () => {
     render(
       <BrowserRouter>
         <DataLocationList locations={locations} onChange={vi.fn()} />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
     expect(screen.getByRole('button', { name: /Add another location/i })).toBeInTheDocument()
   })
