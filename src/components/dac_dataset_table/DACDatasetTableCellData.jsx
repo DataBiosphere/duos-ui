@@ -3,7 +3,7 @@ import style from 'src/pages/DACDatasets.module.css'
 import { styles } from './DACDatasetConstants'
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus'
 import { createDataUseDisplay, processDataUseCodes } from 'src/utils/DataUseUtils.js'
-import { DataSet } from 'src/libs/ajax/DataSet.js'
+import { DataSet } from 'src/libs/ajax/DataSet'
 
 export const consoleTypes = { CHAIR: 'chair' }
 
