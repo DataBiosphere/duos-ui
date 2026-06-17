@@ -224,23 +224,20 @@ export default function MultiDatasetVoteSlab({
                 <DataUseSummary bucket={bucket} />
               </td>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                {showBothVotes
-                  ? (
-                      <>
-                        <div style={roleLabel}>Member</div>
-                        <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
-                        <VoteInfoSubsection currentUserVotes={currentUserVotes} bucket={bucket} isChair={false} isApprovalDisabled={false} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
-                        <div style={roleLabel}>Chair</div>
-                        <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
-                        <VoteInfoSubsection currentUserVotes={currentUserChairVotes} bucket={bucket} isChair={true} isApprovalDisabled={chairApprovalDisabled} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
-                      </>
-                    )
-                  : (
-                      <>
-                        <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
-                        <VoteInfoSubsection currentUserVotes={currentUserVotes} bucket={bucket} isChair={isChair} isApprovalDisabled={isApprovalDisabled} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
-                      </>
-                    )}
+                {(!isChair || showBothVotes) && (
+                  <>
+                    {showBothVotes && <div style={roleLabel}>Member</div>}
+                    <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
+                    <VoteInfoSubsection currentUserVotes={currentUserVotes} bucket={bucket} isChair={false} isApprovalDisabled={false} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
+                  </>
+                )}
+                {effectiveIsChair && (
+                  <>
+                    {showBothVotes && <div style={roleLabel}>Chair</div>}
+                    <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
+                    <VoteInfoSubsection currentUserVotes={showBothVotes ? currentUserChairVotes : currentUserVotes} bucket={bucket} isChair={true} isApprovalDisabled={showBothVotes ? chairApprovalDisabled : isApprovalDisabled} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
+                  </>
+                )}
               </td>
             </tr>
             <tr>
