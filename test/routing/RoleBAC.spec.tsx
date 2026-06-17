@@ -1,28 +1,42 @@
 import React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import RoleBAC from 'src/routing/RoleBAC'
 import { Storage } from 'src/libs/storage'
 import { USER_ROLES } from 'src/libs/utils'
+import { DuosUser } from 'src/types/model'
+
+vi.mock('src/libs/storage', () => ({
+  Storage: {
+    getCurrentUser: vi.fn(),
+  },
+}))
 
 const TestProtectedComponent = () => <div data-cy="protected-content">Protected Content</div>
 
 const researcherUser = {
   roles: [{ name: USER_ROLES.researcher }],
-}
+} as DuosUser
 
 const adminUser = {
   roles: [{ name: USER_ROLES.admin }],
-}
+} as DuosUser
 
 const noRolesUser = {
   roles: [],
-}
+} as unknown as DuosUser
 
 describe('RoleBAC', () => {
-  it('should render the protected component if the user has the required role', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(researcherUser)
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-    cy.mount(
+  it('should render the protected component if the user has the required role', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(researcherUser)
+
+    const { container } = render(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -32,14 +46,14 @@ describe('RoleBAC', () => {
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="protected-content"]').should('be.visible')
-    cy.get('[data-cy="not-found"]').should('not.exist')
+    expect(container.querySelector('[data-cy="protected-content"]')).not.toBeNull()
+    expect(container.querySelector('[data-cy="not-found"]')).toBeNull()
   })
 
   it('should redirect to the not found page if the user does not have the required role', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
 
-    cy.mount(
+    const { container } = render(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -49,14 +63,14 @@ describe('RoleBAC', () => {
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="not-found"]').should('be.visible')
-    cy.get('[data-cy="protected-content"]').should('not.exist')
+    expect(container.querySelector('[data-cy="not-found"]')).not.toBeNull()
+    expect(container.querySelector('[data-cy="protected-content"]')).toBeNull()
   })
 
   it('should redirect to the not found page if the user has no roles', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(noRolesUser)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(noRolesUser)
 
-    cy.mount(
+    const { container } = render(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -66,14 +80,14 @@ describe('RoleBAC', () => {
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="not-found"]').should('be.visible')
-    cy.get('[data-cy="protected-content"]').should('not.exist')
+    expect(container.querySelector('[data-cy="not-found"]')).not.toBeNull()
+    expect(container.querySelector('[data-cy="protected-content"]')).toBeNull()
   })
 
   it('should render the protected component if "all" roles are allowed', () => {
-    cy.stub(Storage, 'getCurrentUser').returns(noRolesUser)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(noRolesUser)
 
-    cy.mount(
+    const { container } = render(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route path="/protected" element={<RoleBAC rolesAllowed={[USER_ROLES.all]} />}>
@@ -83,7 +97,7 @@ describe('RoleBAC', () => {
       </MemoryRouter>,
     )
 
-    cy.get('[data-cy="protected-content"]').should('be.visible')
-    cy.get('[data-cy="not-found"]').should('not.exist')
+    expect(container.querySelector('[data-cy="protected-content"]')).not.toBeNull()
+    expect(container.querySelector('[data-cy="not-found"]')).toBeNull()
   })
 })

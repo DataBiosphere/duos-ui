@@ -167,9 +167,9 @@ export const DataLibrary: React.FC = () => {
 
     return {
       accessManagement: [
-        { value: 'controlled', label: 'Controlled' },
-        { value: 'open', label: 'Open' },
-        { value: 'external', label: 'External' },
+        { value: 'open', label: 'Open Access' },
+        { value: 'controlled', label: 'via DUOS' },
+        { value: 'external', label: 'External to DUOS' },
       ],
       dataUse: [
         { value: 'HMB', label: 'Health/Medical/Biomedical' },

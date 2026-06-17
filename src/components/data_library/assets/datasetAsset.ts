@@ -35,6 +35,7 @@ export const datasetAsset: AssetDefinition = {
     'study.dataTypes',
     'dataUse.primary.code',
     'dataUse.secondary.code',
+    'datasetIdentifier',
   ],
 
   buildQuery(
