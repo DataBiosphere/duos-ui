@@ -1,7 +1,17 @@
 import React from 'react'
+import '@testing-library/jest-dom/vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import InstitutionTable, { InstitutionTableProps } from 'src/components/institution_table/InstitutionTable'
 import { DuosUser, InstitutionInterface } from 'src/types/model'
-import { BrowserRouter } from 'react-router-dom'
+
+vi.mock('src/libs/storage', () => ({
+  Storage: {
+    getCurrentUserSettings: vi.fn().mockReturnValue(null),
+    setCurrentUserSettings: vi.fn(),
+  },
+}))
 
 const createUser: DuosUser = {
   createDate: new Date(),
@@ -47,7 +57,7 @@ const updateUser: DuosUser = {
   userId: 2,
 }
 
-export const mockInstitutions = [
+const mockInstitutions = [
   {
     id: 1,
     name: 'Test Institution 1',
@@ -81,12 +91,11 @@ const defaultProps = {
 
 describe('InstitutionTable', () => {
   beforeEach(() => {
-    cy.viewport(1400, 600)
-    cy.initApplicationConfig()
+    vi.clearAllMocks()
   })
 
   it('renders', () => {
-    cy.mount(
+    render(
       <BrowserRouter>
         <InstitutionTable
           filteredList={defaultProps.filteredList}
@@ -97,12 +106,12 @@ describe('InstitutionTable', () => {
         />
       </BrowserRouter>,
     )
-    cy.get('[data-cy="institution-table"]').should('exist')
+    expect(document.querySelector('[data-cy="institution-table"]')).not.toBeNull()
   })
 
   it('displays paginated institution rows', () => {
     // Set the page count to 1 so only the first institution is displayed
-    cy.mount(
+    render(
       <BrowserRouter>
         <InstitutionTable
           filteredList={defaultProps.filteredList}
@@ -113,13 +122,13 @@ describe('InstitutionTable', () => {
         />
       </BrowserRouter>,
     )
-    cy.get('[data-cy="institution-table"]').should('exist')
-    cy.get('[data-cy="institution-table"]').should('contain', mockInstitutions[0].name)
-    cy.get('[data-cy="institution-table"]').should('not.contain', mockInstitutions[1].name)
+    expect(document.querySelector('[data-cy="institution-table"]')).not.toBeNull()
+    expect(screen.getByText(mockInstitutions[0].name)).toBeInTheDocument()
+    expect(screen.queryByText(mockInstitutions[1].name)).not.toBeInTheDocument()
   })
 
   it('links to the update institution page', () => {
-    cy.mount(
+    render(
       <BrowserRouter>
         <InstitutionTable
           filteredList={defaultProps.filteredList}
@@ -130,9 +139,10 @@ describe('InstitutionTable', () => {
         />
       </BrowserRouter>,
     )
-    cy.get('a').each((link) => {
-      const href = link.prop('href').toString()
-      expect(href).to.match(/\/admin_manage_institutions\/institutions\/([12])/)
+    const links = document.querySelectorAll('a')
+    links.forEach((link) => {
+      const href = link.getAttribute('href') ?? ''
+      expect(href).toMatch(/\/admin_manage_institutions\/institutions\/([12])/)
     })
   })
 })
