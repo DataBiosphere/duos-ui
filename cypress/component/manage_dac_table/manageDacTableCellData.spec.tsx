@@ -162,8 +162,8 @@ describe('ManageDacTableCellData Actions Tests', () => {
       )
 
       // Should have correct href for RADAR management
-      cy.get('a[href*="/manage_radar/123"]').should('exist')
-      cy.get('img.radar-icon').parent().should('have.attr', 'href').and('include', '/manage_radar/123')
+      cy.get('a[href*="/manage_dac/123"]').should('exist')
+      cy.get('img.radar-icon').parent().should('have.attr', 'href').and('include', '/manage_dac/123')
     })
   })
 
