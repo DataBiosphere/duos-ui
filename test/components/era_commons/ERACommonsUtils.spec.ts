@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import * as ERACommonsUtils from 'src/components/era_commons/ERACommonsUtils'
 import { DuosUser } from 'src/types/model'
 
@@ -5,11 +6,11 @@ describe('ERACommonsUtils Tests', () => {
   describe('Verify RAS is enabled', () => {
     it('nihAccountLabel', () => {
       const result = ERACommonsUtils.nihAccountLabel()
-      expect(result).to.eq('RAS')
+      expect(result).toBe('RAS')
     })
     it('nihAccountInstructions', () => {
       const result = ERACommonsUtils.nihAccountInstructions()
-      expect(result).to.eq('https://datascience.nih.gov/researcher-auth-service-initiative')
+      expect(result).toBe('https://datascience.nih.gov/researcher-auth-service-initiative')
     })
   })
 
@@ -33,7 +34,7 @@ describe('ERACommonsUtils Tests', () => {
 
       const result = ERACommonsUtils.extractEraAuthenticationState(user)
 
-      cy.wrap(result).should('deep.equal', {
+      expect(result).toEqual({
         isAuthorized: true,
         expirationCount: 30,
         nihValid: true,
@@ -52,8 +53,8 @@ describe('ERACommonsUtils Tests', () => {
 
       const result = ERACommonsUtils.extractEraAuthenticationState(user)
 
-      expect(result.isAuthorized).to.eq(false)
-      expect(result.nihValid).to.eq(false)
+      expect(result.isAuthorized).toBe(false)
+      expect(result.nihValid).toBe(false)
     })
 
     it('returns invalid state when authorization is expired', () => {
@@ -67,9 +68,9 @@ describe('ERACommonsUtils Tests', () => {
 
       const result = ERACommonsUtils.extractEraAuthenticationState(user)
 
-      expect(result.isAuthorized).to.eq(true)
-      expect(result.expirationCount).to.eq(-1)
-      expect(result.nihValid).to.eq(false)
+      expect(result.isAuthorized).toBe(true)
+      expect(result.expirationCount).toBe(-1)
+      expect(result.nihValid).toBe(false)
     })
 
     it('handles missing properties gracefully', () => {
@@ -82,7 +83,7 @@ describe('ERACommonsUtils Tests', () => {
 
       const result = ERACommonsUtils.extractEraAuthenticationState(user)
 
-      cy.wrap(result).should('deep.equal', {
+      expect(result).toEqual({
         isAuthorized: false,
         expirationCount: 0,
         nihValid: false,
@@ -100,7 +101,7 @@ describe('ERACommonsUtils Tests', () => {
 
       const result = ERACommonsUtils.extractEraAuthenticationState(user)
 
-      cy.wrap(result).should('deep.equal', {
+      expect(result).toEqual({
         isAuthorized: false,
         expirationCount: 0,
         nihValid: false,
@@ -118,7 +119,7 @@ describe('ERACommonsUtils Tests', () => {
 
       const result = ERACommonsUtils.extractEraAuthenticationState(user)
 
-      cy.wrap(result).should('deep.equal', {
+      expect(result).toEqual({
         isAuthorized: true,
         expirationCount: 0,
         nihValid: false,
