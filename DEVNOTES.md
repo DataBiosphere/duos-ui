@@ -77,6 +77,24 @@ docker compose up -d
 
 Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running under docker.
 
+### Environment variables
+
+The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up`. The required variables are:
+
+```properties
+# Fastify session
+DUOS_SESSION_SECRET=          # random base64 string, e.g.: openssl rand -base64 32
+
+# PostgreSQL connection
+DUOS_DB_HOST=                 # hostname of the Postgres server (e.g. db or a Cloud SQL proxy)
+DUOS_DB_NAME=                 # database name
+DUOS_DB_PORT=5432             # defaults to 5432 if omitted
+DUOS_DB_USER=                 # database user
+DUOS_DB_PASSWORD=             # database password
+```
+
+`NODE_ENV`, `PORT`, and `FASTIFY_LOG_LEVEL` can be overridden at the shell level when running `docker compose up` but have sensible defaults and do not need to be in `.env.local`.
+
 # Testing
 
 ## Cypress Tests
