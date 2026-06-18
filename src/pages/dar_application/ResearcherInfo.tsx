@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Alert } from 'src/components/Alert'
 import ERACommons from 'src/components/era_commons/ERACommons'
 import CollaboratorList from './collaborator/CollaboratorList'
@@ -9,7 +9,9 @@ import { nihAccountLabel, nihAccountInstructions } from 'src/components/era_comm
 import {
   ERACommonsDisplay,
 } from 'src/components/era_commons/ERACommonsDisplay'
-import { CombinedDataAccessRequest, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+import { CombinedDataAccessRequest, DuosUser, SigningOfficialUserWithData, SimplifiedDuosUser } from 'src/types/model'
+import { User } from 'src/libs/ajax/User'
+import SigningOfficialReadOnlyCard from 'src/components/SigningOfficialReadOnlyCard'
 import { ValidationError } from './FormValidationState'
 
 interface FieldChange {
@@ -96,6 +98,20 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
     }
     return !isNil(researcher.libraryCard)
   }, [researcher])
+
+  const [selectedSOWithData, setSelectedSOWithData] = useState<SigningOfficialUserWithData | undefined>(undefined)
+
+  useEffect(() => {
+    if (!readOnlyMode || !researcher?.institutionId || !formData.signingOfficialEmail) {
+      return
+    }
+    User.getSOsForInstitution(researcher.institutionId).then((sos) => {
+      const match = sos.find(so => so.email === formData.signingOfficialEmail)
+      setSelectedSOWithData(match)
+    }).catch(() => {
+      // Leave selectedSOWithData undefined; the disabled FormField fallback will still render
+    })
+  }, [readOnlyMode, researcher?.institutionId, formData.signingOfficialEmail])
 
   const anvilUseYesNoUndefined = (anvilUse: boolean | undefined): string | undefined => {
     if (anvilUse === true) return 'yes'
@@ -254,30 +270,54 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
         </div>
 
         <div className="dar-application-row">
-          <FormField
-            id="signingOfficial"
-            type={FormFieldTypes.SELECT}
-            description="I certify that the individual listed below is my Institutional Signing official"
-            title="1.6 Institutional Signing Official"
-            titleStyle={titleStyle}
-            validators={[FormValidators.REQUIRED]}
-            ariaLevel={ariaLevel + 1}
-            defaultValue={{
-              displayText: formData.signingOfficial,
-              email: formData.signingOfficialEmail,
-            }}
-            validation={validation.signingOfficial}
-            onValidationChange={onValidationChange}
-            disabled={readOnlyMode}
-            onChange={({ key, value: { displayText, email } }: { key: string, value: { displayText: string, email?: string } }) => {
-              formFieldChange({ key, value: displayText })
-              formFieldChange({ key: 'signingOfficialEmail', value: email })
-            }}
-            selectOptions={(allSigningOfficials?.map((so: SimplifiedDuosUser) => {
-              const displayText = formatSOString(so.displayName, so.email)
-              return { displayText, email: so.email }
-            }) || [''])}
-          />
+          {readOnlyMode
+            ? (
+                <div>
+                  <h3 style={titleStyle}>1.6 Institutional Signing Official</h3>
+                  <p>I certify that the individual listed below is my Institutional Signing official</p>
+                  {selectedSOWithData
+                    ? (
+                        <SigningOfficialReadOnlyCard
+                          name={selectedSOWithData.displayName}
+                          email={selectedSOWithData.email}
+                          institutionName={selectedSOWithData.institutionName}
+                          externalProfiles={selectedSOWithData.userData?.externalProfiles}
+                        />
+                      )
+                    : formData.signingOfficial && (
+                      <SigningOfficialReadOnlyCard
+                        name={formData.signingOfficial}
+                        email={formData.signingOfficialEmail ?? ''}
+                      />
+                    )}
+                </div>
+              )
+            : (
+                <FormField
+                  id="signingOfficial"
+                  type={FormFieldTypes.SELECT}
+                  description="I certify that the individual listed below is my Institutional Signing official"
+                  title="1.6 Institutional Signing Official"
+                  titleStyle={titleStyle}
+                  validators={[FormValidators.REQUIRED]}
+                  ariaLevel={ariaLevel + 1}
+                  defaultValue={{
+                    displayText: formData.signingOfficial,
+                    email: formData.signingOfficialEmail,
+                  }}
+                  validation={validation.signingOfficial}
+                  onValidationChange={onValidationChange}
+                  disabled={false}
+                  onChange={({ key, value: { displayText, email } }: { key: string, value: { displayText: string, email?: string } }) => {
+                    formFieldChange({ key, value: displayText })
+                    formFieldChange({ key: 'signingOfficialEmail', value: email })
+                  }}
+                  selectOptions={(allSigningOfficials?.map((so: SimplifiedDuosUser) => {
+                    const displayText = formatSOString(so.displayName, so.email)
+                    return { displayText, email: so.email }
+                  }) || [''])}
+                />
+              )}
         </div>
 
         <div className="dar-application-row">
