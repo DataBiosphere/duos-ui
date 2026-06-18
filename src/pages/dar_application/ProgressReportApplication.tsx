@@ -198,7 +198,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
   const isCloseoutReview = () => {
     const user = Storage.getCurrentUser()
     const isSameUserId = user.userId === dar.closeoutSupplement?.signingOfficialId
-    const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined
+    const isCloseoutApproved = dar.approvingSigningOfficialApprovedDate !== undefined
     return readOnlyMode
       && (
         (user.isSigningOfficial && isSameUserId && !isCloseoutApproved)

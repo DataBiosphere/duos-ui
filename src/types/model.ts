@@ -708,6 +708,8 @@ export interface DarCollectionSummary {
   referenceIds: string[]
   requiresSOApproval: boolean
   researcherName: string
+  soApproverId?: number
+  soApproverTimestamp?: number
   status: string
   submissionDate: number
 }
@@ -729,8 +731,8 @@ export interface DataAccessRequest {
   datasetIds: number[]
   elections: Record<number, Election>
   eraCommonsId: string
-  closeoutSigningOfficialApprovedDate?: number
-  closeoutSigningOfficialApprovedUserId?: number
+  approvingSigningOfficialApprovedDate?: number
+  approvingSigningOfficialUserId?: number
 }
 
 export interface DataAccessRequestData {
