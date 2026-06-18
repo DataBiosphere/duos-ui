@@ -1,17 +1,19 @@
+import { describe, it, expect } from 'vitest'
 import {
-  asIdAndDisplayText, getFormattedName,
+  asIdAndDisplayText,
+  getFormattedName,
   SelectOptionWithKeyNameAndAbbreviation,
-} from '../../../src/components/forms/SelectOptionInterface'
+} from 'src/components/forms/SelectOptionInterface'
 
 describe('SelectOptions tests', () => {
   describe('getFormattedName tests', () => {
     it('should render expected name when key, name are present ', () => {
       const entry: SelectOptionWithKeyNameAndAbbreviation = { key: 'en', name: 'Entry' }
-      expect(getFormattedName(entry)).to.be.equal('Entry')
+      expect(getFormattedName(entry)).toBe('Entry')
     })
     it('should render expected name when key, name, and abbreviation are present ', () => {
       const entry: SelectOptionWithKeyNameAndAbbreviation = { key: 'en', name: 'Entry', abbreviation: 'EN' }
-      expect(getFormattedName(entry)).to.be.equal('Entry (EN)')
+      expect(getFormattedName(entry)).toBe('Entry (EN)')
     })
   })
 
@@ -19,13 +21,13 @@ describe('SelectOptions tests', () => {
     it('test single entry in list', () => {
       const entry: SelectOptionWithKeyNameAndAbbreviation = { key: 'en', name: 'Entry', abbreviation: 'EN' }
       const entryList = asIdAndDisplayText([entry])
-      expect(entryList.length).to.be.equal(1)
-      expect(entryList[0].displayText).to.be.equal('Entry (EN)')
+      expect(entryList.length).toBe(1)
+      expect(entryList[0].displayText).toBe('Entry (EN)')
     })
 
     it('test empty entry list', () => {
       const entryList = asIdAndDisplayText([])
-      expect(entryList.length).to.be.equal(0)
+      expect(entryList.length).toBe(0)
     })
   })
 })
