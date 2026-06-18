@@ -84,6 +84,7 @@ The server reads sensitive configuration from `.env.local` in the project root (
 ```properties
 # Fastify session
 DUOS_SESSION_SECRET=          # random base64 string, e.g.: openssl rand -base64 32
+DUOS_SESSION_MAX_AGE_MS=      # cookie max-age in milliseconds (default: 28800000 = 8 hours)
 
 # PostgreSQL connection
 DUOS_DB_HOST=                 # hostname of the Postgres server (e.g. db or a Cloud SQL proxy)

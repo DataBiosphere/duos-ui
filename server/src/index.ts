@@ -29,7 +29,7 @@ export async function buildApp(): Promise<FastifyInstance> {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 8 * 60 * 60 * 1000,
+      maxAge: Number(process.env.DUOS_SESSION_MAX_AGE_MS) || 8 * 60 * 60 * 1000,
       path: '/',
     },
     saveUninitialized: false,
