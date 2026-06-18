@@ -1,4 +1,7 @@
 import React from 'react'
+import '@testing-library/jest-dom/vitest'
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import StudyAssetRow, { StudyAssetRowProps } from 'src/components/study_asset/StudyAssetRow'
 
 interface TestAsset {
@@ -46,53 +49,57 @@ describe('StudyAssetRow', () => {
     asset: sampleAsset,
     assets: [sampleAsset],
     columnsToShow: ['name', 'value'],
-    editAction: cy.stub(),
-    deleteAction: cy.stub(),
-    closeAction: cy.stub(),
-    viewAction: cy.stub(),
-    onAssetsChange: cy.stub(),
+    editAction: vi.fn(),
+    deleteAction: vi.fn(),
+    closeAction: vi.fn(),
+    viewAction: vi.fn(),
+    onAssetsChange: vi.fn(),
     disabled: false,
     AddEditComponent: TestAddEditComponent,
     SummaryComponent: TestSummaryComponent,
     addEditProps: {
       asset: sampleAsset,
-      onSave: cy.stub(),
-      onCancel: cy.stub(),
+      onSave: vi.fn(),
+      onCancel: vi.fn(),
     },
     summaryProps: {
       asset: sampleAsset,
     },
   })
 
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('renders summary component when not in edit or view mode', () => {
     const props = createDefaultProps()
-    cy.mount(<StudyAssetRow {...props} />)
-    cy.get('[data-testid="summary-component"]').should('exist')
-    cy.contains('Test Asset').should('exist')
-    cy.get('[data-testid="add-edit-component"]').should('not.exist')
+    render(<StudyAssetRow {...props} />)
+    expect(screen.getByTestId('summary-component')).toBeInTheDocument()
+    expect(screen.getByText('Test Asset')).toBeInTheDocument()
+    expect(screen.queryByTestId('add-edit-component')).not.toBeInTheDocument()
   })
 
   it('renders add/edit component when in edit mode', () => {
     const props = createDefaultProps()
-    cy.mount(<StudyAssetRow {...props} editMode={true} />)
-    cy.get('[data-testid="add-edit-component"]').should('exist')
-    cy.get('#assetName').should('have.value', 'Test Asset')
-    cy.get('[data-testid="summary-component"]').should('not.exist')
+    render(<StudyAssetRow {...props} editMode={true} />)
+    expect(screen.getByTestId('add-edit-component')).toBeInTheDocument()
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('Test Asset')
+    expect(screen.queryByTestId('summary-component')).not.toBeInTheDocument()
   })
 
   it('renders add/edit component in read-only mode when in view mode', () => {
     const props = createDefaultProps()
-    cy.mount(<StudyAssetRow {...props} viewMode={true} />)
-    cy.get('[data-testid="add-edit-component"]').should('exist')
-    cy.get('#assetName').should('be.disabled')
-    cy.contains('Save').should('be.disabled')
-    cy.get('[data-testid="summary-component"]').should('not.exist')
+    render(<StudyAssetRow {...props} viewMode={true} />)
+    expect(screen.getByTestId('add-edit-component')).toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
+    expect(screen.queryByTestId('summary-component')).not.toBeInTheDocument()
   })
 
   it('does not render add/edit component as read-only when in edit mode', () => {
     const props = createDefaultProps()
-    cy.mount(<StudyAssetRow {...props} editMode={true} />)
-    cy.get('#assetName').should('not.be.disabled')
-    cy.contains('Save').should('not.be.disabled')
+    render(<StudyAssetRow {...props} editMode={true} />)
+    expect(screen.getByRole('textbox')).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled()
   })
 })
