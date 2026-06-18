@@ -297,10 +297,10 @@ export default function DarCollectionReview(props) {
             dataUseBuckets={dataUseBuckets}
             externalCollaborators={darInfo.externalCollaborators}
             internalCollaborators={darInfo.internalCollaborators}
-            signingOfficial={darInfo.signingOfficial}
-            itDirector={darInfo.itDirector}
-            signingOfficialEmail={darInfo.signingOfficial} // todo
-            itDirectorEmail={darInfo.itDirector} // todo
+            signingOfficialName={darInfo.signingOfficial}
+            signingOfficialEmail={darInfo.signingOfficialEmail}
+            researcherInstitutionId={researcherProfile.institutionId}
+            itDirectorEmail={darInfo.itDirector}
             internalLabStaff={darInfo.labCollaborators}
             anvilStorage={darInfo.anvilUse}
             localComputing={darInfo.localUse}

@@ -314,6 +314,7 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
         <DarCloseout
           readOnly={readOnlyMode}
           datasets={datasets}
+          researcherInstitutionId={researcher.institutionId}
           formState={formState}
           onFormChange={onFormChange}
           validation={formValidation.darErrors}

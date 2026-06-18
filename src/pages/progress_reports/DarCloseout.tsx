@@ -4,11 +4,13 @@ import { FormState, FormStateKey, ValidFormState } from 'src/pages/progress_repo
 import { DarErrors, ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
 import { User } from 'src/libs/ajax/User'
-import { Dataset, SimplifiedDuosUser } from 'src/types/model'
+import { Dataset, SigningOfficialUserWithData, SimplifiedDuosUser } from 'src/types/model'
+import SigningOfficialReadOnlyCard from 'src/components/SigningOfficialReadOnlyCard'
 
 interface DarCloseoutProps {
   readonly readOnly: boolean
   readonly datasets: Dataset[]
+  readonly researcherInstitutionId?: number
   formState: FormState
   onFormChange: (newState: Partial<FormState>) => void
   onValidationChange?: (validationState: { key: string, validation: ValidationError }) => void
@@ -16,10 +18,11 @@ interface DarCloseoutProps {
 }
 
 export default function DarCloseout(props: Readonly<DarCloseoutProps>): React.JSX.Element {
-  const { readOnly, datasets, formState, onFormChange, onValidationChange, validation } = props
+  const { readOnly, datasets, researcherInstitutionId, formState, onFormChange, onValidationChange, validation } = props
 
   const [allSigningOfficials, setAllSigningOfficials] = useState<SimplifiedDuosUser[]>([])
   const [defaultSigningOfficial, setDefaultSigningOfficial] = useState<SimplifiedDuosUser>()
+  const [selectedSOWithData, setSelectedSOWithData] = useState<SigningOfficialUserWithData | undefined>()
 
   const displaySigningOfficial = (so: SimplifiedDuosUser) => {
     const { displayName, email } = so
@@ -29,15 +32,24 @@ export default function DarCloseout(props: Readonly<DarCloseoutProps>): React.JS
 
   useEffect(() => {
     const init = async () => {
-      const signingOfficials = await User.getSOsForCurrentUser()
-      setAllSigningOfficials(signingOfficials)
-      const closeoutSigningOfficial = signingOfficials.find(so => so.userId === formState.closeoutSigningOfficial?.userId)
-      if (closeoutSigningOfficial !== undefined) {
-        setDefaultSigningOfficial(displaySigningOfficial(closeoutSigningOfficial))
+      if (readOnly) {
+        const sos = researcherInstitutionId
+          ? await User.getSOsForInstitution(researcherInstitutionId)
+          : await User.getSOsForCurrentUser()
+        const match = sos.find(so => so.userId === formState.closeoutSigningOfficial?.userId)
+        setSelectedSOWithData(match)
+      }
+      else {
+        const signingOfficials = await User.getSOsForCurrentUser()
+        setAllSigningOfficials(signingOfficials)
+        const closeoutSigningOfficial = signingOfficials.find(so => so.userId === formState.closeoutSigningOfficial?.userId)
+        if (closeoutSigningOfficial !== undefined) {
+          setDefaultSigningOfficial(displaySigningOfficial(closeoutSigningOfficial))
+        }
       }
     }
     init()
-  }, [formState.closeoutSigningOfficial?.userId])
+  }, [readOnly, researcherInstitutionId, formState.closeoutSigningOfficial?.userId])
 
   return (
     <div data-cy="dar-closeout">
@@ -73,21 +85,35 @@ export default function DarCloseout(props: Readonly<DarCloseoutProps>): React.JS
             <div data-cy="dar-closeout-details">
 
               <div style={{ marginTop: '10px' }}>
-                <FormField
-                  id={FormStateKey.CLOSEOUT_SIGNING_OFFICIAL}
-                  type={FormFieldTypes.SELECT}
-                  description="I certify that the individual listed below is my institutional Signing Official"
-                  validators={[FormValidators.REQUIRED]}
-                  disabled={readOnly}
-                  onChange={({ key, value }: ValidFormState) => {
-                    onFormChange({
-                      [key]: value,
-                    } as Partial<FormState>)
-                  }}
-                  defaultValue={defaultSigningOfficial}
-                  selectOptions={(allSigningOfficials?.map(so => displaySigningOfficial(so)) ?? [''])}
-                  validation={validation?.closeoutSigningOfficial}
-                />
+                {readOnly
+                  ? (
+                      <div>
+                        <p>I certify that the individual listed below is my institutional Signing Official</p>
+                        <SigningOfficialReadOnlyCard
+                          name={selectedSOWithData?.displayName ?? ''}
+                          email={selectedSOWithData?.email ?? ''}
+                          institutionName={selectedSOWithData?.institutionName}
+                          externalProfiles={selectedSOWithData?.userData?.externalProfiles}
+                        />
+                      </div>
+                    )
+                  : (
+                      <FormField
+                        id={FormStateKey.CLOSEOUT_SIGNING_OFFICIAL}
+                        type={FormFieldTypes.SELECT}
+                        description="I certify that the individual listed below is my institutional Signing Official"
+                        validators={[FormValidators.REQUIRED]}
+                        disabled={false}
+                        onChange={({ key, value }: ValidFormState) => {
+                          onFormChange({
+                            [key]: value,
+                          } as Partial<FormState>)
+                        }}
+                        defaultValue={defaultSigningOfficial}
+                        selectOptions={(allSigningOfficials?.map(so => displaySigningOfficial(so)) ?? [''])}
+                        validation={validation?.closeoutSigningOfficial}
+                      />
+                    )}
               </div>
 
               <p>
