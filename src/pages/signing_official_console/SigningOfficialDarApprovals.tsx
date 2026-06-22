@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { Notifications, USER_ROLES } from 'src/libs/utils'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import SearchBar from 'src/components/SearchBar'
+import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
@@ -11,10 +12,18 @@ import { DarCollectionSummary } from 'src/types/model'
 
 export default function SigningOfficialDarApprovals(): React.JSX.Element {
   usePageTitle('My DAR Approvals')
-  const [collectionList, setCollectionList] = useState<DarCollectionSummary[]>([])
+  const [collections, setCollections] = useState<DarCollectionSummary[]>([])
+  const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
+  const [searchText, setSearchText] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const filterFn = useMemo(() => getSearchFilterFunctions().darCollections, [])
 
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.SIGNING_OFFICIAL)
+
+  const handleSearchChange = useCallback((searchTerms: string) => {
+    setSearchText(searchTerms)
+    searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList)
+  }, [collections, filterFn])
 
   useEffect(() => {
     const init = async (): Promise<void> => {
@@ -23,7 +32,8 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
         const collectionList = (await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial))
           .filter((collection: DarCollectionSummary) =>
             collection.requiresSOApproval || collection.actions.includes('Review_Progress_Report'))
-        setCollectionList(collectionList)
+        setCollections(collectionList)
+        setFilteredList(collectionList)
         setIsLoading(false)
       }
       catch {
@@ -35,17 +45,16 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
   }, [])
 
   const updateCollections = useCallback((updatedCollection: DarCollectionSummary) => {
-    setCollectionList((prevList) => {
+    setCollections((prevList) => {
       const index = prevList.findIndex(c => c.darCollectionId === updatedCollection.darCollectionId)
       if (index === -1) return prevList
-      if (!updatedCollection.requiresSOApproval) {
-        return prevList.filter((_, i) => i !== index)
-      }
-      const newList = [...prevList]
-      newList[index] = updatedCollection
+      const newList = !updatedCollection.requiresSOApproval
+        ? prevList.filter((_, i) => i !== index)
+        : [...prevList.slice(0, index), updatedCollection, ...prevList.slice(index + 1)]
+      searchOnFilteredList(searchText, newList, filterFn, setFilteredList)
       return newList
     })
-  }, [])
+  }, [searchText, filterFn])
 
   const approveCollection = approveCollectionFn({
     updateCollections,
@@ -60,20 +69,21 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
           description="Your Institution's Data Access Approvals: Records from all current data access approvals"
         />
       </div>
-      <div className="signing-official-tabs">
-        {responsiveColumns.length > 0 && (
-          <DarCollectionTable
-            key="so-dar-table"
-            collections={collectionList}
-            columns={responsiveColumns}
-            isLoading={isLoading}
-            cancelCollection={null}
-            reviseCollection={null}
-            approveCollection={approveCollection}
-            consoleType={consoleTypes.SIGNING_OFFICIAL}
-          />
-        )}
+      <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
+        <SearchBar handleSearchChange={handleSearchChange} />
       </div>
+      {responsiveColumns.length > 0 && (
+        <DarCollectionTable
+          key="so-dar-table"
+          collections={filteredList}
+          columns={responsiveColumns}
+          isLoading={isLoading}
+          cancelCollection={null}
+          reviseCollection={null}
+          approveCollection={approveCollection}
+          consoleType={consoleTypes.SIGNING_OFFICIAL}
+        />
+      )}
     </div>
   )
 }

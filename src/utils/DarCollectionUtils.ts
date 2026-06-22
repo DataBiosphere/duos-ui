@@ -245,7 +245,7 @@ export const updateCollectionFn = ({
   setFilteredList,
 }: {
   collections: DarCollectionSummary[]
-  filterFn: (searchText: string | undefined, collections: DarCollectionSummary[]) => DarCollectionSummary[]
+  filterFn: (searchText: string, collections: DarCollectionSummary[]) => DarCollectionSummary[]
   searchText?: string
   setCollections: (collections: DarCollectionSummary[]) => void
   setFilteredList: (collections: DarCollectionSummary[]) => void
@@ -262,7 +262,7 @@ export const updateCollectionFn = ({
     else {
       const collectionsCopy = cloneDeep(collections)
       collectionsCopy[targetIndex] = updatedCollection
-      const updatedFilteredList = filterFn(searchText, collectionsCopy)
+      const updatedFilteredList = filterFn(searchText ?? '', collectionsCopy)
       setCollections(collectionsCopy)
       setFilteredList(updatedFilteredList)
     }
