@@ -106,7 +106,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
   const updateInstitution = async (updatedInstitution: InstitutionDetailsUpdate) => {
     try {
       setSaving(true)
-      const resp = await InstitutionAPI.patchInstitution(institutionId, updatedInstitution)
+      const resp = await InstitutionAPI.patchInstitution(Number(institutionId ?? 0), updatedInstitution)
       // NB: we need to preserve signing officials in state on update since they're not returned by the patch endpoint
       setInstitution((prevInstitution) => {
         if (!prevInstitution) return resp
