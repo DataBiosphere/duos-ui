@@ -17,7 +17,7 @@ export const NotificationService = {
 
   /**
    * Get the raw banner content from GCS
-   * @returns {Promise<JSON>}
+   * @returns {Promise<Banner[]>}
    */
   getBanners: async (): Promise<Banner[]> => {
     const env = await Config.getEnv()
@@ -29,8 +29,8 @@ export const NotificationService = {
   },
 
   /**
-   * Get the raw banner content from GCS
-   * @returns {Promise<JSON>}
+   * Get only the active banners from GCS
+   * @returns {Promise<Banner[]>}
    */
   getActiveBanners: async (): Promise<Banner[]> => {
     try {
@@ -43,9 +43,9 @@ export const NotificationService = {
   },
 
   /**
-   * Get an individual banner by its id, and active status == true
-   * @param id
-   * @returns {Promise<JSON>}
+   * Get an individual active banner by its id
+   * @param {string} id - the banner id to look up
+   * @returns {Promise<Banner | undefined | null>}
    */
   getBannerObjectById: async (id: string): Promise<Banner | undefined | null> => {
     try {
