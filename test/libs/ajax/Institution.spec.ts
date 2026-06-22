@@ -3,7 +3,7 @@ import { Config } from 'src/libs/config'
 import { fetchGet, fetchPost, fetchPut, fetchPatch, fetchDelete } from 'src/libs/ajax/fetchAdapter'
 import { Institution } from 'src/libs/ajax/Institution'
 import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
-import type { InstitutionInterface } from 'src/types/model'
+import type { DuosUser, InstitutionInterface } from 'src/types/model'
 
 vi.mock('src/libs/config', () => ({
   Config: {
@@ -31,7 +31,7 @@ const headers = {
 const mockInstitution: InstitutionInterface = {
   id: 1,
   name: 'Broad Institute',
-  createUser: { userId: 10, displayName: 'Admin', email: 'admin@example.org' },
+  createUser: { userId: 10, displayName: 'Admin', email: 'admin@example.org' } as DuosUser,
   createUserId: 10,
   createDate: '2024-01-01T00:00:00Z',
   signingOfficials: [],
