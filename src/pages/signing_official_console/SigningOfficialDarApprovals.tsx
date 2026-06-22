@@ -48,9 +48,9 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
     setCollections((prevList) => {
       const index = prevList.findIndex(c => c.darCollectionId === updatedCollection.darCollectionId)
       if (index === -1) return prevList
-      const newList = !updatedCollection.requiresSOApproval
-        ? prevList.filter((_, i) => i !== index)
-        : [...prevList.slice(0, index), updatedCollection, ...prevList.slice(index + 1)]
+      const newList = updatedCollection.requiresSOApproval
+        ? [...prevList.slice(0, index), updatedCollection, ...prevList.slice(index + 1)]
+        : prevList.filter((_, i) => i !== index)
       searchOnFilteredList(searchText, newList, filterFn, setFilteredList)
       return newList
     })
