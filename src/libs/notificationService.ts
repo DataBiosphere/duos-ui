@@ -18,8 +18,8 @@ export const NotificationService = {
   getBanners: async (): Promise<Banner[]> => {
     const env = await Config.getEnv()
     const url = env === 'local'
-      ? gcs + '/dev_' + bannerFileName
-      : gcs + '/' + env + '_' + bannerFileName
+      ? `${gcs}/dev_${bannerFileName}`
+      : `${gcs}/${env}_${bannerFileName}`
     const res = await fetchGet<Banner[]>(url)
     return res.data
   },
@@ -29,7 +29,7 @@ export const NotificationService = {
       const banners = await NotificationService.getBanners()
       return filter(banners, { active: true })
     }
-    catch (_error) {
+    catch {
       return []
     }
   },
@@ -41,7 +41,7 @@ export const NotificationService = {
         return find(banners, { active: true, id })
       }
     }
-    catch (_error) {
+    catch {
       return null
     }
   },
