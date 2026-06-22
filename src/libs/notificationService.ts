@@ -17,10 +17,9 @@ export const NotificationService = {
 
   getBanners: async (): Promise<Banner[]> => {
     const env = await Config.getEnv()
-    const url =
-      env === 'local'
-        ? gcs + '/dev_' + bannerFileName
-        : gcs + '/' + env + '_' + bannerFileName
+    const url = env === 'local'
+      ? gcs + '/dev_' + bannerFileName
+      : gcs + '/' + env + '_' + bannerFileName
     const res = await fetchGet<Banner[]>(url)
     return res.data
   },
