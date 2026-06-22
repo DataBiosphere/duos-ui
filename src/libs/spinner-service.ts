@@ -1,15 +1,22 @@
 // TODO: Delete this class
 // Deprecated
+interface Spinner {
+  name: string
+  show: boolean
+}
+
 export class SpinnerService {
+  private spinnerCache: Set<Spinner>
+
   constructor() {
     this.spinnerCache = new Set()
   }
 
-  _register(spinner) {
+  _register(spinner: Spinner): void {
     this.spinnerCache.add(spinner)
   }
 
-  show(spinnerName) {
+  show(spinnerName: string): void {
     this.spinnerCache.forEach((spinner) => {
       if (spinner.name === spinnerName) {
         spinner.show = true
@@ -17,12 +24,12 @@ export class SpinnerService {
     })
   }
 
-  showAll() {
-    this.spinnerCache.forEach(spinner => spinner.show = true)
+  showAll(): void {
+    this.spinnerCache.forEach((spinner) => (spinner.show = true))
   }
 
-  hideAll() {
-    this.spinnerCache.forEach(spinner => spinner.show = false)
+  hideAll(): void {
+    this.spinnerCache.forEach((spinner) => (spinner.show = false))
   }
 }
 
