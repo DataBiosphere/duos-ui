@@ -25,11 +25,11 @@ export class SpinnerService {
   }
 
   showAll(): void {
-    this.spinnerCache.forEach((spinner) => (spinner.show = true))
+    this.spinnerCache.forEach(spinner => (spinner.show = true))
   }
 
   hideAll(): void {
-    this.spinnerCache.forEach((spinner) => (spinner.show = false))
+    this.spinnerCache.forEach(spinner => (spinner.show = false))
   }
 }
 

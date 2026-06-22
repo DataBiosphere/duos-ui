@@ -45,11 +45,11 @@ describe('SpinnerService', () => {
         { name: 'b', show: false },
         { name: 'c', show: false },
       ]
-      spinners.forEach((s) => service._register(s))
+      spinners.forEach(s => service._register(s))
 
       service.showAll()
 
-      spinners.forEach((s) => expect(s.show).toBe(true))
+      spinners.forEach(s => expect(s.show).toBe(true))
     })
   })
 
@@ -61,11 +61,11 @@ describe('SpinnerService', () => {
         { name: 'b', show: true },
         { name: 'c', show: true },
       ]
-      spinners.forEach((s) => service._register(s))
+      spinners.forEach(s => service._register(s))
 
       service.hideAll()
 
-      spinners.forEach((s) => expect(s.show).toBe(false))
+      spinners.forEach(s => expect(s.show).toBe(false))
     })
   })
 
