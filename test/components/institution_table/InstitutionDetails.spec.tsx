@@ -7,6 +7,7 @@ import { InstitutionDetails } from 'src/components/institution_table/Institution
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { Notifications } from 'src/libs/utils'
 import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode'
+import type { DuosUser, InstitutionInterface } from 'src/types/model'
 
 vi.mock('src/libs/ajax/Institution', () => ({
   Institution: {
@@ -25,25 +26,22 @@ vi.mock('src/libs/utils', () => ({
 }))
 
 describe('Institution Details Tests', () => {
-  const mockInstitution = {
+  const mockInstitution: InstitutionInterface = {
     id: 123,
     name: 'Broad Institute',
     domains: ['broadinstitute.org', 'broad.mit.edu'],
     signingOfficials: [
       {
-        userId: '1',
+        userId: 1,
         displayName: 'John Testerson',
         email: 'john@broad.mit.edu',
       },
     ],
     createDate: '2023-01-01',
     updateDate: '2023-02-01',
-    createUser: {
-      displayName: 'Admin User',
-    },
-    updateUser: {
-      displayName: 'Admin User',
-    },
+    createUserId: 1,
+    createUser: { displayName: 'Admin User' } as DuosUser,
+    updateUser: { displayName: 'Admin User' } as DuosUser,
   }
 
   beforeEach(() => {
@@ -126,7 +124,7 @@ describe('Institution Details Tests', () => {
       fireEvent.click(screen.getByRole('button', { name: /Save/i }))
     })
 
-    expect(InstitutionAPI.patchInstitution).toHaveBeenCalledWith('123', {
+    expect(InstitutionAPI.patchInstitution).toHaveBeenCalledWith(123, {
       name: 'Broad Institute of MIT & Harvard',
       domains: mockInstitution.domains,
     })
@@ -164,7 +162,7 @@ describe('Institution Details Tests', () => {
     vi.mocked(InstitutionAPI.postInstitution).mockImplementation((institution) => {
       expect(institution.name).toBe('The Broad Institute')
       expect(institution.domains).toEqual(['broadinstitute.org', 'broad.mit.edu'])
-      return Promise.resolve({ ...newInstitution, id: 999 })
+      return Promise.resolve({ ...newInstitution, id: 999 } as InstitutionInterface)
     })
 
     await act(async () => {
@@ -218,7 +216,7 @@ describe('Institution Details Tests', () => {
       { id: 1, name: 'Broad Institute', domains: ['broadinstitute.org'] },
       { id: 2, name: 'MIT', domains: ['mit.edu'] },
       { id: 3, name: 'Harvard University', domains: ['harvard.edu'] },
-    ]
+    ] as InstitutionInterface[]
 
     it('should show error when institution name is empty', async () => {
       vi.mocked(InstitutionAPI.list).mockResolvedValue(existingInstitutions)
@@ -449,7 +447,7 @@ describe('Institution Details Tests', () => {
         const institutionsWithSpaces = [
           { id: 1, name: 'Research University', domains: ['ru.edu'] },
           { id: 2, name: 'MIT', domains: ['mit.edu'] },
-        ]
+        ] as InstitutionInterface[]
 
         vi.mocked(InstitutionAPI.list).mockResolvedValue(institutionsWithSpaces)
         await act(async () => {
@@ -496,7 +494,7 @@ describe('Institution Details Tests', () => {
         const institutionsWithSimilarNames = [
           { id: 1, name: 'University Research Center', domains: ['urc.edu'] },
           { id: 2, name: 'MIT', domains: ['mit.edu'] },
-        ]
+        ] as InstitutionInterface[]
 
         vi.mocked(InstitutionAPI.list).mockResolvedValue(institutionsWithSimilarNames)
         await act(async () => {
