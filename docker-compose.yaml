@@ -22,9 +22,14 @@ services:
     container_name: duos
     ports:
       - ${PORT:-8080}:${PORT:-8080}
+    env_file:
+      - path: .env.local
+        required: false
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT:-8080}
+      FASTIFY_LOG_LEVEL: ${FASTIFY_LOG_LEVEL:-debug}
+      DUOS_SESSION_MAX_AGE_MS: ${DUOS_SESSION_MAX_AGE_MS:-}
     volumes:
       - ./public/config.json:/usr/src/app/build/config.json
     command: ["node", "server/dist/index.js"]
