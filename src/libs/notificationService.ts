@@ -15,6 +15,10 @@ export interface Banner {
 
 export const NotificationService = {
 
+  /**
+   * Get the raw banner content from GCS
+   * @returns {Promise<JSON>}
+   */
   getBanners: async (): Promise<Banner[]> => {
     const env = await Config.getEnv()
     const url = env === 'local'
@@ -24,6 +28,10 @@ export const NotificationService = {
     return res.data
   },
 
+  /**
+   * Get the raw banner content from GCS
+   * @returns {Promise<JSON>}
+   */
   getActiveBanners: async (): Promise<Banner[]> => {
     try {
       const banners = await NotificationService.getBanners()
@@ -34,6 +42,11 @@ export const NotificationService = {
     }
   },
 
+  /**
+   * Get an individual banner by its id, and active status == true
+   * @param id
+   * @returns {Promise<JSON>}
+   */
   getBannerObjectById: async (id: string): Promise<Banner | undefined | null> => {
     try {
       const banners = await NotificationService.getBanners()
