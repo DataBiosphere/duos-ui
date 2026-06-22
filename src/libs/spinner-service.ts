@@ -1,12 +1,10 @@
-// TODO: Delete this class
-// Deprecated
 interface Spinner {
   name: string
   show: boolean
 }
 
 export class SpinnerService {
-  private spinnerCache: Set<Spinner>
+  private readonly spinnerCache: Set<Spinner>
 
   constructor() {
     this.spinnerCache = new Set()
@@ -22,14 +20,6 @@ export class SpinnerService {
         spinner.show = true
       }
     })
-  }
-
-  showAll(): void {
-    this.spinnerCache.forEach(spinner => (spinner.show = true))
-  }
-
-  hideAll(): void {
-    this.spinnerCache.forEach(spinner => (spinner.show = false))
   }
 }
 
