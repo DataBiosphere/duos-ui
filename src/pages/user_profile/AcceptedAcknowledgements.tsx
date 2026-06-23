@@ -85,8 +85,8 @@ export default function AcceptedAcknowledgements() {
                 <p>No Accepted Terms & Policies Found</p>
               </div>
             )
-          : acceptedAcknowledgements.map((value, index) => (
-              <Acknowledgment key={index} value={value} />
+          : acceptedAcknowledgements.map(value => (
+              <Acknowledgment key={`${value.name}-${value.attestedTime}`} value={value} />
             ))
       }
     </div>
