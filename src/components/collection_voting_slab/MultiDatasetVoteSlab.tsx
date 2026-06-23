@@ -171,6 +171,10 @@ export default function MultiDatasetVoteSlab({
   const [dacVotes, setDacVotes] = useState<Vote[]>([])
   const [isDMI, setIsDMI] = useState(false)
   const { algorithmResult } = bucket
+  // Role labels are only shown when the user has both member and chair votes so the vote blocks can be quickly
+  // distinguished from each other. If the user only has one type of vote, the label is not shown to reduce visual
+  // clutter.
+  const showRoleLabels = !isEmpty(memberVotes) && !isEmpty(chairVotes)
 
   const getMemberVoteSectionTitle = () => {
     if (adminPage) return 'DAC Member Votes'
@@ -212,14 +216,14 @@ export default function MultiDatasetVoteSlab({
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
                 {!isEmpty(memberVotes) && (
                   <>
-                    {!isEmpty(chairVotes) && <div style={roleLabel}>Member</div>}
+                    {showRoleLabels && <div style={roleLabel}>Member</div>}
                     <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
                     <VoteInfoSubsection currentUserVotes={memberVotes} bucket={bucket} isChair={false} isApprovalDisabled={false} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
                   </>
                 )}
                 {!isEmpty(chairVotes) && (
                   <>
-                    {!isEmpty(memberVotes) && <div style={roleLabel}>Chair</div>}
+                    {showRoleLabels && <div style={roleLabel}>Chair</div>}
                     <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
                     <VoteInfoSubsection currentUserVotes={chairVotes} bucket={bucket} isChair={true} isApprovalDisabled={isApprovalDisabled} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
                   </>
