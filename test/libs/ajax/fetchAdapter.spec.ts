@@ -1,3 +1,4 @@
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import {
   fetchGet,
   fetchPost,
@@ -10,9 +11,39 @@ import {
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
-import { Auth } from 'src/libs/auth/auth'
+import { redirectOnLogout } from 'src/libs/auth/auth'
+import type { OidcUser } from 'src/libs/auth/oidcBroker'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import eventList from 'src/libs/events'
+
+vi.mock('src/libs/config', () => ({
+  Config: {
+    getApiUrl: vi.fn(),
+    getBardApiUrl: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/Metrics', () => ({
+  Metrics: {
+    captureEvent: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/storage', () => ({
+  Storage: {
+    getOidcUser: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/auth/auth', () => ({
+  redirectOnLogout: vi.fn(),
+}))
+
+vi.mock('src/libs/ErrorReporter', () => ({
+  ErrorReporter: {
+    report: vi.fn(),
+  },
+}))
 
 interface StubOptions {
   method?: string
@@ -22,845 +53,615 @@ interface StubOptions {
 }
 
 describe('fetchAdapter - Fetch methods', () => {
-  let fetchStub: ReturnType<typeof cy.stub>
+  let fetchMock: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
-    cy.window().then((_win) => {
-      fetchStub = cy.stub(_win, 'fetch')
-    })
+    vi.clearAllMocks()
+    fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    vi.mocked(Config.getBardApiUrl).mockResolvedValue('https://bard.example.org')
+    vi.mocked(Config.getApiUrl).mockResolvedValue('https://consent.example.org')
+    vi.mocked(ErrorReporter.report).mockResolvedValue(undefined)
   })
 
   afterEach(() => {
-    cy.window().then(() => {
-      fetchStub.restore()
-    })
+    vi.unstubAllGlobals()
   })
 
-  it('fetchGet - should make GET request with JSON response', () => {
+  it('fetchGet - should make GET request with JSON response', async () => {
     const mockResponse = { id: 1, name: 'Test' }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet<typeof mockResponse>('/api/test').then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-      })
-    })
+    const result = await fetchGet<typeof mockResponse>('/api/test')
+    expect(result.data).toEqual(mockResponse)
   })
 
-  it('fetchGet - should handle query parameters', () => {
+  it('fetchGet - should handle query parameters', async () => {
     const mockResponse = { results: [] }
     const params: Params = { page: 1, limit: 10, active: true }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet<typeof mockResponse>('/api/items', { params }).then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-        const [url] = fetchStub.getCall(0).args
-        expect(url).to.include('page=1')
-        expect(url).to.include('limit=10')
-        expect(url).to.include('active=true')
-      })
-    })
+    const result = await fetchGet<typeof mockResponse>('/api/items', { params })
+    expect(result.data).toEqual(mockResponse)
+    const [url] = fetchMock.mock.calls[0]
+    expect(url).toContain('page=1')
+    expect(url).toContain('limit=10')
+    expect(url).toContain('active=true')
   })
 
-  it('fetchGet - should return blob when responseType is blob', () => {
-    cy.window().then((win) => {
-      const mockBlob = new win.Blob(['test data'], { type: 'text/plain' })
-      fetchStub.resolves(new win.Response(mockBlob, { status: 200 }))
+  it('fetchGet - should return blob when responseType is blob', async () => {
+    const mockBlob = new Blob(['test data'], { type: 'text/plain' })
+    fetchMock.mockResolvedValue(new Response(mockBlob, { status: 200 }))
 
-      fetchGet<Blob>('/api/file', { responseType: 'blob' }).then((result) => {
-        expect(result.data).to.be.instanceOf(win.Blob)
-      })
-    })
+    const result = await fetchGet<Blob>('/api/file', { responseType: 'blob' })
+    expect(result.data).toBeInstanceOf(Blob)
   })
 
-  it('fetchGet - should return text when content-type is text/plain', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response('Plain text response', {
-          status: 200,
-          headers: { 'content-type': 'text/plain' },
-        }),
-      )
+  it('fetchGet - should return text when content-type is text/plain', async () => {
+    fetchMock.mockResolvedValue(
+      new Response('Plain text response', {
+        status: 200,
+        headers: { 'content-type': 'text/plain' },
+      }),
+    )
 
-      fetchGet<string>('/api/text').then((result) => {
-        expect(result.data).to.equal('Plain text response')
-      })
-    })
+    const result = await fetchGet<string>('/api/text')
+    expect(result.data).toBe('Plain text response')
   })
 
-  it('fetchGet - should include credentials when specified', () => {
+  it('fetchGet - should include credentials when specified', async () => {
     const mockResponse = { authenticated: true }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet<typeof mockResponse>('/api/secure', { credentials: 'include' }).then(() => {
-        const [, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(options.credentials).to.equal('include')
-      })
-    })
+    await fetchGet<typeof mockResponse>('/api/secure', { credentials: 'include' })
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.credentials).toBe('include')
   })
 
-  it('fetchPost - should send data as JSON', () => {
+  it('fetchPost - should send data as JSON', async () => {
     const requestData = { name: 'Item', value: 42 }
     const mockResponse = { id: 1, ...requestData }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 201,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 201,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchPost<typeof mockResponse>('/api/items', requestData).then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-        const [url, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(url).to.equal('/api/items')
-        expect(options.method).to.equal('POST')
-        expect(options.body).to.equal(JSON.stringify(requestData))
-      })
-    })
+    const result = await fetchPost<typeof mockResponse>('/api/items', requestData)
+    expect(result.data).toEqual(mockResponse)
+    const [url, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(url).toBe('/api/items')
+    expect(options.method).toBe('POST')
+    expect(options.body).toBe(JSON.stringify(requestData))
   })
 
-  it('fetchPut - should update resource with data', () => {
+  it('fetchPut - should update resource with data', async () => {
     const requestData = { name: 'Updated' }
     const mockResponse = { id: 1, ...requestData }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchPut<typeof mockResponse>('/api/items/1', requestData).then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-        const [, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(options.method).to.equal('PUT')
-      })
-    })
+    const result = await fetchPut<typeof mockResponse>('/api/items/1', requestData)
+    expect(result.data).toEqual(mockResponse)
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.method).toBe('PUT')
   })
 
-  it('fetchPatch - should partially update resource', () => {
+  it('fetchPatch - should partially update resource', async () => {
     const requestData = { status: 'active' }
     const mockResponse = { id: 1, name: 'Item', ...requestData }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchPatch<typeof mockResponse>('/api/items/1', requestData).then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-        const [, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(options.method).to.equal('PATCH')
-      })
-    })
+    const result = await fetchPatch<typeof mockResponse>('/api/items/1', requestData)
+    expect(result.data).toEqual(mockResponse)
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.method).toBe('PATCH')
   })
 
-  it('fetchDelete - should delete resource', () => {
+  it('fetchDelete - should delete resource', async () => {
     const mockResponse = { success: true }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchDelete('/api/items/1').then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-        const [, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(options.method).to.equal('DELETE')
-      })
-    })
+    const result = await fetchDelete('/api/items/1')
+    expect(result.data).toEqual(mockResponse)
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.method).toBe('DELETE')
   })
 
-  it('fetchMultipart - should POST FormData without Content-Type header', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      formData.append('file', new win.Blob(['content']), 'test.txt')
+  it('fetchMultipart - should POST FormData without Content-Type header', async () => {
+    const formData = new FormData()
+    formData.append('file', new Blob(['content']), 'test.txt')
 
-      const mockResponse = { id: 1, filename: 'test.txt' }
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 201,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    const mockResponse = { id: 1, filename: 'test.txt' }
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 201,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchMultipart<typeof mockResponse>('/api/upload', formData).then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-        const [url, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(url).to.equal('/api/upload')
-        expect(options.method).to.equal('POST')
-        expect(options.body).to.be.instanceOf(win.FormData)
-        expect(options.headers?.['Content-Type']).to.equal(undefined)
-      })
-    })
+    const result = await fetchMultipart<typeof mockResponse>('/api/upload', formData)
+    expect(result.data).toEqual(mockResponse)
+    const [url, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(url).toBe('/api/upload')
+    expect(options.method).toBe('POST')
+    expect(options.body).toBeInstanceOf(FormData)
+    expect(options.headers?.['Content-Type']).toBeUndefined()
   })
 
-  it('fetchMultipart - should support PUT method', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      const mockResponse = { success: true }
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('fetchMultipart - should support PUT method', async () => {
+    const formData = new FormData()
+    const mockResponse = { success: true }
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchMultipart<typeof mockResponse>('/api/upload/1', formData, {}, 'PUT').then(() => {
-        const [, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(options.method).to.equal('PUT')
-      })
-    })
+    await fetchMultipart<typeof mockResponse>('/api/upload/1', formData, {}, 'PUT')
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.method).toBe('PUT')
   })
 
-  it('fetchMultipart - should include params in URL', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      const mockResponse = { success: true }
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('fetchMultipart - should include params in URL', async () => {
+    const formData = new FormData()
+    const mockResponse = { success: true }
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchMultipart('/api/upload', formData, { params: { tag: 'important' } }).then(() => {
-        const [url] = fetchStub.getCall(0).args
-        expect(url).to.include('tag=important')
-      })
-    })
+    await fetchMultipart('/api/upload', formData, { params: { tag: 'important' } })
+    const [url] = fetchMock.mock.calls[0]
+    expect(url).toContain('tag=important')
   })
 
-  it('should merge custom headers with defaults', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({}), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('should merge custom headers with defaults', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({}), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchPost('/api/test', { key: 'value' }, {
-        headers: { 'X-Custom': 'header' },
-      }).then(() => {
-        const [, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(options.headers?.['Content-Type']).to.equal('application/json')
-        expect(options.headers?.['X-Custom']).to.equal('header')
-      })
-    })
+    await fetchPost('/api/test', { key: 'value' }, { headers: { 'X-Custom': 'header' } })
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.headers?.['Content-Type']).toBe('application/json')
+    expect(options.headers?.['X-Custom']).toBe('header')
   })
 
-  it('should handle network errors', () => {
-    cy.window().then((win) => {
-      fetchStub.rejects(new win.TypeError('Network error'))
+  it('should handle network errors', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Network error'))
 
-      fetchGet('/api/test').then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.include('Network error on request to')
-          expect(error.message).to.include('TypeError: Network error')
-          expect(error.message).to.include('duos@duos.org')
-        },
-      )
-    })
+    const error = await fetchGet('/api/test').catch(e => e)
+    expect(error.message).toContain('Network error on request to')
+    expect(error.message).toContain('TypeError: Network error')
+    expect(error.message).toContain('duos@duos.org')
   })
 
-  it('should handle AbortError as a DOMException network error', () => {
-    cy.window().then((win) => {
-      const abortError = new win.DOMException('The user aborted a request.', 'AbortError')
-      fetchStub.rejects(abortError)
+  it('should handle AbortError as a DOMException network error', async () => {
+    const abortError = new DOMException('The user aborted a request.', 'AbortError')
+    fetchMock.mockRejectedValue(abortError)
 
-      fetchGet('/api/test').then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.include('Network error on request to')
-          expect(error.message).to.include('AbortError: The user aborted a request.')
-          expect(error.message).to.include('duos@duos.org')
-        },
-      )
-    })
+    const error = await fetchGet('/api/test').catch(e => e)
+    expect(error.message).toContain('Network error on request to')
+    expect(error.message).toContain('AbortError: The user aborted a request.')
+    expect(error.message).toContain('duos@duos.org')
   })
 
-  it('should handle DOMException (e.g. NotAllowedError) as a network error', () => {
-    cy.window().then((win) => {
-      const notAllowedError = new win.DOMException('The operation is not allowed.', 'NotAllowedError')
-      fetchStub.rejects(notAllowedError)
+  it('should handle DOMException (e.g. NotAllowedError) as a network error', async () => {
+    const notAllowedError = new DOMException('The operation is not allowed.', 'NotAllowedError')
+    fetchMock.mockRejectedValue(notAllowedError)
 
-      fetchGet('/api/test').then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.include('Network error on request to')
-          expect(error.message).to.include('NotAllowedError: The operation is not allowed.')
-          expect(error.message).to.include('duos@duos.org')
-        },
-      )
-    })
+    const error = await fetchGet('/api/test').catch(e => e)
+    expect(error.message).toContain('Network error on request to')
+    expect(error.message).toContain('NotAllowedError: The operation is not allowed.')
+    expect(error.message).toContain('duos@duos.org')
   })
 
-  it('should include help desk message for unknown thrown errors', () => {
-    cy.window().then((_win) => {
-      fetchStub.rejects({ message: 'Something unexpected', toString: () => 'Something unexpected' })
+  it('should include help desk message for unknown thrown errors', async () => {
+    fetchMock.mockRejectedValue({ message: 'Something unexpected', toString: () => 'Something unexpected' })
 
-      fetchGet('/api/test').then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.include('duos@duos.org')
-        },
-      )
-    })
+    const error = await fetchGet('/api/test').catch(e => e)
+    expect(error.message).toContain('duos@duos.org')
   })
 
-  it('fetchMultipart - should report network error (not 502) on network-level failure', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      fetchStub.rejects(new win.TypeError('Network error'))
+  it('fetchMultipart - should report network error (not 502) on network-level failure', async () => {
+    const formData = new FormData()
+    fetchMock.mockRejectedValue(new TypeError('Network error'))
 
-      fetchMultipart('/api/progress_report/123', formData).then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.include('Network error on request to')
-          expect(error.message).to.include('TypeError: Network error')
-          expect(error.message).to.include('duos@duos.org')
-        },
-      )
-    })
+    const error = await fetchMultipart('/api/progress_report/123', formData).catch(e => e)
+    expect(error.message).toContain('Network error on request to')
+    expect(error.message).toContain('TypeError: Network error')
+    expect(error.message).toContain('duos@duos.org')
   })
 
-  it('fetchMultipart - should use backend error message when provided', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ message: 'File too large' }), {
-          status: 413,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('fetchMultipart - should use backend error message when provided', async () => {
+    const formData = new FormData()
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'File too large' }), {
+        status: 413,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchMultipart('/api/upload', formData).then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.equal('File too large')
-        },
-      )
-    })
+    const error = await fetchMultipart('/api/upload', formData).catch(e => e)
+    expect(error.message).toBe('File too large')
   })
 
-  it('fetchMultipart - should fall back to help desk message when no message field in error body', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ error: 'Bad request' }), {
+  it('fetchMultipart - should fall back to help desk message when no message field in error body', async () => {
+    const formData = new FormData()
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ error: 'Bad request' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const error = await fetchMultipart('/api/upload', formData).catch(e => e)
+    expect(error.message).toContain('400')
+    expect(error.message).toContain('duos@duos.org')
+  })
+
+  it('fetchMultipart - should fall back to help desk message for non-JSON error responses', async () => {
+    const formData = new FormData()
+    fetchMock.mockResolvedValue(
+      new Response('Server error', {
+        status: 500,
+        headers: { 'content-type': 'text/html' },
+      }),
+    )
+
+    const error = await fetchMultipart('/api/upload', formData).catch(e => e)
+    expect(error.message).toContain('500')
+    expect(error.message).toContain('duos@duos.org')
+  })
+
+  it('fetchMultipart - should always throw errors regardless of method', async () => {
+    const formData = new FormData()
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Missing library card' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const error = await fetchMultipart('/api/progress_report/123', formData, {}, 'POST').catch(e => e)
+    expect(error.message).toBe('Missing library card')
+  })
+
+  it('should encode URL parameters correctly', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({}), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const params: Params = { search: 'test value', page: 1, limit: 50, active: true }
+
+    await fetchGet('/api/items', { params })
+    const [url] = fetchMock.mock.calls[0]
+    expect(url).toContain('search=test+value')
+    expect(url).toContain('page=1')
+    expect(url).toContain('limit=50')
+    expect(url).toContain('active=true')
+  })
+
+  it('should not append query string when params is empty', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({}), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    await fetchGet('/api/items', { params: {} })
+    const [url] = fetchMock.mock.calls[0]
+    expect(url).toBe('/api/items')
+  })
+
+  it('should serialize objects to JSON', async () => {
+    const data = { name: 'test', nested: { value: 123 } }
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({}), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    await fetchPost('/api/test', data)
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.body).toBe(JSON.stringify(data))
+  })
+
+  it('should handle responseType text', async () => {
+    fetchMock.mockResolvedValue(
+      new Response('Hello', {
+        status: 200,
+        headers: { 'content-type': 'text/plain' },
+      }),
+    )
+
+    const result = await fetchGet<string>('/api/test', { responseType: 'text' })
+    expect(result.data).toBe('Hello')
+  })
+
+  it('should handle responseType json explicitly', async () => {
+    const mockResponse = { data: 'test' }
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const result = await fetchGet<typeof mockResponse>('/api/test', { responseType: 'json' })
+    expect(result.data).toEqual(mockResponse)
+  })
+
+  it('should default to json responseType', async () => {
+    const mockResponse = { data: 'test' }
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const result = await fetchGet<typeof mockResponse>('/api/test')
+    expect(result.data).toEqual(mockResponse)
+  })
+
+  describe('Error handling with axios-like structure', () => {
+    const verifyErrorStructure = (
+      error: Error & { response?: { status: number, data: unknown } },
+      expectedStatus: number,
+      expectedMessage: string,
+      expectedData?: unknown,
+    ) => {
+      expect(error.message).toBe(expectedMessage)
+      expect(error).toHaveProperty('response')
+      if (!error.response) {
+        throw new Error('Expected error.response to be defined')
+      }
+      expect(error.response.status).toBe(expectedStatus)
+      expect(error.response).toHaveProperty('data')
+      if (expectedData !== undefined) {
+        expect(error.response.data).toEqual(expectedData)
+      }
+    }
+
+    it('fetchPost - should throw error with response.data structure on 400', async () => {
+      const errorMessage = 'Validation failed: Email is required'
+      const errorBody = { code: 400, message: errorMessage }
+
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify(errorBody), {
           status: 400,
           headers: { 'content-type': 'application/json' },
         }),
       )
 
-      fetchMultipart('/api/upload', formData).then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.include('400')
-          expect(error.message).to.include('duos@duos.org')
-        },
-      )
+      const error = await fetchPost('/api/dar/v2', { data: 'test' }).catch(e => e)
+      verifyErrorStructure(error, 400, errorMessage, errorBody)
     })
-  })
 
-  it('fetchMultipart - should fall back to help desk message for non-JSON error responses', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      fetchStub.resolves(
-        new win.Response('Server error', {
+    it('fetchPost - should throw error with response.data structure on 500', async () => {
+      const errorMessage = 'Internal server error'
+      const errorBody = { message: errorMessage, code: 500 }
+
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify(errorBody), {
           status: 500,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      const error = await fetchGet('/api/data').catch(e => e)
+      verifyErrorStructure(error, 500, errorMessage)
+      if (!error.response) {
+        throw new Error('Expected error.response to be defined')
+      }
+      expect(error.response.data).toHaveProperty('message', errorMessage)
+    })
+
+    it('should handle 400 error with non-JSON response', async () => {
+      fetchMock.mockResolvedValue(
+        new Response('Bad Request', {
+          status: 400,
           headers: { 'content-type': 'text/html' },
         }),
       )
 
-      fetchMultipart('/api/upload', formData).then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.include('500')
-          expect(error.message).to.include('duos@duos.org')
-        },
-      )
+      const error = await fetchPost('/api/test', { data: 'test' }).catch(e => e)
+      verifyErrorStructure(error, 400, 'Request failed with status 400', {})
     })
-  })
 
-  it('fetchMultipart - should always throw errors regardless of method', () => {
-    cy.window().then((win) => {
-      const formData = new win.FormData()
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ message: 'Missing library card' }), {
+    it('should preserve error message from backend', async () => {
+      const backendMessage = 'All listed personnel must share the same institutional affiliation'
+      const errorBody = { code: 400, message: backendMessage }
+
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify(errorBody), {
           status: 400,
           headers: { 'content-type': 'application/json' },
         }),
       )
 
-      fetchMultipart('/api/progress_report/123', formData, {}, 'POST').then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          expect(error.message).to.equal('Missing library card')
-        },
-      )
-    })
-  })
-
-  it('should encode URL parameters correctly', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({}), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-
-      const params: Params = {
-        search: 'test value',
-        page: 1,
-        limit: 50,
-        active: true,
-      }
-
-      fetchGet('/api/items', { params }).then(() => {
-        const [url] = fetchStub.getCall(0).args
-        expect(url).to.include('search=test%20value')
-        expect(url).to.include('page=1')
-        expect(url).to.include('limit=50')
-        expect(url).to.include('active=true')
-      })
-    })
-  })
-
-  it('should not append query string when params is empty', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({}), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-
-      fetchGet('/api/items', { params: {} }).then(() => {
-        const [url] = fetchStub.getCall(0).args
-        expect(url).to.equal('/api/items')
-      })
-    })
-  })
-
-  it('should serialize objects to JSON', () => {
-    const data = { name: 'test', nested: { value: 123 } }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({}), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-
-      fetchPost('/api/test', data).then(() => {
-        const [, options] = fetchStub.getCall(0).args as [string, StubOptions]
-        expect(options.body).to.equal(JSON.stringify(data))
-      })
-    })
-  })
-
-  it('should handle responseType text', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response('Hello', {
-          status: 200,
-          headers: { 'content-type': 'text/plain' },
-        }),
-      )
-
-      fetchGet<string>('/api/test', { responseType: 'text' }).then((result) => {
-        expect(result.data).to.equal('Hello')
-      })
-    })
-  })
-
-  it('should handle responseType json explicitly', () => {
-    const mockResponse = { data: 'test' }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-
-      fetchGet<typeof mockResponse>('/api/test', { responseType: 'json' }).then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-      })
-    })
-  })
-
-  it('should default to json responseType', () => {
-    const mockResponse = { data: 'test' }
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-
-      fetchGet<typeof mockResponse>('/api/test').then((result) => {
-        expect(result.data).to.deep.equal(mockResponse)
-      })
-    })
-  })
-
-  describe('Error handling with axios-like structure', () => {
-    // Helper to verify common error structure
-    const verifyErrorStructure = (error: Error & { response?: { status: number, data: unknown } }, expectedStatus: number, expectedMessage: string, expectedData?: unknown) => {
-      expect(error).to.have.property('message', expectedMessage)
-      expect(error).to.have.property('response')
+      const error = await fetchPost('/api/dar/v2', {}).catch(e => e)
+      expect(error.message).toBe(backendMessage)
       if (!error.response) {
         throw new Error('Expected error.response to be defined')
       }
-      expect(error.response).to.have.property('status', expectedStatus)
-      expect(error.response).to.have.property('data')
-      if (expectedData !== undefined) {
-        expect(error.response.data).to.deep.equal(expectedData)
-      }
-    }
-
-    it('fetchPost - should throw error with response.data structure on 400', () => {
-      const errorMessage = 'Validation failed: Email is required'
-      const errorBody = {
-        code: 400,
-        message: errorMessage,
-      }
-
-      cy.window().then((win) => {
-        fetchStub.resolves(
-          new win.Response(JSON.stringify(errorBody), {
-            status: 400,
-            headers: { 'content-type': 'application/json' },
-          }),
-        )
-      })
-
-      fetchPost('/api/dar/v2', { data: 'test' }).then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          verifyErrorStructure(error, 400, errorMessage, errorBody)
-        },
-      )
-    })
-
-    it('fetchPost - should throw error with response.data structure on 500', () => {
-      const errorMessage = 'Internal server error'
-      const errorBody = {
-        message: errorMessage,
-        code: 500,
-      }
-
-      cy.window().then((win) => {
-        fetchStub.resolves(
-          new win.Response(JSON.stringify(errorBody), {
-            status: 500,
-            headers: { 'content-type': 'application/json' },
-          }),
-        )
-      })
-
-      fetchGet('/api/data').then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          verifyErrorStructure(error, 500, errorMessage)
-          if (!error.response) {
-            throw new Error('Expected error.response to be defined')
-          }
-          expect(error.response.data).to.have.property('message', errorMessage)
-        },
-      )
-    })
-
-    it('should handle 400 error with non-JSON response', () => {
-      cy.window().then((win) => {
-        fetchStub.resolves(
-          new win.Response('Bad Request', {
-            status: 400,
-            headers: { 'content-type': 'text/html' },
-          }),
-        )
-      })
-
-      fetchPost('/api/test', { data: 'test' }).then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          verifyErrorStructure(error, 400, 'Request failed with status 400', {})
-        },
-      )
-    })
-
-    it('should preserve error message from backend', () => {
-      const backendMessage = 'All listed personnel must share the same institutional affiliation'
-      const errorBody = {
-        code: 400,
-        message: backendMessage,
-      }
-
-      cy.window().then((win) => {
-        fetchStub.resolves(
-          new win.Response(JSON.stringify(errorBody), {
-            status: 400,
-            headers: { 'content-type': 'application/json' },
-          }),
-        )
-      })
-
-      fetchPost('/api/dar/v2', {}).then(
-        () => {
-          throw new Error('Should have thrown')
-        },
-        (error) => {
-          // The error message should be the backend message
-          expect(error.message).to.equal(backendMessage)
-          // And it should also be in response.data.message for error handlers
-          if (!error.response) {
-            throw new Error('Expected error.response to be defined')
-          }
-          expect(error.response.data.message).to.equal(backendMessage)
-        },
-      )
+      expect(error.response.data.message).toBe(backendMessage)
     })
   })
 
   describe('reportError recursion guard', () => {
-    it('does not report failures of the Bard metrics API', () => {
-      const reportStub = cy.stub(ErrorReporter, 'report')
-      cy.stub(Config, 'getApiUrl').resolves('https://consent.example.org')
-      cy.stub(Config, 'getBardApiUrl').resolves('https://bard.example.org')
+    it('does not report failures of the Bard metrics API', async () => {
+      fetchMock.mockResolvedValue(
+        new Response('Not Found', {
+          status: 404,
+          headers: { 'content-type': 'text/html' },
+        }),
+      )
 
-      cy.window().then((win) => {
-        fetchStub.resolves(
-          new win.Response('Not Found', {
-            status: 404,
-            headers: { 'content-type': 'text/html' },
-          }),
-        )
+      await fetchPost('https://bard.example.org/api/event', { event: 'test' }).catch(() => {})
+      // Give the fire-and-forget reportError chain time to complete
+      await new Promise(resolve => setTimeout(resolve, 0))
 
-        // The request rejects; reportError runs async (fire-and-forget).
-        return fetchPost('https://bard.example.org/api/event', { event: 'test' }).catch(() => {})
-      })
-
-      // Reporting a Bard failure via Bard would recurse infinitely, so it stays silent.
-      // Wait to give the fire-and-forget reportError a chance to (wrongly) report.
-      // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(50)
-      cy.then(() => {
-        expect(reportStub.called).to.equal(false)
-      })
+      expect(ErrorReporter.report).not.toHaveBeenCalled()
     })
 
-    it('reports failures of other endpoints', () => {
-      const reportStub = cy.stub(ErrorReporter, 'report')
-      cy.stub(Config, 'getApiUrl').resolves('https://consent.example.org')
-      cy.stub(Config, 'getBardApiUrl').resolves('https://bard.example.org')
+    it('reports failures of other endpoints', async () => {
+      fetchMock.mockResolvedValue(
+        new Response('Not Found', {
+          status: 404,
+          headers: { 'content-type': 'text/html' },
+        }),
+      )
 
-      cy.window().then((win) => {
-        fetchStub.resolves(
-          new win.Response('Not Found', {
-            status: 404,
-            headers: { 'content-type': 'text/html' },
-          }),
-        )
-
-        // The request rejects; reportError runs async (fire-and-forget).
-        return fetchPost('/api/dar/v2', { data: 'test' }).catch(() => {})
-      })
-
-      // Retries until the async reportError reports the failure.
-      cy.wrap(null).should(() => {
-        expect(reportStub.calledOnce).to.equal(true)
-      })
+      await fetchPost('/api/dar/v2', { data: 'test' }).catch(() => {})
+      await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce())
     })
   })
 })
 
 describe('fetchAdapter - 401 Bard metric logging', () => {
-  let fetchStub: ReturnType<typeof cy.stub>
-  let captureEventStub: Cypress.Agent<sinon.SinonStub> | sinon.SinonStub
-  let signOutStub: Cypress.Agent<sinon.SinonStub> | sinon.SinonStub
-
+  let fetchMock: ReturnType<typeof vi.fn>
   const mockExpTime = Math.floor(Date.now() / 1000) + 3600 // 1h from now
 
   beforeEach(() => {
-    cy.initApplicationConfig()
-    cy.stub(Config, 'getApiUrl').resolves('https://consent.example.org')
-    captureEventStub = cy.stub(Metrics, 'captureEvent').resolves()
-    signOutStub = cy.stub(Auth, 'signOut').resolves()
-    cy.stub(Storage, 'getOidcUser').returns({
+    vi.clearAllMocks()
+    fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    vi.mocked(Config.getApiUrl).mockResolvedValue('https://consent.example.org')
+    vi.mocked(Config.getBardApiUrl).mockResolvedValue('https://bard.example.org')
+    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
+    vi.mocked(redirectOnLogout).mockReturnValue(undefined)
+    vi.mocked(Storage.getOidcUser).mockReturnValue({
       profile: { exp: mockExpTime, sub: '', iss: '', aud: '', iat: 0 },
-    })
-
-    // Suppress navigation errors from redirectOnLogout setting window.location.href
-    cy.on('uncaught:exception', () => false)
-
-    cy.window().then((win) => {
-      fetchStub = cy.stub(win, 'fetch')
-    })
+    } as unknown as OidcUser)
   })
 
   afterEach(() => {
-    cy.window().then(() => {
-      if (fetchStub) fetchStub.restore()
-    })
+    vi.unstubAllGlobals()
   })
 
-  it('should fire Bard metric with session details on 401 from DUOS API', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
-          status: 401,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('should fire Bard metric with session details on 401 from DUOS API', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet('https://consent.example.org/api/something').then(
-        () => { throw new Error('Should have thrown') },
-        () => {
-          expect(captureEventStub.calledOnce).to.equal(true)
-          const [event, details] = captureEventStub.firstCall.args
-          expect(event).to.equal(eventList.userAutoLogout401)
-          expect(details).to.have.property('expires_on', mockExpTime)
-          expect(details).to.have.property('current_time').that.is.a('number')
-          expect(details).to.have.property('time_until_expires').that.is.a('number')
-          expect(details).to.have.property('endpoint_url', 'https://consent.example.org/api/something')
-        },
-      )
-    })
+    await fetchGet('https://consent.example.org/api/something').catch(() => {})
+
+    expect(Metrics.captureEvent).toHaveBeenCalledOnce()
+    const [event, details] = vi.mocked(Metrics.captureEvent).mock.calls[0]
+    expect(event).toBe(eventList.userAutoLogout401)
+    expect(details).toHaveProperty('expires_on', mockExpTime)
+    expect(details).toHaveProperty('current_time')
+    expect(typeof (details as Record<string, unknown>).current_time).toBe('number')
+    expect(details).toHaveProperty('time_until_expires')
+    expect(typeof (details as Record<string, unknown>).time_until_expires).toBe('number')
+    expect(details).toHaveProperty('endpoint_url', 'https://consent.example.org/api/something')
   })
 
-  it('should NOT fire Bard metric on 401 for GET /api/user/me', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
-          status: 401,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('should NOT fire Bard metric on 401 for GET /api/user/me', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet('https://consent.example.org/api/user/me').then(
-        () => { throw new Error('Should have thrown') },
-        () => {
-          expect(captureEventStub.called).to.equal(false)
-          expect(signOutStub.called).to.equal(false)
-        },
-      )
-    })
+    await fetchGet('https://consent.example.org/api/user/me').catch(() => {})
+
+    expect(Metrics.captureEvent).not.toHaveBeenCalled()
+    expect(redirectOnLogout).not.toHaveBeenCalled()
   })
 
-  it('should NOT fire Bard metric or redirect on non-401 errors', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ message: 'Server error' }), {
-          status: 500,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('should NOT fire Bard metric or redirect on non-401 errors', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Server error' }), {
+        status: 500,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet('https://consent.example.org/api/something').then(
-        () => { throw new Error('Should have thrown') },
-        () => {
-          expect(captureEventStub.called).to.equal(false)
-          expect(signOutStub.called).to.equal(false)
-        },
-      )
-    })
+    await fetchGet('https://consent.example.org/api/something').catch(() => {})
+
+    expect(Metrics.captureEvent).not.toHaveBeenCalled()
+    expect(redirectOnLogout).not.toHaveBeenCalled()
   })
 
-  it('should include null expires_on when OIDC user has no exp', () => {
-    // Override the Storage stub for this test
-    (Storage.getOidcUser as ReturnType<typeof cy.stub>).restore()
-    cy.stub(Storage, 'getOidcUser').returns({
+  it('should include null expires_on when OIDC user has no exp', async () => {
+    vi.mocked(Storage.getOidcUser).mockReturnValue({
       profile: { sub: '', iss: '', aud: '', iat: 0 },
-    })
+    } as unknown as OidcUser)
 
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
-          status: 401,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet('https://consent.example.org/api/something').then(
-        () => { throw new Error('Should have thrown') },
-        () => {
-          expect(captureEventStub.calledOnce).to.equal(true)
-          const [, details] = captureEventStub.firstCall.args
-          expect(details).to.have.property('expires_on', null)
-          expect(details).to.have.property('time_until_expires', null)
-        },
-      )
-    })
+    await fetchGet('https://consent.example.org/api/something').catch(() => {})
+
+    expect(Metrics.captureEvent).toHaveBeenCalledOnce()
+    const [, details] = vi.mocked(Metrics.captureEvent).mock.calls[0]
+    expect(details).toHaveProperty('expires_on', null)
+    expect(details).toHaveProperty('time_until_expires', null)
   })
 
-  it('should NOT fire Bard metric on 401 from non-DUOS API', () => {
-    cy.window().then((win) => {
-      fetchStub.resolves(
-        new win.Response(JSON.stringify({ message: 'Unauthorized' }), {
-          status: 401,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+  it('should NOT fire Bard metric on 401 from non-DUOS API', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
 
-      fetchGet('https://other-api.example.org/api/resource').then(
-        () => { throw new Error('Should have thrown') },
-        () => {
-          expect(captureEventStub.called).to.equal(false)
-          expect(signOutStub.called).to.equal(false)
-        },
-      )
-    })
+    await fetchGet('https://other-api.example.org/api/resource').catch(() => {})
+
+    expect(Metrics.captureEvent).not.toHaveBeenCalled()
+    expect(redirectOnLogout).not.toHaveBeenCalled()
   })
 })
