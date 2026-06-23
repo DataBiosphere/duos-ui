@@ -10,6 +10,8 @@
 # 	127.0.0.1	local.broadinstitute.org
 # Ensure that `public/config.json` is pointing to the correct env (not local), i.e.:
 #   ... "env": "dev", ...
+# Place a consent database dump (which now includes the BFF `user_sessions`
+# table) at `config/consentdb.sql`; the `db` service loads it on first start.
 # Build:
 #   docker build . -t duos
 # Run:
@@ -20,8 +22,15 @@ services:
   app:
     image: duos:latest
     container_name: duos
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - ${PORT:-8080}:${PORT:-8080}
+    # Note that docker looks for a local .env file by default, but we explicitly point to .env.local so that the
+    # gitignored .env file is not used in this local stack. The .env.local file is optional, but if it exists, it
+    # should contain the same variables as .env, with values appropriate for local development. An .env.example file
+    # is not used in this stack, but is included in the repo for reference.
     env_file:
       - path: .env.local
         required: false
@@ -30,9 +39,39 @@ services:
       PORT: ${PORT:-8080}
       FASTIFY_LOG_LEVEL: ${FASTIFY_LOG_LEVEL:-debug}
       DUOS_SESSION_MAX_AGE_MS: ${DUOS_SESSION_MAX_AGE_MS:-}
+      # Session store / DB — points at the bundled `db` service, not dev.
+      DUOS_DB_HOST: db
+      DUOS_DB_PORT: '5432'
+      DUOS_DB_NAME: ${DUOS_DB_NAME:-consent}
+      DUOS_DB_USER: ${DUOS_DB_USER:-consent}
+      DUOS_DB_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env (copy .env.example)}
+      DUOS_DB_SSL: 'false'
+      DUOS_SESSION_SECRET: ${DUOS_SESSION_SECRET:?set DUOS_SESSION_SECRET (32+ chars) in .env (copy .env.example)}
     volumes:
       - ./public/config.json:/usr/src/app/build/config.json
     command: ["node", "server/dist/index.js"]
+    restart: always
+
+  # Local Postgres standing in for the consent Cloud SQL instance. Loads a
+  # consent dump so the BFF talks to a real database entirely within the stack,
+  # without reaching dev. Mirrors the `sqlproxy` service in consent/config.
+  db:
+    image: postgres:16.13-alpine
+    container_name: duos-db
+    ports:
+      - 5432:5432
+    environment:
+      PGGSSENCMODE: disable
+      POSTGRES_DB: ${DUOS_DB_NAME:-consent}
+      POSTGRES_USER: ${DUOS_DB_USER:-consent}
+      POSTGRES_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env (copy .env.example)}
+    volumes:
+      - ./config/consentdb.sql:/docker-entrypoint-initdb.d/consentdb.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DUOS_DB_USER:-consent} -d ${DUOS_DB_NAME:-consent}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: always
 
   proxy:

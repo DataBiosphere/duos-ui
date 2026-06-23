@@ -5,6 +5,8 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { createPgSessionStore } from './session/pgStore.js'
+import './types/session.js'
 
 const BUILD_DIR = path.join(import.meta.dirname, '..', '..', 'build')
 
@@ -18,13 +20,18 @@ export async function buildApp(): Promise<FastifyInstance> {
     port: Number.parseInt(process.env.DUOS_DB_PORT ?? '5432', 10),
     user: process.env.DUOS_DB_USER,
     password: process.env.DUOS_DB_PASSWORD,
-    ssl: { rejectUnauthorized: true },
+    // App-level TLS is only used for a direct connection to Cloud SQL. When the
+    // BFF reaches Postgres over localhost (a Cloud SQL Proxy sidecar in k8s, or
+    // the bundled `db` container in docker-compose) the transport is already
+    // plaintext-on-loopback, so SSL must be off or the connection is rejected.
+    ssl: process.env.DUOS_DB_SSL === 'true' ? { rejectUnauthorized: true } : false,
   })
 
-  // 2. Cookie + session — store: createPgSessionStore(fastify.pg) wired in next story
+  // 2. Cookie + session — the store reads fastify.pg registered in step 1
   await fastify.register(fastifyCookie)
   await fastify.register(fastifySession, {
     secret: process.env.DUOS_SESSION_SECRET!,
+    store: createPgSessionStore(fastify.pg),
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
