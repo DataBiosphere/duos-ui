@@ -263,6 +263,37 @@ async function fetchMultipartRequest<T>(
   return handleResponse<T>(res, fullUrl, 'json', method)
 }
 
+const RETRY_DELAYS_MS = [500, 1000, 2000]
+
+const isRetryable = (error: unknown): boolean => {
+  const status = (error as { response?: { status?: number } })?.response?.status
+  // Retry 5xx (transient server errors, e.g. service restart) and network errors (no HTTP response)
+  return status === undefined || status >= 500
+}
+
+const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason)
+    const timer = setTimeout(resolve, ms)
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer)
+      reject(signal.reason)
+    }, { once: true })
+  })
+
+const withRetry = async <T>(fn: () => Promise<T>, signal?: AbortSignal): Promise<T> => {
+  for (let i = 0; i <= RETRY_DELAYS_MS.length; i++) {
+    try {
+      return await fn()
+    }
+    catch (error) {
+      if (i === RETRY_DELAYS_MS.length || signal?.aborted || !isRetryable(error)) throw error
+      await sleep(RETRY_DELAYS_MS[i] + Math.random() * 200, signal)
+    }
+  }
+  throw new Error('unreachable')
+}
+
 export const fetchGet = <T>(
   url: string,
   config: FetchRequestConfig = {},
@@ -273,6 +304,12 @@ export const fetchPost = <T, TBody = unknown>(
   data?: TBody,
   config: FetchRequestConfig<TBody> = {},
 ) => fetchRequest<T>({ url, data, ...config, method: 'POST' })
+
+export const retryFetchPost = <T, TBody = unknown>(
+  url: string,
+  data?: TBody,
+  config: FetchRequestConfig<TBody> = {},
+) => withRetry(() => fetchPost<T, TBody>(url, data, config), config.signal)
 
 export const fetchPut = <T, TBody = unknown>(
   url: string,
