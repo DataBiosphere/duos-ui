@@ -172,12 +172,9 @@ export default function MultiDatasetVoteSlab({
   const [isDMI, setIsDMI] = useState(false)
   const { algorithmResult } = bucket
 
-  const userIsChair = !isEmpty(chairVotes)
-  const userIsMember = !isEmpty(memberVotes)
-
   const getMemberVoteSectionTitle = () => {
     if (adminPage) return 'DAC Member Votes'
-    if (userIsChair) return 'My DAC Member\'s Votes (detail)'
+    if (!isEmpty(chairVotes)) return 'My DAC Member\'s Votes (detail)'
     return 'Other DAC Member\'s Votes'
   }
 
@@ -213,16 +210,16 @@ export default function MultiDatasetVoteSlab({
                 <DataUseSummary bucket={bucket} />
               </td>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                {userIsMember && (
+                {!isEmpty(memberVotes) && (
                   <>
-                    {userIsChair && <div style={roleLabel}>Member</div>}
+                    {!isEmpty(chairVotes) && <div style={roleLabel}>Member</div>}
                     <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
                     <VoteInfoSubsection currentUserVotes={memberVotes} bucket={bucket} isChair={false} isApprovalDisabled={false} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
                   </>
                 )}
-                {userIsChair && (
+                {!isEmpty(chairVotes) && (
                   <>
-                    {userIsMember && <div style={roleLabel}>Chair</div>}
+                    {!isEmpty(memberVotes) && <div style={roleLabel}>Chair</div>}
                     <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
                     <VoteInfoSubsection currentUserVotes={chairVotes} bucket={bucket} isChair={true} isApprovalDisabled={isApprovalDisabled} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
                   </>
@@ -231,7 +228,7 @@ export default function MultiDatasetVoteSlab({
             </tr>
             <tr>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                <ChairVoteInfo dacVotes={dacVotes} isChair={userIsChair} adminPage={adminPage} />
+                <ChairVoteInfo dacVotes={dacVotes} isChair={!isEmpty(chairVotes)} adminPage={adminPage} />
               </td>
               <td style={{ width: '50%', verticalAlign: 'text-top' }}>
                 {!isDMI && !isEmpty(algorithmResult) && (
@@ -242,7 +239,7 @@ export default function MultiDatasetVoteSlab({
           </tbody>
         </table>
         <div style={{ paddingLeft: '20px' }}>
-          <MemberVoteSummary dacVotes={dacVotes} title={getMemberVoteSectionTitle()} isLoading={isLoading} adminPage={adminPage} isChair={userIsChair} />
+          <MemberVoteSummary dacVotes={dacVotes} title={getMemberVoteSectionTitle()} isLoading={isLoading} adminPage={adminPage} isChair={!isEmpty(chairVotes)} />
         </div>
         <DatasetsRequestedPanel dacDatasetIds={dacDatasetIds} bucketDatasets={bucket.datasets} dacs={bucket.dacs} isLoading={isLoading} adminPage={adminPage} />
       </div>
