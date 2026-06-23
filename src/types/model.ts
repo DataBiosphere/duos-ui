@@ -100,6 +100,14 @@ export interface SimplifiedDuosUser {
   email: string
 }
 
+export interface SigningOfficialUserWithData extends SimplifiedDuosUser {
+  institutionId?: number
+  institutionName?: string
+  userData?: {
+    externalProfiles?: ExternalProfiles
+  }
+}
+
 export interface DAAObject {
   // Define the shape of a DAA object as needed
   daaId: number
@@ -700,6 +708,8 @@ export interface DarCollectionSummary {
   referenceIds: string[]
   requiresSOApproval: boolean
   researcherName: string
+  soApproverId?: number
+  soApproverTimestamp?: number
   status: string
   submissionDate: number
 }
@@ -721,8 +731,8 @@ export interface DataAccessRequest {
   datasetIds: number[]
   elections: Record<number, Election>
   eraCommonsId: string
-  closeoutSigningOfficialApprovedDate?: number
-  closeoutSigningOfficialApprovedUserId?: number
+  approvingSigningOfficialApprovedDate?: number
+  approvingSigningOfficialUserId?: number
 }
 
 export interface DataAccessRequestData {

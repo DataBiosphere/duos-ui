@@ -13,6 +13,7 @@ type UserEventInstance = ReturnType<typeof userEvent.setup>
 vi.mock('src/libs/ajax/User', () => ({
   User: {
     getMe: vi.fn(),
+    getSOsForInstitution: vi.fn(),
   },
 }))
 
@@ -346,5 +347,52 @@ describe('Researcher Info', () => {
     expect(byId<HTMLInputElement>('piName')?.value).toBe(props.formData.piName)
     expect(byId<HTMLInputElement>('piEmail')?.value).toBe(props.formData.piEmail)
     expect(screen.getByText('scoobydoo')).not.toBeNull()
+  })
+
+  it('shows SO institution name from payload in read-only mode, not from researcher.institution', async () => {
+    vi.mocked(User.getSOsForInstitution).mockResolvedValue([{
+      userId: 99,
+      displayName: 'Jane Smith',
+      email: 'jane@broad.mit.edu',
+      institutionName: 'Broad Institute',
+    }])
+
+    renderResearcherInfo({
+      readOnlyMode: true,
+      researcher: {
+        ...props.researcher,
+        institutionId: 5,
+        institution: { name: 'Different Institution' } as DuosUser['institution'],
+      },
+      formData: {
+        ...props.formData,
+        signingOfficial: 'Jane Smith',
+        signingOfficialEmail: 'jane@broad.mit.edu',
+      },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Broad Institute')).not.toBeNull()
+    })
+    expect(screen.queryByText('Different Institution')).toBeNull()
+  })
+
+  it('shows SO name and email when getSOsForInstitution returns no match', async () => {
+    vi.mocked(User.getSOsForInstitution).mockResolvedValue([])
+
+    renderResearcherInfo({
+      readOnlyMode: true,
+      researcher: { ...props.researcher, institutionId: 5 },
+      formData: {
+        ...props.formData,
+        signingOfficial: 'Jane Smith',
+        signingOfficialEmail: 'jane@broad.mit.edu',
+      },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Jane Smith')).not.toBeNull()
+      expect(screen.getByText('jane@broad.mit.edu')).not.toBeNull()
+    })
   })
 })

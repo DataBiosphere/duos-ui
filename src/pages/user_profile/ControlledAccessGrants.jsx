@@ -6,7 +6,7 @@ import { User } from 'src/libs/ajax/User'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection.tsx'
-import { Styles } from 'src/libs/theme.js'
+import { Styles } from 'src/libs/theme'
 
 const columns = [
   { field: 'darCode', headerName: 'DAR Code', flex: 1 },

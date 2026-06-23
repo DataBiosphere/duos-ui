@@ -16,6 +16,16 @@ type MockDarCollectionTableProps = {
   consoleType: string
 }
 
+vi.mock('src/components/SearchBar', () => ({
+  default: ({ handleSearchChange }: { handleSearchChange: (value: string) => void }) => (
+    <input
+      type="text"
+      aria-label="search"
+      onChange={e => handleSearchChange(e.target.value)}
+    />
+  ),
+}))
+
 vi.mock('src/hooks/useResponsiveDarCollectionColumns', () => ({
   useResponsiveDarCollectionColumns: vi.fn(() => ['darCode', 'actions']),
 }))
@@ -76,10 +86,22 @@ const collection = (overrides: Partial<DarCollectionSummary> = {}): DarCollectio
   return { ...baseCollection, ...overrides }
 }
 
+const collection2 = collection({
+  darCollectionId: 2,
+  darCode: 'DAR-2',
+  name: 'Collection 2',
+  researcherName: 'Other Researcher',
+  institutionName: 'Other Institution',
+  actions: [],
+  datasetIds: [2],
+  referenceIds: ['reference-id-2'],
+  latestReferenceId: 'reference-id-2',
+})
+
 describe('SigningOfficialDarRequests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(Collections.getCollectionSummariesByRoleName).mockResolvedValue([collection()])
+    vi.mocked(Collections.getCollectionSummariesByRoleName).mockResolvedValue([collection(), collection2])
   })
 
   it('fetches signing official DAR request summaries and renders the table', async () => {
@@ -94,7 +116,47 @@ describe('SigningOfficialDarRequests', () => {
     expect(table).toHaveAttribute('data-console-type', consoleTypes.SIGNING_OFFICIAL)
     expect(table).toHaveAttribute('data-loading', 'false')
     expect(screen.getByText('DAR-1')).toBeInTheDocument()
+    expect(screen.getByText('DAR-2')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Approve DAR-1' })).toBeInTheDocument()
+  })
+
+  it('renders a search bar', async () => {
+    render(<SigningOfficialDarRequests />)
+    await screen.findByTestId('dar-collection-table')
+    expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument()
+  })
+
+  it('filters collections by search term', async () => {
+    render(<SigningOfficialDarRequests />)
+    await screen.findByText('DAR-2')
+
+    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+      target: { value: 'DAR-1' },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('DAR-1')).toBeInTheDocument()
+      expect(screen.queryByText('DAR-2')).not.toBeInTheDocument()
+    })
+  })
+
+  it('restores all collections when search is cleared', async () => {
+    render(<SigningOfficialDarRequests />)
+    await screen.findByText('DAR-2')
+
+    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+      target: { value: 'DAR-1' },
+    })
+    await waitFor(() => expect(screen.queryByText('DAR-2')).not.toBeInTheDocument())
+
+    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+      target: { value: '' },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('DAR-1')).toBeInTheDocument()
+      expect(screen.getByText('DAR-2')).toBeInTheDocument()
+    })
   })
 
   it('approves a DAR and refreshes the updated row in place', async () => {
