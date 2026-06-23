@@ -1,9 +1,14 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
-import { User } from '../../libs/ajax/User'
-import { Notifications } from '../../libs/utils'
+import React, { useEffect, useState } from 'react'
+import { User } from 'src/libs/ajax/User'
+import { Notifications } from 'src/libs/utils'
+import { AcknowledgementMap } from 'src/types/model'
 
-const Acknowledgment = ({ value }) => (
+interface AcknowledgmentItem {
+  name: string
+  attestedTime: string
+}
+
+const Acknowledgment = ({ value }: { value: AcknowledgmentItem }) => (
   <div style={{
     display: 'flex',
     flexDirection: 'row',
@@ -28,25 +33,25 @@ const Acknowledgment = ({ value }) => (
 )
 
 export default function AcceptedAcknowledgements() {
-  const [acceptedAcknowledgements, setAcceptedAcknowledgements] = useState([])
+  const [acceptedAcknowledgements, setAcceptedAcknowledgements] = useState<AcknowledgmentItem[]>([])
 
   useEffect(() => {
     const init = async () => {
-      const allAcknowledgements = []
-      const ToS = {
+      const allAcknowledgements: AcknowledgmentItem[] = []
+      const ToS: AcknowledgmentItem = {
         name: 'DUOS/Terra Terms of Service',
         attestedTime: '',
       }
       allAcknowledgements.push(ToS)
       try {
-        const acknowledgements = await User.getAcknowledgements()
+        const acknowledgements: AcknowledgementMap = await User.getAcknowledgements()
         for (const key in acknowledgements) {
           const currAcknowledgement = acknowledgements[key]
           const date = new Date(currAcknowledgement.lastAcknowledged)
           const month = String(date.getMonth() + 1).padStart(2, '0')
           const day = String(date.getDate()).padStart(2, '0')
           const year = date.getFullYear()
-          const newAcknowledgment = {
+          const newAcknowledgment: AcknowledgmentItem = {
             name: currAcknowledgement.ackKey,
             attestedTime: `${month}/${day}/${year}`,
           }
@@ -54,7 +59,7 @@ export default function AcceptedAcknowledgements() {
         }
         setAcceptedAcknowledgements(allAcknowledgements)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
       }
     }
