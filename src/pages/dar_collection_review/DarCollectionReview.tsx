@@ -100,7 +100,7 @@ const getApprovedDatasetsFromLatestDar = (darCollection: DarCollection, dacIds: 
     if (submittedDars.length === 0) return submittedDars[0]
     return submittedDars.reduce((latest, current) =>
       new Date(current.submissionDate ?? 0) > new Date(latest.submissionDate ?? 0) ? current : latest,
-    )
+    submittedDars[0])
   }
 
   const getClosedDataAccessElections = (mostRecentDar: ReturnType<typeof getMostRecentSubmittedDar>) => {
@@ -176,7 +176,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
   const [canVote, setCanVote] = useState<boolean | undefined>(undefined)
 
   const init = useCallback(async () => {
-    const user = await Storage.getCurrentUser()
+    const user = Storage.getCurrentUser()
     try {
       const collection = await Collections.getCollectionById(collectionId)
       if (adminPage || userIsDacUser(user)) {
