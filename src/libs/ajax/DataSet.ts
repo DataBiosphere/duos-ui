@@ -2,7 +2,7 @@ import { Config } from 'src/libs/config'
 import { fileDownload } from 'src/utils/FileDownload'
 import { fetchDelete, fetchGet, fetchMultipart, fetchPost } from 'src/libs/ajax/fetchAdapter'
 import { Dataset, DatasetTerm } from 'src/types/model'
-import { DatasetRegistrationSchemaV1, Study } from 'src/pages/data_submission/v2/v2-models'
+import { Study } from 'src/pages/data_submission/v2/v2-models'
 import { ElasticsearchQuery, ElasticsearchResponse } from 'src/types/elastic'
 
 export const DataSet = {
@@ -13,16 +13,6 @@ export const DataSet = {
   getDatasetNames: async (): Promise<string[]> => {
     const url = `${await Config.getApiUrl()}/api/dataset/datasetNames`
     const res = await fetchGet<string[]>(url, Config.authOpts())
-    return res.data
-  },
-
-  /**
-   * Fetch the v1 dataset registration schema.
-   * @returns Promise resolving to the DatasetRegistrationSchemaV1 object
-   */
-  getRegistrationSchema: async (): Promise<DatasetRegistrationSchemaV1> => {
-    const url = `${await Config.getApiUrl()}/schemas/dataset-registration/v1`
-    const res = await fetchGet<DatasetRegistrationSchemaV1>(url, Config.authOpts())
     return res.data
   },
 
