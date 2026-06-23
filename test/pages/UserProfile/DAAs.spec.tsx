@@ -1,85 +1,96 @@
 import React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import '@testing-library/jest-dom/vitest'
 import DAAs from 'src/pages/user_profile/DAAs'
-import { DAA } from 'src/libs/ajax/DAA'
 import { DAAObject, FileStorageObject } from 'src/types/model'
 
+vi.mock('src/libs/ajax/DAA', () => ({
+  DAA: {
+    getDaaFileById: vi.fn(),
+  },
+}))
+
+import { DAA } from 'src/libs/ajax/DAA'
+
+const fso: FileStorageObject = {
+  fileStorageObjectId: 1,
+  entityId: 'entity-1',
+  fileName: 'test-agreement.pdf',
+  category: 'irbCollaborationLetter',
+  mediaType: 'application/pdf',
+  createUserId: 3,
+  createDate: new Date().getDate(),
+}
+
+const daa: DAAObject = {
+  daaId: 1,
+  createUserId: 3,
+  createDate: new Date().toISOString(),
+  updateUserId: 3,
+  updateDate: new Date().toISOString(),
+  initialDacId: 1,
+  file: fso,
+  dacs: [],
+}
+
+const issuedBy = 'Test Signing Official'
+const issuedOn = '2024-06-15T00:00:00.000Z'
+
 describe('DAAs', () => {
-  const fso: FileStorageObject = {
-    fileStorageObjectId: 1,
-    entityId: 'entity-1',
-    fileName: 'test-agreement.pdf',
-    category: 'irbCollaborationLetter',
-    mediaType: 'application/pdf',
-    createUserId: 3,
-    createDate: new Date().getDate(),
-  }
-
-  const daa: DAAObject = {
-    daaId: 1,
-    createUserId: 3,
-    createDate: new Date().toISOString(),
-    updateUserId: 3,
-    updateDate: new Date().toISOString(),
-    initialDacId: 1,
-    file: fso,
-    dacs: [],
-  }
-
-  const issuedBy = 'Test Signing Official'
-  const issuedOn = '2024-06-15T00:00:00.000Z'
-
   beforeEach(() => {
-    cy.viewport(800, 600)
-    cy.initApplicationConfig()
-    cy.stub(DAA, 'getDaaFileById').resolves(undefined)
+    vi.clearAllMocks()
   })
 
-  it('renders a download link for each DAA', () => {
-    cy.mount(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
-
-    cy.contains('test-agreement').should('exist')
+  it('renders a download button for each DAA showing the filename without extension', () => {
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
+    expect(screen.getByRole('button', { name: /test-agreement/i })).toBeInTheDocument()
   })
 
-  it('renders the issued-by name and formatted date', () => {
-    const expectedDate = new Date(issuedOn).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+  it('strips the file extension from the displayed name', () => {
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
+    expect(screen.getByRole('button', { name: /test-agreement/i })).toBeInTheDocument()
+    expect(screen.queryByText(/test-agreement\.pdf/i)).not.toBeInTheDocument()
+  })
 
-    cy.mount(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
-
-    cy.contains('Issued by').should('exist')
-    cy.contains(issuedBy).should('exist')
-    cy.contains(expectedDate).should('exist')
+  it('renders "Issued by", the issuedBy name, and the formatted date', () => {
+    const formattedDate = new Date(issuedOn).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
+    expect(screen.getByText('Issued by')).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(issuedBy))).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(formattedDate))).toBeInTheDocument()
   })
 
   it('renders multiple DAAs', () => {
+    const fso2: FileStorageObject = {
+      ...fso,
+      fileStorageObjectId: 2,
+      fileName: 'second-agreement.pdf',
+    }
     const daa2: DAAObject = {
       ...daa,
       daaId: 2,
-      file: { ...fso, fileStorageObjectId: 2, fileName: 'second-agreement.pdf' },
+      file: fso2,
     }
-
-    cy.mount(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa, daa2]} />)
-
-    cy.contains('test-agreement').should('exist')
-    cy.contains('second-agreement').should('exist')
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa, daa2]} />)
+    expect(screen.getByRole('button', { name: /test-agreement/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /second-agreement/i })).toBeInTheDocument()
   })
 
-  it('renders nothing when daas array is empty', () => {
-    cy.mount(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[]} />)
-
-    cy.get('a').should('not.exist')
+  it('renders no buttons when the daas array is empty', () => {
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[]} />)
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
-  it('strips the file extension from the displayed file name', () => {
-    cy.mount(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
-
-    cy.contains('test-agreement').should('exist')
-    cy.contains('test-agreement.pdf').should('not.exist')
-  })
-
-  it('calls DAA.getDaaFileById with the correct id and name when download is clicked', () => {
-    cy.mount(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
-
-    cy.contains('test-agreement').click()
-    cy.wrap(DAA.getDaaFileById).should('have.been.calledWith', daa.daaId, 'test-agreement')
+  it('calls DAA.getDaaFileById with the daaId and filename without extension when the download button is clicked', async () => {
+    const user = userEvent.setup()
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
+    await user.click(screen.getByRole('button', { name: /test-agreement/i }))
+    expect(DAA.getDaaFileById).toHaveBeenCalledWith(1, 'test-agreement')
   })
 })

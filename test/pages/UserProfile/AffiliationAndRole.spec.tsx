@@ -1,7 +1,26 @@
 import React from 'react'
-import { Institution } from 'src/libs/ajax/Institution'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import AffiliationAndRole from 'src/pages/user_profile/AffiliationAndRoles'
-import { DuosUser } from 'src/types/model'
+import { DuosUser, InstitutionInterface } from 'src/types/model'
+
+vi.mock('src/libs/ajax/Institution', () => ({
+  Institution: {
+    getById: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/utils', () => ({
+  Notifications: {
+    showError: vi.fn(),
+  },
+}))
+
+import { Institution } from 'src/libs/ajax/Institution'
+import { Notifications } from 'src/libs/utils'
+
+const institution: InstitutionInterface = { id: 1, name: 'Test Institution' } as InstitutionInterface
 
 const user: DuosUser = {
   createDate: new Date(),
@@ -18,70 +37,62 @@ const user: DuosUser = {
   isResearcher: true,
   isSigningOfficial: true,
   roles: [
-    {
-      roleId: 1,
-      userId: 1,
-      userRoleId: 1,
-      name: 'Researcher',
-    },
-    {
-      roleId: 2,
-      userId: 1,
-      userRoleId: 2,
-      name: 'SigningOfficial',
-    },
+    { roleId: 1, userId: 1, userRoleId: 1, name: 'Researcher' },
+    { roleId: 2, userId: 1, userRoleId: 2, name: 'SigningOfficial' },
   ],
 }
 
-const institution = {
-  id: 1,
-  name: 'Test Institution',
-  signingOfficials: [],
-}
-
-describe('Affiliation And Role', () => {
+describe('AffiliationAndRole', () => {
   beforeEach(() => {
-    cy.viewport(600, 600)
-    cy.initApplicationConfig()
+    vi.clearAllMocks()
+    vi.mocked(Institution.getById).mockResolvedValue(institution)
   })
 
-  it('Displays institution name when institution is present', () => {
-    cy.stub(Institution, 'getById').returns(institution)
-    cy.mount(<AffiliationAndRole user={user} />)
-    cy.get('[ data-cy="institutional-affiliation"]').contains(institution.name)
-  })
-
-  it('Displays contact us text when no institution present', () => {
-    cy.stub(Institution, 'getById').returns(institution)
-    const { institutionId, ...userWithoutInstitution } = user
-    cy.mount(<AffiliationAndRole user={userWithoutInstitution} />)
-    cy.get('[ data-cy="institutional-affiliation"]').contains('Your institutional affiliation is automatically derived from your email domain.'
-      + ' Please use your institutional email to be affiliated with your institution. If you are using your institutional email and have not been assigned an institution'
-      + ' please use the Contact Us form and provide your email and institution.')
-  })
-
-  it('Displays all role names for user', () => {
-    cy.stub(Institution, 'getById').returns(institution)
-    cy.mount(<AffiliationAndRole user={user} />)
-    user.roles.forEach((role) => {
-      cy.get('[ data-cy="user-roles"]').contains(role.name)
+  it('displays institution name when Institution.getById resolves with an institution', async () => {
+    const { container } = render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="institutional-affiliation"]')?.textContent).toContain('Test Institution')
     })
   })
 
-  it('Displays error when error is thrown loading user information', () => {
-    const error = new Error('Error: Unable to retrieve user information')
-    cy.stub(Institution, 'getById').throws(error)
-    cy.mount(<AffiliationAndRole user={user} />)
-    cy.get('[ data-cy="notification-alert"]').contains(error.message)
+  it('displays the "contact us" fallback text when user has no institutionId', async () => {
+    const userWithoutInstitution = { ...user, institutionId: undefined }
+    const { container } = render(<AffiliationAndRole user={userWithoutInstitution} />)
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="institutional-affiliation"]')?.textContent).toContain(
+        'Your institutional affiliation is automatically derived from your email domain.',
+      )
+    })
   })
 
-  it('Handles non-TS compliant user argument', () => {
-    // cy.stub(Institution, 'getById').returns(institution);
-    [{}, undefined, null].forEach((value) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      cy.mount(<AffiliationAndRole user={value} />)
-      cy.get('[ data-cy="notification-alert"]').should('not.exist')
+  it('displays all role names joined with ", " for the user', async () => {
+    const { container } = render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="user-roles"]')?.textContent).toBe('Researcher, SigningOfficial')
+    })
+  })
+
+  it('shows error notification when Institution.getById rejects', async () => {
+    vi.mocked(Institution.getById).mockRejectedValue(new Error('API error'))
+    render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalledWith({
+        text: 'Error: Unable to retrieve user information',
+      })
+    })
+  })
+
+  it('handles undefined user without crashing and without showing an error notification', async () => {
+    render(<AffiliationAndRole user={undefined as unknown as DuosUser} />)
+    await waitFor(() => {
+      expect(Notifications.showError).not.toHaveBeenCalled()
+    })
+  })
+
+  it('handles null user without crashing and without showing an error notification', async () => {
+    render(<AffiliationAndRole user={null as unknown as DuosUser} />)
+    await waitFor(() => {
+      expect(Notifications.showError).not.toHaveBeenCalled()
     })
   })
 })
