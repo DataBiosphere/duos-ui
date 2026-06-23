@@ -64,8 +64,8 @@ vi.mock('src/components/forms/forms', () => {
   const FormField = ({ id, type, onChange, defaultValue, disabled }: {
     id: string
     type: string
-    onChange?: (field: { key: string; value: any; isValid: boolean }) => void
-    defaultValue?: any
+    onChange?: (field: { key: string, value: string | boolean, isValid: boolean }) => void
+    defaultValue?: string | boolean
     disabled?: boolean
   }) => {
     if (type === FormFieldTypes.YESNORADIOGROUP) {
@@ -92,9 +92,9 @@ vi.mock('src/components/forms/forms', () => {
       <input
         id={id}
         type="text"
-        defaultValue={defaultValue ?? ''}
+        defaultValue={typeof defaultValue === 'string' ? defaultValue : ''}
         disabled={disabled}
-        onChange={(e) => onChange?.({ key: id, value: e.target.value, isValid: true })}
+        onChange={e => onChange?.({ key: id, value: e.target.value, isValid: true })}
       />
     )
   }
@@ -126,7 +126,7 @@ function renderUserProfile() {
   return render(
     <BrowserRouter>
       <UserProfile />
-    </BrowserRouter>
+    </BrowserRouter>,
   )
 }
 
