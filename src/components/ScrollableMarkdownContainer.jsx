@@ -21,7 +21,7 @@ export default function ScrollableMarkdownContainer(props) {
   const generateContent = (text) => {
     return (
       <ReactMarkdown components={{ a: props => <a target="_blank" {...props} /> }}>
-        {DOMPurify.sanitize(text)}
+        {DOMPurify.sanitize(text, null)}
       </ReactMarkdown>
     )
   }
