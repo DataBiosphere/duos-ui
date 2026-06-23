@@ -6,6 +6,7 @@ import {
   fetchPatch,
   fetchDelete,
   fetchMultipart,
+  retryFetchPost,
   type Params,
 } from 'src/libs/ajax/fetchAdapter'
 import { Metrics } from 'src/libs/ajax/Metrics'
@@ -558,6 +559,174 @@ describe('fetchAdapter - Fetch methods', () => {
       await fetchPost('/api/dar/v2', { data: 'test' }).catch(() => {})
       await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce())
     })
+  })
+})
+
+describe('retryFetchPost', () => {
+  let fetchMock: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    vi.mocked(Config.getBardApiUrl).mockResolvedValue('https://bard.example.org')
+    vi.mocked(Config.getApiUrl).mockResolvedValue('https://consent.example.org')
+    vi.mocked(ErrorReporter.report).mockResolvedValue(undefined)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  it('succeeds on the first attempt without retrying', async () => {
+    const mockResponse = { id: 1 }
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const result = await retryFetchPost<typeof mockResponse>('/api/test', { data: 'value' })
+    expect(result.data).toEqual(mockResponse)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries on 5xx and succeeds on the next attempt', async () => {
+    const mockResponse = { id: 1 }
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: 'Internal Server Error' }), {
+          status: 500,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(mockResponse), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+    const promise = retryFetchPost<typeof mockResponse>('/api/test', { data: 'value' })
+    await vi.advanceTimersByTimeAsync(800) // past 500ms + max 200ms jitter
+
+    const result = await promise
+    expect(result.data).toEqual(mockResponse)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not retry on 4xx errors', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Bad Request' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const error = await retryFetchPost('/api/test', { data: 'value' }).catch(e => e)
+    expect(error.message).toBe('Bad Request')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries on network errors', async () => {
+    const mockResponse = { id: 1 }
+    fetchMock
+      .mockRejectedValueOnce(new TypeError('Network error'))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(mockResponse), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+    const promise = retryFetchPost<typeof mockResponse>('/api/test', { data: 'value' })
+    await vi.advanceTimersByTimeAsync(800)
+
+    const result = await promise
+    expect(result.data).toEqual(mockResponse)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('exhausts all retries and throws after 4 total attempts', async () => {
+    // mockImplementation creates a fresh Response per call — bodies can't be re-read
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ message: 'Service Unavailable' }), {
+          status: 503,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    )
+
+    const promise = retryFetchPost('/api/test', { data: 'value' })
+    const settled = promise.catch(e => e) // prevent unhandled rejection during timer advancement
+
+    // Max total delay: 500+200 + 1000+200 + 2000+200 = 4100ms
+    await vi.advanceTimersByTimeAsync(5000)
+
+    const error = await settled
+    expect(error.message).toBe('Service Unavailable')
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+  })
+
+  it('uses increasing delays between retries', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0) // eliminate jitter: delays are exactly 500, 1000, 2000ms
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ message: 'Service Unavailable' }), {
+          status: 503,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    )
+
+    const promise = retryFetchPost('/api/test', { data: 'value' })
+    const settled = promise.catch(() => {}) // prevent unhandled rejection during timer advancement
+
+    // First delay is 500ms — advancing 499ms must not trigger a retry yet
+    await vi.advanceTimersByTimeAsync(499)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    // Crossing 500ms triggers the second attempt
+    await vi.advanceTimersByTimeAsync(1)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+
+    // Second delay is 1000ms — advancing 999ms must not trigger a third attempt
+    await vi.advanceTimersByTimeAsync(999)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+
+    // Crossing 1000ms triggers the third attempt
+    await vi.advanceTimersByTimeAsync(1)
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+
+    // Third delay is 2000ms — advance past it and the final attempt
+    await vi.advanceTimersByTimeAsync(2001)
+    await settled
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+  })
+
+  it('stops retrying when abort signal fires during sleep', async () => {
+    const controller = new AbortController()
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Service Unavailable' }), {
+        status: 503,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const promise = retryFetchPost('/api/test', { data: 'value' }, { signal: controller.signal })
+    // Pre-attach catch to prevent an unhandled rejection when the abort fires asynchronously
+    const settled = promise.catch(() => {})
+
+    // Abort at t=250ms, inside the 500ms first-retry sleep window
+    setTimeout(() => controller.abort(), 250)
+    await vi.advanceTimersByTimeAsync(300)
+
+    await settled
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })
 
