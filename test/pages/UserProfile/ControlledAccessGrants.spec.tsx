@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
 import { formatDate } from 'src/libs/utils'
+import type { ApprovedDataset } from 'src/types/model'
 
 vi.mock('src/libs/ajax/User', () => ({
   User: {
@@ -33,6 +34,8 @@ describe('ControlledAccessGrants', () => {
     vi.clearAllMocks()
   })
 
+  type ApprovedDatasetRow = ApprovedDataset & { darCode?: string, datasetIdentifier?: string }
+
   it('renders header title and description', async () => {
     vi.mocked(User.getApprovedDatasets).mockResolvedValue([])
 
@@ -59,8 +62,10 @@ describe('ControlledAccessGrants', () => {
   })
 
   it('renders dataset rows returned by the API', async () => {
-    const mockDatasets = [
+    const mockDatasets: ApprovedDatasetRow[] = [
       {
+        darId: '1',
+        datasetId: 123,
         darCode: 'DAR-001',
         datasetIdentifier: 'DS-123',
         datasetName: 'Test Dataset 1',
@@ -68,6 +73,8 @@ describe('ControlledAccessGrants', () => {
         expirationDate: 1742014831956,
       },
       {
+        darId: '2',
+        datasetId: 456,
         darCode: 'DAR-002',
         datasetIdentifier: 'DS-456',
         datasetName: 'Test Dataset 2',
@@ -76,7 +83,7 @@ describe('ControlledAccessGrants', () => {
       },
     ]
 
-    vi.mocked(User.getApprovedDatasets).mockResolvedValue(mockDatasets as any)
+    vi.mocked(User.getApprovedDatasets).mockResolvedValue(mockDatasets)
 
     render(<ControlledAccessGrants />)
 
