@@ -1,33 +1,64 @@
 import React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
+import { formatDate } from 'src/libs/utils'
+
+vi.mock('src/libs/ajax/User', () => ({
+  User: {
+    getApprovedDatasets: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('src/libs/utils')>()
+  return {
+    ...actual,
+    Notifications: {
+      showError: vi.fn(),
+    },
+  }
+})
+
+vi.mock('src/hooks/usePageTitle', () => ({
+  usePageTitle: vi.fn(),
+}))
+
 import { User } from 'src/libs/ajax/User'
+import { Notifications } from 'src/libs/utils'
 
 describe('ControlledAccessGrants', () => {
   beforeEach(() => {
-    cy.viewport(1000, 500)
+    vi.clearAllMocks()
   })
 
-  it('should render the component with correct header and description', () => {
-    cy.stub(User, 'getApprovedDatasets').returns(Promise.resolve([]))
+  it('renders header title and description', async () => {
+    vi.mocked(User.getApprovedDatasets).mockResolvedValue([])
 
-    cy.mount(<ControlledAccessGrants />)
+    render(<ControlledAccessGrants />)
 
-    cy.get('[data-cy="table-header-title"]').should('exist')
-    cy.get('[data-cy="table-header-title"]').should('contain', 'My Dataset Approvals')
-
-    cy.get('[data-cy="table-header-description"]').should('exist')
-    cy.get('[data-cy="table-header-description"]').should('contain', 'Your current dataset approvals')
-
-    // Check if all the expected table headers are present
-    cy.get('[role="grid"]').should('exist')
-    cy.contains('[role="columnheader"]', 'DAR Code').should('be.visible')
-    cy.contains('[role="columnheader"]', 'Dataset Identifier').should('be.visible')
-    cy.contains('[role="columnheader"]', 'Dataset Name').should('be.visible')
-    cy.contains('[role="columnheader"]', 'DAC Name').should('be.visible')
-    cy.contains('[role="columnheader"]', 'Expiration Date').should('be.visible')
+    await waitFor(() => {
+      expect(screen.getByText('My Dataset Approvals')).toBeInTheDocument()
+      expect(screen.getByText('Your current dataset approvals')).toBeInTheDocument()
+    })
   })
 
-  it('should display dataset information', () => {
+  it('renders all expected column headers', async () => {
+    vi.mocked(User.getApprovedDatasets).mockResolvedValue([])
+
+    render(<ControlledAccessGrants />)
+
+    await waitFor(() => {
+      expect(screen.getByText('DAR Code')).toBeInTheDocument()
+      expect(screen.getByText('Dataset Identifier')).toBeInTheDocument()
+      expect(screen.getByText('Dataset Name')).toBeInTheDocument()
+      expect(screen.getByText('DAC Name')).toBeInTheDocument()
+      expect(screen.getByText('Expiration Date')).toBeInTheDocument()
+    })
+  })
+
+  it('renders dataset rows returned by the API', async () => {
     const mockDatasets = [
       {
         darCode: 'DAR-001',
@@ -45,20 +76,34 @@ describe('ControlledAccessGrants', () => {
       },
     ]
 
-    cy.stub(User, 'getApprovedDatasets').returns(Promise.resolve(mockDatasets))
+    vi.mocked(User.getApprovedDatasets).mockResolvedValue(mockDatasets as any)
 
-    cy.mount(<ControlledAccessGrants />)
+    render(<ControlledAccessGrants />)
 
-    cy.contains('DAR-001').should('be.visible')
-    cy.contains('DS-123').should('be.visible')
-    cy.contains('Test Dataset 1').should('be.visible')
-    cy.contains('DAC 1').should('be.visible')
-    cy.contains('2025-03-15').should('be.visible')
+    await waitFor(() => {
+      expect(screen.getByText('DAR-001')).toBeInTheDocument()
+      expect(screen.getByText('DS-123')).toBeInTheDocument()
+      expect(screen.getByText('Test Dataset 1')).toBeInTheDocument()
+      expect(screen.getByText('DAC 1')).toBeInTheDocument()
+      expect(screen.getByText(formatDate(1742014831956))).toBeInTheDocument()
 
-    cy.contains('DAR-002').should('be.visible')
-    cy.contains('DS-456').should('be.visible')
-    cy.contains('Test Dataset 2').should('be.visible')
-    cy.contains('DAC 2').should('be.visible')
-    cy.contains('2025-07-08').should('be.visible')
+      expect(screen.getByText('DAR-002')).toBeInTheDocument()
+      expect(screen.getByText('DS-456')).toBeInTheDocument()
+      expect(screen.getByText('Test Dataset 2')).toBeInTheDocument()
+      expect(screen.getByText('DAC 2')).toBeInTheDocument()
+      expect(screen.getByText(formatDate(1752014831956))).toBeInTheDocument()
+    })
+  })
+
+  it('shows an error notification when the API call fails', async () => {
+    vi.mocked(User.getApprovedDatasets).mockRejectedValue(new Error('network error'))
+
+    render(<ControlledAccessGrants />)
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalledWith({
+        text: 'Error: Unable to retrieve user data from server',
+      })
+    })
   })
 })
