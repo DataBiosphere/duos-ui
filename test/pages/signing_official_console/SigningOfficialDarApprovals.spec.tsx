@@ -1,6 +1,6 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { Collections } from 'src/libs/ajax/Collections'
@@ -14,6 +14,16 @@ type MockDarCollectionTableProps = {
   isLoading: boolean
   consoleType: string
 }
+
+vi.mock('src/components/SearchBar', () => ({
+  default: ({ handleSearchChange }: { handleSearchChange: (value: string) => void }) => (
+    <input
+      type="text"
+      aria-label="search"
+      onChange={e => handleSearchChange(e.target.value)}
+    />
+  ),
+}))
 
 vi.mock('src/hooks/useResponsiveDarCollectionColumns', () => ({
   useResponsiveDarCollectionColumns: vi.fn(() => ['darCode', 'actions']),
@@ -125,5 +135,45 @@ describe('SigningOfficialDarApprovals', () => {
     expect(document.querySelector('#signingOfficial-approve-2')).not.toBeInTheDocument()
     expect(document.querySelector('#signingOfficial-approve-3')).toBeInTheDocument()
     expect(document.querySelector('#signingOfficial-approve-3')).toHaveTextContent('Approve')
+  })
+
+  it('renders a search bar', async () => {
+    render(<SigningOfficialDarApprovals />)
+    await screen.findByTestId('dar-collection-table')
+    expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument()
+  })
+
+  it('filters the approval list by search term', async () => {
+    render(<SigningOfficialDarApprovals />)
+    // DAR-1 and DAR-3 pass the requiresSOApproval filter; DAR-2 is already excluded
+    await screen.findByText('DAR-3')
+
+    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+      target: { value: 'DAR-1' },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('DAR-1')).toBeInTheDocument()
+      expect(screen.queryByText('DAR-3')).not.toBeInTheDocument()
+    })
+  })
+
+  it('restores the approval list when search is cleared', async () => {
+    render(<SigningOfficialDarApprovals />)
+    await screen.findByText('DAR-3')
+
+    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+      target: { value: 'DAR-1' },
+    })
+    await waitFor(() => expect(screen.queryByText('DAR-3')).not.toBeInTheDocument())
+
+    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+      target: { value: '' },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('DAR-1')).toBeInTheDocument()
+      expect(screen.getByText('DAR-3')).toBeInTheDocument()
+    })
   })
 })
