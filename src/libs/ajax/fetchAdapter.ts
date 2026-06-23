@@ -288,7 +288,7 @@ const withRetry = async <T>(fn: () => Promise<T>, signal?: AbortSignal): Promise
     }
     catch (error) {
       if (i === RETRY_DELAYS_MS.length || signal?.aborted || !isRetryable(error)) throw error
-      await sleep(RETRY_DELAYS_MS[i] + Math.random() * 200, signal)
+      await sleep(RETRY_DELAYS_MS[i] + Math.random() * 200, signal) // NOSONAR: non-cryptographic jitter to spread retry thundering herd
     }
   }
   throw new Error('unreachable')
