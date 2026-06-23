@@ -16,7 +16,7 @@ interface MultiDatasetVotingTabProps {
   readonly isLoading?: boolean
   readonly readOnly?: boolean
   readonly adminPage?: boolean
-  readonly updateFinalVote?: (...args: unknown[]) => void
+  readonly updateFinalVote?: (key: string, votePayload: Record<string, unknown>, voteIds: number[]) => void
   readonly reloadFn?: (...args: unknown[]) => void
 }
 
@@ -27,7 +27,7 @@ interface DatasetVoteSlabsProps {
   readonly isApprovalDisabled: boolean
   readonly readOnly: boolean
   readonly adminPage: boolean
-  readonly updateFinalVote: (...args: unknown[]) => void
+  readonly updateFinalVote: (key: string, votePayload: Record<string, unknown>, voteIds: number[]) => void
   readonly isLoading: boolean
   readonly reloadFn: (...args: unknown[]) => void
 }
@@ -53,7 +53,7 @@ const DatasetVoteSlabs = ({
       readOnly={readOnly}
       key={bucket.key}
       adminPage={adminPage}
-      updateFinalVote={updateFinalVote}
+      updateFinalVote={updateFinalVote as (...args: unknown[]) => void}
       isLoading={isLoading}
       reloadFn={reloadFn}
     />
