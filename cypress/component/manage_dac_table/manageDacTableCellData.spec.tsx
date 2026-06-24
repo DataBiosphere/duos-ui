@@ -46,7 +46,7 @@ describe('ManageDacTableCellData Actions Tests', () => {
   it('disables the delete button when the DAC has datasets', () => {
     mountActions({ dac: mockDacWithDatasets, deleteDac: cy.stub(), userRole: 'Admin' })
 
-    cy.get('button[disabled]').should('exist')
+    cy.get('[data-tip="All datasets assigned to this DAC must be reassigned before this can be deleted"]').should('exist')
   })
 
   it('calls deleteDac when the delete button is clicked', () => {
