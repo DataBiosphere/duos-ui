@@ -963,4 +963,7 @@ DataAccessRequestApplication.propTypes = {
   isProgressReportApplication: PropTypes.bool.isRequired,
   existingDarsReadOnlyMode: PropTypes.bool,
   collection: PropTypes.object,
+  researcherProfile: PropTypes.object,
+  adminPage: PropTypes.bool,
+  readOnly: PropTypes.bool,
 }
