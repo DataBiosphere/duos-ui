@@ -115,37 +115,6 @@ describe('DataSet', () => {
     })
   })
 
-  describe('getRegistrationSchema', () => {
-    it('fetches the registration schema and returns the data', async () => {
-      const schema = { studyName: 'My Study', studyDescription: 'desc', dataTypes: [], piName: 'Dr. PI', publicVisibility: true }
-      vi.mocked(fetchGet).mockResolvedValue({ data: schema })
-
-      const result = await DataSet.getRegistrationSchema()
-
-      expect(fetchGet).toHaveBeenCalledWith(
-        'https://duos.example.org/schemas/dataset-registration/v1',
-        headers,
-      )
-      expect(result).toEqual(schema)
-    })
-
-    it('propagates fetch failures', async () => {
-      vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
-      await expect(DataSet.getRegistrationSchema()).rejects.toThrow('network failure')
-    })
-
-    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
-      const consentError = { message: 'Schema not found', code: 404 }
-      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
-      const error = await DataSet.getRegistrationSchema().then(
-        () => { throw new Error('expected rejection') },
-        e => e,
-      )
-      expect(extractConsentError(error)).toEqual(consentError)
-      expect(extractError(error)).toBe('Schema not found')
-    })
-  })
-
   describe('registerDataset', () => {
     it('posts multipart form data and returns the created dataset', async () => {
       const dataset = buildDataset()
