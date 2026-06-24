@@ -14,7 +14,7 @@ const mockDacWithDatasets = {
   datasets: [{ datasetId: 1 }],
 }
 
-const mountActions = (props: { dac: object; deleteDac: unknown; userRole: string }) => {
+const mountActions = (props: { dac: object, deleteDac: unknown, userRole: string }) => {
   const cellData = actionsCellData(props)
   cy.mount(<BrowserRouter>{cellData.data}</BrowserRouter>)
 }
