@@ -28,17 +28,17 @@ export function createPgSessionStore(pg: PostgresDb): PgSessionStore {
   const expiryFromSession = (session: Session) =>
     new Date(Date.now() + (session.cookie.maxAge ?? EIGHT_HOURS_MS))
 
-  const store = {
+  return {
     async get(sid, callback) {
       try {
         const { rows } = await pg.query(
           'SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW()',
-          [sid]
+          [sid],
         )
         callback(null, rows[0]?.sess ?? null)
       }
       catch (err) {
-        callback(err as Error)
+        callback(err)
       }
     },
 
@@ -47,12 +47,12 @@ export function createPgSessionStore(pg: PostgresDb): PgSessionStore {
         await pg.query(
           `INSERT INTO user_sessions (sid, sess, expire) VALUES ($1, $2, $3)
            ON CONFLICT (sid) DO UPDATE SET sess = $2, expire = $3`,
-          [sid, session, expiryFromSession(session)]
+          [sid, session, expiryFromSession(session)],
         )
         callback(null)
       }
       catch (err) {
-        callback(err as Error)
+        callback(err)
       }
     },
 
@@ -62,7 +62,7 @@ export function createPgSessionStore(pg: PostgresDb): PgSessionStore {
         callback(null)
       }
       catch (err) {
-        callback(err as Error)
+        callback(err)
       }
     },
 
@@ -70,15 +70,13 @@ export function createPgSessionStore(pg: PostgresDb): PgSessionStore {
       try {
         await pg.query(
           'UPDATE user_sessions SET expire = $2 WHERE sid = $1',
-          [sid, expiryFromSession(session)]
+          [sid, expiryFromSession(session)],
         )
         callback(null)
       }
       catch (err) {
-        callback(err as Error)
+        callback(err)
       }
     },
   } satisfies PgSessionStore
-
-  return store
 }
