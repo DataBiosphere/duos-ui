@@ -3,7 +3,7 @@ import { getDefaultProperties } from '@databiosphere/bard-client'
 import { Storage } from 'src/libs/storage'
 import { Config, Token } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
-import { fetchPost } from 'src/libs/ajax/fetchAdapter'
+import { retryFetchPost } from 'src/libs/ajax/fetchAdapter'
 
 // Set default timeout for all metrics calls to 30 seconds
 const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
@@ -52,7 +52,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
   const url = `${await Config.getBardApiUrl()}/api/event`
   const headers = isRegistered ? { Authorization: `Bearer ${Token.getToken()}` } : undefined
 
-  return fetchPost(url, body, { headers, signal })
+  return retryFetchPost(url, body, { headers, signal })
 }
 
 /**
@@ -65,7 +65,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
 const syncProfile = async (signal: AbortSignal): Promise<any> => {
   const url = `${await Config.getBardApiUrl()}/api/syncProfile`
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
-  return fetchPost(url, undefined, { headers, signal }).catch(() => {})
+  return retryFetchPost(url, undefined, { headers, signal }).catch(() => {})
 }
 
 /**
@@ -82,5 +82,5 @@ const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
   const url = `${await Config.getBardApiUrl()}/api/identify`
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
 
-  return fetchPost(url, body, { headers, signal }).catch(() => {})
+  return retryFetchPost(url, body, { headers, signal }).catch(() => {})
 }
