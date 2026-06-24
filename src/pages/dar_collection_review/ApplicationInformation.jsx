@@ -318,8 +318,6 @@ ApplicationInformation.propTypes = {
   institution: PropTypes.string,
   nonTechSummary: PropTypes.string,
   isLoading: PropTypes.bool,
-  collection: PropTypes.object,
-  dataUseBuckets: PropTypes.array,
   externalCollaborators: PropTypes.arrayOf(PropTypes.shape({ name: PropTypes.string })),
   internalCollaborators: PropTypes.arrayOf(PropTypes.shape({ name: PropTypes.string })),
   internalLabStaff: PropTypes.arrayOf(PropTypes.shape({ name: PropTypes.string })),
@@ -334,8 +332,6 @@ ApplicationInformation.propTypes = {
   cloudProviderDescription: PropTypes.string,
   rus: PropTypes.string,
   referenceId: PropTypes.string,
-  irbDocumentLocation: PropTypes.string,
-  irbDocumentName: PropTypes.string,
   collaborationLetterLocation: PropTypes.string,
   collaborationLetterName: PropTypes.string,
 }

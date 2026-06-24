@@ -161,9 +161,4 @@ export default function ResearchProposalSlab(props) {
 ResearchProposalSlab.propTypes = {
   darInfo: PropTypes.object,
   isLoading: PropTypes.bool,
-  updateFinalVote: PropTypes.func,
-  bucket: PropTypes.object,
-  isChair: PropTypes.bool,
-  readOnly: PropTypes.bool,
-  adminPage: PropTypes.bool,
 }
