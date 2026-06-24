@@ -1,7 +1,7 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import { isNil } from 'src/utils/NodashUtil'
 import VotesPieChart from 'src/components/common/VotesPieChart'
+import { Vote } from 'src/types/model'
 
 const styles = {
   chairVoteInfo: {
@@ -10,9 +10,15 @@ const styles = {
     rowGap: '1.5rem',
     fontWeight: 'bold',
   },
+} as const
+
+interface ChairVoteInfoProps {
+  readonly dacVotes: Vote[]
+  readonly isChair?: boolean
+  readonly adminPage?: boolean
 }
 
-export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
+export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }: ChairVoteInfoProps) => {
   return (isChair && dacVotes.some(v => !isNil(v.vote))) && (
     <div
       style={styles.chairVoteInfo}
@@ -37,10 +43,4 @@ export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
       </div>
     </div>
   )
-}
-
-ChairVoteInfo.propTypes = {
-  dacVotes: PropTypes.array.isRequired,
-  isChair: PropTypes.bool,
-  adminPage: PropTypes.bool,
 }
