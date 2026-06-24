@@ -19,8 +19,8 @@ const styles = {
 interface CollectionVoteButtonProps {
   /** Function to execute when button is clicked */
   readonly onClick?: () => Promise<void>
-  /** The text label to display on the button */
-  readonly label: string
+  /** The label to display on the button */
+  readonly label: React.ReactNode
   /** Whether the button is disabled */
   readonly disabled?: boolean
   /** Whether the button is in selected state */
