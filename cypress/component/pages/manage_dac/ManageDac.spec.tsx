@@ -2,7 +2,6 @@ import React from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { DAC } from 'src/libs/ajax/DAC'
-import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import { DataUseTranslation } from 'src/libs/dataUseTranslation'
@@ -167,7 +166,6 @@ const mountManageDac = () => {
         <Route path="/manage_dac/:dacId" element={<RouteStateViewer />} />
         <Route path="/manage_add_dac_daa" element={<RouteStateViewer />} />
         <Route path="/manage_dac_datasets" element={<RouteStateViewer />} />
-        <Route path="/manage_edit_dac_daa/:dacId" element={<RouteStateViewer />} />
       </Routes>
     </MemoryRouter>,
   )
@@ -201,15 +199,14 @@ describe('ManageDac', () => {
     cy.contains('Beta DAC').should('not.exist')
   })
 
-  it('opens the inline add DAC form when ADD DAC is clicked', () => {
+  it('navigates to the add DAC page when ADD DAC is clicked', () => {
     cy.stub(Storage, 'getCurrentUser').returns(adminUser)
     cy.stub(DAC, 'list').resolves([])
-    cy.stub(DAA, 'getDaas').resolves([])
 
     mountManageDac()
 
     cy.get('#btn_addDAC').click()
-    cy.contains('DAC Configurations').should('be.visible')
+    cy.get('[data-cy="route-path"]').should('contain', '/manage_add_dac_daa')
   })
 
   it('navigates to the DAC profile page when the DAC name is clicked', () => {
@@ -254,6 +251,43 @@ describe('ManageDac', () => {
 
     cy.get('@showError').should('have.been.calledWith', { text: 'DAC has no datasets.' })
     cy.contains('Manage My Data Access Committee').should('be.visible')
+  })
+
+  it('shows an error and stops loading when the DAC list fails to load', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'list').rejects(new Error('Network error'))
+
+    mountManageDac()
+
+    cy.get('@showError').should('have.been.calledWith', { text: 'Failed to load DACs.' })
+    cy.get('img[alt="spinner"]').should('not.exist')
+  })
+
+  it('navigates to the edit DAC page when the edit icon is clicked', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'list').resolves([primaryDac])
+
+    mountManageDac()
+
+    cy.get(`[data-tip="Edit ${primaryDac.name}"]`).click({ force: true })
+    cy.get('[data-cy="route-path"]').should('contain', `/manage_dac/${primaryDac.dacId}`)
+  })
+
+  it('hides the datasets section when the Close button is clicked', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'list').resolves([primaryDac])
+    cy.stub(DataUseTranslation, 'translateDataUseRestrictions').resolves([])
+    cy.stub(DAC, 'datasets').resolves([
+      makeDataset({ datasetId: 1, name: 'Approved Dataset', dacId: 1, dacApproval: true, createUser: adminUser }),
+    ])
+
+    mountManageDac()
+
+    cy.get(`#${primaryDac.dacId}_dacDatasets`).click()
+    cy.contains('DAC Datasets associated with DAC: Alpha DAC').should('be.visible')
+
+    cy.contains('button', 'Close').click()
+    cy.contains('DAC Datasets associated with DAC: Alpha DAC').should('not.exist')
   })
 
   it('deletes the selected DAC after confirmation and refreshes the list', () => {

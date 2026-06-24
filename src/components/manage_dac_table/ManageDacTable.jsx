@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { DAC } from 'src/libs/ajax/DAC'
 import { filter, isNil } from 'src/utils/NodashUtil'
-import { recalculateVisibleTable, goToPage as updatePage } from 'src/libs/utils'
+import { recalculateVisibleTable, goToPage as updatePage, Notifications } from 'src/libs/utils'
 import cellData from 'src/components/manage_dac_table/ManageDacTableCellData'
 import { styles } from 'src/components/manage_dac_table/manageDacTableUtils'
 import SimpleTable from 'src/components/SimpleTable'
@@ -56,7 +56,7 @@ const getInitialSort = (columns = []) => {
   }
 }
 
-const processDacRowData = ({ dacs, viewDatasets, editDac, deleteDac, userRole, columns = columns }) => {
+const processDacRowData = ({ dacs, viewDatasets, deleteDac, userRole, columns = columns }) => {
   if (!isNil(dacs)) {
     return dacs.map((dac) => {
       const {
@@ -72,7 +72,6 @@ const processDacRowData = ({ dacs, viewDatasets, editDac, deleteDac, userRole, c
           description,
           name,
           viewDatasets,
-          editDac,
           deleteDac,
           userRole,
         })
@@ -95,17 +94,10 @@ export const ManageDacTable = function ManageDacTable(props) {
     isLoading,
     dacs,
     userRole,
-    setShowEditPage,
-    setShowDatasetsPage,
+    onViewDatasets,
     setShowConfirmationModal,
     setSelectedDac,
-    setSelectedDatasets,
   } = props
-
-  const editDac = useCallback((selectedDac) => {
-    setShowEditPage(true)
-    setSelectedDac(selectedDac)
-  }, [setShowEditPage, setSelectedDac])
 
   const deleteDac = useCallback((selectedDac) => {
     setShowConfirmationModal(true)
@@ -113,12 +105,15 @@ export const ManageDacTable = function ManageDacTable(props) {
   }, [setShowConfirmationModal, setSelectedDac])
 
   const viewDatasets = useCallback(async (selectedDac) => {
-    const datasets = await DAC.datasets(selectedDac.dacId)
-    const approvedDatasets = filter(datasets, { dacApproval: true })
-    setShowDatasetsPage(true)
-    setSelectedDac(selectedDac)
-    setSelectedDatasets(approvedDatasets)
-  }, [setShowDatasetsPage, setSelectedDac, setSelectedDatasets])
+    try {
+      const datasets = await DAC.datasets(selectedDac.dacId)
+      const approvedDatasets = filter(datasets, { dacApproval: true })
+      onViewDatasets(selectedDac, approvedDatasets)
+    }
+    catch {
+      Notifications.showError({ text: 'Failed to load datasets.' })
+    }
+  }, [onViewDatasets])
 
   useEffect(() => {
     recalculateVisibleTable({
@@ -127,7 +122,6 @@ export const ManageDacTable = function ManageDacTable(props) {
       filteredList: processDacRowData({
         dacs,
         viewDatasets,
-        editDac,
         deleteDac,
         userRole,
         columns,
@@ -138,7 +132,7 @@ export const ManageDacTable = function ManageDacTable(props) {
       setVisibleList: l => setVisibleDacs(l),
       sort,
     })
-  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets])
+  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, viewDatasets])
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !Number.isNaN(Number.parseInt(value))) {
@@ -159,11 +153,9 @@ export const ManageDacTable = function ManageDacTable(props) {
     isLoading: PropTypes.bool,
     dacs: PropTypes.array,
     userRole: PropTypes.string,
-    setShowEditPage: PropTypes.func,
-    setShowDatasetsPage: PropTypes.func,
+    onViewDatasets: PropTypes.func,
     setShowConfirmationModal: PropTypes.func,
     setSelectedDac: PropTypes.func,
-    setSelectedDatasets: PropTypes.func,
     columns: PropTypes.array,
   }
 

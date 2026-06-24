@@ -94,53 +94,56 @@ const DATASET_COLUMNS: GridColDef[] = [
 
 export const DacProfile: React.FC = () => {
   const { dacId: dacIdParam } = useParams<{ dacId: string }>()
-  const dacId = dacIdParam ? Number.parseInt(dacIdParam, 10) : undefined
+  const parsedId = dacIdParam !== undefined ? Number.parseInt(dacIdParam, 10) : NaN
+  const dacId = Number.isNaN(parsedId) ? undefined : parsedId
 
   const [dac, setDac] = useState<DacObject | null>(null)
   const [datasets, setDatasets] = useState<Dataset[]>([])
   const [translatedDataUse, setTranslatedDataUse] = useState<Map<number, string>>(new Map())
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(dacId !== undefined)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [sectionKey, setSectionKey] = useState(0)
 
   usePageTitle(dac?.name ?? 'DAC Profile')
 
-  const loadDacData = useCallback(async () => {
+  // Load DAC data on mount. isLoading starts as true; all setState calls happen after the await.
+  useEffect(() => {
     if (dacId === undefined) return
-    setIsLoading(true)
-    try {
-      const [fetchedDac, allDatasets] = await Promise.all([
-        DAC.get(dacId),
-        DAC.datasets(dacId),
-      ])
-      setDac(fetchedDac)
-      setDatasets(allDatasets.filter((d: Dataset) => d.dacApproval))
-    }
-    catch {
-      Notifications.showError({ text: 'Failed to load DAC profile.' })
-    }
-    finally {
-      setIsLoading(false)
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [fetchedDac, allDatasets] = await Promise.all([
+          DAC.get(dacId),
+          DAC.datasets(dacId),
+        ])
+        if (cancelled) return
+        setDac(fetchedDac)
+        setDatasets(allDatasets.filter((d: Dataset) => d.dacApproval))
+      }
+      catch {
+        if (!cancelled) Notifications.showError({ text: 'Failed to load DAC profile.' })
+      }
+      finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
     }
   }, [dacId])
 
+  // Translate data use restrictions whenever the dataset list changes.
+  // Promise.all([]) resolves to [] when datasets is empty, yielding an empty Map.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadDacData()
-  }, [loadDacData])
-
-  // Translate data use restrictions whenever the dataset list changes
-  useEffect(() => {
-    if (datasets.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTranslatedDataUse(new Map())
-      return
-    }
+    let cancelled = false
     const translateAll = async () => {
       const entries = await Promise.all(datasets.map(translateDataset))
-      setTranslatedDataUse(new Map(entries))
+      if (!cancelled) setTranslatedDataUse(new Map(entries))
     }
     void translateAll()
+    return () => {
+      cancelled = true
+    }
   }, [datasets])
 
   // After EditDac saves or cancels: re-fetch fresh data, then re-mount sections

@@ -138,8 +138,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       setDACbotRules(rules)
       return rules
     }
-    catch (e) {
-      console.error(e)
+    catch {
       Notifications.showError(
         {
           severity: 'error',
@@ -169,15 +168,20 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       }
     }
     finally {
-      // Fetch updated rules to refresh state
-      const allRules = await DAC.fetchDACbotRules(dacId)
-      const createUpdatedRulesMap = (allRules: DACbotRule[], updatedRuleIds: number[]) => {
-        const rulesMap = new Map(allRules.map(r => [r.id, r]))
-        return (r: DACbotRule) => updatedRuleIds.includes(r.id) ? rulesMap.get(r.id) || r : r
+      try {
+        // Fetch updated rules to refresh state
+        const allRules = await DAC.fetchDACbotRules(dacId)
+        const createUpdatedRulesMap = (allRules: DACbotRule[], updatedRuleIds: number[]) => {
+          const rulesMap = new Map(allRules.map(r => [r.id, r]))
+          return (r: DACbotRule) => updatedRuleIds.includes(r.id) ? rulesMap.get(r.id) || r : r
+        }
+        setDACbotRules(prevRules =>
+          prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)),
+        )
       }
-      setDACbotRules(prevRules =>
-        prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)),
-      )
+      catch {
+        Notifications.showError({ text: 'Failed to refresh DAC rules.' })
+      }
     }
   }, [dacId, DACbotRules])
 

@@ -5,7 +5,6 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
-import EditDac from 'src/pages/manage_dac/EditDac'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
@@ -13,7 +12,7 @@ import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOu
 import type { DacObject, Dataset, DatasetProperty } from 'src/types/model'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { Box, CircularProgress, Typography } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { DataUseTranslation } from 'src/libs/dataUseTranslation'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 
@@ -99,6 +98,7 @@ const DATASET_COLUMNS: GridColDef[] = [
 
 export const ManageDac = function ManageDac() {
   usePageTitle('DACs')
+  const navigate = useNavigate()
   const currentUser = useMemo(() => Storage.getCurrentUser(), [])
   const roles = useMemo(() => currentUser.roles?.map((r: { name: string }) => r.name) ?? [], [currentUser])
   const userRole: ManageDacRole = roles.includes(ADMIN) ? ADMIN : CHAIR
@@ -111,7 +111,6 @@ export const ManageDac = function ManageDac() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [dacs, setDacs] = useState<DacObject[]>([])
 
-  const [showEditPage, setShowEditPage] = useState<boolean>(false)
   const [showDatasetsPage, setShowDatasetsPage] = useState<boolean>(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false)
 
@@ -121,51 +120,58 @@ export const ManageDac = function ManageDac() {
   const [datasetPaginationModel, setDatasetPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   const initializeDACs = useCallback(async () => {
-    const allDacs = await DAC.list()
-    if (roles.includes(ADMIN)) {
-      setDacs(allDacs)
+    try {
+      const allDacs = await DAC.list()
+      if (roles.includes(ADMIN)) {
+        setDacs(allDacs)
+      }
+      else {
+        setDacs(allDacs.filter((dac: DacObject) => dac.dacId !== undefined && chairDACIds.has(dac.dacId)))
+      }
+      setIsLoading(false)
     }
-    else {
-      setDacs(allDacs.filter((dac: DacObject) => dac.dacId !== undefined && chairDACIds.has(dac.dacId)))
+    catch {
+      Notifications.showError({ text: 'Failed to load DACs.' })
     }
-    setIsLoading(false)
   }, [chairDACIds, roles])
 
+  // Load DACs on mount / when role/chair set changes.
+  // All setState calls happen after the await, so no synchronous state update in the effect body.
   useEffect(() => {
-    let isMounted = true
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    initializeDACs().catch((error) => {
-      if (isMounted) {
-        Notifications.showError({ text: 'Failed to load DACs.' })
-        console.error('Error loading DACs:', error)
+    let cancelled = false
+    ;(async () => {
+      try {
+        const allDacs = await DAC.list()
+        if (cancelled) return
+        const filteredDacs = roles.includes(ADMIN)
+          ? allDacs
+          : allDacs.filter((dac: DacObject) => dac.dacId !== undefined && chairDACIds.has(dac.dacId))
+        setDacs(filteredDacs)
       }
-    })
+      catch {
+        if (!cancelled) Notifications.showError({ text: 'Failed to load DACs.' })
+      }
+      finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    })()
     return () => {
-      isMounted = false
+      cancelled = true
     }
-  }, [initializeDACs])
+  }, [chairDACIds, roles])
 
-  // Show notification when datasets section opens with no datasets
+  // Translate data use restrictions whenever the dataset list changes.
+  // Promise.all([]) resolves to [] when selectedDatasets is empty, yielding an empty Map.
   useEffect(() => {
-    if (showDatasetsPage && selectedDac !== null && selectedDatasets.length === 0) {
-      Notifications.showError({ text: 'DAC has no datasets.' })
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowDatasetsPage(false)
-    }
-  }, [showDatasetsPage, selectedDac, selectedDatasets])
-
-  // Translate data use restrictions whenever the dataset list changes
-  useEffect(() => {
-    if (selectedDatasets.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTranslatedDataUse(new Map())
-      return
-    }
+    let cancelled = false
     const translateAll = async () => {
       const entries = await Promise.all(selectedDatasets.map(translateDataset))
-      setTranslatedDataUse(new Map(entries))
+      if (!cancelled) setTranslatedDataUse(new Map(entries))
     }
     void translateAll()
+    return () => {
+      cancelled = true
+    }
   }, [selectedDatasets])
 
   const handleDeleteDac = async () => {
@@ -184,35 +190,22 @@ export const ManageDac = function ManageDac() {
     }
   }
 
-  const handleEditClose = useCallback(async () => {
-    setShowEditPage(false)
-    setSelectedDac(null)
-    await initializeDACs()
-  }, [initializeDACs])
-
-  const handleOpenEdit = useCallback((show: boolean) => {
-    setShowEditPage(show)
-    if (show) {
-      setShowDatasetsPage(false)
-      setTimeout(() => {
-        document.getElementById('dac-configurations-section')?.scrollIntoView({ behavior: 'smooth' })
-      }, 50)
+  // Combined callback for ManageDacTable: validates datasets and opens the datasets section.
+  const handleViewDatasets = useCallback((dac: DacObject, datasets: Dataset[]) => {
+    if (datasets.length === 0) {
+      Notifications.showError({ text: 'DAC has no datasets.' })
+      return
     }
-  }, [])
-
-  const handleOpenDatasets = useCallback((show: boolean) => {
-    setShowDatasetsPage(show)
-    if (show) {
-      setShowEditPage(false)
-      setTimeout(() => {
-        document.getElementById('dac-datasets-section')?.scrollIntoView({ behavior: 'smooth' })
-      }, 50)
-    }
+    setSelectedDac(dac)
+    setSelectedDatasets(datasets)
+    setShowDatasetsPage(true)
+    setTimeout(() => {
+      document.getElementById('dac-datasets-section')?.scrollIntoView({ behavior: 'smooth' })
+    }, 50)
   }, [])
 
   const addDac = () => {
-    setSelectedDac(null)
-    handleOpenEdit(true)
+    navigate('/manage_add_dac_daa')
   }
 
   const handleDatasetsClose = useCallback(() => {
@@ -259,11 +252,9 @@ export const ManageDac = function ManageDac() {
         isLoading={isLoading}
         dacs={dacs}
         userRole={userRole}
-        setShowDatasetsPage={handleOpenDatasets}
+        onViewDatasets={handleViewDatasets}
         setShowConfirmationModal={setShowConfirmationModal}
         setSelectedDac={setSelectedDac}
-        setSelectedDatasets={setSelectedDatasets}
-        setShowEditPage={handleOpenEdit}
       />
 
       <ConfirmationModal
@@ -275,20 +266,7 @@ export const ManageDac = function ManageDac() {
         onConfirm={handleDeleteDac}
       />
 
-      {/* ── Section 2: DAC Configurations ── */}
-      {showEditPage && (
-        <div id="dac-configurations-section">
-          <hr style={SECTION_DIVIDER} />
-          <Typography sx={SECTION_TITLE_SX}>DAC Configurations</Typography>
-          <EditDac
-            dacId={selectedDac?.dacId}
-            onClose={handleEditClose}
-            hideHeader
-          />
-        </div>
-      )}
-
-      {/* ── Section 3: DAC Datasets associated with DAC: ── */}
+      {/* ── Section 2: DAC Datasets associated with DAC: ── */}
       {showDatasetsPage && selectedDac && selectedDatasets.length > 0 && (
         <div id="dac-datasets-section">
           <hr style={SECTION_DIVIDER} />

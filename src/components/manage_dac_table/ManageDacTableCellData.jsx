@@ -6,7 +6,6 @@ import { Styles } from 'src/libs/theme'
 import { Delete } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
 import editPencilIcon from 'src/images/edit_pencil.svg'
-import radarIcon from 'src/images/google-svg/radar.svg'
 
 export function nameCellData({ name = '- -', dacId, label = 'dac-name' }) {
   return {
@@ -58,29 +57,20 @@ export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) 
   }
 }
 
-export function actionsCellData({ dac, deleteDac, editDac, userRole }) {
+export function actionsCellData({ dac, deleteDac, userRole }) {
   const isAdmin = (userRole === 'Admin')
   const deleteDisabled = (!isNil(dac.datasets) && !isEmpty(dac.datasets))
 
   const actions = (
     <>
-      <div style={{ paddingTop: '5px', paddingRight: '4px' }}>
+      <div style={{ paddingTop: '5px' }}>
         <Link
           to={`/manage_dac/${dac.dacId}`}
-          data-tip={`Edit rule automation for DARs in ${dac.name}`}
-        >
-          <img className="radar-icon" src={radarIcon} alt="Edit rule automation" />
-        </Link>
-      </div>
-      <div style={{ paddingTop: '5px' }}>
-        <button
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           data-tip={`Edit ${dac.name}`}
-          onClick={() => editDac(dac)}
           aria-label={`Edit ${dac.name}`}
         >
           <img id="edit-pencil-icon" src={editPencilIcon} alt="Edit DAC" />
-        </button>
+        </Link>
       </div>
       {isAdmin && (
         <TableIconButton
