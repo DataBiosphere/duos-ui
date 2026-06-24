@@ -4,7 +4,7 @@ import { PageHeading } from 'src/components/PageHeading'
 import { Notification } from 'src/components/Notification'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
-import { NotificationService } from 'src/libs/notificationService'
+import { Banner, NotificationService } from 'src/libs/notificationService'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
@@ -14,16 +14,17 @@ import ga4ghLogo from 'src/images/ga4gh-logo.png'
 import userProfileIcon from 'src/images/user-profile.png'
 import { Link } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import { DuosUser } from 'src/types/model'
 
 export default function UserProfile() {
   usePageTitle('User Profile')
-  const [user, setUser] = useState({})
-  const [name, setName] = useState('')
-  const [updatedName, setUpdatedName] = useState('')
+  const [user, setUser] = useState<Partial<DuosUser>>({})
+  const [name, setName] = useState<string>('')
+  const [updatedName, setUpdatedName] = useState<string>('')
 
-  const [notificationData, setNotificationData] = useState({})
+  const [notificationData, setNotificationData] = useState<Banner | null | undefined>(null)
 
-  const updateRef = ({ _key, value }) => {
+  const updateRef = ({ value }: { key: string, value: string, isValid: boolean }) => {
     setName(value)
     setUpdatedName(value)
   }
@@ -35,7 +36,9 @@ export default function UserProfile() {
       }
 
       User.updateSelf(payload).then((response) => {
-        setUserRoleStatuses(response, Storage)
+        if (response) {
+          setUserRoleStatuses(response, Storage)
+        }
         Notifications.showSuccess({ text: 'Name updated successfully!' })
       }, () => {
         Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' })
@@ -46,13 +49,15 @@ export default function UserProfile() {
     }
   }
 
-  const updateEmailPreference = (value) => {
+  const updateEmailPreference = (value: boolean) => {
     const payload = {
       emailPreference: value,
     }
 
     User.updateSelf(payload).then((response) => {
-      setUserRoleStatuses(response, Storage)
+      if (response) {
+        setUserRoleStatuses(response, Storage)
+      }
       Notifications.showSuccess({ text: 'Email preference updated successfully!' })
     }, () => {
       Notifications.showError({ text: 'Some errors occurred, the user\'s email preference was not updated.' })
@@ -67,7 +72,7 @@ export default function UserProfile() {
         setName(user.displayName)
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
       }
     }
@@ -101,9 +106,6 @@ export default function UserProfile() {
               color="common"
               title="Your Profile"
               descriptionStyle={{ fontSize: '10000px' }}
-              style={{
-                float: 'left',
-              }}
               imgSrc={userProfileIcon}
               iconSize="large"
             />
@@ -125,7 +127,7 @@ export default function UserProfile() {
               }}
             />
             <p>
-              DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found&nbsp;
+              DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found{' '}
               <a href="https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md">
                 here.
               </a>
@@ -191,11 +193,11 @@ export default function UserProfile() {
         title="Send me email notifications"
         hideTitle={true}
         defaultValue={user.emailPreference}
-        onChange={field => updateEmailPreference(field.value)}
+        onChange={(field: { key: string, value: boolean, isValid: boolean }) => updateEmailPreference(field.value)}
       />
       <div style={{ marginTop: '45px' }} />
       <AffiliationAndRoles
-        user={user}
+        user={user as DuosUser}
       />
       <Link to="/request_role">
         <button
@@ -210,7 +212,7 @@ export default function UserProfile() {
       </Link>
       <div style={{ marginTop: '115px' }} />
       <ResearcherStatus
-        user={user}
+        user={user as DuosUser}
       />
       <div style={{ marginTop: '60px' }} />
       <AcceptedAcknowledgements />
