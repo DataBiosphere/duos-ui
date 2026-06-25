@@ -25,6 +25,7 @@ export interface LibraryVersionNew {
   description?: string
   featured: boolean
   order: number
+  showAllControlled?: boolean
 }
 
 export enum AccessManagement {

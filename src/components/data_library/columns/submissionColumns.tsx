@@ -62,9 +62,9 @@ export const makeSubmissionColumns = (
     headerName: 'Actions',
     width: 150,
     sortable: false,
-    filterable: true,
+    filterable: false,
     hideable: true,
-    disableColumnMenu: false,
+    disableColumnMenu: true,
     renderCell: (params) => {
       const term = params.row as unknown as DatasetTerm
       if (!term?.datasetId) return null

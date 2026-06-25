@@ -46,7 +46,6 @@ export default function DatasetSubmissions() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [urlState, updateUrlState] = useLibraryUrlState()
-  const [hideFilters, setHideFilters] = useState(true)
   const [deleteDialog, setDeleteDialog] = useState({ open: false, term: null })
 
   const user = Storage.getCurrentUser()
@@ -75,13 +74,14 @@ export default function DatasetSubmissions() {
   }, [user?.userId, user?.email])
 
   const libraryConfig = useMemo(() => ({
-    key: 'submissions',
+    key: `submissions-${user?.userId ?? 'anonymous'}`,
     title: 'My Data Submissions',
     description: 'View the status of datasets registered in DUOS',
     featured: true,
     order: 0,
     query: userOwnershipQuery,
-  }), [userOwnershipQuery])
+    showAllControlled: true,
+  }), [userOwnershipQuery, user?.userId])
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 
@@ -111,9 +111,9 @@ export default function DatasetSubmissions() {
 
     return {
       accessManagement: [
-        { value: 'controlled', label: 'Controlled' },
-        { value: 'open', label: 'Open' },
-        { value: 'external', label: 'External' },
+        { value: 'open', label: 'Open Access' },
+        { value: 'controlled', label: 'via DUOS' },
+        { value: 'external', label: 'External to DUOS' },
       ],
       dataUse: [
         { value: 'HMB', label: 'Health/Medical/Biomedical' },
@@ -193,8 +193,8 @@ export default function DatasetSubmissions() {
   }, [updateUrlState])
 
   const handleToggleFilters = useCallback(() => {
-    setHideFilters(h => !h)
-  }, [])
+    updateUrlState({ hideFilters: !urlState.hideFilters })
+  }, [updateUrlState, urlState.hideFilters])
 
   const handleDeleteClick = useCallback((term) => {
     setDeleteDialog({ open: true, term })
@@ -284,10 +284,10 @@ export default function DatasetSubmissions() {
         {/* Filters sidebar */}
         <Box
           sx={{
-            width: hideFilters ? 40 : 280,
+            width: urlState.hideFilters ? 40 : 280,
             flexShrink: 0,
-            pr: hideFilters ? 0 : 2,
-            overflowY: hideFilters ? 'hidden' : 'auto',
+            pr: urlState.hideFilters ? 0 : 2,
+            overflowY: urlState.hideFilters ? 'hidden' : 'auto',
             overflowX: 'hidden',
             transition: 'width 0.2s ease',
           }}
@@ -298,7 +298,7 @@ export default function DatasetSubmissions() {
             onClear={handleClearFilters}
             sections={filterSections}
             loading={isMetadataLoading}
-            isOpen={!hideFilters}
+            isOpen={!urlState.hideFilters}
             onToggle={handleToggleFilters}
           />
         </Box>
@@ -337,7 +337,7 @@ export default function DatasetSubmissions() {
               selectedDatasetIds={[]}
               onSelectionChange={() => {}}
               checkboxSelection={false}
-              extraColumns={extraColumns}
+              extraColumns={urlState.tab === AssetType.DATASETS ? extraColumns : undefined}
             />
           </Box>
         </Box>
@@ -349,7 +349,7 @@ export default function DatasetSubmissions() {
         openState={deleteDialog.open}
         close={handleDeleteClose}
         action={handleDeleteConfirm}
-        description={`Are you sure you want to delete the dataset '${deleteDialog.term?.datasetIdentifier}'?`}
+        description={`Are you sure you want to delete the dataset '${deleteDialog.term?.datasetName}'?`}
       />
     </Box>
   )

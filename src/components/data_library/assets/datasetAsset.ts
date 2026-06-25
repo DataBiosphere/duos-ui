@@ -43,9 +43,27 @@ export const datasetAsset: AssetDefinition = {
     filterQuery: QueryClause[],
     pagination: PaginationState,
     sort?: SortState,
+    opts?: { showAllControlled?: boolean },
   ): ElasticsearchQuery {
     const esSortField = sort ? (SORT_FIELD_MAP[sort.field] ?? sort.field) : undefined
-    // ES 9: top-level bool should/minimum_should_match, must/filter for additional clauses
+    const sortClause = sort ? { sort: [{ [esSortField!]: { order: sort.order } }] } : {}
+    const extraClauses = {
+      ...(queryChunks.length > 0 && { must: queryChunks }),
+      ...(filterQuery.length > 0 && { filter: filterQuery }),
+    }
+
+    // Submissions view: include all controlled datasets regardless of dacApproval state
+    if (opts?.showAllControlled) {
+      return {
+        from: pagination.page * pagination.pageSize,
+        size: pagination.pageSize,
+        query: { bool: extraClauses },
+        ...sortClause,
+        aggs: FILTER_AGGS,
+      }
+    }
+
+    // Public library: only surface approved controlled datasets
     return {
       from: pagination.page * pagination.pageSize,
       size: pagination.pageSize,
@@ -61,17 +79,10 @@ export const datasetAsset: AssetDefinition = {
             ] } },
           ],
           minimum_should_match: 1,
-          ...(queryChunks.length > 0 && { must: queryChunks }),
-          ...(filterQuery.length > 0 && { filter: filterQuery }),
+          ...extraClauses,
         },
       },
-      ...(sort && {
-        sort: [
-          {
-            [esSortField!]: { order: sort.order },
-          },
-        ],
-      }),
+      ...sortClause,
       aggs: FILTER_AGGS,
     }
   },

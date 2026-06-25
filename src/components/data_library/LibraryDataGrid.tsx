@@ -9,6 +9,8 @@ import { isEmpty } from 'src/utils/NodashUtil'
 import { LibraryDataGridProps } from 'src/types/library'
 import { assetRegistry, LibraryRow } from 'src/components/data_library/assets'
 
+const EMPTY_RADAR_IDS = new Set<number>()
+
 const LoadingOverlay = () => (
   <Box
     sx={{
@@ -39,7 +41,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   selectedDatasetIds,
   onSelectionChange,
   exportableDatasets = {},
-  radarEnabledDatasetIds = new Set(),
+  radarEnabledDatasetIds = EMPTY_RADAR_IDS,
   extraColumns,
   checkboxSelection = true,
 }) => {
