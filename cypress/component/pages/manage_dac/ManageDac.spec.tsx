@@ -4,6 +4,7 @@ import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Notifications } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
+import { DataUseTranslation } from 'src/libs/dataUseTranslation'
 import type { DacObject, Dataset, DuosUser, Study, UserRole } from 'src/types/model'
 
 const fixedDate = new Date('2026-05-01T12:00:00.000Z')
@@ -162,9 +163,9 @@ const mountManageDac = () => {
     <MemoryRouter initialEntries={['/manage_dac']}>
       <Routes>
         <Route path="/manage_dac" element={<ManageDac />} />
+        <Route path="/manage_dac/:dacId" element={<RouteStateViewer />} />
         <Route path="/manage_add_dac_daa" element={<RouteStateViewer />} />
         <Route path="/manage_dac_datasets" element={<RouteStateViewer />} />
-        <Route path="/manage_edit_dac_daa/:dacId" element={<RouteStateViewer />} />
       </Routes>
     </MemoryRouter>,
   )
@@ -183,7 +184,7 @@ describe('ManageDac', () => {
 
     mountManageDac()
 
-    cy.contains('Manage Data Access Committee').should('be.visible')
+    cy.contains('Manage My Data Access Committee').should('be.visible')
     cy.contains('Alpha DAC').should('be.visible')
     cy.contains('Beta DAC').should('be.visible')
   })
@@ -198,7 +199,7 @@ describe('ManageDac', () => {
     cy.contains('Beta DAC').should('not.exist')
   })
 
-  it('navigates to add DAC page with the current user role in route state', () => {
+  it('navigates to the add DAC page when ADD DAC is clicked', () => {
     cy.stub(Storage, 'getCurrentUser').returns(adminUser)
     cy.stub(DAC, 'list').resolves([])
 
@@ -206,23 +207,22 @@ describe('ManageDac', () => {
 
     cy.get('#btn_addDAC').click()
     cy.get('[data-cy="route-path"]').should('contain', '/manage_add_dac_daa')
-    cy.get('[data-cy="route-user-role"]').should('contain', 'Admin')
   })
 
-  it('opens the DAC members modal when the DAC name is clicked', () => {
+  it('navigates to the DAC profile page when the DAC name is clicked', () => {
     cy.stub(Storage, 'getCurrentUser').returns(adminUser)
     cy.stub(DAC, 'list').resolves([primaryDac])
 
     mountManageDac()
 
-    cy.get('.row-data-0 [role="cell"]').first().click()
-    cy.contains('DAC Members associated with DAC: Alpha DAC').should('be.visible')
-    cy.contains('Chair Person chair.person@example.org').should('be.visible')
+    cy.get('.row-data-0 [role="cell"]').first().find('a').click()
+    cy.get('[data-cy="route-path"]').should('contain', '/manage_dac/1')
   })
 
-  it('navigates to the datasets page with approved datasets only', () => {
+  it('shows approved datasets inline when View Datasets is clicked', () => {
     cy.stub(Storage, 'getCurrentUser').returns(adminUser)
     cy.stub(DAC, 'list').resolves([primaryDac])
+    cy.stub(DataUseTranslation, 'translateDataUseRestrictions').resolves([])
     const datasetsStub = cy.stub(DAC, 'datasets').resolves([
       makeDataset({ datasetId: 1, name: 'Approved Dataset', dacId: 1, dacApproval: true, createUser: adminUser }),
       makeDataset({ datasetId: 2, name: 'Unapproved Dataset', dacId: 1, dacApproval: false, createUser: adminUser }),
@@ -230,14 +230,12 @@ describe('ManageDac', () => {
 
     mountManageDac()
 
-    cy.get('.row-data-0 a[name="dacDatasets"]').click()
+    cy.get(`#${primaryDac.dacId}_dacDatasets`).click()
 
     cy.wrap(datasetsStub).should('have.been.calledWith', 1)
-    cy.get('[data-cy="route-path"]').should('contain', '/manage_dac_datasets')
-    cy.get('[data-cy="route-dac-name"]').should('contain', 'Alpha DAC')
-    cy.get('[data-cy="route-dataset-count"]').should('contain', '1')
-    cy.get('[data-cy="route-datasets"]').should('contain', 'Approved Dataset')
-    cy.get('[data-cy="route-datasets"]').should('not.contain', 'Unapproved Dataset')
+    cy.contains('DAC Datasets associated with DAC: Alpha DAC').should('be.visible')
+    cy.contains('Approved Dataset').should('exist')
+    cy.contains('Unapproved Dataset').should('not.exist')
   })
 
   it('shows an error when a DAC has no approved datasets', () => {
@@ -249,10 +247,48 @@ describe('ManageDac', () => {
 
     mountManageDac()
 
-    cy.get('.row-data-0 a[name="dacDatasets"]').click()
+    cy.get(`#${primaryDac.dacId}_dacDatasets`).click()
 
     cy.get('@showError').should('have.been.calledWith', { text: 'DAC has no datasets.' })
-    cy.contains('Manage Data Access Committee').should('be.visible')
+    cy.contains('Manage My Data Access Committee').should('be.visible')
+  })
+
+  it('shows an error and stops loading when the DAC list fails to load', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'list').rejects(new Error('Network error'))
+
+    mountManageDac()
+
+    cy.get('@showError').should('have.been.calledWith', { text: 'Failed to load DACs.' })
+    cy.get('img[alt="spinner"]').should('not.exist')
+  })
+
+  it('navigates to the edit DAC page when the edit icon is clicked', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'list').resolves([primaryDac])
+
+    mountManageDac()
+
+    cy.get(`[data-tip="Edit ${primaryDac.name}"]`).scrollIntoView()
+    cy.get(`[data-tip="Edit ${primaryDac.name}"]`).click()
+    cy.get('[data-cy="route-path"]').should('contain', `/manage_dac/${primaryDac.dacId}`)
+  })
+
+  it('hides the datasets section when the Close button is clicked', () => {
+    cy.stub(Storage, 'getCurrentUser').returns(adminUser)
+    cy.stub(DAC, 'list').resolves([primaryDac])
+    cy.stub(DataUseTranslation, 'translateDataUseRestrictions').resolves([])
+    cy.stub(DAC, 'datasets').resolves([
+      makeDataset({ datasetId: 1, name: 'Approved Dataset', dacId: 1, dacApproval: true, createUser: adminUser }),
+    ])
+
+    mountManageDac()
+
+    cy.get(`#${primaryDac.dacId}_dacDatasets`).click()
+    cy.contains('DAC Datasets associated with DAC: Alpha DAC').should('be.visible')
+
+    cy.contains('button', 'Close').click()
+    cy.contains('DAC Datasets associated with DAC: Alpha DAC').should('not.exist')
   })
 
   it('deletes the selected DAC after confirmation and refreshes the list', () => {

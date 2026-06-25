@@ -37,6 +37,7 @@ import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import EditDac from 'src/pages/manage_dac/EditDac'
+import DacProfile from 'src/pages/manage_dac/DacProfile'
 import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
 import ChairConsole from 'src/pages/ChairConsole'
@@ -121,9 +122,9 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/manage_dac" element={<ManageDac />} />
+          <Route path="/manage_dac/:dacId" element={<DacProfile />} />
           <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
           <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
-          <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
           <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />
