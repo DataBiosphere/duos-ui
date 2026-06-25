@@ -1,5 +1,5 @@
 import React from 'react'
-import { votingColors } from 'src/libs/VotingColors.ts'
+import { votingColors } from 'src/libs/VotingColors'
 import CollectionVoteButton from './CollectionVoteButton'
 import { CancelOutlined } from '@mui/icons-material'
 
@@ -13,7 +13,7 @@ const styles = {
     fontSize: '28px',
     margin: '2.5%',
   },
-}
+} as const
 
 const Label = () => {
   return (
@@ -24,9 +24,14 @@ const Label = () => {
   )
 }
 
-export default function CollectionVoteNoButton(props) {
-  const { onClick, disabled, isSelected, onError } = props
+interface CollectionVoteNoButtonProps {
+  readonly onClick?: () => Promise<void>
+  readonly disabled?: boolean
+  readonly isSelected?: boolean
+  readonly onError?: (error: unknown) => void
+}
 
+export default function CollectionVoteNoButton({ onClick, disabled, isSelected, onError }: CollectionVoteNoButtonProps) {
   return (
     <CollectionVoteButton
       datacy="no-collection-vote-button"

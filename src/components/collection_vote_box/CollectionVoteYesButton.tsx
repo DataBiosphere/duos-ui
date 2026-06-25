@@ -1,5 +1,5 @@
 import React from 'react'
-import { votingColors } from 'src/libs/VotingColors.ts'
+import { votingColors } from 'src/libs/VotingColors'
 import CollectionVoteButton from './CollectionVoteButton'
 import { CheckCircleOutlined } from '@mui/icons-material'
 
@@ -13,7 +13,7 @@ const styles = {
     fontSize: '28px',
     margin: '2.5%',
   },
-}
+} as const
 
 const Label = () => {
   return (
@@ -24,9 +24,14 @@ const Label = () => {
   )
 }
 
-export default function CollectionVoteYesButton(props) {
-  const { onClick, disabled, isSelected, onError } = props
+interface CollectionVoteYesButtonProps {
+  readonly onClick?: () => Promise<void>
+  readonly disabled?: boolean
+  readonly isSelected?: boolean
+  readonly onError?: (error: unknown) => void
+}
 
+export default function CollectionVoteYesButton({ onClick, disabled, isSelected, onError }: CollectionVoteYesButtonProps) {
   return (
     <CollectionVoteButton
       datacy="yes-collection-vote-button"

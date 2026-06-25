@@ -53,7 +53,6 @@ const roleBACRoutes: string[] = [
   '/manage_dac',
   '/manage_dac_datasets',
   '/manage_radar/1',
-  '/manage_edit_dac_daa/1',
   // admin
   '/admin_review_collection/1',
   '/admin_manage_users',
