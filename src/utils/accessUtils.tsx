@@ -11,13 +11,6 @@ export const applyForAccess = async (selected: number[], navigate: NavigateFunct
     if (draftResponse.referenceId) {
       navigate(`/dar_application/${draftResponse.referenceId}`)
     }
-    else if (draftResponse.code && draftResponse.message) {
-      Notifications.showError(
-        {
-          text: <ReactMarkdown>{draftResponse.message}</ReactMarkdown>,
-          timeout: 6000,
-        })
-    }
     else {
       Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' })
     }

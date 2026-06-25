@@ -10,7 +10,7 @@ describe('SubmitProgressReport tests', () => {
   },
   )
 
-  it('Should show a submit and cancel button', () => {
+  it('Should show a submit and cancel button when form is valid', () => {
     cy.mount(
       <SubmitProgressReport
         formState={{} as FormState}
@@ -19,10 +19,47 @@ describe('SubmitProgressReport tests', () => {
         }}
         onCancel={() => {
         }}
+        isValid={true}
       />,
     )
     cy.get('[data-cy=pr-submit-button]').should('exist')
     cy.get('[data-cy=pr-cancel-button]').should('exist')
+  })
+
+  it('Should show a validate and cancel button when form is invalid', () => {
+    cy.mount(
+      <SubmitProgressReport
+        formState={{} as FormState}
+        parentReferenceId="1"
+        onSuccess={() => {
+        }}
+        onCancel={() => {
+        }}
+        isValid={false}
+      />,
+    )
+    cy.get('[data-cy=pr-validate-button]').should('exist').and('contain', 'Validate')
+    cy.get('[data-cy=pr-submit-button]').should('not.exist')
+    cy.get('[data-cy=pr-cancel-button]').should('exist')
+  })
+
+  it('Validate button calls onValidate handler when clicked', () => {
+    const functionSpy = {
+      validateHandler: () => {},
+    }
+    cy.spy(functionSpy, 'validateHandler').as('validateHandler')
+    cy.mount(
+      <SubmitProgressReport
+        formState={{} as FormState}
+        parentReferenceId="1"
+        onSuccess={() => {}}
+        onCancel={() => {}}
+        isValid={false}
+        onValidate={functionSpy.validateHandler}
+      />,
+    )
+    cy.get('[data-cy=pr-validate-button]').click()
+    cy.get('@validateHandler').should('have.been.calledOnce')
   })
 
   it('Submit should succeed', () => {
@@ -38,6 +75,7 @@ describe('SubmitProgressReport tests', () => {
         }}
         onCancel={() => {
         }}
+        isValid={true}
       />,
     )
     cy.get('[data-cy=pr-submit-button]').click()
@@ -65,6 +103,7 @@ describe('SubmitProgressReport tests', () => {
         onSuccess={functionSpy.successHandler}
         onCancel={() => {
         }}
+        isValid={true}
       />,
     )
     cy.get('[data-cy=pr-submit-button]').should('exist')
@@ -100,6 +139,7 @@ describe('SubmitProgressReport tests', () => {
         parentReferenceId="1"
         onSuccess={() => {}}
         onCancel={() => {}}
+        isValid={true}
       />,
     )
     // Simulate a click and check for the error notification
@@ -139,6 +179,7 @@ describe('SubmitProgressReport tests', () => {
           parentReferenceId="1"
           onSuccess={() => {}}
           onCancel={() => {}}
+          isValid={true}
           uploadedIrbDocument={mockFile}
           parentDar={mockParentDar}
         />,
@@ -179,6 +220,7 @@ describe('SubmitProgressReport tests', () => {
           parentReferenceId="1"
           onSuccess={() => {}}
           onCancel={() => {}}
+          isValid={true}
           uploadedIrbDocument={null}
           parentDar={mockParentDar}
         />,
@@ -218,6 +260,7 @@ describe('SubmitProgressReport tests', () => {
           parentReferenceId="1"
           onSuccess={() => {}}
           onCancel={() => {}}
+          isValid={true}
           uploadedIrbDocument={null}
           parentDar={mockParentDar}
         />,
@@ -252,6 +295,7 @@ describe('SubmitProgressReport tests', () => {
           parentReferenceId="1"
           onSuccess={() => {}}
           onCancel={() => {}}
+          isValid={true}
           uploadedIrbDocument={null}
           parentDar={mockParentDarWithoutIrb}
         />,
@@ -281,6 +325,7 @@ describe('SubmitProgressReport tests', () => {
           parentReferenceId="1"
           onSuccess={() => {}}
           onCancel={() => {}}
+          isValid={true}
           uploadedIrbDocument={null}
           parentDar={undefined}
         />,

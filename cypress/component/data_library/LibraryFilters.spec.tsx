@@ -5,8 +5,8 @@ import { EMPTY_FILTERS, getFilterSectionsForAsset } from 'src/components/data_li
 
 const availableFilters: AvailableFilters = {
   accessManagement: [
-    { value: 'controlled', label: 'Controlled', count: 10 },
-    { value: 'open', label: 'Open', count: 5 },
+    { value: 'controlled', label: 'via DUOS', count: 10 },
+    { value: 'open', label: 'Open Access', count: 5 },
   ],
   dataUse: [
     { value: 'HMB', label: 'Health/Medical/Biomedical', count: 8 },
@@ -82,7 +82,7 @@ describe('LibraryFilters', () => {
   it('renders filter categories', () => {
     cy.mount(<LibraryFiltersWrapper />)
 
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.contains('Data Use').should('exist') // might be collapsed but should exist
     cy.contains('Data Type').should('exist')
     cy.contains('Participants').should('exist')
@@ -91,8 +91,8 @@ describe('LibraryFilters', () => {
   it('renders filter options with counts', () => {
     cy.mount(<LibraryFiltersWrapper />)
 
-    cy.contains('Controlled (10)').should('be.visible')
-    cy.contains('Open (5)').should('be.visible')
+    cy.contains('via DUOS (10)').should('be.visible')
+    cy.contains('Open Access (5)').should('be.visible')
   })
 
   it('shows a helper label when a visible filter section has no options', () => {
@@ -145,7 +145,7 @@ describe('LibraryFilters', () => {
     cy.mount(<LibraryFiltersWrapper loading={true} />)
 
     cy.get('.MuiSkeleton-root').should('have.length', 3)
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
   })
 
   it('renders only configured filters for presentations', () => {
@@ -160,7 +160,7 @@ describe('LibraryFilters', () => {
 
     cy.contains('Datasets Cited?').should('exist')
     cy.contains('Participants').should('not.exist')
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
   })
 
   it('shows post-mortem warning when range is set without a unit', () => {
@@ -215,13 +215,13 @@ describe('LibraryFilters — collapseable panel', () => {
   it('shows filter content and collapse button when open', () => {
     mountWithToggle(true)
     cy.contains('Filters').should('be.visible')
-    cy.contains('Access Management').should('be.visible')
+    cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').should('exist')
   })
 
   it('hides filter content and shows expand button when closed', () => {
     mountWithToggle(false)
-    cy.contains('Access Management').should('not.exist')
+    cy.contains('Access Request Process').should('not.exist')
     cy.contains('Filters').should('not.exist')
     cy.get('[aria-label="Expand filters"]').should('exist')
   })

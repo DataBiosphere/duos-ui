@@ -144,6 +144,7 @@ describe('buildElasticsearchQuery', () => {
     expect(query.query?.bool.must).toHaveLength(2)
     const secondClause = query.query?.bool.must?.[1] as MultiMatchQuery
     expect(secondClause.multi_match.query).toEqual('breast cancer')
+    expect(secondClause.multi_match.fields).toContain('datasetIdentifier')
   })
 
   it('adds access management filters', () => {

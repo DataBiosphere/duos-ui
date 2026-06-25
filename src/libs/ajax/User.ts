@@ -8,6 +8,7 @@ import {
   ApprovedDataset,
   Dataset,
   DuosUser,
+  SigningOfficialUserWithData,
   SimplifiedDuosUser,
 } from 'src/types/model'
 
@@ -78,6 +79,12 @@ export const User = {
   getSOsForCurrentUser: async (): Promise<SimplifiedDuosUser[]> => {
     const url = `${await Config.getApiUrl()}/api/user/signing-officials`
     const res = await fetchGet<SimplifiedDuosUser[]>(url, Config.authOpts())
+    return res.data
+  },
+
+  getSOsForInstitution: async (institutionId: number): Promise<SigningOfficialUserWithData[]> => {
+    const url = `${await Config.getApiUrl()}/api/user/institution/${institutionId}/signing-officials`
+    const res = await fetchGet<SigningOfficialUserWithData[]>(url, Config.authOpts())
     return res.data
   },
 

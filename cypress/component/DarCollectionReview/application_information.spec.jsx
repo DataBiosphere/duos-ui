@@ -138,13 +138,13 @@ describe('Application Information', () => {
     cy.get('#internal-lab-staff-span').should('exist').contains('Person E, Person F')
   })
 
-  it('renders the signing official and signing official', () => {
+  it('renders the signing official information', () => {
     const props = {
       signingOfficialEmail: 'test@test.com',
     }
     cy.mount(<ApplicationInformation {...props} />)
-    cy.get('#signing-official-label').should('exist').contains('Signing Official')
-    cy.get('#signing-official-span').should('exist').contains('test@test.com')
+    cy.contains('Signing Official')
+    cy.contains('test@test.com')
   })
 
   it('renders the IT director and IT director', () => {

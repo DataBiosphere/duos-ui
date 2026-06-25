@@ -12,6 +12,7 @@ import {
   DatasetStatisticsDar,
   DatasetTerm,
 } from 'src/types/model'
+import { ElasticsearchQuery } from 'src/types/elastic'
 import { SnapshotSummaryModel, EnumerateSnapshotModel } from 'src/types/tdrModel'
 import { extractError } from 'src/utils/ErrorUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
@@ -69,9 +70,6 @@ export default function DatasetStatistics() {
       if (draftResponse.referenceId) {
         navigate(`/dar_application/${draftResponse.referenceId}`)
       }
-      else if (draftResponse.message) {
-        showError(draftResponse.message + ' Please contact customer support for help.')
-      }
       else {
         showError('Unable to create a Draft Data Access Request')
       }
@@ -98,20 +96,22 @@ export default function DatasetStatistics() {
   useEffect(() => {
     const init = async () => {
       try {
-        const datasetTerms: DatasetTerm[] = await DataSet.searchDatasetIndex({ query: {
-          bool: {
-            must: [
-              {
-                match: {
-                  _index: 'dataset',
+        const datasetTerms: DatasetTerm[] = await DataSet.searchDatasetIndex({
+          query: {
+            bool: {
+              must: [
+                {
+                  match: {
+                    _index: 'dataset',
+                  },
                 },
-              },
-              {
-                match_phrase: getMatchPhrase(datasetIdentifier),
-              },
-            ],
+                {
+                  match_phrase: getMatchPhrase(datasetIdentifier),
+                },
+              ],
+            },
           },
-        } })
+        } as ElasticsearchQuery)
 
         if (datasetTerms.length === 1) {
           setDatasetTerm(datasetTerms[0])
