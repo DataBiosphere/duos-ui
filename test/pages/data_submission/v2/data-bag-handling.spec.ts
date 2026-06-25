@@ -1,8 +1,8 @@
 /**
  * Tests that document the data-bag bugs found during DT-3599.
  *
- * Each "BUG" test is expected to FAIL against the current code.
- * A passing test confirms the bug is fixed; a failing test confirms it still exists.
+ * These tests are regression coverage for bugs found during DT-3599.
+ * They should pass; if they fail, the bug has regressed.
  *
  * Issues under test:
  *   Critical [1] – studyToDatasetSchemaSubmission reads study.properties[] instead of
