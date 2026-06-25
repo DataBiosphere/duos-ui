@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import PropTypes from 'prop-types'
-import { DataUseTranslation } from '../../libs/dataUseTranslation'
+import { DataUseTranslation, DarInfo, TranslationEntry } from 'src/libs/dataUseTranslation'
 import { isNil, flatMap, keys } from 'src/utils/NodashUtil'
 import { DataUsePills } from './DataUsePill'
 import DataUseAlertBox from './DataUseAlertBox'
-import HighlightText from '../HighlightText'
+import HighlightText from 'src/components/HighlightText'
+import { DataAccessRequestData } from 'src/types/model'
 
 const styles = {
   baseStyle: {
@@ -56,39 +56,27 @@ const styles = {
   },
 }
 
+type TranslatedDataUse = Record<string, TranslationEntry[]>
+
 const highlightedWords = [
   {
     bgColor: 'rgba(0,0,100,.2)',
     textColor: '#0948B7',
     words: [
-      'Health',
-      'Medical',
-      'Biomedical',
-      'Disease',
-      'Methods',
-      'Algorithm',
-      'Population',
-      'Origin',
-      'Ancestry',
-      'Controls',
-      'Commercial',
-      'Profit',
+      'Health', 'Medical', 'Biomedical', 'Disease', 'Methods',
+      'Algorithm', 'Population', 'Origin', 'Ancestry', 'Controls',
+      'Commercial', 'Profit',
     ],
   },
 ]
 
-const DataUseSummary = ({ translatedDataUse }) => {
+const DataUseSummary = ({ translatedDataUse }: { translatedDataUse: TranslatedDataUse }) => {
   const allDataUses = flatMap(keys(translatedDataUse), key => translatedDataUse[key])
   return <div className="data-use-summary">{DataUsePills(allDataUses, true)}</div>
 }
 
-DataUseSummary.propTypes = {
-  translatedDataUse: PropTypes.object.isRequired,
-}
-
-const CollapseExpandLink = ({ expanded, setExpanded }) => {
+const CollapseExpandLink = ({ expanded, setExpanded }: { expanded: boolean, setExpanded: (v: boolean) => void }) => {
   const linkMessage = expanded ? '(Hide)' : '(Show)'
-
   return (
     <button
       style={styles.link}
@@ -100,12 +88,7 @@ const CollapseExpandLink = ({ expanded, setExpanded }) => {
   )
 }
 
-CollapseExpandLink.propTypes = {
-  expanded: PropTypes.bool.isRequired,
-  setExpanded: PropTypes.func.isRequired,
-}
-
-const ResearchPurposeSummary = ({ darInfo }) => {
+const ResearchPurposeSummary = ({ darInfo }: { darInfo?: Partial<DataAccessRequestData> }) => {
   return isNil(darInfo)
     ? (
         <div />
@@ -120,14 +103,24 @@ const ResearchPurposeSummary = ({ darInfo }) => {
       )
 }
 
-ResearchPurposeSummary.propTypes = {
-  darInfo: PropTypes.shape({ rus: PropTypes.string }),
+interface ResearchProposalSlabProps {
+  readonly darInfo?: Partial<DataAccessRequestData>
+  readonly isLoading?: boolean
 }
 
-export default function ResearchProposalSlab(props) {
+const toTranslatedDataUse = (darInfo: Partial<DataAccessRequestData>): TranslatedDataUse => {
+  const { primary = [], secondary = [] } = DataUseTranslation.translateDarInfo(darInfo as DarInfo)
+  return {
+    primary: primary as TranslationEntry[],
+    secondary: secondary as TranslationEntry[],
+  }
+}
+
+export default function ResearchProposalSlab({ darInfo, isLoading }: ResearchProposalSlabProps) {
   const [expanded, setExpanded] = useState(true)
-  const { darInfo, isLoading } = props
-  const translatedDataUse = isNil(darInfo) ? {} : DataUseTranslation.translateDarInfo(darInfo)
+  const translatedDataUse: TranslatedDataUse = isNil(darInfo)
+    ? {}
+    : toTranslatedDataUse(darInfo)
 
   return (
     <div data-cy="rp-slab" style={styles.baseStyle}>
@@ -156,9 +149,4 @@ export default function ResearchProposalSlab(props) {
           )}
     </div>
   )
-}
-
-ResearchProposalSlab.propTypes = {
-  darInfo: PropTypes.object,
-  isLoading: PropTypes.bool,
 }
