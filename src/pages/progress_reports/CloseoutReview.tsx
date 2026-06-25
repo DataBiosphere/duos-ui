@@ -20,7 +20,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
 
   const onApprove = async (): Promise<void> => {
     const user = Storage.getCurrentUser()
-    const isCloseoutApproved = dar.closeoutSigningOfficialApprovedDate !== undefined
+    const isCloseoutApproved = dar.approvingSigningOfficialApprovedDate !== undefined
 
     if (user.isSigningOfficial && !isCloseoutApproved) {
       await DAR.approveCloseout(dar.referenceId)

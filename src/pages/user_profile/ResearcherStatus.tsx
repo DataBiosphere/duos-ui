@@ -6,8 +6,9 @@ import { DAA } from 'src/libs/ajax/DAA'
 import { isNil } from 'src/utils/NodashUtil'
 import DAAs from './DAAs'
 import { nihAccountInstructions, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
-import { DAAObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
+import { DAAObject, DuosUser, SigningOfficialUserWithData } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
+import SigningOfficialReadOnlyCard from 'src/components/SigningOfficialReadOnlyCard'
 
 export interface ResearcherStatusProps {
   user: DuosUser
@@ -23,13 +24,15 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
   }, [])
   const accountLabel = nihAccountLabel()
   const accountLink = nihAccountInstructions()
-  const [signingOfficialUsers, setSigningOfficialUsers] = useState<SimplifiedDuosUser[]>([])
+  const [signingOfficialUsers, setSigningOfficialUsers] = useState<SigningOfficialUserWithData[]>([])
 
   useEffect(() => {
     const init = async () => {
       try {
         if (!isNil(user)) {
-          const signingOfficialUsers = await User.getSOsForCurrentUser()
+          const signingOfficialUsers = user.institutionId
+            ? await User.getSOsForInstitution(user.institutionId)
+            : await User.getSOsForCurrentUser()
           setSigningOfficialUsers(signingOfficialUsers)
           if (isNil(user.libraryCard)) {
             setHasCard(false)
@@ -39,12 +42,12 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
             const card = user.libraryCard
             const daaIds = card.daaIds ?? []
             setIssuedOn(new Date(card.createDate).toISOString().slice(0, 10))
-            const createUser = signingOfficialUsers.find((so: SimplifiedDuosUser) => so.userId === card.createUserId)
+            const createUser = signingOfficialUsers.find((so: SigningOfficialUserWithData) => so.userId === card.createUserId)
             if (createUser) {
               setIssuedBy(createUser.displayName)
             }
             else {
-              const names = signingOfficialUsers.map((so: SimplifiedDuosUser) => so.displayName)
+              const names = signingOfficialUsers.map((so: SigningOfficialUserWithData) => so.displayName)
               setIssuedBy(names.join(', '))
             }
 
@@ -138,11 +141,15 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         : (
             <>
               <p>Signing Official(s):</p>
-              <ul>
-                {signingOfficialUsers.map(so => (
-                  <li key={so.userId}>{so.displayName} - {so.email}</li>
-                ))}
-              </ul>
+              {signingOfficialUsers.map(so => (
+                <SigningOfficialReadOnlyCard
+                  key={so.userId}
+                  name={so.displayName}
+                  email={so.email}
+                  institutionName={so.institutionName}
+                  externalProfiles={so.userData?.externalProfiles}
+                />
+              ))}
             </>
           )}
     </div>

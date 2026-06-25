@@ -148,7 +148,7 @@ export default function DatasetSubmissionsTable(props) {
             </div>
           )
         : <div />
-      const custodians = join(term.study?.dataCustodianEmail, ', ')
+      const custodians = join(term.study?.dataCustodianEmail ?? [], ', ')
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,

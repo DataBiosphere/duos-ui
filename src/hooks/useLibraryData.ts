@@ -113,8 +113,7 @@ export const useLibraryData = (
       )
 
       const response = await DataSet.searchDatasetIndexV2(query)
-      const actualData = response.data || response
-      return assetRegistry[assetType].transformResponse(actualData, pagination, sanitizedFilters)
+      return assetRegistry[assetType].transformResponse(response, pagination, sanitizedFilters)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,

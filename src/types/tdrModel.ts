@@ -35,4 +35,5 @@ export interface EnumerateSnapshotModel {
   roleMap: { [key: string]: string[] }
   filteredTotal: number
   total: number
+  errors: unknown[]
 }
