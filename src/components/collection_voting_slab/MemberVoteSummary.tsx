@@ -1,21 +1,26 @@
-import { React, useState } from 'react'
-import {
-  collapseVotesByUser,
-} from '../../utils/DarCollectionUtils'
-import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable'
+import React, { useState } from 'react'
+import { collapseVotesByUser } from 'src/utils/DarCollectionUtils'
+import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable'
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
+import { Vote } from 'src/types/model'
 
 import './member_vote_summary.css'
 
-export const MemberVoteSummary = (props) => {
-  const {
-    isLoading = false,
-    title = 'DAC Member Votes (detail)',
-    adminPage = false,
-    isChair = false,
-    dacVotes,
-  } = props
+interface MemberVoteSummaryProps {
+  readonly dacVotes: Vote[]
+  readonly isLoading?: boolean
+  readonly title?: string
+  readonly adminPage?: boolean
+  readonly isChair?: boolean
+}
 
+export const MemberVoteSummary = ({
+  isLoading = false,
+  title = 'DAC Member Votes (detail)',
+  adminPage = false,
+  isChair = false,
+  dacVotes,
+}: MemberVoteSummaryProps) => {
   const [showMemberVotes, setShowMemberVotes] = useState(false)
 
   return (
@@ -26,15 +31,17 @@ export const MemberVoteSummary = (props) => {
       padding: '20px 20px 20px 20px',
     }}
     >
-      <div
+      <button
+        type="button"
         className={`sort-icon dac-member-vote-dropdown-arrow ${showMemberVotes ? 'sort-icon-up' : 'sort-icon-down'}`}
-        style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
-        onClick={() => { setShowMemberVotes(!showMemberVotes) }}
+        style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%' }}
+        onClick={() => setShowMemberVotes(!showMemberVotes)}
         id="show-member-vote-dropdown"
+        aria-expanded={showMemberVotes}
       >
         <span style={{ display: 'flex' }}>{showMemberVotes ? <ExpandLess /> : <ExpandMore />}</span>
         <span>{title}</span>
-      </div>
+      </button>
       {showMemberVotes && (
         <VoteSummaryTable
           dacVotes={collapseVotesByUser(dacVotes)}
