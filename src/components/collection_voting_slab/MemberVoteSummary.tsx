@@ -4,8 +4,6 @@ import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import { Vote } from 'src/types/model'
 
-import './member_vote_summary.css'
-
 interface MemberVoteSummaryProps {
   readonly dacVotes: Vote[]
   readonly isLoading?: boolean
@@ -33,7 +31,7 @@ export const MemberVoteSummary = ({
     >
       <button
         type="button"
-        className={`sort-icon dac-member-vote-dropdown-arrow ${showMemberVotes ? 'sort-icon-up' : 'sort-icon-down'}`}
+        className={`sort-icon ${showMemberVotes ? 'sort-icon-up' : 'sort-icon-down'}`}
         style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%' }}
         onClick={() => setShowMemberVotes(!showMemberVotes)}
         id="show-member-vote-dropdown"
