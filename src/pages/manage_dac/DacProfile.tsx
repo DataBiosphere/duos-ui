@@ -94,7 +94,7 @@ const DATASET_COLUMNS: GridColDef[] = [
 
 export const DacProfile: React.FC = () => {
   const { dacId: dacIdParam } = useParams<{ dacId: string }>()
-  const parsedId = dacIdParam !== undefined ? Number.parseInt(dacIdParam, 10) : NaN
+  const parsedId = dacIdParam === undefined ? Number.NaN : Number.parseInt(dacIdParam, 10)
   const dacId = Number.isNaN(parsedId) ? undefined : parsedId
 
   const [dac, setDac] = useState<DacObject | null>(null)
