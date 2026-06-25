@@ -269,7 +269,8 @@ describe('ManageDac', () => {
 
     mountManageDac()
 
-    cy.get(`[data-tip="Edit ${primaryDac.name}"]`).scrollIntoView().click()
+    cy.get(`[data-tip="Edit ${primaryDac.name}"]`).scrollIntoView()
+    cy.get(`[data-tip="Edit ${primaryDac.name}"]`).click()
     cy.get('[data-cy="route-path"]').should('contain', `/manage_dac/${primaryDac.dacId}`)
   })
 
