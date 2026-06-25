@@ -1,5 +1,6 @@
 import React from 'react'
 import { isEmpty, map } from 'src/utils/NodashUtil'
+import { TranslationEntry } from 'src/libs/dataUseTranslation'
 
 const styles = {
   box: {
@@ -23,9 +24,15 @@ const styles = {
     fontSize: '3rem',
     fontWeight: 'bold',
   },
+} as const
+
+type TranslatedDataUse = Record<string, TranslationEntry[]>
+
+const manuallyReviewedDataUses = (dataUses: TranslationEntry[]): TranslationEntry[] => {
+  return dataUses.filter(dataUse => dataUse.manualReview)
 }
 
-const dataUseDescriptions = (translatedDataUse) => {
+const dataUseDescriptions = (translatedDataUse: TranslatedDataUse) => {
   return Object.keys(translatedDataUse).flatMap((key) => {
     const dataUses = translatedDataUse[key]
     return map(manuallyReviewedDataUses(dataUses), (dataUse, index) => {
@@ -39,20 +46,18 @@ const dataUseDescriptions = (translatedDataUse) => {
   })
 }
 
-const manuallyReviewedDataUses = (dataUses) => {
-  return dataUses.filter(dataUse => dataUse.manualReview)
+interface DataUseAlertBoxProps {
+  readonly translatedDataUse: TranslatedDataUse
 }
 
-export default function DataUseAlertBox(props) {
-  const { translatedDataUse } = props
+export default function DataUseAlertBox({ translatedDataUse }: DataUseAlertBoxProps) {
   const descriptions = dataUseDescriptions(translatedDataUse)
 
   return (
-    /* eslint-disable react/no-unknown-property */
     !isEmpty(descriptions) && (
       <>
         <div>Translated Data Use, Requires Review:</div>
-        <div datacy="alert-box" style={styles.box}>
+        <div data-cy="alert-box" style={styles.box}>
           <span style={styles.exclamationPoint}>!</span>
           <div style={styles.text}>{descriptions}</div>
         </div>
