@@ -43,8 +43,7 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
   }, [study])
 
   // Unified source: prefer in-progress edit from properties[], fall back to API-loaded study.data.
-  const currentDataBag = (getStudyPropertyValueByKey(study, 'data') as StudyDataMetadata | undefined) ?? study.data
-
+  const currentDataBag = (getStudyPropertyValueByKey(study, StudyData.key) as StudyDataMetadata | undefined) ?? study.data
   const onChange = ({ key, value }: { key: string, value: unknown, isValid: boolean }) => {
     setStudy((val: Study) => {
       const newForm = structuredClone(val)
