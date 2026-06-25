@@ -123,7 +123,7 @@ describe('ResearchProposalSlab - Tests', function () {
         bucket={{ key: 'test' }}
       />,
     )
-    cy.get('[datacy=alert-box]').should('exist')
+    cy.get('[data-cy=alert-box]').should('exist')
   })
 
   it('Does not render data use alert box when expanded without manually reviewed data uses', function () {
