@@ -1,6 +1,6 @@
 import React from 'react'
 import { isNil } from 'src/utils/NodashUtil'
-import { ControlledAccessType } from '../../libs/dataUseTranslation'
+import { ControlledAccessType, TranslationEntry } from 'src/libs/dataUseTranslation'
 
 const styles = {
   baseStyle: {
@@ -29,20 +29,23 @@ const styles = {
     color: '#333F52',
     fontWeight: '500',
   },
+} as const
+
+interface DataUsePillProps {
+  readonly dataUse: TranslationEntry
+  readonly index: number
 }
 
-export const DataUsePill = (props) => {
-  const { dataUse, index } = props
-
+export const DataUsePill = ({ dataUse, index }: DataUsePillProps) => {
   return (
     <div key={`data_use_pill_${dataUse.type}_${dataUse.code}_${index}`} style={styles.baseStyle}>
-      <span style={styles.code}>{!isNil(dataUse) ? [dataUse.code] : []}</span>
-      <span style={styles.description}>{!isNil(dataUse) ? [dataUse.description] : []}</span>
+      <span style={styles.code}>{isNil(dataUse) ? [] : [dataUse.code]}</span>
+      <span style={styles.description}>{isNil(dataUse) ? [] : [dataUse.description]}</span>
     </div>
   )
 }
 
-export const DataUsePills = (dataUses, twoColumn = false) => {
+export const DataUsePills = (dataUses: TranslationEntry[], twoColumn = false) => {
   const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions)
   const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers)
 
