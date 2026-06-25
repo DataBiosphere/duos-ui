@@ -38,6 +38,7 @@ export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }: ChairVot
         </div>
         <VotesPieChart
           votes={dacVotes}
+          keyString="chair-dac-votes"
           styleOverride={{}}
         />
       </div>
