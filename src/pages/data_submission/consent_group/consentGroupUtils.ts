@@ -1,6 +1,7 @@
 import { isNil, isString } from 'src/utils/NodashUtil'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 import { FileStorageObject } from 'src/types/model'
+import { DatasetDataMetadata } from 'src/libs/data-metadata'
 
 export interface ConsentGroup {
   generalResearchUse?: boolean
@@ -11,7 +12,8 @@ export interface ConsentGroup {
 }
 export type AccessManagementType = 'controlled' | 'open' | 'external'
 export interface ConsentGroup2 {
-  data?: Record<string, unknown>
+  /** Client-managed metadata bag. Backend stores and returns this value as-is without validation. */
+  data?: DatasetDataMetadata
   nihInstitutionalCertificationFile?: FileStorageObject
   addedNIHInstitutionalCertificationFile?: File
   name: string
