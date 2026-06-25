@@ -172,7 +172,7 @@ export default function SimpleTable(props) {
   const output = isLoading ? <TableLoading /> : tableTemplate
   return (
     <div>
-      <div className="table-data" style={containerOverride || Styles.TABLE.CONTAINER} role="table">
+      <div className="table-data" style={containerOverride || Styles.TABLE.CONTAINER} role="table" data-cy="simple-table">
         {output}
         {isNil(paginationBar) ? <div /> : paginationBar}
       </div>
