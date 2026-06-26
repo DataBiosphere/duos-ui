@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, LibraryVersionNew, SortOrder } from 'src/types/library'
+import { AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
   EMPTY_FILTERS,
@@ -119,7 +119,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     updateUrlState({ query, page: 0 })
   }, [updateUrlState])
 
-  const handleFiltersChange = useCallback((newFilters: typeof urlState.filters) => {
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
     updateUrlState({ filters: sanitizeFiltersForAsset(urlState.tab, newFilters) })
   }, [updateUrlState, urlState.tab])
 

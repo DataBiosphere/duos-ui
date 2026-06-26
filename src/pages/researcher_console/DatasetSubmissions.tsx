@@ -38,7 +38,7 @@ export default function DatasetSubmissions() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean, term: DeleteDialogTerm | null }>(
-    { open: false, term: null }
+    { open: false, term: null },
   )
 
   const user = Storage.getCurrentUser()
