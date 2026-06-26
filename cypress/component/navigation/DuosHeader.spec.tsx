@@ -4,6 +4,7 @@ import DuosHeader from 'src/components/DuosHeader'
 import { DuosUser } from 'src/types/model'
 import * as StorageModule from 'src/libs/storage'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const mockUser: DuosUser = {
   createDate: new Date(),
@@ -35,14 +36,18 @@ const mountHeader = (path: string, user?: DuosUser) => {
     cy.stub(StorageModule.Storage, 'getCurrentUser').returns(null)
   }
 
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
   cy.mount(
-    <MemoryRouter initialEntries={[path]}>
-      <NavigationStateProvider>
-        <Routes>
-          <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
-        </Routes>
-      </NavigationStateProvider>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[path]}>
+        <NavigationStateProvider>
+          <Routes>
+            <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
+          </Routes>
+        </NavigationStateProvider>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 

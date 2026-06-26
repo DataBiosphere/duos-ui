@@ -208,7 +208,7 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
     cy.contains('Access Request Process').should('not.exist')
-    cy.get('[aria-label="Expand filters"]').should('exist')
+    cy.get('[aria-label="Show filters"]').should('exist')
   })
 
   it('collapses filter panel when the toggle button is clicked', () => {
@@ -222,7 +222,7 @@ describe('DataLibrary', () => {
     cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').click()
     cy.contains('Access Request Process').should('not.exist')
-    cy.get('[aria-label="Expand filters"]').should('exist')
+    cy.get('[aria-label="Show filters"]').should('exist')
   })
 
   it('expands filter panel when expand button is clicked while collapsed', () => {
@@ -233,7 +233,7 @@ describe('DataLibrary', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    cy.get('[aria-label="Expand filters"]').click()
+    cy.get('[aria-label="Show filters"]').click()
     cy.contains('Access Request Process').should('be.visible')
     cy.get('[aria-label="Collapse filters"]').should('exist')
   })

@@ -71,7 +71,7 @@ export const buildElasticsearchQuery = (
     queryTerm,
     asset.searchFields,
   )
-  return asset.buildQuery(queryChunks, filterQuery, pagination, sort)
+  return asset.buildQuery(queryChunks, filterQuery, pagination, sort, { showAllControlled: libraryConfig.showAllControlled })
 }
 
 /**
