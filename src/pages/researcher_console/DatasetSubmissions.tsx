@@ -74,12 +74,12 @@ export default function DatasetSubmissions() {
   }), [userOwnershipQuery, user?.userId])
 
   const pageState = useLibraryPageState(libraryConfig)
-  const { urlState, handleSearchChange } = pageState
+  const { urlState, handleSearchChange, handleTabChange: pageHandleTabChange } = pageState
 
   const handleTabChange = useCallback((newAssetType: AssetType) => {
     setDeleteDialog({ open: false, term: null })
-    pageState.handleTabChange(newAssetType)
-  }, [pageState.handleTabChange]) // eslint-disable-line react-hooks/exhaustive-deps
+    pageHandleTabChange(newAssetType)
+  }, [pageHandleTabChange])
 
   const handleDeleteClick = useCallback((term: DeleteDialogTerm) => {
     setDeleteDialog({ open: true, term })

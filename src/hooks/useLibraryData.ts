@@ -1,6 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-
-export const LIBRARY_DATA_QUERY_KEY = 'library-data'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery, QueryClause } from 'src/types/elastic'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
@@ -10,6 +8,8 @@ import {
   EMPTY_FILTERS,
   sanitizeFiltersForAsset,
 } from 'src/components/data_library/filterRegistry'
+
+export const LIBRARY_DATA_QUERY_KEY = 'library-data'
 
 /**
  * Build the common Elasticsearch query clauses shared by every asset type:
