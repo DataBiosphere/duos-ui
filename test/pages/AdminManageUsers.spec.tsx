@@ -1,7 +1,7 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { AdminManageUsers } from 'src/pages/AdminManageUsers'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
@@ -78,24 +78,22 @@ describe('AdminManageUsers', () => {
 
   it('renders the page title and description', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    render(<AdminManageUsers />)
+    await act(async () => render(<AdminManageUsers />))
     expect(screen.getByText('Manage Users')).toBeInTheDocument()
     expect(screen.getByText('Select and manage users and their roles')).toBeInTheDocument()
   })
 
   it('fetches users with the admin role on mount', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    render(<AdminManageUsers />)
-    await waitFor(() => expect(User.list).toHaveBeenCalledWith(USER_ROLES.admin))
+    await act(async () => render(<AdminManageUsers />))
+    expect(User.list).toHaveBeenCalledWith(USER_ROLES.admin)
   })
 
   it('passes loaded users to ManageUsersTable', async () => {
     vi.mocked(User.list).mockResolvedValue(testUsers)
-    render(<AdminManageUsers />)
-    await waitFor(() => {
-      expect(screen.getByText('Alice Admin')).toBeInTheDocument()
-      expect(screen.getByText('Bob Admin')).toBeInTheDocument()
-    })
+    await act(async () => render(<AdminManageUsers />))
+    expect(screen.getByText('Alice Admin')).toBeInTheDocument()
+    expect(screen.getByText('Bob Admin')).toBeInTheDocument()
   })
 
   it('shows loading state while fetching', () => {
@@ -106,25 +104,21 @@ describe('AdminManageUsers', () => {
 
   it('clears loading state after fetch completes', async () => {
     vi.mocked(User.list).mockResolvedValue(testUsers)
-    render(<AdminManageUsers />)
-    await waitFor(() => {
-      expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false')
-    })
+    await act(async () => render(<AdminManageUsers />))
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false')
   })
 
   it('shows an error notification when the fetch fails', async () => {
     vi.mocked(User.list).mockRejectedValue(new Error('network error'))
-    render(<AdminManageUsers />)
-    await waitFor(() => {
-      expect(Notifications.showError).toHaveBeenCalledWith({
-        text: 'Error: Unable to retrieve user data from server',
-      })
+    await act(async () => render(<AdminManageUsers />))
+    expect(Notifications.showError).toHaveBeenCalledWith({
+      text: 'Error: Unable to retrieve user data from server',
     })
   })
 
   it('opens the add user modal when the Add User button is clicked', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    render(<AdminManageUsers />)
+    await act(async () => render(<AdminManageUsers />))
     expect(screen.queryByTestId('add-user-modal')).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('ADD USER'))
     expect(screen.getByTestId('add-user-modal')).toBeInTheDocument()
@@ -132,22 +126,20 @@ describe('AdminManageUsers', () => {
 
   it('closes the add user modal and refreshes users when OK is clicked', async () => {
     vi.mocked(User.list).mockResolvedValue(testUsers)
-    render(<AdminManageUsers />)
-    await waitFor(() => expect(User.list).toHaveBeenCalledTimes(1))
+    await act(async () => render(<AdminManageUsers />))
+    expect(User.list).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByText('ADD USER'))
     expect(screen.getByTestId('add-user-modal')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('OK'))
-    await waitFor(() => {
-      expect(screen.queryByTestId('add-user-modal')).not.toBeInTheDocument()
-      expect(User.list).toHaveBeenCalledTimes(2)
-    })
+    await act(async () => fireEvent.click(screen.getByText('OK')))
+    expect(screen.queryByTestId('add-user-modal')).not.toBeInTheDocument()
+    expect(User.list).toHaveBeenCalledTimes(2)
   })
 
   it('closes the add user modal when Close is clicked', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    render(<AdminManageUsers />)
+    await act(async () => render(<AdminManageUsers />))
     fireEvent.click(screen.getByText('ADD USER'))
     expect(screen.getByTestId('add-user-modal')).toBeInTheDocument()
     fireEvent.click(screen.getByText('Close'))
