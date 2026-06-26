@@ -1,16 +1,38 @@
 import { concat, filter, isEmpty, matches } from 'src/utils/NodashUtil'
 import React, { Fragment, useState, useRef, useEffect } from 'react'
-import { User } from '../../libs/ajax/User'
-import { USER_ROLES } from '../../libs/utils'
-import { Alert } from '../Alert'
-import { BaseModal } from '../BaseModal'
-import addUserIcon from '../../images/icon_add_user.png'
+import { User } from 'src/libs/ajax/User'
+import { USER_ROLES } from 'src/libs/utils'
+import { UserRole } from 'src/types/model'
+import { Alert } from 'src/components/Alert'
+import { BaseModal } from 'src/components/BaseModal'
+import addUserIcon from 'src/images/icon_add_user.png'
 
-const adminRole = { roleId: 4, name: USER_ROLES.admin }
-const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
+type Role = Pick<UserRole, 'roleId' | 'name'>
 
-export const AddUserModal = (props) => {
-  const [state, setState] = useState({
+const adminRole: Role = { roleId: 4, name: USER_ROLES.admin }
+const researcherRole: Role = { roleId: 5, name: USER_ROLES.researcher }
+
+interface AddUserModalState {
+  displayName: string
+  email: string
+  displayNameValid: boolean
+  emailValid: boolean
+  invalidForm: boolean
+  submitted: boolean
+  alerts: { type: string, title: string, msg: string }[]
+  updatedRoles: Role[]
+  emailPreference: boolean
+}
+
+interface AddUserModalProps {
+  showModal: boolean
+  onOKRequest: (source: string) => void
+  onCloseRequest: (source: string) => void
+  onAfterOpen: (source: string) => void
+}
+
+export const AddUserModal = ({ showModal, onOKRequest, onCloseRequest, onAfterOpen }: Readonly<AddUserModalProps>) => {
+  const [state, setState] = useState<AddUserModalState>({
     displayName: '',
     email: '',
     displayNameValid: false,
@@ -22,11 +44,11 @@ export const AddUserModal = (props) => {
     emailPreference: false,
   })
 
-  const nameRef = useRef()
-  const emailRef = useRef()
+  const nameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (!props.showModal) return
+    if (!showModal) return
     const r1 = nameRef.current
     const r2 = emailRef.current
     if (r1 && r2) {
@@ -36,27 +58,24 @@ export const AddUserModal = (props) => {
         emailValid: r2.validity.valid,
       }))
     }
-  }, [props.showModal])
+  }, [showModal])
 
-  const OKHandler = async (event) => {
-    event.persist()
-    setState({
-      ...state,
-      submitted: true,
-    })
+  const OKHandler = async (event?: React.SyntheticEvent) => {
+    event?.persist()
     const validForm = state.displayNameValid && state.emailValid
+    setState({ ...state, submitted: true })
     if (!validForm) return
 
     const user = {
       displayName: state.displayName,
       emailPreference: state.emailPreference,
-      roles: state.updatedRoles,
+      roles: state.updatedRoles as UserRole[],
       email: state.email,
     }
 
-    const createUserRequest = async (user) => {
+    const createUserRequest = async (u: typeof user) => {
       try {
-        return await User.create(user)
+        return await User.create(u)
       }
       catch {
         return false
@@ -65,28 +84,23 @@ export const AddUserModal = (props) => {
 
     const createUser = await createUserRequest(user)
 
-    setState({
-      ...state,
-      emailValid: !!createUser,
-    })
-    event.preventDefault()
+    setState({ ...state, submitted: true, emailValid: !!createUser })
+    event?.preventDefault()
 
     if (createUser) {
-      props.onOKRequest('addUser')
+      onOKRequest('addUser')
     }
   }
 
   const closeHandler = () => {
-    props.onCloseRequest('addUser')
+    onCloseRequest('addUser')
   }
 
   const afterOpenHandler = () => {
-    props.onAfterOpen('addUser')
+    onAfterOpen('addUser')
   }
 
-  const emailPreferenceChanged = (e) => {
-    // disable notifications checkbox is not checked: -> Set email preference TRUE
-    // disable notifications checkbox is checked:     -> Set email preference FALSE
+  const emailPreferenceChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checkState = e.target.checked
     setState({
       ...state,
@@ -94,11 +108,9 @@ export const AddUserModal = (props) => {
     })
   }
 
-  const adminChanged = (e) => {
+  const adminChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checkState = e.target.checked
-    // True? add admin role to state.updatedRoles
-    // False? remove admin role from state.updatedRoles
-    let newRoles
+    let newRoles: Role[]
     if (checkState) {
       newRoles = concat(state.updatedRoles, adminRole)
     }
@@ -111,7 +123,7 @@ export const AddUserModal = (props) => {
     })
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.name
     const validName = name + 'Valid'
     setState({
@@ -139,10 +151,10 @@ export const AddUserModal = (props) => {
   return (
     <BaseModal
       id="addUserModal"
-      showModal={props.showModal}
+      showModal={showModal}
       disableOkBtn={!validForm}
       onRequestClose={closeHandler}
-      onAfterOpen={afterOpenHandler}
+      afterOpen={afterOpenHandler}
       imgSrc={addUserIcon}
       color="common"
       title="Add User"
@@ -151,7 +163,7 @@ export const AddUserModal = (props) => {
     >
       <form className="form-horizontal css-form" name="userForm" encType="multipart/form-data" onChange={formChange}>
         <div className="form-group first-form-group">
-          <label id="lbl_name" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Name</label>
+          <label id="lbl_name" htmlFor="txt_name" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Name</label>
           <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
             <input
               type="text"
@@ -169,7 +181,7 @@ export const AddUserModal = (props) => {
         </div>
 
         <div className="form-group">
-          <label id="lbl_email" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Google account id</label>
+          <label id="lbl_email" htmlFor="txt_email" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Google account id</label>
           <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
             <input
               type="email"
@@ -186,7 +198,7 @@ export const AddUserModal = (props) => {
         </div>
 
         <div className="form-group">
-          <label className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Role</label>
+          <label htmlFor="chk_admin" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Role</label>
           <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8 bold">
             <div className="col-lg-6 col-md-6 col-sm-6 col-xs-6">
               <div className="checkbox">
@@ -212,8 +224,6 @@ export const AddUserModal = (props) => {
                     id="chk_emailPreference"
                     type="checkbox"
                     className="checkbox-inline user-checkbox"
-                    // If email preference is TRUE  -> disable checkbox is not checked
-                    // If email preference is FALSE -> disable checkbox is checked
                     checked={!state.emailPreference}
                     onChange={emailPreferenceChanged}
                   />
@@ -225,7 +235,7 @@ export const AddUserModal = (props) => {
         </div>
       </form>
       {
-        state.emailValid === false && state.submitted === true && (
+        !state.emailValid && state.submitted && (
           <div>
             <Alert
               id="emailUsed"
@@ -239,9 +249,9 @@ export const AddUserModal = (props) => {
       {
         state.alerts.length > 0 && (
           <div>
-            {alert.map((alert, ix) => (
+            {state.alerts.map((alertItem, ix) => (
               <Fragment key={'alert_' + ix}>
-                <Alert id={'modal_' + ix} type={alert.type} title={alert.title} description={alert.msg} />
+                <Alert id={'modal_' + ix} type={alertItem.type} title={alertItem.title} description={alertItem.msg} />
               </Fragment>
             ))}
           </div>
