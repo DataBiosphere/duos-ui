@@ -1,67 +1,49 @@
-import React from 'react'
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { AddUserModal } from 'src/components/modals/AddUserModal'
 import { User } from 'src/libs/ajax/User'
-import { USER_ROLES } from 'src/libs/utils'
-import { isNil } from 'src/utils/NodashUtil'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { ManageUsersTable } from 'src/components/manage_users_table/ManageUsersTable'
 import { Styles } from 'src/libs/theme'
 import SearchBar from 'src/components/SearchBar'
-import { Notification } from 'src/components/Notification'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import AddObjectButton from 'src/components/AddObjectButton.tsx'
+import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
+import { DuosUser } from 'src/types/model'
 
-const getUserList = async () => {
-  const users = await User.list(USER_ROLES.admin)
-
-  return users.map((user) => {
-    user.researcher = false
-    if (!isNil(user.roles)) {
-      user.roles.forEach((role) => {
-        if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.researcher = true
-        }
-      })
-    }
-    user.key = user.id
-    return user
-  })
-}
+const getUserList = (): Promise<DuosUser[]> => User.list(USER_ROLES.admin)
 
 export const AdminManageUsers = function AdminManageUsers() {
   usePageTitle('Manage Users')
   const [searchText, setSearchText] = useState('')
-  const [userList, setUserList] = useState([])
+  const [userList, setUserList] = useState<DuosUser[]>([])
   const [showAddUserModal, setShowAddUserModal] = useState(false)
-  const [selectedUser, setSelectedUser] = useState()
   const [isLoading, setIsLoading] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true)
-    getUserList().then((userList) => {
-      setIsLoading(false)
-      setUserList(userList)
-      setIsLoading(false)
-    }).catch(() => {
-      setIsLoading(false)
-      Notification.showError({ text: 'Error: Unable to retrieve user data from server' })
-    })
+    getUserList()
+      .then((users) => {
+        setUserList(users)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setIsLoading(false)
+        Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
+      })
   }, [])
 
   const addUser = () => {
-    setSelectedUser(null)
     setShowAddUserModal(true)
   }
 
   const okModal = async () => {
     setShowAddUserModal(false)
     setIsLoading(true)
-    const userList = await getUserList()
+    const users = await getUserList()
+    setUserList(users)
     setIsLoading(false)
-    setUserList(userList)
   }
 
   const closeModal = () => {
@@ -72,7 +54,7 @@ export const AdminManageUsers = function AdminManageUsers() {
     setShowAddUserModal(false)
   }
 
-  const handleSearchUser = (query) => {
+  const handleSearchUser = (query: string) => {
     setSearchText(query)
   }
 
@@ -98,12 +80,10 @@ export const AdminManageUsers = function AdminManageUsers() {
       </div>
       <ManageUsersTable userList={userList} isLoading={isLoading} searchText={searchText} />
       <AddUserModal
-        isRendered={showAddUserModal}
         showModal={showAddUserModal}
         onOKRequest={okModal}
         onCloseRequest={closeModal}
         onAfterOpen={afterModalOpen}
-        user={selectedUser}
       />
     </div>
   )
