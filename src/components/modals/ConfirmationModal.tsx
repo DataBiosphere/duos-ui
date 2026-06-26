@@ -1,11 +1,11 @@
 import React from 'react'
 import Modal from 'react-modal'
-import CloseIconComponent from '../CloseIconComponent'
-import './ConfirmationModal.css'
+import CloseIconComponent from 'src/components/CloseIconComponent'
+import 'src/components/modals/ConfirmationModal.css'
 import { styled } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
-import { AsyncSpinnerButton } from '../AsyncSpinnerButton.js'
+import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
 const duosBlue = 'rgb(0, 96, 159)'
 const duosBlueHover = 'rgb(9,72,183)'
@@ -23,11 +23,28 @@ const SecondaryButton = styled(Button)(() => ({
   },
 }))
 
-const ConfirmationModal = (props) => {
-  const { showConfirmation, closeConfirmation, title, message, header, onConfirm, styleOverride = {} } = props
+interface ConfirmationModalProps {
+  showConfirmation: boolean
+  closeConfirmation: () => void
+  title: React.ReactNode
+  message: React.ReactNode
+  header: React.ReactNode
+  onConfirm: () => Promise<void>
+  styleOverride?: React.CSSProperties
+}
+
+const ConfirmationModal = ({
+  showConfirmation,
+  closeConfirmation,
+  title,
+  message,
+  header,
+  onConfirm,
+  styleOverride = {},
+}: Readonly<ConfirmationModalProps>) => {
   const closeFn = () => closeConfirmation()
 
-  const setHoverState = (e, backgroundColor) => {
+  const setHoverState = (e: React.MouseEvent<HTMLButtonElement>, backgroundColor: string) => {
     if (!e.currentTarget.disabled) {
       e.currentTarget.style.backgroundColor = backgroundColor
     }

@@ -1,12 +1,46 @@
 import React from 'react'
-import { isNil, map, sortedUniq } from 'src/utils/NodashUtil'
+import { isNil, sortedUniq } from 'src/utils/NodashUtil'
 import { styles } from './manageUsersTableUtils'
 import { Link } from 'react-router-dom'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
+import { UserRole, LibraryCard, InstitutionInterface } from 'src/types/model'
 
-export function usernameCellData({ displayName, userId, label = 'user-name' }) {
+export interface CellData {
+  data: React.ReactNode
+  value?: string
+  id: number
+  style?: React.CSSProperties
+  label: string
+  isComponent?: boolean
+}
+
+interface UsernameCellDataParams {
+  displayName: string
+  userId: number
+  label?: string
+}
+
+interface EmailCellDataParams {
+  userId: number
+  email: string
+  label?: string
+}
+
+interface PermissionsCellDataParams {
+  userId: number
+  roles: UserRole[]
+  libraryCard?: LibraryCard
+  label?: string
+}
+
+interface InstitutionCellDataParams {
+  userId: number
+  institution?: InstitutionInterface
+  label?: string
+}
+
+export function usernameCellData({ displayName, userId, label = 'user-name' }: UsernameCellDataParams): CellData {
   return {
-    // clicking on username lets you edit user
     data: (
       <div>
         <Link
@@ -34,7 +68,7 @@ export function usernameCellData({ displayName, userId, label = 'user-name' }) {
   }
 }
 
-export function emailCellData({ userId, email, label = 'email' }) {
+export function emailCellData({ userId, email, label = 'email' }: EmailCellDataParams): CellData {
   return {
     data: email,
     value: email,
@@ -48,10 +82,10 @@ export function emailCellData({ userId, email, label = 'email' }) {
   }
 }
 
-export function permissionsCellData({ userId, roles, libraryCard, label = 'permissions' }) {
+export function permissionsCellData({ userId, roles, libraryCard, label = 'permissions' }: PermissionsCellDataParams): CellData {
   const hasLibraryCard = !isNil(libraryCard)
-  const roleNames = map(roles, 'name').filter(roleName => roleName !== 'Researcher')
-  const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames)
+  const roleNames = roles.map((role): string => role.name).filter(name => name !== 'Researcher')
+  const perms = hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames
 
   // need to split, e.g., SigningOfficial -> Signing Official
   const formattedPerms = perms.map(perm => perm.replace(/([A-Z])/g, ' $1').trim())
@@ -64,10 +98,10 @@ export function permissionsCellData({ userId, roles, libraryCard, label = 'permi
   }
 }
 
-export function institutionCellData({ userId, institution, label = 'insitution' }) {
+export function institutionCellData({ userId, institution, label = 'insitution' }: InstitutionCellDataParams): CellData {
   return {
     isComponent: true,
-    data: institution?.name || 'N/A',
+    data: institution?.name ?? 'N/A',
     label,
     id: userId,
   }
