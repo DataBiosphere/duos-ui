@@ -7,8 +7,15 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContentText from '@mui/material/DialogContentText'
 import { muiThemeFix } from 'src/libs/muiThemeFix'
 
-export const ConfirmationDialog = (props) => {
-  const { title, openState, close, action, description } = props
+interface ConfirmationDialogProps {
+  title: string
+  openState: boolean
+  close: () => void
+  action: () => void
+  description: string
+}
+
+export const ConfirmationDialog = ({ title, openState, close, action, description }: Readonly<ConfirmationDialogProps>) => {
   return (
     <ThemeProvider theme={muiThemeFix}>
       <Dialog
