@@ -131,6 +131,7 @@ export interface DacObject {
   updateDate?: string
   chairpersons?: DuosUser[]
   members?: DuosUser[]
+  datasets?: Dataset[]
 }
 
 export interface DataAccessAgreement {
