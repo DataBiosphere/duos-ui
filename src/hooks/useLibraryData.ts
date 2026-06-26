@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+
+export const LIBRARY_DATA_QUERY_KEY = 'library-data'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery, QueryClause } from 'src/types/elastic'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
@@ -63,11 +65,10 @@ export const buildElasticsearchQuery = (
   sort?: SortState,
 ): ElasticsearchQuery => {
   const asset = assetRegistry[assetType]
-  const sanitizedFilters = sanitizeFiltersForAsset(assetType, filters)
   const { queryChunks, filterQuery } = buildCommonQueryClauses(
     assetType,
     libraryConfig,
-    sanitizedFilters,
+    filters,
     queryTerm,
     asset.searchFields,
   )
@@ -94,7 +95,7 @@ export const useLibraryData = (
 
   return useQuery({
     queryKey: [
-      'library-data',
+      LIBRARY_DATA_QUERY_KEY,
       libraryConfig.key,
       assetType,
       sanitizedFilters,

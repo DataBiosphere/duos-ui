@@ -345,7 +345,7 @@ interface SearchFilterFunctions {
   institutions: (term: string, targetList: InstitutionInterface[]) => InstitutionInterface[]
 }
 
-const getApprovalStatus = (
+export const getApprovalStatus = (
   dacApproval: boolean | null | undefined,
   defaultStatus: string,
 ): string => {
