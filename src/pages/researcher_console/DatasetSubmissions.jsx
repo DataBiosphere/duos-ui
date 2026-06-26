@@ -211,12 +211,12 @@ export default function DatasetSubmissions() {
     try {
       await DataSet.deleteDataset(term.datasetId)
       Notifications.showSuccess({ text: `Removed dataset '${term.datasetName}' successfully.` })
-      queryClient.invalidateQueries({ queryKey: ['library-data', 'submissions'] })
+      queryClient.invalidateQueries({ queryKey: ['library-data', libraryConfig.key] })
     }
     catch {
       Notifications.showError({ text: `Error removing dataset '${term.datasetName}'` })
     }
-  }, [deleteDialog, queryClient])
+  }, [deleteDialog, libraryConfig, queryClient])
 
   const extraColumns = useMemo(
     () => makeSubmissionColumns(handleDeleteClick),
