@@ -48,7 +48,7 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { ThemeProvider } from '@mui/material/styles'
-import EnhancedTableHeadRaw from './EnhancedTableHead'
+import EnhancedTableHeadRaw, { HeadCell, SortOrder } from './EnhancedTableHead'
 
 interface EnhancedTableHeadProps {
   order: SortOrder
@@ -59,14 +59,6 @@ interface EnhancedTableHeadProps {
 const EnhancedTableHead = EnhancedTableHeadRaw as React.ComponentType<EnhancedTableHeadProps>
 import { theme } from './Themes'
 import Box from '@mui/material/Box'
-
-export interface HeadCell {
-  id: string
-  label: string
-  disablePadding?: boolean
-}
-
-type SortOrder = 'asc' | 'desc'
 
 type RowData = Record<string, React.ReactNode>
 

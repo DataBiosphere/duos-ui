@@ -12,7 +12,7 @@ export interface HeadCell {
   disablePadding?: boolean
 }
 
-type SortOrder = 'asc' | 'desc'
+export type SortOrder = 'asc' | 'desc'
 
 interface EnhancedTableHeadProps {
   order: SortOrder
