@@ -12,7 +12,7 @@ import { DuosUser } from 'src/types/model'
 import { GridColDef } from '@mui/x-data-grid'
 
 // Capture the delete handler passed from DatasetSubmissions to makeSubmissionColumns
-let capturedOnDelete: ((term: { datasetId: number; datasetName: string }) => void) | null = null
+let capturedOnDelete: ((term: { datasetId: number, datasetName: string }) => void) | null = null
 
 vi.mock('src/components/data_library/columns/submissionColumns', () => ({
   makeSubmissionColumns: vi.fn((onDelete: typeof capturedOnDelete) => {
@@ -25,7 +25,7 @@ vi.mock('src/components/data_library/columns/submissionColumns', () => ({
 let capturedHandleTabChange: ((tab: AssetType) => void) | null = null
 
 vi.mock('src/components/data_library/LibraryPageShell', () => ({
-  default: ({ header, pageState }: { header: React.ReactNode; pageState: { handleTabChange: (tab: AssetType) => void } }) => {
+  default: ({ header, pageState }: { header: React.ReactNode, pageState: { handleTabChange: (tab: AssetType) => void } }) => {
     capturedHandleTabChange = pageState.handleTabChange
     return <div data-testid="library-shell">{header}</div>
   },
@@ -164,28 +164,38 @@ describe('DatasetSubmissions', () => {
 
   it('delete dialog opens when the delete callback is triggered', () => {
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' })
+    })
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
   it('delete dialog shows the dataset name in the confirmation prompt', () => {
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' })
+    })
     expect(screen.getByText(/Are you sure you want to delete the dataset 'Test Dataset'\?/)).toBeInTheDocument()
   })
 
   it('Cancel button closes the delete dialog', async () => {
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' })
+    })
     fireEvent.click(screen.getByRole('button', { name: /Cancel/i }))
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 
   it('changing tab while dialog is open closes the dialog', async () => {
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' })
+    })
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    act(() => { capturedHandleTabChange!(AssetType.STUDIES) })
+    act(() => {
+      capturedHandleTabChange!(AssetType.STUDIES)
+    })
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 
@@ -196,7 +206,9 @@ describe('DatasetSubmissions', () => {
     vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
 
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 7, datasetName: 'Dataset Seven' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 7, datasetName: 'Dataset Seven' })
+    })
     fireEvent.click(screen.getByRole('button', { name: /Confirm/i }))
 
     await waitFor(() => {
@@ -209,11 +221,13 @@ describe('DatasetSubmissions', () => {
     const showSuccessSpy = vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
 
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 1, datasetName: 'Dataset One' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 1, datasetName: 'Dataset One' })
+    })
     fireEvent.click(screen.getByRole('button', { name: /Confirm/i }))
 
     await waitFor(() => {
-      expect(showSuccessSpy).toHaveBeenCalledWith({ text: "Removed dataset 'Dataset One' successfully." })
+      expect(showSuccessSpy).toHaveBeenCalledWith({ text: `Removed dataset 'Dataset One' successfully.` })
     })
   })
 
@@ -222,7 +236,9 @@ describe('DatasetSubmissions', () => {
     vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
 
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 1, datasetName: 'Test Dataset' })
+    })
     fireEvent.click(screen.getByRole('button', { name: /Confirm/i }))
 
     await waitFor(() => {
@@ -235,11 +251,13 @@ describe('DatasetSubmissions', () => {
     const showErrorSpy = vi.spyOn(Notifications, 'showError').mockImplementation(() => undefined)
 
     renderComponent()
-    act(() => { capturedOnDelete!({ datasetId: 3, datasetName: 'Fail Dataset' }) })
+    act(() => {
+      capturedOnDelete!({ datasetId: 3, datasetName: 'Fail Dataset' })
+    })
     fireEvent.click(screen.getByRole('button', { name: /Confirm/i }))
 
     await waitFor(() => {
-      expect(showErrorSpy).toHaveBeenCalledWith({ text: "Error removing dataset 'Fail Dataset'" })
+      expect(showErrorSpy).toHaveBeenCalledWith({ text: `Error removing dataset 'Fail Dataset'` })
     })
   })
 })
