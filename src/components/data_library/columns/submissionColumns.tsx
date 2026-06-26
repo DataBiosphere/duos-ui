@@ -4,12 +4,12 @@ import { Box, Button, Chip, IconButton } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Link as RouterLink } from 'react-router-dom'
 import { DatasetTerm } from 'src/types/model'
+import { getApprovalStatus } from 'src/libs/utils'
 
 const getSubmissionStatus = (row: Record<string, unknown>): string | null => {
   if (!row || !('dacApproval' in row)) return null
-  const dacApproval = row.dacApproval
-  if (dacApproval === null || dacApproval === undefined) return 'Pending'
-  return dacApproval ? 'Accepted' : 'Rejected'
+  const raw = getApprovalStatus(row.dacApproval as boolean | null | undefined, 'pending')
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
 }
 
 const getStatusColor = (status: string): 'success' | 'error' | 'default' => {
