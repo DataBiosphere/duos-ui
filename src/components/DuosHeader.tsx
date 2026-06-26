@@ -17,6 +17,7 @@ import { Notification } from './Notification'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface SubTab {
   label: string
@@ -165,6 +166,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   })
 
   const { activeTab, setActiveTab } = useNavigationState()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
@@ -185,6 +187,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const signOut = (): void => {
+    queryClient.clear()
     navigate('/home')
     toggleDrawer(false)
     void Auth.signOut()

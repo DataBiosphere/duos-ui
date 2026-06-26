@@ -365,15 +365,37 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
           mb: 2,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: isOpen ? 'row' : 'column',
+            alignItems: 'center',
+            gap: 0.5,
+          }}
+        >
           {onToggle && (
-            <Tooltip title={isOpen ? 'Collapse filters' : 'Expand filters'} placement="right">
-              <IconButton size="small" onClick={onToggle} aria-label={isOpen ? 'Collapse filters' : 'Expand filters'}>
+            <Tooltip title={isOpen ? 'Collapse filters' : 'Show filters'} placement="right">
+              <IconButton size="small" onClick={onToggle} aria-label={isOpen ? 'Collapse filters' : 'Show filters'}>
                 {isOpen ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
           )}
           {isOpen && <Typography variant="h6">Filters</Typography>}
+          {!isOpen && onToggle && (
+            <Typography
+              variant="caption"
+              onClick={onToggle}
+              sx={{
+                writingMode: 'vertical-rl',
+                cursor: 'pointer',
+                color: 'text.secondary',
+                fontSize: '11px',
+                userSelect: 'none',
+              }}
+            >
+              Show filters
+            </Typography>
+          )}
         </Box>
         {isOpen && hasActiveFilters && (
           <Button size="small" onClick={onClear}>

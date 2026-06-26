@@ -46,7 +46,7 @@ export const makeDatasetColumns = (
   {
     field: 'accessManagement',
     headerName: 'Access',
-    width: 150,
+    width: 115,
     renderCell: (params) => {
       const summary = getAccessManagementSummary(params.value)
       const isRadarEnabled = radarEnabledDatasetIds.has(params.row.datasetId)
@@ -104,8 +104,8 @@ export const makeDatasetColumns = (
 
       return (
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {codes.slice(0, 2).map((code, idx) => (
-            <Chip key={idx} label={code} size="small" variant="outlined" />
+          {codes.slice(0, 2).map(code => (
+            <Chip key={code} label={code} size="small" variant="outlined" />
           ))}
           {codes.length > 2 && (
             <Tooltip title={codes.slice(2).join(', ')}>

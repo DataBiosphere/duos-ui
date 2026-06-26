@@ -9,6 +9,8 @@ import {
   sanitizeFiltersForAsset,
 } from 'src/components/data_library/filterRegistry'
 
+export const LIBRARY_DATA_QUERY_KEY = 'library-data'
+
 /**
  * Build the common Elasticsearch query clauses shared by every asset type:
  * the base `must` clauses (study-exists check + library filter + search term)
@@ -63,15 +65,14 @@ export const buildElasticsearchQuery = (
   sort?: SortState,
 ): ElasticsearchQuery => {
   const asset = assetRegistry[assetType]
-  const sanitizedFilters = sanitizeFiltersForAsset(assetType, filters)
   const { queryChunks, filterQuery } = buildCommonQueryClauses(
     assetType,
     libraryConfig,
-    sanitizedFilters,
+    filters,
     queryTerm,
     asset.searchFields,
   )
-  return asset.buildQuery(queryChunks, filterQuery, pagination, sort)
+  return asset.buildQuery(queryChunks, filterQuery, pagination, sort, { showAllControlled: libraryConfig.showAllControlled })
 }
 
 /**
@@ -94,7 +95,7 @@ export const useLibraryData = (
 
   return useQuery({
     queryKey: [
-      'library-data',
+      LIBRARY_DATA_QUERY_KEY,
       libraryConfig.key,
       assetType,
       sanitizedFilters,

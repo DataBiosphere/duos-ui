@@ -11,6 +11,7 @@ import {
   StudyData,
   ThroughBioId,
 } from 'src/pages/data_submission/v2/v2-models'
+import { StudyDataKeys, StudyDataMetadata } from 'src/libs/data-metadata'
 import {
   extractThroughBioId,
   generateStudyInputFormTextField,
@@ -41,6 +42,8 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
     return typeof id === 'string' && id.trim() !== '' ? `https://through.bio/${id}` : undefined
   }, [study])
 
+  // Unified source: prefer in-progress edit from properties[], fall back to API-loaded study.data.
+  const currentDataBag = (getStudyPropertyValueByKey(study, StudyData.key) as StudyDataMetadata | undefined) ?? study.data
   const onChange = ({ key, value }: { key: string, value: unknown, isValid: boolean }) => {
     setStudy((val: Study) => {
       const newForm = structuredClone(val)
@@ -76,18 +79,18 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
         onChange={onChange}
       />
       <FormField
-        id="tags"
+        id={StudyDataKeys.TAGS}
         title="Tags"
         placeholder="Add tags to help others find your study (e.g. disease area, assay type, etc.)"
         type={FormFieldTypes.SELECT}
         isCreatable={true}
         isMulti={true}
         optionsAreString={true}
-        defaultValue={(getStudyPropertyValueByKey(study, 'data') as Record<string, unknown> | undefined)?.tags || []}
-        selectOptions={study.data?.tags || []}
+        defaultValue={currentDataBag?.tags || []}
+        selectOptions={currentDataBag?.tags || []}
         onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
           const tags = input.value as string[]
-          setStudyPropertyByKey(study, setStudy, input, new StudyData({ ...getStudyPropertyValueByKey(study, 'data') as Record<string, unknown>, tags } as Record<string, unknown>))
+          setStudyPropertyByKey(study, setStudy, input, new StudyData({ ...currentDataBag, [StudyDataKeys.TAGS]: tags }))
         }}
         selectConfig={{
           components: {

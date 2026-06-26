@@ -9,6 +9,7 @@ import { DacPicker } from 'src/components/forms/DacPicker'
 import { FileInput } from 'src/components/forms/FileInput'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
+import { DatasetDataKeys } from 'src/libs/data-metadata'
 
 interface ConsentGroupAddEditProps {
   readonly id: number
@@ -229,8 +230,8 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             disabled={readOnly}
           />
           <FormField
-            id="tags"
-            name="tags"
+            id={DatasetDataKeys.TAGS}
+            name={DatasetDataKeys.TAGS}
             title="Tags"
             placeholder="Add tags to help others find your dataset (e.g. disease area, assay type, etc.)"
             type={FormFieldTypes.SELECT}
@@ -239,8 +240,8 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             optionsAreString={true}
             onChange={onDatasetDataChange}
             disabled={readOnly}
-            defaultValue={current?.data?.tags || []}
-            selectOptions={(current?.data?.tags as string[]) || []}
+            defaultValue={current?.data?.[DatasetDataKeys.TAGS] || []}
+            selectOptions={(current?.data?.[DatasetDataKeys.TAGS] as string[]) || []}
             selectConfig={{
               components: {
                 DropdownIndicator: null,
@@ -661,8 +662,8 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
           </div>
 
           <FormField
-            id="cloud"
-            name="cloud"
+            id={DatasetDataKeys.CLOUD}
+            name={DatasetDataKeys.CLOUD}
             title="Cloud"
             placeholder="Select or enter cloud environment"
             type={FormFieldTypes.SELECT}
@@ -670,7 +671,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             isMulti={true}
             optionsAreString={true}
             selectOptions={CloudProviders.VALUES.map(provider => provider.name)}
-            defaultValue={current?.data?.cloud as string[] | undefined}
+            defaultValue={current?.data?.[DatasetDataKeys.CLOUD]}
             onChange={onDatasetDataChange}
             disabled={readOnly}
           />

@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
-import { formatDate, Notifications, sortVisibleTable } from 'src/libs/utils'
+import { formatDate, Notifications, sortVisibleTable, TableCell } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
 
 const styles = {
@@ -17,14 +17,14 @@ const styles = {
     lineHeight: '2rem',
     justifyContent: 'space-between',
     alignItems: 'center',
-    whiteSpace: 'pre-line',
+    whiteSpace: 'pre-line' as const,
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    fontFamily: 'Montserrat',
+  columnStyle: {
+    ...Styles.TABLE.HEADER_ROW, fontFamily: 'Montserrat',
     fontSize: '1.4rem',
     color: '#333F52',
     justifyContent: 'space-between',
-  }),
+  },
   cellWidths: {
     vote: '10%',
     name: '15%',
@@ -49,6 +49,29 @@ const columnHeaderFormat = {
 const ReminderStates = {
   SENT: 'sent',
   SENDING: 'sending',
+} as const
+
+type ReminderState = typeof ReminderStates[keyof typeof ReminderStates] | undefined
+
+export interface DacVoteRow {
+  vote?: boolean
+  displayName: string
+  voteId: number
+  lastUpdated?: string | null
+  rationale?: string | null
+  updateDate?: string | number
+}
+
+interface VoteSummaryTableProps {
+  dacVotes?: DacVoteRow[]
+  isLoading?: boolean
+  isChair?: boolean
+  adminPage?: boolean
+}
+
+interface SortConfig {
+  colIndex: number
+  dir: number
 }
 
 const columnHeaderData = () => {
@@ -56,11 +79,20 @@ const columnHeaderData = () => {
   return [vote, name, date, rationale]
 }
 
-const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, sendReminder }) => {
+const processVoteSummaryRowData = ({
+  dacVotes,
+  isChair,
+  getReminderSentState,
+  sendReminder,
+}: {
+  dacVotes?: DacVoteRow[]
+  isChair: boolean
+  getReminderSentState: (voteId: number) => ReminderState
+  sendReminder: (voteId: number) => void
+}): TableCell[][] => {
   if (!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
-      const { vote, displayName, voteId, lastUpdated, rationale }
-        = dacVote
+      const { vote, displayName, voteId, lastUpdated, rationale } = dacVote
       return [
         voteCellData({
           vote,
@@ -78,11 +110,12 @@ const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, se
   return []
 }
 
-const voteToString = (vote) => {
-  return isNil(vote) ? '- -' : (vote ? 'Yes' : 'No')
+const voteToString = (vote?: boolean): string => {
+  if (isNil(vote)) return '- -'
+  return vote ? 'Yes' : 'No'
 }
 
-const reminderLink = ({ reminderSentState, sendReminder }) => {
+const reminderLink = ({ reminderSentState, sendReminder }: { reminderSentState: ReminderState, sendReminder: () => void }): React.ReactNode => {
   switch (reminderSentState) {
     case ReminderStates.SENDING:
       return <p style={{ fontStyle: 'italic' }}>Sending...</p>
@@ -90,30 +123,44 @@ const reminderLink = ({ reminderSentState, sendReminder }) => {
       return <p style={{ fontStyle: 'italic', color: 'green' }}>Sent Reminder</p>
     default:
       return (
-        <a onClick={() => sendReminder()}>
+        <button type="button" onClick={() => sendReminder()} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'inherit' }}>
           Send Reminder
-        </a>
+        </button>
       )
   }
 }
 
-function voteCellData({ vote, voteId, isChair, reminderSentState, sendReminder, label = 'vote' }) {
+function voteCellData({ vote, voteId, isChair, reminderSentState, sendReminder, label = 'vote' }: {
+  vote?: boolean
+  voteId: number
+  isChair: boolean
+  reminderSentState: ReminderState
+  sendReminder: () => void
+  label?: string
+}): TableCell {
   const data = (
     isChair && (isNil(vote) || isNil(voteId))
       ? reminderLink({ reminderSentState, sendReminder })
       : voteToString(vote)
   )
+  let value: string
+  if (isNil(vote)) {
+    value = '-'
+  }
+  else {
+    value = vote ? 'Yes' : 'No'
+  }
 
   return {
-    data: data,
-    value: isNil(vote) ? '-' : (vote ? 'Yes' : 'No'),
+    data,
+    value,
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
     label,
   }
 }
 
-function nameCellData({ name = '- -', voteId, label = 'name' }) {
+function nameCellData({ name = '- -', voteId, label = 'name' }: { name?: string, voteId: number, label?: string }): TableCell {
   return {
     data: name,
     id: voteId,
@@ -122,7 +169,7 @@ function nameCellData({ name = '- -', voteId, label = 'name' }) {
   }
 }
 
-function dateCellData({ date, voteId, label = 'date' }) {
+function dateCellData({ date, voteId, label = 'date' }: { date: string | null | undefined, voteId: number, label?: string }): TableCell {
   return {
     data: date,
     id: voteId,
@@ -131,41 +178,37 @@ function dateCellData({ date, voteId, label = 'date' }) {
   }
 }
 
-function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }) {
+function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }: { rationale?: string | null, voteId: number, label?: string }): TableCell {
   return {
-    data: rationale,
+    data: rationale ?? '- -',
     id: voteId,
     cellStyle: { width: styles.cellWidths.rationale },
     label,
   }
 }
 
-export default function VoteSummaryTable(props) {
-  const [sort, setSort] = useState({ colIndex: 0, dir: -1 })
-  const [visibleVotes, setVisibleVotes] = useState([])
+export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false }: Readonly<VoteSummaryTableProps>) {
+  const [sort, setSort] = useState<SortConfig>({ colIndex: 0, dir: -1 })
+  const [visibleVotes, setVisibleVotes] = useState<TableCell[][]>([])
   const [tableSize, setTableSize] = useState(5)
-  const { dacVotes, isLoading, isChair = false } = props
 
-  // key: voteId, value: boolean
-  const [reminderSentState, setReminderSentState] = useState({})
+  const [reminderSentState, setReminderSentState] = useState<Record<number, ReminderState>>({})
 
-  const getReminderSentState = useCallback((voteId) => {
+  const getReminderSentState = useCallback((voteId: number): ReminderState => {
     return reminderSentState[voteId]
   }, [reminderSentState])
 
-  const updateReminderState = (voteId, sentState) => {
+  const updateReminderState = (voteId: number, sentState: ReminderState) => {
     setReminderSentState((state) => {
       return {
         ...state,
-        ...{
-          [voteId]: sentState,
-        },
+        [voteId]: sentState,
       }
     })
   }
 
   React.useEffect(() => {
-    const sendReminder = (voteId) => {
+    const sendReminder = (voteId: number) => {
       updateReminderState(voteId, ReminderStates.SENDING)
 
       Email.sendReminderEmail(voteId)
@@ -187,7 +230,7 @@ export default function VoteSummaryTable(props) {
       }),
     )
     if (!isEmpty(dacVotes)) {
-      setTableSize(dacVotes.length)
+      setTableSize(dacVotes!.length)
     }
   }, [sort, dacVotes, isChair, getReminderSentState])
 
