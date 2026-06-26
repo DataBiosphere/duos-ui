@@ -51,6 +51,7 @@ import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { Dataset } from 'src/types/model'
+import { DatasetDataMetadata, StudyDataMetadata } from 'src/libs/data-metadata'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 
@@ -221,7 +222,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     alternativeDataSharingPlanTargetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined),
     alternativeDataSharingPlanTargetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined),
     consentGroups: structuredClone(study.assets?.consentGroups) || [],
-    data: getStudyPropertyValueByKey(study, StudyData.key) as Record<string, unknown> || {},
+    data: (getStudyPropertyValueByKey(study, StudyData.key) as StudyDataMetadata | undefined) ?? study.data ?? {},
   }
   const assets = structuredClone(study.assets)
   if (assets) {
@@ -291,7 +292,7 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     consentGroup.requestLocation = getDatasetPropertyValueByKey(RequestLocation.propertyName, dataset) as string
     consentGroup.fileTypes = fileTypeAdjustment(getDatasetPropertyValueByKey(FileTypes.propertyName, dataset) as Array<FileType>)
     consentGroup.numberOfParticipants = getDatasetPropertyValueByKey(NumberOfParticipants.propertyName, dataset) as number || 0
-    consentGroup.data = getDatasetPropertyValueByKey(DatasetData.propertyName, dataset) as Record<string, unknown> || {}
+    consentGroup.data = getDatasetPropertyValueByKey<DatasetDataMetadata>(DatasetData.propertyName, dataset)
     consentGroups.push(consentGroup)
   })
   return consentGroups
