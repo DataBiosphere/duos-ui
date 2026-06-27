@@ -72,15 +72,17 @@ interface FormFieldTypeConfig {
 }
 
 interface FormFieldTitleProps {
-  title?: string
+  id?: string
+  title?: React.ReactNode
   hideTitle?: boolean
   description?: React.ReactNode
   helpText?: React.ReactNode
-  formId: string
+  formId?: string
   ariaLevel?: number
   required?: boolean
   validation?: Validation
   titleStyle?: React.CSSProperties
+  disabled?: boolean
 }
 
 export interface FormFieldConfig {
@@ -88,7 +90,7 @@ export interface FormFieldConfig {
   name?: string | null
   type?: FormFieldTypeConfig
   ariaLevel?: number
-  title?: string
+  title?: React.ReactNode
   hideTitle?: boolean
   description?: React.ReactNode
   helpText?: React.ReactNode
@@ -129,7 +131,8 @@ interface FormTableConfig {
   validation?: Record<string, Validation>[] | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onValidationChange?(event: any): void
-  defaultValue?: Record<string, unknown>[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  defaultValue?: any[]
   styleProps?: StyleProps
 }
 
@@ -308,6 +311,7 @@ export const FormValidators: Record<string, Validator> = {
 // ----------------------------------------------------------------------------------------------------- //
 export const FormFieldTitle = (props: FormFieldTitleProps): React.JSX.Element => {
   const {
+    id,
     title,
     hideTitle,
     description,
@@ -319,15 +323,17 @@ export const FormFieldTitle = (props: FormFieldTitleProps): React.JSX.Element =>
     titleStyle,
   } = props
 
+  const labelId = id ?? (formId ? `lbl_${formId}` : undefined)
+
   return (
     <div>
       {title && !hideTitle
         && (
           <label
-            id={`lbl_${formId}`}
+            id={labelId}
             className={`control-label ${isValid(validation) ? '' : 'errored'}`}
             style={titleStyle}
-            htmlFor={`${formId}`}
+            htmlFor={formId}
             aria-level={ariaLevel}
           >
             {title}
@@ -430,7 +436,8 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
     addRowButtonIconClassName = 'glyphicon glyphicon-plus',
     removeRowButtonIconClassName = 'glyphicon glyphicon-remove',
   } = styleProps
-  const [formValue, setFormValue] = useState<Record<string, unknown>[]>(defaultValue ?? [{}])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [formValue, setFormValue] = useState<any[]>(defaultValue ?? [{}])
 
   const key = getKey(config)
 
@@ -438,10 +445,10 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
     <div id={id} className={`formField-table formField-${id}`}>
       {/* generate columns */}
       <div className="formTable-row formTable-cols">
-        {formFields.map(({ validators, title }) => {
+        {formFields.map(({ id: colId, validators, title }) => {
           const required = (validators ?? []).includes(FormValidators.REQUIRED)
           return (
-            <label className="control-label" key={`${id}-${title}`} id={`${id}-${title}`}>
+            <label className="control-label" key={`${id}-${colId}`} id={`${id}-${colId}`}>
               {title}
               {required && '*'}
             </label>
@@ -457,7 +464,7 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
               key={`${id}-${i}-${formCol.id}`}
               id={`${id}-${i}-${formCol.id}`}
               hideTitle={true}
-              ariaDescribedby={`${id}-${formCol.title}`}
+              ariaDescribedby={`${id}-${formCol.id}`}
               defaultValue={formValue[i][getKey(formCol)]}
               validation={!isNil(validation) && isArray(validation) ? validation.at(i)?.[getKey(formCol)] : undefined}
               onChange={({ value }) => {

@@ -45,7 +45,7 @@ import {
   DatasetData,
   ThroughBioId,
 } from 'src/pages/data_submission/v2/v2-models'
-import { FormField, FormFieldTypes } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes, Validator } from 'src/components/forms/forms'
 import { set, isEmpty } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
@@ -74,7 +74,7 @@ export const generateStudyPropertyYesNoField = (formData: Study, setStudy: React
   )
 }
 
-export const generateStudyPropertyFormTextField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: StringStudyProperty, validators: Array<unknown> = []) => {
+export const generateStudyPropertyFormTextField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: StringStudyProperty, validators: Validator[] = []) => {
   return (
     <FormField
       id={studyProperty.key}
@@ -90,7 +90,7 @@ export const generateStudyPropertyFormTextField = (formData: Study, setStudy: Re
   )
 }
 
-export const generateStudyInputFormTextField = (setStudy: React.Dispatch<React.SetStateAction<Study>>, id: string, initialValue: string | undefined, title: string, placeholder: string, validators: Array<unknown> = [], readOnly: boolean = false) => {
+export const generateStudyInputFormTextField = (setStudy: React.Dispatch<React.SetStateAction<Study>>, id: string, initialValue: string | undefined, title: string, placeholder: string, validators: Validator[] = [], readOnly: boolean = false) => {
   return (
     <FormField
       id={id}
@@ -109,7 +109,7 @@ export const generateStudyInputFormTextField = (setStudy: React.Dispatch<React.S
   )
 }
 
-export const generateStudyPropertyFormDateField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: DateStudyProperty, validators: Array<unknown> = [], style: unknown = {}) => {
+export const generateStudyPropertyFormDateField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: DateStudyProperty, validators: Validator[] = [], style: React.CSSProperties = {}) => {
   return (
     <FormField
       id={studyProperty.key}
