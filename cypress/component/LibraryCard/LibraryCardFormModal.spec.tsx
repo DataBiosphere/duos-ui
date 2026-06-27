@@ -7,6 +7,7 @@ import { Institution } from 'src/libs/ajax/Institution'
 const setupInstitutionMock = (domains: string[]) => {
   const duosUser = {
     isSigningOfficial: false,
+    institutionId: 1,
   }
   const institution = {
     id: 1,
