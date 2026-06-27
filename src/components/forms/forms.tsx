@@ -321,6 +321,7 @@ export const FormFieldTitle = (props: FormFieldTitleProps): React.JSX.Element =>
     required,
     validation,
     titleStyle,
+    disabled,
   } = props
 
   const labelId = id ?? (formId ? `lbl_${formId}` : undefined)
@@ -335,6 +336,7 @@ export const FormFieldTitle = (props: FormFieldTitleProps): React.JSX.Element =>
             style={titleStyle}
             htmlFor={formId}
             aria-level={ariaLevel}
+            aria-disabled={disabled}
           >
             {title}
             {required && '*'}
