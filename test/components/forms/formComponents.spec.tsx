@@ -12,7 +12,6 @@ import {
   FormInputCheckbox,
   FormInputSlider,
   FormInputFile,
-  type FormComponentConfig,
   type Validation,
 } from 'src/components/forms/formComponents'
 
@@ -61,7 +60,7 @@ vi.mock('react-select', () => ({
   ),
 }))
 
-const baseConfig = (overrides: Partial<FormComponentConfig> = {}): FormComponentConfig => ({
+const baseConfig = (overrides: Record<string, unknown> = {}) => ({
   id: 'test-field',
   formValue: '',
   setFormValue: vi.fn(),
