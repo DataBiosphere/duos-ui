@@ -38,6 +38,6 @@ jobs:
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
           install: false
-          start: pnpm start
+          start: pnpm run serve
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120

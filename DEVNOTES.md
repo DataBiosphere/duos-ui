@@ -57,6 +57,8 @@ will simulate it for local development.
 pnpm start
 ```
 
+This starts the Fastify server (port 3000) with Vite's HMR middleware embedded. The browser will open automatically.
+
 ## Running using Docker Compose
 
 Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes. Remember to set

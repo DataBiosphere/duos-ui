@@ -1,3 +1,6 @@
+packages:
+  - server
+
 allowBuilds:
   cypress: false
   esbuild: false

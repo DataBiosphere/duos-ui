@@ -3,18 +3,6 @@ import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { aliases_from_tsconfig } from './aliases'
 
-const defaultOptions = {
-  host: 'local.dsde-dev.broadinstitute.org',
-  port: 3000,
-  https: (process.env.CI || process.env.CYPRESS)
-    ? undefined
-    : {
-        key: 'server.key',
-        cert: 'server.crt',
-      },
-  open: true,
-}
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -26,8 +14,10 @@ export default defineConfig({
     outDir: 'build',
     target: 'es2022',
   },
-  server: defaultOptions,
-  preview: defaultOptions,
+  // Vite runs in middlewareMode via @fastify/vite — most server options are ignored.
+  // allowedHosts is the exception: Vite still enforces it in middleware mode to block
+  // requests whose Host header doesn't match. Only applies in dev; inert in production.
+  server: { allowedHosts: ['local.dsde-dev.broadinstitute.org'] },
   resolve: {
     alias: aliases_from_tsconfig(),
   },
