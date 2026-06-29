@@ -6,8 +6,42 @@ import { Styles } from 'src/libs/theme'
 import { Delete } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
 import editPencilIcon from 'src/images/edit_pencil.svg'
+import type { DacObject } from 'src/types/model'
 
-export function nameCellData({ name = '- -', dacId, label = 'dac-name' }) {
+export interface CellData {
+  data: React.ReactNode
+  value?: string
+  id: number | undefined
+  style?: React.CSSProperties
+  label: string
+  isComponent?: boolean
+}
+
+interface NameCellDataParams {
+  name?: string
+  dacId?: number
+  label?: string
+}
+
+interface DescriptionCellDataParams {
+  description?: string
+  dacId?: number
+  label?: string
+}
+
+interface DatasetsCellDataParams {
+  dac: DacObject
+  viewDatasets: (dac: DacObject) => void
+  label?: string
+}
+
+interface ActionsCellDataParams {
+  dac: DacObject
+  deleteDac: (dac: DacObject) => void
+  userRole: string
+}
+
+export function nameCellData({ name = '- -', dacId, label = 'dac-name' }: NameCellDataParams): CellData {
   return {
     isComponent: true,
     id: dacId,
@@ -27,7 +61,7 @@ export function nameCellData({ name = '- -', dacId, label = 'dac-name' }) {
   }
 }
 
-export function descriptionCellData({ description = '- -', dacId, label = 'dac-description' }) {
+export function descriptionCellData({ description = '- -', dacId, label = 'dac-description' }: DescriptionCellDataParams): CellData {
   return {
     data: isEmpty(description) ? '- -' : description,
     id: dacId,
@@ -39,8 +73,8 @@ export function descriptionCellData({ description = '- -', dacId, label = 'dac-d
   }
 }
 
-export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) {
-  const datasetCount = (dac.datasets || []).length
+export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }: DatasetsCellDataParams): CellData {
+  const datasetCount = (dac.datasets ?? []).length
   return {
     isComponent: true,
     id: dac.dacId,
@@ -57,9 +91,9 @@ export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }) 
   }
 }
 
-export function actionsCellData({ dac, deleteDac, userRole }) {
-  const isAdmin = (userRole === 'Admin')
-  const deleteDisabled = (!isNil(dac.datasets) && !isEmpty(dac.datasets))
+export function actionsCellData({ dac, deleteDac, userRole }: ActionsCellDataParams): CellData {
+  const isAdmin = userRole === 'Admin'
+  const deleteDisabled = !isNil(dac.datasets) && !isEmpty(dac.datasets)
 
   const actions = (
     <>
@@ -75,7 +109,7 @@ export function actionsCellData({ dac, deleteDac, userRole }) {
       {isAdmin && (
         <TableIconButton
           key="delete-dac-icon"
-          dataTip={(deleteDisabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC')}
+          dataTip={deleteDisabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC'}
           disabled={deleteDisabled}
           onClick={() => deleteDac(dac)}
           icon={Delete}
