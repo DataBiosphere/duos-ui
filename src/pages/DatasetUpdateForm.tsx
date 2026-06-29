@@ -1,34 +1,32 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
-
-import { Notifications } from '../libs/utils'
-import { Styles } from '../libs/theme'
-import DatasetUpdate from '../components/data_update/DatasetUpdate'
-import { DataSet } from '../libs/ajax/DataSet'
+import React, { useState, useEffect } from 'react'
+import { Notifications } from 'src/libs/utils'
+import { Styles } from 'src/libs/theme'
+import DatasetUpdate from 'src/components/data_update/DatasetUpdate'
+import { DataSet } from 'src/libs/ajax/DataSet'
 import { useParams } from 'react-router-dom'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { Dataset } from 'src/types/model'
 
-export const DatasetUpdateForm = () => {
-  const params = useParams()
-  const { datasetId } = params
+export const DatasetUpdateForm = (): React.JSX.Element | false => {
+  const { datasetId } = useParams<{ datasetId: string }>()
 
   const [failedInit, setFailedInit] = useState(true)
-  const [dataset, setDataset] = useState({})
+  const [dataset, setDataset] = useState<Dataset | null>(null)
 
   useEffect(() => {
-    const init = async () => {
+    const init = async (): Promise<void> => {
       try {
-        setDataset(await DataSet.getDataSetsByDatasetId(datasetId))
+        setDataset(await DataSet.getDataSetsByDatasetId(Number(datasetId)))
         setFailedInit(false)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Failed to load dataset' })
       }
     }
-    init()
+    void init()
   }, [datasetId])
 
-  return !failedInit && (
+  return !failedInit && dataset !== null && (
     <div style={Styles.PAGE}>
       <div>
         <TableHeaderSection
