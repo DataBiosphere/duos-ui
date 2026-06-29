@@ -5,7 +5,8 @@ import { Block, Delete } from '@mui/icons-material'
 import SimpleButton from 'src/components/SimpleButton'
 import { useNavigate } from 'react-router-dom'
 import { includes, toLower } from 'src/utils/NodashUtil'
-import './dar_collection_table.css'
+import { DarCollectionSummary } from 'src/types/model'
+import 'src/components/dar_collection_table/dar_collection_table.css'
 
 const duosBlue = '#0948B7'
 const cancelGray = '#333F52'
@@ -23,15 +24,24 @@ const hoverPrimaryButtonStyle = {
   color: 'white',
 }
 
-export default function Actions(props) {
-  const { showConfirmationModal, collection, goToVote, consoleType, actions = [], status } = props
-  const collectionId = collection.darCollectionId
-  const uniqueId = (collectionId ? collectionId : collection.referenceIds[0])
+export interface ActionsProps {
+  showConfirmationModal: (collection: DarCollectionSummary, action: string) => void
+  collection: DarCollectionSummary
+  goToVote?: (collectionId: number) => void
+  consoleType: string
+  actions?: string[]
+  status?: string
+}
+
+export default function Actions({ showConfirmationModal, collection, goToVote, consoleType, actions = [], status }: ActionsProps) {
+  // Draft collections have no darCollectionId; widen locally to allow null fallback
+  const collectionId: number | null = collection.darCollectionId
+  const uniqueId = collectionId ?? collection.referenceIds[0]
   const navigate = useNavigate()
 
   const openButtonAttributes = {
     keyProp: `${consoleType}-open-${uniqueId}`,
-    label: includes(['complete', 'canceled'], toLower(status)) ? 'Re-Open' : 'Open',
+    label: includes(['complete', 'canceled'], toLower(status ?? '')) ? 'Re-Open' : 'Open',
     onClick: () => showConfirmationModal(collection, 'open'),
     baseColor: duosBlue,
     hoverStyle: {
@@ -59,7 +69,7 @@ export default function Actions(props) {
   const voteButtonAttributes = {
     keyProp: `${consoleType}-vote-${uniqueId}`,
     label: 'Vote',
-    onClick: () => goToVote(collectionId),
+    onClick: () => goToVote?.(collectionId!),
     baseColor: duosBlue,
     hoverStyle: {
       backgroundColor: duosBlue,
@@ -78,7 +88,7 @@ export default function Actions(props) {
   const updateButtonAttributes = {
     keyProp: `${consoleType}-update-${collectionId}`,
     label: 'Update',
-    onClick: () => goToVote(collectionId),
+    onClick: () => goToVote?.(collectionId!),
     baseColor: 'white',
     hoverStyle: {
       backgroundColor: 'white',
