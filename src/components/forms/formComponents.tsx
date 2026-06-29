@@ -23,16 +23,6 @@ export interface Validator {
   readonly msg: string
 }
 
-export interface FormType {
-  inputType?: string
-  parseFormInput?: (value: string, prevValue?: unknown) => unknown
-  defaultValue?: unknown
-  component?: React.ComponentType<FormComponentConfig>
-  requiredProps?: string[]
-  optionalProps?: string[]
-  customPropValidation?: (props: Record<string, unknown>) => void
-}
-
 export interface SelectOption {
   key: string
   displayText: string
@@ -46,7 +36,19 @@ export interface RadioOption {
   [key: string]: unknown
 }
 
-export interface FormComponentConfig {
+export interface FormType {
+  inputType?: string
+  parseFormInput?: (value: string, prevValue?: unknown) => unknown
+  defaultValue?: unknown
+  component?: React.ComponentType<BaseFormComponentConfig>
+  requiredProps?: string[]
+  optionalProps?: string[]
+  customPropValidation?: (props: Record<string, unknown>) => void
+}
+
+// Shared props consumed by the internal helpers (onFormInputChange, updateValidation).
+// All per-component interfaces extend this.
+export interface BaseFormComponentConfig {
   id: string
   name?: string | null
   type?: FormType
@@ -56,12 +58,37 @@ export interface FormComponentConfig {
   setFormValue: (v: unknown) => void
   setValidation: (v: Validation) => void
   validation?: Validation
-  title?: string
   disabled?: boolean
+}
+
+export interface FormInputGenericConfig extends BaseFormComponentConfig {
+  title?: string
   placeholder?: string
   inputStyle?: React.CSSProperties
   ariaDescribedby?: string
   readOnly?: boolean
+}
+
+export interface FormInputTextareaConfig extends BaseFormComponentConfig {
+  title?: string
+  placeholder?: string
+  inputStyle?: React.CSSProperties
+  ariaDescribedby?: string
+  rows?: number
+  maxLength?: number
+}
+
+export interface FormInputMultiTextConfig extends BaseFormComponentConfig {
+  title?: string
+  placeholder?: string
+  ariaDescribedby?: string
+  inputStyle?: React.CSSProperties
+}
+
+export interface FormInputSelectConfig extends BaseFormComponentConfig {
+  title?: string
+  placeholder?: string
+  ariaDescribedby?: string
   selectOptions?: Array<SelectOption | string>
   isMulti?: boolean
   isClearable?: boolean
@@ -71,19 +98,42 @@ export interface FormComponentConfig {
   loadOptions?: (query: string, callback: (options: SelectOption[]) => void) => void
   selectConfig?: Record<string, unknown>
   optionsAreString?: boolean
-  required?: boolean
-  options?: RadioOption[]
+}
+
+export interface FormInputRadioGroupConfig extends BaseFormComponentConfig {
   orientation?: 'vertical' | 'horizontal'
+  options?: RadioOption[]
+}
+
+export interface FormInputYesNoRadioGroupConfig extends BaseFormComponentConfig {
+  orientation?: 'vertical' | 'horizontal'
+}
+
+export interface FormInputRadioButtonConfig extends BaseFormComponentConfig {
   value?: unknown
   toggleText?: string
-  multiple?: boolean
-  accept?: string
+}
+
+export interface FormInputCheckboxConfig extends BaseFormComponentConfig {
+  toggleText?: string
+  ariaDescribedby?: string
+}
+
+export interface FormInputSliderConfig extends BaseFormComponentConfig {
+  toggleText?: string
+}
+
+export interface FormInputFileConfig extends BaseFormComponentConfig {
+  placeholder?: string
   uploadText?: string
   hideTextBar?: boolean
   hideInput?: boolean
-  label?: string
-  rows?: number
-  maxLength?: number
+  multiple?: boolean
+  accept?: string
+}
+
+export interface FormDatePickerConfig extends BaseFormComponentConfig {
+  readOnly?: boolean
 }
 
 // validateFormValue is a JS function typed via JSDoc as (formValue: object, ...).
@@ -97,14 +147,14 @@ const styles = {
   },
 }
 
-const updateValidation = (config: FormComponentConfig, value: unknown): boolean => {
+const updateValidation = (config: BaseFormComponentConfig, value: unknown): boolean => {
   const { setValidation, validators } = config
   const validation = runValidation(value, validators)
   setValidation(validation)
   return isValid(validation)
 }
 
-const onFormInputChange = (config: FormComponentConfig, value: unknown): void => {
+const onFormInputChange = (config: BaseFormComponentConfig, value: unknown): void => {
   const { type, onChange, formValue, setFormValue, validators, setValidation } = config
   const key = getKey(config)
   const validation = runValidation(value, validators)
@@ -138,7 +188,7 @@ const errorMessages = (validation: Validation | undefined): React.ReactNode => {
 // ---------------------------------------------
 // Form Controls
 // ---------------------------------------------
-export const FormInputGeneric = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputGeneric = (config: FormInputGenericConfig): React.ReactElement => {
   const {
     id, name, title, disabled,
     placeholder, type,
@@ -169,7 +219,7 @@ export const FormInputGeneric = (config: FormComponentConfig): React.ReactElemen
   )
 }
 
-export const FormInputTextarea = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputTextarea = (config: FormInputTextareaConfig): React.ReactElement => {
   const {
     id, name, title, disabled,
     placeholder,
@@ -200,7 +250,7 @@ export const FormInputTextarea = (config: FormComponentConfig): React.ReactEleme
   )
 }
 
-export const FormInputMultiText = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputMultiText = (config: FormInputMultiTextConfig): React.ReactElement => {
   const {
     id, name, title, disabled,
     placeholder, ariaDescribedby, validators,
@@ -328,7 +378,7 @@ const getSelectOptionValue = (option: SelectOption, optionsAreString: boolean): 
   return optionsAreString ? option.displayText : option as unknown as string
 }
 
-export const FormInputSelect = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputSelect = (config: FormInputSelectConfig): React.ReactElement => {
   const {
     id, title, disabled, validation, setValidation,
     selectOptions, placeholder, ariaDescribedby,
@@ -438,7 +488,7 @@ export const FormInputSelect = (config: FormComponentConfig): React.ReactElement
   )
 }
 
-export const FormInputRadioGroup = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputRadioGroup = (config: FormInputRadioGroupConfig): React.ReactElement => {
   const {
     id, disabled,
     orientation = 'vertical',
@@ -467,7 +517,7 @@ export const FormInputRadioGroup = (config: FormComponentConfig): React.ReactEle
   )
 }
 
-export const FormInputYesNoRadioGroup = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputYesNoRadioGroup = (config: FormInputYesNoRadioGroupConfig): React.ReactElement => {
   const {
     id, disabled,
     orientation = 'vertical',
@@ -504,7 +554,7 @@ export const FormInputYesNoRadioGroup = (config: FormComponentConfig): React.Rea
   )
 }
 
-export const FormInputRadioButton = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputRadioButton = (config: FormInputRadioButtonConfig): React.ReactElement => {
   const {
     id, name, disabled, value, toggleText,
     formValue, validation,
@@ -525,7 +575,7 @@ export const FormInputRadioButton = (config: FormComponentConfig): React.ReactEl
   )
 }
 
-export const FormInputCheckbox = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputCheckbox = (config: FormInputCheckboxConfig): React.ReactElement => {
   const {
     id, name, disabled, validation, toggleText,
     formValue, ariaDescribedby,
@@ -554,7 +604,7 @@ export const FormInputCheckbox = (config: FormComponentConfig): React.ReactEleme
   )
 }
 
-export const FormInputSlider = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputSlider = (config: FormInputSliderConfig): React.ReactElement => {
   const {
     id, name, disabled, toggleText, formValue,
   } = config
@@ -581,7 +631,7 @@ export const FormInputSlider = (config: FormComponentConfig): React.ReactElement
   )
 }
 
-export const FormInputFile = (config: FormComponentConfig): React.ReactElement => {
+export const FormInputFile = (config: FormInputFileConfig): React.ReactElement => {
   const {
     id,
     name,
@@ -643,7 +693,7 @@ export const FormInputFile = (config: FormComponentConfig): React.ReactElement =
   )
 }
 
-export const FormDatePicker = (config: FormComponentConfig): React.ReactElement => {
+export const FormDatePicker = (config: FormDatePickerConfig): React.ReactElement => {
   const { id, formValue, validation, readOnly, disabled } = config
   const stateClassNames = [
     disabled ? 'disabled' : '',
