@@ -1,65 +1,85 @@
-import React from 'react'
-import { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { cloneDeep, find, isNil } from 'src/utils/NodashUtil'
-import { FormFieldTypes, FormField, FormValidators } from '../forms/forms'
-import { DataSet } from '../../libs/ajax/DataSet'
-import { DAR } from '../../libs/ajax/DAR'
-import { DAC } from '../../libs/ajax/DAC'
-import { Notifications } from '../../libs/utils'
+import { FormFieldTypes, FormField, FormValidators } from 'src/components/forms/forms'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { DAR } from 'src/libs/ajax/DAR'
+import { DAC } from 'src/libs/ajax/DAC'
+import { Notifications } from 'src/libs/utils'
 import { useNavigate } from 'react-router-dom'
+import { Dataset, DataUse, DacObject, DatasetProperty, OntologyEntry } from 'src/types/model'
 
-// TODO: Deprecated - remove this component when all datasets have been converted to studies
-export const DatasetUpdate = (props) => {
+interface DatasetFormProperties {
+  datasetName?: string
+  dataType?: string
+  species?: string
+  phenotype?: string
+  nrParticipants?: string
+  description?: string
+  url?: string
+  dataDepositor?: string
+  principalInvestigator?: string
+}
+
+interface NormalizedDataUse extends DataUse {
+  hasDiseaseRestrictions?: boolean
+  diseaseLabels?: string[]
+  hasPrimaryOther?: boolean
+  hasSecondaryOther?: boolean
+}
+
+interface DacFormData extends DacObject {
+  dacs?: DacObject[]
+}
+
+interface DatasetFormData {
+  datasetName?: string
+  properties: DatasetFormProperties
+  dataUse: NormalizedDataUse
+  dac: DacFormData
+}
+
+export interface DatasetUpdateProps {
+  dataset: Dataset
+}
+
+const dacOptions = (dacs: DacObject[] | undefined): { displayText: string, dacId: number | undefined }[] => {
+  if (isNil(dacs)) {
+    return []
+  }
+  return dacs.map(dac => ({ displayText: dac.name ?? '', dacId: dac.dacId }))
+}
+
+const asProperty = (propertyName: string, propertyValue: string | undefined): DatasetProperty => ({
+  propertyName,
+  propertyValue: propertyValue ?? '',
+})
+
+const getDiseaseLabels = async (ontologyIds: string[]): Promise<string[]> => {
+  const results = await DAR.searchOntologyIdList(ontologyIds)
+  return results.map((r: OntologyEntry) => r.label)
+}
+
+export const DatasetUpdate = ({ dataset }: DatasetUpdateProps): React.JSX.Element => {
   const navigate = useNavigate()
-  const { dataset } = props
 
-  const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} })
+  const [formData, setFormData] = useState<DatasetFormData>({
+    dac: {},
+    dataUse: {},
+    properties: {},
+  })
 
-  const searchOntologies = async (query, callback) => {
-    let options = []
-    await DAR.getAutoCompleteOT(query).then(
-      (items) => {
-        options = items.map((item) => {
-          return item.label
-        })
-        callback(options)
-      })
+  const searchOntologies = async (query: string, callback: (options: string[]) => void): Promise<void> => {
+    const items = await DAR.getAutoCompleteOT(query)
+    callback(items.map((item: OntologyEntry) => item.label))
   }
 
-  const dacOptions = (dacs) => {
-    let options = []
-    if (!isNil(dacs)) {
-      options = dacs.map((dac) => {
-        return { displayText: dac.name, dacId: dac.dacId }
-      })
-    }
-    return options
-  }
-
-  const getDiseaseLabels = async (ontologyIds) => {
-    let labels = []
-    if (!isNil(ontologyIds)) {
-      const idList = ontologyIds.join(',')
-      const result = await DAR.searchOntologyIdList(idList)
-      labels = result.map(r => r.label)
-    }
-    return labels
-  }
-
-  const extract = useCallback((propertyName) => {
+  const extract = useCallback((propertyName: string): string | undefined => {
     const property = find(dataset.properties, { propertyName })
     return property?.propertyValue
   }, [dataset])
 
-  const asProperty = (propertyName, propertyValue) => {
-    return {
-      propertyName,
-      propertyValue,
-    }
-  }
-
-  const normalizeDataUse = useCallback(async (dataUse) => {
-    const du = dataUse
+  const normalizeDataUse = useCallback(async (dataUse: DataUse): Promise<NormalizedDataUse> => {
+    const du: NormalizedDataUse = { ...dataUse }
     if (!isNil(dataUse.diseaseRestrictions)) {
       du.hasDiseaseRestrictions = true
       du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions)
@@ -73,7 +93,7 @@ export const DatasetUpdate = (props) => {
     return du
   }, [])
 
-  const updateProperty = useCallback((propertyName, value) => {
+  const updateProperty = useCallback((propertyName: keyof DatasetFormProperties, value: string | undefined): void => {
     setFormData((prev) => {
       const newFormData = cloneDeep(prev)
       newFormData.properties[propertyName] = value
@@ -81,12 +101,12 @@ export const DatasetUpdate = (props) => {
     })
   }, [])
 
-  const submitForm = (event) => {
+  const submitForm = (event: React.MouseEvent<HTMLButtonElement>): void => {
     event.preventDefault()
     event.stopPropagation()
 
-    const formElement = event.target.form
-    const submitData = new FormData(formElement)
+    const formElement = (event.target as HTMLButtonElement).form
+    const submitData = formElement ? new FormData(formElement) : new FormData()
     const nihFileData = submitData.get('nihInstitutionalCertificationFile')
     const consentGroups = [{ nihInstitutionalCertificationFile: nihFileData }]
 
@@ -108,21 +128,24 @@ export const DatasetUpdate = (props) => {
 
     const multiPartFormData = new FormData()
     multiPartFormData.append('dataset', JSON.stringify(newDataset))
-    multiPartFormData.append('consentGroups', consentGroups)
+    multiPartFormData.append('consentGroups', JSON.stringify(consentGroups))
 
-    DataSet.updateDatasetV3(dataset.datasetId, multiPartFormData).then(() => {
-      navigate('/datalibrary')
-      Notifications.showSuccess({ text: 'Update submitted successfully!' })
-    }, () => {
-      Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' })
-    })
+    DataSet.updateDatasetV3(dataset.datasetId, multiPartFormData).then(
+      () => {
+        navigate('/datalibrary')
+        Notifications.showSuccess({ text: 'Update submitted successfully!' })
+      },
+      () => {
+        Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' })
+      },
+    )
   }
 
-  const prefillFormData = useCallback(async (dataset) => {
-    const dac = await DAC.get(dataset?.dacId)
+  const prefillFormData = useCallback(async (ds: Dataset): Promise<void> => {
+    const dac = await DAC.get(ds.dacId)
     const dacs = await DAC.list()
     setFormData({
-      datasetName: dataset.datasetName,
+      datasetName: ds.datasetName,
       properties: {
         datasetName: extract('Dataset Name'),
         dataType: extract('Data Type'),
@@ -132,20 +155,20 @@ export const DatasetUpdate = (props) => {
         description: extract('Description'),
         url: extract('url'),
         dataDepositor: extract('Data Depositor'),
-        principalInvestigator: dataset?.study?.piName || extract('Principal Investigator(PI)'),
+        principalInvestigator: ds.study?.piName ?? extract('Principal Investigator(PI)'),
       },
-      dataUse: await normalizeDataUse(dataset?.dataUse),
+      dataUse: await normalizeDataUse(ds.dataUse),
       dac: { ...dac, dacs },
     })
   }, [extract, normalizeDataUse])
 
   useEffect(() => {
-    const init = async () => {
+    const init = async (): Promise<void> => {
       if (isNil(formData.datasetName)) {
         await prefillFormData(dataset)
       }
     }
-    init()
+    void init()
   }, [prefillFormData, dataset, formData])
 
   return (
@@ -156,56 +179,56 @@ export const DatasetUpdate = (props) => {
         title="Dataset Name"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.datasetName}
-        onChange={({ value }) => updateProperty('datasetName', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('datasetName', value as string | undefined)}
       />
       <FormField
         id="description"
         title="Dataset Description"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.description}
-        onChange={({ value }) => updateProperty('description', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('description', value as string | undefined)}
       />
       <FormField
         id="dataDepositor"
         title="Data Custodian"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.dataDepositor}
-        onChange={({ value }) => updateProperty('dataDepositor', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('dataDepositor', value as string | undefined)}
       />
       <FormField
         id="principalInvestigator"
         title="Principal Investigator (PI)"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.principalInvestigator}
-        onChange={({ value }) => updateProperty('principalInvestigator', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('principalInvestigator', value as string | undefined)}
       />
       <FormField
         id="url"
         title="Dataset Repository URL"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.url}
-        onChange={({ value }) => updateProperty('url', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('url', value as string | undefined)}
       />
       <FormField
         id="dataType"
         title="Data Type"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.dataType}
-        onChange={({ value }) => updateProperty('dataType', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('dataType', value as string | undefined)}
       />
       <FormField
         id="species"
         title="Species"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.species}
-        onChange={({ value }) => updateProperty('species', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('species', value as string | undefined)}
       />
       <FormField
         id="phenotype"
         title="Phenotype/Indication"
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.phenotype}
-        onChange={({ value }) => updateProperty('phenotype', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('phenotype', value as string | undefined)}
       />
       <FormField
         id="nrParticipants"
@@ -213,7 +236,7 @@ export const DatasetUpdate = (props) => {
         type={FormFieldTypes.NUMBER}
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.nrParticipants}
-        onChange={({ value }) => updateProperty('nrParticipants', value)}
+        onChange={({ value }: { value: unknown }) => updateProperty('nrParticipants', value as string | undefined)}
       />
       <FormField
         id="dac"
@@ -275,7 +298,7 @@ export const DatasetUpdate = (props) => {
           id="otherPrimary"
           toggleText="Other"
           value="otherPrimary"
-          defaultValue={formData.dataUse.otherRestrictions ? 'otherPrimary' : undefined}
+          defaultValue={formData.dataUse.other ? 'otherPrimary' : undefined}
           disabled={true}
         />
         <FormField
