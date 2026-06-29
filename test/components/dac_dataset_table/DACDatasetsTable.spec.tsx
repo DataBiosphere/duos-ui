@@ -102,7 +102,7 @@ describe('DACDatasetsTable', () => {
       )
     })
     const headers = document.querySelectorAll('.column-header')
-    expect(headers.length).toBe(defaultColumns.length)
+    expect(headers).toHaveLength(defaultColumns.length)
   })
 
   it('renders dataset rows with DUOS ID', async () => {

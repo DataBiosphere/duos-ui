@@ -22,13 +22,12 @@ export default function DACDatasetApprovalStatus({ dataset: initialDataset }: DA
   const handleClick = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
-  const handleAction = ({ datasetId, datasetName }: Pick<DatasetTerm, 'datasetId' | 'datasetName'>) => {
+  const handleAction = async ({ datasetId, datasetName }: Pick<DatasetTerm, 'datasetId' | 'datasetName'>) => {
     setOpen(false)
     try {
-      DataSet.deleteDataset(datasetId).then(() => {
-        Notifications.showSuccess({ text: `Deleted dataset '${datasetName}' successfully.` })
-        navigate('/chair_console')
-      })
+      await DataSet.deleteDataset(datasetId)
+      Notifications.showSuccess({ text: `Deleted dataset '${datasetName}' successfully.` })
+      navigate('/chair_console')
     }
     catch {
       Notifications.showError({ text: `Error deleting dataset '${datasetName}'` })
@@ -43,7 +42,7 @@ export default function DACDatasetApprovalStatus({ dataset: initialDataset }: DA
   const dacAccepted = (ds: DatasetTerm) => (
     <div style={{ color: '#1ea371', fontWeight: 'bold' }}>
       <span>ACCEPTED</span>
-      {ds.study?.studyId
+      {!!ds.study?.studyId
         && (
           <Link
             style={{ marginLeft: '15px' }}
