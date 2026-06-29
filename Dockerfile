@@ -9,27 +9,28 @@ WORKDIR /usr/src/app
 # add `/usr/src/app/node_modules/.bin` to $PATH
 ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 
-# install and cache app dependencies
-COPY src /usr/src/app/src
-COPY public /usr/src/app/public
-COPY package.json /usr/src/app/package.json
-COPY pnpm-lock.yaml /usr/src/app/pnpm-lock.yaml
-COPY pnpm-workspace.yaml /usr/src/app/pnpm-workspace.yaml
-COPY index.html /usr/src/app/index.html
-COPY aliases.ts /usr/src/app/aliases.ts
-COPY tsconfig.json /usr/src/app/tsconfig.json
-COPY vite.config.ts /usr/src/app/vite.config.ts
-COPY config/base_config.json /usr/src/app/public/config.json
+# Copy manifests before source so the dep-install layer is cached independently
+# of source changes — pnpm ci only re-runs when package.json/lockfile change.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY server/package.json ./server/package.json
 RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
 RUN pnpm config set update-notifier false
 RUN pnpm ci --loglevel warn
-RUN pnpm run build
 
-# build the server
-COPY server /usr/src/app/server
-RUN pnpm --dir /usr/src/app/server ci \
-	&& pnpm --dir /usr/src/app/server run build \
-	&& CI=true pnpm --dir /usr/src/app/server prune --prod --loglevel warn
+# Build frontend
+COPY src ./src
+COPY public ./public
+COPY index.html aliases.ts tsconfig.json vite.config.ts ./
+COPY config/base_config.json ./public/config.json
+RUN pnpm exec vite build
+
+# Build server
+COPY server/src ./server/src
+COPY server/tsconfig.json ./server/tsconfig.json
+RUN pnpm --filter duos-server run build
+
+# Create a self-contained prod-only server bundle (no devDeps, no workspace symlinks)
+RUN pnpm --filter duos-server deploy --prod --legacy /tmp/server-deploy
 
 # Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian
 FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:f0e79759bb8cea65c59ed276e3b5c0f19188698cf3a1f2fd67a598c05ca2d902
@@ -39,7 +40,7 @@ ENV NODE_ENV=${NODE_ENV}
 ENV PORT=${PORT}
 WORKDIR /usr/src/app
 COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/build ./build
-COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/server ./server
+COPY --chmod=550 --chown=node:node --from=builder /tmp/server-deploy ./server
 USER node
 EXPOSE ${PORT}
 CMD ["node", "server/dist/index.js"]
