@@ -52,7 +52,7 @@ export const SelectOptionsInterfacePicker = (props: SelectOptionsInterfacePicker
     <FormField
       id={fieldId}
       title={fieldTitle}
-      validation={isRequired ? [FormValidators.REQUIRED] : []}
+      validators={isRequired ? [FormValidators.REQUIRED] : []}
       placeholder={fieldPlaceholder}
       onChange={({ value, isValid }: { value: SelectInterfacePickerSelection | undefined | SelectInterfacePickerSelection[], isValid: boolean }) => {
         if (isValid) {
