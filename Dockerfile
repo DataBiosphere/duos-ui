@@ -21,8 +21,9 @@ RUN pnpm ci --loglevel warn
 COPY src ./src
 COPY public ./public
 COPY index.html aliases.ts tsconfig.json vite.config.ts ./
+COPY scripts ./scripts
 COPY config/base_config.json ./public/config.json
-RUN pnpm exec vite build
+RUN pnpm exec vite build && node scripts/write-vite-config-json.mjs
 
 # Build server
 COPY server/src ./server/src
@@ -41,6 +42,7 @@ ENV PORT=${PORT}
 WORKDIR /usr/src/app
 COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/build ./build
 COPY --chmod=550 --chown=node:node --from=builder /tmp/server-deploy ./server
+COPY --chmod=444 --chown=node:node --from=builder /usr/src/app/package.json ./package.json
 USER node
 EXPOSE ${PORT}
 CMD ["node", "server/dist/index.js"]

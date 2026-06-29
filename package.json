@@ -6,7 +6,7 @@
   "scripts": {
     "analyze": "VISUALIZER_PLUGIN=true vite build",
     "start": "tsx watch --env-file=.env.local server/src/index.ts",
-    "build": "vite build && pnpm --filter duos-server build",
+    "build": "vite build && node scripts/write-vite-config-json.mjs && pnpm --filter duos-server build",
     "preview": "vite preview",
     "serve": "vite preview --port 3000",
     "test": "vitest run",
