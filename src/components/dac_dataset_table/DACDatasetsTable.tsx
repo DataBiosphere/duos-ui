@@ -1,14 +1,31 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Storage } from 'src/libs/storage'
-import PaginationBar from '../PaginationBar'
-import SimpleTable from '../SimpleTable'
-import cellData from './DACDatasetTableCellData'
-import { styles, DACDatasetTableColumnOptions } from './DACDatasetConstants'
-import { isNil } from 'src/utils/NodashUtil'
+import PaginationBar from 'src/components/PaginationBar'
+import SimpleTable from 'src/components/SimpleTable'
+import cellData, { CellData, CellDataParams } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
+import { styles, DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
 import { goToPage as updatePage, recalculateVisibleTable } from 'src/libs/utils'
 import { useNavigate } from 'react-router-dom'
+import { DatasetTerm } from 'src/types/model'
 
-const columnHeaderConfig = {
+interface SortConfig {
+  colIndex: number
+  dir: number
+}
+
+interface SortSettings {
+  field: string
+  dir: number
+}
+
+interface ColumnConfig {
+  label: string
+  cellStyle: React.CSSProperties
+  cellDataFn: (args: CellDataParams) => CellData
+  sortable: boolean
+}
+
+const columnHeaderConfig: Record<string, ColumnConfig> = {
   duosId: { label: 'DUOS ID', cellStyle: { width: styles.cellWidths.duosId }, cellDataFn: cellData.duosIdCellData, sortable: true },
   phsId: { label: 'PHS ID', cellStyle: { width: styles.cellWidths.phsId }, cellDataFn: cellData.duosPhsIdCellData, sortable: true },
   datasetName: { label: 'Dataset Name', cellStyle: { width: styles.cellWidths.datasetName }, cellDataFn: cellData.datasetNameCellData, sortable: true },
@@ -22,52 +39,47 @@ const columnHeaderConfig = {
 
 const defaultColumns = Object.keys(columnHeaderConfig)
 
-const columnHeaderData = (columns = defaultColumns) => {
-  return columns.map(col => columnHeaderConfig[col])
-}
+const columnHeaderData = (columns: string[] = defaultColumns) =>
+  columns.map(col => columnHeaderConfig[col])
 
 const processDatasetRowData = ({
-  datasets, columns = defaultColumns, consoleType = '', navigate,
-}) => {
-  if (!isNil(datasets)) {
-    return datasets.map((dataset) => {
-      return columns.map((col) => {
-        return columnHeaderConfig[col].cellDataFn({
-          dataset, consoleType, navigate,
-        })
-      })
-    })
-  }
-}
+  datasets,
+  columns = defaultColumns,
+  consoleType = '',
+  navigate,
+}: { datasets: DatasetTerm[], columns?: string[], consoleType?: string, navigate: ReturnType<typeof useNavigate> }): CellData[][] =>
+  datasets.map(dataset =>
+    columns.map(col => columnHeaderConfig[col].cellDataFn({ dataset, consoleType, navigate })),
+  )
 
 const storageDACDatasetSort = 'storageDACDatasetSort'
 
-const getInitialSort = (columns = []) => {
-  const sort = Storage.getCurrentUserSettings(storageDACDatasetSort) || {
+const getInitialSort = (columns: string[] = []): SortConfig => {
+  const sort = Storage.getCurrentUserSettings<SortSettings>(storageDACDatasetSort) ?? {
     field: DACDatasetTableColumnOptions.DUOS_ID,
     dir: -1,
   }
   const sortIndex = columns.indexOf(sort.field)
-
-  if (sortIndex !== -1) {
-    return { colIndex: sortIndex, dir: sort.dir }
-  }
-  else {
-    return { colIndex: 0, dir: 1 }
-  }
+  return sortIndex === -1 ? { colIndex: 0, dir: 1 } : { colIndex: sortIndex, dir: sort.dir }
 }
 
-export const DACDatasetsTable = function DACDatasetTable(props) {
+export interface DACDatasetsTableProps {
+  datasets: DatasetTerm[]
+  columns?: string[]
+  isLoading: boolean
+  consoleType?: string
+}
+
+export const DACDatasetsTable = function DACDatasetTable({ datasets, columns, isLoading, consoleType }: DACDatasetsTableProps) {
   const navigate = useNavigate()
-  const [visibleDatasets, setVisibleDatasets] = useState([])
+  const [visibleDatasets, setVisibleDatasets] = useState<CellData[][]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [pageCount, setPageCount] = useState(1)
-  const [sort, setSort] = useState(getInitialSort(props.columns))
+  const [sort, setSort] = useState<SortConfig>(getInitialSort(columns))
   const [tableSize, setTableSize] = useState(10)
-  const { datasets, columns, isLoading, consoleType } = props
 
-  const changeTableSize = useCallback((value) => {
-    if (value > 0 && !isNaN(parseInt(value))) {
+  const changeTableSize = useCallback((value: number) => {
+    if (value > 0 && !Number.isNaN(Number.parseInt(String(value)))) {
       setTableSize(value)
     }
   }, [])
@@ -85,9 +97,8 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
     })
   }, [tableSize, currentPage, pageCount, datasets, sort, columns, consoleType, navigate])
 
-  // Helper function to update page
   const goToPage = useCallback(
-    (value) => {
+    (value: number) => {
       updatePage(value, pageCount, setCurrentPage)
     },
     [pageCount],
@@ -110,12 +121,12 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
         />
       )}
       sort={sort}
-      onSort={(sort) => {
+      onSort={(newSort: SortConfig) => {
         Storage.setCurrentUserSettings(storageDACDatasetSort, {
-          field: columns[sort.colIndex],
-          dir: sort.dir,
+          field: (columns ?? defaultColumns)[newSort.colIndex],
+          dir: newSort.dir,
         })
-        setSort(sort)
+        setSort(newSort)
       }}
     />
   )
