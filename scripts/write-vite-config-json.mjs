@@ -4,10 +4,15 @@
 // the plugin's default build/client/.
 import { writeFileSync } from 'node:fs'
 
+// process.cwd() is the project root at build time (e.g. /usr/src/app in Docker).
+// @fastify/vite calls resolveClientModule(viteConfig.root) to find an index.{ext}
+// entry file; pointing it at the project root causes it to return null (no such
+// file exists there), which is correct for pure SPA mode.
 writeFileSync(
   'build/vite.config.json',
   JSON.stringify(
     {
+      root: process.cwd(),
       base: '/',
       build: { assetsDir: 'assets', outDir: 'build' },
       fastify: { outDirs: { client: 'build' } },
