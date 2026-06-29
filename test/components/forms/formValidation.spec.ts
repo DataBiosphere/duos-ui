@@ -1,93 +1,254 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   greaterThanZeroValidator,
   NotUrlValidator,
   requiredValidator,
   urlValidator,
+  emailValidator,
+  dateValidator,
+  dayJSValidator,
+  uniqueValidator,
+  emailDomainValidator,
+  validateFormValue,
+  validationMessage,
+  isValid,
 } from 'src/components/forms/formValidation'
 
+vi.mock('src/libs/storage', () => ({
+  Storage: {
+    getCurrentUser: vi.fn(() => ({ institutionId: 1 })),
+  },
+}))
+
+vi.mock('src/libs/ajax/Institution', () => ({
+  Institution: {
+    getById: vi.fn(),
+  },
+}))
+
 describe('Form Validator tests', () => {
-  describe('Validate number greater than zero tests', () => {
-    it('Positive number should validate to true', () => {
-      expect(greaterThanZeroValidator.isValid(1)).toBe(true)
-    })
-    it('Zero should validate to false', () => {
-      expect(greaterThanZeroValidator.isValid(0)).toBe(false)
-    })
-    it('Negative number should validate to false', () => {
-      expect(greaterThanZeroValidator.isValid(-1)).toBe(false)
-    })
+  beforeEach(() => {
+    vi.clearAllMocks()
   })
 
-  describe('Validate \'required\' field tests', () => {
-    it('Non-whitespace string should validate to true', () => {
+  describe('requiredValidator', () => {
+    it('validates a non-whitespace string as true', () => {
       expect(requiredValidator.isValid('hello! I am a test')).toBe(true)
     })
-    it('Whitespace string should validate to false', () => {
+    it('validates a whitespace string as false', () => {
       expect(requiredValidator.isValid('   ')).toBe(false)
     })
-    it('undefined should validate to false', () => {
+    it('validates undefined as false', () => {
       expect(requiredValidator.isValid(undefined)).toBe(false)
     })
-    it('null should validate to false', () => {
+    it('validates null as false', () => {
       expect(requiredValidator.isValid(null)).toBe(false)
+    })
+    it('validates a non-empty object as true', () => {
+      expect(requiredValidator.isValid({ key: 'value' })).toBe(true)
     })
   })
 
-  describe('Validate \'url\' field tests', () => {
-    it('Validate a non-url string is false', () => {
+  describe('urlValidator', () => {
+    it('validates a non-url string as false', () => {
       expect(urlValidator.isValid('hello! I am a test')).toBe(false)
     })
-    it('Validate an empty string is false', () => {
+    it('validates an empty string as false', () => {
       expect(urlValidator.isValid('')).toBe(false)
     })
-    it('Validate an whitespace string is false', () => {
+    it('validates a whitespace string as false', () => {
       expect(urlValidator.isValid('   ')).toBe(false)
     })
-    it('Whitespace leading URL should validate to true', () => {
+    it('validates a whitespace-leading URL as true', () => {
       expect(urlValidator.isValid('   https://www.broadinstitute.org')).toBe(true)
     })
-    it('Whitespace trailing URL should validate to true', () => {
+    it('validates a whitespace-trailing URL as true', () => {
       expect(urlValidator.isValid('   https://www.broadinstitute.org    ')).toBe(true)
     })
-    it('https URL should validate to true', () => {
+    it('validates an https URL as true', () => {
       expect(urlValidator.isValid('https://www.broadinstitute.org')).toBe(true)
     })
-    it('javascript URL should validate to false', () => {
+    it('validates a javascript URL as false', () => {
       expect(urlValidator.isValid('javascript:alert(1)')).toBe(false)
     })
-    it('data URL should validate to false', () => {
+    it('validates a data URL as false', () => {
       expect(urlValidator.isValid('data:text/html,<script>alert(1)</script>')).toBe(false)
     })
-    it('ftp URL should validate to false', () => {
+    it('validates an ftp URL as false', () => {
       expect(urlValidator.isValid('ftp://example.com/file.txt')).toBe(false)
     })
-    it('undefined should validate to false', () => {
+    it('validates undefined as false', () => {
       expect(urlValidator.isValid(undefined)).toBe(false)
     })
-    it('null should validate to false', () => {
+    it('validates null as false', () => {
       expect(urlValidator.isValid(null)).toBe(false)
     })
   })
 
-  describe('Validate \'not url\' field tests', () => {
-    it('Non-url string should validate to true', () => {
+  describe('NotUrlValidator', () => {
+    it('validates a non-url string as true', () => {
       expect(NotUrlValidator.isValid('hello! I am a test')).toBe(true)
     })
-    it('Valid URL should validate to false', () => {
+    it('validates a valid URL as false', () => {
       expect(NotUrlValidator.isValid('https://www.broadinstitute.org')).toBe(false)
     })
-    it('Empty string should validate to true', () => {
+    it('validates an empty string as true', () => {
       expect(NotUrlValidator.isValid('')).toBe(true)
     })
-    it('Whitespace string should validate to true', () => {
+    it('validates a whitespace string as true', () => {
       expect(NotUrlValidator.isValid('   ')).toBe(true)
     })
-    it('undefined should validate to true', () => {
+    it('validates undefined as true', () => {
       expect(NotUrlValidator.isValid(undefined)).toBe(true)
     })
-    it('null should validate to true', () => {
+    it('validates null as true', () => {
       expect(NotUrlValidator.isValid(null)).toBe(true)
+    })
+  })
+
+  describe('emailValidator', () => {
+    it('validates a correctly formatted email as true', () => {
+      expect(emailValidator.isValid('user@example.com')).toBe(true)
+    })
+    it('validates a string without @ as false', () => {
+      expect(emailValidator.isValid('notanemail')).toBe(false)
+    })
+    it('validates an empty string as false', () => {
+      expect(emailValidator.isValid('')).toBe(false)
+    })
+  })
+
+  describe('dateValidator', () => {
+    it('validates a correctly formatted date as true', () => {
+      expect(dateValidator.isValid('2023-06-15')).toBe(true)
+    })
+    it('validates an invalid date string as false', () => {
+      expect(dateValidator.isValid('not-a-date')).toBe(false)
+    })
+    it('validates a date with wrong format as false', () => {
+      expect(dateValidator.isValid('15/06/2023')).toBe(false)
+    })
+    it('validates a date with an out-of-range day as false', () => {
+      expect(dateValidator.isValid('2023-01-32')).toBe(false)
+    })
+  })
+
+  describe('dayJSValidator', () => {
+    it('validates a valid YYYY-MM-DD date as true', () => {
+      expect(dayJSValidator.isValid('2023-06-15')).toBe(true)
+    })
+    it('validates an invalid date string as false', () => {
+      expect(dayJSValidator.isValid('not-a-date')).toBe(false)
+    })
+    it('validates an empty string as false', () => {
+      expect(dayJSValidator.isValid('')).toBe(false)
+    })
+  })
+
+  describe('uniqueValidator', () => {
+    it('validates a value not in the list as true', () => {
+      expect(uniqueValidator.isValid('new-item', ['item1', 'item2'])).toBe(true)
+    })
+    it('validates a value in the list as false', () => {
+      expect(uniqueValidator.isValid('item1', ['item1', 'item2'])).toBe(false)
+    })
+    it('validates against an empty list as true', () => {
+      expect(uniqueValidator.isValid('anything', [])).toBe(true)
+    })
+  })
+
+  describe('greaterThanZeroValidator', () => {
+    it('validates a positive number as true', () => {
+      expect(greaterThanZeroValidator.isValid(1)).toBe(true)
+    })
+    it('validates zero as false', () => {
+      expect(greaterThanZeroValidator.isValid(0)).toBe(false)
+    })
+    it('validates a negative number as false', () => {
+      expect(greaterThanZeroValidator.isValid(-1)).toBe(false)
+    })
+    it('validates a non-number as false', () => {
+      expect(greaterThanZeroValidator.isValid('5')).toBe(false)
+    })
+  })
+
+  describe('emailDomainValidator', () => {
+    it('has a default msg when no institution is cached', () => {
+      expect(emailDomainValidator.msg).toBe(
+        'Please enter an email that matches your organization domains',
+      )
+    })
+  })
+
+  describe('validateFormValue', () => {
+    it('returns valid:true when value is empty and not required', () => {
+      const result = validateFormValue('', [urlValidator])
+      expect(result.valid).toBe(true)
+    })
+
+    it('returns valid:false when value is empty and required', () => {
+      const result = validateFormValue('', [requiredValidator])
+      expect(result.valid).toBe(false)
+      expect(result.failed).toContain('required')
+    })
+
+    it('returns valid:true when value passes all validators', () => {
+      const result = validateFormValue('hello', [requiredValidator])
+      expect(result.valid).toBe(true)
+      expect(result.failed).toHaveLength(0)
+    })
+
+    it('accumulates multiple failed validator ids', () => {
+      const result = validateFormValue('', [requiredValidator, urlValidator])
+      expect(result.valid).toBe(false)
+      expect(result.failed).toContain('required')
+    })
+
+    it('validates each element when formValue is an array', () => {
+      const result = validateFormValue(['', 'valid'], [requiredValidator])
+      expect(result.valid).toBe(false)
+    })
+
+    it('returns valid:true for array when all elements pass', () => {
+      const result = validateFormValue(['hello', 'world'], [requiredValidator])
+      expect(result.valid).toBe(true)
+    })
+
+    it('handles undefined validators gracefully', () => {
+      const result = validateFormValue('anything', undefined)
+      expect(result.valid).toBe(true)
+    })
+  })
+
+  describe('validationMessage', () => {
+    it('returns a human-readable message for a known validator id', () => {
+      expect(validationMessage('required')).toBe('Please enter a value')
+    })
+
+    it('returns a human-readable message for the url validator', () => {
+      expect(validationMessage('uri')).toBe('Please enter a valid url (e.g., https://duos.org)')
+    })
+
+    it('returns a generic message for an unknown validator id', () => {
+      expect(validationMessage('nonexistent')).toBe('Invalid value.')
+    })
+  })
+
+  describe('isValid', () => {
+    it('returns true when validation is undefined (untouched)', () => {
+      expect(isValid(undefined)).toBe(true)
+    })
+
+    it('returns true when validation.valid is undefined (untouched)', () => {
+      expect(isValid({})).toBe(true)
+    })
+
+    it('returns true when validation.valid is true', () => {
+      expect(isValid({ valid: true })).toBe(true)
+    })
+
+    it('returns false when validation.valid is false', () => {
+      expect(isValid({ valid: false })).toBe(false)
     })
   })
 })
