@@ -179,7 +179,7 @@ const processCollectionRowData = ({
 }
 
 const getInitialSort = (columns: string[] = []): SortConfig => {
-  const sort = Storage.getCurrentUserSettings(storageDarCollectionSort) || {
+  const sort = Storage.getCurrentUserSettings(storageDarCollectionSort) ?? {
     field: DarCollectionTableColumnOptions.SUBMISSION_DATE,
     dir: -1,
   }
