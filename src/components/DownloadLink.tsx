@@ -16,7 +16,7 @@ export const DownloadLink = (props: Readonly<DownloadLinkProps>) => {
   const { label, onDownload } = props
   return (
     <div>
-      <button id={kebabCase(label)} type="button" onClick={onDownload} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+      <button id={kebabCase(label)} type="button" onClick={onDownload} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: Theme.palette.link, textDecoration: 'underline' }}>
         <i className="glyphicon glyphicon-download-alt" style={ICON} />
         <span style={{ fontSize: Theme.font.size.small }}>{label}</span>
       </button>
