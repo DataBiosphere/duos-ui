@@ -644,7 +644,7 @@ describe('EditDAC Tests', () => {
       const downloadStub = cy.stub(DAA, 'getDaaFileById').resolves()
 
       cy.get('[data-cy="daa_tab_shared"]').click()
-      cy.get('[data-cy="daa_option_5"]').parent().parent().find('a').click()
+      cy.get('[data-cy="daa_option_5"]').parent().parent().find('button').click()
 
       cy.wrap(downloadStub).should('have.been.calledWithMatch', 5, 'shared-daa.pdf')
     })
