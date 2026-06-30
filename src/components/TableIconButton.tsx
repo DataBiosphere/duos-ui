@@ -55,8 +55,8 @@ export default function TableIconButton({
   const appliedStyle = setStyle(disabled, style, 'color')
 
   // Inline the conditional attribute construction to avoid incompatible casts with setDivAttributes
-  const spanProps: React.HTMLAttributes<HTMLSpanElement> & { 'data-tip'?: string } = disabled
-    ? { 'style': appliedStyle, 'data-tip': dataTip || undefined }
+  const spanProps: React.HTMLAttributes<HTMLSpanElement> & { 'data-tip'?: string, 'disabled'?: boolean } = disabled
+    ? { 'style': appliedStyle, 'data-tip': dataTip || undefined, 'disabled': true }
     : {
         onClick,
         'onMouseEnter': resolvedOnMouseEnter,
