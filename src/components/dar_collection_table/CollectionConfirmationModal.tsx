@@ -1,14 +1,25 @@
 import React from 'react'
 import { isNil } from 'src/utils/NodashUtil'
-import ConfirmationModal from '../modals/ConfirmationModal'
-import { isCollectionCanceled } from '../../libs/utils'
+import ConfirmationModal from 'src/components/modals/ConfirmationModal'
+import { isCollectionCanceled } from 'src/libs/utils'
+import { DarCollection, DarCollectionSummary } from 'src/types/model'
 
-export default function CollectionConfirmationModal(props) {
-  const { collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction, deleteDraft, approveCollection } = props
+export interface CollectionConfirmationModalProps {
+  collection: DarCollectionSummary
+  showConfirmation: boolean
+  setShowConfirmation: (value: boolean) => void
+  cancelCollection: (collection: DarCollectionSummary) => Promise<void>
+  reviseCollection?: ((collection: DarCollectionSummary) => Promise<void>) | null
+  openCollection: (collection: DarCollectionSummary) => Promise<void>
+  consoleAction?: string
+  deleteDraft: (collection: DarCollectionSummary) => Promise<void>
+  approveCollection: (collection: DarCollectionSummary) => Promise<void>
+}
 
-  const getModalHeader = (collection) => {
-    if (!isNil(collection)) {
-      return `${collection.darCode} - ${collection.name}`
+export default function CollectionConfirmationModal({ collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction, deleteDraft, approveCollection }: Readonly<CollectionConfirmationModalProps>) {
+  const getModalHeader = (coll: DarCollectionSummary | null) => {
+    if (!isNil(coll)) {
+      return `${coll.darCode} - ${coll.name}`
     }
     return ''
   }
@@ -19,7 +30,7 @@ export default function CollectionConfirmationModal(props) {
   }
 
   const reviseOnClick = async () => {
-    await reviseCollection(collection)
+    await reviseCollection?.(collection)
     setShowConfirmation(false)
   }
 
@@ -110,6 +121,7 @@ export default function CollectionConfirmationModal(props) {
     // Logic for this old assumption is flawed since chairs in different DACs may have different actions enabled for the same collection
     // Updates will occur in later console tickets
     default:
-      return isCollectionCanceled(collection) === true ? reviseModal : cancelModal
+      // isCollectionCanceled expects DarCollection; DarCollectionSummary lacks dars so it safely returns false
+      return isCollectionCanceled(collection as unknown as DarCollection) ? reviseModal : cancelModal
   }
 }

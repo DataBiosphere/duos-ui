@@ -3,7 +3,7 @@ import { get, isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
 import { extractDacDataAccessVotesFromBucket, extractUserDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
-import { DacTerm, DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model'
+import { AlgorithmResult, DacTerm, DarCollection, Dataset, DataUse, Election, Vote } from 'src/types/model'
 
 // Components
 import CollectionSubmitVoteBox from 'src/components/collection_vote_box/CollectionSubmitVoteBox'
@@ -17,7 +17,7 @@ import MemberVoteSummary from 'src/components/collection_voting_slab/MemberVoteS
 // Types
 type Bucket = {
   key: string
-  algorithmResult?: unknown
+  algorithmResult?: AlgorithmResult
   datasets: Dataset[]
   elections: Election[]
   dataUses?: DataUse[]
