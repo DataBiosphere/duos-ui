@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import SearchBar from 'src/components/SearchBar'
 import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
@@ -10,22 +10,21 @@ import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCol
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DarCollectionSummary, Dataset } from 'src/types/model'
 
 export default function MemberConsole() {
   usePageTitle('Data Access Requests')
   const navigate = useNavigate()
-  const [collections, setCollections] = useState([])
-  const [filteredList, setFilteredList] = useState([])
-  const [relevantDatasets, setRelevantDatasets] = useState()
+  const [collections, setCollections] = useState<DarCollectionSummary[]>([])
+  const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
+  const [relevantDatasets, setRelevantDatasets] = useState<Dataset[]>()
   const [isLoading, setIsLoading] = useState(true)
-  const searchRef = useRef('')
   const filterFn = getSearchFilterFunctions().darCollections
 
-  // Get responsive columns for member console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.MEMBER)
 
   const handleSearchChange = useCallback(
-    searchTerms =>
+    (searchTerms: string) =>
       searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList),
     [collections, filterFn],
   )
@@ -35,14 +34,14 @@ export default function MemberConsole() {
       try {
         const [collections, datasets] = await Promise.all([
           Collections.getCollectionSummariesByRoleName(USER_ROLES.member),
-          User.getUserRelevantDatasets(), // still need this on this console for status cell
+          User.getUserRelevantDatasets(),
         ])
         setCollections(collections)
         setRelevantDatasets(datasets)
         setFilteredList(collections)
         setIsLoading(false)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({
           text: 'Error initializing Collections table',
         })
@@ -51,7 +50,7 @@ export default function MemberConsole() {
     init()
   }, [])
 
-  const goToVote = useCallback(collectionId => navigate(`/dar_collection/${collectionId}`), [navigate])
+  const goToVote = useCallback((collectionId: number) => navigate(`/dar_collection/${collectionId}`), [navigate])
 
   return (
     <div style={Styles.PAGE}>
@@ -62,7 +61,7 @@ export default function MemberConsole() {
         />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
-        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} />
+        <SearchBar handleSearchChange={handleSearchChange} />
       </div>
       {responsiveColumns.length > 0 && (
         <DarCollectionTable
