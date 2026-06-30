@@ -265,6 +265,7 @@ export interface DatasetTerm {
   requestLocation?: string
   dacId: number
   dacApproval: boolean
+  hasInstitutionCertification?: boolean
   accessManagement: string
   approvedUserIds: number[]
   study: StudyTerm

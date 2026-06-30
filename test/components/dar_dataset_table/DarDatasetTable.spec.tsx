@@ -2,6 +2,7 @@ import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { act, render } from '@testing-library/react'
 import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable'
+import { DarCollection } from 'src/types/model'
 
 vi.mock('src/libs/storage', () => ({
   Storage: {
@@ -45,6 +46,7 @@ vi.mock('src/libs/ajax/DataSet', () => ({
 }))
 
 const darCollection = {
+  id: 211,
   darCollectionId: 211,
   darCode: 'DAR-259',
   createDate: 1730825497654,
@@ -82,18 +84,17 @@ const darCollection = {
       dacId: 8,
     },
   ],
-}
+} as unknown as DarCollection
 
-describe('DarDatasetTable - Tests', function () {
+describe('DarDatasetTable', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders a single row of the data', async function () {
+  it('renders column headers for data use group, dataset count, and datasets', async () => {
     await act(async () => {
       render(
         <DarDatasetTable
-          summary={darCollection}
           collection={darCollection}
           isLoading={false}
           isUnfilteredView={true}
@@ -101,17 +102,36 @@ describe('DarDatasetTable - Tests', function () {
       )
     })
 
-    // There should be columns for: data use group; # of datasets; and datasets
     const columnHeaders = document.querySelectorAll('.column-header')
     expect(columnHeaders).toHaveLength(3)
+  })
 
-    // The data use on the requested dataset in darCollection is:
-    // "dataUse": { "generalUse": true, "nonProfitUse": true }
-    // So we need to ensure those codes are displayed
-    expect(document.querySelector('.row-data-0').textContent).toContain('GRU')
-    expect(document.querySelector('.row-data-0').textContent).toContain('NPU')
+  it('displays data use codes derived from dataset dataUse', async () => {
+    await act(async () => {
+      render(
+        <DarDatasetTable
+          collection={darCollection}
+          isLoading={false}
+          isUnfilteredView={true}
+        />,
+      )
+    })
 
-    // Ensure that the dataset identifier is displayed
-    expect(document.querySelector('.row-data-0').textContent).toContain(darCollection.datasets[0].datasetIdentifier)
+    expect(document.querySelector('.row-data-0')?.textContent).toContain('GRU')
+    expect(document.querySelector('.row-data-0')?.textContent).toContain('NPU')
+  })
+
+  it('displays the dataset identifier in the datasets column', async () => {
+    await act(async () => {
+      render(
+        <DarDatasetTable
+          collection={darCollection}
+          isLoading={false}
+          isUnfilteredView={true}
+        />,
+      )
+    })
+
+    expect(document.querySelector('.row-data-0')?.textContent).toContain('DUOS-000850')
   })
 })

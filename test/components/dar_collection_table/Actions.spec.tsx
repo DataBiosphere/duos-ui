@@ -3,13 +3,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import Actions from 'src/components/dar_collection_table/Actions'
+import Actions, { ActionsProps } from 'src/components/dar_collection_table/Actions'
 import { Navigation } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
-import EnvironmentUtils from 'src/utils/EnvironmentUtils.js'
+import EnvironmentUtils from 'src/utils/EnvironmentUtils'
+import { DarCollectionSummary } from 'src/types/model'
 
-vi.mock('src/libs/utils', async (importOriginal) => {
-  const actual = await importOriginal()
+vi.mock('src/libs/utils', async () => {
+  const actual = await vi.importActual<typeof import('src/libs/utils')>('src/libs/utils')
   return {
     ...actual,
     Navigation: {
@@ -19,8 +20,8 @@ vi.mock('src/libs/utils', async (importOriginal) => {
   }
 })
 
-vi.mock('src/libs/storage', async (importOriginal) => {
-  const actual = await importOriginal()
+vi.mock('src/libs/storage', async () => {
+  const actual = await vi.importActual<typeof import('src/libs/storage')>('src/libs/storage')
   return {
     ...actual,
     Storage: {
@@ -36,59 +37,59 @@ const refId1 = '0a4jn-g838d-bsdg8-6s7fs7'
 
 const darColl = {
   darCollectionId: collectionId,
-  referenceIds: [
-    '4a3fd-g77fd-2f345-4h2g31',
-    '0a4jn-g838d-bsdg8-6s7fs7',
-  ],
+  referenceIds: ['4a3fd-g77fd-2f345-4h2g31', '0a4jn-g838d-bsdg8-6s7fs7'],
   darCode: 'DAR-9583',
   name: 'Example DAR 1',
-  submissionDate: '2022-07-26',
+  submissionDate: 1658880000000,
   researcherName: 'John Doe',
   institutionName: 'Broad Institute',
   status: 'Draft',
-  hasVoted: false,
+  actions: [],
+  dacNames: [],
+  dacCode: '',
   datasetCount: 4,
-}
+  datasetIds: [],
+  expired: false,
+  expiresAt: 0,
+  latestReferenceId: '',
+  progressReport: false,
+  requiresSOApproval: false,
+} as unknown as DarCollectionSummary
 
 const draftDarColl = {
   darCollectionId: null,
   referenceIds: [refId1],
   darCode: 'DRAFT-023',
   name: null,
-  submissionDate: '2022-07-26',
+  submissionDate: 1658880000000,
   researcherName: null,
   institutionName: null,
   status: 'Draft',
-  hasVoted: false,
+  actions: [],
+  dacNames: [],
+  dacCode: '',
   datasetCount: 10,
-}
+  datasetIds: [],
+  expired: false,
+  expiresAt: 0,
+  latestReferenceId: '',
+  progressReport: false,
+  requiresSOApproval: false,
+} as unknown as DarCollectionSummary
 
-const user = {
-  userId: 1,
-  roles: [
-    {
-      dacId: 2,
-    },
-    {}, // not all roles are tied to a DAC, this is a stub for those roles
-    {
-      dacId: 3,
-    },
-  ],
-}
-
-const baseProps = {
+const baseProps: ActionsProps = {
   consoleType: 'chair',
   collection: darColl,
-  showConfirmationModal: () => {},
+  showConfirmationModal: vi.fn(),
 }
 
-let propCopy
+let propCopy: ActionsProps
 
 beforeEach(() => {
   propCopy = { ...baseProps, collection: { ...darColl } }
   vi.clearAllMocks()
-  Storage.getCurrentUser.mockReturnValue(user)
-  Navigation.console.mockResolvedValue({})
+  ;(Storage.getCurrentUser as ReturnType<typeof vi.fn>).mockReturnValue({ userId: 1, roles: [{ dacId: 2 }, {}, { dacId: 3 }] })
+  ;(Navigation.console as ReturnType<typeof vi.fn>).mockResolvedValue({})
 })
 
 describe('Actions - Container', () => {
@@ -99,7 +100,7 @@ describe('Actions - Container', () => {
 })
 
 describe('Actions - Open Button', () => {
-  it('should render the open button if there is a an Open Action', () => {
+  it('should render the open button if there is an Open Action', () => {
     propCopy.actions = ['Open']
     const { container } = render(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     expect(container.querySelector(`#chair-open-${collectionId}`)).not.toBeNull()
@@ -247,9 +248,9 @@ describe('Researcher Actions - Draft', () => {
   })
 })
 
-describe('Researcher Actions - Update Button', () => {
+describe('Researcher Actions - Create Progress Report Button', () => {
   it('renders the update button if the collection is updatable', () => {
-    Storage.getEnv.mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
+    ;(Storage.getEnv as ReturnType<typeof vi.fn>).mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Resume', 'Create_Progress_Report']
     const { container } = render(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
@@ -265,16 +266,16 @@ describe('Researcher Actions - Update Button', () => {
 })
 
 describe('Researcher Actions - Review Closeout Button', () => {
-  it('renders the review closeout button if the collection has Review_Progress_Report action in non-prod environment', () => {
-    Storage.getEnv.mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
+  it('renders the review closeout button if the collection has Review_Progress_Report action', () => {
+    ;(Storage.getEnv as ReturnType<typeof vi.fn>).mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review_Progress_Report']
     const { container } = render(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
     expect(container.querySelector(`#researcher-review-closeout-${collectionId}`)).not.toBeNull()
   })
 
-  it('does render in production environment even with Review_Progress_Report action', () => {
-    Storage.getEnv.mockReturnValue('prod')
+  it('renders in production environment with Review_Progress_Report action', () => {
+    ;(Storage.getEnv as ReturnType<typeof vi.fn>).mockReturnValue('prod')
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review_Progress_Report']
     const { container } = render(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
@@ -282,7 +283,7 @@ describe('Researcher Actions - Review Closeout Button', () => {
   })
 
   it('does not render if Review_Progress_Report action is not present', () => {
-    Storage.getEnv.mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
+    ;(Storage.getEnv as ReturnType<typeof vi.fn>).mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review']
     const { container } = render(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)
@@ -290,7 +291,7 @@ describe('Researcher Actions - Review Closeout Button', () => {
   })
 
   it('renders with correct label "Review Closeout"', () => {
-    Storage.getEnv.mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
+    ;(Storage.getEnv as ReturnType<typeof vi.fn>).mockReturnValue(EnvironmentUtils.envGroups.NON_PROD[0])
     propCopy.consoleType = 'researcher'
     propCopy.actions = ['Review_Progress_Report']
     render(<BrowserRouter><Actions {...propCopy} /></BrowserRouter>)

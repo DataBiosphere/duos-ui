@@ -46,25 +46,25 @@ const columnHeaderConfig: Record<string, ColumnConfig> = {
   name: {
     label: 'DAC Name',
     cellStyle: { width: styles.cellWidth.name },
-    cellDataFn: cellData.nameCellData as (args: DacCellArgs) => CellData,
+    cellDataFn: cellData.nameCellData,
     sortable: true,
   },
   description: {
     label: 'DAC Description',
     cellStyle: { width: styles.cellWidth.description },
-    cellDataFn: cellData.descriptionCellData as (args: DacCellArgs) => CellData,
+    cellDataFn: cellData.descriptionCellData,
     sortable: false,
   },
   datasets: {
     label: 'DAC Datasets',
     cellStyle: { width: styles.cellWidth.datasets },
-    cellDataFn: cellData.datasetsCellData as (args: DacCellArgs) => CellData,
+    cellDataFn: cellData.datasetsCellData,
     sortable: false,
   },
   actions: {
     label: 'Action',
     cellStyle: { width: styles.cellWidth.actions },
-    cellDataFn: cellData.actionsCellData as (args: DacCellArgs) => CellData,
+    cellDataFn: cellData.actionsCellData,
   },
 }
 
@@ -149,10 +149,9 @@ export const ManageDacTable = function ManageDacTable(props: ManageDacTableProps
     })
   }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, viewDatasets, columns])
 
-  const changeTableSize = useCallback((value: string) => {
-    const num = Number.parseInt(value, 10)
-    if (num > 0 && !Number.isNaN(num)) {
-      setTableSize(num)
+  const changeTableSize = useCallback((value: number) => {
+    if (value > 0 && !Number.isNaN(value)) {
+      setTableSize(value)
     }
   }, [])
 
