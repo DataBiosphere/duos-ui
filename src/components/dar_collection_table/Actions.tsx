@@ -33,7 +33,7 @@ export interface ActionsProps {
   status?: string
 }
 
-export default function Actions({ showConfirmationModal, collection, goToVote, consoleType, actions = [], status }: ActionsProps) {
+export default function Actions({ showConfirmationModal, collection, goToVote, consoleType, actions = [], status }: Readonly<ActionsProps>) {
   // Draft collections have no darCollectionId; widen locally to allow null fallback
   const collectionId: number | null = collection.darCollectionId
   const uniqueId = collectionId ?? collection.referenceIds[0]
@@ -69,7 +69,7 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
   const voteButtonAttributes = {
     keyProp: `${consoleType}-vote-${uniqueId}`,
     label: 'Vote',
-    onClick: () => goToVote?.(collectionId!),
+    onClick: () => goToVote?.(collectionId),
     baseColor: duosBlue,
     hoverStyle: {
       backgroundColor: duosBlue,
@@ -88,7 +88,7 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
   const updateButtonAttributes = {
     keyProp: `${consoleType}-update-${collectionId}`,
     label: 'Update',
-    onClick: () => goToVote?.(collectionId!),
+    onClick: () => goToVote?.(collectionId),
     baseColor: 'white',
     hoverStyle: {
       backgroundColor: 'white',

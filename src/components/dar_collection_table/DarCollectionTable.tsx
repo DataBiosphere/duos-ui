@@ -59,6 +59,11 @@ export interface DarCollectionTableProps {
   approveCollection?: ((collection: DarCollectionSummary) => Promise<void>) | null
 }
 
+interface RowWrapperArgs {
+  renderedRow: React.ReactNode
+  rowData: CellData[]
+}
+
 interface ProcessCollectionRowDataArgs {
   collections?: DarCollectionSummary[]
   collectionIsExpanded: (id: number) => boolean
@@ -180,16 +185,16 @@ const getInitialSort = (columns: string[] = []): SortConfig => {
   }
   const sortIndex = columns.indexOf(sort.field)
 
-  if (sortIndex !== -1) {
-    return { colIndex: sortIndex, dir: sort.dir }
+  if (sortIndex === -1) {
+    return { colIndex: 0, dir: 1 }
   }
   else {
-    return { colIndex: 0, dir: 1 }
+    return { colIndex: sortIndex, dir: sort.dir }
   }
 }
 
 export const DarCollectionTable = function DarCollectionTable(props: DarCollectionTableProps) {
-  const [visibleCollection, setVisibleCollections] = useState<CellData[][]>([])
+  const [visibleCollection, setVisibleCollection] = useState<CellData[][]>([])
   const [collectionsExpandedState, setCollectionsExpandedState] = useState<Record<number, boolean>>({})
   const [darCollectionCache, setDarCollectionCache] = useState<Record<number, unknown>>({})
   const [currentPage, setCurrentPage] = useState(1)
@@ -209,7 +214,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     || consoleType === consoleTypes.SIGNING_OFFICIAL
 
   /*
-    NOTE: This component will most likely be used in muliple consoles
+    NOTE: This component will most likely be used in multiple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
     This will be updated to account for token based requests on a later ticket
   */
@@ -223,14 +228,11 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
   }, [collectionsExpandedState])
 
   const collectionIsExpanded = useCallback((id: number) => {
-    return collectionsExpandedState[id] === true
+    return collectionsExpandedState[id]
   }, [collectionsExpandedState])
 
   const fetchDarCollection = useCallback((darCollectionId: number) => {
-    if (!isNil(darCollectionCache[darCollectionId])) {
-      return darCollectionCache[darCollectionId]
-    }
-    else {
+    if (isNil(darCollectionCache[darCollectionId])) {
       return Collections.getCollectionById(darCollectionId).then((coll) => {
         const cache = cloneDeep(darCollectionCache)
         cache[darCollectionId] = coll
@@ -244,10 +246,13 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
         return null
       })
     }
+    else {
+      return darCollectionCache[darCollectionId]
+    }
   }, [darCollectionCache, setDarCollectionCache])
 
   const changeTableSize = useCallback((value: number) => {
-    if (value > 0 && !isNaN(parseInt(String(value)))) {
+    if (value > 0 && !Number.isNaN(Number.parseInt(String(value)))) {
       setTableSize(value)
     }
   }, [])
@@ -275,7 +280,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
       currentPage,
       setPageCount,
       setCurrentPage,
-      setVisibleList: setVisibleCollections,
+      setVisibleList: setVisibleCollection,
       sort,
     })
   }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById, showConfirmationModal])
@@ -287,7 +292,8 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     [pageCount],
   )
 
-  const showDatasetDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode, rowData: CellData[] }) => {
+  const showDatasetDropdownWrapper = useCallback((wrapperArgs: RowWrapperArgs) => {
+    const { renderedRow, rowData } = wrapperArgs
     const darCollectionId = rowData[0].id
 
     if (collectionIsExpanded(darCollectionId)) {
@@ -350,7 +356,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
         - Need to change message based on operation
         - Need to change prop function based on operation
         - showConfirmationModal
-         - Can be take in an extra op argument, assign that as a state variable
+         - Can take in an extra op argument, assign that as a state variable
          - Modal function can be defined via useCallback, recomputed if op state variable changes
          - Above can also be applied for modal message (expect use useMemo instead of useCallback)
     */
