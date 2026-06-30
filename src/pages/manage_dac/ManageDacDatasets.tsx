@@ -66,7 +66,7 @@ export const ManageDacDatasets: React.FC = () => {
   }
 
   const columnHeaders = useMemo(() => {
-    const headerStyle = {
+    const headerStyle: React.CSSProperties = {
       fontWeight: 600,
       fontSize: '1.1rem',
       background: '#f5f7fa',
@@ -91,7 +91,7 @@ export const ManageDacDatasets: React.FC = () => {
     ]
   }, [])
 
-  const cellWrapStyle = {
+  const cellWrapStyle: React.CSSProperties = {
     whiteSpace: 'normal',
     wordBreak: 'break-word',
     overflowWrap: 'anywhere',
@@ -100,7 +100,7 @@ export const ManageDacDatasets: React.FC = () => {
   const styles = {
     baseStyle: { display: 'flex', alignItems: 'center', minHeight: 40, ...cellWrapStyle },
     columnStyle: { display: 'flex', background: '#f5f7fa', ...cellWrapStyle },
-    containerOverride: { width: '100%', overflowX: 'visible' },
+    containerOverride: { width: '100%', overflowX: 'visible' as const },
   }
 
   // Filter and sort datasets
