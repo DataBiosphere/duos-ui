@@ -1,14 +1,92 @@
 import React from 'react'
 import { includes, isEmpty, isNil, toLower, uniq } from 'src/utils/NodashUtil'
-import { formatDate } from '../../libs/utils'
+import { formatDate } from 'src/libs/utils'
 import { ExpandMore, ExpandLess } from '@mui/icons-material'
-import Actions from './Actions'
-import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink'
-import { consoleTypes, styles } from '../../utils/DarCollectionUtils'
+import Actions from 'src/components/dar_collection_table/Actions'
+import DarCollectionAdminReviewLink from 'src/components/dar_collection_table/DarCollectionAdminReviewLink'
+import { consoleTypes, styles } from 'src/utils/DarCollectionUtils'
 import { Link } from 'react-router-dom'
+import { DarCollectionSummary } from 'src/types/model'
+import 'src/components/dar_collection_table/dar_collection_table.css'
+
+export interface CellData {
+  data: React.ReactNode
+  value?: string
+  id: number
+  style?: React.CSSProperties
+  label: string
+  isComponent?: boolean
+}
+
+interface ProjectTitleCellDataParams {
+  name?: string
+  darCollectionId: number
+  label?: string
+}
+
+interface DarCodeCellDataParams {
+  darCode?: string
+  darCollectionId: number
+  collectionIsExpanded: boolean
+  updateCollectionIsExpanded: (expanded: boolean) => void
+  status: string
+  consoleType: string
+  label?: string
+}
+
+interface DacCellDataParams {
+  dacNames: string[]
+  darCollectionId: number
+  label?: string
+}
+
+interface SubmissionDateCellDataParams {
+  submissionDate: number | string | null | undefined
+  darCollectionId: number
+  label?: string
+}
+
+interface ResearcherCellDataParams {
+  researcherName?: string
+  darCollectionId: number
+  label?: string
+}
+
+interface InstitutionCellDataParams {
+  institutionName?: string
+  darCollectionId: number
+  label?: string
+}
+
+interface DatasetCountCellDataParams {
+  collection: DarCollectionSummary
+  darCollectionId: number
+  label?: string
+}
+
+interface ExpiresAtCellDataParams {
+  collection: DarCollectionSummary
+  darCollectionId: number
+  label?: string
+}
+
+interface StatusCellDataParams {
+  status?: string
+  darCollectionId: number
+  label?: string
+}
+
+interface ConsoleActionsCellDataParams {
+  collection: DarCollectionSummary
+  goToVote?: (collectionId: number) => void
+  showConfirmationModal: (collection: DarCollectionSummary, action: string) => void
+  consoleType: string
+  actions?: string[]
+  status?: string
+}
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function projectTitleCellData({ name = '- -', darCollectionId, label = 'project-title' }) {
+export function projectTitleCellData({ darCollectionId, name = '- -', label = 'project-title' }: ProjectTitleCellDataParams): CellData {
   return {
     data: isEmpty(name) ? '- -' : name,
     id: darCollectionId,
@@ -22,8 +100,8 @@ export function projectTitleCellData({ name = '- -', darCollectionId, label = 'p
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function darCodeCellData({ darCode = '- -', darCollectionId, collectionIsExpanded, updateCollectionIsExpanded, status, consoleType, label = 'dar-code' }) {
-  let darCodeData
+export function darCodeCellData({ darCollectionId, collectionIsExpanded, updateCollectionIsExpanded, status, consoleType, darCode = '- -', label = 'dar-code' }: DarCodeCellDataParams): CellData {
+  let darCodeData: React.ReactNode
 
   switch (consoleType) {
     case consoleTypes.ADMIN:
@@ -32,9 +110,9 @@ export function darCodeCellData({ darCode = '- -', darCollectionId, collectionIs
     case consoleTypes.CHAIR:
     case consoleTypes.MEMBER:
     case consoleTypes.SIGNING_OFFICIAL:
-      darCodeData = dacLinkToCollection(darCode, status, darCollectionId)
+      darCodeData = dacLinkToCollection(darCode, darCollectionId, status)
       break
-    default :
+    default:
       darCodeData = darCode
   }
 
@@ -67,7 +145,7 @@ export function darCodeCellData({ darCode = '- -', darCollectionId, collectionIs
   }
 }
 
-const dacLinkToCollection = (darCode, status = '', darCollectionId) => {
+const dacLinkToCollection = (darCode: string, darCollectionId: number, status = '') => {
   const hasOpenElections = includes(toLower(status), 'open')
   const path = hasOpenElections
     ? `/dar_collection/${darCollectionId}`
@@ -76,7 +154,7 @@ const dacLinkToCollection = (darCode, status = '', darCollectionId) => {
   return <Link to={path}>{darCode}</Link>
 }
 
-export function DacCellData({ dacNames, darCollectionId, label = 'dacNames' }) {
+export function DacCellData({ dacNames, darCollectionId, label = 'dacNames' }: DacCellDataParams): CellData {
   const dacString = uniq(dacNames).join('\n')
 
   return {
@@ -91,10 +169,14 @@ export function DacCellData({ dacNames, darCollectionId, label = 'dacNames' }) {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function submissionDateCellData({ submissionDate, darCollectionId, label = 'submission-date' }) {
-  const dateString = isNil(submissionDate)
-    ? '- -'
-    : toLower(submissionDate) === 'unsubmitted' ? '- -' : formatDate(submissionDate)
+export function submissionDateCellData({ submissionDate, darCollectionId, label = 'submission-date' }: SubmissionDateCellDataParams): CellData {
+  let dateString: string
+  if (isNil(submissionDate) || toLower(submissionDate) === 'unsubmitted') {
+    dateString = '- -'
+  }
+  else {
+    dateString = formatDate(submissionDate)
+  }
   return {
     data: dateString,
     id: darCollectionId,
@@ -107,7 +189,7 @@ export function submissionDateCellData({ submissionDate, darCollectionId, label 
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function researcherCellData({ researcherName = '- -', darCollectionId, label = 'researcher' }) {
+export function researcherCellData({ darCollectionId, researcherName = '- -', label = 'researcher' }: ResearcherCellDataParams): CellData {
   return {
     data: researcherName,
     id: darCollectionId,
@@ -120,7 +202,7 @@ export function researcherCellData({ researcherName = '- -', darCollectionId, la
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function institutionCellData({ institutionName = '- -', darCollectionId, label = 'institution' }) {
+export function institutionCellData({ darCollectionId, institutionName = '- -', label = 'institution' }: InstitutionCellDataParams): CellData {
   return {
     data: institutionName,
     id: darCollectionId,
@@ -134,7 +216,7 @@ export function institutionCellData({ institutionName = '- -', darCollectionId, 
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function datasetCountCellData({ collection, darCollectionId, label = 'datasets' }) {
+export function datasetCountCellData({ collection, darCollectionId, label = 'datasets' }: DatasetCountCellDataParams): CellData {
   return {
     data: collection.datasetCount || '- -',
     id: darCollectionId,
@@ -148,21 +230,21 @@ export function datasetCountCellData({ collection, darCollectionId, label = 'dat
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function expiresAtCellData({ collection, darCollectionId, label = 'expiration-date' }) {
+export function expiresAtCellData({ collection, darCollectionId, label = 'expiration-date' }: ExpiresAtCellDataParams): CellData {
   const dateString = isNil(collection.expiresAt) ? '- -' : formatDate(collection.expiresAt)
   return {
     data: dateString,
     id: darCollectionId,
     style: {
       color: '#354052',
-      fontSize: styles.fontSize.expirationDate,
+      fontSize: styles.fontSize.submissionDate,
     },
     label,
   }
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function statusCellData({ status = '- -', darCollectionId, label = 'status' }) {
+export function statusCellData({ darCollectionId, status = '- -', label = 'status' }: StatusCellDataParams): CellData {
   return {
     data: status,
     id: darCollectionId,
@@ -176,15 +258,13 @@ export function statusCellData({ status = '- -', darCollectionId, label = 'statu
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function consoleActionsCellData({ collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status }) {
+export function consoleActionsCellData({ collection, goToVote, showConfirmationModal, consoleType, actions, status }: ConsoleActionsCellDataParams): CellData {
   const actionComponent = (
     <Actions
       collection={collection}
       consoleType={consoleType}
       showConfirmationModal={showConfirmationModal}
       goToVote={goToVote}
-      reviewCollection={reviewCollection}
-      resumeCollection={resumeCollection}
       actions={actions}
       status={status}
     />

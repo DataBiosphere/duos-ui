@@ -1,9 +1,13 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { styles } from '../../utils/DarCollectionUtils'
+import { styles } from 'src/utils/DarCollectionUtils'
 
-export default function DarCollectionAdminReviewLink(props) {
-  const { darCollectionId, darCode } = props
+interface DarCollectionAdminReviewLinkProps {
+  darCollectionId: number
+  darCode: string
+}
+
+export default function DarCollectionAdminReviewLink({ darCollectionId, darCode }: Readonly<DarCollectionAdminReviewLinkProps>) {
   return (
     <NavLink
       style={{
