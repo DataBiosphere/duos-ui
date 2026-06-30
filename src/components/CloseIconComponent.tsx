@@ -1,6 +1,10 @@
 import React from 'react'
 
-export default function CloseIconComponent(props) {
+interface CloseIconComponentProps {
+  closeFn: () => void
+}
+
+export default function CloseIconComponent(props: Readonly<CloseIconComponentProps>) {
   const { closeFn } = props
   return (
     <button type="button" className="modal-close-btn close" onClick={closeFn}>
