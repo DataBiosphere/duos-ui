@@ -9,7 +9,7 @@ describe('HighlightText', () => {
       <HighlightText highlight={[{ bgColor: 'black', textColor: 'white', words: ['hello'] }]} />,
     )
     expect(container.querySelector('div > div')).not.toBeNull()
-    expect(container.querySelectorAll('span').length).toBe(0)
+    expect(container.querySelectorAll('span')).toHaveLength(0)
   })
 
   it('renders text with no highlighting when no words match', () => {
@@ -21,7 +21,7 @@ describe('HighlightText', () => {
       />,
     )
     const spans = container.querySelectorAll('[data-cy^="highlight-"]')
-    expect(spans.length).toBe(1)
+    expect(spans).toHaveLength(1)
     expect(spans[0].textContent).toBe(lorem)
     expect((spans[1] as HTMLElement | undefined)?.textContent).toBeUndefined()
   })
