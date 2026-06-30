@@ -1,13 +1,7 @@
 import React from 'react'
 import { formatDate } from 'src/libs/utils'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
-
-interface AlgorithmResult {
-  createDate?: number | string | null
-  id?: number
-  result?: string
-  rationales?: string[]
-}
+import { AlgorithmResult } from 'src/types/model'
 
 interface CollectionAlgorithmDecisionProps {
   algorithmResult?: AlgorithmResult
@@ -46,7 +40,8 @@ const getResult = (resultValue: string | undefined): React.ReactElement => {
 }
 
 export default function CollectionAlgorithmDecision(props: Readonly<CollectionAlgorithmDecisionProps>) {
-  const { algorithmResult = {}, styleOverride = {} } = props
+  const { algorithmResult, styleOverride = {} } = props
+  if (!algorithmResult) return null
   const { createDate, id, result, rationales = [] } = algorithmResult
 
   const containerProps = {

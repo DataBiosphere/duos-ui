@@ -5,15 +5,20 @@ import { render } from '@testing-library/react'
 import CollectionAlgorithmDecision from 'src/components/CollectionAlgorithmDecision'
 import { formatDate } from 'src/libs/utils'
 
+const id = '1'
+
 describe('CollectionAlgorithmDecision component', () => {
+  it('renders nothing when algorithmResult is not provided', () => {
+    const { container } = render(<CollectionAlgorithmDecision />)
+    expect(container.firstChild).toBeNull()
+  })
+
   it('renders a container with an id', () => {
-    const id = 1
-    const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ id }} />)
+    const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ id, result: 'No' }} />)
     expect(container.querySelector(`#collection-algorithm-id-${id}`)).toBeInTheDocument()
   })
 
   it('renders the decision label', () => {
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'No', id }} />)
     const decisionLabel = container.querySelector(`#collection-${id}-decision-label`) as HTMLElement
     expect(decisionLabel).toBeInTheDocument()
@@ -21,7 +26,6 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders the date label', () => {
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'No', id }} />)
     const dateLabel = container.querySelector(`#collection-${id}-date-label`) as HTMLElement
     expect(dateLabel).toBeInTheDocument()
@@ -29,23 +33,20 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders the component subtitle', () => {
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'No', id }} />)
     const subtitle = container.querySelector(`#collection-${id}-subtitle`) as HTMLElement
     expect(subtitle).toBeInTheDocument()
     expect(subtitle.textContent).toContain('DUOS Algorithm Decision')
   })
 
-  it('renders "N/A" if no result is provided', () => {
-    const id = 1
-    const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: undefined, id }} />)
+  it('renders "N/A" if result is an empty string', () => {
+    const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: '', id }} />)
     const decisionValue = container.querySelector(`#collection-${id}-decision-value`) as HTMLElement
     expect(decisionValue).toBeInTheDocument()
     expect(decisionValue.textContent).toContain('N/A')
   })
 
   it('renders "YES" if provided by algorithmResult', () => {
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'Yes', id }} />)
     const decisionValue = container.querySelector(`#collection-${id}-decision-value`) as HTMLElement
     expect(decisionValue).toBeInTheDocument()
@@ -53,7 +54,6 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders "NO" if provided by algorithmResult', () => {
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'No', id }} />)
     const decisionValue = container.querySelector(`#collection-${id}-decision-value`) as HTMLElement
     expect(decisionValue).toBeInTheDocument()
@@ -61,7 +61,6 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders "ABSTAIN" if provided by algorithmResult', () => {
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'Abstain', id }} />)
     const decisionValue = container.querySelector(`#collection-${id}-decision-value`) as HTMLElement
     expect(decisionValue).toBeInTheDocument()
@@ -69,9 +68,8 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders createDate if provided by algorithmResult', () => {
-    const createDate = 1700000000000
+    const createDate = '2023-11-14'
     const expectedDate = formatDate(createDate)
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'No', id, createDate }} />)
     const dateValue = container.querySelector(`#collection-${id}-date-value`) as HTMLElement
     expect(dateValue).toBeInTheDocument()
@@ -79,7 +77,6 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders "N/A" if createDate is not provided by algorithmResult', () => {
-    const id = 1
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'No', id }} />)
     const dateValue = container.querySelector(`#collection-${id}-date-value`) as HTMLElement
     expect(dateValue).toBeInTheDocument()
@@ -87,9 +84,8 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders rationales when provided', () => {
-    const id = 1
     const { container } = render(
-      <CollectionAlgorithmDecision algorithmResult={{ id, rationales: ['Reason A', 'Reason B'] }} />,
+      <CollectionAlgorithmDecision algorithmResult={{ id, result: 'No', rationales: ['Reason A', 'Reason B'] }} />,
     )
     const reasonValue = container.querySelector(`#collection-${id}-reason-value`) as HTMLElement
     expect(reasonValue).toBeInTheDocument()
@@ -98,8 +94,7 @@ describe('CollectionAlgorithmDecision component', () => {
   })
 
   it('renders "N/A" for reason when rationales are empty', () => {
-    const id = 1
-    const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ id, rationales: [] }} />)
+    const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ id, result: 'No', rationales: [] }} />)
     const reasonValue = container.querySelector(`#collection-${id}-reason-value`) as HTMLElement
     expect(reasonValue).toBeInTheDocument()
     expect(reasonValue.textContent).toContain('N/A')
