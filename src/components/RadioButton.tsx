@@ -64,7 +64,7 @@ export const RadioButton = (props: Readonly<RadioButtonProps>) => {
 
   return (
     <div style={style}>
-      <label htmlFor={id} style={wrapperStyle}>
+      <label htmlFor={id} style={wrapperStyle} aria-label={label}>
         <div style={{ float: 'left' }}>
           <input
             id={id}
