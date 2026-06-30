@@ -24,13 +24,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            server/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm ci
-      - name: Install server dependencies
-        run: pnpm -C server ci
       - name: Run Vitest (root)
         run: pnpm run test:coverage
       - name: Run Vitest (server)
