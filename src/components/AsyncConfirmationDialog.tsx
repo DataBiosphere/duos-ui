@@ -3,14 +3,14 @@ import Modal from 'react-modal'
 import { Alert } from 'src/components/Alert'
 import CloseIconComponent from 'src/components/CloseIconComponent'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
-import 'src/components/ConfirmationDialog_new.css'
+import 'src/components/AsyncConfirmationDialog.css'
 
 interface ConfirmationDialogAction {
   handler: (confirmed: boolean) => () => Promise<void>
   label: string
 }
 
-export interface ConfirmationDialogNewProps {
+export interface AsyncConfirmationDialogProps {
   showModal: boolean
   title: string
   action: ConfirmationDialogAction
@@ -46,7 +46,7 @@ const customStyles: { overlay: React.CSSProperties, content: React.CSSProperties
   },
 }
 
-export const ConfirmationDialog = (props: Readonly<ConfirmationDialogNewProps>) => {
+export const AsyncConfirmationDialog = (props: Readonly<AsyncConfirmationDialogProps>) => {
   const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props
 
   return (
