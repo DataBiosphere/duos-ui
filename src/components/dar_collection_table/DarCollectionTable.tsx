@@ -145,6 +145,8 @@ const columnHeaderData = (columns = defaultColumns): ColumnConfig[] => {
   return columns.map(col => columnHeaderConfig[col])
 }
 
+const collectionsSummaryMap: Record<number, DarCollectionSummary> = {}
+
 const processCollectionRowData = ({
   collections,
   collectionIsExpanded,
@@ -162,6 +164,7 @@ const processCollectionRowData = ({
         submissionDate, status, actions, dacNames,
         researcherName, name, institutionName,
       } = collection
+      collectionsSummaryMap[collection.darCollectionId] = collection
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasetIds, darCode, status, name,
@@ -194,7 +197,7 @@ const getInitialSort = (columns: string[] = []): SortConfig => {
 export const DarCollectionTable = function DarCollectionTable(props: DarCollectionTableProps) {
   const [visibleCollection, setVisibleCollection] = useState<CellData[][]>([])
   const [collectionsExpandedState, setCollectionsExpandedState] = useState<Record<number, boolean>>({})
-  const [darCollectionCache, setDarCollectionCache] = useState<Record<number, DarCollection>>({})
+  const [darCollectionCache, setDarCollectionCache] = useState<Record<number, DarCollection | null>>({})
   const [currentPage, setCurrentPage] = useState(1)
   const [pageCount, setPageCount] = useState(1)
   const [sort, setSort] = useState<SortConfig>(getInitialSort(props.columns))
@@ -229,20 +232,24 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     return collectionsExpandedState[id]
   }, [collectionsExpandedState])
 
-  const fetchDarCollection = useCallback((darCollectionId: number): DarCollection => {
+  const fetchDarCollection = useCallback((darCollectionId: number) => {
     if (isNil(darCollectionCache[darCollectionId])) {
-      Collections.getCollectionById(darCollectionId).then((coll) => {
+      return Collections.getCollectionById(darCollectionId).then((coll) => {
         const cache = cloneDeep(darCollectionCache)
         cache[darCollectionId] = coll
         setDarCollectionCache(cache)
+        return coll
       }).catch(() => {
         const cache = cloneDeep(darCollectionCache)
-        cache[darCollectionId] = {} as DarCollection
+        cache[darCollectionId] = null
         setDarCollectionCache(cache)
         Notifications.showError({ text: 'Could not load DAR Collection.' })
+        return null
       })
     }
-    return darCollectionCache[darCollectionId]
+    else {
+      return darCollectionCache[darCollectionId]
+    }
   }, [darCollectionCache, setDarCollectionCache])
 
   const changeTableSize = useCallback((value: number) => {
@@ -291,6 +298,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     const darCollectionId = rowData[0].id
 
     if (collectionIsExpanded(darCollectionId)) {
+      fetchDarCollection(darCollectionId)
       return (
         <div key={`expanded-${darCollectionId}`}>
           {renderedRow}
@@ -301,7 +309,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
             }}
           >
             <DarDatasetTable
-              collection={fetchDarCollection(darCollectionId)}
+              collection={darCollectionCache[darCollectionId]!}
               isLoading={isNil(darCollectionCache[darCollectionId])}
               isUnfilteredView={isUnfilteredView}
             />

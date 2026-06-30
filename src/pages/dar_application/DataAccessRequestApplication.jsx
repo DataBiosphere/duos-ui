@@ -5,7 +5,7 @@ import DataAccessRequest from 'src/pages/dar_application/DataAccessRequest'
 import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement'
 import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation'
 import { Navigation, Notifications } from 'src/libs/utils'
-import { ConfirmationDialog } from 'src/components/ConfirmationDialog_new'
+import { AsyncConfirmationDialog } from 'src/components/AsyncConfirmationDialog'
 import { Notification } from 'src/components/Notification'
 import { PageHeading } from 'src/components/PageHeading'
 import { User } from 'src/libs/ajax/User'
@@ -761,7 +761,7 @@ const DataAccessRequestApplication = (props) => {
           <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab} onTabChange={setTab} />
 
           <div id="form-views">
-            <ConfirmationDialog
+            <AsyncConfirmationDialog
               title="Save changes?"
               disableOkBtn={disableOkBtn}
               disableNoBtn={disableOkBtn}
@@ -772,8 +772,8 @@ const DataAccessRequestApplication = (props) => {
               <div className="dialog-description">
                 Are you sure you want to save this Data Access Request? Previous changes will be overwritten.
               </div>
-            </ConfirmationDialog>
-            <ConfirmationDialog
+            </AsyncConfirmationDialog>
+            <AsyncConfirmationDialog
               title="Submit Data Access Request?"
               disableOkBtn={disableOkBtn}
               disableNoBtn={disableOkBtn}
@@ -785,7 +785,7 @@ const DataAccessRequestApplication = (props) => {
               <div className="dialog-description">
                 Are you sure you want to submit this Data Access Request? This cannot be undone.
               </div>
-            </ConfirmationDialog>
+            </AsyncConfirmationDialog>
 
             {isProgressReportApplication && (
               <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className="dar-steps">
