@@ -5,11 +5,15 @@ import WarningIcon from '@mui/icons-material/Warning'
 import InfoIcon from '@mui/icons-material/Info'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ReportIcon from '@mui/icons-material/Report'
-import { Banner } from 'src/libs/notificationService'
 import style from 'src/components/Notification.module.css'
 
+export interface NotificationData {
+  message: string
+  level?: 'info' | 'warning' | 'danger' | 'success'
+}
+
 interface NotificationProps {
-  notificationData?: Banner | null
+  notificationData?: NotificationData | null
   index?: number
   customStyle?: React.CSSProperties
 }
@@ -20,7 +24,7 @@ const iconStyle: React.CSSProperties = {
   width: 30,
 }
 
-const getIcon = (level: Banner['level']): React.ReactElement => {
+const getIcon = (level: NotificationData['level']): React.ReactElement => {
   switch (level) {
     case 'success':
       return <CheckCircleIcon fill="#3c763d" style={iconStyle} />
@@ -42,13 +46,15 @@ export const Notification = (props: Readonly<NotificationProps>) => {
     return <div key={index} style={{ display: 'none' }} />
   }
 
+  const level = notificationData.level ?? 'info'
+
   return (
     <div
       key={index}
-      className={`row alert alert-${notificationData.level}`}
+      className={`row alert alert-${level}`}
       style={{ margin: 0, padding: '1.5rem', alignItems: 'center', ...customStyle }}
     >
-      <div style={{ float: 'left' }}>{getIcon(notificationData.level)}</div>
+      <div style={{ float: 'left' }}>{getIcon(level)}</div>
       <div className={style['underlined']} style={{ margin: '0.5rem auto' }}>
         <ReactMarkdown>{notificationData.message}</ReactMarkdown>
       </div>
