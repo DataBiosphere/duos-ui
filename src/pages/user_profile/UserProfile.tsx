@@ -88,9 +88,7 @@ export default function UserProfile() {
       }}
     >
       <div className="header">
-        <Notification>
-          {notificationData}
-        </Notification>
+        <Notification notificationData={notificationData} />
         <div
           style={{
             flexDirection: 'column',

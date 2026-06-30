@@ -491,13 +491,14 @@ export const makeDatasetTableHeader = (
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.dataUse),
       cellDataFn: (dataset: DatasetTerm) => {
-        return dataUseCellData({
+        const cell = dataUseCellData({
           dataset,
           label: `Data Use for dataset ${dataset.datasetId}: ${dataset.dataUse}`,
           divClass: 'data-use-cell',
           cellWidth: cellWidths.dataUse,
           tooltipPlace: 'top',
         })
+        return { data: cell.data, value: cell.value ?? '', id: cell.id, style: cell.cellStyle, label: cell.label }
       },
     },
     {

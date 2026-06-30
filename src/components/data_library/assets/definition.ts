@@ -66,6 +66,7 @@ export interface AssetDefinition {
     filterQuery: QueryClause[],
     pagination: PaginationState,
     sort?: SortState,
+    opts?: { showAllControlled?: boolean },
   ): ElasticsearchQuery
 
   /** Turn a raw Elasticsearch response into a typed, paginated page */

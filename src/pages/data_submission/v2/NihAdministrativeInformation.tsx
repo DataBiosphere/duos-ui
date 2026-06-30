@@ -120,7 +120,7 @@ export const NihAdministrativeInformation = (props: NihAdministrativeInformation
             }}
             placeholder="List site and hit enter here..."
             defaultValue={getStudyPropertyValueByKey(study, CollaboratingSites.key)}
-            onChange={(_key: string, value: string[], isValid: boolean) => setStudyPropertyByKey(study, setStudy, { isValid: isValid }, new CollaboratingSites(value))}
+            onChange={({ value, isValid }: { value: string[], isValid: boolean }) => setStudyPropertyByKey(study, setStudy, { isValid }, new CollaboratingSites(value))}
           />
         )}
 

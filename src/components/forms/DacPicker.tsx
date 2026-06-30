@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes, FormValidators, Validation } from 'src/components/forms/forms'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Notifications } from 'src/libs/utils'
 import { DAC } from 'src/libs/ajax/DAC'
@@ -10,7 +10,7 @@ export interface DacPickerProps {
   fieldTitle: string
   fieldId: string
   isRequired: boolean
-  validation?: unknown
+  validation?: Validation
   onChange: ({ key, value, isValid }: { key: string, value: number, isValid: boolean }) => void
   disabled?: boolean
 }

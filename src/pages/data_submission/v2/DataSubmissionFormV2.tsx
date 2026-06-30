@@ -30,7 +30,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
   const { studyId } = useParams()
   const [isEditing, setIsEditing] = useState(false)
-  const [study, setStudy] = useState({} as Study)
+  const [study, setStudy] = useState({ data: {} } as Study)
   const [loadingError, setLoadingError] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
 
@@ -45,7 +45,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         setStudy(study)
         setIsEditing(true)
       }).catch(() => {
-        setStudy({} as Study)
+        setStudy({ data: {} } as Study)
         setIsEditing(false)
         setLoadingError(true)
       })

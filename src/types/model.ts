@@ -131,6 +131,7 @@ export interface DacObject {
   updateDate?: string
   chairpersons?: DuosUser[]
   members?: DuosUser[]
+  datasets?: Dataset[]
 }
 
 export interface DataAccessAgreement {
@@ -264,6 +265,7 @@ export interface DatasetTerm {
   requestLocation?: string
   dacId: number
   dacApproval: boolean
+  hasInstitutionCertification?: boolean
   accessManagement: string
   approvedUserIds: number[]
   study: StudyTerm

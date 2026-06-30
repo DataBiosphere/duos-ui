@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { filter, find, get, isNil } from 'src/utils/NodashUtil'
+import { filter, get, isNil } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
 import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
 import MultiDatasetVoteSlab from 'src/components/collection_voting_slab/MultiDatasetVoteSlab'
@@ -105,7 +105,6 @@ export default function MultiDatasetVotingTab({
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n'
     + (adminPage ? '' : 'You can still deny this request and/or vote on the Structured Research Purpose.')
 
-  const rpBucket = find(buckets, bucket => get(bucket, 'isRP')) ?? {} as Bucket
   const dataBuckets = filter(buckets, bucket => get(bucket, 'isRP') !== true) as Bucket[]
 
   useEffect(() => {
@@ -138,14 +137,9 @@ export default function MultiDatasetVotingTab({
         />
       )}
       <ResearchProposalVoteSlab
-        updateFinalVote={updateFinalVote}
         darInfo={darInfo}
-        bucket={rpBucket}
         key="rp-vote"
-        isChair={isChair}
         isLoading={isLoading}
-        readOnly={readOnly}
-        adminPage={adminPage}
       />
       <div style={styles.title}>Datasets Requested by Data Use</div>
       <div style={styles.slabs}>

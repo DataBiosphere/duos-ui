@@ -13,6 +13,7 @@ import { StudyType, StudyTypeNames } from 'src/components/forms/StudyType'
 import React from 'react'
 import { ConsentGroup2, FileType } from '../consent_group/consentGroupUtils'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
+import { DatasetDataMetadata, StudyDataMetadata } from 'src/libs/data-metadata'
 
 export type StudyPropertyType = 'Boolean' | 'String' | 'Number' | 'Date' | 'Json'
 
@@ -366,7 +367,8 @@ export class ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanat
 
 export class StudyData extends StudyProperty {
   static readonly key = 'data'
-  constructor(value: Record<string, unknown>, studyId?: number, studyPropertyId?: number) {
+  /** Client-managed metadata bag. Backend stores and returns this value as-is without validation. */
+  constructor(value: StudyDataMetadata, studyId?: number, studyPropertyId?: number) {
     super(StudyData.key, 'Json' as StudyPropertyType, value, studyId, studyPropertyId)
   }
 }
@@ -400,7 +402,8 @@ export interface Study {
     intellectualProperties?: Array<IntellectualProperty>
     biospecimens?: Array<Biospecimen>
   }
-  data: Record<string, unknown>
+  /** Client-managed metadata bag. Backend stores and returns this value as-is without validation. */
+  data: StudyDataMetadata
 }
 export interface DatasetRegistrationSchemaV1 {
   /** @description The study name */
@@ -514,7 +517,8 @@ export interface DatasetRegistrationSchemaV1 {
     funding?: Array<FundingResource>
     intellectualProperties?: Array<IntellectualProperty>
   }
-  data: Record<string, unknown>
+  /** Client-managed metadata bag. Backend stores and returns this value as-is without validation. */
+  data: StudyDataMetadata
 }
 
 export type DatasetPropertyType = 'String' | 'Number' | 'Json'
@@ -630,7 +634,8 @@ export class NumberOfParticipants extends DatasetProperty {
 export class DatasetData extends DatasetProperty {
   static readonly schemaProperty = 'data'
   static readonly propertyName = 'data'
-  constructor(value: Record<string, unknown>, datasetId?: number, propertyId?: number) {
+  /** Client-managed metadata bag. Backend stores and returns this value as-is without validation. */
+  constructor(value: DatasetDataMetadata, datasetId?: number, propertyId?: number) {
     super(DatasetData.propertyName, DatasetData.schemaProperty, 'Json' as DatasetPropertyType, value, datasetId, propertyId)
   }
 }
