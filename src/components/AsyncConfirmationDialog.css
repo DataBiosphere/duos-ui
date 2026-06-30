@@ -55,7 +55,7 @@
 
 .dialog-footer button#btn_cancel {
   background: #eeeeee;
-  color: #777777;
+  color: #595959;
   margin-right: 10px;
 }
 
@@ -64,7 +64,7 @@
 }
 
 .dialog-footer button:hover:enabled {
-  background: #2FA4E7 !important;
+  background: #1878b5 !important;
   color: #ffffff !important;
 }
 

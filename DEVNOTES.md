@@ -51,11 +51,29 @@ will simulate it for local development.
 
 5. Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model.
 
-6. Start the development server:
+6. Start the development server. There are two modes:
 
-```shell
-pnpm start
-```
+   **Frontend only (default — fastest HMR):**
+
+   ```shell
+   pnpm start
+   ```
+
+   Runs Vite's standalone dev server on port 3000 with native hot-module reloading. Use this for
+   day-to-day UI work. The Fastify server is not involved, so sessions, cookies, auth callbacks, and
+   the API proxy are not exercised.
+
+   **Full stack (Fastify + Vite middleware):**
+
+   ```shell
+   pnpm run start:server
+   ```
+
+   Boots the Fastify server (port 3000) with Vite's HMR middleware embedded, so server code (sessions,
+   cookies, auth callbacks, API proxy) runs alongside the frontend. Reloads via `tsx watch`, which is
+   slower than native Vite HMR — use this when you need the server behavior.
+
+   Both modes serve HTTPS from `server.key`/`server.crt` and open the browser automatically.
 
 ## Running using Docker Compose
 
