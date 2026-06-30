@@ -10,7 +10,7 @@ import CollectionConfirmationModal from 'src/components/dar_collection_table/Col
 import 'src/components/dar_collection_table/dar_collection_table.css'
 import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable'
 import { Collections } from 'src/libs/ajax/Collections'
-import { type DarCollection, DarCollectionSummary } from 'src/types/model'
+import { DarCollection, DarCollectionSummary } from 'src/types/model'
 
 interface SortConfig {
   colIndex: number
@@ -293,7 +293,6 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     const darCollectionId = rowData[0].id as number
 
     if (collectionIsExpanded(darCollectionId)) {
-      // Trigger fetch if not yet cached; isLoading guards usage until the value arrives
       fetchDarCollection(darCollectionId)
       return (
         <div key={`expanded-${darCollectionId}`}>
@@ -305,7 +304,6 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
             }}
           >
             <DarDatasetTable
-              // non-null: when isLoading is false, the cache entry is guaranteed to be a DarCollection
               collection={darCollectionCache[darCollectionId]!}
               isLoading={isNil(darCollectionCache[darCollectionId])}
               isUnfilteredView={isUnfilteredView}

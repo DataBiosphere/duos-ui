@@ -2,10 +2,29 @@ import React from 'react'
 import Modal from 'react-modal'
 import { Alert } from 'src/components/Alert'
 import CloseIconComponent from 'src/components/CloseIconComponent'
-import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton.js'
-import './ConfirmationDialog_new.css'
+import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
+import 'src/components/AsyncConfirmationDialog.css'
 
-const customStyles = {
+interface ConfirmationDialogAction {
+  handler: (confirmed: boolean) => () => Promise<void>
+  label: string
+}
+
+export interface AsyncConfirmationDialogProps {
+  showModal: boolean
+  title: string
+  action: ConfirmationDialogAction
+  children?: React.ReactNode
+  afterOpenModal?: () => void
+  onRequestClose?: () => void
+  style?: { overlay?: React.CSSProperties, content?: React.CSSProperties }
+  disableOkBtn?: boolean
+  disableNoBtn?: boolean
+  alertTitle?: string
+  alertMessage?: string
+}
+
+const customStyles: { overlay: React.CSSProperties, content: React.CSSProperties } = {
   overlay: {
     position: 'fixed',
     top: '0',
@@ -14,7 +33,6 @@ const customStyles = {
     bottom: '0',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-
   content: {
     position: 'relative',
     maxHeight: '300px',
@@ -28,7 +46,7 @@ const customStyles = {
   },
 }
 
-export const ConfirmationDialog = (props) => {
+export const AsyncConfirmationDialog = (props: Readonly<AsyncConfirmationDialogProps>) => {
   const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props
 
   return (
@@ -48,21 +66,22 @@ export const ConfirmationDialog = (props) => {
         {props.children}
         {alertTitle !== undefined && (
           <div className="dialog-alert">
-            <Alert id="dialog" type="danger" title={alertTitle} description={alertMessage} />
+            <Alert id="dialog" type="danger" title={alertTitle} description={alertMessage ?? ''} />
           </div>
         )}
       </div>
 
       <div className="flex flex-row" style={{ justifyContent: 'flex-end', marginTop: '20px' }}>
-        <a
+        <button
           id="btn_save"
           className="button button-white"
           style={{ marginRight: '2rem' }}
           onClick={props.action.handler(false)}
           disabled={disableNoBtn}
+          type="button"
         >
           No
-        </a>
+        </button>
         <AsyncSpinnerButton
           id="btn_submit"
           className="button button-blue"
