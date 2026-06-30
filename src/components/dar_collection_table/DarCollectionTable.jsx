@@ -25,6 +25,7 @@ const columnHeaderConfig = {
     label: 'DAC',
     cellStyle: { width: styles.cellWidth.dacNames },
     cellDataFn: cellData.DacCellData,
+    sortable: true,
   },
   name: {
     label: 'Title',
