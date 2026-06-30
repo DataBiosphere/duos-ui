@@ -88,6 +88,7 @@ const columnHeaderConfig: Record<string, ColumnConfig> = {
     label: 'DAC',
     cellStyle: { width: styles.cellWidth.dacNames },
     cellDataFn: cellData.DacCellData as (args: CollectionCellFnArgs) => CellData,
+    sortable: true,
   },
   name: {
     label: 'Title',
