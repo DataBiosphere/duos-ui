@@ -4,13 +4,13 @@ import { DarCollectionTableColumnOptions, styles, consoleTypes } from 'src/utils
 import { Storage } from 'src/libs/storage'
 import PaginationBar from 'src/components/PaginationBar'
 import { recalculateVisibleTable, goToPage as updatePage, Notifications } from 'src/libs/utils'
-import SimpleTable from 'src/components/SimpleTable'
+import SimpleTable, { type RowWrapperArgs } from 'src/components/SimpleTable'
 import cellData, { type CellData } from 'src/components/dar_collection_table/DarCollectionTableCellData'
 import CollectionConfirmationModal from 'src/components/dar_collection_table/CollectionConfirmationModal'
 import 'src/components/dar_collection_table/dar_collection_table.css'
 import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable'
 import { Collections } from 'src/libs/ajax/Collections'
-import { DarCollectionSummary } from 'src/types/model'
+import { type DarCollection, DarCollectionSummary } from 'src/types/model'
 
 interface SortConfig {
   colIndex: number
@@ -57,11 +57,6 @@ export interface DarCollectionTableProps {
   relevantDatasets?: unknown
   deleteDraft?: ((collection: DarCollectionSummary) => Promise<void>) | null
   approveCollection?: ((collection: DarCollectionSummary) => Promise<void>) | null
-}
-
-interface RowWrapperArgs {
-  renderedRow: React.ReactNode
-  rowData: CellData[]
 }
 
 interface ProcessCollectionRowDataArgs {
@@ -197,7 +192,7 @@ const getInitialSort = (columns: string[] = []): SortConfig => {
 export const DarCollectionTable = function DarCollectionTable(props: DarCollectionTableProps) {
   const [visibleCollection, setVisibleCollection] = useState<CellData[][]>([])
   const [collectionsExpandedState, setCollectionsExpandedState] = useState<Record<number, boolean>>({})
-  const [darCollectionCache, setDarCollectionCache] = useState<Record<number, unknown>>({})
+  const [darCollectionCache, setDarCollectionCache] = useState<Record<number, DarCollection | null>>({})
   const [currentPage, setCurrentPage] = useState(1)
   const [pageCount, setPageCount] = useState(1)
   const [sort, setSort] = useState<SortConfig>(getInitialSort(props.columns))
@@ -241,7 +236,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
         return coll
       }).catch(() => {
         const cache = cloneDeep(darCollectionCache)
-        cache[darCollectionId] = {}
+        cache[darCollectionId] = null
         setDarCollectionCache(cache)
         Notifications.showError({ text: 'Could not load DAR Collection.' })
         return null
@@ -295,9 +290,11 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
 
   const showDatasetDropdownWrapper = useCallback((wrapperArgs: RowWrapperArgs) => {
     const { renderedRow, rowData } = wrapperArgs
-    const darCollectionId = rowData[0].id
+    const darCollectionId = rowData[0].id as number
 
     if (collectionIsExpanded(darCollectionId)) {
+      // Trigger fetch if not yet cached; isLoading guards usage until the value arrives
+      fetchDarCollection(darCollectionId)
       return (
         <div key={`expanded-${darCollectionId}`}>
           {renderedRow}
@@ -308,8 +305,8 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
             }}
           >
             <DarDatasetTable
-              summary={collectionsSummaryMap[darCollectionId]}
-              collection={fetchDarCollection(darCollectionId)}
+              // non-null: when isLoading is false, the cache entry is guaranteed to be a DarCollection
+              collection={darCollectionCache[darCollectionId]!}
               isLoading={isNil(darCollectionCache[darCollectionId])}
               isUnfilteredView={isUnfilteredView}
             />

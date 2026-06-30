@@ -34,7 +34,7 @@ export interface TableStyles {
   containerOverride?: React.CSSProperties
 }
 
-interface RowWrapperArgs {
+export interface RowWrapperArgs {
   renderedRow: React.ReactElement
   rowData: CellData[]
 }
