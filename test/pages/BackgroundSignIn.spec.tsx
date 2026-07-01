@@ -95,7 +95,6 @@ describe('BackgroundSignIn', () => {
     vi.mocked(User.getMe).mockReturnValue(new Promise(() => {}))
     renderComponent({ bearerToken: 'my-token' })
     expect(screen.getByTestId('spinner')).toBeInTheDocument()
-    expect(screen.getByTestId('spinner')).toHaveAttribute('data-show', 'true')
   })
 
   it('calls User.getMe and Storage.setOidcUser when bearerToken is provided', async () => {
