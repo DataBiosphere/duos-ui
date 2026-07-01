@@ -8,10 +8,11 @@ import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { Alert } from 'src/components/Alert'
 import { Spinner } from 'src/components/Spinner'
 import { User } from 'src/libs/ajax/User'
+import { ROLES } from 'src/libs/utils'
 import type { DuosUser, UserRole } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
 
-const researcherRole = { roleId: 5, name: 'Researcher' as const } as UserRole
+const researcherRole = ROLES.researcher as UserRole
 
 interface Validation {
   name?: ValidationError
