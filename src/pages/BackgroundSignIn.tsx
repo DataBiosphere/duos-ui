@@ -1,45 +1,65 @@
-import React from 'react'
-import { User } from '../libs/ajax/User'
-import { Storage } from '../libs/storage'
-import { Navigation, setUserRoleStatuses } from '../libs/utils'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { User } from 'src/libs/ajax/User'
+import { Storage } from 'src/libs/storage'
+import { Navigation, setUserRoleStatuses } from 'src/libs/utils'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { SpinnerComponent } from '../components/SpinnerComponent'
-import loadingImage from '../images/loading-indicator.svg'
+import { SpinnerComponent } from 'src/components/SpinnerComponent'
+import loadingImage from 'src/images/loading-indicator.svg'
+import { OidcUser as OidcUserType } from 'src/libs/auth/oidcBroker'
+import { DuosUser } from 'src/types/model'
 
-export default function BackgroundSignIn(props) {
+export interface BackgroundSignInProps {
+  onSignIn?: () => void
+  onError?: (error: { status?: number }) => void
+  bearerToken?: string
+  isLogged?: boolean
+  env?: string
+}
+
+export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Readonly<BackgroundSignInProps>) {
   const location = useLocation()
   const navigate = useNavigate()
   const queryParams = new URLSearchParams(location.search)
-  let token = queryParams.get('token')
-  const { onSignIn, onError, bearerToken } = props
-  token = bearerToken || (token || '')
-  const [loading, setLoading] = useState(token && token !== '')
+  const token = bearerToken ?? (queryParams.get('token') ?? '')
+  const [loading, setLoading] = useState(token !== '')
   const [accessToken, setAccessToken] = useState(token)
   const [formToken, setFormToken] = useState(token)
   const [invalidToken, setInvalidToken] = useState(false)
 
   useEffect(() => {
-    const getUser = async () => {
+    const getUser = async (): Promise<DuosUser> => {
       return await User.getMe()
     }
 
-    const redirect = (user) => {
+    const redirect = (user: DuosUser) => {
       Navigation.console(user, navigate)
       if (onSignIn)
         onSignIn()
     }
 
-    const performLogin = () => {
-      setLoading(true)
-      Storage.setOidcUser({ id_token: accessToken })
+    const handle409 = () => {
       getUser().then(
         (user) => {
-          user = Object.assign(user, setUserRoleStatuses(user, Storage))
+          const enriched = Object.assign(user, setUserRoleStatuses(user, Storage))
+          redirect(enriched)
           setLoading(false)
-          redirect(user)
         },
-        (error) => {
+        () => {
+          Storage.clearStorage()
+          setLoading(false)
+        })
+    }
+
+    const performLogin = () => {
+      setLoading(true)
+      Storage.setOidcUser({ id_token: accessToken } as unknown as OidcUserType)
+      getUser().then(
+        (user) => {
+          const enriched = Object.assign(user, setUserRoleStatuses(user, Storage))
+          setLoading(false)
+          redirect(enriched)
+        },
+        (error: { status?: number }) => {
           const status = error.status
           switch (status) {
             case 400:
@@ -48,22 +68,9 @@ export default function BackgroundSignIn(props) {
               setLoading(false)
               break
             case 409:
-              // If the user exists, just log them in.
-              getUser().then(
-                (user) => {
-                  user = Object.assign(user, setUserRoleStatuses(user, Storage))
-                  redirect(user)
-                  setLoading(false)
-                },
-                () => {
-                  Storage.clearStorage()
-                  setLoading(false)
-                })
+              handle409()
               break
             case 401:
-              setInvalidToken(true)
-              setLoading(false)
-              break
             default:
               setInvalidToken(true)
               setLoading(false)
@@ -74,7 +81,6 @@ export default function BackgroundSignIn(props) {
 
     if (accessToken)
       performLogin()
-    return () => { }
   }, [accessToken, navigate, onError, onSignIn])
 
   return (
@@ -82,7 +88,7 @@ export default function BackgroundSignIn(props) {
       {loading
         ? (
             <div>
-              <SpinnerComponent show={true} name="loadingSpinner" loadingImage={loadingImage} />
+              <SpinnerComponent loadingImage={loadingImage} />
             </div>
           )
         : (
@@ -106,9 +112,9 @@ export default function BackgroundSignIn(props) {
                       </div>
                     )}
                   <br />
-                  <label id="lbl_accessToken" className="common-color">
+                  <div id="lbl_accessToken" className="common-color">
                     Access Token
-                  </label>
+                  </div>
                   <div>
                     <textarea
                       name="accessToken"

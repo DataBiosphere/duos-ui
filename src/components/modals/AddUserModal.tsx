@@ -1,7 +1,7 @@
 import { concat, filter, isEmpty, matches } from 'src/utils/NodashUtil'
 import React, { Fragment, useState, useRef, useEffect } from 'react'
 import { User } from 'src/libs/ajax/User'
-import { USER_ROLES } from 'src/libs/utils'
+import { ROLES } from 'src/libs/utils'
 import { UserRole } from 'src/types/model'
 import { Alert } from 'src/components/Alert'
 import { BaseModal } from 'src/components/BaseModal'
@@ -9,8 +9,8 @@ import addUserIcon from 'src/images/icon_add_user.png'
 
 type Role = Pick<UserRole, 'roleId' | 'name'>
 
-const adminRole: Role = { roleId: 4, name: USER_ROLES.admin }
-const researcherRole: Role = { roleId: 5, name: USER_ROLES.researcher }
+const adminRole: Role = ROLES.admin
+const researcherRole: Role = ROLES.researcher
 
 interface AddUserModalState {
   displayName: string
