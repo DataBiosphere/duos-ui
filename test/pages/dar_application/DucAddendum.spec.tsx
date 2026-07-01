@@ -1,130 +1,165 @@
 import React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { act, render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
-import { makeDatasetTerm } from '../test-utils'
+import type { DatasetTerm, Dataset, DuosUser, StudyTerm, UserTerm } from 'src/types/model'
+
+vi.mock('src/libs/ajax/DataSet', () => ({
+  DataSet: {
+    searchDatasetIndex: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/utils', async (importOriginal) => {
+  const original = await importOriginal<typeof import('src/libs/utils')>()
+  return {
+    ...original,
+    Notifications: {
+      ...original.Notifications,
+      showError: vi.fn(),
+    },
+  }
+})
+
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Notifications } from 'src/libs/utils'
 
+const makeUserTerm = (): UserTerm => ({
+  userId: 0,
+  displayName: 'user',
+  institution: {} as UserTerm['institution'],
+})
+
+const makeStudyTerm = (): StudyTerm => ({
+  description: 'description',
+  studyName: 'study',
+  studyId: 0,
+  phsId: 'phs000000',
+  phenotype: 'phenotype',
+  species: 'species',
+  piName: 'pi',
+  dataSubmitterEmail: 'submitter@example.test',
+  dataSubmitterId: 0,
+  dataCustodianEmail: [],
+  publicVisibility: true,
+  dataTypes: [],
+})
+
+const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
+  datasetId: 0,
+  createUserId: 0,
+  createUserDisplayName: 'user',
+  datasetIdentifier: 'DUOS-123456',
+  deletable: true,
+  datasetName: 'dataset',
+  participantCount: 1,
+  dataUse: {
+    primary: [{ code: 'foo', description: 'bar' }],
+    secondary: [{ code: 'foo', description: 'bar' }],
+  },
+  dataLocation: 'somewhere',
+  url: 'some url',
+  dacId: 0,
+  dacApproval: true,
+  accessManagement: 'access',
+  approvedUserIds: [0],
+  study: makeStudyTerm(),
+  submitter: makeUserTerm(),
+  updateUser: makeUserTerm(),
+  dac: {
+    dacId: 0,
+    dacName: 'some name',
+    dacEmail: 'some email',
+  },
+  piName: 'pi name',
+  ...overrides,
+})
+
+const makeDataset = ({ datasetId, datasetIdentifier, datasetName, dacId }: { datasetId: number, datasetIdentifier: string, datasetName: string, dacId: number }): Dataset => ({
+  name: datasetName,
+  datasetName,
+  datasetId,
+  createUserId: 1,
+  createUser: {} as DuosUser,
+  createDate: new Date('2026-01-01'),
+  dacId,
+  translatedDataUse: 'General Use',
+  deletable: true,
+  properties: [],
+  study: {} as Dataset['study'],
+  alias: datasetId,
+  datasetIdentifier,
+  dataUse: {},
+})
+
+const mockDatasets: Dataset[] = [
+  makeDataset({ datasetId: 1, datasetIdentifier: 'DUOS-1001', datasetName: 'Test Dataset 1', dacId: 1 }),
+  makeDataset({ datasetId: 2, datasetIdentifier: 'DUOS-1002', datasetName: 'Test Dataset 2', dacId: 2 }),
+]
+
+const renderDucAddendum = async (datasets: Dataset[]) => {
+  await act(async () => {
+    render(
+      <DucAddendum
+        datasets={datasets}
+        isLoading={false}
+        save={vi.fn()}
+        doSubmit={vi.fn()}
+      />,
+    )
+  })
+}
+
 describe('DucAddendum', () => {
-  const mockDatasets = [
-    {
-      datasetId: 1,
-      datasetIdentifier: 'DUOS-1001',
-      datasetName: 'Test Dataset 1',
-      dacId: 1,
-    },
-    {
-      datasetId: 2,
-      datasetIdentifier: 'DUOS-1002',
-      datasetName: 'Test Dataset 2',
-      dacId: 2,
-    },
-  ]
-
-  const mockDatasetTerms = [
-    makeDatasetTerm({
-      datasetId: 1,
-      dac: {
-        dacId: 1,
-        dacName: 'DAC 0001',
-        dacEmail: 'foo@bar.com',
-      },
-      dacId: 1,
-    }),
-    makeDatasetTerm({
-      datasetId: 2,
-      dac: {
-        dacId: 2,
-        dacName: 'DAC 0002',
-        dacEmail: 'bar@foo.com',
-      },
-      dacId: 2,
-    }),
-  ]
-
   beforeEach(() => {
-    cy.viewport(1200, 800)
+    vi.clearAllMocks()
   })
 
-  it('should render addendum table with selected datasets', () => {
-    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve(mockDatasetTerms))
+  it('renders the addendum table with selected datasets', async () => {
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([
+      makeDatasetTerm({ datasetId: 1, dacId: 1, dac: { dacId: 1, dacName: 'DAC 0001', dacEmail: 'foo@bar.com' } }),
+      makeDatasetTerm({ datasetId: 2, dacId: 2, dac: { dacId: 2, dacName: 'DAC 0002', dacEmail: 'bar@foo.com' } }),
+    ])
 
-    const props = {
-      datasets: mockDatasets,
-      isLoading: false,
-      save: cy.stub(),
-      doSubmit: cy.stub(),
-    }
+    await renderDucAddendum(mockDatasets)
 
-    cy.mount(<DucAddendum {...props} />)
+    expect(screen.getByText('Addendum')).toBeInTheDocument()
+    expect(screen.getByText(/Please review the datasets you requested/)).toBeInTheDocument()
 
-    // Check the informational header
-    cy.contains('Addendum').should('be.visible')
-    cy.contains('Please review the datasets you requested').should('be.visible')
+    expect(screen.getByText('Dataset ID')).toBeInTheDocument()
+    expect(screen.getByText('Dataset Name')).toBeInTheDocument()
+    expect(screen.getByText('DAC')).toBeInTheDocument()
+    expect(screen.getByText('Acknowledgment')).toBeInTheDocument()
 
-    // Verify column headers
-    cy.contains('Dataset ID').should('be.visible')
-    cy.contains('Dataset Name').should('be.visible')
-    cy.contains('DAC').should('be.visible')
-    cy.contains('Acknowledgment').should('be.visible')
+    expect(screen.getByText('DUOS-1001')).toBeInTheDocument()
+    expect(screen.getByText('Test Dataset 1')).toBeInTheDocument()
+    expect(screen.getByText('DAC 0001')).toBeInTheDocument()
 
-    // Verify dataset row content
-    cy.contains('DUOS-1001')
-      .next().should('have.text', 'Test Dataset 1')
-    cy.contains('Test Dataset 1')
-      .next().should('have.text', 'DAC 0001')
-
-    cy.contains('DUOS-1002')
-      .next().should('have.text', 'Test Dataset 2')
-    cy.contains('Test Dataset 2')
-      .next().should('have.text', 'DAC 0002')
+    expect(screen.getByText('DUOS-1002')).toBeInTheDocument()
+    expect(screen.getByText('Test Dataset 2')).toBeInTheDocument()
+    expect(screen.getByText('DAC 0002')).toBeInTheDocument()
   })
 
-  it('should display a warning when relevant DAC cannot be loaded', () => {
-    const errorMessage = 'Error loading DAC information for datasets'
+  it('shows an error when relevant DAC information cannot be loaded', async () => {
+    vi.mocked(DataSet.searchDatasetIndex).mockRejectedValue(new Error('DAC information could not be found'))
 
-    cy.stub(DataSet, 'searchDatasetIndex').callsFake(() => {
-      const error = new Error('DAC information could not be found')
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      error.data = { message: errorMessage }
-      return Promise.reject(error)
+    await renderDucAddendum([mockDatasets[0]])
+
+    expect(Notifications.showError).toHaveBeenCalledWith({
+      text: 'Error loading Dataset Term information for datasets: DAC information could not be found',
     })
-
-    const showErrorStub = cy.stub()
-    cy.stub(Notifications, 'showError').callsFake(showErrorStub)
-
-    const props = {
-      datasets: [mockDatasets.at(0)],
-      isLoading: false,
-      save: cy.stub(),
-      doSubmit: cy.stub(),
-    }
-
-    cy.mount(<DucAddendum {...props} />)
-
-    cy.wrap(showErrorStub).should('have.been.calledWith', { text: 'Error loading Dataset Term information for datasets: DAC information could not be found' })
   })
 
-  it('should display `N/A` when the DAC information is missing entirely', () => {
-    const datasetTermsMissingDAC = makeDatasetTerm({
-      datasetId: 1,
-      dac: undefined,
-    })
+  it('shows "N/A" when the DAC information is missing entirely', async () => {
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([
+      makeDatasetTerm({ datasetId: 1, dac: undefined }),
+    ])
 
-    cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([datasetTermsMissingDAC]))
+    await renderDucAddendum([mockDatasets[0]])
 
-    const props = {
-      datasets: [mockDatasets.at(0)],
-      isLoading: false,
-      save: cy.stub(),
-      doSubmit: cy.stub(),
-    }
-
-    cy.mount(<DucAddendum {...props} />)
-
-    cy.contains('DUOS-1001')
-      .next().should('have.text', 'Test Dataset 1')
-    cy.contains('Test Dataset 1')
-      .next().should('have.text', 'N/A')
+    expect(screen.getByText('DUOS-1001')).toBeInTheDocument()
+    expect(screen.getByText('Test Dataset 1')).toBeInTheDocument()
+    expect(screen.getByText('N/A')).toBeInTheDocument()
   })
 })
