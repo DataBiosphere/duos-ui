@@ -1,5 +1,5 @@
 # builder image
-FROM node:24.17.0-trixie AS builder
+FROM node:24.18.0-trixie AS builder
 LABEL maintainer="dsp-data-team@broadinstitute.org"
 
 # set working directory
