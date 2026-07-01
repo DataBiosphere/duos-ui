@@ -1,32 +1,25 @@
-import React from 'react'
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import SearchBar from 'src/components/SearchBar'
 import { Collections } from 'src/libs/ajax/Collections'
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
-import {
-  cancelCollectionFn,
-  consoleTypes,
-  openCollectionFn,
-  updateCollectionFn,
-} from 'src/utils/DarCollectionUtils'
+import { cancelCollectionFn, consoleTypes, openCollectionFn, updateCollectionFn } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DarCollectionSummary } from 'src/types/model'
 
 export default function AdminManageDarCollections() {
   usePageTitle('Data Access Requests')
-  const [collections, setCollections] = useState([])
-  const [filteredList, setFilteredList] = useState([])
+  const [collections, setCollections] = useState<DarCollectionSummary[]>([])
+  const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
   const filterFn = getSearchFilterFunctions().darCollections
-
-  // Get responsive columns for admin console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.ADMIN)
 
-  const handleSearchChange = useCallback((searchTerms) => {
+  const handleSearchChange = useCallback((searchTerms: string) => {
     setSearchText(searchTerms)
     searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList)
   }, [collections, filterFn])
@@ -39,7 +32,7 @@ export default function AdminManageDarCollections() {
         setFilteredList(collectionsResp)
         setIsLoading(false)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error initializing Collections table' })
       }
     }
@@ -47,15 +40,15 @@ export default function AdminManageDarCollections() {
   }, [])
 
   const updateCollections = useCallback(
-    updatedCollection => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),
+    (updatedCollection: DarCollectionSummary) => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),
     [collections, filterFn, searchText, setCollections, setFilteredList],
   )
   const cancelCollection = useCallback(
-    params => cancelCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
+    (params: { darCode: string, darCollectionId: number }) => cancelCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
     [updateCollections],
   )
   const openCollection = useCallback(
-    params => openCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
+    (params: { darCode: string, darCollectionId: number }) => openCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
     [updateCollections],
   )
 
