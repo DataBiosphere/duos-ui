@@ -89,6 +89,15 @@ describe('TosService', () => {
       const { container } = render(element)
       expect(container.textContent).toContain('You must agree to these terms.')
     })
+
+    it('renders markdown syntax as formatted HTML rather than raw text', async () => {
+      const rawMarkdown = '# TOS Text'
+      vi.mocked(ToS.getDUOSText).mockResolvedValue(rawMarkdown)
+      const element = await TosService.getFormattedText()
+      const { container } = render(element)
+      expect(container.querySelector('h1')?.textContent).toBe('TOS Text')
+      expect(container.textContent).not.toContain(rawMarkdown)
+    })
   })
 
   // ── acceptTos ─────────────────────────────────────────────────────────────
