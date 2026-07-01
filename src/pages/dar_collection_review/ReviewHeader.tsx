@@ -1,6 +1,6 @@
 import React from 'react'
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   header: {
     fontWeight: 600,
     marginRight: '1rem',
@@ -43,26 +43,35 @@ const styles = {
   },
 }
 
-const appliedPrimaryHeaderStyle = Object.assign({}, styles.containerRow, styles.primaryHeaderRow)
-const appliedSecondaryHeaderStyle = Object.assign({}, styles.containerRow, styles.secondaryHeaderRow)
+const appliedPrimaryHeaderStyle: React.CSSProperties = { ...styles.containerRow, ...styles.primaryHeaderRow }
+const appliedSecondaryHeaderStyle: React.CSSProperties = { ...styles.containerRow, ...styles.secondaryHeaderRow }
 
-const getApprovedDatasetsText = (approvedDatasets) => {
+const getApprovedDatasetsText = (approvedDatasets: string[]): string => {
   if (approvedDatasets.length > 0) {
     return `${approvedDatasets.length} Dataset${approvedDatasets.length > 1 ? 's' : ''} approved: ${approvedDatasets.join(', ')}`
   }
   return 'No datasets approved'
 }
 
-export default function ReviewHeader(props) {
-  const {
-    darCode,
-    projectTitle,
-    userName,
-    institutionName,
-    approvedDatasets,
-    readOnly = false,
-    isLoading,
-  } = props
+export interface ReviewHeaderProps {
+  darCode?: string
+  projectTitle?: string
+  userName?: string
+  institutionName?: string
+  approvedDatasets: string[]
+  readOnly?: boolean
+  isLoading?: boolean
+}
+
+export default function ReviewHeader({
+  darCode,
+  projectTitle,
+  userName,
+  institutionName,
+  approvedDatasets,
+  readOnly = false,
+  isLoading,
+}: Readonly<ReviewHeaderProps>) {
   return (
     <>
       {!isLoading && (

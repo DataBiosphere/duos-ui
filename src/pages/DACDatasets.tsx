@@ -1,39 +1,42 @@
-import React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { DataSet } from '../libs/ajax/DataSet'
-import { Storage } from '../libs/storage'
-import { Styles } from '../libs/theme'
-import SearchBar from '../components/SearchBar'
-import { DACDatasetsTable } from '../components/dac_dataset_table/DACDatasetsTable'
-import { DACDatasetTableColumnOptions } from '../components/dac_dataset_table/DACDatasetConstants.js'
-import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from '../libs/utils'
-import { consoleTypes } from '../components/dac_dataset_table/DACDatasetTableCellData'
+import React, { useCallback, useEffect, useState } from 'react'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { Storage } from 'src/libs/storage'
+import { Styles } from 'src/libs/theme'
+import SearchBar from 'src/components/SearchBar'
+import { DACDatasetsTable } from 'src/components/dac_dataset_table/DACDatasetsTable'
+import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants.js'
+import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from 'src/libs/utils'
+import { consoleTypes } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
 import { useNavigate } from 'react-router-dom'
-import { usePageTitle } from '../hooks/usePageTitle'
+import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import AddObjectButton from 'src/components/AddObjectButton.tsx'
+import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
+import { DatasetTerm } from 'src/types/model'
+import { ElasticsearchQuery } from 'src/types/elastic'
 
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
   const navigate = useNavigate()
-  const [datasets, setDatasets] = useState([])
-  const [filteredList, setFilteredList] = useState([])
+  const [datasets, setDatasets] = useState<DatasetTerm[]>([])
+  const [filteredList, setFilteredList] = useState<DatasetTerm[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const searchRef = useRef('')
 
-  const handleSearchChange = useCallback(searchTerms => searchOnFilteredList(
-    searchTerms,
-    datasets,
-    getSearchFilterFunctions().datasets,
-    setFilteredList,
-  ), [datasets])
+  const handleSearchChange = useCallback(
+    (searchTerms: string) => searchOnFilteredList(
+      searchTerms,
+      datasets,
+      getSearchFilterFunctions().datasetTerms,
+      setFilteredList,
+    ),
+    [datasets],
+  )
 
   useEffect(() => {
     const init = async () => {
       try {
         const user = Storage.getCurrentUser()
-        const dacIds = user.roles?.map(r => r.dacId).filter(id => id !== undefined)
+        const dacIds = user.roles?.map(r => r.dacId).filter(id => id !== undefined) ?? []
         const query = {
           from: 0,
           size: 10000,
@@ -42,7 +45,7 @@ export default function DACDatasets() {
               dacId: dacIds,
             },
           },
-        }
+        } as unknown as ElasticsearchQuery
         setIsLoading(true)
         try {
           if (dacIds.length === 0) {
@@ -54,12 +57,12 @@ export default function DACDatasets() {
             setFilteredList(datasetTerms)
           }
         }
-        catch (_error) {
+        catch {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' })
         }
         setIsLoading(false)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error initializing datasets table' })
       }
     }
@@ -77,7 +80,6 @@ export default function DACDatasets() {
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar
           handleSearchChange={handleSearchChange}
-          searchRef={searchRef}
         />
         <AddObjectButton
           id="add-dataset-btn"

@@ -97,10 +97,10 @@ export const getPropertyValuesFromUser = (user: DuosUser): {
 
 export const applyHoverEffects = (
   e: React.MouseEvent<HTMLElement>,
-  style: Record<string, string>,
+  style: React.CSSProperties,
 ): void => {
-  forEach(style, (value, key) => {
-    (e.target as HTMLElement).style[key as never] = value
+  forEach(style as Record<string, unknown>, (value, key) => {
+    (e.target as HTMLElement).style[key as never] = value as never
   })
 }
 
@@ -698,11 +698,11 @@ export const findOntologyTerms = async (
 
 export const setStyle = (
   disabled: boolean,
-  baseStyle: Record<string, unknown>,
+  baseStyle: React.CSSProperties,
   targetColorAttribute: string,
-): Record<string, unknown> => {
-  const appliedStyle = disabled ? { [targetColorAttribute]: Theme.palette.disabled } : {}
-  return { ...baseStyle, ...appliedStyle }
+): React.CSSProperties => {
+  if (!disabled) return baseStyle
+  return { ...baseStyle, [targetColorAttribute]: Theme.palette.disabled } as React.CSSProperties
 }
 
 interface DivAttributes {
