@@ -22,6 +22,7 @@ export type UserRoleName
     | 'Alumni'
     | 'SigningOfficial'
     | 'DataSubmitter'
+    | 'ServiceAccount'
     | 'All'
 
 export enum AbstainDataUseCodes {
