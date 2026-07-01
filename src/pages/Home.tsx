@@ -280,18 +280,26 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                             }}
                             style={{ textDecoration: 'none', display: 'flex', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
                           >
-                            <img
-                              src={logoSrc}
-                              alt={libraryName}
-                              loading="lazy"
-                              style={{
-                                ...logoImg,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain',
-                                objectPosition: 'center',
-                              }}
-                            />
+                            {logoSrc
+                              ? (
+                                  <img
+                                    src={logoSrc}
+                                    alt={libraryName}
+                                    loading="lazy"
+                                    style={{
+                                      ...logoImg,
+                                      width: '100%',
+                                      height: '100%',
+                                      objectFit: 'contain',
+                                      objectPosition: 'center',
+                                    }}
+                                  />
+                                )
+                              : (
+                                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#1F3B50', textAlign: 'center', padding: '0 1rem' }}>
+                                    {libraryName}
+                                  </span>
+                                )}
                           </Link>
                         </div>
                         {label && (

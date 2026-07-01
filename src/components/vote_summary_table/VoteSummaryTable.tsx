@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react'
-import SimpleTable from '../SimpleTable'
+import SimpleTable, { type CellData } from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
-import { formatDate, Notifications, sortVisibleTable, TableCell } from 'src/libs/utils'
+import { formatDate, Notifications, sortVisibleTable, type TableCell } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
 
 const styles = {
@@ -89,7 +89,7 @@ const processVoteSummaryRowData = ({
   isChair: boolean
   getReminderSentState: (voteId: number) => ReminderState
   sendReminder: (voteId: number) => void
-}): TableCell[][] => {
+}): CellData[][] => {
   if (!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
       const { vote, displayName, voteId, lastUpdated, rationale } = dacVote
@@ -137,59 +137,30 @@ function voteCellData({ vote, voteId, isChair, reminderSentState, sendReminder, 
   reminderSentState: ReminderState
   sendReminder: () => void
   label?: string
-}): TableCell {
+}): CellData {
   const data = (
     isChair && (isNil(vote) || isNil(voteId))
       ? reminderLink({ reminderSentState, sendReminder })
       : voteToString(vote)
   )
-  let value: string
-  if (isNil(vote)) {
-    value = '-'
-  }
-  else {
-    value = vote ? 'Yes' : 'No'
-  }
-
-  return {
-    data,
-    value,
-    id: voteId,
-    cellStyle: { width: styles.cellWidths.vote },
-    label,
-  }
+  return { data, id: voteId, label }
 }
 
-function nameCellData({ name = '- -', voteId, label = 'name' }: { name?: string, voteId: number, label?: string }): TableCell {
-  return {
-    data: name,
-    id: voteId,
-    cellStyle: { width: styles.cellWidths.name },
-    label,
-  }
+function nameCellData({ name = '- -', voteId, label = 'name' }: { name?: string, voteId: number, label?: string }): CellData {
+  return { data: name, id: voteId, label }
 }
 
-function dateCellData({ date, voteId, label = 'date' }: { date: string | null | undefined, voteId: number, label?: string }): TableCell {
-  return {
-    data: date,
-    id: voteId,
-    cellStyle: { width: styles.cellWidths.date },
-    label,
-  }
+function dateCellData({ date, voteId, label = 'date' }: { date: string | null | undefined, voteId: number, label?: string }): CellData {
+  return { data: date ?? '- -', id: voteId, label }
 }
 
-function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }: { rationale?: string | null, voteId: number, label?: string }): TableCell {
-  return {
-    data: rationale ?? '- -',
-    id: voteId,
-    cellStyle: { width: styles.cellWidths.rationale },
-    label,
-  }
+function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }: { rationale?: string | null, voteId: number, label?: string }): CellData {
+  return { data: rationale ?? '- -', id: voteId, label }
 }
 
 export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false }: Readonly<VoteSummaryTableProps>) {
   const [sort, setSort] = useState<SortConfig>({ colIndex: 0, dir: -1 })
-  const [visibleVotes, setVisibleVotes] = useState<TableCell[][]>([])
+  const [visibleVotes, setVisibleVotes] = useState<CellData[][]>([])
   const [tableSize, setTableSize] = useState(5)
 
   const [reminderSentState, setReminderSentState] = useState<Record<number, ReminderState>>({})
@@ -224,10 +195,11 @@ export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false 
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisibleVotes(
+      // sortVisibleTable requires TableCell — cast here (sorting API constraint, not rendering)
       sortVisibleTable({
-        list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }),
+        list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }) as unknown as TableCell[][],
         sort,
-      }),
+      }) as unknown as CellData[][],
     )
     if (!isEmpty(dacVotes)) {
       setTableSize(dacVotes!.length)

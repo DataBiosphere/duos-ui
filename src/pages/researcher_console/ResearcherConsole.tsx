@@ -3,9 +3,7 @@ import { cloneDeep, findIndex } from 'src/utils/NodashUtil'
 import { Styles } from 'src/libs/theme'
 import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'
-import {
-  DarCollectionTable,
-} from 'src/components/dar_collection_table/DarCollectionTable'
+import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
@@ -14,106 +12,94 @@ import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_202
 import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DarCollectionSummary } from 'src/types/model'
 
 const filterFn = getSearchFilterFunctions().darCollections
 
 export default function ResearcherConsole() {
   usePageTitle('Data Acccess Requests')
   const [isLoading, setIsLoading] = useState(true)
-  const [researcherCollections, setResearcherCollections] = useState()
-  const [filteredList, setFilteredList] = useState()
+  const [researcherCollections, setResearcherCollections] = useState<DarCollectionSummary[]>([])
+  const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
   const [searchText, setSearchText] = useState('')
 
-  // Get responsive columns for researcher console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.RESEARCHER)
 
-  // callback function passed to search bar to perform filter
-  const handleSearchChange = useCallback(terms => setSearchText(terms), [])
+  const handleSearchChange = useCallback((terms: string) => setSearchText(terms), [])
 
-  // re-filter whenever search text or underlying data changes
   useEffect(() => {
     searchOnFilteredList(searchText, researcherCollections, filterFn, setFilteredList)
   }, [searchText, researcherCollections])
 
-  // sequence of init events on component load
   useEffect(() => {
     const init = async () => {
-      const collections = await Collections.getCollectionSummariesByRoleName(USER_ROLES.researcher)
-      setResearcherCollections(collections)
-      setFilteredList(collections)
-      setIsLoading(false)
+      try {
+        const collections = await Collections.getCollectionSummariesByRoleName(USER_ROLES.researcher)
+        setResearcherCollections(collections)
+        setFilteredList(collections)
+        setIsLoading(false)
+      }
+      catch {
+        Notifications.showError({ text: 'Error: Failed to load Data Access Requests' })
+        setIsLoading(false)
+      }
     }
-    init()
+    void init()
   }, [])
 
-  // cancel collection function, passed to collections table to be used in buttons
-  const cancelCollection = async (darCollection) => {
+  const fetchAndUpdateCollection = async (darCollectionId: number) => {
+    const updatedCollection = await Collections.getCollectionSummaryByRoleNameAndId({
+      roleName: USER_ROLES.researcher,
+      id: darCollectionId,
+    })
+    const targetIndex = researcherCollections.findIndex(collection =>
+      collection.darCollectionId === darCollectionId)
+    if (targetIndex < 0) {
+      throw new Error('Error: Could not find target Data Access Request')
+    }
+    const clonedCollections = cloneDeep(researcherCollections)
+    clonedCollections[targetIndex] = updatedCollection
+    setResearcherCollections(clonedCollections)
+  }
+
+  const cancelCollection = async (darCollection: DarCollectionSummary) => {
     try {
       const { darCollectionId, darCode } = darCollection
       await Collections.cancelCollection(darCollectionId, USER_ROLES.researcher)
-      const updatedCollection = await Collections.getCollectionSummaryByRoleNameAndId({
-        roleName: USER_ROLES.researcher,
-        id: darCollectionId,
-      })
-      const targetIndex = researcherCollections.findIndex(collection =>
-        collection.darCollectionId === darCollectionId)
-      if (targetIndex < 0) {
-        throw new Error('Error: Could not find target Data Access Request')
-      }
-      const clonedCollections = cloneDeep(researcherCollections)
-      clonedCollections[targetIndex] = updatedCollection
-      setResearcherCollections(clonedCollections)
+      await fetchAndUpdateCollection(darCollectionId)
       Notifications.showSuccess({ text: `Deleted Data Access Request ${darCode}` })
     }
-    catch (_error) {
-      Notifications.showError({
-        text: 'Error: Cannot cancel target Data Access Request',
-      })
+    catch {
+      Notifications.showError({ text: 'Error: Cannot cancel target Data Access Request' })
     }
   }
 
-  // revise collection function, passed to collections table to be used in buttons
-  const reviseCollection = async (darCollection) => {
+  const reviseCollection = async (darCollection: DarCollectionSummary) => {
     try {
       const { darCollectionId, darCode } = darCollection
-      const draftCollection = await Collections.reviseCollection(darCollectionId)
-      const targetIndex = researcherCollections.findIndex(collection =>
-        collection.darCollectionId === darCollectionId)
-      if (targetIndex < 0) {
-        throw new Error('Error: Could not find target Data Access Request')
-      }
-      // remove resubmitted collection from DAR Collection table
-      const clonedCollections = cloneDeep(researcherCollections)
-      clonedCollections[targetIndex] = draftCollection
-      setResearcherCollections(clonedCollections)
+      await Collections.reviseCollection(darCollectionId)
+      await fetchAndUpdateCollection(darCollectionId)
       Notifications.showSuccess({ text: `Revising Data Access Request ${darCode}` })
     }
-    catch (_error) {
-      Notifications.showError({
-        text: 'Error: Cannot revise target Data Access Request',
-      })
+    catch {
+      Notifications.showError({ text: 'Error: Cannot revise target Data Access Request' })
     }
   }
 
-  // Draft delete, by referenceIds
-  const deleteDraftById = async ({ referenceId }) => {
+  const deleteDraftById = async ({ referenceId }: { referenceId: string }): Promise<number> => {
     const collectionsClone = cloneDeep(researcherCollections)
     await DAR.deleteDar(referenceId)
     const targetIndex = findIndex(collectionsClone, (draft) => {
       return draft.referenceIds[0] === referenceId
     })
-
-    // if deleted index, remove it from the collections array
     collectionsClone.splice(targetIndex, 1)
     setResearcherCollections(collectionsClone)
-
     return targetIndex
   }
 
-  // Draft delete, passed down to draft table to be used with delete button
-  const deleteDraft = async ({ referenceIds, darCode }) => {
+  const deleteDraft = async ({ referenceIds, darCode }: Pick<DarCollectionSummary, 'referenceIds' | 'darCode'>) => {
     try {
-      const targetIndex = deleteDraftById({ referenceId: referenceIds[0] })
+      const targetIndex = await deleteDraftById({ referenceId: referenceIds[0] })
       if (targetIndex === -1) {
         Notifications.showError({ text: 'Error processing delete request' })
       }
@@ -121,7 +107,7 @@ export default function ResearcherConsole() {
         Notifications.showSuccess({ text: `Deleted Data Access Request Draft ${darCode}` })
       }
     }
-    catch (_error) {
+    catch {
       Notifications.showError({
         text: `Failed to delete Data Access Request Draft ${darCode}`,
       })

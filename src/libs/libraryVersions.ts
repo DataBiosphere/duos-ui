@@ -1,5 +1,6 @@
 import { StudyDataEsFields } from 'src/libs/data-metadata'
 import broadIcon from 'src/logo.svg'
+import countMeInIcon from 'src/images/count-me-in-logo.svg'
 import duosIcon from 'src/images/duos-network-logo.svg'
 import mgbIcon from 'src/images/mass-general-brigham-logo.svg'
 import elwaziIcon from 'src/images/elwazi-logo-color.svg'
@@ -985,6 +986,23 @@ export const getLibraryVersions = (
       featured: true,
       order: 22,
     },
+    'count-me-in': {
+      query: {
+        bool: {
+          should: [
+            {
+              terms: {
+                'study.data.tags.keyword': ['Count Me In'],
+              },
+            },
+          ],
+        },
+      },
+      icon: countMeInIcon,
+      title: 'Count Me In Data Library',
+      featured: true,
+      order: 23,
+    },
     'nasa': {
       query: {
         bool: {
@@ -1005,7 +1023,7 @@ export const getLibraryVersions = (
       icon: nasaIcon,
       title: 'NASA Data Library',
       featured: false,
-      order: 23,
+      order: 24,
     },
     'nasa2': {
       query: {
@@ -1027,7 +1045,7 @@ export const getLibraryVersions = (
       icon: nasaWormIcon,
       title: 'NASA Data Library',
       featured: false,
-      order: 24,
+      order: 25,
     },
     'ga4gh': {
       query: {
