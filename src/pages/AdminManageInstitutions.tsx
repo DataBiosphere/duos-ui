@@ -99,8 +99,8 @@ export default function AdminManageInstitutions() {
       )}
       {isLoading && (
         <DarTableSkeletonLoader
-          tableHeaderTemplate={tableHeaderTemplate}
-          tableRowLoadingTemplate={tableRowLoadingTemplate}
+          tableHeader={tableHeaderTemplate}
+          tableRowLoading={tableRowLoadingTemplate}
         />
       )}
     </div>

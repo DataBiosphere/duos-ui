@@ -13,7 +13,7 @@ import { FormField, FormValidators } from 'src/components/forms/forms'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { User } from 'src/libs/ajax/User'
 import { CreateDuosUserRequest } from 'src/types/requestTypes'
-import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { Notifications, ROLES } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import ReactMarkdown from 'react-markdown'
 import { Link } from '@mui/material'
@@ -229,7 +229,7 @@ const LibraryCardFormModal = (props: LibraryCardFormModalProps) => {
       if (isNewUser) {
         try {
           // Create new user
-          const researcherRole = { roleId: 5, name: USER_ROLES.researcher } as UserRole
+          const researcherRole = ROLES.researcher as UserRole
           createdUser = await User.create({
             displayName: newUser.name,
             email: newUser.email,

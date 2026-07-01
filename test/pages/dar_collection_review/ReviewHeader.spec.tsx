@@ -59,4 +59,40 @@ describe('ReviewHeader - Tests', () => {
     expect(screen.getByText('Data Access Request Review')).toBeInTheDocument()
     expect(screen.queryByText(/read-only/)).not.toBeInTheDocument()
   })
+
+  it('Renders userName and institutionName together', () => {
+    render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        userName="Jane Doe"
+        institutionName="Broad Institute"
+      />,
+    )
+
+    expect(screen.getByText('Jane Doe, Broad Institute')).toBeInTheDocument()
+  })
+
+  it('Renders skeleton loader when isLoading is true', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        isLoading={true}
+      />,
+    )
+
+    expect(container.querySelector('.header-skeleton-loader')).toBeInTheDocument()
+    expect(container.querySelector('.header-container')).not.toBeInTheDocument()
+  })
+
+  it('Does not render skeleton loader when isLoading is false', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        isLoading={false}
+      />,
+    )
+
+    expect(container.querySelector('.header-container')).toBeInTheDocument()
+    expect(container.querySelector('.header-skeleton-loader')).not.toBeInTheDocument()
+  })
 })
