@@ -35,8 +35,9 @@ describe('Library Versions - Tests', () => {
       expect(featuredLibraries).toContain('anvil')
       expect(featuredLibraries).toContain('hca')
       expect(featuredLibraries).toContain('scp')
+      expect(featuredLibraries).toContain('count-me-in')
 
-      expect(featuredLibraries.length).toBe(22)
+      expect(featuredLibraries.length).toBe(23)
     })
 
     it('marks non-featured libraries correctly', () => {
@@ -115,7 +116,7 @@ describe('Library Versions - Tests', () => {
         .map(([key, library]) => ({ key, ...library }))
         .sort((a, b) => a.order - b.order || a.key.localeCompare(b.key))
 
-      expect(featuredLibraries.length).toBe(22)
+      expect(featuredLibraries.length).toBe(23)
 
       expect(featuredLibraries[0].key).toBe('/datalibrary') // order: 1
       expect(featuredLibraries[1].key).toBe('broad') // order: 2
