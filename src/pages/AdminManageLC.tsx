@@ -16,7 +16,7 @@ export default function AdminManageLC() {
         setLibraryCards(cards)
       }
       catch {
-        Notifications.showError({ text: 'Error: Failed to initialize component' })
+        Notifications.showError({ text: 'Error: Failed to get Library Cards' })
       }
     }
     initData()
