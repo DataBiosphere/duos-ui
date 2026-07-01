@@ -75,7 +75,7 @@ describe('AdminManageLC', () => {
     vi.mocked(LibraryCardAPI.getAllLibraryCards).mockRejectedValue(new Error('network error'))
     await act(async () => render(<AdminManageLC />))
     expect(Notifications.showError).toHaveBeenCalledWith({
-      text: 'Error: Failed to initialize component',
+      text: 'Error: Failed to get Library Cards',
     })
   })
 
