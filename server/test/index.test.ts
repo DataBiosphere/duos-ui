@@ -16,6 +16,13 @@ vi.mock('@fastify/session', () => ({
   default: vi.fn(async () => {}),
 }))
 
+// Default the BFF_ENABLED feature flag to on so the existing DB/session
+// registration tests below exercise their normal path; individual tests
+// override this with mockResolvedValueOnce(false) to test the gated-off path.
+vi.mock('../src/featureFlags.js', () => ({
+  isBffEnabled: vi.fn(async () => true),
+}))
+
 // Mock @fastify/vite: decorate the instance so buildApp() can call vite.ready()
 // and setNotFoundHandler can call reply.html() without starting a real Vite server.
 vi.mock('@fastify/vite', () => {
@@ -94,5 +101,29 @@ describe('plugin registration order', () => {
 
     expect(pgOrder).toBeLessThan(cookieOrder)
     expect(cookieOrder).toBeLessThan(sessionOrder)
+  })
+})
+
+describe('BFF_ENABLED feature flag', () => {
+  it('skips DB/cookie/session registration when the flag is disabled', async () => {
+    const { isBffEnabled } = await import('../src/featureFlags.js')
+    const { default: pgPlugin } = await import('@fastify/postgres')
+    const { default: cookiePlugin } = await import('@fastify/cookie')
+    const { default: sessionPlugin } = await import('@fastify/session')
+
+    vi.clearAllMocks()
+    vi.mocked(isBffEnabled).mockResolvedValueOnce(false)
+
+    const { buildApp } = await import('../src/index.js')
+    const localApp = await buildApp()
+
+    expect(pgPlugin).not.toHaveBeenCalled()
+    expect(cookiePlugin).not.toHaveBeenCalled()
+    expect(sessionPlugin).not.toHaveBeenCalled()
+
+    const res = await localApp.inject({ method: 'GET', url: '/health' })
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
   })
 })

@@ -9,6 +9,7 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { createPgSessionStore } from './session/pgStore.js'
+import { isBffEnabled } from './featureFlags.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
@@ -31,35 +32,40 @@ export async function buildApp(): Promise<AppInstance> {
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' } })
   ) as AppInstance
 
-  // 1. DB pool — must be registered before session so app.pg is available to the store
-  await fastify.register(fastifyPostgres, {
-    host: process.env.DUOS_DB_HOST,
-    database: process.env.DUOS_DB_NAME,
-    port: Number.parseInt(process.env.DUOS_DB_PORT ?? '5432', 10),
-    user: process.env.DUOS_DB_USER,
-    password: process.env.DUOS_DB_PASSWORD,
-    // App-level TLS is only used for a direct connection to Cloud SQL. When the
-    // BFF reaches Postgres over localhost (a Cloud SQL Proxy sidecar in k8s, or
-    // the bundled `db` container in docker-compose) the transport is already
-    // plaintext-on-loopback, so SSL must be off or the connection is rejected.
-    ssl: process.env.DUOS_DB_SSL === 'true' ? { rejectUnauthorized: true } : false,
-  })
+  // 1. DB pool + session — gated on the BFF_ENABLED feature flag (consent API)
+  // so the legacy client-side auth flow can run with no DB/session infra at
+  // all until the BFF rollout flips the flag. Fails safe to disabled status.
+  if (await isBffEnabled()) {
+    // DB pool — must be registered before session so app.pg is available to the store
+    await fastify.register(fastifyPostgres, {
+      host: process.env.DUOS_DB_HOST,
+      database: process.env.DUOS_DB_NAME,
+      port: Number.parseInt(process.env.DUOS_DB_PORT ?? '5432', 10),
+      user: process.env.DUOS_DB_USER,
+      password: process.env.DUOS_DB_PASSWORD,
+      // App-level TLS is only used for a direct connection to Cloud SQL. When the
+      // BFF reaches Postgres over localhost (a Cloud SQL Proxy sidecar in k8s, or
+      // the bundled `db` container in docker-compose) the transport is already
+      // plaintext-on-loopback, so SSL must be off or the connection is rejected.
+      ssl: process.env.DUOS_DB_SSL === 'true' ? { rejectUnauthorized: true } : false,
+    })
 
-  // 2. Cookie + session — the store reads fastify.pg registered in step 1
-  await fastify.register(fastifyCookie)
-  await fastify.register(fastifySession, {
-    secret: process.env.DUOS_SESSION_SECRET!,
-    store: createPgSessionStore(fastify.pg),
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: Number(process.env.DUOS_SESSION_MAX_AGE_MS) || 8 * 60 * 60 * 1000,
-      path: '/',
-    },
-    saveUninitialized: false,
-    rolling: true,
-  })
+    // Cookie + session — the store reads fastify.pg registered above
+    await fastify.register(fastifyCookie)
+    await fastify.register(fastifySession, {
+      secret: process.env.DUOS_SESSION_SECRET!,
+      store: createPgSessionStore(fastify.pg),
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: Number(process.env.DUOS_SESSION_MAX_AGE_MS) || 8 * 60 * 60 * 1000,
+        path: '/',
+      },
+      saveUninitialized: false,
+      rolling: true,
+    })
+  }
 
   // Health check — registered before Vite middleware so it always resolves
   fastify.get('/health', async () => ({ status: 'ok' }))
