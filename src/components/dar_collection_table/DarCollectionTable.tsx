@@ -4,7 +4,7 @@ import { DarCollectionTableColumnOptions, styles, consoleTypes } from 'src/utils
 import { Storage } from 'src/libs/storage'
 import PaginationBar from 'src/components/PaginationBar'
 import { recalculateVisibleTable, goToPage as updatePage, Notifications } from 'src/libs/utils'
-import SimpleTable from 'src/components/SimpleTable'
+import SimpleTable, { type RowWrapperArgs } from 'src/components/SimpleTable'
 import cellData, { type CellData } from 'src/components/dar_collection_table/DarCollectionTableCellData'
 import CollectionConfirmationModal from 'src/components/dar_collection_table/CollectionConfirmationModal'
 import 'src/components/dar_collection_table/dar_collection_table.css'
@@ -57,11 +57,6 @@ export interface DarCollectionTableProps {
   relevantDatasets?: unknown
   deleteDraft?: ((collection: DarCollectionSummary) => Promise<void>) | null
   approveCollection?: ((collection: DarCollectionSummary) => Promise<void>) | null
-}
-
-interface RowWrapperArgs {
-  renderedRow: React.ReactNode
-  rowData: CellData[]
 }
 
 interface ProcessCollectionRowDataArgs {
@@ -295,7 +290,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
 
   const showDatasetDropdownWrapper = useCallback((wrapperArgs: RowWrapperArgs) => {
     const { renderedRow, rowData } = wrapperArgs
-    const darCollectionId = rowData[0].id
+    const darCollectionId = rowData[0].id as number
 
     if (collectionIsExpanded(darCollectionId)) {
       fetchDarCollection(darCollectionId)
