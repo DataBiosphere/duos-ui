@@ -7,7 +7,6 @@ import { envGroups } from 'src/utils/EnvironmentUtils'
 import HealthCheck from 'src/pages/HealthCheck'
 import Status from 'src/pages/Status'
 import BackgroundSignIn from 'src/pages/BackgroundSignIn'
-import NIHICWebform from 'src/pages/NIHicWebform'
 import NIHPilotInfo from 'src/pages/NIHPilotInfo'
 import PrivacyPolicy from 'src/pages/PrivacyPolicy'
 import CookiePolicy from 'src/pages/CookiePolicy'
@@ -64,7 +63,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/home" element={<Home {...props} />} />
       <Route path="/status" element={<Status />} />
       <Route path="/liveness" element={<HealthCheck />} />
-      <Route path="/nih_ic_webform" element={<NIHICWebform />} />
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/cookie_policy" element={<CookiePolicy />} />
