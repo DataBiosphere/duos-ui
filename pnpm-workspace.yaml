@@ -2,6 +2,7 @@ packages:
   - server
 
 allowBuilds:
+  core-js-pure: false
   cypress: false
   esbuild: false
 minimumReleaseAgeExclude:
