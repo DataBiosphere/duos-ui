@@ -1,25 +1,41 @@
 import { concat, filter, includes, isEmpty, map, union, matches as lodashMatches } from 'src/utils/NodashUtil'
 import React, { useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
-import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { Notifications, ROLES } from 'src/libs/utils'
 import { ResearcherReview } from 'src/components/ResearcherReview'
 import editUserIcon from 'src/images/icon_edit_user.png'
 import { PageHeading } from 'src/components/PageHeading'
-import { extractError } from 'src/utils/ErrorUtils.js'
+import { extractError } from 'src/utils/ErrorUtils'
 import { useNavigate, useParams } from 'react-router-dom'
 import ExternalProfile from 'src/pages/user_profile/ExternalProfile'
+import { DuosUser } from 'src/types/model'
 
-const adminRole = { roleId: 4, name: USER_ROLES.admin }
-const researcherRole = { roleId: 5, name: USER_ROLES.researcher }
-const signingOfficialRole = { roleId: 7, name: USER_ROLES.signingOfficial }
-const serviceAccount = { roleId: 10, name: USER_ROLES.serviceAccount }
+interface RoleRef {
+  roleId: number
+  name: string
+}
+
+const adminRole: RoleRef = ROLES.admin
+const researcherRole: RoleRef = ROLES.researcher
+const signingOfficialRole: RoleRef = ROLES.signingOfficial
+const serviceAccount: RoleRef = ROLES.serviceAccount
+
+interface AdminEditUserState {
+  user: DuosUser | undefined
+  displayName: string
+  email: string
+  displayNameValid: boolean
+  updatedRoles: RoleRef[]
+  emailPreference: boolean
+  institutionName: string
+}
 
 export const AdminEditUser = () => {
   const params = useParams()
   const navigate = useNavigate()
-  const userId = params.userId
-  const [state, setState] = useState({
-    user: {},
+  const userId = params.userId ? Number.parseInt(params.userId, 10) : undefined
+  const [state, setState] = useState<AdminEditUserState>({
+    user: undefined,
     displayName: '',
     email: '',
     displayNameValid: false,
@@ -28,25 +44,23 @@ export const AdminEditUser = () => {
     institutionName: '',
   })
   const [fetchingComplete, setFetchingComplete] = useState(false)
-
-  const nameRef = useRef()
+  const nameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    if (userId === undefined) return
     const fetchData = async () => {
       try {
         const user = await User.getById(userId)
-        const currentRoles = map(user.roles, (ur) => {
-          return { roleId: ur.roleId, name: ur.name }
-        })
+        const currentRoles: RoleRef[] = map(user.roles, ur => ({ roleId: ur.roleId, name: ur.name }))
         const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles
         setState(prev => ({
           ...prev,
           displayName: user.displayName,
           email: user.email,
-          user: user,
-          updatedRoles: updatedRoles,
+          user,
+          updatedRoles,
           emailPreference: user.emailPreference,
-          institutionName: user?.institution?.name || '',
+          institutionName: user.institution?.name ?? '',
         }))
         setFetchingComplete(true)
       }
@@ -54,34 +68,47 @@ export const AdminEditUser = () => {
         Notifications.showError({ text: 'Error: Unable to retrieve current user from server' })
       }
     }
-    fetchData()
+    void fetchData()
   }, [userId])
 
   useEffect(() => {
-    if (fetchingComplete) {
-      setState(prev => ({
-        ...prev,
-        displayNameValid: nameRef.current.validity.valid,
-      }))
+    if (fetchingComplete && nameRef.current) {
+      const valid = nameRef.current.validity.valid
+      setState(prev => ({ ...prev, displayNameValid: valid }))
     }
   }, [fetchingComplete])
 
-  const OKHandler = async (event) => {
-    event.preventDefault()
+  const updateRolesIfDifferent = async (uid: number, updatedRoles: RoleRef[]) => {
+    const user = await User.getById(uid)
+    const currentRoleIds = map(user.roles, ur => ur.roleId)
+    const updatedRoleIds = union([researcherRole.roleId], map(updatedRoles, r => r.roleId))
 
-    if (!state.displayNameValid) {
-      return
-    }
-    const userId = state.user.userId
+    await Promise.all(map(updatedRoleIds, async (roleId) => {
+      if (!includes(currentRoleIds, roleId)) {
+        await User.addRoleToUser(uid, roleId)
+      }
+    }))
+
+    await Promise.all(map(currentRoleIds, async (roleId) => {
+      if (!includes(updatedRoleIds, roleId) && roleId !== researcherRole.roleId) {
+        await User.deleteRoleFromUser(uid, roleId)
+      }
+    }))
+  }
+
+  const OKHandler = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    if (!state.displayNameValid || !state.user) return
+
+    const uid = state.user.userId
     const user = {
-      userId: userId,
       displayName: state.displayName,
       emailPreference: state.emailPreference,
     }
 
     try {
-      await User.update(user, userId)
-      await updateRolesIfDifferent(userId, state.updatedRoles)
+      await User.update(user, uid)
+      await updateRolesIfDifferent(uid, state.updatedRoles)
       navigate('/admin_manage_users')
     }
     catch (error) {
@@ -90,69 +117,26 @@ export const AdminEditUser = () => {
     }
   }
 
-  const updateRolesIfDifferent = async (userId, updatedRoles) => {
-    const user = await User.getById(userId)
-    const currentRoleIds = map(user.roles, 'roleId')
-    // Always make sure researcher is a role we already have or need to add.
-    const updatedRoleIds = union([researcherRole.roleId], map(updatedRoles, 'roleId'))
-
-    await Promise.all(map(updatedRoleIds, async (roleId) => {
-      if (!includes(currentRoleIds, roleId)) {
-        await User.addRoleToUser(userId, roleId)
-      }
-    }))
-
-    await Promise.all(map(currentRoleIds, async (roleId) => {
-      if (!includes(updatedRoleIds, roleId)) {
-        // Safety check ... never delete the researcher role!!!
-        if (roleId !== researcherRole.roleId) {
-          await User.deleteRoleFromUser(userId, roleId)
-        }
-      }
-    }))
+  const emailPreferenceChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setState({ ...state, emailPreference: !e.target.checked })
   }
 
-  const emailPreferenceChanged = (e) => {
-    // disable notifications checkbox is not checked: -> Set email preference TRUE
-    // disable notifications checkbox is checked:     -> Set email preference FALSE
-    const checkState = e.target.checked
+  const roleStatusChanged = (e: React.ChangeEvent<HTMLInputElement>, role: RoleRef) => {
+    const newRoles = e.target.checked
+      ? concat(state.updatedRoles, role)
+      : filter(state.updatedRoles, (r: RoleRef) => r.roleId !== role.roleId)
+    setState({ ...state, updatedRoles: newRoles })
+  }
+
+  const userHasRole = (role: RoleRef): boolean => {
+    return !isEmpty(filter(state.updatedRoles, lodashMatches(role)))
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState({
       ...state,
-      emailPreference: !checkState,
-    })
-  }
-
-  const roleStatusChanged = (e, role) => {
-    const checkState = e.target.checked
-    // True? add role to state.updatedRoles
-    // False? remove role from state.updatedRoles
-    let newRoles
-    if (checkState) {
-      newRoles = concat(state.updatedRoles, role)
-    }
-    else {
-      newRoles = filter(state.updatedRoles, (r) => {
-        return r.roleId !== role.roleId
-      })
-    }
-    setState({
-      ...state,
-      updatedRoles: newRoles,
-    })
-  }
-
-  const userHasRole = (role) => {
-    const matches = filter(state.updatedRoles, lodashMatches(role))
-    return !isEmpty(matches)
-  }
-
-  const handleChange = (e) => {
-    const name = e.target.name
-    const validName = name + 'Valid'
-    setState({
-      ...state,
-      [name]: e.target.value,
-      [validName]: e.currentTarget.validity.valid,
+      displayName: e.target.value,
+      displayNameValid: e.currentTarget.validity.valid,
     })
   }
 
@@ -288,31 +272,28 @@ export const AdminEditUser = () => {
             </div>
 
             <div className="form-group">
-              {
-                userHasRole(adminRole) && (
-                  <div
-                    className="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4"
-                    style={{ paddingLeft: '30px' }}
-                  >
-                    <div className="checkbox">
-                      <input
-                        id="chk_emailPreference"
-                        type="checkbox"
-                        className="checkbox-inline user-checkbox"
-                        // If email preference is TRUE  -> disable checkbox is not checked
-                        // If email preference is FALSE -> disable checkbox is checked
-                        checked={!state.emailPreference}
-                        onChange={emailPreferenceChanged}
-                      />
-                      <label htmlFor="chk_emailPreference" className="regular-checkbox rp-choice-questions bold">Disable Admin email notifications</label>
-                    </div>
+              {userHasRole(adminRole) && (
+                <div
+                  className="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4"
+                  style={{ paddingLeft: '30px' }}
+                >
+                  <div className="checkbox">
+                    <input
+                      id="chk_emailPreference"
+                      type="checkbox"
+                      className="checkbox-inline user-checkbox"
+                      checked={!state.emailPreference}
+                      onChange={emailPreferenceChanged}
+                    />
+                    <label htmlFor="chk_emailPreference" className="regular-checkbox rp-choice-questions bold">Disable Admin email notifications</label>
                   </div>
-                )
-              }
+                </div>
+              )}
               <div className="col-lg-12 col-xs-12 inline-block">
                 <div style={{ marginLeft: '40px' }}>
                   <button
-                    id="btn_save"
+                    id="btn_back"
+                    type="button"
                     onClick={() => navigate('/admin_manage_users')}
                     className="f-left btn-primary btn-back"
                   >
@@ -321,6 +302,7 @@ export const AdminEditUser = () => {
                 </div>
                 <button
                   id="btn_save"
+                  type="button"
                   onClick={OKHandler}
                   className="f-right btn-primary common-background"
                   disabled={!displayNameValid}
@@ -331,16 +313,14 @@ export const AdminEditUser = () => {
             </div>
           </form>
         </div>
-        {
-          !isEmpty(state.user) && (
-            <div style={{ marginTop: '50px' }} className="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding">
-              <ResearcherReview user={state.user} />
-              <div style={{ marginTop: '20px' }}>
-                <ExternalProfile userId={userId} readonly={true} />
-              </div>
+        {state.user !== undefined && (
+          <div style={{ marginTop: '50px' }} className="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding">
+            <ResearcherReview user={state.user} />
+            <div style={{ marginTop: '20px' }}>
+              <ExternalProfile userId={userId} readonly={true} />
             </div>
-          )
-        }
+          </div>
+        )}
       </div>
     </div>
   )

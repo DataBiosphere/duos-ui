@@ -34,6 +34,7 @@ import {
   DataAccessRequest,
   DacObject,
   UserRole,
+  UserRoleName,
   UserProperty,
 } from 'src/types/model'
 
@@ -154,6 +155,16 @@ export const USER_ROLES = {
   serviceAccount: 'ServiceAccount',
   all: 'All',
 } as const
+
+// Only the roles that the UI needs to reference by numeric id (e.g. to assign/revoke
+// via the API). Not every USER_ROLES entry has a corresponding id here.
+export const ROLES = {
+  admin: { roleId: 4, name: USER_ROLES.admin },
+  researcher: { roleId: 5, name: USER_ROLES.researcher },
+  signingOfficial: { roleId: 7, name: USER_ROLES.signingOfficial },
+  dataSubmitter: { roleId: 8, name: USER_ROLES.dataSubmitter },
+  serviceAccount: { roleId: 10, name: USER_ROLES.serviceAccount },
+} satisfies Record<string, { roleId: number, name: UserRoleName }>
 
 export const getDatasetNames = (
   datasets: Array<{ label?: string, name?: string }> | null | undefined,
@@ -850,7 +861,7 @@ export const searchOnFilteredList = <T = unknown>(
 
 export const hasDataSubmitterRole = (user: DuosUser): boolean => {
   const roles = get(user, 'roles')
-  const dsRole = find(roles, { roleId: 8 })
+  const dsRole = find(roles, { roleId: ROLES.dataSubmitter.roleId })
   return !isNil(dsRole)
 }
 
