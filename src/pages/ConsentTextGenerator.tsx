@@ -1,20 +1,22 @@
-import React from 'react'
-import { Styles } from '../libs/theme'
-import { RadioButton } from '../components/RadioButton'
+import React, { useState } from 'react'
+import { Styles } from 'src/libs/theme'
+import { RadioButton } from 'src/components/RadioButton'
 import AsyncSelect from 'react-select/async'
 import { isNil, isEmpty, head } from 'src/utils/NodashUtil'
-import { Notifications, searchOntologies } from '../libs/utils'
-import { DataUseTranslation } from '../libs/dataUseTranslation'
-import { useState } from 'react'
+import { Notifications, searchOntologies } from 'src/libs/utils'
+import { DataUseTranslation } from 'src/libs/dataUseTranslation'
+import { DataUse } from 'src/types/model'
 
-const buttonStyle = { marginBottom: '2rem', color: '#777' }
-const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' }
+type OntologyOption = Parameters<Parameters<typeof searchOntologies>[1]>[0][number]
+
+const buttonStyle: React.CSSProperties = { marginBottom: '2rem', color: '#777' }
+const labelStyle: React.CSSProperties = { fontFamily: 'Montserrat', fontSize: '15px' }
 
 export default function ConsentTextGenerator() {
   const [general, setGeneral] = useState(false)
   const [hmb, setHmb] = useState(false)
   const [diseases, setDiseases] = useState(false)
-  const [ontologies, setOntologies] = useState([])
+  const [ontologies, setOntologies] = useState<OntologyOption[]>([])
   const [other, setOther] = useState(false)
   const [otherText, setOtherText] = useState('')
   const [nmds, setNmds] = useState(false)
@@ -24,14 +26,13 @@ export default function ConsentTextGenerator() {
   const [irb, setIrb] = useState(false)
   const [gs, setGs] = useState(false)
   const [npu, setNpu] = useState(false)
-  const [sdsl, setSdsl] = useState('')
+  const [sdsl, setSdsl] = useState<string | string[]>('')
 
-  const isTypeOfResearchValid = () => {
-    return (general || hmb || (diseases && (!isNil(head(ontologies)))) || (other && (!isEmpty(otherText))))
-  }
+  const isTypeOfResearchValid = () =>
+    general || hmb || (diseases && !isNil(head(ontologies))) || (other && !isEmpty(otherText))
 
   const clearOtherTextBox = () => {
-    document.getElementById('other_text').value = ''
+    (document.getElementById('other_text') as HTMLInputElement).value = ''
   }
 
   const generate = () =>
@@ -41,22 +42,28 @@ export default function ConsentTextGenerator() {
 
   const generateHelper = async () => {
     const dataUse = {
-      generalUse: general, diseaseRestrictions: ontologies, populationOriginsAncestry: null,
-      hmbResearch: hmb, methodsResearch: nmds, geneticStudiesOnly: gso, nonProfitUse: npu,
-      publicationResults: pub, collaboratorRequired: col, ethicsApprovalRequired: irb,
-      geographicalRestrictions: gs,
-    }
-    const sdsl = []
+      generalUse: general,
+      diseaseRestrictions: ontologies,
+      hmbResearch: hmb,
+      methodsResearch: nmds,
+      geneticStudiesOnly: gso,
+      nonProfitUse: npu,
+      publicationResults: pub,
+      collaboratorRequired: col,
+      ethicsApprovalRequired: irb,
+      geographicalRestrictions: gs ? 'GS-' : undefined,
+    } as unknown as DataUse
+    const sentences: string[] = []
     if (other) {
-      sdsl.push(otherText)
+      sentences.push(otherText)
     }
     const translatedDataUse = await DataUseTranslation.translateDataUseRestrictions(dataUse)
     translatedDataUse.forEach((sentence) => {
-      return (typeof sentence === 'object')
-        ? sdsl.push(' ' + sentence.description)
-        : sdsl.push(' ' + sentence)
+      return typeof sentence === 'object'
+        ? sentences.push(' ' + sentence.description)
+        : sentences.push(' ' + sentence)
     })
-    setSdsl(sdsl)
+    setSdsl(sentences)
   }
 
   return (
@@ -75,15 +82,14 @@ export default function ConsentTextGenerator() {
         {' '}
         <a href="https://drive.google.com/file/d/102_I0_phOGs9YSmPx7It9CSt1sHFJ87C/view" target="_blank" rel="noreferrer noopener">
           Machine Readable Consent Guidance (MRCG)
-        </a>
-        . The DUO is a structured vocabulary describing permitted data uses and the MRCG is a suggested representation of those uses in consent form language. This tool enables users to easily define what types of data use they would like permitted in their consent forms and then suggests corresponding text for the consent form below, based on the MRCG.
+        </a>. The DUO is a structured vocabulary describing permitted data uses and the MRCG is a suggested representation of those uses in consent form language. This tool enables users to easily define what types of data use they would like permitted in their consent forms and then suggests corresponding text for the consent form below, based on the MRCG.
       </div>
       <div className="form-group" style={{ marginTop: '1rem' }}>
-        <label style={Styles.MEDIUM}>
+        <div style={Styles.MEDIUM}>
           1. Permitted data uses
           <br />
           <span style={Styles.MEDIUM_DESCRIPTION}>Determine what type of secondary use is permitted for your study&apos;s data.</span>
-        </label>
+        </div>
         <div>
           <RadioButton
             value="general"
@@ -130,12 +136,12 @@ export default function ConsentTextGenerator() {
             style={{ fontFamily: 'Montserrat', color: '#1f3b50' }}
           />
         </div>
-        <div style={{ buttonStyle, marginBottom: '10px', cursor: diseases ? 'pointer' : 'not-allowed' }}>
-          <AsyncSelect
+        <div style={{ ...buttonStyle, marginBottom: '10px', cursor: diseases ? 'pointer' : 'not-allowed' }}>
+          <AsyncSelect<OntologyOption, true>
             isDisabled={!diseases}
             isMulti
             loadOptions={(query, callback) => searchOntologies(query, callback)}
-            onChange={option => (option ? setOntologies(option) : setOntologies)}
+            onChange={option => (option ? setOntologies([...option]) : setOntologies([]))}
             value={ontologies}
             placeholder="Please enter one or more diseases"
             classNamePrefix="select"
@@ -158,8 +164,8 @@ export default function ConsentTextGenerator() {
         <textarea
           className="form-control"
           onBlur={e => setOtherText(e.target.value)}
-          maxLength="512"
-          rows="2"
+          maxLength={512}
+          rows={2}
           required={other}
           disabled={!other}
           id="other_text"
@@ -167,13 +173,13 @@ export default function ConsentTextGenerator() {
         />
       </div>
       <div className="form-group" style={{ marginTop: '2rem' }}>
-        <label style={{ ...Styles.MEDIUM, marginBottom: '5px' }}>
+        <div style={{ ...Styles.MEDIUM, marginBottom: '5px' }}>
           2. Additional constraints
           <br />
           <span style={Styles.MEDIUM_DESCRIPTION}>
             If necessary, choose any additional terms on your study&apos;s data to govern its use.
           </span>
-        </label>
+        </div>
         <div className="checkbox">
           <input
             type="checkbox"
@@ -262,7 +268,7 @@ export default function ConsentTextGenerator() {
       <textarea
         defaultValue={sdsl}
         className="form-control"
-        rows="12"
+        rows={12}
         required={false}
         readOnly={true}
         style={{ backgroundColor: '#fff' }}
