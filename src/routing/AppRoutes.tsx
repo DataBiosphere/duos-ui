@@ -13,7 +13,6 @@ import PrivacyPolicy from 'src/pages/PrivacyPolicy'
 import CookiePolicy from 'src/pages/CookiePolicy'
 import TermsOfService from 'src/pages/TermsOfService'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
-import ConsentTextGenerator from 'src/pages/ConsentTextGenerator'
 import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from 'src/pages/DMSPolicyInfo'
 import RequestForm from 'src/pages/user_profile/RequestForm'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
@@ -70,7 +69,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/cookie_policy" element={<CookiePolicy />} />
       <Route path="/tos" element={<TermsOfService />} />
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
-      <Route path="/consent_text_generator" element={<ConsentTextGenerator />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
       <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
