@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { FastifyInstance } from 'fastify'
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 
 // ---------------------------------------------------------------------------
 // Mock all plugins that require external resources (DB, secrets, build dir)
@@ -101,6 +104,33 @@ describe('plugin registration order', () => {
 
     expect(pgOrder).toBeLessThan(cookieOrder)
     expect(cookieOrder).toBeLessThan(sessionOrder)
+  })
+})
+
+describe('GET /config.json', () => {
+  let dir: string
+
+  afterEach(() => {
+    delete process.env.CONFIG_PATH
+    delete process.env.DUOS_API_URL
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('overrides apiUrl with DUOS_API_URL instead of serving the static file verbatim', async () => {
+    dir = mkdtempSync(path.join(tmpdir(), 'duos-config-'))
+    const file = path.join(dir, 'config.json')
+    writeFileSync(file, JSON.stringify({ apiUrl: 'https://consent.dsde-dev.broadinstitute.org', env: 'dev' }))
+    process.env.CONFIG_PATH = file
+    process.env.DUOS_API_URL = 'https://local.dsde-dev.broadinstitute.org:27443'
+
+    const { buildApp } = await import('../src/index.js')
+    const localApp = await buildApp()
+
+    const res = await localApp.inject({ method: 'GET', url: '/config.json' })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+
+    await localApp.close()
   })
 })
 

@@ -10,6 +10,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { createPgSessionStore } from './session/pgStore.js'
 import { isBffEnabled } from './featureFlags.js'
+import { clientConfigPath, readClientConfig } from './clientConfig.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
@@ -77,6 +78,12 @@ export async function buildApp(): Promise<AppInstance> {
 
   // Health check — registered before Vite middleware so it always resolves
   fastify.get('/health', async () => ({ status: 'ok' }))
+
+  // Client config — registered before Vite middleware, same as /health, so this
+  // dynamic route claims the path instead of Vite serving the static file
+  // verbatim. Lets DUOS_API_URL override the static file's `apiUrl` — see
+  // clientConfig.ts for why.
+  fastify.get('/config.json', async () => readClientConfig(clientConfigPath(PROJECT_ROOT, isDev)))
 
   // Vite: dev → HMR middleware; prod → serves static build + SPA fallback
   await fastify.register(FastifyVite, {

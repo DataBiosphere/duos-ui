@@ -15,7 +15,12 @@
 # Build:
 #   docker build . -t duos
 # Run:
-#   docker compose up -d
+#   docker compose --env-file .env.local up -d
+# --env-file is required: the `${VAR:?...}` placeholders below are resolved by
+# Compose's own YAML interpolation, which only reads a file literally named
+# `.env` by default. `.env` is reserved for real dev secrets (see .gitignore)
+# and is never read by this stack, so DUOS_DB_PASSWORD/DUOS_SESSION_SECRET
+# must be supplied via --env-file, not just the `env_file:` on the app service.
 # Test
 #   https://local.broadinstitute.org/
 services:
@@ -27,10 +32,14 @@ services:
         condition: service_healthy
     ports:
       - ${PORT:-8080}:${PORT:-8080}
-    # Note that docker looks for a local .env file by default, but we explicitly point to .env.local so that the
-    # gitignored .env file is not used in this local stack. The .env.local file is optional, but if it exists, it
-    # should contain the same variables as .env, with values appropriate for local development. An .env.example file
-    # is not used in this stack, but is included in the repo for reference.
+    # env_file here only feeds the *container's* runtime environment — it does
+    # NOT satisfy the `${VAR:?...}` interpolation below, which Compose resolves
+    # itself before the container starts (see the --env-file note at the top of
+    # this file). Both must point at .env.local so the gitignored .env file
+    # (real dev secrets) is never pulled into this local stack. .env.local is
+    # optional here only in the sense that Compose won't error if it's absent;
+    # in practice it must exist and be passed via --env-file, or the required
+    # variables below will fail to resolve.
     env_file:
       - path: .env.local
         required: false
@@ -44,9 +53,9 @@ services:
       DUOS_DB_PORT: '5432'
       DUOS_DB_NAME: ${DUOS_DB_NAME:-consent}
       DUOS_DB_USER: ${DUOS_DB_USER:-consent}
-      DUOS_DB_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env (copy .env.example)}
+      DUOS_DB_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env.local (copy .env.example) and run with --env-file .env.local}
       DUOS_DB_SSL: 'false'
-      DUOS_SESSION_SECRET: ${DUOS_SESSION_SECRET:?set DUOS_SESSION_SECRET (32+ chars) in .env (copy .env.example)}
+      DUOS_SESSION_SECRET: ${DUOS_SESSION_SECRET:?set DUOS_SESSION_SECRET (32+ chars) in .env.local (copy .env.example) and run with --env-file .env.local}
     volumes:
       - ./public/config.json:/usr/src/app/build/config.json
     command: ["node", "server/dist/index.js"]
@@ -64,7 +73,7 @@ services:
       PGGSSENCMODE: disable
       POSTGRES_DB: ${DUOS_DB_NAME:-consent}
       POSTGRES_USER: ${DUOS_DB_USER:-consent}
-      POSTGRES_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env (copy .env.example)}
+      POSTGRES_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env.local (copy .env.example) and run with --env-file .env.local}
     volumes:
       - ./config/consentdb.sql:/docker-entrypoint-initdb.d/consentdb.sql:ro
     healthcheck:
