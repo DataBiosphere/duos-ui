@@ -30,6 +30,7 @@ vi.mock('src/libs/theme', () => ({
   Styles: {
     PAGE: {},
     SEARCH_ACTION_HEADER_SECTION: {},
+    TABLE: { HEADER_ROW: {} },
   },
 }))
 
@@ -67,12 +68,15 @@ vi.mock('src/components/dar_collection_table/DarCollectionTable', () => ({
     ),
 }))
 
-vi.mock('src/utils/DarCollectionUtils', () => ({
-  cancelCollectionFn: vi.fn(() => vi.fn()),
-  openCollectionFn: vi.fn(() => vi.fn()),
-  updateCollectionFn: vi.fn(() => vi.fn()),
-  consoleTypes: { ADMIN: 'ADMIN', CHAIR: 'CHAIR', MEMBER: 'MEMBER', RESEARCHER: 'RESEARCHER' },
-}))
+vi.mock('src/utils/DarCollectionUtils', async (importActual) => {
+  const actual = await importActual<typeof import('src/utils/DarCollectionUtils')>()
+  return {
+    ...actual,
+    cancelCollectionFn: vi.fn(() => vi.fn()),
+    openCollectionFn: vi.fn(() => vi.fn()),
+    updateCollectionFn: vi.fn(() => vi.fn()),
+  }
+})
 
 const makeCollection = (id: number, darCode: string): DarCollectionSummary => ({
   darCollectionId: id,
