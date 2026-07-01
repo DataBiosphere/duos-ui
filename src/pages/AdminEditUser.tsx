@@ -1,7 +1,7 @@
 import { concat, filter, includes, isEmpty, map, union, matches as lodashMatches } from 'src/utils/NodashUtil'
 import React, { useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
-import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { Notifications, ROLES } from 'src/libs/utils'
 import { ResearcherReview } from 'src/components/ResearcherReview'
 import editUserIcon from 'src/images/icon_edit_user.png'
 import { PageHeading } from 'src/components/PageHeading'
@@ -15,10 +15,10 @@ interface RoleRef {
   name: string
 }
 
-const adminRole: RoleRef = { roleId: 4, name: USER_ROLES.admin }
-const researcherRole: RoleRef = { roleId: 5, name: USER_ROLES.researcher }
-const signingOfficialRole: RoleRef = { roleId: 7, name: USER_ROLES.signingOfficial }
-const serviceAccount: RoleRef = { roleId: 10, name: USER_ROLES.serviceAccount }
+const adminRole: RoleRef = ROLES.admin
+const researcherRole: RoleRef = ROLES.researcher
+const signingOfficialRole: RoleRef = ROLES.signingOfficial
+const serviceAccount: RoleRef = ROLES.serviceAccount
 
 interface AdminEditUserState {
   user: DuosUser | undefined
