@@ -44,8 +44,8 @@ vi.mock('src/libs/utils', async (importActual) => {
 vi.mock('src/libs/auth/oidcBroker', () => ({}))
 
 vi.mock('src/components/SpinnerComponent', () => ({
-  SpinnerComponent: ({ show, name }: { show: boolean, name: string }) =>
-    React.createElement('div', { 'data-testid': 'spinner', 'data-show': String(show), 'data-name': name }),
+  SpinnerComponent: ({ loadingImage }: { loadingImage?: string }) =>
+    React.createElement('div', { 'data-testid': 'spinner', 'data-loading-image': loadingImage }),
 }))
 
 vi.mock('src/images/loading-indicator.svg', () => ({ default: 'loading.svg' }))
@@ -95,7 +95,7 @@ describe('BackgroundSignIn', () => {
     vi.mocked(User.getMe).mockReturnValue(new Promise(() => {}))
     renderComponent({ bearerToken: 'my-token' })
     expect(screen.getByTestId('spinner')).toBeInTheDocument()
-    expect(screen.getByTestId('spinner')).toHaveAttribute('data-show', 'true')
+    expect(screen.getByTestId('spinner')).toHaveAttribute('data-loading-image', 'loading.svg')
   })
 
   it('calls User.getMe and Storage.setOidcUser when bearerToken is provided', async () => {
