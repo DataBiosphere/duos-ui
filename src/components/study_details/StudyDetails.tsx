@@ -196,10 +196,8 @@ export const StudyDetails = () => {
           <SimpleTable
             rowData={rowData}
             columnHeaders={headers}
-            selected={selectedDatasets}
             styles={styles}
             tableSize={10}
-            summary="faceted dataset search table"
           />
         </div>
       </div>

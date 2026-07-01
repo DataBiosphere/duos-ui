@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import SimpleTable from '../SimpleTable'
+import SimpleTable, { type CellData } from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { formatDate, sortVisibleTable } from 'src/libs/utils'
 import { ElectionWithMemberVotes, Vote } from 'src/types/model'
@@ -146,8 +146,9 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     })
   }, [electionIsExpanded, toggleElectionExpansion])
 
-  const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode, rowData: TableData[] }) => {
-    const electionId = rowData[0].electionId ?? -1
+  const showMemberVoteDropdownWrapper = useCallback(({ renderedRow, rowData }: { renderedRow: React.ReactNode, rowData: CellData[] }) => {
+    const firstData = rowData[0] as unknown as TableData
+    const electionId = firstData.electionId ?? -1
     if (electionIsExpanded(electionId)) {
       return (
         <div key={`expanded-${electionId}`}>
@@ -156,7 +157,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
             <VoteSummaryTable
               isChair={false}
               isLoading={false}
-              dacVotes={rowData[0].memberVotes || []}
+              dacVotes={firstData.memberVotes || []}
             />
           </div>
         </div>
