@@ -53,7 +53,7 @@ interface SimpleTableProps {
 
 const TableLoading = () => (
   <div className="table-loading-placeholder">
-    <SpinnerComponent show={true} name="loadingSpinner" loadingImage={loadingImage} />
+    <SpinnerComponent loadingImage={loadingImage} />
   </div>
 )
 
