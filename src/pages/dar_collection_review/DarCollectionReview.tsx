@@ -226,7 +226,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
   // Remember, votes are contained within buckets, so updating final votes will update the bucket
   // define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
   const updateFinalVoteFn = useCallback((key: string, votePayload: Record<string, unknown>, voteIds: number[]) => {
-    return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets as never, setDataUseBuckets: setDataUseBuckets as never })
+    return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets, setDataUseBuckets: setDataUseBuckets as never })
   }, [dataUseBuckets])
 
   useEffect(() => {
@@ -235,7 +235,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true)
       setSubcomponentLoading(true)
-      init()
+      void init()
     }
     catch (error) {
       const message = extractError(error)
@@ -249,7 +249,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
         // Intentionally setting loading state when switching tabs.
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSubcomponentLoading(true)
-        init()
+        void init()
       }
     }
     catch {
