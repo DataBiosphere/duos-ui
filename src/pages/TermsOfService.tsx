@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 
 export default function TermsOfService() {
   const navigate = useNavigate()
-  const [tosText, setTosText] = useState('')
+  const [tosText, setTosText] = useState<React.ReactElement | null>(null)
   const isLogged = Storage.userIsLogged()
 
   useEffect(() => {
@@ -39,7 +39,6 @@ export default function TermsOfService() {
             <SimpleButton
               keyProp="tos-accept"
               label="Reject Terms of Service"
-              isRendered={true}
               onClick={rejectAndSignOut}
               baseColor="#d13b07"
               hoverStyle={{
