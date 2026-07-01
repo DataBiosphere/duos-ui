@@ -21,6 +21,13 @@ const useHttps = isDev && !isCI
 type AppInstance = FastifyInstance<http.Server | https.Server>
 
 export async function buildApp(): Promise<AppInstance> {
+  // The app always sits behind exactly one reverse-proxy hop (the
+  // httpd-terra-proxy sidecar in k8s, or the `proxy` container in
+  // docker-compose) that terminates TLS and forwards plain HTTP. trustProxy: 1
+  // makes `request.protocol` honor that proxy's X-Forwarded-Proto header
+  // instead of falling back to the raw (unencrypted) socket — without it,
+  // @fastify/session silently refuses to persist sessions once cookie.secure
+  // is true, since it never sees `request.protocol === 'https'`.
   const fastify = (useHttps
     ? Fastify<https.Server>({
         https: {
@@ -28,8 +35,9 @@ export async function buildApp(): Promise<AppInstance> {
           cert: fs.readFileSync(path.join(PROJECT_ROOT, 'server.crt')),
         },
         logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' },
+        trustProxy: 1,
       })
-    : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' } })
+    : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: 1 })
   ) as AppInstance
 
   // 1. DB pool + session — gated on the BFF_ENABLED feature flag (consent API)
