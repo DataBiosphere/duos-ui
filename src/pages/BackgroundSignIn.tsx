@@ -88,7 +88,7 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
       {loading
         ? (
             <div>
-              <SpinnerComponent show={true} name="loadingSpinner" loadingImage={loadingImage} />
+              <SpinnerComponent loadingImage={loadingImage} />
             </div>
           )
         : (
