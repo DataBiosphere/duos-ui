@@ -10,21 +10,21 @@ import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCol
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import { DarCollectionSummary, Dataset } from 'src/types/model'
 
 export default function ChairConsole() {
   usePageTitle('Data Access Requests')
   const navigate = useNavigate()
-  const [collections, setCollections] = useState([])
-  const [filteredList, setFilteredList] = useState([])
-  const [relevantDatasets, setRelevantDatasets] = useState()
+  const [collections, setCollections] = useState<DarCollectionSummary[]>([])
+  const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
+  const [relevantDatasets, setRelevantDatasets] = useState<Dataset[] | undefined>()
   const [isLoading, setIsLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
   const filterFn = getSearchFilterFunctions().darCollections
 
-  // Get responsive columns for chair console
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.CHAIR)
 
-  const handleSearchChange = useCallback((searchTerms) => {
+  const handleSearchChange = useCallback((searchTerms: string) => {
     setSearchText(searchTerms)
     searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList)
   }, [collections, filterFn])
@@ -32,16 +32,16 @@ export default function ChairConsole() {
   useEffect(() => {
     const init = async () => {
       try {
-        const [collections, datasets] = await Promise.all([
+        const [cols, datasets] = await Promise.all([
           Collections.getCollectionSummariesByRoleName(USER_ROLES.chairperson),
           User.getUserRelevantDatasets(),
         ])
-        setCollections(collections)
+        setCollections(cols)
         setRelevantDatasets(datasets)
-        setFilteredList(collections)
+        setFilteredList(cols)
         setIsLoading(false)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error initializing Collections table' })
       }
     }
@@ -49,18 +49,18 @@ export default function ChairConsole() {
   }, [])
 
   const updateCollections = useCallback(
-    updatedCollection => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),
+    (updatedCollection: DarCollectionSummary) => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),
     [collections, filterFn, searchText, setCollections, setFilteredList],
   )
   const cancelCollection = useCallback(
-    params => cancelCollectionFn({ updateCollections, role: USER_ROLES.chairperson })(params),
+    (params: { darCode: string, darCollectionId: number }) => cancelCollectionFn({ updateCollections, role: USER_ROLES.chairperson })(params),
     [updateCollections],
   )
   const openCollection = useCallback(
-    params => openCollectionFn({ updateCollections, role: USER_ROLES.chairperson })(params),
+    (params: { darCode: string, darCollectionId: number }) => openCollectionFn({ updateCollections, role: USER_ROLES.chairperson })(params),
     [updateCollections],
   )
-  const goToVote = useCallback(collectionId => navigate(`/dar_collection/${collectionId}`), [navigate])
+  const goToVote = useCallback((collectionId: number) => navigate(`/dar_collection/${collectionId}`), [navigate])
 
   return (
     <div style={Styles.PAGE}>
