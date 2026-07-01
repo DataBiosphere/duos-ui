@@ -98,6 +98,25 @@ describe('Home page', () => {
       renderHome(false)
       expect(screen.queryByTitle('Please login to access Terra Data Library')).not.toBeInTheDocument()
     })
+
+    it('renders one card per featured library, each with a link', () => {
+      const { container } = renderHome(false)
+      const cards = container.querySelectorAll('.logo-card')
+      expect(cards).toHaveLength(3)
+      cards.forEach((card) => {
+        expect(card.querySelector('a')).not.toBeNull()
+      })
+    })
+
+    it('calls handleSignIn with the target library path when a card is clicked', async () => {
+      const { handleSignIn } = await import('src/libs/signInUtils')
+      const { container } = renderHome(false)
+      const libraryLink = container.querySelector('.logo-card a')!
+      await act(async () => {
+        fireEvent.click(libraryLink)
+      })
+      expect(handleSignIn).toHaveBeenCalledWith('/datalibrary')
+    })
   })
 
   describe('when user is logged in', () => {
@@ -145,6 +164,45 @@ describe('Home page', () => {
       const broadImg = screen.getByAltText('Broad')
       const logoCar = broadImg.closest('.logo-card')
       expect(logoCar).toHaveStyle({ background: '#1F3B50', padding: '15px' })
+    })
+
+    it('navigates directly without calling handleSignIn when logged in', async () => {
+      const { handleSignIn } = await import('src/libs/signInUtils')
+      const { container } = renderHome(true)
+      const libraryLink = container.querySelector('.logo-card a')!
+      await act(async () => {
+        fireEvent.click(libraryLink)
+      })
+      expect(handleSignIn).not.toHaveBeenCalled()
+    })
+
+    it('renders one card per featured library', () => {
+      const { container } = renderHome(true)
+      expect(container.querySelectorAll('.logo-card')).toHaveLength(3)
+    })
+  })
+
+  describe('responsive layout', () => {
+    it('renders the logo grid as a centered, wrapping flex container', () => {
+      const { container } = renderHome(false)
+      const logoGrid = container.querySelector('.logo-grid') as HTMLElement
+      expect(logoGrid).toHaveStyle({
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      })
+    })
+
+    it('defines a tablet breakpoint that shrinks the logo cards', () => {
+      const { container } = renderHome(false)
+      const styleTag = container.querySelector('style')
+      expect(styleTag?.textContent).toMatch(/@media \(max-width: 768px\)[^}]*\.logo-card\s*{[^}]*width: 280px/)
+    })
+
+    it('defines a mobile breakpoint that makes logo cards full width', () => {
+      const { container } = renderHome(false)
+      const styleTag = container.querySelector('style')
+      expect(styleTag?.textContent).toMatch(/@media \(max-width: 480px\)[^}]*\.logo-card\s*{[^}]*width: 100%/)
     })
   })
 
