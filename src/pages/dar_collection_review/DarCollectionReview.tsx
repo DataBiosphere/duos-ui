@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import TabControl from 'src/components/TabControl'
+import { type TabStyleOverride } from 'src/components/SelectableText'
 import ReviewHeader from './ReviewHeader'
 import ApplicationInformation from './ApplicationInformation'
 import { compact, filter, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
@@ -27,7 +28,7 @@ interface DarCollectionReviewProps {
 
 const tabContainerColor = 'rgb(115,154,164)'
 
-const tabStyleOverride = {
+const tabStyleOverride: TabStyleOverride = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: 'clamp(1.2rem, 2vw, 1.6rem)',
