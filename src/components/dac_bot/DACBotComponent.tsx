@@ -114,7 +114,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
   const { dacId, 'data-cy': dataCy, mutuallyExclusiveRules = DEFAULT_MUTUALLY_EXCLUSIVE_RULES } = props
   const [DACbotRules, setDACbotRules] = useState<Array<DACbotRule>>([])
   const [isLoading, setIsLoading] = useState(true)
-  const userIsChair = Storage.getCurrentUser().roles.some((r: UserRole) => r.dacId == dacId && r.name == 'Chairperson')
+  const userIsChair = (Storage.getCurrentUser().roles ?? []).some((r: UserRole) => r.dacId == dacId && r.name == 'Chairperson')
 
   const parsedRules = useMemo(() => {
     return DACbotRules.map((rule: DACbotRule) => {
