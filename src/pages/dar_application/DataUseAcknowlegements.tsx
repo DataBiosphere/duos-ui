@@ -10,7 +10,7 @@ type DataUseAcknowledgementsProps = {
   title: string
   datasets: Dataset[]
   dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
-  formData: FormState
+  formData: Partial<Pick<FormState, 'gsoAcknowledgement' | 'pubAcknowledgement' | 'dsAcknowledgement'>>
   readOnlyMode: boolean
   includeInstructions?: boolean
   onChange: ({ key, value }: ValidFormState) => void
