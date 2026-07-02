@@ -684,9 +684,10 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
 }
 
 export interface DarCollection {
-  id: number
+  darCollectionId: number
   darCode: string
   createDate: number
+  createUser?: DuosUser
   createUserId: number
   updateDate?: number
   updateUserId?: number
@@ -807,6 +808,10 @@ export interface DataAccessRequestData {
   piName: string
   piEmail: string
   piCountryOfOperation: string
+  // Enriched onto the partial DAR data client-side (not part of the wire payload) so
+  // downstream consumers can read a single flattened DataAccessRequest-like object.
+  elections?: Record<number, Election>
+  datasetIds?: number[]
 }
 
 export interface OntologyEntry {

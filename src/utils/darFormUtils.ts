@@ -6,7 +6,6 @@ import { extractEraAuthenticationState } from 'src/components/era_commons/ERACom
 import {
   Dataset,
   DataUse,
-  FileStorageObject,
   Publication,
   Presentation,
   Collaborator,
@@ -35,7 +34,7 @@ interface FormValidationErrors {
   [key: string]: ValidationError
 }
 
-interface DARFormValidationResult {
+export interface DARFormValidationResult {
   researcherInfoErrors: FormValidationErrors
   darErrors: FormValidationErrors
   rusErrors: FormValidationErrors
@@ -199,8 +198,8 @@ const calcDarErrors = (
   formData: FormDataBase,
   datasets: Dataset[],
   dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[],
-  irbDocument: FileStorageObject,
-  collaborationLetter: FileStorageObject,
+  irbDocument: File | null | undefined,
+  collaborationLetter: File | null | undefined,
 ): FormValidationErrors => {
   const errors: FormValidationErrors = {}
   if (isEmpty(formData.datasetIds) || isEmpty(datasets)) {
@@ -455,8 +454,8 @@ export const validateDARFormData = ({
   formData: unknown
   datasets: Dataset[]
   dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
-  irbDocument: FileStorageObject
-  collaborationLetter: FileStorageObject
+  irbDocument: File | null | undefined
+  collaborationLetter: File | null | undefined
   researcher: DuosUser
   labCollaboratorsCompleted: boolean
   internalCollaboratorsCompleted: boolean
