@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 import DAAs from 'src/pages/user_profile/DAAs'
-import { DAAObject, FileStorageObject } from 'src/types/model'
+import { DAAObject, DacObject, FileStorageObject } from 'src/types/model'
 
 vi.mock('src/libs/ajax/DAA', () => ({
   DAA: {
@@ -92,5 +92,27 @@ describe('DAAs', () => {
     render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
     await user.click(screen.getByRole('button', { name: /test-agreement/i }))
     expect(DAA.getDaaFileById).toHaveBeenCalledWith(1, 'test-agreement')
+  })
+
+  it('renders the Agreement, Issued by, and DACs using this DAA column headers', () => {
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
+    expect(screen.getByText('Agreement')).toBeInTheDocument()
+    expect(screen.getByText('Issued by')).toBeInTheDocument()
+    expect(screen.getByText('DACs using this DAA')).toBeInTheDocument()
+  })
+
+  it('renders DAC names in the DACs using this DAA column', () => {
+    const dacs: DacObject[] = [
+      { dacId: 1, name: 'Test DAC' },
+      { dacId: 2, dacName: 'Another DAC' },
+    ]
+    const daaWithDacs: DAAObject = { ...daa, dacs }
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daaWithDacs]} />)
+    expect(screen.getByText('Test DAC, Another DAC')).toBeInTheDocument()
+  })
+
+  it('renders an em dash in the DACs column when the DAA has no associated DACs', () => {
+    render(<DAAs issuedOn={issuedOn} issuedBy={issuedBy} daas={[daa]} />)
+    expect(screen.getByText('—')).toBeInTheDocument()
   })
 })

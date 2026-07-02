@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { PageHeading } from 'src/components/PageHeading'
 import { Notification } from 'src/components/Notification'
+import TableHeaderSection from 'src/components/TableHeaderSection'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
 import { Banner, NotificationService } from 'src/libs/notificationService'
@@ -10,9 +10,6 @@ import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ExternalProfile from './ExternalProfile'
-import ga4ghLogo from 'src/images/ga4gh-logo.png'
-import userProfileIcon from 'src/images/user-profile.png'
-import { Link } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DuosUser } from 'src/types/model'
 
@@ -91,50 +88,9 @@ export default function UserProfile() {
         <Notification>
           {notificationData}
         </Notification>
-        <div
-          style={{
-            flexDirection: 'column',
-          }}
-        >
-          <div
-            style={{
-              marginBottom: '40px',
-            }}
-          >
-            <PageHeading
-              id="researcherProfile"
-              color="common"
-              title="Your Profile"
-              descriptionStyle={{ fontSize: '10000px' }}
-              imgSrc={userProfileIcon}
-              iconSize="large"
-            />
-          </div>
-          <div
-            style={{
-              display: 'flex',
-            }}
-          >
-            <img
-              src={ga4ghLogo}
-              alt="GA4GH Logo"
-              style={{
-                width: '166px',
-                height: '48px',
-                top: '213px',
-                left: '230px',
-                marginRight: '50px',
-              }}
-            />
-            <p>
-              DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found{' '}
-              <a href="https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md">
-                here.
-              </a>
-            </p>
-          </div>
+        <div style={{ marginLeft: '-2em' }}>
+          <TableHeaderSection title="Your Profile" />
         </div>
-        <hr className="section-separator" />
       </div>
       <h1
         style={{
@@ -143,6 +99,8 @@ export default function UserProfile() {
           fontWeight: '600',
           marginBottom: '15px',
           marginTop: '40px',
+          borderBottom: '1px solid #ddd',
+          paddingBottom: '8px',
         }}
       >
         Full Name
@@ -196,30 +154,19 @@ export default function UserProfile() {
         onChange={(field: { key: string, value: boolean, isValid: boolean }) => updateEmailPreference(field.value)}
       />
       <div style={{ marginTop: '45px' }} />
+      <ExternalProfile
+        readonly={false}
+      />
+      <div style={{ marginTop: '45px' }} />
       <AffiliationAndRoles
         user={user as DuosUser}
       />
-      <Link to="/request_role">
-        <button
-          className="f-left btn-primary common-background"
-          style={{
-            marginTop: '10px',
-            marginBottom: '50px',
-          }}
-        >
-          Request a New Role
-        </button>
-      </Link>
       <div style={{ marginTop: '115px' }} />
       <ResearcherStatus
         user={user as DuosUser}
       />
       <div style={{ marginTop: '60px' }} />
       <AcceptedAcknowledgements />
-      <div style={{ marginTop: '60px' }} />
-      <ExternalProfile
-        readonly={false}
-      />
     </div>
   )
 }
