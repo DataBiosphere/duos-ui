@@ -28,7 +28,7 @@ export interface ResearcherInfoProps {
   eRACommonsDestination?: string
   formFieldChange: (change: FieldChange) => void
   onNihStatusUpdate: (valid: boolean) => void
-  formData: Partial<CombinedDataAccessRequest>
+  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'>
   researcher: DuosUser
   setLabCollaboratorsCompleted: (completed: boolean) => void
   setInternalCollaboratorsCompleted: (completed: boolean) => void
@@ -180,8 +180,8 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
           <h3>1.3 Principal Investigator</h3>
           <div>I certify that I am the principal investigator. </div>
           <div className="formTable-row formTable-cols-full">
-            <label className="control-label" id="principal-investigator-name">Principal Investigator Name*</label>
-            <label className="control-label" id="principal-investigator-email">Principal Investigator Email*</label>
+            <label className="control-label" htmlFor="piName">Principal Investigator Name*</label>
+            <label className="control-label" htmlFor="piEmail">Principal Investigator Email*</label>
           </div>
           <div className="formTable-row formTable-data-row">
             <FormField
@@ -200,7 +200,7 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
               defaultValue={readOnlyMode ? formData.piEmail : researcher.email}
             />
           </div>
-          <label className="control-label" id="principal-investigator-country-of-operation">Principal Investigator Country of Operation*</label>
+          <label className="control-label" htmlFor="piCountryOfOperation">Principal Investigator Country of Operation*</label>
           <FormField
             id="piCountryOfOperation"
             placeholder="Country of Operation"
@@ -324,8 +324,8 @@ export default function ResearcherInfo(props: Readonly<ResearcherInfoProps>) {
           <h3>1.7 Information Technology (IT) Director</h3>
           <div>I certify that the individual listed below is my IT Director</div>
           <div className="formTable-row formTable-cols-full">
-            <label className="control-label" id="it-director-name">IT Director Name*</label>
-            <label className="control-label" id="it-director-email">IT Director Email*</label>
+            <label className="control-label" htmlFor="itDirector">IT Director Name*</label>
+            <label className="control-label" htmlFor="itDirectorEmail">IT Director Email*</label>
           </div>
           <div className="formTable-row formTable-data-row">
             <FormField

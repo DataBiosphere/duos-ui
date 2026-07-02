@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
-import DataAccessRequest from 'src/pages/dar_application/DataAccessRequest'
+import DataAccessRequest, { OntologyOption } from 'src/pages/dar_application/DataAccessRequest'
 import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement'
-import { translateDataUseRestrictionsFromDataUseArray } from 'src/libs/dataUseTranslation'
+import { translateDataUseRestrictionsFromDataUseArray, TranslationEntry } from 'src/libs/dataUseTranslation'
 import { Navigation, Notifications } from 'src/libs/utils'
 import { AsyncConfirmationDialog } from 'src/components/AsyncConfirmationDialog'
 import { Notification } from 'src/components/Notification'
@@ -12,7 +12,7 @@ import { User } from 'src/libs/ajax/User'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'
-import { NotificationService } from 'src/libs/notificationService'
+import { NotificationService, Banner } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
@@ -24,15 +24,24 @@ import loadingImage from 'src/images/loading-indicator.svg'
 import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
-import { validateDARFormData, validationFailed } from 'src/utils/darFormUtils'
+import { validateDARFormData, validationFailed, DARFormValidationResult } from 'src/utils/darFormUtils'
 import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'src/utils/NodashUtil'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Countries } from 'src/libs/ajax/Countries'
-import PropTypes from 'prop-types'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  CombinedDataAccessRequest,
+  DarCollection,
+  DataAccessRequest as DataAccessRequestModel,
+  Dataset,
+  DuosUser,
+  Election,
+  SimplifiedDuosUser,
+} from 'src/types/model'
+import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -43,13 +52,33 @@ const PROGRESS_REPORT_TAB_ID_PREFIX = 'progress-report-'
 const PROGRESS_REPORT_APPLICATION_TAB_ID = 'progress-report-app'
 const ADDENDUM_TAB_ID = 'addendum'
 const VOTING_HISTORY_TAB_ID = 'voting-history-info'
-const ApplicationTabs = [
+
+interface AppTab {
+  name: string
+  id: string
+  showStep?: boolean
+}
+
+const ApplicationTabs: AppTab[] = [
   { name: 'Researcher Information', id: RESEARCHER_INFO_TAB_ID },
   { name: 'Data Access Request', id: DATA_ACCESS_REQUEST_TAB_ID },
   { name: 'Research Purpose Statement', id: RESEARCH_PURPOSE_STATEMENT_TAB_ID },
 ]
 
-const fetchAllDatasets = async (dsIds) => {
+// This component's form state is a superset of CombinedDataAccessRequest: `researcher` is a
+// display-name string used for validation/piName-fallback (separate from the `researcher`
+// DuosUser state), and `profileName`/`pubmedId`/`scientificUrl` are legacy fields that are no
+// longer read anywhere but are still submitted with the DAR, so they're preserved here.
+type DarFormData = Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & {
+  ontologies?: OntologyOption[]
+  researcher?: string
+  institution?: string
+  profileName?: string
+  pubmedId?: string
+  scientificUrl?: string
+}
+
+const fetchAllDatasets = async (dsIds: number[]): Promise<Dataset[]> => {
   const filteredDatasetIds = dsIds.filter(id => !isNil(id) && Number.isInteger(id) && id > 0)
   if (isEmpty(filteredDatasetIds)) {
     return []
@@ -59,42 +88,49 @@ const fetchAllDatasets = async (dsIds) => {
   return DataSet.getDatasetsByIds(filteredDatasetIds)
 }
 
-const DataAccessRequestApplication = (props) => {
+export interface DataAccessRequestApplicationProps {
+  draftDar: boolean
+  isProgressReportApplication: boolean
+  existingDarsReadOnlyMode?: boolean
+  collection?: DarCollection | Record<string, never>
+}
+
+const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicationProps>) => {
   const params = useParams()
   const { collectionId, dataRequestId } = params
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<DarFormData>({
     datasetIds: [],
     daaIds: [],
-    darCode: null,
+    darCode: undefined,
     labCollaborators: [],
     internalCollaborators: [],
     externalCollaborators: [],
     checkNihDataOnly: false,
     rus: '',
     nonTechRus: '',
-    oneGender: null,
-    methods: null,
-    aiLlmUse: null,
-    controls: null,
-    population: null,
-    hmb: null,
-    poa: null,
-    diseases: null,
+    oneGender: undefined,
+    methods: undefined,
+    aiLlmUse: undefined,
+    controls: undefined,
+    population: undefined,
+    hmb: undefined,
+    poa: undefined,
+    diseases: undefined,
     ontologies: [],
-    other: null,
+    other: undefined,
     otherText: '',
-    forProfit: null,
+    forProfit: undefined,
     gender: '',
-    pediatric: null,
-    illegalBehavior: null,
-    addiction: null,
-    sexualDiseases: null,
-    stigmatizedDiseases: null,
-    vulnerablePopulation: null,
-    populationMigration: null,
-    psychiatricTraits: null,
-    notHealth: null,
+    pediatric: undefined,
+    illegalBehavior: undefined,
+    addiction: undefined,
+    sexualDiseases: undefined,
+    stigmatizedDiseases: undefined,
+    vulnerablePopulation: undefined,
+    populationMigration: undefined,
+    psychiatricTraits: undefined,
+    notHealth: undefined,
     researcher: '',
     piName: '',
     piEmail: '',
@@ -107,9 +143,9 @@ const DataAccessRequestApplication = (props) => {
     signingOfficialEmail: '',
     itDirector: '',
     itDirectorEmail: '',
-    anvilUse: null,
-    localUse: null,
-    cloudUse: null,
+    anvilUse: undefined,
+    localUse: undefined,
+    cloudUse: undefined,
     cloudProvider: '',
     cloudProviderType: '',
     cloudProviderDescription: '',
@@ -126,12 +162,21 @@ const DataAccessRequestApplication = (props) => {
   const { existingDarsReadOnlyMode, draftDar, isProgressReportApplication, collection } = props
 
   // Set page title based on mode
-  const pageTitle = isProgressReportApplication
-    ? 'Progress Report'
-    : (existingDarsReadOnlyMode ? 'DAR Application Review' : 'DAR Application')
+  let pageTitle = 'DAR Application'
+  if (isProgressReportApplication) {
+    pageTitle = 'Progress Report'
+  }
+  else if (existingDarsReadOnlyMode) {
+    pageTitle = 'DAR Application Review'
+  }
   usePageTitle(pageTitle)
 
-  const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} })
+  const [formValidation, setFormValidation] = useState<DARFormValidationResult>({
+    researcherInfoErrors: {},
+    darErrors: {},
+    rusErrors: {},
+    nihValid: true,
+  })
 
   const [nihValid, setNihValid] = useState(true)
   const [showNihValidationError, setShowNihValidationError] = useState(false)
@@ -145,41 +190,39 @@ const DataAccessRequestApplication = (props) => {
   const [showDialogSave, setShowDialogSave] = useState(false)
   const [showDialogSubmit, setShowDialogSubmit] = useState(false)
 
-  const [tab, setTab] = useState(undefined)
-  const [notificationData, setNotificationData] = useState(undefined)
+  const [tab, setTab] = useState<string | undefined>(undefined)
+  const [notificationData, setNotificationData] = useState<Banner | null | undefined>(undefined)
 
-  const [researcher, setResearcher] = useState({})
-  const [allSigningOfficials, setAllSigningOfficials] = useState([])
+  const [researcher, setResearcher] = useState<DuosUser | Record<string, never>>({})
+  const [allSigningOfficials, setAllSigningOfficials] = useState<SimplifiedDuosUser[]>([])
 
-  const [uploadedIrbDocument, setUploadedIrbDocument] = useState(null)
-  const [uploadedCollaborationLetter, setUploadedCollaborationLetter] = useState(null)
+  const [uploadedIrbDocument, setUploadedIrbDocument] = useState<File | null>(null)
+  const [uploadedCollaborationLetter, setUploadedCollaborationLetter] = useState<File | null>(null)
 
   const [isLoading, setIsLoading] = useState(true)
   const [isAttested, setIsAttested] = useState(false)
 
-  const [applicationTabs, setApplicationTabs] = useState([])
+  const [applicationTabs, setApplicationTabs] = useState<AppTab[]>([])
 
-  const [countriesOfOperation, setCountriesOfOperation] = useState([])
+  const [countriesOfOperation, setCountriesOfOperation] = useState<string[]>([])
 
   // helper function to coordinate local state changes as well as updates to form data on the parent
-  const formFieldChange = useCallback(({ key, value }) => {
+  const formFieldChange = useCallback(({ key, value }: { key: string, value: unknown }) => {
     setFormData(
       (formData) => {
         return {
           ...formData,
-          ...{
-            [key]: value,
-          },
-        }
+          [key]: value,
+        } as DarFormData
       },
     )
   }, [])
 
-  const formValidationChange = useCallback((section, { key, validation }) => {
+  const formValidationChange = useCallback((section: keyof DARFormValidationResult, { key, validation }: { key: string | Array<string | number>, validation: ValidationError }) => {
     setFormValidation((formValidation) => {
       const newFormValidation = cloneDeep(formValidation)
       if (isArray(key)) {
-        set(newFormValidation, [section, ...key], validation)
+        set(newFormValidation, [section, ...key].map(String), validation)
       }
       else {
         set(newFormValidation, [section, key], validation)
@@ -188,16 +231,16 @@ const DataAccessRequestApplication = (props) => {
     })
   }, [])
 
-  const batchFormFieldChange = useCallback((updates) => {
+  const batchFormFieldChange = useCallback((updates: Record<string, unknown>) => {
     setFormData((formData) => {
       return {
         ...formData,
         ...updates,
-      }
+      } as DarFormData
     })
   }, [])
 
-  const onDaaIdsChange = useCallback((ids) => {
+  const onDaaIdsChange = useCallback((ids: number[]) => {
     const normalizedIds = [...new Set((ids ?? [])
       .map(Number)
       .filter(id => Number.isInteger(id) && id > 0))]
@@ -212,46 +255,47 @@ const DataAccessRequestApplication = (props) => {
     })
   }, [])
 
-  const updateCollaborationLetter = (letter) => {
+  const updateCollaborationLetter = (letter: File | undefined) => {
     batchFormFieldChange({
       collaborationLetterName: '',
       collaborationLetterLocation: '',
     })
-    setUploadedCollaborationLetter(letter)
+    setUploadedCollaborationLetter(letter ?? null)
   }
 
-  const updateIrbDocument = (document, expiration) => {
+  const updateIrbDocument = (document: File | undefined, expiration: string) => {
     batchFormFieldChange({
       irbDocumentName: '',
       irbDocumentLocation: '',
       irbProtocolExpiration: expiration,
     })
-    setUploadedIrbDocument(document)
+    setUploadedIrbDocument(document ?? null)
   }
 
   // Initialize cache with collection if available
-  const initialCache = {
-    [collection?.darCollectionId]: collection,
-  }
+  const initialCollectionCache: Record<number, DarCollection> = collection && 'darCollectionId' in collection && collection.darCollectionId
+    ? { [collection.darCollectionId]: collection as DarCollection }
+    : {}
 
-  const { fetchWithCache } = useAsyncCacheFetch(initialCache)
+  const { fetchWithCache: fetchCollectionWithCache } = useAsyncCacheFetch<number, DarCollection>(initialCollectionCache)
+  const { fetchWithCache: fetchDarWithCache } = useAsyncCacheFetch<string, DataAccessRequestModel>({})
 
   const getDarCollection = useCallback(
-    collectionId => fetchWithCache(collectionId, Collections.getCollectionById),
-    [fetchWithCache],
+    (id: string) => fetchCollectionWithCache(Number(id), Collections.getCollectionById),
+    [fetchCollectionWithCache],
   )
   const getPartialDarRequest = useCallback(
-    darId => fetchWithCache(darId, DAR.getPartialDarRequest),
-    [fetchWithCache],
+    (darId: string) => fetchDarWithCache(darId, DAR.getPartialDarRequest),
+    [fetchDarWithCache],
   )
 
-  const [reverseOrderedDARs, setReverseOrderedDARs] = useState([])
-  const [datasets, setDatasets] = useState([])
-  const [selectedDatasets, setSelectedDatasets] = useState([])
-  const [dataUseTranslations, setDataUseTranslations] = useState([])
+  const [reverseOrderedDARs, setReverseOrderedDARs] = useState<DataAccessRequestModel[]>([])
+  const [datasets, setDatasets] = useState<Dataset[]>([])
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([])
+  const [dataUseTranslations, setDataUseTranslations] = useState<(TranslationEntry | undefined)[][]>([])
 
   React.useEffect(() => {
-    fetchAllDatasets(formData.datasetIds).then((datasets) => {
+    fetchAllDatasets(formData.datasetIds ?? []).then((datasets) => {
       setDatasets(datasets)
       setSelectedDatasets(datasets)
     })
@@ -271,9 +315,9 @@ const DataAccessRequestApplication = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (existingDarsReadOnlyMode) {
+        if (existingDarsReadOnlyMode && collectionId) {
           const { createUser } = await getDarCollection(collectionId)
-          setResearcher(createUser)
+          setResearcher(createUser ?? {})
         }
         else {
           const response = await User.getMe()
@@ -282,17 +326,15 @@ const DataAccessRequestApplication = (props) => {
           setAllSigningOfficials(signingOfficials)
         }
       }
-      catch (_error) {
+      catch {
         setShowDialogSave(false)
-        Notifications({ text: 'Error displaying user information. Please try again in a few moments.' })
+        Notifications.showError({ text: 'Error displaying user information. Please try again in a few moments.' })
       }
     }
-    fetchData()
+    void fetchData()
   }, [existingDarsReadOnlyMode, collectionId, getDarCollection])
 
-  const init = useCallback(async () => {
-    let formData = {}
-
+  const resolveInitialFormData = useCallback(async (): Promise<DarFormData> => {
     if (!isNil(collectionId)) {
       // Review existing DAR application - retrieves all datasets in the collection
       // Besides the datasets, DARs split off from the collection should have the same formData
@@ -309,36 +351,44 @@ const DataAccessRequestApplication = (props) => {
       const newReverseOrderedDARs = [...darMap.values()].sort((a, b) => b.id - a.id)
       setReverseOrderedDARs(newReverseOrderedDARs)
       // form data = the "root" DAR's data
-      const darId = darEntries.length > 0 ? darEntries.sort((a, b) => a.id - b.id)[0].referenceId : undefined
-      formData = darId ? await getPartialDarRequest(darId) : {}
+      const darId = darEntries.length > 0 ? darEntries.toSorted((a, b) => a.id - b.id)[0].referenceId : undefined
+      const nextFormData: DarFormData = darId ? await getPartialDarRequest(darId) : {}
 
       // This is a collection, so we need to get the datasets and datasetIds from the collection
-      formData.datasetIds = map(datasets, ds => get(ds, 'datasetId'))
+      nextFormData.datasetIds = map(datasets, ds => get(ds, 'datasetId'))
+      return nextFormData
     }
-    else if (!isNil(dataRequestId)) {
-      // Handle the case where we have an existing DAR id
-      // Same endpoint works for any dataRequestId, not just partials.
-      formData = await getPartialDarRequest(dataRequestId)
-    }
-    else {
+
+    if (isNil(dataRequestId)) {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
-      formData = Storage.getData('dar_application') === null ? formData : Storage.getData('dar_application')
+      const storedFormData = Storage.getData<DarFormData>('dar_application')
       Storage.removeData('dar_application')
+      return storedFormData ?? {}
     }
 
-    formData.researcher = isNil(researcher) ? '' : researcher.displayName
-    formData.piName = existingDarsReadOnlyMode ? formData.piName : formData.researcher
-    formData.piEmail = existingDarsReadOnlyMode ? formData.piEmail : (isNil(researcher) ? '' : researcher.email)
-    formData.institution = isNil(researcher) || isNil(researcher.institution) ? '' : researcher.institution.name
-    formData.userId = researcher.userId
+    // Handle the case where we have an existing DAR id
+    // Same endpoint works for any dataRequestId, not just partials.
+    return getPartialDarRequest(dataRequestId)
+  }, [collectionId, dataRequestId, getDarCollection, getPartialDarRequest])
 
-    batchFormFieldChange(formData)
+  const init = useCallback(async () => {
+    const nextFormData = await resolveInitialFormData()
+
+    const isResearcherEmpty = isNil(researcher) || isEmpty(researcher)
+    const researcherEmail = isResearcherEmpty ? '' : (researcher as DuosUser).email
+    nextFormData.researcher = isResearcherEmpty ? '' : (researcher as DuosUser).displayName
+    nextFormData.piName = existingDarsReadOnlyMode ? nextFormData.piName : nextFormData.researcher
+    nextFormData.piEmail = existingDarsReadOnlyMode ? nextFormData.piEmail : researcherEmail
+    nextFormData.institution = isResearcherEmpty || isNil((researcher as DuosUser).institution) ? '' : (researcher as DuosUser).institution?.name
+    nextFormData.userId = (researcher as DuosUser).userId
+
+    batchFormFieldChange(nextFormData)
     setIsLoading(false)
-  }, [researcher, existingDarsReadOnlyMode, collectionId, dataRequestId, getDarCollection, getPartialDarRequest, batchFormFieldChange])
+  }, [researcher, existingDarsReadOnlyMode, resolveInitialFormData, batchFormFieldChange])
 
   React.useEffect(() => {
     if (existingDarsReadOnlyMode) {
-      let appTabs = []
+      let appTabs: AppTab[] = []
       if (isProgressReportApplication) {
         // if we are creating a new progress report, we need to add another tab for the application
         appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
@@ -348,13 +398,13 @@ const DataAccessRequestApplication = (props) => {
         ...reverseOrderedDARs.map((_dar, index) => {
           const whichPRIsThis = reverseOrderedDARs.length - index - 1
           const isLast = index === reverseOrderedDARs.length - 1
-          const itemLabel = isLast ? formData?.darCode : 'Progress Report ' + whichPRIsThis
-          return { name: itemLabel, id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
+          const itemLabel = isLast ? formData.darCode : 'Progress Report ' + whichPRIsThis
+          return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
         }),
         { name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false },
       ])
     }
-  }, [formData?.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
+  }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -362,20 +412,20 @@ const DataAccessRequestApplication = (props) => {
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       setNotificationData(notificationData)
     })
-    Countries.getCountries().then((isoCountriesData) => {
+    Countries.getCountries().then((isoCountriesData: string[]) => {
       setCountriesOfOperation(isoCountriesData)
     })
   }, [init])
 
-  // Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
+  // Can't do uploads in parallel since endpoints are post and they both alter attributes in JSON column
   // If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
-  const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
+  const saveDARDocuments = async (uploadedIrbDocument: File | null, uploadedCollaborationLetter: File | null, referenceId: string): Promise<DataAccessRequestModel> => {
     const irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument')
     const collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument')
-    return assign(irbUpdate.data, collaborationUpdate.data)
+    return assign(irbUpdate.data ?? {}, collaborationUpdate.data ?? {}) as DataAccessRequestModel
   }
 
-  const updateDraftResponse = async (formattedFormData, referenceId) => {
+  const updateDraftResponse = async (formattedFormData: Record<string, unknown>, referenceId: string | undefined) => {
     let darPartialResponse
     if (!isNil(referenceId) && !isEmpty(referenceId)) {
       darPartialResponse = await DAR.updateDarDraft(formattedFormData, referenceId)
@@ -386,23 +436,21 @@ const DataAccessRequestApplication = (props) => {
     return darPartialResponse
   }
 
-  const scrollToFormErrors = (validation, eraCommonsIdValid, hasLibraryCard) => {
-    if (!isEmpty(validation.researcherInfoErrors) || !eraCommonsIdValid || !hasLibraryCard) {
-      setTab(RESEARCHER_INFO_TAB_ID)
+  const getErrorTabId = (validation: DARFormValidationResult, isResearcherInfoValid: boolean): string => {
+    if (!isEmpty(validation.researcherInfoErrors) || !isResearcherInfoValid) {
+      return RESEARCHER_INFO_TAB_ID
     }
-    else if (!isEmpty(validation.darErrors)) {
-      setTab(DATA_ACCESS_REQUEST_TAB_ID)
+    if (!isEmpty(validation.darErrors)) {
+      return DATA_ACCESS_REQUEST_TAB_ID
     }
-    else if (!isEmpty(validation.rusErrors)) {
-      setTab(RESEARCH_PURPOSE_STATEMENT_TAB_ID)
+    if (isEmpty(validation.rusErrors)) {
+      return RESEARCHER_INFO_TAB_ID
     }
-    else {
-      setTab(RESEARCHER_INFO_TAB_ID)
-    }
+    return RESEARCH_PURPOSE_STATEMENT_TAB_ID
   }
 
   const addDucAddendumTab = () => {
-    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0
+    const hasAddendumTab = applicationTabs.some(tab => tab.id === ADDENDUM_TAB_ID)
     if (!hasAddendumTab) {
       const tabs = [
         ...applicationTabs,
@@ -413,34 +461,34 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const removeAddendumTab = () => {
-    const hasAddendumTab = applicationTabs.filter(tab => tab.id === ADDENDUM_TAB_ID).length > 0
+    const hasAddendumTab = applicationTabs.some(tab => tab.id === ADDENDUM_TAB_ID)
     if (hasAddendumTab) {
       const tabs = applicationTabs.filter(tab => tab.id !== ADDENDUM_TAB_ID)
       setApplicationTabs(tabs)
     }
   }
 
-  const attemptSubmit = async () => {
+  const attemptSubmit = async (): Promise<boolean> => {
     const validation = validateDARFormData({
       formData,
       datasets: draftDar ? selectedDatasets : datasets,
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
-      researcher,
+      researcher: researcher as DuosUser,
       labCollaboratorsCompleted,
       internalCollaboratorsCompleted,
       externalCollaboratorsCompleted,
     })
     setFormValidation(validation)
 
-    const hasLibraryCard = !isNil(researcher.libraryCard)
+    const hasLibraryCard = !isNil((researcher as DuosUser).libraryCard)
 
     const isInvalidForm = validationFailed(validation) || !nihValid || !hasLibraryCard
     setShowNihValidationError(!nihValid)
 
     if (isInvalidForm) {
-      scrollToFormErrors(validation, nihValid, hasLibraryCard)
+      setTab(getErrorTabId(validation, nihValid && hasLibraryCard))
     }
     else {
       // noinspection ES6MissingAwait
@@ -454,51 +502,55 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const doSubmit = () => {
-    if (attemptSubmit()) {
-      setShowDialogSubmit(true)
-    }
+    attemptSubmit().then((isValid) => {
+      if (isValid) {
+        setShowDialogSubmit(true)
+      }
+    })
   }
 
   const submitDARFormData = async () => {
     const userId = Storage.getCurrentUser().userId
-    const formattedFormData = cloneDeep(formData)
+    const formattedFormData: Record<string, unknown> = cloneDeep(formData)
 
     for (const key in formattedFormData) {
-      if (isString(formattedFormData[key]) && formattedFormData[key].trim() && formattedFormData[key].length === 0) {
+      const value = formattedFormData[key]
+      if (isString(value) && value.trim().length === 0) {
         formattedFormData[key] = undefined
       }
     }
     formattedFormData.userId = userId
-    formattedFormData.daaIds = [...new Set((formattedFormData.daaIds ?? [])
+    formattedFormData.daaIds = [...new Set(((formData.daaIds ?? []) as number[])
       .map(Number)
       .filter(id => Number.isInteger(id) && id > 0))]
 
     try {
-      let referenceId = formData.referenceId
+      const referenceId = formData.referenceId
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId)
-      referenceId = darPartialResponse.referenceId
+      const updatedReferenceId = darPartialResponse.referenceId
 
       if (!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
-        darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId)
+        darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, updatedReferenceId)
       }
       const updatedFormData = assign(formattedFormData, darPartialResponse)
       await DAR.postDar(updatedFormData)
-      setShowDialogSubmit({
-        showDialogSubmit: false,
-      }, Navigation.console(Storage.getCurrentUser(), navigate).response)
+      setShowDialogSubmit(false)
+      await Navigation.console(Storage.getCurrentUser(), navigate)
     }
     catch (error) {
       setShowDialogSubmit(false)
 
+      const responseError = error as { response?: { status?: number, data?: { code?: string, message?: string } } }
+
       // Make DAR editable if we get a 400 status (Bad Request) error
-      if (error.response && error.response.status === 400) {
+      if (responseError.response?.status === 400) {
         setIsAttested(false)
       }
 
-      if (error.response.data.code && error.response.data.message) {
+      if (responseError.response?.data?.code && responseError.response.data.message) {
         Notifications.showError(
           {
-            text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
+            text: <ReactMarkdown>{responseError.response.data.message}</ReactMarkdown>,
             timeout: 6000,
           })
       }
@@ -512,9 +564,9 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
-  const onSaveConfirmation = selectedOk => async () => {
+  const onSaveConfirmation = (selectedOk: boolean) => async () => {
     setDisableOkBtn(true)
-    if (selectedOk === true) {
+    if (selectedOk) {
       await saveDarDraft()
       setDisableOkBtn(false)
     }
@@ -524,9 +576,9 @@ const DataAccessRequestApplication = (props) => {
     }
   }
 
-  const onSubmitConfirmation = selectedOk => async () => {
+  const onSubmitConfirmation = (selectedOk: boolean) => async () => {
     setDisableOkBtn(true)
-    if (selectedOk === true) {
+    if (selectedOk) {
       await submitDARFormData()
       setDisableOkBtn(false)
     }
@@ -537,42 +589,45 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const saveDarDraft = async () => {
-    const formattedFormData = cloneDeep(formData)
+    const formattedFormData: Record<string, unknown> = cloneDeep(formData)
     // DAR datasetIds needs to be a list of ids
     formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
-    formattedFormData.daaIds = [...new Set((formattedFormData.daaIds ?? [])
+    formattedFormData.daaIds = [...new Set(((formData.daaIds ?? []) as number[])
       .map(Number)
       .filter(id => Number.isInteger(id) && id > 0))]
 
     // Make sure we navigate back to the current DAR after saving.
     try {
-      let referenceId = formattedFormData.referenceId
+      const referenceId = formData.referenceId
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId)
-      setDatasets(await DataSet.getDatasetsByIds(formData.datasetIds))
-      referenceId = darPartialResponse.referenceId
+      setDatasets(await DataSet.getDatasetsByIds(formData.datasetIds ?? []))
+      const updatedReferenceId = darPartialResponse.referenceId
       if (isNil(dataRequestId)) {
-        navigate('/dar_application/' + referenceId, { replace: true })
+        navigate('/dar_application/' + updatedReferenceId, { replace: true })
       }
       // execute saveDARDocuments method only if documents are required for the DAR
       // value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
       if (!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
-        darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId)
+        darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, updatedReferenceId)
       }
-      batchFormFieldChange(darPartialResponse)
+      batchFormFieldChange({ ...darPartialResponse })
       setShowDialogSave(false)
       setDisableOkBtn(false)
     }
     catch (error) {
       setShowDialogSave(false)
       setDisableOkBtn(false)
-      if (error.response.data.code && error.response.data.message) {
-        Notifications.showError({ text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
+      const responseError = error as { response?: { data?: { code?: string, message?: string } } }
+      if (responseError.response?.data?.code && responseError.response.data.message) {
+        Notifications.showError({
+          text: <ReactMarkdown>{responseError.response.data.message}</ReactMarkdown>,
           severity: 'error',
           timeout: 6000,
         })
       }
       else {
-        Notifications.showError({ text: 'Error saving Data Access Request. Please try again in a few moments.',
+        Notifications.showError({
+          text: 'Error saving Data Access Request. Please try again in a few moments.',
           severity: 'error',
         })
       }
@@ -583,8 +638,8 @@ const DataAccessRequestApplication = (props) => {
   const NO_FINAL_VOTE_STATUS = 'Awaiting Final Vote'
   const PENDING_STATUS = 'Pending'
 
-  const createVoteRecord = (dar, datasetId, election, datasets) => {
-    const getElectionVotes = (election) => {
+  const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, election: Election | undefined, datasets: Dataset[]) => {
+    const getElectionVotes = (election: Election | undefined) => {
       if (Array.isArray(election?.votes)) {
         return election.votes
       }
@@ -600,7 +655,7 @@ const DataAccessRequestApplication = (props) => {
     const dataset = datasets.find(d => d.datasetId === datasetId)
     const datasetName = dataset?.name ?? NO_ELECTION_STATUS
 
-    const formatDate = (dateString) => {
+    const formatDate = (dateString: string | number): string => {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -612,10 +667,10 @@ const DataAccessRequestApplication = (props) => {
 
     const getVoteDate = () => {
       if (finalVote?.updateDate) {
-        return formatDate(finalVote?.updateDate)
+        return formatDate(finalVote.updateDate)
       }
-      if (isElectionClosed) {
-        return formatDate(finalVote?.createDate)
+      if (isElectionClosed && election?.createDate) {
+        return formatDate(election.createDate)
       }
       return NO_FINAL_VOTE_STATUS
     }
@@ -627,7 +682,7 @@ const DataAccessRequestApplication = (props) => {
       if (finalVote?.vote === false) {
         return 'Denied'
       }
-      if (isElectionClosed) {
+      if (isElectionClosed && election) {
         return election.status
       }
       return PENDING_STATUS
@@ -635,7 +690,7 @@ const DataAccessRequestApplication = (props) => {
 
     const getRationale = () => {
       if (hasFinalVoteRationale) {
-        return finalVote.rationale
+        return finalVote?.rationale ?? ''
       }
       if (hasFinalVote) {
         return 'No rationale provided.'
@@ -656,7 +711,7 @@ const DataAccessRequestApplication = (props) => {
       voteDate,
       voteDateRaw: finalVote?.updateDate || finalVote?.createDate || null,
       requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
-      linkedDarId: dar?.collectionId,
+      linkedDarId: String(dar.collectionId),
       voteResult: { decision, rationale },
       status: election?.status ?? NO_ELECTION_STATUS,
     }
@@ -674,7 +729,7 @@ const DataAccessRequestApplication = (props) => {
   }).sort((a, b) => {
     // Compare by vote date (most recent first)
     if (a.voteDateRaw && b.voteDateRaw) {
-      const dateCompare = new Date(b.voteDateRaw) - new Date(a.voteDateRaw)
+      const dateCompare = new Date(b.voteDateRaw).getTime() - new Date(a.voteDateRaw).getTime()
       if (dateCompare !== 0) return dateCompare
     }
     // Handle cases where one or both dates are missing
@@ -682,7 +737,7 @@ const DataAccessRequestApplication = (props) => {
     else if (a.voteDateRaw && !b.voteDateRaw) return 1
 
     // Compare by election status (Open > Closed > Awaiting Election)
-    const statusOrder = { [ElectionStatus.OPEN]: 0, [ElectionStatus.CLOSED]: 1, [NO_ELECTION_STATUS]: 2 }
+    const statusOrder: Record<string, number> = { [ElectionStatus.OPEN]: 0, [ElectionStatus.CLOSED]: 1, [NO_ELECTION_STATUS]: 2 }
     const statusCompare = (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3)
     if (statusCompare !== 0) return statusCompare
 
@@ -694,7 +749,7 @@ const DataAccessRequestApplication = (props) => {
     return a.datasetName.localeCompare(b.datasetName)
   })
 
-  const getDarStatus = (votes) => {
+  const getDarStatus = (votes: { status: string }[]): string => {
     if (votes.some(vote => vote.status === ElectionStatus.OPEN)) {
       return ElectionStatus.OPEN
     }
@@ -705,23 +760,23 @@ const DataAccessRequestApplication = (props) => {
   }
 
   const dar = {
-    referenceId: formData?.darCode || '',
-    piName: formData?.piName || '',
-    institution: formData?.institution || '',
+    referenceId: formData.darCode || '',
+    piName: formData.piName || '',
+    institution: formData.institution || '',
     status: getDarStatus(votes),
   }
 
   const back = () => {
-    navigate.goBack()
+    navigate(-1)
   }
 
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId)
 
+  const stepContainerClassName = existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'
+
   if (isLoading) {
     return (
       <SpinnerComponent
-        show={true}
-        name="loadingSpinner"
         loadingImage={loadingImage}
       />
     )
@@ -734,12 +789,13 @@ const DataAccessRequestApplication = (props) => {
           <div className="row no-margin">
             <Notification notificationData={notificationData} />
             <div
-              className={(formData.darCode !== null
-                ? 'col-lg-12 col-md-12 col-sm-9 '
-                : 'col-lg-12 col-md-12 col-sm-12 ')}
+              className={(formData.darCode === null
+                ? 'col-lg-12 col-md-12 col-sm-12 '
+                : 'col-lg-12 col-md-12 col-sm-9 ')}
             >
               <PageHeading
-                title={existingDarsReadOnlyMode ? formData.darCode : 'Data Access Request Application'}
+                id="dar-application-heading"
+                title={(existingDarsReadOnlyMode ? formData.darCode : 'Data Access Request Application') ?? ''}
                 description={existingDarsReadOnlyMode ? formData.projectTitle : 'Please complete the fields below to request access to data.'}
               />
             </div>
@@ -747,10 +803,11 @@ const DataAccessRequestApplication = (props) => {
               && !existingDarsReadOnlyMode
               && (
                 <div className="col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding">
-                  <a id="btn_back" onClick={back} className="btn-primary btn-back">
+                  <button id="btn_back" type="button" onClick={back} className="btn-primary btn-back">
                     <i className="glyphicon glyphicon-chevron-left" />
+                    {' '}
                     Back
-                  </a>
+                  </button>
                 </div>
               )}
           </div>
@@ -765,7 +822,6 @@ const DataAccessRequestApplication = (props) => {
               title="Save changes?"
               disableOkBtn={disableOkBtn}
               disableNoBtn={disableOkBtn}
-              color=""
               showModal={showDialogSave}
               action={{ label: 'Yes', handler: onSaveConfirmation }}
             >
@@ -777,8 +833,6 @@ const DataAccessRequestApplication = (props) => {
               title="Submit Data Access Request?"
               disableOkBtn={disableOkBtn}
               disableNoBtn={disableOkBtn}
-              color=""
-              id="submitConfirmationModal"
               showModal={showDialogSubmit}
               action={{ label: 'Yes', handler: onSubmitConfirmation }}
             >
@@ -796,8 +850,8 @@ const DataAccessRequestApplication = (props) => {
                   <ProgressReportApplication
                     readOnlyMode={false}
                     datasets={datasets}
-                    dar={merge({}, reverseOrderedDARs[0]?.data, reverseOrderedDARs[0])}
-                    researcher={researcher}
+                    dar={merge({}, reverseOrderedDARs[0]?.data, reverseOrderedDARs[0]) as CombinedDataAccessRequest}
+                    researcher={researcher as DuosUser}
                     countriesOfOperation={countriesOfOperation}
                   />
                 </ConditionalAccordion>
@@ -809,9 +863,9 @@ const DataAccessRequestApplication = (props) => {
                 {reverseOrderedDARs.map((dar, index) => {
                   if ((index + 1 !== reverseOrderedDARs.length)) {
                     return (
-                      <div key={`dar-${index}`} id={`${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
+                      <div key={dar.referenceId} id={`${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
                         <ConditionalAccordion
-                          key={`dar-${index}`}
+                          key={dar.referenceId}
                           condition={true}
                           title={`Progress Report ${reverseOrderedDARs.length - index - 1}`}
                           defaultExpanded={index === 0}
@@ -819,14 +873,15 @@ const DataAccessRequestApplication = (props) => {
                           <ProgressReportApplication
                             readOnlyMode={true}
                             datasets={datasets}
-                            dar={merge({}, dar?.data, dar)}
-                            researcher={researcher}
+                            dar={merge({}, dar?.data, dar) as CombinedDataAccessRequest}
+                            researcher={researcher as DuosUser}
                             countriesOfOperation={countriesOfOperation}
                           />
                         </ConditionalAccordion>
                       </div>
                     )
                   }
+                  return null
                 })}
               </div>
             )}
@@ -838,9 +893,9 @@ const DataAccessRequestApplication = (props) => {
                   Summary
                 </h3>
               )}
-              <div id={RESEARCHER_INFO_TAB_ID} className={existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+              <div id={RESEARCHER_INFO_TAB_ID} className={stepContainerClassName}>
                 <ConditionalAccordion
-                  condition={existingDarsReadOnlyMode}
+                  condition={!!existingDarsReadOnlyMode}
                   title="Step 1: Researcher Information"
                   defaultExpanded={reverseOrderedDARs.length === 1}
                 >
@@ -853,10 +908,9 @@ const DataAccessRequestApplication = (props) => {
                     formValidationChange={val => formValidationChange('researcherInfoErrors', val)}
                     eRACommonsDestination={eRACommonsDestination}
                     formFieldChange={formFieldChange}
-                    nihValid={nihValid}
                     onNihStatusUpdate={setNihValid}
                     showNihValidationError={showNihValidationError}
-                    researcher={researcher}
+                    researcher={researcher as DuosUser}
                     allSigningOfficials={allSigningOfficials}
                     setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
                     setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
@@ -867,18 +921,18 @@ const DataAccessRequestApplication = (props) => {
                 </ConditionalAccordion>
               </div>
 
-              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={stepContainerClassName}>
                 <ConditionalAccordion
-                  condition={existingDarsReadOnlyMode}
+                  condition={!!existingDarsReadOnlyMode}
                   title="Step 2: Data Access Request"
                 >
                   <DataAccessRequest
                     formData={formData}
-                    readOnlyMode={existingDarsReadOnlyMode || isAttested}
+                    readOnlyMode={(existingDarsReadOnlyMode || isAttested)}
                     includeInstructions={!existingDarsReadOnlyMode}
                     datasets={datasets}
                     validation={formValidation.darErrors}
-                    formValidationChange={val => formValidationChange('darErrors', val)}
+                    formValidationChange={(val: { key: string, validation: ValidationError }) => formValidationChange('darErrors', val)}
                     dataUseTranslations={dataUseTranslations}
                     formFieldChange={formFieldChange}
                     batchFormFieldChange={batchFormFieldChange}
@@ -886,32 +940,31 @@ const DataAccessRequestApplication = (props) => {
                     updateCollaborationLetter={updateCollaborationLetter}
                     uploadedIrbDocument={uploadedIrbDocument}
                     updateUploadedIrbDocument={updateIrbDocument}
-                    setDatasets={setDatasets}
                     setSelectedDatasets={setSelectedDatasets}
                     referenceId={formData.referenceId}
-                    draftDar={draftDar}
                   />
                 </ConditionalAccordion>
               </div>
 
-              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={stepContainerClassName}>
                 <ConditionalAccordion
-                  condition={existingDarsReadOnlyMode}
+                  condition={!!existingDarsReadOnlyMode}
                   title="Step 3: Research Purpose Statement"
                 >
                   <ResearchPurposeStatement
                     darCode={formData.darCode}
-                    readOnlyMode={existingDarsReadOnlyMode || isAttested}
+                    readOnlyMode={(existingDarsReadOnlyMode || isAttested)}
                     validation={formValidation.rusErrors}
-                    formValidationChange={val => formValidationChange('rusErrors', val)}
+                    formValidationChange={(val: { key: string, validation: ValidationError }) => formValidationChange('rusErrors', val)}
                     formFieldChange={formFieldChange}
                     formData={formData}
                   />
                 </ConditionalAccordion>
               </div>
 
-              {!existingDarsReadOnlyMode
-                ? (
+              {existingDarsReadOnlyMode
+                ? <div />
+                : (
                     <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} className="step-container">
                       <DataAccessAgreements
                         datasets={selectedDatasets}
@@ -922,12 +975,13 @@ const DataAccessRequestApplication = (props) => {
                           removeAddendumTab()
                         }}
                         isAttested={isAttested}
-                        attest={attemptSubmit}
+                        attest={() => {
+                          void attemptSubmit()
+                        }}
                         save={() => setShowDialogSave(true)}
                       />
                     </div>
-                  )
-                : <div />}
+                  )}
 
               {isAttested
                 && (
@@ -936,15 +990,13 @@ const DataAccessRequestApplication = (props) => {
                       doSubmit={doSubmit}
                       save={() => setShowDialogSave(true)}
                       isLoading={isLoading}
-                      formData={formData}
                       datasets={selectedDatasets}
-                      dataUseTranslations={dataUseTranslations}
                     />
                   </div>
                 )}
               {!isEmpty(votes)
                 && (
-                  <div id={VOTING_HISTORY_TAB_ID} className={existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                  <div id={VOTING_HISTORY_TAB_ID} className={stepContainerClassName}>
                     <VotingHistoryOverview dar={dar} votes={votes} />
                   </div>
                 )}
@@ -957,10 +1009,3 @@ const DataAccessRequestApplication = (props) => {
 }
 
 export default DataAccessRequestApplication
-
-DataAccessRequestApplication.propTypes = {
-  draftDar: PropTypes.bool.isRequired,
-  isProgressReportApplication: PropTypes.bool.isRequired,
-  existingDarsReadOnlyMode: PropTypes.bool,
-  collection: PropTypes.object,
-}

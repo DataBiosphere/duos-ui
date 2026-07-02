@@ -64,7 +64,7 @@ const ResearchPurposeRow = (props: Readonly<ResearchPurposeRowProps>) => {
 export interface ResearchPurposeStatementProps {
   darCode?: string | null
   formFieldChange: (change: FieldChange) => void
-  formData: Partial<CombinedDataAccessRequest>
+  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'>
   validation: RusErrors
   readOnlyMode?: boolean
   formValidationChange: (change: ValidationChange) => void

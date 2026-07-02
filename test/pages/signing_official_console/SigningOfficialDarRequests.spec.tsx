@@ -166,7 +166,7 @@ describe('SigningOfficialDarRequests', () => {
       status: 'Approved',
     })
     const approvedDarCollection: DarCollection = {
-      id: approvedCollection.darCollectionId,
+      darCollectionId: approvedCollection.darCollectionId,
       darCode: approvedCollection.darCode,
       createDate: approvedCollection.submissionDate,
       createUserId: 1,

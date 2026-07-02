@@ -18,7 +18,7 @@ import { Dayjs } from 'dayjs'
 
 const titleStyle: React.CSSProperties = { fontSize: '24px', fontWeight: 500, color: '#333333' }
 
-interface OntologyOption {
+export interface OntologyOption {
   id?: string
   key?: string
   value?: string
@@ -80,7 +80,7 @@ interface ValidationChange {
 export interface DataAccessRequestProps {
   formFieldChange: (change: FieldChange) => void
   batchFormFieldChange: (updates: Record<string, unknown>) => void
-  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & { ontologies: OntologyOption[] }
+  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & { ontologies?: OntologyOption[] }
   datasets: Dataset[]
   dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
   uploadedIrbDocument?: File | null
@@ -248,7 +248,7 @@ export default function DataAccessRequest(props: Readonly<DataAccessRequestProps
                 loadOptions={autocompleteOntologies}
                 validators={[FormValidators.REQUIRED]}
                 placeholder="Please enter one or more diseases"
-                defaultValue={formData.ontologies.map(formatOntologyForSelect)}
+                defaultValue={(formData.ontologies ?? []).map(formatOntologyForSelect)}
                 validation={validation.ontologies}
                 onValidationChange={onValidationChange}
                 onChange={({ key, value }: { key: string, value: OntologyOption[] }) => onChange({ key, value: value.map(formatOntologyForFormData) })}
