@@ -407,7 +407,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    void init()
+    init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       setNotificationData(notificationData)
     })
