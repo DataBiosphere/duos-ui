@@ -1,15 +1,14 @@
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import React from 'react'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-
-type ApproverStatusType = boolean | 'true' | 'false' | undefined
+import { ApproverStatusType } from 'src/types/model'
 
 interface ApproverStatusProps {
   readonly index: number
   readonly approverStatus: ApproverStatusType
   readonly readOnly?: boolean
   readonly validation?: ValidationError
-  readonly onValidationChange?: (params: { key: string, validator: ValidationError }) => void
+  readonly onValidationChange?: (params: { key: string, validation: ValidationError }) => void
   readonly onChange: ((params: { key: string, value: ApproverStatusType }) => void) | null
 }
 export default function ApproverStatus(props: ApproverStatusProps): React.JSX.Element {
