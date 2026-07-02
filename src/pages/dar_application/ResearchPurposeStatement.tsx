@@ -1,9 +1,32 @@
 import React from 'react'
 import { isEmpty } from 'src/utils/NodashUtil'
-import './dar_application.css'
-import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms'
+import 'src/pages/dar_application/dar_application.css'
+import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { CombinedDataAccessRequest } from 'src/types/model'
+import { RusErrors, ValidationError } from 'src/pages/dar_application/FormValidationState'
 
-const ResearchPurposeRow = (props) => {
+interface FieldChange {
+  key: string
+  value: unknown
+}
+
+interface ValidationChange {
+  key: string
+  validation: ValidationError
+}
+
+interface ResearchPurposeRowProps {
+  title: React.ReactNode
+  description?: string
+  id: string
+  defaultValue?: boolean
+  onChange: (change: FieldChange) => void
+  validation?: ValidationError
+  disabled?: boolean
+  onValidationChange: (change: ValidationChange) => void
+}
+
+const ResearchPurposeRow = (props: Readonly<ResearchPurposeRowProps>) => {
   const {
     title,
     description,
@@ -38,7 +61,16 @@ const ResearchPurposeRow = (props) => {
   )
 }
 
-export default function ResearchPurposeStatement(props) {
+export interface ResearchPurposeStatementProps {
+  darCode?: string | null
+  formFieldChange: (change: FieldChange) => void
+  formData: Partial<CombinedDataAccessRequest>
+  validation: RusErrors
+  readOnlyMode?: boolean
+  formValidationChange: (change: ValidationChange) => void
+}
+
+export default function ResearchPurposeStatement(props: Readonly<ResearchPurposeStatementProps>) {
   const {
     darCode,
     formFieldChange,
@@ -55,7 +87,7 @@ export default function ResearchPurposeStatement(props) {
   // however the inputs, when given a value, can either be a string (as seen with gender), or a boolean
   // isEmpty will give a false negative with booleans and isNil will give a false positive with empty strings
 
-  const onChange = ({ key, value }) => {
+  const onChange = ({ key, value }: FieldChange) => {
     formFieldChange({ key, value })
   }
 
