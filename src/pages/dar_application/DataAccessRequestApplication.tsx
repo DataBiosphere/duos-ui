@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
-import DataAccessRequest from 'src/pages/dar_application/DataAccessRequest'
+import DataAccessRequest, { OntologyOption } from 'src/pages/dar_application/DataAccessRequest'
 import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeStatement'
 import { translateDataUseRestrictionsFromDataUseArray, TranslationEntry } from 'src/libs/dataUseTranslation'
 import { Navigation, Notifications } from 'src/libs/utils'
@@ -69,7 +69,8 @@ const ApplicationTabs: AppTab[] = [
 // display-name string used for validation/piName-fallback (separate from the `researcher`
 // DuosUser state), and `profileName`/`pubmedId`/`scientificUrl` are legacy fields that are no
 // longer read anywhere but are still submitted with the DAR, so they're preserved here.
-type DarFormData = Partial<CombinedDataAccessRequest> & {
+type DarFormData = Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & {
+  ontologies?: OntologyOption[]
   researcher?: string
   institution?: string
   profileName?: string
