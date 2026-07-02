@@ -57,7 +57,7 @@ interface VoteGroup {
  * Step 6: Coalesce the algorithm decision per bucket
  * Step 7: Prepend an RP Vote bucket for the DAC to vote on the research purpose
  */
-export const binCollectionToBuckets = async (collection: DarCollection, dacIds: number[] = []): Promise<Bucket[]> => {
+export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'datasets'> & Partial<Pick<DarCollection, 'dars'>>, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
   // Find the most recent DAR
   const recentDar: DataAccessRequest = collection.dars === undefined
