@@ -15,7 +15,6 @@ import { CombinedDataAccessRequest, Dataset, DataUse, OntologyEntry } from 'src/
 import { TranslationEntry } from 'src/libs/dataUseTranslation'
 import { DarErrors, ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { Dayjs } from 'dayjs'
-import { DateValidationError } from '@mui/x-date-pickers'
 
 const titleStyle: React.CSSProperties = { fontSize: '24px', fontWeight: 500, color: '#333333' }
 
@@ -396,10 +395,7 @@ export default function DataAccessRequest(props: Readonly<DataAccessRequestProps
                 onChange={(value: Dayjs | string | undefined) => {
                   onChange({ key: 'irbProtocolExpiration', value })
                 }}
-                onError={(_error: DateValidationError | null, value: Dayjs | string | undefined) => {
-                  // Handle error if needed
-                  console.warn('Date picker error:', _error, value)
-                }}
+                onError={() => {}}
               />
             </div>
           )}
