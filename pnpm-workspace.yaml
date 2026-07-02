@@ -1,6 +1,12 @@
+packages:
+  - server
+
 allowBuilds:
+  core-js-pure: false
   cypress: false
   esbuild: false
 minimumReleaseAgeExclude:
   - qs@6.15.2
   - tmp@0.2.6
+  - '@babel/core@7.29.1'
+  - undici@7.28.0

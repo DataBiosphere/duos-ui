@@ -44,20 +44,51 @@ export type ParsedDACbotRule = DACbotRule & {
  */
 const DEFAULT_MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {}
 
-type RuleGroupLabel = 'Automatic approval' | 'Automatic open' | 'SO prior approval'
+type RuleGroupLabel
+  = | 'Automatically approve DARs when...'
+    | 'Send DARs to the entire DAC on submission by researchers?'
+    | 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?'
 
 /** Maps each ruleType to a visual group heading */
 const RULE_GROUP_LABELS: { [key: string]: RuleGroupLabel } = {
-  GRU_V1: 'Automatic approval',
-  HMB_V1: 'Automatic approval',
-  GRU_DSV1: 'Automatic approval',
-  HMB_DSV1: 'Automatic approval',
-  AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'Automatic open',
-  REQUIRE_SO_DAR_APPROVAL: 'SO prior approval',
+  GRU_V1: 'Automatically approve DARs when...',
+  HMB_V1: 'Automatically approve DARs when...',
+  GRU_DSV1: 'Automatically approve DARs when...',
+  HMB_DSV1: 'Automatically approve DARs when...',
+  AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'Send DARs to the entire DAC on submission by researchers?',
+  REQUIRE_SO_DAR_APPROVAL: 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?',
 }
 
 /** Order in which groups appear; rules with unknown types go last */
-const GROUP_ORDER: RuleGroupLabel[] = ['Automatic approval', 'Automatic open', 'SO prior approval']
+const GROUP_ORDER: RuleGroupLabel[] = [
+  'Automatically approve DARs when...',
+  'Send DARs to the entire DAC on submission by researchers?',
+  'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?',
+]
+
+/** Stable data-cy key for each group label — avoids fragile long-string selectors in tests */
+const RULE_GROUP_DATA_CY_KEYS: { [key: string]: string } = {
+  'Automatically approve DARs when...': 'automatic-approval',
+  'Send DARs to the entire DAC on submission by researchers?': 'automatic-open',
+  'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?': 'so-prior-approval',
+}
+
+/** Client-side description overrides for rules whose server description differs from desired display text */
+const DESCRIPTION_OVERRIDES: { [key: string]: string } = {
+  AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'Yes, automatically open DARs for all DAC members upon submission, without requiring Chair to open manually.',
+  REQUIRE_SO_DAR_APPROVAL: 'Yes, require approval by the Signing Official identified in the Data Access Request (DAR) prior to DAC Voting.',
+}
+
+const APPROVAL_PREFIX = 'Automatically approve Data Access Requests (DARs) when the'
+
+const stripApprovalPrefix = (description: string): string => {
+  if (!description.startsWith(APPROVAL_PREFIX)) return description
+  const remainder = description.slice(APPROVAL_PREFIX.length).trimStart()
+  const cleaned = remainder
+    .replace('primary purpose of the ', '')
+    .replace(' and ', ' and  \n')
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
+}
 
 /**
  * Groups parsed rules by their visual group label, preserving order within each group.
@@ -92,6 +123,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
 
       return {
         ...rule,
+        description: DESCRIPTION_OVERRIDES[rule.ruleType] ?? stripApprovalPrefix(rule.description),
         exclusiveRuleType,
         isDisabled: !!isExclusiveRuleEnabled,
       }
@@ -106,7 +138,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       setDACbotRules(rules)
       return rules
     }
-    catch (_e) {
+    catch {
       Notifications.showError(
         {
           severity: 'error',
@@ -136,15 +168,20 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       }
     }
     finally {
-      // Fetch updated rules to refresh state
-      const allRules = await DAC.fetchDACbotRules(dacId)
-      const createUpdatedRulesMap = (allRules: DACbotRule[], updatedRuleIds: number[]) => {
-        const rulesMap = new Map(allRules.map(r => [r.id, r]))
-        return (r: DACbotRule) => updatedRuleIds.includes(r.id) ? rulesMap.get(r.id) || r : r
+      try {
+        // Fetch updated rules to refresh state
+        const allRules = await DAC.fetchDACbotRules(dacId)
+        const createUpdatedRulesMap = (allRules: DACbotRule[], updatedRuleIds: number[]) => {
+          const rulesMap = new Map(allRules.map(r => [r.id, r]))
+          return (r: DACbotRule) => updatedRuleIds.includes(r.id) ? rulesMap.get(r.id) || r : r
+        }
+        setDACbotRules(prevRules =>
+          prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)),
+        )
       }
-      setDACbotRules(prevRules =>
-        prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)),
-      )
+      catch {
+        Notifications.showError({ text: 'Failed to refresh DAC rules.' })
+      }
     }
   }, [dacId, DACbotRules])
 
@@ -156,7 +193,6 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
 
   return (
     <div data-cy={dataCy} data-dac-id={dacId.toString()}>
-      <h4>Rule Automated Data Access Request (RADAR) Settings</h4>
       <p>
         Data Access Committees may automate Data Access Requests for a limited set of data use terms, namely datasets that are
         {' '}
@@ -178,19 +214,22 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
       <p>
         Check the box below to opt in to this feature, and then select the data use terms for which Data Access Requests you would like automated.
       </p>
-      {!isLoading && groupRules(parsedRules).map(({ label, rules }) => (
-        <div key={label} data-cy={`rule-group-${label.toLowerCase().replace(/\s+/g, '-')}`} style={{ marginBottom: '1.5rem' }}>
-          <h6 style={{ marginBottom: '0.5rem', color: '#333' }}>{label}</h6>
-          {rules.map(rule => (
-            <DACBotCheckboxComponent
-              rule={rule}
-              key={rule.id}
-              disableEdit={!userIsChair || rule.isDisabled}
-              onRuleChange={handleRuleChange}
-            />
-          ))}
-        </div>
-      ))}
+      {!isLoading && groupRules(parsedRules).map(({ label, rules }) => {
+        const dataCy = RULE_GROUP_DATA_CY_KEYS[label] ?? label.toLowerCase().replace(/\s+/g, '-')
+        return (
+          <div key={label} data-cy={`rule-group-${dataCy}`} style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ marginBottom: '0.5rem', color: '#333' }}>{label}</h4>
+            {rules.map(rule => (
+              <DACBotCheckboxComponent
+                rule={rule}
+                key={rule.id}
+                disableEdit={!userIsChair || rule.isDisabled}
+                onRuleChange={handleRuleChange}
+              />
+            ))}
+          </div>
+        )
+      })}
     </div>
   )
 }

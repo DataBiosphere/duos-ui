@@ -4,7 +4,7 @@ import { DarCollection } from 'src/types/model'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 
 const darCollection: DarCollection = {
-  id: 1234,
+  darCollectionId: 1234,
   darCode: 'DAR-XXX',
   createDate: 1669229413840,
   createUserId: 7,

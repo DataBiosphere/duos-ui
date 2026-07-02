@@ -1,0 +1,348 @@
+import React, { useMemo, useState } from 'react'
+import homeHeaderBackground from 'src/images/home_header_background.png'
+import duosLogoImg from 'src/images/duos_logo.svg'
+import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
+import broadLogo from 'src/images/broad_logo_allwhite.png'
+import { OverflowTooltip } from 'src/components/Tooltips'
+import { Link, useLocation } from 'react-router-dom'
+import { getLibraryVersions } from 'src/libs/libraryVersions'
+import { handleSignIn } from 'src/libs/signInUtils'
+import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
+
+export interface HomeProps {
+  isLogged: boolean
+}
+
+const homeTitle: React.CSSProperties = {
+  color: '#FFFFFF',
+  fontFamily: 'Montserrat',
+  fontSize: '28px',
+  fontWeight: 600,
+  textAlign: 'center',
+  padding: '0 5rem',
+}
+
+const homeBannerDescription: React.CSSProperties = {
+  color: '#FFFFFF',
+  fontFamily: 'Montserrat',
+  fontSize: '20px',
+  textAlign: 'center',
+  whiteSpace: 'pre-wrap',
+  padding: '0 10rem',
+}
+
+const duosLogoStyle: React.CSSProperties = {
+  height: '80px',
+  width: '300px',
+  display: 'block',
+  margin: '0 auto 3rem',
+  padding: '0 3rem',
+}
+
+const header: React.CSSProperties = {
+  color: '#1F3B50',
+  fontFamily: 'Montserrat',
+  fontSize: '24px',
+  fontWeight: 600,
+  textAlign: 'center',
+  padding: '0 5rem',
+}
+
+const subHeader: React.CSSProperties = {
+  color: '#1F3B50',
+  fontFamily: 'Montserrat',
+  fontSize: '16px',
+  textAlign: 'center',
+  whiteSpace: 'pre-wrap',
+  padding: '0 5rem',
+}
+
+const description: React.CSSProperties = {
+  color: '#1F3B50',
+  fontFamily: 'Montserrat',
+  fontSize: '14px',
+  textAlign: 'center',
+  textIndent: '10px',
+  whiteSpace: 'pre-wrap',
+  padding: '10px 1rem',
+}
+
+const logoGrid: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '2rem',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
+  maxWidth: '1400px',
+  margin: '0 auto',
+}
+
+const baseCard: React.CSSProperties = {
+  width: '320px',
+  height: '160px',
+  borderRadius: '6px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'relative',
+  overflow: 'hidden',
+}
+
+const logoImg: React.CSSProperties = {
+  maxWidth: '100%',
+  maxHeight: '100%',
+  objectFit: 'contain',
+  display: 'block',
+}
+
+const Home = ({ isLogged }: Readonly<HomeProps>) => {
+  const location = useLocation()
+  const [showContactModal, setShowContactModal] = useState(false)
+
+  const featuredLibraries = useMemo(() => {
+    const allLibraries = getLibraryVersions(null, null)
+    return Object.entries(allLibraries)
+      .filter(([_key, library]) => library.featured)
+      .map(([key, library]) => ({ key, ...library }))
+      .sort((a, b) => {
+        if (a.order !== b.order) {
+          return a.order - b.order
+        }
+        return a.key.localeCompare(b.key)
+      })
+  }, [])
+
+  return (
+    <>
+      <style>
+        {`
+        .logo-card {
+          width: 320px;
+          height: 160px;
+        }
+        .library-item {
+          width: 344px;
+          height: 240px;
+          border: 1.5px solid rgba(0, 0, 0, 0.08);
+          border-radius: 12px;
+          padding: 0.75rem;
+          cursor: pointer;
+          box-sizing: border-box;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        .library-item:hover {
+          transform: translateY(-4px) scale(1.03);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+          border-color: rgba(0, 0, 0, 0.18);
+        }
+        .library-item-label {
+          height: 44px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          overflow: hidden;
+        }
+        @media (max-width: 768px) {
+          .logo-card {
+            width: 280px;
+            height: 140px;
+          }
+          .library-item {
+            width: 304px;
+            height: 220px;
+          }
+          .logo-grid {
+            gap: 1.5rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .logo-card {
+            width: 100%;
+            max-width: 320px;
+            height: 160px;
+          }
+          .library-item {
+            width: 100%;
+            max-width: 344px;
+            height: 240px;
+          }
+          .logo-grid {
+            gap: 1rem !important;
+          }
+        }
+      `}
+      </style>
+      <div className="row">
+        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
+            <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
+            <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+              <img style={duosLogoStyle} alt="DUOS logo" src={duosLogoImg} />
+              <h1 style={homeTitle}>Data Use Oversight System</h1>
+              <div className="hidden-xs" style={homeBannerDescription}>
+                Access data faster.
+                {' '}
+              </div>
+            </div>
+          </div>
+          <div className="row" style={{ background: '#eff0f2', padding: '48px 0 60px 0' }}>
+            <div className="col-lg-4 col-md-4">
+              <p style={header}>DUOS for DACs</p>
+              <p style={description}>
+                Swiftly manage data access requests
+                <br />
+                {' '}
+                and clearly track data use compliance.
+                <br />
+                {' '}
+                Interested in using DUOS for your DAC?
+                <br />
+                {' '}
+                Request a meeting with our team
+                <br />
+                <button
+                  type="button"
+                  onClick={() => setShowContactModal(true)}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline', font: 'inherit' }}
+                >
+                  here
+                </button> to learn more.
+              </p>
+              <SupportRequestModal
+                showModal={showContactModal}
+                onCloseRequest={() => setShowContactModal(false)}
+                url={location.pathname}
+              />
+              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
+                <a id="blog-support-dac-link" href="https://duos.blog/help/dacguide/" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-4 ">
+              <p style={header}>DUOS for Signing Officials</p>
+              <p style={description}>Grant permissions to principal investigators to request data.</p>
+              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
+                <a href="https://duos.blog/help/preauthorize_researchers_librarycards/" target="_blank" rel="noreferrer" id="blog-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-4">
+              <p style={header}>Looking for data?</p>
+              <p style={description}>
+                Find and request access to 100s of datasets through DUOS!
+                <br />
+                <button
+                  type="button"
+                  onClick={() => handleSignIn('/datalibrary')}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline', font: 'inherit' }}
+                >
+                  Sign in
+                </button> to get started.
+              </p>
+            </div>
+          </div>
+
+          <section style={{ margin: '5rem auto', padding: '0 2rem' }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
+              <p style={header}>Search Data Libraries in DUOS</p>
+              <p style={description}>
+                Institutions, programs, and studies use curated Data Libraries to showcase their science! Check out the options below and contact us to request your own.
+              </p>
+
+              <div style={logoGrid} className="logo-grid">
+                {featuredLibraries.map((library) => {
+                  const libraryPath = library.key.startsWith('/') ? library.key : `/datalibrary/${library.key}`
+                  const libraryName = library.title.replace(' Data Library', '')
+                  const tooltipText = isLogged
+                    ? libraryName
+                    : `Please login to access ${libraryName} Data Library`
+
+                  const label = libraryName
+
+                  const cardStyle: React.CSSProperties = library.key === 'broad'
+                    ? { ...baseCard, background: '#1F3B50', padding: '15px' }
+                    : baseCard
+
+                  const logoSrc = library.key === 'broad'
+                    ? broadLogo
+                    : library.icon ?? undefined
+
+                  return (
+                    <OverflowTooltip key={library.key} id={library.key} tooltipText={tooltipText}>
+                      <div className="library-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="logo-card" style={cardStyle}>
+                          <Link
+                            to={isLogged ? libraryPath : '#'}
+                            onClick={(e) => {
+                              if (!isLogged) {
+                                e.preventDefault()
+                                handleSignIn(libraryPath)
+                              }
+                            }}
+                            style={{ textDecoration: 'none', display: 'flex', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
+                          >
+                            {logoSrc
+                              ? (
+                                  <img
+                                    src={logoSrc}
+                                    alt={libraryName}
+                                    loading="lazy"
+                                    style={{
+                                      ...logoImg,
+                                      width: '100%',
+                                      height: '100%',
+                                      objectFit: 'contain',
+                                      objectPosition: 'center',
+                                    }}
+                                  />
+                                )
+                              : (
+                                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#1F3B50', textAlign: 'center', padding: '0 1rem' }}>
+                                    {libraryName}
+                                  </span>
+                                )}
+                          </Link>
+                        </div>
+                        {label && (
+                          <div
+                            className="library-item-label"
+                            style={{
+                              fontSize: '16px',
+                              color: '#333',
+                              textAlign: 'center',
+                              fontWeight: '600',
+                              wordWrap: 'break-word',
+                              width: '100%',
+                            }}
+                          >
+                            {label}
+                          </div>
+                        )}
+                      </div>
+                    </OverflowTooltip>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+          <div className="row">
+            <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
+              <h1 style={header}>How does DUOS expedite compliant data sharing?</h1>
+              <h3 style={subHeader}>
+                Researchers use DUOS to share and request access to data, and data access committees
+                {' '}
+                <br />
+                {' '}
+                and institutional officials use DUOS to review and approve research uses of the data.
+              </h3>
+              <div>
+                <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25% 8.25% 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default Home

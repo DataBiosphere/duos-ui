@@ -8,7 +8,7 @@ import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
 import { Auth } from 'src/libs/auth/auth'
-import { NotificationService } from 'src/libs/notificationService'
+import { Banner, NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { withStyles } from 'tss-react/mui'
 import { SupportRequestModal } from './modals/SupportRequestModal'
@@ -17,6 +17,7 @@ import { Notification } from './Notification'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface SubTab {
   label: string
@@ -34,15 +35,10 @@ export interface Tab {
   isRendered: (user: DuosUser) => boolean
 }
 
-interface NotificationData {
-  message: string
-  level: 'info' | 'warning' | 'danger' | 'success'
-}
-
 interface DuosHeaderState {
   showSupportRequestModal: boolean
   hover: boolean
-  notificationData: NotificationData[]
+  notificationData: Banner[]
   openDrawer: boolean
   showProfileLinks: boolean
 }
@@ -165,6 +161,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   })
 
   const { activeTab, setActiveTab } = useNavigationState()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
@@ -185,6 +182,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const signOut = (): void => {
+    queryClient.clear()
     navigate('/home')
     toggleDrawer(false)
     void Auth.signOut()

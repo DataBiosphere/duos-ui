@@ -16,11 +16,19 @@ vi.mock('@fastify/session', () => ({
   default: vi.fn(async () => {}),
 }))
 
-// Mock static as a no-op; sendFile is tested via integration tests against the
-// real plugin. Scoped plugins can't reliably decorate the root reply in tests.
-vi.mock('@fastify/static', () => ({
-  default: vi.fn(async () => {}),
-}))
+// Mock @fastify/vite: decorate the instance so buildApp() can call vite.ready()
+// and setNotFoundHandler can call reply.html() without starting a real Vite server.
+vi.mock('@fastify/vite', () => {
+  // fastify-plugin sets Symbol.for('skip-override') so decorations reach the
+  // parent instance; replicate that here without importing fastify-plugin.
+  const plugin = async (fastify: FastifyInstance) => {
+    fastify.decorate('vite', { ready: vi.fn(async () => {}) })
+    fastify.decorateReply('html', vi.fn(() => ''))
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(plugin as any)[Symbol.for('skip-override')] = true
+  return { default: plugin }
+})
 
 // ---------------------------------------------------------------------------
 // Setup

@@ -223,7 +223,8 @@ describe('LibraryFilters — collapseable panel', () => {
     mountWithToggle(false)
     cy.contains('Access Request Process').should('not.exist')
     cy.contains('Filters').should('not.exist')
-    cy.get('[aria-label="Expand filters"]').should('exist')
+    cy.get('[aria-label="Show filters"]').should('exist')
+    cy.contains('Show filters').should('exist')
   })
 
   it('calls onToggle when the chevron button is clicked while open', () => {
@@ -234,7 +235,7 @@ describe('LibraryFilters — collapseable panel', () => {
 
   it('calls onToggle when expand button is clicked while closed', () => {
     mountWithToggle(false)
-    cy.get('[aria-label="Expand filters"]').click()
+    cy.get('[aria-label="Show filters"]').click()
     cy.get('@onToggle').should('have.been.calledOnce')
   })
 
@@ -248,7 +249,7 @@ describe('LibraryFilters — collapseable panel', () => {
       />,
     )
     cy.get('[aria-label="Collapse filters"]').should('not.exist')
-    cy.get('[aria-label="Expand filters"]').should('not.exist')
+    cy.get('[aria-label="Show filters"]').should('not.exist')
   })
 
   it('does not show Clear button when closed even with active filters', () => {

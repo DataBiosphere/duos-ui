@@ -3,6 +3,7 @@ import { ElasticsearchQuery, ElasticsearchResponse, QueryClause, StudyAggregatio
 import { PaginationState, SortState, StudyAggregation } from 'src/types/library'
 import { makeStudyColumns } from 'src/components/data_library/columns/studyColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { StudyDataEsFields } from 'src/libs/data-metadata'
 
 export const studyAsset: AssetDefinition = {
   label: { singular: 'Study', plural: 'Studies' },
@@ -20,7 +21,7 @@ export const studyAsset: AssetDefinition = {
     'dataUse.secondary.code',
     'dac.dacName',
     'datasetIdentifier',
-    'study.data.tags',
+    StudyDataEsFields.TAGS,
     'study.phenotype',
   ],
 

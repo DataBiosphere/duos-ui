@@ -85,11 +85,49 @@ export default function UserProfile() {
       }}
     >
       <div className="header">
-        <Notification>
-          {notificationData}
-        </Notification>
-        <div style={{ marginLeft: '-2em' }}>
-          <TableHeaderSection title="Your Profile" />
+        <Notification notificationData={notificationData} />
+        <div
+          style={{
+            flexDirection: 'column',
+          }}
+        >
+          <div
+            style={{
+              marginBottom: '40px',
+            }}
+          >
+            <PageHeading
+              id="researcherProfile"
+              color="common"
+              title="Your Profile"
+              descriptionStyle={{ fontSize: '10000px' }}
+              imgSrc={userProfileIcon}
+              iconSize="large"
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+            }}
+          >
+            <img
+              src={ga4ghLogo}
+              alt="GA4GH Logo"
+              style={{
+                width: '166px',
+                height: '48px',
+                top: '213px',
+                left: '230px',
+                marginRight: '50px',
+              }}
+            />
+            <p>
+              DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found{' '}
+              <a href="https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md">
+                here.
+              </a>
+            </p>
+          </div>
         </div>
       </div>
       <h1

@@ -46,14 +46,14 @@ export const InstitutionPicker = (props: InstitutionPickerProps) => {
     }
   }
 
-  const validation = isRequired ? [FormValidators.REQUIRED] : []
+  const validators = isRequired ? [FormValidators.REQUIRED] : []
 
   return (
     <FormField
       id={fieldId}
       title={fieldTitle}
       isRendered={!isEmpty(institutionList)}
-      validation={validation}
+      validators={validators}
       type={FormFieldTypes.SELECT}
       selectOptions={institutionList.map(inst => ({ displayText: inst.name, id: inst.id }))}
       isCreatable={false}

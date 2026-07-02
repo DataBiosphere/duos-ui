@@ -1,0 +1,81 @@
+import React from 'react'
+import Modal from 'react-modal'
+import CloseIconComponent from 'src/components/CloseIconComponent'
+import 'src/pages/dar_application/collaborator/DeleteCollaboratorModal.css'
+import { styled } from '@mui/material/styles'
+import Stack from '@mui/material/Stack'
+import Button from '@mui/material/Button'
+
+const duosBlue = '#0948B7'
+const duosBlueHover = 'rgb(9,72,183)'
+
+const SecondaryButton = styled(Button)(() => ({
+  'fontFamily': 'Montserrat, sans-serif',
+  'color': duosBlue,
+  'backgroundColor': 'white',
+  'borderRadius': '4px',
+  'fontSize': '1.45rem',
+  'borderColor': duosBlue,
+  '&:hover': {
+    borderColor: duosBlueHover,
+    color: duosBlueHover,
+  },
+}))
+
+const PrimaryButton = styled(Button)(({ theme }) => ({
+  'fontFamily': 'Montserrat, sans-serif',
+  'color': theme.palette.getContrastText(duosBlue),
+  'backgroundColor': duosBlue,
+  'borderRadius': '4px',
+  'fontSize': '1.45rem',
+  '&:hover': {
+    backgroundColor: duosBlueHover,
+  },
+}))
+
+export interface DeleteCollaboratorModalProps {
+  showDelete: boolean
+  closeDelete: () => void
+  header: React.ReactNode
+  title: React.ReactNode
+  message: React.ReactNode
+  onConfirm: () => void
+  styleOverride?: React.CSSProperties
+}
+
+const DeleteModal = (props: Readonly<DeleteCollaboratorModalProps>) => {
+  const { showDelete, closeDelete, header, title, message, onConfirm, styleOverride = {} } = props
+  const closeFn = () => closeDelete()
+
+  const actionButtons = (
+    <Stack spacing={2} direction="row">
+      <PrimaryButton variant="contained" className="delete-modal-primary-button" onClick={onConfirm}>
+        Delete
+      </PrimaryButton>
+      <SecondaryButton variant="outlined" className="delete-modal-secondary-button" onClick={closeFn}>
+        Cancel
+      </SecondaryButton>
+    </Stack>
+  )
+
+  return (
+    <Modal
+      isOpen={showDelete}
+      onRequestClose={closeFn}
+      shouldCloseOnEsc={true}
+      shouldCloseOnOverlayClick={true}
+      className="delete-modal"
+      style={{ content: styleOverride }}
+    >
+      <div>
+        <CloseIconComponent closeFn={closeFn} />
+        <div className="delete-modal-header">{header}</div>
+        <div className="delete-modal-title">{title}</div>
+        <div className="delete-modal-message">{message}</div>
+        <div className="delete-modal-actions">{actionButtons}</div>
+      </div>
+    </Modal>
+  )
+}
+
+export default DeleteModal

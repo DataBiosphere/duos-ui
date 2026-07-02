@@ -7,13 +7,11 @@ import { envGroups } from 'src/utils/EnvironmentUtils'
 import HealthCheck from 'src/pages/HealthCheck'
 import Status from 'src/pages/Status'
 import BackgroundSignIn from 'src/pages/BackgroundSignIn'
-import NIHICWebform from 'src/pages/NIHicWebform'
 import NIHPilotInfo from 'src/pages/NIHPilotInfo'
 import PrivacyPolicy from 'src/pages/PrivacyPolicy'
 import CookiePolicy from 'src/pages/CookiePolicy'
 import TermsOfService from 'src/pages/TermsOfService'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
-import ConsentTextGenerator from 'src/pages/ConsentTextGenerator'
 import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from 'src/pages/DMSPolicyInfo'
 import RequestForm from 'src/pages/user_profile/RequestForm'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
@@ -37,6 +35,7 @@ import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import EditDac from 'src/pages/manage_dac/EditDac'
+import DacProfile from 'src/pages/manage_dac/DacProfile'
 import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
 import ChairConsole from 'src/pages/ChairConsole'
@@ -63,13 +62,11 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/home" element={<Home {...props} />} />
       <Route path="/status" element={<Status />} />
       <Route path="/liveness" element={<HealthCheck />} />
-      <Route path="/nih_ic_webform" element={<NIHICWebform />} />
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/cookie_policy" element={<CookiePolicy />} />
       <Route path="/tos" element={<TermsOfService />} />
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
-      <Route path="/consent_text_generator" element={<ConsentTextGenerator />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
       <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
@@ -121,9 +118,9 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/manage_dac" element={<ManageDac />} />
+          <Route path="/manage_dac/:dacId" element={<DacProfile />} />
           <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
           <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
-          <Route path="/manage_edit_dac_daa/:dacId" element={<EditDac />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
           <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />

@@ -1,0 +1,423 @@
+import React from 'react'
+import { DAR } from 'src/libs/ajax/DAR'
+import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
+import {
+  needsIrbApprovalDocument,
+  needsCollaborationLetter,
+  newIrbDocumentExpirationDate,
+} from 'src/utils/darFormUtils'
+import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets'
+import { DuosDatePicker } from 'src/components/DuosDatePicker'
+import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements'
+import { DownloadLink } from 'src/components/DownloadLink'
+import { CombinedDataAccessRequest, Dataset, DataUse, OntologyEntry } from 'src/types/model'
+import { TranslationEntry } from 'src/libs/dataUseTranslation'
+import { DarErrors, ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { Dayjs } from 'dayjs'
+
+const titleStyle: React.CSSProperties = { fontSize: '24px', fontWeight: 500, color: '#333333' }
+
+export interface OntologyOption {
+  id?: string
+  key?: string
+  value?: string
+  label?: string
+  displayText?: string
+  item?: OntologyEntry | OntologyOption
+}
+
+const formatOntologyForSelect = (ontology: OntologyEntry | OntologyOption): OntologyOption => {
+  return {
+    value: ontology.id,
+    displayText: ontology.label,
+    item: ontology,
+  }
+}
+
+const isOntologyOption = (ontology: OntologyEntry | OntologyOption): ontology is OntologyOption => 'item' in ontology
+
+const formatOntologyForFormData = (ontology: OntologyEntry | OntologyOption): OntologyOption => {
+  if (!isOntologyOption(ontology)) {
+    return {
+      id: ontology.id,
+      key: ontology.id,
+      value: ontology.id,
+      label: ontology.label,
+      item: ontology,
+    }
+  }
+
+  const nested = ontology.item
+  const id = ontology.id ?? nested?.id
+  const label = ontology.label ?? nested?.label
+  return {
+    id,
+    key: id,
+    value: id,
+    label,
+    item: nested ?? ontology,
+  }
+}
+
+const autocompleteOntologies = (query: string | string[], callback: (options: OntologyOption[]) => void) => {
+  DAR.getAutoCompleteOT(query).then(
+    (items) => {
+      callback(items.map(formatOntologyForSelect))
+    })
+}
+
+interface FieldChange {
+  key: string
+  value: unknown
+}
+
+interface ValidationChange {
+  key: string
+  validation: ValidationError
+}
+
+export interface DataAccessRequestProps {
+  formFieldChange: (change: FieldChange) => void
+  batchFormFieldChange: (updates: Record<string, unknown>) => void
+  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & { ontologies?: OntologyOption[] }
+  datasets: Dataset[]
+  dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
+  uploadedIrbDocument?: File | null
+  updateUploadedIrbDocument: (document: File | undefined, expiration: string) => void
+  uploadedCollaborationLetter?: File | null
+  updateCollaborationLetter: (letter: File | undefined) => void
+  setSelectedDatasets: (datasets: Dataset[]) => void
+  validation: DarErrors
+  readOnlyMode: boolean
+  includeInstructions?: boolean
+  formValidationChange: (change: ValidationChange) => void
+  ariaLevel?: number
+  referenceId?: string
+}
+
+export default function DataAccessRequest(props: Readonly<DataAccessRequestProps>) {
+  const {
+    formFieldChange,
+    batchFormFieldChange,
+    formData,
+    datasets,
+    dataUseTranslations,
+    uploadedIrbDocument,
+    updateUploadedIrbDocument,
+    uploadedCollaborationLetter,
+    updateCollaborationLetter,
+    setSelectedDatasets,
+    validation,
+    readOnlyMode,
+    includeInstructions,
+    formValidationChange,
+    ariaLevel = 2,
+    referenceId,
+  } = props
+
+  const irbProtocolExpiration = formData.irbProtocolExpiration ?? newIrbDocumentExpirationDate()
+
+  // I need to figure out a way to only actually remove them without using onChange
+  const onChange = ({ key, value }: FieldChange) => {
+    formFieldChange({ key, value })
+  }
+
+  const onValidationChange = ({ key, validation }: ValidationChange) => {
+    formValidationChange({ key, validation })
+  }
+
+  const primaryChange = ({ key, value }: FieldChange) => {
+    const newFormData: Record<string, unknown> = {
+      diseases: null,
+      hmb: null,
+      poa: null,
+      methods: null,
+      other: null,
+    }
+
+    // ensure that non-visible fields are unselected
+    for (const key0 in newFormData) {
+      if (key === key0) {
+        newFormData[key0] = value
+        break
+      }
+      else {
+        newFormData[key0] = false
+      }
+    }
+
+    // if, after updating, 'diseases', 'hmb', 'poa', and 'methods' are false, then 'other' is true.
+    if (newFormData['diseases'] === false && newFormData['hmb'] === false && newFormData['poa'] === false && newFormData['methods'] === false) {
+      newFormData['other'] = true
+    }
+
+    batchFormFieldChange(newFormData)
+  }
+
+  return (
+    <div data-cy="data-access-request">
+      <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
+
+        <div>
+          <h3>2.1 Select Dataset(s)</h3>
+          <SelectableDatasets
+            disabled={readOnlyMode}
+            datasets={datasets}
+            setSelectedDatasets={setSelectedDatasets}
+            referenceId={referenceId}
+          />
+        </div>
+
+        <FormField
+          id="projectTitle"
+          key="projectTitle"
+          title="2.2 Descriptive Title of Project"
+          titleStyle={titleStyle}
+          disabled={readOnlyMode}
+          validators={[FormValidators.REQUIRED]}
+          validation={validation.projectTitle}
+          description={includeInstructions ? 'Please note that coordinated requests by External Collaborators should each use the same title.' : ''}
+          placeholder="Project Title"
+          defaultValue={formData.projectTitle}
+          onChange={onChange}
+          onValidationChange={onValidationChange}
+        />
+
+        <div className="dar-form-notice-card">
+          <span>
+            In sections 2.3, 2.4, and 2.5, you are attesting that your proposed research will remain with the scope of the items selected below, and will be liable for any deviations. Further, it is to your benefit to be as specific as possible in your selections, as it will maximize the data available to you.
+          </span>
+        </div>
+
+        <FormField
+          id="rus"
+          key="rus"
+          disabled={readOnlyMode}
+          type={FormFieldTypes.TEXTAREA}
+          title="2.3 Research Use Statement (RUS)"
+          titleStyle={titleStyle}
+          validators={[FormValidators.REQUIRED]}
+          description={(
+            <p>
+              A RUS is a brief description of the applicant&apos;s proposed use of the dataset(s). The RUS will be
+              reviewed by all parties responsible for data covered by this Data Access Request. Please note that if
+              access is approved, you agree that the RUS, along with your name and institution, will be included on
+              this website to describe your research project to the public.{' '}
+              <span>
+                Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them.
+              </span>
+            </p>
+          )}
+          placeholder={`Please limit your RUS to ${FORM_TEXT_AREA_MAX_LENGTH} characters.`}
+          rows={6}
+          maxLength={FORM_TEXT_AREA_MAX_LENGTH}
+          ariaLevel={ariaLevel + 3}
+          defaultValue={formData.rus}
+          validation={validation.rus}
+          onValidationChange={onValidationChange}
+          onChange={onChange}
+        />
+
+        <FormField
+          id="diseases"
+          key="diseases"
+          title="Is the primary purpose of this research to investigate a specific disease(s)?"
+          disabled={readOnlyMode}
+          type={FormFieldTypes.YESNORADIOGROUP}
+          orientation="horizontal"
+          defaultValue={formData.diseases}
+          validators={[FormValidators.REQUIRED]}
+          validation={validation.diseases}
+          onValidationChange={onValidationChange}
+          onChange={primaryChange}
+        />
+
+        {formData.diseases === true
+          && (
+            <div style={{ marginTop: '2.0rem', marginBottom: '1.0rem' }}>
+              <FormField
+                id="ontologies"
+                key="ontologies"
+                type={FormFieldTypes.SELECT}
+                disabled={readOnlyMode}
+                isMulti={true}
+                isCreatable={false}
+                isAsync={true}
+                optionsAreString={false}
+                loadOptions={autocompleteOntologies}
+                validators={[FormValidators.REQUIRED]}
+                placeholder="Please enter one or more diseases"
+                defaultValue={(formData.ontologies ?? []).map(formatOntologyForSelect)}
+                validation={validation.ontologies}
+                onValidationChange={onValidationChange}
+                onChange={({ key, value }: { key: string, value: OntologyOption[] }) => onChange({ key, value: value.map(formatOntologyForFormData) })}
+              />
+            </div>
+          )}
+
+        {formData.diseases === false
+          && (
+            <FormField
+              id="hmb"
+              key="hmb"
+              type={FormFieldTypes.YESNORADIOGROUP}
+              disabled={readOnlyMode}
+              title="Is the primary purpose health/medical/biomedical research in nature?"
+              orientation="horizontal"
+              defaultValue={formData.hmb}
+              validators={[FormValidators.REQUIRED]}
+              validation={validation.hmb}
+              onValidationChange={onValidationChange}
+              onChange={primaryChange}
+            />
+          )}
+        {formData.hmb === false
+          && (
+            <FormField
+              id="poa"
+              key="poa"
+              type={FormFieldTypes.YESNORADIOGROUP}
+              disabled={readOnlyMode}
+              title="Is the primary purpose of this research regarding population origins or ancestry?"
+              orientation="horizontal"
+              defaultValue={formData.poa}
+              validators={[FormValidators.REQUIRED]}
+              validation={validation.poa}
+              onValidationChange={onValidationChange}
+              onChange={primaryChange}
+            />
+          )}
+
+        {formData.poa === false
+          && (
+            <FormField
+              id="methods"
+              key="methods"
+              type={FormFieldTypes.YESNORADIOGROUP}
+              disabled={readOnlyMode}
+              title="Is the primary purpose of this research to develop or validate new methods for analyzing/interpreting data?"
+              orientation="horizontal"
+              defaultValue={formData.methods}
+              validators={[FormValidators.REQUIRED]}
+              validation={validation.methods}
+              onValidationChange={onValidationChange}
+              onChange={primaryChange}
+            />
+          )}
+
+        {formData.methods === false
+          && (
+            <FormField
+              id="otherText"
+              key="otherText"
+              disabled={readOnlyMode}
+              title="If none of the above, please describe the primary purpose of your research:"
+              placeholder="Please specify..."
+              defaultValue={formData.otherText}
+              validators={[FormValidators.REQUIRED]}
+              validation={validation.otherText}
+              onValidationChange={onValidationChange}
+              onChange={onChange}
+            />
+          )}
+
+        <FormField
+          id="nonTechRus"
+          key="nonTechRus"
+          disabled={readOnlyMode}
+          type={FormFieldTypes.TEXTAREA}
+          title="2.4 Non-Technical Summary"
+          titleStyle={titleStyle}
+          validators={[FormValidators.REQUIRED]}
+          description={includeInstructions ? 'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).' : ''}
+          placeholder="Please limit your your non-technical summary to 1100 characters"
+          rows={6}
+          maxLength={1100}
+          ariaLevel={ariaLevel + 3}
+          defaultValue={formData.nonTechRus}
+          validation={validation.nonTechRus}
+          onValidationChange={onValidationChange}
+          onChange={onChange}
+        />
+
+        <DataUseAcknowledgements
+          title="2.5 Data Use Acknowledgements"
+          datasets={datasets}
+          dataUseTranslations={dataUseTranslations}
+          formData={formData}
+          readOnlyMode={readOnlyMode}
+          onChange={onChange}
+          onValidationChange={onValidationChange}
+          validation={validation}
+        />
+
+        {needsIrbApprovalDocument(datasets)
+          && (
+            <FormFieldTitle
+              key="irbApprovalDocument"
+              description="One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval."
+            />
+          )}
+        {needsIrbApprovalDocument(datasets)
+          && (
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <FormField
+                  key="irbDocument"
+                  type={FormFieldTypes.FILE}
+                  disabled={readOnlyMode}
+                  id="irbDocument"
+                  defaultValue={uploadedIrbDocument || {
+                    name: formData.irbDocumentName,
+                  }}
+                  validation={validation.irbDocument}
+                  onValidationChange={onValidationChange}
+                  onChange={({ value }: { value: File | undefined }) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
+                />
+                {readOnlyMode && formData.irbDocumentName && formData.irbDocumentLocation && referenceId && (
+                  <div style={{ marginTop: '10px' }}>
+                    <DownloadLink
+                      label="Download IRB Document"
+                      onDownload={async () => {
+                        await DAR.downloadDARDocument(referenceId, 'irbDocument', formData.irbDocumentName as string)
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <div style={{ marginTop: 12 }}>Expiration Date:</div>
+              <DuosDatePicker
+                readOnly={readOnlyMode}
+                id="irbProtocolExpiration"
+                inputFormat="YYYY-MM-DD"
+                defaultValue={irbProtocolExpiration}
+                onChange={(value: Dayjs | string | undefined) => {
+                  onChange({ key: 'irbProtocolExpiration', value })
+                }}
+                onError={() => {}}
+              />
+            </div>
+          )}
+
+        {needsCollaborationLetter(datasets)
+          && (
+            <FormField
+              type={FormFieldTypes.FILE}
+              readOnly={readOnlyMode}
+              defaultValue={uploadedCollaborationLetter || {
+                name: formData.collaborationLetterName,
+              }}
+              id="collaborationLetter"
+              validation={validation.collaborationLetter}
+              onValidationChange={onValidationChange}
+              description="One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here."
+              onChange={({ value }: { value: File | undefined }) => updateCollaborationLetter(value)}
+            />
+          )}
+
+      </div>
+    </div>
+
+  )
+}

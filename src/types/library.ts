@@ -25,6 +25,7 @@ export interface LibraryVersionNew {
   description?: string
   featured: boolean
   order: number
+  showAllControlled?: boolean
 }
 
 export enum AccessManagement {
@@ -252,3 +253,16 @@ export interface FundingResourceAsset extends Omit<FundingResource, 'studyId'> {
   studyId: number
   studyName: string
 }
+
+export const ALL_LIBRARY_TABS: TabConfig[] = [
+  { key: AssetType.STUDIES, label: 'Studies' },
+  { key: AssetType.DATASETS, label: 'Datasets' },
+  { key: AssetType.MODELS, label: 'AI Models' },
+  { key: AssetType.WORKSPACES, label: 'Workspaces' },
+  { key: AssetType.CLINICAL_TRIALS, label: 'Clinical Trials' },
+  { key: AssetType.BIOSPECIMENS, label: 'Biospecimens' },
+  { key: AssetType.PUBLICATIONS, label: 'Publications' },
+  { key: AssetType.PRESENTATIONS, label: 'Presentations' },
+  { key: AssetType.INTELLECTUAL_PROPERTY, label: 'Intellectual Property' },
+  { key: AssetType.FUNDING_RESOURCES, label: 'Funding Resources' },
+]

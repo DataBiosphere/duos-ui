@@ -53,7 +53,6 @@ describe('DACBotComponent', () => {
     })
 
     it('should render component with heading and description', () => {
-      cy.contains('h4', 'Rule Automated Data Access Request (RADAR) Settings').should('be.visible')
       cy.contains('p', 'Data Access Committees may automate Data Access Requests').should('be.visible')
     })
 
@@ -96,9 +95,9 @@ describe('DACBotComponent', () => {
     })
 
     it('renders a heading for each group', () => {
-      cy.contains('h6', 'Automatic approval').should('be.visible')
-      cy.contains('h6', 'Automatic open').should('be.visible')
-      cy.contains('h6', 'SO prior approval').should('be.visible')
+      cy.contains('h4', 'Automatically approve DARs when...').should('be.visible')
+      cy.contains('h4', 'Send DARs to the entire DAC on submission by researchers?').should('be.visible')
+      cy.contains('h4', 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?').should('be.visible')
     })
 
     it('places GRU_V1, HMB_V1, GRU_DSV1, HMB_DSV1 under Automatic approval', () => {
@@ -122,17 +121,21 @@ describe('DACBotComponent', () => {
 
     it('places REQUIRE_SO_DAR_APPROVAL under SO prior approval', () => {
       cy.get('[data-cy="rule-group-so-prior-approval"]').within(() => {
-        cy.contains('Require approval by the Signing Official').should('exist')
+        cy.contains('require approval by the Signing Official').should('exist')
         cy.contains('only General Research Use (GRU)').should('not.exist')
         cy.contains('Disease Specific (DS) with one or more selected diseases').should('not.exist')
         cy.contains('without requiring Chair to open manually').should('not.exist')
       })
     })
 
-    it('renders groups in order: Automatic approval, Automatic open, SO prior approval', () => {
-      cy.get('h6').then(($headings) => {
+    it('renders groups in order: Automatically approve DARs when..., Send DARs..., Require SO sign-off', () => {
+      cy.get('h4').then(($headings) => {
         const labels = [...$headings].map(el => el.textContent)
-        expect(labels).to.deep.equal(['Automatic approval', 'Automatic open', 'SO prior approval'])
+        expect(labels).to.deep.equal([
+          'Automatically approve DARs when...',
+          'Send DARs to the entire DAC on submission by researchers?',
+          'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?',
+        ])
       })
     })
   })
@@ -152,7 +155,7 @@ describe('DACBotComponent', () => {
     })
 
     it('places rules with unknown ruleType in an Other group at the end', () => {
-      cy.get('h6').last().should('have.text', 'Other')
+      cy.get('h4').last().should('have.text', 'Other')
       cy.get('[data-cy="rule-group-other"]').within(() => {
         cy.contains('Some future rule').should('exist')
       })

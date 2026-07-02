@@ -8,7 +8,7 @@ describe('Collections ajax', () => {
 
   // Sanitized mock data — no real names, emails, or institution identifiers
   const mockCollection: DarCollection = {
-    id: 1,
+    darCollectionId: 1,
     darCode: 'DAR-0001',
     createDate: 1700000000000,
     createUserId: 10,

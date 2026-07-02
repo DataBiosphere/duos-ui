@@ -22,6 +22,7 @@ export type UserRoleName
     | 'Alumni'
     | 'SigningOfficial'
     | 'DataSubmitter'
+    | 'ServiceAccount'
     | 'All'
 
 export enum AbstainDataUseCodes {
@@ -131,6 +132,7 @@ export interface DacObject {
   updateDate?: string
   chairpersons?: DuosUser[]
   members?: DuosUser[]
+  datasets?: Dataset[]
 }
 
 export interface DataAccessAgreement {
@@ -264,6 +266,7 @@ export interface DatasetTerm {
   requestLocation?: string
   dacId: number
   dacApproval: boolean
+  hasInstitutionCertification?: boolean
   accessManagement: string
   approvedUserIds: number[]
   study: StudyTerm
@@ -681,9 +684,10 @@ export interface CombinedDataAccessRequest extends DataAccessRequest {
 }
 
 export interface DarCollection {
-  id: number
+  darCollectionId: number
   darCode: string
   createDate: number
+  createUser?: DuosUser
   createUserId: number
   updateDate?: number
   updateUserId?: number
@@ -804,6 +808,10 @@ export interface DataAccessRequestData {
   piName: string
   piEmail: string
   piCountryOfOperation: string
+  // Enriched onto the partial DAR data client-side (not part of the wire payload) so
+  // downstream consumers can read a single flattened DataAccessRequest-like object.
+  elections?: Record<number, Election>
+  datasetIds?: number[]
 }
 
 export interface OntologyEntry {
@@ -868,6 +876,8 @@ export interface Publication {
   access?: string
   tags?: string[]
 }
+
+export type ApproverStatusType = boolean | 'true' | 'false' | undefined
 
 export interface Collaborator {
   approverStatus: boolean
