@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { Notification } from 'src/components/Notification'
-import TableHeaderSection from 'src/components/TableHeaderSection'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
 import { Banner, NotificationService } from 'src/libs/notificationService'
@@ -10,8 +9,11 @@ import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ExternalProfile from './ExternalProfile'
+import ga4ghLogo from 'src/images/ga4gh-logo.png'
+import userProfileIcon from 'src/images/user-profile.png'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DuosUser } from 'src/types/model'
+import PageHeading from 'src/components/PageHeading'
 
 export default function UserProfile() {
   usePageTitle('User Profile')

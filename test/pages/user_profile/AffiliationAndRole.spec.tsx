@@ -1,9 +1,10 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import AffiliationAndRole from 'src/pages/user_profile/AffiliationAndRoles'
 import { DuosUser, InstitutionInterface, SigningOfficialUserWithData } from 'src/types/model'
+import { renderWithRouter as render } from '../../test-utils'
 
 vi.mock('src/libs/ajax/Institution', () => ({
   Institution: {

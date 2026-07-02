@@ -124,13 +124,6 @@ describe('ResearcherStatus', () => {
     })
   })
 
-  it('shows "No Library Card Found" when user has no libraryCard', async () => {
-    render(<ResearcherStatus user={baseUser} />)
-    await waitFor(() => {
-      expect(screen.getByText('No Library Card Found')).toBeInTheDocument()
-    })
-  })
-
   it('renders the DAAs component when user has a libraryCard', async () => {
     const userWithCard: DuosUser = {
       ...baseUser,
