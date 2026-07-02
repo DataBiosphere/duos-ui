@@ -36,8 +36,20 @@ const formatOntologyForSelect = (ontology: OntologyEntry | OntologyOption): Onto
   }
 }
 
+const isOntologyOption = (ontology: OntologyEntry | OntologyOption): ontology is OntologyOption => 'item' in ontology
+
 const formatOntologyForFormData = (ontology: OntologyEntry | OntologyOption): OntologyOption => {
-  const nested = 'item' in ontology ? ontology.item : undefined
+  if (!isOntologyOption(ontology)) {
+    return {
+      id: ontology.id,
+      key: ontology.id,
+      value: ontology.id,
+      label: ontology.label,
+      item: ontology,
+    }
+  }
+
+  const nested = ontology.item
   const id = ontology.id ?? nested?.id
   const label = ontology.label ?? nested?.label
   return {
