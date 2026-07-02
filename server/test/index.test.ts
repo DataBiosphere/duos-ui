@@ -32,7 +32,11 @@ vi.mock('@fastify/vite', () => {
   // fastify-plugin sets Symbol.for('skip-override') so decorations reach the
   // parent instance; replicate that here without importing fastify-plugin.
   const plugin = async (fastify: FastifyInstance) => {
-    fastify.decorate('vite', { ready: vi.fn(async () => {}) })
+    // FastifyViteDecoration isn't exported by @fastify/vite and requires
+    // private symbol-keyed properties (kMode/kOptions), so a real value can't
+    // be constructed here — this mock only needs the one method buildApp() calls.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fastify.decorate('vite', { ready: vi.fn(async () => {}) } as any)
     fastify.decorateReply('html', vi.fn(() => ''))
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
