@@ -73,6 +73,8 @@ export default function AcceptedAcknowledgements() {
           color: '#01549F',
           fontSize: '20px',
           fontWeight: '600',
+          borderBottom: '1px solid #ddd',
+          paddingBottom: '8px',
         }}
       >
         Accepted Terms & Policies
