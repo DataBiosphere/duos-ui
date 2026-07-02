@@ -79,11 +79,19 @@ export async function buildApp(): Promise<AppInstance> {
   // Health check — registered before Vite middleware so it always resolves
   fastify.get('/health', async () => ({ status: 'ok' }))
 
-  // Client config — registered before Vite middleware, same as /health, so this
-  // dynamic route claims the path instead of Vite serving the static file
-  // verbatim. Lets DUOS_API_URL override the static file's `apiUrl` — see
-  // clientConfig.ts for why.
-  fastify.get('/config.json', async () => readClientConfig(clientConfigPath(PROJECT_ROOT, isDev)))
+  // Client config — intercepted via onRequest rather than a route, because
+  // @fastify/vite's production static plugin (wildcard: false) walks build/
+  // and registers its own explicit GET/HEAD route for every file it finds
+  // there, including config.json. A competing `fastify.get('/config.json', ...)`
+  // collides with that at startup (FST_ERR_DUPLICATED_ROUTE); onRequest fires
+  // before that nested route's handler regardless of which scope declared it,
+  // so this lets DUOS_API_URL override the static file's `apiUrl` without
+  // fighting Vite for the route — see clientConfig.ts for why.
+  fastify.addHook('onRequest', async (request, reply) => {
+    if (request.method === 'GET' && request.url.split('?')[0] === '/config.json') {
+      reply.send(await readClientConfig(clientConfigPath(PROJECT_ROOT, isDev)))
+    }
+  })
 
   // Vite: dev → HMR middleware; prod → serves static build + SPA fallback
   await fastify.register(FastifyVite, {
