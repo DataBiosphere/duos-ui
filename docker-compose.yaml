@@ -14,8 +14,19 @@
 # table) at `config/consentdb.sql`; the `db` service loads it on first start.
 # Build:
 #   docker build . -t duos
-# Run:
+# Run (standalone, bundled local Postgres):
+#   docker compose --env-file .env.local --profile local-db up -d
+# Run (against a local `consent` compose stack instead — see DEVNOTES.md):
 #   docker compose --env-file .env.local up -d
+#   Set DUOS_DB_HOST=host.docker.internal in .env.local so `app` reaches the
+#   consent compose's `sqlproxy` Postgres (published on host port 5432) rather
+#   than the bundled `db` service, which is skipped entirely in this mode
+#   (profile-gated below) since both would otherwise fight over that port.
+#   DUOS_DB_USER/PASSWORD/NAME must match that Postgres's credentials, not the
+#   bundled `db` service's — consent's dev dump already uses the same
+#   consent/consent schema/role convention, so these are usually identical.
+#   consent's own `app` service also publishes host port 8080, so this repo's
+#   `app` publishes to DUOS_HOST_PORT (18080 by default) instead — see below.
 # --env-file is required: the `${VAR:?...}` placeholders below are resolved by
 # Compose's own YAML interpolation, which only reads a file literally named
 # `.env` by default. `.env` is reserved for real dev secrets (see .gitignore)
@@ -30,8 +41,33 @@ services:
     depends_on:
       db:
         condition: service_healthy
+        # Only required when the local-db profile is active; lets `app` start
+        # without the bundled `db` when pointed at an external Postgres (e.g.
+        # a local `consent` compose stack) instead.
+        required: false
+    # Host-side port is decoupled from PORT (the container's internal listen
+    # port, which `proxy`'s PROXY_URL hardcodes to :8080 for container-to-
+    # container traffic and is unaffected by this mapping) so this doesn't
+    # collide with a local `consent` compose stack — its `app` also publishes
+    # host port 8080. Override DUOS_HOST_PORT in .env.local if 18080 is taken too.
     ports:
-      - ${PORT:-8080}:${PORT:-8080}
+      - ${DUOS_HOST_PORT:-18080}:${PORT:-8080}
+    extra_hosts:
+      # Lets `host.docker.internal` resolve on native Linux Docker (already
+      # works out of the box on Docker Desktop for Mac/Windows). Needed only
+      # when DUOS_DB_HOST=host.docker.internal (pointing at another compose
+      # stack's Postgres published on the host); harmless otherwise.
+      - "host.docker.internal:host-gateway"
+      # `duos-proxy` (below) claims the hostname local.dsde-dev.broadinstitute.org
+      # on this compose network, so without this override, this container's own
+      # outbound requests to that hostname resolve to duos-proxy's container IP
+      # instead of the host — breaking DUOS_API_URL when it points at a local
+      # `consent` compose's proxy (e.g. :27443), since duos-proxy doesn't listen
+      # on that port. host.docker.internal isn't a substitute here: consent's
+      # proxy serves a cert valid only for this hostname, so TLS verification
+      # needs the request to still be made *to* this hostname, just resolved to
+      # the host instead of duos-proxy.
+      - "local.dsde-dev.broadinstitute.org:host-gateway"
     # env_file here only feeds the *container's* runtime environment — it does
     # NOT satisfy the `${VAR:?...}` interpolation below, which Compose resolves
     # itself before the container starts (see the --env-file note at the top of
@@ -48,8 +84,10 @@ services:
       PORT: ${PORT:-8080}
       FASTIFY_LOG_LEVEL: ${FASTIFY_LOG_LEVEL:-debug}
       DUOS_SESSION_MAX_AGE_MS: ${DUOS_SESSION_MAX_AGE_MS:-}
-      # Session store / DB — points at the bundled `db` service, not dev.
-      DUOS_DB_HOST: db
+      # Session store / DB — defaults to the bundled `db` service; override to
+      # host.docker.internal in .env.local to point at another compose stack's
+      # Postgres instead (see the --env-file note above).
+      DUOS_DB_HOST: ${DUOS_DB_HOST:-db}
       DUOS_DB_PORT: '5432'
       DUOS_DB_NAME: ${DUOS_DB_NAME:-consent}
       DUOS_DB_USER: ${DUOS_DB_USER:-consent}
@@ -64,9 +102,14 @@ services:
   # Local Postgres standing in for the consent Cloud SQL instance. Loads a
   # consent dump so the BFF talks to a real database entirely within the stack,
   # without reaching dev. Mirrors the `sqlproxy` service in consent/config.
+  # Profile-gated: skipped unless `--profile local-db` is passed, so it doesn't
+  # fight a local `consent` compose's `sqlproxy` for host port 5432 when
+  # DUOS_DB_HOST is pointed there instead (see the top-of-file run instructions).
   db:
     image: postgres:16.13-alpine
     container_name: duos-db
+    profiles:
+      - local-db
     ports:
       - 5432:5432
     environment:

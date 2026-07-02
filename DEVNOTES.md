@@ -90,8 +90,16 @@ Build and run:
 
 ```shell
 docker build . -t duos --platform linux/amd64
-docker compose up -d
+docker compose --env-file .env.local --profile local-db up -d
 ```
+
+`--env-file .env.local` is required — the `${VAR:?...}` placeholders in `docker-compose.yaml` are resolved by Compose's
+own YAML interpolation, which only reads a file literally named `.env` by default, and that name is reserved for real
+secrets (see `.gitignore`).
+
+`--profile local-db` brings up the bundled `db` Postgres service, used as a stand-in for the consent Cloud SQL instance.
+Omit it if you're pointing at a local `consent` compose stack instead (see below) — otherwise both would fight over host
+port 5432.
 
 Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running under docker.
 
@@ -113,6 +121,27 @@ DUOS_DB_PASSWORD=             # database password
 ```
 
 `NODE_ENV`, `PORT`, and `FASTIFY_LOG_LEVEL` can be overridden at the shell level when running `docker compose up` but have sensible defaults and do not need to be in `.env.local`.
+
+### Pointing at a local `consent` compose stack instead of the bundled Postgres
+
+Real deployments run the BFF's `user_sessions` table in the same Postgres consent already uses, not a separate database — the `consent` schema's default role (`consent`) resolves unqualified table names (like `user_sessions`) to the `consent` schema automatically via Postgres's `"$user"` search_path convention, so no extra config is needed to point this app's BFF at a local `consent` compose checkout's database instead of the bundled one:
+
+1. Start (or leave running) `consent`'s own compose stack — its `sqlproxy` service already publishes Postgres on host port 5432.
+2. In this repo's `.env.local`, set:
+   ```properties
+   DUOS_DB_HOST=host.docker.internal
+   DUOS_DB_NAME=consent
+   DUOS_DB_USER=consent
+   DUOS_DB_PASSWORD=            # must match consent's sqlproxy password
+   ```
+3. Run this repo's compose **without** `--profile local-db`, so the bundled `db` service is skipped (it would otherwise also try to claim host port 5432):
+   ```shell
+   docker compose --env-file .env.local up -d
+   ```
+
+`host.docker.internal` resolves out of the box on Docker Desktop (Mac/Windows); `docker-compose.yaml` also sets `extra_hosts` so it resolves on native Linux Docker too.
+
+consent's own `app` service also publishes host port 8080, which would otherwise collide with this repo's `app`. To avoid that, this repo's `app` publishes to `DUOS_HOST_PORT` (`18080` by default) instead of `8080` — only the host-side port changes; the container still listens on `PORT` internally, so `proxy`'s routing to `app:8080` is unaffected. You shouldn't need to hit `app` directly at all (go through `proxy` at https://local.dsde-dev.broadinstitute.org/), but `curl localhost:18080/health` works if you want to bypass the proxy. Override `DUOS_HOST_PORT` in `.env.local` if `18080` is also taken.
 
 # Testing
 
