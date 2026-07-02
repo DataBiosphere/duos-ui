@@ -2,6 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import Modal from 'react-modal'
 import SigningOfficialTable from 'src/pages/signing_official_console/SigningOfficialTable'
 import { LibraryCard as LibraryCardApi } from 'src/libs/ajax/LibraryCard'
 import { Notifications } from 'src/libs/utils'
@@ -112,6 +113,13 @@ const rowFor = async (name: string): Promise<HTMLElement> => {
 describe('SigningOfficialTable', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    let appRoot = document.getElementById('root')
+    if (!appRoot) {
+      appRoot = document.createElement('div')
+      appRoot.setAttribute('id', 'root')
+      document.body.appendChild(appRoot)
+    }
+    Modal.setAppElement(appRoot)
     vi.spyOn(Notifications, 'showError').mockImplementation(() => undefined)
     vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
     vi.spyOn(Notifications, 'showWarning').mockImplementation(() => undefined)
@@ -178,7 +186,7 @@ describe('SigningOfficialTable', () => {
   })
 
   it('displays a success message when deactivating a researcher succeeds', async () => {
-    vi.mocked(LibraryCardApi.deleteLibraryCard).mockResolvedValue(undefined)
+    vi.mocked(LibraryCardApi.deleteLibraryCard).mockResolvedValue(libraryCard({ userId: mockResearcher3.userId }))
 
     renderTable()
 
