@@ -91,7 +91,7 @@
     "not op_mini all"
   ],
   "engines": {
-    "node": ">=24.11.1 <25"
+    "node": ">=26.4.0 <27"
   },
   "type": "module",
   "pnpm": {

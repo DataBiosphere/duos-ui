@@ -1,5 +1,5 @@
 # builder image
-FROM node:24.18.0-trixie AS builder
+FROM node:26.4.0-trixie AS builder
 LABEL maintainer="dsp-data-team@broadinstitute.org"
 
 # set working directory
@@ -13,7 +13,7 @@ ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 # of source changes — pnpm ci only re-runs when package.json/lockfile change.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY server/package.json ./server/package.json
-RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
+RUN npm install -g corepack@0.35.0 && corepack enable && corepack prepare pnpm@11.1.2 --activate
 RUN pnpm config set update-notifier false
 RUN pnpm ci --loglevel warn
 
@@ -33,8 +33,8 @@ RUN pnpm --filter duos-server run build
 # Create a self-contained prod-only server bundle (no devDeps, no workspace symlinks)
 RUN pnpm --filter duos-server deploy --prod --legacy /tmp/server-deploy
 
-# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:f0e79759bb8cea65c59ed276e3b5c0f19188698cf3a1f2fd67a598c05ca2d902
+# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:26-debian
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:07b0bbd4dd7bd7f974d51fdd8f7c50c3a28d82b913f24c108ffd4f70ac5c98ac
 ARG NODE_ENV=production
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}
