@@ -1,35 +1,45 @@
 import React, { useEffect, useState } from 'react'
-import PropTypes from 'prop-types'
 import DeleteIcon from '@mui/icons-material/Delete'
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
-import { DAR } from 'src/libs/ajax/DAR'
+import { DAR, DatasetDaaSnapshot } from 'src/libs/ajax/DAR'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import { DownloadLink } from 'src/components/DownloadLink'
+import { DAAObject, Dataset, ResponseError } from 'src/types/model'
 
 const NO_SNAPSHOT_MESSAGE = 'The DUOS Library Card Agreements in effect at the time this request was made govern the use of this data.'
 
-const getSnapshotDatasetId = (snapshot) => {
+interface DaaDetails {
+  daaId: number
+  fileName: string
+}
+
+type DaaFileNameByDaaId = Record<number, string>
+type DaaByDatasetId = Record<number, DaaDetails>
+type DaaByDatasetIdentifier = Record<string, DaaDetails>
+type DaaByDacId = Record<number, DaaDetails>
+
+const getSnapshotDatasetId = (snapshot: DatasetDaaSnapshot): number | undefined => {
   const value = snapshot?.datasetId ?? snapshot?.dataset?.datasetId
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
 }
 
-const getSnapshotDatasetIdentifier = (snapshot) => {
+const getSnapshotDatasetIdentifier = (snapshot: DatasetDaaSnapshot): string | undefined => {
   const value = snapshot?.datasetIdentifier ?? snapshot?.dataset?.datasetIdentifier
   return (typeof value === 'string' && value.trim().length > 0) ? value : undefined
 }
 
-const getSnapshotDaaId = (snapshot) => {
+const getSnapshotDaaId = (snapshot: DatasetDaaSnapshot): number | undefined => {
   const value = snapshot?.daaId ?? snapshot?.daa?.daaId
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
 }
 
-const getSnapshotDaaFileName = (snapshot, daaId, daaFileNameByDaaId) => {
-  return daaFileNameByDaaId[daaId]
+const getSnapshotDaaFileName = (snapshot: DatasetDaaSnapshot, daaId: number | undefined, daaFileNameByDaaId: DaaFileNameByDaaId): string => {
+  return (daaId === undefined ? undefined : daaFileNameByDaaId[daaId])
     || snapshot?.daaFileName
     || snapshot?.fileName
     || snapshot?.daaFile?.fileName
@@ -37,9 +47,9 @@ const getSnapshotDaaFileName = (snapshot, daaId, daaFileNameByDaaId) => {
     || (daaId ? `daa-${daaId}` : '')
 }
 
-const buildDaaMapsFromSnapshots = (snapshotList, daaFileNameByDaaId) => {
-  const nextDaaByDatasetId = {}
-  const nextDaaByDatasetIdentifier = {}
+const buildDaaMapsFromSnapshots = (snapshotList: DatasetDaaSnapshot[], daaFileNameByDaaId: DaaFileNameByDaaId): { byDatasetId: DaaByDatasetId, byDatasetIdentifier: DaaByDatasetIdentifier } => {
+  const nextDaaByDatasetId: DaaByDatasetId = {}
+  const nextDaaByDatasetIdentifier: DaaByDatasetIdentifier = {}
 
   for (const snapshot of snapshotList) {
     const datasetId = getSnapshotDatasetId(snapshot)
@@ -50,7 +60,7 @@ const buildDaaMapsFromSnapshots = (snapshotList, daaFileNameByDaaId) => {
       continue
     }
 
-    const daaDetails = {
+    const daaDetails: DaaDetails = {
       daaId,
       fileName: getSnapshotDaaFileName(snapshot, daaId, daaFileNameByDaaId),
     }
@@ -70,8 +80,8 @@ const buildDaaMapsFromSnapshots = (snapshotList, daaFileNameByDaaId) => {
   }
 }
 
-const buildDaaFileNameByDaaId = (daaList) => {
-  const nextFileNameByDaaId = {}
+const buildDaaFileNameByDaaId = (daaList: DAAObject[]): DaaFileNameByDaaId => {
+  const nextFileNameByDaaId: DaaFileNameByDaaId = {}
 
   for (const daa of daaList) {
     if (!daa?.daaId) {
@@ -85,20 +95,21 @@ const buildDaaFileNameByDaaId = (daaList) => {
   return nextFileNameByDaaId
 }
 
-const buildSnapshotList = (response) => {
+const buildSnapshotList = (response: unknown): DatasetDaaSnapshot[] => {
   if (Array.isArray(response)) {
-    return response
+    return response as DatasetDaaSnapshot[]
   }
 
-  if (Array.isArray(response?.datasetDaaSnapshots)) {
-    return response.datasetDaaSnapshots
+  const wrapped = response as { datasetDaaSnapshots?: unknown } | null | undefined
+  if (Array.isArray(wrapped?.datasetDaaSnapshots)) {
+    return wrapped.datasetDaaSnapshots as DatasetDaaSnapshot[]
   }
 
   // Some snapshot endpoints return a map keyed by datasetId string:
   // { "1969": { daaId: 36, capturedAt: ... } }
   if (response && typeof response === 'object') {
-    const entries = Object.entries(response)
-    const mappedEntries = []
+    const entries = Object.entries(response as Record<string, unknown>)
+    const mappedEntries: DatasetDaaSnapshot[] = []
 
     for (const [datasetIdKey, snapshotValue] of entries) {
       if (!snapshotValue || typeof snapshotValue !== 'object') {
@@ -110,7 +121,7 @@ const buildSnapshotList = (response) => {
         datasetId: Number.isInteger(parsedDatasetId) && parsedDatasetId > 0
           ? parsedDatasetId
           : undefined,
-        ...snapshotValue,
+        ...(snapshotValue as DatasetDaaSnapshot),
       })
     }
 
@@ -120,8 +131,8 @@ const buildSnapshotList = (response) => {
   return []
 }
 
-const buildDaaByDacId = (daaList) => {
-  const nextDaaByDacId = {}
+const buildDaaByDacId = (daaList: DAAObject[]): DaaByDacId => {
+  const nextDaaByDacId: DaaByDacId = {}
 
   for (const daa of daaList) {
     if (!daa?.daaId || !Array.isArray(daa.dacs)) {
@@ -144,18 +155,24 @@ const buildDaaByDacId = (daaList) => {
   return nextDaaByDacId
 }
 
-export default function SelectableDatasets(props) {
-  const { datasets, setSelectedDatasets, disabled, referenceId } = props
-  const [removedIds, setRemovedIds] = useState([])
-  const [daaByDacId, setDaaByDacId] = useState({})
-  const [daaByDatasetId, setDaaByDatasetId] = useState({})
-  const [daaByDatasetIdentifier, setDaaByDatasetIdentifier] = useState({})
+export interface SelectableDatasetsProps {
+  datasets: Dataset[]
+  setSelectedDatasets: (datasets: Dataset[]) => void
+  disabled?: boolean
+  referenceId?: string | number
+}
+
+export default function SelectableDatasets({ datasets, setSelectedDatasets, disabled, referenceId }: Readonly<SelectableDatasetsProps>) {
+  const [removedIds, setRemovedIds] = useState<number[]>([])
+  const [daaByDacId, setDaaByDacId] = useState<DaaByDacId>({})
+  const [daaByDatasetId, setDaaByDatasetId] = useState<DaaByDatasetId>({})
+  const [daaByDatasetIdentifier, setDaaByDatasetIdentifier] = useState<DaaByDatasetIdentifier>({})
   const [snapshotNotFound, setSnapshotNotFound] = useState(false)
 
   useEffect(() => {
     let isMounted = true
 
-    const loadCurrentDaas = async () => {
+    const loadCurrentDaas = async (): Promise<DaaFileNameByDaaId> => {
       try {
         if (!disabled) {
           setSnapshotNotFound(false)
@@ -168,7 +185,7 @@ export default function SelectableDatasets(props) {
         return buildDaaFileNameByDaaId(daaList)
       }
       catch (error) {
-        if (error?.response?.status === 404) {
+        if ((error as ResponseError)?.response?.status === 404) {
           setDaaByDacId({})
           if (disabled) {
             setSnapshotNotFound(true)
@@ -183,7 +200,7 @@ export default function SelectableDatasets(props) {
       }
     }
 
-    const loadSnapshotDaas = async (fileNameByDaaId = {}) => {
+    const loadSnapshotDaas = async (fileNameByDaaId: DaaFileNameByDaaId = {}) => {
       if (!referenceId) {
         setDaaByDatasetId({})
         setDaaByDatasetIdentifier({})
@@ -193,7 +210,7 @@ export default function SelectableDatasets(props) {
 
       try {
         setSnapshotNotFound(false)
-        const response = await DAR.getDatasetDaaSnapshots(referenceId)
+        const response = await DAR.getDatasetDaaSnapshots(String(referenceId))
         if (!isMounted) {
           return
         }
@@ -205,7 +222,7 @@ export default function SelectableDatasets(props) {
         setDaaByDatasetIdentifier(snapshotMaps.byDatasetIdentifier)
       }
       catch (error) {
-        if (error?.response?.status === 404) {
+        if ((error as ResponseError)?.response?.status === 404) {
           setDaaByDatasetId({})
           setDaaByDatasetIdentifier({})
           setSnapshotNotFound(true)
@@ -236,8 +253,8 @@ export default function SelectableDatasets(props) {
     }
   }, [disabled, referenceId])
 
-  const updateLocalState = (ds) => {
-    let newRemovedIds = []
+  const updateLocalState = (ds: Dataset) => {
+    let newRemovedIds: number[] = []
     if (removedIds.includes(ds.datasetId)) {
       newRemovedIds = removedIds.toSpliced(removedIds.indexOf(ds.datasetId), 1)
     }
@@ -250,7 +267,7 @@ export default function SelectableDatasets(props) {
     setSelectedDatasets(newSelectedDatasets)
   }
 
-  const onDaaLinkClick = async (event, daaId, fileName) => {
+  const onDaaLinkClick = async (event: React.MouseEvent<HTMLButtonElement>, daaId: number | undefined, fileName: string) => {
     event.preventDefault()
     event.stopPropagation()
     if (!daaId) {
@@ -267,8 +284,8 @@ export default function SelectableDatasets(props) {
     }
   }
 
-  const datasetDescriptionDiv = (ds) => {
-    let daaForDataset
+  const datasetDescriptionDiv = (ds: Dataset) => {
+    let daaForDataset: DaaDetails | undefined
     if (disabled) {
       daaForDataset = (ds.datasetId ? daaByDatasetId[ds.datasetId] : undefined)
         || (ds.datasetIdentifier ? daaByDatasetIdentifier[ds.datasetIdentifier] : undefined)
@@ -305,7 +322,7 @@ export default function SelectableDatasets(props) {
     )
   }
 
-  const deletableStyled = (ds) => {
+  const deletableStyled = (ds: Dataset) => {
     const isDeletable = removedIds.length < datasets.length - 1
     const clickable = isDeletable && !disabled
     return (
@@ -342,8 +359,8 @@ export default function SelectableDatasets(props) {
     )
   }
 
-  const unDeletableStyled = (ds) => {
-    const style = disabled
+  const unDeletableStyled = (ds: Dataset) => {
+    const style: React.CSSProperties = disabled
       ? { backgroundColor: 'lightgray', opacity: 0.5 }
       : { backgroundColor: 'lightgray', opacity: 0.5, cursor: 'pointer' }
     return (
@@ -376,16 +393,4 @@ export default function SelectableDatasets(props) {
       {datasetList()}
     </div>
   )
-}
-
-SelectableDatasets.propTypes = {
-  datasets: PropTypes.arrayOf(PropTypes.shape({
-    datasetId: PropTypes.number,
-    datasetIdentifier: PropTypes.string,
-    datasetName: PropTypes.string,
-    dacId: PropTypes.number,
-  })).isRequired,
-  setSelectedDatasets: PropTypes.func.isRequired,
-  disabled: PropTypes.bool,
-  referenceId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 }
