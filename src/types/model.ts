@@ -877,6 +877,8 @@ export interface Publication {
   tags?: string[]
 }
 
+export type ApproverStatusType = boolean | 'true' | 'false' | undefined
+
 export interface Collaborator {
   approverStatus: boolean
   countryOfOperation: string

@@ -27,6 +27,10 @@ export interface DarErrors {
   rus?: ValidationError
   diseases?: ValidationError
   ontologies?: ValidationError
+  hmb?: ValidationError
+  poa?: ValidationError
+  methods?: ValidationError
+  otherText?: ValidationError
   nonTechRus?: ValidationError
   collaborationLetter?: ValidationError
   irbDocument?: ValidationError

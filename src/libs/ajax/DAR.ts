@@ -9,10 +9,13 @@ import { DataAccessRequest, OntologyEntry } from 'src/types/model'
 
 export interface DatasetDaaSnapshot {
   datasetId?: number
+  datasetIdentifier?: string
   daaId?: number
   daaFileName?: string
-  dataset?: { datasetId: number }
-  daa?: { daaId: number, file?: { fileName: string } }
+  fileName?: string
+  daaFile?: { fileName?: string }
+  dataset?: { datasetId?: number, datasetIdentifier?: string }
+  daa?: { daaId?: number, file?: { fileName?: string } }
 }
 
 export const DAR = {

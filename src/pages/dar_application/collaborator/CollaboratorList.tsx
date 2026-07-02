@@ -3,8 +3,27 @@ import CollaboratorForm from './CollaboratorForm'
 import CollaboratorRow from 'src/components/collaborator_list/CollaboratorRow'
 import './collaborator.css'
 import { isNil } from 'src/utils/NodashUtil'
+import { Collaborator } from 'src/types/model'
+import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
-export default function CollaboratorList(props) {
+export interface CollaboratorListProps {
+  readonly formFieldChange: (change: { key: string, value: unknown }) => void
+  readonly collaboratorLabel: string
+  readonly collaboratorKey: string
+  readonly countriesOfOperation: string[]
+  readonly showApproval: boolean
+  readonly setCompleted: (completed: boolean) => void
+  // Declared as a flat ValidationError at the ResearcherInfo boundary, but for collaborator
+  // lists it's actually populated as a per-index map of per-field errors.
+  readonly validation?: ValidationError
+  readonly onValidationChange: (change: { key: Array<string | number> | string, validation: ValidationError }) => void
+  readonly readOnly?: boolean
+  readonly collaborators?: Collaborator[]
+  readonly deleteBoolArray?: boolean[]
+  readonly disabled?: boolean
+}
+
+export default function CollaboratorList(props: Readonly<CollaboratorListProps>) {
   const {
     formFieldChange,
     collaboratorLabel,
@@ -17,21 +36,30 @@ export default function CollaboratorList(props) {
     readOnly = false,
   } = props
 
-  const [collaborators, setCollaborators] = useState(props.collaborators || [])
-  const [editState, setEditState] = useState([])
-  const [showNewForm, setShowNewForm] = useState(false)
-  const [deleteBoolArray, setDeleteBoolArray] = useState(props.deleteBoolArray || [])
+  const collaboratorValidation = validation as unknown as Record<number, Record<string, ValidationError>> | undefined
 
-  const onCollaboratorValidationChange = ({ index, key, validation }) => {
+  const [collaborators, setCollaborators] = useState<Collaborator[]>(props.collaborators || [])
+  const [editState, setEditState] = useState<boolean[]>([])
+  const [showNewForm, setShowNewForm] = useState(false)
+  const [deleteBoolArray, setDeleteBoolArray] = useState<boolean[]>(props.deleteBoolArray || [])
+
+  const onCollaboratorValidationChange = ({ index, key, validation }: {
+    index: number
+    key?: string
+    validation: ValidationError | Record<string, ValidationError>
+  }) => {
+    // Root-caused in ResearcherInfoProps.formValidationChange: only a flat ValidationError is
+    // declared, but the per-collaborator-field bulk-save path genuinely passes an errors map.
+    const castValidation = validation as ValidationError
     if (isNil(key)) {
-      onValidationChange({ key: [collaboratorKey, index], validation })
+      onValidationChange({ key: [collaboratorKey, index], validation: castValidation })
     }
     else {
-      onValidationChange({ key: [collaboratorKey, index, key], validation })
+      onValidationChange({ key: [collaboratorKey, index, key], validation: castValidation })
     }
   }
 
-  const deleteCollaborator = (index) => {
+  const deleteCollaborator = (index: number) => {
     const deleteCopy = deleteBoolArray.slice()
     const collaboratorCopy = collaborators.slice()
     const editCopy = editState.slice()
@@ -46,10 +74,10 @@ export default function CollaboratorList(props) {
   }
 
   useEffect(() => {
-    setCompleted(!showNewForm && editState.every(v => v === false))
+    setCompleted(!showNewForm && editState.every(v => !v))
   }, [setCompleted, showNewForm, editState])
 
-  const saveCollaborator = (index, newCollaborator) => {
+  const saveCollaborator = (index: number, newCollaborator: Collaborator) => {
     const newCollaborators = collaborators.slice()
     newCollaborators[index] = newCollaborator
     setCollaborators(newCollaborators)
@@ -57,21 +85,21 @@ export default function CollaboratorList(props) {
     setDeleteBoolArray(deleteBoolCopy)
   }
 
-  const updateEditState = (index, bool) => {
+  const updateEditState = (index: number, bool: boolean) => {
     const newEditState = [...editState]
     newEditState[index] = bool
     setEditState(newEditState)
   }
 
   useEffect(() => {
-    return formFieldChange({ key: collaboratorKey, value: collaborators })
+    formFieldChange({ key: collaboratorKey, value: collaborators })
   }, [formFieldChange, collaboratorKey, collaborators])
 
   const ListItems = (
     <div className="form-group row no-margin">
       {collaborators.map((collaborator, index) => (
         <CollaboratorRow
-          key={index}
+          key={collaborator.uuid}
           id={index}
           editMode={editState[index]}
           readOnly={readOnly}
@@ -92,7 +120,7 @@ export default function CollaboratorList(props) {
           countriesOfOperation={countriesOfOperation}
           showApproverStatus={showApproval}
           // Pass validation-related props for DAR application compatibility
-          validation={!isNil(validation) ? validation[index] || {} : {}}
+          validation={isNil(collaboratorValidation) ? {} : collaboratorValidation[index] || {}}
           onCollaboratorValidationChange={onCollaboratorValidationChange}
           collaboratorKey={collaboratorKey}
         />
@@ -133,8 +161,7 @@ export default function CollaboratorList(props) {
             updateEditState={bool => setShowNewForm(bool)}
             collaboratorLabel={collaboratorLabel}
             showApproval={showApproval}
-            editMode={true}
-            validation={!isNil(validation) ? validation[collaborators.length] || {} : {}}
+            validation={isNil(collaboratorValidation) ? {} : collaboratorValidation[collaborators.length] || {}}
             onCollaboratorValidationChange={onCollaboratorValidationChange}
             countriesOfOperation={countriesOfOperation}
           />
