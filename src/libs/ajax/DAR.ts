@@ -1,18 +1,21 @@
-import { fileDownload } from '../../utils/FileDownload'
+import { fileDownload } from 'src/utils/FileDownload'
 import { omit } from 'src/utils/NodashUtil'
-import { Config } from '../config'
-import { isFileEmpty } from '../utils'
-import { Metrics } from './Metrics'
-import eventList from '../events'
+import { Config } from 'src/libs/config'
+import { isFileEmpty } from 'src/libs/utils'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import eventList from 'src/libs/events'
 import { fetchGet, fetchMultipart, fetchPost, fetchPut, fetchDelete, FetchData } from 'src/libs/ajax/fetchAdapter'
 import { DataAccessRequest, OntologyEntry } from 'src/types/model'
 
 export interface DatasetDaaSnapshot {
   datasetId?: number
+  datasetIdentifier?: string
   daaId?: number
   daaFileName?: string
-  dataset?: { datasetId: number }
-  daa?: { daaId: number, file?: { fileName: string } }
+  fileName?: string
+  daaFile?: { fileName?: string }
+  dataset?: { datasetId?: number, datasetIdentifier?: string }
+  daa?: { daaId?: number, file?: { fileName?: string } }
 }
 
 export const DAR = {
@@ -173,8 +176,8 @@ export const DAR = {
    * @param fileType The document type slug (e.g. 'irbDocument', 'collaborationDocument')
    * @returns FetchData wrapping the updated DataAccessRequest, or { data: null } if file was empty
    */
-  uploadDARDocument: async (file: File, darId: string, fileType: string): Promise<FetchData<DataAccessRequest | null>> => {
-    if (isFileEmpty(file)) {
+  uploadDARDocument: async (file: File | null, darId: string, fileType: string): Promise<FetchData<DataAccessRequest | null>> => {
+    if (!file || isFileEmpty(file)) {
       return { data: null }
     }
     else {

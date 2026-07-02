@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from '../forms/forms'
-import { Collaborator } from 'src/types/model'
+import { ApproverStatusType, Collaborator } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { computeCollaboratorErrors, validationFailed } from 'src/utils/darFormUtils'
 import { nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
@@ -149,7 +149,7 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
               readOnly={readOnly}
               validation={validation.approverStatus}
               onChange={(!readOnly
-                ? ({ key: _key, value }: { key: string, value: boolean | 'true' | 'false' | undefined }) => {
+                ? ({ key: _key, value }: { key: string, value: ApproverStatusType }) => {
                     onChange({ key: 'approverStatus', value: String(value || '') })
                   }
                 : null)}

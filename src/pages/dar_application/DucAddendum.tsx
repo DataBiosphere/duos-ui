@@ -1,14 +1,14 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { Styles } from 'src/libs/theme'
-import SimpleTable from 'src/components/SimpleTable'
-import './dar_application.css'
-import { binCollectionToBuckets } from 'src/utils/BucketUtils'
+import SimpleTable, { CellData, ColumnHeader, TableStyles } from 'src/components/SimpleTable'
+import 'src/pages/dar_application/dar_application.css'
+import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
 import { flatten, isEmpty } from 'src/utils/NodashUtil'
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
-import PropTypes from 'prop-types'
+import { DacTerm, Dataset } from 'src/types/model'
 
-const commonStyles = {
+const commonStyles: TableStyles = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.6rem',
@@ -58,7 +58,7 @@ const columnStyles = {
   },
 }
 
-const columnConfig = {
+const columnConfig: Record<string, ColumnHeader> = {
   datasetId: {
     label: 'Dataset ID',
     cellStyle: { width: columnStyles.cellWidth.datasetId },
@@ -81,16 +81,23 @@ const columnConfig = {
   },
 }
 
-const columnHeaderData = (columns) => {
+const columnHeaderData = (columns: Record<string, ColumnHeader>): ColumnHeader[] => {
   return Object.values(columns)
 }
 
-export default function DucAddendum(props) {
+export interface DucAddendumProps {
+  datasets: Dataset[]
+  isLoading: boolean
+  save: () => void
+  doSubmit: () => void
+}
+
+export default function DucAddendum(props: Readonly<DucAddendumProps>) {
   const { datasets, isLoading, save, doSubmit } = props
 
-  const [dacs, setDacs] = useState([])
-  const [buckets, setBuckets] = useState([])
-  const [ducAddendumTable, setDucAddendumTable] = useState([])
+  const [dacs, setDacs] = useState<DacTerm[]>([])
+  const [buckets, setBuckets] = useState<Bucket[]>([])
+  const [ducAddendumTable, setDucAddendumTable] = useState<React.ReactNode[]>([])
 
   const getBuckets = useCallback(async () => {
     if (isEmpty(datasets)) {
@@ -98,16 +105,16 @@ export default function DucAddendum(props) {
       return
     }
     try {
-      const buckets = await binCollectionToBuckets({ datasets })
-      const dataAccessBuckets = buckets.filter(
+      const fetchedBuckets = await binCollectionToBuckets({ datasets })
+      const dataAccessBuckets = fetchedBuckets.filter(
         bucket => bucket.isRP !== true,
       )
       setBuckets(dataAccessBuckets)
-      setDacs(dataAccessBuckets.flatMap(bucket => bucket.dacs))
+      setDacs(dataAccessBuckets.flatMap(bucket => bucket.dacs ?? []))
     }
     catch (error) {
       const errorMessage = extractError(error)
-      Notifications.showError('Error retrieving datasets for addendum table: ' + errorMessage)
+      Notifications.showError({ text: 'Error retrieving datasets for addendum table: ' + errorMessage })
     }
   }, [datasets])
 
@@ -115,20 +122,20 @@ export default function DucAddendum(props) {
     const init = async () => {
       await getBuckets()
     }
-    init()
+    void init()
   }, [getBuckets])
 
   const buildDucAddendumTable = useCallback(async () => {
-    const getDacName = (dacId) => {
-      const dac = dacs?.find(dac => dac?.dacId === dacId)
-      return dac?.dacName || 'N/A'
+    const getDacName = (dacId: number): string => {
+      const dac = dacs.find(candidate => candidate.dacId === dacId)
+      return dac?.dacName ?? 'N/A'
     }
 
-    const tableChunks = buckets?.map((bucket) => {
+    const tableChunks = buckets.map((bucket) => {
       const dataUseCodes = bucket.label
-      const dataUseSummary = bucket.dataUses.map(dataUse => dataUse.description).join('. ')
+      const dataUseSummary = (bucket.dataUses ?? []).map(dataUse => dataUse.description).join('. ')
 
-      const headerConfig = {
+      const headerConfig: Record<string, ColumnHeader> = {
         dataUseCodes: {
           label: dataUseCodes,
           cellStyle: { width: headerStyles.cellWidth.dataUseCodes, color: '#337ab7', fontSize: '1.6rem', margin: '1rem' },
@@ -141,27 +148,27 @@ export default function DucAddendum(props) {
         },
       }
 
-      const datasetData = bucket.datasets.map((dataset) => {
+      const datasetData: CellData[][] = bucket.datasets.map((dataset) => {
         return [
           {
             data: dataset.datasetIdentifier,
             id: dataset.datasetId,
-            style: columnStyles,
+            style: columnStyles.baseStyle,
           },
           {
             data: dataset.datasetName?.replaceAll('_', '_\u200b'),
             id: dataset.datasetId,
-            style: columnStyles,
+            style: columnStyles.baseStyle,
           },
           {
             data: getDacName(dataset.dacId),
             id: dataset.datasetId,
-            style: columnStyles,
+            style: columnStyles.baseStyle,
           },
           {
             data: '',
             id: dataset.datasetId,
-            style: columnStyles,
+            style: columnStyles.baseStyle,
           },
         ]
       })
@@ -197,7 +204,7 @@ export default function DucAddendum(props) {
         }}
       />,
     )
-    const fullTable = flatten(tableChunks)
+    const fullTable = flatten<React.ReactNode>(tableChunks)
     setDucAddendumTable(fullTable)
   }, [buckets, isLoading, dacs])
 
@@ -205,7 +212,7 @@ export default function DucAddendum(props) {
     const init = async () => {
       await buildDucAddendumTable()
     }
-    init()
+    void init()
   }, [buildDucAddendumTable])
 
   return (
@@ -216,16 +223,9 @@ export default function DucAddendum(props) {
       <div className="table-container">{ducAddendumTable}</div>
 
       <div className="flex flex-row" style={{ justifyContent: 'flex-start', paddingTop: '4rem' }}>
-        <a id="btn_openSubmitModal" onClick={() => doSubmit()} className="button button-blue" style={{ marginRight: '2rem' }}>Submit</a>
-        <a id="btn_save" onClick={() => save()} className="button button-white">Save</a>
+        <button type="button" id="btn_openSubmitModal" onClick={() => doSubmit()} className="button button-blue" style={{ marginRight: '2rem' }}>Submit</button>
+        <button type="button" id="btn_save" onClick={() => save()} className="button button-white">Save</button>
       </div>
     </div>
   )
-}
-
-DucAddendum.propTypes = {
-  datasets: PropTypes.array.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  save: PropTypes.func.isRequired,
-  doSubmit: PropTypes.func.isRequired,
 }

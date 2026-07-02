@@ -325,10 +325,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
             existingDarsReadOnlyMode={true}
             draftDar={false}
             isProgressReportApplication={false}
-            researcherProfile={researcherProfile}
             collection={collection}
-            adminPage={adminPage}
-            readOnly={readOnly}
           />
         )}
         {!adminPage && selectedTab === tabs.memberVote && (

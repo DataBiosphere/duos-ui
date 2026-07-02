@@ -1,20 +1,33 @@
 import React from 'react'
 import { DAR } from 'src/libs/ajax/DAR'
-import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms'
+import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
 import {
   needsIrbApprovalDocument,
   needsCollaborationLetter,
   newIrbDocumentExpirationDate,
 } from 'src/utils/darFormUtils'
-import SelectableDatasets from './SelectableDatasets'
-import { DuosDatePicker } from 'src/components/DuosDatePicker.js'
-import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements.js'
+import SelectableDatasets from 'src/pages/dar_application/SelectableDatasets'
+import { DuosDatePicker } from 'src/components/DuosDatePicker'
+import { DataUseAcknowledgements } from 'src/pages/dar_application/DataUseAcknowlegements'
 import { DownloadLink } from 'src/components/DownloadLink'
+import { CombinedDataAccessRequest, Dataset, DataUse, OntologyEntry } from 'src/types/model'
+import { TranslationEntry } from 'src/libs/dataUseTranslation'
+import { DarErrors, ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { Dayjs } from 'dayjs'
 
-const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' }
+const titleStyle: React.CSSProperties = { fontSize: '24px', fontWeight: 500, color: '#333333' }
 
-const formatOntologyForSelect = (ontology) => {
+export interface OntologyOption {
+  id?: string
+  key?: string
+  value?: string
+  label?: string
+  displayText?: string
+  item?: OntologyEntry | OntologyOption
+}
+
+const formatOntologyForSelect = (ontology: OntologyEntry | OntologyOption): OntologyOption => {
   return {
     value: ontology.id,
     displayText: ontology.label,
@@ -22,26 +35,68 @@ const formatOntologyForSelect = (ontology) => {
   }
 }
 
-const formatOntologyForFormData = (ontology) => {
+const isOntologyOption = (ontology: OntologyEntry | OntologyOption): ontology is OntologyOption => 'item' in ontology
+
+const formatOntologyForFormData = (ontology: OntologyEntry | OntologyOption): OntologyOption => {
+  if (!isOntologyOption(ontology)) {
+    return {
+      id: ontology.id,
+      key: ontology.id,
+      value: ontology.id,
+      label: ontology.label,
+      item: ontology,
+    }
+  }
+
+  const nested = ontology.item
+  const id = ontology.id ?? nested?.id
+  const label = ontology.label ?? nested?.label
   return {
-    id: ontology.id || ontology.item.id,
-    key: ontology.id || ontology.item.id,
-    value: ontology.id || ontology.item.id,
-    label: ontology.label || ontology.item.label,
-    item: ontology.item || ontology,
+    id,
+    key: id,
+    value: id,
+    label,
+    item: nested ?? ontology,
   }
 }
 
-const autocompleteOntologies = (query, callback) => {
-  let options = []
+const autocompleteOntologies = (query: string | string[], callback: (options: OntologyOption[]) => void) => {
   DAR.getAutoCompleteOT(query).then(
     (items) => {
-      options = items.map(formatOntologyForSelect)
-      callback(options)
+      callback(items.map(formatOntologyForSelect))
     })
 }
 
-export default function DataAccessRequest(props) {
+interface FieldChange {
+  key: string
+  value: unknown
+}
+
+interface ValidationChange {
+  key: string
+  validation: ValidationError
+}
+
+export interface DataAccessRequestProps {
+  formFieldChange: (change: FieldChange) => void
+  batchFormFieldChange: (updates: Record<string, unknown>) => void
+  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & { ontologies?: OntologyOption[] }
+  datasets: Dataset[]
+  dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
+  uploadedIrbDocument?: File | null
+  updateUploadedIrbDocument: (document: File | undefined, expiration: string) => void
+  uploadedCollaborationLetter?: File | null
+  updateCollaborationLetter: (letter: File | undefined) => void
+  setSelectedDatasets: (datasets: Dataset[]) => void
+  validation: DarErrors
+  readOnlyMode: boolean
+  includeInstructions?: boolean
+  formValidationChange: (change: ValidationChange) => void
+  ariaLevel?: number
+  referenceId?: string
+}
+
+export default function DataAccessRequest(props: Readonly<DataAccessRequestProps>) {
   const {
     formFieldChange,
     batchFormFieldChange,
@@ -59,22 +114,21 @@ export default function DataAccessRequest(props) {
     formValidationChange,
     ariaLevel = 2,
     referenceId,
-    _draftDar,
   } = props
 
-  const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate()
+  const irbProtocolExpiration = formData.irbProtocolExpiration ?? newIrbDocumentExpirationDate()
 
-  // i need to figure out a way to only actually remove them without using onChange
-  const onChange = ({ key, value }) => {
+  // I need to figure out a way to only actually remove them without using onChange
+  const onChange = ({ key, value }: FieldChange) => {
     formFieldChange({ key, value })
   }
 
-  const onValidationChange = ({ key, validation }) => {
+  const onValidationChange = ({ key, validation }: ValidationChange) => {
     formValidationChange({ key, validation })
   }
 
-  const primaryChange = ({ key, value }) => {
-    const newFormData = {
+  const primaryChange = ({ key, value }: FieldChange) => {
+    const newFormData: Record<string, unknown> = {
       diseases: null,
       hmb: null,
       poa: null,
@@ -82,7 +136,7 @@ export default function DataAccessRequest(props) {
       other: null,
     }
 
-    // ensure that non visible fields are unselected
+    // ensure that non-visible fields are unselected
     for (const key0 in newFormData) {
       if (key === key0) {
         newFormData[key0] = value
@@ -102,8 +156,7 @@ export default function DataAccessRequest(props) {
   }
 
   return (
-    // eslint-disable-next-line react/no-unknown-property
-    <div datacy="data-access-request">
+    <div data-cy="data-access-request">
       <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
 
         <div>
@@ -146,14 +199,15 @@ export default function DataAccessRequest(props) {
           titleStyle={titleStyle}
           validators={[FormValidators.REQUIRED]}
           description={(
-            <>
-              <p>
-                A RUS is a brief description of the applicant&apos;s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.
-                <span>
-                  Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them.
-                </span>
-              </p>
-            </>
+            <p>
+              A RUS is a brief description of the applicant&apos;s proposed use of the dataset(s). The RUS will be
+              reviewed by all parties responsible for data covered by this Data Access Request. Please note that if
+              access is approved, you agree that the RUS, along with your name and institution, will be included on
+              this website to describe your research project to the public.{' '}
+              <span>
+                Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them.
+              </span>
+            </p>
           )}
           placeholder={`Please limit your RUS to ${FORM_TEXT_AREA_MAX_LENGTH} characters.`}
           rows={6}
@@ -194,10 +248,10 @@ export default function DataAccessRequest(props) {
                 loadOptions={autocompleteOntologies}
                 validators={[FormValidators.REQUIRED]}
                 placeholder="Please enter one or more diseases"
-                defaultValue={formData.ontologies.map(formatOntologyForSelect)}
+                defaultValue={(formData.ontologies ?? []).map(formatOntologyForSelect)}
                 validation={validation.ontologies}
                 onValidationChange={onValidationChange}
-                onChange={({ key, value }) => onChange({ key, value: value.map(formatOntologyForFormData) })}
+                onChange={({ key, value }: { key: string, value: OntologyOption[] }) => onChange({ key, value: value.map(formatOntologyForFormData) })}
               />
             </div>
           )}
@@ -319,14 +373,14 @@ export default function DataAccessRequest(props) {
                   }}
                   validation={validation.irbDocument}
                   onValidationChange={onValidationChange}
-                  onChange={({ value }) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
+                  onChange={({ value }: { value: File | undefined }) => updateUploadedIrbDocument(value, irbProtocolExpiration)}
                 />
                 {readOnlyMode && formData.irbDocumentName && formData.irbDocumentLocation && referenceId && (
                   <div style={{ marginTop: '10px' }}>
                     <DownloadLink
                       label="Download IRB Document"
-                      onDownload={() => {
-                        DAR.downloadDARDocument(referenceId, 'irbDocument', formData.irbDocumentName)
+                      onDownload={async () => {
+                        await DAR.downloadDARDocument(referenceId, 'irbDocument', formData.irbDocumentName as string)
                       }}
                     />
                   </div>
@@ -338,13 +392,10 @@ export default function DataAccessRequest(props) {
                 id="irbProtocolExpiration"
                 inputFormat="YYYY-MM-DD"
                 defaultValue={irbProtocolExpiration}
-                onChange={(value) => {
+                onChange={(value: Dayjs | string | undefined) => {
                   onChange({ key: 'irbProtocolExpiration', value })
                 }}
-                onError={(_error, value) => {
-                  // Handle error if needed
-                  console.warn('Date picker error:', _error, value)
-                }}
+                onError={() => {}}
               />
             </div>
           )}
@@ -361,7 +412,7 @@ export default function DataAccessRequest(props) {
               validation={validation.collaborationLetter}
               onValidationChange={onValidationChange}
               description="One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here."
-              onChange={({ value }) => updateCollaborationLetter(value)}
+              onChange={({ value }: { value: File | undefined }) => updateCollaborationLetter(value)}
             />
           )}
 

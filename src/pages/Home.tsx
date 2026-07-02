@@ -9,109 +9,109 @@ import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 
-const Home = (props) => {
-  const { isLogged } = props
+export interface HomeProps {
+  isLogged: boolean
+}
 
+const homeTitle: React.CSSProperties = {
+  color: '#FFFFFF',
+  fontFamily: 'Montserrat',
+  fontSize: '28px',
+  fontWeight: 600,
+  textAlign: 'center',
+  padding: '0 5rem',
+}
+
+const homeBannerDescription: React.CSSProperties = {
+  color: '#FFFFFF',
+  fontFamily: 'Montserrat',
+  fontSize: '20px',
+  textAlign: 'center',
+  whiteSpace: 'pre-wrap',
+  padding: '0 10rem',
+}
+
+const duosLogoStyle: React.CSSProperties = {
+  height: '80px',
+  width: '300px',
+  display: 'block',
+  margin: '0 auto 3rem',
+  padding: '0 3rem',
+}
+
+const header: React.CSSProperties = {
+  color: '#1F3B50',
+  fontFamily: 'Montserrat',
+  fontSize: '24px',
+  fontWeight: 600,
+  textAlign: 'center',
+  padding: '0 5rem',
+}
+
+const subHeader: React.CSSProperties = {
+  color: '#1F3B50',
+  fontFamily: 'Montserrat',
+  fontSize: '16px',
+  textAlign: 'center',
+  whiteSpace: 'pre-wrap',
+  padding: '0 5rem',
+}
+
+const description: React.CSSProperties = {
+  color: '#1F3B50',
+  fontFamily: 'Montserrat',
+  fontSize: '14px',
+  textAlign: 'center',
+  textIndent: '10px',
+  whiteSpace: 'pre-wrap',
+  padding: '10px 1rem',
+}
+
+const logoGrid: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '2rem',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
+  maxWidth: '1400px',
+  margin: '0 auto',
+}
+
+const baseCard: React.CSSProperties = {
+  width: '320px',
+  height: '160px',
+  borderRadius: '6px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'relative',
+  overflow: 'hidden',
+}
+
+const logoImg: React.CSSProperties = {
+  maxWidth: '100%',
+  maxHeight: '100%',
+  objectFit: 'contain',
+  display: 'block',
+}
+
+const Home = ({ isLogged }: Readonly<HomeProps>) => {
   const location = useLocation()
   const [showContactModal, setShowContactModal] = useState(false)
 
-  // Get all library versions and filter for featured ones
   const featuredLibraries = useMemo(() => {
     const allLibraries = getLibraryVersions(null, null)
     return Object.entries(allLibraries)
       .filter(([_key, library]) => library.featured)
       .map(([key, library]) => ({ key, ...library }))
       .sort((a, b) => {
-        // Sort by order first, then alphabetically by key as fallback
         if (a.order !== b.order) {
           return a.order - b.order
         }
         return a.key.localeCompare(b.key)
       })
   }, [])
-
-  const homeTitle = {
-    color: '#FFFFFF',
-    fontFamily: 'Montserrat',
-    fontSize: '28px',
-    fontWeight: 600,
-    textAlign: 'center',
-    padding: '0 5rem',
-  }
-
-  const homeBannerDescription = {
-    color: '#FFFFFF',
-    fontFamily: 'Montserrat',
-    fontSize: '20px',
-    textAlign: 'center',
-    whiteSpace: 'pre-wrap',
-    padding: '0 10rem',
-  }
-
-  const duosLogo = {
-    height: '80px',
-    width: '300px',
-    display: 'block',
-    margin: '0 auto 3rem',
-    padding: '0 3rem',
-  }
-
-  const header = {
-    color: '#1F3B50',
-    fontFamily: 'Montserrat',
-    fontSize: '24px',
-    fontWeight: 600,
-    textAlign: 'center',
-    padding: '0 5rem',
-  }
-
-  const subHeader = {
-    color: '#1F3B50',
-    fontFamily: 'Montserrat',
-    fontSize: '16px',
-    textAlign: 'center',
-    whiteSpace: 'pre-wrap',
-    padding: '0 5rem',
-  }
-
-  const description = {
-    color: '#1F3B50',
-    fontFamily: 'Montserrat',
-    fontSize: '14px',
-    textAlign: 'center',
-    textIndent: '10px',
-    whiteSpace: 'pre-wrap',
-    padding: '10px 1rem',
-  }
-
-  const logoGrid = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '2rem',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: '1400px',
-    margin: '0 auto',
-  }
-
-  const baseCard = {
-    width: '320px',
-    height: '160px', // 2:1 aspect ratio
-    borderRadius: '6px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    overflow: 'hidden', // Prevent images from overflowing
-  }
-
-  const logoImg = {
-    maxWidth: '100%',
-    maxHeight: '100%',
-    objectFit: 'contain',
-    display: 'block',
-  }
 
   return (
     <>
@@ -178,7 +178,7 @@ const Home = (props) => {
           <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
             <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
             <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-              <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
+              <img style={duosLogoStyle} alt="DUOS logo" src={duosLogoImg} />
               <h1 style={homeTitle}>Data Use Oversight System</h1>
               <div className="hidden-xs" style={homeBannerDescription}>
                 Access data faster.
@@ -201,12 +201,13 @@ const Home = (props) => {
                 {' '}
                 Request a meeting with our team
                 <br />
-                <span
+                <button
+                  type="button"
                   onClick={() => setShowContactModal(true)}
-                  style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline', font: 'inherit' }}
                 >
                   here
-                </span> to learn more.
+                </button> to learn more.
               </p>
               <SupportRequestModal
                 showModal={showContactModal}
@@ -229,12 +230,13 @@ const Home = (props) => {
               <p style={description}>
                 Find and request access to 100s of datasets through DUOS!
                 <br />
-                <span
+                <button
+                  type="button"
                   onClick={() => handleSignIn('/datalibrary')}
-                  style={{ cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline' }}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline', font: 'inherit' }}
                 >
                   Sign in
-                </span> to get started.
+                </button> to get started.
               </p>
             </div>
           </div>
@@ -254,18 +256,15 @@ const Home = (props) => {
                     ? libraryName
                     : `Please login to access ${libraryName} Data Library`
 
-                  // Use the library name (title without "Data Library") as the label
                   const label = libraryName
 
-                  // Special styling for Broad Institute (dark background)
-                  const cardStyle = library.key === 'broad'
+                  const cardStyle: React.CSSProperties = library.key === 'broad'
                     ? { ...baseCard, background: '#1F3B50', padding: '15px' }
                     : baseCard
 
-                  // Special case for Broad logo to use the imported asset
                   const logoSrc = library.key === 'broad'
                     ? broadLogo
-                    : library.icon
+                    : library.icon ?? undefined
 
                   return (
                     <OverflowTooltip key={library.key} id={library.key} tooltipText={tooltipText}>

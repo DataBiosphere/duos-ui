@@ -1,7 +1,7 @@
 import React from 'react'
 import Modal from 'react-modal'
-import CloseIconComponent from '../../../components/CloseIconComponent'
-import './DeleteCollaboratorModal.css'
+import CloseIconComponent from 'src/components/CloseIconComponent'
+import 'src/pages/dar_application/collaborator/DeleteCollaboratorModal.css'
 import { styled } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
@@ -33,7 +33,17 @@ const PrimaryButton = styled(Button)(({ theme }) => ({
   },
 }))
 
-const DeleteModal = (props) => {
+export interface DeleteCollaboratorModalProps {
+  showDelete: boolean
+  closeDelete: () => void
+  header: React.ReactNode
+  title: React.ReactNode
+  message: React.ReactNode
+  onConfirm: () => void
+  styleOverride?: React.CSSProperties
+}
+
+const DeleteModal = (props: Readonly<DeleteCollaboratorModalProps>) => {
   const { showDelete, closeDelete, header, title, message, onConfirm, styleOverride = {} } = props
   const closeFn = () => closeDelete()
 
