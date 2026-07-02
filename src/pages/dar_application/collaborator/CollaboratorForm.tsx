@@ -9,9 +9,9 @@ import { v4 as uuidV4 } from 'uuid'
 import { computeCollaboratorErrors } from 'src/utils/darFormUtils'
 import DeleteCollaboratorModal from './DeleteCollaboratorModal'
 import { nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
-import ApproverStatus, { ApproverStatusType } from 'src/pages/dar_application/collaborator/ApproverStatus'
+import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus'
 import { Countries } from 'src/libs/ajax/Countries'
-import { Collaborator } from 'src/types/model'
+import { ApproverStatusType, Collaborator } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 
 export interface CollaboratorFormProps {

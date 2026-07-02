@@ -1,8 +1,7 @@
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import React from 'react'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-
-export type ApproverStatusType = boolean | 'true' | 'false' | undefined
+import { ApproverStatusType } from 'src/types/model'
 
 interface ApproverStatusProps {
   readonly index: number
