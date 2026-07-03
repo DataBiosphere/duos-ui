@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
@@ -84,6 +84,10 @@ describe('session middleware (integration)', () => {
     const fake = makeInMemoryPg()
     rows = fake.rows
     app = await buildSessionApp(fake.pg)
+  })
+
+  afterEach(async () => {
+    await app.close()
   })
 
   it('does not persist a session when nothing is written (saveUninitialized: false)', async () => {

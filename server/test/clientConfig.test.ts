@@ -31,7 +31,9 @@ describe('readClientConfig', () => {
     delete process.env.DUOS_API_URL
     resetClientConfigCache()
     log.error.mockClear()
-    rmSync(dir, { recursive: true, force: true })
+    // Guarded: rmSync(undefined) throws and would mask the real failure of a
+    // test that died before mkdtempSync assigned dir.
+    if (dir) rmSync(dir, { recursive: true, force: true })
   })
 
   function writeFixture(config: Record<string, unknown>): string {
