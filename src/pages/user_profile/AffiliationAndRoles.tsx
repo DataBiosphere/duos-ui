@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Institution as InstitutionAPI } from '../../libs/ajax/Institution'
-import { User } from '../../libs/ajax/User'
-import { Notifications } from '../../libs/utils'
-import { DuosUser, InstitutionInterface, SigningOfficialUserWithData } from '../../types/model'
+import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
+import { User } from 'src/libs/ajax/User'
+import { Notifications } from 'src/libs/utils'
+import { DuosUser, InstitutionInterface, SigningOfficialUserWithData } from 'src/types/model'
 
 interface AffiliationAndRoleProps {
   readonly user: DuosUser
@@ -25,15 +25,11 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
           if (institution) {
             setInstitution(institution)
           }
-          const soUsers = await User.getSOsForInstitution(user.institutionId)
-          setSigningOfficialUsers(soUsers)
         }
-        else if (user) {
-          const soUsers = await User.getSOsForCurrentUser()
-          setSigningOfficialUsers(soUsers)
-        }
+        const soUsers = await User.getSOsForCurrentUser()
+        setSigningOfficialUsers(soUsers)
       }
-      catch (_error) {
+      catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user information' })
       }
     }
