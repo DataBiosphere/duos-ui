@@ -115,11 +115,11 @@ describe('AffiliationAndRole', () => {
     })
   })
 
-  it('calls getSOsForInstitution when user has an institutionId', async () => {
+  it('calls getSOsForCurrentUser when user has an institutionId', async () => {
     render(<AffiliationAndRole user={user} />)
     await waitFor(() => {
-      expect(User.getSOsForInstitution).toHaveBeenCalledWith(1)
-      expect(User.getSOsForCurrentUser).not.toHaveBeenCalled()
+      expect(User.getSOsForCurrentUser).toHaveBeenCalled()
+      expect(User.getSOsForInstitution).not.toHaveBeenCalled()
     })
   })
 
@@ -132,7 +132,7 @@ describe('AffiliationAndRole', () => {
   })
 
   it('renders name and email in table rows for each signing official', async () => {
-    vi.mocked(User.getSOsForInstitution).mockResolvedValue([soWithData])
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue([soWithData])
     render(<AffiliationAndRole user={user} />)
     await waitFor(() => {
       expect(screen.getByRole('cell', { name: 'Jane SO' })).toBeInTheDocument()
@@ -141,7 +141,7 @@ describe('AffiliationAndRole', () => {
   })
 
   it('renders the Name and Email column headers', async () => {
-    vi.mocked(User.getSOsForInstitution).mockResolvedValue([soWithData])
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue([soWithData])
     render(<AffiliationAndRole user={user} />)
     await waitFor(() => {
       expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument()
