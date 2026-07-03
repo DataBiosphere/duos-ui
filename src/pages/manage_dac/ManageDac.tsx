@@ -103,7 +103,7 @@ export const ManageDac = function ManageDac() {
   const roles = useMemo(() => currentUser.roles?.map((r: { name: string }) => r.name) ?? [], [currentUser])
   const userRole: ManageDacRole = roles.includes(ADMIN) ? ADMIN : CHAIR
   const chairDACIds = useMemo(() => new Set(
-    (currentUser.roles ?? [])
+    currentUser.roles
       .filter((roleItem: { name: string, dacId?: number }) => roleItem.name === CHAIR && roleItem.dacId !== undefined)
       .map((roleItem: { dacId?: number }) => roleItem.dacId as number),
   ), [currentUser])

@@ -163,7 +163,7 @@ const SubmitterCell = ({
 }
 
 const roleCell = (roles: DuosUserWithInstitutionId['roles'], id: TableRowId): TableCell => {
-  const roleString = chain((roles ?? []).map(role => role.name))
+  const roleString = chain(roles.map(role => role.name))
     .sortBy()
     .sortedUniq()
     .join(', ')
