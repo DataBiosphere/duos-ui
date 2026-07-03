@@ -104,6 +104,11 @@ docker compose --env-file .env.local up -d
 Compose automatically merges in `docker-compose.override.yaml` whenever it's present alongside `docker-compose.yaml`
 and no `-f` flags are given, which is what adds the bundled `db` service here.
 
+Standalone mode requires a consent database dump (which includes the BFF `user_sessions` table) at
+`config/consentdb.sql` before first start — the file is gitignored and nothing provisions it automatically. If it's
+missing, Docker silently creates a directory at that path and the stack comes up green with an *empty* database;
+the first session write then fails with "relation user_sessions does not exist".
+
 **Against a local `consent` compose stack instead** (see below for the full walkthrough):
 
 First, ensure that the consent stack is up and running separately, then run this repo's stack with the consent overlay.

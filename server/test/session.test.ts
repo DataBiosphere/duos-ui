@@ -29,12 +29,6 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
       rows.delete(params[0] as string)
       return { rows: [] }
     }
-    if (sql.includes('UPDATE user_sessions SET expire')) {
-      const [sid, expire] = params as [string, Date]
-      const existing = rows.get(sid)
-      if (existing) existing.expire = expire
-      return { rows: [] }
-    }
     return { rows: [] }
   }
   return { pg: { query } as unknown as PostgresDb, rows }

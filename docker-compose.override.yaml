@@ -4,6 +4,13 @@
 # so the BFF talks to a real database entirely within this stack, without
 # reaching dev or needing a local `consent` checkout. Mirrors the `sqlproxy`
 # service in consent/config. See docker-compose.consent.yaml for the other mode.
+#
+# REQUIRED before first start: place a consent database dump (which includes
+# the BFF `user_sessions` table) at config/consentdb.sql — the file is
+# gitignored and nothing provisions it for you. If it's absent, Docker silently
+# creates a *directory* at that path, Postgres skips init, the healthcheck
+# still passes, and you get a green stack with an empty database whose first
+# session write fails with an opaque "relation does not exist" error.
 services:
   app:
     depends_on:

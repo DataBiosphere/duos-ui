@@ -114,9 +114,11 @@ describe('plugin registration order', () => {
 describe('GET /config.json', () => {
   let dir: string
 
-  afterEach(() => {
+  afterEach(async () => {
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_API_URL
+    const { resetClientConfigCache } = await import('../src/clientConfig.js')
+    resetClientConfigCache()
     rmSync(dir, { recursive: true, force: true })
   })
 
@@ -133,6 +135,12 @@ describe('GET /config.json', () => {
     const res = await localApp.inject({ method: 'GET', url: '/config.json' })
     expect(res.statusCode).toBe(200)
     expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+
+    // HEAD must serve the same (overridden) resource, not fall through to the
+    // static file — mismatched GET/HEAD Content-Length corrupts caches.
+    const head = await localApp.inject({ method: 'HEAD', url: '/config.json' })
+    expect(head.statusCode).toBe(200)
+    expect(head.headers['content-length']).toBe(String(res.payload.length))
 
     await localApp.close()
   })

@@ -44,7 +44,7 @@ export async function buildApp(): Promise<AppInstance> {
   // 1. DB pool + session — gated on the BFF_ENABLED feature flag (consent API)
   // so the legacy client-side auth flow can run with no DB/session infra at
   // all until the BFF rollout flips the flag. Fails safe to disabled status.
-  if (await isBffEnabled()) {
+  if (await isBffEnabled(fastify.log)) {
     // DB pool — must be registered before session so app.pg is available to the store
     await fastify.register(fastifyPostgres, {
       host: process.env.DUOS_DB_HOST,
@@ -59,10 +59,17 @@ export async function buildApp(): Promise<AppInstance> {
       ssl: process.env.DUOS_DB_SSL === 'true' ? { rejectUnauthorized: true } : false,
     })
 
+    // Validated here so a misconfigured environment fails with an error naming
+    // the env var, instead of @fastify/session's generic "secret is required".
+    const sessionSecret = process.env.DUOS_SESSION_SECRET
+    if (!sessionSecret || sessionSecret.length < 32) {
+      throw new Error('BFF is enabled but DUOS_SESSION_SECRET is unset or shorter than 32 characters — set it in .env.local locally, or the deployment env in k8s')
+    }
+
     // Cookie + session — the store reads fastify.pg registered above
     await fastify.register(fastifyCookie)
     await fastify.register(fastifySession, {
-      secret: process.env.DUOS_SESSION_SECRET!,
+      secret: sessionSecret,
       store: createPgSessionStore(fastify.pg),
       cookie: {
         httpOnly: true,
@@ -87,9 +94,16 @@ export async function buildApp(): Promise<AppInstance> {
   // before that nested route's handler regardless of which scope declared it,
   // so this lets DUOS_API_URL override the static file's `apiUrl` without
   // fighting Vite for the route — see clientConfig.ts for why.
+  // HEAD must be intercepted along with GET: the static plugin registers both,
+  // so a HEAD that fell through would describe the raw un-overridden file and
+  // disagree with GET's body (mismatched Content-Length for caches/validators).
+  // Node itself omits the body for HEAD responses; sending the same payload
+  // yields matching headers.
+  const configJsonPath = clientConfigPath(PROJECT_ROOT, isDev)
   fastify.addHook('onRequest', async (request, reply) => {
-    if (request.method === 'GET' && request.url.split('?')[0] === '/config.json') {
-      reply.send(await readClientConfig(clientConfigPath(PROJECT_ROOT, isDev)))
+    if ((request.method === 'GET' || request.method === 'HEAD')
+      && (request.url === '/config.json' || request.url.startsWith('/config.json?'))) {
+      reply.send(await readClientConfig(configJsonPath, request.log))
     }
   })
 

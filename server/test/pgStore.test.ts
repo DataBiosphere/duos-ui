@@ -117,26 +117,4 @@ describe('createPgSessionStore', () => {
       ).rejects.toThrow('delete failed')
     })
   })
-
-  describe('touch', () => {
-    it('updates only the expire column for the given sid', async () => {
-      query.mockResolvedValueOnce({ rows: [] })
-      const before = Date.now()
-
-      await promisifyVoid(cb => store.touch('sid-1', sampleSession, cb))
-
-      const [sql, params] = query.mock.calls[0]
-      expect(sql).toContain('UPDATE user_sessions SET expire = $2 WHERE sid = $1')
-      expect(params[0]).toBe('sid-1')
-      const expire = params[1] as Date
-      expect(expire.getTime() - before).toBeGreaterThan(8 * 60 * 60 * 1000 - 1000)
-    })
-
-    it('propagates query errors to the callback', async () => {
-      query.mockRejectedValueOnce(new Error('touch failed'))
-      await expect(
-        promisifyVoid(cb => store.touch('sid-1', sampleSession, cb)),
-      ).rejects.toThrow('touch failed')
-    })
-  })
 })

@@ -47,11 +47,11 @@ services:
       # sets it to `db`; docker-compose.consent.yaml sets it to host.docker.internal).
       # Same for `ports`, `extra_hosts`, and `depends_on` below — all mode-specific,
       # all live in the overlay files instead of here.
-      DUOS_DB_PORT: '5432'
+      DUOS_DB_PORT: ${DUOS_DB_PORT:-5432}
       DUOS_DB_NAME: ${DUOS_DB_NAME:-consent}
       DUOS_DB_USER: ${DUOS_DB_USER:-consent}
       DUOS_DB_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env.local (copy .env.example)}
-      DUOS_DB_SSL: 'false'
+      DUOS_DB_SSL: ${DUOS_DB_SSL:-false}
       DUOS_SESSION_SECRET: ${DUOS_SESSION_SECRET:?set DUOS_SESSION_SECRET (32+ chars) in .env.local (copy .env.example)}
     volumes:
       - ./public/config.json:/usr/src/app/build/config.json
