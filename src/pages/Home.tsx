@@ -404,11 +404,11 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                   <img src={signingOfficialIcon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
                 </div>
                 <h3 className="audience-card-title">DUOS for Signing Officials</h3>
-                <p className="audience-card-tagline">Authorize your institution's researchers</p>
+                <p className="audience-card-tagline">Authorize your institution&#39;s researchers</p>
                 <ul className="audience-card-features">
                   <li>
                     <CheckIcon color="#00609f" />
-                    Promote and share your institution's data
+                    Promote and share your institution&#39;s data
                   </li>
                   <li>
                     <CheckIcon color="#00609f" />
