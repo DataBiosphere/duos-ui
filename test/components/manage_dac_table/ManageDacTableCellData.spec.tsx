@@ -64,11 +64,32 @@ describe('ManageDacTableCellData', () => {
   })
 
   describe('datasetsCellData', () => {
-    it('shows the dataset count', () => {
-      const dac: DacObject = { ...baseDac, datasets: [{ datasetId: 1 } as Dataset, { datasetId: 2 } as Dataset] }
+    it('shows the count of approved datasets', () => {
+      const dac: DacObject = {
+        ...baseDac,
+        datasets: [
+          { datasetId: 1, dacApproval: true } as Dataset,
+          { datasetId: 2, dacApproval: true } as Dataset,
+          { datasetId: 3, dacApproval: false } as Dataset,
+        ],
+      }
       const cell = datasetsCellData({ dac, viewDatasets: vi.fn() })
       renderNode(cell.data)
       expect(screen.getByRole('button')).toHaveTextContent('2')
+    })
+
+    it('excludes datasets that are not approved', () => {
+      const dac: DacObject = {
+        ...baseDac,
+        datasets: [
+          { datasetId: 1, dacApproval: true } as Dataset,
+          { datasetId: 2, dacApproval: false } as Dataset,
+          { datasetId: 3 } as Dataset,
+        ],
+      }
+      const cell = datasetsCellData({ dac, viewDatasets: vi.fn() })
+      renderNode(cell.data)
+      expect(screen.getByRole('button')).toHaveTextContent('1')
     })
 
     it('shows 0 when dac has no datasets', () => {
