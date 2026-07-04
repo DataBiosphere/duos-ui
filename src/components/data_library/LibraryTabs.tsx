@@ -33,7 +33,7 @@ export const LibraryTabs: React.FC<LibraryTabsProps> = ({
           <Tab
             key={tab.key}
             value={tab.key}
-            label={tab.label}
+            label={tab.count === undefined ? tab.label : `${tab.label} (${tab.count.toLocaleString()})`}
             sx={{
               textTransform: 'none',
               fontSize: '15px',

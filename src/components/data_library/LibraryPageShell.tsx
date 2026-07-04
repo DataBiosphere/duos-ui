@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Box, Skeleton, Typography } from '@mui/material'
 import { GridColDef } from '@mui/x-data-grid'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
@@ -42,12 +42,18 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
     sanitizedFilters,
     filterSections,
     sortModel,
+    tabCounts,
     handleTabChange,
     handleFiltersChange,
     handleClearFilters,
     handleSortChange,
     handleToggleFilters,
   } = pageState
+
+  const tabsWithCounts = useMemo(
+    () => tabs.map(tab => ({ ...tab, count: tabCounts[tab.key] })),
+    [tabs, tabCounts],
+  )
 
   const {
     selectedDatasetIds = [],
@@ -77,7 +83,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         <LibraryTabs
           value={urlState.tab}
           onChange={handleTabChange}
-          tabs={tabs}
+          tabs={tabsWithCounts}
         />
       </Box>
 

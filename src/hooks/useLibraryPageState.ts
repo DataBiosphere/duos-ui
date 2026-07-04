@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
-import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
+import { useLibraryData, useLibraryMetadata, useLibraryTabCounts } from 'src/hooks/useLibraryData'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
+import { ALL_LIBRARY_TABS, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder, TabConfig } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
   EMPTY_FILTERS,
@@ -16,8 +16,15 @@ import {
   clinicalTrialStatusSelectOptions,
 } from 'src/utils/ClinicalTrialEnumUtils'
 
-export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
+export function useLibraryPageState(libraryConfig: LibraryVersionNew, tabs: TabConfig[] = ALL_LIBRARY_TABS) {
   const [urlState, updateUrlState] = useLibraryUrlState()
+
+  const tabCounts = useLibraryTabCounts(
+    libraryConfig,
+    tabs.map(t => t.key),
+    urlState.filters,
+    urlState.query ?? '',
+  )
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 
@@ -152,6 +159,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     sanitizedFilters,
     filterSections,
     sortModel,
+    tabCounts,
     handleTabChange,
     handleSearchChange,
     handleFiltersChange,
