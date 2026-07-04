@@ -1,5 +1,6 @@
 import React from 'react'
-import { Box, Skeleton, Typography } from '@mui/material'
+import { Box, Skeleton, Tooltip, Typography } from '@mui/material'
+import BoltIcon from '@mui/icons-material/Bolt'
 import { GridColDef } from '@mui/x-data-grid'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
@@ -104,23 +105,60 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         </Box>
 
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {isFetching
-            ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px', mb: 1 }} />
-            : (
-                <Typography
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            {isFetching
+              ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px' }} />
+              : (
+                  <Typography
+                    sx={{
+                      color: 'primary.main',
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {(data?.total ?? 0).toLocaleString()}
+                    {' '}
+                    {data?.total === 1 ? currentAsset.label.singular : currentAsset.label.plural}
+                  </Typography>
+                )}
+            {radarEnabledDatasetIds !== undefined && (
+              <Tooltip title="Datasets marked with a lightning bolt are eligible for automatic, instant access approvals — your request may be approved immediately if it clearly falls within the dataset's data use terms." arrow>
+                <Box
                   sx={{
-                    color: 'primary.main',
-                    fontFamily: 'Montserrat, sans-serif',
-                    fontSize: '15px',
-                    fontWeight: 'bold',
-                    mb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 99,
+                    bgcolor: 'rgba(255, 215, 0, 0.10)',
+                    border: '1px solid rgba(255, 215, 0, 0.45)',
+                    cursor: 'default',
+                    userSelect: 'none',
+                    transition: 'background-color 0.15s',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 215, 0, 0.18)',
+                    },
                   }}
                 >
-                  {(data?.total ?? 0).toLocaleString()}
-                  {' '}
-                  {data?.total === 1 ? currentAsset.label.singular : currentAsset.label.plural}
-                </Typography>
-              )}
+                  <BoltIcon sx={{ color: 'gold', fontSize: 17 }} />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                      fontWeight: 600,
+                      fontSize: '0.72rem',
+                      whiteSpace: 'nowrap',
+                      letterSpacing: 0.2,
+                    }}
+                  >
+                    Instant approval eligible
+                  </Typography>
+                </Box>
+              </Tooltip>
+            )}
+          </Box>
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
             <LibraryDataGrid
               assetType={urlState.tab}
