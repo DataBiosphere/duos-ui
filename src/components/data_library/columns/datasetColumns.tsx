@@ -2,8 +2,8 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
-import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
-import { AccessManagement, ExportableDatasets } from 'src/types/library'
+import { DatasetTerm } from 'src/types/model'
+import { ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
@@ -46,41 +46,25 @@ export const makeDatasetColumns = (
   {
     field: 'accessManagement',
     headerName: 'Access',
-    width: 115,
+    width: 140,
     renderCell: (params) => {
-      const summary = getAccessManagementSummary(params.value)
       const isRadarEnabled = radarEnabledDatasetIds.has(params.row.datasetId)
+      const label = (() => {
+        switch (params.value) {
+          case 'open': return 'Open Access'
+          case 'controlled': return 'via DUOS'
+          case 'external': return 'External to DUOS'
+          default: return params.value
+        }
+      })()
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
-          <Tooltip title={summary.description}>
-            <Chip
-              label={(
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  {summary.name}
-                  {isRadarEnabled && (
-                    <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
-                      <BoltIcon sx={{ color: 'gold' }} />
-                    </Tooltip>
-                  )}
-                </Box>
-              )}
-              size="small"
-              color={
-                (() => {
-                  switch (params.value) {
-                    case AccessManagement.CONTROLLED:
-                      return 'primary'
-                    case AccessManagement.OPEN:
-                      return 'success'
-                    case AccessManagement.EXTERNAL:
-                      return 'secondary'
-                    default:
-                      return 'default'
-                  }
-                })()
-              }
-            />
-          </Tooltip>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, height: '100%' }}>
+          {label}
+          {isRadarEnabled && (
+            <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
+              <BoltIcon sx={{ color: 'gold' }} />
+            </Tooltip>
+          )}
         </Box>
       )
     },
