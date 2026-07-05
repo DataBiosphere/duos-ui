@@ -5,6 +5,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
+import RequestAccessButton from 'src/components/data_library/columns/RequestAccessButton'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 
@@ -86,6 +87,27 @@ export const makeDatasetColumns = (
     },
   },
   {
+    field: 'requestLocation',
+    headerName: 'Request Path',
+    width: 180,
+    sortable: false,
+    renderCell: (params) => {
+      if (params.row.accessManagement === AccessManagement.OPEN) {
+        return '-'
+      }
+      if (params.row.accessManagement === AccessManagement.CONTROLLED) {
+        return <RequestAccessButton datasetId={params.row.datasetId} />
+      }
+      return params.value
+        ? (
+            <Link href={validateHttpUrl(params.value) ? params.value : undefined} target="_blank" rel="noopener noreferrer" underline="hover">
+              {params.value}
+            </Link>
+          )
+        : null
+    },
+  },
+  {
     field: 'participantCount',
     headerName: 'Participants',
     width: 120,
@@ -122,20 +144,6 @@ export const makeDatasetColumns = (
     headerName: 'DAC',
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
-  },
-  {
-    field: 'requestLocation',
-    headerName: 'Request Location',
-    width: 180,
-    sortable: false,
-    renderCell: params =>
-      params.value
-        ? (
-            <Link href={validateHttpUrl(params.value) ? params.value : undefined} target="_blank" rel="noopener noreferrer" underline="hover">
-              {params.value}
-            </Link>
-          )
-        : null,
   },
   {
     field: 'actions',

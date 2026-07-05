@@ -17,10 +17,10 @@ describe('datasetColumns — column order', () => {
       'studyName',
       'datasetIdentifier',
       'accessManagement',
+      'requestLocation',
       'participantCount',
       'dataUse',
       'dac',
-      'requestLocation',
       'actions',
     ])
   })
@@ -87,5 +87,41 @@ describe('datasetColumns — Access Management chip', () => {
       </MemoryRouter>,
     )
     cy.get('svg[data-testid="BoltIcon"]').should('exist')
+  })
+})
+
+describe('datasetColumns — Request Path column', () => {
+  beforeEach(() => {
+    cy.viewport(1200, 800)
+  })
+
+  const renderGrid = (overrides: Partial<Parameters<typeof makeDatasetTerm>[0]> = {}) => {
+    const row = makeDatasetTerm({ datasetId: 1, ...overrides })
+    cy.mount(
+      <MemoryRouter>
+        <DataGrid
+          rows={[row]}
+          columns={makeDatasetColumns()}
+          getRowId={r => r.datasetId}
+          autoHeight
+        />,
+      </MemoryRouter>,
+    )
+  }
+
+  it('always shows a "-" for open access datasets, ignoring requestLocation', () => {
+    renderGrid({ accessManagement: 'open', requestLocation: 'https://example.com' })
+    cy.get('[data-field="requestLocation"]').contains('-').should('exist')
+    cy.get('[data-field="requestLocation"] a').should('not.exist')
+  })
+
+  it('shows a "Request Now" button for controlled (Via DUOS) datasets', () => {
+    renderGrid({ accessManagement: 'controlled' })
+    cy.get('[data-field="requestLocation"]').contains('button', 'Request Now').should('exist')
+  })
+
+  it('shows a link to the requestLocation for external datasets', () => {
+    renderGrid({ accessManagement: 'external', requestLocation: 'https://example.com/request' })
+    cy.get('[data-field="requestLocation"] a').should('have.attr', 'href', 'https://example.com/request')
   })
 })
