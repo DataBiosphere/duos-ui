@@ -509,6 +509,32 @@ describe('DataLibrary', () => {
     })
   })
 
+  describe('bolt icon legend', () => {
+    it('shows the instant approval legend on the datasets tab', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=datasets']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+      cy.wait('@searchApi')
+      cy.contains('Instant approval eligible').should('be.visible')
+    })
+
+    it('does not show the instant approval legend on non-dataset tabs', () => {
+      cy.mount(
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/?tab=studies']}>
+            <DataLibrary />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+      cy.wait('@searchApi')
+      cy.contains('Instant approval eligible').should('not.exist')
+    })
+  })
+
   describe('Export functionality', () => {
     const emptyTdrResponse = { filteredTotal: 0, total: 0, items: [], roleMap: {} }
 
