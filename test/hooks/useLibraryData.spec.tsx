@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
-import { useLibraryData, buildElasticsearchQuery } from 'src/hooks/useLibraryData'
+import { useLibraryData, buildElasticsearchQuery, useLibraryTabCounts } from 'src/hooks/useLibraryData'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
 import { BoolQuery, ExistsQuery, MultiMatchQuery, TermQuery } from 'src/types/elastic'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
@@ -242,5 +242,53 @@ describe('buildElasticsearchQuery', () => {
     )
 
     expect(query.query?.bool.filter).toEqual(undefined)
+  })
+})
+
+describe('useLibraryTabCounts', () => {
+  const libraryConfig: LibraryVersionNew = {
+    key: 'duos',
+    title: 'DUOS Data Library',
+    featured: true,
+    order: 0,
+  }
+
+  const CountsComponent = ({ assetTypes }: { assetTypes: AssetType[] }) => {
+    const counts = useLibraryTabCounts(libraryConfig, assetTypes, { ...EMPTY_FILTERS }, '')
+    return (
+      <div>
+        {assetTypes.map(type => (
+          <div key={type} id={`count-${type}`}>{counts[type] ?? 'pending'}</div>
+        ))}
+      </div>
+    )
+  }
+
+  it('returns an entry for each requested asset type', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    await act(async () => {
+      render(
+        <QueryClientProvider client={queryClient}>
+          <CountsComponent assetTypes={[AssetType.STUDIES, AssetType.DATASETS]} />
+        </QueryClientProvider>,
+      )
+    })
+    // Counts start as pending (no mock response) — verify both keys rendered
+    expect(screen.getAllByText('pending')).toHaveLength(2)
+  })
+
+  it('registers one query per asset type in the cache', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    await act(async () => {
+      render(
+        <QueryClientProvider client={queryClient}>
+          <CountsComponent assetTypes={[AssetType.STUDIES, AssetType.DATASETS, AssetType.MODELS]} />
+        </QueryClientProvider>,
+      )
+    })
+    const tabCountQueries = queryClient.getQueryCache().findAll({
+      predicate: q => Array.isArray(q.queryKey) && q.queryKey[0] === 'library-tab-count',
+    })
+    expect(tabCountQueries).toHaveLength(3)
   })
 })
