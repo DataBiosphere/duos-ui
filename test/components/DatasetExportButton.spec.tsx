@@ -19,7 +19,6 @@ const buildSnapshot = (id: string, name: string): SnapshotSummaryModel => ({
 })
 
 const snapshotA = buildSnapshot('snap-aaa', 'Snapshot Alpha')
-const snapshotB = buildSnapshot('snap-bbb', 'Snapshot Beta')
 
 const renderButton = async (snapshots: SnapshotSummaryModel[]) => {
   let result: ReturnType<typeof render>
@@ -39,64 +38,38 @@ describe('DatasetExportButton', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders a single link for one snapshot', async () => {
+  it('renders an "Export to..." dropdown button', async () => {
     await renderButton([snapshotA])
 
-    const link = screen.getByRole('link', { name: /Snapshot Alpha/i })
-    expect(link.textContent).toBe('Export')
-    expect(link.getAttribute('href')).toContain('snap-aaa')
-    expect(link.getAttribute('href')).toContain('tdrexport')
-    expect(link.getAttribute('target')).toBe('_blank')
+    expect(screen.getByRole('button', { name: /export to/i }).textContent).toContain('Export to...')
   })
 
-  it('single-snapshot link href uses the terra base URL', async () => {
+  it('dropdown is closed initially', async () => {
     await renderButton([snapshotA])
 
-    const link = screen.getByRole('link', { name: /Snapshot Alpha/i })
-    expect(link.getAttribute('href')).toMatch(/^https:\/\/terra\.example\.com/)
+    expect(screen.queryByText('Terra')).toBeNull()
   })
 
-  it('renders a button (not a link) for multiple snapshots', async () => {
-    await renderButton([snapshotA, snapshotB])
+  it('opens dropdown menu on button click and shows the Terra option with its logo', async () => {
+    await renderButton([snapshotA])
 
-    expect(screen.getByRole('button', { name: /export/i })).toBeTruthy()
-    expect(screen.queryByRole('link', { name: /export snapshot/i })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /export to/i }))
+
+    const terraItem = await screen.findByText('Terra')
+    expect(terraItem).toBeTruthy()
+    expect(terraItem.closest('a')?.querySelector('img')).toBeTruthy()
   })
 
-  it('dropdown is closed initially for multiple snapshots', async () => {
-    await renderButton([snapshotA, snapshotB])
+  it('the Terra option links to the correct Terra snapshot URL in a new tab', async () => {
+    await renderButton([snapshotA])
 
-    expect(screen.queryByText('Snapshot Alpha')).toBeNull()
-    expect(screen.queryByText('Snapshot Beta')).toBeNull()
-  })
+    fireEvent.click(screen.getByRole('button', { name: /export to/i }))
 
-  it('opens dropdown menu on button click and shows snapshot names', async () => {
-    await renderButton([snapshotA, snapshotB])
-
-    fireEvent.click(screen.getByRole('button', { name: /export/i }))
-
-    expect(await screen.findByText('Snapshot Alpha')).toBeTruthy()
-    expect(await screen.findByText('Snapshot Beta')).toBeTruthy()
-  })
-
-  it('each dropdown item links to the correct Terra snapshot URL', async () => {
-    await renderButton([snapshotA, snapshotB])
-
-    fireEvent.click(screen.getByRole('button', { name: /export/i }))
-
-    const itemA = await screen.findByText('Snapshot Alpha')
-    const itemB = await screen.findByText('Snapshot Beta')
-
-    expect(itemA.closest('a')?.getAttribute('href')).toContain('snap-aaa')
-    expect(itemB.closest('a')?.getAttribute('href')).toContain('snap-bbb')
-  })
-
-  it('dropdown items open in a new tab', async () => {
-    await renderButton([snapshotA, snapshotB])
-
-    fireEvent.click(screen.getByRole('button', { name: /export/i }))
-
-    const itemA = await screen.findByText('Snapshot Alpha')
-    expect(itemA.closest('a')?.getAttribute('target')).toBe('_blank')
+    const terraItem = await screen.findByText('Terra')
+    const link = terraItem.closest('a')
+    expect(link?.getAttribute('href')).toContain('snap-aaa')
+    expect(link?.getAttribute('href')).toContain('tdrexport')
+    expect(link?.getAttribute('href')).toMatch(/^https:\/\/terra\.example\.com/)
+    expect(link?.getAttribute('target')).toBe('_blank')
   })
 })
