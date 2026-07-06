@@ -82,7 +82,7 @@ describe('DataAccessAgreements Component Tests', () => {
       datasets: [{ dataSetId: 1, datasetId: 1, dacId: 2 }],
     })
 
-    cy.contains(‘By submitting this data access request you agree to the data access agreements below’).should(‘exist’)
+    cy.contains('By submitting this data access request you agree to the data access agreements below').should('exist')
   })
 
   it('calls save when the save button is clicked', () => {
