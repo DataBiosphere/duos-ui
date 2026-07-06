@@ -51,7 +51,6 @@ const roleBACRoutes: string[] = [
   '/dac_datasets',
   // chairperson | admin
   '/manage_dac',
-  '/manage_dac_datasets',
   '/manage_radar/1',
   // admin
   '/admin_review_collection/1',
