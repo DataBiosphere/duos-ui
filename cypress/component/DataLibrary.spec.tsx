@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
+import { DataSet } from 'src/libs/ajax/DataSet'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
@@ -93,16 +94,10 @@ describe('DataLibrary', () => {
     cy.stub(Storage, 'getCurrentUser').as('getCurrentUserStub').returns({
       libraryCard: { cardNumber: '12345' },
     })
-    cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-      if (req.body.aggs?.studies) {
-        req.reply(mockStudiesResponse)
-      }
-      else if (req.body.size === 0 && !req.body.queryTerm) {
-        req.reply(mockMetadataResponse)
-      }
-      else {
-        req.reply(mockDatasetsResponse)
-      }
+    cy.stub(DataSet, 'searchDatasetIndexV2').callsFake(async (query) => {
+      if (query.aggs?.studies) return mockStudiesResponse
+      if (query.size === 0) return mockMetadataResponse
+      return mockDatasetsResponse
     }).as('searchApi')
   })
 
@@ -280,56 +275,54 @@ describe('DataLibrary', () => {
   })
 
   it('applies row-level filtering for nested presentation rows when Datasets Cited is selected', () => {
-    cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-      if (req.body.aggs?.studies) {
-        req.reply({
-          aggregations: {
-            studies: {
-              buckets: [
-                {
-                  key: 501,
-                  doc_count: 1,
-                  study_details: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            study: {
-                              studyId: 501,
-                              studyName: 'Shared Study',
-                              assets: {
-                                presentations: [
-                                  {
-                                    presentationId: 'pres-match',
-                                    title: 'Nested Match Presentation',
-                                    citation: true,
-                                  },
-                                  {
-                                    presentationId: 'pres-non-match',
-                                    title: 'Nested Non-Match Presentation',
-                                    citation: false,
-                                  },
-                                ],
+    const nestedResponse = {
+      aggregations: {
+        studies: {
+          buckets: [
+            {
+              key: 501,
+              doc_count: 1,
+              study_details: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        study: {
+                          studyId: 501,
+                          studyName: 'Shared Study',
+                          assets: {
+                            presentations: [
+                              {
+                                presentationId: 'pres-match',
+                                title: 'Nested Match Presentation',
+                                citation: true,
                               },
-                            },
+                              {
+                                presentationId: 'pres-non-match',
+                                title: 'Nested Non-Match Presentation',
+                                citation: false,
+                              },
+                            ],
                           },
                         },
-                      ],
+                      },
                     },
-                  },
+                  ],
                 },
-              ],
+              },
             },
-          },
-        })
-      }
-      else if (req.body.size === 0 && !req.body.queryTerm) {
-        req.reply(mockMetadataResponse)
-      }
-      else {
-        req.reply(mockDatasetsResponse)
-      }
-    }).as('nestedPresentationSearchApi')
+          ],
+        },
+      },
+    }
+
+    cy.get('@searchApi').then((stub) => {
+      (stub as sinon.SinonStub).callsFake(async (query) => {
+        if (query.aggs?.studies) return nestedResponse
+        if (query.size === 0) return mockMetadataResponse
+        return mockDatasetsResponse
+      })
+    })
 
     cy.mount(
       <QueryClientProvider client={queryClient}>
@@ -339,14 +332,12 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    cy.wait('@nestedPresentationSearchApi')
     cy.contains('Nested Match Presentation').should('exist')
     cy.contains('Nested Non-Match Presentation').should('exist')
 
     cy.contains('Datasets Cited?').click()
     cy.contains('Yes').closest('label').find('input[type="radio"]').check({ force: true })
 
-    cy.wait('@nestedPresentationSearchApi')
     cy.contains('Nested Match Presentation').should('exist')
     cy.contains('Nested Non-Match Presentation').should('not.exist')
   })
@@ -407,74 +398,68 @@ describe('DataLibrary', () => {
     it('shows the plural studies count after loading', () => {
       // mockStudiesResponse has total_studies.value = 2
       mountDefault('studies')
-      cy.wait('@searchApi')
       cy.contains('2 Studies').should('be.visible')
     })
 
     it('shows singular "Study" when total is 1', () => {
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        if (req.body.aggs?.studies) {
-          req.reply({
-            aggregations: {
-              total_studies: { value: 1 },
-              studies: {
-                buckets: [
-                  {
-                    key: { study_id: 101 },
-                    study_details: { hits: { hits: [{ _source: { study: { studyName: 'Only Study', description: '' } } }] } },
-                    dataset_count: { value: 1 },
-                    total_participants: { value: 50 },
-                    dataset_ids: { buckets: [{ key: 1 }] },
-                  },
-                ],
+      const singularStudyResponse = {
+        aggregations: {
+          total_studies: { value: 1 },
+          studies: {
+            buckets: [
+              {
+                key: { study_id: 101 },
+                study_details: { hits: { hits: [{ _source: { study: { studyName: 'Only Study', description: '' } } }] } },
+                dataset_count: { value: 1 },
+                total_participants: { value: 50 },
+                dataset_ids: { buckets: [{ key: 1 }] },
               },
-            },
-          })
-        }
-        else {
-          req.reply(mockMetadataResponse)
-        }
-      }).as('searchApiSingular')
+            ],
+          },
+        },
+      }
+
+      cy.get('@searchApi').then((stub) => {
+        (stub as sinon.SinonStub).callsFake(async (query) => {
+          if (query.aggs?.studies) return singularStudyResponse
+          if (query.size === 0) return mockMetadataResponse
+          return mockDatasetsResponse
+        })
+      })
 
       mountDefault('studies')
-      cy.wait('@searchApiSingular')
       cy.contains('1 Study').should('be.visible')
     })
 
     it('shows the datasets count on the datasets tab', () => {
       // mockDatasetsResponse has hits.total.value = 1
       mountDefault('datasets')
-      cy.wait('@searchApi')
       cy.contains('1 Dataset').should('be.visible')
     })
 
     it('shows plural "Datasets" when total is greater than 1', () => {
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        if (req.body.aggs?.studies) {
-          req.reply(mockStudiesResponse)
-        }
-        else if (req.body.size === 0 && !req.body.queryTerm) {
-          req.reply(mockMetadataResponse)
-        }
-        else {
-          req.reply({
-            hits: {
-              total: { value: 42 },
-              hits: [],
-            },
-          })
-        }
-      }).as('searchApiMultiple')
+      const multipleResponse = {
+        hits: {
+          total: { value: 42 },
+          hits: [],
+        },
+      }
+
+      cy.get('@searchApi').then((stub) => {
+        (stub as sinon.SinonStub).callsFake(async (query) => {
+          if (query.aggs?.studies) return mockStudiesResponse
+          if (query.size === 0) return mockMetadataResponse
+          return multipleResponse
+        })
+      })
 
       mountDefault('datasets')
-      cy.wait('@searchApiMultiple')
       cy.contains('42 Datasets').should('be.visible')
     })
 
     it('does not clip the data grid when the asset count header is visible', () => {
       cy.viewport(1200, 900)
       mountDefault('datasets')
-      cy.wait('@searchApi')
 
       cy.contains('1 Dataset').should('be.visible')
 
@@ -482,20 +467,14 @@ describe('DataLibrary', () => {
     })
 
     it('shows a loading skeleton while data is fetching', () => {
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        req.on('response', (res) => {
-          res.setDelay(500)
+      cy.get('@searchApi').then((stub) => {
+        (stub as sinon.SinonStub).callsFake(async (query) => {
+          await new Promise(resolve => setTimeout(resolve, 500))
+          if (query.aggs?.studies) return mockStudiesResponse
+          if (query.size === 0) return mockMetadataResponse
+          return mockDatasetsResponse
         })
-        if (req.body.aggs?.studies) {
-          req.reply(mockStudiesResponse)
-        }
-        else if (req.body.size === 0 && !req.body.queryTerm) {
-          req.reply(mockMetadataResponse)
-        }
-        else {
-          req.reply(mockDatasetsResponse)
-        }
-      }).as('searchApiDelayed')
+      })
 
       mountDefault('studies')
 
@@ -503,7 +482,6 @@ describe('DataLibrary', () => {
       cy.get('[class*="MuiSkeleton"]').should('be.visible')
 
       // After loading, skeleton should be gone and count should show
-      cy.wait('@searchApiDelayed')
       cy.get('[class*="MuiSkeleton"]').should('not.exist')
       cy.contains('2 Studies').should('be.visible')
     })
@@ -824,12 +802,6 @@ describe('DataLibrary', () => {
     })
 
     it('sends correct query for controlled/open dataset approval logic', () => {
-      let capturedBody: DatasetSearchBody | undefined
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        capturedBody = req.body as DatasetSearchBody
-        req.reply(mockDatasetsResponse)
-      }).as('searchApi')
-
       cy.mount(
         <QueryClientProvider client={queryClient}>
           <MemoryRouter initialEntries={['/?tab=datasets']}>
@@ -838,42 +810,52 @@ describe('DataLibrary', () => {
         </QueryClientProvider>,
       )
 
-      cy.wait('@searchApi').then(() => {
-        cy.wrap(capturedBody).should('exist')
-        cy.then(() => {
-          // ES 9: top-level bool.should + minimum_should_match drives approval logic
-          const topBool = capturedBody?.query?.bool
-          assert.exists(topBool)
-          if (!topBool) {
-            throw new Error('Expected top-level bool clause in dataset search query')
-          }
+      // Wait for the datasets row to appear — confirms the main query resolved
+      cy.get('.MuiDataGrid-row').should('exist')
 
-          assert.equal(topBool.minimum_should_match, 1)
-
-          const should = topBool.should
-          assert.exists(should)
-          if (!should) {
-            throw new Error('Expected bool.should clause for approval filtering')
-          }
-          assert.lengthOf(should, 2)
-
-          // First branch: must_not accessManagement: controlled
-          const mustNot = should[0]?.bool?.must_not
-          assert.exists(mustNot)
-          if (!mustNot) {
-            throw new Error('Expected must_not branch excluding controlled datasets')
-          }
-          assert.deepEqual(mustNot[0]?.term, { accessManagement: 'controlled' })
-
-          // Second branch: must accessManagement: controlled AND dacApproval: true
-          const mustArr = should[1]?.bool?.must
-          assert.exists(mustArr)
-          if (!mustArr) {
-            throw new Error('Expected must branch for controlled approved datasets')
-          }
-          assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.accessManagement === 'controlled'))
-          assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.dacApproval === true))
+      cy.get('@searchApi').then((stub) => {
+        const calls = (stub as sinon.SinonStub).getCalls()
+        // Main datasets query: has size > 0 and no aggs.studies aggregation
+        const dataCall = calls.find((call) => {
+          const q = call.args[0] as DatasetSearchBody & { size?: number, aggs?: { studies?: unknown } }
+          return !q.aggs?.studies && q.size !== 0
         })
+
+        assert.exists(dataCall, 'datasets query should have been called')
+        const capturedBody = dataCall!.args[0] as DatasetSearchBody
+
+        // ES 9: top-level bool.should + minimum_should_match drives approval logic
+        const topBool = capturedBody?.query?.bool
+        assert.exists(topBool)
+        if (!topBool) {
+          throw new Error('Expected top-level bool clause in dataset search query')
+        }
+
+        assert.equal(topBool.minimum_should_match, 1)
+
+        const should = topBool.should
+        assert.exists(should)
+        if (!should) {
+          throw new Error('Expected bool.should clause for approval filtering')
+        }
+        assert.lengthOf(should, 2)
+
+        // First branch: must_not accessManagement: controlled
+        const mustNot = should[0]?.bool?.must_not
+        assert.exists(mustNot)
+        if (!mustNot) {
+          throw new Error('Expected must_not branch excluding controlled datasets')
+        }
+        assert.deepEqual(mustNot[0]?.term, { accessManagement: 'controlled' })
+
+        // Second branch: must accessManagement: controlled AND dacApproval: true
+        const mustArr = should[1]?.bool?.must
+        assert.exists(mustArr)
+        if (!mustArr) {
+          throw new Error('Expected must branch for controlled approved datasets')
+        }
+        assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.accessManagement === 'controlled'))
+        assert.isTrue(mustArr.some((q: DatasetApprovalTerm) => q.term?.dacApproval === true))
       })
     })
   })
