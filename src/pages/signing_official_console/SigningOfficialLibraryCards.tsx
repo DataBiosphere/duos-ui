@@ -7,7 +7,7 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DuosUser, DuosUserWithInstitutionId } from 'src/types/model'
 
 export default function SigningOfficialLibraryCards(): React.JSX.Element {
-  usePageTitle('Library Cards')
+  usePageTitle('Researcher Status')
   const [signingOfficial, setSigningOfficial] = useState<DuosUserWithInstitutionId>()
   const [researchers, setResearchers] = useState<DuosUser[]>([])
 
