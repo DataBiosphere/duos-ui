@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest'
 import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
 import { toLower } from 'src/utils/NodashUtil'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
@@ -113,11 +114,12 @@ let collectionSearchFn: (term: string, list: DarCollectionSummary[]) => DarColle
 let cardSearchFn: (term: string, list: LibraryCard[]) => LibraryCard[]
 let researcherSearchFn: (term: string, list: DuosUser[]) => DuosUser[]
 let summaryList: DarCollectionSummary[]
+
 const expectResearcherMatch = (actual: DuosUser, expected: DuosUser) => {
-  expect(actual.displayName).to.equal(expected.displayName)
-  expect(actual.email).to.equal(expected.email)
-  expect(actual.eraCommonsId).to.equal(expected.eraCommonsId)
-  expect(actual.roles[0].name).to.equal(expected.roles[0].name)
+  expect(actual.displayName).toBe(expected.displayName)
+  expect(actual.email).toBe(expected.email)
+  expect(actual.eraCommonsId).toBe(expected.eraCommonsId)
+  expect(actual.roles[0].name).toBe(expected.roles[0].name)
 }
 
 beforeEach(() => {
@@ -128,33 +130,6 @@ beforeEach(() => {
   summaryList = [darCollectionSummaryOne, darCollectionSummaryTwo]
 })
 
-describe('Dar Collection Search Filter', () => {
-  it('filters on dar code', () => {
-    const darTerm = darCollectionSummaryOne.darCode
-    const filteredList = collectionSearchFn(darTerm, summaryList)
-    expect(filteredList.length).to.equal(1)
-    expect(filteredList[0].darCode).to.equal(darCollectionSummaryOne.darCode)
-    const emptyList = collectionSearchFn('invalid', summaryList)
-    expect(emptyList.length).to.equal(0)
-  })
-
-  it('filters on dataset count', () => {
-    const filteredList = collectionSearchFn('4', summaryList)
-    expect(filteredList.length).to.equal(1)
-    expect(filteredList[0].darCode).to.equal(darCollectionSummaryOne.darCode)
-  })
-
-  it('filters on submission date', () => {
-    const formattedSubmissionDate = formatDate(darCollectionSummaryOne.submissionDate)
-    const filteredList = collectionSearchFn(formattedSubmissionDate, summaryList)
-    expect(filteredList.length).to.equal(1)
-    expect(formatDate(filteredList[0].submissionDate)).to.equal(formattedSubmissionDate)
-    const emptyList = collectionSearchFn('invalid', summaryList)
-    expect(emptyList.length).to.equal(0)
-  })
-})
-
-// Helper to test filtering for a given term and expected result
 function testFilter<T>(
   filterFn: (term: string, list: T[]) => T[],
   list: T[],
@@ -163,27 +138,46 @@ function testFilter<T>(
   matchFn: (actual: T, expected: T) => void,
 ) {
   const filteredList = filterFn(term, list)
-  expect(filteredList.length).equals(1)
+  expect(filteredList).toHaveLength(1)
   matchFn(filteredList[0], expected)
 }
 
-// Helper for LibraryCard field match
 const expectLibraryCardMatch = (actual: LibraryCard, expected: LibraryCard) => {
   Object.keys(expected).forEach((key) => {
-    expect(actual[key as keyof LibraryCard]).equals(expected[key as keyof LibraryCard])
+    expect(actual[key as keyof LibraryCard]).toBe(expected[key as keyof LibraryCard])
   })
 }
+
+describe('Dar Collection Search Filter', () => {
+  it('filters on dar code', () => {
+    const darTerm = darCollectionSummaryOne.darCode
+    const filteredList = collectionSearchFn(darTerm, summaryList)
+    expect(filteredList).toHaveLength(1)
+    expect(filteredList[0].darCode).toBe(darCollectionSummaryOne.darCode)
+    const emptyList = collectionSearchFn('invalid', summaryList)
+    expect(emptyList).toHaveLength(0)
+  })
+
+  it('filters on dataset count', () => {
+    const filteredList = collectionSearchFn('4', summaryList)
+    expect(filteredList).toHaveLength(1)
+    expect(filteredList[0].darCode).toBe(darCollectionSummaryOne.darCode)
+  })
+
+  it('filters on submission date', () => {
+    const formattedSubmissionDate = formatDate(darCollectionSummaryOne.submissionDate)
+    const filteredList = collectionSearchFn(formattedSubmissionDate, summaryList)
+    expect(filteredList).toHaveLength(1)
+    expect(formatDate(filteredList[0].submissionDate)).toBe(formattedSubmissionDate)
+    const emptyList = collectionSearchFn('invalid', summaryList)
+    expect(emptyList).toHaveLength(0)
+  })
+})
 
 describe('LC Search Filter', () => {
   it('filters cards on create date', () => {
     const originalCard = sampleLCList[0]
-    testFilter(
-      cardSearchFn,
-      sampleLCList,
-      formatDate(originalCard.createDate.getTime()),
-      originalCard,
-      expectLibraryCardMatch,
-    )
+    testFilter(cardSearchFn, sampleLCList, formatDate(originalCard.createDate.getTime()), originalCard, expectLibraryCardMatch)
   })
 
   it('filters cards on user name', () => {
@@ -198,21 +192,13 @@ describe('LC Search Filter', () => {
 })
 
 describe('Researcher Search Filter (SO Console)', () => {
-  it('filters on researcher name', () => {
-    const originalResearcher = sampleResearcherList[0]
-    testFilter(researcherSearchFn, sampleResearcherList, 'test', originalResearcher, expectResearcherMatch)
-  })
-  it('filters on eraCommonsId', () => {
-    const originalResearcher = sampleResearcherList[0]
-    testFilter(researcherSearchFn, sampleResearcherList, 'era', originalResearcher, expectResearcherMatch)
-  })
-  it('filters on email', () => {
-    const originalResearcher = sampleResearcherList[0]
-    testFilter(researcherSearchFn, sampleResearcherList, 'devemail', originalResearcher, expectResearcherMatch)
-  })
-  it('filters on role name', () => {
-    const originalResearcher = sampleResearcherList[0]
-    testFilter(researcherSearchFn, sampleResearcherList, 'admin', originalResearcher, expectResearcherMatch)
+  it.each([
+    ['name', 'test'],
+    ['eraCommonsId', 'era'],
+    ['email', 'devemail'],
+    ['role name', 'admin'],
+  ])('filters on researcher %s', (_field, term) => {
+    testFilter(researcherSearchFn, sampleResearcherList, term, sampleResearcherList[0], expectResearcherMatch)
   })
 })
 
@@ -220,133 +206,71 @@ describe('processElectionStatus utils - tests', () => {
   it('Returns Unreviewed when election has a null status', () => {
     const election = {} as Election
     const status = processElectionStatus(election, null, false)
-    expect(toLower(status)).equals('unreviewed')
+    expect(toLower(status)).toBe('unreviewed')
   })
 
   it('Returns Approved when election is closed and has an approving final vote', () => {
-    const election = {
-      status: 'Closed',
-    } as Election
-    const votes = [
-      {
-        type: VOTE_TYPES.FINAL,
-        vote: true,
-      },
-    ] as Array<Vote>
+    const election = { status: 'Closed' } as Election
+    const votes = [{ type: VOTE_TYPES.FINAL, vote: true }] as Vote[]
     const status = processElectionStatus(election, votes, false)
-    expect(toLower(status)).equals('approved')
+    expect(toLower(status)).toBe('approved')
   })
 
   it('Returns Approved when election is final and has an approving final vote', () => {
-    const election = {
-      status: 'Final',
-    } as Election
-    const votes = [
-      {
-        type: VOTE_TYPES.FINAL,
-        vote: true,
-      },
-    ] as Array<Vote>
+    const election = { status: 'Final' } as Election
+    const votes = [{ type: VOTE_TYPES.FINAL, vote: true }] as Vote[]
     const status = processElectionStatus(election, votes, false)
-    expect(toLower(status)).equals('approved')
+    expect(toLower(status)).toBe('approved')
   })
 
   it('Returns Denied when election is closed and there are no approving final votes', () => {
-    const election = {
-      status: 'Closed',
-    } as Election
+    const election = { status: 'Closed' } as Election
     const votes = [
-      {
-        type: 'DAC',
-        vote: true,
-      },
-      {
-        type: VOTE_TYPES.FINAL,
-        vote: false,
-      },
-    ] as Array<Vote>
+      { type: 'DAC', vote: true },
+      { type: VOTE_TYPES.FINAL, vote: false },
+    ] as Vote[]
     const status = processElectionStatus(election, votes, false)
-    expect(toLower(status)).equals('denied')
+    expect(toLower(status)).toBe('denied')
   })
 
   it('Returns Denied when election is final and there are no approving final votes', () => {
-    const election = {
-      status: 'Final',
-    }
+    const election = { status: 'Final' } as Election
     const votes = [
-      {
-        type: 'DAC',
-        vote: true,
-      },
-      {
-        type: VOTE_TYPES.FINAL,
-        vote: false,
-      },
-    ]
-    const status = processElectionStatus(election as Election, votes as Array<Vote>, false)
-    expect(toLower(status)).equals('denied')
+      { type: 'DAC', vote: true },
+      { type: VOTE_TYPES.FINAL, vote: false },
+    ] as Vote[]
+    const status = processElectionStatus(election, votes, false)
+    expect(toLower(status)).toBe('denied')
   })
 
   it('Returns Open when election is open and contains votes', () => {
-    const election = {
-      status: 'Open',
-      electionId: 1,
-    }
-    const votes = [
-      {
-        type: 'DAC',
-        electionId: 1,
-      },
-    ]
-    const status = processElectionStatus(election as Election, votes as Array<Vote>, false)
-    expect(toLower(status)).equals('open')
+    const election = { status: 'Open', electionId: 1 } as Election
+    const votes = [{ type: 'DAC', electionId: 1 }] as Vote[]
+    const status = processElectionStatus(election, votes, false)
+    expect(toLower(status)).toBe('open')
   })
 
   it('Returns Open with vote counts when election is open, contains votes, and showVotes is true', () => {
-    const election = {
-      status: 'Open',
-      electionId: 1,
-    }
+    const election = { status: 'Open', electionId: 1 } as Election
     const votes = [
-      {
-        type: 'DAC',
-        electionId: 1,
-      },
-      {
-        type: 'DAC',
-        vote: false,
-        createDate: 1651241829000,
-        electionId: 1,
-      },
-    ]
-    const status = processElectionStatus(election as Election, votes as Array<Vote>, true)
-    expect(toLower(status)).equals('open(1 / 2 votes)')
+      { type: 'DAC', electionId: 1 },
+      { type: 'DAC', vote: false, createDate: 1651241829000, electionId: 1 },
+    ] as Vote[]
+    const status = processElectionStatus(election, votes, true)
+    expect(toLower(status)).toBe('open(1 / 2 votes)')
   })
 
   it('Vote counts for open election only considers DAC votes with electionId that matches the election', () => {
-    const election = {
-      status: 'Open',
-      electionId: 1,
-    }
+    const election = { status: 'Open', electionId: 1 } as Election
     const votes = [
-      {
-        type: VOTE_TYPES.FINAL,
-        vote: true,
-        createDate: 1651241829000,
-        electionId: 1,
-      },
-      {
-        type: 'DAC',
-        vote: true,
-        createDate: 1651241829000,
-        electionId: 2,
-      },
-    ]
-    const status = processElectionStatus(election as Election, votes as Array<Vote>, true)
-    expect(toLower(status)).equals('open(0 / 0 votes)')
+      { type: VOTE_TYPES.FINAL, vote: true, createDate: 1651241829000, electionId: 1 },
+      { type: 'DAC', vote: true, createDate: 1651241829000, electionId: 2 },
+    ] as Vote[]
+    const status = processElectionStatus(election, votes, true)
+    expect(toLower(status)).toBe('open(0 / 0 votes)')
   })
 
-  it('sortVisibleTables returns the correct order', () => {
+  it('sortVisibleTable returns the correct order', () => {
     const rowData: TableCell[][] = [
       [
         { data: 'Progress Report', cellStyle: { width: '10%' }, label: 'Request Type', id: 0 },
@@ -369,33 +293,27 @@ describe('processElectionStatus utils - tests', () => {
     ]
 
     sortVisibleTable({ list: rowData, sort: { colIndex: 1, dir: -1 } })
-
-    expect(rowData[0][1].data).to.equal('DAR Title 3')
-    expect(rowData[1][1].data).to.equal('DAR Title 2')
-    expect(rowData[2][1].data).to.equal('DAR Title 1')
+    expect(rowData[0][1].data).toBe('DAR Title 3')
+    expect(rowData[1][1].data).toBe('DAR Title 2')
+    expect(rowData[2][1].data).toBe('DAR Title 1')
 
     sortVisibleTable({ list: rowData, sort: { colIndex: 2, dir: 1 } })
-    expect(rowData[0][2].data).to.equal('2023-01-01')
-    expect(rowData[1][2].data).to.equal('2023-01-02')
-    expect(rowData[2][2].data).to.equal('2023-01-03')
+    expect(rowData[0][2].data).toBe('2023-01-01')
+    expect(rowData[1][2].data).toBe('2023-01-02')
+    expect(rowData[2][2].data).toBe('2023-01-03')
 
     sortVisibleTable({ list: rowData, sort: { colIndex: 3, dir: 1 } })
-    expect(rowData[0][3].data).to.equal(true)
-    expect(rowData[1][3].data).to.equal(false)
-    expect(rowData[2][3].data).to.equal(false)
+    expect(rowData[0][3].data).toBe(true)
+    expect(rowData[1][3].data).toBe(false)
+    expect(rowData[2][3].data).toBe(false)
 
     sortVisibleTable({ list: rowData, sort: { colIndex: 3, dir: -1 } })
-    expect(rowData[0][3].data).to.equal(false)
-    expect(rowData[1][3].data).to.equal(false)
-    expect(rowData[2][3].data).to.equal(true)
+    expect(rowData[0][3].data).toBe(false)
+    expect(rowData[1][3].data).toBe(false)
+    expect(rowData[2][3].data).toBe(true)
   })
 
-  it('sortVisibleTables shouldn\'t error when no data is passed', () => {
-    Cypress.on('window:before:load', (win) => {
-      cy.stub(win.console, 'error').callsFake((message: string) => {
-        throw new Error(`Console Error: ${message}`)
-      })
-    })
-    sortVisibleTable({ list: undefined, sort: { colIndex: 1, dir: -1 } })
+  it('sortVisibleTable should not error when no data is passed', () => {
+    expect(() => sortVisibleTable({ list: undefined, sort: { colIndex: 1, dir: -1 } })).not.toThrow()
   })
 })
