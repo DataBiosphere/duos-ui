@@ -159,6 +159,7 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
           display: flex;
           gap: 2rem;
           justify-content: center;
+          align-items: stretch;
           flex-wrap: wrap;
           max-width: 1120px;
           margin: 0 auto;
@@ -194,19 +195,23 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
           font-family: Montserrat, sans-serif;
           font-size: 20px;
           font-weight: 700;
+          line-height: 1.3;
           color: #1F3B50;
           margin: 0 0 0.4rem;
           text-align: center;
+          min-height: 52px;
         }
         .audience-card-tagline {
           font-family: Montserrat, sans-serif;
           font-size: 13px;
           font-weight: 500;
+          line-height: 1.4;
           color: #6b7280;
           text-align: center;
           text-transform: uppercase;
           letter-spacing: 0.06em;
           margin: 0 0 1.4rem;
+          min-height: 37px;
         }
         .audience-card-features {
           list-style: none;
