@@ -317,9 +317,10 @@ describe('LibraryDataGrid', () => {
         />,
       )
 
-      cy.contains('a', 'Export')
+      cy.contains('button', 'Export to...').should('be.visible').click()
+      cy.contains('a', 'Terra')
         .should('be.visible')
-        .and('have.attr', 'title', 'Export snapshot Snapshot 001')
+        .and('have.attr', 'title', 'Export snapshot Snapshot 001 to Terra')
     })
 
     it('does not render an Export link for a dataset with no matching snapshots', () => {
@@ -359,9 +360,9 @@ describe('LibraryDataGrid', () => {
         />,
       )
 
-      cy.contains('a', 'Export').should('have.length', 1)
-      cy.get('.MuiDataGrid-row[data-id="201"]').contains('Export').should('exist')
-      cy.get('.MuiDataGrid-row[data-id="202"]').contains('Export').should('not.exist')
+      cy.contains('button', 'Export to...').should('have.length', 1)
+      cy.get('.MuiDataGrid-row[data-id="201"]').contains('Export to...').should('exist')
+      cy.get('.MuiDataGrid-row[data-id="202"]').contains('Export to...').should('not.exist')
     })
 
     it('does not render Export links when exportableDatasets is not provided (default)', () => {
