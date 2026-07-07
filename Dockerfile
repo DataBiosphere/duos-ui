@@ -34,7 +34,7 @@ RUN pnpm --filter duos-server run build
 RUN pnpm --filter duos-server deploy --prod --legacy /tmp/server-deploy
 
 # Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:3289da9ee7c03c4a6f317dcdd767722857d4b12c288edeea4ec4b6d152bd97a8
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:f4a51d4a89698ce6b37d5840f483c5f537ebec6ba0afa498e70e302d1d576c8f
 ARG NODE_ENV=production
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}
