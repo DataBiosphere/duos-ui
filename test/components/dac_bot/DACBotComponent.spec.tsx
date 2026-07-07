@@ -1,7 +1,12 @@
 import React from 'react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { DACBotComponent } from 'src/components/dac_bot/DACBotComponent'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
+import { Notifications } from 'src/libs/utils'
 
 describe('DACBotComponent', () => {
   describe('mutual exclusivity rules', () => {
@@ -28,20 +33,16 @@ describe('DACBotComponent', () => {
       },
     ]
 
-    beforeEach(() => {
-      // Mock the user to be a chair so checkboxes are enabled
-      cy.stub(Storage, 'getCurrentUser').returns({
-        roles: [{ dacId: 1, name: 'Chairperson' }],
-      })
-      cy.stub(DAC, 'fetchDACbotRules').resolves(mockRules)
-      cy.stub(DAC, 'toggleDACbotRule').resolves({
-        ruleId: 1,
-        isRuleEnabled: true,
-        enabledTime: Date.now(),
-        displayName: 'Test User',
-        email: 'test@example.com',
-      })
-      cy.mount(
+    let container: HTMLElement
+
+    beforeEach(async () => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ roles: [{ dacId: 1, name: 'Chairperson' }] } as never)
+      vi.spyOn(DAC, 'fetchDACbotRules').mockResolvedValue(mockRules as never)
+      vi.spyOn(DAC, 'toggleDACbotRule').mockResolvedValue({
+        ruleId: 1, isRuleEnabled: true, enabledTime: Date.now(), displayName: 'Test User', email: 'test@example.com',
+      } as never)
+      vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
+      const result = render(
         <DACBotComponent
           dacId={1}
           mutuallyExclusiveRules={{
@@ -50,29 +51,35 @@ describe('DACBotComponent', () => {
           }}
         />,
       )
+      container = result.container
+      await waitFor(() => expect(document.getElementById('1_checkbox')).toBeInTheDocument())
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
     })
 
     it('should render component with heading and description', () => {
-      cy.contains('p', 'Data Access Committees may automate Data Access Requests').should('be.visible')
+      expect(screen.getByText(/Data Access Committees may automate Data Access Requests/)).toBeInTheDocument()
     })
 
     it('should display all rules from API', () => {
-      cy.get('[id="1_checkbox"]').should('exist')
-      cy.get('[id="2_checkbox"]').should('exist')
+      expect(document.getElementById('1_checkbox')).toBeInTheDocument()
+      expect(document.getElementById('2_checkbox')).toBeInTheDocument()
     })
 
     it('should disable exclusive rule checkbox when other is enabled', () => {
-      cy.get('[id="2_checkbox"]').should('be.disabled')
+      expect(document.getElementById('2_checkbox')).toBeDisabled()
     })
 
-    it('should call toggleDACbotRule API when checkbox is clicked', () => {
-      cy.get('[id="1_checkbox"]').click()
-      cy.wrap(DAC.toggleDACbotRule).should('have.been.called')
+    it('should call toggleDACbotRule API when checkbox is clicked', async () => {
+      await userEvent.click(document.getElementById('1_checkbox')!)
+      await waitFor(() => expect(DAC.toggleDACbotRule).toHaveBeenCalled())
     })
 
     it('should display enabled rule info with user details', () => {
-      cy.contains('Enabled by:').should('be.visible')
-      cy.contains('Test User').should('be.visible')
+      expect(screen.getByText(/Enabled by:/)).toBeInTheDocument()
+      expect(container).toHaveTextContent('Test User')
     })
   })
 
@@ -86,57 +93,60 @@ describe('DACBotComponent', () => {
       { id: 6, ruleType: 'REQUIRE_SO_DAR_APPROVAL', description: 'Require approval by the Signing Official identified in the Data Access Request (DAR) prior to DAC Voting.', ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
     ]
 
-    beforeEach(() => {
-      cy.stub(Storage, 'getCurrentUser').returns({
-        roles: [{ dacId: 1, name: 'Chairperson' }],
-      })
-      cy.stub(DAC, 'fetchDACbotRules').resolves(allRules)
-      cy.mount(<DACBotComponent dacId={1} />)
+    let container: HTMLElement
+
+    beforeEach(async () => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ roles: [{ dacId: 1, name: 'Chairperson' }] } as never)
+      vi.spyOn(DAC, 'fetchDACbotRules').mockResolvedValue(allRules as never)
+      vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
+      const result = render(<DACBotComponent dacId={1} />)
+      container = result.container
+      await waitFor(() => expect(document.getElementById('1_checkbox')).toBeInTheDocument())
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
     })
 
     it('renders a heading for each group', () => {
-      cy.contains('h4', 'Automatically approve DARs when...').should('be.visible')
-      cy.contains('h4', 'Send DARs to the entire DAC on submission by researchers?').should('be.visible')
-      cy.contains('h4', 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?').should('be.visible')
+      expect(screen.getByRole('heading', { level: 4, name: 'Automatically approve DARs when...' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 4, name: 'Send DARs to the entire DAC on submission by researchers?' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 4, name: 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?' })).toBeInTheDocument()
     })
 
     it('places GRU_V1, HMB_V1, GRU_DSV1, HMB_DSV1 under Automatic approval', () => {
-      cy.get('[data-cy="rule-group-automatic-approval"]').within(() => {
-        cy.contains('only General Research Use (GRU)').should('exist')
-        cy.contains('only Health/Medical/Biomedical Use (HMB)').should('exist')
-        cy.contains('Disease Specific (DS) with one or more selected diseases').should('exist')
-        cy.contains('without requiring Chair to open manually').should('not.exist')
-        cy.contains('Require approval by the Signing Official').should('not.exist')
-      })
+      const group = container.querySelector('[data-cy="rule-group-automatic-approval"]') as HTMLElement
+      expect(group).toHaveTextContent('only General Research Use (GRU)')
+      expect(group).toHaveTextContent('only Health/Medical/Biomedical Use (HMB)')
+      expect(group).toHaveTextContent('Disease Specific (DS) with one or more selected diseases')
+      expect(group).not.toHaveTextContent('without requiring Chair to open manually')
+      expect(group).not.toHaveTextContent('Require approval by the Signing Official')
     })
 
     it('places AUTO_OPEN_DAR_FOR_ALL_MEMBERS under Automatic open', () => {
-      cy.get('[data-cy="rule-group-automatic-open"]').within(() => {
-        cy.contains('without requiring Chair to open manually').should('exist')
-        cy.contains('only General Research Use (GRU)').should('not.exist')
-        cy.contains('Disease Specific (DS) with one or more selected diseases').should('not.exist')
-        cy.contains('Require approval by the Signing Official').should('not.exist')
-      })
+      const group = container.querySelector('[data-cy="rule-group-automatic-open"]') as HTMLElement
+      expect(group).toHaveTextContent('without requiring Chair to open manually')
+      expect(group).not.toHaveTextContent('only General Research Use (GRU)')
+      expect(group).not.toHaveTextContent('Disease Specific (DS) with one or more selected diseases')
+      expect(group).not.toHaveTextContent('Require approval by the Signing Official')
     })
 
     it('places REQUIRE_SO_DAR_APPROVAL under SO prior approval', () => {
-      cy.get('[data-cy="rule-group-so-prior-approval"]').within(() => {
-        cy.contains('require approval by the Signing Official').should('exist')
-        cy.contains('only General Research Use (GRU)').should('not.exist')
-        cy.contains('Disease Specific (DS) with one or more selected diseases').should('not.exist')
-        cy.contains('without requiring Chair to open manually').should('not.exist')
-      })
+      const group = container.querySelector('[data-cy="rule-group-so-prior-approval"]') as HTMLElement
+      expect(group).toHaveTextContent('require approval by the Signing Official')
+      expect(group).not.toHaveTextContent('only General Research Use (GRU)')
+      expect(group).not.toHaveTextContent('Disease Specific (DS) with one or more selected diseases')
+      expect(group).not.toHaveTextContent('without requiring Chair to open manually')
     })
 
     it('renders groups in order: Automatically approve DARs when..., Send DARs..., Require SO sign-off', () => {
-      cy.get('h4').then(($headings) => {
-        const labels = [...$headings].map(el => el.textContent)
-        expect(labels).to.deep.equal([
-          'Automatically approve DARs when...',
-          'Send DARs to the entire DAC on submission by researchers?',
-          'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?',
-        ])
-      })
+      const headings = screen.getAllByRole('heading', { level: 4 })
+      const labels = headings.map(h => h.textContent)
+      expect(labels).toEqual([
+        'Automatically approve DARs when...',
+        'Send DARs to the entire DAC on submission by researchers?',
+        'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?',
+      ])
     })
   })
 
@@ -146,19 +156,26 @@ describe('DACBotComponent', () => {
       { id: 2, ruleType: 'FUTURE_RULE', description: 'Some future rule', ruleState: 'AVAILABLE', activationDate: 0, enabledByUserId: null, displayName: null, userEmail: null },
     ]
 
-    beforeEach(() => {
-      cy.stub(Storage, 'getCurrentUser').returns({
-        roles: [{ dacId: 1, name: 'Chairperson' }],
-      })
-      cy.stub(DAC, 'fetchDACbotRules').resolves(rulesWithUnknown)
-      cy.mount(<DACBotComponent dacId={1} />)
+    let container: HTMLElement
+
+    beforeEach(async () => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ roles: [{ dacId: 1, name: 'Chairperson' }] } as never)
+      vi.spyOn(DAC, 'fetchDACbotRules').mockResolvedValue(rulesWithUnknown as never)
+      vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
+      const result = render(<DACBotComponent dacId={1} />)
+      container = result.container
+      await waitFor(() => expect(document.getElementById('1_checkbox')).toBeInTheDocument())
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
     })
 
     it('places rules with unknown ruleType in an Other group at the end', () => {
-      cy.get('h4').last().should('have.text', 'Other')
-      cy.get('[data-cy="rule-group-other"]').within(() => {
-        cy.contains('Some future rule').should('exist')
-      })
+      const headings = screen.getAllByRole('heading', { level: 4 })
+      expect(headings[headings.length - 1]).toHaveTextContent('Other')
+      const otherGroup = container.querySelector('[data-cy="rule-group-other"]') as HTMLElement
+      expect(within(otherGroup).getByText(/Some future rule/)).toBeInTheDocument()
     })
   })
 })
