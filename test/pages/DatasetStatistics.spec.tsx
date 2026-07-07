@@ -186,60 +186,55 @@ describe('DatasetStatistics', () => {
 
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
-    expect(screen.queryByRole('button', { name: /export to/i })).toBeNull()
+    expect(screen.queryByText('Export')).toBeNull()
   })
 
-  it('shows "Export to..." dropdown with a Terra option when TDR returns a snapshot with reader role', async () => {
+  it('shows export button when TDR returns a snapshot with reader role', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithSnapshot })
 
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
-    const exportButton = await screen.findByRole('button', { name: /export to/i })
-    fireEvent.click(exportButton)
-
-    const terraItem = await screen.findByText('Terra')
-    const anchor = terraItem.closest('a')
+    const exportLink = await screen.findByText('Export')
+    expect(exportLink).toBeTruthy()
+    const anchor = exportLink?.closest('a')
     expect(anchor).toBeTruthy()
     expect(anchor?.getAttribute('href')).toContain('snapshot-abc')
   })
 
-  it('shows "Export to..." dropdown with a Terra option when TDR returns a snapshot with steward role', async () => {
+  it('shows export button when TDR returns a snapshot with steward role', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithStewardSnapshot })
 
     expect(await screen.findByText('TDR Location')).toBeTruthy()
-    const exportButton = await screen.findByRole('button', { name: /export to/i })
-    fireEvent.click(exportButton)
-
-    const terraItem = await screen.findByText('Terra')
-    const anchor = terraItem.closest('a')
+    const exportLink = await screen.findByText('Export')
+    expect(exportLink).toBeTruthy()
+    const anchor = exportLink?.closest('a')
     expect(anchor?.getAttribute('href')).toContain('snapshot-xyz')
   })
 
-  it('does not show export dropdown for snapshots without reader or steward role', async () => {
+  it('does not show export button for snapshots without reader or steward role', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithoutRole })
 
-    expect(screen.queryByRole('button', { name: /export to/i })).toBeNull()
+    expect(screen.queryByText('Export')).toBeNull()
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
   })
 
-  it('offers only the first snapshot via the Terra option when multiple snapshots are returned', async () => {
+  it('shows a dropdown menu with an item per snapshot when multiple snapshots are available', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithMultipleSnapshots })
 
     expect(await screen.findByText('TDR Location')).toBeTruthy()
 
-    const exportButton = await screen.findByRole('button', { name: /export to/i })
+    const exportButton = await screen.findByRole('button', { name: /export/i })
     fireEvent.click(exportButton)
 
-    const terraItem = await screen.findByText('Terra')
-    expect(terraItem.closest('a')?.getAttribute('href')).toContain('snapshot-abc')
-    expect(screen.queryByText('Snapshot XYZ')).toBeNull()
+    expect(await screen.findByText('Snapshot ABC')).toBeTruthy()
+    expect(await screen.findByText('Snapshot XYZ')).toBeTruthy()
   })
 
   it('handles TDR API errors gracefully and shows Data Location', async () => {
     renderDatasetStatistics({ tdrError: new Error('TDR API unavailable') })
 
-    expect(screen.queryByRole('button', { name: /export to/i })).toBeNull()
+    expect(screen.queryByText('Export')).toBeNull()
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
   })
