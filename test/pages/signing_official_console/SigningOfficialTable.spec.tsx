@@ -2,47 +2,11 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import Modal from 'react-modal'
 import SigningOfficialTable from 'src/pages/signing_official_console/SigningOfficialTable'
 import { LibraryCard as LibraryCardApi } from 'src/libs/ajax/LibraryCard'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser, DuosUserWithInstitutionId, LibraryCard, UserRole } from 'src/types/model'
-
-vi.mock('src/components/modals/LibraryCardFormModal', () => ({
-  default: ({
-    showModal,
-    createOnClick,
-    users,
-  }: {
-    showModal: boolean
-    createOnClick: (cards: LibraryCard[], newUser: DuosUser | false | undefined) => Promise<void>
-    users: DuosUser[]
-  }) => {
-    if (!showModal) {
-      return null
-    }
-
-    const cards = users.map(user => ({
-      id: 0,
-      userId: user.userId,
-      userEmail: user.email,
-      userName: user.displayName,
-      createDate: new Date('2022-01-01T00:00:00.000Z'),
-      createUserId: 1,
-    }))
-
-    return (
-      <div data-testid="library-card-form-modal">
-        <h2>Add Library Cards</h2>
-        <button id="Add-button" type="button" onClick={() => createOnClick([cards[0]], undefined)}>
-          Add First
-        </button>
-        <button id="Add-two-button" type="button" onClick={() => createOnClick(cards.slice(0, 2), undefined)}>
-          Add Two
-        </button>
-      </div>
-    )
-  },
-}))
 
 vi.mock('src/libs/ajax/LibraryCard', () => ({
   LibraryCard: {
@@ -149,40 +113,55 @@ const rowFor = async (name: string): Promise<HTMLElement> => {
 describe('SigningOfficialTable', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    let appRoot = document.getElementById('root')
+    if (!appRoot) {
+      appRoot = document.createElement('div')
+      appRoot.setAttribute('id', 'root')
+      document.body.appendChild(appRoot)
+    }
+    Modal.setAppElement(appRoot)
     vi.spyOn(Notifications, 'showError').mockImplementation(() => undefined)
     vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
     vi.spyOn(Notifications, 'showWarning').mockImplementation(() => undefined)
   })
 
-  it('renders the modal when Add Users button is clicked', async () => {
+  it('shows Inactive status and unchecked toggle for researcher without a library card', async () => {
     renderTable()
 
-    fireEvent.click(screen.getByRole('button', { name: 'ADD LIBRARY CARD' }))
-
-    expect(await screen.findByText('Add Library Cards')).toBeInTheDocument()
-    expect(screen.getByTestId('library-card-form-modal')).toBeInTheDocument()
+    const row = await rowFor(mockResearcher1.displayName)
+    expect(within(row).getByText('Inactive')).toBeInTheDocument()
+    expect(within(row).getByRole('switch')).not.toBeChecked()
   })
 
-  it('displays an error message when issuing a library card fails', async () => {
+  it('shows Active status and checked toggle for researcher with a library card', async () => {
+    renderTable()
+
+    const row = await rowFor(mockResearcher3.displayName)
+    expect(within(row).getByText('Active')).toBeInTheDocument()
+    expect(within(row).getByRole('switch')).toBeChecked()
+  })
+
+  it('displays an error message when activating a researcher fails', async () => {
     vi.mocked(LibraryCardApi.createLibraryCard).mockRejectedValue(
       libraryCardError(`Failed to issue library card for ${mockResearcher1.email}`),
     )
 
     renderTable()
 
-    fireEvent.click(screen.getByRole('button', { name: 'ADD LIBRARY CARD' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Add First' }))
+    const row = await rowFor(mockResearcher1.displayName)
+    fireEvent.click(within(row).getByRole('switch'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
 
-    expect(await screen.findByText(mockResearcher1.displayName)).toBeInTheDocument()
     await waitFor(() => {
       expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error issuing library card.' })
     })
 
-    const row = await rowFor(mockResearcher1.displayName)
-    expect(within(row).getByRole('button', { name: 'Issue' })).toHaveAttribute('id', `issue-card-${mockResearcher1.email}`)
+    const updatedRow = await rowFor(mockResearcher1.displayName)
+    expect(within(updatedRow).getByText('Inactive')).toBeInTheDocument()
+    expect(within(updatedRow).getByRole('switch')).not.toBeChecked()
   })
 
-  it('displays a success message when issuing a library card succeeds', async () => {
+  it('displays a success message when activating a researcher succeeds', async () => {
     const newCard = libraryCard({
       id: 102,
       userId: mockResearcher1.userId,
@@ -193,46 +172,72 @@ describe('SigningOfficialTable', () => {
 
     renderTable()
 
-    fireEvent.click(screen.getByRole('button', { name: 'ADD LIBRARY CARD' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Add First' }))
+    const row = await rowFor(mockResearcher1.displayName)
+    fireEvent.click(within(row).getByRole('switch'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
 
     await waitFor(() => {
       expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Issued 1 library card' })
     })
 
-    const row = await rowFor(mockResearcher1.displayName)
-    expect(within(row).getByRole('button', { name: 'Deactivate' })).toHaveAttribute('id', `deactivate-card-${newCard.id}`)
+    const updatedRow = await rowFor(mockResearcher1.displayName)
+    expect(within(updatedRow).getByText('Active')).toBeInTheDocument()
+    expect(within(updatedRow).getByRole('switch')).toBeChecked()
   })
 
-  it('displays a warning when there are both failures and successes bulk-issuing library cards', async () => {
-    const newCard = libraryCard({
-      id: 103,
-      userId: mockResearcher1.userId,
-      userEmail: mockResearcher1.email,
-      userName: mockResearcher1.displayName,
-    })
-    vi.mocked(LibraryCardApi.createLibraryCard).mockImplementation((card: LibraryCard) => {
-      if (card.userEmail === mockResearcher1.email) {
-        return Promise.resolve(newCard)
-      }
-      return Promise.reject(libraryCardError(`Failed to issue library card for ${card.userEmail}`))
-    })
+  it('displays a success message when deactivating a researcher succeeds', async () => {
+    vi.mocked(LibraryCardApi.deleteLibraryCard).mockResolvedValue(libraryCard({ userId: mockResearcher3.userId }))
 
     renderTable()
 
-    fireEvent.click(screen.getByRole('button', { name: 'ADD LIBRARY CARD' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Add Two' }))
+    const row = await rowFor(mockResearcher3.displayName)
+    fireEvent.click(within(row).getByRole('switch'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
 
     await waitFor(() => {
-      expect(Notifications.showWarning).toHaveBeenCalledWith({
-        text: `Issued 1 library card, but encountered errors issuing library cards to ${mockResearcher2.email}`,
+      expect(Notifications.showSuccess).toHaveBeenCalledWith({
+        text: `Removed library card issued to ${mockResearcher3.displayName}`,
       })
     })
 
-    const successRow = await rowFor(mockResearcher1.displayName)
-    expect(within(successRow).getByRole('button', { name: 'Deactivate' })).toHaveAttribute('id', `deactivate-card-${newCard.id}`)
+    const updatedRow = await rowFor(mockResearcher3.displayName)
+    expect(within(updatedRow).getByText('Inactive')).toBeInTheDocument()
+    expect(within(updatedRow).getByRole('switch')).not.toBeChecked()
+  })
 
-    const failedRow = await rowFor(mockResearcher2.displayName)
-    expect(within(failedRow).getByRole('button', { name: 'Issue' })).toHaveAttribute('id', `issue-card-${mockResearcher2.email}`)
+  it('displays an error message when deactivating a researcher fails', async () => {
+    vi.mocked(LibraryCardApi.deleteLibraryCard).mockRejectedValue(
+      libraryCardError(`Failed to delete library card for ${mockResearcher3.email}`),
+    )
+
+    renderTable()
+
+    const row = await rowFor(mockResearcher3.displayName)
+    fireEvent.click(within(row).getByRole('switch'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalledWith({
+        text: expect.stringContaining(`Error deleting library card issued to ${mockResearcher3.displayName}`),
+      })
+    })
+
+    const updatedRow = await rowFor(mockResearcher3.displayName)
+    expect(within(updatedRow).getByText('Active')).toBeInTheDocument()
+    expect(within(updatedRow).getByRole('switch')).toBeChecked()
+  })
+
+  it('does not change researcher status when confirmation is cancelled', async () => {
+    renderTable()
+
+    const row = await rowFor(mockResearcher1.displayName)
+    fireEvent.click(within(row).getByRole('switch'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }))
+
+    expect(LibraryCardApi.createLibraryCard).not.toHaveBeenCalled()
+
+    const updatedRow = await rowFor(mockResearcher1.displayName)
+    expect(within(updatedRow).getByText('Inactive')).toBeInTheDocument()
+    expect(within(updatedRow).getByRole('switch')).not.toBeChecked()
   })
 })

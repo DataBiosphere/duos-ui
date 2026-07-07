@@ -223,7 +223,16 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     : (
         <div className="external-profile">
           <div className="header-container">
-            <h1> External Profile
+            <h1
+              style={{
+                color: '#01549F',
+                fontSize: '20px',
+                fontWeight: '600',
+                borderBottom: '1px solid #ddd',
+                paddingBottom: '8px',
+              }}
+            >
+              External Profiles
             </h1>
           </div>
           <div style={{ marginTop: '20px' }} />

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { PageHeading } from 'src/components/PageHeading'
 import { Notification } from 'src/components/Notification'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
@@ -12,9 +11,9 @@ import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ExternalProfile from './ExternalProfile'
 import ga4ghLogo from 'src/images/ga4gh-logo.png'
 import userProfileIcon from 'src/images/user-profile.png'
-import { Link } from 'react-router-dom'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DuosUser } from 'src/types/model'
+import PageHeading from 'src/components/PageHeading'
 
 export default function UserProfile() {
   usePageTitle('User Profile')
@@ -132,7 +131,6 @@ export default function UserProfile() {
             </p>
           </div>
         </div>
-        <hr className="section-separator" />
       </div>
       <h1
         style={{
@@ -141,6 +139,8 @@ export default function UserProfile() {
           fontWeight: '600',
           marginBottom: '15px',
           marginTop: '40px',
+          borderBottom: '1px solid #ddd',
+          paddingBottom: '8px',
         }}
       >
         Full Name
@@ -194,30 +194,19 @@ export default function UserProfile() {
         onChange={(field: { key: string, value: boolean, isValid: boolean }) => updateEmailPreference(field.value)}
       />
       <div style={{ marginTop: '45px' }} />
+      <ExternalProfile
+        readonly={false}
+      />
+      <div style={{ marginTop: '45px' }} />
       <AffiliationAndRoles
         user={user as DuosUser}
       />
-      <Link to="/request_role">
-        <button
-          className="f-left btn-primary common-background"
-          style={{
-            marginTop: '10px',
-            marginBottom: '50px',
-          }}
-        >
-          Request a New Role
-        </button>
-      </Link>
       <div style={{ marginTop: '115px' }} />
       <ResearcherStatus
         user={user as DuosUser}
       />
       <div style={{ marginTop: '60px' }} />
       <AcceptedAcknowledgements />
-      <div style={{ marginTop: '60px' }} />
-      <ExternalProfile
-        readonly={false}
-      />
     </div>
   )
 }
