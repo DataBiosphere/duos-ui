@@ -125,7 +125,7 @@ export const makeDatasetColumns = (
       if (codes.length === 0) return null
 
       return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', height: '100%' }}>
           {codes.slice(0, 2).map(code => (
             <Chip key={code} label={code} size="small" variant="outlined" />
           ))}
