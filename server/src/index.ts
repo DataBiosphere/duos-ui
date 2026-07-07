@@ -10,7 +10,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { createPgSessionStore } from './session/pgStore.js'
 import { isBffEnabled } from './featureFlags.js'
-import { clientConfigPath, readClientConfig } from './clientConfig.js'
+import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
@@ -93,17 +93,17 @@ export async function buildApp(): Promise<AppInstance> {
   // collides with that at startup (FST_ERR_DUPLICATED_ROUTE); onRequest fires
   // before that nested route's handler regardless of which scope declared it,
   // so this lets DUOS_API_URL override the static file's `apiUrl` without
-  // fighting Vite for the route — see clientConfig.ts for why.
+  // fighting Vite for the route — see config.ts for why.
   // HEAD must be intercepted along with GET: the static plugin registers both,
   // so a HEAD that fell through would describe the raw un-overridden file and
   // disagree with GET's body (mismatched Content-Length for caches/validators).
   // Node itself omits the body for HEAD responses; sending the same payload
   // yields matching headers.
-  const configJsonPath = clientConfigPath(PROJECT_ROOT, isDev)
+  const configJsonPath = configPath(PROJECT_ROOT, isDev)
   fastify.addHook('onRequest', async (request, reply) => {
     if ((request.method === 'GET' || request.method === 'HEAD')
       && (request.url === '/config.json' || request.url.startsWith('/config.json?'))) {
-      reply.send(await readClientConfig(configJsonPath, request.log))
+      reply.send(await readConfig(configJsonPath, request.log))
     }
   })
 

@@ -117,8 +117,8 @@ describe('GET /config.json', () => {
   afterEach(async () => {
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_API_URL
-    const { resetClientConfigCache } = await import('../src/clientConfig.js')
-    resetClientConfigCache()
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
     // Guarded: rmSync(undefined) throws and would mask the real failure of a
     // test that died before mkdtempSync assigned dir.
     if (dir) rmSync(dir, { recursive: true, force: true })

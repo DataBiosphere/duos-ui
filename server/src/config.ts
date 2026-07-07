@@ -7,7 +7,7 @@ import type { FastifyBaseLogger } from 'fastify'
  * (see Dockerfile). CONFIG_PATH overrides this directly — used by tests and as
  * an escape hatch for non-standard layouts.
  */
-export function clientConfigPath(projectRoot: string, isDev: boolean): string {
+export function configPath(projectRoot: string, isDev: boolean): string {
   return process.env.CONFIG_PATH ?? path.join(projectRoot, isDev ? 'public' : 'build', 'config.json')
 }
 
@@ -26,10 +26,10 @@ export function clientConfigPath(projectRoot: string, isDev: boolean): string {
  */
 let configPromise: Promise<Record<string, unknown>> | null = null
 
-export function readClientConfig(configPath: string, log: Pick<FastifyBaseLogger, 'error'>): Promise<Record<string, unknown>> {
+export function readConfig(configPath: string, log: Pick<FastifyBaseLogger, 'error'>): Promise<Record<string, unknown>> {
   configPromise ??= loadAndMerge(configPath).catch((err: unknown) => {
     configPromise = null
-    log.error({ err }, `[clientConfig] Could not read ${configPath}`)
+    log.error({ err }, `[config] Could not read ${configPath}`)
     throw err
   })
   return configPromise
@@ -44,6 +44,6 @@ async function loadAndMerge(configPath: string): Promise<Record<string, unknown>
 }
 
 // Test-only: clear the process-lifetime cache between cases.
-export const resetClientConfigCache = (): void => {
+export const resetConfigCache = (): void => {
   configPromise = null
 }
