@@ -33,8 +33,8 @@ RUN pnpm --filter duos-server run build
 # Create a self-contained prod-only server bundle (no devDeps, no workspace symlinks)
 RUN pnpm --filter duos-server deploy --prod --legacy /tmp/server-deploy
 
-# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:f0e79759bb8cea65c59ed276e3b5c0f19188698cf3a1f2fd67a598c05ca2d902
+# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian-fips
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:3289da9ee7c03c4a6f317dcdd767722857d4b12c288edeea4ec4b6d152bd97a8
 ARG NODE_ENV=production
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}
