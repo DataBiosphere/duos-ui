@@ -5,7 +5,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
-import RequestAccessButton from 'src/components/data_library/columns/RequestAccessButton'
+import RequestAccessButton from 'src/components/data_library/RequestAccessButton'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 
@@ -15,6 +15,7 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
+  hasSelection: boolean = false,
 ): GridColDef<DatasetTerm>[] => [
   {
     field: 'datasetName',
@@ -96,7 +97,7 @@ export const makeDatasetColumns = (
         return '-'
       }
       if (params.row.accessManagement === AccessManagement.CONTROLLED) {
-        return <RequestAccessButton datasetId={params.row.datasetId} />
+        return <RequestAccessButton datasetId={params.row.datasetId} disabledForSelection={hasSelection} />
       }
       return params.value
         ? (

@@ -2,7 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import RequestAccessButton from 'src/components/data_library/columns/RequestAccessButton'
+import RequestAccessButton from 'src/components/data_library/RequestAccessButton'
 import { Storage } from 'src/libs/storage'
 import { DAR } from 'src/libs/ajax/DAR'
 import { DuosUser, LibraryCard } from 'src/types/model'
@@ -77,6 +77,29 @@ describe('RequestAccessButton', () => {
       expect(postDarDraftSpy).toHaveBeenCalledWith({ datasetId: [101] })
       expect(navigate).toHaveBeenCalledWith('/dar_application/REF-789')
     })
+  })
+
+  it('is disabled with a selection tooltip when disabledForSelection is set, even with a library card', async () => {
+    getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
+
+    render(<RequestAccessButton datasetId={101} disabledForSelection />)
+
+    const button = screen.getByRole('button', { name: 'Request Now' })
+    expect(button).toBeDisabled()
+
+    fireEvent.mouseOver(button.parentElement as HTMLElement)
+    expect(await screen.findByText('Use \'Apply for Access\' below to request the selected datasets')).toBeInTheDocument()
+  })
+
+  it('does not create a draft when clicked while disabledForSelection', () => {
+    getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
+
+    render(<RequestAccessButton datasetId={101} disabledForSelection />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Request Now' }))
+
+    expect(postDarDraftSpy).not.toHaveBeenCalled()
+    expect(navigate).not.toHaveBeenCalled()
   })
 
   it('does not create a draft when the disabled button is clicked', () => {

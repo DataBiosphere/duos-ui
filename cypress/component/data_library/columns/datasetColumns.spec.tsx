@@ -95,16 +95,16 @@ describe('datasetColumns — Request Path column', () => {
     cy.viewport(1200, 800)
   })
 
-  const renderGrid = (overrides: Partial<Parameters<typeof makeDatasetTerm>[0]> = {}) => {
+  const renderGrid = (overrides: Partial<Parameters<typeof makeDatasetTerm>[0]> = {}, hasSelection = false) => {
     const row = makeDatasetTerm({ datasetId: 1, ...overrides })
     cy.mount(
       <MemoryRouter>
         <DataGrid
           rows={[row]}
-          columns={makeDatasetColumns()}
+          columns={makeDatasetColumns({}, new Set(), hasSelection)}
           getRowId={r => r.datasetId}
           autoHeight
-        />,
+        />
       </MemoryRouter>,
     )
   }
@@ -123,5 +123,10 @@ describe('datasetColumns — Request Path column', () => {
   it('shows a link to the requestLocation for external datasets', () => {
     renderGrid({ accessManagement: 'external', requestLocation: 'https://example.com/request' })
     cy.get('[data-field="requestLocation"] a').should('have.attr', 'href', 'https://example.com/request')
+  })
+
+  it('disables the "Request Now" button when datasets are selected elsewhere on the page', () => {
+    renderGrid({ accessManagement: 'controlled' }, true)
+    cy.get('[data-field="requestLocation"]').contains('button', 'Request Now').should('be.disabled')
   })
 })

@@ -6,21 +6,30 @@ import { Storage } from 'src/libs/storage'
 
 interface RequestAccessButtonProps {
   datasetId: number
+  /** When datasets are selected elsewhere on the page, single-dataset requests
+   *  are disabled so the footer's 'Apply for Access' is the only request path. */
+  disabledForSelection?: boolean
 }
 
-export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datasetId }) => {
+export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datasetId, disabledForSelection = false }) => {
   const navigate = useNavigate()
   const hasLibraryCard = Storage.getCurrentUser()?.libraryCard != null
 
+  const tooltip = disabledForSelection
+    ? 'Use \'Apply for Access\' below to request the selected datasets'
+    : hasLibraryCard
+      ? ''
+      : 'A Library Card is required to apply for data access'
+
   return (
-    <Tooltip title={hasLibraryCard ? '' : 'A Library Card is required to apply for data access'}>
+    <Tooltip title={tooltip}>
       <span>
         <Button
           variant="contained"
           size="small"
           onClick={() => applyForAccess([datasetId], navigate)}
           sx={{ fontWeight: 600, fontSize: '12px' }}
-          disabled={!hasLibraryCard}
+          disabled={disabledForSelection || !hasLibraryCard}
         >
           Request Now
         </Button>
