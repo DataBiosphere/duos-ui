@@ -15,11 +15,13 @@ export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datase
   const navigate = useNavigate()
   const hasLibraryCard = Storage.getCurrentUser()?.libraryCard != null
 
-  const tooltip = disabledForSelection
-    ? 'Use \'Apply for Access\' below to request the selected datasets'
-    : hasLibraryCard
-      ? ''
-      : 'A Library Card is required to apply for data access'
+  let tooltip = ''
+  if (disabledForSelection) {
+    tooltip = 'Use \'Apply for Access\' below to request the selected datasets'
+  }
+  else if (!hasLibraryCard) {
+    tooltip = 'A Library Card is required to apply for data access'
+  }
 
   return (
     <Tooltip title={tooltip}>
