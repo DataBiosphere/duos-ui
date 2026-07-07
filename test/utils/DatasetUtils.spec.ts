@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { firstNonEmptyPropertyValue, getRadarEnabledDatasetsWithRules, isOnlyGRUorHMB } from 'src/utils/DatasetUtils'
 import type {
   Dataset,
@@ -47,53 +48,60 @@ describe('firstNonEmptyPropertyValue', () => {
   it('ensure no errors when no study properties', () => {
     const dataset: Partial<Dataset> = { datasetId: 1, study: { ...minimalStudy } }
     const result = firstNonEmptyPropertyValue(dataset, ['test'])
-    cy.wrap(result).should('be.empty')
+    expect(result).toBe('')
   })
+
   it('ensure no errors when no dataset properties', () => {
     const dataset: Partial<Dataset> = { datasetId: 1 }
     const result = firstNonEmptyPropertyValue(dataset, ['test'])
-    cy.wrap(result).should('be.empty')
+    expect(result).toBe('')
   })
+
   it('ensure no errors when incorrect properties', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
       study: { ...minimalStudy, properties: [{ key: 'hello', value: 'goodbye' }] as StudyProperty[] },
     }
     const result = firstNonEmptyPropertyValue(dataset, ['test'])
-    cy.wrap(result).should('be.empty')
+    expect(result).toBe('')
   })
+
   it('ensure no errors when empty study property values', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
       study: { ...minimalStudy, properties: [{ key: 'hello' }] as StudyProperty[] },
     }
     const result = firstNonEmptyPropertyValue(dataset, ['hello'])
-    cy.wrap(result).should('be.empty')
+    expect(result).toBe('')
   })
+
   it('ensure no errors when empty dataset property values', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
       properties: [{ propertyName: 'hello', propertyValue: undefined } as unknown as DatasetProperty],
     }
     const result = firstNonEmptyPropertyValue(dataset, ['hello'])
-    cy.wrap(result).should('be.empty')
+    expect(result).toBe('')
   })
+
   it('extract hello property from study', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
       study: { ...minimalStudy, properties: [{ key: 'hello', value: 'goodbye' }] as StudyProperty[] },
     }
     const result = firstNonEmptyPropertyValue(dataset, ['hello'])
-    cy.wrap(result).should('equal', 'goodbye')
+    expect(result).toBe('goodbye')
   })
+
   it('extract hello property from dataset', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
       properties: [{ propertyName: 'hello', propertyValue: 'goodbye' } as DatasetProperty],
     }
     const result = firstNonEmptyPropertyValue(dataset, ['hello'])
-    cy.wrap(result).should('equal', 'goodbye')
+    expect(result).toBe('goodbye')
   })
+
   it('prioritize study property over dataset property', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
@@ -101,8 +109,9 @@ describe('firstNonEmptyPropertyValue', () => {
       study: { ...minimalStudy, properties: [{ key: 'hello', value: 'world' }] as StudyProperty[] },
     }
     const result = firstNonEmptyPropertyValue(dataset, ['hello'])
-    cy.wrap(result).should('equal', 'world')
+    expect(result).toBe('world')
   })
+
   it('extract first available property from study', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
@@ -115,8 +124,9 @@ describe('firstNonEmptyPropertyValue', () => {
       },
     }
     const result = firstNonEmptyPropertyValue(dataset, ['hello', 'world'])
-    cy.wrap(result).should('equal', 'goodbye')
+    expect(result).toBe('goodbye')
   })
+
   it('extract first available property from dataset', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
@@ -126,8 +136,9 @@ describe('firstNonEmptyPropertyValue', () => {
       ],
     }
     const result = firstNonEmptyPropertyValue(dataset, ['hello', 'world'])
-    cy.wrap(result).should('equal', 'goodbye')
+    expect(result).toBe('goodbye')
   })
+
   it('extract mix of properties from study and dataset', () => {
     const dataset: Partial<Dataset> = {
       datasetId: 1,
@@ -135,7 +146,7 @@ describe('firstNonEmptyPropertyValue', () => {
       study: { ...minimalStudy, properties: [{ key: 'world', value: 'hello' }] as StudyProperty[] },
     }
     const result = firstNonEmptyPropertyValue(dataset, ['world', 'hello'])
-    cy.wrap(result).should('equal', 'hello')
+    expect(result).toBe('hello')
   })
 })
 
@@ -144,36 +155,31 @@ describe('isOnlyGRUorHMB', () => {
 
   it('returns true for only GRU', () => {
     const dataUse: DataUseSummary = { primary: [makeTerm('GRU')], secondary: [] }
-    cy.wrap(isOnlyGRUorHMB(dataUse)).should('equal', true)
+    expect(isOnlyGRUorHMB(dataUse)).toBe(true)
   })
+
   it('returns true for only HMB', () => {
     const dataUse: DataUseSummary = { primary: [makeTerm('HMB')], secondary: [] }
-    cy.wrap(isOnlyGRUorHMB(dataUse)).should('equal', true)
+    expect(isOnlyGRUorHMB(dataUse)).toBe(true)
   })
+
   it('returns false for GRU with modifier', () => {
     const dataUse: DataUseSummary = { primary: [makeTerm('GRU')], secondary: [makeTerm('IRB')] }
-    cy.wrap(isOnlyGRUorHMB(dataUse)).should('equal', false)
+    expect(isOnlyGRUorHMB(dataUse)).toBe(false)
   })
+
   it('returns false for multiple primary codes', () => {
     const dataUse: DataUseSummary = { primary: [makeTerm('GRU'), makeTerm('HMB')], secondary: [] }
-    cy.wrap(isOnlyGRUorHMB(dataUse)).should('equal', false)
+    expect(isOnlyGRUorHMB(dataUse)).toBe(false)
   })
+
   it('returns false for other code', () => {
     const dataUse: DataUseSummary = { primary: [makeTerm('DS')], secondary: [] }
-    cy.wrap(isOnlyGRUorHMB(dataUse)).should('equal', false)
+    expect(isOnlyGRUorHMB(dataUse)).toBe(false)
   })
 })
 
 describe('getRadarEnabledDatasetsWithRules', () => {
-  beforeEach(() => {
-    cy.stub(DAC, 'fetchDACbotRules').callsFake((dacId: number) => {
-      if (dacId === 2) {
-        return Promise.resolve([{ activationDate: 123, ruleType: 'GRU_V1' }])
-      }
-      return Promise.resolve([])
-    })
-  })
-
   const minimalDataset: Omit<DatasetTerm, 'datasetId' | 'dacId' | 'dataUse'> = {
     createUserId: 0,
     createUserDisplayName: '',
@@ -193,7 +199,20 @@ describe('getRadarEnabledDatasetsWithRules', () => {
     piName: '',
   }
 
-  it('returns set of eligible dataset IDs', () => {
+  beforeEach(() => {
+    vi.spyOn(DAC, 'fetchDACbotRules').mockImplementation((dacId: number) => {
+      if (dacId === 2) {
+        return Promise.resolve([{ activationDate: 123, ruleType: 'GRU_V1' }] as never)
+      }
+      return Promise.resolve([] as never)
+    })
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('returns set of eligible dataset IDs', async () => {
     const datasets: DatasetTerm[] = [
       {
         datasetId: 1,
@@ -208,19 +227,17 @@ describe('getRadarEnabledDatasetsWithRules', () => {
         ...minimalDataset,
       },
     ]
-    cy.wrap(getRadarEnabledDatasetsWithRules(datasets)).then((result) => {
-      expect(result).to.be.instanceOf(Set)
-      expect(Array.from(result as Set<number>)).to.deep.equal([1])
-    })
+    const result = await getRadarEnabledDatasetsWithRules(datasets)
+    expect(result).toBeInstanceOf(Set)
+    expect(Array.from(result as Set<number>)).toEqual([1])
   })
 
-  it('returns undefined for empty datasets', () => {
-    cy.wrap(getRadarEnabledDatasetsWithRules([])).then((result) => {
-      cy.wrap(result).should('be.undefined')
-    })
+  it('returns undefined for empty datasets', async () => {
+    const result = await getRadarEnabledDatasetsWithRules([])
+    expect(result).toBeUndefined()
   })
 
-  it('returns empty set if no eligible datasets', () => {
+  it('returns empty set if no eligible datasets', async () => {
     const datasets: DatasetTerm[] = [
       {
         datasetId: 3,
@@ -229,8 +246,7 @@ describe('getRadarEnabledDatasetsWithRules', () => {
         ...minimalDataset,
       },
     ]
-    cy.wrap(getRadarEnabledDatasetsWithRules(datasets)).then((result) => {
-      cy.wrap(Array.from(result as Set<number>)).should('deep.equal', [])
-    })
+    const result = await getRadarEnabledDatasetsWithRules(datasets)
+    expect(Array.from(result as Set<number>)).toEqual([])
   })
 })
