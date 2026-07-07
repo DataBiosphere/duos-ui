@@ -2,6 +2,7 @@ import React from 'react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DataLibrary } from 'src/pages/DataLibrary'
+import { DataSet } from 'src/libs/ajax/DataSet'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
@@ -78,8 +79,26 @@ const mockStudiesResponse = {
   },
 }
 
+type SearchQuery = { aggs?: { studies?: unknown }, size?: number }
+
+// Dispatch a mocked search response based on the query shape, mirroring what
+// the API would return for studies aggregations, metadata, and dataset hits.
+// The searches are stubbed at the ajax layer (rather than cy.intercept) because
+// the tab-count queries fire ~11 concurrent POSTs per mount, which the Cypress
+// proxy handles unreliably (responses are intermittently never delivered).
+const defaultSearchDispatcher = (query: SearchQuery): Promise<unknown> => {
+  if (query.aggs?.studies) {
+    return Promise.resolve(mockStudiesResponse)
+  }
+  if (query.size === 0) {
+    return Promise.resolve(mockMetadataResponse)
+  }
+  return Promise.resolve(mockDatasetsResponse)
+}
+
 describe('DataLibrary', () => {
   let queryClient: QueryClient
+  let searchStub: Cypress.Agent<sinon.SinonStub>
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -93,17 +112,7 @@ describe('DataLibrary', () => {
     cy.stub(Storage, 'getCurrentUser').as('getCurrentUserStub').returns({
       libraryCard: { cardNumber: '12345' },
     })
-    cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-      if (req.body.aggs?.studies) {
-        req.reply(mockStudiesResponse)
-      }
-      else if (req.body.size === 0 && !req.body.queryTerm) {
-        req.reply(mockMetadataResponse)
-      }
-      else {
-        req.reply(mockDatasetsResponse)
-      }
-    }).as('searchApi')
+    searchStub = cy.stub(DataSet, 'searchDatasetIndexV2').callsFake(defaultSearchDispatcher as never)
   })
 
   it('renders the data library page', () => {
@@ -280,9 +289,9 @@ describe('DataLibrary', () => {
   })
 
   it('applies row-level filtering for nested presentation rows when Datasets Cited is selected', () => {
-    cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-      if (req.body.aggs?.studies) {
-        req.reply({
+    searchStub.callsFake(((query: SearchQuery) => {
+      if (query.aggs?.studies) {
+        return Promise.resolve({
           aggregations: {
             studies: {
               buckets: [
@@ -323,13 +332,11 @@ describe('DataLibrary', () => {
           },
         })
       }
-      else if (req.body.size === 0 && !req.body.queryTerm) {
-        req.reply(mockMetadataResponse)
+      if (query.size === 0) {
+        return Promise.resolve(mockMetadataResponse)
       }
-      else {
-        req.reply(mockDatasetsResponse)
-      }
-    }).as('nestedPresentationSearchApi')
+      return Promise.resolve(mockDatasetsResponse)
+    }) as never)
 
     cy.mount(
       <QueryClientProvider client={queryClient}>
@@ -339,14 +346,12 @@ describe('DataLibrary', () => {
       </QueryClientProvider>,
     )
 
-    cy.wait('@nestedPresentationSearchApi')
     cy.contains('Nested Match Presentation').should('exist')
     cy.contains('Nested Non-Match Presentation').should('exist')
 
     cy.contains('Datasets Cited?').click()
     cy.contains('Yes').closest('label').find('input[type="radio"]').check({ force: true })
 
-    cy.wait('@nestedPresentationSearchApi')
     cy.contains('Nested Match Presentation').should('exist')
     cy.contains('Nested Non-Match Presentation').should('not.exist')
   })
@@ -407,14 +412,13 @@ describe('DataLibrary', () => {
     it('shows the plural studies count after loading', () => {
       // mockStudiesResponse has total_studies.value = 2
       mountDefault('studies')
-      cy.wait('@searchApi')
       cy.contains('2 Studies').should('be.visible')
     })
 
     it('shows singular "Study" when total is 1', () => {
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        if (req.body.aggs?.studies) {
-          req.reply({
+      searchStub.callsFake(((query: SearchQuery) => {
+        if (query.aggs?.studies) {
+          return Promise.resolve({
             aggregations: {
               total_studies: { value: 1 },
               studies: {
@@ -431,50 +435,42 @@ describe('DataLibrary', () => {
             },
           })
         }
-        else {
-          req.reply(mockMetadataResponse)
-        }
-      }).as('searchApiSingular')
+        return Promise.resolve(mockMetadataResponse)
+      }) as never)
 
       mountDefault('studies')
-      cy.wait('@searchApiSingular')
       cy.contains('1 Study').should('be.visible')
     })
 
     it('shows the datasets count on the datasets tab', () => {
       // mockDatasetsResponse has hits.total.value = 1
       mountDefault('datasets')
-      cy.wait('@searchApi')
       cy.contains('1 Dataset').should('be.visible')
     })
 
     it('shows plural "Datasets" when total is greater than 1', () => {
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        if (req.body.aggs?.studies) {
-          req.reply(mockStudiesResponse)
+      searchStub.callsFake(((query: SearchQuery) => {
+        if (query.aggs?.studies) {
+          return Promise.resolve(mockStudiesResponse)
         }
-        else if (req.body.size === 0 && !req.body.queryTerm) {
-          req.reply(mockMetadataResponse)
+        if (query.size === 0) {
+          return Promise.resolve(mockMetadataResponse)
         }
-        else {
-          req.reply({
-            hits: {
-              total: { value: 42 },
-              hits: [],
-            },
-          })
-        }
-      }).as('searchApiMultiple')
+        return Promise.resolve({
+          hits: {
+            total: { value: 42 },
+            hits: [],
+          },
+        })
+      }) as never)
 
       mountDefault('datasets')
-      cy.wait('@searchApiMultiple')
       cy.contains('42 Datasets').should('be.visible')
     })
 
     it('does not clip the data grid when the asset count header is visible', () => {
       cy.viewport(1200, 900)
       mountDefault('datasets')
-      cy.wait('@searchApi')
 
       cy.contains('1 Dataset').should('be.visible')
 
@@ -482,20 +478,10 @@ describe('DataLibrary', () => {
     })
 
     it('shows a loading skeleton while data is fetching', () => {
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        req.on('response', (res) => {
-          res.setDelay(500)
-        })
-        if (req.body.aggs?.studies) {
-          req.reply(mockStudiesResponse)
-        }
-        else if (req.body.size === 0 && !req.body.queryTerm) {
-          req.reply(mockMetadataResponse)
-        }
-        else {
-          req.reply(mockDatasetsResponse)
-        }
-      }).as('searchApiDelayed')
+      // Delay every search response so the loading state is observable
+      searchStub.callsFake(((query: SearchQuery) => new Promise((resolve) => {
+        setTimeout(() => resolve(defaultSearchDispatcher(query)), 300)
+      })) as never)
 
       mountDefault('studies')
 
@@ -503,7 +489,6 @@ describe('DataLibrary', () => {
       cy.get('[class*="MuiSkeleton"]').should('be.visible')
 
       // After loading, skeleton should be gone and count should show
-      cy.wait('@searchApiDelayed')
       cy.get('[class*="MuiSkeleton"]').should('not.exist')
       cy.contains('2 Studies').should('be.visible')
     })
@@ -824,12 +809,6 @@ describe('DataLibrary', () => {
     })
 
     it('sends correct query for controlled/open dataset approval logic', () => {
-      let capturedBody: DatasetSearchBody | undefined
-      cy.intercept('POST', '**/api/dataset/search/index/v2', (req) => {
-        capturedBody = req.body as DatasetSearchBody
-        req.reply(mockDatasetsResponse)
-      }).as('searchApi')
-
       cy.mount(
         <QueryClientProvider client={queryClient}>
           <MemoryRouter initialEntries={['/?tab=datasets']}>
@@ -838,7 +817,10 @@ describe('DataLibrary', () => {
         </QueryClientProvider>,
       )
 
-      cy.wait('@searchApi').then(() => {
+      // Wait for the main dataset query (size > 0) to be issued, then inspect its body
+      cy.contains('Dataset One').should('be.visible').then(() => {
+        const mainCall = searchStub.getCalls().find(call => ((call.args[0] as SearchQuery).size ?? 0) > 0)
+        const capturedBody = mainCall?.args[0] as DatasetSearchBody | undefined
         cy.wrap(capturedBody).should('exist')
         cy.then(() => {
           // ES 9: top-level bool.should + minimum_should_match drives approval logic
