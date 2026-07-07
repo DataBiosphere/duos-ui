@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import {
   needsIrbApprovalDocument,
   needsCollaborationLetter,
@@ -27,183 +28,120 @@ describe('darFormUtils - DUL Logic', () => {
   describe('needsIrbApprovalDocument', () => {
     it('should return true when datasets require ethics approval', () => {
       const datasets: Partial<Dataset>[] = [
-        {
-          dataUse: {
-            ethicsApprovalRequired: true,
-          } as DataUse,
-        } as Dataset,
+        { dataUse: { ethicsApprovalRequired: true } as DataUse } as Dataset,
       ]
-      expect(needsIrbApprovalDocument(datasets as Dataset[])).to.equal(true)
+      expect(needsIrbApprovalDocument(datasets as Dataset[])).toBe(true)
     })
 
     it('should return false when datasets do not require ethics approval', () => {
       const datasets: Partial<Dataset>[] = [
-        {
-          dataUse: {
-            ethicsApprovalRequired: false,
-          } as DataUse,
-        } as Dataset,
+        { dataUse: { ethicsApprovalRequired: false } as DataUse } as Dataset,
       ]
-      expect(needsIrbApprovalDocument(datasets as Dataset[])).to.equal(false)
+      expect(needsIrbApprovalDocument(datasets as Dataset[])).toBe(false)
     })
 
     it('should return false when datasets is undefined', () => {
-      expect(needsIrbApprovalDocument([])).to.equal(false)
+      expect(needsIrbApprovalDocument([])).toBe(false)
     })
 
     it('should return false when datasets is empty', () => {
-      expect(needsIrbApprovalDocument([])).to.equal(false)
+      expect(needsIrbApprovalDocument([])).toBe(false)
     })
   })
 
   describe('needsCollaborationLetter', () => {
     it('should return true when datasets require collaborator', () => {
       const datasets: Partial<Dataset>[] = [
-        {
-          dataUse: {
-            collaboratorRequired: true,
-          } as DataUse,
-        } as Dataset,
+        { dataUse: { collaboratorRequired: true } as DataUse } as Dataset,
       ]
-      expect(needsCollaborationLetter(datasets as Dataset[])).to.equal(true)
+      expect(needsCollaborationLetter(datasets as Dataset[])).toBe(true)
     })
 
     it('should return false when datasets do not require collaborator', () => {
       const datasets: Partial<Dataset>[] = [
-        {
-          dataUse: {
-            collaboratorRequired: false,
-          } as DataUse,
-        } as Dataset,
+        { dataUse: { collaboratorRequired: false } as DataUse } as Dataset,
       ]
-      expect(needsCollaborationLetter(datasets as Dataset[])).to.equal(false)
+      expect(needsCollaborationLetter(datasets as Dataset[])).toBe(false)
     })
   })
 
   describe('needsGsoAcknowledgement', () => {
     it('should return true when datasets are genetic studies only', () => {
       const datasets: Partial<Dataset>[] = [
-        {
-          dataUse: {
-            geneticStudiesOnly: true,
-          } as DataUse,
-        } as Dataset,
+        { dataUse: { geneticStudiesOnly: true } as DataUse } as Dataset,
       ]
-      expect(needsGsoAcknowledgement(datasets as Dataset[])).to.equal(true)
+      expect(needsGsoAcknowledgement(datasets as Dataset[])).toBe(true)
     })
   })
 
   describe('needsPubAcknowledgement', () => {
     it('should return true when publication results required', () => {
       const datasets: Partial<Dataset>[] = [
-        {
-          dataUse: {
-            publicationResults: true,
-          } as DataUse,
-        } as Dataset,
+        { dataUse: { publicationResults: true } as DataUse } as Dataset,
       ]
-      expect(needsPubAcknowledgement(datasets as Dataset[])).to.equal(true)
+      expect(needsPubAcknowledgement(datasets as Dataset[])).toBe(true)
     })
   })
 
   describe('needsDsAcknowledgement', () => {
     it('should return true when data use translations differ', () => {
-      const translations = [
-        { generalUse: true },
-        { hmbResearch: false },
-      ]
-      expect(needsDsAcknowledgement(translations)).to.equal(true)
+      const translations = [{ generalUse: true }, { hmbResearch: false }]
+      expect(needsDsAcknowledgement(translations)).toBe(true)
     })
 
     it('should return false when data use translations are the same', () => {
-      const translations = [
-        { generalUse: true },
-        { generalUse: true },
-      ]
-      expect(needsDsAcknowledgement(translations)).to.equal(false)
+      const translations = [{ generalUse: true }, { generalUse: true }]
+      expect(needsDsAcknowledgement(translations)).toBe(false)
     })
 
     it('should return false when there is only one translation', () => {
       const translations = [{ generalUse: true }]
-      expect(needsDsAcknowledgement(translations)).to.equal(false)
+      expect(needsDsAcknowledgement(translations)).toBe(false)
     })
 
     describe('normalization behavior', () => {
       it('should return false for semantically equivalent DataUse objects when using translations', async () => {
-        // Two DataUse objects that are semantically equivalent but structurally different
-        const dataUse1: Partial<DataUse> = {
-          generalUse: true,
-          other: undefined, // null and undefined are semantically equivalent
-        }
-        const dataUse2: Partial<DataUse> = {
-          generalUse: true,
-          other: undefined, // undefined value
-        }
+        const dataUse1: Partial<DataUse> = { generalUse: true, other: undefined }
+        const dataUse2: Partial<DataUse> = { generalUse: true, other: undefined }
 
-        // Translate both to normalized entries
         const translations = await translateDataUseRestrictionsFromDataUseArray([
           dataUse1 as DataUse,
           dataUse2 as DataUse,
         ])
 
-        // With translations, these should be treated as equivalent
-        // (both normalize to "Not provided" for the 'other' field)
-        expect(needsDsAcknowledgement(translations)).to.equal(false)
+        expect(needsDsAcknowledgement(translations)).toBe(false)
       })
 
       it('would incorrectly return true for raw DataUse objects with empty string vs undefined', () => {
-        // This demonstrates the bug when using raw DataUse[] instead of translations
-        const dataUse1 = {
-          generalUse: true,
-          other: '',
-        }
-        const dataUse2 = {
-          generalUse: true,
-          other: undefined,
-        }
+        const dataUse1 = { generalUse: true, other: '' }
+        const dataUse2 = { generalUse: true, other: undefined }
 
-        // Passing raw DataUse objects (the buggy approach)
-        // lodash isEqual treats { other: '' } !== { other: undefined }
         const result = needsDsAcknowledgement([dataUse1, dataUse2])
-
-        // This incorrectly returns true even though they're semantically equivalent
-        expect(result).to.equal(true)
+        expect(result).toBe(true)
       })
 
       it('should return false for semantically equivalent empty arrays vs null', async () => {
-        const dataUse1: Partial<DataUse> = {
-          generalUse: true,
-          diseaseRestrictions: [], // empty array
-        }
-        const dataUse2: Partial<DataUse> = {
-          generalUse: true,
-          diseaseRestrictions: undefined, // undefined
-        }
+        const dataUse1: Partial<DataUse> = { generalUse: true, diseaseRestrictions: [] }
+        const dataUse2: Partial<DataUse> = { generalUse: true, diseaseRestrictions: undefined }
 
         const translations = await translateDataUseRestrictionsFromDataUseArray([
           dataUse1 as DataUse,
           dataUse2 as DataUse,
         ])
 
-        // Both should normalize to no disease restrictions
-        expect(needsDsAcknowledgement(translations)).to.equal(false)
+        expect(needsDsAcknowledgement(translations)).toBe(false)
       })
 
       it('should still return true when datasets actually have different restrictions', async () => {
-        const dataUse1: Partial<DataUse> = {
-          generalUse: true,
-        }
-        const dataUse2: Partial<DataUse> = {
-          hmbResearch: true,
-        }
+        const dataUse1: Partial<DataUse> = { generalUse: true }
+        const dataUse2: Partial<DataUse> = { hmbResearch: true }
 
         const translations = await translateDataUseRestrictionsFromDataUseArray([
           dataUse1 as DataUse,
           dataUse2 as DataUse,
         ])
 
-        // These are genuinely different and should require acknowledgement
-        expect(needsDsAcknowledgement(translations)).to.equal(true)
+        expect(needsDsAcknowledgement(translations)).toBe(true)
       })
     })
   })
@@ -211,19 +149,20 @@ describe('darFormUtils - DUL Logic', () => {
   describe('newIrbDocumentExpirationDate', () => {
     it('should return a date string one year from today', () => {
       const result = newIrbDocumentExpirationDate()
-      const today = new Date()
-      const nextYear = today.getFullYear() + 1
-      expect(result).to.match(/^\d{4}-\d{2}-\d{2}$/) // YYYY-MM-DD format
-      expect(result.startsWith(nextYear.toString())).to.equal(true)
+      const nextYear = new Date().getFullYear() + 1
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(result.startsWith(nextYear.toString())).toBe(true)
     })
 
     it('should return properly formatted date string', () => {
       const result = newIrbDocumentExpirationDate()
       const parts = result.split('-')
-      expect(parts.length).to.equal(3)
-      expect(Number.parseInt(parts[0])).to.be.greaterThan(2000)
-      expect(Number.parseInt(parts[1])).to.be.within(1, 12)
-      expect(Number.parseInt(parts[2])).to.be.within(1, 31)
+      expect(parts).toHaveLength(3)
+      expect(Number.parseInt(parts[0])).toBeGreaterThan(2000)
+      expect(Number.parseInt(parts[1])).toBeGreaterThanOrEqual(1)
+      expect(Number.parseInt(parts[1])).toBeLessThanOrEqual(12)
+      expect(Number.parseInt(parts[2])).toBeGreaterThanOrEqual(1)
+      expect(Number.parseInt(parts[2])).toBeLessThanOrEqual(31)
     })
   })
 })
@@ -231,23 +170,17 @@ describe('darFormUtils - DUL Logic', () => {
 describe('darFormUtils - Form Validation', () => {
   describe('validationFailed', () => {
     it('should return true when validation object contains errors', () => {
-      const validation = {
-        field1: { valid: false, failed: ['required'] },
-      }
-      expect(validationFailed(validation)).to.equal(true)
+      const validation = { field1: { valid: false, failed: ['required'] } }
+      expect(validationFailed(validation)).toBe(true)
     })
 
     it('should return false when validation object is empty', () => {
-      const validation = {}
-      expect(validationFailed(validation)).to.equal(false)
+      expect(validationFailed({})).toBe(false)
     })
 
     it('should return false when all values are empty', () => {
-      const validation = {
-        field1: undefined,
-        field2: null,
-      }
-      expect(validationFailed(validation)).to.equal(false)
+      const validation = { field1: undefined, field2: null }
+      expect(validationFailed(validation)).toBe(false)
     })
   })
 
@@ -263,13 +196,13 @@ describe('darFormUtils - Form Validation', () => {
       } as Partial<Collaborator>
 
       const errors = computeCollaboratorErrors({ collaborator })
-      expect(errors.name).to.be.an('object')
-      expect(errors.name?.valid).to.equal(false)
+      expect(errors.name).toBeDefined()
+      expect(errors.name?.valid).toBe(false)
     })
 
     it('should return error for undefined collaborator', () => {
       const errors = computeCollaboratorErrors({ collaborator: {} as Partial<Collaborator> })
-      expect(Object.keys(errors).length).to.be.greaterThan(0)
+      expect(Object.keys(errors).length).toBeGreaterThan(0)
     })
 
     it('should not return error when needsApproverStatus is false', () => {
@@ -282,7 +215,7 @@ describe('darFormUtils - Form Validation', () => {
       } as Partial<Collaborator>
 
       const errors = computeCollaboratorErrors({ collaborator, needsApproverStatus: false })
-      expect(errors.approverStatus).to.equal(undefined)
+      expect(errors.approverStatus).toBeUndefined()
     })
 
     it('should return no errors for valid collaborator', () => {
@@ -297,7 +230,7 @@ describe('darFormUtils - Form Validation', () => {
 
       const errors = computeCollaboratorErrors({ collaborator })
       const errorKeys = Object.keys(errors).filter(key => errors[key] !== undefined)
-      expect(errorKeys.length).to.equal(0)
+      expect(errorKeys).toHaveLength(0)
     })
   })
 })
@@ -311,7 +244,7 @@ describe('darFormUtils - Publication & Presentation Validation', () => {
         '1234-5678-9012-345X',
       ]
       validOrcids.forEach((orcid) => {
-        expect(ORCID_REGEX.test(orcid)).to.equal(true)
+        expect(ORCID_REGEX.test(orcid)).toBe(true)
       })
     })
 
@@ -322,25 +255,21 @@ describe('darFormUtils - Publication & Presentation Validation', () => {
         'not-valid-orcid-xxxx', // completely invalid format
       ]
       invalidOrcids.forEach((orcid) => {
-        expect(ORCID_REGEX.test(orcid)).to.equal(false)
+        expect(ORCID_REGEX.test(orcid)).toBe(false)
       })
     })
   })
 
   describe('calcPublicationErrors', () => {
     it('should return error for missing title', () => {
-      const publication: Partial<Publication> = {}
-      const errors = calcPublicationErrors(publication)
-      expect(errors.title).to.be.an('object')
+      const errors = calcPublicationErrors({} as Partial<Publication>)
+      expect(errors.title).toBeDefined()
     })
 
     it('should return error for missing authors', () => {
-      const publication: Partial<Publication> = {
-        title: 'Test Publication',
-        authors: [],
-      }
+      const publication: Partial<Publication> = { title: 'Test Publication', authors: [] }
       const errors = calcPublicationErrors(publication)
-      expect(errors.authors).to.be.an('object')
+      expect(errors.authors).toBeDefined()
     })
 
     it('should return error for author with missing name', () => {
@@ -349,7 +278,7 @@ describe('darFormUtils - Publication & Presentation Validation', () => {
         authors: [{ name: '' }] as Array<{ name: string }>,
       }
       const errors = calcPublicationErrors(publication)
-      expect(errors.authors).to.be.an('object')
+      expect(errors.authors).toBeDefined()
     })
 
     it('should return error for invalid ORCID format', () => {
@@ -358,29 +287,25 @@ describe('darFormUtils - Publication & Presentation Validation', () => {
         authors: [{ name: 'John Doe', orcId: 'invalid-orcid' }] as Array<{ name: string, orcId: string }>,
       }
       const errors = calcPublicationErrors(publication)
-      expect(errors.authors).to.be.an('object')
+      expect(errors.authors).toBeDefined()
     })
   })
 
   describe('calcPresentationErrors', () => {
     it('should return error for missing title', () => {
-      const presentation: Partial<Presentation> = {}
-      const errors = calcPresentationErrors(presentation)
-      expect(errors.title).to.be.an('object')
+      const errors = calcPresentationErrors({} as Partial<Presentation>)
+      expect(errors.title).toBeDefined()
     })
 
     it('should return errors for multiple missing fields', () => {
-      const presentation: Partial<Presentation> = {}
-      const errors = calcPresentationErrors(presentation)
-      expect(Object.keys(errors).length).to.be.greaterThan(1)
+      const errors = calcPresentationErrors({} as Partial<Presentation>)
+      expect(Object.keys(errors).length).toBeGreaterThan(1)
     })
   })
 })
 
 describe('darFormUtils - DAR Form Validation', () => {
-  const mockDataset: Partial<Dataset> = {
-    dataUse: {} as DataUse,
-  }
+  const mockDataset: Partial<Dataset> = { dataUse: {} as DataUse }
 
   describe('validateDARFormData', () => {
     it('should validate minimal form data', () => {
@@ -426,17 +351,15 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result).to.have.property('researcherInfoErrors')
-      expect(result).to.have.property('darErrors')
-      expect(result).to.have.property('rusErrors')
-      expect(result).to.have.property('nihValid')
+      expect(result).toHaveProperty('researcherInfoErrors')
+      expect(result).toHaveProperty('darErrors')
+      expect(result).toHaveProperty('rusErrors')
+      expect(result).toHaveProperty('nihValid')
     })
 
     it('should return errors for missing required researcher info', () => {
-      const formData = {}
-
       const result = validateDARFormData({
-        formData,
+        formData: {},
         datasets: [],
         dataUseTranslations: [],
         irbDocument: undefined as never,
@@ -447,16 +370,12 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: false,
       })
 
-      expect(Object.keys(result.researcherInfoErrors).length).to.be.greaterThan(0)
+      expect(Object.keys(result.researcherInfoErrors).length).toBeGreaterThan(0)
     })
 
     it('should return errors for incomplete collaborators', () => {
-      const formData = {
-        nihValid: true,
-      }
-
       const result = validateDARFormData({
-        formData,
+        formData: { nihValid: true },
         datasets: [mockDataset as Dataset],
         dataUseTranslations: [],
         irbDocument: undefined as never,
@@ -467,16 +386,15 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: false,
       })
 
-      expect(result.researcherInfoErrors.labCollaboratorsCompleted).to.be.an('object')
-      expect(result.researcherInfoErrors.internalCollaborators).to.be.an('object')
-      expect(result.researcherInfoErrors.externalCollaborators).to.be.an('object')
+      expect(result.researcherInfoErrors.labCollaboratorsCompleted).toBeDefined()
+      expect(result.researcherInfoErrors.internalCollaborators).toBeDefined()
+      expect(result.researcherInfoErrors.externalCollaborators).toBeDefined()
     })
 
     it('should require IRB document when dataset requires it', () => {
       const datasetWithIrb: Partial<Dataset> = {
         dataUse: { ethicsApprovalRequired: true } as DataUse,
       }
-
       const formData = {
         projectTitle: 'Test Project',
         rus: 'RUS',
@@ -497,14 +415,13 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result.darErrors.irbDocument).to.be.an('object')
+      expect(result.darErrors.irbDocument).toBeDefined()
     })
 
     it('should require collaboration letter when dataset requires it', () => {
       const datasetWithCollaboration: Partial<Dataset> = {
         dataUse: { collaboratorRequired: true } as DataUse,
       }
-
       const formData = {
         projectTitle: 'Test Project',
         rus: 'RUS',
@@ -525,24 +442,15 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result.darErrors.collaborationLetter).to.be.an('object')
+      expect(result.darErrors.collaborationLetter).toBeDefined()
     })
 
     it('should validate gender when oneGender is true', () => {
       const formData = {
-        oneGender: true,
-        gender: 'X',
-        aiLlmUse: false,
-        controls: false,
-        population: false,
-        forProfit: false,
-        pediatric: false,
-        vulnerablePopulation: false,
-        illegalBehavior: false,
-        sexualDiseases: false,
-        psychiatricTraits: false,
-        notHealth: false,
-        stigmatizedDiseases: false,
+        oneGender: true, gender: 'X',
+        aiLlmUse: false, controls: false, population: false, forProfit: false,
+        pediatric: false, vulnerablePopulation: false, illegalBehavior: false,
+        sexualDiseases: false, psychiatricTraits: false, notHealth: false, stigmatizedDiseases: false,
       }
 
       const result = validateDARFormData({
@@ -557,24 +465,15 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result.rusErrors.gender).to.be.an('object')
+      expect(result.rusErrors.gender).toBeDefined()
     })
 
     it('should not error on valid gender value', () => {
       const formData = {
-        oneGender: true,
-        gender: 'M',
-        aiLlmUse: false,
-        controls: false,
-        population: false,
-        forProfit: false,
-        pediatric: false,
-        vulnerablePopulation: false,
-        illegalBehavior: false,
-        sexualDiseases: false,
-        psychiatricTraits: false,
-        notHealth: false,
-        stigmatizedDiseases: false,
+        oneGender: true, gender: 'M',
+        aiLlmUse: false, controls: false, population: false, forProfit: false,
+        pediatric: false, vulnerablePopulation: false, illegalBehavior: false,
+        sexualDiseases: false, psychiatricTraits: false, notHealth: false, stigmatizedDiseases: false,
       }
 
       const result = validateDARFormData({
@@ -589,7 +488,7 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result.rusErrors.gender).to.equal(undefined)
+      expect(result.rusErrors.gender).toBeUndefined()
     })
   })
 
@@ -606,16 +505,13 @@ describe('darFormUtils - DAR Form Validation', () => {
 
       const result = validatePRFormData(true, formData, [], [])
 
-      expect(result).to.have.property('darErrors')
-      expect(result.darErrors).to.be.an('object')
+      expect(result).toHaveProperty('darErrors')
+      expect(typeof result.darErrors).toBe('object')
     })
 
     it('should return error when nihValid is false', () => {
-      const formData = {}
-
-      const result = validatePRFormData(false, formData, [], [])
-
-      expect(result.darErrors.nihEraId).to.be.an('object')
+      const result = validatePRFormData(false, {}, [], [])
+      expect(result.darErrors.nihEraId).toBeDefined()
     })
 
     it('should require progress report summary', () => {
@@ -628,20 +524,15 @@ describe('darFormUtils - DAR Form Validation', () => {
       }
 
       const result = validatePRFormData(true, formData, [], [])
-
-      expect(result.darErrors.progressReportSummary).to.be.an('object')
+      expect(result.darErrors.progressReportSummary).toBeDefined()
     })
   })
 
   describe('Cloud use validation', () => {
     it('should require cloud provider when cloudUse is true and anvilUse is false', () => {
       const formData = {
-        anvilUse: false,
-        cloudUse: true,
-        localUse: false,
-        cloudProvider: '',
-        cloudProviderType: '',
-        cloudProviderDescription: '',
+        anvilUse: false, cloudUse: true, localUse: false,
+        cloudProvider: '', cloudProviderType: '', cloudProviderDescription: '',
       }
 
       const result = validateDARFormData({
@@ -656,18 +547,13 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result.researcherInfoErrors.cloudProvider).to.be.an('object')
-      expect(result.researcherInfoErrors.cloudProviderType).to.be.an('object')
-      expect(result.researcherInfoErrors.cloudProviderDescription).to.be.an('object')
+      expect(result.researcherInfoErrors.cloudProvider).toBeDefined()
+      expect(result.researcherInfoErrors.cloudProviderType).toBeDefined()
+      expect(result.researcherInfoErrors.cloudProviderDescription).toBeDefined()
     })
 
     it('should not require cloud provider when anvilUse is true', () => {
-      const formData = {
-        anvilUse: true,
-        cloudUse: true,
-        localUse: false,
-        cloudProvider: '',
-      }
+      const formData = { anvilUse: true, cloudUse: true, localUse: false, cloudProvider: '' }
 
       const result = validateDARFormData({
         formData,
@@ -681,15 +567,11 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result.researcherInfoErrors.cloudProvider).to.equal(undefined)
+      expect(result.researcherInfoErrors.cloudProvider).toBeUndefined()
     })
 
     it('should require at least one storage option', () => {
-      const formData = {
-        anvilUse: false,
-        cloudUse: false,
-        localUse: false,
-      }
+      const formData = { anvilUse: false, cloudUse: false, localUse: false }
 
       const result = validateDARFormData({
         formData,
@@ -703,7 +585,7 @@ describe('darFormUtils - DAR Form Validation', () => {
         externalCollaboratorsCompleted: true,
       })
 
-      expect(result.researcherInfoErrors.dataStorageAndAnalysis).to.be.an('object')
+      expect(result.researcherInfoErrors.dataStorageAndAnalysis).toBeDefined()
     })
   })
 })
