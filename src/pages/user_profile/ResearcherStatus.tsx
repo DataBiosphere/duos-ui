@@ -8,7 +8,6 @@ import DAAs from './DAAs'
 import { nihAccountInstructions, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import { DAAObject, DuosUser, SigningOfficialUserWithData } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
-import SigningOfficialReadOnlyCard from 'src/components/SigningOfficialReadOnlyCard'
 
 export interface ResearcherStatusProps {
   user: DuosUser
@@ -24,16 +23,13 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
   }, [])
   const accountLabel = nihAccountLabel()
   const accountLink = nihAccountInstructions()
-  const [signingOfficialUsers, setSigningOfficialUsers] = useState<SigningOfficialUserWithData[]>([])
-
   useEffect(() => {
     const init = async () => {
       try {
         if (!isNil(user)) {
-          const signingOfficialUsers = user.institutionId
+          const signingOfficialUsers: SigningOfficialUserWithData[] = user.institutionId
             ? await User.getSOsForInstitution(user.institutionId)
             : await User.getSOsForCurrentUser()
-          setSigningOfficialUsers(signingOfficialUsers)
           if (isNil(user.libraryCard)) {
             setHasCard(false)
           }
@@ -80,10 +76,28 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
           color: '#01549F',
           fontSize: '20px',
           fontWeight: '600',
+          borderBottom: '1px solid #ddd',
+          paddingBottom: '8px',
         }}
       >
         Researcher Status
       </h1>
+      <div style={{ marginTop: '20px' }} />
+      <p style={subheadStyle}>Status</p>
+      <p style={{
+        fontFamily: 'Montserrat',
+        fontSize: '16px',
+        fontWeight: 600,
+        color: hasCard ? '#00928A' : 'rgb(128, 128, 128)',
+      }}
+      >
+        {hasCard ? 'Active' : 'Inactive'}
+      </p>
+      {!hasCard && (
+        <p style={{ marginTop: '10px' }}>
+          You must be an Active researcher to submit a data access request in DUOS. Please contact your Institutional Signing Official to change your status in DUOS.
+        </p>
+      )}
       <div style={{ marginTop: '20px' }} />
       <p style={subheadStyle}>
         {accountLabel}
@@ -104,10 +118,10 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         header: false,
       })}
       <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>Library Card issued to you</p>
+      <p style={subheadStyle}>Your Pre-Authorized Data Access Agreements</p>
       <p>
-        A Library Card is a Signing Official’s pre-authorization of a researcher to submit Data Access Requests (DARs)
-        in DUOS. A valid Library Card is required to initiate a DAR.
+        Pre-authorization data access agreements (DAAs) allows your Signing Official to approve you once to submit
+        data access requests (DARs) to a data access committee (DAC) at will.
       </p>
       <div style={{ marginTop: '15px' }} />
       {hasCard
@@ -118,40 +132,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
               daas={daaObjects}
             />
           )
-        : (
-            <div>
-              <p>No Library Card Found</p>
-              <p style={{
-                marginTop: '10px',
-                marginBottom: '50px',
-              }}
-              >
-                You must have a Library Card to submit a data access request. To obtain one, your Institutional
-                Signing Official must register in DUOS, request and receive Signing Official permissions, and issue
-                you a Library Card.
-              </p>
-            </div>
-          )}
-      {signingOfficialUsers.length === 0
-        ? (
-            <p>
-              No Signing Official found for your institution. Please refer to <a href="https://duos.blog/2025/08/06/how-to-get-a-library-card-from-your-signing-official/" target="_blank" rel="noreferrer">this help article</a> for instructions on how to get a Library Card.
-            </p>
-          )
-        : (
-            <>
-              <p>Signing Official(s):</p>
-              {signingOfficialUsers.map(so => (
-                <SigningOfficialReadOnlyCard
-                  key={so.userId}
-                  name={so.displayName}
-                  email={so.email}
-                  institutionName={so.institutionName}
-                  externalProfiles={so.userData?.externalProfiles}
-                />
-              ))}
-            </>
-          )}
+        : null}
     </div>
   )
 }

@@ -165,7 +165,6 @@ const mountManageDac = () => {
         <Route path="/manage_dac" element={<ManageDac />} />
         <Route path="/manage_dac/:dacId" element={<RouteStateViewer />} />
         <Route path="/manage_add_dac_daa" element={<RouteStateViewer />} />
-        <Route path="/manage_dac_datasets" element={<RouteStateViewer />} />
       </Routes>
     </MemoryRouter>,
   )

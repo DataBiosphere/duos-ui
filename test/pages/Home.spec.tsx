@@ -219,14 +219,14 @@ describe('Home page', () => {
 
     it('renders Looking for data section', () => {
       renderHome(false)
-      expect(screen.getByText('Looking for data?')).toBeInTheDocument()
+      expect(screen.getByText('Looking for Data?')).toBeInTheDocument()
     })
 
-    it('opens contact modal when "here" is clicked', async () => {
+    it('opens contact modal when "Request a Meeting" is clicked', async () => {
       renderHome(false)
       expect(screen.queryByTestId('support-modal')).not.toBeInTheDocument()
       await act(async () => {
-        fireEvent.click(screen.getByText('here'))
+        fireEvent.click(screen.getByText('Request a Meeting'))
       })
       expect(screen.getByTestId('support-modal')).toBeInTheDocument()
     })
