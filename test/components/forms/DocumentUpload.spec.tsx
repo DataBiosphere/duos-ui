@@ -69,16 +69,11 @@ describe('DocumentUpload', () => {
 
   it('uploads files immediately and stores uploaded state', async () => {
     const onFilesReady = vi.fn()
+    let resolveUpload!: (val: unknown) => void
     const api = {
-      uploadDocument: vi.fn().mockResolvedValue({
-        fileStorageObjectId: 101,
-        entityId: 'dar-1',
-        fileName: 'consent.pdf',
-        category: FileCategory.IRB_COLLABORATION_LETTER,
-        mediaType: 'application/pdf',
-        createUserId: 1,
-        createDate: Date.now(),
-      }),
+      uploadDocument: vi.fn().mockImplementation(
+        () => new Promise(resolve => { resolveUpload = resolve }),
+      ),
       deleteDocument: vi.fn().mockResolvedValue({} as never),
       listDocuments: vi.fn().mockResolvedValue([]),
     }
@@ -99,6 +94,23 @@ describe('DocumentUpload', () => {
     })
 
     expect(screen.getByText('consent.pdf')).toBeInTheDocument()
+
+    // Upload is in-flight — status must pass through Uploading before resolving
+    await waitFor(() => {
+      expect(document.querySelector('[data-cy="document-upload-status"]')).toHaveTextContent('Uploading')
+    })
+
+    await act(async () => {
+      resolveUpload({
+        fileStorageObjectId: 101,
+        entityId: 'dar-1',
+        fileName: 'consent.pdf',
+        category: FileCategory.IRB_COLLABORATION_LETTER,
+        mediaType: 'application/pdf',
+        createUserId: 1,
+        createDate: Date.now(),
+      })
+    })
 
     await waitFor(() => {
       expect(document.querySelector('[data-cy="document-upload-status"]')).toHaveTextContent('Uploaded')
@@ -462,6 +474,8 @@ describe('DocumentUpload', () => {
     const previewWindow = { document: previewDocument }
     vi.spyOn(window, 'open').mockReturnValue(previewWindow as never)
 
+    const documentBlob = new Blob(['pdf'], { type: 'application/pdf' })
+
     const api = {
       uploadDocument: vi.fn().mockResolvedValue({} as never),
       deleteDocument: vi.fn().mockResolvedValue({} as never),
@@ -476,7 +490,7 @@ describe('DocumentUpload', () => {
           createDate: Date.now(),
         },
       ]),
-      getDocumentFile: vi.fn().mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' })),
+      getDocumentFile: vi.fn().mockResolvedValue(documentBlob),
       getDocument: getDocumentStub,
     }
 
@@ -496,7 +510,10 @@ describe('DocumentUpload', () => {
 
     await waitFor(() => {
       expect(window.open).toHaveBeenCalledOnce()
-      expect(URL.createObjectURL).toHaveBeenCalledOnce()
+      // Component wraps the blob in new File([blob], doc.file.name, {type}) before passing to createObjectURL
+      expect(URL.createObjectURL).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'viewable.pdf', type: 'application/pdf' }),
+      )
     })
 
     expect(previewWindow.document.title).toBe('viewable.pdf')
@@ -518,7 +535,9 @@ describe('DocumentUpload', () => {
   })
 
   it('does not inject uploaded PDF filenames into preview HTML', async () => {
-    const maliciousFileName = 'report"><img src="" alt="">.pdf'
+    // Payload that would inject `onerror` onto the <iframe> element and a stray <img>
+    // if the preview code used string interpolation instead of safe DOM property assignment.
+    const maliciousFileName = 'report" onerror="alert(1)"><img src=x'
 
     const previewDocument = document.implementation.createHTMLDocument('')
     vi.spyOn(window, 'open').mockReturnValue({ document: previewDocument } as never)
