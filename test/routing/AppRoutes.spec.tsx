@@ -47,6 +47,7 @@ const roleBACRoutes: string[] = [
   '/chair_console',
   '/dac_datasets',
   '/manage_dac',
+  '/manage_dac/1',
   '/manage_radar/1',
   '/admin_review_collection/1',
   '/admin_manage_users',
