@@ -60,28 +60,16 @@ describe('datasetColumns — column order', () => {
 })
 
 describe('datasetColumns — Access Management chip', () => {
-  it('renders "Controlled" chip with primary color for controlled access', () => {
-    const { container } = renderCell('accessManagement', 'controlled')
-    expect(screen.getByText('Controlled')).toBeInTheDocument()
-    expect(container.querySelector('.MuiChip-colorPrimary')).toBeInTheDocument()
-  })
-
-  it('renders "Open" chip with success color for open access', () => {
-    const { container } = renderCell('accessManagement', 'open')
-    expect(screen.getByText('Open')).toBeInTheDocument()
-    expect(container.querySelector('.MuiChip-colorSuccess')).toBeInTheDocument()
-  })
-
-  it('renders "External" chip with secondary color for external access', () => {
-    const { container } = renderCell('accessManagement', 'external')
-    expect(screen.getByText('External')).toBeInTheDocument()
-    expect(container.querySelector('.MuiChip-colorSecondary')).toBeInTheDocument()
-  })
-
-  it('renders "Unknown" chip with default color for unknown access', () => {
-    const { container } = renderCell('accessManagement', 'something-unknown')
-    expect(screen.getByText('Unknown')).toBeInTheDocument()
-    expect(container.querySelector('.MuiChip-colorDefault')).toBeInTheDocument()
+  it.each([
+    ['controlled', 'Controlled', '.MuiChip-colorPrimary'],
+    ['open', 'Open', '.MuiChip-colorSuccess'],
+    ['external', 'External', '.MuiChip-colorSecondary'],
+    ['something-unknown', 'Unknown', '.MuiChip-colorDefault'],
+  ])('renders chip for %s access — correct label, color, and no Bolt icon', (value, label, colorClass) => {
+    const { container } = renderCell('accessManagement', value)
+    expect(screen.getByText(label)).toBeInTheDocument()
+    expect(container.querySelector(colorClass)).toBeInTheDocument()
+    expect(container.querySelector('svg[data-testid="BoltIcon"]')).not.toBeInTheDocument()
   })
 
   it('shows Bolt icon for radar enabled datasets', () => {
