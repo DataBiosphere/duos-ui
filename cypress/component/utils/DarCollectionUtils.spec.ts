@@ -331,6 +331,10 @@ describe('processVotesForBucket', () => {
     expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
     expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
 
+    expect(result.dataAccess.chairpersonVotes[0].electionId).to.equal(12)
+    expect(result.dataAccess.memberVotes[0].electionId).to.equal(12)
+    expect(result.dataAccess.finalVotes[0].electionId).to.equal(12)
+
     expect(elections[1].votes[3].electionStatus).to.equal('Closed')
     expect(elections[1].votes[4].electionStatus).to.equal('Closed')
     expect(elections[1].votes[5].electionStatus).to.equal('Closed')
