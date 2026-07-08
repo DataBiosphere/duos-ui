@@ -1,4 +1,7 @@
 import React from 'react'
+import { describe, it, expect } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { render } from '@testing-library/react'
 import AuthStatusChip from 'src/pages/signing_official_console/DAAAssignment/AuthStatusChip'
 
 describe('AuthStatusChip', () => {
@@ -10,9 +13,10 @@ describe('AuthStatusChip', () => {
 
   cases.forEach(({ status, label }) => {
     it(`renders ${label} status`, () => {
-      cy.mount(<AuthStatusChip status={status} />)
-      cy.get(`[data-cy="auth-status-chip-${status}"]`).should('exist')
-      cy.get(`[data-cy="auth-status-chip-${status}"]`).should('contain.text', label)
+      const { container } = render(<AuthStatusChip status={status} />)
+      const el = container.querySelector(`[data-cy="auth-status-chip-${status}"]`)
+      expect(el).toBeInTheDocument()
+      expect(el).toHaveTextContent(label)
     })
   })
 })
