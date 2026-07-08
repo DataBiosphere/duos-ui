@@ -1,5 +1,4 @@
 import { DAAObject, DuosUser } from 'src/types/model'
-import { DAARowData } from 'src/pages/signing_official_console/DAAAssignment/types'
 
 interface DaaOptions {
   daaId: number
@@ -79,8 +78,4 @@ export function makeResearcher({
       ...(daaDetails && { daaDetails }),
     },
   }
-}
-
-export function makeDaaRow(daa: DAAObject, status: DAARowData['status'], dacName: string): DAARowData {
-  return { daa, dacName, status }
 }
