@@ -1,3 +1,7 @@
+import React from 'react'
+import { describe, it, expect } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { render, screen } from '@testing-library/react'
 import { DatasetTerm } from 'src/types/model'
 import { processDataUseCodes, createDataUseDisplay } from 'src/utils/DataUseUtils'
 
@@ -19,12 +23,12 @@ describe('DataUseUtils', () => {
 
       const result = processDataUseCodes(dataset as DatasetTerm)
 
-      expect(result.codesAndDescriptions).to.have.length(2)
-      expect(result.codesAndDescriptions[0].code).to.equal('GRU')
-      expect(result.codesAndDescriptions[1].code).to.equal('NPU')
+      expect(result.codesAndDescriptions).toHaveLength(2)
+      expect(result.codesAndDescriptions[0].code).toBe('GRU')
+      expect(result.codesAndDescriptions[1].code).toBe('NPU')
 
-      expect(result.codeList).to.have.length(2)
-      expect(result.codeList).to.deep.equal(['GRU', 'NPU'])
+      expect(result.codeList).toHaveLength(2)
+      expect(result.codeList).toEqual(['GRU', 'NPU'])
     })
   })
 
@@ -42,10 +46,10 @@ describe('DataUseUtils', () => {
         },
       }
 
-      cy.mount(createDataUseDisplay({ dataset: dataset as DatasetTerm }))
+      const { container } = render(createDataUseDisplay({ dataset: dataset as DatasetTerm }) as React.ReactElement)
 
-      cy.get('span').should('contain', 'GRU, HMB')
-      cy.get('[data-for="dataset-data-use-8"]').should('exist')
+      expect(screen.getByText('GRU, HMB')).toBeInTheDocument()
+      expect(container.querySelector('[data-for="dataset-data-use-8"]')).toBeInTheDocument()
     })
   })
 })

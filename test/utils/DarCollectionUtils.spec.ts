@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   updateCollectionFn,
   cancelCollectionFn,
@@ -19,7 +20,8 @@ import { Collections } from 'src/libs/ajax/Collections'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { DarCollectionSummary, Election, Vote } from 'src/types/model'
 
-// Helper to cast partial bucket objects for tests
+// ─── Cast helpers ─────────────────────────────────────────────────────────────
+
 const asBucket = (partial: object): VoteBucket => partial as VoteBucket
 const asCollections = (partial: object[]): DarCollectionSummary[] => partial as DarCollectionSummary[]
 const asCollection = (partial: object): DarCollectionSummary => partial as DarCollectionSummary
@@ -29,6 +31,8 @@ type UpdateFinalVoteArgs = Parameters<typeof updateFinalVote>[0]
 type UpdateFinalVoteBuckets = UpdateFinalVoteArgs['dataUseBuckets']
 
 const asUpdateFinalVoteBuckets = (partial: object[]): UpdateFinalVoteBuckets => partial as UpdateFinalVoteBuckets
+
+// ─── Fixture factories ────────────────────────────────────────────────────────
 
 const makeElection = ({
   electionId,
@@ -55,24 +59,23 @@ const makeElection = ({
   archived: false,
 })
 
+// ─── Assertion helpers ────────────────────────────────────────────────────────
+
 const expectIncludedVotes = (votes: Array<Partial<Vote>>, expected: Array<Partial<Vote>>) => {
   expected.forEach((vote) => {
-    expect(votes).to.deep.include(vote)
+    expect(votes).toContainEqual(vote)
   })
 }
 
 const expectExcludedVotes = (votes: Array<Partial<Vote>>, unexpected: Array<Partial<Vote>>) => {
   unexpected.forEach((vote) => {
-    expect(votes).to.not.deep.include(vote)
+    expect(votes).not.toContainEqual(vote)
   })
 }
 
 type DacVoteScope = 'dataAccess' | 'rp'
 type DacVoteExtractor = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean) => Vote[]
-type VotePayloadExpectation = {
-  vote: boolean
-  rationale?: string | null
-}
+type VotePayloadExpectation = { vote: boolean, rationale?: string | null }
 
 const getBucketVotesForScope = (bucket: VoteBucket, scope: DacVoteScope): Vote[] =>
   (bucket.votes ?? []).flatMap((voteGroup) => {
@@ -91,15 +94,17 @@ const expectVotePayloadApplied = ({
 }) => {
   votes.forEach((vote) => {
     if (voteIds.includes(vote.voteId)) {
-      expect(vote.vote).to.equal(votePayload.vote)
-      expect(vote.rationale).to.equal(votePayload.rationale ?? undefined)
+      expect(vote.vote).toBe(votePayload.vote)
+      expect(vote.rationale).toBe(votePayload.rationale ?? undefined)
     }
     else {
-      expect(vote.vote).to.equal(undefined)
-      expect(vote.rationale).to.equal(undefined)
+      expect(vote.vote).toBeUndefined()
+      expect(vote.rationale).toBeUndefined()
     }
   })
 }
+
+// ─── DAC extraction suites ────────────────────────────────────────────────────
 
 const runDacExtractionSuite = ({
   suiteName,
@@ -119,7 +124,7 @@ const runDacExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 })
-      expect(votes).to.have.lengthOf(0)
+      expect(votes).toHaveLength(0)
     })
 
     it('returns all member votes in the same scoped elections as the given user', () => {
@@ -132,7 +137,7 @@ const runDacExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 })
-      expect(votes).to.have.lengthOf(5)
+      expect(votes).toHaveLength(5)
       expectIncludedVotes(votes, [
         { userId: 1 },
         { vote: false, userId: 2 },
@@ -155,7 +160,7 @@ const runDacExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 })
-      expect(votes).to.have.lengthOf(2)
+      expect(votes).toHaveLength(2)
       expectIncludedVotes(votes, [{ vote: true, userId: 1 }, { userId: 2 }])
       expectExcludedVotes(votes, [{ userId: 1 }, { vote: false, userId: 3 }])
     })
@@ -171,7 +176,7 @@ const runDacExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 })
-      expect(votes).to.have.lengthOf(2)
+      expect(votes).toHaveLength(2)
       expectIncludedVotes(votes, [{ userId: 1 }, { vote: false, userId: 3 }])
       expectExcludedVotes(votes, [{ vote: true, userId: 1 }, { userId: 2 }])
     })
@@ -185,13 +190,13 @@ const runDacExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 }, true)
-      expect(votes).to.have.lengthOf(3)
+      expect(votes).toHaveLength(3)
       expectIncludedVotes(votes, [{ userId: 2 }, { userId: 3 }, { userId: 4 }])
     })
 
     it('returns empty array for null bucket', () => {
       const votes = extractor(null, { userId: 1 })
-      expect(votes).to.have.lengthOf(0)
+      expect(votes).toHaveLength(0)
     })
   })
 }
@@ -207,6 +212,8 @@ runDacExtractionSuite({
   scope: 'rp',
   extractor: extractDacRPVotesFromBucket,
 })
+
+// ─── User extraction suites ───────────────────────────────────────────────────
 
 type UserVoteExtractor = (
   bucket: VoteBucket | null | undefined,
@@ -241,7 +248,7 @@ const runUserExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 }, false)
-      expect(votes).to.have.lengthOf(2)
+      expect(votes).toHaveLength(2)
       expectIncludedVotes(votes, [{ userId: 1 }, { vote: true, userId: 1 }])
       expectExcludedVotes(votes, [{ userId: 2 }, { userId: 3 }])
     })
@@ -258,7 +265,7 @@ const runUserExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 }, false)
-      expect(votes).to.have.lengthOf(1)
+      expect(votes).toHaveLength(1)
       expectIncludedVotes(votes, [{ userId: 1 }])
       expectExcludedVotes(votes, [{ vote: true, userId: 1 }, { vote: false, userId: 2 }, { userId: 3 }])
     })
@@ -275,13 +282,13 @@ const runUserExtractionSuite = ({
       })
 
       const votes = extractor(bucket, { userId: 1 }, true)
-      expect(votes.length).to.be.greaterThan(0)
+      expect(votes.length).toBeGreaterThan(0)
       expectExcludedVotes(votes, [{ vote: false, userId: 2 }, { userId: 3 }])
     })
 
     it('returns empty array for null bucket', () => {
       const votes = extractor(null, { userId: 1 })
-      expect(votes).to.have.lengthOf(0)
+      expect(votes).toHaveLength(0)
     })
   })
 }
@@ -305,7 +312,7 @@ describe('extractUserDataAccessVotesFromBucket edge cases', () => {
     })
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, { userId: 1 }, true)
-    expect(votes).to.have.lengthOf(2)
+    expect(votes).toHaveLength(2)
     expectIncludedVotes(votes, [{ vote: true, userId: 1 }, { vote: false, userId: 1 }])
     expectExcludedVotes(votes, [{ userId: 2 }])
   })
@@ -323,7 +330,7 @@ describe('extractUserDataAccessVotesFromBucket edge cases', () => {
     })
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, { userId: 1 }, false, true)
-    expect(votes).to.have.lengthOf(4)
+    expect(votes).toHaveLength(4)
     expectIncludedVotes(votes, [
       { vote: true, userId: 10 },
       { vote: false, userId: 20 },
@@ -355,11 +362,13 @@ describe('extractUserRPVotesFromBucket edge cases', () => {
     })
 
     const votes = extractUserRPVotesFromBucket(bucket, { userId: 1 }, false, true)
-    expect(votes).to.have.lengthOf(2)
+    expect(votes).toHaveLength(2)
     expectIncludedVotes(votes, [{ vote: true, userId: 2 }, { vote: false, userId: 3 }])
     expectExcludedVotes(votes, [{ userId: 4 }])
   })
 })
+
+// ─── processVotesForBucket ────────────────────────────────────────────────────
 
 describe('processVotesForBucket', () => {
   it('preserves output bucketing and source vote mutation for mixed RP/DataAccess elections', () => {
@@ -387,29 +396,29 @@ describe('processVotesForBucket', () => {
 
     const result = processVotesForBucket(elections)
 
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(1)
-    expect(result.rp.memberVotes).to.have.lengthOf(1)
-    expect(result.rp.finalVotes).to.have.lengthOf(1)
-    expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(1)
-    expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
-    expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
+    expect(result.rp.chairpersonVotes).toHaveLength(1)
+    expect(result.rp.memberVotes).toHaveLength(1)
+    expect(result.rp.finalVotes).toHaveLength(1)
+    expect(result.dataAccess.chairpersonVotes).toHaveLength(1)
+    expect(result.dataAccess.memberVotes).toHaveLength(1)
+    expect(result.dataAccess.finalVotes).toHaveLength(1)
 
-    expect(elections[0].votes[1].electionStatus).to.equal('Open')
-    expect(elections[0].votes[2].electionStatus).to.equal('Open')
-    expect(elections[1].votes[3].electionStatus).to.equal('Closed')
-    expect(elections[1].votes[4].electionStatus).to.equal('Closed')
-    expect(elections[1].votes[5].electionStatus).to.equal('Closed')
+    expect(elections[0].votes[1].electionStatus).toBe('Open')
+    expect(elections[0].votes[2].electionStatus).toBe('Open')
+    expect(elections[1].votes[3].electionStatus).toBe('Closed')
+    expect(elections[1].votes[4].electionStatus).toBe('Closed')
+    expect(elections[1].votes[5].electionStatus).toBe('Closed')
   })
 
   it('returns empty vote arrays for no elections', () => {
     const result = processVotesForBucket([])
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(0)
-    expect(result.rp.memberVotes).to.have.lengthOf(0)
-    expect(result.rp.finalVotes).to.have.lengthOf(0)
-    expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(0)
-    expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
-    expect(result.dataAccess.finalVotes).to.have.lengthOf(0)
-    expect(result.dataAccess.radarVotes).to.have.lengthOf(0)
+    expect(result.rp.chairpersonVotes).toHaveLength(0)
+    expect(result.rp.memberVotes).toHaveLength(0)
+    expect(result.rp.finalVotes).toHaveLength(0)
+    expect(result.dataAccess.chairpersonVotes).toHaveLength(0)
+    expect(result.dataAccess.memberVotes).toHaveLength(0)
+    expect(result.dataAccess.finalVotes).toHaveLength(0)
+    expect(result.dataAccess.radarVotes).toHaveLength(0)
   })
 
   it('categorizes RP election votes correctly', () => {
@@ -423,13 +432,12 @@ describe('processVotesForBucket', () => {
       },
     })]
     const result = processVotesForBucket(elections)
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(1)
-    expect(result.rp.memberVotes).to.have.lengthOf(1)
+    expect(result.rp.chairpersonVotes).toHaveLength(1)
+    expect(result.rp.memberVotes).toHaveLength(1)
     // RP chairperson votes also go to finalVotes
-    expect(result.rp.finalVotes).to.have.lengthOf(1)
-    // Data access should remain empty
-    expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(0)
-    expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
+    expect(result.rp.finalVotes).toHaveLength(1)
+    expect(result.dataAccess.chairpersonVotes).toHaveLength(0)
+    expect(result.dataAccess.memberVotes).toHaveLength(0)
   })
 
   it('categorizes data access election votes correctly', () => {
@@ -444,11 +452,11 @@ describe('processVotesForBucket', () => {
       },
     })]
     const result = processVotesForBucket(elections)
-    expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(1)
-    expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
-    expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(0)
-    expect(result.rp.memberVotes).to.have.lengthOf(0)
+    expect(result.dataAccess.chairpersonVotes).toHaveLength(1)
+    expect(result.dataAccess.memberVotes).toHaveLength(1)
+    expect(result.dataAccess.finalVotes).toHaveLength(1)
+    expect(result.rp.chairpersonVotes).toHaveLength(0)
+    expect(result.rp.memberVotes).toHaveLength(0)
   })
 
   it('routes radar_approve votes to radarVotes', () => {
@@ -461,9 +469,9 @@ describe('processVotesForBucket', () => {
       },
     })]
     const result = processVotesForBucket(elections)
-    expect(result.dataAccess.radarVotes).to.have.lengthOf(1)
-    expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
-    expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(0)
+    expect(result.dataAccess.radarVotes).toHaveLength(1)
+    expect(result.dataAccess.memberVotes).toHaveLength(0)
+    expect(result.dataAccess.chairpersonVotes).toHaveLength(0)
   })
 
   it('annotates votes with electionStatus from election', () => {
@@ -477,7 +485,7 @@ describe('processVotesForBucket', () => {
     })]
     const result = processVotesForBucket(elections)
     const vote = result.dataAccess.memberVotes[0]
-    expect(vote.electionStatus).to.equal('Closed')
+    expect(vote.electionStatus).toBe('Closed')
   })
 
   it('handles multiple elections of different types', () => {
@@ -500,18 +508,23 @@ describe('processVotesForBucket', () => {
       }),
     ]
     const result = processVotesForBucket(elections)
-    expect(result.rp.memberVotes).to.have.lengthOf(1)
-    expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
+    expect(result.rp.memberVotes).toHaveLength(1)
+    expect(result.dataAccess.memberVotes).toHaveLength(1)
   })
 
   it('uses empty array as default for omitted elections argument', () => {
     const result = processVotesForBucket()
-    expect(result.rp.memberVotes).to.have.lengthOf(0)
-    expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
+    expect(result.rp.memberVotes).toHaveLength(0)
+    expect(result.dataAccess.memberVotes).toHaveLength(0)
   })
 })
 
+// ─── updateCollectionFn ───────────────────────────────────────────────────────
+
 describe('updateCollectionFn', () => {
+  beforeEach(() => vi.clearAllMocks())
+  afterEach(() => vi.restoreAllMocks())
+
   it('generates an update callback function for consoles to use', () => {
     const collections = asCollections([{}])
     const filterFn = () => collections
@@ -519,7 +532,8 @@ describe('updateCollectionFn', () => {
     const setCollections = (_arr: DarCollectionSummary[]) => {}
     const setFilteredList = (_arr: DarCollectionSummary[]) => {}
 
-    cy.wrap(updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })).should('exist')
+    const callback = updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })
+    expect(callback).toBeDefined()
   })
 
   it('updates collections and filteredList with the filter results', () => {
@@ -538,8 +552,8 @@ describe('updateCollectionFn', () => {
     const callback = updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })
 
     callback(updatedCollection)
-    expect(filteredList[0].darCollectionId).to.equal(updatedList[0].darCollectionId)
-    expect(collections[0].darCollectionId).to.equal(updatedCollection.darCollectionId)
+    expect(filteredList[0].darCollectionId).toBe(updatedList[0].darCollectionId)
+    expect(collections[0].darCollectionId).toBe(updatedCollection.darCollectionId)
   })
 
   it('shows an error notification when the collection is not found', () => {
@@ -548,120 +562,139 @@ describe('updateCollectionFn', () => {
     const setCollections = (_arr: DarCollectionSummary[]) => {}
     const setFilteredList = (_arr: DarCollectionSummary[]) => {}
 
-    cy.stub(Notifications, 'showError').returns(undefined)
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
 
     const callback = updateCollectionFn({ collections, filterFn, setCollections, setFilteredList })
     callback(asCollection({ darCollectionId: 999, darCode: 'DAR-MISSING' }))
 
-    cy.wrap(Notifications.showError).should('have.been.calledWith', {
-      text: 'Error: Could not find DAR-MISSING collection',
-    })
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error: Could not find DAR-MISSING collection' })
   })
 })
+
+// ─── cancelCollectionFn ───────────────────────────────────────────────────────
 
 describe('cancelCollectionFn', () => {
+  beforeEach(() => vi.clearAllMocks())
+  afterEach(() => vi.restoreAllMocks())
+
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (_c: DarCollectionSummary) => {}
     const callback = cancelCollectionFn({ updateCollections, role: 'Admin' })
-    cy.wrap(callback).should('exist')
+    expect(callback).toBeDefined()
   })
 
-  it('updates collections and filteredList on successful cancel', () => {
+  it('updates collections and filteredList on successful cancel', async () => {
     let collections = asCollections([{ status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1 }])
     const updatedCollection = asCollection({ status: 'Complete', darCode: 'DAR-1', darCollectionId: 1 })
     const updateCollections = (collection: DarCollectionSummary) => {
       collections = [collection]
     }
-    const callback = cancelCollectionFn({ updateCollections, role: 'Admin' })
-    cy.stub(Collections, 'cancelCollection').returns(undefined)
-    cy.stub(Collections, 'getCollectionSummaryByRoleNameAndId').returns(updatedCollection)
-    cy.stub(Notifications, 'showSuccess').returns(undefined)
-    cy.stub(Notifications, 'showError').returns(undefined)
 
-    cy.wrap(callback({ darCode: 'DAR-1', darCollectionId: 1 })).then(() => {
-      cy.wrap(collections).should('not.be.empty')
-      cy.wrap(collections[0].darCollectionId).should('equal', 1)
-      cy.wrap(collections[0].status).should('equal', 'Complete')
-    })
+    vi.spyOn(Collections, 'cancelCollection').mockResolvedValue(undefined as never)
+    vi.spyOn(Collections, 'getCollectionSummaryByRoleNameAndId').mockResolvedValue(updatedCollection as never)
+    vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => {})
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
+
+    const callback = cancelCollectionFn({ updateCollections, role: 'Admin' })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1 })
+
+    expect(collections).not.toHaveLength(0)
+    expect(collections[0].darCollectionId).toBe(1)
+    expect(collections[0].status).toBe('Complete')
   })
 
-  it('shows error notification on cancel failure', () => {
-    cy.stub(Collections, 'cancelCollection').rejects(new Error('network error'))
-    cy.stub(Notifications, 'showError').returns(undefined)
+  it('shows error notification on cancel failure', async () => {
+    vi.spyOn(Collections, 'cancelCollection').mockRejectedValue(new Error('network error'))
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
 
     const callback = cancelCollectionFn({ updateCollections: () => {}, role: 'Admin' })
-    cy.wrap(callback({ darCode: 'DAR-1', darCollectionId: 1 })).then(() => {
-      cy.wrap(Notifications.showError).should('have.been.calledWith', { text: 'Error canceling DAR-1' })
-    })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1 })
+
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error canceling DAR-1' })
   })
 })
 
+// ─── openCollectionFn ─────────────────────────────────────────────────────────
+
 describe('openCollectionFn', () => {
+  beforeEach(() => vi.clearAllMocks())
+  afterEach(() => vi.restoreAllMocks())
+
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (_c: DarCollectionSummary) => {}
     const callback = openCollectionFn({ updateCollections, role: 'Admin' })
-    cy.wrap(callback).should('exist')
+    expect(callback).toBeDefined()
   })
 
-  it('updates collections on a successful open', () => {
+  it('updates collections on a successful open', async () => {
     let collections = asCollections([{ status: 'Complete', darCode: 'DAR-1', darCollectionId: 1 }])
     const updatedCollection = asCollection({ status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1 })
-    cy.stub(Collections, 'openElectionsById').returns({})
-    cy.stub(Collections, 'getCollectionSummaryByRoleNameAndId').returns(updatedCollection)
     const updateCollections = (collection: DarCollectionSummary) => {
       collections = [collection]
     }
+
+    vi.spyOn(Collections, 'openElectionsById').mockResolvedValue({} as never)
+    vi.spyOn(Collections, 'getCollectionSummaryByRoleNameAndId').mockResolvedValue(updatedCollection as never)
+
     const callback = openCollectionFn({ updateCollections, role: 'Admin' })
-    cy.wrap(callback({ darCode: 'DAR-1', darCollectionId: 1 })).then(() => {
-      cy.wrap(collections[0].darCode).should('equal', 'DAR-1')
-      cy.wrap(collections[0].status).should('equal', 'In Progress')
-    })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1 })
+
+    expect(collections[0].darCode).toBe('DAR-1')
+    expect(collections[0].status).toBe('In Progress')
   })
 
-  it('shows error notification on open failure', () => {
-    cy.stub(Collections, 'openElectionsById').rejects(new Error('network error'))
-    cy.stub(Notifications, 'showError').returns(undefined)
+  it('shows error notification on open failure', async () => {
+    vi.spyOn(Collections, 'openElectionsById').mockRejectedValue(new Error('network error'))
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
 
     const callback = openCollectionFn({ updateCollections: () => {}, role: 'Admin' })
-    cy.wrap(callback({ darCode: 'DAR-1', darCollectionId: 1 })).then(() => {
-      cy.wrap(Notifications.showError).should('have.been.calledWith', { text: 'Error opening DAR-1' })
-    })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1 })
+
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error opening DAR-1' })
   })
 })
 
+// ─── approveCollectionFn ──────────────────────────────────────────────────────
+
 describe('approveCollectionFn', () => {
+  beforeEach(() => vi.clearAllMocks())
+  afterEach(() => vi.restoreAllMocks())
+
   it('returns a callback function for consoles to use', () => {
     const callback = approveCollectionFn({ updateCollections: () => {}, role: 'Admin' })
-    cy.wrap(callback).should('exist')
+    expect(callback).toBeDefined()
   })
 
-  it('updates collection on successful approval', () => {
+  it('updates collection on successful approval', async () => {
     let collections = asCollections([{ status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1 }])
     const updatedCollection = asCollection({ status: 'Complete', darCode: 'DAR-1', darCollectionId: 1 })
-    cy.stub(Collections, 'approveCollectionById').returns({})
-    cy.stub(Collections, 'getCollectionSummaryByRoleNameAndId').returns(updatedCollection)
-    cy.stub(Notifications, 'showSuccess').returns(undefined)
-
     const updateCollections = (collection: DarCollectionSummary) => {
       collections = [collection]
     }
+
+    vi.spyOn(Collections, 'approveCollectionById').mockResolvedValue({} as never)
+    vi.spyOn(Collections, 'getCollectionSummaryByRoleNameAndId').mockResolvedValue(updatedCollection as never)
+    vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => {})
+
     const callback = approveCollectionFn({ updateCollections, role: 'Admin' })
-    cy.wrap(callback({ darCode: 'DAR-1', darCollectionId: 1 })).then(() => {
-      cy.wrap(collections[0].status).should('equal', 'Complete')
-      cy.wrap(Notifications.showSuccess).should('have.been.calledWith', { text: 'Successfully approved DAR-1' })
-    })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1 })
+
+    expect(collections[0].status).toBe('Complete')
+    expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Successfully approved DAR-1' })
   })
 
-  it('shows error notification on approval failure', () => {
-    cy.stub(Collections, 'approveCollectionById').rejects(new Error('network error'))
-    cy.stub(Notifications, 'showError').returns(undefined)
+  it('shows error notification on approval failure', async () => {
+    vi.spyOn(Collections, 'approveCollectionById').mockRejectedValue(new Error('network error'))
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
 
     const callback = approveCollectionFn({ updateCollections: () => {}, role: 'Admin' })
-    cy.wrap(callback({ darCode: 'DAR-2', darCollectionId: 2 })).then(() => {
-      cy.wrap(Notifications.showError).should('have.been.calledWith', { text: 'Error approving DAR-2' })
-    })
+    await callback({ darCode: 'DAR-2', darCollectionId: 2 })
+
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error approving DAR-2' })
   })
 })
+
+// ─── collapseVotesByUser ──────────────────────────────────────────────────────
 
 describe('collapseVotesByUser', () => {
   it('does not collapse votes by different users', () => {
@@ -672,10 +705,10 @@ describe('collapseVotesByUser', () => {
     ]
 
     const collapsedVotes = collapseVotesByUser(asVotes(votes))
-    expect(collapsedVotes).to.have.lengthOf(3)
-    expect(collapsedVotes).to.deep.include({ userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
-    expect(collapsedVotes).to.deep.include({ userId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
-    expect(collapsedVotes).to.deep.include({ userId: 3, voteId: 3, displayName: 'Lauren', vote: true, rationale: null, lastUpdated: null })
+    expect(collapsedVotes).toHaveLength(3)
+    expect(collapsedVotes).toContainEqual({ userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
+    expect(collapsedVotes).toContainEqual({ userId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
+    expect(collapsedVotes).toContainEqual({ userId: 3, voteId: 3, displayName: 'Lauren', vote: true, rationale: null, lastUpdated: null })
   })
 
   it('does not collapse votes by the same user with different vote values', () => {
@@ -686,10 +719,10 @@ describe('collapseVotesByUser', () => {
     ]
 
     const collapsedVotes = collapseVotesByUser(asVotes(votes))
-    expect(collapsedVotes).to.have.lengthOf(3)
-    expect(collapsedVotes).to.deep.include({ userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
-    expect(collapsedVotes).to.deep.include({ userId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, lastUpdated: null })
-    expect(collapsedVotes).to.deep.include({ userId: 1, voteId: 3, displayName: 'John', vote: undefined, rationale: null, lastUpdated: null })
+    expect(collapsedVotes).toHaveLength(3)
+    expect(collapsedVotes).toContainEqual({ userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null })
+    expect(collapsedVotes).toContainEqual({ userId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, lastUpdated: null })
+    expect(collapsedVotes).toContainEqual({ userId: 1, voteId: 3, displayName: 'John', vote: undefined, rationale: null, lastUpdated: null })
   })
 
   it('collapses votes by the same user without appending identical dates / rationales', () => {
@@ -699,8 +732,8 @@ describe('collapseVotesByUser', () => {
     ]
 
     const collapsedVotes = collapseVotesByUser(asVotes(votes))
-    expect(collapsedVotes).to.have.lengthOf(1)
-    expect(collapsedVotes).to.deep.include({
+    expect(collapsedVotes).toHaveLength(1)
+    expect(collapsedVotes).toContainEqual({
       userId: 1,
       voteId: 1,
       displayName: 'John',
@@ -718,8 +751,8 @@ describe('collapseVotesByUser', () => {
     const collapsedVotes = collapseVotesByUser(asVotes(votes))
     const formattedDate = `${formatDate('20000')}\n${formatDate('30000')}\n`
 
-    expect(collapsedVotes).to.have.lengthOf(1)
-    expect(collapsedVotes).to.deep.include({
+    expect(collapsedVotes).toHaveLength(1)
+    expect(collapsedVotes).toContainEqual({
       userId: 1,
       voteId: 1,
       displayName: 'John',
@@ -736,8 +769,8 @@ describe('collapseVotesByUser', () => {
     ]
 
     const collapsedVotes = collapseVotesByUser(asVotes(votes))
-    expect(collapsedVotes).to.have.lengthOf(1)
-    expect(collapsedVotes).to.deep.include({
+    expect(collapsedVotes).toHaveLength(1)
+    expect(collapsedVotes).toContainEqual({
       userId: 1,
       voteId: 1,
       displayName: 'John',
@@ -754,8 +787,8 @@ describe('collapseVotesByUser', () => {
     ]
 
     const collapsedVotes = collapseVotesByUser(asVotes(votes))
-    expect(collapsedVotes).to.have.lengthOf(1)
-    expect(collapsedVotes).to.deep.include({
+    expect(collapsedVotes).toHaveLength(1)
+    expect(collapsedVotes).toContainEqual({
       userId: 1,
       voteId: 1,
       vote: true,
@@ -767,9 +800,11 @@ describe('collapseVotesByUser', () => {
 
   it('handles empty votes array', () => {
     const collapsedVotes = collapseVotesByUser([])
-    expect(collapsedVotes).to.have.lengthOf(0)
+    expect(collapsedVotes).toHaveLength(0)
   })
 })
+
+// ─── updateFinalVote ──────────────────────────────────────────────────────────
 
 describe('updateFinalVote()', () => {
   const makeSingleVoteDataAccessSetup = () => {
@@ -782,13 +817,7 @@ describe('updateFinalVote()', () => {
     const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
       dataUseBuckets = newBucketArray
     }
-
-    return {
-      key,
-      voteIds,
-      dataUseBuckets,
-      setDataUseBuckets,
-    }
+    return { key, voteIds, dataUseBuckets, setDataUseBuckets }
   }
 
   it('updates votes for the target bucket in the source collection (non-RP)', () => {
@@ -812,7 +841,7 @@ describe('updateFinalVote()', () => {
       })
     })
 
-    cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets)
+    expect(dataUseBuckets).toEqual(updatedBuckets)
   })
 
   it('updates votes for the target bucket in the source collection (rp votes)', () => {
@@ -836,7 +865,7 @@ describe('updateFinalVote()', () => {
       })
     })
 
-    cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets)
+    expect(dataUseBuckets).toEqual(updatedBuckets)
   })
 
   it('returns undefined when votePayload is empty', () => {
@@ -847,7 +876,7 @@ describe('updateFinalVote()', () => {
       dataUseBuckets: asUpdateFinalVoteBuckets([]),
       setDataUseBuckets: () => {},
     })
-    expect(result).to.equal(undefined)
+    expect(result).toBeUndefined()
   })
 
   it('is case-insensitive when matching bucket key', () => {
@@ -863,65 +892,55 @@ describe('updateFinalVote()', () => {
     }
     const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
 
-    expect(updatedBuckets).to.have.lengthOf(1)
+    expect(updatedBuckets).toHaveLength(1)
   })
 
   it('clears rationale when votePayload.rationale is null', () => {
     const { key, voteIds, dataUseBuckets, setDataUseBuckets } = makeSingleVoteDataAccessSetup()
     const votePayload = { vote: false, rationale: null }
 
-    const updatedBuckets = updateFinalVote({
-      key,
-      votePayload,
-      voteIds,
-      dataUseBuckets,
-      setDataUseBuckets,
-    })!
+    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
 
     const votes = getBucketVotesForScope(updatedBuckets[0], 'dataAccess')
-    expect(votes[0].vote).to.equal(false)
-    expect(votes[0].rationale).to.equal(undefined)
+    expect(votes[0].vote).toBe(false)
+    expect(votes[0].rationale).toBeUndefined()
   })
 
   it('keeps existing rationale when payload omits rationale', () => {
     const { key, voteIds, dataUseBuckets, setDataUseBuckets } = makeSingleVoteDataAccessSetup()
     const votePayload = { vote: true }
 
-    const updatedBuckets = updateFinalVote({
-      key,
-      votePayload,
-      voteIds,
-      dataUseBuckets,
-      setDataUseBuckets,
-    })!
+    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
 
     const votes = getBucketVotesForScope(updatedBuckets[0], 'dataAccess')
-    expect(votes[0].vote).to.equal(true)
-    expect(votes[0].rationale).to.equal('existing rationale')
+    expect(votes[0].vote).toBe(true)
+    expect(votes[0].rationale).toBe('existing rationale')
   })
 })
 
+// ─── constants ────────────────────────────────────────────────────────────────
+
 describe('consoleTypes', () => {
   it('has the expected console type values', () => {
-    expect(consoleTypes.ADMIN).to.equal('admin')
-    expect(consoleTypes.MEMBER).to.equal('member')
-    expect(consoleTypes.MANAGE_ACCESS).to.equal('manageAccess')
-    expect(consoleTypes.CHAIR).to.equal('chair')
-    expect(consoleTypes.SIGNING_OFFICIAL).to.equal('signingOfficial')
-    expect(consoleTypes.RESEARCHER).to.equal('researcher')
+    expect(consoleTypes.ADMIN).toBe('admin')
+    expect(consoleTypes.MEMBER).toBe('member')
+    expect(consoleTypes.MANAGE_ACCESS).toBe('manageAccess')
+    expect(consoleTypes.CHAIR).toBe('chair')
+    expect(consoleTypes.SIGNING_OFFICIAL).toBe('signingOfficial')
+    expect(consoleTypes.RESEARCHER).toBe('researcher')
   })
 })
 
 describe('DarCollectionTableColumnOptions', () => {
   it('has the expected column option values', () => {
-    expect(DarCollectionTableColumnOptions.DAR_CODE).to.equal('darCode')
-    expect(DarCollectionTableColumnOptions.DAC).to.equal('dacNames')
-    expect(DarCollectionTableColumnOptions.NAME).to.equal('name')
-    expect(DarCollectionTableColumnOptions.SUBMISSION_DATE).to.equal('submissionDate')
-    expect(DarCollectionTableColumnOptions.RESEARCHER).to.equal('researcher')
-    expect(DarCollectionTableColumnOptions.INSTITUTION).to.equal('institution')
-    expect(DarCollectionTableColumnOptions.DATASET_COUNT).to.equal('datasetCount')
-    expect(DarCollectionTableColumnOptions.STATUS).to.equal('status')
-    expect(DarCollectionTableColumnOptions.ACTIONS).to.equal('actions')
+    expect(DarCollectionTableColumnOptions.DAR_CODE).toBe('darCode')
+    expect(DarCollectionTableColumnOptions.DAC).toBe('dacNames')
+    expect(DarCollectionTableColumnOptions.NAME).toBe('name')
+    expect(DarCollectionTableColumnOptions.SUBMISSION_DATE).toBe('submissionDate')
+    expect(DarCollectionTableColumnOptions.RESEARCHER).toBe('researcher')
+    expect(DarCollectionTableColumnOptions.INSTITUTION).toBe('institution')
+    expect(DarCollectionTableColumnOptions.DATASET_COUNT).toBe('datasetCount')
+    expect(DarCollectionTableColumnOptions.STATUS).toBe('status')
+    expect(DarCollectionTableColumnOptions.ACTIONS).toBe('actions')
   })
 })
