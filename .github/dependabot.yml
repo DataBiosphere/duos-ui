@@ -21,9 +21,7 @@ updates:
           - "minor"
           - "patch"
   - package-ecosystem: npm
-    directories:
-      - "/"
-      - "/server/"
+    directory: "/"
     schedule:
       interval: weekly
     cooldown:
