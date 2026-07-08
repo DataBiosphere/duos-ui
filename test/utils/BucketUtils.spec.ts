@@ -280,7 +280,7 @@ describe('BucketUtils', () => {
         expect(b.datasets).not.toHaveLength(0)
         expect(b.datasetIds).not.toHaveLength(0)
         if (b.dataUse) {
-          expect(b.dataUse).toBeTruthy()
+          expect(b.dataUse).not.toStrictEqual({})
           expect(b.dataUses).not.toHaveLength(0)
         }
         expect(b.elections).not.toHaveLength(0)
@@ -398,18 +398,18 @@ describe('BucketUtils', () => {
     const buckets = await binCollectionToBuckets(similar_data_use_collection)
 
     expect(buckets).not.toHaveLength(0)
-    expect(buckets).toHaveLength(4)
-    expect(buckets[0].isRP).toBe(true)
+    // Three distinct data-use patterns → three buckets (no separate RP bucket)
+    expect(buckets).toHaveLength(3)
     // HMB + Other
-    expect(buckets[1].isRP).toBeUndefined()
-    expect(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).toBeDefined()
-    expect(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).toBeDefined()
+    expect(buckets[0].isRP).toBe(false)
+    expect(buckets[0].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).toBeDefined()
+    expect(buckets[0].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).toBeDefined()
     // General Use
-    expect(buckets[2].isRP).toBeUndefined()
-    expect(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'GRU')).toBeDefined()
+    expect(buckets[1].isRP).toBe(false)
+    expect(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'GRU')).toBeDefined()
     // HMB only
-    expect(buckets[3].isRP).toBeUndefined()
-    expect(buckets[3].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).toBeDefined()
-    expect(buckets[3].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).toBeUndefined()
+    expect(buckets[2].isRP).toBe(false)
+    expect(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).toBeDefined()
+    expect(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).toBeUndefined()
   })
 })
