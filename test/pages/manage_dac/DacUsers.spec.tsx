@@ -100,11 +100,27 @@ describe('DacUsers Component Tests', () => {
 
     const chair = dacData.chairpersons![0]
     const btn = container.querySelector(`[data-cy="remove_button_${chair.userId}"]`) as HTMLElement
+    const row = btn.closest('.row') as HTMLElement
+
+    expect(row).not.toHaveStyle({ backgroundColor: 'rgba(211, 211, 211, 0.5)' })
 
     fireEvent.click(btn)
 
-    const row = btn.closest('.row') as HTMLElement
     expect(row).toHaveStyle({ backgroundColor: 'rgba(211, 211, 211, 0.5)' })
+  })
+
+  it('displays all chairpersons and members separately', () => {
+    render(<DacUsers dac={dacData} removeButton={true} removeHandler={() => {}} />)
+
+    dacData.chairpersons?.forEach((chair) => {
+      expect(screen.getByText(new RegExp(`${chair.displayName}.*${chair.email}`))).toBeInTheDocument()
+    })
+    expect(screen.getAllByText('Chairperson', { selector: 'div' })).toHaveLength(dacData.chairpersons!.length)
+
+    dacData.members?.forEach((member) => {
+      expect(screen.getByText(new RegExp(`${member.displayName}.*${member.email}`))).toBeInTheDocument()
+    })
+    expect(screen.getAllByText('Member', { selector: 'div' })).toHaveLength(dacData.members!.length)
   })
 
   it('handles multiple user removals independently', () => {

@@ -45,31 +45,41 @@ vi.mock('src/components/modals/ConfirmationModal', () => ({
       : null,
 }))
 
-let mockDatasetsForViewClick: Dataset[] = []
+// Module-level function that tests can point at DAC.datasets to restore the call assertion.
+// Defaults to returning [] so tests that don't click View Datasets are unaffected.
+let mockDacDatasetsImpl: (dacId: number) => Promise<Dataset[]> = () => Promise.resolve([])
 
-vi.mock('src/components/manage_dac_table/ManageDacTable', () => {
+vi.mock('src/components/manage_dac_table/ManageDacTable', async () => {
+  const { Link } = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+
   const MockTable = ({
     dacs,
+    isLoading,
     onViewDatasets,
     setShowConfirmationModal,
     setSelectedDac,
   }: ManageDacTableProps) => (
     <div data-testid="manage-dac-table">
+      {isLoading && <img alt="spinner" src="" />}
       {dacs.map(dac => (
         <div key={dac.dacId} data-testid={`dac-row-${dac.dacId}`}>
-          <a href={`/manage_dac/${dac.dacId}`}>{dac.name}</a>
+          <Link to={`/manage_dac/${dac.dacId}`}>{dac.name}</Link>
           <button
             id={`${dac.dacId}_dacDatasets`}
-            onClick={() => onViewDatasets(dac, mockDatasetsForViewClick)}
+            onClick={() => {
+              void mockDacDatasetsImpl(dac.dacId!).then((datasets) => {
+                onViewDatasets(dac, datasets.filter(d => d.dacApproval))
+              })
+            }}
           >
             View Datasets
           </button>
-          <a
-            href={`/manage_dac/${dac.dacId}`}
+          <Link
+            to={`/manage_dac/${dac.dacId}`}
             data-tip={`Edit ${dac.name}`}
           >
             Edit
-          </a>
+          </Link>
           <button
             data-tip="Delete DAC"
             onClick={() => {
@@ -179,7 +189,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockDatasetsForViewClick = []
+  mockDacDatasetsImpl = () => Promise.resolve([])
   vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([])
 })
 
@@ -225,10 +235,48 @@ describe('ManageDac', () => {
     })
   })
 
+  it('navigates to the DAC profile page when the DAC name is clicked', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list).mockResolvedValue([primaryDac])
+
+    mountManageDac()
+
+    await waitFor(() => {
+      expect(screen.getByText('Alpha DAC')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Alpha DAC'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('route-path')).toHaveTextContent('/manage_dac/1')
+    })
+  })
+
+  it('navigates to the edit DAC page when the edit icon is clicked', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list).mockResolvedValue([primaryDac])
+
+    mountManageDac()
+
+    await waitFor(() => {
+      expect(screen.getByText('Alpha DAC')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Edit'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('route-path')).toHaveTextContent(`/manage_dac/${primaryDac.dacId}`)
+    })
+  })
+
   it('shows approved datasets inline when View Datasets is clicked', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
     vi.mocked(DAC.list).mockResolvedValue([primaryDac])
-    mockDatasetsForViewClick = [makeDataset(1, 'Approved Dataset', true)]
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset(1, 'Approved Dataset', true),
+      makeDataset(2, 'Unapproved Dataset', false),
+    ] as never)
+    mockDacDatasetsImpl = dacId => DAC.datasets(dacId)
 
     mountManageDac()
 
@@ -239,16 +287,21 @@ describe('ManageDac', () => {
     fireEvent.click(screen.getByRole('button', { name: 'View Datasets' }))
 
     await waitFor(() => {
+      expect(vi.mocked(DAC.datasets)).toHaveBeenCalledWith(1)
       expect(screen.getByText('DAC Datasets associated with DAC: Alpha DAC')).toBeInTheDocument()
       expect(screen.getByText('Approved Dataset')).toBeInTheDocument()
     })
+    expect(screen.queryByText('Unapproved Dataset')).toBeNull()
     await act(async () => {})
   })
 
   it('shows an error when a DAC has no approved datasets', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
     vi.mocked(DAC.list).mockResolvedValue([primaryDac])
-    mockDatasetsForViewClick = []
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset(2, 'Unapproved Dataset', false),
+    ] as never)
+    mockDacDatasetsImpl = dacId => DAC.datasets(dacId)
 
     mountManageDac()
 
@@ -258,7 +311,9 @@ describe('ManageDac', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'View Datasets' }))
 
-    expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith({ text: 'DAC has no datasets.' })
+    await waitFor(() => {
+      expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith({ text: 'DAC has no datasets.' })
+    })
   })
 
   it('shows an error and stops loading when the DAC list fails to load', async () => {
@@ -270,12 +325,16 @@ describe('ManageDac', () => {
     await waitFor(() => {
       expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith({ text: 'Failed to load DACs.' })
     })
+    expect(document.querySelector('img[alt="spinner"]')).toBeNull()
   })
 
   it('hides the datasets section when the Close button is clicked', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
     vi.mocked(DAC.list).mockResolvedValue([primaryDac])
-    mockDatasetsForViewClick = [makeDataset(1, 'Approved Dataset', true)]
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset(1, 'Approved Dataset', true),
+    ] as never)
+    mockDacDatasetsImpl = dacId => DAC.datasets(dacId)
 
     mountManageDac()
 
@@ -320,6 +379,7 @@ describe('ManageDac', () => {
       expect(vi.mocked(DAC.delete)).toHaveBeenCalledWith(1)
       expect(vi.mocked(DAC.list)).toHaveBeenCalledTimes(2)
       expect(vi.mocked(Notifications.showSuccess)).toHaveBeenCalledWith({ text: 'DAC successfully deleted.' })
+      expect(screen.queryByText('Alpha DAC')).toBeNull()
     })
   })
 })

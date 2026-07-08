@@ -132,13 +132,22 @@ describe('RequestForm', () => {
     })
   })
 
-  it('allows multiple checkbox selection', () => {
+  it('allows multiple checkbox selection and submits correct description', async () => {
     mount()
     const submit = screen.getByRole('button', { name: /submit/i })
 
     fireEvent.click(document.getElementById('checkRegisterDataset')!)
     fireEvent.click(document.getElementById('checkJoinDac')!)
     expect(submit).toBeEnabled()
+
+    fireEvent.click(submit)
+
+    await waitFor(() => {
+      expect(vi.mocked(Support.createTicket)).toHaveBeenCalled()
+      const description = vi.mocked(Support.createTicket).mock.calls[0][4]
+      expect(description).toContain('Register a dataset')
+      expect(description).toContain('join a DAC')
+    })
   })
 
   it('includes extra request text in submission', async () => {
@@ -200,6 +209,19 @@ describe('RequestForm', () => {
   it('prevents submission if no external profile URL is filled', async () => {
     mount()
     fireEvent.click(document.getElementById('checkSOPermissions')!)
+    fireEvent.click(screen.getByRole('button', { name: /submit/i }))
+
+    await waitFor(() => {
+      expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith(
+        expect.objectContaining({ text: expect.stringContaining('Please provide at least one external profile URL') }),
+      )
+    })
+  })
+
+  it('prevents submission when non-URL text is entered in an external profile field', async () => {
+    mount()
+    fireEvent.click(document.getElementById('checkSOPermissions')!)
+    fireEvent.change(document.getElementById('linkedIn')!, { target: { value: 'non-url text' } })
     fireEvent.click(screen.getByRole('button', { name: /submit/i }))
 
     await waitFor(() => {
