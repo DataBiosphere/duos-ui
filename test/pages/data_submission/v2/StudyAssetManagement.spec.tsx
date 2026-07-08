@@ -92,6 +92,10 @@ describe('StudyAssetManagement', () => {
       />,
     )
 
+    expect(screen.getByRole('heading', { level: 2, name: 'Study Assets' })).toBeInTheDocument()
+    expect(screen.getByText(/Add datasets, models, workspaces, and other resources associated with this study/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /contact the DUOS Team/i })).toBeInTheDocument()
+
     expect(screen.getByRole('heading', { level: 3, name: 'Datasets' })).toBeInTheDocument()
     expect(screen.getByText('Add datasets associated with this study')).toBeInTheDocument()
 

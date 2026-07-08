@@ -32,9 +32,16 @@ const buildProps = (nihAnvilUseValue?: string): NihAdministrativeInformationProp
   } as Study,
 })
 
-const expectFieldsVisible = (visible: boolean) => {
+const expectFieldsVisible = () => {
   ADMIN_INFO_FIELD_IDS.forEach((id) => {
-    expect(queryById(id) !== null).toBe(visible)
+    expect(queryById(id), `#${id} should be visible`).toBeVisible()
+  })
+}
+
+const expectFieldsAbsent = () => {
+  expect(document.querySelector('.formField-container')).toBeNull()
+  ADMIN_INFO_FIELD_IDS.forEach((id) => {
+    expect(queryById(id), `#${id} should not exist`).toBeNull()
   })
 }
 
@@ -45,26 +52,26 @@ describe('NihAdministrativeInformation', () => {
 
   it('renders no fields when nihAnvilUse is not set', () => {
     render(<NihAdministrativeInformation {...buildProps()} />)
-    expectFieldsVisible(false)
+    expectFieldsAbsent()
   })
 
   it('shows all 8 fields for YES_NHGRI_YES_PHS_ID', () => {
     render(<NihAdministrativeInformation {...buildProps(NihAnvilUse.YES_NHGRI_YES_PHS_ID)} />)
-    expectFieldsVisible(true)
+    expectFieldsVisible()
   })
 
   it('shows all 8 fields for YES_NHGRI_NO_PHS_ID', () => {
     render(<NihAdministrativeInformation {...buildProps(NihAnvilUse.YES_NHGRI_NO_PHS_ID)} />)
-    expectFieldsVisible(true)
+    expectFieldsVisible()
   })
 
   it('shows all 8 fields for NO_NHGRI_YES_ANVIL', () => {
     render(<NihAdministrativeInformation {...buildProps(NihAnvilUse.NO_NHGRI_YES_ANVIL)} />)
-    expectFieldsVisible(true)
+    expectFieldsVisible()
   })
 
   it('renders no fields for NO_NHGRI_NO_ANVIL', () => {
     render(<NihAdministrativeInformation {...buildProps(NihAnvilUse.NO_NHGRI_NO_ANVIL)} />)
-    expectFieldsVisible(false)
+    expectFieldsAbsent()
   })
 })

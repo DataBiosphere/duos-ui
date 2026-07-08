@@ -23,7 +23,7 @@ describe('StudyAsset', () => {
 
     expect(screen.getByRole('heading', { level: 3, name: 'Test Title' })).toBeInTheDocument()
     expect(screen.getByText('Test description text')).toBeInTheDocument()
-    expect(screen.getByTestId('test-icon')).toBeInTheDocument()
+    expect(screen.getByTestId('test-icon')).toHaveTextContent('Icon')
     expect(screen.getByTestId('test-children')).toBeInTheDocument()
 
     const button = screen.getByRole('button', { name: 'Action' })
@@ -57,5 +57,6 @@ describe('StudyAsset', () => {
     const heading = screen.getByRole('heading', { level: 3, name: 'Style Check' })
     const container = heading.parentElement!.parentElement!.parentElement!.parentElement!
     expect(container).toHaveStyle({ background: '#eaf0fa', borderRadius: '12px' })
+    expect(container.style.boxShadow).toMatch(/rgba\(0,\s*0,\s*0,\s*0\.08\)/)
   })
 })
