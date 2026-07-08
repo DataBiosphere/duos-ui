@@ -67,12 +67,13 @@ describe('AppRoutes — RoleBAC routes redirect unauthenticated users', () => {
 
   it.each(roleBACRoutes)('redirects unauthenticated user visiting "%s" to /?redirectTo=<route>', (route) => {
     const onLocationChange = vi.fn()
-    render(
+    const { container } = render(
       <MemoryRouter initialEntries={[route]}>
         <LocationSpy onLocationChange={onLocationChange} />
         <AppRoutes isLogged={false} env="dev" />
       </MemoryRouter>,
     )
     expect(onLocationChange).toHaveBeenCalledWith(`/?redirectTo=${route}`)
+    expect(container.querySelector('[data-cy="not-found"]')).not.toBeInTheDocument()
   })
 })
