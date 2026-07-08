@@ -33,7 +33,7 @@ export interface Bucket {
   votes: Record<string, VoteGroup>[]
   matchResults: MatchResult[]
   algorithmResult?: AlgorithmResult
-  isRP: boolean
+  isRP: boolean // In practice, this will always be false.
   dacs?: DacTerm[]
 }
 
@@ -162,8 +162,8 @@ export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'da
 }
 
 /**
- * Find all elections (in a dar) with a dataset id in the provided list of dataset ids. Ensures that all elections are
- * DataAccess elections, as we don't want to include RP elections in the bucket processing.
+ * Find all elections (in a dar) with a dataset id in the provided list of dataset ids.
+ * Ensures that all elections are DataAccess elections.
  */
 const findElectionsForDatasets = (dar: DataAccessRequest, datasetIds: number[]): Election[] => {
   return dar.elections
