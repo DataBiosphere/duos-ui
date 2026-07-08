@@ -62,9 +62,10 @@ describe('CloseoutReview', () => {
     renderComponent()
 
     await waitFor(() => {
-      expect(document.querySelector('[data-cy="closeout-review"]')).toBeInTheDocument()
-      expect(screen.getByText('Please note:')).toBeInTheDocument()
-      expect(screen.getByText(/If there are issues with the content/)).toBeInTheDocument()
+      expect(document.querySelector('[data-cy="closeout-review"]')).toBeVisible()
+      expect(document.querySelector('.MuiSvgIcon-root')).toBeVisible()
+      expect(screen.getByText('Please note:')).toBeVisible()
+      expect(screen.getByText(/If there are issues with the content/)).toBeVisible()
     })
   })
 
@@ -74,8 +75,8 @@ describe('CloseoutReview', () => {
     renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Approve closeout' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Go to Data Access Requests' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Approve closeout' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Go to Data Access Requests' })).toBeVisible()
     })
   })
 
@@ -114,21 +115,36 @@ describe('CloseoutReview', () => {
     renderComponent()
 
     await waitFor(() => {
-      expect(document.querySelector('[data-cy="closeout-review"]')).toBeInTheDocument()
-      expect(screen.getByText('Please note:')).toBeInTheDocument()
-      expect(screen.getByText(/If there are issues with the content/)).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Approve closeout' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Go to Data Access Requests' })).toBeInTheDocument()
+      expect(document.querySelector('[data-cy="closeout-review"]')).toBeVisible()
+      expect(document.querySelector('.MuiSvgIcon-root')).toBeVisible()
+      expect(screen.getByText('Please note:')).toBeVisible()
+      expect(screen.getByText(/If there are issues with the content/)).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Approve closeout' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Go to Data Access Requests' })).toBeVisible()
+      expect(document.querySelectorAll('button')).toHaveLength(2)
     })
   })
 
-  it('displays "Please note:" text', async () => {
+  it('displays "Please note:" text in bold', async () => {
     vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
 
     renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('Please note:')).toBeInTheDocument()
+      expect(screen.getByText('Please note:')).toBeVisible()
+      expect(screen.getByText('Please note:')).toHaveStyle({ fontWeight: 'bold' })
+    })
+  })
+
+  it('displays explanatory text with normal font weight', async () => {
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
+
+    renderComponent()
+
+    await waitFor(() => {
+      const text = screen.getByText(/If there are issues with the content/)
+      expect(text).toBeVisible()
+      expect(text).not.toHaveStyle({ fontWeight: 'bold' })
     })
   })
 
@@ -138,8 +154,8 @@ describe('CloseoutReview', () => {
     renderComponent()
 
     await waitFor(() => {
-      expect(document.querySelector('[data-cy="closeout-review"]')).toBeInTheDocument()
-      expect(document.querySelector('[data-cy="closeout-review-approve-button"]')).toBeInTheDocument()
+      expect(document.querySelector('[data-cy="closeout-review"]')).toBeVisible()
+      expect(document.querySelector('[data-cy="closeout-review-approve-button"]')).toBeVisible()
     })
   })
 

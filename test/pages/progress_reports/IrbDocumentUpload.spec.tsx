@@ -83,14 +83,14 @@ describe('IrbDocumentUpload', () => {
         referenceId: mockReferenceId,
       })
 
-      expect(screen.getByText(/Current file:/)).toBeInTheDocument()
-      expect(screen.getByText(/existing-irb\.pdf/)).toBeInTheDocument()
-      expect(screen.getByText('Download')).toBeInTheDocument()
+      expect(screen.getByText(/Current file:/)).toBeVisible()
+      expect(screen.getByText(/existing-irb\.pdf/)).toBeVisible()
+      expect(screen.getByText('Download')).toBeVisible()
       expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
       // No file input in read-only mode (FormField not rendered)
       expect(document.querySelector('input[type="file"]')).not.toBeInTheDocument()
-      expect(screen.getByText('IRB Protocol Expiration Date')).toBeInTheDocument()
-      expect(screen.getByText('2026-06-14')).toBeInTheDocument()
+      expect(screen.getByText('IRB Protocol Expiration Date')).toBeVisible()
+      expect(screen.getByText('2026-06-14')).toBeVisible()
     })
 
     it('Should display uploaded file name when a new file is uploaded', () => {
@@ -101,8 +101,8 @@ describe('IrbDocumentUpload', () => {
         uploadedIrbDocument: uploadedFile,
       })
 
-      expect(screen.getByText(/Current file:/)).toBeInTheDocument()
-      expect(screen.getByText(/new-irb-document\.pdf/)).toBeInTheDocument()
+      expect(screen.getByText(/Current file:/)).toBeVisible()
+      expect(screen.getByText(/new-irb-document\.pdf/)).toBeVisible()
     })
 
     it('Should prioritize uploaded file name over form state file name', () => {
@@ -113,7 +113,7 @@ describe('IrbDocumentUpload', () => {
         uploadedIrbDocument: uploadedFile,
       })
 
-      expect(screen.getByText(/newly-uploaded\.pdf/)).toBeInTheDocument()
+      expect(screen.getByText(/newly-uploaded\.pdf/)).toBeVisible()
       expect(screen.queryByText(/existing-irb\.pdf/)).not.toBeInTheDocument()
     })
   })
@@ -125,9 +125,9 @@ describe('IrbDocumentUpload', () => {
         formState: mockFormStateWithoutIrb,
       })
 
-      expect(screen.getByText('IRB Document')).toBeInTheDocument()
-      expect(screen.getByText('Upload your current IRB approval document')).toBeInTheDocument()
-      expect(screen.getByText('When does your current IRB approval expire?')).toBeInTheDocument()
+      expect(screen.getByText('IRB Document')).toBeVisible()
+      expect(screen.getByText('Upload your current IRB approval document')).toBeVisible()
+      expect(screen.getByText('When does your current IRB approval expire?')).toBeVisible()
     })
 
     it('Should call onIrbDocumentChange when file is uploaded', () => {
@@ -155,9 +155,9 @@ describe('IrbDocumentUpload', () => {
         formState: mockFormState,
       })
 
-      expect(screen.getByText('IRB Protocol Expiration Date')).toBeInTheDocument()
-      expect(screen.getByText('When does your current IRB approval expire?')).toBeInTheDocument()
-      expect(screen.getByTestId('date-picker')).toBeInTheDocument()
+      expect(screen.getByText('IRB Protocol Expiration Date')).toBeVisible()
+      expect(screen.getByText('When does your current IRB approval expire?')).toBeVisible()
+      expect(screen.getByTestId('date-picker')).toBeVisible()
     })
 
     it('Should only show expiration date in read-only mode, not date picker', () => {
@@ -167,8 +167,8 @@ describe('IrbDocumentUpload', () => {
         referenceId: mockReferenceId,
       })
 
-      expect(screen.getByText('IRB Protocol Expiration Date')).toBeInTheDocument()
-      expect(screen.getByText('2026-06-14')).toBeInTheDocument()
+      expect(screen.getByText('IRB Protocol Expiration Date')).toBeVisible()
+      expect(screen.getByText('2026-06-14')).toBeVisible()
       expect(screen.queryByText('When does your current IRB approval expire?')).not.toBeInTheDocument()
       expect(screen.queryByTestId('date-picker')).not.toBeInTheDocument()
     })
@@ -192,7 +192,7 @@ describe('IrbDocumentUpload', () => {
         referenceId: mockReferenceId,
       })
 
-      expect(screen.getByText('Download')).toBeInTheDocument()
+      expect(screen.getByText('Download')).toBeVisible()
     })
 
     it('Should not show download link when reference ID is missing', () => {

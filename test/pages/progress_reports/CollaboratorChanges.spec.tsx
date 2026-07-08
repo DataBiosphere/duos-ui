@@ -43,60 +43,60 @@ describe('CollaboratorChanges', () => {
 
   it('renders the component correctly', () => {
     renderComponent()
-    expect(document.querySelector('[data-cy="dar-closeout"]')).toBeInTheDocument()
-    expect(screen.getByText('Step 3: Add or Remove Collaborators')).toBeInTheDocument()
-    expect(screen.getByText('3.1 Internal Lab Staff')).toBeInTheDocument()
-    expect(screen.getByText('3.2 Internal Collaborators')).toBeInTheDocument()
-    expect(screen.getByText('3.3 External Collaborators')).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="dar-closeout"]')).toBeVisible()
+    expect(screen.getByText('Step 3: Add or Remove Collaborators')).toBeVisible()
+    expect(screen.getByText('3.1 Internal Lab Staff')).toBeVisible()
+    expect(screen.getByText('3.2 Internal Collaborators')).toBeVisible()
+    expect(screen.getByText('3.3 External Collaborators')).toBeVisible()
   })
 
   it('renders all three collaborator sections', () => {
     renderComponent()
-    expect(screen.getByRole('button', { name: 'Add Internal Lab Staff' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Add Internal Collaborators' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Add External Collaborators' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add Internal Lab Staff' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Add Internal Collaborators' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Add External Collaborators' })).toBeVisible()
   })
 
   it('displays preloaded internal lab staff', () => {
     renderComponent({ labCollaborators: initialCollaborators as Collaborator[] })
-    expect(screen.getByText('Test User 1')).toBeInTheDocument()
-    expect(screen.getByText('Test User 2')).toBeInTheDocument()
-    expect(screen.getByText('Researcher')).toBeInTheDocument()
-    expect(screen.getByText('Assistant')).toBeInTheDocument()
+    expect(screen.getByText('Test User 1')).toBeVisible()
+    expect(screen.getByText('Test User 2')).toBeVisible()
+    expect(screen.getByText('Researcher')).toBeVisible()
+    expect(screen.getByText('Assistant')).toBeVisible()
   })
 
   it('displays preloaded internal collaborators', () => {
     renderComponent({ internalCollaborators: initialCollaborators as Collaborator[] })
-    expect(screen.getByText('Test User 1')).toBeInTheDocument()
-    expect(screen.getByText('Test User 2')).toBeInTheDocument()
+    expect(screen.getByText('Test User 1')).toBeVisible()
+    expect(screen.getByText('Test User 2')).toBeVisible()
   })
 
   it('displays preloaded external collaborators', () => {
     renderComponent({ externalCollaborators: initialCollaborators as Collaborator[] })
-    expect(screen.getByText('Test User 1')).toBeInTheDocument()
-    expect(screen.getByText('Test User 2')).toBeInTheDocument()
+    expect(screen.getByText('Test User 1')).toBeVisible()
+    expect(screen.getByText('Test User 2')).toBeVisible()
   })
 
   it('renders in read-only mode correctly', () => {
     renderComponent({ labCollaborators: initialCollaborators as Collaborator[] }, true)
-    expect(screen.getByText('Test User 1')).toBeInTheDocument()
-    expect(screen.getByText('Test User 2')).toBeInTheDocument()
+    expect(screen.getByText('Test User 1')).toBeVisible()
+    expect(screen.getByText('Test User 2')).toBeVisible()
   })
 
   it('handles empty collaborator lists', () => {
     renderComponent({ labCollaborators: [], internalCollaborators: [], externalCollaborators: [] })
-    expect(screen.getByText('3.1 Internal Lab Staff')).toBeInTheDocument()
-    expect(screen.getByText('3.2 Internal Collaborators')).toBeInTheDocument()
-    expect(screen.getByText('3.3 External Collaborators')).toBeInTheDocument()
+    expect(screen.getByText('3.1 Internal Lab Staff')).toBeVisible()
+    expect(screen.getByText('3.2 Internal Collaborators')).toBeVisible()
+    expect(screen.getByText('3.3 External Collaborators')).toBeVisible()
   })
 
   it('displays correct description text for each collaborator type', () => {
     renderComponent()
-    expect(screen.getByText(/Please add Internal Lab Staff here/)).toBeInTheDocument()
-    expect(screen.getByText(/Please add Internal Collaborators here/)).toBeInTheDocument()
-    expect(screen.getByText(/Please list External collaborators here/)).toBeInTheDocument()
-    expect(screen.getByText(/Internal Lab Staff are defined as users of data/)).toBeInTheDocument()
-    expect(screen.getByText(/Internal Collaborators are defined as individuals/)).toBeInTheDocument()
-    expect(screen.getByText(/External Collaborators are not employees/)).toBeInTheDocument()
+    expect(screen.getByText(/Please add Internal Lab Staff here/)).toBeVisible()
+    expect(screen.getByText(/Please add Internal Collaborators here/)).toBeVisible()
+    expect(screen.getByText(/Please list External collaborators here/)).toBeVisible()
+    expect(screen.getByText(/Internal Lab Staff are defined as users of data/)).toBeVisible()
+    expect(screen.getByText(/Internal Collaborators are defined as individuals/)).toBeVisible()
+    expect(screen.getByText(/External Collaborators are not employees/)).toBeVisible()
   })
 })

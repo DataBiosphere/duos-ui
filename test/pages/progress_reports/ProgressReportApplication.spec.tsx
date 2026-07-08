@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { BrowserRouter } from 'react-router-dom'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
@@ -22,57 +22,86 @@ import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
 // ─── Mock sub-components ────────────────────────────────────────────────────
 
-vi.mock('src/pages/progress_reports/SummarySection', () => ({
-  default: ({ formState }: { formState: FormState }) => (
-    <div data-testid="summary-section">
-      <input
-        id="intellectualPropertiesYesNo_yes"
-        type="radio"
-        checked={formState.intellectualPropertiesYesNo}
-        onChange={() => {}}
-      />
-      <input
-        id="intellectualPropertiesYesNo_no"
-        type="radio"
-        checked={!formState.intellectualPropertiesYesNo}
-        onChange={() => {}}
-      />
-      <input
-        id="publicationsYesNo_yes"
-        type="radio"
-        checked={formState.publicationsYesNo}
-        onChange={() => {}}
-      />
-      <input
-        id="publicationsYesNo_no"
-        type="radio"
-        checked={!formState.publicationsYesNo}
-        onChange={() => {}}
-      />
-      <input
-        id="presentationsYesNo_yes"
-        type="radio"
-        checked={formState.presentationsYesNo}
-        onChange={() => {}}
-      />
-      <input
-        id="presentationsYesNo_no"
-        type="radio"
-        checked={!formState.presentationsYesNo}
-        onChange={() => {}}
-      />
-      {(formState.intellectualProperties || []).map((ip, i) => (
-        <span key={i}>{ip.title}</span>
-      ))}
-      {(formState.publications || []).map((pub, i) => (
-        <span key={i}>{pub.title}</span>
-      ))}
-      {(formState.presentations || []).map((p, i) => (
-        <span key={i}>{p.title}</span>
-      ))}
-    </div>
-  ),
-}))
+vi.mock('src/pages/progress_reports/SummarySection', () => {
+  function MockSummarySection({
+    formState,
+    validation,
+    onNihStatusUpdate,
+    researcher: researcherProp,
+  }: {
+    formState: FormState
+    validation?: Record<string, unknown>
+    onNihStatusUpdate?: (valid: boolean) => void
+    researcher?: { properties?: Array<{ propertyKey: string, propertyValue: string }> }
+  }) {
+    React.useEffect(() => {
+      const eraAuthorized
+        = researcherProp?.properties?.find(p => p.propertyKey === 'eraAuthorized')?.propertyValue === 'true'
+      const rawExpiry = Number(
+        researcherProp?.properties?.find(p => p.propertyKey === 'eraExpiration')?.propertyValue ?? '0',
+      )
+      onNihStatusUpdate?.(eraAuthorized && rawExpiry > Date.now())
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    return (
+      <div data-testid="summary-section">
+        <input
+          id="intellectualPropertiesYesNo_yes"
+          type="radio"
+          checked={formState.intellectualPropertiesYesNo}
+          onChange={() => {}}
+        />
+        <input
+          id="intellectualPropertiesYesNo_no"
+          type="radio"
+          checked={!formState.intellectualPropertiesYesNo}
+          onChange={() => {}}
+        />
+        <input
+          id="publicationsYesNo_yes"
+          type="radio"
+          checked={formState.publicationsYesNo}
+          onChange={() => {}}
+        />
+        <input
+          id="publicationsYesNo_no"
+          type="radio"
+          checked={!formState.publicationsYesNo}
+          onChange={() => {}}
+        />
+        <input
+          id="presentationsYesNo_yes"
+          type="radio"
+          checked={formState.presentationsYesNo}
+          onChange={() => {}}
+        />
+        <input
+          id="presentationsYesNo_no"
+          type="radio"
+          checked={!formState.presentationsYesNo}
+          onChange={() => {}}
+        />
+        {(formState.intellectualProperties || []).map((ip, i) => (
+          <span key={i}>{ip.title}</span>
+        ))}
+        {(formState.publications || []).map((pub, i) => (
+          <span key={i}>{pub.title}</span>
+        ))}
+        {(formState.presentations || []).map((p, i) => (
+          <span key={i}>{p.title}</span>
+        ))}
+        {!!validation?.nihEraId && <div className="errored">NIH ERA Commons ID is required</div>}
+        <a
+          data-cy="era-commons-authenticate-link"
+          className={validation?.nihEraId ? 'era-button-state-error' : 'era-button-state'}
+          href="#"
+        >
+          Link NIH Account
+        </a>
+      </div>
+    )
+  }
+  return { default: MockSummarySection }
+})
 
 vi.mock('src/pages/dar_application/SelectableDatasets', () => ({
   default: ({ datasets }: { datasets: Dataset[] }) => (
@@ -152,8 +181,13 @@ vi.mock('src/pages/progress_reports/IrbDocumentUpload', () => ({
   ),
 }))
 
+let lastDaaProps: { datasets: Dataset[], onDaaIdsChange: (ids: number[]) => void } | null = null
+
 vi.mock('src/pages/progress_reports/ProgressReportDataAccessAgreements', () => ({
-  default: () => null,
+  default: (props: { datasets: Dataset[], onDaaIdsChange: (ids: number[]) => void }) => {
+    lastDaaProps = props
+    return null
+  },
 }))
 
 vi.mock('src/pages/progress_reports/CloseoutReview', () => ({
@@ -307,6 +341,7 @@ const mountComponent = async (
   dar: Partial<CombinedDataAccessRequest> = {},
   readOnly = true,
   datasets = mockDatasets,
+  researcherOverride?: DuosUser,
 ) => {
   const fullDar = { ...baseDar, ...dar } as CombinedDataAccessRequest
   await act(async () => {
@@ -316,7 +351,7 @@ const mountComponent = async (
           dar={fullDar}
           datasets={datasets}
           readOnlyMode={readOnly}
-          researcher={researcher}
+          researcher={researcherOverride ?? researcher}
           countriesOfOperation={[]}
         />
       </BrowserRouter>,
@@ -329,15 +364,19 @@ const mountComponent = async (
 describe('ProgressReportApplication', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    lastDaaProps = null
+    Element.prototype.scrollIntoView = () => {}
     vi.mocked(Storage.getCurrentUser).mockReturnValue(researcher)
     vi.mocked(needsIrbApprovalDocument).mockReturnValue(false)
-    vi.mocked(validatePRFormData).mockReturnValue({ darErrors: {} })
+    vi.mocked(validatePRFormData).mockImplementation(nihValid => ({
+      darErrors: nihValid ? {} : { nihEraId: { valid: false, message: 'NIH ERA Commons ID is required' } },
+    } as ReturnType<typeof validatePRFormData>))
     vi.mocked(validationFailed).mockReturnValue(true)
   })
 
   it('renders the component without errors', async () => {
     await mountComponent({})
-    expect(document.querySelector('.accordion-step-container')).toBeInTheDocument()
+    expect(document.querySelector('.accordion-step-container')).toBeVisible()
   })
 
   it('does not render dataset/DAA relationship section in read-only mode', async () => {
@@ -365,6 +404,23 @@ describe('ProgressReportApplication', () => {
     expect(
       screen.queryByText('Step 2.1: Required Data Access Agreements'),
     ).not.toBeInTheDocument()
+  })
+
+  it('mounts ProgressReportDataAccessAgreements with approved datasets in create mode', async () => {
+    const ds1 = { ...createDataset(1, 'Dataset 1', true), dacId: 2 }
+    const ds2 = { ...createDataset(2, 'Dataset 2', true), dacId: 3 }
+    const elections = {
+      1: createApprovedElection(1, 1),
+      2: createApprovedElection(2, 2),
+    }
+    await mountComponent({ elections, datasetIds: [1, 2] }, false, [ds1, ds2])
+    expect(lastDaaProps).not.toBeNull()
+    expect(lastDaaProps!.datasets.map(d => d.datasetId)).toEqual([1, 2])
+  })
+
+  it('does not mount ProgressReportDataAccessAgreements in read-only mode', async () => {
+    await mountComponent({}, true)
+    expect(lastDaaProps).toBeNull()
   })
 
   // ── intellectualPropertiesYesNo ──────────────────────────────────────────
@@ -402,8 +458,8 @@ describe('ProgressReportApplication', () => {
     expect(
       document.getElementById('intellectualPropertiesYesNo_yes') as HTMLInputElement,
     ).toBeChecked()
-    expect(screen.getByText('IP 1')).toBeInTheDocument()
-    expect(screen.getByText('IP 2')).toBeInTheDocument()
+    expect(screen.getByText('IP 1')).toBeVisible()
+    expect(screen.getByText('IP 2')).toBeVisible()
   })
 
   // ── publicationsYesNo ────────────────────────────────────────────────────
@@ -437,8 +493,8 @@ describe('ProgressReportApplication', () => {
     expect(
       document.getElementById('publicationsYesNo_yes') as HTMLInputElement,
     ).toBeChecked()
-    expect(screen.getByText('Publication 1')).toBeInTheDocument()
-    expect(screen.getByText('Publication 2')).toBeInTheDocument()
+    expect(screen.getByText('Publication 1')).toBeVisible()
+    expect(screen.getByText('Publication 2')).toBeVisible()
   })
 
   it('displays publications in read-only when they exist', async () => {
@@ -448,7 +504,7 @@ describe('ProgressReportApplication', () => {
       journal: '', doi: '',
     }
     await mountComponent({ publications: [pub] })
-    expect(screen.getByText('Test Publication')).toBeInTheDocument()
+    expect(screen.getByText('Test Publication')).toBeVisible()
   })
 
   // ── presentationsYesNo ───────────────────────────────────────────────────
@@ -480,8 +536,8 @@ describe('ProgressReportApplication', () => {
     expect(
       document.getElementById('presentationsYesNo_yes') as HTMLInputElement,
     ).toBeChecked()
-    expect(screen.getByText('Presentation 1')).toBeInTheDocument()
-    expect(screen.getByText('Presentation 2')).toBeInTheDocument()
+    expect(screen.getByText('Presentation 1')).toBeVisible()
+    expect(screen.getByText('Presentation 2')).toBeVisible()
   })
 
   // ── IRB document ─────────────────────────────────────────────────────────
@@ -495,7 +551,7 @@ describe('ProgressReportApplication', () => {
   it('displays IRB document upload when required by dataUse', async () => {
     vi.mocked(needsIrbApprovalDocument).mockReturnValue(true)
     await mountComponent({}, true)
-    expect(screen.getByText('IRB Documentation')).toBeInTheDocument()
+    expect(screen.getByText('IRB Documentation')).toBeVisible()
   })
 
   // ── dmiYesNo ─────────────────────────────────────────────────────────────
@@ -566,8 +622,8 @@ describe('ProgressReportApplication', () => {
       expect(cards).toHaveLength(2)
     })
 
-    expect(screen.getByText('Approved Dataset 1')).toBeInTheDocument()
-    expect(screen.getByText('Approved Dataset 2')).toBeInTheDocument()
+    expect(screen.getByText('Approved Dataset 1')).toBeVisible()
+    expect(screen.getByText('Approved Dataset 2')).toBeVisible()
     expect(screen.queryByText('Not DAC Approved Dataset')).not.toBeInTheDocument()
   })
 
@@ -614,7 +670,7 @@ describe('ProgressReportApplication', () => {
       expect(cards).toHaveLength(1)
     })
 
-    expect(screen.getByText('All Criteria Met')).toBeInTheDocument()
+    expect(screen.getByText('All Criteria Met')).toBeVisible()
     expect(screen.queryByText('No Election Approval')).not.toBeInTheDocument()
     expect(screen.queryByText('No DAC Approval')).not.toBeInTheDocument()
   })
@@ -639,8 +695,8 @@ describe('ProgressReportApplication', () => {
 
   it('shows Validate button in create mode when required fields are missing', async () => {
     await mountComponent({}, false)
-    expect(document.querySelector('[data-cy="pr-validate-button"]')).toBeInTheDocument()
-    expect(screen.getByText('Validate')).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="pr-validate-button"]')).toBeVisible()
+    expect(screen.getByText('Validate')).toBeVisible()
     expect(document.querySelector('[data-cy="pr-submit-button"]')).not.toBeInTheDocument()
   })
 
@@ -648,5 +704,63 @@ describe('ProgressReportApplication', () => {
     await mountComponent({}, true)
     expect(document.querySelector('[data-cy="pr-validate-button"]')).not.toBeInTheDocument()
     expect(document.querySelector('[data-cy="pr-submit-button"]')).not.toBeInTheDocument()
+  })
+
+  it('Validate button stays visible after being clicked', async () => {
+    await mountComponent({}, false)
+    const validateBtn = document.querySelector('[data-cy="pr-validate-button"]')!
+    await act(async () => {
+      fireEvent.click(validateBtn)
+    })
+    expect(document.querySelector('[data-cy="pr-validate-button"]')).toBeVisible()
+  })
+
+  it('clicking Validate reveals error indicators on required fields', async () => {
+    await mountComponent({}, false)
+    const validateBtn = document.querySelector('[data-cy="pr-validate-button"]')!
+    await act(async () => {
+      fireEvent.click(validateBtn)
+    })
+    await waitFor(() => {
+      expect(document.querySelector('.errored')).toBeVisible()
+    })
+  })
+
+  it('clicking Validate shows error styling on ERA Commons authenticate button when NIH is not linked', async () => {
+    await mountComponent({}, false)
+    const validateBtn = document.querySelector('[data-cy="pr-validate-button"]')!
+    await act(async () => {
+      fireEvent.click(validateBtn)
+    })
+    await waitFor(() => {
+      const eraLink = document.querySelector('[data-cy="era-commons-authenticate-link"]')!
+      expect(eraLink).toHaveClass('era-button-state-error')
+    })
+  })
+
+  it('shows Submit button when all required fields are complete and NIH is linked', async () => {
+    vi.mocked(validationFailed).mockReturnValue(false)
+    const validResearcher: DuosUser = {
+      ...researcher,
+      properties: [
+        { propertyId: 1, userId: 1, propertyKey: 'eraAuthorized', propertyValue: 'true' },
+        { propertyId: 2, userId: 1, propertyKey: 'eraExpiration', propertyValue: '4000000000000' },
+      ],
+    }
+    await mountComponent(
+      {
+        progressReportSummary: 'A complete summary of research progress.',
+        intellectualProperties: [],
+        publications: [],
+        presentations: [],
+        dmi: { incidents: [], description: '' },
+        closeoutSupplement: { reasons: [], otherText: '', signingOfficialId: 0 },
+      },
+      false,
+      mockDatasets,
+      validResearcher,
+    )
+    expect(document.querySelector('[data-cy="pr-submit-button"]')).toBeVisible()
+    expect(document.querySelector('[data-cy="pr-validate-button"]')).not.toBeInTheDocument()
   })
 })

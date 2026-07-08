@@ -31,10 +31,10 @@ describe('DataManagementIncident', () => {
 
   it('renders the component correctly', () => {
     renderComponent()
-    expect(document.querySelector('[data-cy="data-management-incident"]')).toBeInTheDocument()
-    expect(screen.getByText('Step 4: Data Management Incident')).toBeInTheDocument()
-    expect(screen.getByText('4.1 Data Management Incident')).toBeInTheDocument()
-    expect(screen.getByText('Have there been any incidents related to mismanagement or misuse of data?')).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="data-management-incident"]')).toBeVisible()
+    expect(screen.getByText('Step 4: Data Management Incident')).toBeVisible()
+    expect(screen.getByText('4.1 Data Management Incident')).toBeVisible()
+    expect(screen.getByText('Have there been any incidents related to mismanagement or misuse of data?')).toBeVisible()
   })
 
   it('initially does not show incident details form', () => {
@@ -46,16 +46,16 @@ describe('DataManagementIncident', () => {
 
   it('shows incident details form when "Yes" is selected', () => {
     renderComponent({ dmiYesNo: true })
-    expect(screen.getByText(/Please select any of the following/)).toBeInTheDocument()
-    expect(document.getElementById('dmiCombination')).toBeInTheDocument()
-    expect(document.getElementById('dmiIdentification')).toBeInTheDocument()
-    expect(document.getElementById('dmiSharing')).toBeInTheDocument()
-    expect(document.getElementById('dmiSecurity')).toBeInTheDocument()
-    expect(document.getElementById('dmiAcknowledgement')).toBeInTheDocument()
-    expect(document.getElementById('dmiPublication')).toBeInTheDocument()
-    expect(document.getElementById('dmiFalsification')).toBeInTheDocument()
-    expect(document.getElementById('dmiOther')).toBeInTheDocument()
-    expect(document.getElementById('dmiDescription')).toBeInTheDocument()
+    expect(screen.getByText(/Please select any of the following/)).toBeVisible()
+    expect(document.getElementById('dmiCombination')).toBeVisible()
+    expect(document.getElementById('dmiIdentification')).toBeVisible()
+    expect(document.getElementById('dmiSharing')).toBeVisible()
+    expect(document.getElementById('dmiSecurity')).toBeVisible()
+    expect(document.getElementById('dmiAcknowledgement')).toBeVisible()
+    expect(document.getElementById('dmiPublication')).toBeVisible()
+    expect(document.getElementById('dmiFalsification')).toBeVisible()
+    expect(document.getElementById('dmiOther')).toBeVisible()
+    expect(document.getElementById('dmiDescription')).toBeVisible()
   })
 
   it('hides incident details form when "No" is selected', () => {
@@ -68,16 +68,19 @@ describe('DataManagementIncident', () => {
     renderComponent({ dmiYesNo: true })
     const combination = document.getElementById('dmiCombination') as HTMLInputElement
     const identification = document.getElementById('dmiIdentification') as HTMLInputElement
+    const sharing = document.getElementById('dmiSharing') as HTMLInputElement
 
     expect(combination).not.toBeChecked()
     expect(identification).not.toBeChecked()
+    expect(sharing).not.toBeChecked()
 
     fireEvent.click(combination)
-    expect(combination).toBeChecked()
-
     fireEvent.click(identification)
+    fireEvent.click(sharing)
+
     expect(combination).toBeChecked()
     expect(identification).toBeChecked()
+    expect(sharing).toBeChecked()
   })
 
   it('allows entering incident description text', () => {

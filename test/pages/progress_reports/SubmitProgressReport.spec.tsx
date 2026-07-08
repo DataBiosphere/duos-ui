@@ -28,7 +28,9 @@ vi.mock('src/components/AsyncSpinnerButton', () => ({
 }))
 
 import { ProgressReport } from 'src/libs/ajax/ProgressReport'
+import { DAR } from 'src/libs/ajax/DAR'
 import { Notifications } from 'src/libs/utils'
+import { CombinedDataAccessRequest } from 'src/types/model'
 
 const mockFormState = {} as FormState
 const mockParentReferenceId = 'DAR-123'
@@ -41,6 +43,7 @@ function renderComponent(overrides: {
   isValid?: boolean
   onValidate?: () => void
   uploadedIrbDocument?: File | null
+  parentDar?: CombinedDataAccessRequest
 } = {}) {
   const onSuccess = overrides.onSuccess ?? vi.fn()
   const onCancel = overrides.onCancel ?? vi.fn()
@@ -53,6 +56,7 @@ function renderComponent(overrides: {
       isValid={overrides.isValid}
       onValidate={overrides.onValidate}
       uploadedIrbDocument={overrides.uploadedIrbDocument}
+      parentDar={overrides.parentDar}
     />,
   )
   return { onSuccess, onCancel }
@@ -70,18 +74,18 @@ describe('SubmitProgressReport', () => {
   it('Should show a submit and cancel button when form is valid', () => {
     renderComponent({ isValid: true })
 
-    expect(document.querySelector('[data-cy="pr-submit-button"]')).toBeInTheDocument()
-    expect(document.querySelector('[data-cy="pr-cancel-button"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="pr-submit-button"]')).toBeVisible()
+    expect(document.querySelector('[data-cy="pr-cancel-button"]')).toBeVisible()
   })
 
   it('Should show a validate and cancel button when form is invalid', () => {
     renderComponent({ isValid: false })
 
     const validateButton = document.querySelector('[data-cy="pr-validate-button"]')
-    expect(validateButton).toBeInTheDocument()
+    expect(validateButton).toBeVisible()
     expect(validateButton?.textContent).toContain('Validate')
     expect(document.querySelector('[data-cy="pr-submit-button"]')).not.toBeInTheDocument()
-    expect(document.querySelector('[data-cy="pr-cancel-button"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="pr-cancel-button"]')).toBeVisible()
   })
 
   it('Validate button calls onValidate handler when clicked', () => {
@@ -145,7 +149,142 @@ describe('SubmitProgressReport', () => {
     })
 
     await waitFor(() => {
-      expect(Notifications.showError).toHaveBeenCalled()
+      expect(Notifications.showError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('Submit failed'),
+        }),
+      )
+    })
+  })
+
+  describe('IRB Document Inheritance Tests', () => {
+    const mockIrbFormState = { irbProtocolExpiration: '2026-06-14' } as FormState
+
+    const mockParentDar = {
+      referenceId: 'DAR-123',
+      irbDocumentName: 'parent-irb-document.pdf',
+      irbDocumentLocation: 'f7e8d9c0-b1a2-3456-7890-abcdef123456',
+    } as CombinedDataAccessRequest
+
+    const mockParentDarWithoutIrb = {
+      referenceId: 'DAR-456',
+      irbDocumentName: undefined,
+      irbDocumentLocation: undefined,
+    } as CombinedDataAccessRequest
+
+    beforeEach(() => {
+      vi.mocked(ProgressReport.submitProgressReport).mockResolvedValue({ data: null })
+    })
+
+    it('Should submit with uploaded IRB document when one is provided', async () => {
+      const mockFile = new File(['test content'], 'new-irb.pdf', { type: 'application/pdf' })
+      renderComponent({
+        formState: mockIrbFormState,
+        isValid: true,
+        uploadedIrbDocument: mockFile,
+        parentDar: mockParentDar,
+      })
+
+      const submitButton = document.querySelector('[data-cy="pr-submit-button"]') as HTMLButtonElement
+      await act(async () => {
+        fireEvent.click(submitButton)
+      })
+
+      await waitFor(() => {
+        expect(ProgressReport.submitProgressReport).toHaveBeenCalled()
+        const formData = vi.mocked(ProgressReport.submitProgressReport).mock.calls[0][0]
+        const irbFile = formData.get('ethicsApprovalRequiredFile') as File
+        expect(irbFile).toBeInstanceOf(File)
+        expect(irbFile.name).toBe('new-irb.pdf')
+      })
+    })
+
+    it('Should fetch and submit parent IRB document when no new document is uploaded', async () => {
+      vi.mocked(DAR.getDARDocumentAsBlob).mockResolvedValue(
+        new Blob(['parent irb content'], { type: 'application/pdf' }),
+      )
+      renderComponent({
+        formState: mockIrbFormState,
+        isValid: true,
+        uploadedIrbDocument: null,
+        parentDar: mockParentDar,
+      })
+
+      const submitButton = document.querySelector('[data-cy="pr-submit-button"]') as HTMLButtonElement
+      await act(async () => {
+        fireEvent.click(submitButton)
+      })
+
+      await waitFor(() => {
+        expect(DAR.getDARDocumentAsBlob).toHaveBeenCalledWith(mockParentReferenceId, 'irbDocument')
+        expect(ProgressReport.submitProgressReport).toHaveBeenCalled()
+        const formData = vi.mocked(ProgressReport.submitProgressReport).mock.calls[0][0]
+        const irbFile = formData.get('ethicsApprovalRequiredFile') as File
+        expect(irbFile).toBeInstanceOf(File)
+        expect(irbFile.name).toBe('parent-irb-document.pdf')
+      })
+    })
+
+    it('Should handle parent IRB document fetch failure gracefully', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      vi.mocked(DAR.getDARDocumentAsBlob).mockRejectedValue(new Error('Document not found'))
+      renderComponent({
+        formState: mockIrbFormState,
+        isValid: true,
+        uploadedIrbDocument: null,
+        parentDar: mockParentDar,
+      })
+
+      const submitButton = document.querySelector('[data-cy="pr-submit-button"]') as HTMLButtonElement
+      await act(async () => {
+        fireEvent.click(submitButton)
+      })
+
+      await waitFor(() => {
+        expect(ProgressReport.submitProgressReport).toHaveBeenCalled()
+        const formData = vi.mocked(ProgressReport.submitProgressReport).mock.calls[0][0]
+        expect(formData.get('ethicsApprovalRequiredFile')).toBe('')
+      })
+    })
+
+    it('Should submit without IRB document when no new document and no parent document exists', async () => {
+      renderComponent({
+        formState: mockIrbFormState,
+        isValid: true,
+        uploadedIrbDocument: null,
+        parentDar: mockParentDarWithoutIrb,
+      })
+
+      const submitButton = document.querySelector('[data-cy="pr-submit-button"]') as HTMLButtonElement
+      await act(async () => {
+        fireEvent.click(submitButton)
+      })
+
+      await waitFor(() => {
+        expect(ProgressReport.submitProgressReport).toHaveBeenCalled()
+        const formData = vi.mocked(ProgressReport.submitProgressReport).mock.calls[0][0]
+        expect(formData.get('ethicsApprovalRequiredFile')).toBe('')
+      })
+    })
+
+    it('Should handle missing parent DAR gracefully', async () => {
+      renderComponent({
+        formState: mockIrbFormState,
+        isValid: true,
+        uploadedIrbDocument: null,
+        parentDar: undefined,
+      })
+
+      const submitButton = document.querySelector('[data-cy="pr-submit-button"]') as HTMLButtonElement
+      await act(async () => {
+        fireEvent.click(submitButton)
+      })
+
+      await waitFor(() => {
+        expect(ProgressReport.submitProgressReport).toHaveBeenCalled()
+        const formData = vi.mocked(ProgressReport.submitProgressReport).mock.calls[0][0]
+        expect(formData.get('ethicsApprovalRequiredFile')).toBe('')
+      })
     })
   })
 })
