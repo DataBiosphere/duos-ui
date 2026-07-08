@@ -86,10 +86,12 @@ describe('WorkspaceList component', () => {
     const user = userEvent.setup()
     const { container } = render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
     await user.click(container.querySelector('.glyphicon-trash')!)
-    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeInTheDocument())
+    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!
     await user.click(deleteBtn)
     await waitFor(() => expect(screen.queryByText(sampleWorkspace.name)).not.toBeInTheDocument())
+    expect(document.querySelector('.ReactModal__Content')).not.toBeInTheDocument()
+    expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(0)
   })
 })

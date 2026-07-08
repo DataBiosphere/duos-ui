@@ -72,7 +72,7 @@ describe('BiospecimenList component', () => {
     expect(container.querySelector('#add-biospecimen-btn')).toBeInTheDocument()
   })
 
-  it('deletes a model via modal confirmation', async () => {
+  it('deletes a biospecimen via modal confirmation', async () => {
     const user = userEvent.setup()
     const deleteAction = vi.fn()
     const { container } = render(
@@ -85,10 +85,11 @@ describe('BiospecimenList component', () => {
       />,
     )
     await user.click(container.querySelector('.glyphicon-trash')!)
-    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeInTheDocument())
+    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!
     await user.click(deleteBtn)
     expect(deleteAction).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).not.toBeInTheDocument())
   })
 })

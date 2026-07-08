@@ -122,9 +122,11 @@ describe('PresentationList component', () => {
     const user = userEvent.setup()
     const { container } = render(<PresentationListHarness initial={[samplePresentation]} />)
     await user.click(container.querySelector('.glyphicon-trash')!)
-    await waitFor(() => expect(container.querySelector('.delete-modal-primary-button')).toBeInTheDocument())
+    await waitFor(() => expect(container.querySelector('.delete-modal-primary-button')).toBeVisible())
     const deleteBtn = container.querySelector('.delete-modal-primary-button')!
     await user.click(deleteBtn)
     await waitFor(() => expect(screen.queryByText(samplePresentation.title)).not.toBeInTheDocument())
+    expect(document.querySelector('.ReactModal__Content')).not.toBeInTheDocument()
+    expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(0)
   })
 })

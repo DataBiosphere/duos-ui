@@ -93,11 +93,13 @@ describe('IntellectualPropertyList', () => {
     const user = userEvent.setup()
     const { container } = render(<IntellectualPropertyListHarness initial={[sampleIp]} />)
     await user.click(container.querySelector('.glyphicon-trash')!)
-    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeInTheDocument())
+    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!
     await user.click(deleteBtn)
     await waitFor(() => expect(screen.queryByText(sampleIp.title)).not.toBeInTheDocument())
+    expect(document.querySelector('.ReactModal__Content')).not.toBeInTheDocument()
+    expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(0)
   })
 
   it('opens intellectual property in view mode when view button is clicked', async () => {

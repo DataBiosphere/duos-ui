@@ -67,6 +67,7 @@ async function fillConsentGroupForm(
 }
 
 async function clickSaveButton(user: ReturnType<typeof userEvent.setup>, container: HTMLElement) {
+  expect(container.querySelector('.collaborator-form-add-save-button')).not.toBeDisabled()
   await user.click(container.querySelector('.collaborator-form-add-save-button')!)
 }
 
@@ -231,10 +232,12 @@ describe('ConsentGroupList component', () => {
       </MemoryRouter>,
     )
     await user.click(container.querySelector('.glyphicon-trash')!)
-    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeInTheDocument())
+    await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!
     await user.click(deleteBtn)
     await waitFor(() => expect(screen.queryByText(sampleConsentGroup.consentGroupName)).not.toBeInTheDocument())
+    expect(document.querySelector('.ReactModal__Content')).not.toBeInTheDocument()
+    expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(0)
   })
 })
