@@ -7,18 +7,18 @@ import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 import { DarErrors } from 'src/pages/dar_application/FormValidationState'
 
 vi.mock('src/components/forms/forms', () => ({
-  FormField: ({ id, title, description, onChange }: any) => (
+  FormField: ({ id, title, description, onChange }: { id: string, title?: string, description?: string, onChange?: (e: { _key: string, value: File | undefined }) => void }) => (
     <div>
       {title && <label>{title}</label>}
       {description && <span>{description}</span>}
-      <input id={id} type="file" onChange={(e) => onChange?.({ _key: id, value: e.target.files?.[0] })} />
+      <input id={id} type="file" onChange={e => onChange?.({ _key: id, value: e.target.files?.[0] })} />
     </div>
   ),
   FormFieldTypes: { FILE: 'file' },
 }))
 
 vi.mock('src/components/DownloadLink', () => ({
-  DownloadLink: ({ label }: any) => <a href="#">{label}</a>,
+  DownloadLink: ({ label }: { label: string }) => <a href="#">{label}</a>,
 }))
 
 vi.mock('src/components/DuosDatePicker', () => ({

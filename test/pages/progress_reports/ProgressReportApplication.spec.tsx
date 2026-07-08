@@ -1,11 +1,12 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { BrowserRouter } from 'react-router-dom'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import {
   CombinedDataAccessRequest,
+  DataManagementIncident,
   Dataset,
   DuosUser,
   Election,
@@ -17,55 +18,56 @@ import {
   validatePRFormData,
   validationFailed,
 } from 'src/utils/darFormUtils'
+import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
 // ─── Mock sub-components ────────────────────────────────────────────────────
 
 vi.mock('src/pages/progress_reports/SummarySection', () => ({
-  default: ({ formState }: { formState: any }) => (
+  default: ({ formState }: { formState: FormState }) => (
     <div data-testid="summary-section">
       <input
         id="intellectualPropertiesYesNo_yes"
         type="radio"
-        checked={!!formState.intellectualPropertiesYesNo}
+        checked={formState.intellectualPropertiesYesNo}
         onChange={() => {}}
       />
       <input
         id="intellectualPropertiesYesNo_no"
         type="radio"
-        checked={formState.intellectualPropertiesYesNo === false}
+        checked={!formState.intellectualPropertiesYesNo}
         onChange={() => {}}
       />
       <input
         id="publicationsYesNo_yes"
         type="radio"
-        checked={!!formState.publicationsYesNo}
+        checked={formState.publicationsYesNo}
         onChange={() => {}}
       />
       <input
         id="publicationsYesNo_no"
         type="radio"
-        checked={formState.publicationsYesNo === false}
+        checked={!formState.publicationsYesNo}
         onChange={() => {}}
       />
       <input
         id="presentationsYesNo_yes"
         type="radio"
-        checked={!!formState.presentationsYesNo}
+        checked={formState.presentationsYesNo}
         onChange={() => {}}
       />
       <input
         id="presentationsYesNo_no"
         type="radio"
-        checked={formState.presentationsYesNo === false}
+        checked={!formState.presentationsYesNo}
         onChange={() => {}}
       />
-      {(formState.intellectualProperties || []).map((ip: any, i: number) => (
+      {(formState.intellectualProperties || []).map((ip, i) => (
         <span key={i}>{ip.title}</span>
       ))}
-      {(formState.publications || []).map((pub: any, i: number) => (
+      {(formState.publications || []).map((pub, i) => (
         <span key={i}>{pub.title}</span>
       ))}
-      {(formState.presentations || []).map((p: any, i: number) => (
+      {(formState.presentations || []).map((p, i) => (
         <span key={i}>{p.title}</span>
       ))}
     </div>
@@ -73,9 +75,9 @@ vi.mock('src/pages/progress_reports/SummarySection', () => ({
 }))
 
 vi.mock('src/pages/dar_application/SelectableDatasets', () => ({
-  default: ({ datasets }: { datasets: any[] }) => (
+  default: ({ datasets }: { datasets: Dataset[] }) => (
     <div data-testid="selectable-datasets">
-      {(datasets || []).map((ds: any, i: number) => (
+      {(datasets || []).map((ds, i) => (
         <div key={i} className="collaborator-summary-card">
           {ds.name || ds.datasetName}
         </div>
@@ -85,18 +87,18 @@ vi.mock('src/pages/dar_application/SelectableDatasets', () => ({
 }))
 
 vi.mock('src/pages/progress_reports/DataManagementIncident', () => ({
-  default: ({ formState }: { formState: any }) => (
+  default: ({ formState }: { formState: FormState }) => (
     <div data-testid="data-management-incident">
       <input
         id="dmiYesNo_yes"
         type="radio"
-        checked={!!formState.dmiYesNo}
+        checked={formState.dmiYesNo}
         onChange={() => {}}
       />
       <input
         id="dmiYesNo_no"
         type="radio"
-        checked={formState.dmiYesNo === false}
+        checked={!formState.dmiYesNo}
         onChange={() => {}}
       />
     </div>
@@ -104,18 +106,18 @@ vi.mock('src/pages/progress_reports/DataManagementIncident', () => ({
 }))
 
 vi.mock('src/pages/progress_reports/DarCloseout', () => ({
-  default: ({ formState }: { formState: any }) => (
+  default: ({ formState }: { formState: FormState }) => (
     <div data-testid="dar-closeout">
       <input
         id="closeoutYesNo_yes"
         type="radio"
-        checked={!!formState.closeoutYesNo}
+        checked={formState.closeoutYesNo}
         onChange={() => {}}
       />
       <input
         id="closeoutYesNo_no"
         type="radio"
-        checked={formState.closeoutYesNo === false}
+        checked={!formState.closeoutYesNo}
         onChange={() => {}}
       />
     </div>
@@ -131,13 +133,13 @@ vi.mock('src/pages/progress_reports/SubmitProgressReport', () => ({
     onValidate?: () => void
   }) => (
     <div>
-      {isValid ? (
-        <button data-cy="pr-submit-button">Submit</button>
-      ) : (
-        <button data-cy="pr-validate-button" onClick={onValidate}>
-          Validate
-        </button>
-      )}
+      {isValid
+        ? <button data-cy="pr-submit-button">Submit</button>
+        : (
+            <button data-cy="pr-validate-button" onClick={onValidate}>
+              Validate
+            </button>
+          )}
     </div>
   ),
 }))
@@ -301,23 +303,25 @@ const baseDar: Partial<CombinedDataAccessRequest> = {
   updateDate: 1748736000,
 }
 
-const mountComponent = (
+const mountComponent = async (
   dar: Partial<CombinedDataAccessRequest> = {},
   readOnly = true,
   datasets = mockDatasets,
 ) => {
   const fullDar = { ...baseDar, ...dar } as CombinedDataAccessRequest
-  return render(
-    <BrowserRouter>
-      <ProgressReportApplication
-        dar={fullDar}
-        datasets={datasets}
-        readOnlyMode={readOnly}
-        researcher={researcher}
-        countriesOfOperation={[]}
-      />
-    </BrowserRouter>,
-  )
+  await act(async () => {
+    render(
+      <BrowserRouter>
+        <ProgressReportApplication
+          dar={fullDar}
+          datasets={datasets}
+          readOnlyMode={readOnly}
+          researcher={researcher}
+          countriesOfOperation={[]}
+        />
+      </BrowserRouter>,
+    )
+  })
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
@@ -331,33 +335,33 @@ describe('ProgressReportApplication', () => {
     vi.mocked(validationFailed).mockReturnValue(true)
   })
 
-  it('renders the component without errors', () => {
-    mountComponent({})
+  it('renders the component without errors', async () => {
+    await mountComponent({})
     expect(document.querySelector('.accordion-step-container')).toBeInTheDocument()
   })
 
-  it('does not render dataset/DAA relationship section in read-only mode', () => {
-    mountComponent({}, true)
+  it('does not render dataset/DAA relationship section in read-only mode', async () => {
+    await mountComponent({}, true)
     expect(
       screen.queryByText('Dataset and Data Access Agreement Relationships'),
     ).not.toBeInTheDocument()
   })
 
-  it('does not render dataset/DAA relationship section in non-read-only mode', () => {
-    mountComponent({}, false)
+  it('does not render dataset/DAA relationship section in non-read-only mode', async () => {
+    await mountComponent({}, false)
     expect(
       screen.queryByText('Dataset and Data Access Agreement Relationships'),
     ).not.toBeInTheDocument()
   })
 
-  it('does not display required DAA links in read-only mode', () => {
-    mountComponent({}, true)
+  it('does not display required DAA links in read-only mode', async () => {
+    await mountComponent({}, true)
     expect(screen.queryByText('Required Data Access Agreements')).not.toBeInTheDocument()
     expect(screen.queryByText('TestDAA')).not.toBeInTheDocument()
   })
 
-  it('does not show the required DAA step in read-only mode', () => {
-    mountComponent({}, true)
+  it('does not show the required DAA step in read-only mode', async () => {
+    await mountComponent({}, true)
     expect(
       screen.queryByText('Step 2.1: Required Data Access Agreements'),
     ).not.toBeInTheDocument()
@@ -365,8 +369,8 @@ describe('ProgressReportApplication', () => {
 
   // ── intellectualPropertiesYesNo ──────────────────────────────────────────
 
-  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is undefined', () => {
-    mountComponent({})
+  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is undefined', async () => {
+    await mountComponent({})
     expect(
       document.getElementById('intellectualPropertiesYesNo_no') as HTMLInputElement,
     ).toBeChecked()
@@ -375,8 +379,8 @@ describe('ProgressReportApplication', () => {
     ).not.toBeChecked()
   })
 
-  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is empty array', () => {
-    mountComponent({ intellectualProperties: [] })
+  it('defaults intellectualPropertiesYesNo to false when dar.intellectualProperties is empty array', async () => {
+    await mountComponent({ intellectualProperties: [] })
     expect(
       document.getElementById('intellectualPropertiesYesNo_no') as HTMLInputElement,
     ).toBeChecked()
@@ -385,7 +389,7 @@ describe('ProgressReportApplication', () => {
     ).not.toBeChecked()
   })
 
-  it('sets intellectualPropertiesYesNo to true when dar.intellectualProperties has items', () => {
+  it('sets intellectualPropertiesYesNo to true when dar.intellectualProperties has items', async () => {
     const ip1 = {
       ipId: '1', studyId: '1', type: 'patent', title: 'IP 1',
       assignee: '', patentNumber: '', filingDate: '', status: '', url: '', contact: '',
@@ -394,7 +398,7 @@ describe('ProgressReportApplication', () => {
       ipId: '2', studyId: '1', type: 'patent', title: 'IP 2',
       assignee: '', patentNumber: '', filingDate: '', status: '', url: '', contact: '',
     }
-    mountComponent({ intellectualProperties: [ip1, ip2] })
+    await mountComponent({ intellectualProperties: [ip1, ip2] })
     expect(
       document.getElementById('intellectualPropertiesYesNo_yes') as HTMLInputElement,
     ).toBeChecked()
@@ -404,21 +408,21 @@ describe('ProgressReportApplication', () => {
 
   // ── publicationsYesNo ────────────────────────────────────────────────────
 
-  it('defaults publicationsYesNo to false when dar.publications is undefined', () => {
-    mountComponent({})
+  it('defaults publicationsYesNo to false when dar.publications is undefined', async () => {
+    await mountComponent({})
     expect(
       document.getElementById('publicationsYesNo_no') as HTMLInputElement,
     ).toBeChecked()
   })
 
-  it('defaults publicationsYesNo to false when dar.publications is empty array', () => {
-    mountComponent({ publications: [] })
+  it('defaults publicationsYesNo to false when dar.publications is empty array', async () => {
+    await mountComponent({ publications: [] })
     expect(
       document.getElementById('publicationsYesNo_no') as HTMLInputElement,
     ).toBeChecked()
   })
 
-  it('sets publicationsYesNo to true when dar.publications has items', () => {
+  it('sets publicationsYesNo to true when dar.publications has items', async () => {
     const pub1 = {
       title: 'Publication 1', publishedDate: '', authors: [],
       datasetCitation: '', citation: false, publicationId: '1', studyId: '1',
@@ -429,7 +433,7 @@ describe('ProgressReportApplication', () => {
       datasetCitation: '', citation: false, publicationId: '2', studyId: '1',
       journal: '', doi: '',
     }
-    mountComponent({ publications: [pub1, pub2] })
+    await mountComponent({ publications: [pub1, pub2] })
     expect(
       document.getElementById('publicationsYesNo_yes') as HTMLInputElement,
     ).toBeChecked()
@@ -437,33 +441,33 @@ describe('ProgressReportApplication', () => {
     expect(screen.getByText('Publication 2')).toBeInTheDocument()
   })
 
-  it('displays publications in read-only when they exist', () => {
+  it('displays publications in read-only when they exist', async () => {
     const pub = {
       title: 'Test Publication', publishedDate: '', authors: [],
       datasetCitation: '', citation: false, publicationId: '1', studyId: '1',
       journal: '', doi: '',
     }
-    mountComponent({ publications: [pub] })
+    await mountComponent({ publications: [pub] })
     expect(screen.getByText('Test Publication')).toBeInTheDocument()
   })
 
   // ── presentationsYesNo ───────────────────────────────────────────────────
 
-  it('defaults presentationsYesNo to false when dar.presentations is undefined', () => {
-    mountComponent({})
+  it('defaults presentationsYesNo to false when dar.presentations is undefined', async () => {
+    await mountComponent({})
     expect(
       document.getElementById('presentationsYesNo_no') as HTMLInputElement,
     ).toBeChecked()
   })
 
-  it('defaults presentationsYesNo to false when dar.presentations is empty array', () => {
-    mountComponent({ presentations: [] })
+  it('defaults presentationsYesNo to false when dar.presentations is empty array', async () => {
+    await mountComponent({ presentations: [] })
     expect(
       document.getElementById('presentationsYesNo_no') as HTMLInputElement,
     ).toBeChecked()
   })
 
-  it('sets presentationsYesNo to true when dar.presentations has items', () => {
+  it('sets presentationsYesNo to true when dar.presentations has items', async () => {
     const p1 = {
       title: 'Presentation 1', date: '', citation: false,
       presentationId: '1', studyId: '1',
@@ -472,7 +476,7 @@ describe('ProgressReportApplication', () => {
       title: 'Presentation 2', date: '', citation: false,
       presentationId: '2', studyId: '1',
     }
-    mountComponent({ presentations: [p1, p2] })
+    await mountComponent({ presentations: [p1, p2] })
     expect(
       document.getElementById('presentationsYesNo_yes') as HTMLInputElement,
     ).toBeChecked()
@@ -482,32 +486,32 @@ describe('ProgressReportApplication', () => {
 
   // ── IRB document ─────────────────────────────────────────────────────────
 
-  it('does not display IRB document upload when not required by dataUse', () => {
+  it('does not display IRB document upload when not required by dataUse', async () => {
     vi.mocked(needsIrbApprovalDocument).mockReturnValue(false)
-    mountComponent({}, true)
+    await mountComponent({}, true)
     expect(screen.queryByText('IRB Documentation')).not.toBeInTheDocument()
   })
 
-  it('displays IRB document upload when required by dataUse', () => {
+  it('displays IRB document upload when required by dataUse', async () => {
     vi.mocked(needsIrbApprovalDocument).mockReturnValue(true)
-    mountComponent({}, true)
+    await mountComponent({}, true)
     expect(screen.getByText('IRB Documentation')).toBeInTheDocument()
   })
 
   // ── dmiYesNo ─────────────────────────────────────────────────────────────
 
-  it('defaults dmiYesNo to false when dar.dmi is undefined', () => {
-    mountComponent({})
+  it('defaults dmiYesNo to false when dar.dmi is undefined', async () => {
+    await mountComponent({})
     expect(document.getElementById('dmiYesNo_no') as HTMLInputElement).toBeChecked()
   })
 
-  it('defaults dmiYesNo to false when dar.dmi.incidents is undefined', () => {
-    mountComponent({ dmi: { description: '' } as any })
+  it('defaults dmiYesNo to false when dar.dmi.incidents is undefined', async () => {
+    await mountComponent({ dmi: { description: '', incidents: [] } as DataManagementIncident })
     expect(document.getElementById('dmiYesNo_no') as HTMLInputElement).toBeChecked()
   })
 
-  it('sets dmiYesNo to true when dar.dmi.incidents has items', () => {
-    mountComponent({
+  it('sets dmiYesNo to true when dar.dmi.incidents has items', async () => {
+    await mountComponent({
       dmi: {
         incidents: ['dmiCombination', 'dmiSharing', 'dmiSecurity'],
         description: '',
@@ -518,13 +522,13 @@ describe('ProgressReportApplication', () => {
 
   // ── closeoutYesNo ────────────────────────────────────────────────────────
 
-  it('defaults closeoutYesNo to false when dar.closeoutSupplement is undefined', () => {
-    mountComponent({})
+  it('defaults closeoutYesNo to false when dar.closeoutSupplement is undefined', async () => {
+    await mountComponent({})
     expect(document.getElementById('closeoutYesNo_no') as HTMLInputElement).toBeChecked()
   })
 
-  it('sets closeoutYesNo to true when closeoutSupplement has reasons', () => {
-    mountComponent({
+  it('sets closeoutYesNo to true when closeoutSupplement has reasons', async () => {
+    await mountComponent({
       closeoutSupplement: {
         reasons: ['closeoutProjectCompleted'],
         otherText: '',
@@ -549,7 +553,7 @@ describe('ProgressReportApplication', () => {
       4: createDeniedElection(4, 4),
     }
 
-    mountComponent(
+    await mountComponent(
       { elections, datasetIds: [1, 2, 3, 4] },
       false,
       [approvedDataset1, approvedDataset2, deniedDataset1, deniedDataset2],
@@ -576,7 +580,7 @@ describe('ProgressReportApplication', () => {
       2: createDeniedElection(2, 2),
     }
 
-    mountComponent({ elections, datasetIds: [1, 2] }, false, [ds1, ds2])
+    await mountComponent({ elections, datasetIds: [1, 2] }, false, [ds1, ds2])
 
     await waitFor(() => {
       const cards = document.querySelectorAll(
@@ -597,7 +601,7 @@ describe('ProgressReportApplication', () => {
       3: createApprovedElection(3, 3),
     }
 
-    mountComponent(
+    await mountComponent(
       { elections, datasetIds: [1, 2, 3] },
       false,
       [allCriteriaMet, noElectionApproval, noDacApproval],
@@ -621,7 +625,7 @@ describe('ProgressReportApplication', () => {
     const ds3 = createDataset(3, 'Dataset 3')
     const ds4 = createDataset(4, 'Dataset 4')
 
-    mountComponent({ datasetIds: [1, 2] }, true, [ds1, ds2, ds3, ds4])
+    await mountComponent({ datasetIds: [1, 2] }, true, [ds1, ds2, ds3, ds4])
 
     await waitFor(() => {
       const cards = document.querySelectorAll(
@@ -633,15 +637,15 @@ describe('ProgressReportApplication', () => {
 
   // ── Validate / Submit buttons ────────────────────────────────────────────
 
-  it('shows Validate button in create mode when required fields are missing', () => {
-    mountComponent({}, false)
+  it('shows Validate button in create mode when required fields are missing', async () => {
+    await mountComponent({}, false)
     expect(document.querySelector('[data-cy="pr-validate-button"]')).toBeInTheDocument()
     expect(screen.getByText('Validate')).toBeInTheDocument()
     expect(document.querySelector('[data-cy="pr-submit-button"]')).not.toBeInTheDocument()
   })
 
-  it('does not show Validate or Submit button in read-only mode', () => {
-    mountComponent({}, true)
+  it('does not show Validate or Submit button in read-only mode', async () => {
+    await mountComponent({}, true)
     expect(document.querySelector('[data-cy="pr-validate-button"]')).not.toBeInTheDocument()
     expect(document.querySelector('[data-cy="pr-submit-button"]')).not.toBeInTheDocument()
   })

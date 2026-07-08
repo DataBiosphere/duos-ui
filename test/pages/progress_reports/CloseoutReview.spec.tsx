@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { CloseoutReview } from 'src/pages/progress_reports/CloseoutReview'
-import { DataAccessRequest } from 'src/types/model'
+import { Acknowledgement, DataAccessRequest, DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/ajax/User', () => ({
   User: {
@@ -49,7 +49,7 @@ function renderComponent(overrides: Partial<{ dar: DataAccessRequest, onReturn: 
 describe('CloseoutReview', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as any)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as unknown as DuosUser)
   })
 
   afterEach(() => {
@@ -57,7 +57,7 @@ describe('CloseoutReview', () => {
   })
 
   it('renders the component correctly', async () => {
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
 
     renderComponent()
 
@@ -69,7 +69,7 @@ describe('CloseoutReview', () => {
   })
 
   it('displays both buttons with correct text', async () => {
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
 
     renderComponent()
 
@@ -80,8 +80,8 @@ describe('CloseoutReview', () => {
   })
 
   it('calls onApprove when Approve closeout button is clicked', async () => {
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(false as any)
-    vi.mocked(DAR.approveCloseout).mockResolvedValue(true as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(false as unknown as Acknowledgement)
+    vi.mocked(DAR.approveCloseout).mockResolvedValue(1)
 
     renderComponent()
 
@@ -97,7 +97,7 @@ describe('CloseoutReview', () => {
   })
 
   it('calls onReturn when Go to Data Access Requests button is clicked', async () => {
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
     const onReturnSpy = vi.fn()
 
     renderComponent({ onReturn: onReturnSpy })
@@ -109,7 +109,7 @@ describe('CloseoutReview', () => {
   })
 
   it('maintains proper layout with icon, text, and buttons', async () => {
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
 
     renderComponent()
 
@@ -123,7 +123,7 @@ describe('CloseoutReview', () => {
   })
 
   it('displays "Please note:" text', async () => {
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
 
     renderComponent()
 
@@ -133,7 +133,7 @@ describe('CloseoutReview', () => {
   })
 
   it('displays closeout approve button when no acknowledgement exists', async () => {
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(null as unknown as Acknowledgement)
 
     renderComponent()
 
@@ -145,7 +145,7 @@ describe('CloseoutReview', () => {
 
   it('hides closeout approve button when acknowledgement exists', async () => {
     const acknowledgement = { key: 'dar_closeout_chair_ref_DAR-UUID', value: 'true' }
-    vi.mocked(User.getAcknowledgement).mockResolvedValue(acknowledgement as any)
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(acknowledgement as unknown as Acknowledgement)
 
     renderComponent()
 

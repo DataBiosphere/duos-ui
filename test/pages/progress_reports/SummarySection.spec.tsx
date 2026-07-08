@@ -9,11 +9,13 @@ import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
 
 vi.mock('src/components/era_commons/ERACommons', () => ({
   default: ({ onNihStatusUpdate }: { onNihStatusUpdate?: (valid: boolean) => void }) => {
-    React.useEffect(() => {
-      onNihStatusUpdate?.(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-    return <div data-cy="era-commons-authenticate-link">Authenticate your account</div>
+    const ERACommonsMock = () => {
+      React.useEffect(() => {
+        onNihStatusUpdate?.(true)
+      }, [])
+      return <div data-cy="era-commons-authenticate-link">Authenticate your account</div>
+    }
+    return <ERACommonsMock />
   },
 }))
 

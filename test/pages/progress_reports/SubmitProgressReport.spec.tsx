@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import SubmitProgressReport from 'src/pages/progress_reports/SubmitProgressReport'
 import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
@@ -22,8 +22,8 @@ vi.mock('src/utils/DarUtils', () => ({
 }))
 
 vi.mock('src/components/AsyncSpinnerButton', () => ({
-  default: ({ children, onClick, 'data-cy': dataCy, ...rest }: any) => (
-    <button data-cy={dataCy} onClick={onClick} {...rest}>{children}</button>
+  default: ({ children, onClick, 'data-cy': dataCy }: { 'children'?: React.ReactNode, 'onClick'?: () => void | Promise<void>, 'data-cy'?: string }) => (
+    <button data-cy={dataCy} onClick={onClick}>{children}</button>
   ),
 }))
 
@@ -95,7 +95,7 @@ describe('SubmitProgressReport', () => {
   })
 
   it('Submit should succeed', async () => {
-    vi.mocked(ProgressReport.submitProgressReport).mockResolvedValue({} as any)
+    vi.mocked(ProgressReport.submitProgressReport).mockResolvedValue({ data: null })
     renderComponent({ isValid: true })
 
     const submitButton = document.querySelector('[data-cy="pr-submit-button"]') as HTMLButtonElement
@@ -110,7 +110,7 @@ describe('SubmitProgressReport', () => {
 
   it('On Submit handler should be called after successful submit', async () => {
     const onSuccessSpy = vi.fn()
-    vi.mocked(ProgressReport.submitProgressReport).mockResolvedValue({} as any)
+    vi.mocked(ProgressReport.submitProgressReport).mockResolvedValue({ data: null })
     renderComponent({ isValid: true, onSuccess: onSuccessSpy })
 
     const submitButton = document.querySelector('[data-cy="pr-submit-button"]') as HTMLButtonElement
