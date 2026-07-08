@@ -33,8 +33,9 @@ const renderCell = makeRenderCellHelper<PublicationAsset>(makePublicationColumns
 describe('makePublicationColumns — Title column', () => {
   it('renders the publication title as a link when url is present', () => {
     const { container } = renderCell('title', 'A Novel Genomics Study', { url: 'https://doi.org/10.1038/test' })
-    expect(container.querySelector('a[href="https://doi.org/10.1038/test"]')).toBeInTheDocument()
-    expect(screen.getByText('A Novel Genomics Study')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://doi.org/10.1038/test"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('A Novel Genomics Study')
   })
 
   it('renders plain text when url is absent', () => {
@@ -52,7 +53,7 @@ describe('makePublicationColumns — Title column', () => {
 
   it('renders gracefully when title is empty', () => {
     const { container } = renderCell('title', '', { url: '' })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -76,7 +77,7 @@ describe('makePublicationColumns — Journal column', () => {
 
   it('renders gracefully when journal is empty', () => {
     const { container } = renderCell('journal', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -88,15 +89,16 @@ describe('makePublicationColumns — Published Date column', () => {
 
   it('renders gracefully when publishedDate is empty', () => {
     const { container } = renderCell('publishedDate', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
 describe('makePublicationColumns — PubMed ID column', () => {
   it('renders the PubMed ID as a link', () => {
     const { container } = renderCell('pubmedId', '87654321')
-    expect(container.querySelector('a[href="https://pubmed.ncbi.nlm.nih.gov/87654321"]')).toBeInTheDocument()
-    expect(screen.getByText('87654321')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://pubmed.ncbi.nlm.nih.gov/87654321"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('87654321')
   })
 
   it('sets target="_blank" and rel="noopener noreferrer"', () => {
@@ -116,8 +118,9 @@ describe('makePublicationColumns — PubMed ID column', () => {
 describe('makePublicationColumns — DOI column', () => {
   it('renders the DOI as a link', () => {
     const { container } = renderCell('doi', '10.1038/ng.1234')
-    expect(container.querySelector('a[href="https://doi.org/10.1038/ng.1234"]')).toBeInTheDocument()
-    expect(screen.getByText('10.1038/ng.1234')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://doi.org/10.1038/ng.1234"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('10.1038/ng.1234')
   })
 
   it('sets target="_blank" and rel="noopener noreferrer"', () => {
@@ -142,7 +145,7 @@ describe('makePublicationColumns — Authors column', () => {
 
   it('renders gracefully when authorNames is empty', () => {
     const { container } = renderCell('authorNames', [])
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 

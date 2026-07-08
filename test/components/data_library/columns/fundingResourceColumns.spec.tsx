@@ -1,6 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import React from 'react'
+import { describe, it, expect, beforeAll } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import { DataGrid } from '@mui/x-data-grid'
 import { makeMockParams, makeRenderCellHelper } from './columnTestUtils'
 import { makeFundingResourceColumns } from 'src/components/data_library/columns/fundingResourceColumns'
 import { FundingResourceAsset } from 'src/types/library'
@@ -38,7 +41,7 @@ describe('makeFundingResourceColumns — Study Name column', () => {
 
   it('renders an empty cell gracefully when studyName is absent', () => {
     const { container } = renderCell('studyName', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -48,9 +51,15 @@ describe('makeFundingResourceColumns — Funding ID column', () => {
     expect(screen.getByText('FR-12345')).toBeInTheDocument()
   })
 
+  it('applies ellipsis styling to long funding IDs', () => {
+    renderCell('fundingId', 'VERY-LONG-FUNDING-RESOURCE-IDENTIFIER-12345')
+    const box = screen.getByText('VERY-LONG-FUNDING-RESOURCE-IDENTIFIER-12345')
+    expect(box).toHaveStyle({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })
+  })
+
   it('renders an empty cell gracefully when fundingId is absent', () => {
     const { container } = renderCell('fundingId', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -62,7 +71,7 @@ describe('makeFundingResourceColumns — Funder Name column', () => {
 
   it('renders an empty cell gracefully when funderName is absent', () => {
     const { container } = renderCell('funderName', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -74,7 +83,7 @@ describe('makeFundingResourceColumns — Grant Number column', () => {
 
   it('renders an empty cell gracefully when grantNumber is absent', () => {
     const { container } = renderCell('grantNumber', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -86,7 +95,7 @@ describe('makeFundingResourceColumns — Project Title column', () => {
 
   it('renders an empty cell gracefully when projectTitle is absent', () => {
     const { container } = renderCell('projectTitle', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -98,7 +107,7 @@ describe('makeFundingResourceColumns — Start Date column', () => {
 
   it('renders an empty cell gracefully when startDate is absent', () => {
     const { container } = renderCell('startDate', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -109,7 +118,7 @@ describe('makeFundingResourceColumns — URL column', () => {
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(screen.getByText('Link')).toBeInTheDocument()
+    expect(link).toHaveTextContent('Link')
   })
 
   it('renders null for empty url', () => {
@@ -169,17 +178,26 @@ describe('makeFundingResourceColumns — column structure', () => {
 })
 
 describe('makeFundingResourceColumns — accessibility', () => {
-  it('renders headers with proper labels', () => {
-    const cols = makeFundingResourceColumns()
-    const headers = cols.map(c => c.headerName)
-    expect(headers).toContain('Study Name')
-    expect(headers).toContain('Funding Resource ID')
-    expect(headers).toContain('Funder Name')
-    expect(headers).toContain('Funder Program')
-    expect(headers).toContain('Grant Number')
-    expect(headers).toContain('Project Title')
-    expect(headers).toContain('Start Date')
-    expect(headers).toContain('URL')
-    expect(headers).toContain('Tags')
+  beforeAll(() => {
+    global.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver
+  })
+
+  it('renders column headers with correct accessible names', () => {
+    render(
+      <MemoryRouter>
+        <div style={{ height: 400, width: 800 }}>
+          <DataGrid columns={makeFundingResourceColumns()} rows={[]} />
+        </div>
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('columnheader', { name: 'Study Name' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Funding Resource ID' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Funder Name' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Funder Program' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Grant Number' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Project Title' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Start Date' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'URL' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Tags' })).toBeInTheDocument()
   })
 })

@@ -29,8 +29,9 @@ const renderCell = makeRenderCellHelper<IntellectualPropertyAsset>(makeIntellect
 describe('makeIntellectualPropertyColumns — Title column', () => {
   it('renders the IP title as a link when url is present', () => {
     const { container } = renderCell('title', 'Novel Sequencing Method', { url: 'https://patents.example.com/US00001' })
-    expect(container.querySelector('a[href="https://patents.example.com/US00001"]')).toBeInTheDocument()
-    expect(screen.getByText('Novel Sequencing Method')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://patents.example.com/US00001"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('Novel Sequencing Method')
   })
 
   it('renders plain text when url is absent', () => {
@@ -48,7 +49,7 @@ describe('makeIntellectualPropertyColumns — Title column', () => {
 
   it('renders gracefully when title is empty', () => {
     const { container } = renderCell('title', '', { url: '' })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -72,7 +73,7 @@ describe('makeIntellectualPropertyColumns — Type column', () => {
 
   it('renders gracefully when type is empty', () => {
     const { container } = renderCell('type', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -84,7 +85,7 @@ describe('makeIntellectualPropertyColumns — Patent Number column', () => {
 
   it('renders gracefully when patent number is empty', () => {
     const { container } = renderCell('patentNumber', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -96,7 +97,7 @@ describe('makeIntellectualPropertyColumns — Assignee column', () => {
 
   it('renders gracefully when assignee is empty', () => {
     const { container } = renderCell('assignee', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -108,7 +109,7 @@ describe('makeIntellectualPropertyColumns — Status column', () => {
 
   it('renders gracefully when status is empty', () => {
     const { container } = renderCell('status', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -120,7 +121,7 @@ describe('makeIntellectualPropertyColumns — Filing Date column', () => {
 
   it('renders gracefully when filing date is empty', () => {
     const { container } = renderCell('filingDate', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -132,7 +133,7 @@ describe('makeIntellectualPropertyColumns — Contact column', () => {
 
   it('renders gracefully when contact is empty', () => {
     const { container } = renderCell('contact', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 

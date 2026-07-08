@@ -32,7 +32,7 @@ describe('makeWorkspaceColumns — Workspace Name column', () => {
 
   it('renders an empty cell gracefully when name is absent', () => {
     const { container } = renderCell('name', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -56,15 +56,16 @@ describe('makeWorkspaceColumns — Platform column', () => {
 
   it('renders an empty cell when platform is absent', () => {
     const { container } = renderCell('platform', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
 describe('makeWorkspaceColumns — URL column', () => {
   it('renders "Link" as a clickable anchor when url is present', () => {
     const { container } = renderCell('url', 'https://app.terra.bio/#workspaces/test/example')
-    expect(container.querySelector('a[href="https://app.terra.bio/#workspaces/test/example"]')).toBeInTheDocument()
-    expect(screen.getByText('Link')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://app.terra.bio/#workspaces/test/example"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('Link')
   })
 
   it('renders nothing when url is absent', () => {
@@ -89,7 +90,7 @@ describe('makeWorkspaceColumns — Description column', () => {
 
   it('renders an empty cell when description is absent', () => {
     const { container } = renderCell('description', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -130,7 +131,7 @@ describe('makeWorkspaceColumns — Access column', () => {
 
   it('renders an empty cell when access is absent', () => {
     const { container } = renderCell('access', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 

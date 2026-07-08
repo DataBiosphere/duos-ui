@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import React from 'react'
+import { describe, it, expect, beforeAll } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import { DataGrid } from '@mui/x-data-grid'
 import { makeRenderCellHelper } from './columnTestUtils'
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
 import { BiospecimenAsset } from 'src/types/library'
@@ -35,7 +38,7 @@ describe('makeBiospecimenColumns — Study Name column', () => {
 
   it('renders an empty cell gracefully when studyName is absent', () => {
     const { container } = renderCell('studyName', '', { studyId: 1 })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -47,13 +50,14 @@ describe('makeBiospecimenColumns — Biospecimen ID column', () => {
 
   it('renders an empty cell gracefully when biospecimenId is absent', () => {
     const { container } = renderCell('biospecimenId', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 
   it('wraps long biospecimen IDs with tooltip and ellipsis', () => {
     const longId = 'VERY-LONG-BIOSPECIMEN-ID-WITH-MANY-CHARACTERS'
     renderCell('biospecimenId', longId)
-    expect(screen.getByText(longId)).toBeInTheDocument()
+    const box = screen.getByText(longId)
+    expect(box).toHaveStyle({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })
   })
 })
 
@@ -70,7 +74,7 @@ describe('makeBiospecimenColumns — Specimen Type column', () => {
 
   it('renders an empty cell when specimenType is absent', () => {
     const { container } = renderCell('specimenType', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 
   it('converts multiple underscores correctly', () => {
@@ -87,13 +91,14 @@ describe('makeBiospecimenColumns — Donor ID column', () => {
 
   it('renders an empty cell gracefully when donorId is absent', () => {
     const { container } = renderCell('donorId', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 
   it('wraps long donor IDs with tooltip and ellipsis', () => {
     const longDonorId = 'VERY-LONG-DONOR-IDENTIFICATION-STRING'
     renderCell('donorId', longDonorId)
-    expect(screen.getByText(longDonorId)).toBeInTheDocument()
+    const box = screen.getByText(longDonorId)
+    expect(box).toHaveStyle({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })
   })
 })
 
@@ -105,7 +110,7 @@ describe('makeBiospecimenColumns — Date Of Collection column', () => {
 
   it('renders an empty cell when dateOfCollection is absent', () => {
     const { container } = renderCell('dateOfCollection', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 
   it('renders various date formats correctly', () => {
@@ -148,7 +153,8 @@ describe('makeBiospecimenColumns — column structure', () => {
 describe('makeBiospecimenColumns — tooltip and text ellipsis', () => {
   it('applies ellipsis styling to biospecimen ID', () => {
     renderCell('biospecimenId', 'VERY-LONG-BIOSPECIMEN-IDENTIFIER')
-    expect(screen.getByText('VERY-LONG-BIOSPECIMEN-IDENTIFIER')).toBeInTheDocument()
+    const box = screen.getByText('VERY-LONG-BIOSPECIMEN-IDENTIFIER')
+    expect(box).toHaveStyle({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })
   })
 
   it('shows tooltip on hover for biospecimen ID', async () => {
@@ -160,13 +166,22 @@ describe('makeBiospecimenColumns — tooltip and text ellipsis', () => {
 })
 
 describe('makeBiospecimenColumns — accessibility', () => {
-  it('renders headers with proper labels', () => {
-    const cols = makeBiospecimenColumns()
-    const headers = cols.map(c => c.headerName)
-    expect(headers).toContain('Study Name')
-    expect(headers).toContain('Biospecimen ID')
-    expect(headers).toContain('Specimen Type')
-    expect(headers).toContain('Donor ID')
-    expect(headers).toContain('Date Of Collection')
+  beforeAll(() => {
+    global.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver
+  })
+
+  it('renders column headers with correct accessible names', () => {
+    render(
+      <MemoryRouter>
+        <div style={{ height: 400, width: 800 }}>
+          <DataGrid columns={makeBiospecimenColumns()} rows={[]} />
+        </div>
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('columnheader', { name: 'Study Name' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Biospecimen ID' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Specimen Type' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Donor ID' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Date Of Collection' })).toBeInTheDocument()
   })
 })

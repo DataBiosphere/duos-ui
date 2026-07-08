@@ -29,8 +29,9 @@ const renderCell = makeRenderCellHelper<ClinicalTrialAsset>(makeClinicalTrialCol
 describe('makeClinicalTrialColumns — Trial Title column', () => {
   it('renders the title as a link when url is present', () => {
     const { container } = renderCell('title', 'Phase II Immunotherapy Study', { url: 'https://clinicaltrials.gov/study/NCT001' })
-    expect(container.querySelector('a[href="https://clinicaltrials.gov/study/NCT001"]')).toBeInTheDocument()
-    expect(screen.getByText('Phase II Immunotherapy Study')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://clinicaltrials.gov/study/NCT001"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('Phase II Immunotherapy Study')
   })
 
   it('sets target="_blank" and rel="noopener noreferrer" on the title link', () => {
@@ -48,7 +49,7 @@ describe('makeClinicalTrialColumns — Trial Title column', () => {
 
   it('renders an empty cell gracefully when title is absent', () => {
     const { container } = renderCell('title', '', { url: '' })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -67,8 +68,9 @@ describe('makeClinicalTrialColumns — Study column', () => {
 describe('makeClinicalTrialColumns — Identifier column', () => {
   it('renders the identifier as a link when url is present', () => {
     const { container } = renderCell('identifier', 'NCT00000001', { url: 'https://clinicaltrials.gov/study/NCT00000001' })
-    expect(container.querySelector('a[href="https://clinicaltrials.gov/study/NCT00000001"]')).toBeInTheDocument()
-    expect(screen.getByText('NCT00000001')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://clinicaltrials.gov/study/NCT00000001"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('NCT00000001')
   })
 
   it('renders the identifier as plain text when url is absent', () => {
@@ -79,7 +81,7 @@ describe('makeClinicalTrialColumns — Identifier column', () => {
 
   it('renders an empty cell gracefully when identifier is absent', () => {
     const { container } = renderCell('identifier', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -119,7 +121,7 @@ describe('makeClinicalTrialColumns — Phase column', () => {
 
   it('renders an empty cell when phase is absent', () => {
     const { container } = renderCell('phase', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -136,7 +138,7 @@ describe('makeClinicalTrialColumns — Intervention Type column', () => {
 
   it('renders an empty cell gracefully when interventionType is absent', () => {
     const { container } = renderCell('interventionType', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -148,7 +150,7 @@ describe('makeClinicalTrialColumns — Sponsor column', () => {
 
   it('renders an empty cell gracefully when sponsor is absent', () => {
     const { container } = renderCell('sponsor', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -160,7 +162,7 @@ describe('makeClinicalTrialColumns — Start Date column', () => {
 
   it('renders an empty cell gracefully when startDate is absent', () => {
     const { container } = renderCell('startDate', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 

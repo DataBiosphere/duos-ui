@@ -33,8 +33,9 @@ const renderCell = makeRenderCellHelper<PresentationAsset>(makePresentationColum
 describe('makePresentationColumns — Title column', () => {
   it('renders the presentation title as a link when url is present', () => {
     const { container } = renderCell('title', 'Genomics in Practice', { url: 'https://example.com/slides' })
-    expect(container.querySelector('a[href="https://example.com/slides"]')).toBeInTheDocument()
-    expect(screen.getByText('Genomics in Practice')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://example.com/slides"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('Genomics in Practice')
   })
 
   it('renders plain text when url is absent', () => {
@@ -52,19 +53,16 @@ describe('makePresentationColumns — Title column', () => {
 
   it('renders gracefully when title is empty', () => {
     const { container } = renderCell('title', '', { url: '' })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
 describe('makePresentationColumns — Study column', () => {
   it('renders a link with the study name', () => {
-    renderCell('studyName', 'Genome Atlas', { studyId: 7 })
-    expect(screen.getByText('Genome Atlas')).toBeInTheDocument()
-  })
-
-  it('links to /studies/:studyId', () => {
     const { container } = renderCell('studyName', 'Genome Atlas', { studyId: 7 })
-    expect(container.querySelector('a[href="/studies/7"]')).toBeInTheDocument()
+    const link = container.querySelector('a[href="/studies/7"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('Genome Atlas')
   })
 })
 
@@ -76,7 +74,7 @@ describe('makePresentationColumns — Event column', () => {
 
   it('renders gracefully when event is empty', () => {
     const { container } = renderCell('event', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -88,7 +86,7 @@ describe('makePresentationColumns — Date column', () => {
 
   it('renders gracefully when date is empty', () => {
     const { container } = renderCell('date', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -100,7 +98,7 @@ describe('makePresentationColumns — Location column', () => {
 
   it('renders gracefully when location is empty', () => {
     const { container } = renderCell('location', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -112,12 +110,12 @@ describe('makePresentationColumns — Presenter column', () => {
 
   it('renders gracefully when presenter is absent', () => {
     const { container } = renderCell('presenter', '', { presenter: undefined })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 
   it('renders gracefully when presenter name is absent', () => {
     const { container } = renderCell('presenter', '', { presenter: { email: 'alice@example.com' } as Presenter })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -129,7 +127,7 @@ describe('makePresentationColumns — Format column', () => {
 
   it('renders gracefully when format is empty', () => {
     const { container } = renderCell('format', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 

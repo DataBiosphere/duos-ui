@@ -33,7 +33,7 @@ describe('makeModelColumns — Model Name column', () => {
 
   it('renders an empty cell gracefully when name is absent', () => {
     const { container } = renderCell('name', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -57,7 +57,7 @@ describe('makeModelColumns — Format column', () => {
 
   it('renders an empty cell when format is absent', () => {
     const { container } = renderCell('format', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -69,7 +69,7 @@ describe('makeModelColumns — License column', () => {
 
   it('renders an empty cell when license is absent', () => {
     const { container } = renderCell('license', '')
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
@@ -81,15 +81,16 @@ describe('makeModelColumns — Maintainer column', () => {
 
   it('renders an empty cell when maintainer name is absent', () => {
     const { container } = renderCell('maintainer', '', { maintainer: { name: '', email: '' } })
-    expect(container).toBeInTheDocument()
+    expect(container.textContent?.trim()).toBe('')
   })
 })
 
 describe('makeModelColumns — URL column', () => {
   it('renders "Link" as a clickable anchor when url is present', () => {
     const { container } = renderCell('url', 'https://huggingface.co/my-model')
-    expect(container.querySelector('a[href="https://huggingface.co/my-model"]')).toBeInTheDocument()
-    expect(screen.getByText('Link')).toBeInTheDocument()
+    const link = container.querySelector('a[href="https://huggingface.co/my-model"]')!
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveTextContent('Link')
   })
 
   it('renders nothing when url is absent', () => {
