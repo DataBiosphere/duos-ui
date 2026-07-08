@@ -172,48 +172,6 @@ const dar_collection = {
             },
           },
         },
-        2: {
-          electionId: 2,
-          electionType: 'RP',
-          referenceId: 'dar-reference-id-1',
-          datasetId: 1,
-          createDate: time,
-          lastUpdate: time,
-          status: 'Open',
-          displayId: 'DUOS-000001-1',
-          dulName: 'Test DUL',
-          version: 1,
-          archived: false,
-          votes: {
-            4: {
-              voteId: 4,
-              userId: 1,
-              electionId: 2,
-              rationale: '',
-              type: 'Chairperson',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            5: {
-              voteId: 5,
-              userId: 1,
-              electionId: 2,
-              rationale: '',
-              type: 'DAC',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            6: {
-              voteId: 6,
-              userId: 1,
-              electionId: 2,
-              rationale: '',
-              type: 'Final',
-              displayName: 'User 1',
-              createDate: time,
-            },
-          },
-        },
         3: {
           electionId: 3,
           electionType: 'DataAccess',
@@ -249,48 +207,6 @@ const dar_collection = {
               voteId: 33,
               userId: 1,
               electionId: 3,
-              rationale: '',
-              type: 'Final',
-              displayName: 'User 1',
-              createDate: time,
-            },
-          },
-        },
-        4: {
-          electionId: 4,
-          electionType: 'RP',
-          referenceId: 'dar-reference-id-1',
-          datasetId: 2,
-          createDate: time,
-          lastUpdate: time,
-          status: 'Open',
-          displayId: 'DUOS-000001-1',
-          dulName: 'Test DUL',
-          version: 1,
-          archived: false,
-          votes: {
-            44: {
-              voteId: 44,
-              userId: 1,
-              electionId: 4,
-              rationale: '',
-              type: 'Chairperson',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            55: {
-              voteId: 55,
-              userId: 1,
-              electionId: 4,
-              rationale: '',
-              type: 'DAC',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            66: {
-              voteId: 66,
-              userId: 1,
-              electionId: 4,
               rationale: '',
               type: 'Final',
               displayName: 'User 1',
@@ -340,48 +256,6 @@ const dar_collection = {
             },
           },
         },
-        6: {
-          electionId: 6,
-          electionType: 'RP',
-          referenceId: 'dar-reference-id-1',
-          datasetId: 3,
-          createDate: time,
-          lastUpdate: time,
-          status: 'Open',
-          displayId: 'DUOS-000001-1',
-          dulName: 'Test DUL',
-          version: 1,
-          archived: false,
-          votes: {
-            444: {
-              voteId: 444,
-              userId: 1,
-              electionId: 6,
-              rationale: '',
-              type: 'Chairperson',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            555: {
-              voteId: 555,
-              userId: 1,
-              electionId: 6,
-              rationale: '',
-              type: 'DAC',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            666: {
-              voteId: 666,
-              userId: 1,
-              electionId: 6,
-              rationale: '',
-              type: 'Final',
-              displayName: 'User 1',
-              createDate: time,
-            },
-          },
-        },
         7: {
           electionId: 7,
           electionType: 'DataAccess',
@@ -424,48 +298,6 @@ const dar_collection = {
             },
           },
         },
-        8: {
-          electionId: 8,
-          electionType: 'RP',
-          referenceId: 'dar-reference-id-1',
-          datasetId: 4,
-          createDate: time,
-          lastUpdate: time,
-          status: 'Open',
-          displayId: 'DUOS-000001-1',
-          dulName: 'Test DUL',
-          version: 1,
-          archived: false,
-          votes: {
-            4444: {
-              voteId: 4444,
-              userId: 1,
-              electionId: 8,
-              rationale: '',
-              type: 'Chairperson',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            5555: {
-              voteId: 5555,
-              userId: 1,
-              electionId: 8,
-              rationale: '',
-              type: 'DAC',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            6666: {
-              voteId: 6666,
-              userId: 1,
-              electionId: 8,
-              rationale: '',
-              type: 'Final',
-              displayName: 'User 1',
-              createDate: time,
-            },
-          },
-        },
         9: {
           electionId: 9,
           electionType: 'DataAccess',
@@ -501,48 +333,6 @@ const dar_collection = {
               voteId: 33333,
               userId: 1,
               electionId: 9,
-              rationale: '',
-              type: 'Final',
-              displayName: 'User 1',
-              createDate: time,
-            },
-          },
-        },
-        10: {
-          electionId: 10,
-          electionType: 'RP',
-          referenceId: 'dar-reference-id-1',
-          datasetId: 5,
-          createDate: time,
-          lastUpdate: time,
-          status: 'Open',
-          displayId: 'DUOS-000001-1',
-          dulName: 'Test DUL',
-          version: 1,
-          archived: false,
-          votes: {
-            44444: {
-              voteId: 44444,
-              userId: 1,
-              electionId: 10,
-              rationale: '',
-              type: 'Chairperson',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            55555: {
-              voteId: 55555,
-              userId: 1,
-              electionId: 10,
-              rationale: '',
-              type: 'DAC',
-              displayName: 'User 1',
-              createDate: time,
-            },
-            66666: {
-              voteId: 66666,
-              userId: 1,
-              electionId: 10,
               rationale: '',
               type: 'Final',
               displayName: 'User 1',
@@ -765,16 +555,14 @@ describe('BucketUtils', () => {
       for (const b1 of buckets) {
         cy.wrap(b1.key).should('not.be.empty')
         cy.wrap(b1.votes).should('not.be.empty')
-        if (!b1.isRP) {
-          cy.wrap(b1.label).should('not.be.empty')
-          cy.wrap(b1.datasets).should('not.be.empty')
-          cy.wrap(b1.datasetIds).should('not.be.empty')
-          if (b1.dataUse) {
-            cy.wrap(b1.dataUse).should('not.be.empty')
-            cy.wrap(b1.dataUses).should('not.be.empty')
-          }
-          cy.wrap(b1.elections).should('not.be.empty')
+        cy.wrap(b1.label).should('not.be.empty')
+        cy.wrap(b1.datasets).should('not.be.empty')
+        cy.wrap(b1.datasetIds).should('not.be.empty')
+        if (b1.dataUse) {
+          cy.wrap(b1.dataUse).should('not.be.empty')
+          cy.wrap(b1.dataUses).should('not.be.empty')
         }
+        cy.wrap(b1.elections).should('not.be.empty')
       }
     })
   })
@@ -820,7 +608,7 @@ describe('BucketUtils', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms)
     cy.wrap(binCollectionToBuckets(dar_collection)).then((b) => {
       const buckets = b as Bucket[]
-      const missingDataUse = buckets.find(b => !b.isRP && isUndefined(b.dataUse))
+      const missingDataUse = buckets.find(b => isUndefined(b.dataUse))
       cy.wrap(missingDataUse).should('not.be.empty')
       cy.wrap(missingDataUse?.datasets).should('not.be.empty')
       cy.wrap(missingDataUse?.datasets.length).should('eq', 1)
@@ -834,10 +622,9 @@ describe('BucketUtils', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms.filter(d => d.dacId === 1))
     cy.wrap(binCollectionToBuckets(dar_collection, [1])).then((b) => {
       const buckets = b as Bucket[]
-      const dataAccessBuckets = buckets.filter(b => !b.isRP)
-      cy.wrap(dataAccessBuckets).should('exist')
-      cy.wrap(dataAccessBuckets.length).should('eq', 1)
-      cy.wrap(dataAccessBuckets[0].datasetIds.length).should('eq', 1)
+      cy.wrap(buckets).should('exist')
+      cy.wrap(buckets.length).should('eq', 1)
+      cy.wrap(buckets[0].datasetIds.length).should('eq', 1)
       verifyBucketElectionsAndDatasets(buckets)
     })
   })
@@ -847,9 +634,8 @@ describe('BucketUtils', () => {
     cy.stub(DataSet, 'searchDatasetIndex').returns(dataset_terms.filter(d => d.dacId === 1 || d.dacId === 5))
     cy.wrap(binCollectionToBuckets(dar_collection, [1, 5])).then((b) => {
       const buckets = b as Bucket[]
-      const dataAccessBuckets = buckets.filter(b => !b.isRP)
-      cy.wrap(dataAccessBuckets).should('exist')
-      cy.wrap(dataAccessBuckets.length).should('eq', 2)
+      cy.wrap(buckets).should('exist')
+      cy.wrap(buckets.length).should('eq', 2)
       verifyBucketElectionsAndDatasets(buckets)
     })
   })
@@ -1051,48 +837,6 @@ describe('BucketUtils', () => {
                 },
               },
             },
-            2: {
-              electionId: 2,
-              electionType: 'RP',
-              referenceId: 'dar-reference-id-1',
-              datasetId: 1,
-              createDate: time,
-              lastUpdate: time,
-              status: 'Open',
-              displayId: 'DUOS-000002-1',
-              dulName: 'Test DUL',
-              version: 1,
-              archived: false,
-              votes: {
-                4: {
-                  voteId: 4,
-                  userId: 1,
-                  electionId: 2,
-                  rationale: '',
-                  type: 'Chairperson',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                5: {
-                  voteId: 5,
-                  userId: 1,
-                  electionId: 2,
-                  rationale: '',
-                  type: 'DAC',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                6: {
-                  voteId: 6,
-                  userId: 1,
-                  electionId: 2,
-                  rationale: '',
-                  type: 'Final',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-              },
-            },
             3: {
               electionId: 3,
               electionType: 'DataAccess',
@@ -1128,48 +872,6 @@ describe('BucketUtils', () => {
                   voteId: 9,
                   userId: 1,
                   electionId: 3,
-                  rationale: '',
-                  type: 'Final',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-              },
-            },
-            4: {
-              electionId: 4,
-              electionType: 'RP',
-              referenceId: 'dar-reference-id-1',
-              datasetId: 2,
-              createDate: time,
-              lastUpdate: time,
-              status: 'Open',
-              displayId: 'DUOS-000004-1',
-              dulName: 'Test DUL',
-              version: 1,
-              archived: false,
-              votes: {
-                10: {
-                  voteId: 10,
-                  userId: 1,
-                  electionId: 4,
-                  rationale: '',
-                  type: 'Chairperson',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                11: {
-                  voteId: 11,
-                  userId: 1,
-                  electionId: 4,
-                  rationale: '',
-                  type: 'DAC',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                12: {
-                  voteId: 12,
-                  userId: 1,
-                  electionId: 4,
                   rationale: '',
                   type: 'Final',
                   displayName: 'User 1',
@@ -1219,48 +921,6 @@ describe('BucketUtils', () => {
                 },
               },
             },
-            6: {
-              electionId: 6,
-              electionType: 'RP',
-              referenceId: 'dar-reference-id-1',
-              datasetId: 3,
-              createDate: time,
-              lastUpdate: time,
-              status: 'Open',
-              displayId: 'DUOS-000006-1',
-              dulName: 'Test DUL',
-              version: 1,
-              archived: false,
-              votes: {
-                16: {
-                  voteId: 16,
-                  userId: 1,
-                  electionId: 6,
-                  rationale: '',
-                  type: 'Chairperson',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                17: {
-                  voteId: 17,
-                  userId: 1,
-                  electionId: 6,
-                  rationale: '',
-                  type: 'DAC',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                18: {
-                  voteId: 666,
-                  userId: 1,
-                  electionId: 6,
-                  rationale: '',
-                  type: 'Final',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-              },
-            },
             7: {
               electionId: 7,
               electionType: 'DataAccess',
@@ -1303,48 +963,6 @@ describe('BucketUtils', () => {
                 },
               },
             },
-            8: {
-              electionId: 8,
-              electionType: 'RP',
-              referenceId: 'dar-reference-id-1',
-              datasetId: 4,
-              createDate: time,
-              lastUpdate: time,
-              status: 'Open',
-              displayId: 'DUOS-000008-1',
-              dulName: 'Test DUL',
-              version: 1,
-              archived: false,
-              votes: {
-                22: {
-                  voteId: 22,
-                  userId: 1,
-                  electionId: 8,
-                  rationale: '',
-                  type: 'Chairperson',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                23: {
-                  voteId: 5555,
-                  userId: 1,
-                  electionId: 8,
-                  rationale: '',
-                  type: 'DAC',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                24: {
-                  voteId: 6666,
-                  userId: 1,
-                  electionId: 8,
-                  rationale: '',
-                  type: 'Final',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-              },
-            },
             9: {
               electionId: 9,
               electionType: 'DataAccess',
@@ -1380,48 +998,6 @@ describe('BucketUtils', () => {
                   voteId: 27,
                   userId: 1,
                   electionId: 9,
-                  rationale: '',
-                  type: 'Final',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-              },
-            },
-            10: {
-              electionId: 10,
-              electionType: 'RP',
-              referenceId: 'dar-reference-id-1',
-              datasetId: 5,
-              createDate: time,
-              lastUpdate: time,
-              status: 'Open',
-              displayId: 'DUOS-000010-1',
-              dulName: 'Test DUL',
-              version: 1,
-              archived: false,
-              votes: {
-                28: {
-                  voteId: 28,
-                  userId: 1,
-                  electionId: 10,
-                  rationale: '',
-                  type: 'Chairperson',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                29: {
-                  voteId: 29,
-                  userId: 1,
-                  electionId: 10,
-                  rationale: '',
-                  type: 'DAC',
-                  displayName: 'User 1',
-                  createDate: time,
-                },
-                30: {
-                  voteId: 30,
-                  userId: 1,
-                  electionId: 10,
                   rationale: '',
                   type: 'Final',
                   displayName: 'User 1',
@@ -1601,20 +1177,16 @@ describe('BucketUtils', () => {
     cy.wrap(binCollectionToBuckets(collection)).then((b) => {
       const buckets = b as Bucket[]
       cy.wrap(buckets).should('not.be.empty')
-      // The provided dar collection should have 1 RP bucket and 3 Data Use buckets
-      cy.wrap(buckets.length).should('eq', 4)
-      cy.wrap(buckets[0].isRP).should('eq', true)
+      // The provided dar collection should have 3 Data Use buckets
+      cy.wrap(buckets.length).should('eq', 3)
       // HMB + Other
-      cy.wrap(buckets[1].isRP).should('eq', undefined)
-      cy.wrap(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).should('exist')
-      cy.wrap(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).should('exist')
+      cy.wrap(buckets[0].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).should('exist')
+      cy.wrap(buckets[0].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).should('exist')
       // General Use
-      cy.wrap(buckets[2].isRP).should('eq', undefined)
-      cy.wrap(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'GRU')).should('exist')
+      cy.wrap(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'GRU')).should('exist')
       // HMB
-      cy.wrap(buckets[3].isRP).should('eq', undefined)
-      cy.wrap(buckets[3].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).should('exist')
-      cy.wrap(buckets[3].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).should('not.exist')
+      cy.wrap(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).should('exist')
+      cy.wrap(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).should('not.exist')
     })
   })
 })
