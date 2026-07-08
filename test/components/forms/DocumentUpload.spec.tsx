@@ -72,7 +72,7 @@ describe('DocumentUpload', () => {
     let resolveUpload!: (val: unknown) => void
     const api = {
       uploadDocument: vi.fn().mockImplementation(
-        () => new Promise(resolve => { resolveUpload = resolve }),
+        () => new Promise((resolve) => { resolveUpload = resolve }),
       ),
       deleteDocument: vi.fn().mockResolvedValue({} as never),
       listDocuments: vi.fn().mockResolvedValue([]),
