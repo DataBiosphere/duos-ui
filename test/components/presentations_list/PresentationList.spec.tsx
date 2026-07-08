@@ -126,7 +126,7 @@ describe('PresentationList component', () => {
     const deleteBtn = container.querySelector('.delete-modal-primary-button')!
     await user.click(deleteBtn)
     await waitFor(() => expect(screen.queryByText(samplePresentation.title)).not.toBeInTheDocument())
-    expect(document.querySelector('.ReactModal__Content')).not.toBeInTheDocument()
+    expect(container.querySelector('.delete-modal-primary-button')).not.toBeInTheDocument()
     expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(0)
   })
 })
