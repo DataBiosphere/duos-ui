@@ -227,13 +227,24 @@ describe('VotingHistory', () => {
     // RP election (created 2023-01-10) is excluded; DataAccess election (2022-11-21) is included
     expect(within(chairTable).queryByText('2023-01-10')).not.toBeInTheDocument()
 
-    // chair table only includes FINAL/RADAR_APPROVE votes with a vote value
+    // chair table positive: FINAL and RADAR_APPROVE vote-type strings appear in the Vote Type column
+    expect(within(chairTable).getByText('FINAL')).toBeInTheDocument()
+    expect(within(chairTable).getByText('RADAR_APPROVE')).toBeInTheDocument()
+    // Sue Smith has a RADAR_APPROVE vote (vote 8684) — positive RADAR_APPROVE case
+    expect(within(chairTable).getByText('Sue Smith')).toBeInTheDocument()
+    // chair table includes only FINAL/RADAR_APPROVE votes with a vote value
     expect(within(chairTable).getByText('Stuart Williams')).toBeInTheDocument()
     expect(within(chairTable).queryByText('Ted Lasso')).not.toBeInTheDocument()
+    // chair table negative: DAC, AGREEMENT, Chairperson vote types must be excluded
+    expect(within(chairTable).queryByText('DAC')).not.toBeInTheDocument()
+    expect(within(chairTable).queryByText('AGREEMENT')).not.toBeInTheDocument()
+    expect(within(chairTable).queryByText('Chairperson')).not.toBeInTheDocument()
 
-    // member table shows election for datasetId 13
+    // member table shows election for datasetId 13 (DataAccess)
     expect(within(memberTable).getAllByText('2022-11-21').length).toBeGreaterThan(0)
     expect(within(memberTable).queryByText('2023-01-03')).not.toBeInTheDocument()
+    // RP election (2023-01-10) excluded from member table too, not just chair table
+    expect(within(memberTable).queryByText('2023-01-10')).not.toBeInTheDocument()
 
     // expand the first row to see member vote names
     await user.click(within(memberTable).getByTestId('ExpandMoreIcon'))
@@ -243,5 +254,9 @@ describe('VotingHistory', () => {
     expect(within(memberTable).getByText('DAC Member 2')).toBeInTheDocument()
     expect(within(memberTable).queryByText('Ted Lasso')).not.toBeInTheDocument()
     expect(within(memberTable).queryByText('Sue Smith')).not.toBeInTheDocument()
+    // userId 9988 has both a DAC vote (displayName='DAC Member 2') and a Chairperson
+    // vote (displayName='Stuart Williams') in election 8888; DAC-only filter must
+    // pick the DAC record and exclude the Chairperson record
+    expect(within(memberTable).queryByText('Stuart Williams')).not.toBeInTheDocument()
   })
 })
