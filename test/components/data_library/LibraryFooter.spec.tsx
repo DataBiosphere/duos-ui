@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { Storage } from 'src/libs/storage'
@@ -52,6 +52,34 @@ describe('LibraryFooter — selection summary text', () => {
     withoutLibraryCard()
     render(<LibraryFooter selectedDatasetIds={[1, 2]} selectedStudyIds={[101]} onApplyForAccess={vi.fn()} />)
     expect(screen.getByText('2 datasets selected from 1 study')).toBeInTheDocument()
+  })
+})
+
+describe('LibraryFooter — tooltip', () => {
+  it('shows a tooltip explaining that a library card is required when the button is disabled', async () => {
+    const user = userEvent.setup()
+    withoutLibraryCard()
+    render(<LibraryFooter selectedDatasetIds={[1]} selectedStudyIds={[101]} onApplyForAccess={vi.fn()} />)
+
+    const btn = screen.getByRole('button', { name: 'Apply for Access' })
+    await user.hover(btn.closest('span')!)
+
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'A Library Card is required to apply for data access',
+      )
+    })
+  })
+
+  it('does not show a restricting tooltip when the user has a library card', async () => {
+    const user = userEvent.setup()
+    withLibraryCard()
+    render(<LibraryFooter selectedDatasetIds={[1]} selectedStudyIds={[101]} onApplyForAccess={vi.fn()} />)
+
+    const btn = screen.getByRole('button', { name: 'Apply for Access' })
+    await user.hover(btn.closest('span')!)
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
 })
 

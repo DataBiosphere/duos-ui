@@ -92,9 +92,10 @@ describe('LibraryFilters', () => {
     const onChange = vi.fn()
     render(<LibraryFiltersWrapper onChange={onChange} />)
     await user.click(screen.getAllByRole('checkbox')[0])
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+    expect(onChange).toHaveBeenCalledWith({
+      ...EMPTY_FILTERS,
       accessManagement: ['controlled'],
-    }))
+    })
   })
 
   it('calls onClear when clear button is clicked and then hides the clear button', async () => {

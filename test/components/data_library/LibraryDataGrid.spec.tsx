@@ -103,7 +103,7 @@ const baseProps = {
 
 describe('LibraryDataGrid', () => {
   it('renders study data correctly', () => {
-    mountGrid(
+    const { container } = mountGrid(
       <LibraryDataGrid assetType={AssetType.STUDIES} data={studies} total={2} {...baseProps} />,
     )
     expect(screen.getByText('Study 1')).toBeInTheDocument()
@@ -111,6 +111,9 @@ describe('LibraryDataGrid', () => {
     expect(screen.getByText('Human')).toBeInTheDocument()
     expect(screen.getByText('Condition A')).toBeInTheDocument()
     expect(screen.getByText('Study 2')).toBeInTheDocument()
+    const row1 = container.querySelector('.MuiDataGrid-row[data-id="1"]')!
+    expect(within(row1 as HTMLElement).getByText('100')).toBeInTheDocument()
+    expect(within(row1 as HTMLElement).getByText('2')).toBeInTheDocument()
   })
 
   it('renders dataset data correctly', () => {
@@ -118,11 +121,14 @@ describe('LibraryDataGrid', () => {
       <LibraryDataGrid assetType={AssetType.DATASETS} data={datasets} total={3} {...baseProps} />,
     )
     expect(screen.getByText('Dataset 101')).toBeInTheDocument()
+    expect(screen.getByText('60')).toBeInTheDocument()
     expect(screen.getByText('Dataset 102')).toBeInTheDocument()
+    expect(screen.getByText('40')).toBeInTheDocument()
     expect(screen.getByText('Dataset 103')).toBeInTheDocument()
-    expect(screen.getByText('Controlled')).toBeInTheDocument()
-    expect(screen.getByText('Open')).toBeInTheDocument()
-    expect(screen.getByText('External')).toBeInTheDocument()
+    expect(screen.getByText('20')).toBeInTheDocument()
+    expect(screen.getByText('Controlled').closest('.MuiChip-root')).toHaveClass('MuiChip-colorPrimary')
+    expect(screen.getByText('Open').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSuccess')
+    expect(screen.getByText('External').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary')
   })
 
   it('renders loading state', () => {
@@ -170,10 +176,14 @@ describe('LibraryDataGrid', () => {
     })
 
     it('renders Export links only for datasets that have matching snapshots', () => {
-      mountGrid(
+      const { container } = mountGrid(
         <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset, nonExportableDataset]} total={2} {...baseProps} exportableDatasets={exportableDatasets} />,
       )
       expect(screen.getAllByRole('link', { name: /Export/ })).toHaveLength(1)
+      const row201 = container.querySelector('.MuiDataGrid-row[data-id="201"]')!
+      const row202 = container.querySelector('.MuiDataGrid-row[data-id="202"]')!
+      expect(within(row201 as HTMLElement).getByRole('link', { name: /Export/ })).toBeInTheDocument()
+      expect(within(row202 as HTMLElement).queryByRole('link', { name: /Export/ })).not.toBeInTheDocument()
     })
 
     it('does not render Export links when exportableDatasets is not provided', () => {
@@ -198,8 +208,10 @@ describe('LibraryDataGrid', () => {
       )
       const row101 = container.querySelector('.MuiDataGrid-row[data-id="101"]')!
       const row102 = container.querySelector('.MuiDataGrid-row[data-id="102"]')!
+      const row103 = container.querySelector('.MuiDataGrid-row[data-id="103"]')!
       expect(within(row101 as HTMLElement).queryByTestId('BoltIcon')).toBeInTheDocument()
       expect(within(row102 as HTMLElement).queryByTestId('BoltIcon')).not.toBeInTheDocument()
+      expect(within(row103 as HTMLElement).queryByTestId('BoltIcon')).not.toBeInTheDocument()
     })
 
     it('does not show Bolt icon when radarEnabledDatasetIds is empty', () => {
@@ -230,6 +242,16 @@ describe('LibraryDataGrid', () => {
     const checkbox = container.querySelector('.MuiDataGrid-row[data-id="1"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
     await user.click(checkbox)
     expect(onSelectionChange).toHaveBeenCalledWith([101, 102])
+  })
+
+  it('calls onPaginationChange when page changes', async () => {
+    const user = userEvent.setup()
+    const onPaginationChange = vi.fn()
+    mountGrid(
+      <LibraryDataGrid assetType={AssetType.STUDIES} data={studies} total={100} {...{ ...baseProps, onPaginationChange }} />,
+    )
+    await user.click(screen.getByRole('button', { name: 'Go to next page' }))
+    expect(onPaginationChange).toHaveBeenCalledWith({ page: 1, pageSize: 25 }, expect.anything())
   })
 
   it('calls onSortChange when a column header is clicked', async () => {
