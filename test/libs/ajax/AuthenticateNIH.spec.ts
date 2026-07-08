@@ -56,7 +56,7 @@ describe('AuthenticateNIH', () => {
   it('getECMProviderAuthUrl throws when response is empty', async () => {
     vi.mocked(fetchPost).mockResolvedValue({ data: '' })
 
-    await expect(AuthenticateNIH.getECMProviderAuthUrl('uri', '/home')).rejects.toThrow()
+    await expect(AuthenticateNIH.getECMProviderAuthUrl('uri', '/home')).rejects.toThrow('{"data":""}')
   })
 
   it('getECMProviderLinkInfo sends correct request and returns data', async () => {

@@ -171,6 +171,8 @@ describe('DAA ajax', () => {
       expect.any(FormData),
       authHeaders,
     )
+    const formData = vi.mocked(fetchMultipart).mock.calls[0][1] as FormData
+    expect(formData.get('file')).toBe(file)
   })
 
   it('addDaaToDac sends a PUT request and returns 200', async () => {
