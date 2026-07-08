@@ -75,36 +75,36 @@ const renderComponent = (propsOverride: Record<string, unknown> = {}) => {
 describe('NavigationTabsComponent', () => {
   it('renders component when logged in', () => {
     renderComponent()
-    expect(screen.getByText(mockUser.displayName)).toBeInTheDocument()
+    expect(screen.getByText(mockUser.displayName)).toBeVisible()
   })
 
   it('displays logo when horizontal orientation and logged in', () => {
     renderComponent()
-    expect(screen.getByAltText('DUOS Logo')).toBeInTheDocument()
+    expect(screen.getByAltText('DUOS Logo')).toBeVisible()
   })
 
   it('renders main tabs when logged in', () => {
     renderComponent()
-    expect(screen.getByRole('tab', { name: 'Tab 1' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Tab 2' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Tab 1' })).toBeVisible()
+    expect(screen.getByRole('tab', { name: 'Tab 2' })).toBeVisible()
   })
 
   it('renders subtabs for selected main tab', () => {
     renderComponent()
-    expect(screen.getByRole('tab', { name: 'SubTab 1' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'SubTab 2' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'SubTab 1' })).toBeVisible()
+    expect(screen.getByRole('tab', { name: 'SubTab 2' })).toBeVisible()
   })
 
   it('displays sign-in button when not logged in and horizontal', () => {
     renderComponent({ isLogged: false })
-    expect(screen.getByText('Sign In')).toBeInTheDocument()
+    expect(screen.getByText('Sign In')).toBeVisible()
   })
 
   it('displays public navigation links when not logged in', () => {
     renderComponent({ isLogged: false })
-    expect(screen.getByText('About')).toBeInTheDocument()
-    expect(screen.getByText('FAQs')).toBeInTheDocument()
-    expect(screen.getByText('Blog')).toBeInTheDocument()
+    expect(screen.getByText('About')).toBeVisible()
+    expect(screen.getByText('FAQs')).toBeVisible()
+    expect(screen.getByText('Blog')).toBeVisible()
   })
 
   it('hides main tabs when not logged in', () => {
@@ -119,12 +119,13 @@ describe('NavigationTabsComponent', () => {
 
   it('renders sign-in button in vertical menu when not logged in', () => {
     renderComponent({ isLogged: false, orientation: 'vertical' })
-    expect(screen.getByText('Sign In')).toBeInTheDocument()
+    expect(screen.getByText('Sign In')).toBeVisible()
   })
 
   it('does not render sign-in button in right-side wrapper when vertical', () => {
-    renderComponent({ isLogged: false, orientation: 'vertical' })
-    expect(screen.getByText('Sign In').closest('.navbar-public')).toBeInTheDocument()
+    const { container } = renderComponent({ isLogged: false, orientation: 'vertical' })
+    // The horizontal-only right-side wrapper (minWidth: 185px) must not exist
+    expect(container.querySelector('[style*="min-width"]')).not.toBeInTheDocument()
   })
 
   it('calls onSubtabChange when subtab is clicked', async () => {
@@ -147,7 +148,7 @@ describe('NavigationTabsComponent', () => {
       },
     ]
     renderComponent({ tabs: filteredTabs, initialTab: 0, initialSubTab: 0 })
-    expect(screen.getByRole('tab', { name: 'Visible SubTab' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Visible SubTab' })).toBeVisible()
     expect(screen.queryByRole('tab', { name: 'Hidden SubTab' })).not.toBeInTheDocument()
   })
 })

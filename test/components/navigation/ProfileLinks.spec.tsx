@@ -51,8 +51,8 @@ describe('ProfileLinks', () => {
     const user = userEvent.setup()
     renderComponent()
     await user.click(screen.getByText(mockUser.displayName))
-    expect(screen.getByText('Your Profile')).toBeInTheDocument()
-    expect(screen.getByText('Sign out')).toBeInTheDocument()
+    expect(screen.getByText('Your Profile')).toBeVisible()
+    expect(screen.getByText('Sign out')).toBeVisible()
   })
 
   it('calls onSubtabChange when clicking Your Profile', async () => {
@@ -76,7 +76,7 @@ describe('ProfileLinks', () => {
     renderComponent({ orientation: 'vertical' })
     expect(screen.getByText(mockUser.displayName)).toBeInTheDocument()
     await user.click(screen.getByText(mockUser.displayName))
-    expect(screen.getByText('Your Profile')).toBeInTheDocument()
-    expect(screen.getByText('Sign out')).toBeInTheDocument()
+    expect(screen.getByText('Your Profile')).toBeVisible()
+    expect(screen.getByText('Sign out')).toBeVisible()
   })
 })

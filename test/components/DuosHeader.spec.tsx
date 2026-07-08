@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DuosHeader from 'src/components/DuosHeader'
@@ -81,7 +81,7 @@ const defaultUser: DuosUser = {
 
 afterEach(() => vi.restoreAllMocks())
 
-const mountHeader = (path: string, user?: DuosUser) => {
+const mountHeader = async (path: string, user?: DuosUser) => {
   vi.spyOn(Storage, 'userIsLogged').mockReturnValue(!!user)
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(user ?? defaultUser)
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -96,29 +96,30 @@ const mountHeader = (path: string, user?: DuosUser) => {
       </MemoryRouter>
     </QueryClientProvider>,
   )
+  await act(async () => {})
 }
 
 describe('DuosHeader', () => {
   describe('Unauthenticated User', () => {
-    it('displays the DUOS logo', () => {
-      mountHeader('/home')
+    it('displays the DUOS logo', async () => {
+      await mountHeader('/home')
       expect(screen.getAllByAltText('DUOS Logo').length).toBeGreaterThan(0)
     })
 
-    it('displays Contact Us button', () => {
-      mountHeader('/home')
+    it('displays Contact Us button', async () => {
+      await mountHeader('/home')
       expect(screen.getByRole('button', { name: /Contact Us/ })).toBeInTheDocument()
     })
   })
 
   describe('Authenticated Researcher', () => {
-    it('displays Researcher Console tab', () => {
-      mountHeader('/datalibrary', mockUser)
+    it('displays Researcher Console tab', async () => {
+      await mountHeader('/datalibrary', mockUser)
       expect(screen.getByRole('tab', { name: 'Researcher Console' })).toBeInTheDocument()
     })
 
-    it('displays correct subtabs for researcher', () => {
-      mountHeader('/datalibrary', mockUser)
+    it('displays correct subtabs for researcher', async () => {
+      await mountHeader('/datalibrary', mockUser)
       expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
       expect(screen.getByRole('tab', { name: 'Data Access Requests' })).toBeInTheDocument()
       expect(screen.getByRole('tab', { name: 'My Dataset Approvals' })).toBeInTheDocument()
@@ -126,59 +127,69 @@ describe('DuosHeader', () => {
   })
 
   describe('Authenticated Admin', () => {
-    it('displays Admin Console tab', () => {
-      mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: false })
+    it('displays Admin Console tab', async () => {
+      await mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toBeInTheDocument()
     })
   })
 
   describe('Authenticated Signing Official', () => {
-    it('displays SO Console tab', () => {
-      mountHeader('/signing_official_console/library_cards', { ...mockUser, isSigningOfficial: true, isResearcher: false })
+    it('displays SO Console tab', async () => {
+      await mountHeader('/signing_official_console/library_cards', { ...mockUser, isSigningOfficial: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'SO Console' })).toBeInTheDocument()
     })
   })
 
   describe('Authenticated DAC Chair', () => {
-    it('displays DAC Chair Console tab', () => {
-      mountHeader('/chair_console', { ...mockUser, isChairPerson: true, isResearcher: false })
+    it('displays DAC Chair Console tab', async () => {
+      await mountHeader('/chair_console', { ...mockUser, isChairPerson: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'DAC Chair Console' })).toBeInTheDocument()
     })
   })
 
   describe('Authenticated DAC Member', () => {
-    it('displays DAC Member Console tab', () => {
-      mountHeader('/member_console', { ...mockUser, isMember: true, isResearcher: false })
+    it('displays DAC Member Console tab', async () => {
+      await mountHeader('/member_console', { ...mockUser, isMember: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'DAC Member Console' })).toBeInTheDocument()
     })
   })
 
   describe('Contact Us Button', () => {
-    it('displays Contact Us icon and text', () => {
-      mountHeader('/home')
+    it('displays Contact Us icon and text', async () => {
+      await mountHeader('/home')
       expect(screen.getByAltText('Contact Us Icon')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /Contact Us/ })).toHaveTextContent('Contact Us')
+    })
+
+    it('changes color on hover', async () => {
+      await mountHeader('/home')
+      const button = screen.getByRole('button', { name: /Contact Us/ })
+      expect(button).toHaveStyle({ color: '#ffffff' })
+      fireEvent.mouseEnter(button)
+      expect(button).toHaveStyle({ color: '#2FA4E7' })
+      fireEvent.mouseLeave(button)
+      expect(button).toHaveStyle({ color: '#ffffff' })
     })
   })
 
   describe('Tab Highlighting', () => {
-    it('highlights Researcher Console on /datalibrary for researcher-only user', () => {
-      mountHeader('/datalibrary', mockUser)
+    it('highlights Researcher Console on /datalibrary for researcher-only user', async () => {
+      await mountHeader('/datalibrary', mockUser)
       expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
     })
 
-    it('highlights Researcher Console on /datalibrary for admin+researcher (direct link wins over child match)', () => {
-      mountHeader('/datalibrary', { ...mockUser, isAdmin: true, isResearcher: true })
+    it('highlights Researcher Console on /datalibrary for admin+researcher (direct link wins over child match)', async () => {
+      await mountHeader('/datalibrary', { ...mockUser, isAdmin: true, isResearcher: true })
       expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
     })
 
-    it('highlights Admin Console on /admin_manage_dar_collections for admin+researcher', () => {
-      mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: true })
+    it('highlights Admin Console on /admin_manage_dar_collections for admin+researcher', async () => {
+      await mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: true })
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
     })
 
-    it('preserves a tab selection on a detail page with no URL match (context fallback)', () => {
-      mountHeader('/dar_application_review/999', mockUser)
+    it('preserves a tab selection on a detail page with no URL match (context fallback)', async () => {
+      await mountHeader('/dar_application_review/999', mockUser)
       expect(document.querySelector('.Mui-selected')).toBeInTheDocument()
     })
   })
