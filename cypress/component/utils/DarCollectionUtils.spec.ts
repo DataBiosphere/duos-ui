@@ -4,12 +4,9 @@ import {
   openCollectionFn,
   approveCollectionFn,
   extractDacDataAccessVotesFromBucket,
-  extractDacRPVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
-  extractUserRPVotesFromBucket,
   collapseVotesByUser,
   updateFinalVote,
-  rpVoteKey,
   processVotesForBucket,
   consoleTypes,
   DarCollectionTableColumnOptions,
@@ -67,7 +64,7 @@ const expectExcludedVotes = (votes: Array<Partial<Vote>>, unexpected: Array<Part
   })
 }
 
-type DacVoteScope = 'dataAccess' | 'rp'
+type DacVoteScope = 'dataAccess'
 type DacVoteExtractor = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean) => Vote[]
 type VotePayloadExpectation = {
   vote: boolean
@@ -110,8 +107,6 @@ const runDacExtractionSuite = ({
   scope: DacVoteScope
   extractor: DacVoteExtractor
 }) => {
-  const otherScope: DacVoteScope = scope === 'dataAccess' ? 'rp' : 'dataAccess'
-
   describe(suiteName, () => {
     it('returns empty list if scoped votes in this bucket do not have the userId of the given user', () => {
       const bucket = asBucket({
@@ -144,20 +139,6 @@ const runDacExtractionSuite = ({
         { vote: true, userId: 5 },
         { userId: 6 },
       ])
-    })
-
-    it(`only returns ${scope} votes`, () => {
-      const bucket = asBucket({
-        votes: [{
-          [scope]: { memberVotes: [{ vote: true, userId: 1 }, { userId: 2 }] },
-          [otherScope]: { memberVotes: [{ userId: 1 }, { vote: false, userId: 3 }] },
-        }],
-      })
-
-      const votes = extractor(bucket, { userId: 1 })
-      expect(votes).to.have.lengthOf(2)
-      expectIncludedVotes(votes, [{ vote: true, userId: 1 }, { userId: 2 }])
-      expectExcludedVotes(votes, [{ userId: 1 }, { vote: false, userId: 3 }])
     })
 
     it('only returns member votes', () => {
@@ -202,12 +183,6 @@ runDacExtractionSuite({
   extractor: extractDacDataAccessVotesFromBucket,
 })
 
-runDacExtractionSuite({
-  suiteName: 'extractDacRPVotesFromBucket',
-  scope: 'rp',
-  extractor: extractDacRPVotesFromBucket,
-})
-
 type UserVoteExtractor = (
   bucket: VoteBucket | null | undefined,
   user: { userId: number },
@@ -225,18 +200,11 @@ const runUserExtractionSuite = ({
   extractor: UserVoteExtractor
 }) => {
   describe(suiteName, () => {
-    const otherScope: DacVoteScope = scope === 'dataAccess' ? 'rp' : 'dataAccess'
-
     it('returns scoped votes by this user', () => {
       const bucket = asBucket({
         votes: [
-          {
-            [scope]: { memberVotes: [{ userId: 1 }, { userId: 2 }] },
-            [otherScope]: { memberVotes: [{ vote: false, userId: 1 }] },
-          },
-          {
-            [scope]: { memberVotes: [{ vote: true, userId: 1 }, { userId: 3 }] },
-          },
+          { [scope]: { memberVotes: [{ userId: 1 }, { userId: 2 }] } },
+          { [scope]: { memberVotes: [{ vote: true, userId: 1 }, { userId: 3 }] } },
         ],
       })
 
@@ -333,36 +301,8 @@ describe('extractUserDataAccessVotesFromBucket edge cases', () => {
   })
 })
 
-runUserExtractionSuite({
-  suiteName: 'extractUserRPVotesFromBucket',
-  scope: 'rp',
-  extractor: extractUserRPVotesFromBucket,
-})
-
-describe('extractUserRPVotesFromBucket edge cases', () => {
-  it('adminPage only returns chairperson votes with explicit vote values', () => {
-    const bucket = asBucket({
-      votes: [{
-        rp: {
-          memberVotes: [{ vote: true, userId: 1 }],
-          chairpersonVotes: [
-            { vote: true, userId: 2 },
-            { vote: false, userId: 3 },
-            { userId: 4 },
-          ],
-        },
-      }],
-    })
-
-    const votes = extractUserRPVotesFromBucket(bucket, { userId: 1 }, false, true)
-    expect(votes).to.have.lengthOf(2)
-    expectIncludedVotes(votes, [{ vote: true, userId: 2 }, { vote: false, userId: 3 }])
-    expectExcludedVotes(votes, [{ userId: 4 }])
-  })
-})
-
 describe('processVotesForBucket', () => {
-  it('preserves output bucketing and source vote mutation for mixed RP/DataAccess elections', () => {
+  it('ignores RP elections and mutates electionStatus only on DataAccess elections', () => {
     const elections: Election[] = [
       makeElection({
         electionId: 11,
@@ -387,15 +327,10 @@ describe('processVotesForBucket', () => {
 
     const result = processVotesForBucket(elections)
 
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(1)
-    expect(result.rp.memberVotes).to.have.lengthOf(1)
-    expect(result.rp.finalVotes).to.have.lengthOf(1)
     expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(1)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
     expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
 
-    expect(elections[0].votes[1].electionStatus).to.equal('Open')
-    expect(elections[0].votes[2].electionStatus).to.equal('Open')
     expect(elections[1].votes[3].electionStatus).to.equal('Closed')
     expect(elections[1].votes[4].electionStatus).to.equal('Closed')
     expect(elections[1].votes[5].electionStatus).to.equal('Closed')
@@ -403,16 +338,13 @@ describe('processVotesForBucket', () => {
 
   it('returns empty vote arrays for no elections', () => {
     const result = processVotesForBucket([])
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(0)
-    expect(result.rp.memberVotes).to.have.lengthOf(0)
-    expect(result.rp.finalVotes).to.have.lengthOf(0)
     expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(0)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
     expect(result.dataAccess.finalVotes).to.have.lengthOf(0)
     expect(result.dataAccess.radarVotes).to.have.lengthOf(0)
   })
 
-  it('categorizes RP election votes correctly', () => {
+  it('ignores RP election votes', () => {
     const elections: Election[] = [makeElection({
       electionId: 1,
       electionType: 'RP',
@@ -423,10 +355,6 @@ describe('processVotesForBucket', () => {
       },
     })]
     const result = processVotesForBucket(elections)
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(1)
-    expect(result.rp.memberVotes).to.have.lengthOf(1)
-    // RP chairperson votes also go to finalVotes
-    expect(result.rp.finalVotes).to.have.lengthOf(1)
     // Data access should remain empty
     expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(0)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
@@ -447,8 +375,6 @@ describe('processVotesForBucket', () => {
     expect(result.dataAccess.chairpersonVotes).to.have.lengthOf(1)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
     expect(result.dataAccess.finalVotes).to.have.lengthOf(1)
-    expect(result.rp.chairpersonVotes).to.have.lengthOf(0)
-    expect(result.rp.memberVotes).to.have.lengthOf(0)
   })
 
   it('routes radar_approve votes to radarVotes', () => {
@@ -500,13 +426,11 @@ describe('processVotesForBucket', () => {
       }),
     ]
     const result = processVotesForBucket(elections)
-    expect(result.rp.memberVotes).to.have.lengthOf(1)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(1)
   })
 
   it('uses empty array as default for omitted elections argument', () => {
     const result = processVotesForBucket()
-    expect(result.rp.memberVotes).to.have.lengthOf(0)
     expect(result.dataAccess.memberVotes).to.have.lengthOf(0)
   })
 })
@@ -815,30 +739,6 @@ describe('updateFinalVote()', () => {
     cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets)
   })
 
-  it('updates votes for the target bucket in the source collection (rp votes)', () => {
-    const voteIds = [1, 2, 3]
-    const votePayload = { vote: false, rationale: 'false rationale' }
-    const key = rpVoteKey
-    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key, votes: [{ rp: {
-      finalVotes: [{ voteId: 1 }, { voteId: 2 }, { voteId: 4 }],
-      chairpersonVotes: [{ voteId: 1 }, { voteId: 2 }, { voteId: 4 }],
-    } }] })])
-    const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
-      dataUseBuckets = newBucketArray
-    }
-    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
-
-    updatedBuckets.forEach((bucket) => {
-      expectVotePayloadApplied({
-        votes: getBucketVotesForScope(bucket, 'rp'),
-        voteIds,
-        votePayload,
-      })
-    })
-
-    cy.wrap(dataUseBuckets).should('deep.equal', updatedBuckets)
-  })
-
   it('returns undefined when votePayload is empty', () => {
     const result = updateFinalVote({
       key: 'someKey',
@@ -853,15 +753,15 @@ describe('updateFinalVote()', () => {
   it('is case-insensitive when matching bucket key', () => {
     const voteIds = [1]
     const votePayload = { vote: true, rationale: 'test' }
-    const key = 'RUS VOTE' // uppercase version of rpVoteKey
-    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key: rpVoteKey, votes: [{ rp: {
+    const bucketKey = 'target-key'
+    let dataUseBuckets = asUpdateFinalVoteBuckets([asBucket({ key: bucketKey, votes: [{ dataAccess: {
       finalVotes: [{ voteId: 1 }],
       chairpersonVotes: [],
     } }] })])
     const setDataUseBuckets = (newBucketArray: typeof dataUseBuckets) => {
       dataUseBuckets = newBucketArray
     }
-    const updatedBuckets = updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
+    const updatedBuckets = updateFinalVote({ key: 'TARGET-KEY', votePayload, voteIds, dataUseBuckets, setDataUseBuckets })!
 
     expect(updatedBuckets).to.have.lengthOf(1)
   })
