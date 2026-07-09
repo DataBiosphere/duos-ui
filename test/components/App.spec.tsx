@@ -66,6 +66,7 @@ const initialLocation = { pathname: '/', search: `?code=${code}&state=${state}` 
 
 describe('Main App Functions', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
   })
 
@@ -131,7 +132,7 @@ describe('Main App Functions', () => {
     )
 
     await waitFor(() => expect(vi.mocked(AuthenticateNIH.getECMProviderLinkInfo)).toHaveBeenCalledWith(code, state))
-    expect(vi.mocked(AuthenticateNIH.getSyncedUser)).toHaveBeenCalled()
+    await waitFor(() => expect(vi.mocked(AuthenticateNIH.getSyncedUser)).toHaveBeenCalledOnce())
     expect(pageVisitStub).toHaveBeenCalledWith('/')
   })
 })
