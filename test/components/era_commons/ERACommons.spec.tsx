@@ -90,6 +90,20 @@ describe('ERA Commons Component', () => {
     expect(document.querySelector('.required-field-error-span')).not.toBeInTheDocument()
   })
 
+  it('shows an error when auth token decoding fails', async () => {
+    // User.getMe returns no ERA data (mirrors Cypress "no-getMe" scenario where real getMe would fail,
+    // leaving the component without any ERA authentication state — authenticate link remains visible)
+    vi.mocked(User.getMe).mockResolvedValue({} as never)
+    vi.mocked(AuthenticateNIH.getECMProviderAuthUrl).mockRejectedValue(new Error('token decode error'))
+    const user = userEvent.setup()
+    mountComponent()
+    await waitFor(() =>
+      expect(document.querySelector('[data-cy=era-commons-authenticate-link]')).toBeInTheDocument(),
+    )
+    await user.click(document.querySelector('[data-cy=era-commons-authenticate-link]')!)
+    await waitFor(() => expect(document.querySelector('[data-cy=era-commons-error-span]')).toBeVisible())
+  })
+
   it('shows an error when removing linked account fails', async () => {
     const exp = Date.now() + (30 * 24 * 60 * 60 * 1000)
     const eraAuthedUser: Researcher = {
