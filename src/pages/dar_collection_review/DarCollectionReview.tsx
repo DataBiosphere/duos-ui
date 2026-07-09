@@ -4,7 +4,7 @@ import TabControl from 'src/components/TabControl'
 import { type TabStyleOverride } from 'src/components/SelectableText'
 import ReviewHeader from './ReviewHeader'
 import ApplicationInformation from './ApplicationInformation'
-import { compact, filter, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
+import { compact, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
 import { updateFinalVote } from 'src/utils/DarCollectionUtils'
 import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
 import { Navigation, Notifications } from 'src/libs/utils'
@@ -69,8 +69,7 @@ const tabsForUser = (user: DuosUser, buckets: Bucket[], adminPage = false): Reco
       votingHistory: 'Voting History',
     }
   }
-  const dataAccessBuckets = filter(buckets, bucket => get(bucket, 'isRP') !== true) as Bucket[]
-  const allVoteRecords = dataAccessBuckets.flatMap(b => b.votes)
+  const allVoteRecords = buckets.flatMap(b => b.votes)
   const myMemberVotes = allVoteRecords
     .map(vr => vr['dataAccess'])
     .flatMap(vg => vg.memberVotes)

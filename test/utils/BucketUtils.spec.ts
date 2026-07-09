@@ -275,16 +275,14 @@ describe('BucketUtils', () => {
     for (const b of buckets) {
       expect(b.key).not.toBe('')
       expect(b.votes).not.toHaveLength(0)
-      if (!b.isRP) {
-        expect(b.label).not.toBe('')
-        expect(b.datasets).not.toHaveLength(0)
-        expect(b.datasetIds).not.toHaveLength(0)
-        if (b.dataUse) {
-          expect(b.dataUse).not.toStrictEqual({})
-          expect(b.dataUses).not.toHaveLength(0)
-        }
-        expect(b.elections).not.toHaveLength(0)
+      expect(b.label).not.toBe('')
+      expect(b.datasets).not.toHaveLength(0)
+      expect(b.datasetIds).not.toHaveLength(0)
+      if (b.dataUse) {
+        expect(b.dataUse).not.toStrictEqual({})
+        expect(b.dataUses).not.toHaveLength(0)
       }
+      expect(b.elections).not.toHaveLength(0)
     }
   })
 
@@ -329,7 +327,7 @@ describe('BucketUtils', () => {
     vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue(dataset_terms)
 
     const buckets = await binCollectionToBuckets(dar_collection)
-    const missingDataUse = buckets.find(b => !b.isRP && isUndefined(b.dataUse))
+    const missingDataUse = buckets.find(b => isUndefined(b.dataUse))
 
     expect(missingDataUse).toBeDefined()
     expect(missingDataUse?.datasets).not.toHaveLength(0)
@@ -343,10 +341,9 @@ describe('BucketUtils', () => {
     vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue(dataset_terms.filter(d => d.dacId === 1))
 
     const buckets = await binCollectionToBuckets(dar_collection, [1])
-    const dataAccessBuckets = buckets.filter(b => !b.isRP)
 
-    expect(dataAccessBuckets).toHaveLength(1)
-    expect(dataAccessBuckets[0].datasetIds).toHaveLength(1)
+    expect(buckets).toHaveLength(1)
+    expect(buckets[0].datasetIds).toHaveLength(1)
     verifyBucketElectionsAndDatasets(buckets)
   })
 
@@ -355,9 +352,8 @@ describe('BucketUtils', () => {
     vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue(dataset_terms.filter(d => d.dacId === 1 || d.dacId === 5))
 
     const buckets = await binCollectionToBuckets(dar_collection, [1, 5])
-    const dataAccessBuckets = buckets.filter(b => !b.isRP)
 
-    expect(dataAccessBuckets).toHaveLength(2)
+    expect(buckets).toHaveLength(2)
     verifyBucketElectionsAndDatasets(buckets)
   })
 
@@ -398,17 +394,14 @@ describe('BucketUtils', () => {
     const buckets = await binCollectionToBuckets(similar_data_use_collection)
 
     expect(buckets).not.toHaveLength(0)
-    // Three distinct data-use patterns → three buckets (no separate RP bucket)
+    // Three distinct data-use patterns → three buckets
     expect(buckets).toHaveLength(3)
     // HMB + Other
-    expect(buckets[0].isRP).toBe(false)
     expect(buckets[0].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).toBeDefined()
     expect(buckets[0].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).toBeDefined()
     // General Use
-    expect(buckets[1].isRP).toBe(false)
     expect(buckets[1].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'GRU')).toBeDefined()
     // HMB only
-    expect(buckets[2].isRP).toBe(false)
     expect(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).toBeDefined()
     expect(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).toBeUndefined()
   })
