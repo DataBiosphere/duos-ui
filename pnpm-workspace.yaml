@@ -10,3 +10,5 @@ minimumReleaseAgeExclude:
   - tmp@0.2.6
   - '@babel/core@7.29.1'
   - undici@7.28.0
+allowedDeprecatedVersions:
+  node-domexception: "1.0.0"
