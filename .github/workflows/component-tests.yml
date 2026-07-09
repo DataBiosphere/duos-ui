@@ -31,6 +31,10 @@ jobs:
         run: pnpm run test:coverage
       - name: Run Vitest (server)
         run: pnpm -C server run test:coverage
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+      - name: Run Vitest browser tests
+        run: pnpm run test:browser
       - name: Merge coverage reports
         run: node scripts/merge-coverage.mjs
       - name: Publish coverage report to PR

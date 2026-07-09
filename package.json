@@ -21,7 +21,9 @@
     "cypress:open:component": "cypress open --component",
     "cypress:run": "CYPRESS_ADMIN=$(cat cypress/fixtures/duos-automation-admin.json) CYPRESS_CHAIR=$(cat cypress/fixtures/duos-automation-chair.json) CYPRESS_MEMBER=$(cat cypress/fixtures/duos-automation-member.json) CYPRESS_RESEARCHER=$(cat cypress/fixtures/duos-automation-researcher.json) CYPRESS_SIGNING_OFFICIAL=$(cat cypress/fixtures/duos-automation-signing-official.json) cypress run",
     "cypress:run:component": "cypress run --component",
-    "cypress:verify": "cypress verify"
+    "cypress:verify": "cypress verify",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "test:browser:coverage": "vitest run --coverage --config vitest.browser.config.ts"
   },
   "dependencies": {
     "@databiosphere/bard-client": "0.1.0",
@@ -62,6 +64,8 @@
     "@types/react-dom": "18.3.1",
     "@types/react-modal": "3.16.3",
     "@vitejs/plugin-react": "6.0.3",
+    "@vitest/browser": "4.1.9",
+    "@vitest/browser-playwright": "4.1.9",
     "@vitest/coverage-v8": "4.1.9",
     "cypress": "15.18.0",
     "cypress-vite": "1.10.2",
@@ -76,6 +80,7 @@
     "jiti": "2.7.0",
     "jsdom": "29.1.1",
     "open": "11.0.0",
+    "playwright": "^1.61.1",
     "prop-types": "15.8.1",
     "rollup-plugin-visualizer": "7.0.1",
     "tsx": "4.23.0",
