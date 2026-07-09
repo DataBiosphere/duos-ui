@@ -1,4 +1,7 @@
 import React from 'react'
+import { describe, it, expect } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { render, screen } from '@testing-library/react'
 import { TableHeaderSection } from 'src/components/TableHeaderSection'
 
 describe('TableHeaderSection', () => {
@@ -9,96 +12,87 @@ describe('TableHeaderSection', () => {
   }
 
   it('renders title and description', () => {
-    cy.mount(
+    render(
       <TableHeaderSection
         title="Test Title"
         description="Test Description"
       />,
     )
-
-    cy.contains('Test Title').should('be.visible')
-    cy.contains('Test Description').should('be.visible')
+    expect(screen.getByText('Test Title')).toBeVisible()
+    expect(screen.getByText('Test Description')).toBeVisible()
   })
 
   it('renders icon when provided', () => {
-    cy.mount(
+    const { container } = render(
       <TableHeaderSection
         icon={mockIcon}
         title="Test Title"
         description="Test Description"
       />,
     )
-
-    cy.get('img[alt="Dataset Icon"]')
-      .should('be.visible')
-      .and('have.attr', 'src', mockIcon.src)
+    const img = container.querySelector('img[alt="Dataset Icon"]') as HTMLImageElement
+    expect(img).toBeVisible()
+    expect(img).toHaveAttribute('src', mockIcon.src)
   })
 
   it('does not render icon when not provided', () => {
-    cy.mount(
+    const { container } = render(
       <TableHeaderSection
         title="Test Title"
         description="Test Description"
       />,
     )
-
-    cy.get('img[alt="Dataset Icon"]').should('not.exist')
+    expect(container.querySelector('img[alt="Dataset Icon"]')).not.toBeInTheDocument()
   })
 
   it('does not render icon when src is missing', () => {
-    cy.mount(
+    const { container } = render(
       <TableHeaderSection
         icon={{ src: '', width: 64 }}
         title="Test Title"
         description="Test Description"
       />,
     )
-
-    cy.get('img[alt="Dataset Icon"]').should('not.exist')
+    expect(container.querySelector('img[alt="Dataset Icon"]')).not.toBeInTheDocument()
   })
 
   it('applies custom width and height to icon', () => {
-    cy.mount(
+    const { container } = render(
       <TableHeaderSection
         icon={{ src: '/test.png', width: 100, height: 50 }}
         title="Test Title"
         description="Test Description"
       />,
     )
-
-    cy.get('img[alt="Dataset Icon"]')
-      .should('have.css', 'width', '100px')
-      .and('have.css', 'height', '50px')
+    const img = container.querySelector('img[alt="Dataset Icon"]') as HTMLImageElement
+    expect(img).toHaveStyle({ width: '100px', height: '50px' })
   })
 
   it('renders React nodes as title and description', () => {
     const titleNode = <span>Custom Title</span>
     const descNode = <span>Custom Description</span>
-
-    cy.mount(
+    render(
       <TableHeaderSection
         title={titleNode}
         description={descNode}
       />,
     )
-
-    cy.contains('Custom Title').should('be.visible')
-    cy.contains('Custom Description').should('be.visible')
+    expect(screen.getByText('Custom Title')).toBeVisible()
+    expect(screen.getByText('Custom Description')).toBeVisible()
   })
 
   it('has correct data-cy attributes', () => {
-    cy.mount(
+    const { container } = render(
       <TableHeaderSection
         title="Test Title"
         description="Test Description"
       />,
     )
-
-    cy.get('[data-cy="table-header-title"]')
-      .should('be.visible')
-      .and('contain', 'Test Title')
-    cy.get('[data-cy="table-header-description"]')
-      .should('be.visible')
-      .and('contain', 'Test Description')
+    const titleEl = container.querySelector('[data-cy="table-header-title"]')
+    const descEl = container.querySelector('[data-cy="table-header-description"]')
+    expect(titleEl).toBeVisible()
+    expect(titleEl).toHaveTextContent('Test Title')
+    expect(descEl).toBeVisible()
+    expect(descEl).toHaveTextContent('Test Description')
   })
 })
