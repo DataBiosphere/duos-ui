@@ -93,10 +93,5 @@
   "engines": {
     "node": ">=24.11.1 <25"
   },
-  "type": "module",
-  "pnpm": {
-    "allowedDeprecatedVersions": {
-      "node-domexception": "1.0.0"
-    }
-  }
+  "type": "module"
 }
