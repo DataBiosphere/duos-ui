@@ -105,14 +105,18 @@ const mockConfig = {
   terraUrl: '', tdrApiUrl: '', ecmApiUrl: '', features: {},
 }
 const originalFetch = globalThis.fetch
-globalThis.fetch = vi.fn((url: Parameters<typeof fetch>[0]) => {
+globalThis.fetch = vi.fn((...args: Parameters<typeof fetch>) => {
+  const [url] = args
   if (url === CONFIG_PATH || (typeof url === 'string' && url.endsWith?.(CONFIG_PATH))) {
     return Promise.resolve(new Response(JSON.stringify(mockConfig), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     }))
   }
-  return originalFetch(url)
+  if (typeof originalFetch !== 'function') {
+    throw new Error('globalThis.fetch is not available in this test environment')
+  }
+  return originalFetch(...args)
 }) as typeof fetch
 
 beforeAll(() => {
