@@ -1,10 +1,3 @@
-vi.mock('src/libs/ajax/DataSet', () => ({
-  DataSet: { searchDatasetIndexV2: vi.fn() },
-}))
-vi.mock('src/utils/DatasetUtils', () => ({
-  getRadarEnabledDatasetsWithRules: vi.fn().mockResolvedValue([]),
-}))
-
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
@@ -23,6 +16,13 @@ import { BoolQuery, ElasticsearchQuery, ElasticsearchResponse, QueryClause } fro
 import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
 import { DuosUser } from 'src/types/model'
 import { EnumerateSnapshotModel } from 'src/types/tdrModel'
+
+vi.mock('src/libs/ajax/DataSet', () => ({
+  DataSet: { searchDatasetIndexV2: vi.fn() },
+}))
+vi.mock('src/utils/DatasetUtils', () => ({
+  getRadarEnabledDatasetsWithRules: vi.fn(),
+}))
 
 const ACCESS_REQUEST_PROCESS_LABEL = 'Access Request Process'
 const CLEAR_FILTERS_LABEL = 'Clear'
