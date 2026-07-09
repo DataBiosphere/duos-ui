@@ -506,10 +506,13 @@ describe('DataLibrary', () => {
     })
 
     it('does not clip the data grid when the asset count header is visible', async () => {
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1200 })
+      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 900 })
+      window.dispatchEvent(new Event('resize'))
       mountDefault('datasets')
 
       expect(await screen.findByText('1 Dataset')).toBeInTheDocument()
-      expect(document.querySelector('.MuiDataGrid-footerContainer')).toBeInTheDocument()
+      expect(document.querySelector('.MuiDataGrid-footerContainer')).toBeVisible()
     })
 
     it('shows a loading skeleton while data is fetching', async () => {

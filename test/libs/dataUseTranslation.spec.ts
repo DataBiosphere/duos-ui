@@ -22,6 +22,7 @@ const expectTranslatedLimitation = (targetKey: string, dataUse: MockDataUse) => 
   const targetTranslation = consentTranslations[targetKey] as TranslationEntry
 
   expect(response).toBeDefined()
+  expect(Object.keys(response!)).not.toHaveLength(0)
   expect(response?.code).toBe(targetTranslation.code)
   expect(response?.description).toBe(targetTranslation.description)
 }

@@ -19,7 +19,7 @@ describe('ToastNotifications', () => {
       })
 
       const alert = document.querySelector('[data-cy="notification-alert"]')
-      expect(alert).toBeInTheDocument()
+      expect(alert).toBeVisible()
       expect(alert).toHaveTextContent('Test notification')
       expect(alert).toHaveClass('MuiAlert-colorInfo')
     })
@@ -33,7 +33,7 @@ describe('ToastNotifications', () => {
       })
 
       const alert = document.querySelector('[data-cy="notification-alert"]')
-      expect(alert).toBeInTheDocument()
+      expect(alert).toBeVisible()
       expect(alert).toHaveTextContent('Warning message')
       expect(alert).toHaveClass('MuiAlert-colorWarning')
     })
@@ -45,6 +45,7 @@ describe('ToastNotifications', () => {
         })
       })
 
+      expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible()
       const reactText = document.querySelector('[data-testid="react-text"]')
       expect(reactText).toBeInTheDocument()
       expect(reactText).toHaveTextContent('React notification')
@@ -79,7 +80,7 @@ describe('ToastNotifications', () => {
           ToastNotifications.showNotification({ text: 'Closeable notification' })
         })
 
-        expect(document.querySelector('[data-cy="notification-alert"]')).toBeInTheDocument()
+        expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible()
 
         const closeButton = document.querySelector('[data-cy="notification-alert"] .MuiAlert-action button') as HTMLElement
         fireEvent.click(closeButton)
@@ -103,9 +104,15 @@ describe('ToastNotifications', () => {
         })
       })
 
-      // MUI emotion CSS-in-JS is not computed in jsdom; verify the notification renders without error
-      expect(document.querySelector('[data-cy="notification-alert"]')).toBeInTheDocument()
-      expect(document.querySelector('.MuiSnackbar-root')).toBeInTheDocument()
+      expect(document.querySelector('.MuiSnackbar-root')).toBeVisible()
+      // Emotion injects CSS into <style data-emotion> tags or cssRules; verify the sx rule was applied
+      const injectedCss = Array.from(document.styleSheets).flatMap((sheet) => {
+        try {
+          return Array.from(sheet.cssRules).map(r => r.cssText)
+        }
+        catch { return [] }
+      }).join('\n')
+      expect(injectedCss).toMatch(/background-color:\s*red/)
     })
 
     it('should handle multiple notifications', async () => {
@@ -128,7 +135,7 @@ describe('ToastNotifications', () => {
       })
 
       const alert = document.querySelector('[data-cy="notification-alert"]')
-      expect(alert).toBeInTheDocument()
+      expect(alert).toBeVisible()
       expect(alert).toHaveTextContent('Error message')
       expect(alert).toHaveClass('MuiAlert-colorError')
     })
@@ -154,7 +161,7 @@ describe('ToastNotifications', () => {
       })
 
       const alert = document.querySelector('[data-cy="notification-alert"]')
-      expect(alert).toBeInTheDocument()
+      expect(alert).toBeVisible()
       expect(alert).toHaveTextContent('Success message')
       expect(alert).toHaveClass('MuiAlert-colorSuccess')
     })
@@ -178,7 +185,7 @@ describe('ToastNotifications', () => {
       })
 
       const alert = document.querySelector('[data-cy="notification-alert"]')
-      expect(alert).toBeInTheDocument()
+      expect(alert).toBeVisible()
       expect(alert).toHaveTextContent('Warning message')
       expect(alert).toHaveClass('MuiAlert-colorWarning')
     })
@@ -191,7 +198,7 @@ describe('ToastNotifications', () => {
       })
 
       const alert = document.querySelector('[data-cy="notification-alert"]')
-      expect(alert).toBeInTheDocument()
+      expect(alert).toBeVisible()
       expect(alert).toHaveTextContent('Info message')
       expect(alert).toHaveClass('MuiAlert-colorInfo')
     })
@@ -217,24 +224,25 @@ describe('ToastNotifications', () => {
 
   describe('Styling and constraints', () => {
     it('should respect maximum width constraint', async () => {
+      const longText = 'This is a very long notification message that should be constrained by the maximum width setting to ensure it does not overflow off the page and remains readable within the viewport boundaries'
       await act(async () => {
-        ToastNotifications.showNotification({
-          text: 'This is a very long notification message that should be constrained by the maximum width setting to ensure it does not overflow off the page and remains readable within the viewport boundaries',
-        })
+        ToastNotifications.showNotification({ text: longText })
       })
 
-      // jsdom has no layout engine; verify the notification renders without error
-      expect(document.querySelector('.MuiSnackbar-root')).toBeInTheDocument()
+      const snackbar = document.querySelector('.MuiSnackbar-root')
+      expect(snackbar).toBeVisible()
+      // jsdom has no layout engine; verify the notification renders with the full long text
+      expect(snackbar).toHaveTextContent('constrained by the maximum width setting')
     })
 
     it('should have appropriate width for content', async () => {
       await act(async () => {
-        ToastNotifications.showNotification({
-          text: 'Short text',
-        })
+        ToastNotifications.showNotification({ text: 'Short text' })
       })
 
-      expect(document.querySelector('.MuiSnackbar-root')).toBeInTheDocument()
+      const snackbar = document.querySelector('.MuiSnackbar-root')
+      expect(snackbar).toBeVisible()
+      expect(snackbar).toHaveTextContent('Short text')
     })
   })
 })
