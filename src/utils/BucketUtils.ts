@@ -33,7 +33,6 @@ export interface Bucket {
   votes: Record<string, VoteGroup>[]
   matchResults: MatchResult[]
   algorithmResult?: AlgorithmResult
-  isRP: boolean // In practice, this will always be false.
   dacs?: DacTerm[]
 }
 
@@ -126,7 +125,6 @@ export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'da
       elections: [],
       votes: [],
       matchResults: [],
-      isRP: false,
       dacs: dacs,
     }
     buckets.push(bucket)
