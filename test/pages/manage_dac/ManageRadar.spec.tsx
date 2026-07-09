@@ -6,6 +6,9 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { act } from 'react'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import { DAC } from 'src/libs/ajax/DAC'
+import { Storage } from 'src/libs/storage'
+import { setUserRoleStatuses } from 'src/libs/utils'
+import { DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/ajax/DAC', () => ({
   DAC: {
@@ -26,6 +29,23 @@ const dac = {
   datasetIds: [],
 }
 
+const admin = {
+  userId: 2,
+  displayName: 'Admin',
+  institution: { id: 150, name: 'The Broad Institute of MIT and Harvard' },
+  roles: [{ userId: 2, roleId: 4, name: 'Admin' }],
+} as unknown as DuosUser
+
+// Chair fixture: dacId=1 in the role, component is mounted with dacId=123 (mismatched,
+// as in the original Cypress spec). ManageRadar doesn't gate on role, so both admin and
+// chair render identically — the setup call still exercises the setUserRoleStatuses path.
+const chair = {
+  userId: 1,
+  displayName: 'Chairperson',
+  institution: { id: 150, name: 'The Broad Institute of MIT and Harvard' },
+  roles: [{ userId: 1, roleId: 2, name: 'Chairperson', dacId: 1 }],
+} as unknown as DuosUser
+
 const mockDacId = 123
 
 const renderManageRadar = (dacId: number | undefined) => {
@@ -40,6 +60,7 @@ const renderManageRadar = (dacId: number | undefined) => {
 
 describe('ManageRadar Component Tests', () => {
   beforeEach(() => {
+    vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
     vi.mocked(DAC.fetchDACbotRules).mockResolvedValue([])
   })
 
@@ -83,6 +104,7 @@ describe('ManageRadar Component Tests', () => {
 
   describe('User Role Integration', () => {
     it('should render correctly for admin users', async () => {
+      setUserRoleStatuses(admin, Storage)
       vi.mocked(DAC.get).mockResolvedValue(dac)
       const { container } = renderManageRadar(mockDacId)
       await waitFor(() => expect(container.querySelector('[data-cy="loading-spinner"]')).not.toBeInTheDocument())
@@ -91,6 +113,7 @@ describe('ManageRadar Component Tests', () => {
     })
 
     it('should render correctly for chair users', async () => {
+      setUserRoleStatuses(chair, Storage)
       vi.mocked(DAC.get).mockResolvedValue(dac)
       const { container } = renderManageRadar(mockDacId)
       await waitFor(() => expect(container.querySelector('[data-cy="loading-spinner"]')).not.toBeInTheDocument())
@@ -119,6 +142,32 @@ describe('ManageRadar Component Tests', () => {
   })
 
   describe('Page Layout and Structure', () => {
+    it('should be visible on different screen sizes', async () => {
+      setUserRoleStatuses(admin, Storage)
+      vi.mocked(DAC.get).mockResolvedValue(dac)
+
+      // Mount once at mobile size
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 375 })
+      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 667 })
+      window.dispatchEvent(new Event('resize'))
+      const { container } = renderManageRadar(mockDacId)
+
+      await waitFor(() => expect(container.querySelector('[data-cy="loading-spinner"]')).not.toBeInTheDocument())
+      expect(container.querySelector('[data-cy="manage-radar-container"]')).toBeVisible()
+
+      // Tablet — same mounted component, resize only
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 768 })
+      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 1024 })
+      window.dispatchEvent(new Event('resize'))
+      expect(container.querySelector('[data-cy="manage-radar-container"]')).toBeVisible()
+
+      // Desktop — same mounted component, resize only
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1200 })
+      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 800 })
+      window.dispatchEvent(new Event('resize'))
+      expect(container.querySelector('[data-cy="manage-radar-container"]')).toBeVisible()
+    })
+
     it('should have proper page structure', async () => {
       vi.mocked(DAC.get).mockResolvedValue(dac)
       const { container } = renderManageRadar(mockDacId)
@@ -127,13 +176,6 @@ describe('ManageRadar Component Tests', () => {
       expect(container.querySelector('[data-cy="table-header-description"]')).toHaveTextContent(dac.name)
       expect(container.querySelector('[data-cy="back-button"]')).toBeInTheDocument()
       await waitFor(() => expect(container.querySelector('[data-cy="dac-bot-component"]')).toBeInTheDocument())
-    })
-
-    it('should be visible on different screen sizes', async () => {
-      vi.mocked(DAC.get).mockResolvedValue(dac)
-      const { container } = renderManageRadar(mockDacId)
-      await waitFor(() => expect(container.querySelector('[data-cy="manage-radar-container"]')).toBeInTheDocument())
-      expect(container.querySelector('[data-cy="manage-radar-container"]')).toBeVisible()
     })
   })
 
