@@ -90,16 +90,6 @@ describe('ERA Commons Component', () => {
     expect(document.querySelector('.required-field-error-span')).not.toBeInTheDocument()
   })
 
-  it('shows an error when auth token decoding fails', async () => {
-    vi.mocked(User.getMe).mockResolvedValue(researcher as never)
-    vi.mocked(AuthenticateNIH.getECMProviderAuthUrl).mockRejectedValue(new Error('error'))
-    const user = userEvent.setup()
-    mountComponent()
-    await waitFor(() => expect(document.querySelector('[data-cy=era-commons-authenticate-link]')).toBeInTheDocument())
-    await user.click(document.querySelector('[data-cy=era-commons-authenticate-link]')!)
-    await waitFor(() => expect(document.querySelector('[data-cy=era-commons-error-span]')).toBeVisible())
-  })
-
   it('shows an error when removing linked account fails', async () => {
     const exp = Date.now() + (30 * 24 * 60 * 60 * 1000)
     const eraAuthedUser: Researcher = {
@@ -121,11 +111,17 @@ describe('ERA Commons Component', () => {
 
   it('shows an error when ECM fails', async () => {
     vi.mocked(User.getMe).mockResolvedValue(researcher as never)
-    vi.mocked(AuthenticateNIH.getECMProviderAuthUrl).mockRejectedValue(new Error('error'))
+    vi.mocked(AuthenticateNIH.getECMProviderAuthUrl).mockRejectedValue({
+      response: { data: { message: 'ECM unavailable' } },
+    })
     const user = userEvent.setup()
     mountComponent()
     await waitFor(() => expect(document.querySelector('[data-cy=era-commons-authenticate-link]')).toBeInTheDocument())
     await user.click(document.querySelector('[data-cy=era-commons-authenticate-link]')!)
-    await waitFor(() => expect(document.querySelector('[data-cy=era-commons-error-span]')).toBeVisible())
+    await waitFor(() => {
+      expect(document.querySelector('[data-cy=era-commons-error-span]')).toHaveTextContent(
+        'Error from Authentication Provider: ECM unavailable: test@email.com',
+      )
+    })
   })
 })

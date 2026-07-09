@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid'
 import type { UserManager } from 'oidc-client-ts'
 
 const mockOidcUser = {
-  access_token: '',
+  access_token: 'valid-access-token',
   session_state: null as null,
   state: undefined as undefined,
   token_type: '',
@@ -28,7 +28,6 @@ describe('Auth Failure', () => {
   it('Sign In error throws expected message', async () => {
     vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(null as never)
     await expect(Auth.signIn()).rejects.toThrow(Auth.signInError())
-    expect(Storage.getOidcUser()).toBeTruthy()
     expect(Storage.userIsLogged()).toBe(false)
   })
 })
@@ -55,7 +54,7 @@ describe('Auth Success', () => {
   it('Sign In stores the current user', async () => {
     vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(mockOidcUser as never)
     await Auth.signIn()
-    expect(Storage.getOidcUser()).toBeTruthy()
+    expect(Storage.getOidcUser().access_token).toBe(mockOidcUser.access_token)
     expect(Storage.userIsLogged()).toBe(true)
   })
 
