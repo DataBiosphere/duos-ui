@@ -44,7 +44,6 @@ vi.mock('react-modal', async (importOriginal) => {
 import App from 'src/App'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
-import { Notifications } from 'src/libs/utils'
 
 const duosUser = {
   userId: 2,
@@ -73,6 +72,9 @@ describe('Main App Functions', () => {
   afterEach(() => {
     vi.restoreAllMocks()
     localStorage.clear()
+    Array.from(document.body.children)
+      .filter(el => el.querySelector('[data-cy="notification-alert"]') || el.querySelector('.MuiSnackbar-root'))
+      .forEach(el => el.remove())
   })
 
   it('should render main layout components on the home page', async () => {
@@ -89,26 +91,24 @@ describe('Main App Functions', () => {
 
   it('should display an error when ECM fails', async () => {
     vi.mocked(AuthenticateNIH.getECMProviderLinkInfo).mockRejectedValue(new Error('Authentication failed'))
-    const showErrorSpy = vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
     render(
       <MemoryRouter initialEntries={[initialLocation]}>
         <App />
       </MemoryRouter>,
     )
     await waitFor(() => expect(vi.mocked(AuthenticateNIH.getECMProviderLinkInfo)).toHaveBeenCalledWith(code, state))
-    await waitFor(() => expect(showErrorSpy).toHaveBeenCalled())
+    await waitFor(() => expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible())
   })
 
   it('should display an error when account syncing fails', async () => {
     vi.mocked(AuthenticateNIH.getECMProviderLinkInfo).mockResolvedValue(linkInfo as never)
     vi.mocked(AuthenticateNIH.getSyncedUser).mockRejectedValue(new Error('Authentication failed'))
-    const showErrorSpy = vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
     render(
       <MemoryRouter initialEntries={[initialLocation]}>
         <App />
       </MemoryRouter>,
     )
-    await waitFor(() => expect(showErrorSpy).toHaveBeenCalled())
+    await waitFor(() => expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible())
   })
 
   it('should process RAS query params (code, state) and navigate to the profile page when the parameter specifies it', async () => {
