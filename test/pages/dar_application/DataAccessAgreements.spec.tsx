@@ -81,7 +81,7 @@ describe('DataAccessAgreements Component Tests', () => {
     }] as never)
     mountComponent({ datasets: [{ dataSetId: 1, datasetId: 1, dacId: 2 }] })
     await waitFor(() =>
-      expect(document.body).toHaveTextContent(/By submitting this data access request/),
+      expect(document.body).toHaveTextContent('By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.'),
     )
   })
 
