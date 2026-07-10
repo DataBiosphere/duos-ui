@@ -67,7 +67,9 @@ const hasTerm = (query: QueryClause, field: string, value: string | number | boo
   'term' in query && query.term?.[field] === value
 
 const getLabelControl = <T extends HTMLElement>(labelText: string, role: string): T => {
-  const label = screen.getByText(labelText).closest('label')
+  const label = screen.getAllByText(labelText)
+    .map(el => el.closest('label'))
+    .find((el): el is HTMLLabelElement => el !== null)
   expect(label).toBeInTheDocument()
   return within(label as HTMLElement).getByRole(role) as T
 }
