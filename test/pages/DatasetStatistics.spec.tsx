@@ -226,7 +226,7 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText('TDR Location')).toBeTruthy()
   })
 
-  it('offers only the first snapshot via the Terra option when multiple snapshots are returned', async () => {
+  it('offers a Terra option per snapshot, differentiated by name, when multiple snapshots are returned', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithMultipleSnapshots })
 
     expect(await screen.findByText('TDR Location')).toBeTruthy()
@@ -234,9 +234,12 @@ describe('DatasetStatistics', () => {
     const exportButton = await screen.findByRole('button', { name: /export to/i })
     fireEvent.click(exportButton)
 
-    const terraItem = await screen.findByText('Terra')
-    expect(terraItem.closest('a')?.getAttribute('href')).toContain('snapshot-abc')
-    expect(screen.queryByText('Snapshot XYZ')).toBeNull()
+    expect(await screen.findAllByText('Terra')).toHaveLength(2)
+
+    const abcLink = screen.getByText('Snapshot ABC').closest('a')
+    const xyzLink = screen.getByText('Snapshot XYZ').closest('a')
+    expect(abcLink?.getAttribute('href')).toContain('snapshot-abc')
+    expect(xyzLink?.getAttribute('href')).toContain('snapshot-xyz')
   })
 
   it('handles TDR API errors gracefully and shows Data Location', async () => {
