@@ -14,12 +14,10 @@ const isCI = Boolean(process.env.CI)
 // allowedHosts is the exception: Vite still enforces it in middleware mode to reject
 // requests whose Host header doesn't match. All of this is inert in production builds.
 const serverOptions = {
-  // CI runners can't resolve the Broad local-dev hostname (and have no
-  // browser to open); everything binds/waits on localhost:3000 there.
-  host: isCI ? 'localhost' : 'local.dsde-dev.broadinstitute.org',
+  host: 'local.dsde-dev.broadinstitute.org',
   port: 3000,
   https: isCI ? undefined : { key: 'server.key', cert: 'server.crt' },
-  open: !isCI,
+  open: true,
   allowedHosts: ['local.dsde-dev.broadinstitute.org'],
 }
 
