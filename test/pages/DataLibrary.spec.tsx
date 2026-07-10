@@ -34,7 +34,6 @@ const EXPORT_LABEL = 'Export'
 const FOOTER_SELECTOR = '[data-cy="library-footer"]'
 const SEARCH_INPUT_SELECTOR = 'input[placeholder="Enter search terms"]'
 const SHOW_FILTERS_BUTTON_SELECTOR = '[aria-label="Show filters"]'
-const SKELETON_SELECTOR = '[class*="MuiSkeleton"]'
 const STUDIES_TAB_PATH = '/?tab=studies'
 const VIA_DUOS_LABEL = 'via DUOS'
 
@@ -159,6 +158,7 @@ const mockDatasetsResponse = {
 const mockStudiesResponse = {
   aggregations: {
     total_studies: { value: 2 },
+    datasets_count: { doc_count: 1 },
     studies: {
       buckets: [
         {
@@ -347,7 +347,7 @@ describe('DataLibrary', () => {
     })
   })
 
-  it('removes incompatible filters when switching to an asset with a narrower filter set', async () => {
+  it('keeps filters set on other tabs and surfaces them as removable chips', async () => {
     const user = userEvent.setup()
     renderLibrary('/?tab=datasets&access=controlled&minParticipants=10')
     await screen.findByText(ACCESS_REQUEST_PROCESS_LABEL)
@@ -356,16 +356,19 @@ describe('DataLibrary', () => {
 
     await user.click(screen.getByRole('tab', { name: /Publications/i }))
 
+    // Access Request Process and Participants are not part of the Publications
+    // panel, so those accordion sections disappear...
     await waitFor(() => {
       expect(screen.queryByText(ACCESS_REQUEST_PROCESS_LABEL)).not.toBeInTheDocument()
-      expect(screen.queryByText('Participants')).not.toBeInTheDocument()
-      expect(screen.queryByText('Datasets Cited?')).not.toBeInTheDocument()
-      expect(screen.queryByText(CLEAR_FILTERS_LABEL)).not.toBeInTheDocument()
     })
 
+    // ...but the filters stay active: they are carried over as removable chips
+    // under "Filters from other views" and remain in the URL, so filters
+    // combine across tabs rather than being dropped on tab switch.
+    expect(screen.getByText('Filters from other views')).toBeInTheDocument()
     const locationSearch = screen.getByTestId('location').textContent
-    expect(locationSearch).not.toContain('access=')
-    expect(locationSearch).not.toContain('minParticipants=')
+    expect(locationSearch).toContain('access=')
+    expect(locationSearch).toContain('minParticipants=')
   })
 
   it('applies row-level filtering for nested presentation rows when Datasets Cited is selected', async () => {
@@ -421,7 +424,7 @@ describe('DataLibrary', () => {
     expect(await screen.findByText('Nested Match Presentation')).toBeInTheDocument()
     expect(screen.getByText('Nested Non-Match Presentation')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('Datasets Cited?'))
+    fireEvent.click(screen.getByText('Datasets Cited (Presentations)?'))
     await screen.findByText('Yes')
 
     fireEvent.click(getLabelControl<HTMLInputElement>('Yes', 'radio'))
@@ -456,21 +459,31 @@ describe('DataLibrary', () => {
     expect(screen.getByText(/2 datasets selected from 1 study/)).toBeInTheDocument()
   })
 
-  describe('asset count', () => {
+  describe('tab counts', () => {
     const mountDefault = (tab = 'studies') => renderLibrary(`/?tab=${tab}`)
 
-    it('shows the plural studies count after loading', async () => {
+    // Every tab's count comes from a single dedicated tab-counts query
+    // (`total_studies` and `datasets_count` aggregations), rendered as a badge on
+    // the tab itself rather than a total-count header above the grid.
+    it('shows the studies count as a badge on the Studies tab', async () => {
       mountDefault('studies')
-      expect(await screen.findByText('2 Studies')).toBeInTheDocument()
+      expect(await screen.findByLabelText('2 items')).toBeInTheDocument()
     })
 
-    it('shows singular "Study" when total is 1', async () => {
+    it('shows the datasets count as a badge derived from the tab-counts query', async () => {
+      mountDefault('datasets')
+      // `datasets_count.doc_count` on the shared studies response is 1.
+      expect(await screen.findByLabelText('1 items')).toBeInTheDocument()
+    })
+
+    it('reflects an updated studies count from the tab-counts query', async () => {
       vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) => {
         const q = asTestQuery(query)
         if (q.aggs?.studies) {
           return asSearchResponse({
             aggregations: {
-              total_studies: { value: 1 },
+              total_studies: { value: 42 },
+              datasets_count: { doc_count: 1 },
               studies: {
                 buckets: [
                   {
@@ -489,53 +502,30 @@ describe('DataLibrary', () => {
       })
 
       mountDefault('studies')
-      expect(await screen.findByText('1 Study')).toBeInTheDocument()
+      expect(await screen.findByLabelText('42 items')).toBeInTheDocument()
     })
 
-    it('shows the datasets count on the datasets tab', async () => {
-      mountDefault('datasets')
-      expect(await screen.findByText('1 Dataset')).toBeInTheDocument()
-    })
+    it('omits the count badges until the tab-counts query resolves', async () => {
+      const { promise: countsPromise, resolve: resolveCounts } = createDeferred<SearchDatasetResponse>()
 
-    it('shows plural "Datasets" when total is greater than 1', async () => {
       vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) => {
         const q = asTestQuery(query)
+        // The tab-counts query is the only one carrying the `datasets_count` agg.
+        if (q.aggs?.datasets_count) return countsPromise
         if (q.aggs?.studies) return asSearchResponse(mockStudiesResponse)
-        if (q.size === 0) return asSearchResponse(mockMetadataResponse)
-        return asSearchResponse({ hits: { total: { value: 42 }, hits: [] } })
-      })
-
-      mountDefault('datasets')
-      expect(await screen.findByText('42 Datasets')).toBeInTheDocument()
-    })
-
-    it('does not clip the data grid when the asset count header is visible', async () => {
-      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1200 })
-      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 900 })
-      window.dispatchEvent(new Event('resize'))
-      mountDefault('datasets')
-
-      expect(await screen.findByText('1 Dataset')).toBeInTheDocument()
-      expect(document.querySelector('.MuiDataGrid-footerContainer')).toBeVisible()
-    })
-
-    it('shows a loading skeleton while data is fetching', async () => {
-      const { promise: studiesPromise, resolve: resolveStudies } = createDeferred<SearchDatasetResponse>()
-
-      vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) => {
-        const q = asTestQuery(query)
-        if (q.aggs?.studies) return studiesPromise
         return asSearchResponse(mockMetadataResponse)
       })
 
       mountDefault('studies')
 
-      await waitFor(() => expect(document.querySelector(SKELETON_SELECTOR)).toBeInTheDocument())
+      // Rows render from the data query while the counts query is still pending,
+      // so no count badge is shown yet.
+      await getSingleDataGridRow()
+      expect(screen.queryByLabelText('2 items')).not.toBeInTheDocument()
 
-      resolveStudies(asSearchResponse(mockStudiesResponse))
+      resolveCounts(asSearchResponse(mockStudiesResponse))
 
-      await waitFor(() => expect(screen.queryByText('2 Studies')).toBeInTheDocument())
-      await waitFor(() => expect(document.querySelector(SKELETON_SELECTOR)).not.toBeInTheDocument())
+      expect(await screen.findByLabelText('2 items')).toBeInTheDocument()
     })
   })
 

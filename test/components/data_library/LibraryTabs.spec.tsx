@@ -68,9 +68,11 @@ describe('LibraryTabs', () => {
       { key: AssetType.DATASETS, label: 'Datasets', count: 0 },
     ]
     render(<LibraryTabs value={AssetType.STUDIES} onChange={() => {}} tabs={tabsWithCounts} />)
-    // Counts render with locale formatting, including zero.
-    expect(screen.getByText('1,234')).toBeInTheDocument()
-    expect(screen.getByText('0')).toBeInTheDocument()
+    // Counts render with locale formatting, including zero. Assert against
+    // toLocaleString() (not a hard-coded separator) so the expectation matches
+    // the runtime locale and the test isn't flaky under a non-en-US locale.
+    expect(screen.getByText((1234).toLocaleString())).toBeInTheDocument()
+    expect(screen.getByText((0).toLocaleString())).toBeInTheDocument()
   })
 
   it('omits the count when a tab has no count (e.g. still loading)', () => {

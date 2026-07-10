@@ -11,8 +11,9 @@ export type TabCounts = Partial<Record<AssetType, number>>
  * "aggregate every study, return its `study.*` source" Elasticsearch query and
  * only differs in which `study.assets.*` array its `transformResponse` flattens.
  * Their counts can therefore all be derived from a single shared `studies`
- * aggregation — which those tabs' data query already fetches, so their counts
- * ride along for free with no second request.
+ * aggregation. That aggregation is fetched once by the dedicated `size: 0`
+ * tab-counts query (see `useLibraryTabCounts`), so every one of these tabs is
+ * counted from that one shared response rather than from its own data query.
  */
 // Derived from the AssetType enum rather than hand-listed: every asset other
 // than Studies and Datasets is rendered from the shared study aggregation, so a

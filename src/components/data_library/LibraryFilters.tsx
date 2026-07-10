@@ -394,10 +394,17 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
             <>
               {activeFilterCount > 0 && (
                 <Box
-                  component="span"
+                  component="button"
+                  type="button"
                   aria-label={`${activeFilterCount} active filters`}
                   onClick={onToggle}
-                  sx={{ ...COUNT_BADGE_SX, fontWeight: 'bold', cursor: 'pointer' }}
+                  sx={{
+                    ...COUNT_BADGE_SX,
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    border: 'none',
+                    fontFamily: 'inherit',
+                  }}
                 >
                   {activeFilterCount}
                 </Box>
