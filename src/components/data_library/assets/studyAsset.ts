@@ -45,7 +45,7 @@ export const studyAsset: AssetDefinition = {
         },
         studies: {
           composite: {
-            size: Math.max(1, (pagination.page + 1) * pagination.pageSize),
+            size: (pagination.page + 1) * pagination.pageSize,
             sources: [
               {
                 study_id: {

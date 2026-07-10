@@ -1,4 +1,4 @@
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery, QueryClause } from 'src/types/elastic'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
@@ -121,41 +121,6 @@ export const useLibraryData = (
     // Preserve previous rows/options while new filters load to avoid UI flicker.
     placeholderData: previousData => previousData ?? emptyResult,
   })
-}
-
-/**
- * Custom hook for fetching the total count of assets for each tab type in parallel.
- * Uses pageSize:0 so only the total is returned, not full row data.
- */
-export const useLibraryTabCounts = (
-  libraryConfig: LibraryVersionNew,
-  assetTypes: AssetType[],
-  filters: FilterState,
-  queryTerm: string,
-): Partial<Record<AssetType, number>> => {
-  const results = useQueries({
-    queries: assetTypes.map(assetType => {
-      const sanitized = sanitizeFiltersForAsset(assetType, filters)
-      return {
-        queryKey: ['library-tab-count', libraryConfig.key, assetType, sanitized, queryTerm],
-        queryFn: async () => {
-          const query = buildElasticsearchQuery(libraryConfig, assetType, sanitized, queryTerm, { page: 0, pageSize: 0 })
-          const response = await DataSet.searchDatasetIndexV2(query)
-          return assetRegistry[assetType].transformResponse(response, { page: 0, pageSize: 0 }).total
-        },
-        staleTime: 5 * 60 * 1000,
-        retry: 1,
-      }
-    }),
-  })
-
-  const counts: Partial<Record<AssetType, number>> = {}
-  assetTypes.forEach((assetType, i) => {
-    if (results[i].data !== undefined) {
-      counts[assetType] = results[i].data
-    }
-  })
-  return counts
 }
 
 /**
