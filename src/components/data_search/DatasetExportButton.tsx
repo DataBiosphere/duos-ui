@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { Link, Button, Menu, MenuItem } from '@mui/material'
+import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { Config } from 'src/libs/config'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
+import terraLogo from 'src/images/terra-logo.svg'
 
 interface DatasetExportButtonProps {
   snapshots: SnapshotSummaryModel[]
@@ -19,27 +20,10 @@ export const DatasetExportButton = ({ snapshots }: DatasetExportButtonProps) => 
     })()
   }, [])
 
-  const makeLink = (snapshot: SnapshotSummaryModel) =>
-    `${terraUrl}/#import-data?snapshotId=${snapshot.id}&format=tdrexport&tdrSyncPermissions=false`
-
   if (snapshots.length === 0) return null
 
-  if (snapshots.length === 1) {
-    const snapshot = snapshots[0]
-    const title = `Export snapshot ${snapshot.name}`
-    return (
-      <Link
-        style={{ marginRight: '5px' }}
-        href={makeLink(snapshot)}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={title}
-        aria-label={title}
-      >
-        Export
-      </Link>
-    )
-  }
+  const makeTerraLink = (snapshot: SnapshotSummaryModel) =>
+    `${terraUrl}/#import-data?snapshotId=${snapshot.id}&format=tdrexport&tdrSyncPermissions=false`
 
   return (
     <>
@@ -48,10 +32,10 @@ export const DatasetExportButton = ({ snapshots }: DatasetExportButtonProps) => 
         variant="text"
         endIcon={<ArrowDropDownIcon />}
         onClick={e => setAnchorEl(e.currentTarget)}
-        aria-label={`Export — ${snapshots.length} snapshots available`}
+        aria-label="Export to..."
         sx={{ marginRight: '5px', textTransform: 'none', padding: '0 4px 0 0', minWidth: 0, fontSize: 'inherit', lineHeight: 'inherit' }}
       >
-        Export
+        Export to...
       </Button>
       <Menu
         anchorEl={anchorEl}
@@ -62,13 +46,16 @@ export const DatasetExportButton = ({ snapshots }: DatasetExportButtonProps) => 
           <MenuItem
             key={snapshot.id}
             component="a"
-            href={makeLink(snapshot)}
+            href={makeTerraLink(snapshot)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setAnchorEl(null)}
-            title={`Export snapshot ${snapshot.name}`}
+            title={`Export snapshot ${snapshot.name} to Terra`}
           >
-            {snapshot.name}
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <Box component="img" src={terraLogo} alt="" sx={{ width: 32, height: 32 }} />
+            </ListItemIcon>
+            <ListItemText primary="Terra" secondary={snapshot.name} />
           </MenuItem>
         ))}
       </Menu>
