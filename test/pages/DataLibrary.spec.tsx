@@ -248,6 +248,14 @@ describe('DataLibrary', () => {
     expect(document.querySelector(SEARCH_INPUT_SELECTOR)).toBeInTheDocument()
   })
 
+  it('shows an error message when the dataset query fails', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockRejectedValue(new Error('boom'))
+
+    renderLibrary(DATASETS_TAB_PATH)
+
+    expect(await screen.findByText('Error Loading Data', {}, { timeout: 5000 })).toBeInTheDocument()
+  })
+
   it('renders filter categories', async () => {
     renderLibrary('/')
     // Wait for render; use toHaveTextContent since some labels also appear as DataGrid column headers

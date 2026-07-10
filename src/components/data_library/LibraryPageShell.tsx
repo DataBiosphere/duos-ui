@@ -1,10 +1,10 @@
 import React from 'react'
-import { Box, Skeleton, Tooltip, Typography } from '@mui/material'
-import BoltIcon from '@mui/icons-material/Bolt'
+import { Box, Skeleton, Typography } from '@mui/material'
 import { GridColDef } from '@mui/x-data-grid'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
+import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
 import { ExportableDatasets, TabConfig } from 'src/types/library'
 import { LibraryPageState } from 'src/hooks/useLibraryPageState'
 
@@ -122,42 +122,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
                     {data?.total === 1 ? currentAsset.label.singular : currentAsset.label.plural}
                   </Typography>
                 )}
-            {radarEnabledDatasetIds !== undefined && (
-              <Tooltip title="Datasets marked with a lightning bolt are eligible for automatic, instant access approvals — your request may be approved immediately if it clearly falls within the dataset's data use terms." arrow>
-                <Box
-                  sx={{
-                    'display': 'flex',
-                    'alignItems': 'center',
-                    'gap': 0.75,
-                    'px': 1.5,
-                    'py': 0.5,
-                    'borderRadius': 99,
-                    'bgcolor': 'rgba(255, 215, 0, 0.10)',
-                    'border': '1px solid rgba(255, 215, 0, 0.45)',
-                    'cursor': 'default',
-                    'userSelect': 'none',
-                    'transition': 'background-color 0.15s',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 215, 0, 0.18)',
-                    },
-                  }}
-                >
-                  <BoltIcon sx={{ color: 'gold', fontSize: 17 }} />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'text.secondary',
-                      fontWeight: 600,
-                      fontSize: '0.72rem',
-                      whiteSpace: 'nowrap',
-                      letterSpacing: 0.2,
-                    }}
-                  >
-                    Instant approval eligible
-                  </Typography>
-                </Box>
-              </Tooltip>
-            )}
+            {radarEnabledDatasetIds !== undefined && <InstantApprovalBadge />}
           </Box>
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
             <LibraryDataGrid

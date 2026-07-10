@@ -8,13 +8,15 @@ import DatasetStatistics from 'src/pages/DatasetStatistics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
-import { DatasetStatisticsDar } from 'src/types/model'
+import { DAC } from 'src/libs/ajax/DAC'
+import { DatasetStatisticsDar, DataUseSummary } from 'src/types/model'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
 
 // Mock the AJAX modules
 vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/ajax/DatasetMetrics')
 vi.mock('src/libs/ajax/TerraDataRepo')
+vi.mock('src/libs/ajax/DAC')
 
 // Mock fetch for config.json
 const mockConfig = {
@@ -57,7 +59,7 @@ const mockDatasetTerm = {
   dacApproval: true,
   approvedUserIds: [],
   piName: 'Dr. Test PI',
-  dataUse: { primary: [] },
+  dataUse: { primary: [] } as DataUseSummary,
   study: {
     studyId: 101,
     studyName: 'Test Study',
@@ -138,14 +140,17 @@ describe('DatasetStatistics', () => {
     dars = mockDarsResponse,
     tdrResponse = mockEmptyTdrResponse,
     tdrError,
+    dacRules = [],
   }: {
     dataset?: typeof mockDatasetTerm
     dars?: DatasetStatisticsDar[]
     tdrResponse?: ReturnType<typeof buildTdrResponse>
     tdrError?: Error
+    dacRules?: unknown[]
   } = {}) => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(dars)
+    vi.mocked(DAC.fetchDACbotRules).mockResolvedValue(dacRules as never)
 
     if (tdrError) {
       vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockRejectedValue(tdrError)
@@ -182,6 +187,31 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText(/DUOS-000001 - Test Dataset/)).toBeTruthy()
     expect(await screen.findByText('Test Study')).toBeTruthy()
     expect(await screen.findByText('Dr. Test PI')).toBeTruthy()
+  })
+
+  it('shows the instant approval badge when the dataset is radar-eligible', async () => {
+    renderDatasetStatistics({
+      dataset: { ...mockDatasetTerm, dataUse: { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [] } },
+      dacRules: [{
+        id: 1,
+        ruleType: 'GRU_V1',
+        description: 'Auto-approve GRU',
+        ruleState: 'AVAILABLE',
+        activationDate: Date.parse('2026-01-01'),
+        enabledByUserId: null,
+        displayName: null,
+        userEmail: null,
+      }],
+    })
+
+    expect(await screen.findByText('Instant approval eligible')).toBeInTheDocument()
+  })
+
+  it('does not show the instant approval badge when the dataset is not radar-eligible', async () => {
+    renderDatasetStatistics()
+
+    expect(await screen.findByText(/DUOS-000001 - Test Dataset/)).toBeTruthy()
+    expect(screen.queryByText('Instant approval eligible')).not.toBeInTheDocument()
   })
 
   it('shows Data Location when no exportable snapshots are available', async () => {
@@ -294,6 +324,7 @@ describe('DatasetStatistics', () => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue([])
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
+    vi.mocked(DAC.fetchDACbotRules).mockResolvedValue([])
     return render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={[path]}>
