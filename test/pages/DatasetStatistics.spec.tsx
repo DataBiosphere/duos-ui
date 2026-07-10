@@ -1,6 +1,7 @@
+import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
@@ -133,15 +134,17 @@ describe('DatasetStatistics', () => {
   let queryClient: QueryClient
 
   const renderDatasetStatistics = ({
+    dataset = mockDatasetTerm,
     dars = mockDarsResponse,
     tdrResponse = mockEmptyTdrResponse,
     tdrError,
   }: {
+    dataset?: typeof mockDatasetTerm
     dars?: DatasetStatisticsDar[]
     tdrResponse?: ReturnType<typeof buildTdrResponse>
     tdrError?: Error
   } = {}) => {
-    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDatasetTerm])
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(dars)
 
     if (tdrError) {
@@ -174,7 +177,7 @@ describe('DatasetStatistics', () => {
   })
 
   it('renders the dataset details page', async () => {
-    renderDatasetStatistics()
+    renderDatasetStatistics({ dataset: mockDatasetTerm })
 
     expect(await screen.findByText(/DUOS-000001 - Test Dataset/)).toBeTruthy()
     expect(await screen.findByText('Test Study')).toBeTruthy()
@@ -258,5 +261,240 @@ describe('DatasetStatistics', () => {
     expect(
       await screen.findByText(/No Data Access Requests have been created for this dataset/),
     ).toBeTruthy()
+  })
+})
+
+// access management, field display, identifier variants
+describe('DatasetStatistics', () => {
+  let queryClient: QueryClient
+
+  const mockDataset = {
+    datasetId: 1975,
+    name: 'ExternalAccessTestJL1',
+    datasetName: 'ExternalAccessTestJL1',
+    datasetIdentifier: 'DUOS-000682',
+    participantCount: 100,
+    dataUse: {
+      primary: [{ code: 'GRU', description: 'Data is available for general research use.' }],
+      secondary: [],
+    },
+    study: {
+      studyId: 5854,
+      studyName: 'ExternalAccessTestJL1',
+      description: 'A description for ExternalAccessTestJL1',
+      publicVisibility: true,
+      piName: 'Dr. Make',
+      dataTypes: ['Hybrid Capture'],
+      datasetIds: [1975, 1976, 1977],
+    },
+    deletable: false,
+    createDate: 'Nov 2, 2023',
+    createUserId: 3396,
+    alias: 682,
+    updateDate: 1730999135936,
+    updateUserId: 3351,
+  }
+
+  const mount = (dataset: object, path = `/dataset/${mockDataset.datasetIdentifier}`) => {
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset as never])
+    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue([])
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+  }
+
+  beforeEach(() => {
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    vi.clearAllMocks()
+  })
+
+  it('Renders the correct dataset from a DUOS-xxx identifier path parameter', async () => {
+    mount(mockDataset)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
+  })
+
+  it('Renders the correct dataset from a DUOS-D{id} identifier path parameter', async () => {
+    mount(mockDataset, `/dataset/DUOS-D${mockDataset.datasetId}`)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
+  })
+
+  it('Displays Controlled Access Dataset Apply Button', async () => {
+    const controlled = { ...mockDataset, accessManagement: 'controlled' }
+    mount(controlled)
+    await screen.findByText(new RegExp(controlled.datasetIdentifier))
+    expect(document.body).toHaveTextContent(controlled.datasetName)
+    expect(await screen.findByText('Apply for Access')).toBeInTheDocument()
+  })
+
+  it('Displays External Access Language With Location', async () => {
+    const external = { ...mockDataset, accessManagement: 'external', url: 'https://duos.org' }
+    mount(external)
+    await screen.findByText(new RegExp(external.datasetIdentifier))
+    expect(document.body).toHaveTextContent(external.datasetName)
+    expect(await screen.findByText(/This dataset is externally managed/)).toBeInTheDocument()
+    expect(await screen.findByText(/Requests cannot be made via DUOS/)).toBeInTheDocument()
+    expect(await screen.findByText(/must be made directly through/)).toBeInTheDocument()
+  })
+
+  it('Displays External Access Language Without Location', async () => {
+    const external = { ...mockDataset, accessManagement: 'external' }
+    mount(external)
+    await screen.findByText(new RegExp(external.datasetIdentifier))
+    expect(document.body).toHaveTextContent(external.datasetName)
+    expect(await screen.findByText(/This dataset is externally managed/)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByText(/must be made directly through/)).not.toBeInTheDocument()
+    })
+  })
+
+  it('Displays Open Access Language With Location', async () => {
+    const open = { ...mockDataset, accessManagement: 'open', url: 'https://duos.org' }
+    mount(open)
+    await screen.findByText(new RegExp(open.datasetIdentifier))
+    expect(document.body).toHaveTextContent(open.datasetName)
+    expect(await screen.findByText(/This dataset is open access/)).toBeInTheDocument()
+    expect(await screen.findByText(/and can be accessed directly/)).toBeInTheDocument()
+  })
+
+  it('Displays Open Access Language Without Location', async () => {
+    const open = { ...mockDataset, accessManagement: 'open' }
+    mount(open)
+    await screen.findByText(new RegExp(open.datasetIdentifier))
+    expect(document.body).toHaveTextContent(open.datasetName)
+    expect(await screen.findByText(/This dataset is open access/)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByText(/and can be accessed directly/)).not.toBeInTheDocument()
+    })
+  })
+
+  it('Displays with no additional properties', async () => {
+    mount(mockDataset)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
+  })
+
+  it('Displays All Data Custodian Emails', async () => {
+    const dataCustodians = ['foo@bar.com', 'bar@baz.com']
+    const withCustodians = {
+      ...mockDataset,
+      study: { ...mockDataset.study, dataCustodianEmail: dataCustodians },
+    }
+    mount(withCustodians)
+    expect(await screen.findByText(/Data Custodian/)).toBeInTheDocument()
+    for (const email of dataCustodians) {
+      expect(await screen.findByText(new RegExp(email))).toBeInTheDocument()
+    }
+  })
+
+  it('Does not display the Data Use field for open datasets', async () => {
+    const open = { ...mockDataset, accessManagement: 'open' }
+    mount(open)
+    await screen.findByText(new RegExp(open.datasetIdentifier))
+    expect(screen.queryByText(/^Data Use/)).not.toBeInTheDocument()
+  })
+
+  it('Displays the Data Use field for controlled datasets', async () => {
+    const controlled = { ...mockDataset, accessManagement: 'controlled' }
+    mount(controlled)
+    expect(await screen.findByText(/Data Use/)).toBeInTheDocument()
+    expect(await screen.findByText(new RegExp(mockDataset.dataUse.primary[0].code))).toBeInTheDocument()
+  })
+
+  it('Displays the Principal Investigator field', async () => {
+    mount(mockDataset)
+    expect(await screen.findByText(/Principal Investigator/)).toBeInTheDocument()
+    expect(await screen.findByText(mockDataset.study.piName)).toBeInTheDocument()
+  })
+
+  it('Displays the Request Location field as a link when present', async () => {
+    const requestLocationUrl = 'https://request.example.org/apply'
+    const withRequestLocation = { ...mockDataset, requestLocation: requestLocationUrl }
+    mount(withRequestLocation)
+    expect(await screen.findByText(/Request Location/)).toBeInTheDocument()
+    expect(document.querySelector(`a[href="${requestLocationUrl}"]`)).toBeInTheDocument()
+  })
+
+  it('Does not display the Request Location field when absent', async () => {
+    const withoutRequestLocation = { ...mockDataset }
+    mount(withoutRequestLocation)
+    await screen.findByText(new RegExp(mockDataset.datasetIdentifier))
+    expect(screen.queryByText(/Request Location/)).not.toBeInTheDocument()
+  })
+
+  it('Displays DAR section with data', async () => {
+    const darsData: DatasetStatisticsDar[] = [{
+      darCode: 'DAR-123',
+      projectTitle: 'Test Project',
+      updateDate: new Date('2023-01-01').getTime(),
+      nonTechRus: 'Test summary',
+      expired: false,
+      referenceId: 'abc',
+    }]
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
+    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeInTheDocument()
+    expect(await screen.findByText('DAR-123')).toBeInTheDocument()
+    expect(await screen.findByText('Test Project')).toBeInTheDocument()
+  })
+
+  it('Displays message when no DARs exist', async () => {
+    mount(mockDataset)
+    expect(await screen.findByText(/No Data Access Requests have been created for this dataset/)).toBeInTheDocument()
+  })
+
+  it('Displays DAR section with expired data', async () => {
+    const expired = new Date()
+    expired.setFullYear(expired.getFullYear() - 2)
+    const dateTime = expired.getTime()
+    const pad = (n: number) => ('0' + n).slice(-2)
+    const expectedDateString = `${expired.getFullYear()}-${pad(expired.getMonth() + 1)}-${pad(expired.getDate())}`
+
+    const darsData: DatasetStatisticsDar[] = [{
+      darCode: 'DAR-123',
+      projectTitle: 'Test Project',
+      updateDate: dateTime,
+      nonTechRus: 'Test summary',
+      expired: true,
+      referenceId: 'abc',
+    }]
+
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
+    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeInTheDocument()
+    expect(await screen.findByText('DAR-123')).toBeInTheDocument()
+    expect(await screen.findByText('Test Project')).toBeInTheDocument()
+    const showMoreButton = await screen.findByText('Show More')
+    fireEvent.click(showMoreButton)
+    expect(await screen.findByText(/Expired/)).toBeInTheDocument()
+    expect(await screen.findByText(new RegExp(expectedDateString))).toBeInTheDocument()
+    expect(await screen.findByText(darsData[0].nonTechRus)).toBeInTheDocument()
   })
 })

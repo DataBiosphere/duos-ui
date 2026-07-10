@@ -15,8 +15,8 @@ const Status = () => {
     fetchStatus()
   }, [])
 
-  const healthyState = <TaskAltOutlined sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'green' }} />
-  const unhealthyState = <ErrorOutlined sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'red' }} />
+  const healthyState = <TaskAltOutlined data-testid="status-healthy" sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'green' }} />
+  const unhealthyState = <ErrorOutlined data-testid="status-unhealthy" sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'red' }} />
 
   const consentHealthy = consentStatus?.ok ? healthyState : unhealthyState
   const samHealthy = samStatus?.ok ? healthyState : unhealthyState
@@ -36,7 +36,7 @@ const Status = () => {
         </li>
       </ul>
       <hr />
-      <h2><a id="consent">Consent Status</a></h2>
+      <h2 id="consent">Consent Status</h2>
       <pre>{JSON.stringify(consentStatus, null, 4)}</pre>
     </div>
   )

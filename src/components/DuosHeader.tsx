@@ -83,7 +83,7 @@ export const headerTabsConfig: Tab[] = [
     label: 'SO Console',
     link: '/signing_official_console/library_cards',
     children: [
-      { label: 'Library Cards', link: '/signing_official_console/library_cards' },
+      { label: 'Researcher Status', link: '/signing_official_console/library_cards' },
       { label: 'Data Access Requests', link: '/signing_official_console/dar_requests' },
       { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },

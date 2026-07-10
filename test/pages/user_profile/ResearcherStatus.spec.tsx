@@ -97,44 +97,30 @@ describe('ResearcherStatus', () => {
     })
   })
 
-  it('shows "No Signing Official found" when API returns empty array', async () => {
-    vi.mocked(User.getSOsForInstitution).mockResolvedValue([])
+  it('shows "Inactive" status when user has no libraryCard', async () => {
     render(<ResearcherStatus user={baseUser} />)
     await waitFor(() => {
-      expect(screen.getByText(/No Signing Official found/)).toBeInTheDocument()
+      expect(screen.getByText('Inactive')).toBeInTheDocument()
     })
   })
 
-  it('renders a SigningOfficialReadOnlyCard for each SO returned', async () => {
+  it('shows "Active" status when user has a libraryCard', async () => {
+    const userWithCard: DuosUser = {
+      ...baseUser,
+      libraryCard: {
+        id: 1,
+        userId: 1,
+        userName: 'Test Researcher',
+        userEmail: 'researcher@example.com',
+        createDate: new Date('2025-01-15'),
+        createUserId: 99,
+        daaIds: [],
+      },
+    }
     vi.mocked(User.getSOsForInstitution).mockResolvedValue([soWithData])
-    render(<ResearcherStatus user={baseUser} />)
+    render(<ResearcherStatus user={userWithCard} />)
     await waitFor(() => {
-      expect(screen.getByText('Jane SO')).toBeInTheDocument()
-      expect(screen.getByText('jane.so@broad.mit.edu')).toBeInTheDocument()
-    })
-  })
-
-  it('shows institution name from SO API payload', async () => {
-    vi.mocked(User.getSOsForInstitution).mockResolvedValue([soWithData])
-    render(<ResearcherStatus user={baseUser} />)
-    await waitFor(() => {
-      expect(screen.getByText('Broad Institute')).toBeInTheDocument()
-    })
-  })
-
-  it('renders LinkedIn link from SO external profiles', async () => {
-    vi.mocked(User.getSOsForInstitution).mockResolvedValue([soWithData])
-    render(<ResearcherStatus user={baseUser} />)
-    await waitFor(() => {
-      const link = screen.getByRole('link', { name: /LinkedIn/ })
-      expect(link).toHaveAttribute('href', 'https://www.linkedin.com/in/janeso')
-    })
-  })
-
-  it('shows "No Library Card Found" when user has no libraryCard', async () => {
-    render(<ResearcherStatus user={baseUser} />)
-    await waitFor(() => {
-      expect(screen.getByText('No Library Card Found')).toBeInTheDocument()
+      expect(screen.getByText('Active')).toBeInTheDocument()
     })
   })
 

@@ -1,25 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Info } from '@mui/icons-material'
+import { Switch } from '@mui/material'
 import { Styles, Theme } from 'src/libs/theme'
-import { chain, cloneDeep, findIndex, isNil } from 'src/utils/NodashUtil'
+import { cloneDeep, findIndex, isNil } from 'src/utils/NodashUtil'
 import SimpleTable from 'src/components/SimpleTable'
-import SimpleButton from 'src/components/SimpleButton'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
 import { getSearchFilterFunctions, Notifications, recalculateVisibleTable, searchOnFilteredList } from 'src/libs/utils'
-import LibraryCardFormModal from 'src/components/modals/LibraryCardFormModal'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { LibraryCard } from 'src/libs/ajax/LibraryCard'
 import { confirmModalType } from 'src/libs/libraryCardUtils'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
-import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
-import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
-import { NIHDataUseCertificationAgreement } from 'src/components/external_docs/NIHDataUseCertificationAgreement'
 import { processLibraryCards } from 'src/utils/LibraryCardUtils'
 import { extractError } from 'src/utils/ErrorUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import AddObjectButton from 'src/components/AddObjectButton'
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import { DuosUser, DuosUserWithInstitutionId, LibraryCard as LibraryCardModel } from 'src/types/model'
 
 type TableRowId = number | string
@@ -46,11 +39,6 @@ interface ShowConfirmationModalParams {
   message: React.ReactNode
   title: string
   confirmType: string
-}
-
-interface LibraryCardButtonProps {
-  card: SelectedLibraryCard
-  showConfirmationModal: (params: ShowConfirmationModalParams) => void
 }
 
 interface LibraryCardCellProps {
@@ -83,70 +71,15 @@ const styles = {
     email: '25%',
     name: '20%',
     libraryCard: '25%',
-    role: '20%',
   },
 }
 
 // column header format for table
 const columnHeaderFormat = {
   email: { label: 'Email', cellStyle: { width: styles.cellWidths.email } },
-  name: { label: 'Name', cellStyle: { width: styles.cellWidths.name } },
-  libraryCard: { label: 'Library Card', cellStyle: { width: styles.cellWidths.libraryCard } },
-  role: { label: 'Role', cellStyle: { width: styles.cellWidths.libraryCard } },
+  name: { label: 'Researcher', cellStyle: { width: styles.cellWidths.name } },
+  libraryCard: { label: 'Status', cellStyle: { width: styles.cellWidths.libraryCard } },
   // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
-}
-
-const DeactivateLibraryCardButton = (props: LibraryCardButtonProps): React.JSX.Element => {
-  const { card, showConfirmationModal } = props
-  const message = 'Are you sure you want to deactivate this library card?'
-  const title = 'Deactivate Library Card'
-  return (
-    <SimpleButton
-      keyProp={`deactivate-card-${card.id}`}
-      label="Deactivate"
-      baseColor={Theme.palette.error}
-      hoverStyle={{
-        backgroundColor: 'rgb(194, 38,11)',
-        color: 'white',
-      }}
-      additionalStyle={{
-        padding: '2.25% 5%',
-        fontSize: '1.45rem',
-        fontWeight: 600,
-        fontFamily: 'Montserrat',
-      }}
-      onClick={() => showConfirmationModal({ card, message, title, confirmType: confirmModalType.delete })}
-    />
-  )
-}
-
-const IssueLibraryCardButton = (props: LibraryCardButtonProps): React.JSX.Element => {
-  // SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
-  // username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
-  const { card, showConfirmationModal } = props
-  const message = (
-    <div>
-      {/* LCA Terms Download */}
-      <LibraryCardAgreementTermsDownload />
-      {'By clicking \'Confirm\' you agree to the terms of the agreements above for this user. Are you sure you want to issue this library card?'}
-    </div>
-  )
-  const title = 'Issue Library Card'
-  return (
-    <SimpleButton
-      keyProp={`issue-card-${card.userEmail}`}
-      label="Issue"
-      baseColor={Theme.palette.secondary}
-      additionalStyle={{
-        width: '30%',
-        padding: '2.25% 5%',
-        fontSize: '1.45rem',
-        fontWeight: 600,
-        fontFamily: 'Montserrat',
-      }}
-      onClick={() => showConfirmationModal({ card, message, title, confirmType: confirmModalType.issue })}
-    />
-  )
 }
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers
@@ -157,52 +90,67 @@ const LibraryCardCell = ({
 }: LibraryCardCellProps): TableCell => {
   const id = researcher.userId
   const card = researcher.libraryCard
-  const button = isNil(card)
-    ? IssueLibraryCardButton({
+  const isActive = !isNil(card)
+
+  const handleToggle = (): void => {
+    if (isActive) {
+      showConfirmationModal({
+        card: card,
+        message: 'Are you sure you want to deactivate this researcher?',
+        title: 'Deactivate Researcher',
+        confirmType: confirmModalType.delete,
+      })
+    }
+    else {
+      showConfirmationModal({
         card: {
           userId: researcher.userId,
           userEmail: researcher.email,
           userName: researcher.displayName,
         },
-        showConfirmationModal,
+        message: (
+          <div>
+            <LibraryCardAgreementTermsDownload />
+            {'By clicking \'Confirm\' you agree to the terms of the agreements above for this user. Are you sure you want to activate this researcher?'}
+          </div>
+        ),
+        title: 'Activate Researcher',
+        confirmType: confirmModalType.issue,
       })
-    : DeactivateLibraryCardButton({
-        card: card,
-        showConfirmationModal,
-      })
+    }
+  }
 
   return {
     isComponent: true,
     id,
     style: {},
-    label: 'lc-button',
+    label: 'lc-status',
     data: (
       <div
-        style={{
-          display: 'flex',
-          justifyContent: 'left',
-        }}
-        key={`lc-action-cell-${id}`}
+        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        key={`lc-status-cell-${id}`}
       >
-        {button}
+        <Switch
+          checked={isActive}
+          onChange={handleToggle}
+          size="small"
+          sx={{
+            '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
+            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
+          }}
+        />
+        <span
+          style={{
+            color: isActive ? Theme.palette.success : 'rgb(128, 128, 128)',
+            fontWeight: 600,
+            fontSize: '1.45rem',
+            fontFamily: 'Montserrat',
+          }}
+        >
+          {isActive ? 'Active' : 'Inactive'}
+        </span>
       </div>
     ),
-  }
-}
-
-const roleCell = (roles: DuosUser['roles'], id: TableRowId): TableCell => {
-  const roleString = chain(roles.map(role => role.name))
-    .sortBy()
-    .sortedUniq()
-    .join(', ')
-    .value()
-
-  return {
-    data: roleString.length > 0 ? roleString : '- -',
-    id,
-    style: {},
-    label: 'user-role',
-    isComponent: false,
   }
 }
 
@@ -226,10 +174,6 @@ const displayNameCell = (displayName: string, id: TableRowId): TableCell => {
   }
 }
 
-const onlyResearchersWithoutCardFilter = (researcher: DuosUser): boolean => {
-  return isNil(researcher.libraryCard)
-}
-
 export default function SigningOfficialTable(props: SigningOfficialTableProps): React.JSX.Element {
   const [researchers, setResearchers] = useState<DuosUser[]>(props.researchers)
   const [tableSize, setTableSize] = useState<number>(10)
@@ -238,7 +182,6 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
   const [filteredResearchers, setFilteredResearchers] = useState<DuosUser[]>([])
   const [visibleResearchers, setVisibleResearchers] = useState<DuosUser[]>([])
   const [selectedCard, setSelectedCard] = useState<SelectedLibraryCard | null>(null)
-  const [showModal, setShowModal] = useState<boolean>(false)
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [confirmationModalMsg, setConfirmationModalMsg] = useState<React.ReactNode>('')
@@ -324,7 +267,7 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
 
   const processResearcherRowData = (researchers: DuosUser[]): TableCell[][] => {
     return researchers.map((researcher) => {
-      const { displayName, /* count = 0, */ roles } = researcher
+      const { displayName } = researcher
       const email = researcher.email
       const id = researcher.userId
       return [
@@ -334,7 +277,6 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
           researcher,
           showConfirmationModal,
         }),
-        roleCell(roles, id),
         // activeDarCountCell(count, id)
       ]
     })
@@ -344,19 +286,8 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     columnHeaderFormat.name,
     columnHeaderFormat.email,
     columnHeaderFormat.libraryCard,
-    columnHeaderFormat.role,
     // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
   ]
-
-  const showModalOnClick = (): void => {
-    setSelectedCard({
-      userEmail: signingOfficial.email,
-      userId: signingOfficial.userId,
-      userName: signingOfficial.displayName,
-      institutionId: signingOfficial.institutionId,
-    })
-    setShowModal(true)
-  }
 
   const issueLibraryCards = async (
     cards: LibraryCardRequest[],
@@ -396,7 +327,6 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     }
 
     setShowConfirmation(false)
-    setShowModal(false)
 
     const successNotificationText = `Issued ${successfulCards.length} library card${successfulCards.length > 1 ? 's' : ''}`
 
@@ -455,52 +385,18 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     <div style={{ ...Styles.PAGE }}>
       <div style={{ marginLeft: '-7.5%' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <TableHeaderSection
-              title="Pre-authorize my Institution's Researchers with Library Cards"
-              description="Use the table below to add or remove Library Cards so DUOS-registered researchers can submit DARs."
-            />
-            <a
-              rel="noopener noreferrer"
-              href="https://duos.blog/preauthorize_researchers_librarycards"
-              target="_blank"
-              id="so-console-info-link"
-            >
-              <Info fontSize="medium" />
-            </a>
-          </div>
-          <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify', width: '70%' }}>
-            <p>
-              Issuing Library Card privileges is done in accordance with the
-              {' '}
-              <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad Library Card Agreement</a>
-              ,
-              {' '}
-              <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH Library Card Agreement</a>
-              , and
-              {' '}
-              <NIHDataUseCertificationAgreement className={undefined} showDownloadIcon={undefined} />
-              {' '}
-              and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does
-              {' '}
-              <span style={{ fontWeight: 600 }}>not</span>
-              {' '}
-              include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
-            </p>
-            <p>
-              Note: NIH DACs are not currently using DUOS to review Data Access Requests (DARs). Signing Officials agree to review Library Cards for their institutions annually, and add/remove Library Cards as necessary.
-            </p>
-          </div>
+          <TableHeaderSection
+            title="Researcher Status"
+            description={(
+              <>
+                <div>Use the table below to change the active status of your institution&apos;s researchers.</div>
+                <div>Deactivating a researcher will disable them from submitting access requests, and suspend their access to any data approved by a DAC in DUOS.</div>
+              </>
+            )}
+          />
         </div>
         <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
           <SearchBar handleSearchChange={handleSearchChange} />
-          <AddObjectButton
-            id="btn_addUser"
-            label="ADD LIBRARY CARD"
-            onClick={showModalOnClick}
-            icon={<AddCircleOutlineOutlinedIcon />}
-            className="button button-blue"
-          />
         </div>
       </div>
 
@@ -511,12 +407,6 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
         styles={styles}
         tableSize={tableSize}
         paginationBar={paginationBar}
-      />
-      <LibraryCardFormModal
-        showModal={showModal}
-        createOnClick={(cards, newUser) => issueLibraryCards(cards, researchers, newUser)}
-        closeModal={() => setShowModal(false)}
-        users={researchers.filter(onlyResearchersWithoutCardFilter)}
       />
       {selectedCard !== null && (
         <ConfirmationModal
