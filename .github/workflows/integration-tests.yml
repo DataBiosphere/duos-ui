@@ -1,10 +1,10 @@
 on: [pull_request]
-name: cypress integration tests
-concurrency: 
+name: Playwright integration tests
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  cypress-run:
+  playwright-run:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
     steps:
@@ -24,20 +24,17 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm ci
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
       - name: Copy Configs
         run: cp config/base_config.json public/config.json
       - name: Build app
         run: CI=false pnpm run build --silent
-      - name: Cypress run integration tests
-        uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7
-        env:
-          CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
-          CYPRESS_CHAIR: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}
-          CYPRESS_MEMBER: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
-          CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
-          CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
+      - name: Run Playwright integration tests
+        run: pnpm run test:e2e
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: failure()
         with:
-          install: false
-          start: pnpm run serve
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: 120
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
