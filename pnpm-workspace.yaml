@@ -3,7 +3,6 @@ packages:
 
 allowBuilds:
   core-js-pure: false
-  cypress: false
   esbuild: false
 minimumReleaseAgeExclude:
   - qs@6.15.2

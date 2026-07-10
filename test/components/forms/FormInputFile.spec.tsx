@@ -5,7 +5,7 @@ import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 // Replicates FormInputFile behavior (no standalone source component exists;
-// this matches the component defined in the original Cypress spec exactly)
+// this matches the component defined in the original spec exactly)
 const TestFormInputFile = ({
   id,
   disabled = false,

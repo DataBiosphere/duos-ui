@@ -106,7 +106,7 @@ const toggleRationale = async (index: number) => {
 
 // jsdom doesn't compute real CSS layout, so these toBeVisible() checks only catch inline
 // display:none/hidden-attribute regressions - not full stylesheet-driven hiding a real
-// browser (the original Cypress suite) would. Still, they confirm the trigger and the
+// browser would. Still, they confirm the trigger and the
 // panel it reveals aren't accidentally rendered hidden, which a bare presence check misses.
 const openVotingHistoryTab = async () => {
   const trigger = document.getElementById('voting-history-info')

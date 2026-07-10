@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react'
+import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 import { aliases_from_tsconfig } from './aliases'
 
@@ -11,15 +12,14 @@ export default defineConfig({
     alias: aliases_from_tsconfig(),
   },
   test: {
-    css: false,
+    name: 'browser',
     globals: true,
-    environment: 'jsdom',
-    pool: 'vmThreads',
-    include: ['test/**/*.{spec,test}.{js,jsx,ts,tsx}'],
-    exclude: ['test/browser/**', 'test/e2e/**', 'build/**', 'node_modules/**', 'server/**'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['json-summary', 'json'],
+    include: ['test/browser/**/*.{spec,test}.{js,jsx,ts,tsx}'],
+    browser: {
+      enabled: true,
+      headless: true,
+      provider: playwright(),
+      instances: [{ browser: 'chromium' }],
     },
   },
 })
