@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, IntellectualPropertyStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { IntellectualPropertyAsset, PaginationState, SortState } from 'src/types/library'
 import { makeIntellectualPropertyColumns } from 'src/components/data_library/columns/intellectualPropertyColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 
 export const intellectualPropertyAsset: AssetDefinition = {
   label: { singular: 'Intellectual Property', plural: 'Intellectual Properties' },
@@ -38,20 +38,7 @@ export const intellectualPropertyAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },

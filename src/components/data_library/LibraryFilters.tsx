@@ -23,6 +23,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { FilterKey, LibraryFilterSection, LibraryFiltersProps } from 'src/types/library'
 import { COUNT_BADGE_SX } from 'src/components/data_library/countBadgeStyles'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 const CHECKBOX_FILTER_KEYS = [
   'accessManagement',
@@ -103,29 +104,10 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   const hasPostMortemIntervalWithoutUnit = hasPostMortemIntervalValue
     && filters.biospecimenPostMortemIntervalUnit.length === 0
 
-  const hasSectionValue = (section: LibraryFilterSection) => {
-    switch (section.key) {
-      case 'participantCount':
-        return filters.participantCount.min !== undefined || filters.participantCount.max !== undefined
-      case 'datasetsCited':
-        return filters.datasetsCited !== undefined
-      case 'publicationsDatasetsCited':
-        return filters.publicationsDatasetsCited !== undefined
-      case 'clinicalTrialDates':
-        return !hasInvalidClinicalTrialDateRange
-          && (!!filters.clinicalTrialDates.startDate || !!filters.clinicalTrialDates.endDate)
-      case 'biospecimenCollectionDate':
-        return !!filters.biospecimenCollectionDate.after || !!filters.biospecimenCollectionDate.before
-      case 'ipFiledDate':
-        return !!filters.ipFiledDate.after || !!filters.ipFiledDate.before
-      case 'fundingDate':
-        return !!filters.fundingDate.startDate || !!filters.fundingDate.endDate
-      case 'biospecimenPostMortemInterval':
-        return hasPostMortemIntervalValue
-      default:
-        return (filters[section.key]).length > 0
-    }
-  }
+  // Delegate the per-key "is this filter active" decision to the shared
+  // isFilterActive helper so the collapsed-panel active-filter count and the
+  // external filter chips (getExternalActiveFilters) can never disagree.
+  const hasSectionValue = (section: LibraryFilterSection) => isFilterActive(section.key, filters)
 
   // Active if a visible section has a value or a filter carried over from
   // another tab is still applied. Count by filter category (not by selected

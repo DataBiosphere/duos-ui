@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { BiospecimenStudyAggregationResponse, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import { BiospecimenAsset, FilterState, PaginationState, SortState } from 'src/types/library'
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit, Sex } from 'src/types/model'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
@@ -87,20 +87,7 @@ export const biospecimenAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },

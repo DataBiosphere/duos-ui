@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { FundingResourceStudyAggregationResponse, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import { FundingResourceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeFundingResourceColumns } from 'src/components/data_library/columns/fundingResourceColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 
 export const fundingResourceAsset: AssetDefinition = {
   label: { singular: 'FundingResource', plural: 'FundingResources' },
@@ -37,20 +37,7 @@ export const fundingResourceAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },

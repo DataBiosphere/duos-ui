@@ -98,6 +98,7 @@ export const useLibraryData = (
   queryTerm: string,
   pagination: PaginationState,
   sort?: SortState,
+  options?: { enabled?: boolean },
 ) => {
   const emptyResult = {
     items: [],
@@ -106,6 +107,10 @@ export const useLibraryData = (
   }
 
   return useQuery({
+    // Study-asset tabs render from the shared tab-counts query response, so their
+    // caller disables this query (`enabled: false`) to avoid a redundant
+    // full-corpus request. Studies and Datasets keep their own data query.
+    enabled: options?.enabled ?? true,
     queryKey: [
       LIBRARY_DATA_QUERY_KEY,
       libraryConfig.key,

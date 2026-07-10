@@ -110,6 +110,70 @@ export const EMPTY_FILTERS: FilterState = {
   fundingDate: {},
 }
 
+/**
+ * Single source of truth for "is this filter contributing anything right now".
+ *
+ * Every place that needs to know whether a filter is active — the collapsed
+ * panel's active-filter count (`hasSectionValue` in LibraryFilters), the external
+ * filter chips (`getExternalActiveFilters`), and the query builder's
+ * clinical-trial-dates guard (`FILTER_DEFINITIONS.clinicalTrialDates.buildClause`)
+ * — calls this so they cannot disagree. In particular the inverted
+ * clinical-trial date range (start after end) builds no query clause, so it must
+ * also count as inactive everywhere; encoding that once here keeps the badge, the
+ * chips, and the query in lockstep.
+ */
+export const isFilterActive = (key: FilterKey, filters: FilterState): boolean => {
+  switch (key) {
+    // Multi-select (array) filters are active once any value is selected.
+    case 'accessManagement':
+    case 'dataUse':
+    case 'dataType':
+    case 'dac':
+    case 'workspaceTools':
+    case 'workspacePlatform':
+    case 'clinicalTrialStatus':
+    case 'clinicalTrialPhase':
+    case 'clinicalTrialInterventionType':
+    case 'clinicalTrialRegistry':
+    case 'biospecimenType':
+    case 'biospecimenDataUse':
+    case 'biospecimenPostMortemIntervalUnit':
+      return filters[key].length > 0
+
+    // Boolean filters are active once explicitly set to Yes/No (not "Any").
+    case 'datasetsCited':
+    case 'publicationsDatasetsCited':
+      return filters[key] !== undefined
+
+    // Range filters are active once either bound is set.
+    case 'participantCount':
+    case 'biospecimenPostMortemInterval':
+      return filters[key].min !== undefined || filters[key].max !== undefined
+
+    case 'clinicalTrialDates': {
+      const { startDate, endDate } = filters.clinicalTrialDates
+      // An inverted range builds no clause (see buildClause), so it is inactive.
+      if (startDate && endDate && startDate > endDate) {
+        return false
+      }
+      return !!startDate || !!endDate
+    }
+    case 'fundingDate': {
+      const { startDate, endDate } = filters.fundingDate
+      return !!startDate || !!endDate
+    }
+
+    case 'biospecimenCollectionDate':
+    case 'ipFiledDate': {
+      const { after, before } = filters[key]
+      return !!after || !!before
+    }
+
+    default:
+      return false
+  }
+}
+
 const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) => {
   switch (key) {
     case 'accessManagement':
@@ -165,6 +229,31 @@ const dateRangeClause = (field: string, range: { gte?: string, lte?: string }): 
     },
   },
 } as unknown as QueryClause)
+
+/**
+ * Clause for a nested-asset "cited datasets?" boolean.
+ *
+ * The grid treats a missing `citation` field as `false` (`citation ?? false`),
+ * so the query must do the same or the two diverge. A bare `term: { citation:
+ * false }` would exclude any asset indexed without the field — every pre-Oct-2025
+ * record and any non-form ingestion path — even though the grid shows them as
+ * "No". Selecting "No" therefore matches an explicit `false` OR the absence of the
+ * field; "Yes" matches only an explicit `true`.
+ */
+const citationClause = (field: string, cited: boolean): QueryClause => {
+  if (cited) {
+    return { term: { [field]: true } }
+  }
+  return {
+    bool: {
+      should: [
+        { term: { [field]: false } },
+        { bool: { must_not: [{ exists: { field } }] } },
+      ],
+      minimum_should_match: 1,
+    },
+  }
+}
 
 const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   accessManagement: {
@@ -332,13 +421,12 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   clinicalTrialDates: {
     label: 'Clinical Trial Dates',
     buildClause: (filters) => {
+      // isFilterActive encodes both the empty-range and inverted-range guards, so
+      // the query, the badge and the chips all agree on when this filter applies.
+      if (!isFilterActive('clinicalTrialDates', filters)) {
+        return undefined
+      }
       const { startDate, endDate } = filters.clinicalTrialDates
-      if (startDate && endDate && startDate > endDate) {
-        return undefined
-      }
-      if (!startDate && !endDate) {
-        return undefined
-      }
 
       const clauses: QueryClause[] = []
       if (startDate) {
@@ -394,9 +482,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         return undefined
       }
 
-      return {
-        term: { 'study.assets.presentations.citation': filters.datasetsCited },
-      }
+      return citationClause('study.assets.presentations.citation', filters.datasetsCited)
     },
   },
   publicationsDatasetsCited: {
@@ -406,9 +492,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         return undefined
       }
 
-      return {
-        term: { 'study.assets.publications.citation': filters.publicationsDatasetsCited },
-      }
+      return citationClause('study.assets.publications.citation', filters.publicationsDatasetsCited)
     },
   },
   ipFiledDate: {
@@ -492,36 +576,27 @@ const formatDateRange = (start?: string, end?: string): string => {
 }
 
 /**
- * Describe the active value of an object (range/date) filter for display in a
- * removable chip. Returns `undefined` when the filter holds no active value.
+ * Format the value of an object (range/date) filter for display in a removable
+ * chip. Callers gate on `isFilterActive` first, so this only ever runs for a
+ * filter that holds an active value and always returns a label.
  */
-const describeObjectFilter = (key: typeof OBJECT_FILTER_KEYS[number], filters: FilterState): string | undefined => {
+const describeObjectFilter = (key: typeof OBJECT_FILTER_KEYS[number], filters: FilterState): string => {
   switch (key) {
     case 'participantCount':
-    case 'biospecimenPostMortemInterval': {
-      const range = filters[key]
-      return range.min === undefined && range.max === undefined ? undefined : formatRange(range)
-    }
+    case 'biospecimenPostMortemInterval':
+      return formatRange(filters[key])
     case 'clinicalTrialDates':
     case 'fundingDate': {
       const { startDate, endDate } = filters[key]
-      if (!startDate && !endDate) {
-        return undefined
-      }
-      // Mirror buildClause: an inverted clinical-trial range builds no clause,
-      // so it must not appear as an active chip either.
-      if (key === 'clinicalTrialDates' && startDate && endDate && startDate > endDate) {
-        return undefined
-      }
       return formatDateRange(startDate, endDate)
     }
     case 'biospecimenCollectionDate':
     case 'ipFiledDate': {
       const { after, before } = filters[key]
-      return !after && !before ? undefined : formatDateRange(after, before)
+      return formatDateRange(after, before)
     }
     default:
-      return undefined
+      return ''
   }
 }
 
@@ -543,7 +618,7 @@ export const getExternalActiveFilters = (
     getFilterOptions(key, availableFilters)?.find(option => option.value === value)?.label ?? value
 
   for (const key of ARRAY_FILTER_KEYS) {
-    if (visible.has(key)) {
+    if (visible.has(key) || !isFilterActive(key, filters)) {
       continue
     }
     for (const value of filters[key]) {
@@ -557,17 +632,14 @@ export const getExternalActiveFilters = (
   }
 
   for (const key of OBJECT_FILTER_KEYS) {
-    if (visible.has(key)) {
+    if (visible.has(key) || !isFilterActive(key, filters)) {
       continue
     }
-    const valueLabel = describeObjectFilter(key, filters)
-    if (valueLabel !== undefined) {
-      chips.push({ key, sectionLabel: FILTER_DEFINITIONS[key].label, valueLabel })
-    }
+    chips.push({ key, sectionLabel: FILTER_DEFINITIONS[key].label, valueLabel: describeObjectFilter(key, filters) })
   }
 
   for (const key of BOOL_FILTER_KEYS) {
-    if (!visible.has(key) && filters[key] !== undefined) {
+    if (!visible.has(key) && isFilterActive(key, filters)) {
       chips.push({
         key,
         sectionLabel: FILTER_DEFINITIONS[key].label,

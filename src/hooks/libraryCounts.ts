@@ -1,6 +1,7 @@
 import { ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import { AssetType, FilterState, PaginationState } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
+import { STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { APPROVED_CONTROLLED_SHOULD } from 'src/components/data_library/assets/datasetAsset'
 
 /** Map of asset type → number of items its tab would show for the current query. */
@@ -50,6 +51,11 @@ export const datasetsCountClause = (showAllControlled?: boolean): QueryClause =>
  *  - `total_studies` (cardinality) → Studies tab count
  *  - `datasets_count` (filter agg)  → Datasets tab count
  *  - `studies` (terms + top_hits)   → the study documents every other tab counts
+ *
+ * The `studies` aggregation reuses the shared `STUDIES_AGG` constant that every
+ * study-asset `buildQuery` renders from, so each study-asset badge is computed
+ * from a byte-identical aggregation to the one its grid uses — they cannot
+ * silently diverge if the shape ever changes.
  */
 export const buildCountAggregations = (
   showAllControlled: boolean | undefined,
@@ -60,12 +66,7 @@ export const buildCountAggregations = (
   datasets_count: {
     filter: datasetsCountClause(showAllControlled),
   },
-  studies: {
-    terms: { field: 'study.studyId', size: 10000 },
-    aggs: {
-      study_details: { top_hits: { size: 1, _source: ['study.*'] } },
-    },
-  },
+  studies: STUDIES_AGG,
 })
 
 /**

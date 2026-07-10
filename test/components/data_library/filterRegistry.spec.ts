@@ -149,6 +149,40 @@ describe('filterRegistry', () => {
       expect(JSON.stringify(clauses)).not.toContain('study.assets.presentations.citation')
     })
 
+    it('matches an explicit true with a bare term when "Yes" is selected', () => {
+      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: true })
+      expect(clauses).toContainEqual({ term: { 'study.assets.publications.citation': true } })
+    })
+
+    it('treats a missing citation field as "No" so legacy documents are not excluded', () => {
+      // The grid renders a missing citation as false (`citation ?? false`), so
+      // "No" must match an explicit false OR the absence of the field rather than
+      // a bare `term: { citation: false }` that would drop legacy documents.
+      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: false })
+      expect(clauses).toContainEqual({
+        bool: {
+          should: [
+            { term: { 'study.assets.publications.citation': false } },
+            { bool: { must_not: [{ exists: { field: 'study.assets.publications.citation' } }] } },
+          ],
+          minimum_should_match: 1,
+        },
+      })
+    })
+
+    it('applies the same missing-field handling to the presentations citation filter', () => {
+      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, datasetsCited: false })
+      expect(clauses).toContainEqual({
+        bool: {
+          should: [
+            { term: { 'study.assets.presentations.citation': false } },
+            { bool: { must_not: [{ exists: { field: 'study.assets.presentations.citation' } }] } },
+          ],
+          minimum_should_match: 1,
+        },
+      })
+    })
+
     it('is a visible filter on the Publications tab (not an external chip there)', () => {
       const sections = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
       expect(sections.map(s => s.key)).toContain('publicationsDatasetsCited')

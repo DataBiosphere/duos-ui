@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
+import { STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
@@ -23,7 +24,20 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 
-  const { data, isFetching, error } = useLibraryData(
+  const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
+
+  // Every tab except Studies and Datasets renders from the identical shared
+  // `studies` aggregation that the tab-counts query already fetches. Those
+  // "study-asset" tabs therefore skip their own data query and derive their grid
+  // from that single shared response — one full-corpus request per interaction
+  // instead of two (the data query + the counts query returned the same corpus).
+  const isStudyAssetTab = STUDY_ASSET_TABS.includes(urlState.tab)
+
+  const {
+    data: dataQueryResult,
+    isFetching: isDataFetching,
+    error: dataError,
+  } = useLibraryData(
     libraryConfig,
     urlState.tab,
     urlState.filters,
@@ -32,16 +46,42 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     urlState.sortField && urlState.sortOrder
       ? { field: urlState.sortField, order: urlState.sortOrder as SortOrder }
       : undefined,
+    { enabled: !isStudyAssetTab },
   )
 
   // Tab counts come from a single dedicated query, independent of the active
   // tab, pagination and sort, so they are fetched once and reused as the user
-  // pages, sorts, and switches tabs.
-  const { data: tabCounts } = useLibraryTabCounts(
+  // pages, sorts, and switches tabs. Study-asset grids reuse its response too.
+  const {
+    data: tabCountsResult,
+    isFetching: isCountsFetching,
+    error: countsError,
+  } = useLibraryTabCounts(
     libraryConfig,
     urlState.filters,
     urlState.query ?? '',
   )
+
+  const tabCounts = tabCountsResult?.counts
+
+  // Derive the study-asset grid page from the shared tab-counts response using
+  // the asset's own transformResponse (which client-side paginates and filters),
+  // so a tab's badge and its grid are computed from one identical request and
+  // can never disagree. Pagination stays client-side, so paging needs no refetch.
+  const derivedStudyAssetData = useMemo(() => {
+    if (!isStudyAssetTab || !tabCountsResult?.response) {
+      return undefined
+    }
+    return currentAsset.transformResponse(
+      tabCountsResult.response,
+      { page: urlState.page, pageSize: urlState.pageSize },
+      urlState.filters,
+    )
+  }, [isStudyAssetTab, tabCountsResult?.response, currentAsset, urlState.page, urlState.pageSize, urlState.filters])
+
+  const data = isStudyAssetTab ? derivedStudyAssetData : dataQueryResult
+  const isFetching = isStudyAssetTab ? isCountsFetching : isDataFetching
+  const error = isStudyAssetTab ? countsError : dataError
 
   const availableFilters: AvailableFilters = useMemo(() => {
     const dacAgg = (metadata?.dac as AggregationResult)?.buckets || []
@@ -102,8 +142,6 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
       participantCountRange: { min: 0, max: 100000 },
     }
   }, [metadata, data?.items, urlState.tab])
-
-  const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
 
   const filterSections = useMemo(
     () => getFilterSectionsForAsset(urlState.tab, availableFilters),

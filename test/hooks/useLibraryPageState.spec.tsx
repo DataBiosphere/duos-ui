@@ -38,7 +38,11 @@ beforeEach(() => {
     isFetching: false,
     error: null,
   } as unknown as ReturnType<typeof useLibraryData>)
-  vi.mocked(useLibraryTabCounts).mockReturnValue({ data: tabCountsData } as unknown as ReturnType<typeof useLibraryTabCounts>)
+  vi.mocked(useLibraryTabCounts).mockReturnValue({
+    data: { counts: tabCountsData, response: { aggregations: { studies: { buckets: [] } } } },
+    isFetching: false,
+    error: null,
+  } as unknown as ReturnType<typeof useLibraryTabCounts>)
 })
 
 describe('useLibraryPageState — tab-count wiring', () => {
@@ -58,6 +62,57 @@ describe('useLibraryPageState — tab-count wiring', () => {
 
     expect(result.current.tabCounts).toEqual(tabCountsData)
     expect(vi.mocked(useLibraryTabCounts).mock.calls.at(-1)).toEqual([libraryConfig, EMPTY_FILTERS, ''])
+  })
+})
+
+describe('useLibraryPageState — request sharing', () => {
+  const dataQueryOptions = () => vi.mocked(useLibraryData).mock.calls.at(-1)?.[6]
+
+  it('disables the per-tab data query on a study-asset tab so the grid reuses the shared counts response', () => {
+    setup(AssetType.MODELS)
+    renderHook(() => useLibraryPageState(libraryConfig))
+    expect(dataQueryOptions()).toEqual({ enabled: false })
+  })
+
+  it('keeps its own data query enabled on the Studies and Datasets tabs', () => {
+    setup(AssetType.STUDIES)
+    renderHook(() => useLibraryPageState(libraryConfig))
+    expect(dataQueryOptions()).toEqual({ enabled: true })
+
+    vi.mocked(useLibraryData).mockClear()
+    setup(AssetType.DATASETS)
+    renderHook(() => useLibraryPageState(libraryConfig))
+    expect(dataQueryOptions()).toEqual({ enabled: true })
+  })
+
+  it('derives the study-asset grid rows from the shared counts response', () => {
+    setup(AssetType.MODELS)
+    vi.mocked(useLibraryTabCounts).mockReturnValue({
+      data: {
+        counts: tabCountsData,
+        response: {
+          aggregations: {
+            studies: {
+              buckets: [
+                {
+                  key: 1,
+                  study_details: {
+                    hits: { hits: [{ _source: { study: { studyId: 1, studyName: 'S1', assets: { models: [{ name: 'M1' }] } } } }] },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      isFetching: false,
+      error: null,
+    } as unknown as ReturnType<typeof useLibraryTabCounts>)
+
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+    // modelAsset.transformResponse flattens the one nested model from the shared
+    // counts response — no separate data query needed.
+    expect(result.current.data?.items).toHaveLength(1)
   })
 })
 

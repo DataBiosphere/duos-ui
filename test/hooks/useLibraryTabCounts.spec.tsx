@@ -64,13 +64,14 @@ const TestComponent = ({
   queryTerm?: string
 }) => {
   const { data } = useLibraryTabCounts(libraryConfig, filters, queryTerm)
+  const counts = data?.counts
   return (
     <div>
-      <div data-testid="studies">{data?.[AssetType.STUDIES] ?? 'none'}</div>
-      <div data-testid="datasets">{data?.[AssetType.DATASETS] ?? 'none'}</div>
-      <div data-testid="models">{data?.[AssetType.MODELS] ?? 'none'}</div>
-      <div data-testid="workspaces">{data?.[AssetType.WORKSPACES] ?? 'none'}</div>
-      <div data-testid="clinical_trials">{data?.[AssetType.CLINICAL_TRIALS] ?? 'none'}</div>
+      <div data-testid="studies">{counts?.[AssetType.STUDIES] ?? 'none'}</div>
+      <div data-testid="datasets">{counts?.[AssetType.DATASETS] ?? 'none'}</div>
+      <div data-testid="models">{counts?.[AssetType.MODELS] ?? 'none'}</div>
+      <div data-testid="workspaces">{counts?.[AssetType.WORKSPACES] ?? 'none'}</div>
+      <div data-testid="clinical_trials">{counts?.[AssetType.CLINICAL_TRIALS] ?? 'none'}</div>
     </div>
   )
 }

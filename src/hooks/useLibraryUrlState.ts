@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { AssetType, FilterState, LibraryUrlState, SortOrder } from 'src/types/library'
 
 type ArrayFilterParamConfig = {
@@ -317,7 +317,13 @@ const applyHideFiltersUpdate = (updates: Partial<LibraryUrlState>, searchParams:
 export const useLibraryUrlState = () => {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const state: LibraryUrlState = {
+  // react-router returns a stable `searchParams` reference per location, so
+  // memoising on it keeps `state` (and, critically, `state.filters`) referentially
+  // stable across unrelated re-renders. That preserves the React.memo on
+  // LibraryFilters and the downstream useMemo/useCallback in useLibraryPageState,
+  // which would otherwise recompute every render because a fresh filters object
+  // was parsed each time.
+  const state: LibraryUrlState = useMemo(() => ({
     library: searchParams.get('library') || 'duos',
     tab: (searchParams.get('tab') as AssetType) || AssetType.DATASETS,
     filters: parseFiltersFromUrl(searchParams),
@@ -327,7 +333,7 @@ export const useLibraryUrlState = () => {
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as SortOrder) || undefined,
     hideFilters: searchParams.get('hideFilters') === 'true',
-  }
+  }), [searchParams])
 
   const updateState = useCallback((updates: Partial<LibraryUrlState>) => {
     const newParams = new URLSearchParams(searchParams)
