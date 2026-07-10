@@ -28,8 +28,10 @@ jobs:
         run: pnpm exec playwright install chromium --with-deps
       - name: Copy Configs
         run: cp config/base_config.json public/config.json
+      - name: Map local dev hostname
+        run: echo "127.0.0.1 local.dsde-dev.broadinstitute.org" | sudo tee -a /etc/hosts
       - name: Build app
-        run: CI=false pnpm run build --silent
+        run: CI=false pnpm run build
       - name: Run Playwright integration tests
         run: pnpm run test:e2e
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
