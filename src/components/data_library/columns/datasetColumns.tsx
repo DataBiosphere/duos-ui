@@ -48,7 +48,7 @@ export const makeDatasetColumns = (
   {
     field: 'accessManagement',
     headerName: 'Access',
-    width: 140,
+    width: 150,
     renderCell: (params) => {
       const isRadarEnabled = radarEnabledDatasetIds.has(params.row.datasetId)
       const label = (() => {
@@ -59,14 +59,30 @@ export const makeDatasetColumns = (
           default: return params.value
         }
       })()
+      const color = (() => {
+        switch (params.value) {
+          case AccessManagement.CONTROLLED: return 'primary'
+          case AccessManagement.OPEN: return 'success'
+          case AccessManagement.EXTERNAL: return 'secondary'
+          default: return 'default'
+        }
+      })()
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, height: '100%' }}>
-          {label}
-          {isRadarEnabled && (
-            <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
-              <BoltIcon sx={{ color: 'gold' }} />
-            </Tooltip>
-          )}
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Chip
+            label={(
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {label}
+                {isRadarEnabled && (
+                  <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
+                    <BoltIcon sx={{ color: 'gold' }} />
+                  </Tooltip>
+                )}
+              </Box>
+            )}
+            size="small"
+            color={color}
+          />
         </Box>
       )
     },
