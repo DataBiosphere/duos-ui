@@ -237,6 +237,38 @@ describe('getRadarEnabledDatasetsWithRules', () => {
     expect(result).toBeUndefined()
   })
 
+  it('does not flag a dataset as eligible when the DAC only enabled the other code (GRU rule enabled, dataset is HMB)', async () => {
+    const datasets: DatasetTerm[] = [
+      {
+        datasetId: 4,
+        dacId: 2,
+        dataUse: { primary: [{ code: 'HMB', description: '' }], secondary: [] },
+        ...minimalDataset,
+      },
+    ]
+    const result = await getRadarEnabledDatasetsWithRules(datasets)
+    expect(Array.from(result as Set<number>)).toEqual([])
+  })
+
+  it('flags a dataset as eligible when the DAC has enabled that dataset\'s own code', async () => {
+    vi.spyOn(DAC, 'fetchDACbotRules').mockImplementation((dacId: number) => {
+      if (dacId === 2) {
+        return Promise.resolve([{ activationDate: 123, ruleType: 'HMB_V1' }] as never)
+      }
+      return Promise.resolve([] as never)
+    })
+    const datasets: DatasetTerm[] = [
+      {
+        datasetId: 5,
+        dacId: 2,
+        dataUse: { primary: [{ code: 'HMB', description: '' }], secondary: [] },
+        ...minimalDataset,
+      },
+    ]
+    const result = await getRadarEnabledDatasetsWithRules(datasets)
+    expect(Array.from(result as Set<number>)).toEqual([5])
+  })
+
   it('returns empty set if no eligible datasets', async () => {
     const datasets: DatasetTerm[] = [
       {
