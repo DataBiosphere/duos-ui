@@ -9,7 +9,6 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { createPgSessionStore } from './session/pgStore.js'
-import { isBffEnabled } from './featureFlags.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -20,6 +19,17 @@ const isCI = Boolean(process.env.CI || process.env.CYPRESS)
 const useHttps = isDev && !isCI
 
 type AppInstance = FastifyInstance<http.Server | https.Server>
+
+// Boolean env vars are coerced through one helper so a typo or unexpected
+// casing can't silently pick the insecure branch: only an explicit, recognized
+// "off" value returns false — anything unrecognized keeps the default.
+export function envBool(value: string | undefined, defaultValue: boolean): boolean {
+  const v = value?.trim().toLowerCase()
+  if (!v) return defaultValue
+  if (['true', '1', 'yes', 'on'].includes(v)) return true
+  if (['false', '0', 'no', 'off'].includes(v)) return false
+  return defaultValue
+}
 
 export async function buildApp(): Promise<AppInstance> {
   // The app always sits behind exactly one reverse-proxy hop (the
@@ -41,10 +51,25 @@ export async function buildApp(): Promise<AppInstance> {
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: 1 })
   ) as AppInstance
 
-  // 1. DB pool + session — gated on the BFF_ENABLED feature flag (consent API)
-  // so the legacy client-side auth flow can run with no DB/session infra at
-  // all until the BFF rollout flips the flag. Fails safe to disabled status.
-  if (await isBffEnabled(fastify.log)) {
+  // 1. DB pool + session — registered only when the deployment provides the
+  // BFF database configuration. Session infrastructure is deployment config
+  // (env vars via helmfile/compose), not a runtime flag: every pod of a given
+  // deployment behaves identically, with no network dependency at boot. Which
+  // *users* get the BFF sign-in flow is a separate client-side concern, gated
+  // by the boolean BFF_ENABLED flag — see docs/plans/BFF_Overview.md.
+  if (process.env.DUOS_DB_HOST) {
+    fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
+
+    // App-level TLS to Postgres is on unless explicitly disabled. The only
+    // deployments that should disable it are those where the transport is
+    // already plaintext-on-loopback (a Cloud SQL Proxy sidecar in k8s, or the
+    // bundled `db` container in docker-compose) — there the Postgres end
+    // doesn't speak TLS and the connection would be rejected.
+    const dbSsl = envBool(process.env.DUOS_DB_SSL, true)
+    if (!dbSsl) {
+      fastify.log.warn('[server] DUOS_DB_SSL=false — connecting to Postgres without TLS; only safe when the transport is loopback (Cloud SQL Proxy sidecar or local docker network)')
+    }
+
     // DB pool — must be registered before session so app.pg is available to the store
     await fastify.register(fastifyPostgres, {
       host: process.env.DUOS_DB_HOST,
@@ -52,11 +77,7 @@ export async function buildApp(): Promise<AppInstance> {
       port: Number.parseInt(process.env.DUOS_DB_PORT ?? '5432', 10),
       user: process.env.DUOS_DB_USER,
       password: process.env.DUOS_DB_PASSWORD,
-      // App-level TLS is only used for a direct connection to Cloud SQL. When the
-      // BFF reaches Postgres over localhost (a Cloud SQL Proxy sidecar in k8s, or
-      // the bundled `db` container in docker-compose) the transport is already
-      // plaintext-on-loopback, so SSL must be off or the connection is rejected.
-      ssl: process.env.DUOS_DB_SSL === 'true' ? { rejectUnauthorized: true } : false,
+      ssl: dbSsl ? { rejectUnauthorized: true } : false,
     })
 
     // Validated here so a misconfigured environment fails with an error naming
@@ -79,8 +100,14 @@ export async function buildApp(): Promise<AppInstance> {
         path: '/',
       },
       saveUninitialized: false,
-      rolling: true,
+      // No `rolling`: sessions get a fixed maxAge from creation. Rolling expiry
+      // would re-save the session (SELECT + UPSERT) on every session-bearing
+      // request just to bump `expire`. Phase 2 adds a throttled sliding expiry
+      // instead — re-save only when the session is near expiry.
     })
+  }
+  else {
+    fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
   // Health check — registered before Vite middleware so it always resolves

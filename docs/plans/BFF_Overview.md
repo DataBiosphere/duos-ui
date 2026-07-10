@@ -47,15 +47,31 @@ The work is split into seven phases, delivered in order.
 | 3 | API Proxy Layer | Add a reverse proxy so the client calls relative `/api/*` URLs; the server injects the Bearer token from the session and proactively refreshes tokens before expiry. | [DT-3608](https://broadworkbench.atlassian.net/browse/DT-3608) | |
 | 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect with provider selection. | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) | |
 | 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, CSRF protection, session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) | |
-| 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a feature-flag gated percentage rollout. The legacy flow is removed only after the new flow is stable at 100%. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) | |
+| 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a feature-flag gated per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) | |
 
 ## Rollout strategy
 
-A server-driven feature flag controls what percentage of users get the new
-sign-in flow, allowing a staged rollout (internal users → 10% → 50% → 100%)
-with no redeploys and a fail-safe default to the legacy flow. Google and Azure
-B2C are supported behind the same flag, so we can test both in each environment
-before cutting over.
+Two independent switches control the rollout, at different layers:
+
+- **Server session infrastructure is deployment configuration.** The server
+  registers its Postgres/cookie/session plugins when the deployment provides
+  the database configuration (`DUOS_DB_HOST` etc., via helmfile env vars).
+  There is no runtime flag check at boot: every pod of a given deployment
+  behaves identically, with no network dependency at startup. The
+  infrastructure is inert until users are routed to it — sessions are only
+  created by the BFF auth routes.
+- **User-facing cutover is a feature flag.** The `BFF_ENABLED` flag in
+  Consent's feature flag service is a boolean (`"true"`/`"false"`), evaluated
+  client-side to choose between the new sign-in flow and the legacy one. A
+  boolean — rather than a percentage bucket — keeps behavior deterministic:
+  everyone in an environment sees the same flow, so each rollout stage is
+  directly testable. Cutover proceeds environment by environment (dev →
+  staging → prod) with no redeploys; internal users can opt in early via a
+  localStorage override, and a missing flag or unreachable flag service fails
+  safe to the legacy flow.
+
+Google and Azure B2C are supported behind the same flag, so we can test both
+in each environment before cutting over.
 
 ## Key architectural decisions
 

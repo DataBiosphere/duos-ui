@@ -21,8 +21,10 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
         : { rows: [] }
     }
     if (sql.includes('INSERT INTO user_sessions')) {
-      const [sid, sess, expire] = params as [string, unknown, Date]
-      rows.set(sid, { sess, expire })
+      // The real store passes maxAge in ms and lets Postgres compute
+      // NOW() + interval; this stand-in plays the role of the DB clock.
+      const [sid, sess, maxAgeMs] = params as [string, unknown, number]
+      rows.set(sid, { sess, expire: new Date(Date.now() + maxAgeMs) })
       return { rows: [] }
     }
     if (sql.includes('DELETE FROM user_sessions')) {
@@ -50,7 +52,6 @@ async function buildSessionApp(pg: PostgresDb): Promise<FastifyInstance> {
       path: '/',
     },
     saveUninitialized: false,
-    rolling: true,
   })
 
   app.post('/login', async (request) => {

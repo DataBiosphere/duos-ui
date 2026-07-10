@@ -72,23 +72,29 @@ describe('createPgSessionStore', () => {
   })
 
   describe('set', () => {
-    it('upserts sid/sess/expire with an expiry derived from cookie.maxAge', async () => {
+    it('upserts sid/sess with an expiry computed in SQL from cookie.maxAge', async () => {
       query.mockResolvedValueOnce({ rows: [] })
-      const before = Date.now()
 
       await promisifyVoid(cb => store.set('sid-1', sampleSession, cb))
 
       const [sql, params] = query.mock.calls[0]
       expect(sql).toContain('INSERT INTO user_sessions')
       expect(sql).toContain('ON CONFLICT (sid) DO UPDATE')
-      expect(params[0]).toBe('sid-1')
-      expect(params[1]).toBe(sampleSession)
-      const expire = params[2] as Date
-      expect(expire).toBeInstanceOf(Date)
-      // ~8h ahead of "now", allowing slack for test execution time.
-      const delta = expire.getTime() - before
-      expect(delta).toBeGreaterThan(8 * 60 * 60 * 1000 - 1000)
-      expect(delta).toBeLessThan(8 * 60 * 60 * 1000 + 5000)
+      // The expiry is NOW() + maxAge evaluated by Postgres, so writes use the
+      // same clock `get` filters with (`expire > NOW()`) — container/DB clock
+      // drift cannot shorten or extend sessions.
+      expect(sql).toContain(`NOW() + $3 * interval '1 millisecond'`)
+      expect(params).toEqual(['sid-1', sampleSession, 8 * 60 * 60 * 1000])
+    })
+
+    it.each([null, 0, -1])('falls back to the 8h default when cookie.maxAge is %s', async (maxAge) => {
+      query.mockResolvedValueOnce({ rows: [] })
+      const session = { cookie: { originalMaxAge: null, maxAge } } as never
+
+      await promisifyVoid(cb => store.set('sid-1', session, cb))
+
+      const [, params] = query.mock.calls[0]
+      expect(params[2]).toBe(8 * 60 * 60 * 1000)
     })
 
     it('propagates query errors to the callback', async () => {

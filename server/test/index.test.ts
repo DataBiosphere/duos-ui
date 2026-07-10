@@ -19,13 +19,6 @@ vi.mock('@fastify/session', () => ({
   default: vi.fn(async () => {}),
 }))
 
-// Default the BFF_ENABLED feature flag to on so the existing DB/session
-// registration tests below exercise their normal path; individual tests
-// override this with mockResolvedValueOnce(false) to test the gated-off path.
-vi.mock('../src/featureFlags.js', () => ({
-  isBffEnabled: vi.fn(async () => true),
-}))
-
 // Mock @fastify/vite: decorate the instance so buildApp() can call vite.ready()
 // and setNotFoundHandler can call reply.html() without starting a real Vite server.
 vi.mock('@fastify/vite', () => {
@@ -50,6 +43,10 @@ vi.mock('@fastify/vite', () => {
 let app: FastifyInstance
 
 beforeEach(async () => {
+  // DUOS_DB_HOST gates the DB/cookie/session registration; set it so the
+  // default path below is the fully-configured one. Individual tests unset it
+  // to exercise the legacy (no-session-infra) path.
+  process.env.DUOS_DB_HOST = 'localhost'
   process.env.DUOS_SESSION_SECRET = 'test-secret-that-is-at-least-32-characters'
   vi.clearAllMocks()
   // Do NOT call app.ready() here — it finalises the Fastify lifecycle and
@@ -148,15 +145,14 @@ describe('GET /config.json', () => {
   })
 })
 
-describe('BFF_ENABLED feature flag', () => {
-  it('skips DB/cookie/session registration when the flag is disabled', async () => {
-    const { isBffEnabled } = await import('../src/featureFlags.js')
+describe('BFF env-config gating', () => {
+  it('skips DB/cookie/session registration when DUOS_DB_HOST is not set', async () => {
     const { default: pgPlugin } = await import('@fastify/postgres')
     const { default: cookiePlugin } = await import('@fastify/cookie')
     const { default: sessionPlugin } = await import('@fastify/session')
 
     vi.clearAllMocks()
-    vi.mocked(isBffEnabled).mockResolvedValueOnce(false)
+    delete process.env.DUOS_DB_HOST
 
     const { buildApp } = await import('../src/index.js')
     const localApp = await buildApp()
@@ -169,5 +165,30 @@ describe('BFF_ENABLED feature flag', () => {
     expect(res.statusCode).toBe(200)
 
     await localApp.close()
+  })
+
+  it('fails loud when DUOS_DB_HOST is set but the session secret is missing', async () => {
+    // A half-configured deployment must crash with an error naming the env
+    // var, not silently boot into legacy mode.
+    delete process.env.DUOS_SESSION_SECRET
+
+    const { buildApp } = await import('../src/index.js')
+    await expect(buildApp()).rejects.toThrow('DUOS_SESSION_SECRET')
+  })
+})
+
+describe('envBool', () => {
+  it('keeps the default for unset, blank, or unrecognized values', async () => {
+    const { envBool } = await import('../src/index.js')
+    expect(envBool(undefined, true)).toBe(true)
+    expect(envBool('', true)).toBe(true)
+    expect(envBool('  ', false)).toBe(false)
+    expect(envBool('flase', true)).toBe(true) // typo cannot pick the insecure branch
+  })
+
+  it('recognizes explicit on/off spellings case-insensitively', async () => {
+    const { envBool } = await import('../src/index.js')
+    for (const v of ['false', 'FALSE', '0', 'no', 'off']) expect(envBool(v, true)).toBe(false)
+    for (const v of ['true', 'True', '1', 'yes', 'on']) expect(envBool(v, false)).toBe(true)
   })
 })

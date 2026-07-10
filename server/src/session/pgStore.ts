@@ -9,52 +9,49 @@ const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
  *
  * Implements the typed `SessionStore` interface (get/set/destroy) directly
  * against `app.pg` — no Express compatibility shim, and no `touch`:
- * `@fastify/session` re-saves via `set` when `rolling` is enabled and never
- * calls `touch`.
+ * `@fastify/session` only re-saves via `set` when the session data changes
+ * (`rolling` is off — see index.ts) and never calls `touch`.
  *
  * Correctness never depends on the `pg_cron` cleanup job: `get` filters on
  * `expire > NOW()`, so expired rows are invisible even before they are purged.
  */
 export function createPgSessionStore(pg: PostgresDb): SessionStore {
-  const expiryFromSession = (session: Session) =>
-    new Date(Date.now() + (session.cookie.maxAge ?? EIGHT_HOURS_MS))
+  // Expiry is computed in SQL from the same clock `get` filters with
+  // (`expire > NOW()`), so drift between the Node container's clock and
+  // Postgres's cannot shorten or extend sessions. `@fastify/session` types
+  // `cookie.maxAge` as nullable, and a non-positive value would write an
+  // already-expired row — both fall back to the default.
+  const maxAgeMs = (session: Session): number => {
+    const maxAge = session.cookie.maxAge
+    return typeof maxAge === 'number' && maxAge > 0 ? maxAge : EIGHT_HOURS_MS
+  }
+
+  // Uniform bridge from promise-returning work to the store's callback
+  // contract, so error handling is identical across methods by construction.
+  const run = <T>(callback: (err?: unknown, result?: T) => void, work: () => Promise<T>): void => {
+    work().then(result => callback(null, result), err => callback(err))
+  }
 
   return {
-    async get(sid, callback) {
-      try {
-        const { rows } = await pg.query(
-          'SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW()',
-          [sid],
-        )
-        callback(null, rows[0]?.sess ?? null)
-      }
-      catch (err) {
-        callback(err)
-      }
-    },
+    get: (sid, callback) => run(callback, async () => {
+      const { rows } = await pg.query(
+        'SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW()',
+        [sid],
+      )
+      return rows[0]?.sess ?? null
+    }),
 
-    async set(sid, session, callback) {
-      try {
-        await pg.query(
-          `INSERT INTO user_sessions (sid, sess, expire) VALUES ($1, $2, $3)
-           ON CONFLICT (sid) DO UPDATE SET sess = $2, expire = $3`,
-          [sid, session, expiryFromSession(session)],
-        )
-        callback(null)
-      }
-      catch (err) {
-        callback(err)
-      }
-    },
+    set: (sid, session, callback) => run(callback, async () => {
+      await pg.query(
+        `INSERT INTO user_sessions (sid, sess, expire)
+         VALUES ($1, $2, NOW() + $3 * interval '1 millisecond')
+         ON CONFLICT (sid) DO UPDATE SET sess = $2, expire = NOW() + $3 * interval '1 millisecond'`,
+        [sid, session, maxAgeMs(session)],
+      )
+    }),
 
-    async destroy(sid, callback) {
-      try {
-        await pg.query('DELETE FROM user_sessions WHERE sid = $1', [sid])
-        callback(null)
-      }
-      catch (err) {
-        callback(err)
-      }
-    },
+    destroy: (sid, callback) => run(callback, async () => {
+      await pg.query('DELETE FROM user_sessions WHERE sid = $1', [sid])
+    }),
   } satisfies SessionStore
 }
