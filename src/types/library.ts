@@ -49,6 +49,7 @@ export interface FilterState {
   biospecimenDataUse: string[]
   biospecimenPostMortemIntervalUnit: string[]
   datasetsCited?: boolean
+  publicationsDatasetsCited?: boolean
   participantCount: {
     min?: number
     max?: number
@@ -116,6 +117,7 @@ export interface AvailableFilters {
   biospecimenDataUse: FilterOption[]
   biospecimenPostMortemIntervalUnit: FilterOption[]
   datasetsCited: FilterOption[]
+  publicationsDatasetsCited: FilterOption[]
   biospecimenPostMortemIntervalRange: {
     min: number
     max: number
@@ -126,6 +128,20 @@ export interface AvailableFilters {
   }
 }
 
+/**
+ * A single active filter that belongs to a tab other than the one currently
+ * being viewed. Surfaced so the user can see (and remove) filters carried over
+ * from other tabs, even though the control to re-add them lives on another tab.
+ */
+export interface ActiveFilterChip {
+  key: FilterKey
+  sectionLabel: string
+  valueLabel: string
+  // Present for multi-value (array) filters so a single value can be removed;
+  // absent for range/date/boolean filters, whose chip clears the whole filter.
+  value?: string
+}
+
 export interface LibraryFiltersProps {
   filters: FilterState
   onChange: (filters: FilterState) => void
@@ -134,6 +150,8 @@ export interface LibraryFiltersProps {
   loading?: boolean
   isOpen?: boolean
   onToggle?: () => void
+  externalFilters?: ActiveFilterChip[]
+  onRemoveExternalFilter?: (chip: ActiveFilterChip) => void
 }
 
 export type SortOrder = 'asc' | 'desc'

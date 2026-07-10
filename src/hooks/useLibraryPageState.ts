@@ -1,12 +1,14 @@
 import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
+import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
+import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
   EMPTY_FILTERS,
+  getExternalActiveFilters,
   getFilterSectionsForAsset,
-  sanitizeFiltersForAsset,
+  removeFilterValue,
 } from 'src/components/data_library/filterRegistry'
 import { AggregationResult } from 'src/types/elastic'
 import { BioSpecimenType, PostMortemIntervalUnit } from 'src/types/model'
@@ -30,6 +32,15 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     urlState.sortField && urlState.sortOrder
       ? { field: urlState.sortField, order: urlState.sortOrder as SortOrder }
       : undefined,
+  )
+
+  // Tab counts come from a single dedicated query, independent of the active
+  // tab, pagination and sort, so they are fetched once and reused as the user
+  // pages, sorts, and switches tabs.
+  const { data: tabCounts } = useLibraryTabCounts(
+    libraryConfig,
+    urlState.filters,
+    urlState.query ?? '',
   )
 
   const availableFilters: AvailableFilters = useMemo(() => {
@@ -83,6 +94,10 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
         { value: 'true', label: 'Yes' },
         { value: 'false', label: 'No' },
       ],
+      publicationsDatasetsCited: [
+        { value: 'true', label: 'Yes' },
+        { value: 'false', label: 'No' },
+      ],
       biospecimenPostMortemIntervalRange: { min: 0, max: 1000000 },
       participantCountRange: { min: 0, max: 100000 },
     }
@@ -90,14 +105,16 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
 
   const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
 
-  const sanitizedFilters = useMemo(
-    () => sanitizeFiltersForAsset(urlState.tab, urlState.filters),
-    [urlState.tab, urlState.filters],
-  )
-
   const filterSections = useMemo(
     () => getFilterSectionsForAsset(urlState.tab, availableFilters),
     [urlState.tab, availableFilters],
+  )
+
+  // Filters set on other tabs are kept in state so they persist across tab
+  // switches; surface them here so the panel can show them as removable chips.
+  const externalFilters = useMemo(
+    () => getExternalActiveFilters(urlState.tab, urlState.filters, availableFilters),
+    [urlState.tab, urlState.filters, availableFilters],
   )
 
   const sortModel = useMemo(() => {
@@ -107,25 +124,28 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     return []
   }, [urlState.sortField, urlState.sortOrder])
 
+  // Keep the full filter set when switching tabs so filters applied on one tab
+  // remain active (and visible) on the others.
   const handleTabChange = useCallback((newAssetType: AssetType) => {
-    updateUrlState({
-      tab: newAssetType,
-      page: 0,
-      filters: sanitizeFiltersForAsset(newAssetType, urlState.filters),
-    })
-  }, [updateUrlState, urlState.filters])
+    updateUrlState({ tab: newAssetType, page: 0 })
+  }, [updateUrlState])
 
   const handleSearchChange = useCallback((query: string) => {
     updateUrlState({ query, page: 0 })
   }, [updateUrlState])
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    updateUrlState({ filters: sanitizeFiltersForAsset(urlState.tab, newFilters) })
-  }, [updateUrlState, urlState.tab])
+    updateUrlState({ filters: newFilters })
+  }, [updateUrlState])
 
   const handleClearFilters = useCallback(() => {
-    updateUrlState({ filters: sanitizeFiltersForAsset(urlState.tab, EMPTY_FILTERS), page: 0 })
-  }, [updateUrlState, urlState.tab])
+    updateUrlState({ filters: EMPTY_FILTERS, page: 0 })
+  }, [updateUrlState])
+
+  // Remove a filter carried over from another tab without switching to it.
+  const handleRemoveExternalFilter = useCallback((chip: ActiveFilterChip) => {
+    updateUrlState({ filters: removeFilterValue(urlState.filters, chip.key, chip.value) })
+  }, [updateUrlState, urlState.filters])
 
   const handleSortChange = useCallback((model: Array<{ field: string, sort: SortOrder | null }>) => {
     if (model.length > 0 && model[0].sort) {
@@ -148,14 +168,16 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     error,
     isMetadataLoading,
     availableFilters,
+    tabCounts,
     currentAsset,
-    sanitizedFilters,
     filterSections,
+    externalFilters,
     sortModel,
     handleTabChange,
     handleSearchChange,
     handleFiltersChange,
     handleClearFilters,
+    handleRemoveExternalFilter,
     handleSortChange,
     handleToggleFilters,
   }

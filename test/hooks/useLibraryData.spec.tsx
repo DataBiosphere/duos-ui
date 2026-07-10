@@ -1,12 +1,14 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useLibraryData, buildElasticsearchQuery } from 'src/hooks/useLibraryData'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
 import { BoolQuery, ExistsQuery, MultiMatchQuery, TermQuery } from 'src/types/elastic'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
+
+vi.mock('src/libs/ajax/DataSet')
 
 const TestComponent = ({
   libraryConfig,
@@ -224,8 +226,47 @@ describe('buildElasticsearchQuery', () => {
     expect(searchClause.multi_match.query).toEqual('pytorch')
   })
 
-  it('ignores filters that are not visible for the selected asset type', () => {
-    const filtersWithDatasetOnlyValues: FilterState = {
+  const searchFieldsFor = (assetType: AssetType): string[] => {
+    const query = buildElasticsearchQuery(libraryConfig, assetType, filters, 'cancer', pagination)
+    const searchClause = query.query?.bool.must?.[1] as { multi_match: { fields: string[] } }
+    return searchClause.multi_match.fields
+  }
+
+  it('searches the union of every asset\'s fields on every tab so tab counts stay consistent', () => {
+    // The Datasets query searches model fields and the Models query searches
+    // dataset fields — both use the same union — so a search term matches the
+    // same studies regardless of the active tab, keeping the folded tab-count
+    // badges in agreement with each tab's own grid.
+    const datasetsFields = searchFieldsFor(AssetType.DATASETS)
+    const modelsFields = searchFieldsFor(AssetType.MODELS)
+
+    expect(datasetsFields).toContain('study.assets.models.name')
+    expect(modelsFields).toContain('datasetIdentifier')
+    expect(new Set(datasetsFields)).toEqual(new Set(modelsFields))
+  })
+
+  it('keeps the datasets data query lean — no tab-count aggregations, approved-controlled restriction inline', () => {
+    // Tab counts now come from the dedicated useLibraryTabCounts query, so the
+    // data query carries no count aggregations and re-runs cheaply on page/sort.
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination)
+    expect(query.aggs).not.toHaveProperty('total_studies')
+    expect(query.aggs).not.toHaveProperty('studies')
+    expect(query.aggs).not.toHaveProperty('datasets_count')
+    // The approved-controlled restriction stays inline on the query.
+    expect(query.query?.bool.should).toBeDefined()
+  })
+
+  it('does not attach tab-count aggregations to a study-asset tab data query', () => {
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.MODELS, filters, '', pagination)
+    // The tab's own `studies` aggregation is present (it renders the rows), but
+    // the count-only aggregations are not folded in.
+    expect(query.aggs).toHaveProperty('studies')
+    expect(query.aggs).not.toHaveProperty('total_studies')
+    expect(query.aggs).not.toHaveProperty('datasets_count')
+  })
+
+  it('applies every active filter so filter rules combine across asset types', () => {
+    const filtersFromOtherTabs: FilterState = {
       ...filters,
       accessManagement: ['controlled'],
       participantCount: { min: 25 },
@@ -233,14 +274,16 @@ describe('buildElasticsearchQuery', () => {
       dataUse: ['HMB'],
     }
 
+    // Publications has no filters of its own, but filters set on other tabs
+    // must still restrict its results (combined filter rules).
     const query = buildElasticsearchQuery(
       libraryConfig,
       AssetType.PUBLICATIONS,
-      filtersWithDatasetOnlyValues,
+      filtersFromOtherTabs,
       '',
       pagination,
     )
 
-    expect(query.query?.bool.filter).toEqual(undefined)
+    expect(query.query?.bool.filter).toHaveLength(4)
   })
 })

@@ -3,8 +3,8 @@ import {
   Box,
   Button,
   Checkbox,
+  Chip,
   FormControl,
-  FormLabel,
   IconButton,
   Radio,
   RadioGroup,
@@ -22,6 +22,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { FilterKey, LibraryFilterSection, LibraryFiltersProps } from 'src/types/library'
+import { COUNT_BADGE_SX } from 'src/components/data_library/countBadgeStyles'
 
 const CHECKBOX_FILTER_KEYS = [
   'accessManagement',
@@ -52,6 +53,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   loading = false,
   isOpen = true,
   onToggle,
+  externalFilters = [],
+  onRemoveExternalFilter,
 }) => {
   const handleFilterToggle = (category: keyof typeof filters, value: string) => {
     const currentValues = filters[category] as string[]
@@ -106,6 +109,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
         return filters.participantCount.min !== undefined || filters.participantCount.max !== undefined
       case 'datasetsCited':
         return filters.datasetsCited !== undefined
+      case 'publicationsDatasetsCited':
+        return filters.publicationsDatasetsCited !== undefined
       case 'clinicalTrialDates':
         return !hasInvalidClinicalTrialDateRange
           && (!!filters.clinicalTrialDates.startDate || !!filters.clinicalTrialDates.endDate)
@@ -122,8 +127,15 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     }
   }
 
-  // Compute activity based on currently visible sections only.
-  const hasActiveFilters = sections.some(hasSectionValue)
+  // Active if a visible section has a value or a filter carried over from
+  // another tab is still applied. Count by filter category (not by selected
+  // value) on both sides so the indicator is stable regardless of which tab is
+  // active — a visible multi-select section counts once, and an external filter
+  // counts once even though it contributes one chip per selected value.
+  const activeSectionCount = sections.filter(hasSectionValue).length
+  const externalFilterCount = new Set(externalFilters.map(chip => chip.key)).size
+  const activeFilterCount = activeSectionCount + externalFilterCount
+  const hasActiveFilters = activeFilterCount > 0
 
   const renderCheckboxSection = (section: LibraryFilterSection) => {
     const { key, label, options = [] } = section
@@ -180,7 +192,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
             type="number"
             label="Minimum"
             size="small"
-            value={filters.participantCount.min || ''}
+            value={filters.participantCount.min ?? ''}
             onChange={e => handleParticipantChange('min', e.target.value)}
             slotProps={{
               htmlInput: {
@@ -193,7 +205,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
             type="number"
             label="Maximum"
             size="small"
-            value={filters.participantCount.max || ''}
+            value={filters.participantCount.max ?? ''}
             onChange={e => handleParticipantChange('max', e.target.value)}
             slotProps={{
               htmlInput: {
@@ -218,7 +230,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
             type="number"
             label="Minimum"
             size="small"
-            value={filters.biospecimenPostMortemInterval.min || ''}
+            value={filters.biospecimenPostMortemInterval.min ?? ''}
             onChange={e => handlePostMortemIntervalChange('min', e.target.value)}
             slotProps={{
               htmlInput: {
@@ -231,7 +243,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
             type="number"
             label="Maximum"
             size="small"
-            value={filters.biospecimenPostMortemInterval.max || ''}
+            value={filters.biospecimenPostMortemInterval.max ?? ''}
             onChange={e => handlePostMortemIntervalChange('max', e.target.value)}
             slotProps={{
               htmlInput: {
@@ -315,28 +327,25 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     )
   }
 
-  const renderDatasetsCitedSection = (label: string) => (
-    <Accordion key="datasetsCited">
+  const renderBooleanSection = (key: 'datasetsCited' | 'publicationsDatasetsCited', label: string) => (
+    <Accordion key={key}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <FormControl>
-          <FormLabel id="publications-datasets-cited-group" sx={{ display: 'none' }}>
-            Datasets Cited
-          </FormLabel>
           <RadioGroup
-            aria-labelledby="publications-datasets-cited-group"
-            value={filters.datasetsCited === undefined ? '' : String(filters.datasetsCited)}
+            aria-label={label}
+            value={filters[key] === undefined ? '' : String(filters[key])}
             onChange={(event) => {
               const value = event.target.value
               onChange({
                 ...filters,
-                datasetsCited: value === '' ? undefined : value === 'true',
+                [key]: value === '' ? undefined : value === 'true',
               })
             }}
           >
-            {(sections.find(section => section.key === 'datasetsCited')?.options || []).map(option => (
+            {(sections.find(section => section.key === key)?.options || []).map(option => (
               <FormControlLabel
                 key={option.value}
                 value={option.value}
@@ -382,19 +391,31 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
           )}
           {isOpen && <Typography variant="h6">Filters</Typography>}
           {!isOpen && onToggle && (
-            <Typography
-              variant="caption"
-              onClick={onToggle}
-              sx={{
-                writingMode: 'vertical-rl',
-                cursor: 'pointer',
-                color: 'text.secondary',
-                fontSize: '11px',
-                userSelect: 'none',
-              }}
-            >
-              Show filters
-            </Typography>
+            <>
+              {activeFilterCount > 0 && (
+                <Box
+                  component="span"
+                  aria-label={`${activeFilterCount} active filters`}
+                  onClick={onToggle}
+                  sx={{ ...COUNT_BADGE_SX, fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  {activeFilterCount}
+                </Box>
+              )}
+              <Typography
+                variant="caption"
+                onClick={onToggle}
+                sx={{
+                  writingMode: 'vertical-rl',
+                  cursor: 'pointer',
+                  color: 'text.secondary',
+                  fontSize: '11px',
+                  userSelect: 'none',
+                }}
+              >
+                {activeFilterCount > 0 ? 'Filters active' : 'Show filters'}
+              </Typography>
+            </>
           )}
         </Box>
         {isOpen && hasActiveFilters && (
@@ -403,6 +424,25 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
           </Button>
         )}
       </Box>
+
+      {isOpen && externalFilters.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+            Filters from other views
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {externalFilters.map(chip => (
+              <Chip
+                key={`${chip.key}:${chip.value ?? ''}`}
+                size="small"
+                variant="outlined"
+                label={`${chip.sectionLabel}: ${chip.valueLabel}`}
+                onDelete={onRemoveExternalFilter ? () => onRemoveExternalFilter(chip) : undefined}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
 
       {isOpen && (loading
         ? (
@@ -423,8 +463,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
                   return renderPostMortemIntervalSection(section)
                 }
 
-                if (section.key === 'datasetsCited') {
-                  return renderDatasetsCitedSection(section.label)
+                if (section.key === 'datasetsCited' || section.key === 'publicationsDatasetsCited') {
+                  return renderBooleanSection(section.key, section.label)
                 }
 
                 if (

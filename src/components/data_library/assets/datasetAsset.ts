@@ -21,6 +21,18 @@ const FILTER_AGGS = {
   dac: { terms: { field: 'dac.dacName.keyword' } },
 }
 
+// A dataset is visible when it is not controlled, or it is controlled and
+// DAC-approved. This is the single source of truth for that predicate; the
+// tab-count query reuses it (see `datasetsCountClause`) so the datasets badge
+// and the datasets grid never diverge.
+export const APPROVED_CONTROLLED_SHOULD: QueryClause[] = [
+  { bool: { must_not: [{ term: { accessManagement: 'controlled' } }] } },
+  { bool: { must: [
+    { term: { accessManagement: 'controlled' } },
+    { term: { dacApproval: true } },
+  ] } },
+]
+
 export const datasetAsset: AssetDefinition = {
   label: { singular: 'Dataset', plural: 'Datasets' },
   sortingMode: 'server',
@@ -51,12 +63,14 @@ export const datasetAsset: AssetDefinition = {
       ...(queryChunks.length > 0 && { must: queryChunks }),
       ...(filterQuery.length > 0 && { filter: filterQuery }),
     }
+    const from = pagination.page * pagination.pageSize
+    const size = pagination.pageSize
 
     // Submissions view: include all controlled datasets regardless of dacApproval state
     if (opts?.showAllControlled) {
       return {
-        from: pagination.page * pagination.pageSize,
-        size: pagination.pageSize,
+        from,
+        size,
         query: { bool: extraClauses },
         ...sortClause,
         aggs: FILTER_AGGS,
@@ -65,19 +79,11 @@ export const datasetAsset: AssetDefinition = {
 
     // Public library: only surface approved controlled datasets
     return {
-      from: pagination.page * pagination.pageSize,
-      size: pagination.pageSize,
+      from,
+      size,
       query: {
         bool: {
-          should: [
-            // Non-controlled datasets (open/external/etc) are always included
-            { bool: { must_not: [{ term: { accessManagement: 'controlled' } }] } },
-            // Controlled datasets must be approved
-            { bool: { must: [
-              { term: { accessManagement: 'controlled' } },
-              { term: { dacApproval: true } },
-            ] } },
-          ],
+          should: APPROVED_CONTROLLED_SHOULD,
           minimum_should_match: 1,
           ...extraClauses,
         },

@@ -23,6 +23,7 @@ interface Validation {
   publishedDate?: ValidationError
   authors?: ValidationError
   datasetCitation?: ValidationError
+  citation?: ValidationError
   journal?: ValidationError
   doi?: ValidationError
   url?: ValidationError
@@ -317,6 +318,17 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={(submitted || touched.datasetCitation) ? validation.datasetCitation : undefined}
+            disabled={readOnly}
+          />
+
+          <FormField
+            id="citation"
+            type={FormFieldTypes.YESNORADIOGROUP}
+            defaultValue={newPublication.citation}
+            title="Did you cite the dataset(s) used in this publication?"
+            orientation="horizontal"
+            onChange={onChange}
+            validation={(submitted || touched.citation) ? validation.citation : undefined}
             disabled={readOnly}
           />
 

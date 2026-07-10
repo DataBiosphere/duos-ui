@@ -9,11 +9,11 @@ const matchesPublicationFilters = (publication: PublicationAsset, filters?: Filt
     return true
   }
 
-  if (filters.datasetsCited === undefined) {
+  if (filters.publicationsDatasetsCited === undefined) {
     return true
   }
 
-  return publication.citation === filters.datasetsCited
+  return publication.citation === filters.publicationsDatasetsCited
 }
 
 export const publicationAsset: AssetDefinition = {

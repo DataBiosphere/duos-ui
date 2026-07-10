@@ -2,7 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
@@ -165,5 +165,92 @@ describe('useLibraryUrlState', () => {
 
     const filters = JSON.parse(document.getElementById('filters')!.textContent!)
     expect(filters.clinicalTrialStatus).toEqual(['Recruiting', 'Active, not recruiting'])
+  })
+})
+
+const BooleanFilterHarness = () => {
+  const [state, updateState] = useLibraryUrlState()
+  const location = useLocation()
+  return (
+    <div>
+      <div id="filters">{JSON.stringify(state.filters)}</div>
+      <div id="search">{location.search}</div>
+      <button
+        id="set-both"
+        onClick={() => updateState({
+          filters: { ...EMPTY_FILTERS, datasetsCited: true, publicationsDatasetsCited: false },
+        })}
+      >Set Both
+      </button>
+      <button
+        id="clear-both"
+        onClick={() => updateState({ filters: EMPTY_FILTERS })}
+      >Clear Both
+      </button>
+    </div>
+  )
+}
+
+describe('useLibraryUrlState — datasets-cited boolean params', () => {
+  it('parses datasetsCited and publicationsDatasetsCited independently', () => {
+    render(
+      <MemoryRouter initialEntries={['/?datasetsCited=true&publicationsDatasetsCited=false']}>
+        <BooleanFilterHarness />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.datasetsCited).toBe(true)
+    expect(filters.publicationsDatasetsCited).toBe(false)
+  })
+
+  it('treats the legacy presentationsDatasetsCited param as datasetsCited', () => {
+    render(
+      <MemoryRouter initialEntries={['/?presentationsDatasetsCited=true']}>
+        <BooleanFilterHarness />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.datasetsCited).toBe(true)
+    // The legacy param must NOT leak into the new, independent publications filter.
+    expect(filters.publicationsDatasetsCited).toBeUndefined()
+  })
+
+  it('leaves both undefined when neither param is present', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <BooleanFilterHarness />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.datasetsCited).toBeUndefined()
+    expect(filters.publicationsDatasetsCited).toBeUndefined()
+  })
+
+  it('serializes both citation filters to their own params and clears the legacy one', () => {
+    render(
+      <MemoryRouter initialEntries={['/?presentationsDatasetsCited=true']}>
+        <BooleanFilterHarness />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('set-both')!)
+
+    const search = document.getElementById('search')!.textContent!
+    expect(search).toContain('datasetsCited=true')
+    expect(search).toContain('publicationsDatasetsCited=false')
+    // The legacy alias is dropped once the canonical params are written.
+    expect(search).not.toContain('presentationsDatasetsCited')
+  })
+
+  it('removes the citation params from the URL when the filters are cleared', () => {
+    render(
+      <MemoryRouter initialEntries={['/?datasetsCited=true&publicationsDatasetsCited=false']}>
+        <BooleanFilterHarness />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('clear-both')!)
+
+    const search = document.getElementById('search')!.textContent!
+    expect(search).not.toContain('datasetsCited')
+    expect(search).not.toContain('publicationsDatasetsCited')
   })
 })

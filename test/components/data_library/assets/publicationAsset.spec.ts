@@ -280,7 +280,7 @@ describe('publicationAsset — transformResponse', () => {
 
     const result = publicationAsset.transformResponse(response, pagination, {
       ...EMPTY_FILTERS,
-      datasetsCited: true,
+      publicationsDatasetsCited: true,
     })
 
     expect(result.items).toHaveLength(1)

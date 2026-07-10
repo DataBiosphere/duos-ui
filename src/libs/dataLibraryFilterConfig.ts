@@ -33,7 +33,7 @@ export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
     ],
   },
   [AssetType.PUBLICATIONS]: {
-    visibleFilters: [],
+    visibleFilters: ['publicationsDatasetsCited'],
   },
   [AssetType.PRESENTATIONS]: {
     visibleFilters: ['datasetsCited'],

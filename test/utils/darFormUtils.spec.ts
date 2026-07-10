@@ -289,6 +289,17 @@ describe('darFormUtils - Publication & Presentation Validation', () => {
       const errors = calcPublicationErrors(publication)
       expect(errors.authors).toBeDefined()
     })
+
+    it('should return error for missing citation', () => {
+      const errors = calcPublicationErrors({} as Partial<Publication>)
+      expect(errors.citation).toBeDefined()
+    })
+
+    it('should not return citation error when citation is set', () => {
+      const publication: Partial<Publication> = { citation: false }
+      const errors = calcPublicationErrors(publication)
+      expect(errors.citation).toBeUndefined()
+    })
   })
 
   describe('calcPresentationErrors', () => {

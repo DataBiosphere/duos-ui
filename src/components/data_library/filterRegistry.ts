@@ -1,5 +1,6 @@
 import { QueryClause } from 'src/types/elastic'
 import {
+  ActiveFilterChip,
   AvailableFilters,
   AssetType,
   FilterKey,
@@ -56,7 +57,10 @@ const OBJECT_FILTER_KEYS: Array<
   'fundingDate',
 ]
 
-const BOOL_FILTER_KEYS: Array<'datasetsCited'> = ['datasetsCited']
+const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited'> = [
+  'datasetsCited',
+  'publicationsDatasetsCited',
+]
 
 const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   accessManagement: 'checkbox',
@@ -73,6 +77,7 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   biospecimenDataUse: 'checkbox',
   biospecimenPostMortemIntervalUnit: 'checkbox',
   datasetsCited: 'boolean',
+  publicationsDatasetsCited: 'boolean',
   participantCount: 'range',
   biospecimenPostMortemInterval: 'range',
   clinicalTrialDates: 'dateRange',
@@ -99,22 +104,11 @@ export const EMPTY_FILTERS: FilterState = {
   biospecimenPostMortemInterval: {},
   biospecimenCollectionDate: {},
   datasetsCited: undefined,
+  publicationsDatasetsCited: undefined,
   participantCount: {},
   ipFiledDate: {},
   fundingDate: {},
 }
-
-const clearInvisibleObjectFilters = (visible: Set<FilterKey>, filters: FilterState): Pick<
-  FilterState,
-  'participantCount' | 'biospecimenPostMortemInterval' | 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate'
-> => ({
-  participantCount: visible.has('participantCount') ? { ...filters.participantCount } : {},
-  biospecimenPostMortemInterval: visible.has('biospecimenPostMortemInterval') ? { ...filters.biospecimenPostMortemInterval } : {},
-  clinicalTrialDates: visible.has('clinicalTrialDates') ? { ...filters.clinicalTrialDates } : {},
-  biospecimenCollectionDate: visible.has('biospecimenCollectionDate') ? { ...filters.biospecimenCollectionDate } : {},
-  ipFiledDate: visible.has('ipFiledDate') ? { ...filters.ipFiledDate } : {},
-  fundingDate: visible.has('fundingDate') ? { ...filters.fundingDate } : {},
-})
 
 const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) => {
   switch (key) {
@@ -132,6 +126,7 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'biospecimenDataUse':
     case 'biospecimenPostMortemIntervalUnit':
     case 'datasetsCited':
+    case 'publicationsDatasetsCited':
       return availableFilters[key]
     default:
       return undefined
@@ -393,7 +388,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   datasetsCited: {
-    label: 'Datasets Cited?',
+    label: 'Datasets Cited (Presentations)?',
     buildClause: (filters) => {
       if (filters.datasetsCited === undefined) {
         return undefined
@@ -401,6 +396,18 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
 
       return {
         term: { 'study.assets.presentations.citation': filters.datasetsCited },
+      }
+    },
+  },
+  publicationsDatasetsCited: {
+    label: 'Datasets Cited (Publications)?',
+    buildClause: (filters) => {
+      if (filters.publicationsDatasetsCited === undefined) {
+        return undefined
+      }
+
+      return {
+        term: { 'study.assets.publications.citation': filters.publicationsDatasetsCited },
       }
     },
   },
@@ -464,44 +471,143 @@ export const getFilterSectionsForAsset = (
   })
 }
 
-export const sanitizeFiltersForAsset = (
+const formatRange = (range: { min?: number, max?: number }): string => {
+  if (range.min !== undefined && range.max !== undefined) {
+    return `${range.min} – ${range.max}`
+  }
+  if (range.min !== undefined) {
+    return `≥ ${range.min}`
+  }
+  return `≤ ${range.max}`
+}
+
+const formatDateRange = (start?: string, end?: string): string => {
+  if (start && end) {
+    return `${start} – ${end}`
+  }
+  if (start) {
+    return `From ${start}`
+  }
+  return `Until ${end}`
+}
+
+/**
+ * Describe the active value of an object (range/date) filter for display in a
+ * removable chip. Returns `undefined` when the filter holds no active value.
+ */
+const describeObjectFilter = (key: typeof OBJECT_FILTER_KEYS[number], filters: FilterState): string | undefined => {
+  switch (key) {
+    case 'participantCount':
+    case 'biospecimenPostMortemInterval': {
+      const range = filters[key]
+      return range.min === undefined && range.max === undefined ? undefined : formatRange(range)
+    }
+    case 'clinicalTrialDates':
+    case 'fundingDate': {
+      const { startDate, endDate } = filters[key]
+      if (!startDate && !endDate) {
+        return undefined
+      }
+      // Mirror buildClause: an inverted clinical-trial range builds no clause,
+      // so it must not appear as an active chip either.
+      if (key === 'clinicalTrialDates' && startDate && endDate && startDate > endDate) {
+        return undefined
+      }
+      return formatDateRange(startDate, endDate)
+    }
+    case 'biospecimenCollectionDate':
+    case 'ipFiledDate': {
+      const { after, before } = filters[key]
+      return !after && !before ? undefined : formatDateRange(after, before)
+    }
+    default:
+      return undefined
+  }
+}
+
+/**
+ * Collect the filters that are currently active but not shown on `assetType`'s
+ * own filter panel — i.e. filters carried over from another tab. These are
+ * rendered as removable chips so the user can drop them without switching tabs,
+ * but cannot re-add them (the control for that lives on the owning tab).
+ */
+export const getExternalActiveFilters = (
   assetType: AssetType,
   filters: FilterState,
-): FilterState => {
+  availableFilters: AvailableFilters,
+): ActiveFilterChip[] => {
   const visible = new Set(assetFilterRegistry[assetType].visibleFilters)
+  const chips: ActiveFilterChip[] = []
 
-  const sanitized: FilterState = {
-    ...filters,
-    ...clearInvisibleObjectFilters(visible, filters),
-    datasetsCited: visible.has('datasetsCited') ? filters.datasetsCited : undefined,
-  }
+  const labelForValue = (key: FilterKey, value: string): string =>
+    getFilterOptions(key, availableFilters)?.find(option => option.value === value)?.label ?? value
 
   for (const key of ARRAY_FILTER_KEYS) {
-    sanitized[key] = visible.has(key) ? [...filters[key]] : []
+    if (visible.has(key)) {
+      continue
+    }
+    for (const value of filters[key]) {
+      chips.push({
+        key,
+        sectionLabel: FILTER_DEFINITIONS[key].label,
+        valueLabel: labelForValue(key, value),
+        value,
+      })
+    }
   }
 
   for (const key of OBJECT_FILTER_KEYS) {
-    if (!visible.has(key)) {
-      sanitized[key] = {}
+    if (visible.has(key)) {
+      continue
+    }
+    const valueLabel = describeObjectFilter(key, filters)
+    if (valueLabel !== undefined) {
+      chips.push({ key, sectionLabel: FILTER_DEFINITIONS[key].label, valueLabel })
     }
   }
 
   for (const key of BOOL_FILTER_KEYS) {
-    if (!visible.has(key)) {
-      sanitized[key] = undefined
+    if (!visible.has(key) && filters[key] !== undefined) {
+      chips.push({
+        key,
+        sectionLabel: FILTER_DEFINITIONS[key].label,
+        valueLabel: filters[key] ? 'Yes' : 'No',
+      })
     }
   }
 
-  return sanitized
+  return chips
 }
 
-export const buildFilterClausesForAsset = (
-  assetType: AssetType,
+/**
+ * Remove a single active filter value from the filter state. For array filters
+ * only the matching `value` is dropped; range/date filters are cleared entirely
+ * and boolean filters are reset to undefined.
+ */
+export const removeFilterValue = (
   filters: FilterState,
-): QueryClause[] => {
-  const sanitized = sanitizeFiltersForAsset(assetType, filters)
+  key: FilterKey,
+  value?: string,
+): FilterState => {
+  if ((ARRAY_FILTER_KEYS as readonly string[]).includes(key)) {
+    const arrayKey = key as ArrayFilterKey
+    return { ...filters, [arrayKey]: filters[arrayKey].filter(entry => entry !== value) }
+  }
 
-  return assetFilterRegistry[assetType].visibleFilters
-    .map(key => FILTER_DEFINITIONS[key].buildClause(sanitized))
-    .filter((clause): clause is QueryClause => clause !== undefined)
+  if ((OBJECT_FILTER_KEYS as readonly string[]).includes(key)) {
+    return { ...filters, [key]: {} }
+  }
+
+  return { ...filters, [key]: undefined }
 }
+
+/**
+ * Build Elasticsearch clauses for every active filter, regardless of which tab
+ * owns it, so filters set on different tabs combine into a single query. Each
+ * filter's `buildClause` inspects only its own state and returns `undefined`
+ * when inactive, so inactive filters contribute nothing.
+ */
+export const buildActiveFilterClauses = (filters: FilterState): QueryClause[] =>
+  (Object.keys(FILTER_DEFINITIONS) as FilterKey[])
+    .map(key => FILTER_DEFINITIONS[key].buildClause(filters))
+    .filter((clause): clause is QueryClause => clause !== undefined)

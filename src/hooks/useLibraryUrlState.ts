@@ -183,25 +183,30 @@ const serializeDateFiltersToUrl = (filters: FilterState, searchParams: URLSearch
   })
 }
 
-const parseDatasetsCited = (searchParams: URLSearchParams) => {
-  const value = searchParams.get('datasetsCited')
-    ?? searchParams.get('presentationsDatasetsCited')
-    ?? searchParams.get('publicationsDatasetsCited')
-
-  return value === null ? undefined : value === 'true'
+const parseBooleanParam = (searchParams: URLSearchParams, params: string[]): boolean | undefined => {
+  for (const param of params) {
+    const value = searchParams.get(param)
+    if (value !== null) {
+      return value === 'true'
+    }
+  }
+  return undefined
 }
 
-const serializeDatasetsCitedToUrl = (filters: FilterState, searchParams: URLSearchParams) => {
-  if (filters.datasetsCited === undefined) {
-    searchParams.delete('datasetsCited')
-    searchParams.delete('presentationsDatasetsCited')
-    searchParams.delete('publicationsDatasetsCited')
-    return
-  }
+const serializeBooleanFilterToUrl = (
+  value: boolean | undefined,
+  param: string,
+  searchParams: URLSearchParams,
+  legacyParams: string[] = [],
+) => {
+  legacyParams.forEach(legacyParam => searchParams.delete(legacyParam))
 
-  searchParams.set('datasetsCited', filters.datasetsCited ? 'true' : 'false')
-  searchParams.delete('presentationsDatasetsCited')
-  searchParams.delete('publicationsDatasetsCited')
+  if (value === undefined) {
+    searchParams.delete(param)
+  }
+  else {
+    searchParams.set(param, value ? 'true' : 'false')
+  }
 }
 
 /**
@@ -212,7 +217,8 @@ const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),
-    datasetsCited: parseDatasetsCited(searchParams),
+    datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
+    publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
   } as FilterState
 }
 
@@ -224,7 +230,8 @@ const serializeFiltersToUrl = (
   searchParams: URLSearchParams,
 ): void => {
   serializeArrayFiltersToUrl(filters, searchParams)
-  serializeDatasetsCitedToUrl(filters, searchParams)
+  serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
+  serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
 }
