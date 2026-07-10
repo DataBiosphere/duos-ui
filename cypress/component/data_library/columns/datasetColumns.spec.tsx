@@ -4,6 +4,10 @@ import { DataGrid } from '@mui/x-data-grid'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { makeDatasetTerm } from '../../test-utils'
 
+/**
+ * Tests for makeDatasetColumns — focused on the Access Management chip
+ * color and label rendering for each AccessManagement value.
+ */
 describe('datasetColumns — column order', () => {
   it('returns columns in the expected order', () => {
     const columns = makeDatasetColumns()
@@ -22,7 +26,7 @@ describe('datasetColumns — column order', () => {
   })
 })
 
-describe('datasetColumns — Access Management text', () => {
+describe('datasetColumns — Access Management chip', () => {
   beforeEach(() => {
     cy.viewport(1200, 800)
   })
@@ -41,31 +45,31 @@ describe('datasetColumns — Access Management text', () => {
     )
   }
 
-  it('renders "via DUOS" for controlled access', () => {
+  it('renders "Controlled" chip with primary color for controlled access', () => {
     renderGrid('controlled')
-    cy.contains('via DUOS').should('exist')
-    cy.get('.MuiChip-root').should('not.exist')
+    cy.get('.MuiChip-label').contains('Controlled').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorPrimary').should('exist')
     cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 
-  it('renders "Open Access" for open access', () => {
+  it('renders "Open" chip with success color for open access', () => {
     renderGrid('open')
-    cy.contains('Open Access').should('exist')
-    cy.get('.MuiChip-root').should('not.exist')
+    cy.get('.MuiChip-label').contains('Open').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorSuccess').should('exist')
     cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 
-  it('renders "External to DUOS" for external access', () => {
+  it('renders "External" chip with secondary color for external access', () => {
     renderGrid('external')
-    cy.contains('External to DUOS').should('exist')
-    cy.get('.MuiChip-root').should('not.exist')
+    cy.get('.MuiChip-label').contains('External').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorSecondary').should('exist')
     cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 
-  it('renders the raw value for unknown access types', () => {
+  it('renders "Unknown" chip with default color for unknown access', () => {
     renderGrid('something-unknown')
-    cy.contains('something-unknown').should('exist')
-    cy.get('.MuiChip-root').should('not.exist')
+    cy.get('.MuiChip-label').contains('Unknown').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorDefault').should('exist')
     cy.get('svg[data-testid="BoltIcon"]').should('not.exist')
   })
 

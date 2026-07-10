@@ -109,15 +109,18 @@ describe('LibraryDataGrid', () => {
 
     cy.contains('Dataset 101').should('exist')
     cy.contains('60').should('exist')
-    cy.contains('via DUOS').should('exist')
+    cy.get('.MuiChip-label').contains('Controlled').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorPrimary').should('exist')
 
     cy.contains('Dataset 102').should('exist')
     cy.contains('40').should('exist')
-    cy.contains('Open Access').should('exist')
+    cy.get('.MuiChip-label').contains('Open').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorSuccess').should('exist')
 
     cy.contains('Dataset 103').should('exist')
     cy.contains('20').should('exist')
-    cy.contains('External to DUOS').should('exist')
+    cy.get('.MuiChip-label').contains('External').should('exist')
+    cy.get('.MuiChip-root.MuiChip-colorSecondary').should('exist')
   })
 
   it('handles row selection for datasets', () => {
