@@ -694,4 +694,42 @@ describe('DataLibrary', () => {
       expect(mustArr?.some(q => hasTerm(q, 'dacApproval', true))).toBe(true)
     })
   })
+
+  describe('public visibility filter', () => {
+    // The outer beforeEach seeds the implementation; clear accumulated call
+    // history so each test only inspects its own render's queries.
+    beforeEach(() => {
+      vi.mocked(DataSet.searchDatasetIndexV2).mockClear()
+    })
+
+    const capturedDatasetsMust = async (): Promise<QueryClause[]> => {
+      await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalled())
+      const calls = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls
+      const datasetsCall = calls.find(([q]) => {
+        const query = asTestQuery(q)
+        return !query.aggs?.studies && (query.size ?? 0) > 0
+      })
+      return datasetsCall?.[0].query?.bool.must ?? []
+    }
+
+    const hasVisibilityTerm = (must: QueryClause[]) =>
+      must.some(q => hasTerm(q, 'study.publicVisibility', true))
+
+    it('restricts a researcher to public studies', async () => {
+      vi.mocked(Storage.getCurrentUser).mockReturnValue(defaultUser)
+      renderLibrary(DATASETS_TAB_PATH)
+      expect(hasVisibilityTerm(await capturedDatasetsMust())).toBe(true)
+    })
+
+    it.each([
+      ['a chairperson', { isChairPerson: true }],
+      ['a data submitter', { isDataSubmitter: true }],
+      ['an admin', { isAdmin: true }],
+      ['a signing official', { isSigningOfficial: true }],
+    ])('does not restrict %s', async (_label, roleFlags) => {
+      vi.mocked(Storage.getCurrentUser).mockReturnValue(asDuosUser({ ...defaultUser, ...roleFlags }))
+      renderLibrary(DATASETS_TAB_PATH)
+      expect(hasVisibilityTerm(await capturedDatasetsMust())).toBe(false)
+    })
+  })
 })

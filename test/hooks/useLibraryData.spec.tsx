@@ -149,6 +149,23 @@ describe('buildElasticsearchQuery', () => {
     expect(secondClause.multi_match.fields).toContain('datasetIdentifier')
   })
 
+  it('does not restrict to public visibility by default', () => {
+    const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, '', pagination)
+    const hasVisibilityClause = (query.query?.bool.must ?? []).some(
+      clause => (clause as TermQuery).term?.['study.publicVisibility'] === true,
+    )
+    expect(hasVisibilityClause).toBe(false)
+  })
+
+  it('restricts to public visibility when the config flag is set', () => {
+    const restrictedConfig = { ...libraryConfig, restrictToPublicVisibility: true }
+    const query = buildElasticsearchQuery(restrictedConfig, AssetType.DATASETS, filters, '', pagination)
+    const visibilityClause = (query.query?.bool.must ?? []).find(
+      clause => (clause as TermQuery).term?.['study.publicVisibility'] !== undefined,
+    ) as TermQuery | undefined
+    expect(visibilityClause?.term['study.publicVisibility']).toBe(true)
+  })
+
   it('adds access management filters', () => {
     const filtersWithAccess = { ...filters, accessManagement: ['controlled'] }
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filtersWithAccess, '', pagination)

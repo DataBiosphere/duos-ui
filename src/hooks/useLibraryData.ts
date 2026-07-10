@@ -37,6 +37,13 @@ export const buildCommonQueryClauses = (
     queryChunks.push(libraryConfig.query as QueryClause)
   }
 
+  // Hide studies not flagged for public visibility from the researcher-facing
+  // library. Privileged roles (Chairperson, Data Submitter, Admin, Signing
+  // Official) leave this flag unset so they still see non-public studies.
+  if (libraryConfig.restrictToPublicVisibility) {
+    queryChunks.push({ term: { 'study.publicVisibility': true } })
+  }
+
   if (queryTerm.length > 0) {
     queryChunks.push({
       multi_match: {

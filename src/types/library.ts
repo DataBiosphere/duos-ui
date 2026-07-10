@@ -26,6 +26,11 @@ export interface LibraryVersionNew {
   featured: boolean
   order: number
   showAllControlled?: boolean
+  // When set, restrict results to studies flagged for public visibility
+  // (`study.publicVisibility: true`). Applied for the researcher-facing library
+  // so non-public studies stay hidden; privileged roles (Chairperson, Data
+  // Submitter, Admin, Signing Official) leave it unset to see everything.
+  restrictToPublicVisibility?: boolean
 }
 
 export enum AccessManagement {
