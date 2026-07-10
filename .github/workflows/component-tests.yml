@@ -38,7 +38,7 @@ jobs:
       - name: Merge coverage reports
         run: node scripts/merge-coverage.mjs
       - name: Publish coverage report to PR
-        if: always()
+        if: success()
         uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
         with:
           name: DUOS Coverage Report
