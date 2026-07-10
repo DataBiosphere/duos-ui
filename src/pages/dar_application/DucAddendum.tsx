@@ -106,11 +106,8 @@ export default function DucAddendum(props: Readonly<DucAddendumProps>) {
     }
     try {
       const fetchedBuckets = await binCollectionToBuckets({ datasets })
-      const dataAccessBuckets = fetchedBuckets.filter(
-        bucket => bucket.isRP !== true,
-      )
-      setBuckets(dataAccessBuckets)
-      setDacs(dataAccessBuckets.flatMap(bucket => bucket.dacs ?? []))
+      setBuckets(fetchedBuckets)
+      setDacs(fetchedBuckets.flatMap(bucket => bucket.dacs ?? []))
     }
     catch (error) {
       const errorMessage = extractError(error)
