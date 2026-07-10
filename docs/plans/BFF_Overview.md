@@ -47,31 +47,42 @@ The work is split into seven phases, delivered in order.
 | 3 | API Proxy Layer | Add a reverse proxy so the client calls relative `/api/*` URLs; the server injects the Bearer token from the session and proactively refreshes tokens before expiry. | [DT-3608](https://broadworkbench.atlassian.net/browse/DT-3608) | |
 | 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect with provider selection. | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) | |
 | 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, CSRF protection, session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) | |
-| 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a feature-flag gated per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) | |
+| 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a config-driven (`bffEnabled` in `config.json`) per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) | |
 
 ## Rollout strategy
 
-Two independent switches control the rollout, at different layers:
+Two independent switches control the rollout. Both are deployment
+configuration, resolved from local files/env at pod startup — no network
+dependency at boot, and every pod of a given deployment behaves identically.
 
-- **Server session infrastructure is deployment configuration.** The server
-  registers its Postgres/cookie/session plugins when the deployment provides
-  the database configuration (`DUOS_DB_HOST` etc., via helmfile env vars).
-  There is no runtime flag check at boot: every pod of a given deployment
-  behaves identically, with no network dependency at startup. The
+- **Session infrastructure: database env config.** The server registers its
+  Postgres/cookie/session plugins when the deployment provides the database
+  configuration (`DUOS_DB_HOST` etc., via helmfile env vars). The
   infrastructure is inert until users are routed to it — sessions are only
   created by the BFF auth routes.
-- **User-facing cutover is a feature flag.** The `BFF_ENABLED` flag in
-  Consent's feature flag service is a boolean (`"true"`/`"false"`), evaluated
-  client-side to choose between the new sign-in flow and the legacy one. A
-  boolean — rather than a percentage bucket — keeps behavior deterministic:
-  everyone in an environment sees the same flow, so each rollout stage is
-  directly testable. Cutover proceeds environment by environment (dev →
-  staging → prod) with no redeploys; internal users can opt in early via a
-  localStorage override, and a missing flag or unreachable flag service fails
-  safe to the legacy flow.
+- **Auth-flow cutover: `bffEnabled` in `config.json`.** Each environment's
+  `config.json` (the same deploy-time file that carries `apiUrl` etc.)
+  declares a boolean `bffEnabled`. The server checks it at startup and only
+  then enables the BFF auth routes and directs users down the BFF sign-in
+  flow; the client reads the same `config.json` it already fetches, so both
+  sides agree by construction. A missing key defaults to `false` — the
+  fail-safe is the legacy client-side flow.
+
+Cutover proceeds environment by environment (dev → staging → prod) by setting
+`bffEnabled: true` in that environment's `config.json` and restarting pods —
+a config change and pod restart, not a live flag flip. That trade is
+deliberate: no runtime dependency on a feature-flag service, no mixed-mode
+pods, and deterministic behavior — everyone in an environment sees the same
+flow, so each rollout stage is directly testable. Rollback is the same
+operation in reverse. The two switches are independent: an environment can
+have the session infrastructure configured (and exercised by tests) while
+`bffEnabled` is still `false`.
 
 Google and Azure B2C are supported behind the same flag, so we can test both
 in each environment before cutting over.
+
+> Status: as of Phase 1 nothing reads `bffEnabled` yet — the flag-gated
+> routing lands with the Phase 2 auth routes.
 
 ## Key architectural decisions
 

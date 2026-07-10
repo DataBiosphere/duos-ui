@@ -54,9 +54,10 @@ export async function buildApp(): Promise<AppInstance> {
   // 1. DB pool + session — registered only when the deployment provides the
   // BFF database configuration. Session infrastructure is deployment config
   // (env vars via helmfile/compose), not a runtime flag: every pod of a given
-  // deployment behaves identically, with no network dependency at boot. Which
-  // *users* get the BFF sign-in flow is a separate client-side concern, gated
-  // by the boolean BFF_ENABLED flag — see docs/plans/BFF_Overview.md.
+  // deployment behaves identically, with no network dependency at boot.
+  // Directing users to the BFF sign-in flow is a separate switch — the
+  // boolean `bffEnabled` in config.json, checked at startup (Phase 2+) — see
+  // docs/plans/BFF_Overview.md.
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
 
