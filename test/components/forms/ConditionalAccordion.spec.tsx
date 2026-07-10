@@ -19,11 +19,13 @@ describe('ConditionalAccordion', () => {
     renderAccordion(true)
     expect(screen.getByRole('button', { name: 'hello world' })).toBeInTheDocument()
     expect(screen.getByText('Child component')).toBeInTheDocument()
+    expect(screen.getByTestId('ExpandMoreIcon')).toBeInTheDocument()
   })
 
   it('renders children without accordion when condition is false', () => {
     renderAccordion(false)
     expect(screen.getByRole('heading', { level: 2, name: 'hello world' })).toBeInTheDocument()
     expect(screen.getByText('Child component')).toBeInTheDocument()
+    expect(screen.queryByTestId('ExpandMoreIcon')).not.toBeInTheDocument()
   })
 })

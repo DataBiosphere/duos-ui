@@ -212,7 +212,8 @@ describe('Support Request Modal Tests', () => {
     })
 
     it('Submits with dac_usage type and correct payload', async () => {
-      vi.mocked(Support.createTicket).mockImplementation((_name, type, ..._rest) => ({ type: type.toUpperCase() } as never))
+      const { Support: ActualSupport } = await vi.importActual<typeof import('src/libs/ajax/Support')>('src/libs/ajax/Support')
+      vi.mocked(Support.createTicket).mockImplementation(ActualSupport.createTicket)
       const user = userEvent.setup()
       mountModal()
       await selectType(user, 'Using DUOS for my DAC')
