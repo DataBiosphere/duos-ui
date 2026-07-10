@@ -116,58 +116,19 @@ DUOS_DB_PASSWORD=             # database password
 
 # Testing
 
-## Cypress Tests
+See [TESTING.md](TESTING.md) for full testing instructions.
 
-We use Cypress for all component and integration testing. Each suite
-of tests is run separately for all PRs via github actions. Local
-testing can be run headless or viewed interactively.
+## E2E Tests (Playwright)
 
-Cypress integration (e2e) tests run locally require a different `baseUrl` than those
-run in GitHub Actions. Create a `cypress.env.json` file in the root of your
-local repo that looks like this:
-
-```json
-{
-  "baseUrl": "https://local.dsde-dev.broadinstitute.org:3000/"
-}
-```
-Cypress will use these values in `cypress.config.js` and `cypress/support/commands.js`
-files instead of the default values.
-
-### Headless
-
-To run cypress integration tests, first start up the app in one terminal
-and in another terminal window, spin up the tests headless:
+Build the app and run e2e tests against the preview server:
 
 ```shell
-pnpm start
-pnpm run cypress:run
+CI=false pnpm run build
+pnpm run test:e2e
 ```
 
-To run cypress component tests headless:
+## Unit & Component Tests (Vitest)
 
 ```shell
-pnpm run cypress:run:component
-```
-
-### Interactive
-
-To run cypress integration tests, first start up the app in one terminal
-and in another terminal window, spin up the tests for viewing:
-
-```shell
-pnpm start
-pnpm run cypress:open
-```
-
-To run cypress component tests in a browser:
-
-```shell
-pnpm run cypress:open:component
-```
-
-To run a single test suite:
-
-```shell
-pnpm run cypress:open:component --spec "**/data_access_governance.spec.js"
+pnpm test
 ```

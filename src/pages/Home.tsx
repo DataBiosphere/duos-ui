@@ -3,6 +3,9 @@ import homeHeaderBackground from 'src/images/home_header_background.png'
 import duosLogoImg from 'src/images/duos_logo.svg'
 import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
 import broadLogo from 'src/images/broad_logo_allwhite.png'
+import dacIcon from 'src/images/dac_icon.svg'
+import signingOfficialIcon from 'src/images/icon_add_user.png'
+import datasetIcon from 'src/images/icon_dataset_.png'
 import { OverflowTooltip } from 'src/components/Tooltips'
 import { Link, useLocation } from 'react-router-dom'
 import { getLibraryVersions } from 'src/libs/libraryVersions'
@@ -96,6 +99,13 @@ const logoImg: React.CSSProperties = {
   display: 'block',
 }
 
+const CheckIcon = ({ color }: { color: string }) => (
+  <svg className="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="8" r="8" fill={color} fillOpacity="0.15" />
+    <path d="M4.5 8.2L6.8 10.5L11.5 5.5" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
 const Home = ({ isLogged }: Readonly<HomeProps>) => {
   const location = useLocation()
   const [showContactModal, setShowContactModal] = useState(false)
@@ -143,6 +153,162 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
           justify-content: center;
           overflow: hidden;
         }
+
+        /* Audience cards */
+        .audience-cards-grid {
+          display: flex;
+          gap: 2rem;
+          justify-content: center;
+          align-items: stretch;
+          flex-wrap: wrap;
+          max-width: 1120px;
+          margin: 0 auto;
+        }
+        .audience-card {
+          background: #ffffff;
+          border-radius: 12px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+          border-top: 5px solid transparent;
+          padding: 2.25rem 2rem 2rem;
+          width: 320px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          box-sizing: border-box;
+          transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .audience-card:hover {
+          box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+          transform: translateY(-3px);
+        }
+        .audience-card-icon-wrap {
+          width: 72px;
+          height: 72px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1.25rem;
+          flex-shrink: 0;
+        }
+        .audience-card-title {
+          font-family: Montserrat, sans-serif;
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 1.3;
+          color: #1F3B50;
+          margin: 0 0 0.4rem;
+          text-align: center;
+          min-height: 52px;
+        }
+        .audience-card-tagline {
+          font-family: Montserrat, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          line-height: 1.4;
+          color: #6b7280;
+          text-align: center;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          margin: 0 0 1.4rem;
+          min-height: 37px;
+        }
+        .audience-card-features {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 1.75rem;
+          width: 100%;
+          flex: 1;
+        }
+        .audience-card-features li {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.6rem;
+          font-family: Montserrat, sans-serif;
+          font-size: 14px;
+          color: #374151;
+          padding: 0.45rem 0;
+          line-height: 1.5;
+        }
+        .audience-card-features li .check-icon {
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+        .audience-card-actions {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.6rem;
+          width: 100%;
+          margin-top: auto;
+        }
+        .audience-cta-primary {
+          font-family: Montserrat, sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          color: #ffffff;
+          background: #1F3B50;
+          border: none;
+          border-radius: 6px;
+          padding: 10px 22px;
+          cursor: pointer;
+          width: 100%;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          transition: background 0.18s ease;
+        }
+        .audience-cta-primary:hover {
+          background: #2d5470;
+          color: #ffffff;
+        }
+        .audience-cta-primary-teal {
+          background: #00928A;
+        }
+        .audience-cta-primary-teal:hover {
+          background: #007a73;
+        }
+        .audience-cta-secondary {
+          font-family: Montserrat, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          color: #00609f;
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+          padding: 2px 0;
+          transition: color 0.15s ease;
+        }
+        .audience-cta-secondary:hover {
+          color: #004c7e;
+          text-decoration: underline;
+        }
+        .audience-section-eyebrow {
+          font-family: Montserrat, sans-serif;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #9ca3af;
+          text-align: center;
+          margin-bottom: 0.75rem;
+        }
+        .audience-section-heading {
+          font-family: Montserrat, sans-serif;
+          font-size: 26px;
+          font-weight: 700;
+          color: #1F3B50;
+          text-align: center;
+          margin: 0 0 0.5rem;
+        }
+        .audience-section-subheading {
+          font-family: Montserrat, sans-serif;
+          font-size: 15px;
+          color: #6b7280;
+          text-align: center;
+          margin: 0 0 2.75rem;
+        }
         @media (max-width: 768px) {
           .logo-card {
             width: 280px;
@@ -154,6 +320,10 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
           }
           .logo-grid {
             gap: 1.5rem !important;
+          }
+          .audience-card {
+            width: 100%;
+            max-width: 400px;
           }
         }
         @media (max-width: 480px) {
@@ -186,59 +356,131 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
               </div>
             </div>
           </div>
-          <div className="row" style={{ background: '#eff0f2', padding: '48px 0 60px 0' }}>
-            <div className="col-lg-4 col-md-4">
-              <p style={header}>DUOS for DACs</p>
-              <p style={description}>
-                Swiftly manage data access requests
-                <br />
-                {' '}
-                and clearly track data use compliance.
-                <br />
-                {' '}
-                Interested in using DUOS for your DAC?
-                <br />
-                {' '}
-                Request a meeting with our team
-                <br />
-                <button
-                  type="button"
-                  onClick={() => setShowContactModal(true)}
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline', font: 'inherit' }}
-                >
-                  here
-                </button> to learn more.
-              </p>
-              <SupportRequestModal
-                showModal={showContactModal}
-                onCloseRequest={() => setShowContactModal(false)}
-                url={location.pathname}
-              />
-              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a id="blog-support-dac-link" href="https://duos.blog/help/dacguide/" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+          <div style={{ background: '#eff0f2', padding: '64px 24px 80px' }}>
+            <p className="audience-section-eyebrow">Who uses DUOS?</p>
+            <h2 className="audience-section-heading">Built for every role in data sharing</h2>
+            <p className="audience-section-subheading">Whether you oversee access, authorize researchers, or need data for your work — DUOS has you covered.</p>
+            <div className="audience-cards-grid">
+
+              {/* DACs card */}
+              <div className="audience-card" style={{ borderTopColor: '#1F3B50' }}>
+                <div className="audience-card-icon-wrap" style={{ background: 'rgba(31,59,80,0.1)' }}>
+                  <img src={dacIcon} alt="" style={{ width: '44px', height: '44px' }} />
+                </div>
+                <h3 className="audience-card-title">DUOS for DACs</h3>
+                <p className="audience-card-tagline">Streamline access oversight</p>
+                <ul className="audience-card-features">
+                  <li>
+                    <CheckIcon color="#1F3B50" />
+                    Centralized review of all incoming data access requests
+                  </li>
+                  <li>
+                    <CheckIcon color="#1F3B50" />
+                    Automated consent-code matching to research purposes
+                  </li>
+                  <li>
+                    <CheckIcon color="#1F3B50" />
+                    Audit-ready compliance tracking across every request
+                  </li>
+                </ul>
+                <div className="audience-card-actions">
+                  <button
+                    type="button"
+                    className="audience-cta-primary"
+                    onClick={() => setShowContactModal(true)}
+                  >
+                    Request a Meeting
+                  </button>
+                  <a
+                    id="blog-support-dac-link"
+                    href="https://duos.blog/help/dacguide/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="audience-cta-secondary"
+                  >
+                    Read the DAC Guide →
+                  </a>
+                </div>
+              </div>
+
+              {/* Signing Officials card */}
+              <div className="audience-card" style={{ borderTopColor: '#00609f' }}>
+                <div className="audience-card-icon-wrap" style={{ background: 'rgba(0,96,159,0.1)' }}>
+                  <img src={signingOfficialIcon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                </div>
+                <h3 className="audience-card-title">DUOS for Signing Officials</h3>
+                <p className="audience-card-tagline">Authorize your institution&#39;s researchers</p>
+                <ul className="audience-card-features">
+                  <li>
+                    <CheckIcon color="#00609f" />
+                    Promote and share your institution&#39;s data
+                  </li>
+                  <li>
+                    <CheckIcon color="#00609f" />
+                    Enable your PIs to request controlled-access datasets
+                  </li>
+                  <li>
+                    <CheckIcon color="#00609f" />
+                    Simple one-time setup — no repeat steps per dataset
+                  </li>
+                </ul>
+                <div className="audience-card-actions">
+                  <a
+                    id="blog-support-so-link"
+                    href="https://duos.blog/help/preauthorize_researchers_librarycards/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="audience-cta-primary"
+                    style={{ background: '#00609f', textDecoration: 'none' }}
+                  >
+                    Signing Official Guide
+                  </a>
+                  <span className="audience-cta-secondary" style={{ fontSize: '12px', color: '#9ca3af' }}>
+                    Sign in to get started
+                  </span>
+                </div>
+              </div>
+
+              {/* Looking for Data card */}
+              <div className="audience-card" style={{ borderTopColor: '#00928A' }}>
+                <div className="audience-card-icon-wrap" style={{ background: 'rgba(0,146,138,0.1)' }}>
+                  <img src={datasetIcon} alt="" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
+                </div>
+                <h3 className="audience-card-title">Looking for Data?</h3>
+                <p className="audience-card-tagline">Access hundreds of curated datasets</p>
+                <ul className="audience-card-features">
+                  <li>
+                    <CheckIcon color="#00928A" />
+                    Browse datasets from leading genomics &amp; biomedical programs
+                  </li>
+                  <li>
+                    <CheckIcon color="#00928A" />
+                    Submit access requests directly through DUOS
+                  </li>
+                  <li>
+                    <CheckIcon color="#00928A" />
+                    Integrated with Terra, AnVIL, and other platforms
+                  </li>
+                </ul>
+                <div className="audience-card-actions">
+                  <button
+                    type="button"
+                    className="audience-cta-primary audience-cta-primary-teal"
+                    onClick={() => handleSignIn('/datalibrary')}
+                  >
+                    Sign In to Browse Data
+                  </button>
+                  <span className="audience-cta-secondary" style={{ fontSize: '12px', color: '#9ca3af' }}>
+                    Search 1,000s of datasets and scientific assets
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="col-lg-4 col-md-4 ">
-              <p style={header}>DUOS for Signing Officials</p>
-              <p style={description}>Grant permissions to principal investigators to request data.</p>
-              <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-                <a href="https://duos.blog/help/preauthorize_researchers_librarycards/" target="_blank" rel="noreferrer" id="blog-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-4">
-              <p style={header}>Looking for data?</p>
-              <p style={description}>
-                Find and request access to 100s of datasets through DUOS!
-                <br />
-                <button
-                  type="button"
-                  onClick={() => handleSignIn('/datalibrary')}
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2FA4E7', textDecoration: 'underline', font: 'inherit' }}
-                >
-                  Sign in
-                </button> to get started.
-              </p>
-            </div>
+            <SupportRequestModal
+              showModal={showContactModal}
+              onCloseRequest={() => setShowContactModal(false)}
+              url={location.pathname}
+            />
           </div>
 
           <section style={{ margin: '5rem auto', padding: '0 2rem' }}>

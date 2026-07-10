@@ -12,7 +12,7 @@ import FastifyVite from '@fastify/vite'
 
 const PROJECT_ROOT = path.join(import.meta.dirname, '..', '..')
 const isDev = process.env.NODE_ENV !== 'production'
-const isCI = Boolean(process.env.CI || process.env.CYPRESS)
+const isCI = Boolean(process.env.CI)
 const useHttps = isDev && !isCI
 
 type AppInstance = FastifyInstance<http.Server | https.Server>
