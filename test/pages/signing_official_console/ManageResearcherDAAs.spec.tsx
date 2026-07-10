@@ -39,6 +39,7 @@ describe('ManageResearcherDAAs', () => {
   })
 
   it('shows an error notification when initial data load fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     vi.spyOn(User, 'list').mockRejectedValue(new Error('network'))
     vi.spyOn(DAA, 'getDaas').mockResolvedValue([])
 
