@@ -134,7 +134,7 @@ export const useLibraryTabCounts = (
   queryTerm: string,
 ): Partial<Record<AssetType, number>> => {
   const results = useQueries({
-    queries: assetTypes.map((assetType) => {
+    queries: assetTypes.map(assetType => {
       const sanitized = sanitizeFiltersForAsset(assetType, filters)
       return {
         queryKey: ['library-tab-count', libraryConfig.key, assetType, sanitized, queryTerm],

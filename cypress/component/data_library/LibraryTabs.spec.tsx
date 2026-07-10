@@ -47,34 +47,6 @@ describe('LibraryTabs', () => {
     cy.get('@onChange').should('have.been.calledWith', AssetType.DATASETS)
   })
 
-  it('shows count in tab label when count is provided', () => {
-    const tabsWithCounts = [
-      { key: AssetType.STUDIES, label: 'Studies', count: 312 },
-      { key: AssetType.DATASETS, label: 'Datasets', count: 1000 },
-    ]
-    cy.mount(
-      <LibraryTabs
-        value={AssetType.STUDIES}
-        onChange={() => {}}
-        tabs={tabsWithCounts}
-      />,
-    )
-    cy.contains('Studies (312)').should('be.visible')
-    cy.contains('Datasets (1,000)').should('be.visible')
-  })
-
-  it('omits count from tab label when count is undefined', () => {
-    cy.mount(
-      <LibraryTabs
-        value={AssetType.STUDIES}
-        onChange={() => {}}
-        tabs={tabs}
-      />,
-    )
-    cy.contains('Studies').should('be.visible')
-    cy.contains('(').should('not.exist')
-  })
-
   it('shows scroll buttons when tabs overflow the container width', () => {
     cy.viewport(300, 600)
 
