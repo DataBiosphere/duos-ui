@@ -101,8 +101,8 @@ describe('DarCloseout', () => {
         />,
       )
       await waitFor(() => {
-        expect(screen.getByText('Jane SO')).toBeInTheDocument()
-        expect(screen.getByText('jane.so@broad.mit.edu')).toBeInTheDocument()
+        expect(screen.getByText('Jane SO')).toBeVisible()
+        expect(screen.getByText('jane.so@broad.mit.edu')).toBeVisible()
       })
     })
 
@@ -116,7 +116,7 @@ describe('DarCloseout', () => {
         />,
       )
       await waitFor(() => {
-        expect(screen.getByText('Broad Institute')).toBeInTheDocument()
+        expect(screen.getByText('Broad Institute')).toBeVisible()
       })
     })
 
@@ -145,7 +145,7 @@ describe('DarCloseout', () => {
         />,
       )
       await waitFor(() => {
-        expect(screen.getByText(/I certify that the individual listed below/)).toBeInTheDocument()
+        expect(screen.getByText(/I certify that the individual listed below/)).toBeVisible()
       })
     })
 
@@ -176,7 +176,7 @@ describe('DarCloseout', () => {
     it('renders the SELECT form field', async () => {
       render(<DarCloseout {...defaultProps} readOnly={false} />)
       await waitFor(() => {
-        expect(screen.getByTestId('form-field-closeoutSigningOfficial')).toBeInTheDocument()
+        expect(screen.getByTestId('form-field-closeoutSigningOfficial')).toBeVisible()
       })
     })
   })

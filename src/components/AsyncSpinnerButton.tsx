@@ -12,7 +12,7 @@ export interface AsyncSpinnerButtonProps {
   'className'?: string
   /** Optional aria-label for accessibility - defaults to button text */
   'aria-label'?: string
-  /** Optional data-cy attribute for Cypress testing */
+  /** Optional data-cy attribute for test selectors */
   'data-cy'?: string
   /** Optional disabled state */
   'disabled'?: boolean

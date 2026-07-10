@@ -98,9 +98,8 @@ export const DarDatasetTable = ({
       }
       const dacIds = isUnfilteredView ? [] : uniq(compact(map(user.roles, r => r.dacId))) as number[]
       const allBuckets = await binCollectionToBuckets(collection, dacIds)
-      const dataAccessBuckets = allBuckets.filter(b => b.isRP !== true)
-      setBuckets(dataAccessBuckets)
-      setTableSize(dataAccessBuckets.length)
+      setBuckets(allBuckets)
+      setTableSize(allBuckets.length)
     }
     catch {
       Notifications.showError({ text: 'Error initializing DAR Collection Dataset summary.' })

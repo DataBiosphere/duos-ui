@@ -182,7 +182,7 @@ describe('SelectableDatasets', () => {
       expect(document.getElementById('remove_dataset_456789')).not.toBeNull()
 
       const lastDeleteIcon = container.querySelector(`${summaryId(456789)} [data-testid="DeleteIcon"]`)
-      expect(lastDeleteIcon).toHaveStyle({ opacity: 0.5 })
+      expect(lastDeleteIcon).toHaveStyle({ opacity: '0.5' })
     })
   })
 

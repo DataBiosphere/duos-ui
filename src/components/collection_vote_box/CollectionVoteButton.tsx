@@ -27,7 +27,7 @@ interface CollectionVoteButtonProps {
   readonly isSelected?: boolean
   /** The base color for button styling when selected */
   readonly baseColor?: string
-  /** Data attribute for Cypress testing */
+  /** Data attribute for test selectors */
   readonly datacy?: string
   /** Error handler function called when onClick fails */
   readonly onError?: (error: unknown) => void
