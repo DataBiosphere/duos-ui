@@ -73,7 +73,7 @@ export default function DatasetSubmissions() {
     showAllControlled: true,
   }), [userOwnershipQuery, user?.userId])
 
-  const pageState = useLibraryPageState(libraryConfig, SUBMISSION_TABS)
+  const pageState = useLibraryPageState(libraryConfig)
   const { urlState, handleSearchChange, handleTabChange: pageHandleTabChange } = pageState
 
   const handleTabChange = useCallback((newAssetType: AssetType) => {
