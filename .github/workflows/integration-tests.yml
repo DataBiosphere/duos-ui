@@ -27,7 +27,9 @@ jobs:
       - name: Copy Configs
         run: cp config/base_config.json public/config.json
       - name: Build app
-        run: CI=false pnpm run build --silent
+        # --silent must precede the script name: pnpm forwards trailing args to
+        # the script, which chains into the server build and breaks `tsc --silent`.
+        run: CI=false pnpm run --silent build
       - name: Cypress run integration tests
         uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7
         env:
