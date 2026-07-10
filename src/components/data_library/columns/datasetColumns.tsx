@@ -67,22 +67,23 @@ export const makeDatasetColumns = (
           default: return 'default'
         }
       })()
+      const tooltipTitle = isRadarEnabled
+        ? 'Automatic request approvals available for datasets clearly within the data use terms.'
+        : ''
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          <Chip
-            label={(
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                {label}
-                {isRadarEnabled && (
-                  <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
-                    <BoltIcon sx={{ color: 'gold' }} />
-                  </Tooltip>
-                )}
-              </Box>
-            )}
-            size="small"
-            color={color}
-          />
+          <Tooltip title={tooltipTitle}>
+            <Chip
+              label={(
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {label}
+                  {isRadarEnabled && <BoltIcon sx={{ color: 'gold' }} />}
+                </Box>
+              )}
+              size="small"
+              color={color}
+            />
+          </Tooltip>
         </Box>
       )
     },
