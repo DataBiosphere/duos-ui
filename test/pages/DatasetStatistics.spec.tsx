@@ -259,11 +259,11 @@ describe('DatasetStatistics', () => {
   })
 })
 
-// Cypress spec coverage — access management, field display, identifier variants
-describe('DatasetStatistics - Cypress spec', () => {
+// access management, field display, identifier variants
+describe('DatasetStatistics', () => {
   let queryClient: QueryClient
 
-  const cypressDataset = {
+  const mockDataset = {
     datasetId: 1975,
     name: 'ExternalAccessTestJL1',
     datasetName: 'ExternalAccessTestJL1',
@@ -290,7 +290,7 @@ describe('DatasetStatistics - Cypress spec', () => {
     updateUserId: 3351,
   }
 
-  const mount = (dataset: object, path = `/dataset/${cypressDataset.datasetIdentifier}`) => {
+  const mount = (dataset: object, path = `/dataset/${mockDataset.datasetIdentifier}`) => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue([])
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
@@ -311,17 +311,17 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Renders the correct dataset from a DUOS-xxx identifier path parameter', async () => {
-    mount(cypressDataset)
-    expect(await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))).toBeInTheDocument()
+    mount(mockDataset)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
   })
 
   it('Renders the correct dataset from a DUOS-D{id} identifier path parameter', async () => {
-    mount(cypressDataset, `/dataset/DUOS-D${cypressDataset.datasetId}`)
-    expect(await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))).toBeInTheDocument()
+    mount(mockDataset, `/dataset/DUOS-D${mockDataset.datasetId}`)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
   })
 
   it('Displays Controlled Access Dataset Apply Button', async () => {
-    const controlled = { ...cypressDataset, accessManagement: 'controlled' }
+    const controlled = { ...mockDataset, accessManagement: 'controlled' }
     mount(controlled)
     await screen.findByText(new RegExp(controlled.datasetIdentifier))
     expect(document.body).toHaveTextContent(controlled.datasetName)
@@ -329,7 +329,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays External Access Language With Location', async () => {
-    const external = { ...cypressDataset, accessManagement: 'external', url: 'https://duos.org' }
+    const external = { ...mockDataset, accessManagement: 'external', url: 'https://duos.org' }
     mount(external)
     await screen.findByText(new RegExp(external.datasetIdentifier))
     expect(document.body).toHaveTextContent(external.datasetName)
@@ -339,7 +339,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays External Access Language Without Location', async () => {
-    const external = { ...cypressDataset, accessManagement: 'external' }
+    const external = { ...mockDataset, accessManagement: 'external' }
     mount(external)
     await screen.findByText(new RegExp(external.datasetIdentifier))
     expect(document.body).toHaveTextContent(external.datasetName)
@@ -350,7 +350,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays Open Access Language With Location', async () => {
-    const open = { ...cypressDataset, accessManagement: 'open', url: 'https://duos.org' }
+    const open = { ...mockDataset, accessManagement: 'open', url: 'https://duos.org' }
     mount(open)
     await screen.findByText(new RegExp(open.datasetIdentifier))
     expect(document.body).toHaveTextContent(open.datasetName)
@@ -359,7 +359,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays Open Access Language Without Location', async () => {
-    const open = { ...cypressDataset, accessManagement: 'open' }
+    const open = { ...mockDataset, accessManagement: 'open' }
     mount(open)
     await screen.findByText(new RegExp(open.datasetIdentifier))
     expect(document.body).toHaveTextContent(open.datasetName)
@@ -370,15 +370,15 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays with no additional properties', async () => {
-    mount(cypressDataset)
-    expect(await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))).toBeInTheDocument()
+    mount(mockDataset)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
   })
 
   it('Displays All Data Custodian Emails', async () => {
     const dataCustodians = ['foo@bar.com', 'bar@baz.com']
     const withCustodians = {
-      ...cypressDataset,
-      study: { ...cypressDataset.study, dataCustodianEmail: dataCustodians },
+      ...mockDataset,
+      study: { ...mockDataset.study, dataCustodianEmail: dataCustodians },
     }
     mount(withCustodians)
     expect(await screen.findByText(/Data Custodian/)).toBeInTheDocument()
@@ -388,37 +388,37 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Does not display the Data Use field for open datasets', async () => {
-    const open = { ...cypressDataset, accessManagement: 'open' }
+    const open = { ...mockDataset, accessManagement: 'open' }
     mount(open)
     await screen.findByText(new RegExp(open.datasetIdentifier))
     expect(screen.queryByText(/^Data Use/)).not.toBeInTheDocument()
   })
 
   it('Displays the Data Use field for controlled datasets', async () => {
-    const controlled = { ...cypressDataset, accessManagement: 'controlled' }
+    const controlled = { ...mockDataset, accessManagement: 'controlled' }
     mount(controlled)
     expect(await screen.findByText(/Data Use/)).toBeInTheDocument()
-    expect(await screen.findByText(new RegExp(cypressDataset.dataUse.primary[0].code))).toBeInTheDocument()
+    expect(await screen.findByText(new RegExp(mockDataset.dataUse.primary[0].code))).toBeInTheDocument()
   })
 
   it('Displays the Principal Investigator field', async () => {
-    mount(cypressDataset)
+    mount(mockDataset)
     expect(await screen.findByText(/Principal Investigator/)).toBeInTheDocument()
-    expect(await screen.findByText(cypressDataset.study.piName)).toBeInTheDocument()
+    expect(await screen.findByText(mockDataset.study.piName)).toBeInTheDocument()
   })
 
   it('Displays the Request Location field as a link when present', async () => {
     const requestLocationUrl = 'https://request.example.org/apply'
-    const withRequestLocation = { ...cypressDataset, requestLocation: requestLocationUrl }
+    const withRequestLocation = { ...mockDataset, requestLocation: requestLocationUrl }
     mount(withRequestLocation)
     expect(await screen.findByText(/Request Location/)).toBeInTheDocument()
     expect(document.querySelector(`a[href="${requestLocationUrl}"]`)).toBeInTheDocument()
   })
 
   it('Does not display the Request Location field when absent', async () => {
-    const withoutRequestLocation = { ...cypressDataset }
+    const withoutRequestLocation = { ...mockDataset }
     mount(withoutRequestLocation)
-    await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))
+    await screen.findByText(new RegExp(mockDataset.datasetIdentifier))
     expect(screen.queryByText(/Request Location/)).not.toBeInTheDocument()
   })
 
@@ -431,12 +431,12 @@ describe('DatasetStatistics - Cypress spec', () => {
       expired: false,
       referenceId: 'abc',
     }]
-    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([cypressDataset as never])
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[`/dataset/${cypressDataset.datasetIdentifier}`]}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
           <Routes>
             <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
           </Routes>
@@ -449,7 +449,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays message when no DARs exist', async () => {
-    mount(cypressDataset)
+    mount(mockDataset)
     expect(await screen.findByText(/No Data Access Requests have been created for this dataset/)).toBeInTheDocument()
   })
 
@@ -469,13 +469,13 @@ describe('DatasetStatistics - Cypress spec', () => {
       referenceId: 'abc',
     }]
 
-    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([cypressDataset as never])
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
 
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[`/dataset/${cypressDataset.datasetIdentifier}`]}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
           <Routes>
             <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
           </Routes>

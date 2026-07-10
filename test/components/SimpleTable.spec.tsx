@@ -35,7 +35,7 @@ describe('SimpleTable', () => {
     expect(screen.getByRole('table')).toBeInTheDocument()
   })
 
-  it('has the data-cy attribute for cypress selectors', () => {
+  it('has the data-cy attribute for test selectors', () => {
     render(<SimpleTable styles={baseStyles} />)
     expect(screen.getByRole('table')).toHaveAttribute('data-cy', 'simple-table')
   })

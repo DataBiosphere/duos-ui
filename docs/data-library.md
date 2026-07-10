@@ -24,7 +24,7 @@ filters are shown.
 2. Add filter definition and clause builder in `src/components/data_library/filterRegistry.ts`.
 3. Add per-asset visibility in `src/libs/dataLibraryFilterConfig.ts`.
 4. Add URL mapping in `src/hooks/useLibraryUrlState.ts`.
-5. Add Cypress component tests for:
+5. Add component tests for:
    - section visibility by asset
    - sanitization of hidden filters
    - query clause generation
