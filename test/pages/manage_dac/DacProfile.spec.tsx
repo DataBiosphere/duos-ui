@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import DacProfile from 'src/pages/manage_dac/DacProfile'
 import { DAC } from 'src/libs/ajax/DAC'
@@ -79,15 +79,18 @@ const makeDataset = ({
   dacApproval,
 })
 
-const renderDacProfile = (dacId: number | string = 1) =>
-  render(
-    <MemoryRouter initialEntries={[`/manage_dac/${dacId}`]}>
-      <Routes>
-        <Route path="/manage_dac/:dacId" element={<DacProfile />} />
-        <Route path="/manage_dac" element={<div>Manage DAC</div>} />
-      </Routes>
-    </MemoryRouter>,
-  )
+const renderDacProfile = async (dacId: number | string = 1) => {
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[`/manage_dac/${dacId}`]}>
+        <Routes>
+          <Route path="/manage_dac/:dacId" element={<DacProfile />} />
+          <Route path="/manage_dac" element={<div>Manage DAC</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+  })
+}
 
 describe('DacProfile', () => {
   beforeEach(() => {
@@ -99,16 +102,16 @@ describe('DacProfile', () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([])
 
-    renderDacProfile()
+    await renderDacProfile()
 
-    expect(await screen.findByText('Test DAC')).toBeTruthy()
+    expect(screen.getByText('Test DAC')).toBeTruthy()
   })
 
   it('shows an error notification when the DAC fails to load', async () => {
     vi.mocked(DAC.get).mockRejectedValue(new Error('Network error'))
     vi.mocked(DAC.datasets).mockRejectedValue(new Error('Network error'))
 
-    renderDacProfile()
+    await renderDacProfile()
 
     await waitFor(() => {
       expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Failed to load DAC profile.' })
@@ -122,9 +125,9 @@ describe('DacProfile', () => {
       makeDataset({ datasetId: 2, name: 'Unapproved Dataset', dacApproval: false }),
     ])
 
-    renderDacProfile()
+    await renderDacProfile()
 
-    expect(await screen.findByText('1 dataset')).toBeTruthy()
+    expect(screen.getByText('1 dataset')).toBeTruthy()
     expect(screen.queryByText('Unapproved Dataset')).toBeNull()
   })
 
@@ -134,13 +137,13 @@ describe('DacProfile', () => {
       makeDataset({ datasetId: 2, name: 'Unapproved Dataset', dacApproval: false }),
     ])
 
-    renderDacProfile()
+    await renderDacProfile()
 
-    expect(await screen.findByText('No datasets are associated with this DAC.')).toBeTruthy()
+    expect(screen.getByText('No datasets are associated with this DAC.')).toBeTruthy()
   })
 
-  it('does not show a spinner and makes no API calls for an invalid dacId', () => {
-    renderDacProfile('abc')
+  it('does not show a spinner and makes no API calls for an invalid dacId', async () => {
+    await renderDacProfile('abc')
 
     expect(screen.queryByAltText('spinner')).toBeNull()
     expect(DAC.get).not.toHaveBeenCalled()
@@ -151,9 +154,9 @@ describe('DacProfile', () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([])
 
-    renderDacProfile()
+    await renderDacProfile()
 
-    const backLink = await screen.findByLabelText('Back to Manage DAC')
+    const backLink = screen.getByLabelText('Back to Manage DAC')
     expect(backLink.tagName.toLowerCase()).toBe('a')
   })
 
@@ -164,11 +167,11 @@ describe('DacProfile', () => {
       .mockResolvedValueOnce(updatedDac)
     vi.mocked(DAC.datasets).mockResolvedValue([])
 
-    renderDacProfile()
+    await renderDacProfile()
 
-    await screen.findByText('Test DAC')
-
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    })
 
     expect(await screen.findByText('Updated DAC Name')).toBeTruthy()
     expect(vi.mocked(DAC.get)).toHaveBeenCalledTimes(2)

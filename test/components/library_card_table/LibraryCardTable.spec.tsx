@@ -1,7 +1,8 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
+import Modal from 'react-modal'
 import LibraryCardTable, { LibraryCardTableProps } from 'src/components/library_card_table/LibraryCardTable'
 import { LibraryCard as LibraryCardModel } from 'src/types/model'
 
@@ -49,6 +50,10 @@ const libraryCardList: LibraryCardModel[] = [
 ]
 
 describe('Library Card Table Tests', () => {
+  beforeAll(() => {
+    Modal.setAppElement(document.body)
+  })
+
   beforeEach(() => {
     vi.useFakeTimers()
     vi.clearAllMocks()
