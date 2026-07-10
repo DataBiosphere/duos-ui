@@ -22,8 +22,8 @@ export const DatasetExportButton = ({ snapshots }: DatasetExportButtonProps) => 
 
   if (snapshots.length === 0) return null
 
-  const snapshot = snapshots[0]
-  const terraLink = `${terraUrl}/#import-data?snapshotId=${snapshot.id}&format=tdrexport&tdrSyncPermissions=false`
+  const makeTerraLink = (snapshot: SnapshotSummaryModel) =>
+    `${terraUrl}/#import-data?snapshotId=${snapshot.id}&format=tdrexport&tdrSyncPermissions=false`
 
   return (
     <>
@@ -42,19 +42,22 @@ export const DatasetExportButton = ({ snapshots }: DatasetExportButtonProps) => 
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
       >
-        <MenuItem
-          component="a"
-          href={terraLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => setAnchorEl(null)}
-          title={`Export snapshot ${snapshot.name} to Terra`}
-        >
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            <Box component="img" src={terraLogo} alt="" sx={{ width: 32, height: 32 }} />
-          </ListItemIcon>
-          <ListItemText>Terra</ListItemText>
-        </MenuItem>
+        {snapshots.map(snapshot => (
+          <MenuItem
+            key={snapshot.id}
+            component="a"
+            href={makeTerraLink(snapshot)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setAnchorEl(null)}
+            title={`Export snapshot ${snapshot.name} to Terra`}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <Box component="img" src={terraLogo} alt="" sx={{ width: 32, height: 32 }} />
+            </ListItemIcon>
+            <ListItemText primary="Terra" secondary={snapshot.name} />
+          </MenuItem>
+        ))}
       </Menu>
     </>
   )

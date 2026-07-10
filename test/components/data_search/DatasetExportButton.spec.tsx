@@ -19,6 +19,7 @@ const buildSnapshot = (id: string, name: string): SnapshotSummaryModel => ({
 })
 
 const snapshotA = buildSnapshot('snap-aaa', 'Snapshot Alpha')
+const snapshotB = buildSnapshot('snap-bbb', 'Snapshot Beta')
 
 const renderButton = async (snapshots: SnapshotSummaryModel[]) => {
   let result: ReturnType<typeof render>
@@ -71,5 +72,20 @@ describe('DatasetExportButton', () => {
     expect(link?.getAttribute('href')).toContain('tdrexport')
     expect(link?.getAttribute('href')).toMatch(/^https:\/\/terra\.example\.com/)
     expect(link?.getAttribute('target')).toBe('_blank')
+  })
+
+  it('renders one menu item per snapshot, each labeled with its snapshot name', async () => {
+    await renderButton([snapshotA, snapshotB])
+
+    fireEvent.click(screen.getByRole('button', { name: /export to/i }))
+
+    expect(await screen.findAllByText('Terra')).toHaveLength(2)
+    expect(screen.getByText('Snapshot Alpha')).toBeTruthy()
+    expect(screen.getByText('Snapshot Beta')).toBeTruthy()
+
+    const alphaLink = screen.getByText('Snapshot Alpha').closest('a')
+    const betaLink = screen.getByText('Snapshot Beta').closest('a')
+    expect(alphaLink?.getAttribute('href')).toContain('snap-aaa')
+    expect(betaLink?.getAttribute('href')).toContain('snap-bbb')
   })
 })
